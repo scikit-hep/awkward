@@ -24,7 +24,7 @@
 #include "awkward/array/RegularArray.h"
 
 namespace awkward {
-  RegularArray::RegularArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const ContentPtr& content, int64_t size)
+  RegularArray::RegularArray(const IdentitiesPtr& identities, const util::Parameters& parameters, const ContentPtr& content, int64_t size)
       : Content(identities, parameters)
       , content_(content)
       , size_(size) {
@@ -62,7 +62,7 @@ namespace awkward {
       throw std::invalid_argument(std::string("cannot broadcast RegularArray of length ") + std::to_string(len) + (" to length ") + std::to_string(offsets.length() - 1));
     }
 
-    std::shared_ptr<Identities> identities;
+    IdentitiesPtr identities;
     if (identities_.get() != nullptr) {
       identities = identities_.get()->getitem_range_nowrap(0, offsets.length() - 1);
     }
@@ -103,7 +103,7 @@ namespace awkward {
     return "RegularArray";
   }
 
-  void RegularArray::setidentities(const std::shared_ptr<Identities>& identities) {
+  void RegularArray::setidentities(const IdentitiesPtr& identities) {
     if (identities.get() == nullptr) {
       content_.get()->setidentities(identities);
     }
@@ -111,12 +111,12 @@ namespace awkward {
       if (length() != identities.get()->length()) {
         util::handle_error(failure("content and its identities must have the same length", kSliceNone, kSliceNone), classname(), identities_.get());
       }
-      std::shared_ptr<Identities> bigidentities = identities;
+      IdentitiesPtr bigidentities = identities;
       if (content_.get()->length() > kMaxInt32) {
         bigidentities = identities.get()->to64();
       }
       if (Identities32* rawidentities = dynamic_cast<Identities32*>(bigidentities.get())) {
-        std::shared_ptr<Identities> subidentities = std::make_shared<Identities32>(Identities::newref(), rawidentities->fieldloc(), rawidentities->width() + 1, content_.get()->length());
+        IdentitiesPtr subidentities = std::make_shared<Identities32>(Identities::newref(), rawidentities->fieldloc(), rawidentities->width() + 1, content_.get()->length());
         Identities32* rawsubidentities = reinterpret_cast<Identities32*>(subidentities.get());
         struct Error err = awkward_identities32_from_regulararray(
           rawsubidentities->ptr().get(),
@@ -130,7 +130,7 @@ namespace awkward {
         content_.get()->setidentities(subidentities);
       }
       else if (Identities64* rawidentities = dynamic_cast<Identities64*>(bigidentities.get())) {
-        std::shared_ptr<Identities> subidentities = std::make_shared<Identities64>(Identities::newref(), rawidentities->fieldloc(), rawidentities->width() + 1, content_.get()->length());
+        IdentitiesPtr subidentities = std::make_shared<Identities64>(Identities::newref(), rawidentities->fieldloc(), rawidentities->width() + 1, content_.get()->length());
         Identities64* rawsubidentities = reinterpret_cast<Identities64*>(subidentities.get());
         struct Error err = awkward_identities64_from_regulararray(
           rawsubidentities->ptr().get(),
@@ -152,14 +152,14 @@ namespace awkward {
 
   void RegularArray::setidentities() {
     if (length() < kMaxInt32) {
-      std::shared_ptr<Identities> newidentities = std::make_shared<Identities32>(Identities::newref(), Identities::FieldLoc(), 1, length());
+      IdentitiesPtr newidentities = std::make_shared<Identities32>(Identities::newref(), Identities::FieldLoc(), 1, length());
       Identities32* rawidentities = reinterpret_cast<Identities32*>(newidentities.get());
       struct Error err = awkward_new_identities32(rawidentities->ptr().get(), length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
     }
     else {
-      std::shared_ptr<Identities> newidentities = std::make_shared<Identities64>(Identities::newref(), Identities::FieldLoc(), 1, length());
+      IdentitiesPtr newidentities = std::make_shared<Identities64>(Identities::newref(), Identities::FieldLoc(), 1, length());
       Identities64* rawidentities = reinterpret_cast<Identities64*>(newidentities.get());
       struct Error err = awkward_new_identities64(rawidentities->ptr().get(), length());
       util::handle_error(err, classname(), identities_.get());
@@ -167,7 +167,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Type> RegularArray::type(const std::map<std::string, std::string>& typestrs) const {
+  const TypePtr RegularArray::type(const std::map<std::string, std::string>& typestrs) const {
     return std::make_shared<RegularType>(parameters_, util::gettypestr(parameters_, typestrs), content_.get()->type(typestrs), size_);
   }
 
@@ -212,7 +212,7 @@ namespace awkward {
 
   const ContentPtr RegularArray::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
     ContentPtr content = content_.get()->deep_copy(copyarrays, copyindexes, copyidentities);
-    std::shared_ptr<Identities> identities = identities_;
+    IdentitiesPtr identities = identities_;
     if (copyidentities  &&  identities_.get() != nullptr) {
       identities = identities_.get()->deep_copy();
     }
@@ -256,7 +256,7 @@ namespace awkward {
   }
 
   const ContentPtr RegularArray::getitem_range_nowrap(int64_t start, int64_t stop) const {
-    std::shared_ptr<Identities> identities(nullptr);
+    IdentitiesPtr identities(nullptr);
     if (identities_.get() != nullptr) {
       identities = identities_.get()->getitem_range_nowrap(start, stop);
     }
@@ -281,7 +281,7 @@ namespace awkward {
       size_);
     util::handle_error(err, classname(), identities_.get());
 
-    std::shared_ptr<Identities> identities(nullptr);
+    IdentitiesPtr identities(nullptr);
     if (identities_.get() != nullptr) {
       identities = identities_.get()->getitem_carry_64(carry);
     }
@@ -498,7 +498,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<SliceItem> RegularArray::asslice() const {
+  const SliceItemPtr RegularArray::asslice() const {
     throw std::invalid_argument("slice items can have all fixed-size dimensions (to follow NumPy's slice rules) or they can have all var-sized dimensions (for jagged indexing), but not both in the same slice item");
   }
 
@@ -568,7 +568,7 @@ namespace awkward {
     }
   }
 
-  const ContentPtr RegularArray::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
+  const ContentPtr RegularArray::choose(int64_t n, bool diagonal, const util::RecordLookupPtr& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
     if (n < 1) {
       throw std::invalid_argument("in choose, 'n' must be at least 1");
     }
@@ -639,7 +639,7 @@ namespace awkward {
       throw std::runtime_error("RegularArray::getitem_next(SliceAt): advanced.length() != 0");
     }
     int64_t len = length();
-    std::shared_ptr<SliceItem> nexthead = tail.head();
+    SliceItemPtr nexthead = tail.head();
     Slice nexttail = tail.tail();
     Index64 nextcarry(len);
 
@@ -656,7 +656,7 @@ namespace awkward {
 
   const ContentPtr RegularArray::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
     int64_t len = length();
-    std::shared_ptr<SliceItem> nexthead = tail.head();
+    SliceItemPtr nexthead = tail.head();
     Slice nexttail = tail.tail();
 
     if (range.step() == 0) {
@@ -714,7 +714,7 @@ namespace awkward {
 
   const ContentPtr RegularArray::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
     int64_t len = length();
-    std::shared_ptr<SliceItem> nexthead = tail.head();
+    SliceItemPtr nexthead = tail.head();
     Slice nexttail = tail.tail();
     Index64 flathead = array.ravel();
     Index64 regular_flathead(flathead.length());

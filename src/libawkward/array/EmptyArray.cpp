@@ -14,7 +14,7 @@
 #include "awkward/array/EmptyArray.h"
 
 namespace awkward {
-  EmptyArray::EmptyArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters)
+  EmptyArray::EmptyArray(const IdentitiesPtr& identities, const util::Parameters& parameters)
       : Content(identities, parameters) { }
 
   const ContentPtr EmptyArray::toNumpyArray(const std::string& format, ssize_t itemsize) const {
@@ -28,7 +28,7 @@ namespace awkward {
     return "EmptyArray";
   }
 
-  void EmptyArray::setidentities(const std::shared_ptr<Identities>& identities) {
+  void EmptyArray::setidentities(const IdentitiesPtr& identities) {
     if (identities.get() != nullptr  &&  length() != identities.get()->length()) {
       util::handle_error(failure("content and its identities must have the same length", kSliceNone, kSliceNone), classname(), identities_.get());
     }
@@ -37,7 +37,7 @@ namespace awkward {
 
   void EmptyArray::setidentities() { }
 
-  const std::shared_ptr<Type> EmptyArray::type(const std::map<std::string, std::string>& typestrs) const {
+  const TypePtr EmptyArray::type(const std::map<std::string, std::string>& typestrs) const {
     return std::make_shared<UnknownType>(parameters_, util::gettypestr(parameters_, typestrs));
   }
 
@@ -81,7 +81,7 @@ namespace awkward {
   }
 
   const ContentPtr EmptyArray::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
-    std::shared_ptr<Identities> identities = identities_;
+    IdentitiesPtr identities = identities_;
     if (copyidentities  &&  identities_.get() != nullptr) {
       identities = identities_.get()->deep_copy();
     }
@@ -202,7 +202,7 @@ namespace awkward {
     return other;
   }
 
-  const std::shared_ptr<SliceItem> EmptyArray::asslice() const {
+  const SliceItemPtr EmptyArray::asslice() const {
     Index64 index(0);
     std::vector<int64_t> shape({ 0 });
     std::vector<int64_t> strides({ 1 });
@@ -242,7 +242,7 @@ namespace awkward {
     return std::make_shared<NumpyArray>(Index64(0));
   }
 
-  const ContentPtr EmptyArray::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
+  const ContentPtr EmptyArray::choose(int64_t n, bool diagonal, const util::RecordLookupPtr& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
     if (n < 1) {
       throw std::invalid_argument("in choose, 'n' must be at least 1");
     }

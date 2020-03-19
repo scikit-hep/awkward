@@ -25,7 +25,7 @@ namespace awkward {
     builder_.get()->clear();
   }
 
-  const std::shared_ptr<Type> ArrayBuilder::type(const std::map<std::string, std::string>& typestrs) const {
+  const TypePtr ArrayBuilder::type(const std::map<std::string, std::string>& typestrs) const {
     return builder_.get()->snapshot().get()->type(typestrs);
   }
 
@@ -98,7 +98,7 @@ namespace awkward {
   }
 
   void ArrayBuilder::endlist() {
-    std::shared_ptr<Builder> tmp = builder_.get()->endlist();
+    BuilderPtr tmp = builder_.get()->endlist();
     if (tmp.get() == nullptr) {
       throw std::invalid_argument("endlist doesn't match a corresponding beginlist");
     }
@@ -166,14 +166,14 @@ namespace awkward {
   }
 
   void ArrayBuilder::extend(const ContentPtr& array) {
-    std::shared_ptr<Builder> tmp = builder_;
+    BuilderPtr tmp = builder_;
     for (int64_t i = 0;  i < array.get()->length();  i++) {
       tmp = builder_.get()->append(array, i);
     }
     maybeupdate(tmp);
   }
 
-  void ArrayBuilder::maybeupdate(const std::shared_ptr<Builder>& tmp) {
+  void ArrayBuilder::maybeupdate(const BuilderPtr& tmp) {
     if (tmp.get() != builder_.get()) {
       builder_ = tmp;
     }

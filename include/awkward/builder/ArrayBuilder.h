@@ -18,7 +18,7 @@ namespace awkward {
     const std::string tostring() const;
     int64_t length() const;
     void clear();
-    const std::shared_ptr<Type> type(const std::map<std::string, std::string>& typestrs) const;
+    const TypePtr type(const std::map<std::string, std::string>& typestrs) const;
     const ContentPtr snapshot() const;
     const ContentPtr getitem_at(int64_t at) const;
     const ContentPtr getitem_range(int64_t start, int64_t stop) const;
@@ -54,12 +54,12 @@ namespace awkward {
     void extend(const ContentPtr& array);
 
   private:
-    void maybeupdate(const std::shared_ptr<Builder>& tmp);
+    void maybeupdate(const BuilderPtr& tmp);
 
     static const char* no_encoding;
     static const char* utf8_encoding;
 
-    std::shared_ptr<Builder> builder_;
+    BuilderPtr builder_;
   };
 }
 

@@ -12,17 +12,19 @@
 namespace awkward {
   class Content;
   typedef std::shared_ptr<Content> ContentPtr;
+  class Type;
+  typedef std::shared_ptr<Type> TypePtr;
 
   class EXPORT_SYMBOL Type {
   public:
-    static std::shared_ptr<Type> none();
+    static TypePtr none();
 
     Type(const util::Parameters& parameters, const std::string& typestr);
     virtual ~Type();
 
     virtual std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const = 0;
-    virtual const std::shared_ptr<Type> shallow_copy() const = 0;
-    virtual bool equal(const std::shared_ptr<Type>& other, bool check_parameters) const = 0;
+    virtual const TypePtr shallow_copy() const = 0;
+    virtual bool equal(const TypePtr& other, bool check_parameters) const = 0;
     virtual int64_t numfields() const = 0;
     virtual int64_t fieldindex(const std::string& key) const = 0;
     virtual const std::string key(int64_t fieldindex) const = 0;
@@ -37,7 +39,7 @@ namespace awkward {
     bool parameter_equals(const std::string& key, const std::string& value) const;
     bool parameters_equal(const util::Parameters& other) const;
     const std::string tostring() const;
-    const std::string compare(std::shared_ptr<Type> supertype);
+    const std::string compare(TypePtr supertype);
 
     const std::string typestr() const;
 

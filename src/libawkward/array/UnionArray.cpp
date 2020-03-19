@@ -32,7 +32,7 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  UnionArrayOf<T, I>::UnionArrayOf(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const IndexOf<T> tags, const IndexOf<I>& index, const ContentPtrVec& contents)
+  UnionArrayOf<T, I>::UnionArrayOf(const IdentitiesPtr& identities, const util::Parameters& parameters, const IndexOf<T> tags, const IndexOf<I>& index, const ContentPtrVec& contents)
       : Content(identities, parameters)
       , tags_(tags)
       , index_(index)
@@ -335,14 +335,14 @@ namespace awkward {
   template <typename T, typename I>
   void UnionArrayOf<T, I>::setidentities() {
     if (length() <= kMaxInt32) {
-      std::shared_ptr<Identities> newidentities = std::make_shared<Identities32>(Identities::newref(), Identities::FieldLoc(), 1, length());
+      IdentitiesPtr newidentities = std::make_shared<Identities32>(Identities::newref(), Identities::FieldLoc(), 1, length());
       Identities32* rawidentities = reinterpret_cast<Identities32*>(newidentities.get());
       struct Error err = awkward_new_identities32(rawidentities->ptr().get(), length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
     }
     else {
-      std::shared_ptr<Identities> newidentities = std::make_shared<Identities64>(Identities::newref(), Identities::FieldLoc(), 1, length());
+      IdentitiesPtr newidentities = std::make_shared<Identities64>(Identities::newref(), Identities::FieldLoc(), 1, length());
       Identities64* rawidentities = reinterpret_cast<Identities64*>(newidentities.get());
       struct Error err = awkward_new_identities64(rawidentities->ptr().get(), length());
       util::handle_error(err, classname(), identities_.get());
@@ -351,7 +351,7 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  void UnionArrayOf<T, I>::setidentities(const std::shared_ptr<Identities>& identities) {
+  void UnionArrayOf<T, I>::setidentities(const IdentitiesPtr& identities) {
     if (identities.get() == nullptr) {
       for (auto content : contents_) {
         content.get()->setidentities(identities);
@@ -366,13 +366,13 @@ namespace awkward {
       }
       for (size_t which = 0;  which < contents_.size();  which++) {
         ContentPtr content = contents_[which];
-        std::shared_ptr<Identities> bigidentities = identities;
+        IdentitiesPtr bigidentities = identities;
         if (content.get()->length() > kMaxInt32  ||  !std::is_same<I, int32_t>::value) {
           bigidentities = identities.get()->to64();
         }
         if (Identities32* rawidentities = dynamic_cast<Identities32*>(bigidentities.get())) {
           bool uniquecontents;
-          std::shared_ptr<Identities> subidentities = std::make_shared<Identities32>(Identities::newref(), rawidentities->fieldloc(), rawidentities->width(), content.get()->length());
+          IdentitiesPtr subidentities = std::make_shared<Identities32>(Identities::newref(), rawidentities->fieldloc(), rawidentities->width(), content.get()->length());
           Identities32* rawsubidentities = reinterpret_cast<Identities32*>(subidentities.get());
           struct Error err = util::awkward_identities32_from_unionarray<T, I>(
             &uniquecontents,
@@ -397,7 +397,7 @@ namespace awkward {
         }
         else if (Identities64* rawidentities = dynamic_cast<Identities64*>(bigidentities.get())) {
           bool uniquecontents;
-          std::shared_ptr<Identities> subidentities = std::make_shared<Identities64>(Identities::newref(), rawidentities->fieldloc(), rawidentities->width(), content.get()->length());
+          IdentitiesPtr subidentities = std::make_shared<Identities64>(Identities::newref(), rawidentities->fieldloc(), rawidentities->width(), content.get()->length());
           Identities64* rawsubidentities = reinterpret_cast<Identities64*>(subidentities.get());
           struct Error err = util::awkward_identities64_from_unionarray<T, I>(
             &uniquecontents,
@@ -429,8 +429,8 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  const std::shared_ptr<Type> UnionArrayOf<T, I>::type(const std::map<std::string, std::string>& typestrs) const {
-    std::vector<std::shared_ptr<Type>> types;
+  const TypePtr UnionArrayOf<T, I>::type(const std::map<std::string, std::string>& typestrs) const {
+    std::vector<TypePtr> types;
     for (auto item : contents_) {
       types.push_back(item.get()->type(typestrs));
     }
@@ -497,7 +497,7 @@ namespace awkward {
     for (auto x : contents_) {
       contents.push_back(x.get()->deep_copy(copyarrays, copyindexes, copyidentities));
     }
-    std::shared_ptr<Identities> identities = identities_;
+    IdentitiesPtr identities = identities_;
     if (copyidentities  &&  identities_.get() != nullptr) {
       identities = identities_.get()->deep_copy();
     }
@@ -559,7 +559,7 @@ namespace awkward {
 
   template <typename T, typename I>
   const ContentPtr UnionArrayOf<T, I>::getitem_range_nowrap(int64_t start, int64_t stop) const {
-    std::shared_ptr<Identities> identities(nullptr);
+    IdentitiesPtr identities(nullptr);
     if (identities_.get() != nullptr) {
       identities = identities_.get()->getitem_range_nowrap(start, stop);
     }
@@ -585,7 +585,7 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  const ContentPtr UnionArrayOf<T, I>::getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const {
+  const ContentPtr UnionArrayOf<T, I>::getitem_next(const SliceItemPtr& head, const Slice& tail, const Index64& advanced) const {
     if (head.get() == nullptr) {
       return shallow_copy();
     }
@@ -643,7 +643,7 @@ namespace awkward {
       index_.offset(),
       lencarry);
     util::handle_error(err2, classname(), identities_.get());
-    std::shared_ptr<Identities> identities(nullptr);
+    IdentitiesPtr identities(nullptr);
     if (identities_.get() != nullptr) {
       identities = identities_.get()->getitem_carry_64(carry);
     }
@@ -1121,7 +1121,7 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  const std::shared_ptr<SliceItem> UnionArrayOf<T, I>::asslice() const {
+  const SliceItemPtr UnionArrayOf<T, I>::asslice() const {
     ContentPtr simplified = simplify_uniontype(false);
     if (UnionArray8_32* raw = dynamic_cast<UnionArray8_32*>(simplified.get())) {
       if (raw->numcontents() == 1) {
@@ -1221,7 +1221,7 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  const ContentPtr UnionArrayOf<T, I>::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
+  const ContentPtr UnionArrayOf<T, I>::choose(int64_t n, bool diagonal, const util::RecordLookupPtr& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
     if (n < 1) {
       throw std::invalid_argument("in choose, 'n' must be at least 1");
     }

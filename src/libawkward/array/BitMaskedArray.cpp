@@ -20,7 +20,7 @@
 #include "awkward/array/BitMaskedArray.h"
 
 namespace awkward {
-  BitMaskedArray::BitMaskedArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const IndexU8& mask, const ContentPtr& content, bool validwhen, int64_t length, bool lsb_order)
+  BitMaskedArray::BitMaskedArray(const IdentitiesPtr& identities, const util::Parameters& parameters, const IndexU8& mask, const ContentPtr& content, bool validwhen, int64_t length, bool lsb_order)
       : Content(identities, parameters)
       , mask_(mask)
       , content_(content)
@@ -121,7 +121,7 @@ namespace awkward {
     return "BitMaskedArray";
   }
 
-  void BitMaskedArray::setidentities(const std::shared_ptr<Identities>& identities) {
+  void BitMaskedArray::setidentities(const IdentitiesPtr& identities) {
     if (identities.get() == nullptr) {
       content_.get()->setidentities(identities);
     }
@@ -162,14 +162,14 @@ namespace awkward {
 
   void BitMaskedArray::setidentities() {
     if (length() <= kMaxInt32) {
-      std::shared_ptr<Identities> newidentities = std::make_shared<Identities32>(Identities::newref(), Identities::FieldLoc(), 1, length());
+      IdentitiesPtr newidentities = std::make_shared<Identities32>(Identities::newref(), Identities::FieldLoc(), 1, length());
       Identities32* rawidentities = reinterpret_cast<Identities32*>(newidentities.get());
       struct Error err = awkward_new_identities32(rawidentities->ptr().get(), length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
     }
     else {
-      std::shared_ptr<Identities> newidentities = std::make_shared<Identities64>(Identities::newref(), Identities::FieldLoc(), 1, length());
+      IdentitiesPtr newidentities = std::make_shared<Identities64>(Identities::newref(), Identities::FieldLoc(), 1, length());
       Identities64* rawidentities = reinterpret_cast<Identities64*>(newidentities.get());
       struct Error err = awkward_new_identities64(rawidentities->ptr().get(), length());
       util::handle_error(err, classname(), identities_.get());
@@ -177,7 +177,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Type> BitMaskedArray::type(const std::map<std::string, std::string>& typestrs) const {
+  const TypePtr BitMaskedArray::type(const std::map<std::string, std::string>& typestrs) const {
     return std::make_shared<OptionType>(parameters_, util::gettypestr(parameters_, typestrs), content_.get()->type(typestrs));
   }
 
@@ -225,7 +225,7 @@ namespace awkward {
   const ContentPtr BitMaskedArray::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
     IndexU8 mask = copyindexes ? mask_.deep_copy() : mask_;
     ContentPtr content = content_.get()->deep_copy(copyarrays, copyindexes, copyidentities);
-    std::shared_ptr<Identities> identities = identities_;
+    IdentitiesPtr identities = identities_;
     if (copyidentities  &&  identities_.get() != nullptr) {
       identities = identities_.get()->deep_copy();
     }
@@ -280,7 +280,7 @@ namespace awkward {
     int64_t bitstart = start / 8;
     int64_t remainder = start % 8;
     if (remainder == 0) {
-      std::shared_ptr<Identities> identities(nullptr);
+      IdentitiesPtr identities(nullptr);
       if (identities_.get() != nullptr) {
         identities = identities_.get()->getitem_range_nowrap(start, stop);
       }
@@ -303,7 +303,7 @@ namespace awkward {
     return std::make_shared<BitMaskedArray>(identities_, util::Parameters(), mask_, content_.get()->getitem_fields(keys), validwhen_, length_, lsb_order_);
   }
 
-  const ContentPtr BitMaskedArray::getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const {
+  const ContentPtr BitMaskedArray::getitem_next(const SliceItemPtr& head, const Slice& tail, const Index64& advanced) const {
     return toByteMaskedArray().get()->getitem_next(head, tail, advanced);
   }
 
@@ -424,7 +424,7 @@ namespace awkward {
     return toIndexedOptionArray64().get()->merge(other);
   }
 
-  const std::shared_ptr<SliceItem> BitMaskedArray::asslice() const {
+  const SliceItemPtr BitMaskedArray::asslice() const {
     return toIndexedOptionArray64().get()->asslice();
   }
 
@@ -448,7 +448,7 @@ namespace awkward {
     return toByteMaskedArray().get()->localindex(axis, depth);
   }
 
-  const ContentPtr BitMaskedArray::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
+  const ContentPtr BitMaskedArray::choose(int64_t n, bool diagonal, const util::RecordLookupPtr& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
     return toByteMaskedArray().get()->choose(n, diagonal, recordlookup, parameters, axis, depth);
   }
 

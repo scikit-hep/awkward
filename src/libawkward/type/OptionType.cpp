@@ -12,7 +12,7 @@
 #include "awkward/type/OptionType.h"
 
 namespace awkward {
-  OptionType::OptionType(const util::Parameters& parameters, const std::string& typestr, const std::shared_ptr<Type>& type)
+  OptionType::OptionType(const util::Parameters& parameters, const std::string& typestr, const TypePtr& type)
       : Type(parameters, typestr)
       , type_(type) { }
 
@@ -38,11 +38,11 @@ namespace awkward {
     return out.str();
   }
 
-  const std::shared_ptr<Type> OptionType::shallow_copy() const {
+  const TypePtr OptionType::shallow_copy() const {
     return std::make_shared<OptionType>(parameters_, typestr_, type_);
   }
 
-  bool OptionType::equal(const std::shared_ptr<Type>& other, bool check_parameters) const {
+  bool OptionType::equal(const TypePtr& other, bool check_parameters) const {
     if (OptionType* t = dynamic_cast<OptionType*>(other.get())) {
       if (check_parameters  &&  !parameters_equal(other.get()->parameters())) {
         return false;
@@ -80,8 +80,8 @@ namespace awkward {
     return std::make_shared<IndexedOptionArray64>(Identities::none(), parameters_, index, content);
   }
 
-  const std::shared_ptr<Type> OptionType::type() const {
-    std::shared_ptr<Type> out = type_;
+  const TypePtr OptionType::type() const {
+    TypePtr out = type_;
     while (OptionType* t = dynamic_cast<OptionType*>(out.get())) {
       out = t->type_;
     }

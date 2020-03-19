@@ -11,7 +11,7 @@
 #include "awkward/type/RecordType.h"
 
 namespace awkward {
-  RecordType::RecordType(const util::Parameters& parameters, const std::string& typestr, const std::vector<std::shared_ptr<Type>>& types, const std::shared_ptr<util::RecordLookup>& recordlookup)
+  RecordType::RecordType(const util::Parameters& parameters, const std::string& typestr, const std::vector<TypePtr>& types, const util::RecordLookupPtr& recordlookup)
       : Type(parameters, typestr)
       , types_(types)
       , recordlookup_(recordlookup) {
@@ -20,16 +20,16 @@ namespace awkward {
     }
   }
 
-  RecordType::RecordType(const util::Parameters& parameters, const std::string& typestr, const std::vector<std::shared_ptr<Type>>& types)
+  RecordType::RecordType(const util::Parameters& parameters, const std::string& typestr, const std::vector<TypePtr>& types)
       : Type(parameters, typestr)
       , types_(types)
       , recordlookup_(nullptr) { }
 
-  const std::vector<std::shared_ptr<Type>> RecordType::types() const {
+  const std::vector<TypePtr> RecordType::types() const {
     return types_;
   };
 
-  const std::shared_ptr<util::RecordLookup> RecordType::recordlookup() const {
+  const util::RecordLookupPtr RecordType::recordlookup() const {
     return recordlookup_;
   }
 
@@ -98,11 +98,11 @@ namespace awkward {
     return out.str();
   }
 
-  const std::shared_ptr<Type> RecordType::shallow_copy() const {
+  const TypePtr RecordType::shallow_copy() const {
     return std::make_shared<RecordType>(parameters_, typestr_, types_, recordlookup_);
   }
 
-  bool RecordType::equal(const std::shared_ptr<Type>& other, bool check_parameters) const {
+  bool RecordType::equal(const TypePtr& other, bool check_parameters) const {
     if (RecordType* t = dynamic_cast<RecordType*>(other.get())) {
       if (check_parameters  &&  !parameters_equal(other.get()->parameters())) {
         return false;
@@ -169,40 +169,40 @@ namespace awkward {
     return std::make_shared<RecordArray>(Identities::none(), parameters_, contents, recordlookup_);
   }
 
-  const std::shared_ptr<Type> RecordType::field(int64_t fieldindex) const {
+  const TypePtr RecordType::field(int64_t fieldindex) const {
     if (fieldindex >= numfields()) {
       throw std::invalid_argument(std::string("fieldindex ") + std::to_string(fieldindex) + std::string(" for record with only " + std::to_string(numfields()) + std::string(" fields")));
     }
     return types_[(size_t)fieldindex];
   }
 
-  const std::shared_ptr<Type> RecordType::field(const std::string& key) const {
+  const TypePtr RecordType::field(const std::string& key) const {
     return types_[(size_t)fieldindex(key)];
   }
 
-  const std::vector<std::shared_ptr<Type>> RecordType::fields() const {
-    return std::vector<std::shared_ptr<Type>>(types_);
+  const std::vector<TypePtr> RecordType::fields() const {
+    return std::vector<TypePtr>(types_);
   }
 
-  const std::vector<std::pair<std::string, std::shared_ptr<Type>>> RecordType::fielditems() const {
-    std::vector<std::pair<std::string, std::shared_ptr<Type>>> out;
+  const std::vector<std::pair<std::string, TypePtr>> RecordType::fielditems() const {
+    std::vector<std::pair<std::string, TypePtr>> out;
     if (recordlookup_.get() != nullptr) {
       size_t cols = types_.size();
       for (size_t j = 0;  j < cols;  j++) {
-        out.push_back(std::pair<std::string, std::shared_ptr<Type>>(recordlookup_.get()->at(j), types_[j]));
+        out.push_back(std::pair<std::string, TypePtr>(recordlookup_.get()->at(j), types_[j]));
       }
     }
     else {
       size_t cols = types_.size();
       for (size_t j = 0;  j < cols;  j++) {
-        out.push_back(std::pair<std::string, std::shared_ptr<Type>>(std::to_string(j), types_[j]));
+        out.push_back(std::pair<std::string, TypePtr>(std::to_string(j), types_[j]));
       }
     }
     return out;
   }
 
-  const std::shared_ptr<Type> RecordType::astuple() const {
-    return std::make_shared<RecordType>(parameters_, typestr_, types_, std::shared_ptr<util::RecordLookup>(nullptr));
+  const TypePtr RecordType::astuple() const {
+    return std::make_shared<RecordType>(parameters_, typestr_, types_, util::RecordLookupPtr(nullptr));
   }
 
 }

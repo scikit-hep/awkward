@@ -64,15 +64,15 @@ namespace awkward {
       }
     }
 
-    std::shared_ptr<RecordLookup> init_recordlookup(int64_t numfields) {
-      std::shared_ptr<RecordLookup> out = std::make_shared<RecordLookup>();
+    RecordLookupPtr init_recordlookup(int64_t numfields) {
+      RecordLookupPtr out = std::make_shared<RecordLookup>();
       for (int64_t i = 0;  i < numfields;  i++) {
         out.get()->push_back(std::to_string(i));
       }
       return out;
     }
 
-    int64_t fieldindex(const std::shared_ptr<RecordLookup>& recordlookup, const std::string& key, int64_t numfields) {
+    int64_t fieldindex(const RecordLookupPtr& recordlookup, const std::string& key, int64_t numfields) {
       int64_t out = -1;
       if (recordlookup.get() != nullptr) {
         for (size_t i = 0;  i < recordlookup.get()->size();  i++) {
@@ -96,7 +96,7 @@ namespace awkward {
       return out;
     }
 
-    const std::string key(const std::shared_ptr<RecordLookup>& recordlookup, int64_t fieldindex, int64_t numfields) {
+    const std::string key(const RecordLookupPtr& recordlookup, int64_t fieldindex, int64_t numfields) {
       if (fieldindex >= numfields) {
         throw std::invalid_argument(std::string("fieldindex ") + std::to_string(fieldindex) + std::string(" for records with only " + std::to_string(numfields) + std::string(" fields")));
       }
@@ -108,7 +108,7 @@ namespace awkward {
       }
     }
 
-    bool haskey(const std::shared_ptr<RecordLookup>& recordlookup, const std::string& key, int64_t numfields) {
+    bool haskey(const RecordLookupPtr& recordlookup, const std::string& key, int64_t numfields) {
       try {
         fieldindex(recordlookup, key, numfields);
       }
@@ -118,7 +118,7 @@ namespace awkward {
       return true;
     }
 
-    const std::vector<std::string> keys(const std::shared_ptr<RecordLookup>& recordlookup, int64_t numfields) {
+    const std::vector<std::string> keys(const RecordLookupPtr& recordlookup, int64_t numfields) {
       std::vector<std::string> out;
       if (recordlookup.get() != nullptr) {
         out.insert(out.end(), recordlookup.get()->begin(), recordlookup.get()->end());

@@ -40,11 +40,12 @@ namespace awkward {
     IndexOf<T> make_stops(const IndexOf<T>& offsets);
 
     typedef std::vector<std::string> RecordLookup;
-    std::shared_ptr<RecordLookup> init_recordlookup(int64_t numfields);
-    int64_t fieldindex(const std::shared_ptr<RecordLookup>& recordlookup, const std::string& key, int64_t numfields);
-    const std::string key(const std::shared_ptr<RecordLookup>& recordlookup, int64_t fieldindex, int64_t numfields);
-    bool haskey(const std::shared_ptr<RecordLookup>& recordlookup, const std::string& key, int64_t numfields);
-    const std::vector<std::string> keys(const std::shared_ptr<RecordLookup>& recordlookup, int64_t numfields);
+    typedef std::shared_ptr<RecordLookup> RecordLookupPtr;
+    RecordLookupPtr init_recordlookup(int64_t numfields);
+    int64_t fieldindex(const RecordLookupPtr& recordlookup, const std::string& key, int64_t numfields);
+    const std::string key(const RecordLookupPtr& recordlookup, int64_t fieldindex, int64_t numfields);
+    bool haskey(const RecordLookupPtr& recordlookup, const std::string& key, int64_t numfields);
+    const std::vector<std::string> keys(const RecordLookupPtr& recordlookup, int64_t numfields);
 
     typedef std::map<std::string, std::string> Parameters;
     bool parameter_equals(const Parameters& parameters, const std::string& key, const std::string& value);

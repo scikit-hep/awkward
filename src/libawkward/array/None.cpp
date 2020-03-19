@@ -21,7 +21,7 @@ namespace awkward {
     return "None";
   }
 
-  void None::setidentities(const std::shared_ptr<Identities>& identities) {
+  void None::setidentities(const IdentitiesPtr& identities) {
     throw std::runtime_error("undefined operation: None::setidentities(identities)");
   }
 
@@ -29,7 +29,7 @@ namespace awkward {
     throw std::runtime_error("undefined operation: None::setidentities()");
   }
 
-  const std::shared_ptr<Type> None::type(const std::map<std::string, std::string>& typestrs) const {
+  const TypePtr None::type(const std::map<std::string, std::string>& typestrs) const {
     throw std::runtime_error("undefined operation: None::type()");
   }
 
@@ -157,7 +157,7 @@ namespace awkward {
     throw std::runtime_error("undefined operation: None::merge");
   }
 
-  const std::shared_ptr<SliceItem> None::asslice() const {
+  const SliceItemPtr None::asslice() const {
     throw std::runtime_error("undefined opteration: None::asslice");
   }
 
@@ -181,7 +181,7 @@ namespace awkward {
     throw std::runtime_error("undefined operation: None:localindex");
   }
 
-  const ContentPtr None::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
+  const ContentPtr None::choose(int64_t n, bool diagonal, const util::RecordLookupPtr& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
     throw std::runtime_error("undefined operation: None::choose");
   }
 

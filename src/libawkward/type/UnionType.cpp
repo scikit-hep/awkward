@@ -10,7 +10,7 @@
 #include "awkward/type/UnionType.h"
 
 namespace awkward {
-  UnionType::UnionType(const util::Parameters& parameters, const std::string& typestr, const std::vector<std::shared_ptr<Type>>& types)
+  UnionType::UnionType(const util::Parameters& parameters, const std::string& typestr, const std::vector<TypePtr>& types)
       : Type(parameters, typestr)
       , types_(types) { }
 
@@ -35,11 +35,11 @@ namespace awkward {
     return out.str();
   }
 
-  const std::shared_ptr<Type> UnionType::shallow_copy() const {
+  const TypePtr UnionType::shallow_copy() const {
     return std::make_shared<UnionType>(parameters_, typestr_, types_);
   }
 
-  bool UnionType::equal(const std::shared_ptr<Type>& other, bool check_parameters) const {
+  bool UnionType::equal(const TypePtr& other, bool check_parameters) const {
     if (UnionType* t = dynamic_cast<UnionType*>(other.get())) {
       if (check_parameters  &&  !parameters_equal(other.get()->parameters())) {
         return false;
@@ -83,7 +83,7 @@ namespace awkward {
     throw std::runtime_error("FIXME: UnionType::keys");
   }
 
-  const std::vector<std::shared_ptr<Type>> UnionType::types() const {
+  const std::vector<TypePtr> UnionType::types() const {
     return types_;
   }
 
@@ -97,7 +97,7 @@ namespace awkward {
     return std::make_shared<UnionArray8_64>(Identities::none(), parameters_, tags, index, contents);
   }
 
-  const std::shared_ptr<Type> UnionType::type(int64_t index) const {
+  const TypePtr UnionType::type(int64_t index) const {
     return types_[(size_t)index];
   }
 }

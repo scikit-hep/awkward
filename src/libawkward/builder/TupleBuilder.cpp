@@ -14,13 +14,13 @@
 #include "awkward/builder/TupleBuilder.h"
 
 namespace awkward {
-  const std::shared_ptr<Builder> TupleBuilder::fromempty(const ArrayBuilderOptions& options) {
-    std::shared_ptr<Builder> out = std::make_shared<TupleBuilder>(options, std::vector<std::shared_ptr<Builder>>(), -1, false, -1);
+  const BuilderPtr TupleBuilder::fromempty(const ArrayBuilderOptions& options) {
+    BuilderPtr out = std::make_shared<TupleBuilder>(options, std::vector<BuilderPtr>(), -1, false, -1);
     out.get()->setthat(out);
     return out;
   }
 
-  TupleBuilder::TupleBuilder(const ArrayBuilderOptions& options, const std::vector<std::shared_ptr<Builder>>& contents, int64_t length, bool begun, size_t nextindex)
+  TupleBuilder::TupleBuilder(const ArrayBuilderOptions& options, const std::vector<BuilderPtr>& contents, int64_t length, bool begun, size_t nextindex)
       : options_(options)
       , contents_(contents)
       , length_(length)
@@ -56,16 +56,16 @@ namespace awkward {
     for (size_t i = 0;  i < contents_.size();  i++) {
       contents.push_back(contents_[i].get()->snapshot());
     }
-    return std::make_shared<RecordArray>(Identities::none(), util::Parameters(), contents, std::shared_ptr<util::RecordLookup>(nullptr), length_);
+    return std::make_shared<RecordArray>(Identities::none(), util::Parameters(), contents, util::RecordLookupPtr(nullptr), length_);
   }
 
   bool TupleBuilder::active() const {
     return begun_;
   }
 
-  const std::shared_ptr<Builder> TupleBuilder::null() {
+  const BuilderPtr TupleBuilder::null() {
     if (!begun_) {
-      std::shared_ptr<Builder> out = OptionBuilder::fromvalids(options_, that_);
+      BuilderPtr out = OptionBuilder::fromvalids(options_, that_);
       out.get()->null();
       return out;
     }
@@ -81,9 +81,9 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> TupleBuilder::boolean(bool x) {
+  const BuilderPtr TupleBuilder::boolean(bool x) {
     if (!begun_) {
-      std::shared_ptr<Builder> out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
       out.get()->boolean(x);
       return out;
     }
@@ -99,9 +99,9 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> TupleBuilder::integer(int64_t x) {
+  const BuilderPtr TupleBuilder::integer(int64_t x) {
     if (!begun_) {
-      std::shared_ptr<Builder> out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
       out.get()->integer(x);
       return out;
     }
@@ -117,9 +117,9 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> TupleBuilder::real(double x) {
+  const BuilderPtr TupleBuilder::real(double x) {
     if (!begun_) {
-      std::shared_ptr<Builder> out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
       out.get()->real(x);
       return out;
     }
@@ -135,9 +135,9 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> TupleBuilder::string(const char* x, int64_t length, const char* encoding) {
+  const BuilderPtr TupleBuilder::string(const char* x, int64_t length, const char* encoding) {
     if (!begun_) {
-      std::shared_ptr<Builder> out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
       out.get()->string(x, length, encoding);
       return out;
     }
@@ -153,9 +153,9 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> TupleBuilder::beginlist() {
+  const BuilderPtr TupleBuilder::beginlist() {
     if (!begun_) {
-      std::shared_ptr<Builder> out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
       out.get()->beginlist();
       return out;
     }
@@ -171,7 +171,7 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> TupleBuilder::endlist() {
+  const BuilderPtr TupleBuilder::endlist() {
     if (!begun_) {
       throw std::invalid_argument("called 'endlist' without 'beginlist' at the same level before it");
     }
@@ -184,10 +184,10 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> TupleBuilder::begintuple(int64_t numfields) {
+  const BuilderPtr TupleBuilder::begintuple(int64_t numfields) {
     if (length_ == -1) {
       for (int64_t i = 0;  i < numfields;  i++) {
-        contents_.push_back(std::shared_ptr<Builder>(UnknownBuilder::fromempty(options_)));
+        contents_.push_back(BuilderPtr(UnknownBuilder::fromempty(options_)));
       }
       length_ = 0;
     }
@@ -197,7 +197,7 @@ namespace awkward {
       nextindex_ = -1;
     }
     else if (!begun_) {
-      std::shared_ptr<Builder> out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
       out.get()->begintuple(numfields);
       return out;
     }
@@ -213,7 +213,7 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> TupleBuilder::index(int64_t index) {
+  const BuilderPtr TupleBuilder::index(int64_t index) {
     if (!begun_) {
       throw std::invalid_argument("called 'index' without 'begintuple' at the same level before it");
     }
@@ -226,7 +226,7 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> TupleBuilder::endtuple() {
+  const BuilderPtr TupleBuilder::endtuple() {
     if (!begun_) {
       throw std::invalid_argument("called 'endtuple' without 'begintuple' at the same level before it");
     }
@@ -248,9 +248,9 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> TupleBuilder::beginrecord(const char* name, bool check) {
+  const BuilderPtr TupleBuilder::beginrecord(const char* name, bool check) {
     if (!begun_) {
-      std::shared_ptr<Builder> out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
       out.get()->beginrecord(name, check);
       return out;
     }
@@ -266,7 +266,7 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> TupleBuilder::field(const char* key, bool check) {
+  const BuilderPtr TupleBuilder::field(const char* key, bool check) {
     if (!begun_) {
       throw std::invalid_argument("called 'field_fast' without 'beginrecord' at the same level before it");
     }
@@ -279,7 +279,7 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> TupleBuilder::endrecord() {
+  const BuilderPtr TupleBuilder::endrecord() {
     if (!begun_) {
       throw std::invalid_argument("called 'endrecord' without 'beginrecord' at the same level before it");
     }
@@ -292,9 +292,9 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> TupleBuilder::append(const ContentPtr& array, int64_t at) {
+  const BuilderPtr TupleBuilder::append(const ContentPtr& array, int64_t at) {
     if (!begun_) {
-      std::shared_ptr<Builder> out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
       out.get()->append(array, at);
       return out;
     }
@@ -310,7 +310,7 @@ namespace awkward {
     return that_;
   }
 
-  void TupleBuilder::maybeupdate(int64_t i, const std::shared_ptr<Builder>& tmp) {
+  void TupleBuilder::maybeupdate(int64_t i, const BuilderPtr& tmp) {
     if (tmp.get() != contents_[(size_t)i].get()) {
       contents_[(size_t)i] = tmp;
     }

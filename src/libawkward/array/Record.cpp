@@ -35,7 +35,7 @@ namespace awkward {
     return out;
   }
 
-  const std::shared_ptr<util::RecordLookup> Record::recordlookup() const {
+  const util::RecordLookupPtr Record::recordlookup() const {
     return array_.get()->recordlookup();
   }
 
@@ -51,8 +51,8 @@ namespace awkward {
     return "Record";
   }
 
-  const std::shared_ptr<Identities> Record::identities() const {
-    std::shared_ptr<Identities> recidentities = array_.get()->identities();
+  const IdentitiesPtr Record::identities() const {
+    IdentitiesPtr recidentities = array_.get()->identities();
     if (recidentities.get() == nullptr) {
       return recidentities;
     }
@@ -65,12 +65,12 @@ namespace awkward {
     throw std::runtime_error("undefined operation: Record::setidentities");
   }
 
-  void Record::setidentities(const std::shared_ptr<Identities>& identities) {
+  void Record::setidentities(const IdentitiesPtr& identities) {
     throw std::runtime_error("undefined operation: Record::setidentities");
   }
 
-  const std::shared_ptr<Type> Record::type(const std::map<std::string, std::string>& typestrs) const {
-    std::shared_ptr<Type> out = array_.get()->type(typestrs);
+  const TypePtr Record::type(const std::map<std::string, std::string>& typestrs) const {
+    TypePtr out = array_.get()->type(typestrs);
     out.get()->setparameters(parameters_);
     return out;
   }
@@ -88,7 +88,7 @@ namespace awkward {
 
   void Record::tojson_part(ToJson& builder) const {
     size_t cols = (size_t)numfields();
-    std::shared_ptr<util::RecordLookup> keys = array_.get()->recordlookup();
+    util::RecordLookupPtr keys = array_.get()->recordlookup();
     if (istuple()) {
       keys = std::make_shared<util::RecordLookup>();
       for (size_t j = 0;  j < cols;  j++) {
@@ -233,7 +233,7 @@ namespace awkward {
     throw std::invalid_argument("Record cannot be merged because it is not an array");
   }
 
-  const std::shared_ptr<SliceItem> Record::asslice() const {
+  const SliceItemPtr Record::asslice() const {
     throw std::invalid_argument("cannot use a record as a slice");
   }
 
@@ -266,7 +266,7 @@ namespace awkward {
     }
   }
 
-  const ContentPtr Record::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
+  const ContentPtr Record::choose(int64_t n, bool diagonal, const util::RecordLookupPtr& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
     if (n < 1) {
       throw std::invalid_argument("in choose, 'n' must be at least 1");
     }
@@ -299,7 +299,7 @@ namespace awkward {
 
   const std::vector<std::pair<std::string, ContentPtr>> Record::fielditems() const {
     std::vector<std::pair<std::string, ContentPtr>> out;
-    std::shared_ptr<util::RecordLookup> keys = array_.get()->recordlookup();
+    util::RecordLookupPtr keys = array_.get()->recordlookup();
     if (istuple()) {
       int64_t cols = numfields();
       for (int64_t j = 0;  j < cols;  j++) {

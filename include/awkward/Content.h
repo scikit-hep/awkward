@@ -21,15 +21,15 @@ namespace awkward {
 
   class EXPORT_SYMBOL Content {
   public:
-    Content(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters);
+    Content(const IdentitiesPtr& identities, const util::Parameters& parameters);
     virtual ~Content();
 
     virtual bool isscalar() const;
     virtual const std::string classname() const = 0;
-    virtual const std::shared_ptr<Identities> identities() const;
+    virtual const IdentitiesPtr identities() const;
     virtual void setidentities() = 0;
-    virtual void setidentities(const std::shared_ptr<Identities>& identities) = 0;
-    virtual const std::shared_ptr<Type> type(const std::map<std::string, std::string>& typestrs) const = 0;
+    virtual void setidentities(const IdentitiesPtr& identities) = 0;
+    virtual const TypePtr type(const std::map<std::string, std::string>& typestrs) const = 0;
     virtual const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const = 0;
     virtual void tojson_part(ToJson& builder) const = 0;
     virtual void nbytes_part(std::map<size_t, int64_t>& largest) const = 0;
@@ -45,8 +45,8 @@ namespace awkward {
     virtual const ContentPtr getitem_field(const std::string& key) const = 0;
     virtual const ContentPtr getitem_fields(const std::vector<std::string>& keys) const = 0;
     virtual const ContentPtr getitem(const Slice& where) const;
-    virtual const ContentPtr getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const;
-    virtual const ContentPtr getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const std::shared_ptr<SliceItem>& slicecontent, const Slice& tail) const;
+    virtual const ContentPtr getitem_next(const SliceItemPtr& head, const Slice& tail, const Index64& advanced) const;
+    virtual const ContentPtr getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceItemPtr& slicecontent, const Slice& tail) const;
     virtual const ContentPtr carry(const Index64& carry) const = 0;
     virtual const std::string purelist_parameter(const std::string& key) const = 0;
     virtual bool purelist_isregular() const = 0;
@@ -66,13 +66,13 @@ namespace awkward {
     virtual const std::pair<Index64, ContentPtr> offsets_and_flattened(int64_t axis, int64_t depth) const = 0;
     virtual bool mergeable(const ContentPtr& other, bool mergebool) const = 0;
     virtual const ContentPtr merge(const ContentPtr& other) const = 0;
-    virtual const std::shared_ptr<SliceItem> asslice() const = 0;
+    virtual const SliceItemPtr asslice() const = 0;
     virtual const ContentPtr fillna(const ContentPtr& value) const = 0;
     virtual const ContentPtr rpad(int64_t length, int64_t axis, int64_t depth) const = 0;
     virtual const ContentPtr rpad_and_clip(int64_t length, int64_t axis, int64_t depth) const = 0;
     virtual const ContentPtr reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const = 0;
     virtual const ContentPtr localindex(int64_t axis, int64_t depth) const = 0;
-    virtual const ContentPtr choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const = 0;
+    virtual const ContentPtr choose(int64_t n, bool diagonal, const util::RecordLookupPtr& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const = 0;
 
     const std::string tostring() const;
     const std::string tojson(bool pretty, int64_t maxdecimals) const;
@@ -89,7 +89,7 @@ namespace awkward {
     const ContentPtr merge_as_union(const ContentPtr& other) const;
     const ContentPtr rpad_axis0(int64_t target, bool clip) const;
     const ContentPtr localindex_axis0() const;
-    const ContentPtr choose_axis0(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters) const;
+    const ContentPtr choose_axis0(int64_t n, bool diagonal, const util::RecordLookupPtr& recordlookup, const util::Parameters& parameters) const;
 
     virtual const ContentPtr getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const = 0;
     virtual const ContentPtr getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const = 0;
@@ -111,7 +111,7 @@ namespace awkward {
     const int64_t axis_wrap_if_negative(int64_t axis) const;
 
   protected:
-    std::shared_ptr<Identities> identities_;
+    IdentitiesPtr identities_;
     util::Parameters parameters_;
   };
 }

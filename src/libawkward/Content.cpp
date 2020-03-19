@@ -18,7 +18,7 @@
 #include "awkward/Content.h"
 
 namespace awkward {
-  Content::Content(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters)
+  Content::Content(const IdentitiesPtr& identities, const util::Parameters& parameters)
       : identities_(identities)
       , parameters_(parameters) { }
 
@@ -28,7 +28,7 @@ namespace awkward {
     return false;
   }
 
-  const std::shared_ptr<Identities> Content::identities() const {
+  const IdentitiesPtr Content::identities() const {
     return identities_;
   }
 
@@ -198,7 +198,7 @@ namespace awkward {
     return std::make_shared<NumpyArray>(localindex);
   }
 
-  const ContentPtr Content::choose_axis0(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters) const {
+  const ContentPtr Content::choose_axis0(int64_t n, bool diagonal, const util::RecordLookupPtr& recordlookup, const util::Parameters& parameters) const {
     int64_t size = length();
     if (diagonal) {
       size += (n - 1);
@@ -247,7 +247,7 @@ namespace awkward {
   const ContentPtr Content::getitem(const Slice& where) const {
     ContentPtr next = std::make_shared<RegularArray>(Identities::none(), util::Parameters(), shallow_copy(), length());
 
-    std::shared_ptr<SliceItem> nexthead = where.head();
+    SliceItemPtr nexthead = where.head();
     Slice nexttail = where.tail();
     Index64 nextadvanced(0);
     ContentPtr out = next.get()->getitem_next(nexthead, nexttail, nextadvanced);
@@ -260,7 +260,7 @@ namespace awkward {
     }
   }
 
-  const ContentPtr Content::getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const {
+  const ContentPtr Content::getitem_next(const SliceItemPtr& head, const Slice& tail, const Index64& advanced) const {
     if (head.get() == nullptr) {
       return shallow_copy();
     }
@@ -296,7 +296,7 @@ namespace awkward {
     }
   }
 
-  const ContentPtr Content::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const std::shared_ptr<SliceItem>& slicecontent, const Slice& tail) const {
+  const ContentPtr Content::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceItemPtr& slicecontent, const Slice& tail) const {
     if (SliceArray64* array = dynamic_cast<SliceArray64*>(slicecontent.get())) {
       return getitem_next_jagged(slicestarts, slicestops, *array, tail);
     }
@@ -317,7 +317,7 @@ namespace awkward {
     int64_t maxdepth = minmax.second;
 
     if (tail.length() == 0  ||  (mindepth - 1 == tail.dimlength()  &&  maxdepth - 1 == tail.dimlength())) {
-      std::shared_ptr<SliceItem> nexthead = tail.head();
+      SliceItemPtr nexthead = tail.head();
       Slice nexttail = tail.tail();
       return getitem_next(nexthead, nexttail, advanced);
     }
@@ -325,29 +325,29 @@ namespace awkward {
       throw std::invalid_argument("ellipsis (...) can't be used on a data structure of different depths");
     }
     else {
-      std::vector<std::shared_ptr<SliceItem>> tailitems = tail.items();
-      std::vector<std::shared_ptr<SliceItem>> items = { std::make_shared<SliceEllipsis>() };
+      std::vector<SliceItemPtr> tailitems = tail.items();
+      std::vector<SliceItemPtr> items = { std::make_shared<SliceEllipsis>() };
       items.insert(items.end(), tailitems.begin(), tailitems.end());
-      std::shared_ptr<SliceItem> nexthead = std::make_shared<SliceRange>(Slice::none(), Slice::none(), 1);
+      SliceItemPtr nexthead = std::make_shared<SliceRange>(Slice::none(), Slice::none(), 1);
       Slice nexttail(items);
       return getitem_next(nexthead, nexttail, advanced);
     }
   }
 
   const ContentPtr Content::getitem_next(const SliceNewAxis& newaxis, const Slice& tail, const Index64& advanced) const {
-    std::shared_ptr<SliceItem> nexthead = tail.head();
+    SliceItemPtr nexthead = tail.head();
     Slice nexttail = tail.tail();
     return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), getitem_next(nexthead, nexttail, advanced), 1);
   }
 
   const ContentPtr Content::getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const {
-    std::shared_ptr<SliceItem> nexthead = tail.head();
+    SliceItemPtr nexthead = tail.head();
     Slice nexttail = tail.tail();
     return getitem_field(field.key()).get()->getitem_next(nexthead, nexttail, advanced);
   }
 
   const ContentPtr Content::getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const {
-    std::shared_ptr<SliceItem> nexthead = tail.head();
+    SliceItemPtr nexthead = tail.head();
     Slice nexttail = tail.tail();
     return getitem_fields(fields.keys()).get()->getitem_next(nexthead, nexttail, advanced);
   }

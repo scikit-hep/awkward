@@ -14,13 +14,13 @@
 namespace awkward {
   class EXPORT_SYMBOL EmptyArray: public Content {
   public:
-    EmptyArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters);
+    EmptyArray(const IdentitiesPtr& identities, const util::Parameters& parameters);
     const ContentPtr toNumpyArray(const std::string& format, ssize_t itemsize) const;
 
     const std::string classname() const override;
     void setidentities() override;
-    void setidentities(const std::shared_ptr<Identities>& identities) override;
-    const std::shared_ptr<Type> type(const std::map<std::string, std::string>& typestrs) const override;
+    void setidentities(const IdentitiesPtr& identities) override;
+    const TypePtr type(const std::map<std::string, std::string>& typestrs) const override;
     const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override;
     void tojson_part(ToJson& builder) const override;
     void nbytes_part(std::map<size_t, int64_t>& largest) const override;
@@ -54,13 +54,13 @@ namespace awkward {
     const std::pair<Index64, ContentPtr> offsets_and_flattened(int64_t axis, int64_t depth) const override;
     bool mergeable(const ContentPtr& other, bool mergebool) const override;
     const ContentPtr merge(const ContentPtr& other) const override;
-    const std::shared_ptr<SliceItem> asslice() const override;
+    const SliceItemPtr asslice() const override;
     const ContentPtr fillna(const ContentPtr& value) const override;
     const ContentPtr rpad(int64_t length, int64_t axis, int64_t depth) const override;
     const ContentPtr rpad_and_clip(int64_t length, int64_t axis, int64_t depth) const override;
     const ContentPtr reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const override;
     const ContentPtr localindex(int64_t axis, int64_t depth) const override;
-    const ContentPtr choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const override;
+    const ContentPtr choose(int64_t n, bool diagonal, const util::RecordLookupPtr& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const override;
 
     const ContentPtr getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const override;
     const ContentPtr getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const override;

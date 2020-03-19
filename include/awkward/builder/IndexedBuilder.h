@@ -23,19 +23,19 @@ namespace awkward {
     void clear() override;
 
     bool active() const override;
-    const std::shared_ptr<Builder> null() override;
-    const std::shared_ptr<Builder> boolean(bool x) override;
-    const std::shared_ptr<Builder> integer(int64_t x) override;
-    const std::shared_ptr<Builder> real(double x) override;
-    const std::shared_ptr<Builder> string(const char* x, int64_t length, const char* encoding) override;
-    const std::shared_ptr<Builder> beginlist() override;
-    const std::shared_ptr<Builder> endlist() override;
-    const std::shared_ptr<Builder> begintuple(int64_t numfields) override;
-    const std::shared_ptr<Builder> index(int64_t index) override;
-    const std::shared_ptr<Builder> endtuple() override;
-    const std::shared_ptr<Builder> beginrecord(const char* name, bool check) override;
-    const std::shared_ptr<Builder> field(const char* key, bool check) override;
-    const std::shared_ptr<Builder> endrecord() override;
+    const BuilderPtr null() override;
+    const BuilderPtr boolean(bool x) override;
+    const BuilderPtr integer(int64_t x) override;
+    const BuilderPtr real(double x) override;
+    const BuilderPtr string(const char* x, int64_t length, const char* encoding) override;
+    const BuilderPtr beginlist() override;
+    const BuilderPtr endlist() override;
+    const BuilderPtr begintuple(int64_t numfields) override;
+    const BuilderPtr index(int64_t index) override;
+    const BuilderPtr endtuple() override;
+    const BuilderPtr beginrecord(const char* name, bool check) override;
+    const BuilderPtr field(const char* key, bool check) override;
+    const BuilderPtr endrecord() override;
 
   protected:
     const ArrayBuilderOptions options_;
@@ -46,13 +46,13 @@ namespace awkward {
 
   class IndexedGenericBuilder: public IndexedBuilder<Content> {
   public:
-    static const std::shared_ptr<Builder> fromnulls(const ArrayBuilderOptions& options, int64_t nullcount, const ContentPtr& array);
+    static const BuilderPtr fromnulls(const ArrayBuilderOptions& options, int64_t nullcount, const ContentPtr& array);
 
     IndexedGenericBuilder(const ArrayBuilderOptions& options, const GrowableBuffer<int64_t>& index, const ContentPtr& array, bool hasnull);
 
     const std::string classname() const override;
     const ContentPtr snapshot() const override;
-    const std::shared_ptr<Builder> append(const ContentPtr& array, int64_t at) override;
+    const BuilderPtr append(const ContentPtr& array, int64_t at) override;
   };
 
   class IndexedI32Builder: public IndexedBuilder<IndexedArray32> {
@@ -61,7 +61,7 @@ namespace awkward {
 
     const std::string classname() const override;
     const ContentPtr snapshot() const override;
-    const std::shared_ptr<Builder> append(const ContentPtr& array, int64_t at) override;
+    const BuilderPtr append(const ContentPtr& array, int64_t at) override;
   };
 
   class IndexedIU32Builder: public IndexedBuilder<IndexedArrayU32> {
@@ -70,7 +70,7 @@ namespace awkward {
 
     const std::string classname() const override;
     const ContentPtr snapshot() const override;
-    const std::shared_ptr<Builder> append(const ContentPtr& array, int64_t at) override;
+    const BuilderPtr append(const ContentPtr& array, int64_t at) override;
   };
 
   class IndexedI64Builder: public IndexedBuilder<IndexedArray64> {
@@ -79,7 +79,7 @@ namespace awkward {
 
     const std::string classname() const override;
     const ContentPtr snapshot() const override;
-    const std::shared_ptr<Builder> append(const ContentPtr& array, int64_t at) override;
+    const BuilderPtr append(const ContentPtr& array, int64_t at) override;
   };
 
   class IndexedIO32Builder: public IndexedBuilder<IndexedOptionArray32> {
@@ -88,7 +88,7 @@ namespace awkward {
 
     const std::string classname() const override;
     const ContentPtr snapshot() const override;
-    const std::shared_ptr<Builder> append(const ContentPtr& array, int64_t at) override;
+    const BuilderPtr append(const ContentPtr& array, int64_t at) override;
   };
 
   class IndexedIO64Builder: public IndexedBuilder<IndexedOptionArray64> {
@@ -97,7 +97,7 @@ namespace awkward {
 
     const std::string classname() const override;
     const ContentPtr snapshot() const override;
-    const std::shared_ptr<Builder> append(const ContentPtr& array, int64_t at) override;
+    const BuilderPtr append(const ContentPtr& array, int64_t at) override;
   };
 
 }

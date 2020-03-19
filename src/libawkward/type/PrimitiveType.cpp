@@ -44,11 +44,11 @@ namespace awkward {
     return out.str();
   }
 
-  const std::shared_ptr<Type> PrimitiveType::shallow_copy() const {
+  const TypePtr PrimitiveType::shallow_copy() const {
     return std::make_shared<PrimitiveType>(parameters_, typestr_, dtype_);
   }
 
-  bool PrimitiveType::equal(const std::shared_ptr<Type>& other, bool check_parameters) const {
+  bool PrimitiveType::equal(const TypePtr& other, bool check_parameters) const {
     if (PrimitiveType* t = dynamic_cast<PrimitiveType*>(other.get())) {
       if (check_parameters  &&  !parameters_equal(other.get()->parameters())) {
         return false;

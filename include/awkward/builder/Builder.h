@@ -11,6 +11,9 @@
 #include "awkward/type/Type.h"
 
 namespace awkward {
+  class Builder;
+  typedef std::shared_ptr<Builder> BuilderPtr;
+
   class EXPORT_SYMBOL Builder {
   public:
     virtual ~Builder();
@@ -21,25 +24,25 @@ namespace awkward {
     virtual const ContentPtr snapshot() const = 0;
 
     virtual bool active() const = 0;
-    virtual const std::shared_ptr<Builder> null() = 0;
-    virtual const std::shared_ptr<Builder> boolean(bool x) = 0;
-    virtual const std::shared_ptr<Builder> integer(int64_t x) = 0;
-    virtual const std::shared_ptr<Builder> real(double x) = 0;
-    virtual const std::shared_ptr<Builder> string(const char* x, int64_t length, const char* encoding) = 0;
-    virtual const std::shared_ptr<Builder> beginlist() = 0;
-    virtual const std::shared_ptr<Builder> endlist() = 0;
-    virtual const std::shared_ptr<Builder> begintuple(int64_t numfields) = 0;
-    virtual const std::shared_ptr<Builder> index(int64_t index) = 0;
-    virtual const std::shared_ptr<Builder> endtuple() = 0;
-    virtual const std::shared_ptr<Builder> beginrecord(const char* name, bool check) = 0;
-    virtual const std::shared_ptr<Builder> field(const char* key, bool check) = 0;
-    virtual const std::shared_ptr<Builder> endrecord() = 0;
-    virtual const std::shared_ptr<Builder> append(const ContentPtr& array, int64_t at) = 0;
+    virtual const BuilderPtr null() = 0;
+    virtual const BuilderPtr boolean(bool x) = 0;
+    virtual const BuilderPtr integer(int64_t x) = 0;
+    virtual const BuilderPtr real(double x) = 0;
+    virtual const BuilderPtr string(const char* x, int64_t length, const char* encoding) = 0;
+    virtual const BuilderPtr beginlist() = 0;
+    virtual const BuilderPtr endlist() = 0;
+    virtual const BuilderPtr begintuple(int64_t numfields) = 0;
+    virtual const BuilderPtr index(int64_t index) = 0;
+    virtual const BuilderPtr endtuple() = 0;
+    virtual const BuilderPtr beginrecord(const char* name, bool check) = 0;
+    virtual const BuilderPtr field(const char* key, bool check) = 0;
+    virtual const BuilderPtr endrecord() = 0;
+    virtual const BuilderPtr append(const ContentPtr& array, int64_t at) = 0;
 
-    void setthat(const std::shared_ptr<Builder>& that);
+    void setthat(const BuilderPtr& that);
 
   protected:
-    std::shared_ptr<Builder> that_;
+    BuilderPtr that_;
   };
 }
 

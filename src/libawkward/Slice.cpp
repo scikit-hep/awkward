@@ -25,7 +25,7 @@ namespace awkward {
     return at_;
   }
 
-  const std::shared_ptr<SliceItem> SliceAt::shallow_copy() const {
+  const SliceItemPtr SliceAt::shallow_copy() const {
     return std::make_shared<SliceAt>(at_);
   }
 
@@ -68,7 +68,7 @@ namespace awkward {
     return stop_ != none();
   }
 
-  const std::shared_ptr<SliceItem> SliceRange::shallow_copy() const {
+  const SliceItemPtr SliceRange::shallow_copy() const {
     return std::make_shared<SliceRange>(start_, stop_, step_);
   }
 
@@ -95,7 +95,7 @@ namespace awkward {
 
   SliceEllipsis::SliceEllipsis() { }
 
-  const std::shared_ptr<SliceItem> SliceEllipsis::shallow_copy() const {
+  const SliceItemPtr SliceEllipsis::shallow_copy() const {
     return std::make_shared<SliceEllipsis>();
   }
 
@@ -111,7 +111,7 @@ namespace awkward {
 
   SliceNewAxis::SliceNewAxis() { }
 
-  const std::shared_ptr<SliceItem> SliceNewAxis::shallow_copy() const {
+  const SliceItemPtr SliceNewAxis::shallow_copy() const {
     return std::make_shared<SliceNewAxis>();
   }
 
@@ -170,7 +170,7 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<SliceItem> SliceArrayOf<T>::shallow_copy() const {
+  const SliceItemPtr SliceArrayOf<T>::shallow_copy() const {
     return std::make_shared<SliceArrayOf<T>>(index_, shape_, strides_, frombool_);
   }
 
@@ -279,7 +279,7 @@ namespace awkward {
     return key_;
   }
 
-  const std::shared_ptr<SliceItem> SliceField::shallow_copy() const {
+  const SliceItemPtr SliceField::shallow_copy() const {
     return std::make_shared<SliceField>(key_);
   }
 
@@ -300,7 +300,7 @@ namespace awkward {
     return keys_;
   }
 
-  const std::shared_ptr<SliceItem> SliceFields::shallow_copy() const {
+  const SliceItemPtr SliceFields::shallow_copy() const {
     return std::make_shared<SliceFields>(keys_);
   }
 
@@ -324,7 +324,7 @@ namespace awkward {
   /////////////////////////////////////////////////////// SliceMissingOf<T>
 
   template <typename T>
-  SliceMissingOf<T>::SliceMissingOf(const IndexOf<T>& index, const Index8& originalmask, const std::shared_ptr<SliceItem>& content)
+  SliceMissingOf<T>::SliceMissingOf(const IndexOf<T>& index, const Index8& originalmask, const SliceItemPtr& content)
       : index_(index)
       , originalmask_(originalmask)
       , content_(content) { }
@@ -345,12 +345,12 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<SliceItem> SliceMissingOf<T>::content() const {
+  const SliceItemPtr SliceMissingOf<T>::content() const {
     return content_;
   }
 
   template <typename T>
-  const std::shared_ptr<SliceItem> SliceMissingOf<T>::shallow_copy() const {
+  const SliceItemPtr SliceMissingOf<T>::shallow_copy() const {
     return std::make_shared<SliceMissingOf<T>>(index_, originalmask_, content_);
   }
 
@@ -400,7 +400,7 @@ namespace awkward {
   /////////////////////////////////////////////////////// SliceJaggedOf<T>
 
   template <typename T>
-  SliceJaggedOf<T>::SliceJaggedOf(const IndexOf<T>& offsets, const std::shared_ptr<SliceItem>& content)
+  SliceJaggedOf<T>::SliceJaggedOf(const IndexOf<T>& offsets, const SliceItemPtr& content)
       : offsets_(offsets)
       , content_(content) { }
 
@@ -415,12 +415,12 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<SliceItem> SliceJaggedOf<T>::content() const {
+  const SliceItemPtr SliceJaggedOf<T>::content() const {
     return content_;
   }
 
   template <typename T>
-  const std::shared_ptr<SliceItem> SliceJaggedOf<T>::shallow_copy() const {
+  const SliceItemPtr SliceJaggedOf<T>::shallow_copy() const {
     return std::make_shared<SliceJaggedOf<T>>(offsets_, content_);
   }
 
@@ -474,18 +474,18 @@ namespace awkward {
   }
 
   Slice::Slice()
-      : items_(std::vector<std::shared_ptr<SliceItem>>())
+      : items_(std::vector<SliceItemPtr>())
       , sealed_(false) { }
 
-  Slice::Slice(const std::vector<std::shared_ptr<SliceItem>>& items)
+  Slice::Slice(const std::vector<SliceItemPtr>& items)
       : items_(items)
       , sealed_(false) { }
 
-  Slice::Slice(const std::vector<std::shared_ptr<SliceItem>>& items, bool sealed)
+  Slice::Slice(const std::vector<SliceItemPtr>& items, bool sealed)
       : items_(items)
       , sealed_(sealed) { }
 
-  const std::vector<std::shared_ptr<SliceItem>> Slice::items() const {
+  const std::vector<SliceItemPtr> Slice::items() const {
     return items_;
   }
 
@@ -513,17 +513,17 @@ namespace awkward {
     return out;
   }
 
-  const std::shared_ptr<SliceItem> Slice::head() const {
+  const SliceItemPtr Slice::head() const {
     if (!items_.empty()) {
       return items_[0];
     }
     else {
-      return std::shared_ptr<SliceItem>(nullptr);
+      return SliceItemPtr(nullptr);
     }
   }
 
   const Slice Slice::tail() const {
-    std::vector<std::shared_ptr<SliceItem>> items;
+    std::vector<SliceItemPtr> items;
     if (!items_.empty()) {
       items.insert(items.end(), items_.begin() + 1, items_.end());
     }
@@ -543,7 +543,7 @@ namespace awkward {
     return out.str();
   }
 
-  void Slice::append(const std::shared_ptr<SliceItem>& item) {
+  void Slice::append(const SliceItemPtr& item) {
     if (sealed_) {
       throw std::runtime_error("Slice::append when sealed_ == true");
     }

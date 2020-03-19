@@ -12,8 +12,8 @@
 namespace rj = rapidjson;
 
 namespace awkward {
-  std::shared_ptr<Type> Type::none() {
-    return std::shared_ptr<Type>(nullptr);
+  TypePtr Type::none() {
+    return TypePtr(nullptr);
   }
 
   Type::Type(const util::Parameters& parameters, const std::string& typestr)
@@ -58,7 +58,7 @@ namespace awkward {
     return tostring_part("", "", "");
   };
 
-  const std::string Type::compare(std::shared_ptr<Type> supertype) {
+  const std::string Type::compare(TypePtr supertype) {
     // FIXME: better side-by-side comparison
     return tostring() + std::string(" versus ") + supertype.get()->tostring();
   }

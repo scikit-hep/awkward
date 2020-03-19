@@ -26,11 +26,11 @@ namespace awkward {
     return out.str();
   }
 
-  const std::shared_ptr<Type> UnknownType::shallow_copy() const {
+  const TypePtr UnknownType::shallow_copy() const {
     return std::make_shared<UnknownType>(parameters_, typestr_);
   }
 
-  bool UnknownType::equal(const std::shared_ptr<Type>& other, bool check_parameters) const {
+  bool UnknownType::equal(const TypePtr& other, bool check_parameters) const {
     if (UnknownType* t = dynamic_cast<UnknownType*>(other.get())) {
       if (check_parameters  &&  !parameters_equal(other.get()->parameters())) {
         return false;

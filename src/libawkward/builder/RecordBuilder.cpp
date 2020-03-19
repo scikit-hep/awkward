@@ -17,13 +17,13 @@
 #include "awkward/builder/RecordBuilder.h"
 
 namespace awkward {
-  const std::shared_ptr<Builder> RecordBuilder::fromempty(const ArrayBuilderOptions& options) {
-    std::shared_ptr<Builder> out = std::make_shared<RecordBuilder>(options, std::vector<std::shared_ptr<Builder>>(), std::vector<std::string>(), std::vector<const char*>(), "", nullptr, -1, false, -1, -1);
+  const BuilderPtr RecordBuilder::fromempty(const ArrayBuilderOptions& options) {
+    BuilderPtr out = std::make_shared<RecordBuilder>(options, std::vector<BuilderPtr>(), std::vector<std::string>(), std::vector<const char*>(), "", nullptr, -1, false, -1, -1);
     out.get()->setthat(out);
     return out;
   }
 
-  RecordBuilder::RecordBuilder(const ArrayBuilderOptions& options, const std::vector<std::shared_ptr<Builder>>& contents, const std::vector<std::string>& keys, const std::vector<const char*>& pointers, const std::string& name, const char* nameptr, int64_t length, bool begun, int64_t nextindex, int64_t nexttotry)
+  RecordBuilder::RecordBuilder(const ArrayBuilderOptions& options, const std::vector<BuilderPtr>& contents, const std::vector<std::string>& keys, const std::vector<const char*>& pointers, const std::string& name, const char* nameptr, int64_t length, bool begun, int64_t nextindex, int64_t nexttotry)
       : options_(options)
       , contents_(contents)
       , keys_(keys)
@@ -74,7 +74,7 @@ namespace awkward {
       parameters["__record__"] = util::quote(name_, true);
     }
     ContentPtrVec contents;
-    std::shared_ptr<util::RecordLookup> recordlookup = std::make_shared<util::RecordLookup>();
+    util::RecordLookupPtr recordlookup = std::make_shared<util::RecordLookup>();
     for (size_t i = 0;  i < contents_.size();  i++) {
       contents.push_back(contents_[i].get()->snapshot());
       recordlookup.get()->push_back(keys_[i]);
@@ -86,9 +86,9 @@ namespace awkward {
     return begun_;
   }
 
-  const std::shared_ptr<Builder> RecordBuilder::null() {
+  const BuilderPtr RecordBuilder::null() {
     if (!begun_) {
-      std::shared_ptr<Builder> out = OptionBuilder::fromvalids(options_, that_);
+      BuilderPtr out = OptionBuilder::fromvalids(options_, that_);
       out.get()->null();
       return out;
     }
@@ -104,9 +104,9 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> RecordBuilder::boolean(bool x) {
+  const BuilderPtr RecordBuilder::boolean(bool x) {
     if (!begun_) {
-      std::shared_ptr<Builder> out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
       out.get()->boolean(x);
       return out;
     }
@@ -122,9 +122,9 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> RecordBuilder::integer(int64_t x) {
+  const BuilderPtr RecordBuilder::integer(int64_t x) {
     if (!begun_) {
-      std::shared_ptr<Builder> out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
       out.get()->integer(x);
       return out;
     }
@@ -140,9 +140,9 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> RecordBuilder::real(double x) {
+  const BuilderPtr RecordBuilder::real(double x) {
     if (!begun_) {
-      std::shared_ptr<Builder> out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
       out.get()->real(x);
       return out;
     }
@@ -158,9 +158,9 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> RecordBuilder::string(const char* x, int64_t length, const char* encoding) {
+  const BuilderPtr RecordBuilder::string(const char* x, int64_t length, const char* encoding) {
     if (!begun_) {
-      std::shared_ptr<Builder> out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
       out.get()->string(x, length, encoding);
       return out;
     }
@@ -176,9 +176,9 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> RecordBuilder::beginlist() {
+  const BuilderPtr RecordBuilder::beginlist() {
     if (!begun_) {
-      std::shared_ptr<Builder> out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
       out.get()->beginlist();
       return out;
     }
@@ -194,7 +194,7 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> RecordBuilder::endlist() {
+  const BuilderPtr RecordBuilder::endlist() {
     if (!begun_) {
       throw std::invalid_argument("called 'endlist' without 'beginlist' at the same level before it");
     }
@@ -207,9 +207,9 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> RecordBuilder::begintuple(int64_t numfields) {
+  const BuilderPtr RecordBuilder::begintuple(int64_t numfields) {
     if (!begun_) {
-      std::shared_ptr<Builder> out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
       out.get()->begintuple(numfields);
       return out;
     }
@@ -225,7 +225,7 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> RecordBuilder::index(int64_t index) {
+  const BuilderPtr RecordBuilder::index(int64_t index) {
     if (!begun_) {
       throw std::invalid_argument("called 'index' without 'begintuple' at the same level before it");
     }
@@ -238,7 +238,7 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> RecordBuilder::endtuple() {
+  const BuilderPtr RecordBuilder::endtuple() {
     if (!begun_) {
       throw std::invalid_argument("called 'endtuple' without 'begintuple' at the same level before it");
     }
@@ -251,7 +251,7 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> RecordBuilder::beginrecord(const char* name, bool check) {
+  const BuilderPtr RecordBuilder::beginrecord(const char* name, bool check) {
     if (length_ == -1) {
       if (name == nullptr) {
         name_ = std::string("");
@@ -269,7 +269,7 @@ namespace awkward {
       nexttotry_ = 0;
     }
     else if (!begun_) {
-      std::shared_ptr<Builder> out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
       out.get()->beginrecord(name, check);
       return out;
     }
@@ -285,7 +285,7 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> RecordBuilder::field(const char* key, bool check) {
+  const BuilderPtr RecordBuilder::field(const char* key, bool check) {
     if (check) {
       return field_check(key);
     }
@@ -294,7 +294,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Builder> RecordBuilder::field_fast(const char* key) {
+  const BuilderPtr RecordBuilder::field_fast(const char* key) {
     if (!begun_) {
       throw std::invalid_argument("called 'field' without 'beginrecord' at the same level before it");
     }
@@ -333,7 +333,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Builder> RecordBuilder::field_check(const char* key) {
+  const BuilderPtr RecordBuilder::field_check(const char* key) {
     if (!begun_) {
       throw std::invalid_argument("called 'field' without 'beginrecord' at the same level before it");
     }
@@ -372,7 +372,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Builder> RecordBuilder::endrecord() {
+  const BuilderPtr RecordBuilder::endrecord() {
     if (!begun_) {
       throw std::invalid_argument("called 'endrecord' without 'beginrecord' at the same level before it");
     }
@@ -394,9 +394,9 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> RecordBuilder::append(const ContentPtr& array, int64_t at) {
+  const BuilderPtr RecordBuilder::append(const ContentPtr& array, int64_t at) {
     if (!begun_) {
-      std::shared_ptr<Builder> out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
       out.get()->append(array, at);
       return out;
     }
@@ -412,7 +412,7 @@ namespace awkward {
     return that_;
   }
 
-  void RecordBuilder::maybeupdate(int64_t i, const std::shared_ptr<Builder>& tmp) {
+  void RecordBuilder::maybeupdate(int64_t i, const BuilderPtr& tmp) {
     if (tmp.get() != contents_[(size_t)i].get()) {
       contents_[(size_t)i] = tmp;
     }

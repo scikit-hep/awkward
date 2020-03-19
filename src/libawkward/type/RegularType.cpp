@@ -10,7 +10,7 @@
 #include "awkward/type/RegularType.h"
 
 namespace awkward {
-  RegularType::RegularType(const util::Parameters& parameters, const std::string& typestr, const std::shared_ptr<Type>& type, int64_t size)
+  RegularType::RegularType(const util::Parameters& parameters, const std::string& typestr, const TypePtr& type, int64_t size)
       : Type(parameters, typestr)
       , type_(type)
       , size_(size) { }
@@ -31,11 +31,11 @@ namespace awkward {
     return out.str();
   }
 
-  const std::shared_ptr<Type> RegularType::shallow_copy() const {
+  const TypePtr RegularType::shallow_copy() const {
     return std::make_shared<RegularType>(parameters_, typestr_, type_, size_);
   }
 
-  bool RegularType::equal(const std::shared_ptr<Type>& other, bool check_parameters) const {
+  bool RegularType::equal(const TypePtr& other, bool check_parameters) const {
     if (RegularType* t = dynamic_cast<RegularType*>(other.get())) {
       if (check_parameters  &&  !parameters_equal(other.get()->parameters())) {
         return false;
@@ -72,7 +72,7 @@ namespace awkward {
     return std::make_shared<RegularArray>(Identities::none(), parameters_, content, size_);
   }
 
-  const std::shared_ptr<Type> RegularType::type() const {
+  const TypePtr RegularType::type() const {
     return type_;
   }
 

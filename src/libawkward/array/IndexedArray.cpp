@@ -26,7 +26,7 @@
 
 namespace awkward {
   template <typename T, bool ISOPTION>
-  IndexedArrayOf<T, ISOPTION>::IndexedArrayOf(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const IndexOf<T>& index, const ContentPtr& content)
+  IndexedArrayOf<T, ISOPTION>::IndexedArrayOf(const IdentitiesPtr& identities, const util::Parameters& parameters, const IndexOf<T>& index, const ContentPtr& content)
       : Content(identities, parameters)
       , index_(index)
       , content_(content) { }
@@ -404,7 +404,7 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  void IndexedArrayOf<T, ISOPTION>::setidentities(const std::shared_ptr<Identities>& identities) {
+  void IndexedArrayOf<T, ISOPTION>::setidentities(const IdentitiesPtr& identities) {
     if (identities.get() == nullptr) {
       content_.get()->setidentities(identities);
     }
@@ -412,13 +412,13 @@ namespace awkward {
       if (length() != identities.get()->length()) {
         util::handle_error(failure("content and its identities must have the same length", kSliceNone, kSliceNone), classname(), identities_.get());
       }
-      std::shared_ptr<Identities> bigidentities = identities;
+      IdentitiesPtr bigidentities = identities;
       if (content_.get()->length() > kMaxInt32  ||  !std::is_same<T, int32_t>::value) {
         bigidentities = identities.get()->to64();
       }
       if (Identities32* rawidentities = dynamic_cast<Identities32*>(bigidentities.get())) {
         bool uniquecontents;
-        std::shared_ptr<Identities> subidentities = std::make_shared<Identities32>(Identities::newref(), rawidentities->fieldloc(), rawidentities->width(), content_.get()->length());
+        IdentitiesPtr subidentities = std::make_shared<Identities32>(Identities::newref(), rawidentities->fieldloc(), rawidentities->width(), content_.get()->length());
         Identities32* rawsubidentitites = reinterpret_cast<Identities32*>(subidentities.get());
         struct Error err = util::awkward_identities32_from_indexedarray<T>(
           &uniquecontents,
@@ -440,7 +440,7 @@ namespace awkward {
       }
       else if (Identities64* rawidentities = dynamic_cast<Identities64*>(bigidentities.get())) {
         bool uniquecontents;
-        std::shared_ptr<Identities> subidentities = std::make_shared<Identities64>(Identities::newref(), rawidentities->fieldloc(), rawidentities->width(), content_.get()->length());
+        IdentitiesPtr subidentities = std::make_shared<Identities64>(Identities::newref(), rawidentities->fieldloc(), rawidentities->width(), content_.get()->length());
         Identities64* rawsubidentitites = reinterpret_cast<Identities64*>(subidentities.get());
         struct Error err = util::awkward_identities64_from_indexedarray<T>(
           &uniquecontents,
@@ -470,14 +470,14 @@ namespace awkward {
   template <typename T, bool ISOPTION>
   void IndexedArrayOf<T, ISOPTION>::setidentities() {
     if (length() <= kMaxInt32) {
-      std::shared_ptr<Identities> newidentities = std::make_shared<Identities32>(Identities::newref(), Identities::FieldLoc(), 1, length());
+      IdentitiesPtr newidentities = std::make_shared<Identities32>(Identities::newref(), Identities::FieldLoc(), 1, length());
       Identities32* rawidentities = reinterpret_cast<Identities32*>(newidentities.get());
       struct Error err = awkward_new_identities32(rawidentities->ptr().get(), length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
     }
     else {
-      std::shared_ptr<Identities> newidentities = std::make_shared<Identities64>(Identities::newref(), Identities::FieldLoc(), 1, length());
+      IdentitiesPtr newidentities = std::make_shared<Identities64>(Identities::newref(), Identities::FieldLoc(), 1, length());
       Identities64* rawidentities = reinterpret_cast<Identities64*>(newidentities.get());
       struct Error err = awkward_new_identities64(rawidentities->ptr().get(), length());
       util::handle_error(err, classname(), identities_.get());
@@ -486,12 +486,12 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Type> IndexedArrayOf<T, ISOPTION>::type(const std::map<std::string, std::string>& typestrs) const {
+  const TypePtr IndexedArrayOf<T, ISOPTION>::type(const std::map<std::string, std::string>& typestrs) const {
     if (ISOPTION) {
       return std::make_shared<OptionType>(parameters_, util::gettypestr(parameters_, typestrs), content_.get()->type(typestrs));
     }
     else {
-      std::shared_ptr<Type> out = content_.get()->type(typestrs);
+      TypePtr out = content_.get()->type(typestrs);
       out.get()->setparameters(parameters_);
       return out;
     }
@@ -547,7 +547,7 @@ namespace awkward {
   const ContentPtr IndexedArrayOf<T, ISOPTION>::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
     IndexOf<T> index = copyindexes ? index_.deep_copy() : index_;
     ContentPtr content = content_.get()->deep_copy(copyarrays, copyindexes, copyidentities);
-    std::shared_ptr<Identities> identities = identities_;
+    IdentitiesPtr identities = identities_;
     if (copyidentities  &&  identities_.get() != nullptr) {
       identities = identities_.get()->deep_copy();
     }
@@ -609,7 +609,7 @@ namespace awkward {
 
   template <typename T, bool ISOPTION>
   const ContentPtr IndexedArrayOf<T, ISOPTION>::getitem_range_nowrap(int64_t start, int64_t stop) const {
-    std::shared_ptr<Identities> identities(nullptr);
+    IdentitiesPtr identities(nullptr);
     if (identities_.get() != nullptr) {
       identities = identities_.get()->getitem_range_nowrap(start, stop);
     }
@@ -627,7 +627,7 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const ContentPtr IndexedArrayOf<T, ISOPTION>::getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const {
+  const ContentPtr IndexedArrayOf<T, ISOPTION>::getitem_next(const SliceItemPtr& head, const Slice& tail, const Index64& advanced) const {
     if (head.get() == nullptr) {
       return shallow_copy();
     }
@@ -688,7 +688,7 @@ namespace awkward {
       index_.length(),
       carry.length());
     util::handle_error(err, classname(), identities_.get());
-    std::shared_ptr<Identities> identities(nullptr);
+    IdentitiesPtr identities(nullptr);
     if (identities_.get() != nullptr) {
       identities = identities_.get()->getitem_carry_64(carry);
     }
@@ -1071,7 +1071,7 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<SliceItem> IndexedArrayOf<T, ISOPTION>::asslice() const {
+  const SliceItemPtr IndexedArrayOf<T, ISOPTION>::asslice() const {
     if (ISOPTION) {
       int64_t numnull;
       struct Error err1 = util::awkward_indexedarray_numnull<T>(
@@ -1094,7 +1094,7 @@ namespace awkward {
 
       ContentPtr next = content_.get()->carry(nextcarry);
 
-      std::shared_ptr<SliceItem> slicecontent = next.get()->asslice();
+      SliceItemPtr slicecontent = next.get()->asslice();
       if (SliceArray64* raw = dynamic_cast<SliceArray64*>(slicecontent.get())) {
         if (raw->frombool()) {
           Index64 nonzero(raw->index());
@@ -1113,7 +1113,7 @@ namespace awkward {
             nonzero.length());
           util::handle_error(err3, classname(), nullptr);
 
-          std::shared_ptr<SliceItem> outcontent = std::make_shared<SliceArray64>(adjustednonzero, raw->shape(), raw->strides(), true);
+          SliceItemPtr outcontent = std::make_shared<SliceArray64>(adjustednonzero, raw->shape(), raw->strides(), true);
           return std::make_shared<SliceMissing64>(adjustedindex, originalmask, outcontent);
         }
       }
@@ -1290,7 +1290,7 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const ContentPtr IndexedArrayOf<T, ISOPTION>::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
+  const ContentPtr IndexedArrayOf<T, ISOPTION>::choose(int64_t n, bool diagonal, const util::RecordLookupPtr& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
     if (n < 1) {
       throw std::invalid_argument("in choose, 'n' must be at least 1");
     }

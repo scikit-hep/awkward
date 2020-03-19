@@ -20,8 +20,8 @@
 #include "awkward/builder/UnknownBuilder.h"
 
 namespace awkward {
-  const std::shared_ptr<Builder> UnknownBuilder::fromempty(const ArrayBuilderOptions& options) {
-    std::shared_ptr<Builder> out = std::make_shared<UnknownBuilder>(options, 0);
+  const BuilderPtr UnknownBuilder::fromempty(const ArrayBuilderOptions& options) {
+    BuilderPtr out = std::make_shared<UnknownBuilder>(options, 0);
     out.get()->setthat(out);
     return out;
   }
@@ -61,13 +61,13 @@ namespace awkward {
     return false;
   }
 
-  const std::shared_ptr<Builder> UnknownBuilder::null() {
+  const BuilderPtr UnknownBuilder::null() {
     nullcount_++;
     return that_;
   }
 
-  const std::shared_ptr<Builder> UnknownBuilder::boolean(bool x) {
-    std::shared_ptr<Builder> out = BoolBuilder::fromempty(options_);
+  const BuilderPtr UnknownBuilder::boolean(bool x) {
+    BuilderPtr out = BoolBuilder::fromempty(options_);
     if (nullcount_ != 0) {
       out = OptionBuilder::fromnulls(options_, nullcount_, out);
     }
@@ -75,8 +75,8 @@ namespace awkward {
     return out;
   }
 
-  const std::shared_ptr<Builder> UnknownBuilder::integer(int64_t x) {
-    std::shared_ptr<Builder> out = Int64Builder::fromempty(options_);
+  const BuilderPtr UnknownBuilder::integer(int64_t x) {
+    BuilderPtr out = Int64Builder::fromempty(options_);
     if (nullcount_ != 0) {
       out = OptionBuilder::fromnulls(options_, nullcount_, out);
     }
@@ -84,8 +84,8 @@ namespace awkward {
     return out;
   }
 
-  const std::shared_ptr<Builder> UnknownBuilder::real(double x) {
-    std::shared_ptr<Builder> out = Float64Builder::fromempty(options_);
+  const BuilderPtr UnknownBuilder::real(double x) {
+    BuilderPtr out = Float64Builder::fromempty(options_);
     if (nullcount_ != 0) {
       out = OptionBuilder::fromnulls(options_, nullcount_, out);
     }
@@ -93,8 +93,8 @@ namespace awkward {
     return out;
   }
 
-  const std::shared_ptr<Builder> UnknownBuilder::string(const char* x, int64_t length, const char* encoding) {
-    std::shared_ptr<Builder> out = StringBuilder::fromempty(options_, encoding);
+  const BuilderPtr UnknownBuilder::string(const char* x, int64_t length, const char* encoding) {
+    BuilderPtr out = StringBuilder::fromempty(options_, encoding);
     if (nullcount_ != 0) {
       out = OptionBuilder::fromnulls(options_, nullcount_, out);
     }
@@ -102,8 +102,8 @@ namespace awkward {
     return out;
   }
 
-  const std::shared_ptr<Builder> UnknownBuilder::beginlist() {
-    std::shared_ptr<Builder> out = ListBuilder::fromempty(options_);
+  const BuilderPtr UnknownBuilder::beginlist() {
+    BuilderPtr out = ListBuilder::fromempty(options_);
     if (nullcount_ != 0) {
       out = OptionBuilder::fromnulls(options_, nullcount_, out);
     }
@@ -111,12 +111,12 @@ namespace awkward {
     return out;
   }
 
-  const std::shared_ptr<Builder> UnknownBuilder::endlist() {
+  const BuilderPtr UnknownBuilder::endlist() {
     throw std::invalid_argument("called 'endlist' without 'beginlist' at the same level before it");
   }
 
-  const std::shared_ptr<Builder> UnknownBuilder::begintuple(int64_t numfields) {
-    std::shared_ptr<Builder> out = TupleBuilder::fromempty(options_);
+  const BuilderPtr UnknownBuilder::begintuple(int64_t numfields) {
+    BuilderPtr out = TupleBuilder::fromempty(options_);
     if (nullcount_ != 0) {
       out = OptionBuilder::fromnulls(options_, nullcount_, out);
     }
@@ -124,16 +124,16 @@ namespace awkward {
     return out;
   }
 
-  const std::shared_ptr<Builder> UnknownBuilder::index(int64_t index) {
+  const BuilderPtr UnknownBuilder::index(int64_t index) {
     throw std::invalid_argument("called 'index' without 'begintuple' at the same level before it");
   }
 
-  const std::shared_ptr<Builder> UnknownBuilder::endtuple() {
+  const BuilderPtr UnknownBuilder::endtuple() {
     throw std::invalid_argument("called 'endtuple' without 'begintuple' at the same level before it");
   }
 
-  const std::shared_ptr<Builder> UnknownBuilder::beginrecord(const char* name, bool check) {
-    std::shared_ptr<Builder> out = RecordBuilder::fromempty(options_);
+  const BuilderPtr UnknownBuilder::beginrecord(const char* name, bool check) {
+    BuilderPtr out = RecordBuilder::fromempty(options_);
     if (nullcount_ != 0) {
       out = OptionBuilder::fromnulls(options_, nullcount_, out);
     }
@@ -141,16 +141,16 @@ namespace awkward {
     return out;
   }
 
-  const std::shared_ptr<Builder> UnknownBuilder::field(const char* key, bool check) {
+  const BuilderPtr UnknownBuilder::field(const char* key, bool check) {
     throw std::invalid_argument("called 'field' without 'beginrecord' at the same level before it");
   }
 
-  const std::shared_ptr<Builder> UnknownBuilder::endrecord() {
+  const BuilderPtr UnknownBuilder::endrecord() {
     throw std::invalid_argument("called 'endrecord' without 'beginrecord' at the same level before it");
   }
 
-  const std::shared_ptr<Builder> UnknownBuilder::append(const ContentPtr& array, int64_t at) {
-    std::shared_ptr<Builder> out = IndexedGenericBuilder::fromnulls(options_, nullcount_, array);
+  const BuilderPtr UnknownBuilder::append(const ContentPtr& array, int64_t at) {
+    BuilderPtr out = IndexedGenericBuilder::fromnulls(options_, nullcount_, array);
     out.get()->append(array, at);
     return out;
   }

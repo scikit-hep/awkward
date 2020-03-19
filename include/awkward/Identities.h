@@ -12,13 +12,16 @@
 #include "awkward/Index.h"
 
 namespace awkward {
+  class Identities;
+  typedef std::shared_ptr<Identities> IdentitiesPtr;
+
   class EXPORT_SYMBOL Identities {
   public:
     typedef int64_t Ref;
     typedef std::vector<std::pair<int64_t, std::string>> FieldLoc;
 
     static Ref newref();
-    static std::shared_ptr<Identities> none();
+    static IdentitiesPtr none();
 
     Identities(const Ref ref, const FieldLoc& fieldloc, int64_t offset, int64_t width, int64_t length);
     const Ref ref() const;
@@ -29,14 +32,14 @@ namespace awkward {
 
     virtual const std::string classname() const = 0;
     virtual const std::string identity_at(int64_t where) const = 0;
-    virtual const std::shared_ptr<Identities> to64() const = 0;
+    virtual const IdentitiesPtr to64() const = 0;
     virtual const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const = 0;
-    virtual const std::shared_ptr<Identities> getitem_range_nowrap(int64_t start, int64_t stop) const = 0;
+    virtual const IdentitiesPtr getitem_range_nowrap(int64_t start, int64_t stop) const = 0;
     virtual void nbytes_part(std::map<size_t, int64_t>& largest) const = 0;
-    virtual const std::shared_ptr<Identities> shallow_copy() const = 0;
-    virtual const std::shared_ptr<Identities> deep_copy() const = 0;
-    virtual const std::shared_ptr<Identities> getitem_carry_64(const Index64& carry) const = 0;
-    virtual const std::shared_ptr<Identities> withfieldloc(const FieldLoc& fieldloc) const = 0;
+    virtual const IdentitiesPtr shallow_copy() const = 0;
+    virtual const IdentitiesPtr deep_copy() const = 0;
+    virtual const IdentitiesPtr getitem_carry_64(const Index64& carry) const = 0;
+    virtual const IdentitiesPtr withfieldloc(const FieldLoc& fieldloc) const = 0;
     virtual int64_t value(int64_t row, int64_t col) const = 0;
 
     const std::string tostring() const;
@@ -59,19 +62,19 @@ namespace awkward {
 
     const std::string classname() const override;
     const std::string identity_at(int64_t at) const override;
-    const std::shared_ptr<Identities> to64() const override;
+    const IdentitiesPtr to64() const override;
     const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override;
-    const std::shared_ptr<Identities> getitem_range_nowrap(int64_t start, int64_t stop) const override;
+    const IdentitiesPtr getitem_range_nowrap(int64_t start, int64_t stop) const override;
     void nbytes_part(std::map<size_t, int64_t>& largest) const override;
-    const std::shared_ptr<Identities> shallow_copy() const override;
-    const std::shared_ptr<Identities> deep_copy() const override;
-    const std::shared_ptr<Identities> getitem_carry_64(const Index64& carry) const override;
-    const std::shared_ptr<Identities> withfieldloc(const FieldLoc& fieldloc) const override;
+    const IdentitiesPtr shallow_copy() const override;
+    const IdentitiesPtr deep_copy() const override;
+    const IdentitiesPtr getitem_carry_64(const Index64& carry) const override;
+    const IdentitiesPtr withfieldloc(const FieldLoc& fieldloc) const override;
     int64_t value(int64_t row, int64_t col) const override;
 
     const std::vector<T> getitem_at(int64_t at) const;
     const std::vector<T> getitem_at_nowrap(int64_t at) const;
-    const std::shared_ptr<Identities> getitem_range(int64_t start, int64_t stop) const;
+    const IdentitiesPtr getitem_range(int64_t start, int64_t stop) const;
 
   private:
     const std::shared_ptr<T> ptr_;

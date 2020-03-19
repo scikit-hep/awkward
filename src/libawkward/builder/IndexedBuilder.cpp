@@ -39,92 +39,92 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Builder> IndexedBuilder<T>::null() {
+  const BuilderPtr IndexedBuilder<T>::null() {
     index_.append(-1);
     hasnull_ = true;
     return that_;
   }
 
   template <typename T>
-  const std::shared_ptr<Builder> IndexedBuilder<T>::boolean(bool x) {
-    std::shared_ptr<Builder> out = UnionBuilder::fromsingle(options_, that_);
+  const BuilderPtr IndexedBuilder<T>::boolean(bool x) {
+    BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
     out.get()->boolean(x);
     return out;
   }
 
   template <typename T>
-  const std::shared_ptr<Builder> IndexedBuilder<T>::integer(int64_t x) {
-    std::shared_ptr<Builder> out = UnionBuilder::fromsingle(options_, that_);
+  const BuilderPtr IndexedBuilder<T>::integer(int64_t x) {
+    BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
     out.get()->integer(x);
     return out;
   }
 
   template <typename T>
-  const std::shared_ptr<Builder> IndexedBuilder<T>::real(double x) {
-    std::shared_ptr<Builder> out = UnionBuilder::fromsingle(options_, that_);
+  const BuilderPtr IndexedBuilder<T>::real(double x) {
+    BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
     out.get()->real(x);
     return out;
   }
 
   template <typename T>
-  const std::shared_ptr<Builder> IndexedBuilder<T>::string(const char* x, int64_t length, const char* encoding) {
-    std::shared_ptr<Builder> out = UnionBuilder::fromsingle(options_, that_);
+  const BuilderPtr IndexedBuilder<T>::string(const char* x, int64_t length, const char* encoding) {
+    BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
     out.get()->string(x, length, encoding);
     return out;
   }
 
   template <typename T>
-  const std::shared_ptr<Builder> IndexedBuilder<T>::beginlist() {
-    std::shared_ptr<Builder> out = UnionBuilder::fromsingle(options_, that_);
+  const BuilderPtr IndexedBuilder<T>::beginlist() {
+    BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
     out.get()->beginlist();
     return out;
   }
 
   template <typename T>
-  const std::shared_ptr<Builder> IndexedBuilder<T>::endlist() {
+  const BuilderPtr IndexedBuilder<T>::endlist() {
     throw std::invalid_argument("called 'endlist' without 'beginlist' at the same level before it");
   }
 
   template <typename T>
-  const std::shared_ptr<Builder> IndexedBuilder<T>::begintuple(int64_t numfields) {
-    std::shared_ptr<Builder> out = UnionBuilder::fromsingle(options_, that_);
+  const BuilderPtr IndexedBuilder<T>::begintuple(int64_t numfields) {
+    BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
     out.get()->begintuple(numfields);
     return out;
   }
 
   template <typename T>
-  const std::shared_ptr<Builder> IndexedBuilder<T>::index(int64_t index) {
+  const BuilderPtr IndexedBuilder<T>::index(int64_t index) {
     throw std::invalid_argument("called 'index' without 'begintuple' at the same level before it");
   }
 
   template <typename T>
-  const std::shared_ptr<Builder> IndexedBuilder<T>::endtuple() {
+  const BuilderPtr IndexedBuilder<T>::endtuple() {
     throw std::invalid_argument("called 'endtuple' without 'begintuple' at the same level before it");
   }
 
   template <typename T>
-  const std::shared_ptr<Builder> IndexedBuilder<T>::beginrecord(const char* name, bool check) {
-    std::shared_ptr<Builder> out = UnionBuilder::fromsingle(options_, that_);
+  const BuilderPtr IndexedBuilder<T>::beginrecord(const char* name, bool check) {
+    BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
     out.get()->beginrecord(name, check);
     return out;
   }
 
   template <typename T>
-  const std::shared_ptr<Builder> IndexedBuilder<T>::field(const char* key, bool check) {
+  const BuilderPtr IndexedBuilder<T>::field(const char* key, bool check) {
     throw std::invalid_argument("called 'field' without 'beginrecord' at the same level before it");
   }
 
   template <typename T>
-  const std::shared_ptr<Builder> IndexedBuilder<T>::endrecord() {
+  const BuilderPtr IndexedBuilder<T>::endrecord() {
     throw std::invalid_argument("called 'endrecord' without 'beginrecord' at the same level before it");
   }
 
   /////////////////////////////////////////////////////////////////////////////////////////////
   template class IndexedBuilder<Content>;
 
-  const std::shared_ptr<Builder> IndexedGenericBuilder::fromnulls(const ArrayBuilderOptions& options, int64_t nullcount, const ContentPtr& array) {
+  const BuilderPtr IndexedGenericBuilder::fromnulls(const ArrayBuilderOptions& options, int64_t nullcount, const ContentPtr& array) {
     GrowableBuffer<int64_t> index = GrowableBuffer<int64_t>::full(options, -1, nullcount);
-    std::shared_ptr<Builder> out;
+    BuilderPtr out;
     if (std::shared_ptr<IndexedArray32> ptr = std::dynamic_pointer_cast<IndexedArray32>(array)) {
       out = std::make_shared<IndexedI32Builder>(options, index, ptr, nullcount != 0);
     }
@@ -164,12 +164,12 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Builder> IndexedGenericBuilder::append(const ContentPtr& array, int64_t at) {
+  const BuilderPtr IndexedGenericBuilder::append(const ContentPtr& array, int64_t at) {
     if (array.get() == array_.get()) {
       index_.append(at);
     }
     else {
-      std::shared_ptr<Builder> out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
       out.get()->append(array, at);
       return out;
     }
@@ -196,12 +196,12 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Builder> IndexedI32Builder::append(const ContentPtr& array, int64_t at) {
+  const BuilderPtr IndexedI32Builder::append(const ContentPtr& array, int64_t at) {
     if (array.get() == array_.get()) {
       index_.append((int64_t)array_.get()->index_at_nowrap(at));
     }
     else {
-      std::shared_ptr<Builder> out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
       out.get()->append(array, at);
       return out;
     }
@@ -228,12 +228,12 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Builder> IndexedIU32Builder::append(const ContentPtr& array, int64_t at) {
+  const BuilderPtr IndexedIU32Builder::append(const ContentPtr& array, int64_t at) {
     if (array.get() == array_.get()) {
       index_.append((int64_t)array_.get()->index_at_nowrap(at));
     }
     else {
-      std::shared_ptr<Builder> out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
       out.get()->append(array, at);
       return out;
     }
@@ -260,12 +260,12 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Builder> IndexedI64Builder::append(const ContentPtr& array, int64_t at) {
+  const BuilderPtr IndexedI64Builder::append(const ContentPtr& array, int64_t at) {
     if (array.get() == array_.get()) {
       index_.append(array_.get()->index_at_nowrap(at));
     }
     else {
-      std::shared_ptr<Builder> out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
       out.get()->append(array, at);
       return out;
     }
@@ -287,12 +287,12 @@ namespace awkward {
     return std::make_shared<IndexedOptionArray64>(Identities::none(), array_.get()->content().get()->parameters(), index, array_.get()->content());
   }
 
-  const std::shared_ptr<Builder> IndexedIO32Builder::append(const ContentPtr& array, int64_t at) {
+  const BuilderPtr IndexedIO32Builder::append(const ContentPtr& array, int64_t at) {
     if (array.get() == array_.get()) {
       index_.append((int64_t)array_.get()->index_at_nowrap(at));
     }
     else {
-      std::shared_ptr<Builder> out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
       out.get()->append(array, at);
       return out;
     }
@@ -314,12 +314,12 @@ namespace awkward {
     return std::make_shared<IndexedOptionArray64>(Identities::none(), array_.get()->content().get()->parameters(), index, array_.get()->content());
   }
 
-  const std::shared_ptr<Builder> IndexedIO64Builder::append(const ContentPtr& array, int64_t at) {
+  const BuilderPtr IndexedIO64Builder::append(const ContentPtr& array, int64_t at) {
     if (array.get() == array_.get()) {
       index_.append(array_.get()->index_at_nowrap(at));
     }
     else {
-      std::shared_ptr<Builder> out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
       out.get()->append(array, at);
       return out;
     }

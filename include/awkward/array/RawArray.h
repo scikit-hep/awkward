@@ -51,7 +51,7 @@ namespace awkward {
   template <typename T>
   class EXPORT_SYMBOL RawArrayOf: public Content {
   public:
-    RawArrayOf<T>(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::shared_ptr<T>& ptr, const int64_t offset, const int64_t length, const int64_t itemsize)
+    RawArrayOf<T>(const IdentitiesPtr& identities, const util::Parameters& parameters, const std::shared_ptr<T>& ptr, const int64_t offset, const int64_t length, const int64_t itemsize)
         : Content(identities, parameters)
         , ptr_(ptr)
         , offset_(offset)
@@ -62,14 +62,14 @@ namespace awkward {
       }
     }
 
-    RawArrayOf<T>(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::shared_ptr<T>& ptr, const int64_t length)
+    RawArrayOf<T>(const IdentitiesPtr& identities, const util::Parameters& parameters, const std::shared_ptr<T>& ptr, const int64_t length)
         : Content(identities, parameters)
         , ptr_(ptr)
         , offset_(0)
         , length_(length)
         , itemsize_(sizeof(T)) { }
 
-    RawArrayOf<T>(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const int64_t length)
+    RawArrayOf<T>(const IdentitiesPtr& identities, const util::Parameters& parameters, const int64_t length)
         : Content(identities, parameters)
         , ptr_(std::shared_ptr<T>(new T[(size_t)length], util::array_deleter<T>()))
         , offset_(0)
@@ -116,27 +116,27 @@ namespace awkward {
 
     void setidentities() override {
       if (length() <= kMaxInt32) {
-        std::shared_ptr<Identities> newidentities = std::make_shared<Identities32>(Identities::newref(), Identities::FieldLoc(), 1, length());
+        IdentitiesPtr newidentities = std::make_shared<Identities32>(Identities::newref(), Identities::FieldLoc(), 1, length());
         Identities32* rawidentities = reinterpret_cast<Identities32*>(newidentities.get());
         awkward_new_identities32(rawidentities->ptr().get(), length());
         setidentities(newidentities);
       }
       else {
-        std::shared_ptr<Identities> newidentities = std::make_shared<Identities64>(Identities::newref(), Identities::FieldLoc(), 1, length());
+        IdentitiesPtr newidentities = std::make_shared<Identities64>(Identities::newref(), Identities::FieldLoc(), 1, length());
         Identities64* rawidentities = reinterpret_cast<Identities64*>(newidentities.get());
         awkward_new_identities64(rawidentities->ptr().get(), length());
         setidentities(newidentities);
       }
     }
 
-    void setidentities(const std::shared_ptr<Identities>& identities) override {
+    void setidentities(const IdentitiesPtr& identities) override {
       if (identities.get() != nullptr  &&  length() != identities.get()->length()) {
         throw std::invalid_argument("content and its identities must have the same length");
       }
       identities_ = identities;
     }
 
-    const std::shared_ptr<Type> type(const std::map<std::string, std::string>& typestrs) const override {
+    const TypePtr type(const std::map<std::string, std::string>& typestrs) const override {
       if (std::is_same<T, double>::value) {
         return std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::float64);
       }
@@ -288,7 +288,7 @@ namespace awkward {
         memcpy(ptr.get(), &ptr_.get()[(size_t)offset_], sizeof(T)*((size_t)length_));
         offset = 0;
       }
-      std::shared_ptr<Identities> identities = identities_;
+      IdentitiesPtr identities = identities_;
       if (copyidentities  &&  identities_.get() != nullptr) {
         identities = identities_.get()->deep_copy();
       }
@@ -331,7 +331,7 @@ namespace awkward {
     }
 
     const ContentPtr getitem_range_nowrap(int64_t start, int64_t stop) const override {
-      std::shared_ptr<Identities> identities(nullptr);
+      IdentitiesPtr identities(nullptr);
       if (identities_.get() != nullptr) {
         identities = identities_.get()->getitem_range_nowrap(start, stop);
       }
@@ -347,13 +347,13 @@ namespace awkward {
     }
 
     const ContentPtr getitem(const Slice& where) const override {
-      std::shared_ptr<SliceItem> nexthead = where.head();
+      SliceItemPtr nexthead = where.head();
       Slice nexttail = where.tail();
       Index64 nextadvanced(0);
       return getitem_next(nexthead, nexttail, nextadvanced);
     }
 
-    const ContentPtr getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const override {
+    const ContentPtr getitem_next(const SliceItemPtr& head, const Slice& tail, const Index64& advanced) const override {
       if (tail.length() != 0) {
         throw std::invalid_argument("too many indexes for array");
       }
@@ -371,7 +371,7 @@ namespace awkward {
         carry.ptr().get());
       util::handle_error(err, classname(), identities_.get());
 
-      std::shared_ptr<Identities> identities(nullptr);
+      IdentitiesPtr identities(nullptr);
       if (identities_.get() != nullptr) {
         identities = identities_.get()->getitem_carry_64(carry);
       }
@@ -528,7 +528,7 @@ namespace awkward {
       }
     }
 
-    const std::shared_ptr<SliceItem> asslice() const override {
+    const SliceItemPtr asslice() const override {
       throw std::invalid_argument("cannot use RawArray as a slice");
     }
 
@@ -578,7 +578,7 @@ namespace awkward {
       }
     }
 
-    const ContentPtr choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const override {
+    const ContentPtr choose(int64_t n, bool diagonal, const util::RecordLookupPtr& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const override {
       if (n < 1) {
         throw std::invalid_argument("in choose, 'n' must be at least 1");
       }

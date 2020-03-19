@@ -11,7 +11,7 @@
 namespace awkward {
   class EXPORT_SYMBOL StringBuilder: public Builder {
   public:
-    static const std::shared_ptr<Builder> fromempty(const ArrayBuilderOptions& options, const char* encoding);
+    static const BuilderPtr fromempty(const ArrayBuilderOptions& options, const char* encoding);
 
     StringBuilder(const ArrayBuilderOptions& options, const GrowableBuffer<int64_t>& offsets, const GrowableBuffer<uint8_t>& content, const char* encoding);
     const char* encoding() const;
@@ -22,20 +22,20 @@ namespace awkward {
     const ContentPtr snapshot() const override;
 
     bool active() const override;
-    const std::shared_ptr<Builder> null() override;
-    const std::shared_ptr<Builder> boolean(bool x) override;
-    const std::shared_ptr<Builder> integer(int64_t x) override;
-    const std::shared_ptr<Builder> real(double x) override;
-    const std::shared_ptr<Builder> string(const char* x, int64_t length, const char* encoding) override;
-    const std::shared_ptr<Builder> beginlist() override;
-    const std::shared_ptr<Builder> endlist() override;
-    const std::shared_ptr<Builder> begintuple(int64_t numfields) override;
-    const std::shared_ptr<Builder> index(int64_t index) override;
-    const std::shared_ptr<Builder> endtuple() override;
-    const std::shared_ptr<Builder> beginrecord(const char* name, bool check) override;
-    const std::shared_ptr<Builder> field(const char* key, bool check) override;
-    const std::shared_ptr<Builder> endrecord() override;
-    const std::shared_ptr<Builder> append(const ContentPtr& array, int64_t at) override;
+    const BuilderPtr null() override;
+    const BuilderPtr boolean(bool x) override;
+    const BuilderPtr integer(int64_t x) override;
+    const BuilderPtr real(double x) override;
+    const BuilderPtr string(const char* x, int64_t length, const char* encoding) override;
+    const BuilderPtr beginlist() override;
+    const BuilderPtr endlist() override;
+    const BuilderPtr begintuple(int64_t numfields) override;
+    const BuilderPtr index(int64_t index) override;
+    const BuilderPtr endtuple() override;
+    const BuilderPtr beginrecord(const char* name, bool check) override;
+    const BuilderPtr field(const char* key, bool check) override;
+    const BuilderPtr endrecord() override;
+    const BuilderPtr append(const ContentPtr& array, int64_t at) override;
 
   private:
     const ArrayBuilderOptions options_;

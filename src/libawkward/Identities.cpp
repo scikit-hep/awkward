@@ -19,8 +19,8 @@ namespace awkward {
     return numrefs++;
   }
 
-  std::shared_ptr<Identities> Identities::none() {
-    return std::shared_ptr<Identities>(nullptr);
+  IdentitiesPtr Identities::none() {
+    return IdentitiesPtr(nullptr);
   }
 
   Identities::Identities(const Ref ref, const FieldLoc& fieldloc, int64_t offset, int64_t width, int64_t length)
@@ -96,12 +96,12 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Identities> IdentitiesOf<T>::to64() const {
+  const IdentitiesPtr IdentitiesOf<T>::to64() const {
     if (std::is_same<T, int64_t>::value) {
       return shallow_copy();
     }
     else if (std::is_same<T, int32_t>::value) {
-      std::shared_ptr<Identities> out = std::make_shared<Identities64>(ref_, fieldloc_, width_, length_);
+      IdentitiesPtr out = std::make_shared<Identities64>(ref_, fieldloc_, width_, length_);
       Identities64* raw = reinterpret_cast<Identities64*>(out.get());
       awkward_identities32_to_identities64(raw->ptr().get(), reinterpret_cast<int32_t*>(ptr_.get()), length_, width_);
       return out;
@@ -131,7 +131,7 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Identities> IdentitiesOf<T>::getitem_range_nowrap(int64_t start, int64_t stop) const {
+  const IdentitiesPtr IdentitiesOf<T>::getitem_range_nowrap(int64_t start, int64_t stop) const {
     if (!(0 <= start  &&  start < length_  &&  0 <= stop  &&  stop <= length_)  &&  start != stop) {
       throw std::runtime_error("Identities::getitem_range_nowrap with illegal start:stop for this length");
     }
@@ -148,12 +148,12 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Identities> IdentitiesOf<T>::shallow_copy() const {
+  const IdentitiesPtr IdentitiesOf<T>::shallow_copy() const {
     return std::make_shared<IdentitiesOf<T>>(ref_, fieldloc_, offset_, width_, length_, ptr_);
   }
 
   template <typename T>
-  const std::shared_ptr<Identities> IdentitiesOf<T>::deep_copy() const {
+  const IdentitiesPtr IdentitiesOf<T>::deep_copy() const {
     std::shared_ptr<T> ptr(length_ == 0 ? nullptr : new T[(size_t)length_], util::array_deleter<T>());
     if (length_ != 0) {
       memcpy(ptr.get(), &ptr_.get()[(size_t)offset_], sizeof(T)*((size_t)length_));
@@ -162,8 +162,8 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Identities> IdentitiesOf<T>::getitem_carry_64(const Index64& carry) const {
-    std::shared_ptr<Identities> out = std::make_shared<IdentitiesOf<T>>(ref_, fieldloc_, width_, carry.length());
+  const IdentitiesPtr IdentitiesOf<T>::getitem_carry_64(const Index64& carry) const {
+    IdentitiesPtr out = std::make_shared<IdentitiesOf<T>>(ref_, fieldloc_, width_, carry.length());
     IdentitiesOf<T>* rawout = reinterpret_cast<IdentitiesOf<T>*>(out.get());
 
     if (std::is_same<T, int32_t>::value) {
@@ -200,7 +200,7 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Identities> IdentitiesOf<T>::withfieldloc(const FieldLoc& fieldloc) const {
+  const IdentitiesPtr IdentitiesOf<T>::withfieldloc(const FieldLoc& fieldloc) const {
     return std::make_shared<IdentitiesOf<T>>(ref_, fieldloc, offset_, width_, length_, ptr_);
   }
 
@@ -234,7 +234,7 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Identities> IdentitiesOf<T>::getitem_range(int64_t start, int64_t stop) const {
+  const IdentitiesPtr IdentitiesOf<T>::getitem_range(int64_t start, int64_t stop) const {
     int64_t regular_start = start;
     int64_t regular_stop = stop;
     awkward_regularize_rangeslice(&regular_start, &regular_stop, true, start != Slice::none(), stop != Slice::none(), length_);
