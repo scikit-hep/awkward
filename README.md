@@ -1,20 +1,10 @@
 <img src="docs-img/logo-300px.png">
 
-# awkward-1.0
-
-Development of Awkward 1.0, to replace [scikit-hep/awkward-array](https://github.com/scikit-hep/awkward-array#readme) in 2020.
-
-   * The [original motivations document](https://docs.google.com/document/d/1lj8ARTKV1_hqGTh0W_f01S6SsmpzZAXz9qqqWnEB3j4/edit?usp=sharing) from July 2019, now a little out-of-date.
-   * My [StrangeLoop talk](https://youtu.be/2NxWpU7NArk) on September 14, 2019.
-   * My [PyHEP talk](https://indico.cern.ch/event/833895/contributions/3577882) on October 17, 2019.
-   * My [CHEP talk](https://indico.cern.ch/event/773049/contributions/3473258) on November 7, 2019.
-   * My [CHEP 2019 proceedings](https://arxiv.org/abs/2001.06307) (to be published in _EPJ Web of Conferences_).
-   * [Demo for Coffea developers](https://github.com/scikit-hep/awkward-1.0/blob/master/docs/demos/2019-12-20-coffea-demo.ipynb) on December 20, 2019.
-   * [Demo for Numba developers](https://github.com/scikit-hep/awkward-1.0/blob/master/docs/demos/2020-01-22-numba-demo-EVALUATED.ipynb) on January 22, 2020.
-
-## Front-page stuff here
+# Awkward Array
 
 I'm in the process of writing documentation; the "first page" will go here.
+
+# Installation
 
 ## Normal installation
 
@@ -81,3 +71,16 @@ Python projects can simply use `awkward1` as a Python library.
 C++ projects can either link against the shared libraries `libawkward-cpu-kernels.so` and `libawkward.so` or the static libraries, whose names end in `-static`. All four libraries, as well as their C++ header files, are shipped with the Python library. Even if you installed Awkward Array with pip, you'll have everything you need to build an Awkward C++ program.
 
 If you also want to bind your C++ to Python and share Awkward Arrays between modules in Python, see the [dependent-project](https://github.com/scikit-hep/awkward-1.0/tree/master/dependent-project) example. This is a small CMake project bound to Python with pybind11 that can produce and consume Awkward Arrays in Python. Such projects depend on a specific version of Awkward Array, but we intend to stabilize the ABI for more flexibility.
+
+# Papers and talks on Awkward Array
+
+Development of Awkward 1.0, to replace [scikit-hep/awkward-array](https://github.com/scikit-hep/awkward-array#readme) in 2020.
+
+   * The [original motivations document](https://docs.google.com/document/d/1lj8ARTKV1_hqGTh0W_f01S6SsmpzZAXz9qqqWnEB3j4/edit?usp=sharing) from July 2019, now a little out-of-date.
+   * My [StrangeLoop talk](https://youtu.be/2NxWpU7NArk) on September 14, 2019.
+   * My [PyHEP talk](https://indico.cern.ch/event/833895/contributions/3577882) on October 17, 2019.
+   * My [CHEP talk](https://indico.cern.ch/event/773049/contributions/3473258) on November 7, 2019.
+   * My [CHEP 2019 proceedings](https://arxiv.org/abs/2001.06307) (to be published in _EPJ Web of Conferences_).
+   * [Demo for Coffea developers](https://github.com/scikit-hep/awkward-1.0/blob/master/docs/demos/2019-12-20-coffea-demo.ipynb) on December 20, 2019.
+   * [Demo for Numba developers](https://github.com/scikit-hep/awkward-1.0/blob/master/docs/demos/2020-01-22-numba-demo-EVALUATED.ipynb) on January 22, 2020.
+
