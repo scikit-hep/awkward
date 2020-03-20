@@ -20,7 +20,8 @@
 #include "awkward/builder/UnknownBuilder.h"
 
 namespace awkward {
-  const BuilderPtr UnknownBuilder::fromempty(const ArrayBuilderOptions& options) {
+  const BuilderPtr
+  UnknownBuilder::fromempty(const ArrayBuilderOptions& options) {
     BuilderPtr out = std::make_shared<UnknownBuilder>(options, 0);
     out.get()->setthat(out);
     return out;
@@ -30,43 +31,56 @@ namespace awkward {
       : options_(options)
       , nullcount_(nullcount) { }
 
-  const std::string UnknownBuilder::classname() const {
+  const std::string
+  UnknownBuilder::classname() const {
     return "UnknownBuilder";
   };
 
-  int64_t UnknownBuilder::length() const {
+  int64_t
+  UnknownBuilder::length() const {
     return nullcount_;
   }
 
-  void UnknownBuilder::clear() {
+  void
+  UnknownBuilder::clear() {
     nullcount_ = 0;
   }
 
-  const ContentPtr UnknownBuilder::snapshot() const {
+  const ContentPtr
+  UnknownBuilder::snapshot() const {
     if (nullcount_ == 0) {
-      return std::make_shared<EmptyArray>(Identities::none(), util::Parameters());
+      return std::make_shared<EmptyArray>(Identities::none(),
+                                          util::Parameters());
     }
     else {
-      // This is the only snapshot that is O(N), rather than O(1), but it is unusual (array of only None).
+      // This is the only snapshot that is O(N), rather than O(1),
+      // but it is a corner case (array of only Nones).
       Index64 index(nullcount_);
       int64_t* rawptr = index.ptr().get();
       for (int64_t i = 0;  i < nullcount_;  i++) {
         rawptr[i] = -1;
       }
-      return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, std::make_shared<EmptyArray>(Identities::none(), util::Parameters()));
+      return std::make_shared<IndexedOptionArray64>(
+        Identities::none(),
+        util::Parameters(),
+        index,
+        std::make_shared<EmptyArray>(Identities::none(), util::Parameters()));
     }
   }
 
-  bool UnknownBuilder::active() const {
+  bool
+  UnknownBuilder::active() const {
     return false;
   }
 
-  const BuilderPtr UnknownBuilder::null() {
+  const BuilderPtr
+  UnknownBuilder::null() {
     nullcount_++;
     return that_;
   }
 
-  const BuilderPtr UnknownBuilder::boolean(bool x) {
+  const BuilderPtr
+  UnknownBuilder::boolean(bool x) {
     BuilderPtr out = BoolBuilder::fromempty(options_);
     if (nullcount_ != 0) {
       out = OptionBuilder::fromnulls(options_, nullcount_, out);
@@ -75,7 +89,8 @@ namespace awkward {
     return out;
   }
 
-  const BuilderPtr UnknownBuilder::integer(int64_t x) {
+  const BuilderPtr
+  UnknownBuilder::integer(int64_t x) {
     BuilderPtr out = Int64Builder::fromempty(options_);
     if (nullcount_ != 0) {
       out = OptionBuilder::fromnulls(options_, nullcount_, out);
@@ -84,7 +99,8 @@ namespace awkward {
     return out;
   }
 
-  const BuilderPtr UnknownBuilder::real(double x) {
+  const BuilderPtr
+  UnknownBuilder::real(double x) {
     BuilderPtr out = Float64Builder::fromempty(options_);
     if (nullcount_ != 0) {
       out = OptionBuilder::fromnulls(options_, nullcount_, out);
@@ -93,7 +109,8 @@ namespace awkward {
     return out;
   }
 
-  const BuilderPtr UnknownBuilder::string(const char* x, int64_t length, const char* encoding) {
+  const BuilderPtr
+  UnknownBuilder::string(const char* x, int64_t length, const char* encoding) {
     BuilderPtr out = StringBuilder::fromempty(options_, encoding);
     if (nullcount_ != 0) {
       out = OptionBuilder::fromnulls(options_, nullcount_, out);
@@ -102,7 +119,8 @@ namespace awkward {
     return out;
   }
 
-  const BuilderPtr UnknownBuilder::beginlist() {
+  const BuilderPtr
+  UnknownBuilder::beginlist() {
     BuilderPtr out = ListBuilder::fromempty(options_);
     if (nullcount_ != 0) {
       out = OptionBuilder::fromnulls(options_, nullcount_, out);
@@ -111,11 +129,14 @@ namespace awkward {
     return out;
   }
 
-  const BuilderPtr UnknownBuilder::endlist() {
-    throw std::invalid_argument("called 'endlist' without 'beginlist' at the same level before it");
+  const BuilderPtr
+  UnknownBuilder::endlist() {
+    throw std::invalid_argument(
+      "called 'endlist' without 'beginlist' at the same level before it");
   }
 
-  const BuilderPtr UnknownBuilder::begintuple(int64_t numfields) {
+  const BuilderPtr
+  UnknownBuilder::begintuple(int64_t numfields) {
     BuilderPtr out = TupleBuilder::fromempty(options_);
     if (nullcount_ != 0) {
       out = OptionBuilder::fromnulls(options_, nullcount_, out);
@@ -124,15 +145,20 @@ namespace awkward {
     return out;
   }
 
-  const BuilderPtr UnknownBuilder::index(int64_t index) {
-    throw std::invalid_argument("called 'index' without 'begintuple' at the same level before it");
+  const BuilderPtr
+  UnknownBuilder::index(int64_t index) {
+    throw std::invalid_argument(
+      "called 'index' without 'begintuple' at the same level before it");
   }
 
-  const BuilderPtr UnknownBuilder::endtuple() {
-    throw std::invalid_argument("called 'endtuple' without 'begintuple' at the same level before it");
+  const BuilderPtr
+  UnknownBuilder::endtuple() {
+    throw std::invalid_argument(
+      "called 'endtuple' without 'begintuple' at the same level before it");
   }
 
-  const BuilderPtr UnknownBuilder::beginrecord(const char* name, bool check) {
+  const BuilderPtr
+  UnknownBuilder::beginrecord(const char* name, bool check) {
     BuilderPtr out = RecordBuilder::fromempty(options_);
     if (nullcount_ != 0) {
       out = OptionBuilder::fromnulls(options_, nullcount_, out);
@@ -141,16 +167,23 @@ namespace awkward {
     return out;
   }
 
-  const BuilderPtr UnknownBuilder::field(const char* key, bool check) {
-    throw std::invalid_argument("called 'field' without 'beginrecord' at the same level before it");
+  const BuilderPtr
+  UnknownBuilder::field(const char* key, bool check) {
+    throw std::invalid_argument(
+      "called 'field' without 'beginrecord' at the same level before it");
   }
 
-  const BuilderPtr UnknownBuilder::endrecord() {
-    throw std::invalid_argument("called 'endrecord' without 'beginrecord' at the same level before it");
+  const BuilderPtr
+  UnknownBuilder::endrecord() {
+    throw std::invalid_argument(
+      "called 'endrecord' without 'beginrecord' at the same level before it");
   }
 
-  const BuilderPtr UnknownBuilder::append(const ContentPtr& array, int64_t at) {
-    BuilderPtr out = IndexedGenericBuilder::fromnulls(options_, nullcount_, array);
+  const BuilderPtr
+  UnknownBuilder::append(const ContentPtr& array, int64_t at) {
+    BuilderPtr out = IndexedGenericBuilder::fromnulls(options_,
+                                                      nullcount_,
+                                                      array);
     out.get()->append(array, at);
     return out;
   }

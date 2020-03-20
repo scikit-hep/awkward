@@ -288,7 +288,7 @@ namespace awkward {
     }
   }
 
-  const TypePtr NumpyArray::type(const std::map<std::string, std::string>& typestrs) const {
+  const TypePtr NumpyArray::type(const util::TypeStrs& typestrs) const {
     TypePtr out;
     if (format_.compare("d") == 0) {
       out = std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::float64);

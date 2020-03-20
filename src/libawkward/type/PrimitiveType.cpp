@@ -9,11 +9,16 @@
 #include "awkward/type/PrimitiveType.h"
 
 namespace awkward {
-  PrimitiveType::PrimitiveType(const util::Parameters& parameters, const std::string& typestr, DType dtype)
+  PrimitiveType::PrimitiveType(const util::Parameters& parameters,
+                               const std::string& typestr,
+                               PrimitiveType::DType dtype)
       : Type(parameters, typestr)
       , dtype_(dtype) { }
 
-  std::string PrimitiveType::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
+  std::string
+  PrimitiveType::tostring_part(const std::string& indent,
+                               const std::string& pre,
+                               const std::string& post) const {
     std::string typestr;
     if (get_typestr(typestr)) {
       return typestr;
@@ -44,11 +49,13 @@ namespace awkward {
     return out.str();
   }
 
-  const TypePtr PrimitiveType::shallow_copy() const {
+  const TypePtr
+  PrimitiveType::shallow_copy() const {
     return std::make_shared<PrimitiveType>(parameters_, typestr_, dtype_);
   }
 
-  bool PrimitiveType::equal(const TypePtr& other, bool check_parameters) const {
+  bool
+  PrimitiveType::equal(const TypePtr& other, bool check_parameters) const {
     if (PrimitiveType* t = dynamic_cast<PrimitiveType*>(other.get())) {
       if (check_parameters  &&  !parameters_equal(other.get()->parameters())) {
         return false;
@@ -60,27 +67,33 @@ namespace awkward {
     }
   }
 
-  int64_t PrimitiveType::numfields() const {
+  int64_t
+  PrimitiveType::numfields() const {
     return -1;
   }
 
-  int64_t PrimitiveType::fieldindex(const std::string& key) const {
+  int64_t
+  PrimitiveType::fieldindex(const std::string& key) const {
     throw std::invalid_argument("type contains no Records");
   }
 
-  const std::string PrimitiveType::key(int64_t fieldindex) const {
+  const std::string
+  PrimitiveType::key(int64_t fieldindex) const {
     throw std::invalid_argument("type contains no Records");
   }
 
-  bool PrimitiveType::haskey(const std::string& key) const {
+  bool
+  PrimitiveType::haskey(const std::string& key) const {
     throw std::invalid_argument("type contains no Records");
   }
 
-  const std::vector<std::string> PrimitiveType::keys() const {
+  const std::vector<std::string>
+  PrimitiveType::keys() const {
     throw std::invalid_argument("type contains no Records");
   }
 
-  const ContentPtr PrimitiveType::empty() const {
+  const ContentPtr
+  PrimitiveType::empty() const {
     std::shared_ptr<void> ptr(new uint8_t[0], util::array_deleter<uint8_t>());
     std::vector<ssize_t> shape({ 0 });
     std::vector<ssize_t> strides({ 0 });
@@ -105,12 +118,21 @@ namespace awkward {
 #endif
       case float32: itemsize = 4; format = "f"; break;
       case float64: itemsize = 8; format = "d"; break;
-      default: throw std::runtime_error(std::string("unexpected dtype: ") + std::to_string(dtype_));
+      default: throw std::runtime_error(
+                 std::string("unexpected dtype: ") + std::to_string(dtype_));
     }
-    return std::make_shared<NumpyArray>(Identities::none(), parameters_, ptr, shape, strides, 0, itemsize, format);
+    return std::make_shared<NumpyArray>(Identities::none(),
+                                        parameters_,
+                                        ptr,
+                                        shape,
+                                        strides,
+                                        0,
+                                        itemsize,
+                                        format);
   }
 
-  const PrimitiveType::DType PrimitiveType::dtype() const {
+  const PrimitiveType::DType
+  PrimitiveType::dtype() const {
     return dtype_;
   }
 }

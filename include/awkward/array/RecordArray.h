@@ -57,7 +57,7 @@ namespace awkward {
                     const std::string& post) const override;
 
     const TypePtr
-      type(const std::map<std::string, std::string>& typestrs) const override;
+      type(const util::TypeStrs& typestrs) const override;
 
     void
       tojson_part(ToJson& builder) const override;

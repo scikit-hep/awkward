@@ -69,7 +69,7 @@ namespace awkward {
     throw std::runtime_error("undefined operation: Record::setidentities");
   }
 
-  const TypePtr Record::type(const std::map<std::string, std::string>& typestrs) const {
+  const TypePtr Record::type(const util::TypeStrs& typestrs) const {
     TypePtr out = array_.get()->type(typestrs);
     out.get()->setparameters(parameters_);
     return out;

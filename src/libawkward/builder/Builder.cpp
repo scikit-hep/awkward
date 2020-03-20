@@ -5,7 +5,8 @@
 namespace awkward {
   Builder::~Builder() { }
 
-  void Builder::setthat(const BuilderPtr& that) {
+  void
+  Builder::setthat(const BuilderPtr& that) {
     that_ = that;
   }
 }

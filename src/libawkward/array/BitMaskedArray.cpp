@@ -177,7 +177,7 @@ namespace awkward {
     }
   }
 
-  const TypePtr BitMaskedArray::type(const std::map<std::string, std::string>& typestrs) const {
+  const TypePtr BitMaskedArray::type(const util::TypeStrs& typestrs) const {
     return std::make_shared<OptionType>(parameters_, util::gettypestr(parameters_, typestrs), content_.get()->type(typestrs));
   }
 

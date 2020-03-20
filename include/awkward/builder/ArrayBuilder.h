@@ -25,7 +25,7 @@ namespace awkward {
       clear();
 
     const TypePtr
-      type(const std::map<std::string, std::string>& typestrs) const;
+      type(const util::TypeStrs& typestrs) const;
 
     const ContentPtr
       snapshot() const;

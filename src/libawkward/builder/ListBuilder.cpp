@@ -12,44 +12,61 @@
 #include "awkward/builder/ListBuilder.h"
 
 namespace awkward {
-  const BuilderPtr ListBuilder::fromempty(const ArrayBuilderOptions& options) {
+  const BuilderPtr
+  ListBuilder::fromempty(const ArrayBuilderOptions& options) {
     GrowableBuffer<int64_t> offsets = GrowableBuffer<int64_t>::empty(options);
     offsets.append(0);
-    BuilderPtr out = std::make_shared<ListBuilder>(options, offsets, UnknownBuilder::fromempty(options), false);
+    BuilderPtr out =
+      std::make_shared<ListBuilder>(options,
+                                    offsets,
+                                    UnknownBuilder::fromempty(options),
+                                    false);
     out.get()->setthat(out);
     return out;
   }
 
-  ListBuilder::ListBuilder(const ArrayBuilderOptions& options, const GrowableBuffer<int64_t>& offsets, const BuilderPtr& content, bool begun)
+  ListBuilder::ListBuilder(const ArrayBuilderOptions& options,
+                           const GrowableBuffer<int64_t>& offsets,
+                           const BuilderPtr& content,
+                           bool begun)
       : options_(options)
       , offsets_(offsets)
       , content_(content)
       , begun_(begun) { }
 
-  const std::string ListBuilder::classname() const {
+  const std::string
+  ListBuilder::classname() const {
     return "ListBuilder";
   };
 
-  int64_t ListBuilder::length() const {
+  int64_t
+  ListBuilder::length() const {
     return offsets_.length() - 1;
   }
 
-  void ListBuilder::clear() {
+  void
+  ListBuilder::clear() {
     offsets_.clear();
     offsets_.append(0);
     content_.get()->clear();
   }
 
-  const ContentPtr ListBuilder::snapshot() const {
+  const ContentPtr
+  ListBuilder::snapshot() const {
     Index64 offsets(offsets_.ptr(), 0, offsets_.length());
-    return std::make_shared<ListOffsetArray64>(Identities::none(), util::Parameters(), offsets, content_.get()->snapshot());
+    return std::make_shared<ListOffsetArray64>(Identities::none(),
+                                               util::Parameters(),
+                                               offsets,
+                                               content_.get()->snapshot());
   }
 
-  bool ListBuilder::active() const {
+  bool
+  ListBuilder::active() const {
     return begun_;
   }
 
-  const BuilderPtr ListBuilder::null() {
+  const BuilderPtr
+  ListBuilder::null() {
     if (!begun_) {
       BuilderPtr out = OptionBuilder::fromvalids(options_, that_);
       out.get()->null();
@@ -61,7 +78,8 @@ namespace awkward {
     }
   }
 
-  const BuilderPtr ListBuilder::boolean(bool x) {
+  const BuilderPtr
+  ListBuilder::boolean(bool x) {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
       out.get()->boolean(x);
@@ -73,7 +91,8 @@ namespace awkward {
     }
   }
 
-  const BuilderPtr ListBuilder::integer(int64_t x) {
+  const BuilderPtr
+  ListBuilder::integer(int64_t x) {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
       out.get()->integer(x);
@@ -85,7 +104,8 @@ namespace awkward {
     }
   }
 
-  const BuilderPtr ListBuilder::real(double x) {
+  const BuilderPtr
+  ListBuilder::real(double x) {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
       out.get()->real(x);
@@ -97,7 +117,8 @@ namespace awkward {
     }
   }
 
-  const BuilderPtr ListBuilder::string(const char* x, int64_t length, const char* encoding) {
+  const BuilderPtr
+  ListBuilder::string(const char* x, int64_t length, const char* encoding) {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
       out.get()->string(x, length, encoding);
@@ -109,7 +130,8 @@ namespace awkward {
     }
   }
 
-  const BuilderPtr ListBuilder::beginlist() {
+  const BuilderPtr
+  ListBuilder::beginlist() {
     if (!begun_) {
       begun_ = true;
     }
@@ -119,9 +141,11 @@ namespace awkward {
     return that_;
   }
 
-  const BuilderPtr ListBuilder::endlist() {
+  const BuilderPtr
+  ListBuilder::endlist() {
     if (!begun_) {
-      throw std::invalid_argument("called 'endlist' without 'beginlist' at the same level before it");
+      throw std::invalid_argument(
+        "called 'endlist' without 'beginlist' at the same level before it");
     }
     else if (!content_.get()->active()) {
       offsets_.append(content_.get()->length());
@@ -133,7 +157,8 @@ namespace awkward {
     return that_;
   }
 
-  const BuilderPtr ListBuilder::begintuple(int64_t numfields) {
+  const BuilderPtr
+  ListBuilder::begintuple(int64_t numfields) {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
       out.get()->begintuple(numfields);
@@ -145,9 +170,11 @@ namespace awkward {
     }
   }
 
-  const BuilderPtr ListBuilder::index(int64_t index) {
+  const BuilderPtr
+  ListBuilder::index(int64_t index) {
     if (!begun_) {
-      throw std::invalid_argument("called 'index' without 'begintuple' at the same level before it");
+      throw std::invalid_argument(
+        "called 'index' without 'begintuple' at the same level before it");
     }
     else {
       content_.get()->index(index);
@@ -155,9 +182,11 @@ namespace awkward {
     }
   }
 
-  const BuilderPtr ListBuilder::endtuple() {
+  const BuilderPtr
+  ListBuilder::endtuple() {
     if (!begun_) {
-      throw std::invalid_argument("called 'endtuple' without 'begintuple' at the same level before it");
+      throw std::invalid_argument(
+        "called 'endtuple' without 'begintuple' at the same level before it");
     }
     else {
       content_.get()->endtuple();
@@ -165,7 +194,8 @@ namespace awkward {
     }
   }
 
-  const BuilderPtr ListBuilder::beginrecord(const char* name, bool check) {
+  const BuilderPtr
+  ListBuilder::beginrecord(const char* name, bool check) {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
       out.get()->beginrecord(name, check);
@@ -177,9 +207,11 @@ namespace awkward {
     }
   }
 
-  const BuilderPtr ListBuilder::field(const char* key, bool check) {
+  const BuilderPtr
+  ListBuilder::field(const char* key, bool check) {
     if (!begun_) {
-      throw std::invalid_argument("called 'field' without 'beginrecord' at the same level before it");
+      throw std::invalid_argument(
+        "called 'field' without 'beginrecord' at the same level before it");
     }
     else {
       content_.get()->field(key, check);
@@ -187,9 +219,11 @@ namespace awkward {
     }
   }
 
-  const BuilderPtr ListBuilder::endrecord() {
+  const BuilderPtr
+  ListBuilder::endrecord() {
     if (!begun_) {
-      throw std::invalid_argument("called 'endrecord' without 'beginrecord' at the same level before it");
+      throw std::invalid_argument(
+        "called 'endrecord' without 'beginrecord' at the same level before it");
     }
     else {
       content_.get()->endrecord();
@@ -197,7 +231,8 @@ namespace awkward {
     }
   }
 
-  const BuilderPtr ListBuilder::append(const ContentPtr& array, int64_t at) {
+  const BuilderPtr
+  ListBuilder::append(const ContentPtr& array, int64_t at) {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
       out.get()->append(array, at);
@@ -209,7 +244,8 @@ namespace awkward {
     }
   }
 
-  void ListBuilder::maybeupdate(const BuilderPtr& tmp) {
+  void
+  ListBuilder::maybeupdate(const BuilderPtr& tmp) {
     if (tmp.get() != content_.get()) {
       content_ = tmp;
     }

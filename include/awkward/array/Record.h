@@ -41,7 +41,7 @@ namespace awkward {
       setidentities(const IdentitiesPtr& identities) override;
 
     const TypePtr
-      type(const std::map<std::string, std::string>& typestrs) const override;
+      type(const util::TypeStrs& typestrs) const override;
 
     const std::string
       tostring_part(const std::string& indent,

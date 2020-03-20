@@ -165,7 +165,7 @@ namespace awkward {
     identities_ = identities;
   }
 
-  const TypePtr RecordArray::type(const std::map<std::string, std::string>& typestrs) const {
+  const TypePtr RecordArray::type(const util::TypeStrs& typestrs) const {
     std::vector<TypePtr> types;
     for (auto item : contents_) {
       types.push_back(item.get()->type(typestrs));

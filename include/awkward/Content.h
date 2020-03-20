@@ -42,7 +42,7 @@ namespace awkward {
       setidentities(const IdentitiesPtr& identities) = 0;
 
     virtual const TypePtr
-      type(const std::map<std::string, std::string>& typestrs) const = 0;
+      type(const util::TypeStrs& typestrs) const = 0;
 
     virtual const std::string
       tostring_part(const std::string& indent,

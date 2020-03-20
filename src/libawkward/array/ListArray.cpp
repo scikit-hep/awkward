@@ -214,7 +214,7 @@ namespace awkward {
   }
 
   template <typename T>
-  const TypePtr ListArrayOf<T>::type(const std::map<std::string, std::string>& typestrs) const {
+  const TypePtr ListArrayOf<T>::type(const util::TypeStrs& typestrs) const {
     return std::make_shared<ListType>(parameters_, util::gettypestr(parameters_, typestrs), content_.get()->type(typestrs));
   }
 

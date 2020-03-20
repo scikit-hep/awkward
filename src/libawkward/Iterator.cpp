@@ -11,23 +11,30 @@ namespace awkward {
     content.get()->check_for_iteration();
   }
 
-  const ContentPtr Iterator::content() const {
+  const ContentPtr
+  Iterator::content() const {
     return content_;
   }
 
-  const int64_t Iterator::at() const {
+  const int64_t
+  Iterator::at() const {
     return at_;
   }
 
-  const bool Iterator::isdone() const {
+  const bool
+  Iterator::isdone() const {
     return at_ >= content_.get()->length();
   }
 
-  const ContentPtr Iterator::next() {
+  const ContentPtr
+  Iterator::next() {
     return content_.get()->getitem_at_nowrap(at_++);
   }
 
-  const std::string Iterator::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
+  const std::string
+  Iterator::tostring_part(const std::string& indent,
+                          const std::string& pre,
+                          const std::string& post) const {
     std::stringstream out;
     out << indent << pre << "<Iterator at=\"" << at_ << "\">\n";
     out << content_.get()->tostring_part(indent + std::string("    "), "", "\n");
@@ -35,7 +42,8 @@ namespace awkward {
     return out.str();
   }
 
-  const std::string Iterator::tostring() const {
+  const std::string
+  Iterator::tostring() const {
     return tostring_part("", "", "");
   }
 }

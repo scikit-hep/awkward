@@ -176,7 +176,7 @@ namespace awkward {
     }
 
     const TypePtr
-      type(const std::map<std::string, std::string>& typestrs) const override {
+      type(const util::TypeStrs& typestrs) const override {
       if (std::is_same<T, double>::value) {
         return std::make_shared<PrimitiveType>(parameters_,
           util::gettypestr(parameters_, typestrs), PrimitiveType::float64);

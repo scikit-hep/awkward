@@ -37,7 +37,7 @@ namespace awkward {
 
   void EmptyArray::setidentities() { }
 
-  const TypePtr EmptyArray::type(const std::map<std::string, std::string>& typestrs) const {
+  const TypePtr EmptyArray::type(const util::TypeStrs& typestrs) const {
     return std::make_shared<UnknownType>(parameters_, util::gettypestr(parameters_, typestrs));
   }
 

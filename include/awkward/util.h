@@ -80,10 +80,11 @@ namespace awkward {
     bool
       parameters_equal(const Parameters& self, const Parameters& other);
 
+    using TypeStrs = std::map<std::string, std::string>;
+
     std::string
       gettypestr(const Parameters& parameters,
-                 const std::map<std::string,
-                 std::string>& typestrs);
+                 const TypeStrs& typestrs);
 
     template <typename T>
     ERROR

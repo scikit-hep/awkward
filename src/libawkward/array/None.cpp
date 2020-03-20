@@ -29,7 +29,7 @@ namespace awkward {
     throw std::runtime_error("undefined operation: None::setidentities()");
   }
 
-  const TypePtr None::type(const std::map<std::string, std::string>& typestrs) const {
+  const TypePtr None::type(const util::TypeStrs& typestrs) const {
     throw std::runtime_error("undefined operation: None::type()");
   }
 
