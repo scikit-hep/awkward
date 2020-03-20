@@ -724,38 +724,57 @@ namespace awkward {
     for (auto content : contents_) {
       contents.push_back(content.get()->getitem_fields(keys));
     }
-    return std::make_shared<UnionArrayOf<T, I>>(identities_, util::Parameters(), tags_, index_, contents);
+    return std::make_shared<UnionArrayOf<T, I>>(identities_,
+                                                util::Parameters(),
+                                                tags_,
+                                                index_,
+                                                contents);
   }
 
   template <typename T, typename I>
   const ContentPtr
-  UnionArrayOf<T, I>::getitem_next(const SliceItemPtr& head, const Slice& tail, const Index64& advanced) const {
+  UnionArrayOf<T, I>::getitem_next(const SliceItemPtr& head,
+                                   const Slice& tail,
+                                   const Index64& advanced) const {
     if (head.get() == nullptr) {
       return shallow_copy();
     }
-    else if (dynamic_cast<SliceAt*>(head.get())  ||  dynamic_cast<SliceRange*>(head.get())  ||  dynamic_cast<SliceArray64*>(head.get())  ||  dynamic_cast<SliceJagged64*>(head.get())) {
+    else if (dynamic_cast<SliceAt*>(head.get())  ||
+             dynamic_cast<SliceRange*>(head.get())  ||
+             dynamic_cast<SliceArray64*>(head.get())  ||
+             dynamic_cast<SliceJagged64*>(head.get())) {
       ContentPtrVec outcontents;
       for (int64_t i = 0;  i < numcontents();  i++) {
         ContentPtr projection = project(i);
-        outcontents.push_back(projection.get()->getitem_next(head, tail, advanced));
+        outcontents.push_back(
+          projection.get()->getitem_next(head, tail, advanced));
       }
       IndexOf<I> outindex = regular_index(tags_);
-      UnionArrayOf<T, I> out(identities_, parameters_, tags_, outindex, outcontents);
+      UnionArrayOf<T, I> out(identities_,
+                             parameters_,
+                             tags_,
+                             outindex,
+                             outcontents);
       return out.simplify_uniontype(false);
     }
-    else if (SliceEllipsis* ellipsis = dynamic_cast<SliceEllipsis*>(head.get())) {
+    else if (SliceEllipsis* ellipsis =
+             dynamic_cast<SliceEllipsis*>(head.get())) {
       return Content::getitem_next(*ellipsis, tail, advanced);
     }
-    else if (SliceNewAxis* newaxis = dynamic_cast<SliceNewAxis*>(head.get())) {
+    else if (SliceNewAxis* newaxis =
+             dynamic_cast<SliceNewAxis*>(head.get())) {
       return Content::getitem_next(*newaxis, tail, advanced);
     }
-    else if (SliceField* field = dynamic_cast<SliceField*>(head.get())) {
+    else if (SliceField* field =
+             dynamic_cast<SliceField*>(head.get())) {
       return Content::getitem_next(*field, tail, advanced);
     }
-    else if (SliceFields* fields = dynamic_cast<SliceFields*>(head.get())) {
+    else if (SliceFields* fields =
+             dynamic_cast<SliceFields*>(head.get())) {
       return Content::getitem_next(*fields, tail, advanced);
     }
-    else if (SliceMissing64* missing = dynamic_cast<SliceMissing64*>(head.get())) {
+    else if (SliceMissing64* missing =
+             dynamic_cast<SliceMissing64*>(head.get())) {
       return Content::getitem_next(*missing, tail, advanced);
     }
     else {
@@ -768,7 +787,10 @@ namespace awkward {
   UnionArrayOf<T, I>::carry(const Index64& carry) const {
     int64_t lentags = tags_.length();
     if (index_.length() < lentags) {
-      util::handle_error(failure("len(index) < len(tags)", kSliceNone, kSliceNone), classname(), identities_.get());
+      util::handle_error(
+        failure("len(index) < len(tags)", kSliceNone, kSliceNone),
+        classname(),
+        identities_.get());
     }
     int64_t lencarry = carry.length();
     IndexOf<T> nexttags(lencarry);
@@ -792,7 +814,11 @@ namespace awkward {
     if (identities_.get() != nullptr) {
       identities = identities_.get()->getitem_carry_64(carry);
     }
-    return std::make_shared<UnionArrayOf<T, I>>(identities, parameters_, nexttags, nextindex, contents_);
+    return std::make_shared<UnionArrayOf<T, I>>(identities,
+                                                parameters_,
+                                                nexttags,
+                                                nextindex,
+                                                contents_);
   }
 
   template <typename T, typename I>
@@ -893,13 +919,17 @@ namespace awkward {
   template <typename T, typename I>
   int64_t
   UnionArrayOf<T, I>::fieldindex(const std::string& key) const {
-    throw std::invalid_argument("UnionArray breaks the one-to-one relationship between fieldindexes and keys");
+    throw std::invalid_argument(
+      "UnionArray breaks the one-to-one relationship "
+      "between fieldindexes and keys");
   }
 
   template <typename T, typename I>
   const std::string
   UnionArrayOf<T, I>::key(int64_t fieldindex) const {
-    throw std::invalid_argument("UnionArray breaks the one-to-one relationship between fieldindexes and keys");
+    throw std::invalid_argument(
+      "UnionArray breaks the one-to-one relationship "
+      "between fieldindexes and keys");
   }
 
   template <typename T, typename I>
@@ -955,10 +985,13 @@ namespace awkward {
       numcontents(),
       lencontents.data());
     if (err.str != nullptr) {
-      return std::string("at ") + path + std::string(" (") + classname() + std::string("): ") + std::string(err.str) + std::string(" at i=") + std::to_string(err.identity);
+      return (std::string("at ") + path + std::string(" (") + classname()
+              + std::string("): ") + std::string(err.str)
+              + std::string(" at i=") + std::to_string(err.identity));
     }
     for (int64_t i = 0;  i < numcontents();  i++) {
-      std::string sub = content(i).get()->validityerror(path + std::string(".content(") + std::to_string(i) + (")"));
+      std::string sub = content(i).get()->validityerror(
+        path + std::string(".content(") + std::to_string(i) + (")"));
       if (!sub.empty()) {
         return sub;
       }
@@ -986,7 +1019,11 @@ namespace awkward {
       for (auto content : contents_) {
         contents.push_back(content.get()->num(axis, depth));
       }
-      UnionArrayOf<T, I> out(Identities::none(), util::Parameters(), tags_, index_, contents);
+      UnionArrayOf<T, I> out(Identities::none(),
+                             util::Parameters(),
+                             tags_,
+                             index_,
+                             contents);
       return out.simplify_uniontype(false);
     }
   }
@@ -1005,7 +1042,8 @@ namespace awkward {
       std::vector<int64_t> offsetsoffsets;
       ContentPtrVec contents;
       for (auto content : contents_) {
-        std::pair<Index64, ContentPtr> pair = content.get()->offsets_and_flattened(axis, depth);
+        std::pair<Index64, ContentPtr> pair =
+          content.get()->offsets_and_flattened(axis, depth);
         Index64 offsets = pair.first;
         offsetsptrs.push_back(offsets.ptr());
         offsetsraws.push_back(offsets.ptr().get());
@@ -1042,21 +1080,33 @@ namespace awkward {
           offsetsraws.data(),
           offsetsoffsets.data());
         util::handle_error(err2, classname(), identities_.get());
-        return std::pair<Index64, ContentPtr>(tooffsets, std::make_shared<UnionArray8_64>(Identities::none(), util::Parameters(), totags, toindex, contents));
+        return std::pair<Index64, ContentPtr>(
+          tooffsets,
+          std::make_shared<UnionArray8_64>(Identities::none(),
+                                           util::Parameters(),
+                                           totags,
+                                           toindex,
+                                           contents));
       }
       else {
-        return std::pair<Index64, ContentPtr>(Index64(0), std::make_shared<UnionArrayOf<T, I>>(Identities::none(), util::Parameters(), tags_, index_, contents));
+        return std::pair<Index64, ContentPtr>(
+          Index64(0),
+          std::make_shared<UnionArrayOf<T, I>>(Identities::none(),
+                                               util::Parameters(),
+                                               tags_,
+                                               index_,
+                                               contents));
       }
     }
   }
 
   template <typename T, typename I>
   bool
-  UnionArrayOf<T, I>::mergeable(const ContentPtr& other, bool mergebool) const {
+  UnionArrayOf<T, I>::mergeable(const ContentPtr& other,
+                                bool mergebool) const {
     if (!parameters_equal(other.get()->parameters())) {
       return false;
     }
-
     return true;
   }
 
@@ -1129,10 +1179,15 @@ namespace awkward {
     }
 
     if (contents.size() > kMaxInt8) {
-      throw std::runtime_error("FIXME: handle UnionArray with more than 127 contents");
+      throw std::runtime_error(
+        "FIXME: handle UnionArray with more than 127 contents");
     }
 
-    return std::make_shared<UnionArray8_64>(Identities::none(), util::Parameters(), tags, index, contents);
+    return std::make_shared<UnionArray8_64>(Identities::none(),
+                                            util::Parameters(),
+                                            tags,
+                                            index,
+                                            contents);
   }
 
   template <typename T, typename I>
@@ -1197,9 +1252,12 @@ namespace awkward {
     }
 
     ContentPtrVec contents(contents_.begin(), contents_.end());
-    if (UnionArray8_32* rawother = dynamic_cast<UnionArray8_32*>(other.get())) {
+    if (UnionArray8_32* rawother =
+        dynamic_cast<UnionArray8_32*>(other.get())) {
       ContentPtrVec other_contents = rawother->contents();
-      contents.insert(contents.end(), other_contents.begin(), other_contents.end());
+      contents.insert(contents.end(),
+                      other_contents.begin(),
+                      other_contents.end());
       Index8 other_tags = rawother->tags();
       struct Error err1 = awkward_unionarray_filltags_to8_from8(
         tags.ptr().get(),
@@ -1208,7 +1266,9 @@ namespace awkward {
         other_tags.offset(),
         theirlength,
         numcontents());
-      util::handle_error(err1, rawother->classname(), rawother->identities().get());
+      util::handle_error(err1,
+                         rawother->classname(),
+                         rawother->identities().get());
       Index32 other_index = rawother->index();
       struct Error err2 = awkward_unionarray_fillindex_to64_from32(
         index.ptr().get(),
@@ -1216,11 +1276,16 @@ namespace awkward {
         other_index.ptr().get(),
         other_index.offset(),
         theirlength);
-      util::handle_error(err2, rawother->classname(), rawother->identities().get());
+      util::handle_error(err2,
+                         rawother->classname(),
+                         rawother->identities().get());
     }
-    else if (UnionArray8_U32* rawother = dynamic_cast<UnionArray8_U32*>(other.get())) {
+    else if (UnionArray8_U32* rawother =
+             dynamic_cast<UnionArray8_U32*>(other.get())) {
       ContentPtrVec other_contents = rawother->contents();
-      contents.insert(contents.end(), other_contents.begin(), other_contents.end());
+      contents.insert(contents.end(),
+                      other_contents.begin(),
+                      other_contents.end());
       Index8 other_tags = rawother->tags();
       struct Error err1 = awkward_unionarray_filltags_to8_from8(
         tags.ptr().get(),
@@ -1229,7 +1294,9 @@ namespace awkward {
         other_tags.offset(),
         theirlength,
         numcontents());
-      util::handle_error(err1, rawother->classname(), rawother->identities().get());
+      util::handle_error(err1,
+                         rawother->classname(),
+                         rawother->identities().get());
       IndexU32 other_index = rawother->index();
       struct Error err2 = awkward_unionarray_fillindex_to64_fromU32(
         index.ptr().get(),
@@ -1237,11 +1304,16 @@ namespace awkward {
         other_index.ptr().get(),
         other_index.offset(),
         theirlength);
-      util::handle_error(err2, rawother->classname(), rawother->identities().get());
+      util::handle_error(err2,
+                         rawother->classname(),
+                         rawother->identities().get());
     }
-    else if (UnionArray8_64* rawother = dynamic_cast<UnionArray8_64*>(other.get())) {
+    else if (UnionArray8_64* rawother =
+             dynamic_cast<UnionArray8_64*>(other.get())) {
       ContentPtrVec other_contents = rawother->contents();
-      contents.insert(contents.end(), other_contents.begin(), other_contents.end());
+      contents.insert(contents.end(),
+                      other_contents.begin(),
+                      other_contents.end());
       Index8 other_tags = rawother->tags();
       struct Error err1 = awkward_unionarray_filltags_to8_from8(
         tags.ptr().get(),
@@ -1250,7 +1322,9 @@ namespace awkward {
         other_tags.offset(),
         theirlength,
         numcontents());
-      util::handle_error(err1, rawother->classname(), rawother->identities().get());
+      util::handle_error(err1,
+                         rawother->classname(),
+                         rawother->identities().get());
       Index64 other_index = rawother->index();
       struct Error err2 = awkward_unionarray_fillindex_to64_from64(
         index.ptr().get(),
@@ -1258,7 +1332,9 @@ namespace awkward {
         other_index.ptr().get(),
         other_index.offset(),
         theirlength);
-      util::handle_error(err2, rawother->classname(), rawother->identities().get());
+      util::handle_error(err2,
+                         rawother->classname(),
+                         rawother->identities().get());
     }
     else {
       contents.push_back(other);
@@ -1276,38 +1352,49 @@ namespace awkward {
     }
 
     if (contents.size() > kMaxInt8) {
-      throw std::runtime_error("FIXME: handle UnionArray with more than 127 contents");
+      throw std::runtime_error(
+        "FIXME: handle UnionArray with more than 127 contents");
     }
 
-    return std::make_shared<UnionArray8_64>(Identities::none(), util::Parameters(), tags, index, contents);
+    return std::make_shared<UnionArray8_64>(Identities::none(),
+                                            util::Parameters(),
+                                            tags,
+                                            index,
+                                            contents);
   }
 
   template <typename T, typename I>
   const SliceItemPtr
   UnionArrayOf<T, I>::asslice() const {
     ContentPtr simplified = simplify_uniontype(false);
-    if (UnionArray8_32* raw = dynamic_cast<UnionArray8_32*>(simplified.get())) {
+    if (UnionArray8_32* raw =
+        dynamic_cast<UnionArray8_32*>(simplified.get())) {
       if (raw->numcontents() == 1) {
         return raw->content(0).get()->asslice();
       }
       else {
-        throw std::invalid_argument("cannot use a union of different types as a slice");
+        throw std::invalid_argument(
+          "cannot use a union of different types as a slice");
       }
     }
-    else if (UnionArray8_U32* raw = dynamic_cast<UnionArray8_U32*>(simplified.get())) {
+    else if (UnionArray8_U32* raw =
+             dynamic_cast<UnionArray8_U32*>(simplified.get())) {
       if (raw->numcontents() == 1) {
         return raw->content(0).get()->asslice();
       }
       else {
-        throw std::invalid_argument("cannot use a union of different types as a slice");
+        throw std::invalid_argument(
+          "cannot use a union of different types as a slice");
       }
     }
-    else if (UnionArray8_64* raw = dynamic_cast<UnionArray8_64*>(simplified.get())) {
+    else if (UnionArray8_64* raw =
+             dynamic_cast<UnionArray8_64*>(simplified.get())) {
       if (raw->numcontents() == 1) {
         return raw->content(0).get()->asslice();
       }
       else {
-        throw std::invalid_argument("cannot use a union of different types as a slice");
+        throw std::invalid_argument(
+          "cannot use a union of different types as a slice");
       }
     }
     else {
@@ -1338,14 +1425,20 @@ namespace awkward {
       for (auto content : contents_) {
         contents.emplace_back(content.get()->rpad(target, axis, depth));
       }
-      UnionArrayOf<T, I> out(identities_, parameters_, tags_, index_, contents);
+      UnionArrayOf<T, I> out(identities_,
+                             parameters_,
+                             tags_,
+                             index_,
+                             contents);
       return out.simplify_uniontype(false);
     }
   }
 
   template <typename T, typename I>
   const ContentPtr
-  UnionArrayOf<T, I>::rpad_and_clip(int64_t target, int64_t axis, int64_t depth) const {
+  UnionArrayOf<T, I>::rpad_and_clip(int64_t target,
+                                    int64_t axis,
+                                    int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
       return rpad_axis0(target, true);
@@ -1353,23 +1446,42 @@ namespace awkward {
     else {
       ContentPtrVec contents;
       for (auto content : contents_) {
-        contents.emplace_back(content.get()->rpad_and_clip(target, axis, depth));
+        contents.emplace_back(
+          content.get()->rpad_and_clip(target, axis, depth));
       }
-      UnionArrayOf<T, I> out(identities_, parameters_, tags_, index_, contents);
+      UnionArrayOf<T, I> out(identities_,
+                             parameters_,
+                             tags_,
+                             index_,
+                             contents);
       return out.simplify_uniontype(false);
     }
   }
 
   template <typename T, typename I>
   const ContentPtr
-  UnionArrayOf<T, I>::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
+  UnionArrayOf<T, I>::reduce_next(const Reducer& reducer,
+                                  int64_t negaxis,
+                                  const Index64& starts,
+                                  const Index64& parents,
+                                  int64_t outlength,
+                                  bool mask,
+                                  bool keepdims) const {
     ContentPtr simplified = simplify_uniontype(true);
     if (dynamic_cast<UnionArray8_32*>(simplified.get())  ||
         dynamic_cast<UnionArray8_U32*>(simplified.get())  ||
         dynamic_cast<UnionArray8_64*>(simplified.get())) {
-      throw std::invalid_argument(std::string("cannot reduce (call '") + reducer.name() + std::string("' on) an irreducible ") + classname());
+      throw std::invalid_argument(
+        std::string("cannot reduce (call '") + reducer.name()
+        + std::string("' on) an irreducible ") + classname());
     }
-    return simplified.get()->reduce_next(reducer, negaxis, starts, parents, outlength, mask, keepdims);
+    return simplified.get()->reduce_next(reducer,
+                                         negaxis,
+                                         starts,
+                                         parents,
+                                         outlength,
+                                         mask,
+                                         keepdims);
   }
 
   template <typename T, typename I>
@@ -1384,13 +1496,22 @@ namespace awkward {
       for (auto content : contents_) {
         contents.push_back(content.get()->localindex(axis, depth));
       }
-      return std::make_shared<UnionArrayOf<T, I>>(identities_, util::Parameters(), tags_, index_, contents);
+      return std::make_shared<UnionArrayOf<T, I>>(identities_,
+                                                  util::Parameters(),
+                                                  tags_,
+                                                  index_,
+                                                  contents);
     }
   }
 
   template <typename T, typename I>
   const ContentPtr
-  UnionArrayOf<T, I>::choose(int64_t n, bool diagonal, const util::RecordLookupPtr& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
+  UnionArrayOf<T, I>::choose(int64_t n,
+                             bool diagonal,
+                             const util::RecordLookupPtr& recordlookup,
+                             const util::Parameters& parameters,
+                             int64_t axis,
+                             int64_t depth) const {
     if (n < 1) {
       throw std::invalid_argument("in choose, 'n' must be at least 1");
     }
@@ -1401,65 +1522,111 @@ namespace awkward {
     else {
       ContentPtrVec contents;
       for (auto content : contents_) {
-        contents.push_back(content.get()->choose(n, diagonal, recordlookup, parameters, axis, depth));
+        contents.push_back(content.get()->choose(n,
+                                                 diagonal,
+                                                 recordlookup,
+                                                 parameters,
+                                                 axis,
+                                                 depth));
       }
-      return std::make_shared<UnionArrayOf<T, I>>(identities_, util::Parameters(), tags_, index_, contents);
+      return std::make_shared<UnionArrayOf<T, I>>(identities_,
+                                                  util::Parameters(),
+                                                  tags_,
+                                                  index_,
+                                                  contents);
     }
   }
 
   template <typename T, typename I>
   const ContentPtr
-  UnionArrayOf<T, I>::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("undefined operation: UnionArray::getitem_next(at)");
+  UnionArrayOf<T, I>::getitem_next(const SliceAt& at,
+                                   const Slice& tail,
+                                   const Index64& advanced) const {
+    throw std::runtime_error(
+      "undefined operation: UnionArray::getitem_next(at)");
   }
 
   template <typename T, typename I>
   const ContentPtr
-  UnionArrayOf<T, I>::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("undefined operation: UnionArray::getitem_next(range)");
+  UnionArrayOf<T, I>::getitem_next(const SliceRange& range,
+                                   const Slice& tail,
+                                   const Index64& advanced) const {
+    throw std::runtime_error(
+      "undefined operation: UnionArray::getitem_next(range)");
   }
 
   template <typename T, typename I>
   const ContentPtr
-  UnionArrayOf<T, I>::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("undefined operation: UnionArray::getitem_next(array)");
+  UnionArrayOf<T, I>::getitem_next(const SliceArray64& array,
+                                   const Slice& tail,
+                                   const Index64& advanced) const {
+    throw std::runtime_error(
+      "undefined operation: UnionArray::getitem_next(array)");
   }
 
   template <typename T, typename I>
   const ContentPtr
-  UnionArrayOf<T, I>::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("undefined operation: UnionArray::getitem_next(jagged)");
+  UnionArrayOf<T, I>::getitem_next(const SliceJagged64& jagged,
+                                   const Slice& tail,
+                                   const Index64& advanced) const {
+    throw std::runtime_error(
+      "undefined operation: UnionArray::getitem_next(jagged)");
   }
 
   template <typename T, typename I>
   const ContentPtr
-  UnionArrayOf<T, I>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const {
-    return getitem_next_jagged_generic<SliceArray64>(slicestarts, slicestops, slicecontent, tail);
+  UnionArrayOf<T, I>::getitem_next_jagged(const Index64& slicestarts,
+                                          const Index64& slicestops,
+                                          const SliceArray64& slicecontent,
+                                          const Slice& tail) const {
+    return getitem_next_jagged_generic<SliceArray64>(slicestarts,
+                                                     slicestops,
+                                                     slicecontent,
+                                                     tail);
   }
 
   template <typename T, typename I>
   const ContentPtr
-  UnionArrayOf<T, I>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const {
-    return getitem_next_jagged_generic<SliceMissing64>(slicestarts, slicestops, slicecontent, tail);
+  UnionArrayOf<T, I>::getitem_next_jagged(const Index64& slicestarts,
+                                          const Index64& slicestops,
+                                          const SliceMissing64& slicecontent,
+                                          const Slice& tail) const {
+    return getitem_next_jagged_generic<SliceMissing64>(slicestarts,
+                                                       slicestops,
+                                                       slicecontent,
+                                                       tail);
   }
 
   template <typename T, typename I>
   const ContentPtr
-  UnionArrayOf<T, I>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const {
-    return getitem_next_jagged_generic<SliceJagged64>(slicestarts, slicestops, slicecontent, tail);
+  UnionArrayOf<T, I>::getitem_next_jagged(const Index64& slicestarts,
+                                          const Index64& slicestops,
+                                          const SliceJagged64& slicecontent,
+                                          const Slice& tail) const {
+    return getitem_next_jagged_generic<SliceJagged64>(slicestarts,
+                                                      slicestops,
+                                                      slicecontent,
+                                                      tail);
   }
 
   template <typename T, typename I>
   template <typename S>
   const ContentPtr
-  UnionArrayOf<T, I>::getitem_next_jagged_generic(const Index64& slicestarts, const Index64& slicestops, const S& slicecontent, const Slice& tail) const {
+  UnionArrayOf<T, I>::getitem_next_jagged_generic(const Index64& slicestarts,
+                                                  const Index64& slicestops,
+                                                  const S& slicecontent,
+                                                  const Slice& tail) const {
     ContentPtr simplified = simplify_uniontype(false);
     if (dynamic_cast<UnionArray8_32*>(simplified.get())  ||
         dynamic_cast<UnionArray8_U32*>(simplified.get())  ||
         dynamic_cast<UnionArray8_64*>(simplified.get())) {
-      throw std::invalid_argument("cannot apply jagged slices to irreducible union arrays");
+      throw std::invalid_argument(
+        "cannot apply jagged slices to irreducible union arrays");
     }
-    return simplified.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent, tail);
+    return simplified.get()->getitem_next_jagged(slicestarts,
+                                                 slicestops,
+                                                 slicecontent,
+                                                 tail);
   }
 
   template class UnionArrayOf<int8_t, int32_t>;
