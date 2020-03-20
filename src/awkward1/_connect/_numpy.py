@@ -42,7 +42,10 @@ def array_ufunc(ufunc, method, inputs, kwargs, behavior):
     if method != "__call__" or len(inputs) == 0 or "out" in kwargs:
         return NotImplemented
 
-    inputs = [awkward1.operations.convert.tolayout(x, allowrecord=True, allowother=True) for x in inputs]
+    inputs = [awkward1.operations.convert.tolayout(x,
+                                                   allowrecord=True,
+                                                   allowother=True)
+                for x in inputs]
 
     def adjust(custom, inputs, kwargs):
         tmp = custom(*inputs, **kwargs)
@@ -52,18 +55,28 @@ def array_ufunc(ufunc, method, inputs, kwargs, behavior):
             return tmp
 
     def getfunction(inputs, depth):
-        signature = (ufunc,) + tuple(x.parameters.get("__record__") if isinstance(x, awkward1.layout.Content) else type(x) for x in inputs)
+        signature = (ufunc,) + tuple(
+                                 x.parameters.get("__record__")
+                                 if isinstance(x, awkward1.layout.Content)
+                                 else type(x)
+                                   for x in inputs)
         custom = awkward1._util.overload(behavior, signature)
         if custom is not None:
             return lambda: adjust(custom, inputs, kwargs)
 
-        signature = (ufunc,) + tuple(x.parameters.get("__array__") if isinstance(x, awkward1.layout.Content) else type(x) for x in inputs)
+        signature = (ufunc,) + tuple(x.parameters.get("__array__")
+                                     if isinstance(x, awkward1.layout.Content)
+                                     else type(x)
+                                       for x in inputs)
         custom = awkward1._util.overload(behavior, signature)
         if custom is not None:
             return lambda: adjust(custom, inputs, kwargs)
 
-        if all(isinstance(x, awkward1.layout.NumpyArray) or not isinstance(x, awkward1.layout.Content) for x in inputs):
-            return lambda: (awkward1.layout.NumpyArray(getattr(ufunc, method)(*inputs, **kwargs)),)
+        if all(isinstance(x, awkward1.layout.NumpyArray) or
+               not isinstance(x, awkward1.layout.Content)
+                 for x in inputs):
+            return lambda: (awkward1.layout.NumpyArray(
+                              getattr(ufunc, method)(*inputs, **kwargs)),)
 
         return None
 
@@ -78,14 +91,12 @@ except AttributeError:
     from numpy.core import umath as um
 
     def _disables_array_ufunc(obj):
-        """True when __array_ufunc__ is set to None."""
         try:
             return obj.__array_ufunc__ is None
         except AttributeError:
             return False
 
     def _binary_method(ufunc, name):
-        """Implement a forward binary method with a ufunc, e.g., __add__."""
         def func(self, other):
             if _disables_array_ufunc(other):
                 return NotImplemented
@@ -94,7 +105,6 @@ except AttributeError:
         return func
 
     def _reflected_binary_method(ufunc, name):
-        """Implement a reflected binary method with a ufunc, e.g., __radd__."""
         def func(self, other):
             if _disables_array_ufunc(other):
                 return NotImplemented
@@ -103,20 +113,17 @@ except AttributeError:
         return func
 
     def _inplace_binary_method(ufunc, name):
-        """Implement an in-place binary method with a ufunc, e.g., __iadd__."""
         def func(self, other):
             return ufunc(self, other, out=(self,))
         func.__name__ = "__i{}__".format(name)
         return func
 
     def _numeric_methods(ufunc, name):
-        """Implement forward, reflected and inplace binary methods with a ufunc."""
         return (_binary_method(ufunc, name),
                 _reflected_binary_method(ufunc, name),
                 _inplace_binary_method(ufunc, name))
 
     def _unary_method(ufunc, name):
-        """Implement a unary special method with a ufunc."""
         def func(self):
             return ufunc(self)
         func.__name__ = "__{}__".format(name)
@@ -130,12 +137,10 @@ except AttributeError:
         __gt__ = _binary_method(um.greater, "gt")
         __ge__ = _binary_method(um.greater_equal, "ge")
 
-        # numeric methods
         __add__, __radd__, __iadd__ = _numeric_methods(um.add, "add")
         __sub__, __rsub__, __isub__ = _numeric_methods(um.subtract, "sub")
         __mul__, __rmul__, __imul__ = _numeric_methods(um.multiply, "mul")
         if sys.version_info.major < 3:
-            # Python 3 uses only __truediv__ and __floordiv__
             __div__, __rdiv__, __idiv__ = _numeric_methods(um.divide, "div")
         __truediv__, __rtruediv__, __itruediv__ = _numeric_methods(
             um.true_divide, "truediv")
@@ -145,8 +150,6 @@ except AttributeError:
         if hasattr(um, "divmod"):
             __divmod__ = _binary_method(um.divmod, "divmod")
             __rdivmod__ = _reflected_binary_method(um.divmod, "divmod")
-        # __idivmod__ does not exist
-        # TODO: handle the optional third argument for __pow__?
         __pow__, __rpow__, __ipow__ = _numeric_methods(um.power, "pow")
         __lshift__, __rlshift__, __ilshift__ = _numeric_methods(
             um.left_shift, "lshift")
@@ -156,7 +159,6 @@ except AttributeError:
         __xor__, __rxor__, __ixor__ = _numeric_methods(um.bitwise_xor, "xor")
         __or__, __ror__, __ior__ = _numeric_methods(um.bitwise_or, "or")
 
-        # unary methods
         __neg__ = _unary_method(um.negative, "neg")
         if hasattr(um, "positive"):
             __pos__ = _unary_method(um.positive, "pos")
