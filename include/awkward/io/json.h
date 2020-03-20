@@ -13,38 +13,63 @@
 namespace awkward {
   class Content;
 
-  EXPORT_SYMBOL const ContentPtr FromJsonString(const char* source, const ArrayBuilderOptions& options);
-  EXPORT_SYMBOL const ContentPtr FromJsonFile(FILE* source, const ArrayBuilderOptions& options, int64_t buffersize);
+  EXPORT_SYMBOL const ContentPtr
+    FromJsonString(const char* source, const ArrayBuilderOptions& options);
+  EXPORT_SYMBOL const ContentPtr
+    FromJsonFile(FILE* source,
+                 const ArrayBuilderOptions& options,
+                 int64_t buffersize);
 
   class EXPORT_SYMBOL ToJson {
   public:
-    virtual void null() = 0;
-    virtual void boolean(bool x) = 0;
-    virtual void integer(int64_t x) = 0;
-    virtual void real(double x) = 0;
-    virtual void string(const char* x, int64_t length) = 0;
-    virtual void beginlist() = 0;
-    virtual void endlist() = 0;
-    virtual void beginrecord() = 0;
-    virtual void field(const char* x) = 0;
-    virtual void endrecord() = 0;
+    virtual void
+      null() = 0;
+    virtual void
+      boolean(bool x) = 0;
+    virtual void
+      integer(int64_t x) = 0;
+    virtual void
+      real(double x) = 0;
+    virtual void
+      string(const char* x, int64_t length) = 0;
+    virtual void
+      beginlist() = 0;
+    virtual void
+      endlist() = 0;
+    virtual void
+      beginrecord() = 0;
+    virtual void
+      field(const char* x) = 0;
+    virtual void
+      endrecord() = 0;
   };
 
   class EXPORT_SYMBOL ToJsonString: public ToJson {
   public:
     ToJsonString(int64_t maxdecimals);
     ~ToJsonString();
-    void null() override;
-    void boolean(bool x) override;
-    void integer(int64_t x) override;
-    void real(double x) override;
-    void string(const char* x, int64_t length) override;
-    void beginlist() override;
-    void endlist() override;
-    void beginrecord() override;
-    void field(const char* x) override;
-    void endrecord() override;
-    const std::string tostring();
+    void
+      null() override;
+    void
+      boolean(bool x) override;
+    void
+      integer(int64_t x) override;
+    void
+      real(double x) override;
+    void
+      string(const char* x, int64_t length) override;
+    void
+      beginlist() override;
+    void
+      endlist() override;
+    void
+      beginrecord() override;
+    void
+      field(const char* x) override;
+    void
+      endrecord() override;
+    const std::string
+      tostring();
   private:
     class Impl;
     Impl* impl_;
@@ -54,17 +79,28 @@ namespace awkward {
   public:
     ToJsonPrettyString(int64_t maxdecimals);
     ~ToJsonPrettyString();
-    void null() override;
-    void boolean(bool x) override;
-    void integer(int64_t x) override;
-    void real(double x) override;
-    void string(const char* x, int64_t length) override;
-    void beginlist() override;
-    void endlist() override;
-    void beginrecord() override;
-    void field(const char* x) override;
-    void endrecord() override;
-    const std::string tostring();
+    void
+      null() override;
+    void
+      boolean(bool x) override;
+    void
+      integer(int64_t x) override;
+    void
+      real(double x) override;
+    void
+      string(const char* x, int64_t length) override;
+    void
+      beginlist() override;
+    void
+      endlist() override;
+    void
+      beginrecord() override;
+    void
+      field(const char* x) override;
+    void
+      endrecord() override;
+    const std::string
+      tostring();
   private:
     class Impl;
     Impl* impl_;
@@ -74,16 +110,26 @@ namespace awkward {
   public:
     ToJsonFile(FILE* destination, int64_t maxdecimals, int64_t buffersize);
     ~ToJsonFile();
-    void null() override;
-    void boolean(bool x) override;
-    void integer(int64_t x) override;
-    void real(double x) override;
-    void string(const char* x, int64_t length) override;
-    void beginlist() override;
-    void endlist() override;
-    void beginrecord() override;
-    void field(const char* x) override;
-    void endrecord() override;
+    void
+      null() override;
+    void
+      boolean(bool x) override;
+    void
+      integer(int64_t x) override;
+    void
+      real(double x) override;
+    void
+      string(const char* x, int64_t length) override;
+    void
+      beginlist() override;
+    void
+      endlist() override;
+    void
+      beginrecord() override;
+    void
+      field(const char* x) override;
+    void
+      endrecord() override;
   private:
     class Impl;
     Impl* impl_;
@@ -91,18 +137,30 @@ namespace awkward {
 
   class EXPORT_SYMBOL ToJsonPrettyFile: public ToJson {
   public:
-    ToJsonPrettyFile(FILE* destination, int64_t maxdecimals, int64_t buffersize);
+    ToJsonPrettyFile(FILE* destination,
+                     int64_t maxdecimals,
+                     int64_t buffersize);
     ~ToJsonPrettyFile();
-    void null() override;
-    void boolean(bool x) override;
-    void integer(int64_t x) override;
-    void real(double x) override;
-    void string(const char* x, int64_t length) override;
-    void beginlist() override;
-    void endlist() override;
-    void beginrecord() override;
-    void field(const char* x) override;
-    void endrecord() override;
+    void
+      null() override;
+    void
+      boolean(bool x) override;
+    void
+      integer(int64_t x) override;
+    void
+      real(double x) override;
+    void
+      string(const char* x, int64_t length) override;
+    void
+      beginlist() override;
+    void
+      endlist() override;
+    void
+      beginrecord() override;
+    void
+      field(const char* x) override;
+    void
+      endrecord() override;
   private:
     class Impl;
     Impl* impl_;

@@ -11,36 +11,78 @@
 namespace awkward {
   class EXPORT_SYMBOL Float64Builder: public Builder {
   public:
-    static const BuilderPtr fromempty(const ArrayBuilderOptions& options);
-    static const BuilderPtr fromint64(const ArrayBuilderOptions& options, const GrowableBuffer<int64_t>& old);
+    static const BuilderPtr
+      fromempty(const ArrayBuilderOptions& options);
 
-    Float64Builder(const ArrayBuilderOptions& options, const GrowableBuffer<double>& buffer);
+    static const BuilderPtr
+      fromint64(const ArrayBuilderOptions& options,
+                const GrowableBuffer<int64_t>& old);
 
-    const std::string classname() const override;
-    int64_t length() const override;
-    void clear() override;
-    const ContentPtr snapshot() const override;
+   Float64Builder(const ArrayBuilderOptions& options,
+                  const GrowableBuffer<double>& buffer);
 
-    bool active() const override;
-    const BuilderPtr null() override;
-    const BuilderPtr boolean(bool x) override;
-    const BuilderPtr integer(int64_t x) override;
-    const BuilderPtr real(double x) override;
-    const BuilderPtr string(const char* x, int64_t length, const char* encoding) override;
-    const BuilderPtr beginlist() override;
-    const BuilderPtr endlist() override;
-    const BuilderPtr begintuple(int64_t numfields) override;
-    const BuilderPtr index(int64_t index) override;
-    const BuilderPtr endtuple() override;
-    const BuilderPtr beginrecord(const char* name, bool check) override;
-    const BuilderPtr field(const char* key, bool check) override;
-    const BuilderPtr endrecord() override;
-    const BuilderPtr append(const ContentPtr& array, int64_t at) override;
+    const std::string
+      classname() const override;
+
+    int64_t
+      length() const override;
+
+    void
+      clear() override;
+
+    const ContentPtr
+      snapshot() const override;
+
+    bool
+      active() const override;
+
+    const BuilderPtr
+      null() override;
+
+    const BuilderPtr
+      boolean(bool x) override;
+
+    const BuilderPtr
+      integer(int64_t x) override;
+
+    const BuilderPtr
+      real(double x) override;
+
+    const BuilderPtr
+      string(const char* x, int64_t length, const char* encoding) override;
+
+    const BuilderPtr
+      beginlist() override;
+
+    const BuilderPtr
+      endlist() override;
+
+    const BuilderPtr
+      begintuple(int64_t numfields) override;
+
+    const BuilderPtr
+      index(int64_t index) override;
+
+    const BuilderPtr
+      endtuple() override;
+
+    const BuilderPtr
+      beginrecord(const char* name, bool check) override;
+
+    const BuilderPtr
+      field(const char* key, bool check) override;
+
+    const BuilderPtr
+      endrecord() override;
+
+    const BuilderPtr
+      append(const ContentPtr& array, int64_t at) override;
 
   private:
     const ArrayBuilderOptions options_;
     GrowableBuffer<double> buffer_;
   };
+
 }
 
 #endif // AWKWARD_FLOAT64BUILDER_H_

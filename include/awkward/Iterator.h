@@ -11,12 +11,25 @@ namespace awkward {
   public:
     Iterator(const ContentPtr& content);
 
-    const ContentPtr content() const;
-    const int64_t at() const;
-    const bool isdone() const;
-    const ContentPtr next();
-    const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const;
-    const std::string tostring() const;
+    const ContentPtr
+      content() const;
+
+    const int64_t
+      at() const;
+
+    const bool
+      isdone() const;
+
+    const ContentPtr
+      next();
+
+    const std::string
+      tostring_part(const std::string& indent,
+                    const std::string& pre,
+                    const std::string& post) const;
+
+    const std::string
+      tostring() const;
 
   private:
     const ContentPtr content_;

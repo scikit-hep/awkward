@@ -14,28 +14,67 @@
 namespace awkward {
   class EXPORT_SYMBOL RecordType: public Type {
   public:
-    RecordType(const util::Parameters& parameters, const std::string& typestr, const std::vector<TypePtr>& types, const util::RecordLookupPtr& recordlookup);
-    RecordType(const util::Parameters& parameters, const std::string& typestr, const std::vector<TypePtr>& types);
+    RecordType(const util::Parameters& parameters,
+               const std::string& typestr,
+               const std::vector<TypePtr>& types,
+               const util::RecordLookupPtr& recordlookup);
 
-    const std::vector<TypePtr> types() const;
-    const util::RecordLookupPtr recordlookup() const;
-    bool istuple() const;
+    RecordType(const util::Parameters& parameters,
+               const std::string& typestr,
+               const std::vector<TypePtr>& types);
 
-    std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override;
-    const TypePtr shallow_copy() const override;
-    bool equal(const TypePtr& other, bool check_parameters) const override;
-    int64_t numfields() const override;
-    int64_t fieldindex(const std::string& key) const override;
-    const std::string key(int64_t fieldindex) const override;
-    bool haskey(const std::string& key) const override;
-    const std::vector<std::string> keys() const override;
-    const ContentPtr empty() const override;
+    const std::vector<TypePtr>
+      types() const;
 
-    const TypePtr field(int64_t fieldindex) const;
-    const TypePtr field(const std::string& key) const;
-    const std::vector<TypePtr> fields() const;
-    const std::vector<std::pair<std::string, TypePtr>> fielditems() const;
-    const TypePtr astuple() const;
+    const util::RecordLookupPtr
+      recordlookup() const;
+
+    bool
+      istuple() const;
+
+    std::string
+      tostring_part(const std::string& indent,
+                    const std::string& pre,
+                    const std::string& post) const override;
+
+    const TypePtr
+      shallow_copy() const override;
+
+    bool
+      equal(const TypePtr& other, bool check_parameters) const override;
+
+    int64_t
+      numfields() const override;
+
+    int64_t
+      fieldindex(const std::string& key) const override;
+
+    const std::string
+      key(int64_t fieldindex) const override;
+
+    bool
+      haskey(const std::string& key) const override;
+
+    const std::vector<std::string>
+      keys() const override;
+
+    const ContentPtr
+      empty() const override;
+
+    const TypePtr
+      field(int64_t fieldindex) const;
+
+    const TypePtr
+      field(const std::string& key) const;
+
+    const std::vector<TypePtr>
+      fields() const;
+
+    const std::vector<std::pair<std::string, TypePtr>>
+      fielditems() const;
+
+    const TypePtr
+      astuple() const;
 
   private:
     const std::vector<TypePtr> types_;
