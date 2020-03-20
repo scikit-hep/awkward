@@ -1314,32 +1314,47 @@ namespace awkward {
     ContentPtr nextcontent = content_.get()->carry(nextcarry);
 
     if (advanced.length() == 0) {
-      return std::make_shared<ListOffsetArrayOf<T>>(identities_, parameters_, nextoffsets, nextcontent.get()->getitem_next(nexthead, nexttail, advanced));
+      return std::make_shared<ListOffsetArrayOf<T>>(
+        identities_,
+        parameters_,
+        nextoffsets,
+        nextcontent.get()->getitem_next(nexthead, nexttail, advanced));
     }
     else {
       int64_t total;
-      struct Error err1 = util::awkward_listarray_getitem_next_range_counts_64<T>(
+      struct Error err1 =
+        util::awkward_listarray_getitem_next_range_counts_64<T>(
         &total,
         nextoffsets.ptr().get(),
         lenstarts);
       util::handle_error(err1, classname(), identities_.get());
       Index64 nextadvanced(total);
-      struct Error err2 = util::awkward_listarray_getitem_next_range_spreadadvanced_64<T>(
+      struct Error err2 =
+        util::awkward_listarray_getitem_next_range_spreadadvanced_64<T>(
         nextadvanced.ptr().get(),
         advanced.ptr().get(),
         nextoffsets.ptr().get(),
         lenstarts);
       util::handle_error(err2, classname(), identities_.get());
-      return std::make_shared<ListOffsetArrayOf<T>>(identities_, parameters_, nextoffsets, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced));
+      return std::make_shared<ListOffsetArrayOf<T>>(
+        identities_,
+        parameters_,
+        nextoffsets,
+        nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced));
     }
   }
 
   template <typename T>
   const ContentPtr
-  ListArrayOf<T>::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
+  ListArrayOf<T>::getitem_next(const SliceArray64& array,
+                               const Slice& tail,
+                               const Index64& advanced) const {
     int64_t lenstarts = starts_.length();
     if (stops_.length() < lenstarts) {
-      util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), identities_.get());
+      util::handle_error(
+        failure("len(stops) < len(starts)", kSliceNone, kSliceNone),
+        classname(),
+        identities_.get());
     }
 
     SliceItemPtr nexthead = tail.head();
@@ -1361,12 +1376,17 @@ namespace awkward {
         content_.get()->length());
       util::handle_error(err, classname(), identities_.get());
       ContentPtr nextcontent = content_.get()->carry(nextcarry);
-      return getitem_next_array_wrap(nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced), array.shape());
+      return getitem_next_array_wrap(
+        nextcontent.get()->getitem_next(nexthead,
+                                        nexttail,
+                                        nextadvanced),
+        array.shape());
     }
     else {
       Index64 nextcarry(lenstarts);
       Index64 nextadvanced(lenstarts);
-      struct Error err = util::awkward_listarray_getitem_next_array_advanced_64<T>(
+      struct Error err =
+        util::awkward_listarray_getitem_next_array_advanced_64<T>(
         nextcarry.ptr().get(),
         nextadvanced.ptr().get(),
         starts_.ptr().get(),
@@ -1386,12 +1406,18 @@ namespace awkward {
 
   template <typename T>
   const ContentPtr
-  ListArrayOf<T>::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
+  ListArrayOf<T>::getitem_next(const SliceJagged64& jagged,
+                               const Slice& tail,
+                               const Index64& advanced) const {
     if (advanced.length() != 0) {
-      throw std::invalid_argument("cannot mix jagged slice with NumPy-style advanced indexing");
+      throw std::invalid_argument(
+        "cannot mix jagged slice with NumPy-style advanced indexing");
     }
     if (stops_.length() < starts_.length()) {
-      util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), identities_.get());
+      util::handle_error(
+        failure("len(stops) < len(starts)", kSliceNone, kSliceNone),
+        classname(),
+        identities_.get());
     }
 
     int64_t len = length();
@@ -1413,19 +1439,35 @@ namespace awkward {
     util::handle_error(err, classname(), identities_.get());
 
     ContentPtr carried = content_.get()->carry(nextcarry);
-    ContentPtr down = carried.get()->getitem_next_jagged(multistarts, multistops, jagged.content(), tail);
+    ContentPtr down = carried.get()->getitem_next_jagged(multistarts,
+                                                         multistops,
+                                                         jagged.content(),
+                                                         tail);
 
-    return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), down, jagged.length());
+    return std::make_shared<RegularArray>(Identities::none(),
+                                          util::Parameters(),
+                                          down, jagged.length());
   }
 
   template <typename T>
   const ContentPtr
-  ListArrayOf<T>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const {
+  ListArrayOf<T>::getitem_next_jagged(const Index64& slicestarts,
+                                      const Index64& slicestops,
+                                      const SliceArray64& slicecontent,
+                                      const Slice& tail) const {
     if (starts_.length() < slicestarts.length()) {
-      util::handle_error(failure("jagged slice length differs from array length", kSliceNone, kSliceNone), classname(), identities_.get());
+      util::handle_error(
+        failure("jagged slice length differs from array length",
+                kSliceNone,
+                kSliceNone),
+        classname(),
+        identities_.get());
     }
     if (stops_.length() < starts_.length()) {
-      util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), identities_.get());
+      util::handle_error(
+        failure("len(stops) < len(starts)", kSliceNone, kSliceNone),
+        classname(),
+        identities_.get());
     }
 
     int64_t carrylen;
@@ -1460,16 +1502,29 @@ namespace awkward {
     util::handle_error(err2, classname(), nullptr);
 
     ContentPtr nextcontent = content_.get()->carry(nextcarry);
-    ContentPtr outcontent = nextcontent.get()->getitem_next(tail.head(), tail.tail(), Index64(0));
+    ContentPtr outcontent = nextcontent.get()->getitem_next(tail.head(),
+                                                            tail.tail(),
+                                                            Index64(0));
 
-    return std::make_shared<ListOffsetArray64>(Identities::none(), util::Parameters(), outoffsets, outcontent);
+    return std::make_shared<ListOffsetArray64>(Identities::none(),
+                                               util::Parameters(),
+                                               outoffsets,
+                                               outcontent);
   }
 
   template <typename T>
   const ContentPtr
-  ListArrayOf<T>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const {
+  ListArrayOf<T>::getitem_next_jagged(const Index64& slicestarts,
+                                      const Index64& slicestops,
+                                      const SliceMissing64& slicecontent,
+                                      const Slice& tail) const {
     if (starts_.length() < slicestarts.length()) {
-      util::handle_error(failure("jagged slice length differs from array length", kSliceNone, kSliceNone), classname(), identities_.get());
+      util::handle_error(
+        failure("jagged slice length differs from array length",
+                kSliceNone,
+                kSliceNone),
+        classname(),
+        identities_.get());
     }
 
     Index64 missing = slicecontent.index();
@@ -1505,28 +1560,55 @@ namespace awkward {
     ContentPtr out;
     if (dynamic_cast<SliceJagged64*>(slicecontent.content().get())) {
       ContentPtr nextcontent = content_.get()->carry(nextcarry);
-      ContentPtr next = std::make_shared<ListOffsetArray64>(Identities::none(), util::Parameters(), smalloffsets, nextcontent);
-      out = next.get()->getitem_next_jagged(util::make_starts(smalloffsets), util::make_stops(smalloffsets), slicecontent.content(), tail);
+      ContentPtr next = std::make_shared<ListOffsetArray64>(Identities::none(),
+                                                            util::Parameters(),
+                                                            smalloffsets,
+                                                            nextcontent);
+      out = next.get()->getitem_next_jagged(util::make_starts(smalloffsets),
+                                            util::make_stops(smalloffsets),
+                                            slicecontent.content(),
+                                            tail);
     }
     else {
-      out = Content::getitem_next_jagged(util::make_starts(smalloffsets), util::make_stops(smalloffsets), slicecontent.content(), tail);
+      out = Content::getitem_next_jagged(util::make_starts(smalloffsets),
+                                         util::make_stops(smalloffsets),
+                                         slicecontent.content(),
+                                         tail);
     }
 
     if (ListOffsetArray64* raw = dynamic_cast<ListOffsetArray64*>(out.get())) {
       ContentPtr content = raw->content();
-      IndexedOptionArray64 indexedoptionarray(Identities::none(), util::Parameters(), missing, content);
-      return std::make_shared<ListOffsetArray64>(Identities::none(), util::Parameters(), largeoffsets, indexedoptionarray.simplify_optiontype());
+      IndexedOptionArray64 indexedoptionarray(Identities::none(),
+                                              util::Parameters(),
+                                              missing,
+                                              content);
+      return std::make_shared<ListOffsetArray64>(
+        Identities::none(),
+        util::Parameters(),
+        largeoffsets,
+        indexedoptionarray.simplify_optiontype());
     }
     else {
-      throw std::runtime_error(std::string("expected ListOffsetArray64 from ListArray::getitem_next_jagged, got ") + out.get()->classname());
+      throw std::runtime_error(
+        std::string("expected ListOffsetArray64 from "
+                    "ListArray::getitem_next_jagged, got ")
+        + out.get()->classname());
     }
   }
 
   template <typename T>
   const ContentPtr
-  ListArrayOf<T>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const {
+  ListArrayOf<T>::getitem_next_jagged(const Index64& slicestarts,
+                                      const Index64& slicestops,
+                                      const SliceJagged64& slicecontent,
+                                      const Slice& tail) const {
     if (starts_.length() < slicestarts.length()) {
-      util::handle_error(failure("jagged slice length differs from array length", kSliceNone, kSliceNone), classname(), identities_.get());
+      util::handle_error(
+        failure("jagged slice length differs from array length",
+                kSliceNone,
+                kSliceNone),
+        classname(),
+        identities_.get());
     }
 
     Index64 outoffsets(slicestarts.length() + 1);
@@ -1544,9 +1626,16 @@ namespace awkward {
     util::handle_error(err, classname(), identities_.get());
 
     Index64 sliceoffsets = slicecontent.offsets();
-    ContentPtr outcontent = content_.get()->getitem_next_jagged(util::make_starts(sliceoffsets), util::make_stops(sliceoffsets), slicecontent.content(), tail);
+    ContentPtr outcontent = content_.get()->getitem_next_jagged(
+      util::make_starts(sliceoffsets),
+      util::make_stops(sliceoffsets),
+      slicecontent.content(),
+      tail);
 
-    return std::make_shared<ListOffsetArray64>(Identities::none(), util::Parameters(), outoffsets, outcontent);
+    return std::make_shared<ListOffsetArray64>(Identities::none(),
+                                               util::Parameters(),
+                                               outoffsets,
+                                               outcontent);
   }
 
   template class ListArrayOf<int32_t>;
