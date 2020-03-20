@@ -11,23 +11,25 @@ def register():
     import awkward1._connect._numba.layout
     import awkward1._connect._numba.builder
 
-    awkward1.numba.ArrayViewType = awkward1._connect._numba.arrayview.ArrayViewType
-    awkward1.numba.ArrayViewModel = awkward1._connect._numba.arrayview.ArrayViewModel
-    awkward1.numba.RecordViewType = awkward1._connect._numba.arrayview.RecordViewType
-    awkward1.numba.RecordViewModel = awkward1._connect._numba.arrayview.RecordViewModel
-    awkward1.numba.ContentType = awkward1._connect._numba.layout.ContentType
-    awkward1.numba.NumpyArrayType = awkward1._connect._numba.layout.NumpyArrayType
-    awkward1.numba.RegularArrayType = awkward1._connect._numba.layout.RegularArrayType
-    awkward1.numba.ListArrayType = awkward1._connect._numba.layout.ListArrayType
-    awkward1.numba.IndexedArrayType = awkward1._connect._numba.layout.IndexedArrayType
-    awkward1.numba.IndexedOptionArrayType = awkward1._connect._numba.layout.IndexedOptionArrayType
-    awkward1.numba.ByteMaskedArrayType = awkward1._connect._numba.layout.ByteMaskedArrayType
-    awkward1.numba.BitMaskedArrayType = awkward1._connect._numba.layout.BitMaskedArrayType
-    awkward1.numba.UnmaskedArrayType = awkward1._connect._numba.layout.UnmaskedArrayType
-    awkward1.numba.RecordArrayType = awkward1._connect._numba.layout.RecordArrayType
-    awkward1.numba.UnionArrayType = awkward1._connect._numba.layout.UnionArrayType
-    awkward1.numba.ArrayBuilderType = awkward1._connect._numba.builder.ArrayBuilderType
-    awkward1.numba.ArrayBuilderModel = awkward1._connect._numba.builder.ArrayBuilderModel
+    n = awkward1.numba
+    n.ArrayViewType       = awkward1._connect._numba.arrayview.ArrayViewType
+    n.ArrayViewModel      = awkward1._connect._numba.arrayview.ArrayViewModel
+    n.RecordViewType      = awkward1._connect._numba.arrayview.RecordViewType
+    n.RecordViewModel     = awkward1._connect._numba.arrayview.RecordViewModel
+    n.ContentType         = awkward1._connect._numba.layout.ContentType
+    n.NumpyArrayType      = awkward1._connect._numba.layout.NumpyArrayType
+    n.RegularArrayType    = awkward1._connect._numba.layout.RegularArrayType
+    n.ListArrayType       = awkward1._connect._numba.layout.ListArrayType
+    n.IndexedArrayType    = awkward1._connect._numba.layout.IndexedArrayType
+    n.IndexedOptionArrayType = \
+                         awkward1._connect._numba.layout.IndexedOptionArrayType
+    n.ByteMaskedArrayType = awkward1._connect._numba.layout.ByteMaskedArrayType
+    n.BitMaskedArrayType  = awkward1._connect._numba.layout.BitMaskedArrayType
+    n.UnmaskedArrayType   = awkward1._connect._numba.layout.UnmaskedArrayType
+    n.RecordArrayType     = awkward1._connect._numba.layout.RecordArrayType
+    n.UnionArrayType      = awkward1._connect._numba.layout.UnionArrayType
+    n.ArrayBuilderType    = awkward1._connect._numba.builder.ArrayBuilderType
+    n.ArrayBuilderModel   = awkward1._connect._numba.builder.ArrayBuilderModel
 
 try:
     import numba
@@ -62,7 +64,8 @@ def castint(context, builder, fromtype, totype, val):
         elif fromtype.width == 64:
             fromtype = numba.int64
     if not isinstance(fromtype, numba.types.Integer):
-        raise AssertionError("unrecognized integer type: {0}".format(repr(fromtype)))
+        raise AssertionError(
+                "unrecognized integer type: {0}".format(repr(fromtype)))
 
     if fromtype.bitwidth < totype.bitwidth:
         if fromtype.signed:
