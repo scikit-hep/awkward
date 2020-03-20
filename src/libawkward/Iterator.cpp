@@ -37,7 +37,8 @@ namespace awkward {
                           const std::string& post) const {
     std::stringstream out;
     out << indent << pre << "<Iterator at=\"" << at_ << "\">\n";
-    out << content_.get()->tostring_part(indent + std::string("    "), "", "\n");
+    out << content_.get()->tostring_part(
+             indent + std::string("    "), "", "\n");
     out << indent << "</Iterator>" << post;
     return out.str();
   }

@@ -146,7 +146,8 @@ namespace awkward {
           bool unmerged = true;
           for (size_t k = 0;  k < contents.size();  k++) {
             if (contents[k].get()->mergeable(innercontents[j], mergebool)) {
-              struct Error err = util::awkward_unionarray_simplify8_32_to8_64<T, I>(
+              struct Error err =
+                util::awkward_unionarray_simplify8_32_to8_64<T, I>(
                 tags.ptr().get(),
                 index.ptr().get(),
                 tags_.ptr().get(),
@@ -224,7 +225,8 @@ namespace awkward {
             }
           }
           if (unmerged) {
-            struct Error err = util::awkward_unionarray_simplify8_U32_to8_64<T, I>(
+            struct Error err =
+              util::awkward_unionarray_simplify8_U32_to8_64<T, I>(
               tags.ptr().get(),
               index.ptr().get(),
               tags_.ptr().get(),
@@ -254,7 +256,8 @@ namespace awkward {
           bool unmerged = true;
           for (size_t k = 0;  k < contents.size();  k++) {
             if (contents[k].get()->mergeable(innercontents[j], mergebool)) {
-              struct Error err = util::awkward_unionarray_simplify8_64_to8_64<T, I>(
+              struct Error err =
+                util::awkward_unionarray_simplify8_64_to8_64<T, I>(
                 tags.ptr().get(),
                 index.ptr().get(),
                 tags_.ptr().get(),
@@ -1030,7 +1033,8 @@ namespace awkward {
 
   template <typename T, typename I>
   const std::pair<Index64, ContentPtr>
-  UnionArrayOf<T, I>::offsets_and_flattened(int64_t axis, int64_t depth) const {
+  UnionArrayOf<T, I>::offsets_and_flattened(int64_t axis,
+                                            int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
       throw std::invalid_argument("axis=0 not allowed for flatten");

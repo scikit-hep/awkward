@@ -3161,7 +3161,8 @@ ERROR awkward_listarray_choose_length(
   *totallen = 0;
   tooffsets[0] = 0;
   for (int64_t i = 0;  i < length;  i++) {
-    int64_t size = (int64_t)(stops[stopsoffset + i] - starts[startsoffset + i]);
+    int64_t size = (int64_t)(stops[stopsoffset + i] -
+                             starts[startsoffset + i]);
     if (diagonal) {
       size += (n - 1);
     }

@@ -27,7 +27,8 @@ namespace awkward {
     return out;
   }
 
-  UnknownBuilder::UnknownBuilder(const ArrayBuilderOptions& options, int64_t nullcount)
+  UnknownBuilder::UnknownBuilder(const ArrayBuilderOptions& options,
+                                 int64_t nullcount)
       : options_(options)
       , nullcount_(nullcount) { }
 

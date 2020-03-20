@@ -315,7 +315,9 @@ namespace awkward {
     SliceItemPtr nexthead = where.head();
     Slice nexttail = where.tail();
     Index64 nextadvanced(0);
-    ContentPtr out = next.get()->getitem_next(nexthead, nexttail, nextadvanced);
+    ContentPtr out = next.get()->getitem_next(nexthead,
+                                              nexttail,
+                                              nextadvanced);
 
     if (out.get()->length() == 0) {
       return out.get()->getitem_nothing();
@@ -414,7 +416,8 @@ namespace awkward {
     else if (mindepth - 1 == tail.dimlength()  ||
              maxdepth - 1 == tail.dimlength()) {
       throw std::invalid_argument(
-        "ellipsis (...) can't be used on a data structure of different depths");
+        "ellipsis (...) can't be used on a data structure of "
+        "different depths");
     }
     else {
       std::vector<SliceItemPtr> tailitems = tail.items();

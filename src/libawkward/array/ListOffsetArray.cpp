@@ -73,7 +73,8 @@ namespace awkward {
     else {
       int64_t len = offsets_.length() - 1;
       Index64 out(len + 1);
-      struct Error err = util::awkward_listoffsetarray_compact_offsets64<int64_t>(
+      struct Error err =
+        util::awkward_listoffsetarray_compact_offsets64<int64_t>(
         out.ptr().get(),
         offsets_.ptr().get(),
         offsets_.offset(),
@@ -1122,7 +1123,8 @@ namespace awkward {
           Index64 adjustedoffsets(offsets.get()->length());
           Index64 adjustednonzero(nonzero.length());
 
-          struct Error err = awkward_listoffsetarray_getitem_adjust_offsets_index_64(
+          struct Error err =
+            awkward_listoffsetarray_getitem_adjust_offsets_index_64(
             adjustedoffsets.ptr().get(),
             adjustednonzero.ptr().get(),
             offsets.get()->ptr().get(),
@@ -1298,7 +1300,8 @@ namespace awkward {
       Index64 nextparents(nextlen);
       int64_t maxnextparents;
       Index64 distincts(maxcount * outlength);
-      struct Error err3 = awkward_listoffsetarray_reduce_nonlocal_preparenext_64(
+      struct Error err3 =
+        awkward_listoffsetarray_reduce_nonlocal_preparenext_64(
         nextcarry.ptr().get(),
         nextparents.ptr().get(),
         nextlen,
@@ -1337,7 +1340,8 @@ namespace awkward {
 
       Index64 outstarts(outlength);
       Index64 outstops(outlength);
-      struct Error err6 = awkward_listoffsetarray_reduce_nonlocal_outstartsstops_64(
+      struct Error err6 =
+        awkward_listoffsetarray_reduce_nonlocal_outstartsstops_64(
         outstarts.ptr().get(),
         outstops.ptr().get(),
         distincts.ptr().get(),

@@ -368,7 +368,8 @@ namespace awkward {
   UnionBuilder::endrecord() {
     if (current_ == -1) {
       throw std::invalid_argument(
-        "called 'endrecord' without 'beginrecord' at the same level before it");
+        "called 'endrecord' without 'beginrecord' at the same level "
+        "before it");
     }
     else {
       int64_t length = contents_[(size_t)current_].get()->length();

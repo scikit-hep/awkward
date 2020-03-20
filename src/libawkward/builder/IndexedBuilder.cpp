@@ -400,8 +400,15 @@ namespace awkward {
 
   template class IndexedBuilder<IndexedOptionArray32>;
 
-  IndexedIO32Builder::IndexedIO32Builder(const ArrayBuilderOptions& options, const GrowableBuffer<int64_t>& index, const std::shared_ptr<IndexedOptionArray32>& array, bool hasnull)
-      : IndexedBuilder<IndexedOptionArray32>(options, index, array, hasnull) { }
+  IndexedIO32Builder::IndexedIO32Builder(
+    const ArrayBuilderOptions& options,
+    const GrowableBuffer<int64_t>& index,
+    const std::shared_ptr<IndexedOptionArray32>& array,
+    bool hasnull)
+      : IndexedBuilder<IndexedOptionArray32>(options,
+                                             index,
+                                             array,
+                                             hasnull) { }
 
   const std::string
   IndexedIO32Builder::classname() const {
@@ -435,8 +442,14 @@ namespace awkward {
 
   template class IndexedBuilder<IndexedOptionArray64>;
 
-  IndexedIO64Builder::IndexedIO64Builder(const ArrayBuilderOptions& options, const GrowableBuffer<int64_t>& index, const std::shared_ptr<IndexedOptionArray64>& array, bool hasnull)
-      : IndexedBuilder<IndexedOptionArray64>(options, index, array, hasnull) { }
+  IndexedIO64Builder::IndexedIO64Builder(
+    const ArrayBuilderOptions& options,
+    const GrowableBuffer<int64_t>& index,
+    const std::shared_ptr<IndexedOptionArray64>& array, bool hasnull)
+      : IndexedBuilder<IndexedOptionArray64>(options,
+                                             index,
+                                             array,
+                                             hasnull) { }
 
   const std::string
   IndexedIO64Builder::classname() const {

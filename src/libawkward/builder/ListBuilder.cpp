@@ -223,7 +223,8 @@ namespace awkward {
   ListBuilder::endrecord() {
     if (!begun_) {
       throw std::invalid_argument(
-        "called 'endrecord' without 'beginrecord' at the same level before it");
+        "called 'endrecord' without 'beginrecord' at the same level "
+        "before it");
     }
     else {
       content_.get()->endrecord();

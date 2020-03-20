@@ -14,7 +14,8 @@
 #include "awkward/array/EmptyArray.h"
 
 namespace awkward {
-  EmptyArray::EmptyArray(const IdentitiesPtr& identities, const util::Parameters& parameters)
+  EmptyArray::EmptyArray(const IdentitiesPtr& identities,
+                         const util::Parameters& parameters)
       : Content(identities, parameters) { }
 
   const ContentPtr

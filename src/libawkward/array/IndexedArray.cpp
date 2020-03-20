@@ -760,7 +760,8 @@ namespace awkward {
 
   template <typename T, bool ISOPTION>
   const ContentPtr
-  IndexedArrayOf<T, ISOPTION>::getitem_range(int64_t start, int64_t stop) const {
+  IndexedArrayOf<T, ISOPTION>::getitem_range(int64_t start,
+                                             int64_t stop) const {
     int64_t regular_start = start;
     int64_t regular_stop = stop;
     awkward_regularize_rangeslice(&regular_start, &regular_stop,
@@ -1354,7 +1355,8 @@ namespace awkward {
 
       Index64 nextcarry(length() - numnull);
       Index64 outindex(length());
-      struct Error err2 = util::awkward_indexedarray_getitem_nextcarry_outindex_mask_64<T>(
+      struct Error err2 =
+        util::awkward_indexedarray_getitem_nextcarry_outindex_mask_64<T>(
         nextcarry.ptr().get(),
         outindex.ptr().get(),
         index_.ptr().get(),
@@ -1570,10 +1572,12 @@ namespace awkward {
       return out;
     }
     else {
-      if (RegularArray* raw = dynamic_cast<RegularArray*>(out.get())) {
+      if (RegularArray* raw =
+          dynamic_cast<RegularArray*>(out.get())) {
         out = raw->toListOffsetArray64(true);
       }
-      if (ListOffsetArray64* raw = dynamic_cast<ListOffsetArray64*>(out.get())) {
+      if (ListOffsetArray64* raw =
+          dynamic_cast<ListOffsetArray64*>(out.get())) {
         Index64 outoffsets(starts.length() + 1);
         if (starts.length() > 0  &&  starts.getitem_at_nowrap(0) != 0) {
           throw std::runtime_error(

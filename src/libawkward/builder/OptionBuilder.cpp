@@ -229,7 +229,8 @@ namespace awkward {
   OptionBuilder::endrecord() {
     if (!content_.get()->active()) {
       throw std::invalid_argument(
-        "called 'endrecord' without 'beginrecord' at the same level before it");
+        "called 'endrecord' without 'beginrecord' at the same level "
+        "before it");
     }
     else {
       int64_t length = content_.get()->length();

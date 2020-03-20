@@ -1037,7 +1037,8 @@ namespace awkward {
       }
       else {
         int64_t tolength = 0;
-        struct Error err2 = util::awkward_ListArray_rpad_and_clip_length_axis1<T>(
+        struct Error err2 =
+          util::awkward_ListArray_rpad_and_clip_length_axis1<T>(
           &tolength,
           starts_.ptr().get(),
           stops_.ptr().get(),
@@ -1284,7 +1285,8 @@ namespace awkward {
       step = 1;
     }
     int64_t carrylength;
-    struct Error err1 = util::awkward_listarray_getitem_next_range_carrylength<T>(
+    struct Error err1 =
+      util::awkward_listarray_getitem_next_range_carrylength<T>(
       &carrylength,
       starts_.ptr().get(),
       stops_.ptr().get(),

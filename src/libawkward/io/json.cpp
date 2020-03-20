@@ -199,7 +199,9 @@ namespace awkward {
   public:
     Impl(FILE* destination, int64_t maxdecimals, int64_t buffersize)
         : buffer_(new char[(size_t)buffersize], util::array_deleter<char>())
-        , stream_(destination, buffer_.get(), ((size_t)buffersize)*sizeof(char))
+        , stream_(destination,
+                  buffer_.get(),
+                  ((size_t)buffersize)*sizeof(char))
         , writer_(stream_) {
       if (maxdecimals >= 0) {
         writer_.SetMaxDecimalPlaces((int)maxdecimals);
@@ -285,7 +287,9 @@ namespace awkward {
   public:
     Impl(FILE* destination, int64_t maxdecimals, int64_t buffersize)
         : buffer_(new char[(size_t)buffersize], util::array_deleter<char>())
-        , stream_(destination, buffer_.get(), ((size_t)buffersize)*sizeof(char))
+        , stream_(destination,
+                  buffer_.get(),
+                  ((size_t)buffersize)*sizeof(char))
         , writer_(stream_) {
       if (maxdecimals >= 0) {
         writer_.SetMaxDecimalPlaces((int)maxdecimals);

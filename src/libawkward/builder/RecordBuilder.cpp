@@ -101,7 +101,8 @@ namespace awkward {
       parameters["__record__"] = util::quote(name_, true);
     }
     ContentPtrVec contents;
-    util::RecordLookupPtr recordlookup = std::make_shared<util::RecordLookup>();
+    util::RecordLookupPtr recordlookup =
+      std::make_shared<util::RecordLookup>();
     for (size_t i = 0;  i < contents_.size();  i++) {
       contents.push_back(contents_[i].get()->snapshot());
       recordlookup.get()->push_back(keys_[i]);
@@ -239,7 +240,8 @@ namespace awkward {
         "needs 'index' or 'endrecord'");
     }
     else if (!contents_[(size_t)nextindex_].get()->active()) {
-      maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->beginlist());
+      maybeupdate(nextindex_,
+                  contents_[(size_t)nextindex_].get()->beginlist());
     }
     else {
       contents_[(size_t)nextindex_].get()->beginlist();
@@ -353,7 +355,8 @@ namespace awkward {
     }
     else if (!contents_[(size_t)nextindex_].get()->active()) {
       maybeupdate(nextindex_,
-                  contents_[(size_t)nextindex_].get()->beginrecord(name, check));
+                  contents_[(size_t)nextindex_].get()->beginrecord(name,
+                                                                   check));
     }
     else {
       contents_[(size_t)nextindex_].get()->beginrecord(name, check);
@@ -465,7 +468,8 @@ namespace awkward {
   RecordBuilder::endrecord() {
     if (!begun_) {
       throw std::invalid_argument(
-        "called 'endrecord' without 'beginrecord' at the same level before it");
+        "called 'endrecord' without 'beginrecord' at the same level "
+        "before it");
     }
     else if (nextindex_ == -1  ||
              !contents_[(size_t)nextindex_].get()->active()) {

@@ -1380,7 +1380,8 @@ namespace awkward {
     NumpyArray contiguous_self = contiguous();
     if (NumpyArray* rawother = dynamic_cast<NumpyArray*>(other.get())) {
       if (ndim() != rawother->ndim()) {
-        throw std::invalid_argument("cannot merge arrays with different shapes");
+        throw std::invalid_argument(
+          "cannot merge arrays with different shapes");
       }
 
       std::string other_format = rawother->format();
@@ -1673,7 +1674,8 @@ namespace awkward {
                   other_offset,
                   other_flatlength);
         }
-        else if (other_format.compare("B") == 0  ||  format_.compare("c") == 0) {
+        else if (other_format.compare("B") == 0  ||
+                 format_.compare("c") == 0) {
           err = awkward_numpyarray_fill_todouble_fromU8(
                   reinterpret_cast<double*>(ptr.get()),
                   self_flatlength,
@@ -1882,7 +1884,8 @@ namespace awkward {
                   other_offset,
                   other_flatlength);
         }
-        else if (other_format.compare("B") == 0  ||  format_.compare("c") == 0) {
+        else if (other_format.compare("B") == 0  ||
+                 format_.compare("c") == 0) {
           err = awkward_numpyarray_fill_to64_fromU8(
                   reinterpret_cast<int64_t*>(ptr.get()),
                   self_flatlength,
@@ -2112,7 +2115,9 @@ namespace awkward {
   }
 
   const ContentPtr
-  NumpyArray::rpad_and_clip(int64_t target, int64_t axis, int64_t depth) const {
+  NumpyArray::rpad_and_clip(int64_t target,
+                            int64_t axis,
+                            int64_t depth) const {
     if (ndim() == 0) {
       throw std::runtime_error("cannot rpad a scalar");
     }
@@ -2381,7 +2386,8 @@ namespace awkward {
                            const Slice& tail, const Index64& advanced) const {
     if (shape_.size() != 1) {
       throw std::runtime_error(
-        "undefined operation: NumpyArray::getitem_next(jagged) with ndim != 1");
+        "undefined operation: NumpyArray::getitem_next(jagged) with "
+        "ndim != 1");
     }
 
     if (advanced.length() != 0) {
@@ -2400,7 +2406,8 @@ namespace awkward {
                                   const SliceArray64& slicecontent,
                                   const Slice& tail) const {
     if (ndim() == 1) {
-      throw std::invalid_argument("too many jagged slice dimensions for array");
+      throw std::invalid_argument(
+        "too many jagged slice dimensions for array");
     }
     else {
       throw std::runtime_error(
@@ -2415,7 +2422,8 @@ namespace awkward {
                                   const SliceMissing64& slicecontent,
                                   const Slice& tail) const {
     if (ndim() == 1) {
-      throw std::invalid_argument("too many jagged slice dimensions for array");
+      throw std::invalid_argument(
+        "too many jagged slice dimensions for array");
     }
     else {
       throw std::runtime_error(
@@ -2430,7 +2438,8 @@ namespace awkward {
                                   const SliceJagged64& slicecontent,
                                   const Slice& tail) const {
     if (ndim() == 1) {
-      throw std::invalid_argument("too many jagged slice dimensions for array");
+      throw std::invalid_argument(
+        "too many jagged slice dimensions for array");
     }
     else {
       throw std::runtime_error(
@@ -3194,7 +3203,8 @@ namespace awkward {
       for (auto x = arrayshape.rbegin();  x != arrayshape.rend();  ++x) {
         outstrides.insert(outstrides.begin(), ((ssize_t)(*x))*outstrides[0]);
       }
-      return NumpyArray(arrayshape.size() == 1 ? out.identities_ : Identities::none(),
+      return NumpyArray(arrayshape.size() == 1 ? out.identities_
+                                               : Identities::none(),
                         out.parameters_,
                         out.ptr_,
                         outshape,

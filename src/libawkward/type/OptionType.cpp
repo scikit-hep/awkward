@@ -12,7 +12,9 @@
 #include "awkward/type/OptionType.h"
 
 namespace awkward {
-  OptionType::OptionType(const util::Parameters& parameters, const std::string& typestr, const TypePtr& type)
+  OptionType::OptionType(const util::Parameters& parameters,
+                         const std::string& typestr,
+                         const TypePtr& type)
       : Type(parameters, typestr)
       , type_(type) { }
 

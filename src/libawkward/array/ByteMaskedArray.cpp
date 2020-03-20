@@ -711,7 +711,8 @@ namespace awkward {
     else if (toaxis == depth + 1) {
       Index8 mask = bytemask();
       Index64 index(mask.length());
-      struct Error err = awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_64(
+      struct Error err =
+        awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_64(
         index.ptr().get(),
         mask.ptr().get(),
         mask.length());
@@ -815,10 +816,12 @@ namespace awkward {
       return out;
     }
     else {
-      if (RegularArray* raw = dynamic_cast<RegularArray*>(out.get())) {
+      if (RegularArray* raw =
+          dynamic_cast<RegularArray*>(out.get())) {
         out = raw->toListOffsetArray64(true);
       }
-      if (ListOffsetArray64* raw = dynamic_cast<ListOffsetArray64*>(out.get())) {
+      if (ListOffsetArray64* raw =
+          dynamic_cast<ListOffsetArray64*>(out.get())) {
         Index64 outoffsets(starts.length() + 1);
         if (starts.length() > 0  &&  starts.getitem_at_nowrap(0) != 0) {
           throw std::runtime_error(

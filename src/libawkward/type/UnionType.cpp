@@ -109,7 +109,11 @@ namespace awkward {
     }
     Index8 tags(0);
     Index64 index(0);
-    return std::make_shared<UnionArray8_64>(Identities::none(), parameters_, tags, index, contents);
+    return std::make_shared<UnionArray8_64>(Identities::none(),
+                                            parameters_,
+                                            tags,
+                                            index,
+                                            contents);
   }
 
   const TypePtr
