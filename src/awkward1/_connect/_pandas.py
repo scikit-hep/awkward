@@ -11,7 +11,6 @@ import awkward1._util
 import awkward1.operations.convert
 import awkward1.operations.structure
 
-# Don't import 'pandas' until an Awkward Array is used in Pandas or register() is called.
 def register():
     global AwkwardDtype
     try:
@@ -29,8 +28,11 @@ def get_pandas():
     import pandas
     global checked_version
     if not checked_version:
-        if distutils.version.LooseVersion(pandas.__version__) < distutils.version.LooseVersion("0.24.0"):
-            raise ImportError("cannot use Awkward Array with Pandas version {0} (at least 0.24.0 is required)".format(pandas.__version__))
+        if (distutils.version.LooseVersion(pandas.__version__) <
+            distutils.version.LooseVersion("0.24.0")):
+            raise ImportError(
+                    "cannot use Awkward Array with Pandas version {0} (at "
+                    "least 0.24.0 is required)".format(pandas.__version__))
         checked_version = True
     return pandas
 
@@ -54,7 +56,8 @@ def get_dtype():
                 if string == cls.name:
                     return cls()
                 else:
-                    raise TypeError("cannot construct a {0} from {1}".format(cls, string))
+                    raise TypeError(
+                        "cannot construct a {0} from {1}".format(cls, string))
 
             @classmethod
             def construct_array_type(cls):
@@ -150,26 +153,37 @@ class PandasMixin(PandasNotImportedYet):
             indices = numpy.asarray(indices, dtype=numpy.int64)
             if fill_value is None:
                 index = awkward1.layout.Index64(indices)
-                layout = awkward1.layout.IndexedOptionArray64(index, self.layout, parameters=self.layout.parameters)
-                return awkward1._util.wrap(layout, awkward1._util.behaviorof(self))
+                layout = awkward1.layout.IndexedOptionArray64(
+                           index,
+                           self.layout,
+                           parameters=self.layout.parameters)
+                return awkward1._util.wrap(layout,
+                                           awkward1._util.behaviorof(self))
 
             else:
                 tags = (indices >= 0).view(numpy.int8)
                 index = indices.copy()
                 index[~tags] = 0
-                content0 = awkward1.operations.convert.fromiter([fill_value], highlevel=False)
+                content0 = awkward1.operations.convert.fromiter(
+                             [fill_value], highlevel=False)
                 content1 = self.layout
                 tags = awkward1.layout.Index8(tags)
                 index = awkward1.layout.Index64(index)
-                layout = awkward1.layout.UnionArray8_64(tags, index, [content0, content1])
-                return awkward1._util.wrap(layout, awkward1._util.behaviorof(self))
+                layout = awkward1.layout.UnionArray8_64(tags,
+                                                        index,
+                                                        [content0, content1])
+                return awkward1._util.wrap(layout,
+                                           awkward1._util.behaviorof(self))
 
         else:
             return self[indices]
 
     def copy(self):
         # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray.copy.html
-        return awkward1._util.wrap(self._layout.deep_copy(copyarrays=True, copyindexes=True, copyidentities=True), awkward1._util.behaviorof(self))
+        return awkward1._util.wrap(self._layout.deep_copy(copyarrays=True,
+                                                          copyindexes=True,
+                                                          copyidentities=True),
+                                   awkward1._util.behaviorof(self))
 
     @classmethod
     def _concat_same_type(cls, to_concat):
@@ -236,7 +250,10 @@ class PandasMixin(PandasNotImportedYet):
     #     register()
     #     raise NotImplementedError
 
-def df(array, how="inner", levelname=lambda i: "sub"*i + "entry", anonymous="values"):
+def df(array,
+       how="inner",
+       levelname=lambda i: "sub"*i + "entry",
+       anonymous="values"):
     register()
     pandas = get_pandas()
     out = None
@@ -244,10 +261,16 @@ def df(array, how="inner", levelname=lambda i: "sub"*i + "entry", anonymous="val
         if out is None:
             out = df
         else:
-            out = pandas.merge(out, df, how=how, left_index=True, right_index=True)
+            out = pandas.merge(out,
+                               df,
+                               how=how,
+                               left_index=True,
+                               right_index=True)
     return out
 
-def dfs(array, levelname=lambda i: "sub"*i + "entry", anonymous="values"):
+def dfs(array,
+        levelname=lambda i: "sub"*i + "entry",
+        anonymous="values"):
     register()
     pandas = get_pandas()
 
@@ -260,23 +283,31 @@ def dfs(array, levelname=lambda i: "sub"*i + "entry", anonymous="values"):
             if awkward1._util.win:
                 counts = counts.astype(numpy.int32)
             if len(row_arrays) == 0:
-                newrows = [numpy.repeat(numpy.arange(len(counts), dtype=counts.dtype), counts)]
+                newrows = [numpy.repeat(numpy.arange(len(counts),
+                                                     dtype=counts.dtype),
+                                        counts)]
             else:
                 newrows = [numpy.repeat(x, counts) for x in row_arrays]
-            newrows.append(numpy.arange(offsets[-1], dtype=counts.dtype) - numpy.repeat(starts, counts))
+            newrows.append(numpy.arange(offsets[-1], dtype=counts.dtype) -
+                           numpy.repeat(starts, counts))
             return recurse(flattened, newrows, col_names)
 
         elif isinstance(layout, awkward1.layout.RecordArray):
-            return sum([recurse(layout.field(n), row_arrays, col_names + (n,)) for n in layout.keys()], [])
+            return sum([recurse(layout.field(n), row_arrays, col_names + (n,))
+                          for n in layout.keys()], [])
 
         else:
             try:
-                return [(awkward1.operations.convert.tonumpy(layout), row_arrays, col_names)]
+                return [(awkward1.operations.convert.tonumpy(layout),
+                         row_arrays,
+                         col_names)]
             except:
                 return [(layout, row_arrays, col_names)]
 
     behavior = awkward1._util.behaviorof(array)
-    layout = awkward1.operations.convert.tolayout(array, allowrecord=True, allowother=False)
+    layout = awkward1.operations.convert.tolayout(array,
+                                                  allowrecord=True,
+                                                  allowother=False)
     if isinstance(layout, awkward1.layout.Record):
         layout2 = layout.array[layout.at : layout.at + 1]
     else:
@@ -286,30 +317,42 @@ def dfs(array, levelname=lambda i: "sub"*i + "entry", anonymous="values"):
     last_row_arrays = None
     for column, row_arrays, col_names in recurse(layout2, [], ()):
         if isinstance(layout, awkward1.layout.Record):
-            row_arrays = row_arrays[1:]   # this Record was presented as a RecordArray of one element
+            row_arrays = row_arrays[1:]   # Record --> one-element RecordArray
 
         if len(col_names) == 0:
             columns = [anonymous]
         else:
             columns = pandas.MultiIndex.from_tuples([col_names])
 
-        if last_row_arrays is not None and len(last_row_arrays) == len(row_arrays) and all(numpy.array_equal(x, y) for x, y in zip(last_row_arrays, row_arrays)):
+        if (last_row_arrays is not None and
+            len(last_row_arrays) == len(row_arrays) and
+            all(numpy.array_equal(x, y)
+                  for x, y in zip(last_row_arrays, row_arrays))):
             oldcolumns = tables[-1].columns
             numold = len(oldcolumns.levels)
             numnew = len(columns.levels)
             maxnum = max(numold, numnew)
             if numold != maxnum:
-                oldcolumns = pandas.MultiIndex.from_tuples([x + ("",)*(maxnum - numold) for x in oldcolumns])
+                oldcolumns = pandas.MultiIndex.from_tuples(
+                               [x + ("",)*(maxnum - numold)
+                                  for x in oldcolumns])
                 tables[-1].columns = oldcolumns
             if numnew != maxnum:
-                columns = pandas.MultiIndex.from_tuples([x + ("",)*(maxnum - numold) for x in columns])
+                columns = pandas.MultiIndex.from_tuples(
+                            [x + ("",)*(maxnum - numold)
+                               for x in columns])
 
-            newframe = pandas.DataFrame(data=column, index=tables[-1].index, columns=columns)
+            newframe = pandas.DataFrame(data=column,
+                                        index=tables[-1].index,
+                                        columns=columns)
             tables[-1] = pandas.concat([tables[-1], newframe], axis=1)
 
         else:
-            index = pandas.MultiIndex.from_arrays(row_arrays, names=[levelname(i) for i in range(len(row_arrays))])
-            tables.append(pandas.DataFrame(data=column, index=index, columns=columns))
+            index = pandas.MultiIndex.from_arrays(
+                      row_arrays,
+                      names=[levelname(i) for i in range(len(row_arrays))])
+            tables.append(pandas.DataFrame(data=column,
+                                           index=index, columns=columns))
 
         last_row_arrays = row_arrays
 

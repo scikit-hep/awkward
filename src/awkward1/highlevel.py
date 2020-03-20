@@ -20,20 +20,27 @@ import awkward1.operations.convert
 
 _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
-class Array(awkward1._connect._numpy.NDArrayOperatorsMixin, awkward1._connect._pandas.PandasMixin, Sequence):
+class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
+            awkward1._connect._pandas.PandasMixin, Sequence):
     def __init__(self, data, behavior=None, checkvalid=False):
         if isinstance(data, awkward1.layout.Content):
             layout = data
         elif isinstance(data, Array):
             layout = data.layout
         elif isinstance(data, numpy.ndarray):
-            layout = awkward1.operations.convert.fromnumpy(data, highlevel=False)
+            layout = awkward1.operations.convert.fromnumpy(data,
+                                                           highlevel=False)
         elif isinstance(data, str):
-            layout = awkward1.operations.convert.fromjson(data, highlevel=False)
+            layout = awkward1.operations.convert.fromjson(data,
+                                                          highlevel=False)
         elif isinstance(data, dict):
-            raise TypeError("could not convert dict into an awkward1.Array; try awkward1.Record")
+            raise TypeError(
+                    "could not convert dict into an awkward1.Array; "
+                    "try awkward1.Record")
         else:
-            layout = awkward1.operations.convert.fromiter(data, highlevel=False, allowrecord=False)
+            layout = awkward1.operations.convert.fromiter(data,
+                                                          highlevel=False,
+                                                          allowrecord=False)
         if not isinstance(layout, awkward1.layout.Content):
             raise TypeError("could not convert data into an awkward1.Array")
 
@@ -55,7 +62,8 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin, awkward1._connect._p
             self._layout = layout
             self._numbaview = None
         else:
-            raise TypeError("layout must be a subclass of awkward1.layout.Content")
+            raise TypeError(
+                    "layout must be a subclass of awkward1.layout.Content")
 
     @property
     def behavior(self):
@@ -70,7 +78,9 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin, awkward1._connect._p
 
     @property
     def type(self):
-        return awkward1.types.ArrayType(self._layout.type(awkward1._util.typestrs(self._behavior)), len(self._layout))
+        return awkward1.types.ArrayType(
+                 self._layout.type(awkward1._util.typestrs(self._behavior)),
+                 len(self._layout))
 
     def __len__(self):
         return len(self._layout)
@@ -84,8 +94,11 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin, awkward1._connect._p
 
     def __setitem__(self, where, what):
         if not isinstance(where, str):
-            raise ValueError("only fields may be assigned in-place (by field name)")
-        self._layout = awkward1.operations.structure.withfield(self._layout, what, where).layout
+            raise ValueError(
+                    "only fields may be assigned in-place (by field name)")
+        self._layout = awkward1.operations.structure.withfield(self._layout,
+                                                               what,
+                                                               where).layout
         self._numbaview = None
 
     def __getattr__(self, where):
@@ -96,12 +109,19 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin, awkward1._connect._p
                 try:
                     return self[where]
                 except Exception as err:
-                    raise AttributeError("while trying to get field {0}, an exception occurred:\n{1}: {2}".format(repr(where), type(err), str(err)))
+                    raise AttributeError(
+                            "while trying to get field {0}, an exception "
+                            "occurred:\n{1}: {2}".format(repr(where),
+                                                         type(err),
+                                                         str(err)))
             else:
                 raise AttributeError("no field named {0}".format(repr(where)))
 
     def __dir__(self):
-        return sorted(set(dir(super(Array, self)) + [x for x in self._layout.keys() if _dir_pattern.match(x) and not keyword.iskeyword(x)]))
+        return sorted(set(dir(super(Array, self))
+                          + [x for x in self._layout.keys()
+                               if _dir_pattern.match(x) and
+                                  not keyword.iskeyword(x)]))
 
     @property
     def i0(self):
@@ -135,10 +155,14 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin, awkward1._connect._p
         return self["9"]
 
     def __str__(self, limit_value=85):
-        return awkward1._util.minimally_touching_string(limit_value, self._layout, self._behavior)
+        return awkward1._util.minimally_touching_string(limit_value,
+                                                        self._layout,
+                                                        self._behavior)
 
     def __repr__(self, limit_value=40, limit_total=85):
-        value = awkward1._util.minimally_touching_string(limit_value, self._layout, self._behavior)
+        value = awkward1._util.minimally_touching_string(limit_value,
+                                                         self._layout,
+                                                         self._behavior)
 
         limit_type = limit_total - len(value) - len("<Array  type=>")
         type = repr(str(self.type))
@@ -150,20 +174,31 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin, awkward1._connect._p
     def __array__(self, *args, **kwargs):
         if awkward1._util.called_by_module("pandas"):
             try:
-                return awkward1._connect._numpy.convert_to_array(self._layout, args, kwargs)
+                return awkward1._connect._numpy.convert_to_array(self._layout,
+                                                                 args,
+                                                                 kwargs)
             except:
                 out = numpy.empty(len(self._layout), dtype="O")
                 for i, x in enumerate(self._layout):
                     out[i] = awkward1._util.wrap(x, self._behavior)
                 return out
         else:
-            return awkward1._connect._numpy.convert_to_array(self._layout, args, kwargs)
+            return awkward1._connect._numpy.convert_to_array(self._layout,
+                                                             args,
+                                                             kwargs)
 
     def __array_function__(self, func, types, args, kwargs):
-        return awkward1._connect._numpy.array_function(func, types, args, kwargs)
+        return awkward1._connect._numpy.array_function(func,
+                                                       types,
+                                                       args,
+                                                       kwargs)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        return awkward1._connect._numpy.array_ufunc(ufunc, method, inputs, kwargs, self._behavior)
+        return awkward1._connect._numpy.array_ufunc(ufunc,
+                                                    method,
+                                                    inputs,
+                                                    kwargs,
+                                                    self._behavior)
 
     @property
     def numbatype(self):
@@ -171,7 +206,8 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin, awkward1._connect._p
         import awkward1._connect._numba
         awkward1._connect._numba.register()
         if self._numbaview is None:
-            self._numbaview = awkward1._connect._numba.arrayview.ArrayView.fromarray(self)
+            self._numbaview = \
+              awkward1._connect._numba.arrayview.ArrayView.fromarray(self)
         return numba.typeof(self._numbaview)
 
 class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
@@ -181,11 +217,14 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         elif isinstance(data, Record):
             layout = data.layout
         elif isinstance(data, str):
-            layout = awkward1.operations.convert.fromjson(data, highlevel=False)
+            layout = awkward1.operations.convert.fromjson(data,
+                                                          highlevel=False)
         elif isinstance(data, dict):
-            layout = awkward1.operations.convert.fromiter([data], highlevel=False)[0]
+            layout = awkward1.operations.convert.fromiter([data],
+                                                          highlevel=False)[0]
         elif isinstance(data, Iterable):
-            raise TypeError("could not convert non-dict into an awkward1.Record; try awkward1.Array")
+            raise TypeError("could not convert non-dict into an "
+                            "awkward1.Record; try awkward1.Array")
         else:
             layout = None
         if not isinstance(layout, awkward1.layout.Record):
@@ -209,7 +248,8 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
             self._layout = layout
             self._numbaview = None
         else:
-            raise TypeError("layout must be a subclass of awkward1.layout.Record")
+            raise TypeError(
+                    "layout must be a subclass of awkward1.layout.Record")
 
     @property
     def behavior(self):
@@ -231,8 +271,11 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
 
     def __setitem__(self, where, what):
         if not isinstance(where, str):
-            raise ValueError("only fields may be assigned in-place (by field name)")
-        self._layout = awkward1.operations.structure.withfield(self._layout, what, where).layout
+            raise ValueError(
+                    "only fields may be assigned in-place (by field name)")
+        self._layout = awkward1.operations.structure.withfield(self._layout,
+                                                               what,
+                                                               where).layout
         self._numbaview = None
 
     def __getattr__(self, where):
@@ -243,12 +286,19 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
                 try:
                     return self[where]
                 except Exception as err:
-                    raise AttributeError("while trying to get field {0}, an exception occurred:\n{1}: {2}".format(repr(where), type(err), str(err)))
+                    raise AttributeError(
+                            "while trying to get field {0}, an exception "
+                            "occurred:\n{1}: {2}".format(repr(where),
+                                                         type(err),
+                                                         str(err)))
             else:
                 raise AttributeError("no field named {0}".format(repr(where)))
 
     def __dir__(self):
-        return sorted(set(dir(super(Array, self)) + [x for x in self._layout.keys() if _dir_pattern.match(x) and not keyword.iskeyword(x)]))
+        return sorted(set(dir(super(Array, self))
+                          + [x for x in self._layout.keys()
+                               if _dir_pattern.match(x) and
+                               not keyword.iskeyword(x)]))
 
     @property
     def i0(self):
@@ -282,10 +332,14 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         return self["9"]
 
     def __str__(self, limit_value=85):
-        return awkward1._util.minimally_touching_string(limit_value + 2, self._layout, self._behavior)[1:-1]
+        return awkward1._util.minimally_touching_string(limit_value + 2,
+                                                        self._layout,
+                                                        self._behavior)[1:-1]
 
     def __repr__(self, limit_value=40, limit_total=85):
-        value = awkward1._util.minimally_touching_string(limit_value + 2, self._layout, self._behavior)[1:-1]
+        value = awkward1._util.minimally_touching_string(limit_value + 2,
+                                                         self._layout,
+                                                         self._behavior)[1:-1]
 
         limit_type = limit_total - len(value) - len("<Record  type=>")
         type = repr(str(self.type))
@@ -295,7 +349,11 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         return "<Record {0} type={1}>".format(value, type)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        return awkward1._connect._numpy.array_ufunc(ufunc, method, inputs, kwargs, self._behavior)
+        return awkward1._connect._numpy.array_ufunc(ufunc,
+                                                    method,
+                                                    inputs,
+                                                    kwargs,
+                                                    self._behavior)
 
     @property
     def numbatype(self):
@@ -303,7 +361,8 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         import awkward1._connect._numba
         awkward1._connect._numba.register()
         if self._numbaview is None:
-            self._numbaview = awkward1._connect._numba.arrayview.RecordView.fromrecord(self)
+            self._numbaview = \
+              awkward1._connect._numba.arrayview.RecordView.fromrecord(self)
         return numba.typeof(self._numbaview)
 
 class ArrayBuilder(Sequence):
@@ -333,7 +392,8 @@ class ArrayBuilder(Sequence):
     @property
     def type(self):
         tmp = self._layout.snapshot()
-        return awkward1.types.ArrayType(tmp.type(awkward1._util.typestrs(self._behavior)), len(tmp))
+        return awkward1.types.ArrayType(
+                 tmp.type(awkward1._util.typestrs(self._behavior)), len(tmp))
 
     def __len__(self):
         return len(self._layout)
@@ -362,20 +422,29 @@ class ArrayBuilder(Sequence):
         return "<ArrayBuilder {0} type={1}>".format(value, type)
 
     def __array__(self, *args, **kwargs):
-        return awkward1._connect._numpy.convert_to_array(self._layout.snapshot(), args, kwargs)
+        return awkward1._connect._numpy.convert_to_array(
+                 self._layout.snapshot(), args, kwargs)
 
     def __array_function__(self, func, types, args, kwargs):
-        return awkward1._connect._numpy.array_function(func, types, args, kwargs)
+        return awkward1._connect._numpy.array_function(func,
+                                                       types,
+                                                       args,
+                                                       kwargs)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        return awkward1._connect._numpy.array_ufunc(ufunc, method, inputs, kwargs, self._behavior)
+        return awkward1._connect._numpy.array_ufunc(ufunc,
+                                                    method,
+                                                    inputs,
+                                                    kwargs,
+                                                    self._behavior)
 
     @property
     def numbatype(self):
         import numba
         import awkward1._connect._numba.builder
         awkward1._connect._numba.register()
-        return awkward1._connect._numba.builder.ArrayBuilderType(self._behavior)
+        return awkward1._connect._numba.builder.ArrayBuilderType(
+                 self._behavior)
 
     def snapshot(self):
         return awkward1._util.wrap(self._layout.snapshot(), self._behavior)
@@ -435,7 +504,9 @@ class ArrayBuilder(Sequence):
             if isinstance(obj, Array):
                 self._layout.append(obj.layout, at)
             else:
-                raise TypeError("'append' method can only be used with 'at' when 'obj' is an ak.Array")
+                raise TypeError(
+                        "'append' method can only be used with 'at' when "
+                        "'obj' is an ak.Array")
 
     def extend(self, obj):
         if isinstance(obj, Array):
