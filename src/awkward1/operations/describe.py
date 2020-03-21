@@ -9,7 +9,9 @@ import numpy
 import awkward1.layout
 
 def keys(array):
-    layout = awkward1.operations.convert.tolayout(array, allowrecord=True, allowother=False)
+    layout = awkward1.operations.convert.tolayout(array,
+                                                  allowrecord=True,
+                                                  allowother=False)
     return layout.keys()
 
 def parameters(array):
@@ -41,10 +43,23 @@ def typeof(array):
     elif isinstance(array, numbers.Real):
         return awkward1.types.PrimitiveType("float64")
 
-    elif isinstance(array, (numpy.int8, numpy.int16, numpy.int32, numpy.int64, numpy.uint8, numpy.uint16, numpy.uint32, numpy.uint64, numpy.float32, numpy.float64)):
-        return awkward1.types.PrimitiveType(typeof.dtype2primitive[array.dtype.type])
+    elif isinstance(array,
+                    (numpy.int8,
+                     numpy.int16,
+                     numpy.int32,
+                     numpy.int64,
+                     numpy.uint8,
+                     numpy.uint16,
+                     numpy.uint32,
+                     numpy.uint64,
+                     numpy.float32,
+                     numpy.float64)):
+        return awkward1.types.PrimitiveType(
+                 typeof.dtype2primitive[array.dtype.type])
 
-    elif isinstance(array, (awkward1.highlevel.Array, awkward1.highlevel.Record, awkward1.highlevel.ArrayBuilder)):
+    elif isinstance(array, (awkward1.highlevel.Array,
+                            awkward1.highlevel.Record,
+                            awkward1.highlevel.ArrayBuilder)):
         return array.type
 
     elif isinstance(array, awkward1.layout.Record):
@@ -54,7 +69,8 @@ def typeof(array):
         if len(array.shape) == 0:
             return typeof(array.reshape((1,))[0])
         else:
-            out = awkward1.types.PrimitiveType(typeof.dtype2primitive[array.dtype.type])
+            out = awkward1.types.PrimitiveType(
+                    typeof.dtype2primitive[array.dtype.type])
             for x in array.shape[-1:0:-1]:
                 out = awkward1.types.RegularType(out, x)
             return awkward1.types.ArrayType(out, array.shape[0])
@@ -82,7 +98,8 @@ typeof.dtype2primitive = {
 }
 
 def validityerror(array, exception=False):
-    if isinstance(array, (awkward1.highlevel.Array, awkward1.highlevel.Record)):
+    if isinstance(array, (awkward1.highlevel.Array,
+                          awkward1.highlevel.Record)):
         return validityerror(array.layout, exception=exception)
 
     elif isinstance(array, awkward1.highlevel.ArrayBuilder):
@@ -105,4 +122,6 @@ def isvalid(array, exception=False):
     out = validityerror(array, exception=exception)
     return out is None
 
-__all__ = [x for x in list(globals()) if not x.startswith("_") and x not in ("numbers", "numpy", "awkward1")]
+__all__ = [x for x in list(globals())
+             if not x.startswith("_") and
+             x not in ("numbers", "numpy", "awkward1")]
