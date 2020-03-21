@@ -14,6 +14,26 @@
 #include "awkward/Content.h"
 
 namespace awkward {
+  /**
+   * @class NumpyArray
+   * 
+   * @brief Represents a rectilinear numerical array that can be converted to
+   * and from NumPy without loss of information or copying the underlying
+   * buffer.
+   *
+   * See #NumpyArray for the meaning of each parameter.
+   *
+   * Any NumPy array can be passed through Awkward Array operations, even
+   * slicing, but operations that have to interpret the array's values (such
+   * as reducers like "sum" and "max") only work on numeric types:
+   *
+   *   - 32-bit and 64-bit floating point numbers
+   *   - 8-bit, 16-bit, 32-bit, and 64-bit signed and unsigned integers
+   *   - 8-bit booleans
+   * 
+   * (native endian only).
+   *
+   */
   class EXPORT_SYMBOL NumpyArray: public Content {
   public:
     static const TypePtr
@@ -21,6 +41,35 @@ namespace awkward {
                          const std::vector<ssize_t>& shape);
     static const std::unordered_map<std::type_index, std::string> format_map;
 
+    /**
+     * Creates a NumpyArray from a full set of parameters.
+     *
+     * @param identities Optional Identities for each element of the array
+     * (may be `nullptr`).
+     * @param parameters String-to-JSON map that augments the meaning of this
+     * array.
+     * @param ptr Reference-counted pointer to the array buffer.
+     * @param shape Number of elements in each dimension. A one-dimensional
+     * array has a shape of length one. A zero-length shape represents a
+     * numerical scalar, which is only valid as an output (immediately
+     * converted into a number in Python). Each element in shape must be
+     * non-negative. If not scalar, the total number of elements in the array
+     * is the product of the shape (which can be zero).
+     * @param strides Length of each dimension in number of bytes. The length
+     * of strides must match the length of shape. Strides may be zero or
+     * negative, but they must be multiples of itemsize. An array is only
+     * "contiguous" if `strides[i] == itemsize * prod(shape[i + 1:])`.
+     * @param byteoffset Location of item zero in the buffer, relative to ptr,
+     * measured in bytes, rather than number of elements (must be a multiple of
+     * itemsize). We keep this information in two parameters (ptr and
+     * byteoffset) rather than moving ptr so that ptr can be reference counted
+     * among all arrays that use the same buffer.
+     * @param itemsize Number of bytes per item; should agree with the format.
+     * @param format String representing the NumPy dtype (as defined by
+     * pybind11). Note that 32-bit systems and Windows use "q/Q" for
+     * signed/unsigned 64-bit and "l/L" for 32-bit, while all other systems use
+     * "l/L" for 64-bit and "i/I" for 32-bit.
+     */
     NumpyArray(const IdentitiesPtr& identities,
                const util::Parameters& parameters,
                const std::shared_ptr<void>& ptr,
@@ -30,15 +79,30 @@ namespace awkward {
                ssize_t itemsize,
                const std::string format);
 
+    /// Creates a NumpyArray from an @link IndexOf Index8@endlink.
     NumpyArray(const Index8 index);
+    /// Creates a NumpyArray from an @link IndexOf IndexU8@endlink.
     NumpyArray(const IndexU8 index);
+    /// Creates a NumpyArray from an @link IndexOf Index32@endlink.
     NumpyArray(const Index32 index);
+    /// Creates a NumpyArray from an @link IndexOf IndexU32@endlink.
     NumpyArray(const IndexU32 index);
+    /// Creates a NumpyArray from an @link IndexOf Index64@endlink.
     NumpyArray(const Index64 index);
+    /// Creates a NumpyArray from an @link IndexOf Index8@endlink.
+    /// The format may be specified explicitly.
     NumpyArray(const Index8 index, const std::string& format);
+    /// Creates a NumpyArray from an @link IndexOf IndexU8@endlink.
+    /// The format may be specified explicitly.
     NumpyArray(const IndexU8 index, const std::string& format);
+    /// Creates a NumpyArray from an @link IndexOf Index32@endlink.
+    /// The format may be specified explicitly.
     NumpyArray(const Index32 index, const std::string& format);
+    /// Creates a NumpyArray from an @link IndexOf IndexU32@endlink.
+    /// The format may be specified explicitly.
     NumpyArray(const IndexU32 index, const std::string& format);
+    /// Creates a NumpyArray from an @link IndexOf Index64@endlink.
+    /// The format may be specified explicitly.
     NumpyArray(const Index64 index, const std::string& format);
 
     const std::shared_ptr<void>
