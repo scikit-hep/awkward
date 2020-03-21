@@ -15,10 +15,12 @@ def keys(array):
     return layout.keys()
 
 def parameters(array):
-    if isinstance(array, (awkward1.highlevel.Array, awkward1.highlevel.Record)):
+    if isinstance(array, (awkward1.highlevel.Array,
+                          awkward1.highlevel.Record)):
         return array.layout.parameters
 
-    elif isinstance(array, (awkward1.layout.Content, awkward1.layout.Record)):
+    elif isinstance(array, (awkward1.layout.Content,
+                            awkward1.layout.Record)):
         return array.parameters
 
     elif isinstance(array, awkward1.highlevel.ArrayBuilder):

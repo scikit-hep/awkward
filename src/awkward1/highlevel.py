@@ -415,7 +415,8 @@ class ArrayBuilder(Sequence):
         value = self.__str__(limit_value=limit_value, snapshot=snapshot)
 
         limit_type = limit_total - len(value) - len("<ArrayBuilder  type=>")
-        type = repr(str(snapshot.type(awkward1._util.typestrs(self._behavior))))
+        typestrs = awkward1._util.typestrs(self._behavior)
+        type = repr(str(snapshot.type(typestrs)))
         if len(type) > limit_type:
             type = type[:(limit_type - 4)] + "..." + type[-1]
 

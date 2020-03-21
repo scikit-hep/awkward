@@ -322,10 +322,12 @@ class type_getitem(numba.typing.templates.AbstractTemplate):
                                                                 wheretype)
             elif (isinstance(wheretype, numba.types.SliceType) and
                   not wheretype.has_step):
-                return viewtype.type.getitem_range(viewtype)(viewtype, wheretype)
+                return viewtype.type.getitem_range(viewtype)(viewtype,
+                                                             wheretype)
             elif isinstance(wheretype, numba.types.StringLiteral):
                 return viewtype.type.getitem_field(
-                         viewtype, wheretype.literal_value)(viewtype, wheretype)
+                         viewtype, wheretype.literal_value)(viewtype,
+                                                            wheretype)
             else:
                 raise TypeError(
                         "only an integer, start:stop range, or a *constant* "
