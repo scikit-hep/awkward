@@ -13,6 +13,7 @@ namespace py = pybind11;
 namespace ak = awkward;
 
 template <typename T>
-py::class_<ak::IndexOf<T>> make_IndexOf(const py::handle& m, const std::string& name);
+py::class_<ak::IndexOf<T>>
+  make_IndexOf(const py::handle& m, const std::string& name);
 
 #endif // AWKWARDPY_INDEX_H_

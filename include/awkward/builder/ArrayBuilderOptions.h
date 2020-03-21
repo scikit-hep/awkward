@@ -12,8 +12,12 @@ namespace awkward {
   class EXPORT_SYMBOL ArrayBuilderOptions {
   public:
     ArrayBuilderOptions(int64_t initial, double resize);
-    int64_t initial() const;
-    double resize() const;
+
+    int64_t
+      initial() const;
+
+    double
+      resize() const;
 
   private:
     int64_t initial_;

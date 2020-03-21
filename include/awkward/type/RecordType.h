@@ -14,32 +14,71 @@
 namespace awkward {
   class EXPORT_SYMBOL RecordType: public Type {
   public:
-    RecordType(const util::Parameters& parameters, const std::string& typestr, const std::vector<std::shared_ptr<Type>>& types, const std::shared_ptr<util::RecordLookup>& recordlookup);
-    RecordType(const util::Parameters& parameters, const std::string& typestr, const std::vector<std::shared_ptr<Type>>& types);
+    RecordType(const util::Parameters& parameters,
+               const std::string& typestr,
+               const std::vector<TypePtr>& types,
+               const util::RecordLookupPtr& recordlookup);
 
-    const std::vector<std::shared_ptr<Type>> types() const;
-    const std::shared_ptr<util::RecordLookup> recordlookup() const;
-    bool istuple() const;
+    RecordType(const util::Parameters& parameters,
+               const std::string& typestr,
+               const std::vector<TypePtr>& types);
 
-    std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override;
-    const std::shared_ptr<Type> shallow_copy() const override;
-    bool equal(const std::shared_ptr<Type>& other, bool check_parameters) const override;
-    int64_t numfields() const override;
-    int64_t fieldindex(const std::string& key) const override;
-    const std::string key(int64_t fieldindex) const override;
-    bool haskey(const std::string& key) const override;
-    const std::vector<std::string> keys() const override;
-    const std::shared_ptr<Content> empty() const override;
+    const std::vector<TypePtr>
+      types() const;
 
-    const std::shared_ptr<Type> field(int64_t fieldindex) const;
-    const std::shared_ptr<Type> field(const std::string& key) const;
-    const std::vector<std::shared_ptr<Type>> fields() const;
-    const std::vector<std::pair<std::string, std::shared_ptr<Type>>> fielditems() const;
-    const std::shared_ptr<Type> astuple() const;
+    const util::RecordLookupPtr
+      recordlookup() const;
+
+    bool
+      istuple() const;
+
+    std::string
+      tostring_part(const std::string& indent,
+                    const std::string& pre,
+                    const std::string& post) const override;
+
+    const TypePtr
+      shallow_copy() const override;
+
+    bool
+      equal(const TypePtr& other, bool check_parameters) const override;
+
+    int64_t
+      numfields() const override;
+
+    int64_t
+      fieldindex(const std::string& key) const override;
+
+    const std::string
+      key(int64_t fieldindex) const override;
+
+    bool
+      haskey(const std::string& key) const override;
+
+    const std::vector<std::string>
+      keys() const override;
+
+    const ContentPtr
+      empty() const override;
+
+    const TypePtr
+      field(int64_t fieldindex) const;
+
+    const TypePtr
+      field(const std::string& key) const;
+
+    const std::vector<TypePtr>
+      fields() const;
+
+    const std::vector<std::pair<std::string, TypePtr>>
+      fielditems() const;
+
+    const TypePtr
+      astuple() const;
 
   private:
-    const std::vector<std::shared_ptr<Type>> types_;
-    const std::shared_ptr<util::RecordLookup> recordlookup_;
+    const std::vector<TypePtr> types_;
+    const util::RecordLookupPtr recordlookup_;
   };
 }
 

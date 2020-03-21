@@ -97,8 +97,10 @@ def string_broadcast(layout, offsets):
     counts = offsets[1:] - offsets[:-1]
     if awkward1._util.win:
         counts = counts.astype(numpy.int32)
-    parents = numpy.repeat(numpy.arange(len(counts), dtype=counts.dtype), counts)
-    return awkward1.layout.IndexedArray64(awkward1.layout.Index64(parents), layout).project()
+    parents = numpy.repeat(numpy.arange(len(counts), dtype=counts.dtype),
+                           counts)
+    return awkward1.layout.IndexedArray64(awkward1.layout.Index64(parents),
+                                          layout).project()
 
 awkward1.behavior["__broadcast__", "bytestring"] = string_broadcast
 awkward1.behavior["__broadcast__", "string"] = string_broadcast
@@ -107,31 +109,81 @@ def string_numba_typer(viewtype):
     import numba
     return numba.types.string
 
-def string_numba_lower(context, builder, rettype, viewtype, viewval, viewproxy, attype, atval):
+def string_numba_lower(context,
+                       builder,
+                       rettype,
+                       viewtype,
+                       viewval,
+                       viewproxy,
+                       attype,
+                       atval):
     import numba
     import llvmlite.llvmpy.core
     import awkward1._connect._numba.layout
 
-    whichpos = awkward1._connect._numba.layout.posat(context, builder, viewproxy.pos, viewtype.type.CONTENT)
-    nextpos = awkward1._connect._numba.layout.getat(context, builder, viewproxy.arrayptrs, whichpos)
+    whichpos = awkward1._connect._numba.layout.posat(context,
+                                                     builder,
+                                                     viewproxy.pos,
+                                                     viewtype.type.CONTENT)
+    nextpos = awkward1._connect._numba.layout.getat(context,
+                                                    builder,
+                                                    viewproxy.arrayptrs,
+                                                    whichpos)
 
-    whichnextpos = awkward1._connect._numba.layout.posat(context, builder, nextpos, viewtype.type.contenttype.ARRAY)
+    whichnextpos = awkward1._connect._numba.layout.posat(
+        context,
+        builder,
+        nextpos,
+        viewtype.type.contenttype.ARRAY)
 
-    startspos = awkward1._connect._numba.layout.posat(context, builder, viewproxy.pos, viewtype.type.STARTS)
-    startsptr = awkward1._connect._numba.layout.getat(context, builder, viewproxy.arrayptrs, startspos)
+    startspos = awkward1._connect._numba.layout.posat(context,
+                                                      builder,
+                                                      viewproxy.pos,
+                                                      viewtype.type.STARTS)
+    startsptr = awkward1._connect._numba.layout.getat(context,
+                                                      builder,
+                                                      viewproxy.arrayptrs,
+                                                      startspos)
     startsarraypos = builder.add(viewproxy.start, atval)
-    start = awkward1._connect._numba.layout.getat(context, builder, startsptr, startsarraypos, viewtype.type.indextype.dtype)
+    start = awkward1._connect._numba.layout.getat(
+              context,
+              builder,
+              startsptr,
+              startsarraypos,
+              viewtype.type.indextype.dtype)
 
-    stopspos = awkward1._connect._numba.layout.posat(context, builder, viewproxy.pos, viewtype.type.STOPS)
-    stopsptr = awkward1._connect._numba.layout.getat(context, builder, viewproxy.arrayptrs, stopspos)
+    stopspos = awkward1._connect._numba.layout.posat(context,
+                                                     builder,
+                                                     viewproxy.pos,
+                                                     viewtype.type.STOPS)
+    stopsptr = awkward1._connect._numba.layout.getat(context,
+                                                     builder,
+                                                     viewproxy.arrayptrs,
+                                                     stopspos)
     stopsarraypos = builder.add(viewproxy.start, atval)
-    stop = awkward1._connect._numba.layout.getat(context, builder, stopsptr, stopsarraypos, viewtype.type.indextype.dtype)
+    stop = awkward1._connect._numba.layout.getat(context,
+                                                 builder,
+                                                 stopsptr,
+                                                 stopsarraypos,
+                                                 viewtype.type.indextype.dtype)
 
-    baseptr = awkward1._connect._numba.layout.getat(context, builder, viewproxy.arrayptrs, whichnextpos)
-    rawptr = builder.add(baseptr, awkward1._connect._numba.castint(context, builder, viewtype.type.indextype.dtype, numba.intp, start))
-    rawptr_cast = builder.inttoptr(rawptr, llvmlite.llvmpy.core.Type.pointer(llvmlite.llvmpy.core.Type.int(numba.intp.bitwidth // 8)))
+    baseptr = awkward1._connect._numba.layout.getat(context,
+                                                    builder,
+                                                    viewproxy.arrayptrs,
+                                                    whichnextpos)
+    rawptr = builder.add(baseptr,
+                         awkward1._connect._numba.castint(
+                           context,
+                           builder,
+                           viewtype.type.indextype.dtype,
+                           numba.intp,
+                           start))
+    rawptr_cast = builder.inttoptr(
+        rawptr, llvmlite.llvmpy.core.Type.pointer(
+                  llvmlite.llvmpy.core.Type.int(numba.intp.bitwidth // 8)))
     strsize = builder.sub(stop, start)
-    strsize_cast = awkward1._connect._numba.castint(context, builder, viewtype.type.indextype.dtype, numba.intp, strsize)
+    strsize_cast = awkward1._connect._numba.castint(
+        context, builder, viewtype.type.indextype.dtype, numba.intp, strsize)
 
     pyapi = context.get_python_api(builder)
     gil = pyapi.gil_ensure()

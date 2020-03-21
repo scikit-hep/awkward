@@ -16,7 +16,7 @@
 namespace rj = rapidjson;
 
 namespace awkward {
-  /////////////////////////////////////////////////////// writing to JSON
+  ////////// writing to JSON
 
   class ToJsonString::Impl {
   public:
@@ -29,7 +29,8 @@ namespace awkward {
     void boolean(bool x) { writer_.Bool(x); }
     void integer(int64_t x) { writer_.Int64(x); }
     void real(double x) { writer_.Double(x); }
-    void string(const char* x, int64_t length) { writer_.String(x, (rj::SizeType)length); }
+    void string(const char* x, int64_t length) {
+      writer_.String(x, (rj::SizeType)length); }
     void beginlist() { writer_.StartArray(); }
     void endlist() { writer_.EndArray(); }
     void beginrecord() { writer_.StartObject(); }
@@ -41,7 +42,6 @@ namespace awkward {
   private:
     rj::StringBuffer buffer_;
     rj::Writer<rj::StringBuffer> writer_;
-    // FIXME: rj::UTF8<>, rj::UTF8<>, rj::CrtAllocator<>, rj::kWriteNanAndInfFlag, rj::UTF8<>, rj::UTF8<>, rj::CrtAllocator<>, rj::kWriteNanAndInfFlag, rj::UTF8<>, rj::UTF8<>, rj::CrtAllocator<>, rj::kWriteNanAndInfFlag, rj::UTF8<>, rj::UTF8<>, rj::CrtAllocator<>, rj::kWriteNanAndInfFlag
   };
 
   ToJsonString::ToJsonString(int64_t maxdecimals)
@@ -51,51 +51,63 @@ namespace awkward {
     delete impl_;
   }
 
-  void ToJsonString::null() {
+  void
+  ToJsonString::null() {
     impl_->null();
   }
 
-  void ToJsonString::boolean(bool x) {
+  void
+  ToJsonString::boolean(bool x) {
     impl_->boolean(x);
   }
 
-  void ToJsonString::integer(int64_t x) {
+  void
+  ToJsonString::integer(int64_t x) {
     impl_->integer(x);
   }
 
-  void ToJsonString::real(double x) {
+  void
+  ToJsonString::real(double x) {
     impl_->real(x);
   }
 
-  void ToJsonString::string(const char* x, int64_t length) {
+  void
+  ToJsonString::string(const char* x, int64_t length) {
     impl_->string(x, length);
   }
 
-  void ToJsonString::beginlist() {
+  void
+  ToJsonString::beginlist() {
     impl_->beginlist();
   }
 
-  void ToJsonString::endlist() {
+  void
+  ToJsonString::endlist() {
     impl_->endlist();
   }
 
-  void ToJsonString::beginrecord() {
+  void
+  ToJsonString::beginrecord() {
     impl_->beginrecord();
   }
 
-  void ToJsonString::field(const char* x) {
+  void
+  ToJsonString::field(const char* x) {
     impl_->field(x);
   }
 
-  void ToJsonString::endrecord() {
+  void
+  ToJsonString::endrecord() {
     impl_->endrecord();
   }
 
-  const std::string ToJsonString::tostring() {
+  const std::string
+  ToJsonString::tostring() {
     return impl_->tostring();
   }
 
-  class ToJsonPrettyString::Impl {
+  class
+  ToJsonPrettyString::Impl {
   public:
     Impl(int64_t maxdecimals): buffer_(), writer_(buffer_) {
       if (maxdecimals >= 0) {
@@ -106,7 +118,8 @@ namespace awkward {
     void boolean(bool x) { writer_.Bool(x); }
     void integer(int64_t x) { writer_.Int64(x); }
     void real(double x) { writer_.Double(x); }
-    void string(const char* x, int64_t length) { writer_.String(x, (rj::SizeType)length); }
+    void string(const char* x, int64_t length) {
+      writer_.String(x, (rj::SizeType)length); }
     void beginlist() { writer_.StartArray(); }
     void endlist() { writer_.EndArray(); }
     void beginrecord() { writer_.StartObject(); }
@@ -118,7 +131,6 @@ namespace awkward {
   private:
     rj::StringBuffer buffer_;
     rj::PrettyWriter<rj::StringBuffer> writer_;
-    // FIXME: rj::UTF8<>, rj::UTF8<>, rj::CrtAllocator<>, rj::kWriteNanAndInfFlag, rj::UTF8<>, rj::UTF8<>, rj::CrtAllocator<>, rj::kWriteNanAndInfFlag, rj::UTF8<>, rj::UTF8<>, rj::CrtAllocator<>, rj::kWriteNanAndInfFlag, rj::UTF8<>, rj::UTF8<>, rj::CrtAllocator<>, rj::kWriteNanAndInfFlag
   };
 
   ToJsonPrettyString::ToJsonPrettyString(int64_t maxdecimals)
@@ -128,47 +140,58 @@ namespace awkward {
     delete impl_;
   }
 
-  void ToJsonPrettyString::null() {
+  void
+  ToJsonPrettyString::null() {
     impl_->null();
   }
 
-  void ToJsonPrettyString::boolean(bool x) {
+  void
+  ToJsonPrettyString::boolean(bool x) {
     impl_->boolean(x);
   }
 
-  void ToJsonPrettyString::integer(int64_t x) {
+  void
+  ToJsonPrettyString::integer(int64_t x) {
     impl_->integer(x);
   }
 
-  void ToJsonPrettyString::real(double x) {
+  void
+  ToJsonPrettyString::real(double x) {
     impl_->real(x);
   }
 
-  void ToJsonPrettyString::string(const char* x, int64_t length) {
+  void
+  ToJsonPrettyString::string(const char* x, int64_t length) {
     impl_->string(x, length);
   }
 
-  void ToJsonPrettyString::beginlist() {
+  void
+  ToJsonPrettyString::beginlist() {
     impl_->beginlist();
   }
 
-  void ToJsonPrettyString::endlist() {
+  void
+  ToJsonPrettyString::endlist() {
     impl_->endlist();
   }
 
-  void ToJsonPrettyString::beginrecord() {
+  void
+  ToJsonPrettyString::beginrecord() {
     impl_->beginrecord();
   }
 
-  void ToJsonPrettyString::field(const char* x) {
+  void
+  ToJsonPrettyString::field(const char* x) {
     impl_->field(x);
   }
 
-  void ToJsonPrettyString::endrecord() {
+  void
+  ToJsonPrettyString::endrecord() {
     impl_->endrecord();
   }
 
-  const std::string ToJsonPrettyString::tostring() {
+  const std::string
+  ToJsonPrettyString::tostring() {
     return impl_->tostring();
   }
 
@@ -176,7 +199,9 @@ namespace awkward {
   public:
     Impl(FILE* destination, int64_t maxdecimals, int64_t buffersize)
         : buffer_(new char[(size_t)buffersize], util::array_deleter<char>())
-        , stream_(destination, buffer_.get(), ((size_t)buffersize)*sizeof(char))
+        , stream_(destination,
+                  buffer_.get(),
+                  ((size_t)buffersize)*sizeof(char))
         , writer_(stream_) {
       if (maxdecimals >= 0) {
         writer_.SetMaxDecimalPlaces((int)maxdecimals);
@@ -186,7 +211,8 @@ namespace awkward {
     void boolean(bool x) { writer_.Bool(x); }
     void integer(int64_t x) { writer_.Int64(x); }
     void real(double x) { writer_.Double(x); }
-    void string(const char* x, int64_t length) { writer_.String(x, (rj::SizeType)length); }
+    void string(const char* x, int64_t length) {
+      writer_.String(x, (rj::SizeType)length); }
     void beginlist() { writer_.StartArray(); }
     void endlist() { writer_.EndArray(); }
     void beginrecord() { writer_.StartObject(); }
@@ -196,53 +222,64 @@ namespace awkward {
     std::shared_ptr<char> buffer_;
     rj::FileWriteStream stream_;
     rj::Writer<rj::FileWriteStream> writer_ ;
-    // FIXME: rj::UTF8<>, rj::UTF8<>, rj::CrtAllocator<>, rj::kWriteNanAndInfFlag, rj::UTF8<>, rj::UTF8<>, rj::CrtAllocator<>, rj::kWriteNanAndInfFlag, rj::UTF8<>, rj::UTF8<>, rj::CrtAllocator<>, rj::kWriteNanAndInfFlag, rj::UTF8<>, rj::UTF8<>, rj::CrtAllocator<>, rj::kWriteNanAndInfFlag
   };
 
-  ToJsonFile::ToJsonFile(FILE* destination, int64_t maxdecimals, int64_t buffersize)
+  ToJsonFile::ToJsonFile(FILE* destination,
+                         int64_t maxdecimals,
+                         int64_t buffersize)
       : impl_(new ToJsonFile::Impl(destination, maxdecimals, buffersize)) { }
 
   ToJsonFile::~ToJsonFile() {
     delete impl_;
   }
 
-  void ToJsonFile::null() {
+  void
+  ToJsonFile::null() {
     impl_->null();
   }
 
-  void ToJsonFile::boolean(bool x) {
+  void
+  ToJsonFile::boolean(bool x) {
     impl_->boolean(x);
   }
 
-  void ToJsonFile::integer(int64_t x) {
+  void
+  ToJsonFile::integer(int64_t x) {
     impl_->integer(x);
   }
 
-  void ToJsonFile::real(double x) {
+  void
+  ToJsonFile::real(double x) {
     impl_->real(x);
   }
 
-  void ToJsonFile::string(const char* x, int64_t length) {
+  void
+  ToJsonFile::string(const char* x, int64_t length) {
     impl_->string(x, length);
   }
 
-  void ToJsonFile::beginlist() {
+  void
+  ToJsonFile::beginlist() {
     impl_->beginlist();
   }
 
-  void ToJsonFile::endlist() {
+  void
+  ToJsonFile::endlist() {
     impl_->endlist();
   }
 
-  void ToJsonFile::beginrecord() {
+  void
+  ToJsonFile::beginrecord() {
     impl_->beginrecord();
   }
 
-  void ToJsonFile::field(const char* x) {
+  void
+  ToJsonFile::field(const char* x) {
     impl_->field(x);
   }
 
-  void ToJsonFile::endrecord() {
+  void
+  ToJsonFile::endrecord() {
     impl_->endrecord();
   }
 
@@ -250,7 +287,9 @@ namespace awkward {
   public:
     Impl(FILE* destination, int64_t maxdecimals, int64_t buffersize)
         : buffer_(new char[(size_t)buffersize], util::array_deleter<char>())
-        , stream_(destination, buffer_.get(), ((size_t)buffersize)*sizeof(char))
+        , stream_(destination,
+                  buffer_.get(),
+                  ((size_t)buffersize)*sizeof(char))
         , writer_(stream_) {
       if (maxdecimals >= 0) {
         writer_.SetMaxDecimalPlaces((int)maxdecimals);
@@ -260,7 +299,8 @@ namespace awkward {
     void boolean(bool x) { writer_.Bool(x); }
     void integer(int64_t x) { writer_.Int64(x); }
     void real(double x) { writer_.Double(x); }
-    void string(const char* x, int64_t length) { writer_.String(x, (rj::SizeType)length); }
+    void string(const char* x, int64_t length) {
+      writer_.String(x, (rj::SizeType)length); }
     void beginlist() { writer_.StartArray(); }
     void endlist() { writer_.EndArray(); }
     void beginrecord() { writer_.StartObject(); }
@@ -270,63 +310,78 @@ namespace awkward {
     std::shared_ptr<char> buffer_;
     rj::FileWriteStream stream_;
     rj::PrettyWriter<rj::FileWriteStream> writer_;
-    // FIXME: rj::UTF8<>, rj::UTF8<>, rj::CrtAllocator<>, rj::kWriteNanAndInfFlag, rj::UTF8<>, rj::UTF8<>, rj::CrtAllocator<>, rj::kWriteNanAndInfFlag, rj::UTF8<>, rj::UTF8<>, rj::CrtAllocator<>, rj::kWriteNanAndInfFlag, rj::UTF8<>, rj::UTF8<>, rj::CrtAllocator<>, rj::kWriteNanAndInfFlag
   };
 
-  ToJsonPrettyFile::ToJsonPrettyFile(FILE* destination, int64_t maxdecimals, int64_t buffersize)
-      : impl_(new ToJsonPrettyFile::Impl(destination, maxdecimals, buffersize)) { }
+  ToJsonPrettyFile::ToJsonPrettyFile(FILE* destination,
+                                     int64_t maxdecimals,
+                                     int64_t buffersize)
+      : impl_(new ToJsonPrettyFile::Impl(destination,
+                                         maxdecimals,
+                                         buffersize)) { }
 
   ToJsonPrettyFile::~ToJsonPrettyFile() {
     delete impl_;
   }
 
-  void ToJsonPrettyFile::null() {
+  void
+  ToJsonPrettyFile::null() {
     impl_->null();
   }
 
-  void ToJsonPrettyFile::boolean(bool x) {
+  void
+  ToJsonPrettyFile::boolean(bool x) {
     impl_->boolean(x);
   }
 
-  void ToJsonPrettyFile::integer(int64_t x) {
+  void
+  ToJsonPrettyFile::integer(int64_t x) {
     impl_->integer(x);
   }
 
-  void ToJsonPrettyFile::real(double x) {
+  void
+  ToJsonPrettyFile::real(double x) {
     impl_->real(x);
   }
 
-  void ToJsonPrettyFile::string(const char* x, int64_t length) {
+  void
+  ToJsonPrettyFile::string(const char* x, int64_t length) {
     impl_->string(x, length);
   }
 
-  void ToJsonPrettyFile::beginlist() {
+  void
+  ToJsonPrettyFile::beginlist() {
     impl_->beginlist();
   }
 
-  void ToJsonPrettyFile::endlist() {
+  void
+  ToJsonPrettyFile::endlist() {
     impl_->endlist();
   }
 
-  void ToJsonPrettyFile::beginrecord() {
+  void
+  ToJsonPrettyFile::beginrecord() {
     impl_->beginrecord();
   }
 
-  void ToJsonPrettyFile::field(const char* x) {
+  void
+  ToJsonPrettyFile::field(const char* x) {
     impl_->field(x);
   }
 
-  void ToJsonPrettyFile::endrecord() {
+  void
+  ToJsonPrettyFile::endrecord() {
     impl_->endrecord();
   }
 
-  /////////////////////////////////////////////////////// reading from JSON
+  ////////// reading from JSON
 
   class Handler: public rj::BaseReaderHandler<rj::UTF8<>, Handler> {
   public:
-    Handler(const ArrayBuilderOptions& options): builder_(options), depth_(0) { }
+    Handler(const ArrayBuilderOptions& options)
+        : builder_(options)
+        , depth_(0) { }
 
-    const std::shared_ptr<Content> snapshot() const {
+    const ContentPtr snapshot() const {
       return builder_.snapshot();
     }
 
@@ -338,19 +393,23 @@ namespace awkward {
     bool Uint64(uint64_t x)   { builder_.integer((int64_t)x); return true; }
     bool Double(double x)     { builder_.real(x);             return true; }
 
-    bool String(const char* str, rj::SizeType length, bool copy) {
+    bool
+    String(const char* str, rj::SizeType length, bool copy) {
       builder_.string(str, (int64_t)length);
       return true;
     }
 
-    bool StartArray() {
+    bool
+    StartArray() {
       if (depth_ != 0) {
         builder_.beginlist();
       }
       depth_++;
       return true;
     }
-    bool EndArray(rj::SizeType numfields) {
+
+    bool
+    EndArray(rj::SizeType numfields) {
       depth_--;
       if (depth_ != 0) {
         builder_.endlist();
@@ -358,7 +417,8 @@ namespace awkward {
       return true;
     }
 
-    bool StartObject() {
+    bool
+    StartObject() {
       if (depth_ == 0) {
         builder_.beginlist();
       }
@@ -366,7 +426,9 @@ namespace awkward {
       builder_.beginrecord();
       return true;
     }
-    bool EndObject(rj::SizeType numfields) {
+
+    bool
+    EndObject(rj::SizeType numfields) {
       depth_--;
       builder_.endrecord();
       if (depth_ == 0) {
@@ -374,7 +436,9 @@ namespace awkward {
       }
       return true;
     }
-    bool Key(const char* str, rj::SizeType length, bool copy) {
+
+    bool
+    Key(const char* str, rj::SizeType length, bool copy) {
       builder_.field_check(str);
       return true;
     }
@@ -384,7 +448,8 @@ namespace awkward {
     int64_t depth_;
   };
 
-  const std::shared_ptr<Content> FromJsonString(const char* source, const ArrayBuilderOptions& options) {
+  const ContentPtr
+  FromJsonString(const char* source, const ArrayBuilderOptions& options) {
     Handler handler(options);
     rj::Reader reader;
     rj::StringStream stream(source);
@@ -392,20 +457,32 @@ namespace awkward {
       return handler.snapshot();
     }
     else {
-      throw std::invalid_argument(std::string("JSON error at char ") + std::to_string(reader.GetErrorOffset()) + std::string(": ") + std::string(rj::GetParseError_En(reader.GetParseErrorCode())));
+      throw std::invalid_argument(
+        std::string("JSON error at char ")
+        + std::to_string(reader.GetErrorOffset()) + std::string(": ")
+        + std::string(rj::GetParseError_En(reader.GetParseErrorCode())));
     }
   }
 
-  const std::shared_ptr<Content> FromJsonFile(FILE* source, const ArrayBuilderOptions& options, int64_t buffersize) {
+  const ContentPtr
+  FromJsonFile(FILE* source,
+               const ArrayBuilderOptions& options,
+               int64_t buffersize) {
     Handler handler(options);
     rj::Reader reader;
-    std::shared_ptr<char> buffer(new char[(size_t)buffersize], util::array_deleter<char>());
-    rj::FileReadStream stream(source, buffer.get(), ((size_t)buffersize)*sizeof(char));
+    std::shared_ptr<char> buffer(new char[(size_t)buffersize],
+                                 util::array_deleter<char>());
+    rj::FileReadStream stream(source,
+                              buffer.get(),
+                              ((size_t)buffersize)*sizeof(char));
     if (reader.Parse(stream, handler)) {
       return handler.snapshot();
     }
     else {
-      throw std::invalid_argument(std::string("JSON error at char ") + std::to_string(reader.GetErrorOffset()) + std::string(": ") + std::string(rj::GetParseError_En(reader.GetParseErrorCode())));
+      throw std::invalid_argument(
+        std::string("JSON error at char ")
+        + std::to_string(reader.GetErrorOffset()) + std::string(": ")
+        + std::string(rj::GetParseError_En(reader.GetParseErrorCode())));
     }
     return handler.snapshot();
   }

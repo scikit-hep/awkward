@@ -10,11 +10,16 @@
 #include "awkward/type/UnionType.h"
 
 namespace awkward {
-  UnionType::UnionType(const util::Parameters& parameters, const std::string& typestr, const std::vector<std::shared_ptr<Type>>& types)
+  UnionType::UnionType(const util::Parameters& parameters,
+                       const std::string& typestr,
+                       const std::vector<TypePtr>& types)
       : Type(parameters, typestr)
       , types_(types) { }
 
-  std::string UnionType::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
+  std::string
+  UnionType::tostring_part(const std::string& indent,
+                           const std::string& pre,
+                           const std::string& post) const {
     std::string typestr;
     if (get_typestr(typestr)) {
       return typestr;
@@ -35,11 +40,13 @@ namespace awkward {
     return out.str();
   }
 
-  const std::shared_ptr<Type> UnionType::shallow_copy() const {
+  const TypePtr
+  UnionType::shallow_copy() const {
     return std::make_shared<UnionType>(parameters_, typestr_, types_);
   }
 
-  bool UnionType::equal(const std::shared_ptr<Type>& other, bool check_parameters) const {
+  bool
+  UnionType::equal(const TypePtr& other, bool check_parameters) const {
     if (UnionType* t = dynamic_cast<UnionType*>(other.get())) {
       if (check_parameters  &&  !parameters_equal(other.get()->parameters())) {
         return false;
@@ -59,45 +66,58 @@ namespace awkward {
     }
   }
 
-  int64_t UnionType::numtypes() const {
+  int64_t
+  UnionType::numtypes() const {
     return (int64_t)types_.size();
   }
 
-  int64_t UnionType::numfields() const {
+  int64_t
+  UnionType::numfields() const {
     throw std::runtime_error("FIXME: UnionType::numfields");
   }
 
-  int64_t UnionType::fieldindex(const std::string& key) const {
+  int64_t
+  UnionType::fieldindex(const std::string& key) const {
     throw std::runtime_error("FIXME: UnionType::fieldindex(key)");
   }
 
-  const std::string UnionType::key(int64_t fieldindex) const {
+  const std::string
+  UnionType::key(int64_t fieldindex) const {
     throw std::runtime_error("FIXME: UnionType::key(fieldindex)");
   }
 
-  bool UnionType::haskey(const std::string& key) const {
+  bool
+  UnionType::haskey(const std::string& key) const {
     throw std::runtime_error("FIXME: UnionType::haskey(key)");
   }
 
-  const std::vector<std::string> UnionType::keys() const {
+  const std::vector<std::string>
+  UnionType::keys() const {
     throw std::runtime_error("FIXME: UnionType::keys");
   }
 
-  const std::vector<std::shared_ptr<Type>> UnionType::types() const {
+  const std::vector<TypePtr>
+  UnionType::types() const {
     return types_;
   }
 
-  const std::shared_ptr<Content> UnionType::empty() const {
-    std::vector<std::shared_ptr<Content>> contents;
+  const ContentPtr
+  UnionType::empty() const {
+    ContentPtrVec contents;
     for (auto type : types_) {
       contents.push_back(type.get()->empty());
     }
     Index8 tags(0);
     Index64 index(0);
-    return std::make_shared<UnionArray8_64>(Identities::none(), parameters_, tags, index, contents);
+    return std::make_shared<UnionArray8_64>(Identities::none(),
+                                            parameters_,
+                                            tags,
+                                            index,
+                                            contents);
   }
 
-  const std::shared_ptr<Type> UnionType::type(int64_t index) const {
+  const TypePtr
+  UnionType::type(int64_t index) const {
     return types_[(size_t)index];
   }
 }

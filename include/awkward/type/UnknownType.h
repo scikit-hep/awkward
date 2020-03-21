@@ -8,19 +8,37 @@
 namespace awkward {
   class EXPORT_SYMBOL UnknownType: public Type {
   public:
-    UnknownType(const util::Parameters& parameters, const std::string& typestr);
+    UnknownType(const util::Parameters& parameters,
+                const std::string& typestr);
 
-    std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override;
-    const std::shared_ptr<Type> shallow_copy() const override;
-    bool equal(const std::shared_ptr<Type>& other, bool check_parameters) const override;
-    int64_t numfields() const override;
-    int64_t fieldindex(const std::string& key) const override;
-    const std::string key(int64_t fieldindex) const override;
-    bool haskey(const std::string& key) const override;
-    const std::vector<std::string> keys() const override;
-    const std::shared_ptr<Content> empty() const override;
+    std::string
+      tostring_part(const std::string& indent,
+                    const std::string& pre,
+                    const std::string& post) const override;
 
-  private:
+    const TypePtr
+      shallow_copy() const override;
+
+    bool
+      equal(const TypePtr& other, bool check_parameters) const override;
+
+    int64_t
+      numfields() const override;
+
+    int64_t
+      fieldindex(const std::string& key) const override;
+
+    const std::string
+      key(int64_t fieldindex) const override;
+
+    bool
+      haskey(const std::string& key) const override;
+
+    const std::vector<std::string>
+      keys() const override;
+
+    const ContentPtr
+      empty() const override;
   };
 }
 

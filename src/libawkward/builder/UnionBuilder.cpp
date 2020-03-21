@@ -19,31 +19,44 @@
 #include "awkward/builder/UnionBuilder.h"
 
 namespace awkward {
-  const std::shared_ptr<Builder> UnionBuilder::fromsingle(const ArrayBuilderOptions& options, const std::shared_ptr<Builder>& firstcontent) {
-    GrowableBuffer<int8_t> types = GrowableBuffer<int8_t>::full(options, 0, firstcontent->length());
-    GrowableBuffer<int64_t> offsets = GrowableBuffer<int64_t>::arange(options, firstcontent->length());
-    std::vector<std::shared_ptr<Builder>> contents({ firstcontent });
-    std::shared_ptr<Builder> out = std::make_shared<UnionBuilder>(options, types, offsets, contents);
+  const BuilderPtr
+  UnionBuilder::fromsingle(const ArrayBuilderOptions& options,
+                           const BuilderPtr& firstcontent) {
+    GrowableBuffer<int8_t> types =
+      GrowableBuffer<int8_t>::full(options, 0, firstcontent->length());
+    GrowableBuffer<int64_t> offsets =
+      GrowableBuffer<int64_t>::arange(options, firstcontent->length());
+    std::vector<BuilderPtr> contents({ firstcontent });
+    BuilderPtr out = std::make_shared<UnionBuilder>(options,
+                                                    types,
+                                                    offsets,
+                                                    contents);
     out.get()->setthat(out);
     return out;
   }
 
-  UnionBuilder::UnionBuilder(const ArrayBuilderOptions& options, const GrowableBuffer<int8_t>& types, const GrowableBuffer<int64_t>& offsets, std::vector<std::shared_ptr<Builder>>& contents)
+  UnionBuilder::UnionBuilder(const ArrayBuilderOptions& options,
+                             const GrowableBuffer<int8_t>& types,
+                             const GrowableBuffer<int64_t>& offsets,
+                             std::vector<BuilderPtr>& contents)
       : options_(options)
       , types_(types)
       , offsets_(offsets)
       , contents_(contents)
       , current_(-1) { }
 
-  const std::string UnionBuilder::classname() const {
+  const std::string
+  UnionBuilder::classname() const {
     return "UnionBuilder";
   };
 
-  int64_t UnionBuilder::length() const {
+  int64_t
+  UnionBuilder::length() const {
     return types_.length();
   }
 
-  void UnionBuilder::clear() {
+  void
+  UnionBuilder::clear() {
     types_.clear();
     offsets_.clear();
     for (auto x : contents_) {
@@ -51,23 +64,30 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> UnionBuilder::snapshot() const {
+  const ContentPtr
+  UnionBuilder::snapshot() const {
     Index8 tags(types_.ptr(), 0, types_.length());
     Index64 index(offsets_.ptr(), 0, offsets_.length());
-    std::vector<std::shared_ptr<Content>> contents;
+    ContentPtrVec contents;
     for (auto content : contents_) {
       contents.push_back(content.get()->snapshot());
     }
-    return std::make_shared<UnionArray8_64>(Identities::none(), util::Parameters(), tags, index, contents);
+    return std::make_shared<UnionArray8_64>(Identities::none(),
+                                            util::Parameters(),
+                                            tags,
+                                            index,
+                                            contents);
   }
 
-  bool UnionBuilder::active() const {
+  bool
+  UnionBuilder::active() const {
     return current_ != -1;
   }
 
-  const std::shared_ptr<Builder> UnionBuilder::null() {
+  const BuilderPtr
+  UnionBuilder::null() {
     if (current_ == -1) {
-      std::shared_ptr<Builder> out = OptionBuilder::fromvalids(options_, that_);
+      BuilderPtr out = OptionBuilder::fromvalids(options_, that_);
       out.get()->null();
       return out;
     }
@@ -77,9 +97,10 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Builder> UnionBuilder::boolean(bool x) {
+  const BuilderPtr
+  UnionBuilder::boolean(bool x) {
     if (current_ == -1) {
-      std::shared_ptr<Builder> tofill(nullptr);
+      BuilderPtr tofill(nullptr);
       int8_t i = 0;
       for (auto content : contents_) {
         if (dynamic_cast<BoolBuilder*>(content.get()) != nullptr) {
@@ -103,9 +124,10 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> UnionBuilder::integer(int64_t x) {
+  const BuilderPtr
+  UnionBuilder::integer(int64_t x) {
     if (current_ == -1) {
-      std::shared_ptr<Builder> tofill(nullptr);
+      BuilderPtr tofill(nullptr);
       int8_t i = 0;
       for (auto content : contents_) {
         if (dynamic_cast<Int64Builder*>(content.get()) != nullptr) {
@@ -129,9 +151,10 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> UnionBuilder::real(double x) {
+  const BuilderPtr
+  UnionBuilder::real(double x) {
     if (current_ == -1) {
-      std::shared_ptr<Builder> tofill(nullptr);
+      BuilderPtr tofill(nullptr);
       int8_t i = 0;
       for (auto content : contents_) {
         if (dynamic_cast<Float64Builder*>(content.get()) != nullptr) {
@@ -150,7 +173,9 @@ namespace awkward {
           i++;
         }
         if (tofill.get() != nullptr) {
-          tofill = Float64Builder::fromint64(options_, dynamic_cast<Int64Builder*>(tofill.get())->buffer());
+          tofill = Float64Builder::fromint64(
+            options_,
+            dynamic_cast<Int64Builder*>(tofill.get())->buffer());
           contents_[(size_t)i] = tofill;
         }
         else {
@@ -169,9 +194,10 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> UnionBuilder::string(const char* x, int64_t length, const char* encoding) {
+  const BuilderPtr
+  UnionBuilder::string(const char* x, int64_t length, const char* encoding) {
     if (current_ == -1) {
-      std::shared_ptr<Builder> tofill(nullptr);
+      BuilderPtr tofill(nullptr);
       int8_t i = 0;
       for (auto content : contents_) {
         if (StringBuilder* raw = dynamic_cast<StringBuilder*>(content.get())) {
@@ -197,9 +223,10 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> UnionBuilder::beginlist() {
+  const BuilderPtr
+  UnionBuilder::beginlist() {
     if (current_ == -1) {
-      std::shared_ptr<Builder> tofill(nullptr);
+      BuilderPtr tofill(nullptr);
       int8_t i = 0;
       for (auto content : contents_) {
         if (dynamic_cast<ListBuilder*>(content.get()) != nullptr) {
@@ -221,9 +248,11 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> UnionBuilder::endlist() {
+  const BuilderPtr
+  UnionBuilder::endlist() {
     if (current_ == -1) {
-      throw std::invalid_argument("called 'endlist' without 'beginlist' at the same level before it");
+      throw std::invalid_argument(
+        "called 'endlist' without 'beginlist' at the same level before it");
     }
     else {
       int64_t length = contents_[(size_t)current_].get()->length();
@@ -237,9 +266,10 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> UnionBuilder::begintuple(int64_t numfields) {
+  const BuilderPtr
+  UnionBuilder::begintuple(int64_t numfields) {
     if (current_ == -1) {
-      std::shared_ptr<Builder> tofill(nullptr);
+      BuilderPtr tofill(nullptr);
       int8_t i = 0;
       for (auto content : contents_) {
         if (TupleBuilder* raw = dynamic_cast<TupleBuilder*>(content.get())) {
@@ -263,9 +293,11 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> UnionBuilder::index(int64_t index) {
+  const BuilderPtr
+  UnionBuilder::index(int64_t index) {
     if (current_ == -1) {
-      throw std::invalid_argument("called 'index' without 'begintuple' at the same level before it");
+      throw std::invalid_argument(
+        "called 'index' without 'begintuple' at the same level before it");
     }
     else {
       contents_[(size_t)current_].get()->index(index);
@@ -273,9 +305,11 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> UnionBuilder::endtuple() {
+  const BuilderPtr
+  UnionBuilder::endtuple() {
     if (current_ == -1) {
-      throw std::invalid_argument("called 'endtuple' without 'begintuple' at the same level before it");
+      throw std::invalid_argument(
+        "called 'endtuple' without 'begintuple' at the same level before it");
     }
     else {
       int64_t length = contents_[(size_t)current_].get()->length();
@@ -289,13 +323,16 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> UnionBuilder::beginrecord(const char* name, bool check) {
+  const BuilderPtr
+  UnionBuilder::beginrecord(const char* name, bool check) {
     if (current_ == -1) {
-      std::shared_ptr<Builder> tofill(nullptr);
+      BuilderPtr tofill(nullptr);
       int8_t i = 0;
       for (auto content : contents_) {
         if (RecordBuilder* raw = dynamic_cast<RecordBuilder*>(content.get())) {
-          if (raw->length() == -1  ||  ((check  &&  raw->name() == name)  ||  (!check  &&  raw->nameptr() == name))) {
+          if (raw->length() == -1  ||
+              ((check  &&  raw->name() == name)  ||
+               (!check  &&  raw->nameptr() == name))) {
             tofill = content;
             break;
           }
@@ -315,9 +352,11 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> UnionBuilder::field(const char* key, bool check) {
+  const BuilderPtr
+  UnionBuilder::field(const char* key, bool check) {
     if (current_ == -1) {
-      throw std::invalid_argument("called 'field' without 'beginrecord' at the same level before it");
+      throw std::invalid_argument(
+        "called 'field' without 'beginrecord' at the same level before it");
     }
     else {
       contents_[(size_t)current_].get()->field(key, check);
@@ -325,9 +364,12 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> UnionBuilder::endrecord() {
+  const BuilderPtr
+  UnionBuilder::endrecord() {
     if (current_ == -1) {
-      throw std::invalid_argument("called 'endrecord' without 'beginrecord' at the same level before it");
+      throw std::invalid_argument(
+        "called 'endrecord' without 'beginrecord' at the same level "
+        "before it");
     }
     else {
       int64_t length = contents_[(size_t)current_].get()->length();
@@ -341,42 +383,49 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> UnionBuilder::append(const std::shared_ptr<Content>& array, int64_t at) {
+  const BuilderPtr
+  UnionBuilder::append(const ContentPtr& array, int64_t at) {
     if (current_ == -1) {
-      std::shared_ptr<Builder> tofill(nullptr);
+      BuilderPtr tofill(nullptr);
       int8_t i = 0;
       for (auto content : contents_) {
-        if (IndexedGenericBuilder* raw = dynamic_cast<IndexedGenericBuilder*>(content.get())) {
+        if (IndexedGenericBuilder* raw =
+            dynamic_cast<IndexedGenericBuilder*>(content.get())) {
           if (raw->arrayptr() == array.get()) {
             tofill = content;
             break;
           }
         }
-        else if (IndexedI32Builder* raw = dynamic_cast<IndexedI32Builder*>(content.get())) {
+        else if (IndexedI32Builder* raw =
+                 dynamic_cast<IndexedI32Builder*>(content.get())) {
           if (raw->arrayptr() == array.get()) {
             tofill = content;
             break;
           }
         }
-        else if (IndexedIU32Builder* raw = dynamic_cast<IndexedIU32Builder*>(content.get())) {
+        else if (IndexedIU32Builder* raw =
+                 dynamic_cast<IndexedIU32Builder*>(content.get())) {
           if (raw->arrayptr() == array.get()) {
             tofill = content;
             break;
           }
         }
-        else if (IndexedI64Builder* raw = dynamic_cast<IndexedI64Builder*>(content.get())) {
+        else if (IndexedI64Builder* raw =
+                 dynamic_cast<IndexedI64Builder*>(content.get())) {
           if (raw->arrayptr() == array.get()) {
             tofill = content;
             break;
           }
         }
-        else if (IndexedIO32Builder* raw = dynamic_cast<IndexedIO32Builder*>(content.get())) {
+        else if (IndexedIO32Builder* raw =
+                 dynamic_cast<IndexedIO32Builder*>(content.get())) {
           if (raw->arrayptr() == array.get()) {
             tofill = content;
             break;
           }
         }
-        else if (IndexedIO64Builder* raw = dynamic_cast<IndexedIO64Builder*>(content.get())) {
+        else if (IndexedIO64Builder* raw =
+                 dynamic_cast<IndexedIO64Builder*>(content.get())) {
           if (raw->arrayptr() == array.get()) {
             tofill = content;
             break;

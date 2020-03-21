@@ -18,25 +18,30 @@
 #include "awkward/Content.h"
 
 namespace awkward {
-  Content::Content(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters)
+  Content::Content(const IdentitiesPtr& identities,
+                   const util::Parameters& parameters)
       : identities_(identities)
       , parameters_(parameters) { }
 
   Content::~Content() { }
 
-  bool Content::isscalar() const {
+  bool
+  Content::isscalar() const {
     return false;
   }
 
-  const std::shared_ptr<Identities> Content::identities() const {
+  const IdentitiesPtr
+  Content::identities() const {
     return identities_;
   }
 
-  const std::string Content::tostring() const {
+  const std::string
+  Content::tostring() const {
     return tostring_part("", "", "");
   }
 
-  const std::string Content::tojson(bool pretty, int64_t maxdecimals) const {
+  const std::string
+  Content::tojson(bool pretty, int64_t maxdecimals) const {
     if (pretty) {
       ToJsonPrettyString builder(maxdecimals);
       tojson_part(builder);
@@ -49,7 +54,11 @@ namespace awkward {
     }
   }
 
-  void Content::tojson(FILE* destination, bool pretty, int64_t maxdecimals, int64_t buffersize) const {
+  void
+  Content::tojson(FILE* destination,
+                  bool pretty,
+                  int64_t maxdecimals,
+                  int64_t buffersize) const {
     if (pretty) {
       ToJsonPrettyFile builder(destination, maxdecimals, buffersize);
       builder.beginlist();
@@ -64,9 +73,11 @@ namespace awkward {
     }
   }
 
-  int64_t Content::nbytes() const {
-    // FIXME: this is only accurate if all subintervals of allocated arrays are nested
-    // (which is likely, but not guaranteed). In general, it's <= the correct nbytes.
+  int64_t
+  Content::nbytes() const {
+    // FIXME: this is only accurate if all subintervals of allocated arrays are
+    // nested (which is likely, but not guaranteed). In general, it's <= the 
+    // correct nbytes.
     std::map<size_t, int64_t> largest;
     nbytes_part(largest);
     int64_t out = 0;
@@ -76,7 +87,11 @@ namespace awkward {
     return out;
   }
 
-  const std::shared_ptr<Content> Content::reduce(const Reducer& reducer, int64_t axis, bool mask, bool keepdims) const {
+  const ContentPtr
+  Content::reduce(const Reducer& reducer,
+                  int64_t axis,
+                  bool mask,
+                  bool keepdims) const {
     int64_t negaxis = -axis;
     std::pair<bool, int64_t> branchdepth = branch_depth();
     bool branch = branchdepth.first;
@@ -84,10 +99,17 @@ namespace awkward {
 
     if (branch) {
       if (negaxis <= 0) {
-        throw std::invalid_argument("cannot use non-negative axis on a nested list structure of variable depth (negative axis counts from the leaves of the tree; non-negative from the root)");
+        throw std::invalid_argument(
+        "cannot use non-negative axis on a nested list structure "
+        "of variable depth (negative axis counts from the leaves of the tree; "
+        "non-negative from the root)");
       }
       if (negaxis > depth) {
-        throw std::invalid_argument(std::string("cannot use axis=") + std::to_string(axis) + std::string(" on a nested list structure that splits into different depths, the minimum of which is depth=") + std::to_string(depth) + std::string(" from the leaves"));
+        throw std::invalid_argument(
+          std::string("cannot use axis=") + std::to_string(axis)
+          + std::string(" on a nested list structure that splits into "
+                        "different depths, the minimum of which is depth=")
+          + std::to_string(depth) + std::string(" from the leaves"));
       }
     }
     else {
@@ -95,7 +117,11 @@ namespace awkward {
         negaxis += depth;
       }
       if (!(0 < negaxis  &&  negaxis <= depth)) {
-        throw std::invalid_argument(std::string("axis=") + std::to_string(axis) + std::string(" exceeds the depth of the nested list structure (which is ") + std::to_string(depth) + std::string(")"));
+        throw std::invalid_argument(
+          std::string("axis=") + std::to_string(axis)
+          + std::string(" exceeds the depth of the nested list structure "
+                        "(which is ")
+          + std::to_string(depth) + std::string(")"));
       }
     }
 
@@ -108,19 +134,28 @@ namespace awkward {
       length());
     util::handle_error(err, classname(), identities_.get());
 
-    std::shared_ptr<Content> next = reduce_next(reducer, negaxis, starts, parents, 1, mask, keepdims);
+    ContentPtr next = reduce_next(reducer,
+                                  negaxis,
+                                  starts,
+                                  parents,
+                                  1,
+                                  mask,
+                                  keepdims);
     return next.get()->getitem_at_nowrap(0);
   }
 
-  const util::Parameters Content::parameters() const {
+  const util::Parameters
+  Content::parameters() const {
     return parameters_;
   }
 
-  void Content::setparameters(const util::Parameters& parameters) {
+  void
+  Content::setparameters(const util::Parameters& parameters) {
     parameters_ = parameters;
   }
 
-  const std::string Content::parameter(const std::string& key) const {
+  const std::string
+  Content::parameter(const std::string& key) const {
     auto item = parameters_.find(key);
     if (item == parameters_.end()) {
       return "null";
@@ -128,25 +163,30 @@ namespace awkward {
     return item->second;
   }
 
-  void Content::setparameter(const std::string& key, const std::string& value) {
+  void
+  Content::setparameter(const std::string& key, const std::string& value) {
     parameters_[key] = value;
   }
 
-  bool Content::parameter_equals(const std::string& key, const std::string& value) const {
+  bool
+  Content::parameter_equals(const std::string& key,
+                            const std::string& value) const {
     return util::parameter_equals(parameters_, key, value);
   }
 
-  bool Content::parameters_equal(const util::Parameters& other) const {
+  bool
+  Content::parameters_equal(const util::Parameters& other) const {
     return util::parameters_equal(parameters_, other);
   }
 
-  const std::shared_ptr<Content> Content::merge_as_union(const std::shared_ptr<Content>& other) const {
+  const ContentPtr
+  Content::merge_as_union(const ContentPtr& other) const {
     int64_t mylength = length();
     int64_t theirlength = other.get()->length();
     Index8 tags(mylength + theirlength);
     Index64 index(mylength + theirlength);
 
-    std::vector<std::shared_ptr<Content>> contents({ shallow_copy(), other });
+    ContentPtrVec contents({ shallow_copy(), other });
 
     struct Error err1 = awkward_unionarray_filltags_to8_const(
       tags.ptr().get(),
@@ -172,10 +212,15 @@ namespace awkward {
       theirlength);
     util::handle_error(err4, classname(), identities_.get());
 
-    return std::make_shared<UnionArray8_64>(Identities::none(), util::Parameters(), tags, index, contents);
+    return std::make_shared<UnionArray8_64>(Identities::none(),
+                                            util::Parameters(),
+                                            tags,
+                                            index,
+                                            contents);
   }
 
-  const std::shared_ptr<Content> Content::rpad_axis0(int64_t target, bool clip) const {
+  const ContentPtr
+  Content::rpad_axis0(int64_t target, bool clip) const {
     if (!clip  &&  target < length()) {
       return shallow_copy();
     }
@@ -185,11 +230,16 @@ namespace awkward {
       target,
       length());
     util::handle_error(err, classname(), identities_.get());
-    std::shared_ptr<IndexedOptionArray64> next = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, shallow_copy());
+    std::shared_ptr<IndexedOptionArray64> next =
+      std::make_shared<IndexedOptionArray64>(Identities::none(),
+                                             util::Parameters(),
+                                             index,
+                                             shallow_copy());
     return next.get()->simplify_optiontype();
   }
 
-  const std::shared_ptr<Content> Content::localindex_axis0() const {
+  const ContentPtr
+  Content::localindex_axis0() const {
     Index64 localindex(length());
     struct Error err = awkward_localindex_64(
       localindex.ptr().get(),
@@ -198,7 +248,11 @@ namespace awkward {
     return std::make_shared<NumpyArray>(localindex);
   }
 
-  const std::shared_ptr<Content> Content::choose_axis0(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters) const {
+  const ContentPtr
+  Content::choose_axis0(int64_t n,
+                        bool diagonal,
+                        const util::RecordLookupPtr& recordlookup,
+                        const util::Parameters& parameters) const {
     int64_t size = length();
     if (diagonal) {
       size += (n - 1);
@@ -225,7 +279,8 @@ namespace awkward {
     std::vector<std::shared_ptr<int64_t>> tocarry;
     std::vector<int64_t*> tocarryraw;
     for (int64_t j = 0;  j < n;  j++) {
-      std::shared_ptr<int64_t> ptr(new int64_t[(size_t)chooselen], util::array_deleter<int64_t>());
+      std::shared_ptr<int64_t> ptr(new int64_t[(size_t)chooselen],
+                                   util::array_deleter<int64_t>());
       tocarry.push_back(ptr);
       tocarryraw.push_back(ptr.get());
     }
@@ -237,20 +292,32 @@ namespace awkward {
       1);
     util::handle_error(err, classname(), identities_.get());
 
-    std::vector<std::shared_ptr<Content>> contents;
+    ContentPtrVec contents;
     for (auto ptr : tocarry) {
-      contents.push_back(std::make_shared<IndexedArray64>(Identities::none(), util::Parameters(), Index64(ptr, 0, chooselen), shallow_copy()));
+      contents.push_back(std::make_shared<IndexedArray64>(
+        Identities::none(),
+        util::Parameters(),
+        Index64(ptr, 0, chooselen),
+        shallow_copy()));
     }
-    return std::make_shared<RecordArray>(Identities::none(), parameters, contents, recordlookup);
+    return std::make_shared<RecordArray>(Identities::none(),
+                                         parameters,
+                                         contents,
+                                         recordlookup);
   }
 
-  const std::shared_ptr<Content> Content::getitem(const Slice& where) const {
-    std::shared_ptr<Content> next = std::make_shared<RegularArray>(Identities::none(), util::Parameters(), shallow_copy(), length());
-
-    std::shared_ptr<SliceItem> nexthead = where.head();
+  const ContentPtr
+  Content::getitem(const Slice& where) const {
+    ContentPtr next = std::make_shared<RegularArray>(Identities::none(),
+                                                     util::Parameters(),
+                                                     shallow_copy(),
+                                                     length());
+    SliceItemPtr nexthead = where.head();
     Slice nexttail = where.tail();
     Index64 nextadvanced(0);
-    std::shared_ptr<Content> out = next.get()->getitem_next(nexthead, nexttail, nextadvanced);
+    ContentPtr out = next.get()->getitem_next(nexthead,
+                                              nexttail,
+                                              nextadvanced);
 
     if (out.get()->length() == 0) {
       return out.get()->getitem_nothing();
@@ -260,35 +327,47 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> Content::getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const {
+  const ContentPtr
+  Content::getitem_next(const SliceItemPtr& head,
+                        const Slice& tail,
+                        const Index64& advanced) const {
     if (head.get() == nullptr) {
       return shallow_copy();
     }
-    else if (SliceAt* at = dynamic_cast<SliceAt*>(head.get())) {
+    else if (SliceAt* at =
+             dynamic_cast<SliceAt*>(head.get())) {
       return getitem_next(*at, tail, advanced);
     }
-    else if (SliceRange* range = dynamic_cast<SliceRange*>(head.get())) {
+    else if (SliceRange* range =
+             dynamic_cast<SliceRange*>(head.get())) {
       return getitem_next(*range, tail, advanced);
     }
-    else if (SliceEllipsis* ellipsis = dynamic_cast<SliceEllipsis*>(head.get())) {
+    else if (SliceEllipsis* ellipsis =
+             dynamic_cast<SliceEllipsis*>(head.get())) {
       return getitem_next(*ellipsis, tail, advanced);
     }
-    else if (SliceNewAxis* newaxis = dynamic_cast<SliceNewAxis*>(head.get())) {
+    else if (SliceNewAxis* newaxis =
+             dynamic_cast<SliceNewAxis*>(head.get())) {
       return getitem_next(*newaxis, tail, advanced);
     }
-    else if (SliceArray64* array = dynamic_cast<SliceArray64*>(head.get())) {
+    else if (SliceArray64* array =
+             dynamic_cast<SliceArray64*>(head.get())) {
       return getitem_next(*array, tail, advanced);
     }
-    else if (SliceField* field = dynamic_cast<SliceField*>(head.get())) {
+    else if (SliceField* field =
+             dynamic_cast<SliceField*>(head.get())) {
       return getitem_next(*field, tail, advanced);
     }
-    else if (SliceFields* fields = dynamic_cast<SliceFields*>(head.get())) {
+    else if (SliceFields* fields =
+             dynamic_cast<SliceFields*>(head.get())) {
       return getitem_next(*fields, tail, advanced);
     }
-    else if (SliceMissing64* missing = dynamic_cast<SliceMissing64*>(head.get())) {
+    else if (SliceMissing64* missing =
+             dynamic_cast<SliceMissing64*>(head.get())) {
       return getitem_next(*missing, tail, advanced);
     }
-    else if (SliceJagged64* jagged = dynamic_cast<SliceJagged64*>(head.get())) {
+    else if (SliceJagged64* jagged =
+             dynamic_cast<SliceJagged64*>(head.get())) {
       return getitem_next(*jagged, tail, advanced);
     }
     else {
@@ -296,63 +375,103 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> Content::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const std::shared_ptr<SliceItem>& slicecontent, const Slice& tail) const {
-    if (SliceArray64* array = dynamic_cast<SliceArray64*>(slicecontent.get())) {
+  const ContentPtr
+  Content::getitem_next_jagged(const Index64& slicestarts,
+                               const Index64& slicestops,
+                               const SliceItemPtr& slicecontent,
+                               const Slice& tail) const {
+    if (SliceArray64* array =
+        dynamic_cast<SliceArray64*>(slicecontent.get())) {
       return getitem_next_jagged(slicestarts, slicestops, *array, tail);
     }
-    else if (SliceMissing64* missing = dynamic_cast<SliceMissing64*>(slicecontent.get())) {
+    else if (SliceMissing64* missing =
+             dynamic_cast<SliceMissing64*>(slicecontent.get())) {
       return getitem_next_jagged(slicestarts, slicestops, *missing, tail);
     }
-    else if (SliceJagged64* jagged = dynamic_cast<SliceJagged64*>(slicecontent.get())) {
+    else if (SliceJagged64* jagged =
+             dynamic_cast<SliceJagged64*>(slicecontent.get())) {
       return getitem_next_jagged(slicestarts, slicestops, *jagged, tail);
     }
     else {
-      throw std::runtime_error("unexpected slice type for getitem_next_jagged");
+      throw std::runtime_error(
+        "unexpected slice type for getitem_next_jagged");
     }
   }
 
-  const std::shared_ptr<Content> Content::getitem_next(const SliceEllipsis& ellipsis, const Slice& tail, const Index64& advanced) const {
+  const ContentPtr
+  Content::getitem_next(const SliceEllipsis& ellipsis,
+                        const Slice& tail,
+                        const Index64& advanced) const {
     std::pair<int64_t, int64_t> minmax = minmax_depth();
     int64_t mindepth = minmax.first;
     int64_t maxdepth = minmax.second;
 
-    if (tail.length() == 0  ||  (mindepth - 1 == tail.dimlength()  &&  maxdepth - 1 == tail.dimlength())) {
-      std::shared_ptr<SliceItem> nexthead = tail.head();
+    if (tail.length() == 0  ||
+        (mindepth - 1 == tail.dimlength()  &&
+         maxdepth - 1 == tail.dimlength())) {
+      SliceItemPtr nexthead = tail.head();
       Slice nexttail = tail.tail();
       return getitem_next(nexthead, nexttail, advanced);
     }
-    else if (mindepth - 1 == tail.dimlength()  ||  maxdepth - 1 == tail.dimlength()) {
-      throw std::invalid_argument("ellipsis (...) can't be used on a data structure of different depths");
+    else if (mindepth - 1 == tail.dimlength()  ||
+             maxdepth - 1 == tail.dimlength()) {
+      throw std::invalid_argument(
+        "ellipsis (...) can't be used on a data structure of "
+        "different depths");
     }
     else {
-      std::vector<std::shared_ptr<SliceItem>> tailitems = tail.items();
-      std::vector<std::shared_ptr<SliceItem>> items = { std::make_shared<SliceEllipsis>() };
+      std::vector<SliceItemPtr> tailitems = tail.items();
+      std::vector<SliceItemPtr> items = { std::make_shared<SliceEllipsis>() };
       items.insert(items.end(), tailitems.begin(), tailitems.end());
-      std::shared_ptr<SliceItem> nexthead = std::make_shared<SliceRange>(Slice::none(), Slice::none(), 1);
+      SliceItemPtr nexthead = std::make_shared<SliceRange>(Slice::none(),
+                                                           Slice::none(),
+                                                           1);
       Slice nexttail(items);
       return getitem_next(nexthead, nexttail, advanced);
     }
   }
 
-  const std::shared_ptr<Content> Content::getitem_next(const SliceNewAxis& newaxis, const Slice& tail, const Index64& advanced) const {
-    std::shared_ptr<SliceItem> nexthead = tail.head();
+  const ContentPtr
+  Content::getitem_next(const SliceNewAxis& newaxis,
+                        const Slice& tail,
+                        const Index64& advanced) const {
+    SliceItemPtr nexthead = tail.head();
     Slice nexttail = tail.tail();
-    return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), getitem_next(nexthead, nexttail, advanced), 1);
+    return std::make_shared<RegularArray>(
+      Identities::none(),
+      util::Parameters(),
+      getitem_next(nexthead, nexttail, advanced),
+      1);
   }
 
-  const std::shared_ptr<Content> Content::getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const {
-    std::shared_ptr<SliceItem> nexthead = tail.head();
+  const ContentPtr
+  Content::getitem_next(const SliceField& field,
+                        const Slice& tail,
+                        const Index64& advanced) const {
+    SliceItemPtr nexthead = tail.head();
     Slice nexttail = tail.tail();
-    return getitem_field(field.key()).get()->getitem_next(nexthead, nexttail, advanced);
+    return getitem_field(field.key()).get()->getitem_next(nexthead,
+                                                          nexttail,
+                                                          advanced);
   }
 
-  const std::shared_ptr<Content> Content::getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const {
-    std::shared_ptr<SliceItem> nexthead = tail.head();
+  const ContentPtr
+  Content::getitem_next(const SliceFields& fields,
+                        const Slice& tail,
+                        const Index64& advanced) const {
+    SliceItemPtr nexthead = tail.head();
     Slice nexttail = tail.tail();
-    return getitem_fields(fields.keys()).get()->getitem_next(nexthead, nexttail, advanced);
+    return getitem_fields(fields.keys()).get()->getitem_next(nexthead,
+                                                             nexttail,
+                                                             advanced);
   }
 
-  const std::shared_ptr<Content> getitem_next_regular_missing(const SliceMissing64& missing, const Slice& tail, const Index64& advanced, const RegularArray* raw, int64_t length, const std::string& classname) {
+  const ContentPtr getitem_next_regular_missing(const SliceMissing64& missing,
+                                                const Slice& tail,
+                                                const Index64& advanced,
+                                                const RegularArray* raw,
+                                                int64_t length,
+                                                const std::string& classname) {
     Index64 index(missing.index());
     Index64 outindex(index.length()*length);
 
@@ -365,11 +484,19 @@ namespace awkward {
       raw->size());
     util::handle_error(err, classname, nullptr);
 
-    IndexedOptionArray64 out(Identities::none(), util::Parameters(), outindex, raw->content());
-    return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), out.simplify_optiontype(), index.length());
+    IndexedOptionArray64 out(Identities::none(),
+                             util::Parameters(),
+                             outindex,
+                             raw->content());
+    return std::make_shared<RegularArray>(Identities::none(),
+                                          util::Parameters(),
+                                          out.simplify_optiontype(),
+                                          index.length());
   }
 
-  bool check_missing_jagged_same(const std::shared_ptr<Content>& that, const Index8& bytemask, const SliceMissing64& missing) {
+  bool check_missing_jagged_same(const ContentPtr& that,
+                                 const Index8& bytemask,
+                                 const SliceMissing64& missing) {
     if (bytemask.length() != missing.length()) {
       return false;
     }
@@ -382,42 +509,52 @@ namespace awkward {
       missingindex.ptr().get(),
       missingindex.offset(),
       bytemask.length());
-    util::handle_error(err, that.get()->classname(), that.get()->identities().get());
+    util::handle_error(err,
+                       that.get()->classname(),
+                       that.get()->identities().get());
     return same;
   }
 
-  const std::shared_ptr<Content> check_missing_jagged(const std::shared_ptr<Content>& that, const SliceMissing64& missing) {
-    // FIXME: This function is insufficiently general. While working on something else,
-    // I noticed that it wasn't possible to slice option-type data with a jagged array.
-    // This handles the case where that happens at top-level; the most likely case
-    // for physics analysis, but it should be more deeply considered in general.
-    //
-    // Note that it only replaces the Content that would be passed to
-    // getitem_next(missing.content()) in getitem_next(SliceMissing64) in a particular
-    // scenario; it can probably be generalized by handling more general scenarios.
+  const ContentPtr check_missing_jagged(const ContentPtr& that,
+                                        const SliceMissing64& missing) {
+    // FIXME: This function is insufficiently general. While working on
+    // something else, I noticed that it wasn't possible to slice option-type
+    // data with a jagged array. This handles the case where that happens at
+    // top-level; the most likely case for physics analysis, but it should be
+    // more deeply considered in general.
 
-    if (that.get()->length() == 1  &&  dynamic_cast<SliceJagged64*>(missing.content().get())) {
-      std::shared_ptr<Content> tmp1 = that.get()->getitem_at_nowrap(0);
-      std::shared_ptr<Content> tmp2(nullptr);
-      if (IndexedOptionArray32* rawtmp1 = dynamic_cast<IndexedOptionArray32*>(tmp1.get())) {
+    // Note that it only replaces the Content that would be passed to
+    // getitem_next(missing.content()) in getitem_next(SliceMissing64) in a
+    // particular scenario; it can probably be generalized by handling more
+    // general scenarios.
+
+    if (that.get()->length() == 1  &&
+        dynamic_cast<SliceJagged64*>(missing.content().get())) {
+      ContentPtr tmp1 = that.get()->getitem_at_nowrap(0);
+      ContentPtr tmp2(nullptr);
+      if (IndexedOptionArray32* rawtmp1 =
+          dynamic_cast<IndexedOptionArray32*>(tmp1.get())) {
         tmp2 = rawtmp1->project();
         if (!check_missing_jagged_same(that, rawtmp1->bytemask(), missing)) {
           return that;
         }
       }
-      else if (IndexedOptionArray64* rawtmp1 = dynamic_cast<IndexedOptionArray64*>(tmp1.get())) {
+      else if (IndexedOptionArray64* rawtmp1 =
+               dynamic_cast<IndexedOptionArray64*>(tmp1.get())) {
         tmp2 = rawtmp1->project();
         if (!check_missing_jagged_same(that, rawtmp1->bytemask(), missing)) {
           return that;
         }
       }
-      else if (ByteMaskedArray* rawtmp1 = dynamic_cast<ByteMaskedArray*>(tmp1.get())) {
+      else if (ByteMaskedArray* rawtmp1 =
+               dynamic_cast<ByteMaskedArray*>(tmp1.get())) {
         tmp2 = rawtmp1->project();
         if (!check_missing_jagged_same(that, rawtmp1->bytemask(), missing)) {
           return that;
         }
       }
-      else if (BitMaskedArray* rawtmp1 = dynamic_cast<BitMaskedArray*>(tmp1.get())) {
+      else if (BitMaskedArray* rawtmp1 =
+               dynamic_cast<BitMaskedArray*>(tmp1.get())) {
         tmp2 = rawtmp1->project();
         if (!check_missing_jagged_same(that, rawtmp1->bytemask(), missing)) {
           return that;
@@ -425,53 +562,93 @@ namespace awkward {
       }
 
       if (tmp2.get() != nullptr) {
-        return std::make_shared<RegularArray>(Identities::none(), that.get()->parameters(), tmp2, tmp2.get()->length());
+        return std::make_shared<RegularArray>(Identities::none(),
+                                              that.get()->parameters(),
+                                              tmp2,
+                                              tmp2.get()->length());
       }
     }
     return that;
   }
 
-  const std::shared_ptr<Content> Content::getitem_next(const SliceMissing64& missing, const Slice& tail, const Index64& advanced) const {
+  const ContentPtr
+  Content::getitem_next(const SliceMissing64& missing,
+                        const Slice& tail,
+                        const Index64& advanced) const {
     if (advanced.length() != 0) {
-      throw std::invalid_argument("cannot mix missing values in slice with NumPy-style advanced indexing");
+      throw std::invalid_argument("cannot mix missing values in slice "
+                                  "with NumPy-style advanced indexing");
     }
 
-    std::shared_ptr<Content> next = check_missing_jagged(shallow_copy(), missing).get()->getitem_next(missing.content(), tail, advanced);
+    ContentPtr tmp = check_missing_jagged(shallow_copy(), missing);
+    ContentPtr next = tmp.get()->getitem_next(missing.content(),
+                                              tail,
+                                              advanced);
 
     if (RegularArray* raw = dynamic_cast<RegularArray*>(next.get())) {
-      return getitem_next_regular_missing(missing, tail, advanced, raw, length(), classname());
+      return getitem_next_regular_missing(missing,
+                                          tail,
+                                          advanced,
+                                          raw,
+                                          length(),
+                                          classname());
     }
 
     else if (RecordArray* rec = dynamic_cast<RecordArray*>(next.get())) {
       if (rec->numfields() == 0) {
         return next;
       }
-      std::vector<std::shared_ptr<Content>> contents;
+      ContentPtrVec contents;
       for (auto content : rec->contents()) {
         if (RegularArray* raw = dynamic_cast<RegularArray*>(content.get())) {
-          contents.push_back(getitem_next_regular_missing(missing, tail, advanced, raw, length(), classname()));
+          contents.push_back(getitem_next_regular_missing(missing,
+                                                          tail,
+                                                          advanced,
+                                                          raw,
+                                                          length(),
+                                                          classname()));
         }
         else {
-          throw std::runtime_error(std::string("FIXME: unhandled case of SliceMissing with RecordArray containing\n") + content.get()->tostring());
+          throw std::runtime_error(
+            std::string("FIXME: unhandled case of SliceMissing with ")
+            + std::string("RecordArray containing\n")
+            + content.get()->tostring());
         }
       }
-      return std::make_shared<RecordArray>(Identities::none(), util::Parameters(), contents, rec->recordlookup());
+      return std::make_shared<RecordArray>(Identities::none(),
+                                           util::Parameters(),
+                                           contents,
+                                           rec->recordlookup());
     }
 
     else {
-      throw std::runtime_error(std::string("FIXME: unhandled case of SliceMissing with\n") + next.get()->tostring());
+      throw std::runtime_error(
+        std::string("FIXME: unhandled case of SliceMissing with\n")
+        + next.get()->tostring());
     }
   }
 
-  const std::shared_ptr<Content> Content::getitem_next_array_wrap(const std::shared_ptr<Content>& outcontent, const std::vector<int64_t>& shape) const {
-    std::shared_ptr<Content> out = std::make_shared<RegularArray>(Identities::none(), util::Parameters(), outcontent, (int64_t)shape[shape.size() - 1]);
+  const ContentPtr
+  Content::getitem_next_array_wrap(const ContentPtr& outcontent,
+                                   const std::vector<int64_t>& shape) const {
+    ContentPtr out =
+      std::make_shared<RegularArray>(Identities::none(),
+                                     util::Parameters(),
+                                     outcontent,
+                                     (int64_t)shape[shape.size() - 1]);
     for (int64_t i = (int64_t)shape.size() - 2;  i >= 0;  i--) {
-      out = std::make_shared<RegularArray>(Identities::none(), util::Parameters(), out, (int64_t)shape[(size_t)i]);
+      out = std::make_shared<RegularArray>(Identities::none(),
+                                           util::Parameters(),
+                                           out,
+                                           (int64_t)shape[(size_t)i]);
     }
     return out;
   }
 
-  const std::string Content::parameters_tostring(const std::string& indent, const std::string& pre, const std::string& post) const {
+  const std::string
+  Content::parameters_tostring(const std::string& indent,
+                               const std::string& pre,
+                               const std::string& post) const {
     if (parameters_.empty()) {
       return "";
     }
@@ -479,14 +656,16 @@ namespace awkward {
       std::stringstream out;
       out << indent << pre << "<parameters>\n";
       for (auto pair : parameters_) {
-        out << indent << "    <param key=" << util::quote(pair.first, true) << ">" << pair.second << "</param>\n";
+        out << indent << "    <param key=" << util::quote(pair.first, true)
+            << ">" << pair.second << "</param>\n";
       }
       out << indent << "</parameters>" << post;
       return out.str();
     }
   }
 
-  const int64_t Content::axis_wrap_if_negative(int64_t axis) const {
+  const int64_t
+  Content::axis_wrap_if_negative(int64_t axis) const {
     if (axis < 0) {
       throw std::runtime_error("FIXME: negative axis not implemented yet");
     }

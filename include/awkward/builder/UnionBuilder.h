@@ -16,36 +16,77 @@ namespace awkward {
 
   class EXPORT_SYMBOL UnionBuilder: public Builder {
   public:
-    static const std::shared_ptr<Builder> fromsingle(const ArrayBuilderOptions& options, const std::shared_ptr<Builder>& firstcontent);
+    static const BuilderPtr
+      fromsingle(const ArrayBuilderOptions& options,
+                 const BuilderPtr& firstcontent);
 
-    UnionBuilder(const ArrayBuilderOptions& options, const GrowableBuffer<int8_t>& types, const GrowableBuffer<int64_t>& offsets, std::vector<std::shared_ptr<Builder>>& contents);
+    UnionBuilder(const ArrayBuilderOptions& options,
+                 const GrowableBuffer<int8_t>& types,
+                 const GrowableBuffer<int64_t>& offsets,
+                 std::vector<BuilderPtr>& contents);
 
-    const std::string classname() const override;
-    int64_t length() const override;
-    void clear() override;
-    const std::shared_ptr<Content> snapshot() const override;
+    const std::string
+      classname() const override;
 
-    bool active() const override;
-    const std::shared_ptr<Builder> null() override;
-    const std::shared_ptr<Builder> boolean(bool x) override;
-    const std::shared_ptr<Builder> integer(int64_t x) override;
-    const std::shared_ptr<Builder> real(double x) override;
-    const std::shared_ptr<Builder> string(const char* x, int64_t length, const char* encoding) override;
-    const std::shared_ptr<Builder> beginlist() override;
-    const std::shared_ptr<Builder> endlist() override;
-    const std::shared_ptr<Builder> begintuple(int64_t numfields) override;
-    const std::shared_ptr<Builder> index(int64_t index) override;
-    const std::shared_ptr<Builder> endtuple() override;
-    const std::shared_ptr<Builder> beginrecord(const char* name, bool check) override;
-    const std::shared_ptr<Builder> field(const char* key, bool check) override;
-    const std::shared_ptr<Builder> endrecord() override;
-    const std::shared_ptr<Builder> append(const std::shared_ptr<Content>& array, int64_t at) override;
+    int64_t
+      length() const override;
+
+    void
+      clear() override;
+
+    const ContentPtr
+      snapshot() const override;
+
+    bool
+      active() const override;
+
+    const BuilderPtr
+      null() override;
+
+    const BuilderPtr
+      boolean(bool x) override;
+
+    const BuilderPtr
+      integer(int64_t x) override;
+
+    const BuilderPtr
+      real(double x) override;
+
+    const BuilderPtr
+      string(const char* x, int64_t length, const char* encoding) override;
+
+    const BuilderPtr
+      beginlist() override;
+
+    const BuilderPtr
+      endlist() override;
+
+    const BuilderPtr
+      begintuple(int64_t numfields) override;
+
+    const BuilderPtr
+      index(int64_t index) override;
+
+    const BuilderPtr
+      endtuple() override;
+
+    const BuilderPtr
+      beginrecord(const char* name, bool check) override;
+
+    const BuilderPtr
+      field(const char* key, bool check) override;
+
+    const BuilderPtr
+      endrecord() override;
+
+    const BuilderPtr
+      append(const ContentPtr& array, int64_t at) override;
 
   private:
     const ArrayBuilderOptions options_;
     GrowableBuffer<int8_t> types_;
     GrowableBuffer<int64_t> offsets_;
-    std::vector<std::shared_ptr<Builder>> contents_;
+    std::vector<BuilderPtr> contents_;
     int8_t current_;
   };
 }

@@ -5,37 +5,46 @@
 #include "awkward/Iterator.h"
 
 namespace awkward {
-  Iterator::Iterator(const std::shared_ptr<Content>& content)
+  Iterator::Iterator(const ContentPtr& content)
     : content_(content)
     , at_(0) {
     content.get()->check_for_iteration();
   }
 
-  const std::shared_ptr<Content> Iterator::content() const {
+  const ContentPtr
+  Iterator::content() const {
     return content_;
   }
 
-  const int64_t Iterator::at() const {
+  const int64_t
+  Iterator::at() const {
     return at_;
   }
 
-  const bool Iterator::isdone() const {
+  const bool
+  Iterator::isdone() const {
     return at_ >= content_.get()->length();
   }
 
-  const std::shared_ptr<Content> Iterator::next() {
+  const ContentPtr
+  Iterator::next() {
     return content_.get()->getitem_at_nowrap(at_++);
   }
 
-  const std::string Iterator::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
+  const std::string
+  Iterator::tostring_part(const std::string& indent,
+                          const std::string& pre,
+                          const std::string& post) const {
     std::stringstream out;
     out << indent << pre << "<Iterator at=\"" << at_ << "\">\n";
-    out << content_.get()->tostring_part(indent + std::string("    "), "", "\n");
+    out << content_.get()->tostring_part(
+             indent + std::string("    "), "", "\n");
     out << indent << "</Iterator>" << post;
     return out.str();
   }
 
-  const std::string Iterator::tostring() const {
+  const std::string
+  Iterator::tostring() const {
     return tostring_part("", "", "");
   }
 }

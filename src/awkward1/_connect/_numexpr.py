@@ -9,7 +9,6 @@ import awkward1.operations.convert
 import awkward1._util
 
 def getArguments(names, local_dict=None, global_dict=None):
-    """Replaces numexpr.necompiler.getArguments to avoid calling numpy.asarray on Awkward Arrays."""
     call_frame = sys._getframe(2)
 
     clear_local_dict = False
@@ -21,8 +20,6 @@ def getArguments(names, local_dict=None, global_dict=None):
         if global_dict is None:
             global_dict = frame_globals
 
-        # If `call_frame` is the top frame of the interpreter we can't clear its
-        # `local_dict`, because it is actually the `global_dict`.
         clear_local_dict = clear_local_dict and not frame_globals is local_dict
 
         arguments = []
@@ -31,31 +28,45 @@ def getArguments(names, local_dict=None, global_dict=None):
                 a = local_dict[name]
             except KeyError:
                 a = global_dict[name]
-            arguments.append(a)    # <--- This is different from NumExpr: don't call numpy.asarray(a)
+            arguments.append(a)    # <--- different from NumExpr
     finally:
-        # If we generated local_dict via an explicit reference to f_locals,
-        # clear the dict to prevent creating extra ref counts in the caller's scope
-        # See https://github.com/pydata/numexpr/issues/310
         if clear_local_dict:
             local_dict.clear()
 
     return arguments
 
-def evaluate(expression, local_dict=None, global_dict=None, order="K", casting="safe", **kwargs):
+def evaluate(expression,
+             local_dict=None,
+             global_dict=None,
+             order="K",
+             casting="safe",
+             **kwargs):
     import numexpr
 
     context = numexpr.necompiler.getContext(kwargs, frame_depth=1)
     expr_key = (expression, tuple(sorted(context.items())))
     if expr_key not in numexpr.necompiler._names_cache:
-        numexpr.necompiler._names_cache[expr_key] = numexpr.necompiler.getExprNames(expression, context)
+        numexpr.necompiler._names_cache[expr_key] = \
+          numexpr.necompiler.getExprNames(expression, context)
     names, ex_uses_vml = numexpr.necompiler._names_cache[expr_key]
     arguments = getArguments(names, local_dict, global_dict)
 
-    arrays = [awkward1.operations.convert.tolayout(x, allowrecord=True, allowother=True) for x in arguments]
+    arrays = [awkward1.operations.convert.tolayout(x,
+                                                   allowrecord=True,
+                                                   allowother=True)
+                for x in arguments]
 
     def getfunction(inputs, depth):
-        if all(isinstance(x, awkward1.layout.NumpyArray) or not isinstance(x, awkward1.layout.Content) for x in inputs):
-            return lambda: (awkward1.layout.NumpyArray(numexpr.evaluate(expression, dict(zip(names, inputs)), {}, order=order, casting=casting, **kwargs)),)
+        if all(isinstance(x, awkward1.layout.NumpyArray) or
+               not isinstance(x, awkward1.layout.Content)
+                 for x in inputs):
+            return lambda: (awkward1.layout.NumpyArray(
+                              numexpr.evaluate(expression,
+                                               dict(zip(names, inputs)),
+                                               {},
+                                               order=order,
+                                               casting=casting,
+                                               **kwargs)),)
         else:
             return None
 
@@ -76,11 +87,17 @@ def re_evaluate(local_dict=None):
     names = numexpr.necompiler._numexpr_last["argnames"]
     arguments = getArguments(names, local_dict)
 
-    arrays = [awkward1.operations.convert.tolayout(x, allowrecord=True, allowother=True) for x in arguments]
+    arrays = [awkward1.operations.convert.tolayout(x,
+                                                   allowrecord=True,
+                                                   allowother=True)
+                for x in arguments]
 
     def getfunction(inputs, depth):
-        if all(isinstance(x, awkward1.layout.NumpyArray) or not isinstance(x, awkward1.layout.Content) for x in inputs):
-            return lambda: (awkward1.layout.NumpyArray(numexpr.re_evaluate(dict(zip(names, inputs)))),)
+        if all(isinstance(x, awkward1.layout.NumpyArray) or
+               not isinstance(x, awkward1.layout.Content)
+                 for x in inputs):
+            return lambda: (awkward1.layout.NumpyArray(
+                              numexpr.re_evaluate(dict(zip(names, inputs)))),)
         else:
             return None
 
