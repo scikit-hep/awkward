@@ -104,6 +104,26 @@ namespace awkward {
                           const SliceItemPtr& slicecontent,
                           const Slice& tail) const;
 
+    /// Returns an array of the same type with elements selected, rearranged,
+    /// and possibly duplicated by the `carry` array of integers.
+    ///
+    /// The output has the same length as the `carry` index, not the `array`
+    /// that is being manipulated. For each item `i` in `carry`, the output
+    /// is `array[index[i]]`.
+    /// 
+    /// This operation is called
+    /// [take](https://docs.scipy.org/doc/numpy/reference/generated/numpy.take.html)
+    /// in NumPy and Arrow, although this #carry is a low-level function that
+    /// does not handle negative indexes and is not exposed to the Python
+    /// layer. It is used by many operations to pass
+    /// selections/rearrangements/duplications from one typed array node to
+    /// another without knowing the latter's type.
+    ///
+    /// Taking #getitem_at_nowrap as a function from integers to the array's
+    /// item type, `A: [0, len(a)) → T`, and the `carry` array's 
+    /// {@link IndexOf#getitem_at_nowrap Index64::getitem_at_nowrap} as a
+    /// function `C: [0, len(c)) → [0, len(a))`, this method represents
+    /// composition, `A ∘ C: [0, len(c)) → T`.
     virtual const ContentPtr
       carry(const Index64& carry) const = 0;
 
@@ -119,6 +139,12 @@ namespace awkward {
     virtual const std::pair<int64_t, int64_t>
       minmax_depth() const = 0;
 
+    /// Returns (a) whether the list-depth of this array "branches," or differs
+    /// when followed through different fields of a RecordArray or UnionArray,
+    /// and (b) the minimum list-depth.
+    ///
+    /// If the array does not contain any records or heterogeneous data, the
+    /// `first` element is always `true` and the `second` is simply the depth.
     virtual const std::pair<bool, int64_t>
       branch_depth() const = 0;
 
@@ -156,6 +182,7 @@ namespace awkward {
     virtual const ContentPtr
       merge(const ContentPtr& other) const = 0;
 
+    /// Converts this array into a SliceItem that can be used in getitem.
     virtual const SliceItemPtr
       asslice() const = 0;
 

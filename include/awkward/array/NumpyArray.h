@@ -56,19 +56,19 @@ namespace awkward {
      * non-negative. If not scalar, the total number of elements in the array
      * is the product of the shape (which can be zero).
      * @param strides Length of each dimension in number of bytes. The length
-     * of strides must match the length of shape. Strides may be zero or
+     * of strides must match the length of `shape`. Strides may be zero or
      * negative, but they must be multiples of itemsize. An array is only
      * "contiguous" if `strides[i] == itemsize * prod(shape[i + 1:])`.
-     * @param byteoffset Location of item zero in the buffer, relative to ptr,
-     * measured in bytes, rather than number of elements (must be a multiple of
-     * itemsize). We keep this information in two parameters (ptr and
-     * byteoffset) rather than moving ptr so that ptr can be reference counted
-     * among all arrays that use the same buffer.
+     * @param byteoffset Location of item zero in the buffer, relative to
+     * `ptr`, measured in bytes, rather than number of elements (must be a
+     * multiple of `itemsize`). We keep this information in two parameters
+     * (`ptr` and `byteoffset`) rather than moving ptr so that ptr can be
+     * reference counted among all arrays that use the same buffer.
      * @param itemsize Number of bytes per item; should agree with the format.
      * @param format String representing the NumPy dtype (as defined by
-     * pybind11). Note that 32-bit systems and Windows use "q/Q" for
-     * signed/unsigned 64-bit and "l/L" for 32-bit, while all other systems use
-     * "l/L" for 64-bit and "i/I" for 32-bit.
+     * pybind11). Note that 32-bit systems and Windows use "`q/Q`" for
+     * signed/unsigned 64-bit and "`l/L`" for 32-bit, while all other systems
+     * use "`l/L`" for 64-bit and "`i/I`" for 32-bit.
      */
     NumpyArray(const IdentitiesPtr& identities,
                const util::Parameters& parameters,
@@ -79,47 +79,68 @@ namespace awkward {
                ssize_t itemsize,
                const std::string format);
 
-    /// Creates a NumpyArray from an @link IndexOf Index8@endlink.
+    /// Creates a NumpyArray from an {@link IndexOf Index8}.
     NumpyArray(const Index8 index);
-    /// Creates a NumpyArray from an @link IndexOf IndexU8@endlink.
+    /// Creates a NumpyArray from an {@link IndexOf IndexU8}.
     NumpyArray(const IndexU8 index);
-    /// Creates a NumpyArray from an @link IndexOf Index32@endlink.
+    /// Creates a NumpyArray from an {@link IndexOf Index32}.
     NumpyArray(const Index32 index);
-    /// Creates a NumpyArray from an @link IndexOf IndexU32@endlink.
+    /// Creates a NumpyArray from an {@link IndexOf IndexU32}.
     NumpyArray(const IndexU32 index);
-    /// Creates a NumpyArray from an @link IndexOf Index64@endlink.
+    /// Creates a NumpyArray from an {@link IndexOf Index64}.
     NumpyArray(const Index64 index);
-    /// Creates a NumpyArray from an @link IndexOf Index8@endlink.
+    /// Creates a NumpyArray from an {@link IndexOf Index8}.
     /// The format may be specified explicitly.
     NumpyArray(const Index8 index, const std::string& format);
-    /// Creates a NumpyArray from an @link IndexOf IndexU8@endlink.
+    /// Creates a NumpyArray from an {@link IndexOf IndexU8}.
     /// The format may be specified explicitly.
     NumpyArray(const IndexU8 index, const std::string& format);
-    /// Creates a NumpyArray from an @link IndexOf Index32@endlink.
+    /// Creates a NumpyArray from an {@link IndexOf Index32}.
     /// The format may be specified explicitly.
     NumpyArray(const Index32 index, const std::string& format);
-    /// Creates a NumpyArray from an @link IndexOf IndexU32@endlink.
+    /// Creates a NumpyArray from an {@link IndexOf IndexU32}.
     /// The format may be specified explicitly.
     NumpyArray(const IndexU32 index, const std::string& format);
-    /// Creates a NumpyArray from an @link IndexOf Index64@endlink.
+    /// Creates a NumpyArray from an {@link IndexOf Index64}.
     /// The format may be specified explicitly.
     NumpyArray(const Index64 index, const std::string& format);
 
+    /// Reference-counted pointer to the array buffer.
     const std::shared_ptr<void>
       ptr() const;
 
+    /// Number of elements in each dimension. A one-dimensional
+    /// array has a shape of length one. A zero-length shape represents a
+    /// numerical scalar, which is only valid as an output (immediately
+    /// converted into a number in Python). Each element in shape must be
+    /// non-negative. If not scalar, the total number of elements in the array
+    /// is the product of the shape (which can be zero).
     const std::vector<ssize_t>
       shape() const;
 
+    /// Length of each dimension in number of bytes. The length
+    /// of strides must match the length of `shape`. Strides may be zero or
+    /// negative, but they must be multiples of itemsize. An array is only
+    /// "contiguous" if `strides[i] == itemsize * prod(shape[i + 1:])`.
     const std::vector<ssize_t>
       strides() const;
 
+    /// Location of item zero in the buffer, relative to
+    /// `ptr`, measured in bytes, rather than number of elements (must be a
+    /// multiple of `itemsize`). We keep this information in two parameters
+    /// (`ptr` and `byteoffset`) rather than moving ptr so that ptr can be
+    /// reference counted among all arrays that use the same buffer.
     ssize_t
       byteoffset() const;
 
+    /// Number of bytes per item; should agree with the format.
     ssize_t
       itemsize() const;
 
+    /// String representing the NumPy dtype (as defined by
+    /// pybind11). Note that 32-bit systems and Windows use "`q/Q`" for
+    /// signed/unsigned 64-bit and "`l/L`" for 32-bit, while all other systems
+    /// use "`l/L`" for 64-bit and "`i/I`" for 32-bit.
     const std::string
       format() const;
 
@@ -129,12 +150,18 @@ namespace awkward {
     bool
       isempty() const;
 
+    /// Returns an untyped pointer to item zero in the buffer.
     void*
       byteptr() const;
 
+    /// Returns an untyped pointer to item `at` in the buffer.
     void*
       byteptr(ssize_t at) const;
 
+    /// The length of the array (or scalar, if `shape.empty()`) in bytes.
+    ///
+    /// If scalar, the return value is equal to #itemsize; otherwise, it is
+    /// equal to `shape[0] * strides[0]`.
     ssize_t
       bytelength() const;
 
