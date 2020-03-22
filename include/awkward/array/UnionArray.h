@@ -46,6 +46,8 @@ namespace awkward {
     const ContentPtr
       simplify_uniontype(bool mergebool) const;
 
+    /// User-friendly name of this class: `"UnionArray8_32"`,
+    /// `"UnionArray8_U32"`, or `"UnionArray8_64"`.
     const std::string
       classname() const override;
 

@@ -58,7 +58,8 @@ namespace awkward {
      * @param strides Length of each dimension in number of bytes. The length
      * of strides must match the length of `shape`. Strides may be zero or
      * negative, but they must be multiples of itemsize. An array is only
-     * "contiguous" if `strides[i] == itemsize * prod(shape[i + 1:])`.
+     * "contiguous" if `strides[i] == itemsize * prod(shape[i + 1:])` for all
+     * valid `i`.
      * @param byteoffset Location of item zero in the buffer, relative to
      * `ptr`, measured in bytes, rather than number of elements (must be a
      * multiple of `itemsize`). We keep this information in two parameters
@@ -121,7 +122,8 @@ namespace awkward {
     /// Length of each dimension in number of bytes. The length
     /// of strides must match the length of `shape`. Strides may be zero or
     /// negative, but they must be multiples of itemsize. An array is only
-    /// "contiguous" if `strides[i] == itemsize * prod(shape[i + 1:])`.
+    /// "contiguous" if `strides[i] == itemsize * prod(shape[i + 1:])` for all
+    /// valid `i`.
     const std::vector<ssize_t>
       strides() const;
 
@@ -204,6 +206,7 @@ namespace awkward {
     bool
       isscalar() const override;
 
+    /// User-friendly name of this class: `"NumpyArray"`.
     const std::string
       classname() const override;
 
@@ -356,9 +359,34 @@ namespace awkward {
              int64_t axis,
              int64_t depth) const override;
 
+    /// Returns `true` if this array is contiguous; `false` otherwise.
+    ///
+    /// An array is "contiguous" if
+    /// `strides[i] = itemsize * prod(shape[i + 1:])`
+    /// for all `i` in the #shape and #strides.
+    ///
+    /// This means that there are no unreachable gaps between values and
+    /// each user-visible value is represented by one value in memory.
+    ///
+    /// It does not mean that #byteoffset is `0` or the #length covers the
+    /// entire allocated buffer. There may be unreachable elements before
+    /// or after the user-visible data.
     bool
       iscontiguous() const;
 
+    /// Returns a contiguous version of this array (or this array if
+    /// `iscontiguous()`).
+    ///
+    /// An array is "contiguous" if
+    /// `strides[i] = itemsize * prod(shape[i + 1:])`
+    /// for all `i` in the #shape and #strides.
+    ///
+    /// This means that there are no unreachable gaps between values and
+    /// each user-visible value is represented by one value in memory.
+    ///
+    /// It does not mean that #byteoffset is `0` or the #length covers the
+    /// entire allocated buffer. There may be unreachable elements before
+    /// or after the user-visible data.
     const NumpyArray
       contiguous() const;
 

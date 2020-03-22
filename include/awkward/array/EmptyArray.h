@@ -21,6 +21,7 @@ namespace awkward {
       toNumpyArray(const std::string& format,
                    ssize_t itemsize) const;
 
+    /// User-friendly name of this class: `"EmptyArray"`.
     const std::string
       classname() const override;
 

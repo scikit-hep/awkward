@@ -43,6 +43,8 @@ namespace awkward {
     const ContentPtr
       toListOffsetArray64(bool start_at_zero) const;
 
+    /// User-friendly name of this class: `"ListOffsetArray32"`,
+    /// `"ListOffsetArrayU32"`, or `"ListOffsetArray64"`.
     const std::string
       classname() const override;
 

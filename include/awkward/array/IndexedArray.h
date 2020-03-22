@@ -45,6 +45,9 @@ namespace awkward {
     T
       index_at_nowrap(int64_t at) const;
 
+    /// User-friendly name of this class: `"IndexedArray32"`,
+    /// `"IndexedArrayU32"`, `"IndexedArray64"`,
+    /// `"IndexedOptionArray32"`, or `"IndexedOptionArray64"`.
     const std::string
       classname() const override;
 

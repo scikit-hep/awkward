@@ -37,6 +37,7 @@ namespace awkward {
     const ContentPtr
       toListOffsetArray64(bool start_at_zero) const;
 
+    /// User-friendly name of this class: `"RegularArray"`.
     const std::string
       classname() const override;
 

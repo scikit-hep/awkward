@@ -29,6 +29,8 @@ namespace awkward {
     virtual bool
       isscalar() const;
 
+    /// User-friendly name of this class, including integer-type
+    /// specialization.
     virtual const std::string
       classname() const = 0;
 

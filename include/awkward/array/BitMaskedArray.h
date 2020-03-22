@@ -55,6 +55,7 @@ namespace awkward {
     const std::shared_ptr<IndexedOptionArray64>
       toIndexedOptionArray64() const;
 
+    /// User-friendly name of this class: `"BitMaskedArray"`.
     const std::string
       classname() const override;
 

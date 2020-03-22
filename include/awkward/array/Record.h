@@ -28,6 +28,7 @@ namespace awkward {
     bool
       isscalar() const override;
 
+    /// User-friendly name of this class: `"Record"`.
     const std::string
       classname() const override;
 

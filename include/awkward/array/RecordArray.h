@@ -42,6 +42,7 @@ namespace awkward {
     const ContentPtr
       setitem_field(const std::string& where, const ContentPtr& what) const;
 
+    /// User-friendly name of this class: `"RecordArray"`.
     const std::string
       classname() const override;
 

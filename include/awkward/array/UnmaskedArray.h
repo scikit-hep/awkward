@@ -37,6 +37,7 @@ namespace awkward {
     const ContentPtr
       toIndexedOptionArray64() const;
 
+    /// User-friendly name of this class: `"UnmaskedArray"`.
     const std::string
       classname() const override;
 
