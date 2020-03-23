@@ -56,8 +56,8 @@ namespace awkward {
 
   /// @class RawArrayOf
   ///
-  /// @brief Represents a 1-dimensional array of type `T`, usable purely in C++
-  /// and implemented entirely in include/awkward/array/RawArray.h.
+  /// @brief Represents a one-dimensional array of type `T`, usable purely in
+  /// C++ and implemented entirely in include/awkward/array/RawArray.h.
   ///
   /// See #RawArrayOf for the meaning of each parameter.
   ///
@@ -79,9 +79,9 @@ namespace awkward {
     /// array.
     /// @param ptr Reference-counted pointer to the array buffer.
     /// @param offset Location of item zero in the buffer, relative to
-    /// `ptr`, measured in the number of elements. We keep this information in
-    /// two parameters (`ptr` and `offset`) rather than moving `ptr` so that
-    /// `ptr` can be reference counted among all arrays that use the same
+    /// #ptr, measured in the number of elements. We keep this information in
+    /// two parameters (#ptr and #offset) rather than moving #ptr so that
+    /// #ptr can be reference counted among all arrays that use the same
     /// buffer.
     /// @param length Number of elements in the array.
     /// @param itemsize Number of bytes per item; should agree with the format.
@@ -137,10 +137,10 @@ namespace awkward {
     }
 
     /// @brief Location of item zero in the buffer, relative to
-    /// `ptr`, measured in the number of elements.
+    /// #ptr, measured in the number of elements.
     ///
     /// We keep this information in two parameters
-    /// (`ptr` and `offset`) rather than moving `ptr` so that `ptr` can be
+    /// (#ptr and #offset) rather than moving #ptr so that #ptr can be
     /// reference counted among all arrays that use the same buffer.
     const int64_t
       offset() const {

@@ -53,9 +53,9 @@ namespace awkward {
     /// "contiguous" if `strides[i] == itemsize * prod(shape[i + 1:])` for all
     /// valid `i`.
     /// @param byteoffset Location of item zero in the buffer, relative to
-    /// `ptr`, measured in bytes, rather than number of elements (must be a
+    /// #ptr, measured in bytes, rather than number of elements (must be a
     /// multiple of `itemsize`). We keep this information in two parameters
-    /// (`ptr` and `byteoffset`) rather than moving `ptr` so that `ptr` can be
+    /// (#ptr and #byteoffset) rather than moving #ptr so that #ptr can be
     /// reference counted among all arrays that use the same buffer.
     /// @param itemsize Number of bytes per item; should agree with the format.
     /// @param format String representing the NumPy dtype (as defined by
