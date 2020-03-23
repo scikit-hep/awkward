@@ -13,32 +13,80 @@
 #include "awkward/Content.h"
 
 namespace awkward {
+  /// @class IndexedArrayOf
+  ///
+  /// @brief Filters, rearranges, and/or duplicates items in its #content
+  /// through an #index, which has the same effect as lazily-applied #carry.
+  ///
+  /// If `ISOPTION = true`, the array is an IndexedOptionArray with OptionType,
+  /// and negative values in the #index correspond to `None`. Otherwise, the
+  /// IndexedArray has the same type as its #content.
+  ///
+  /// See #IndexedArrayOf for the meaning of each parameter.
   template <typename T, bool ISOPTION>
   class EXPORT_SYMBOL IndexedArrayOf: public Content {
   public:
+    /// @brief Creates an IndexedArray or IndexedOptionArray from a full set
+    /// of parameters.
+    ///
+    /// @param identities Optional Identities for each element of the array
+    /// (may be `nullptr`).
+    /// @param parameters String-to-JSON map that augments the meaning of this
+    /// array.
+    /// @param index Item positions to be filtered, rearranged, duplicated, or
+    /// masked as `None`.
+    /// If #isoption is `true`, negative values are interpreted as `None`.
+    /// If #isoption is `false`, negative values are invalid. Values
+    /// greater than or equal to `len(content)` are invalid in either case.
+    /// @param content Data to be filtered, rearranged, and/or duplicated.
+    /// Values in `content[i]` where `i` is not in `index` are
+    /// "unreachable;" they do not exist in the high level view.
     IndexedArrayOf<T, ISOPTION>(const IdentitiesPtr& identities,
                                 const util::Parameters& parameters,
                                 const IndexOf<T>& index,
                                 const ContentPtr& content);
 
+    /// @brief Item positions to be filtered, rearranged, duplicated, or
+    /// masked as `None`.
+    ///
+    /// If #isoption is `true`, negative values are interpreted as `None`.
+    /// If #isoption is `false`, negative values are invalid. Values
+    /// greater than or equal to `len(content)` are invalid in either case.
     const IndexOf<T>
       index() const;
 
+    /// @brief Data to be filtered, rearranged, and/or duplicated.
+    ///
+    /// Values in `content[i]` where `i` is not in `index` are
+    /// "unreachable;" they do not exist in the high level view.
     const ContentPtr
       content() const;
 
+    /// @brief Returns `true` if this array is an IndexedOptionArray32 or
+    /// IndexedOptionArray64.
     bool
       isoption() const;
 
+    /// @brief Eagerly applies the #index as a #carry, removing `None`
+    /// elements if an IndexedOptionArray.
     const ContentPtr
       project() const;
 
+    /// @brief Performs a set-union of a given `mask` with the missing values
+    /// (if an IndexedOptionArray) and calls #project.
     const ContentPtr
       project(const Index8& mask) const;
 
+    /// @brief Returns an {@link IndexOf Index8} in which each byte represents
+    /// missing values with `1` and non-missing values with `0`. The mask
+    /// is all `0` if this is an IndexedArray.
     const Index8
       bytemask() const;
 
+    /// @brief If this is an IndexedOptionArray and the #content also has
+    /// OptionType, combine the two indicators of missing values into a single
+    /// OptionType array. If this is an IndexedArray and the #content is also
+    /// an IndexedArray, combine the two #index arrays.
     const ContentPtr
       simplify_optiontype() const;
 
