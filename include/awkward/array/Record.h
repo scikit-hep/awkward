@@ -178,6 +178,9 @@ namespace awkward {
     const std::string
       validityerror(const std::string& path) const override;
 
+    /// @copydoc Content::shallow_simplify()
+    ///
+    /// For Record, this method returns #shallow_copy (pass-through).
     const ContentPtr
       shallow_simplify() const override;
 

@@ -612,6 +612,10 @@ namespace awkward {
       return std::string();
     }
 
+    /// @copydoc Content::shallow_simplify()
+    ///
+    /// For {@link RawArrayOf RawArray}, this method returns #shallow_copy
+    /// (pass-through).
     const ContentPtr
       shallow_simplify() const override {
       return shallow_copy();

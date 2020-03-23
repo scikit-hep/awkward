@@ -203,6 +203,9 @@ namespace awkward {
     const std::string
       validityerror(const std::string& path) const override;
 
+    /// @copydoc Content::shallow_simplify()
+    ///
+    /// For ByteMaskedArray, this method Returns #simplify_optiontype.
     const ContentPtr
       shallow_simplify() const override;
 
