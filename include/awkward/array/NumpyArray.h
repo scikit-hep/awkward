@@ -146,9 +146,13 @@ namespace awkward {
     const std::string
       format() const;
 
+    /// Returns the number of dimensions, which is `shape.size()`.
     ssize_t
       ndim() const;
 
+    /// Returns `true` if any element of the #shape is zero; `false` otherwise.
+    ///
+    /// Note that a NumpyArray can be empty with non-zero #length.
     bool
       isempty() const;
 
@@ -203,6 +207,7 @@ namespace awkward {
     const ContentPtr
       toRegularArray() const;
 
+    /// Returns `true` if the #shape is zero-dimensional; `false` otherwise.
     bool
       isscalar() const override;
 
@@ -390,65 +395,127 @@ namespace awkward {
     const NumpyArray
       contiguous() const;
 
+    /// Inhibited general function (see 7 argument `getitem_next` specific
+    /// to NumpyArray).
     const ContentPtr
       getitem_next(const SliceAt& at,
                    const Slice& tail,
                    const Index64& advanced) const override;
 
+    /// Inhibited general function (see 7 argument `getitem_next` specific
+    /// to NumpyArray).
     const ContentPtr
       getitem_next(const SliceRange& range,
                    const Slice& tail,
                    const Index64& advanced) const override;
 
+    /// Inhibited general function (see 7 argument `getitem_next` specific
+    /// to NumpyArray).
     const ContentPtr
       getitem_next(const SliceArray64& array,
                    const Slice& tail,
                    const Index64& advanced) const override;
 
+    /// Inhibited general function (see 7 argument `getitem_next` specific
+    /// to NumpyArray).
     const ContentPtr
       getitem_next(const SliceField& field,
                    const Slice& tail,
                    const Index64& advanced) const override;
 
+    /// Inhibited general function (see 7 argument `getitem_next` specific
+    /// to NumpyArray).
     const ContentPtr
       getitem_next(const SliceFields& fields,
                    const Slice& tail,
                    const Index64& advanced) const override;
 
+    /// Inhibited general function (see 7 argument `getitem_next` specific
+    /// to NumpyArray).
     const ContentPtr
       getitem_next(const SliceJagged64& jagged,
                    const Slice& tail,
                    const Index64& advanced) const override;
 
   protected:
+    /// Internal function that propagates the derivation of a contiguous
+    /// version of this array from one axis to the next.
+    ///
+    /// This may be thought of as a specialized application of #carry indexed
+    /// by byte positions, rather than item positions. (If it had been written
+    /// after #getitem_next and #carry, it probably would have used $carry.)
     const NumpyArray
       contiguous_next(const Index64& bytepos) const;
 
+    /// Internal function that propagates a generic #getitem request through
+    /// one axis by propagating strides (non-advanced indexing only).
+    ///
+    /// @param head First element of the Slice tuple.
+    /// @param tail The rest of the elements of the Slice tuple.
+    /// @param length The length of the output array (after propagating
+    /// through all axis levels).
     const NumpyArray
       getitem_bystrides(const SliceItemPtr& head,
                         const Slice& tail,
                         int64_t length) const;
 
+    /// Internal function that propagates a generic #getitem request through
+    /// one axis by propagating strides (non-advanced indexing only).
+    ///
+    /// See generic #getitem_bystrides for details.
     const NumpyArray
       getitem_bystrides(const SliceAt& at,
                         const Slice& tail,
                         int64_t length) const;
 
+    /// Internal function that propagates a generic #getitem request through
+    /// one axis by propagating strides (non-advanced indexing only).
+    ///
+    /// See generic #getitem_bystrides for details.
     const NumpyArray
       getitem_bystrides(const SliceRange& range,
                         const Slice& tail,
                         int64_t length) const;
 
+    /// Internal function that propagates a generic #getitem request through
+    /// one axis by propagating strides (non-advanced indexing only).
+    ///
+    /// See generic #getitem_bystrides for details.
     const NumpyArray
       getitem_bystrides(const SliceEllipsis& ellipsis,
                         const Slice& tail,
                         int64_t length) const;
 
+    /// Internal function that propagates a generic #getitem request through
+    /// one axis by propagating strides (non-advanced indexing only).
+    ///
+    /// See generic #getitem_bystrides for details.
     const NumpyArray
       getitem_bystrides(const SliceNewAxis& newaxis,
                         const Slice& tail,
                         int64_t length) const;
 
+    /// Internal function that propagates a generic #getitem request through
+    /// one axis by building up a `carry` {@link IndexOf Index}.
+    ///
+    /// @param head First element of the Slice tuple.
+    /// @param tail The rest of the elements of the Slice tuple.
+    /// @param carry The filter/rearrangement/duplication {@link IndexOf Index}
+    /// that will be applied to the last axis.
+    /// @param advanced If empty, no array slices (integer or boolean) have
+    /// been encountered yet; otherwise, positions in any subsequent array
+    /// slices to select.
+    /// @param length The length of the output array (after propagating
+    /// through all axis levels).
+    /// @param stride The size of the data to carry at each item of the
+    /// carry {@link IndexOf Index}.
+    /// @param first If `true`, this axis is the first axis to be considered.
+    ///
+    /// In the [NumPy documentation](https://docs.scipy.org/doc/numpy/reference/arrays.indexing.html#integer-array-indexing),
+    /// advanced indexes are described as iterating "as one," which requires
+    /// an {@link IndexOf Index} to be propagated when implemented recursively.
+    ///
+    /// Identities are only sliced at the `first` axis.
     const NumpyArray
       getitem_next(const SliceItemPtr& head,
                    const Slice& tail,
@@ -458,6 +525,10 @@ namespace awkward {
                    int64_t stride,
                    bool first) const;
 
+    /// Internal function that propagates a generic #getitem request through
+    /// one axis by building up a `carry` {@link IndexOf Index}.
+    ///
+    /// See generic #getitem_bystrides for details.
     const NumpyArray
       getitem_next(const SliceAt& at,
                    const Slice& tail,
@@ -467,6 +538,10 @@ namespace awkward {
                    int64_t stride,
                    bool first) const;
 
+    /// Internal function that propagates a generic #getitem request through
+    /// one axis by building up a `carry` {@link IndexOf Index}.
+    ///
+    /// See generic #getitem_bystrides for details.
     const NumpyArray
       getitem_next(const SliceRange& range,
                    const Slice& tail,
@@ -476,6 +551,10 @@ namespace awkward {
                    int64_t stride,
                    bool first) const;
 
+    /// Internal function that propagates a generic #getitem request through
+    /// one axis by building up a `carry` {@link IndexOf Index}.
+    ///
+    /// See generic #getitem_bystrides for details.
     const NumpyArray
       getitem_next(const SliceEllipsis& ellipsis,
                    const Slice& tail,
@@ -485,6 +564,10 @@ namespace awkward {
                    int64_t stride,
                    bool first) const;
 
+    /// Internal function that propagates a generic #getitem request through
+    /// one axis by building up a `carry` {@link IndexOf Index}.
+    ///
+    /// See generic #getitem_bystrides for details.
     const NumpyArray
       getitem_next(const SliceNewAxis& newaxis,
                    const Slice& tail,
@@ -494,6 +577,10 @@ namespace awkward {
                    int64_t stride,
                    bool first) const;
 
+    /// Internal function that propagates a generic #getitem request through
+    /// one axis by building up a `carry` {@link IndexOf Index}.
+    ///
+    /// See generic #getitem_bystrides for details.
     const NumpyArray
       getitem_next(const SliceArray64& array,
                    const Slice& tail,

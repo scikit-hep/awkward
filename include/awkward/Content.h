@@ -54,15 +54,36 @@ namespace awkward {
     virtual void
       tojson_part(ToJson& builder) const = 0;
 
+    /// Internal function used to calculate #nbytes.
+    ///
+    /// @param largest The largest range of bytes used in each
+    /// reference-counted pointer (`size_t`).
+    ///
+    /// @note This method of accounting for overlapping buffers is
+    /// insufficient: two nodes could use parts of the same buffer in which
+    /// one doesn't completely overlap the other. It's not likely, but
+    /// currently the calculation of #nbytes is an underestimate.
     virtual void
       nbytes_part(std::map<size_t, int64_t>& largest) const = 0;
 
+    /// The number of elements in the array.
     virtual int64_t
       length() const = 0;
 
     virtual const ContentPtr
       shallow_copy() const = 0;
 
+    /// Return a copy of this array node and all nodes hierarchically nested
+    /// within it, optionally copying the associated arrays, indexes, and
+    /// identities, too.
+    ///
+    /// @param copyarrays If `true`, copy the associated array buffers (in
+    /// NumpyArray and {@link RawArrayOf RawArray}), not just the lightweight
+    /// objects that point to them.
+    /// @param copyindexes If `true`, copy the {@link IndexOf Index} objects
+    /// and their buffers as well.
+    /// @param copyidentities If `true`, copy the
+    /// {@link IdentitiesOf Identities} objects and their buffers as well.
     virtual const ContentPtr
       deep_copy(bool copyarrays,
                 bool copyindexes,
@@ -73,42 +94,97 @@ namespace awkward {
     virtual void
       check_for_iteration() const = 0;
 
+    /// Internal function to return an empty slice (with the correct type).
     virtual const ContentPtr
       getitem_nothing() const = 0;
 
+    /// Returns the element at a given position in the array, handling negative
+    /// indexing and bounds-checking like Python.
+    ///
+    /// The first item in the array is at `0`, the second at `1`, the last at
+    /// `-1`, the penultimate at `-2`, etc.
     virtual const ContentPtr
       getitem_at(int64_t at) const = 0;
 
+    /// Returns the element at a given position in the array, without handling
+    /// negative indexing or bounds-checking.
+    ///
+    /// If the array has Identities, the identity bounds are checked.
     virtual const ContentPtr
       getitem_at_nowrap(int64_t at) const = 0;
 
+    /// Returns a subinterval of this array, handling negative indexing and
+    /// bounds-checking like Python.
+    ///
+    /// The first item in the array is at `0`, the second at `1`, the last at
+    /// `-1`, the penultimate at `-2`, etc.
+    ///
+    /// Ranges beyond the array are not an error; they are trimmed to
+    /// `start = 0` on the left and `stop = length() - 1` on the right.
+    ///
+    /// This operation only affects the node metadata; its calculation time
+    /// does not scale with the size of the array.
     virtual const ContentPtr
       getitem_range(int64_t start, int64_t stop) const = 0;
 
+    /// Returns a subinterval of this array, without handling negative indexing
+    /// or bounds-checking.
+    ///
+    /// If the array has Identities, the identity bounds are checked.
+    ///
+    /// This operation only affects the node metadata; its calculation time
+    /// does not scale with the size of the array.
     virtual const ContentPtr
       getitem_range_nowrap(int64_t start, int64_t stop) const = 0;
 
+    /// Returns the array with the first nested RecordArray replaced by
+    /// the field at `key`.
     virtual const ContentPtr
       getitem_field(const std::string& key) const = 0;
 
+    /// Returns the array with the first nested RecordArray replaced by
+    /// a RecordArray of a given subset of `keys`.
     virtual const ContentPtr
       getitem_fields(const std::vector<std::string>& keys) const = 0;
 
+    /// Entry point for general slicing: Slice represents a tuple of SliceItem
+    /// nodes applying to each level of nested lists.
     virtual const ContentPtr
       getitem(const Slice& where) const;
 
+    /// Internal function that propagates a generic #getitem request through
+    /// one axis (including advanced indexing).
+    ///
+    /// @param head First element of the Slice tuple.
+    /// @param tail The rest of the elements of the Slice tuple.
+    /// @param advanced If empty, no array slices (integer or boolean) have
+    /// been encountered yet; otherwise, positions in any subsequent array
+    /// slices to select.
+    ///
+    /// In the [NumPy documentation](https://docs.scipy.org/doc/numpy/reference/arrays.indexing.html#integer-array-indexing),
+    /// advanced indexes are described as iterating "as one," which requires
+    /// an {@link IndexOf Index} to be propagated when implemented recursively.
     virtual const ContentPtr
       getitem_next(const SliceItemPtr& head,
                    const Slice& tail,
                    const Index64& advanced) const;
 
+    /// Internal function that propagates a jagged array (array with
+    /// irregular-length dimensions) slice through one axis.
+    ///
+    /// @param slicestarts Effective `starts` (similar to
+    /// {@link ListArrayOf ListArray}'s `starts`) of the jagged slice.
+    /// @param slicestops Effective `stops` of the jagged slice.
+    /// @param slicecontent Nested `content` within the jagged slice.
+    /// @param tail Subsequent SliceItem elements beyond the jagged array
+    /// hierarchy.
     virtual const ContentPtr
       getitem_next_jagged(const Index64& slicestarts,
                           const Index64& slicestops,
                           const SliceItemPtr& slicecontent,
                           const Slice& tail) const;
 
-    /// Returns an array of the same type with elements selected, rearranged,
+    /// Returns an array of the same type with elements filtered, rearranged,
     /// and possibly duplicated by the `carry` array of integers.
     ///
     /// The output has the same length as the `carry` index, not the `array`
@@ -120,7 +196,7 @@ namespace awkward {
     /// in NumPy and Arrow, although this #carry is a low-level function that
     /// does not handle negative indexes and is not exposed to the Python
     /// layer. It is used by many operations to pass
-    /// selections/rearrangements/duplications from one typed array node to
+    /// filters/rearrangements/duplications from one typed array node to
     /// another without knowing the latter's type.
     ///
     /// Taking #getitem_at_nowrap as a function from integers to the array's
@@ -136,21 +212,37 @@ namespace awkward {
     virtual const ContentPtr
       carry(const Index64& carry) const = 0;
 
+    /// Returns the parameter associated with `key` at the first level that
+    /// has a non-null value, descending only as deep as the first RecordArray.
     virtual const std::string
       purelist_parameter(const std::string& key) const = 0;
 
+    /// Returns `true` if all nested lists down to the first RecordArray
+    /// are RegularArray nodes; `false` otherwise.
     virtual bool
       purelist_isregular() const = 0;
 
+    /// Returns the list-depth of this array, not counting any contained
+    /// within a RecordArray.
+    ///
+    /// The `purelist_depth` of a Record is `0`, and a RecordArray is `1`
+    /// (regardless of what its fields contain).
+    ///
+    /// If this array contains a {@link UnionArrayOf UnionArray} with
+    /// different depths, the return value is `-1`.
     virtual int64_t
       purelist_depth() const = 0;
 
+    /// Returns (a) the minimum list-depth and (b) the maximum list-depth of
+    /// the array, which can differ if this array "branches" (differs when
+    /// followed through different fields of a RecordArray or
+    /// {@link UnionArrayOf UnionArray}).
     virtual const std::pair<int64_t, int64_t>
       minmax_depth() const = 0;
 
     /// Returns (a) whether the list-depth of this array "branches," or differs
-    /// when followed through different fields of a RecordArray or UnionArray,
-    /// and (b) the minimum list-depth.
+    /// when followed through different fields of a RecordArray or
+    /// {@link UnionArrayOf UnionArray} and (b) the minimum list-depth.
     ///
     /// If the array does not contain any records or heterogeneous data, the
     /// `first` element is always `true` and the `second` is simply the depth.
@@ -160,19 +252,30 @@ namespace awkward {
     virtual int64_t
       numfields() const = 0;
 
+    /// Returns the position of a tuple or record key name if this array
+    /// contains a RecordArray.
     virtual int64_t
       fieldindex(const std::string& key) const = 0;
 
+    /// Returns the record name associated with a given field index or the
+    /// tuple index as a string (e.g. `"0"`, `"1"`, `"2"`) if a tuple.
+    ///
+    /// Raises an error if the array does not contain a RecordArray.
     virtual const std::string
       key(int64_t fieldindex) const = 0;
 
+    /// Returns `true` if the array contains a RecordArray with the specified
+    /// `key`; `false` otherwise.
     virtual bool
       haskey(const std::string& key) const = 0;
 
+    /// Returns a list of RecordArray keys or an empty list if this array
+    /// does not contain a RecordArray.
     virtual const std::vector<std::string>
       keys() const = 0;
 
     // operations
+
     virtual const std::string
       validityerror(const std::string& path) const = 0;
 
@@ -185,9 +288,20 @@ namespace awkward {
     virtual const std::pair<Index64, ContentPtr>
       offsets_and_flattened(int64_t axis, int64_t depth) const = 0;
 
+    /// Returns `true` if this array can be merged with the `other`; `false`
+    /// otherwise.
+    ///
+    /// The #merge method will complete without errors if this function
+    /// returns `true`.
+    ///
+    /// @param other The other array to merge with.
+    /// @param mergebool If `true`, consider boolean types to be equivalent
+    /// to integers.
     virtual bool
       mergeable(const ContentPtr& other, bool mergebool) const = 0;
 
+    /// Return an array with this and the `other` concatenated (this first,
+    /// `other` last).
     virtual const ContentPtr
       merge(const ContentPtr& other) const = 0;
 
@@ -195,6 +309,11 @@ namespace awkward {
     virtual const SliceItemPtr
       asslice() const = 0;
 
+    /// Return a copy of this array with `None` values replaced by a given
+    /// `value`.
+    ///
+    /// @param value An array of exactly one element, which need not have
+    /// the same type as the missing values it's replacing.
     virtual const ContentPtr
       fillna(const ContentPtr& value) const = 0;
 
@@ -213,6 +332,20 @@ namespace awkward {
                   bool mask,
                   bool keepdims) const = 0;
 
+    /// Returns a (possibly nested) array of integers indicating the positions
+    /// of elements within each nested list.
+    ///
+    /// @param axis The nesting depth at which this operation is applied.
+    /// If `axis = 0`, the output is simply an array of integers from `0`
+    /// to `length()`. If `axis = 1`, the output has one level of nesting
+    /// containing integers from `0` to the length of the nested list.
+    /// Higher values of `axis` leave outer layers of the structure untouched.
+    /// Negative `axis` counts backward from the deepest levels (`-1` is
+    /// the last valid `axis`).
+    /// @param depth The current depth while stepping into the array: this
+    /// value is set to `0` on the array node where the user starts the
+    /// process and is increased at each level of list-depth (instead of
+    /// decreasing the user-specified `axis`).
     virtual const ContentPtr
       localindex(int64_t axis, int64_t depth) const = 0;
 
@@ -276,7 +409,7 @@ namespace awkward {
     /// process and is increased at each level of list-depth (instead of
     /// decreasing the user-specified `axis`).
     ///
-    /// @note `axis = 0` is qualitatively different from any other `axis`
+    /// Note that `axis = 0` is qualitatively different from any other `axis`
     /// because a dataset is typically much larger than any one of its
     /// elements. As such, `axis = 0` is lazily generated with an
     /// {@link IndexedArrayOf IndexedArray}, while any other `axis` is
@@ -301,6 +434,9 @@ namespace awkward {
              int64_t maxdecimals,
              int64_t buffersize) const;
 
+    /// The number of bytes contained in all array buffers,
+    /// {@link IndexOf Index} buffers, and Identities buffers, not including
+    /// the lightweight node objects themselves.
     int64_t
       nbytes() const;
 
@@ -343,63 +479,111 @@ namespace awkward {
                    const util::RecordLookupPtr& recordlookup,
                    const util::Parameters& parameters) const;
 
+    /// Internal function that propagates a generic #getitem request through
+    /// one axis (including advanced indexing).
+    ///
+    /// See generic #getitem_next for details.
     virtual const ContentPtr
       getitem_next(const SliceAt& at,
                    const Slice& tail,
                    const Index64& advanced) const = 0;
 
+    /// Internal function that propagates a generic #getitem request through
+    /// one axis (including advanced indexing).
+    ///
+    /// See generic #getitem_next for details.
     virtual const ContentPtr
       getitem_next(const SliceRange& range,
                    const Slice& tail,
                    const Index64& advanced) const = 0;
 
+    /// Internal function that propagates a generic #getitem request through
+    /// one axis (including advanced indexing).
+    ///
+    /// See generic #getitem_next for details.
     virtual const ContentPtr
       getitem_next(const SliceEllipsis& ellipsis,
                    const Slice& tail,
                    const Index64& advanced) const;
 
+    /// Internal function that propagates a generic #getitem request through
+    /// one axis (including advanced indexing).
+    ///
+    /// See generic #getitem_next for details.
     virtual const ContentPtr
       getitem_next(const SliceNewAxis& newaxis,
                    const Slice& tail,
                    const Index64& advanced) const;
 
+    /// Internal function that propagates a generic #getitem request through
+    /// one axis (including advanced indexing).
+    ///
+    /// See generic #getitem_next for details.
     virtual const ContentPtr
       getitem_next(const SliceArray64& array,
                    const Slice& tail,
                    const Index64& advanced) const = 0;
 
+    /// Internal function that propagates a generic #getitem request through
+    /// one axis (including advanced indexing).
+    ///
+    /// See generic #getitem_next for details.
     virtual const ContentPtr
       getitem_next(const SliceField& field,
                    const Slice& tail,
                    const Index64& advanced) const;
 
+    /// Internal function that propagates a generic #getitem request through
+    /// one axis (including advanced indexing).
+    ///
+    /// See generic #getitem_next for details.
     virtual const ContentPtr
       getitem_next(const SliceFields& fields,
                    const Slice& tail,
                    const Index64& advanced) const;
 
+    /// Internal function that propagates a generic #getitem request through
+    /// one axis (including advanced indexing).
+    ///
+    /// See generic #getitem_next for details.
     virtual const ContentPtr
       getitem_next(const SliceMissing64& missing,
                    const Slice& tail,
                    const Index64& advanced) const;
 
+    /// Internal function that propagates a generic #getitem request through
+    /// one axis (including advanced indexing).
+    ///
+    /// See generic #getitem_next for details.
     virtual const ContentPtr
       getitem_next(const SliceJagged64& jagged,
                    const Slice& tail,
                    const Index64& advanced) const = 0;
 
+    /// Internal function that propagates a jagged array (array with
+    /// irregular-length dimensions) slice through one axis.
+    ///
+    /// See generic #getitem_next_jagged for details.
     virtual const ContentPtr
       getitem_next_jagged(const Index64& slicestarts,
                           const Index64& slicestops,
                           const SliceArray64& slicecontent,
                           const Slice& tail) const = 0;
 
+    /// Internal function that propagates a jagged array (array with
+    /// irregular-length dimensions) slice through one axis.
+    ///
+    /// See generic #getitem_next_jagged for details.
     virtual const ContentPtr
       getitem_next_jagged(const Index64& slicestarts,
                           const Index64& slicestops,
                           const SliceMissing64& slicecontent,
                           const Slice& tail) const = 0;
 
+    /// Internal function that propagates a jagged array (array with
+    /// irregular-length dimensions) slice through one axis.
+    ///
+    /// See generic #getitem_next_jagged for details.
     virtual const ContentPtr
       getitem_next_jagged(const Index64& slicestarts,
                           const Index64& slicestops,
