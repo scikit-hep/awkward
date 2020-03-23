@@ -75,7 +75,7 @@ namespace awkward {
   }
 
   template <typename T>
-  const ContentPtr
+  const std::shared_ptr<ListOffsetArray64>
   ListArrayOf<T>::broadcast_tooffsets64(const Index64& offsets) const {
     if (offsets.length() == 0  ||  offsets.getitem_at_nowrap(0) != 0) {
       throw std::invalid_argument(
@@ -116,7 +116,7 @@ namespace awkward {
   }
 
   template <typename T>
-  const ContentPtr
+  const std::shared_ptr<RegularArray>
   ListArrayOf<T>::toRegularArray() const {
     Index64 offsets = compact_offsets64(true);
     ContentPtr listoffsetarray64 = broadcast_tooffsets64(offsets);
@@ -126,7 +126,7 @@ namespace awkward {
   }
 
   template <typename T>
-  const ContentPtr
+  const std::shared_ptr<ListOffsetArray64>
   ListArrayOf<T>::toListOffsetArray64(bool start_at_zero) const {
     Index64 offsets = compact_offsets64(start_at_zero);
     return broadcast_tooffsets64(offsets);

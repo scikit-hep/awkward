@@ -12,6 +12,11 @@
 
 namespace awkward {
   template <typename T>
+  class ListOffsetArrayOf;
+
+  class RegularArray;
+
+  template <typename T>
   class EXPORT_SYMBOL ListArrayOf: public Content {
   public:
     ListArrayOf<T>(const IdentitiesPtr& identities,
@@ -29,16 +34,23 @@ namespace awkward {
     const ContentPtr
       content() const;
 
+    /// @brief Returns 64-bit offsets, possibly starting with `offsets[0] = 0`,
+    /// that would represent this array's #starts and #stops if the #content
+    /// were replaced by a contiguous copy.
+    ///
+    /// @param start_at_zero If `true`, the first offset will be `0`, meaning
+    /// there are no "unreachable" elements in the `content` that corresponds
+    /// to these offsets.
     Index64
       compact_offsets64(bool start_at_zero) const;
 
-    const ContentPtr
+    const std::shared_ptr<ListOffsetArrayOf<int64_t>>
       broadcast_tooffsets64(const Index64& offsets) const;
 
-    const ContentPtr
+    const std::shared_ptr<RegularArray>
       toRegularArray() const;
 
-    const ContentPtr
+    const std::shared_ptr<ListOffsetArrayOf<int64_t>>
       toListOffsetArray64(bool start_at_zero) const;
 
     /// @brief User-friendly name of this class: `"ListArray32"`,

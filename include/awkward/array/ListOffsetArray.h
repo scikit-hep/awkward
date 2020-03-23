@@ -11,36 +11,80 @@
 #include "awkward/Content.h"
 
 namespace awkward {
+  class RegularArray;
+
   template <typename T>
   class EXPORT_SYMBOL ListOffsetArrayOf: public Content {
   public:
+    /// @brief Creates a ListOffsetArray from a full set of parameters.
+    ///
+    /// @param identities Optional Identities for each element of the array
+    /// (may be `nullptr`).
+    /// @param parameters String-to-JSON map that augments the meaning of this
+    /// array.
+    /// @param Index positions where one nested list stops and the next
+    /// starts.
+    /// The length of `offsets` is one greater than the length of the array it
+    /// represents, and as such must always have at least one element.
+    /// @param Data contained within all nested lists as a contiguous array.
+    /// Values in `content[i]` where `i < offsets[0]` are "unreachable," and
+    /// don't exist in the high level view, as are any where
+    /// `i >= offsets[len(offsets) - 1]`.
     ListOffsetArrayOf<T>(const IdentitiesPtr& identities,
                          const util::Parameters& parameters,
                          const IndexOf<T>& offsets,
                          const ContentPtr& content);
 
-    const IndexOf<T>
-      starts() const;
-
-    const IndexOf<T>
-      stops() const;
-
+    /// @brief Index positions where one nested list stops and the next
+    /// starts.
+    ///
+    /// The length of `offsets` is one greater than the length of the array it
+    /// represents, and as such must always have at least one element.
     const IndexOf<T>
       offsets() const;
 
+    /// @brief Data contained within all nested lists as a contiguous array.
+    ///
+    /// Values in `content[i]` where `i < offsets[0]` are "unreachable," and
+    /// don't exist in the high level view, as are any where
+    /// `i >= offsets[len(offsets) - 1]`.
     const ContentPtr
       content() const;
 
+    /// @brief Starting positions of each nested list, similar to
+    /// {@link ListArrayOf#starts ListArray::starts}, but derived from
+    /// #offsets.
+    ///
+    /// This is a view of all but the last element of #offsets.
+    const IndexOf<T>
+      starts() const;
+
+    /// @brief Stopping positions of each nested list, similar to
+    /// {@link ListArrayOf#stops ListArray::stops}, but derived from
+    /// #offsets.
+    ///
+    /// This is a view of all but the first element of #offsets.
+    const IndexOf<T>
+      stops() const;
+
+    /// @brief Returns 64-bit offsets, possibly starting with `offsets[0] = 0`.
+    ///
+    /// If the #offsets of this array satisfies the constraint, it is not
+    /// copied. Otherwise, a new {@link IndexOf Index64} is returned.
+    ///
+    /// @param start_at_zero If `true`, the first offset will be `0`, meaning
+    /// there are no "unreachable" elements in the `content` that corresponds
+    /// to these offsets.
     Index64
       compact_offsets64(bool start_at_zero) const;
 
-    const ContentPtr
+    const std::shared_ptr<ListOffsetArrayOf<int64_t>>
       broadcast_tooffsets64(const Index64& offsets) const;
 
-    const ContentPtr
+    const std::shared_ptr<RegularArray>
       toRegularArray() const;
 
-    const ContentPtr
+    const std::shared_ptr<ListOffsetArrayOf<int64_t>>
       toListOffsetArray64(bool start_at_zero) const;
 
     /// @brief User-friendly name of this class: `"ListOffsetArray32"`,
