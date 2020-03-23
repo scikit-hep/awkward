@@ -12,12 +12,28 @@
 #include "awkward/Content.h"
 
 namespace awkward {
+  class NumpyArray;
+
+  /// @class EmptyArray
+  ///
+  /// @brief Represents an array with length zero and (perhaps as a
+  /// consequence) UnknownType.
+  ///
+  /// See #EmptyArray for the meaning of each parameter.
   class EXPORT_SYMBOL EmptyArray: public Content {
   public:
+    /// @brief Creates an EmptyArray from a full set of parameters.
+    ///
+    /// @param identities Optional Identities for each element of the array
+    /// (may be `nullptr`).
+    /// @param parameters String-to-JSON map that augments the meaning of this
+    /// array.
     EmptyArray(const IdentitiesPtr& identities,
                const util::Parameters& parameters);
 
-    const ContentPtr
+    /// @brief Converts this array into a NumpyArray with a given
+    /// {NumpyArray#format format}.
+    const std::shared_ptr<NumpyArray>
       toNumpyArray(const std::string& format,
                    ssize_t itemsize) const;
 

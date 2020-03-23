@@ -18,7 +18,7 @@ namespace awkward {
                          const util::Parameters& parameters)
       : Content(identities, parameters) { }
 
-  const ContentPtr
+  const std::shared_ptr<NumpyArray>
   EmptyArray::toNumpyArray(const std::string& format, ssize_t itemsize) const {
     std::shared_ptr<void> ptr(new uint8_t[0], util::array_deleter<uint8_t>());
     std::vector<ssize_t> shape({ 0 });

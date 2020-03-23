@@ -12,8 +12,15 @@
 #include "awkward/Content.h"
 
 namespace awkward {
+  /// @class None
+  ///
+  /// @brief Represents a scalar missing value, which is `None` in Python.
+  ///
+  /// Most of the operations raise runtime errors. See
+  /// {@link Content#isscalar Content::isscalar}.
   class EXPORT_SYMBOL None: public Content {
   public:
+    /// @brief Creates a None instance.
     None();
 
     bool
