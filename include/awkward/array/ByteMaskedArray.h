@@ -13,36 +13,88 @@
 #include "awkward/Content.h"
 
 namespace awkward {
+  template <typename T, bool ISOPTION>
+  class IndexedArrayOf;
+
+  /// @class ByteMaskedArray
+  ///
+  /// @brief Represents potentially missing data by overlaying a byte #mask
+  /// over its #content.
+  ///
+  /// See #ByteMaskedArray for the meaning of each parameter.
   class EXPORT_SYMBOL ByteMaskedArray: public Content {
   public:
+    /// @brief Creates an ByteMaskedArray from a full set of parameters.
+    ///
+    /// @param identities Optional Identities for each element of the array
+    /// (may be `nullptr`).
+    /// @param parameters String-to-JSON map that augments the meaning of this
+    /// array.
+    /// @param mask Mask in which each byte represents a missing value (`None`)
+    /// or a valid value (from #content).
+    /// The interpretation depends on #validwhen; only boolean bytes that are
+    /// equal to #validwhen are not `None`.
+    /// @param content Data to be masked; `mask[i]` corresponds to `content[i]`
+    /// for all `i`.
+    /// @param validwhen Interpretation of the boolean bytes in #mask as `None`
+    /// or valid values from #content. Only boolean bytes that are equal to
+    /// validwhen are not `None`.
+    ///
+    /// Any non-zero value of a boolean byte and #validwhen are equivalent.
     ByteMaskedArray(const IdentitiesPtr& identities,
                     const util::Parameters& parameters,
                     const Index8& mask,
                     const ContentPtr& content,
                     bool validwhen);
 
+    /// @brief Mask in which each byte represents a missing value (`None`)
+    /// or a valid value (from #content).
+    ///
+    /// The interpretation depends on #validwhen; only boolean bytes that are
+    /// equal to #validwhen are not `None`. (Any non-zero value of a boolean
+    /// byte and #validwhen are equivalent.)
     const Index8
       mask() const;
 
+    /// @brief Data to be masked; `mask[i]` corresponds to `content[i]` for
+    /// all `i`.
     const ContentPtr
       content() const;
 
+    /// @brief Interpretation of the boolean bytes in #mask as `None` or
+    /// valid values from #content. Only boolean bytes that are equal to
+    /// validwhen are not `None`. (Any non-zero value of a boolean byte
+    /// and `validwhen` are equivalent.)
     bool
       validwhen() const;
 
+    /// @brief Return an array with the same type as #content with `None`
+    /// values removed.
     const ContentPtr
       project() const;
 
+    /// @brief Performs a set-union of a given `mask` with the missing values
+    /// and calls #project.
+    ///
+    /// @param mask A byte mask that is valid when `0`, `None` when `1`.
     const ContentPtr
       project(const Index8& mask) const;
 
+    /// @brief Returns a byte #mask with a fixed interpretation: missing
+    /// values are `1` and valid values are `0` (as though #validwhen were
+    /// `false`).
     const Index8
       bytemask() const;
 
+    /// @brief If the #content also has OptionType, combine the #mask with
+    /// the #content's indicator of missing values; also combine if the
+    /// #content is a non-OptionType {@link IndexedArrayOf IndexedArray}.
     const ContentPtr
       simplify_optiontype() const;
 
-    const ContentPtr
+    /// @brief Converts this array into an
+    /// {@link IndexedArrayOf IndexedOptionArray}.
+    const std::shared_ptr<IndexedArrayOf<int64_t, true>>
       toIndexedOptionArray64() const;
 
     /// @brief User-friendly name of this class: `"ByteMaskedArray"`.
@@ -248,8 +300,11 @@ namespace awkward {
       nextcarry_outindex(int64_t& numnull) const;
 
   private:
+    /// @brief See #mask.
     const Index8 mask_;
+    /// @brief See #content.
     const ContentPtr content_;
+    /// @brief See #validwhen.
     const bool validwhen_;
   };
 

@@ -313,8 +313,11 @@ namespace awkward {
                           const Slice& tail) const override;
 
   private:
+    /// @brief See #starts.
     const IndexOf<T> starts_;
+    /// @brief See #stops.
     const IndexOf<T> stops_;
+    /// @brief See #content.
     const ContentPtr content_;
   };
 

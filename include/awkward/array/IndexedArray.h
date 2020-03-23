@@ -74,6 +74,8 @@ namespace awkward {
 
     /// @brief Performs a set-union of a given `mask` with the missing values
     /// (if an IndexedOptionArray) and calls #project.
+    ///
+    /// @param mask A byte mask that is valid when `0`, `None` when `1`.
     const ContentPtr
       project(const Index8& mask) const;
 
@@ -299,7 +301,9 @@ namespace awkward {
       nextcarry_outindex(int64_t& numnull) const;
 
   private:
+    /// @brief See #index.
     const IndexOf<T> index_;
+    /// @brief See #content.
     const ContentPtr content_;
   };
 

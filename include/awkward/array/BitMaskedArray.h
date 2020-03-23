@@ -11,12 +11,47 @@
 #include "awkward/Slice.h"
 #include "awkward/Index.h"
 #include "awkward/Content.h"
-#include "awkward/array/ByteMaskedArray.h"
-#include "awkward/array/IndexedArray.h"
 
 namespace awkward {
+  template <typename T, bool ISOPTION>
+  class IndexedArrayOf;
+
+  class ByteMaskedArray;
+
+  /// @class BitMaskedArray
+  ///
+  /// @brief Represents potentially missing data by overlaying a bit #mask
+  /// over its #content.
+  ///
+  /// See #BitMaskedArray for the meaning of each parameter.
   class EXPORT_SYMBOL BitMaskedArray: public Content {
   public:
+    /// @brief Creates an BitMaskedArray from a full set of parameters.
+    ///
+    /// @param identities Optional Identities for each element of the array
+    /// (may be `nullptr`).
+    /// @param parameters String-to-JSON map that augments the meaning of this
+    /// array.
+    /// @param mask Mask in which each bit represents a missing value (`None`)
+    /// or a valid value (from #content).
+    /// The interpretation depends on #validwhen; only bits that are
+    /// equal to #validwhen are not `None`. (Any non-zero value of #validwhen
+    /// is equivalent to a `1` bit.)
+    /// @param content Data to be masked; `mask[i]` corresponds to `content[i]`
+    /// for all `i`.
+    /// @param validwhen Interpretation of the boolean bytes in #mask as `None`
+    /// or valid values from #content. Only boolean bytes that are equal to
+    /// validwhen are not `None`.
+    /// @param length Length of the array, since it cannot be determined from
+    /// the #mask without an 8-fold ambiguity.
+    /// @param lsb_order If `true`, the bits in each byte of the #mask are
+    /// taken to be in
+    /// [Least Significant Bit (LSB)](https://en.wikipedia.org/wiki/Bit_numbering#LSB_0_bit_numbering)
+    /// order; if `false`, they are taken to be in
+    /// [Most Significant Bit (MSB)](https://en.wikipedia.org/wiki/Bit_numbering#MSB_0_bit_numbering)
+    /// order.
+    ///
+    /// Any non-zero value of a boolean byte and #validwhen are equivalent.
     BitMaskedArray(const IdentitiesPtr& identities,
                    const util::Parameters& parameters,
                    const IndexU8& mask,
@@ -25,34 +60,67 @@ namespace awkward {
                    int64_t length,
                    bool lsb_order);
 
+    /// @brief Mask in which each bit represents a missing value (`None`)
+    /// or a valid value (from #content).
+    ///
+    /// The interpretation depends on #validwhen; only bits that are
+    /// equal to #validwhen are not `None`. (Any non-zero value of #validwhen
+    /// is equivalent to a `1` bit.)
     const IndexU8
       mask() const;
 
+    /// @brief Data to be masked; `mask[i]` corresponds to `content[i*8]`
+    /// through `content[i*8 + 7]` (inclusive) for all `i`.
     const ContentPtr
       content() const;
 
+    /// @brief Interpretation of the boolean bytes in #mask as `None` or
+    /// valid values from #content. Only boolean bytes that are equal to
+    /// validwhen are not `None`. (Any non-zero value of a boolean byte
+    /// and `validwhen` are equivalent.)
     bool
       validwhen() const;
 
+    /// @brief If `true`, the bits in each byte of the #mask are
+    /// taken to be in
+    /// [Least Significant Bit (LSB)](https://en.wikipedia.org/wiki/Bit_numbering#LSB_0_bit_numbering)
+    /// order; if `false`, they are taken to be in
+    /// [Most Significant Bit (MSB)](https://en.wikipedia.org/wiki/Bit_numbering#MSB_0_bit_numbering)
+    /// order.
     bool
       lsb_order() const;
 
+    /// @brief Return an array with the same type as #content with `None`
+    /// values removed.
     const ContentPtr
       project() const;
 
+    /// @brief Performs a set-union of a given `mask` with the missing values
+    /// and calls #project.
+    ///
+    /// @param mask A byte mask that is valid when `0`, `None` when `1`.
     const ContentPtr
       project(const Index8& mask) const;
 
+    /// @brief Expands the #mask to a byte-valued mask with a fixed
+    /// interpretation: missing values are `1` and valid values are `0`
+    /// (as though #validwhen were `false`).
     const Index8
       bytemask() const;
 
+    /// @brief If the #content also has OptionType, combine the #mask with
+    /// the #content's indicator of missing values; also combine if the
+    /// #content is a non-OptionType {@link IndexedArrayOf IndexedArray}.
     const ContentPtr
       simplify_optiontype() const;
 
+    /// @brief Converts this array into a ByteMaskedArray.
     const std::shared_ptr<ByteMaskedArray>
       toByteMaskedArray() const;
 
-    const std::shared_ptr<IndexedOptionArray64>
+    /// @brief Converts this array into an
+    /// {@link IndexedArrayOf IndexedOptionArray}.
+    const std::shared_ptr<IndexedArrayOf<int64_t, true>>
       toIndexedOptionArray64() const;
 
     /// @brief User-friendly name of this class: `"BitMaskedArray"`.
@@ -247,10 +315,15 @@ namespace awkward {
                           const Slice& tail) const override;
 
   private:
+    /// @brief See #mask.
     const IndexU8 mask_;
+    /// @brief See #content.
     const ContentPtr content_;
+    /// @brief See #validwhen.
     const bool validwhen_;
+    /// @brief See #length.
     const int64_t length_;
+    /// @brief See #order.
     const bool lsb_order_;
   };
 

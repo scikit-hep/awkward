@@ -307,7 +307,9 @@ namespace awkward {
                           const Slice& tail) const override;
 
   private:
+    /// @brief See #offsets.
     const IndexOf<T> offsets_;
+    /// @brief See #content.
     const ContentPtr content_;
   };
 

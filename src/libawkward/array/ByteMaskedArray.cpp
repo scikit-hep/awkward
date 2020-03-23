@@ -142,7 +142,7 @@ namespace awkward {
     }
   }
 
-  const ContentPtr
+  const std::shared_ptr<IndexedOptionArray64>
   ByteMaskedArray::toIndexedOptionArray64() const {
     Index64 index(length());
     struct Error err = awkward_bytemaskedarray_toindexedarray_64(
