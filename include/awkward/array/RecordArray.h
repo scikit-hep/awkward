@@ -12,33 +12,79 @@
 #include "awkward/Content.h"
 
 namespace awkward {
+  /// @class RecordArray
+  ///
+  /// @brief Represents an array of tuples or records, in which a tuple
+  /// has a fixed number of differently typed fields and a record has
+  /// a named set of differently typed fields.
+  ///
+  /// See #RecordArray for the meaning of each parameter.
+  ///
+  /// Tuples and records are distinguished by the absence or presence of a
+  /// #recordlookup (`std::vector<std::string>`) that associates key names
+  /// with each field.
+  ///
+  /// Fields are always ordered, whether tuples or records.
   class EXPORT_SYMBOL RecordArray:
     public Content,
     public std::enable_shared_from_this<RecordArray> {
   public:
+    /// @brief Creates a RecordArray from a full set of parameters.
+    /// 
+    /// @param identities Optional Identities for each element of the array
+    /// (may be `nullptr`).
+    /// @param parameters String-to-JSON map that augments the meaning of this
+    /// array.
+    /// @param contents `std::vector` of Content instances representing the
+    /// (ordered) fields.
+    /// @param recordlookup A `std::shared_ptr<std::vector<std::string>>`
+    /// optional list of key names.
+    /// If absent (`nullptr`), the data are tuples; otherwise, they are
+    /// records. The number of names must match the number of #contents.
+    /// @param length The length of the array, breaking ambiguities between
+    /// #contents of different lengths and essential if there are zero fields.
     RecordArray(const IdentitiesPtr& identities,
                 const util::Parameters& parameters,
                 const ContentPtrVec& contents,
                 const util::RecordLookupPtr& recordlookup,
                 int64_t length);
 
+    /// @brief Creates a RecordArray in which #length is the minimum
+    /// length of the #contents or zero if there are no #contents.
     RecordArray(const IdentitiesPtr& identities,
                 const util::Parameters& parameters,
                 const ContentPtrVec& contents,
                 const util::RecordLookupPtr& recordlookup);
 
+    /// @brief `std::vector` of Content instances representing the
+    /// (ordered) fields.
     const ContentPtrVec
       contents() const;
 
+    /// @brief A `std::shared_ptr<std::vector<std::string>>`
+    /// optional list of key names.
+    /// If absent (`nullptr`), the data are tuples; otherwise, they are
+    /// records. The number of names must match the number of #contents.
     const util::RecordLookupPtr
       recordlookup() const;
 
+    /// @brief Returns `true` if #recordlookup is `nullptr`; `false` otherwise.
     bool
       istuple() const;
 
+    /// @brief Returns a RecordArray with an additional or a replaced field
+    /// at index `where` with value `what`.
+    ///
+    /// This "setitem" method does not change the original array; and the
+    /// output references most of the original data (without copying).
     const ContentPtr
       setitem_field(int64_t where, const ContentPtr& what) const;
 
+    /// @brief Returns a RecordArray with an additional or a replaced field
+    /// at key name `where` with value `what`.
+    ///
+    /// This "setitem" method does not change the original array; and the
+    /// output references most of the original data (without copying).
     const ContentPtr
       setitem_field(const std::string& where, const ContentPtr& what) const;
 
@@ -66,6 +112,9 @@ namespace awkward {
     void
       nbytes_part(std::map<size_t, int64_t>& largest) const override;
 
+    /// @copydoc Content::length()
+    ///
+    /// Note that this is an input parameter.
     int64_t
       length() const override;
 
@@ -136,6 +185,11 @@ namespace awkward {
     bool
       haskey(const std::string& key) const override;
 
+    /// @copydoc Content::keys()
+    ///
+    /// This differs from #recordlookup in that it's never `nullptr`: if
+    /// there is no #recordlookup (the data are tuples), the keys are
+    /// string representations of integers.
     const std::vector<std::string>
       keys() const override;
 
@@ -192,18 +246,34 @@ namespace awkward {
              int64_t axis,
              int64_t depth) const override;
 
+    /// @brief Returns the field at a given index (without trimming it to
+    /// have the same #length as this RecordArray).
+    ///
+    /// Equivalent to `contents[fieldindex]`.
     const ContentPtr
       field(int64_t fieldindex) const;
 
+    /// @brief Returns the field with a given key name (without trimming it to
+    /// have the same #length as this RecordArray).
+    ///
+    /// Equivalent to `contents[fieldindex(key)]`.
     const ContentPtr
       field(const std::string& key) const;
 
+    /// @brief Returns all the fields (without trimming them to have the same
+    /// #length as this RecordArray).
+    ///
+    /// Equivalent to `contents`.
     const ContentPtrVec
       fields() const;
 
+    /// @brief Returns key, field pairs for all fields (without trimming them
+    /// to have the same #length as this RecordArray).
     const std::vector<std::pair<std::string, ContentPtr>>
       fielditems() const;
 
+    /// @brief Returns this RecordArray without #recordlookup, converting any
+    /// records into tuples.
     const std::shared_ptr<RecordArray>
       astuple() const;
 
@@ -264,8 +334,11 @@ namespace awkward {
                                   const Slice& tail) const;
 
   private:
+    /// @brief See #contents.
     const ContentPtrVec contents_;
+    /// @brief See #recordlookup.
     const util::RecordLookupPtr recordlookup_;
+    /// @brief See #length.
     int64_t length_;
   };
 }

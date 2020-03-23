@@ -149,6 +149,9 @@ namespace awkward {
     void
       nbytes_part(std::map<size_t, int64_t>& largest) const override;
 
+    /// @copydoc Content::length()
+    ///
+    /// Note that this is an input parameter.
     int64_t
       length() const override;
 

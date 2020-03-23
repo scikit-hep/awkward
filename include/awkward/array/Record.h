@@ -6,25 +6,52 @@
 #include "awkward/array/RecordArray.h"
 
 namespace awkward {
+  /// @class Record
+  ///
+  /// @brief Represents a tuple or record, a scalar value from RecordArray.
+  ///
+  /// Many of the methods raise runtime errors. See
+  /// {@link Content#isscalar Content::isscalar}.
   class EXPORT_SYMBOL Record: public Content {
   public:
+    /// @brief Creates a Record from a full set of parameters.
+    /// 
+    /// @param array A reference to the array in which this tuple/record
+    /// resides (not a copy, shares reference count).
+    /// @param at The position in the #array where this tuple/record
+    /// resides.
     Record(const std::shared_ptr<const RecordArray> array, int64_t at);
 
+    /// @brief A reference to the array in which this tuple/record
+    /// resides (not a copy, shares reference count).
     const std::shared_ptr<const RecordArray>
       array() const;
 
+    /// @brief The position in the #array where this tuple/record
+    /// resides.
     int64_t
       at() const;
 
+    /// @brief Returns a `std::vector<std::shared_ptr<Content>>` of each
+    /// field at this record position (#at).
+    ///
+    /// The values might be scalars, such as zero-dimensional NumpyArray,
+    /// None, or another Record.
     const ContentPtrVec
       contents() const;
 
+    /// @brief The #array's
+    /// {@link RecordArray#recordlookup RecordArray::recordlookup}.
     const util::RecordLookupPtr
       recordlookup() const;
 
+    /// @brief Returns `true` if #recordlookup is `nullptr`; `false` otherwise.
     bool
       istuple() const;
 
+    /// @copydoc Content::isscalar()
+    ///
+    /// Always returns `true`.
     bool
       isscalar() const override;
 
@@ -35,9 +62,15 @@ namespace awkward {
     const IdentitiesPtr
       identities() const override;
 
+    /// @copydoc Content::setidentities()
+    ///
+    /// @exception std::runtime_error is always thrown
     void
       setidentities() override;
 
+    /// @copydoc Content::setidentities()
+    ///
+    /// @exception std::runtime_error is always thrown
     void
       setidentities(const IdentitiesPtr& identities) override;
 
@@ -69,18 +102,33 @@ namespace awkward {
     void
       check_for_iteration() const override;
 
+    /// @copydoc Content::getitem_nothing()
+    ///
+    /// @exception std::runtime_error is always thrown
     const ContentPtr
       getitem_nothing() const override;
 
+    /// @copydoc Content::getitem_at()
+    ///
+    /// @exception std::runtime_error is always thrown
     const ContentPtr
       getitem_at(int64_t at) const override;
 
+    /// @copydoc Content::getitem_at_nowrap()
+    ///
+    /// @exception std::runtime_error is always thrown
     const ContentPtr
       getitem_at_nowrap(int64_t at) const override;
 
+    /// @copydoc Content::getitem_range()
+    ///
+    /// @exception std::runtime_error is always thrown
     const ContentPtr
       getitem_range(int64_t start, int64_t stop) const override;
 
+    /// @copydoc Content::getitem_range_nowrap()
+    ///
+    /// @exception std::runtime_error is always thrown
     const ContentPtr
       getitem_range_nowrap(int64_t start, int64_t stop) const override;
 
@@ -90,6 +138,9 @@ namespace awkward {
     const ContentPtr
       getitem_fields(const std::vector<std::string>& keys) const override;
 
+    /// @copydoc Content::carry()
+    ///
+    /// @exception std::runtime_error is always thrown
     const ContentPtr
       carry(const Index64& carry) const override;
 
@@ -133,24 +184,42 @@ namespace awkward {
     const ContentPtr
       num(int64_t axis, int64_t depth) const override;
 
+    /// @copydoc Content::offsets_and_flattened()
+    ///
+    /// @exception std::runtime_error is always thrown
     const std::pair<Index64, ContentPtr>
       offsets_and_flattened(int64_t axis, int64_t depth) const override;
 
+    /// @copydoc Content::mergeable()
+    ///
+    /// @exception std::runtime_error is always thrown
     bool
       mergeable(const ContentPtr& other, bool mergebool) const override;
 
+    /// @copydoc Content::merge()
+    ///
+    /// @exception std::runtime_error is always thrown
     const ContentPtr
       merge(const ContentPtr& other) const override;
 
+    /// @copydoc Content::asslice()
+    ///
+    /// @exception std::runtime_error is always thrown
     const SliceItemPtr
       asslice() const override;
 
     const ContentPtr
       fillna(const ContentPtr& value) const override;
 
+    /// @copydoc Content::rpad()
+    ///
+    /// @exception std::runtime_error is always thrown
     const ContentPtr
       rpad(int64_t target, int64_t axis, int64_t depth) const override;
 
+    /// @copydoc Content::rpad_and_clip()
+    ///
+    /// @exception std::runtime_error is always thrown
     const ContentPtr
       rpad_and_clip(int64_t target,
                     int64_t axis,
@@ -176,63 +245,102 @@ namespace awkward {
              int64_t axis,
              int64_t depth) const override;
 
+    /// @brief Returns the field at a given index.
+    ///
+    /// Equivalent to `contents[fieldindex]`.
     const ContentPtr
       field(int64_t fieldindex) const;
 
+    /// @brief Returns the field at a given key name.
+    ///
+    /// Equivalent to `contents[fieldindex]`.
     const ContentPtr
       field(const std::string& key) const;
 
+    /// @brief Returns all fields.
+    ///
+    /// Equivalent to `contents`.
     const ContentPtrVec
       fields() const;
 
+    /// @brief Returns key, field pairs for all fields.
     const std::vector<std::pair<std::string, ContentPtr>>
       fielditems() const;
 
+    /// @brief Returns this Record without #recordlookup, converting any
+    /// records into tuples.
     const std::shared_ptr<Record>
       astuple() const;
 
+    /// @copydoc Content::getitem_next()
+    ///
+    /// @exception std::runtime_error is always thrown
     const ContentPtr
       getitem_next(const SliceAt& at,
                    const Slice& tail,
                    const Index64& advanced) const override;
 
+    /// @copydoc Content::getitem_next()
+    ///
+    /// @exception std::runtime_error is always thrown
     const ContentPtr
       getitem_next(const SliceRange& range,
                    const Slice& tail,
                    const Index64& advanced) const override;
 
+    /// @copydoc Content::getitem_next()
+    ///
+    /// @exception std::runtime_error is always thrown
     const ContentPtr
       getitem_next(const SliceArray64& array,
                    const Slice& tail,
                    const Index64& advanced) const override;
 
+    /// @copydoc Content::getitem_next()
+    ///
+    /// @exception std::runtime_error is always thrown
     const ContentPtr
       getitem_next(const SliceField& field,
                    const Slice& tail,
                    const Index64& advanced) const override;
 
+    /// @copydoc Content::getitem_next()
+    ///
+    /// @exception std::runtime_error is always thrown
     const ContentPtr
       getitem_next(const SliceFields& fields,
                    const Slice& tail,
                    const Index64& advanced) const override;
 
+    /// @copydoc Content::getitem_next()
+    ///
+    /// @exception std::runtime_error is always thrown
     const ContentPtr
       getitem_next(const SliceJagged64& jagged,
                    const Slice& tail,
                    const Index64& advanced) const override;
 
+    /// @copydoc Content::getitem_next_jagged()
+    ///
+    /// @exception std::runtime_error is always thrown
     const ContentPtr
       getitem_next_jagged(const Index64& slicestarts,
                           const Index64& slicestops,
                           const SliceArray64& slicecontent,
                           const Slice& tail) const override;
 
+    /// @copydoc Content::getitem_next_jagged()
+    ///
+    /// @exception std::runtime_error is always thrown
     const ContentPtr
       getitem_next_jagged(const Index64& slicestarts,
                           const Index64& slicestops,
                           const SliceMissing64& slicecontent,
                           const Slice& tail) const override;
 
+    /// @copydoc Content::getitem_next_jagged()
+    ///
+    /// @exception std::runtime_error is always thrown
     const ContentPtr
       getitem_next_jagged(const Index64& slicestarts,
                           const Index64& slicestops,
@@ -240,7 +348,9 @@ namespace awkward {
                           const Slice& tail) const override;
 
   private:
+    /// @brief See #array.
     const std::shared_ptr<const RecordArray> array_;
+    /// @brief See #at.
     int64_t at_;
   };
 }
