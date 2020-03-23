@@ -55,7 +55,7 @@ namespace awkward {
     /// @param byteoffset Location of item zero in the buffer, relative to
     /// `ptr`, measured in bytes, rather than number of elements (must be a
     /// multiple of `itemsize`). We keep this information in two parameters
-    /// (`ptr` and `byteoffset`) rather than moving ptr so that ptr can be
+    /// (`ptr` and `byteoffset`) rather than moving `ptr` so that `ptr` can be
     /// reference counted among all arrays that use the same buffer.
     /// @param itemsize Number of bytes per item; should agree with the format.
     /// @param format String representing the NumPy dtype (as defined by
@@ -125,8 +125,9 @@ namespace awkward {
     /// @brief Location of item zero in the buffer, relative to
     /// `ptr`, measured in bytes, rather than number of elements (must be a
     /// multiple of `itemsize`).
+    ///
     /// We keep this information in two parameters
-    /// (`ptr` and `byteoffset`) rather than moving ptr so that ptr can be
+    /// (`ptr` and `byteoffset`) rather than moving `ptr` so that `ptr` can be
     /// reference counted among all arrays that use the same buffer.
     ssize_t
       byteoffset() const;
@@ -148,7 +149,8 @@ namespace awkward {
     ssize_t
       ndim() const;
 
-    /// @brief Returns `true` if any element of the #shape is zero; `false` otherwise.
+    /// @brief Returns `true` if any element of the #shape is zero; `false`
+    /// otherwise.
     ///
     /// Note that a NumpyArray can be empty with non-zero #length.
     bool
@@ -162,7 +164,8 @@ namespace awkward {
     void*
       byteptr(ssize_t at) const;
 
-    /// @brief The length of the array (or scalar, if `shape.empty()`) in bytes.
+    /// @brief The length of the array (or scalar, if `shape.empty()`) in
+    /// bytes.
     ///
     /// If scalar, the return value is equal to #itemsize; otherwise, it is
     /// equal to `shape[0] * strides[0]`.
