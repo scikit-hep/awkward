@@ -45,7 +45,7 @@ namespace awkward {
     T
       index_at_nowrap(int64_t at) const;
 
-    /// User-friendly name of this class: `"IndexedArray32"`,
+    /// @brief User-friendly name of this class: `"IndexedArray32"`,
     /// `"IndexedArrayU32"`, `"IndexedArray64"`,
     /// `"IndexedOptionArray32"`, or `"IndexedOptionArray64"`.
     const std::string
@@ -173,10 +173,10 @@ namespace awkward {
       fillna(const ContentPtr& value) const override;
 
     const ContentPtr
-      rpad(int64_t length, int64_t axis, int64_t depth) const override;
+      rpad(int64_t target, int64_t axis, int64_t depth) const override;
 
     const ContentPtr
-      rpad_and_clip(int64_t length,
+      rpad_and_clip(int64_t target,
                     int64_t axis,
                     int64_t depth) const override;
 

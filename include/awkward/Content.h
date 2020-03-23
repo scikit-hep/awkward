@@ -21,51 +21,93 @@ namespace awkward {
 
   class EXPORT_SYMBOL Content {
   public:
+    /// @brief Called by all subclass constructors; assigns #identities and
+    /// #parameters upon construction.
     Content(const IdentitiesPtr& identities,
             const util::Parameters& parameters);
 
+    /// @brief Empty destructor; required for some C++ reason.
     virtual ~Content();
 
+    /// @brief Returns `true` if the data represented by this node is scalar,
+    /// not a true array.
+    ///
+    /// Scalars are not valid inputs to many operations, but they are
+    /// instances of Content so that they can be outputs of some operations.
+    ///
+    /// Formally, scalars and arrays should probably be distinct C++ types
+    /// to eliminate this ambiguity, but that would introduce excessive
+    /// type-testing and casting in all the algorithms that chain operations
+    /// (output of one is input to another). It is more convenient to test
+    /// for scalars at runtime with this method.
+    ///
+    /// The only scalars are:
+    ///
+    ///    - NumpyArray with `shape.empty()` (zero-dimensional array), which
+    ///      represents scalar numbers and booleans. (Immediately converted
+    ///      to a number object in Python.)
+    ///    - None, which represents missing values. (Immediately converted
+    ///      to `None` in Python.)
+    ///    - Record, which represents one item from a RecordArray.
     virtual bool
       isscalar() const;
 
-    /// User-friendly name of this class, including integer-type
+    /// @brief User-friendly name of this class, including integer-type
     /// specialization.
     virtual const std::string
       classname() const = 0;
 
+    /// @brief Optional Identities for each element of the array
+    /// (may be `nullptr`).
     virtual const IdentitiesPtr
       identities() const;
 
-    /// Assign a surrogate index of Identities to this array (in-place).
+    /// @brief Assign a surrogate index of Identities to this array (in-place).
     ///
     /// This also assigns and possibly replaces Identities in nested arrays.
+    ///
+    /// @note This mutability is temporary:
+    /// [scikit-hep/awkward-1.0#116](https://github.com/scikit-hep/awkward-1.0/issues/176)
+    /// Eventually, this interface will be deprecated and all Content
+    /// instances will be immutable.
     virtual void
       setidentities() = 0;
 
-    /// Assign a specified set of Identities to this array (in-place).
+    /// @brief Assign a specified set of Identities to this array (in-place).
     ///
     /// This also assigns and possibly replaces Identities in nested arrays.
+    ///
+    /// @note This mutability is temporary:
+    /// [scikit-hep/awkward-1.0#116](https://github.com/scikit-hep/awkward-1.0/issues/176)
+    /// Eventually, this interface will be deprecated and all Content
+    /// instances will be immutable.
     virtual void
       setidentities(const IdentitiesPtr& identities) = 0;
 
-    /// Returns a high-level Type describing this array.
+    /// @brief High-level Type describing this array.
     ///
     /// @param typestrs A mapping from `"__record__"` parameters to string
     /// representations of those types, to override the derived strings.
     virtual const TypePtr
       type(const util::TypeStrs& typestrs) const = 0;
 
+    /// @brief Internal function to build an output string for #tostring.
+    ///
+    /// @param indent Indentation depth as a string of spaces.
+    /// @param pre Prefix string, usually an opening XML tag.
+    /// @param post Postfix string, usually a closing XML tag and carriage
+    /// return.
     virtual const std::string
       tostring_part(const std::string& indent,
                     const std::string& pre,
                     const std::string& post) const = 0;
 
-    /// Internal function to produce a JSON representation one node at a time.
+    /// @brief Internal function to produce a JSON representation one node at
+    /// a time.
     virtual void
       tojson_part(ToJson& builder) const = 0;
 
-    /// Internal function used to calculate #nbytes.
+    /// @brief Internal function used to calculate #nbytes.
     ///
     /// @param largest The largest range of bytes used in each
     /// reference-counted pointer (`size_t`).
@@ -77,19 +119,20 @@ namespace awkward {
     virtual void
       nbytes_part(std::map<size_t, int64_t>& largest) const = 0;
 
-    /// The number of elements in the array.
+    /// @brief The number of elements in the array.
     virtual int64_t
       length() const = 0;
 
-    /// Returns a copy of this node without copying any contents or arrays.
+    /// @brief Copies this node without copying any nodes hierarchically
+    /// nested within it or any array/index/identity buffers.
     ///
     /// See also #deep_copy.
     virtual const ContentPtr
       shallow_copy() const = 0;
 
-    /// Return a copy of this array node and all nodes hierarchically nested
-    /// within it, optionally copying the associated arrays, indexes, and
-    /// identities, too.
+    /// @brief Copies this node and all nodes hierarchically
+    /// nested within it, optionally copying the associated arrays, indexes,
+    /// and identities, too.
     ///
     /// See also #shallow_copy.
     ///
@@ -105,32 +148,33 @@ namespace awkward {
                 bool copyindexes,
                 bool copyidentities) const = 0;
 
-    /// Performs up-front validity checks on an array so that they don't have
-    /// to be checked in #getitem_at_nowrap for each item.
+    /// @brief Performs up-front validity checks on an array so that they don't
+    /// have to be checked in #getitem_at_nowrap for each item.
     virtual void
       check_for_iteration() const = 0;
 
-    /// Internal function to return an empty slice (with the correct type).
+    /// @brief Internal function to get an empty slice (with the correct
+    /// type).
     virtual const ContentPtr
       getitem_nothing() const = 0;
 
-    /// Returns the element at a given position in the array, handling negative
-    /// indexing and bounds-checking like Python.
+    /// @brief Returns the element at a given position in the array, handling
+    /// negative indexing and bounds-checking like Python.
     ///
     /// The first item in the array is at `0`, the second at `1`, the last at
     /// `-1`, the penultimate at `-2`, etc.
     virtual const ContentPtr
       getitem_at(int64_t at) const = 0;
 
-    /// Returns the element at a given position in the array, without handling
-    /// negative indexing or bounds-checking.
+    /// @brief Returns the element at a given position in the array, without
+    /// handling negative indexing or bounds-checking.
     ///
     /// If the array has Identities, the identity bounds are checked.
     virtual const ContentPtr
       getitem_at_nowrap(int64_t at) const = 0;
 
-    /// Returns a subinterval of this array, handling negative indexing and
-    /// bounds-checking like Python.
+    /// @brief Subinterval of this array, handling negative indexing
+    /// and bounds-checking like Python.
     ///
     /// The first item in the array is at `0`, the second at `1`, the last at
     /// `-1`, the penultimate at `-2`, etc.
@@ -143,8 +187,8 @@ namespace awkward {
     virtual const ContentPtr
       getitem_range(int64_t start, int64_t stop) const = 0;
 
-    /// Returns a subinterval of this array, without handling negative indexing
-    /// or bounds-checking.
+    /// @brief Subinterval of this array, without handling negative
+    /// indexing or bounds-checking.
     ///
     /// If the array has Identities, the identity bounds are checked.
     ///
@@ -153,23 +197,23 @@ namespace awkward {
     virtual const ContentPtr
       getitem_range_nowrap(int64_t start, int64_t stop) const = 0;
 
-    /// Returns the array with the first nested RecordArray replaced by
+    /// @brief This array with the first nested RecordArray replaced by
     /// the field at `key`.
     virtual const ContentPtr
       getitem_field(const std::string& key) const = 0;
 
-    /// Returns the array with the first nested RecordArray replaced by
+    /// @brief This array with the first nested RecordArray replaced by
     /// a RecordArray of a given subset of `keys`.
     virtual const ContentPtr
       getitem_fields(const std::vector<std::string>& keys) const = 0;
 
-    /// Entry point for general slicing: Slice represents a tuple of SliceItem
-    /// nodes applying to each level of nested lists.
+    /// @brief Entry point for general slicing: Slice represents a tuple of
+    /// SliceItem nodes applying to each level of nested lists.
     virtual const ContentPtr
       getitem(const Slice& where) const;
 
-    /// Internal function that propagates a generic #getitem request through
-    /// one axis (including advanced indexing).
+    /// @brief Internal function that propagates a generic #getitem request
+    /// through one axis (including advanced indexing).
     ///
     /// @param head First element of the Slice tuple.
     /// @param tail The rest of the elements of the Slice tuple.
@@ -185,7 +229,7 @@ namespace awkward {
                    const Slice& tail,
                    const Index64& advanced) const;
 
-    /// Internal function that propagates a jagged array (array with
+    /// @brief Internal function that propagates a jagged array (array with
     /// irregular-length dimensions) slice through one axis.
     ///
     /// @param slicestarts Effective `starts` (similar to
@@ -200,8 +244,8 @@ namespace awkward {
                           const SliceItemPtr& slicecontent,
                           const Slice& tail) const;
 
-    /// Returns an array of the same type with elements filtered, rearranged,
-    /// and possibly duplicated by the `carry` array of integers.
+    /// @brief Returns an array of the same type with elements filtered,
+    /// rearranged, and possibly duplicated by the `carry` array of integers.
     ///
     /// The output has the same length as the `carry` index, not the `array`
     /// that is being manipulated. For each item `i` in `carry`, the output
@@ -228,17 +272,18 @@ namespace awkward {
     virtual const ContentPtr
       carry(const Index64& carry) const = 0;
 
-    /// Returns the parameter associated with `key` at the first level that
-    /// has a non-null value, descending only as deep as the first RecordArray.
+    /// @brief The parameter associated with `key` at the first level
+    /// that has a non-null value, descending only as deep as the first
+    /// RecordArray.
     virtual const std::string
       purelist_parameter(const std::string& key) const = 0;
 
-    /// Returns `true` if all nested lists down to the first RecordArray
+    /// @brief Returns `true` if all nested lists down to the first RecordArray
     /// are RegularArray nodes; `false` otherwise.
     virtual bool
       purelist_isregular() const = 0;
 
-    /// Returns the list-depth of this array, not counting any contained
+    /// @brief The list-depth of this array, not counting any contained
     /// within a RecordArray.
     ///
     /// The `purelist_depth` of a Record is `0`, and a RecordArray is `1`
@@ -249,15 +294,15 @@ namespace awkward {
     virtual int64_t
       purelist_depth() const = 0;
 
-    /// Returns (a) the minimum list-depth and (b) the maximum list-depth of
-    /// the array, which can differ if this array "branches" (differs when
-    /// followed through different fields of a RecordArray or
+    /// @brief Returns (a) the minimum list-depth and (b) the maximum
+    /// list-depth of the array, which can differ if this array "branches"
+    /// (differs when followed through different fields of a RecordArray or
     /// {@link UnionArrayOf UnionArray}).
     virtual const std::pair<int64_t, int64_t>
       minmax_depth() const = 0;
 
-    /// Returns (a) whether the list-depth of this array "branches," or differs
-    /// when followed through different fields of a RecordArray or
+    /// @brief Returns (a) whether the list-depth of this array "branches,"
+    /// or differs when followed through different fields of a RecordArray or
     /// {@link UnionArrayOf UnionArray} and (b) the minimum list-depth.
     ///
     /// If the array does not contain any records or heterogeneous data, the
@@ -265,41 +310,39 @@ namespace awkward {
     virtual const std::pair<bool, int64_t>
       branch_depth() const = 0;
 
-    /// Returns the number of fields in the first nested tuple or records or
-    /// `-1` if this array does not contain a RecordArray.
+    /// @brief The number of fields in the first nested tuple or
+    /// records or `-1` if this array does not contain a RecordArray.
     virtual int64_t
       numfields() const = 0;
 
-    /// Returns the position of a tuple or record key name if this array
+    /// @brief The position of a tuple or record key name if this array
     /// contains a RecordArray.
     virtual int64_t
       fieldindex(const std::string& key) const = 0;
 
-    /// Returns the record name associated with a given field index or the
-    /// tuple index as a string (e.g. `"0"`, `"1"`, `"2"`) if a tuple.
+    /// @brief The record name associated with a given field index or
+    /// the tuple index as a string (e.g. `"0"`, `"1"`, `"2"`) if a tuple.
     ///
     /// Raises an error if the array does not contain a RecordArray.
     virtual const std::string
       key(int64_t fieldindex) const = 0;
 
-    /// Returns `true` if the array contains a RecordArray with the specified
-    /// `key`; `false` otherwise.
+    /// @brief Returns `true` if the array contains a RecordArray with the
+    /// specified `key`; `false` otherwise.
     virtual bool
       haskey(const std::string& key) const = 0;
 
-    /// Returns a list of RecordArray keys or an empty list if this array
-    /// does not contain a RecordArray.
+    /// @brief A list of RecordArray keys or an empty list if this
+    /// array does not contain a RecordArray.
     virtual const std::vector<std::string>
       keys() const = 0;
 
-    // operations
-
-    /// Returns an error message if this array is invalid; otherwise, returns
-    /// an empty string.
+    /// @brief Returns an error message if this array is invalid; otherwise,
+    /// returns an empty string.
     virtual const std::string
       validityerror(const std::string& path) const = 0;
 
-    /// Return an equivalent array simplified at one level only using
+    /// @brief Returns an equivalent array simplified at one level only using
     /// {@link IndexedArrayOf#simplify_optiontype simplify_optiontype}
     /// if an option-type array and
     /// {@link UnionArrayOf#simplify_uniontype simplify_uniontype}
@@ -309,8 +352,9 @@ namespace awkward {
     virtual const ContentPtr
       shallow_simplify() const = 0;
 
-    /// Returns the length of this array (as a scalar) if `axis = 0` or the
-    /// lengths of subarrays (as an array or nested array) if `axis != 0`.
+    /// @brief The length of this array (as a NumpyArray scalar) if `axis = 0`
+    /// or the lengths of subarrays (as an array or nested array) if
+    /// `axis != 0`.
     ///
     /// @param axis The axis whose length or lengths to quantify.
     /// Negative `axis` counts backward from the deepest levels (`-1` is
@@ -322,7 +366,7 @@ namespace awkward {
     virtual const ContentPtr
       num(int64_t axis, int64_t depth) const = 0;
 
-    /// Returns (a) an offsets {@list IndexOf Index} and (b) a flattened
+    /// @brief Returns (a) an offsets {@list IndexOf Index} and (b) a flattened
     /// version of the array at some `axis` depth.
     ///
     /// If `axis > 1` (or its negative equivalent), the offsets is empty.
@@ -338,8 +382,8 @@ namespace awkward {
     virtual const std::pair<Index64, ContentPtr>
       offsets_and_flattened(int64_t axis, int64_t depth) const = 0;
 
-    /// Returns `true` if this array can be merged with the `other`; `false`
-    /// otherwise.
+    /// @brief Returns `true` if this array can be merged with the `other`;
+    /// `false` otherwise.
     ///
     /// The #merge method will complete without errors if this function
     /// returns `true`.
@@ -350,16 +394,17 @@ namespace awkward {
     virtual bool
       mergeable(const ContentPtr& other, bool mergebool) const = 0;
 
-    /// Return an array with this and the `other` concatenated (this first,
-    /// `other` last).
+    /// @brief An array with this and the `other` concatenated (this
+    /// first, `other` last).
     virtual const ContentPtr
       merge(const ContentPtr& other) const = 0;
 
-    /// Converts this array into a SliceItem that can be used in getitem.
+    /// @brief Converts this array into a SliceItem that can be used in
+    /// getitem.
     virtual const SliceItemPtr
       asslice() const = 0;
 
-    /// Return a copy of this array with `None` values replaced by a given
+    /// @brief Returns this array with `None` values replaced by a given
     /// `value`.
     ///
     /// @param value An array of exactly one element, which need not have
@@ -367,12 +412,12 @@ namespace awkward {
     virtual const ContentPtr
       fillna(const ContentPtr& value) const = 0;
 
-    /// If `axis = 0`, return a copy of this array padded on the right with
-    /// `None` values to have a minimum length; otherwise, return an array
-    /// with nested lists all padded to the minimum length.
+    /// @brief If `axis = 0`, returns a view of this array padded on the
+    /// right with `None` values to have a minimum length; otherwise, returns
+    /// an array with nested lists all padded to the minimum length.
     ///
-    /// @param length The target length. The output may be longer than this
-    /// target, but not shorter (using {@link ListArrayOf ListArray}).
+    /// @param target The intended length. The output may be longer than this
+    /// target length, but not shorter (using {@link ListArrayOf ListArray}).
     /// @param axis The axis at which to apply padding.
     /// Negative `axis` counts backward from the deepest levels (`-1` is
     /// the last valid `axis`).
@@ -381,13 +426,13 @@ namespace awkward {
     /// process and is increased at each level of list-depth (instead of
     /// decreasing the user-specified `axis`).
     virtual const ContentPtr
-      rpad(int64_t length, int64_t axis, int64_t depth) const = 0;
+      rpad(int64_t target, int64_t axis, int64_t depth) const = 0;
 
-    /// If `axis = 0`, return a copy of this array padded on the right with
-    /// `None` values to have exactly the specified length; otherwise, return
-    /// an array with nested lists all padded to the specified length.
+    /// @brief If `axis = 0`, returns a view of this array padded on the right
+    //// with `None` values to have exactly the specified length; otherwise,
+    /// returns an array with nested lists all padded to the specified length.
     ///
-    /// @param length The target length. The output has exactly this target
+    /// @param target The intended length; the output has exactly this target
     /// length (using RegularArray).
     /// @param axis The axis at which to apply padding.
     /// Negative `axis` counts backward from the deepest levels (`-1` is
@@ -397,10 +442,12 @@ namespace awkward {
     /// process and is increased at each level of list-depth (instead of
     /// decreasing the user-specified `axis`).
     virtual const ContentPtr
-      rpad_and_clip(int64_t length, int64_t axis, int64_t depth) const = 0;
+      rpad_and_clip(int64_t target, int64_t axis, int64_t depth) const = 0;
 
-    /// Returns the array with one axis removed by applying a Reducer (e.g.
-    /// "sum", "max", "any", "all).
+    /// @brief This array with one axis removed by applying a Reducer
+    /// (e.g. "sum", "max", "any", "all).
+    ///
+    /// The user's entry point for this operation is #reduce.
     ///
     /// @param reducer The choice of Reducer algorithm.
     /// @param negaxis The negative axis: `-axis`. That is, `negaxis = 1`
@@ -429,8 +476,8 @@ namespace awkward {
                   bool mask,
                   bool keepdims) const = 0;
 
-    /// Returns a (possibly nested) array of integers indicating the positions
-    /// of elements within each nested list.
+    /// @brief A (possibly nested) array of integers indicating the
+    /// positions of elements within each nested list.
     ///
     /// @param axis The nesting depth at which this operation is applied.
     /// If `axis = 0`, the output is simply an array of integers from `0`
@@ -446,8 +493,8 @@ namespace awkward {
     virtual const ContentPtr
       localindex(int64_t axis, int64_t depth) const = 0;
 
-    /// Returns tuples or records of all `n`-tuple combinations of list items
-    /// at some `axis` depth.
+    /// @brief Tuples or records of all `n`-tuple combinations of
+    /// list items at some `axis` depth.
     ///
     /// For example, the `n = 2` combinations at `axis = 0` of
     ///
@@ -519,11 +566,11 @@ namespace awkward {
              int64_t axis,
              int64_t depth) const = 0;
 
-    /// Returns a string representation of this array (multi-line XML).
+    /// @brief Returns a string representation of this array (multi-line XML).
     const std::string
       tostring() const;
 
-    /// Returns a JSON representation of this array.
+    /// @brief Returns a JSON representation of this array.
     ///
     /// @param pretty If `true`, add spacing to make the JSON human-readable.
     /// If `false`, return a compact representation.
@@ -532,7 +579,8 @@ namespace awkward {
     const std::string
       tojson(bool pretty, int64_t maxdecimals) const;
 
-    /// Writes a JSON representation of this array to a `destination` file.
+    /// @brief Writes a JSON representation of this array to a `destination`
+    /// file.
     ///
     /// @param pretty If `true`, add spacing to make the JSON human-readable.
     /// If `false`, return a compact representation.
@@ -545,53 +593,158 @@ namespace awkward {
              int64_t maxdecimals,
              int64_t buffersize) const;
 
-    /// The number of bytes contained in all array buffers,
+    /// @brief The number of bytes contained in all array buffers,
     /// {@link IndexOf Index} buffers, and Identities buffers, not including
     /// the lightweight node objects themselves.
     int64_t
       nbytes() const;
 
+    /// @brief This array with one axis removed by applying a Reducer
+    /// (e.g. "sum", "max", "any", "all).
+    ///
+    /// This operation is implemented on each node through #reduce_next.
+    ///
+    /// @param reducer The choice of Reducer algorithm.
+    /// @param axis The axis to remove by reduction.
+    /// Negative `axis` counts backward from the deepest levels (`-1` is
+    /// the last valid `axis`).
+    /// @param mask If `true`, the Reducer's identity values will be covered
+    /// by `None` using a ByteMaskedArray. This is desirable for ReducerMin,
+    /// ReducerMax, ReducerArgmin, and ReducerArgmax to indicate that empty
+    /// lists have no minimum or maximum.
+    /// @param keepdims If `true`, the reduced values will be wrapped by a
+    /// singleton RegularArray to maintain the same number of dimensions in
+    /// the output.
     const ContentPtr
       reduce(const Reducer& reducer,
              int64_t axis,
              bool mask,
              bool keepdims) const;
 
+    /// @brief String-to-JSON map that augments the meaning of this
+    /// array.
+    ///
+    /// Keys are simple strings, but values are JSON-encoded strings.
+    /// For this reason, values that represent single strings are
+    /// double-quoted: e.g. `"\"actual_value\""`.
     const util::Parameters
       parameters() const;
 
+    /// @brief Assign all the parameters for this array node (in-place).
+    ///
+    /// Keys are simple strings, but values are JSON-encoded strings.
+    /// For this reason, values that represent single strings are
+    /// double-quoted: e.g. `"\"actual_value\""`.
+    ///
+    /// @note This mutability is temporary:
+    /// [scikit-hep/awkward-1.0#117](https://github.com/scikit-hep/awkward-1.0/issues/177)
+    /// Eventually, this interface will be deprecated and all Content
+    /// instances will be immutable.
     void
       setparameters(const util::Parameters& parameters);
 
+    /// @brief Get one parameter from this array node.
+    ///
+    /// If the `key` does not exist, this function returns `"null"`.
+    ///
+    /// Keys are simple strings, but values are JSON-encoded strings.
+    /// For this reason, values that represent single strings are
+    /// double-quoted: e.g. `"\"actual_value\""`.
     const std::string
       parameter(const std::string& key) const;
 
+    /// @brief Assign one parameter for this array node (in-place).
+    ///
+    /// Keys are simple strings, but values are JSON-encoded strings.
+    /// For this reason, values that represent single strings are
+    /// double-quoted: e.g. `"\"actual_value\""`.
+    ///
+    /// @note This mutability is temporary:
+    /// [scikit-hep/awkward-1.0#117](https://github.com/scikit-hep/awkward-1.0/issues/177)
+    /// Eventually, this interface will be deprecated and all Content
+    /// instances will be immutable.
     void
       setparameter(const std::string& key, const std::string& value);
 
+    /// @brief Returns `true` if the parameter associated with `key` exists
+    /// and is equal to `value`; `false` otherwise.
+    ///
+    /// Keys are simple strings, but values are JSON-encoded strings.
+    /// For this reason, values that represent single strings are
+    /// double-quoted: e.g. `"\"actual_value\""`.
+    ///
+    /// Equality is checked at the level of JSON DOMs. The `value` does not
+    /// need to be exactly the same string; it needs to have equivalent JSON
+    /// value.
     bool
       parameter_equals(const std::string& key, const std::string& value) const;
 
+    /// @brief Returns `true` if all parameters of this array node are equal
+    /// to the `other` parameters.
+    ///
+    /// Keys are simple strings, but values are JSON-encoded strings.
+    /// For this reason, values that represent single strings are
+    /// double-quoted: e.g. `"\"actual_value\""`.
+    ///
+    /// Equality is checked at the level of JSON DOMs. The `value` does not
+    /// need to be exactly the same string; it needs to have equivalent JSON
+    /// value.
     bool
       parameters_equal(const util::Parameters& other) const;
 
+    /// @brief Concatenates this array with `other` by creating a
+    /// {@link UnionArrayOf UnionArray} instead of actually merging the data.
     const ContentPtr
       merge_as_union(const ContentPtr& other) const;
 
+    /// @brief Internal function to handle the `axis = 0` case of #rpad
+    /// and #rpad_and_clip.
+    ///
+    /// The `axis = 0` case does not depend on array node type, so it is
+    /// defined universally in the Content class.
+    ///
+    /// @param target The intended length. The output may be longer than this
+    /// target length, but not shorter (using {@link ListArrayOf ListArray}).
+    /// @param axis The axis at which to apply padding.
+    /// @param clip If `true`, do #rpad_and_clip; if `false`, do #rpad.
     const ContentPtr
       rpad_axis0(int64_t target, bool clip) const;
 
+    /// @brief Internal function to handle the `axis = 0` case of #localindex.
+    ///
+    /// The `axis = 0` case does not depend on array node type, so it is
+    /// defined universally in the Content class.
     const ContentPtr
       localindex_axis0() const;
-
+    
+    /// @brief Internal function to handle the `axis = 0` case of #choose.
+    ///
+    /// The `axis = 0` case does not depend on array node type, so it is
+    /// defined universally in the Content class.
+    /// 
+    /// @param n The number of items in each tuple/record.
+    /// @param diagonal If `true`, the tuples/records are allowed to include
+    /// the same item more than once, such as `(a, a, a)` and `(a, a, b)`.
+    /// In the above examples, `diagonal = false`. (If the output of this
+    /// function is thought of as the "upper triangle" elements of the
+    /// Cartesian product of the input with itself `n` times, the `diagonal`
+    /// parameter determines whether elements on the diagonal are allowed.)
+    /// @param recordlookup If `nullptr`, the output consists of tuples, a
+    /// RecordArray indexed by `"0"`, `"1"`, `"2"`, etc. If `recordlookup`
+    /// is a `std::vector<std::string>`, the output consists of records,
+    /// a RecordArray indexed by names (strings). The length of `recordlookup`
+    /// must be equal to `n`.
+    /// @param parameters Parameters assigned to the new RecordArray. This
+    /// can be used to set `"__record_" = "\"record_name\\""` to give the
+    /// records a custom behavior in Python.
     const ContentPtr
       choose_axis0(int64_t n,
                    bool diagonal,
                    const util::RecordLookupPtr& recordlookup,
                    const util::Parameters& parameters) const;
 
-    /// Internal function that propagates a generic #getitem request through
-    /// one axis (including advanced indexing).
+    /// @brief Internal function that propagates a generic #getitem request
+    /// through one axis (including advanced indexing).
     ///
     /// See generic #getitem_next for details.
     virtual const ContentPtr
@@ -599,8 +752,8 @@ namespace awkward {
                    const Slice& tail,
                    const Index64& advanced) const = 0;
 
-    /// Internal function that propagates a generic #getitem request through
-    /// one axis (including advanced indexing).
+    /// @brief Internal function that propagates a generic #getitem request
+    /// through one axis (including advanced indexing).
     ///
     /// See generic #getitem_next for details.
     virtual const ContentPtr
@@ -608,8 +761,8 @@ namespace awkward {
                    const Slice& tail,
                    const Index64& advanced) const = 0;
 
-    /// Internal function that propagates a generic #getitem request through
-    /// one axis (including advanced indexing).
+    /// @brief Internal function that propagates a generic #getitem request
+    /// through one axis (including advanced indexing).
     ///
     /// See generic #getitem_next for details.
     virtual const ContentPtr
@@ -617,8 +770,8 @@ namespace awkward {
                    const Slice& tail,
                    const Index64& advanced) const;
 
-    /// Internal function that propagates a generic #getitem request through
-    /// one axis (including advanced indexing).
+    /// @brief Internal function that propagates a generic #getitem request
+    /// through one axis (including advanced indexing).
     ///
     /// See generic #getitem_next for details.
     virtual const ContentPtr
@@ -626,8 +779,8 @@ namespace awkward {
                    const Slice& tail,
                    const Index64& advanced) const;
 
-    /// Internal function that propagates a generic #getitem request through
-    /// one axis (including advanced indexing).
+    /// @brief Internal function that propagates a generic #getitem request
+    /// through one axis (including advanced indexing).
     ///
     /// See generic #getitem_next for details.
     virtual const ContentPtr
@@ -635,8 +788,8 @@ namespace awkward {
                    const Slice& tail,
                    const Index64& advanced) const = 0;
 
-    /// Internal function that propagates a generic #getitem request through
-    /// one axis (including advanced indexing).
+    /// @brief Internal function that propagates a generic #getitem request
+    /// through one axis (including advanced indexing).
     ///
     /// See generic #getitem_next for details.
     virtual const ContentPtr
@@ -644,8 +797,8 @@ namespace awkward {
                    const Slice& tail,
                    const Index64& advanced) const;
 
-    /// Internal function that propagates a generic #getitem request through
-    /// one axis (including advanced indexing).
+    /// @brief Internal function that propagates a generic #getitem request
+    /// through one axis (including advanced indexing).
     ///
     /// See generic #getitem_next for details.
     virtual const ContentPtr
@@ -653,8 +806,8 @@ namespace awkward {
                    const Slice& tail,
                    const Index64& advanced) const;
 
-    /// Internal function that propagates a generic #getitem request through
-    /// one axis (including advanced indexing).
+    /// @brief Internal function that propagates a generic #getitem request
+    /// through one axis (including advanced indexing).
     ///
     /// See generic #getitem_next for details.
     virtual const ContentPtr
@@ -662,8 +815,8 @@ namespace awkward {
                    const Slice& tail,
                    const Index64& advanced) const;
 
-    /// Internal function that propagates a generic #getitem request through
-    /// one axis (including advanced indexing).
+    /// @brief Internal function that propagates a generic #getitem request
+    /// through one axis (including advanced indexing).
     ///
     /// See generic #getitem_next for details.
     virtual const ContentPtr
@@ -671,7 +824,7 @@ namespace awkward {
                    const Slice& tail,
                    const Index64& advanced) const = 0;
 
-    /// Internal function that propagates a jagged array (array with
+    /// @brief Internal function that propagates a jagged array (array with
     /// irregular-length dimensions) slice through one axis.
     ///
     /// See generic #getitem_next_jagged for details.
@@ -681,7 +834,7 @@ namespace awkward {
                           const SliceArray64& slicecontent,
                           const Slice& tail) const = 0;
 
-    /// Internal function that propagates a jagged array (array with
+    /// @brief Internal function that propagates a jagged array (array with
     /// irregular-length dimensions) slice through one axis.
     ///
     /// See generic #getitem_next_jagged for details.
@@ -691,7 +844,7 @@ namespace awkward {
                           const SliceMissing64& slicecontent,
                           const Slice& tail) const = 0;
 
-    /// Internal function that propagates a jagged array (array with
+    /// @brief Internal function that propagates a jagged array (array with
     /// irregular-length dimensions) slice through one axis.
     ///
     /// See generic #getitem_next_jagged for details.
@@ -702,20 +855,51 @@ namespace awkward {
                           const Slice& tail) const = 0;
 
   protected:
+    /// @brief Internal function to wrap putative #getitem output with enough
+    /// RegularArray nodes to satisfy a given `shape`.
+    ///
+    /// The `shape` is intended to match a
+    /// {@link SliceArrayOf#shape SliceArray::shape}.
     const ContentPtr
       getitem_next_array_wrap(const ContentPtr& outcontent,
                               const std::vector<int64_t>& shape) const;
 
+    /// @brief Internal function to convert #parameters into a string fragment
+    /// for #tostring.
+    ///
+    /// @param indent Indentation depth as a string of spaces.
+    /// @param pre Prefix string, usually an opening XML tag.
+    /// @param post Postfix string, usually a closing XML tag and carriage
+    /// return.
     const std::string
       parameters_tostring(const std::string& indent,
                           const std::string& pre,
                           const std::string& post) const;
 
+    /// @brief Internal function defining the negative axis handling for many
+    /// operations.
+    ///
+    /// Returns a non-negative equivalent `axis` if unambiguous and passes
+    /// the negative `axis` through if ambiguous. A negative `axis` can be
+    /// ambiguous if the list-depth "branches" in a RecordArray or a
+    /// {@link UnionArrayOf UnionArray} with different `contents` having
+    /// different depths. As an operation descends through the nodes of
+    /// an array, it repeatedly calls `axis_wrap_if_negative` until an
+    /// unambiguous non-negative `axis` can be identified.
+    ///
+    /// This allows a RecordArray or {@link UnionArrayOf UnionArray} with
+    /// different depths to accept `axis = -1` as the last axis, regardless
+    /// of how deep that is in different record fields or union possibilities.
+    ///
+    /// @note This function has not been implemented:
+    /// [scikit-hep/awkward-1.0#163](https://github.com/scikit-hep/awkward-1.0/issues/163).
     const int64_t
       axis_wrap_if_negative(int64_t axis) const;
 
   protected:
+    /// @brief See #identities.
     IdentitiesPtr identities_;
+    /// @brief See #parameters.
     util::Parameters parameters_;
   };
 }

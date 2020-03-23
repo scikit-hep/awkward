@@ -137,7 +137,7 @@ namespace awkward {
         (ssize_t)itemsize_*(ssize_t)(offset_ + at));
     }
 
-    /// User-friendly name of this class: `"RawArray<T>"` where `T` is
+    /// @brief User-friendly name of this class: `"RawArray<T>"` where `T` is
     /// is `typeid(T).name()` (platform-dependent).
     const std::string
       classname() const override {

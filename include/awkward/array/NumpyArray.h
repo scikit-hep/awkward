@@ -14,62 +14,54 @@
 #include "awkward/Content.h"
 
 namespace awkward {
-  /**
-   * @class NumpyArray
-   * 
-   * @brief Represents a rectilinear numerical array that can be converted to
-   * and from NumPy without loss of information or copying the underlying
-   * buffer.
-   *
-   * See #NumpyArray for the meaning of each parameter.
-   *
-   * Any NumPy array can be passed through Awkward Array operations, even
-   * slicing, but operations that have to interpret the array's values (such
-   * as reducers like "sum" and "max") only work on numeric types:
-   *
-   *   - 32-bit and 64-bit floating point numbers
-   *   - 8-bit, 16-bit, 32-bit, and 64-bit signed and unsigned integers
-   *   - 8-bit booleans
-   * 
-   * (native endian only).
-   *
-   */
+  /// @class NumpyArray
+  ///
+  /// @brief Represents a rectilinear numerical array that can be converted to
+  /// and from NumPy without loss of information or copying the underlying
+  /// buffer.
+  ///
+  /// See #NumpyArray for the meaning of each parameter.
+  ///
+  /// Any NumPy array can be passed through Awkward Array operations, even
+  /// slicing, but operations that have to interpret the array's values (such
+  /// as reducers like "sum" and "max") only work on numeric types:
+  ///
+  ///  - 32-bit and 64-bit floating point numbers
+  ///  - 8-bit, 16-bit, 32-bit, and 64-bit signed and unsigned integers
+  ///  - 8-bit booleans
+  ///
+  ///(native endian only).
   class EXPORT_SYMBOL NumpyArray: public Content {
   public:
-    /// Mapping from (platform dependent) type index to pybind11 type string;
-    /// used internally.
-    static const std::unordered_map<std::type_index, std::string> format_map;
 
-    /**
-     * Creates a NumpyArray from a full set of parameters.
-     *
-     * @param identities Optional Identities for each element of the array
-     * (may be `nullptr`).
-     * @param parameters String-to-JSON map that augments the meaning of this
-     * array.
-     * @param ptr Reference-counted pointer to the array buffer.
-     * @param shape Number of elements in each dimension. A one-dimensional
-     * array has a shape of length one. A zero-length shape represents a
-     * numerical scalar, which is only valid as an output (immediately
-     * converted into a number in Python). Each element in shape must be
-     * non-negative. If not scalar, the total number of elements in the array
-     * is the product of the shape (which can be zero).
-     * @param strides Length of each dimension in number of bytes. The length
-     * of strides must match the length of `shape`. Strides may be zero or
-     * negative, but they must be multiples of itemsize. An array is only
-     * "contiguous" if `strides[i] == itemsize * prod(shape[i + 1:])` for all
-     * valid `i`.
-     * @param byteoffset Location of item zero in the buffer, relative to
-     * `ptr`, measured in bytes, rather than number of elements (must be a
-     * multiple of `itemsize`). We keep this information in two parameters
-     * (`ptr` and `byteoffset`) rather than moving ptr so that ptr can be
-     * reference counted among all arrays that use the same buffer.
-     * @param itemsize Number of bytes per item; should agree with the format.
-     * @param format String representing the NumPy dtype (as defined by
-     * pybind11). Note that 32-bit systems and Windows use "`q/Q`" for
-     * signed/unsigned 64-bit and "`l/L`" for 32-bit, while all other systems
-     * use "`l/L`" for 64-bit and "`i/I`" for 32-bit.
-     */
+    /// @brief Creates a NumpyArray from a full set of parameters.
+    /// 
+    /// @param identities Optional Identities for each element of the array
+    /// (may be `nullptr`).
+    /// @param parameters String-to-JSON map that augments the meaning of this
+    /// array.
+    /// @param ptr Reference-counted pointer to the array buffer.
+    /// @param shape Number of elements in each dimension. A one-dimensional
+    /// array has a shape of length one. A zero-length shape represents a
+    /// numerical scalar, which is only valid as an output (immediately
+    /// converted into a number in Python). Each element in shape must be
+    /// non-negative. If not scalar, the total number of elements in the array
+    /// is the product of the shape (which can be zero).
+    /// @param strides Length of each dimension in number of bytes. The length
+    /// of strides must match the length of `shape`. Strides may be zero or
+    /// negative, but they must be multiples of itemsize. An array is only
+    /// "contiguous" if `strides[i] == itemsize * prod(shape[i + 1:])` for all
+    /// valid `i`.
+    /// @param byteoffset Location of item zero in the buffer, relative to
+    /// `ptr`, measured in bytes, rather than number of elements (must be a
+    /// multiple of `itemsize`). We keep this information in two parameters
+    /// (`ptr` and `byteoffset`) rather than moving ptr so that ptr can be
+    /// reference counted among all arrays that use the same buffer.
+    /// @param itemsize Number of bytes per item; should agree with the format.
+    /// @param format String representing the NumPy dtype (as defined by
+    /// pybind11). Note that 32-bit systems and Windows use "`q/Q`" for
+    /// signed/unsigned 64-bit and "`l/L`" for 32-bit, while all other systems
+    /// use "`l/L`" for 64-bit and "`i/I`" for 32-bit.
     NumpyArray(const IdentitiesPtr& identities,
                const util::Parameters& parameters,
                const std::shared_ptr<void>& ptr,
@@ -79,38 +71,40 @@ namespace awkward {
                ssize_t itemsize,
                const std::string format);
 
-    /// Creates a NumpyArray from an {@link IndexOf Index8}.
+    /// @brief Creates a NumpyArray from an {@link IndexOf Index8}.
     NumpyArray(const Index8 index);
-    /// Creates a NumpyArray from an {@link IndexOf IndexU8}.
+    /// @brief Creates a NumpyArray from an {@link IndexOf IndexU8}.
     NumpyArray(const IndexU8 index);
-    /// Creates a NumpyArray from an {@link IndexOf Index32}.
+    /// @brief Creates a NumpyArray from an {@link IndexOf Index32}.
     NumpyArray(const Index32 index);
-    /// Creates a NumpyArray from an {@link IndexOf IndexU32}.
+    /// @brief Creates a NumpyArray from an {@link IndexOf IndexU32}.
     NumpyArray(const IndexU32 index);
-    /// Creates a NumpyArray from an {@link IndexOf Index64}.
+    /// @brief Creates a NumpyArray from an {@link IndexOf Index64}.
     NumpyArray(const Index64 index);
-    /// Creates a NumpyArray from an {@link IndexOf Index8}.
+    /// @brief Creates a NumpyArray from an {@link IndexOf Index8}.
     /// The format may be specified explicitly.
     NumpyArray(const Index8 index, const std::string& format);
-    /// Creates a NumpyArray from an {@link IndexOf IndexU8}.
+    /// @brief Creates a NumpyArray from an {@link IndexOf IndexU8}.
     /// The format may be specified explicitly.
     NumpyArray(const IndexU8 index, const std::string& format);
-    /// Creates a NumpyArray from an {@link IndexOf Index32}.
+    /// @brief Creates a NumpyArray from an {@link IndexOf Index32}.
     /// The format may be specified explicitly.
     NumpyArray(const Index32 index, const std::string& format);
-    /// Creates a NumpyArray from an {@link IndexOf IndexU32}.
+    /// @brief Creates a NumpyArray from an {@link IndexOf IndexU32}.
     /// The format may be specified explicitly.
     NumpyArray(const IndexU32 index, const std::string& format);
-    /// Creates a NumpyArray from an {@link IndexOf Index64}.
+    /// @brief Creates a NumpyArray from an {@link IndexOf Index64}.
     /// The format may be specified explicitly.
     NumpyArray(const Index64 index, const std::string& format);
 
-    /// Reference-counted pointer to the array buffer.
+    /// @brief Reference-counted pointer to the array buffer.
     const std::shared_ptr<void>
       ptr() const;
 
-    /// Number of elements in each dimension. A one-dimensional
-    /// array has a shape of length one. A zero-length shape represents a
+    /// @brief Number of elements in each dimension. A one-dimensional
+    /// array has a shape of length one.
+    ///
+    /// A zero-length shape represents a
     /// numerical scalar, which is only valid as an output (immediately
     /// converted into a number in Python). Each element in shape must be
     /// non-negative. If not scalar, the total number of elements in the array
@@ -118,7 +112,9 @@ namespace awkward {
     const std::vector<ssize_t>
       shape() const;
 
-    /// Length of each dimension in number of bytes. The length
+    /// @brief Length of each dimension in number of bytes.
+    ///
+    /// The length
     /// of strides must match the length of `shape`. Strides may be zero or
     /// negative, but they must be multiples of itemsize. An array is only
     /// "contiguous" if `strides[i] == itemsize * prod(shape[i + 1:])` for all
@@ -126,107 +122,110 @@ namespace awkward {
     const std::vector<ssize_t>
       strides() const;
 
-    /// Location of item zero in the buffer, relative to
+    /// @brief Location of item zero in the buffer, relative to
     /// `ptr`, measured in bytes, rather than number of elements (must be a
-    /// multiple of `itemsize`). We keep this information in two parameters
+    /// multiple of `itemsize`).
+    /// We keep this information in two parameters
     /// (`ptr` and `byteoffset`) rather than moving ptr so that ptr can be
     /// reference counted among all arrays that use the same buffer.
     ssize_t
       byteoffset() const;
 
-    /// Number of bytes per item; should agree with the format.
+    /// @brief Number of bytes per item; should agree with the format.
     ssize_t
       itemsize() const;
 
-    /// String representing the NumPy dtype (as defined by
-    /// pybind11). Note that 32-bit systems and Windows use "`q/Q`" for
+    /// @brief String representing the NumPy dtype (as defined by
+    /// pybind11).
+    ///
+    /// Note that 32-bit systems and Windows use "`q/Q`" for
     /// signed/unsigned 64-bit and "`l/L`" for 32-bit, while all other systems
     /// use "`l/L`" for 64-bit and "`i/I`" for 32-bit.
     const std::string
       format() const;
 
-    /// Returns the number of dimensions, which is `shape.size()`.
+    /// @brief The number of dimensions, which is `shape.size()`.
     ssize_t
       ndim() const;
 
-    /// Returns `true` if any element of the #shape is zero; `false` otherwise.
+    /// @brief Returns `true` if any element of the #shape is zero; `false` otherwise.
     ///
     /// Note that a NumpyArray can be empty with non-zero #length.
     bool
       isempty() const;
 
-    /// Returns an untyped pointer to item zero in the buffer.
+    /// @brief An untyped pointer to item zero in the buffer.
     void*
       byteptr() const;
 
-    /// Returns an untyped pointer to item `at` in the buffer.
+    /// @brief An untyped pointer to item `at` in the buffer.
     void*
       byteptr(ssize_t at) const;
 
-    /// The length of the array (or scalar, if `shape.empty()`) in bytes.
+    /// @brief The length of the array (or scalar, if `shape.empty()`) in bytes.
     ///
     /// If scalar, the return value is equal to #itemsize; otherwise, it is
     /// equal to `shape[0] * strides[0]`.
     ssize_t
       bytelength() const;
 
-    /// Dereferences a selected item as a `uint8_t`.
+    /// @brief Dereferences a selected item as a `uint8_t`.
     uint8_t
       getbyte(ssize_t at) const;
 
-    /// Dereferences a selected item as a `int8_t`.
+    /// @brief Dereferences a selected item as a `int8_t`.
     int8_t
       getint8(ssize_t at) const;
 
-    /// Dereferences a selected item as a `uint8_t`.
+    /// @brief Dereferences a selected item as a `uint8_t`.
     uint8_t
       getuint8(ssize_t at) const;
 
-    /// Dereferences a selected item as a `int16_t`.
+    /// @brief Dereferences a selected item as a `int16_t`.
     int16_t
       getint16(ssize_t at) const;
 
-    /// Dereferences a selected item as a `uint16_t`.
+    /// @brief Dereferences a selected item as a `uint16_t`.
     uint16_t
       getuint16(ssize_t at) const;
 
-    /// Dereferences a selected item as a `int32_t`.
+    /// @brief Dereferences a selected item as a `int32_t`.
     int32_t
       getint32(ssize_t at) const;
 
-    /// Dereferences a selected item as a `uint32_t`.
+    /// @brief Dereferences a selected item as a `uint32_t`.
     uint32_t
       getuint32(ssize_t at) const;
 
-    /// Dereferences a selected item as a `int64_t`.
+    /// @brief Dereferences a selected item as a `int64_t`.
     int64_t
       getint64(ssize_t at) const;
 
-    /// Dereferences a selected item as a `uint64_t`.
+    /// @brief Dereferences a selected item as a `uint64_t`.
     uint64_t
       getuint64(ssize_t at) const;
 
-    /// Dereferences a selected item as a `float`.
+    /// @brief Dereferences a selected item as a `float`.
     float_t
       getfloat(ssize_t at) const;
 
-    /// Dereferences a selected item as a `double`.
+    /// @brief Dereferences a selected item as a `double`.
     double_t
       getdouble(ssize_t at) const;
 
-    /// Returns a contiguous copy of this array with multidimensional #shape
-    /// replaced by nested RegularArray nodes.
+    /// @brief A contiguous version of this array with multidimensional
+    /// #shape replaced by nested RegularArray nodes.
     ///
     /// If the #shape has zero dimensions (it's a scalar), it is passed through
     /// unaffected.
     const ContentPtr
       toRegularArray() const;
 
-    /// Returns `true` if the #shape is zero-dimensional; `false` otherwise.
+    /// @brief Returns `true` if the #shape is zero-dimensional; `false` otherwise.
     bool
       isscalar() const override;
 
-    /// User-friendly name of this class: `"NumpyArray"`.
+    /// @brief User-friendly name of this class: `"NumpyArray"`.
     const std::string
       classname() const override;
 
@@ -352,10 +351,10 @@ namespace awkward {
       fillna(const ContentPtr& value) const override;
 
     const ContentPtr
-      rpad(int64_t length, int64_t axis, int64_t depth) const override;
+      rpad(int64_t target, int64_t axis, int64_t depth) const override;
 
     const ContentPtr
-      rpad_and_clip(int64_t length,
+      rpad_and_clip(int64_t target,
                     int64_t axis,
                     int64_t depth) const override;
 
@@ -379,7 +378,7 @@ namespace awkward {
              int64_t axis,
              int64_t depth) const override;
 
-    /// Returns `true` if this array is contiguous; `false` otherwise.
+    /// @brief Returns `true` if this array is contiguous; `false` otherwise.
     ///
     /// An array is "contiguous" if
     /// `strides[i] = itemsize * prod(shape[i + 1:])`
@@ -394,7 +393,7 @@ namespace awkward {
     bool
       iscontiguous() const;
 
-    /// Returns a contiguous version of this array (or this array if
+    /// @brief A contiguous version of this array (or this array if
     /// `iscontiguous()`).
     ///
     /// An array is "contiguous" if
@@ -410,50 +409,50 @@ namespace awkward {
     const NumpyArray
       contiguous() const;
 
-    /// Inhibited general function (see 7 argument `getitem_next` specific
-    /// to NumpyArray).
+    /// @brief Inhibited general function (see 7 argument `getitem_next`
+    /// specific to NumpyArray).
     const ContentPtr
       getitem_next(const SliceAt& at,
                    const Slice& tail,
                    const Index64& advanced) const override;
 
-    /// Inhibited general function (see 7 argument `getitem_next` specific
-    /// to NumpyArray).
+    /// @brief Inhibited general function (see 7 argument `getitem_next`
+    /// specific to NumpyArray).
     const ContentPtr
       getitem_next(const SliceRange& range,
                    const Slice& tail,
                    const Index64& advanced) const override;
 
-    /// Inhibited general function (see 7 argument `getitem_next` specific
-    /// to NumpyArray).
+    /// @brief Inhibited general function (see 7 argument `getitem_next`
+    /// specific to NumpyArray).
     const ContentPtr
       getitem_next(const SliceArray64& array,
                    const Slice& tail,
                    const Index64& advanced) const override;
 
-    /// Inhibited general function (see 7 argument `getitem_next` specific
-    /// to NumpyArray).
+    /// @brief Inhibited general function (see 7 argument `getitem_next`
+    /// specific to NumpyArray).
     const ContentPtr
       getitem_next(const SliceField& field,
                    const Slice& tail,
                    const Index64& advanced) const override;
 
-    /// Inhibited general function (see 7 argument `getitem_next` specific
-    /// to NumpyArray).
+    /// @brief Inhibited general function (see 7 argument `getitem_next`
+    /// specific to NumpyArray).
     const ContentPtr
       getitem_next(const SliceFields& fields,
                    const Slice& tail,
                    const Index64& advanced) const override;
 
-    /// Inhibited general function (see 7 argument `getitem_next` specific
-    /// to NumpyArray).
+    /// @brief Inhibited general function (see 7 argument `getitem_next`
+    /// specific to NumpyArray).
     const ContentPtr
       getitem_next(const SliceJagged64& jagged,
                    const Slice& tail,
                    const Index64& advanced) const override;
 
   protected:
-    /// Internal function that propagates the derivation of a contiguous
+    /// @brief Internal function that propagates the derivation of a contiguous
     /// version of this array from one axis to the next.
     ///
     /// This may be thought of as a specialized application of #carry indexed
@@ -462,8 +461,8 @@ namespace awkward {
     const NumpyArray
       contiguous_next(const Index64& bytepos) const;
 
-    /// Internal function that propagates a generic #getitem request through
-    /// one axis by propagating strides (non-advanced indexing only).
+    /// @brief Internal function that propagates a generic #getitem request
+    /// through one axis by propagating strides (non-advanced indexing only).
     ///
     /// @param head First element of the Slice tuple.
     /// @param tail The rest of the elements of the Slice tuple.
@@ -474,8 +473,8 @@ namespace awkward {
                         const Slice& tail,
                         int64_t length) const;
 
-    /// Internal function that propagates a generic #getitem request through
-    /// one axis by propagating strides (non-advanced indexing only).
+    /// @brief Internal function that propagates a generic #getitem request
+    /// through one axis by propagating strides (non-advanced indexing only).
     ///
     /// See generic #getitem_bystrides for details.
     const NumpyArray
@@ -483,8 +482,8 @@ namespace awkward {
                         const Slice& tail,
                         int64_t length) const;
 
-    /// Internal function that propagates a generic #getitem request through
-    /// one axis by propagating strides (non-advanced indexing only).
+    /// @brief Internal function that propagates a generic #getitem request
+    /// through one axis by propagating strides (non-advanced indexing only).
     ///
     /// See generic #getitem_bystrides for details.
     const NumpyArray
@@ -492,8 +491,8 @@ namespace awkward {
                         const Slice& tail,
                         int64_t length) const;
 
-    /// Internal function that propagates a generic #getitem request through
-    /// one axis by propagating strides (non-advanced indexing only).
+    /// @brief Internal function that propagates a generic #getitem request
+    /// through one axis by propagating strides (non-advanced indexing only).
     ///
     /// See generic #getitem_bystrides for details.
     const NumpyArray
@@ -501,8 +500,8 @@ namespace awkward {
                         const Slice& tail,
                         int64_t length) const;
 
-    /// Internal function that propagates a generic #getitem request through
-    /// one axis by propagating strides (non-advanced indexing only).
+    /// @brief Internal function that propagates a generic #getitem request
+    /// through one axis by propagating strides (non-advanced indexing only).
     ///
     /// See generic #getitem_bystrides for details.
     const NumpyArray
@@ -510,8 +509,8 @@ namespace awkward {
                         const Slice& tail,
                         int64_t length) const;
 
-    /// Internal function that propagates a generic #getitem request through
-    /// one axis by building up a `carry` {@link IndexOf Index}.
+    /// @brief Internal function that propagates a generic #getitem request
+    /// through one axis by building up a `carry` {@link IndexOf Index}.
     ///
     /// @param head First element of the Slice tuple.
     /// @param tail The rest of the elements of the Slice tuple.
@@ -540,8 +539,8 @@ namespace awkward {
                    int64_t stride,
                    bool first) const;
 
-    /// Internal function that propagates a generic #getitem request through
-    /// one axis by building up a `carry` {@link IndexOf Index}.
+    /// @brief Internal function that propagates a generic #getitem request
+    /// through one axis by building up a `carry` {@link IndexOf Index}.
     ///
     /// See generic #getitem_bystrides for details.
     const NumpyArray
@@ -553,8 +552,8 @@ namespace awkward {
                    int64_t stride,
                    bool first) const;
 
-    /// Internal function that propagates a generic #getitem request through
-    /// one axis by building up a `carry` {@link IndexOf Index}.
+    /// @brief Internal function that propagates a generic #getitem request
+    /// through one axis by building up a `carry` {@link IndexOf Index}.
     ///
     /// See generic #getitem_bystrides for details.
     const NumpyArray
@@ -566,8 +565,8 @@ namespace awkward {
                    int64_t stride,
                    bool first) const;
 
-    /// Internal function that propagates a generic #getitem request through
-    /// one axis by building up a `carry` {@link IndexOf Index}.
+    /// @brief Internal function that propagates a generic #getitem request
+    /// through one axis by building up a `carry` {@link IndexOf Index}.
     ///
     /// See generic #getitem_bystrides for details.
     const NumpyArray
@@ -579,8 +578,8 @@ namespace awkward {
                    int64_t stride,
                    bool first) const;
 
-    /// Internal function that propagates a generic #getitem request through
-    /// one axis by building up a `carry` {@link IndexOf Index}.
+    /// @brief Internal function that propagates a generic #getitem request
+    /// through one axis by building up a `carry` {@link IndexOf Index}.
     ///
     /// See generic #getitem_bystrides for details.
     const NumpyArray
@@ -592,8 +591,8 @@ namespace awkward {
                    int64_t stride,
                    bool first) const;
 
-    /// Internal function that propagates a generic #getitem request through
-    /// one axis by building up a `carry` {@link IndexOf Index}.
+    /// @brief Internal function that propagates a generic #getitem request
+    /// through one axis by building up a `carry` {@link IndexOf Index}.
     ///
     /// See generic #getitem_bystrides for details.
     const NumpyArray
@@ -623,31 +622,41 @@ namespace awkward {
                           const SliceJagged64& slicecontent,
                           const Slice& tail) const override;
 
-  /// Internal function to fill JSON with boolean values.
+  /// @brief Internal function to fill JSON with boolean values.
   void
     tojson_boolean(ToJson& builder) const;
 
-  /// Internal function to fill JSON with integer values.
+  /// @brief Internal function to fill JSON with integer values.
   template <typename T>
   void
     tojson_integer(ToJson& builder) const;
 
-  /// Internal function to fill JSON with floating-point values.
+  /// @brief Internal function to fill JSON with floating-point values.
   template <typename T>
   void
     tojson_real(ToJson& builder) const;
 
-  /// Internal function to fill JSON with string values.
+  /// @brief Internal function to fill JSON with string values.
   void
     tojson_string(ToJson& builder) const;
 
   private:
-    std::shared_ptr<void> ptr_;
-    std::vector<ssize_t> shape_;
-    std::vector<ssize_t> strides_;
-    ssize_t byteoffset_;
-    const ssize_t itemsize_;
-    const std::string format_;
+  /// @brief See #ptr.
+  std::shared_ptr<void> ptr_;
+  /// @brief See #shape.
+  std::vector<ssize_t> shape_;
+  /// @brief See #strides.
+  std::vector<ssize_t> strides_;
+  /// @brief See #byteoffset.
+  ssize_t byteoffset_;
+  /// @brief See #itemsize.
+  const ssize_t itemsize_;
+  /// @brief See #format.
+  const std::string format_;
+
+  /// @brief Mapping from (platform dependent) `std::type_index` to pybind11
+  /// format string (see #format).
+  static const std::unordered_map<std::type_index, std::string> format_map;
   };
 }
 

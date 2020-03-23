@@ -21,7 +21,7 @@ namespace awkward {
       toNumpyArray(const std::string& format,
                    ssize_t itemsize) const;
 
-    /// User-friendly name of this class: `"EmptyArray"`.
+    /// @brief User-friendly name of this class: `"EmptyArray"`.
     const std::string
       classname() const override;
 
@@ -139,10 +139,10 @@ namespace awkward {
       fillna(const ContentPtr& value) const override;
 
     const ContentPtr
-      rpad(int64_t length, int64_t axis, int64_t depth) const override;
+      rpad(int64_t target, int64_t axis, int64_t depth) const override;
 
     const ContentPtr
-      rpad_and_clip(int64_t length,
+      rpad_and_clip(int64_t target,
                     int64_t axis,
                     int64_t depth) const override;
 

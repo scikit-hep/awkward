@@ -41,8 +41,8 @@ namespace awkward {
     const ContentPtr
       toListOffsetArray64(bool start_at_zero) const;
 
-    /// User-friendly name of this class: `"ListArray32"`, `"ListArrayU32"`,
-    /// or `"ListArray64"`.
+    /// @brief User-friendly name of this class: `"ListArray32"`,
+    /// `"ListArrayU32"`, or `"ListArray64"`.
     const std::string
       classname() const override;
 
@@ -160,10 +160,10 @@ namespace awkward {
       fillna(const ContentPtr& value) const override;
 
     const ContentPtr
-      rpad(int64_t length, int64_t axis, int64_t depth) const override;
+      rpad(int64_t target, int64_t axis, int64_t depth) const override;
 
     const ContentPtr
-      rpad_and_clip(int64_t length,
+      rpad_and_clip(int64_t target,
                     int64_t axis,
                     int64_t depth) const override;
 
