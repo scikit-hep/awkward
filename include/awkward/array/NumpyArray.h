@@ -36,9 +36,8 @@ namespace awkward {
    */
   class EXPORT_SYMBOL NumpyArray: public Content {
   public:
-    static const TypePtr
-      unwrap_regulartype(const TypePtr& type,
-                         const std::vector<ssize_t>& shape);
+    /// Mapping from (platform dependent) type index to pybind11 type string;
+    /// used internally.
     static const std::unordered_map<std::type_index, std::string> format_map;
 
     /**
@@ -171,39 +170,55 @@ namespace awkward {
     ssize_t
       bytelength() const;
 
+    /// Dereferences a selected item as a `uint8_t`.
     uint8_t
       getbyte(ssize_t at) const;
 
+    /// Dereferences a selected item as a `int8_t`.
     int8_t
       getint8(ssize_t at) const;
 
+    /// Dereferences a selected item as a `uint8_t`.
     uint8_t
       getuint8(ssize_t at) const;
 
+    /// Dereferences a selected item as a `int16_t`.
     int16_t
       getint16(ssize_t at) const;
 
+    /// Dereferences a selected item as a `uint16_t`.
     uint16_t
       getuint16(ssize_t at) const;
 
+    /// Dereferences a selected item as a `int32_t`.
     int32_t
       getint32(ssize_t at) const;
 
+    /// Dereferences a selected item as a `uint32_t`.
     uint32_t
       getuint32(ssize_t at) const;
 
+    /// Dereferences a selected item as a `int64_t`.
     int64_t
       getint64(ssize_t at) const;
 
+    /// Dereferences a selected item as a `uint64_t`.
     uint64_t
       getuint64(ssize_t at) const;
 
+    /// Dereferences a selected item as a `float`.
     float_t
       getfloat(ssize_t at) const;
 
+    /// Dereferences a selected item as a `double`.
     double_t
       getdouble(ssize_t at) const;
 
+    /// Returns a contiguous copy of this array with multidimensional #shape
+    /// replaced by nested RegularArray nodes.
+    ///
+    /// If the #shape has zero dimensions (it's a scalar), it is passed through
+    /// unaffected.
     const ContentPtr
       toRegularArray() const;
 
@@ -608,17 +623,21 @@ namespace awkward {
                           const SliceJagged64& slicecontent,
                           const Slice& tail) const override;
 
+  /// Internal function to fill JSON with boolean values.
   void
     tojson_boolean(ToJson& builder) const;
 
+  /// Internal function to fill JSON with integer values.
   template <typename T>
   void
     tojson_integer(ToJson& builder) const;
 
+  /// Internal function to fill JSON with floating-point values.
   template <typename T>
   void
     tojson_real(ToJson& builder) const;
 
+  /// Internal function to fill JSON with string values.
   void
     tojson_string(ToJson& builder) const;
 

@@ -24,34 +24,6 @@
 #include "awkward/array/NumpyArray.h"
 
 namespace awkward {
-  const TypePtr
-  NumpyArray::unwrap_regulartype(const TypePtr& type,
-                                 const std::vector<ssize_t>& shape) {
-    TypePtr out = type;
-    for (size_t i = 1;  i < shape.size();  i++) {
-      if (RegularType* raw = dynamic_cast<RegularType*>(out.get())) {
-        if (raw->size() == (int64_t)shape[i]) {
-          out = raw->type();
-        }
-        else {
-          throw std::invalid_argument(
-            std::string("NumpyArray cannot be converted to type ")
-            + type.get()->tostring()
-            + std::string(" because shape does not match sizes of "
-                          "RegularTypes"));
-        }
-      }
-      else {
-        throw std::invalid_argument(
-          std::string("NumpyArray cannot be converted to type ")
-          + type.get()->tostring()
-          + std::string(" because shape does not match level of RegularType "
-                        "nesting"));
-      }
-    }
-    return out;
-  }
-
   const std::unordered_map<std::type_index, std::string>
   NumpyArray::format_map = {
     { typeid(int8_t), "b"},
@@ -222,77 +194,61 @@ namespace awkward {
     }
   }
 
-  /// Dereferences a selected item as a `uint8_t`.
   uint8_t
   NumpyArray::getbyte(ssize_t at) const {
     return *reinterpret_cast<uint8_t*>(byteptr(at));
   }
 
-  /// Dereferences a selected item as a `int8_t`.
   int8_t
   NumpyArray::getint8(ssize_t at) const  {
     return *reinterpret_cast<int8_t*>(byteptr(at));
   }
 
-  /// Dereferences a selected item as a `uint8_t`.
   uint8_t
   NumpyArray::getuint8(ssize_t at) const {
     return *reinterpret_cast<uint8_t*>(byteptr(at));
   }
 
-  /// Dereferences a selected item as a `int16_t`.
   int16_t
   NumpyArray::getint16(ssize_t at) const {
     return *reinterpret_cast<int16_t*>(byteptr(at));
   }
 
-  /// Dereferences a selected item as a `uint16_t`.
   uint16_t
   NumpyArray::getuint16(ssize_t at) const {
     return *reinterpret_cast<uint16_t*>(byteptr(at));
   }
 
-  /// Dereferences a selected item as a `int32_t`.
   int32_t
   NumpyArray::getint32(ssize_t at) const {
     return *reinterpret_cast<int32_t*>(byteptr(at));
   }
 
-  /// Dereferences a selected item as a `uint32_t`.
   uint32_t
   NumpyArray::getuint32(ssize_t at) const {
     return *reinterpret_cast<uint32_t*>(byteptr(at));
   }
 
-  /// Dereferences a selected item as a `int64_t`.
   int64_t
   NumpyArray::getint64(ssize_t at) const {
     return *reinterpret_cast<int64_t*>(byteptr(at));
   }
 
-  /// Dereferences a selected item as a `uint64_t`.
   uint64_t
   NumpyArray::getuint64(ssize_t at) const {
     return *reinterpret_cast<uint64_t*>(byteptr(at));
   }
 
-  /// Dereferences a selected item as a `float`.
   float_t
   NumpyArray::getfloat(ssize_t at) const {
     return *reinterpret_cast<float*>(byteptr(at));
   }
 
-  /// Dereferences a selected item as a `double`.
   double_t
   NumpyArray::getdouble(ssize_t at) const {
     return *reinterpret_cast<double*>(byteptr(at));
   }
 
-  /// Returns a contiguous copy of this array with multidimensional #shape
-  /// replaced by nested RegularArray nodes.
-  ///
-  /// If the #shape has zero dimensions (it's a scalar), it is passed through
-  /// unaffected.
   const ContentPtr
   NumpyArray::toRegularArray() const {
     if (isscalar()) {

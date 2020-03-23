@@ -37,12 +37,22 @@ namespace awkward {
     virtual const IdentitiesPtr
       identities() const;
 
+    /// Assign a surrogate index of Identities to this array (in-place).
+    ///
+    /// This also assigns and possibly replaces Identities in nested arrays.
     virtual void
       setidentities() = 0;
 
+    /// Assign a specified set of Identities to this array (in-place).
+    ///
+    /// This also assigns and possibly replaces Identities in nested arrays.
     virtual void
       setidentities(const IdentitiesPtr& identities) = 0;
 
+    /// Returns a high-level Type describing this array.
+    ///
+    /// @param typestrs A mapping from `"__record__"` parameters to string
+    /// representations of those types, to override the derived strings.
     virtual const TypePtr
       type(const util::TypeStrs& typestrs) const = 0;
 
@@ -51,6 +61,7 @@ namespace awkward {
                     const std::string& pre,
                     const std::string& post) const = 0;
 
+    /// Internal function to produce a JSON representation one node at a time.
     virtual void
       tojson_part(ToJson& builder) const = 0;
 
@@ -70,12 +81,17 @@ namespace awkward {
     virtual int64_t
       length() const = 0;
 
+    /// Returns a copy of this node without copying any contents or arrays.
+    ///
+    /// See also #deep_copy.
     virtual const ContentPtr
       shallow_copy() const = 0;
 
     /// Return a copy of this array node and all nodes hierarchically nested
     /// within it, optionally copying the associated arrays, indexes, and
     /// identities, too.
+    ///
+    /// See also #shallow_copy.
     ///
     /// @param copyarrays If `true`, copy the associated array buffers (in
     /// NumpyArray and {@link RawArrayOf RawArray}), not just the lightweight
@@ -249,6 +265,8 @@ namespace awkward {
     virtual const std::pair<bool, int64_t>
       branch_depth() const = 0;
 
+    /// Returns the number of fields in the first nested tuple or records or
+    /// `-1` if this array does not contain a RecordArray.
     virtual int64_t
       numfields() const = 0;
 
@@ -276,15 +294,47 @@ namespace awkward {
 
     // operations
 
+    /// Returns an error message if this array is invalid; otherwise, returns
+    /// an empty string.
     virtual const std::string
       validityerror(const std::string& path) const = 0;
 
+    /// Return an equivalent array simplified at one level only using
+    /// {@link IndexedArrayOf#simplify_optiontype simplify_optiontype}
+    /// if an option-type array and
+    /// {@link UnionArrayOf#simplify_uniontype simplify_uniontype}
+    /// if a union-type array.
+    ///
+    /// For all other types of arrays, this operation is a pass-through.
     virtual const ContentPtr
       shallow_simplify() const = 0;
 
+    /// Returns the length of this array (as a scalar) if `axis = 0` or the
+    /// lengths of subarrays (as an array or nested array) if `axis != 0`.
+    ///
+    /// @param axis The axis whose length or lengths to quantify.
+    /// Negative `axis` counts backward from the deepest levels (`-1` is
+    /// the last valid `axis`).
+    /// @param depth The current depth while stepping into the array: this
+    /// value is set to `0` on the array node where the user starts the
+    /// process and is increased at each level of list-depth (instead of
+    /// decreasing the user-specified `axis`).
     virtual const ContentPtr
       num(int64_t axis, int64_t depth) const = 0;
 
+    /// Returns (a) an offsets {@list IndexOf Index} and (b) a flattened
+    /// version of the array at some `axis` depth.
+    ///
+    /// If `axis > 1` (or its negative equivalent), the offsets is empty.
+    ///
+    /// @param axis The axis to eliminate by flattening. `axis = 0` is
+    /// invalid.
+    /// Negative `axis` counts backward from the deepest levels (`-1` is
+    /// the last valid `axis`).
+    /// @param depth The current depth while stepping into the array: this
+    /// value is set to `0` on the array node where the user starts the
+    /// process and is increased at each level of list-depth (instead of
+    /// decreasing the user-specified `axis`).
     virtual const std::pair<Index64, ContentPtr>
       offsets_and_flattened(int64_t axis, int64_t depth) const = 0;
 
@@ -317,12 +367,59 @@ namespace awkward {
     virtual const ContentPtr
       fillna(const ContentPtr& value) const = 0;
 
+    /// If `axis = 0`, return a copy of this array padded on the right with
+    /// `None` values to have a minimum length; otherwise, return an array
+    /// with nested lists all padded to the minimum length.
+    ///
+    /// @param length The target length. The output may be longer than this
+    /// target, but not shorter (using {@link ListArrayOf ListArray}).
+    /// @param axis The axis at which to apply padding.
+    /// Negative `axis` counts backward from the deepest levels (`-1` is
+    /// the last valid `axis`).
+    /// @param depth The current depth while stepping into the array: this
+    /// value is set to `0` on the array node where the user starts the
+    /// process and is increased at each level of list-depth (instead of
+    /// decreasing the user-specified `axis`).
     virtual const ContentPtr
       rpad(int64_t length, int64_t axis, int64_t depth) const = 0;
 
+    /// If `axis = 0`, return a copy of this array padded on the right with
+    /// `None` values to have exactly the specified length; otherwise, return
+    /// an array with nested lists all padded to the specified length.
+    ///
+    /// @param length The target length. The output has exactly this target
+    /// length (using RegularArray).
+    /// @param axis The axis at which to apply padding.
+    /// Negative `axis` counts backward from the deepest levels (`-1` is
+    /// the last valid `axis`).
+    /// @param depth The current depth while stepping into the array: this
+    /// value is set to `0` on the array node where the user starts the
+    /// process and is increased at each level of list-depth (instead of
+    /// decreasing the user-specified `axis`).
     virtual const ContentPtr
       rpad_and_clip(int64_t length, int64_t axis, int64_t depth) const = 0;
 
+    /// Returns the array with one axis removed by applying a Reducer (e.g.
+    /// "sum", "max", "any", "all).
+    ///
+    /// @param reducer The choice of Reducer algorithm.
+    /// @param negaxis The negative axis: `-axis`. That is, `negaxis = 1`
+    /// means the deepest axis level.
+    /// @param starts Staring positions of each group to combine as an
+    /// {@link IndexOf Index}. These are downward pointers from an outer
+    /// structure into this structure with the same meaning as in
+    /// {@link ListArrayOf ListArray}.
+    /// @param parents Groups to combine as an {@link IndexOf Index} of
+    /// upward pointers from this structure to the outer structure to reduce.
+    /// @param outlength The length of the reduced array, after the operation
+    /// completes.
+    /// @param mask If `true`, the Reducer's identity values will be covered
+    /// by `None` using a ByteMaskedArray. This is desirable for ReducerMin,
+    /// ReducerMax, ReducerArgmin, and ReducerArgmax to indicate that empty
+    /// lists have no minimum or maximum.
+    /// @param keepdims If `true`, the reduced values will be wrapped by a
+    /// singleton RegularArray to maintain the same number of dimensions in
+    /// the output.
     virtual const ContentPtr
       reduce_next(const Reducer& reducer,
                   int64_t negaxis,
@@ -422,12 +519,26 @@ namespace awkward {
              int64_t axis,
              int64_t depth) const = 0;
 
+    /// Returns a string representation of this array (multi-line XML).
     const std::string
       tostring() const;
 
+    /// Returns a JSON representation of this array.
+    ///
+    /// @param pretty If `true`, add spacing to make the JSON human-readable.
+    /// If `false`, return a compact representation.
+    /// @param maxdecimals Maximum number of decimals for floating-point
+    /// numbers or `-1` for no limit.
     const std::string
       tojson(bool pretty, int64_t maxdecimals) const;
 
+    /// Writes a JSON representation of this array to a `destination` file.
+    ///
+    /// @param pretty If `true`, add spacing to make the JSON human-readable.
+    /// If `false`, return a compact representation.
+    /// @param maxdecimals Maximum number of decimals for floating-point
+    /// numbers or `-1` for no limit.
+    /// @param buffersize Size of a temporary buffer in bytes.
     void
       tojson(FILE* destination,
              bool pretty,
