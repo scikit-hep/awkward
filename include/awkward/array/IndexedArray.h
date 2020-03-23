@@ -90,6 +90,7 @@ namespace awkward {
     const ContentPtr
       simplify_optiontype() const;
 
+    /// @brief Returns the value of #index at a given position.
     T
       index_at_nowrap(int64_t at) const;
 
