@@ -13,27 +13,53 @@
 #include "awkward/Content.h"
 
 namespace awkward {
+  /// @class UnmaskedArray
+  ///
+  /// @brief Converts #content of any type into an OptionType in which all
+  /// values happen to be valid.
+  ///
+  /// See #UnmaskedArray for the meaning of each parameter.
   class EXPORT_SYMBOL UnmaskedArray: public Content {
   public:
+    /// @brief Creates an UnmaskedArray from a full set of parameters.
+    ///
+    /// @param identities Optional Identities for each element of the array
+    /// (may be `nullptr`).
+    /// @param parameters String-to-JSON map that augments the meaning of this
+    /// array.
+    /// @param content Data to be converted to an OptionType.
     UnmaskedArray(const IdentitiesPtr& identities,
                   const util::Parameters& parameters,
                   const ContentPtr& content);
 
+    /// @brief Data to be converted to an OptionType.
     const ContentPtr
       content() const;
 
+    /// @brief Equivalent to calling #content; removes OptionType but there are
+    /// no `None` values to remove.
     const ContentPtr
       project() const;
 
+    /// @brief Applies a given `mask` and calls #project.
+    ///
+    /// @param mask A byte mask that is valid when `0`, `None` when `1`.
     const ContentPtr
       project(const Index8& mask) const;
 
+    /// @brief Returns a byte mask of all `0` values (representing valid data).
     const Index8
       bytemask() const;
 
+    /// @brief If the #content also has OptionType, return the #content;
+    /// otherwise, return #shallow_copy.
+    ///
+    /// This is a shallow operation: it only checks the content one level deep.
     const ContentPtr
       simplify_optiontype() const;
 
+    /// @brief Converts this array into an
+    /// {@link IndexedArrayOf IndexedOptionArray} without missing values.
     const ContentPtr
       toIndexedOptionArray64() const;
 
@@ -237,6 +263,7 @@ namespace awkward {
                                   const Slice& tail) const;
 
   private:
+    /// @brief See #content.
     const ContentPtr content_;
 
   };

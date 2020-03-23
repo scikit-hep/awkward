@@ -89,6 +89,8 @@ namespace awkward {
     /// OptionType, combine the two indicators of missing values into a single
     /// OptionType array. If this is an IndexedArray and the #content is also
     /// an IndexedArray, combine the two #index arrays.
+    ///
+    /// This is a shallow operation: it only checks the content one level deep.
     const ContentPtr
       simplify_optiontype() const;
 

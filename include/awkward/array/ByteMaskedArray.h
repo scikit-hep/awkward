@@ -89,11 +89,13 @@ namespace awkward {
     /// @brief If the #content also has OptionType, combine the #mask with
     /// the #content's indicator of missing values; also combine if the
     /// #content is a non-OptionType {@link IndexedArrayOf IndexedArray}.
+    ///
+    /// This is a shallow operation: it only checks the content one level deep.
     const ContentPtr
       simplify_optiontype() const;
 
     /// @brief Converts this array into an
-    /// {@link IndexedArrayOf IndexedOptionArray}.
+    /// {@link IndexedArrayOf IndexedOptionArray} with the same missing values.
     const std::shared_ptr<IndexedArrayOf<int64_t, true>>
       toIndexedOptionArray64() const;
 
