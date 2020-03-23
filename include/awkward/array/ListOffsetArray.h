@@ -22,8 +22,7 @@ namespace awkward {
     /// (may be `nullptr`).
     /// @param parameters String-to-JSON map that augments the meaning of this
     /// array.
-    /// @param Index positions where one nested list stops and the next
-    /// starts.
+    /// @param Positions where one nested list stops and the next starts.
     /// The length of `offsets` is one greater than the length of the array it
     /// represents, and as such must always have at least one element.
     /// @param Data contained within all nested lists as a contiguous array.
@@ -35,8 +34,7 @@ namespace awkward {
                          const IndexOf<T>& offsets,
                          const ContentPtr& content);
 
-    /// @brief Index positions where one nested list stops and the next
-    /// starts.
+    /// @brief Positions where one nested list stops and the next starts.
     ///
     /// The length of `offsets` is one greater than the length of the array it
     /// represents, and as such must always have at least one element.
@@ -78,12 +76,26 @@ namespace awkward {
     Index64
       compact_offsets64(bool start_at_zero) const;
 
+    /// @brief Moves #content elements if necessary to match a given set of
+    /// `offsets` and return a {@link ListOffsetArrayOf ListOffsetArray} that
+    /// matches.
+    ///
+    /// As indicated by the name, this is a basic element of broadcasting.
     const std::shared_ptr<ListOffsetArrayOf<int64_t>>
       broadcast_tooffsets64(const Index64& offsets) const;
 
+    /// @brief Converts this array to a RegularArray if all nested lists have
+    /// the same size (error otherwise).
     const std::shared_ptr<RegularArray>
       toRegularArray() const;
 
+    /// @brief Returns a {@link ListOffsetArrayOf ListOffsetArray} with
+    /// 64-bit #offsets and possibly starting with `offsets[0] = 0`; a
+    /// #shallow_copy if possible.
+    ///
+    /// @param start_at_zero If `true`, the first offset will be `0`, meaning
+    /// there are no "unreachable" elements in the `content` that corresponds
+    /// to these offsets.
     const std::shared_ptr<ListOffsetArrayOf<int64_t>>
       toListOffsetArray64(bool start_at_zero) const;
 

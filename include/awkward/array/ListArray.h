@@ -25,6 +25,7 @@ namespace awkward {
                    const IndexOf<T>& stops,
                    const ContentPtr& content);
 
+    /// @brief Positions where each nested list starts in the #content.
     const IndexOf<T>
       starts() const;
 
@@ -44,12 +45,40 @@ namespace awkward {
     Index64
       compact_offsets64(bool start_at_zero) const;
 
+    /// @brief Moves #content elements if necessary to match a given set of
+    /// `offsets` and return a {@link ListOffsetArrayOf ListOffsetArray} that
+    /// matches.
+    ///
+    /// As indicated by the name, this is a basic element of broadcasting.
+    ///
+    /// Since the output is a {@link ListOffsetArrayOf ListOffsetArray}, this
+    /// operation produces contiguous output, replacing multiply-referenced
+    /// items with copied items and removing unreachable gaps between items.
     const std::shared_ptr<ListOffsetArrayOf<int64_t>>
       broadcast_tooffsets64(const Index64& offsets) const;
 
+    /// @brief Converts this array to a RegularArray if all nested lists have
+    /// the same size (error otherwise).
+    ///
+    /// Since the output is a RegularArray, this
+    /// operation produces contiguous output, replacing multiply-referenced
+    /// items with copied items and removing unreachable gaps before and
+    /// between items.
     const std::shared_ptr<RegularArray>
       toRegularArray() const;
 
+    /// @brief Returns this array as a
+    /// {@link ListOffsetArrayOf ListOffsetArray} with
+    /// 64-bit #offsets and possibly starting with `offsets[0] = 0`; a
+    /// #shallow_copy if possible.
+    ///
+    /// @param start_at_zero If `true`, the first offset will be `0`, meaning
+    /// there are no "unreachable" elements in the `content` that corresponds
+    /// to these offsets.
+    ///
+    /// Since the output is a {@link ListOffsetArrayOf ListOffsetArray}, this
+    /// operation produces contiguous output, replacing multiply-referenced
+    /// items with copied items and removing unreachable gaps between items.
     const std::shared_ptr<ListOffsetArrayOf<int64_t>>
       toListOffsetArray64(bool start_at_zero) const;
 

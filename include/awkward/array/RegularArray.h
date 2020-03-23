@@ -37,12 +37,28 @@ namespace awkward {
     Index64
       compact_offsets64(bool start_at_zero) const;
 
+    /// @brief Verify that a given set of `offsets` are regular
+    /// and return a {@link ListOffsetArrayOf ListOffsetArray} of this array
+    /// using those `offsets`.
+    ///
+    /// As indicated by the name, this is a basic element of broadcasting.
     const std::shared_ptr<ListOffsetArrayOf<int64_t>>
       broadcast_tooffsets64(const Index64& offsets) const;
 
+    /// @brief Effectively the same as #shallow_copy, but with the same name
+    /// as the equivalent
+    /// {@link ListArrayOf#toRegularArray ListArray::toRegularArray} and
+    /// {@link ListOffsetArrayOf#toRegularArray ListOffsetArray::toRegularArray}.
     const std::shared_ptr<RegularArray>
       toRegularArray() const;
 
+    /// @brief Converts this array into a
+    /// {@link ListOffsetArrayOf ListOffsetArray} by generating `offsets` that
+    /// are equivalent to its regular #size.
+    ///
+    /// @param start_at_zero If `true`, the first offset will be `0`, meaning
+    /// there are no "unreachable" elements in the `content` that corresponds
+    /// to these offsets. For a RegularArray, this would always be true.
     const std::shared_ptr<ListOffsetArrayOf<int64_t>>
       toListOffsetArray64(bool start_at_zero) const;
 
