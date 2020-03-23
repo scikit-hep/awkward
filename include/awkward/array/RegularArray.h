@@ -15,16 +15,41 @@ namespace awkward {
   template <typename T>
   class ListOffsetArrayOf;
 
+  /// @class RegularArray
+  ///
+  /// @brief Represents an array of nested lists that all have the same
+  /// length using a scalar #size, rather than an index.
+  ///
+  /// The #content must be contiguous, in-order, and non-overlapping, and
+  /// it must also start at zero.
+  ///
+  /// See #RegularArray for the meaning of each parameter.
   class EXPORT_SYMBOL RegularArray: public Content {
   public:
+    /// @brief Creates a RegularArray from a full set of parameters.
+    ///
+    /// @param identities Optional Identities for each element of the array
+    /// (may be `nullptr`).
+    /// @param parameters String-to-JSON map that augments the meaning of this
+    /// array.
+    /// @param content Data contained within all nested lists as a contiguous
+    /// array.
+    /// Values in `content[i]` where `i >= length * size` are "unreachable,"
+    /// and don't exist in the high level view.
+    /// @param size Length of the equally sized nested lists.
     RegularArray(const IdentitiesPtr& identities,
                  const util::Parameters& parameters,
                  const ContentPtr& content,
                  int64_t size);
 
+    /// @brief Data contained within all nested lists as a contiguous array.
+    ///
+    /// Values in `content[i]` where `i >= length * size` are "unreachable,"
+    /// and don't exist in the high level view.
     const ContentPtr
       content() const;
 
+    /// @brief Length of the equally sized nested lists.
     int64_t
       size() const;
 
@@ -86,6 +111,9 @@ namespace awkward {
     void
       nbytes_part(std::map<size_t, int64_t>& largest) const override;
 
+    /// @copydoc Content::length()
+    ///
+    /// Equal to `floor(len(content) / size)`.
     int64_t
       length() const override;
 

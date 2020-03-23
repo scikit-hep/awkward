@@ -13,6 +13,17 @@
 namespace awkward {
   class RegularArray;
 
+  /// @class ListOffsetArrayOf
+  ///
+  /// @brief Represents an array of nested lists that can have different
+  /// lengths using one index named #offsets.
+  ///
+  /// A single #offsets index requires the #content to be contiguous, in-order,
+  /// and non-overlapping, though it need not start at zero (there can be
+  /// "unreachable" elements before the first visible item if
+  /// `offsets[0] != 0`).
+  ///
+  /// See #ListOffsetArrayOf for the meaning of each parameter.
   template <typename T>
   class EXPORT_SYMBOL ListOffsetArrayOf: public Content {
   public:
@@ -22,10 +33,12 @@ namespace awkward {
     /// (may be `nullptr`).
     /// @param parameters String-to-JSON map that augments the meaning of this
     /// array.
-    /// @param Positions where one nested list stops and the next starts.
+    /// @param offsets Positions where one nested list stops and the next
+    /// starts in the #content; the `offsets` must be monotonically increasing.
     /// The length of `offsets` is one greater than the length of the array it
     /// represents, and as such must always have at least one element.
-    /// @param Data contained within all nested lists as a contiguous array.
+    /// @param content Data contained within all nested lists as a contiguous
+    /// array.
     /// Values in `content[i]` where `i < offsets[0]` are "unreachable," and
     /// don't exist in the high level view, as are any where
     /// `i >= offsets[len(offsets) - 1]`.
@@ -34,7 +47,8 @@ namespace awkward {
                          const IndexOf<T>& offsets,
                          const ContentPtr& content);
 
-    /// @brief Positions where one nested list stops and the next starts.
+    /// @brief Positions where one nested list stops and the next starts in
+    /// the #content; the `offsets` must be monotonically increasing.
     ///
     /// The length of `offsets` is one greater than the length of the array it
     /// represents, and as such must always have at least one element.
@@ -124,6 +138,9 @@ namespace awkward {
     void
       nbytes_part(std::map<size_t, int64_t>& largest) const override;
 
+    /// @copydoc Content::length()
+    ///
+    /// Equal to `len(offsets) - 1`.
     int64_t
       length() const override;
 

@@ -16,9 +16,32 @@ namespace awkward {
 
   class RegularArray;
 
+  /// @class ListArrayOf
+  ///
+  /// @brief Represents an array of nested lists that can have different
+  /// lengths using two indexes named #starts and #stops.
+  ///
+  /// The use of two indexes, #starts and #stops, allows the #content to be
+  /// non-contiguous, out-of-order, and possibly overlapping.
+  ///
+  /// See #ListArrayOf for the meaning of each parameter.
   template <typename T>
   class EXPORT_SYMBOL ListArrayOf: public Content {
   public:
+    /// @brief Creates a ListArray from a full set of parameters.
+    ///
+    /// @param identities Optional Identities for each element of the array
+    /// (may be `nullptr`).
+    /// @param parameters String-to-JSON map that augments the meaning of this
+    /// array.
+    /// @param starts Positions where each nested list starts in the #content.
+    /// @param stops Positions where each nested list stops in the #content.
+    /// The `starts` and `stops` may be in any order, they may repeat elements,
+    /// may represent partially or completely overlapping ranges of the
+    /// #content, and they may leave "unreachable" gaps between lists.
+    /// If `starts[i] == stops[i]`, there is no constraint on the value of
+    /// `starts[i]`. Otherwise, `0 <= starts[i] < len(content)` and
+    /// `0 <= stops[i] <= len(content)`.
     ListArrayOf<T>(const IdentitiesPtr& identities,
                    const util::Parameters& parameters,
                    const IndexOf<T>& starts,
@@ -26,12 +49,32 @@ namespace awkward {
                    const ContentPtr& content);
 
     /// @brief Positions where each nested list starts in the #content.
+    ///
+    /// The `starts` may be in any order, they may repeat elements, may
+    /// represent partially or completely overlapping ranges of the #content,
+    /// and they may leave "unreachable" gaps between lists.
+    ///
+    /// If `starts[i] == stops[i]`, there is no constraint on the value of
+    /// `starts[i]`. Otherwise, `0 <= starts[i] < len(content)`.
     const IndexOf<T>
       starts() const;
 
+    /// @brief Positions where each nested list stops in the #content.
+    ///
+    /// The `stops` may be in any order, they may repeat elements, may
+    /// represent partially or completely overlapping ranges of the #content,
+    /// and they may leave "unreachable" gaps between lists.
+    ///
+    /// If `starts[i] == stops[i]`, there is no constraint on the value of
+    /// `stops[i]`. Otherwise, `0 <= stops[i] <= len(content)`.
     const IndexOf<T>
       stops() const;
 
+    /// @brief Data referenced by the #starts and #stops to build nested lists.
+    /// 
+    /// The `content` does not necessarily represent a flattened version of
+    /// this array because a single element may belong to multiple lists or
+    /// no list at all.
     const ContentPtr
       content() const;
 
@@ -107,6 +150,9 @@ namespace awkward {
     void
       nbytes_part(std::map<size_t, int64_t>& largest) const override;
 
+    /// @copydoc Content::length()
+    ///
+    /// Equal to `len(starts)`.
     int64_t
       length() const override;
 
