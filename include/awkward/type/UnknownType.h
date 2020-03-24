@@ -6,8 +6,21 @@
 #include "awkward/type/Type.h"
 
 namespace awkward {
+  /// @class UnknownType
+  ///
+  /// @brief Describes the high level type of data with whose type is not
+  /// known, usually because an ArrayBuilder did not have any instances
+  /// to sample.
+  ///
+  /// EmptyArray nodes have this type.
   class EXPORT_SYMBOL UnknownType: public Type {
   public:
+    /// @brief Create an OptionType with a full set of parameters.
+    ///
+    /// @param parameters Custom parameters inherited from the Content that
+    /// this type describes.
+    /// @param typestr Optional string that overrides the default string
+    /// representation (missing if empty).
     UnknownType(const util::Parameters& parameters,
                 const std::string& typestr);
 

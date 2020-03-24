@@ -6,11 +6,29 @@
 #include "awkward/type/Type.h"
 
 namespace awkward {
+  /// @class ListType
+  ///
+  /// @brief Describes the high level type of lists of variable length, as
+  /// opposed to RegularType.
+  ///
+  /// {@link ListArrayOf ListArray} and
+  /// {@link ListOffsetArrayOf ListOffsetArray} nodes have this type.
   class EXPORT_SYMBOL ListType: public Type {
   public:
+    /// @brief Create a ListType with a full set of parameters.
+    ///
+    /// @param parameters Custom parameters inherited from the Content that
+    /// this type describes.
+    /// @param typestr Optional string that overrides the default string
+    /// representation (missing if empty).
+    /// @param type The Type of the nested lists.
     ListType(const util::Parameters& parameters,
              const std::string& typestr,
              const TypePtr& type);
+
+    /// @brief The Type of the nested lists.
+    const TypePtr
+      type() const;
 
     std::string
       tostring_part(const std::string& indent,
@@ -41,10 +59,8 @@ namespace awkward {
     const ContentPtr
       empty() const override;
 
-  const TypePtr
-    type() const;
-
   private:
+    /// @brief See #type.
     const TypePtr type_;
   };
 }

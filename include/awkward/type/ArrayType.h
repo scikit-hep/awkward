@@ -6,12 +6,34 @@
 #include "awkward/type/Type.h"
 
 namespace awkward {
+  /// @class ArrayType
+  ///
+  /// @brief Describes the high level type of a user-facing array, i.e.
+  /// `ak.Array` in Python, as opposed to Content. The #length of the array
+  /// is part of its type.
+  ///
+  /// No Content nodes have this type. The #length makes it non-composable.
   class EXPORT_SYMBOL ArrayType: public Type {
   public:
+    /// @brief Create an ArrayType with a full set of parameters.
+    ///
+    /// @param parameters Custom parameters (not used).
+    /// @param typestr Optional string that overrides the default string
+    /// representation (missing if empty).
+    /// @param type The Type of the composable Content.
+    /// @param length The length of the array.
     ArrayType(const util::Parameters& parameters,
               const std::string& typestr,
               const TypePtr& type,
               int64_t length);
+
+    /// @brief The Type of the composable Content.
+    const TypePtr
+      type() const;
+
+    /// @brief The length of the array.
+    int64_t
+      length() const;
 
     std::string
       tostring_part(const std::string& indent,
@@ -42,14 +64,10 @@ namespace awkward {
     const ContentPtr
       empty() const override;
 
-    const TypePtr
-      type() const;
-
-    int64_t
-      length() const;
-
   private:
+    /// @brief See #type.
     TypePtr type_;
+    /// @brief See #length.
     int64_t length_;
   };
 }

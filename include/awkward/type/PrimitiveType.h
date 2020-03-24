@@ -10,6 +10,8 @@ namespace awkward {
   ///
   /// @brief Describes the high level type of an array that contains fixed-size
   /// items, such as numbers or booleans.
+  ///
+  /// NumpyArray and {@link RawArrayOf RawArray} nodes have this type.
   class EXPORT_SYMBOL PrimitiveType: public Type {
   public:
     /// @brief Types that can be described by a PrimitiveType.
@@ -75,6 +77,7 @@ namespace awkward {
       empty() const override;
 
   private:
+    /// @brief See #dtype.
     const DType dtype_;
   };
 
