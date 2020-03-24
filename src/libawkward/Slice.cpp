@@ -10,11 +10,6 @@
 #include "awkward/Slice.h"
 
 namespace awkward {
-  int64_t
-  SliceItem::none() {
-    return kSliceNone;
-  }
-
   SliceItem::~SliceItem() { }
 
   /////////////////////////////////////////////////////// SliceAt
@@ -47,7 +42,7 @@ namespace awkward {
   SliceRange::SliceRange(int64_t start, int64_t stop, int64_t step)
       : start_(start)
       , stop_(stop)
-      , step_(step == none() ? 1 : step) {
+      , step_(step == Slice::none() ? 1 : step) {
     if (step_ == 0) {
       throw std::runtime_error("step must not be zero");
     }
@@ -70,12 +65,12 @@ namespace awkward {
 
   bool
   SliceRange::hasstart() const {
-    return start_ != none();
+    return start_ != Slice::none();
   }
 
   bool
   SliceRange::hasstop() const {
-    return stop_ != none();
+    return stop_ != Slice::none();
   }
 
   const SliceItemPtr
@@ -547,7 +542,7 @@ namespace awkward {
   /////////////////////////////////////////////////////// Slice
 
   int64_t Slice::none() {
-    return SliceItem::none();
+    return kSliceNone;
   }
 
   Slice::Slice()
@@ -658,6 +653,28 @@ namespace awkward {
   template <typename T>
   void
   Slice::append(const SliceArrayOf<T>& item) {
+    items_.push_back(item.shallow_copy());
+  }
+
+  void
+  Slice::append(const SliceField& item) {
+    items_.push_back(item.shallow_copy());
+  }
+
+  void
+  Slice::append(const SliceFields& item) {
+    items_.push_back(item.shallow_copy());
+  }
+
+  template <typename T>
+  void
+  Slice::append(const SliceMissingOf<T>& item) {
+    items_.push_back(item.shallow_copy());
+  }
+
+  template <typename T>
+  void
+  Slice::append(const SliceJaggedOf<T>& item) {
     items_.push_back(item.shallow_copy());
   }
 

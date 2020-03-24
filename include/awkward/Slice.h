@@ -21,11 +21,6 @@ namespace awkward {
   /// passed to an array's `__getitem__` in Python.
   class EXPORT_SYMBOL SliceItem {
   public:
-    /// @brief Represents a missing {@link SliceRange#start start},
-    /// {@link SliceRange#stop stop}, or {@link SliceRange#step step}
-    /// in a SliceRange.
-    static int64_t none();
-
     /// @brief Empty destructor; required for some C++ reason.
     virtual ~SliceItem();
 
@@ -93,14 +88,14 @@ namespace awkward {
     /// @param step The step size, which may be negative but must not be zero.
     ///
     /// Any #start, #stop, or #step may be
-    /// {@link SliceItem#none SliceItem::none}. Appropriate values are
+    /// {@link Slice#none Slice::none}. Appropriate values are
     /// derived from an array's {@link Content#length length} the same way
     /// they are in Python.
     SliceRange(int64_t start, int64_t stop, int64_t step);
 
     /// @brief The inclusive starting position.
     ///
-    /// This value may be {@link SliceItem#none SliceItem::none}; if so,
+    /// This value may be {@link Slice#none Slice::none}; if so,
     /// the value used would be derived from an array's
     /// {@link Content#length length} the same way they are in Python.
     int64_t
@@ -108,7 +103,7 @@ namespace awkward {
 
     /// @brief The exclusive stopping position.
     ///
-    /// This value may be {@link SliceItem#none SliceItem::none}; if so,
+    /// This value may be {@link Slice#none Slice::none}; if so,
     /// the value used would be derived from an array's
     /// {@link Content#length length} the same way they are in Python.
     int64_t
@@ -116,19 +111,19 @@ namespace awkward {
 
     /// @brief The step size, which may be negative but must not be zero.
     ///
-    /// This value may be {@link SliceItem#none SliceItem::none}; if so,
+    /// This value may be {@link Slice#none Slice::none}; if so,
     /// the value used would be derived from an array's
     /// {@link Content#length length} the same way they are in Python.
     int64_t
       step() const;
 
     /// @brief Returns `true` if #start is not
-    /// {@link SliceItem#none SliceItem::none}; `false` otherwise.
+    /// {@link Slice#none Slice::none}; `false` otherwise.
     bool
       hasstart() const;
 
     /// @brief Returns `true` if #stop is not
-    /// {@link SliceItem#none SliceItem::none}; `false` otherwise.
+    /// {@link Slice#none Slice::none}; `false` otherwise.
     bool
       hasstop() const;
 
@@ -524,59 +519,115 @@ namespace awkward {
 
   using SliceJagged64 = SliceJaggedOf<int64_t>;
 
+  /// @class Slice
+  ///
+  /// @brief A sequence of SliceItem objects representing a tuple passed
+  /// to Python's `__getitem__`.
   class EXPORT_SYMBOL Slice {
   public:
+    /// @brief Represents a missing {@link SliceRange#start start},
+    /// {@link SliceRange#stop stop}, or {@link SliceRange#step step}
+    /// in a SliceRange.
     static int64_t none();
 
-    Slice();
-
-    Slice(const std::vector<SliceItemPtr>& items);
-
+    /// @brief Creates a Slice with a full set of parameters.
+    ///
+    /// @param items The SliceItem objects in this Slice.
+    /// @param sealed If `true`, the Slice is immutable and #append will fail.
+    /// Otherwise, the #items may be appended to.
     Slice(const std::vector<SliceItemPtr>& items, bool sealed);
 
+    /// @brief Creates an "unsealed" Slice, to which we can still add
+    /// SliceItem objects (with #append).
+    /// @param items The SliceItem objects in this Slice.
+    Slice(const std::vector<SliceItemPtr>& items);
+
+    /// @brief Creates an empty Slice.
+    Slice();
+
+    /// @brief The SliceItem objects in this Slice.
     const std::vector<SliceItemPtr>
       items() const;
 
+    /// @brief If `true`, the Slice is immutable and #append will fail.
+    /// Otherwise, the #items may be appended to.
     bool
       sealed() const;
 
+    /// @brief The number of SliceItem objects in #items.
     int64_t
       length() const;
 
+    /// @brief The number of SliceAt, SliceRange, and SliceArrayOf objects
+    /// in the #items.
     int64_t
       dimlength() const;
 
+    /// @brief Returns a pointer to the first SliceItem.
     const SliceItemPtr
       head() const;
 
+    /// @brief Returns a Slice representing all but the first SliceItem.
     const Slice
       tail() const;
 
+    /// @brief Returns a string representation of this slice item (single-line
+    /// custom format).
     const std::string
       tostring() const;
 
+    /// @brief Insert a SliceItem at the end of the #items.
     void
       append(const SliceItemPtr& item);
 
+    /// @brief Insert a SliceAt at the end of the #items.
     void
       append(const SliceAt& item);
 
+    /// @brief Insert a SliceRange at the end of the #items.
     void
       append(const SliceRange& item);
 
+    /// @brief Insert a SliceEllipsis at the end of the #items.
     void
       append(const SliceEllipsis& item);
 
+    /// @brief Insert a SliceNewAxis at the end of the #items.
     void
       append(const SliceNewAxis& item);
 
+    /// @brief Insert a SliceArrayOf at the end of the #items.
     template <typename T>
     void
       append(const SliceArrayOf<T>& item);
 
+    /// @brief Insert a SliceField at the end of the #items.
+    void
+      append(const SliceField& item);
+
+    /// @brief Insert a SliceFields at the end of the #items.
+    void
+      append(const SliceFields& item);
+
+    /// @brief Insert a SliceMissingOf at the end of the #items.
+    template <typename T>
+    void
+      append(const SliceMissingOf<T>& item);
+
+    /// @brief Insert a SliceJaggedOf at the end of the #items.
+    template <typename T>
+    void
+      append(const SliceJaggedOf<T>& item);
+
+    /// @brief Seal this Slice so that it is no longer open to #append.
     void
       become_sealed();
 
+    /// @brief Returns `true` if the Slice contains SliceArrayOf; `false`
+    /// otherwise.
+    ///
+    /// This function can only be called when the Slice is sealed (see
+    /// #Slice and #become_sealed).
     bool
       isadvanced() const;
 
@@ -586,6 +637,7 @@ namespace awkward {
     /// @brief See #sealed.
     bool sealed_;
   };
+
 }
 
 #endif // AWKWARD_SLICE_H_
