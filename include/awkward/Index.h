@@ -28,7 +28,7 @@ namespace awkward {
   ///    - {@link IndexOf IndexU32}, which is `IndexOf<uint32_t>`
   ///    - {@link IndexOf Index64}, which is `IndexOf<int64_t>`
   class EXPORT_SYMBOL Index {
-    /// @brief Copies this index without copying its buffer.
+    /// @brief Copies this Index node without copying its buffer.
     ///
     /// See also #deep_copy.
     virtual const std::shared_ptr<Index>
@@ -166,7 +166,7 @@ namespace awkward {
     IndexOf<int64_t>
       to64() const override;
 
-    /// @brief Copies this index and all the data in its buffer.
+    /// @brief Copies this Index node and all the data in its buffer.
     ///
     /// See also #shallow_copy.
     const IndexOf<T>
