@@ -250,15 +250,29 @@ namespace awkward {
     const std::string
       name() const override;
 
+    /// @copydoc Reducer::preferred_type()
+    ///
+    /// The preferred type for ReducerCount is `double`: `"d"`, 8 bytes.
     const std::string
       preferred_type() const override;
 
+    /// @copydoc Reducer::preferred_typesize()
+    ///
+    /// The preferred type for ReducerCount is `double`: `"d"`, 8 bytes.
     ssize_t
       preferred_typesize() const override;
 
+    /// @copydoc Reducer::return_type()
+    ///
+    /// The return type for ReducerCount is `int64`: `"q"` (32-bit systems
+    /// or Windows) or `"l"` (other systems), 8 bytes.
     const std::string
       return_type(const std::string& given_type) const override;
 
+    /// @copydoc Reducer::return_typesize()
+    ///
+    /// The return type for ReducerCount is `int64`: `"q"` (32-bit systems
+    /// or Windows) or `"l"` (other systems), 8 bytes.
     ssize_t
       return_typesize(const std::string& given_type) const override;
 
@@ -353,15 +367,31 @@ namespace awkward {
     const std::string
       name() const override;
 
+    /// @copydoc Reducer::preferred_type()
+    ///
+    /// The preferred type for ReducerCountNonzero is `double`: `"d"`, 8
+    /// bytes.
     const std::string
       preferred_type() const override;
 
+    /// @copydoc Reducer::preferred_typesize()
+    ///
+    /// The preferred type for ReducerCountNonzero is `double`: `"d"`, 8
+    /// bytes.
     ssize_t
       preferred_typesize() const override;
 
+    /// @copydoc Reducer::return_type()
+    ///
+    /// The return type for ReducerCountNonzero is `int64`: `"q"` (32-bit
+    /// systems or Windows) or `"l"` (other systems), 8 bytes.
     const std::string
       return_type(const std::string& given_type) const override;
 
+    /// @copydoc Reducer::return_typesize()
+    ///
+    /// The return type for ReducerCountNonzero is `int64`: `"q"` (32-bit
+    /// systems or Windows) or `"l"` (other systems), 8 bytes.
     ssize_t
       return_typesize(const std::string& given_type) const override;
 
@@ -456,15 +486,29 @@ namespace awkward {
     const std::string
       name() const override;
 
+    /// @copydoc Reducer::preferred_type()
+    ///
+    /// The preferred type for ReducerSum is `double`: `"d"`, 8 bytes.
     const std::string
       preferred_type() const override;
 
+    /// @copydoc Reducer::preferred_typesize()
+    ///
+    /// The preferred type for ReducerSum is `double`: `"d"`, 8 bytes.
     ssize_t
       preferred_typesize() const override;
 
+    /// @copydoc Reducer::return_type()
+    ///
+    /// The return type for ReducerSum promotes integers and booleans to
+    /// 64-bit but leaves floating-point number types as they are.
     const std::string
       return_type(const std::string& given_type) const override;
 
+    /// @copydoc Reducer::return_typesize()
+    ///
+    /// The return type for ReducerSum promotes integers and booleans to
+    /// 64-bit but leaves floating-point number types as they are.
     ssize_t
       return_typesize(const std::string& given_type) const override;
 
@@ -559,15 +603,31 @@ namespace awkward {
     const std::string
       name() const override;
 
+    /// @copydoc Reducer::preferred_type()
+    ///
+    /// The preferred type for ReducerProd is `int64`: `"q"` (32-bit systems
+    /// or Windows) or `"l"` (other systems), 8 bytes.
     const std::string
       preferred_type() const override;
 
+    /// @copydoc Reducer::preferred_typesize()
+    ///
+    /// The preferred type for ReducerProd is `int64`: `"q"` (32-bit systems
+    /// or Windows) or `"l"` (other systems), 8 bytes.
     ssize_t
       preferred_typesize() const override;
 
+    /// @copydoc Reducer::return_type()
+    ///
+    /// The return type for ReducerProd promotes integers and booleans to
+    /// 64-bit but leaves floating-point number types as they are.
     const std::string
       return_type(const std::string& given_type) const override;
 
+    /// @copydoc Reducer::return_typesize()
+    ///
+    /// The return type for ReducerProd promotes integers and booleans to
+    /// 64-bit but leaves floating-point number types as they are.
     ssize_t
       return_typesize(const std::string& given_type) const override;
 
@@ -663,15 +723,27 @@ namespace awkward {
     const std::string
       name() const override;
 
+    /// @copydoc Reducer::preferred_type()
+    ///
+    /// The preferred type for ReducerAny is `boolean`: `"?"`, 1 byte.
     const std::string
       preferred_type() const override;
 
+    /// @copydoc Reducer::preferred_typesize()
+    ///
+    /// The preferred type for ReducerAny is `boolean`: `"?"`, 1 byte.
     ssize_t
       preferred_typesize() const override;
 
+    /// @copydoc Reducer::return_type()
+    ///
+    /// The return type for ReducerAny is `boolean`: `"?"`, 1 byte.
     const std::string
       return_type(const std::string& given_type) const override;
 
+    /// @copydoc Reducer::return_typesize()
+    ///
+    /// The return type for ReducerAny is `boolean`: `"?"`, 1 byte.
     ssize_t
       return_typesize(const std::string& given_type) const override;
 
@@ -767,15 +839,27 @@ namespace awkward {
     const std::string
       name() const override;
 
+    /// @copydoc Reducer::preferred_type()
+    ///
+    /// The preferred type for ReducerAll is `boolean`: `"?"`, 1 byte.
     const std::string
       preferred_type() const override;
 
+    /// @copydoc Reducer::preferred_typesize()
+    ///
+    /// The preferred type for ReducerAll is `boolean`: `"?"`, 1 byte.
     ssize_t
       preferred_typesize() const override;
 
+    /// @copydoc Reducer::return_type()
+    ///
+    /// The return type for ReducerAll is `boolean`: `"?"`, 1 byte.
     const std::string
       return_type(const std::string& given_type) const override;
 
+    /// @copydoc Reducer::return_typesize()
+    ///
+    /// The return type for ReducerAll is `boolean`: `"?"`, 1 byte.
     ssize_t
       return_typesize(const std::string& given_type) const override;
 
@@ -871,9 +955,15 @@ namespace awkward {
     const std::string
       name() const override;
 
+    /// @copydoc Reducer::preferred_type()
+    ///
+    /// The preferred type for ReducerMin is `double`: `"d"`, 8 bytes.
     const std::string
       preferred_type() const override;
 
+    /// @copydoc Reducer::preferred_typesize()
+    ///
+    /// The preferred type for ReducerMin is `double`: `"d"`, 8 bytes.
     ssize_t
       preferred_typesize() const override;
 
@@ -969,9 +1059,15 @@ namespace awkward {
     const std::string
       name() const override;
 
+    /// @copydoc Reducer::preferred_type()
+    ///
+    /// The preferred type for ReducerMax is `double`: `"d"`, 8 bytes.
     const std::string
       preferred_type() const override;
 
+    /// @copydoc Reducer::preferred_typesize()
+    ///
+    /// The preferred type for ReducerMax is `double`: `"d"`, 8 bytes.
     ssize_t
       preferred_typesize() const override;
 
@@ -1067,15 +1163,31 @@ namespace awkward {
     const std::string
       name() const override;
 
+    /// @copydoc Reducer::preferred_type()
+    ///
+    /// The preferred type for ReducerArgmin is `int64`: `"q"` (32-bit systems
+    /// or Windows) or `"l"` (other systems), 8 bytes.
     const std::string
       preferred_type() const override;
 
+    /// @copydoc Reducer::preferred_typesize()
+    ///
+    /// The preferred type for ReducerArgmin is `int64`: `"q"` (32-bit systems
+    /// or Windows) or `"l"` (other systems), 8 bytes.
     ssize_t
       preferred_typesize() const override;
 
+    /// @copydoc Reducer::return_type()
+    ///
+    /// The return type for ReducerArgmin is `int64`: `"q"` (32-bit systems
+    /// or Windows) or `"l"` (other systems), 8 bytes.
     const std::string
       return_type(const std::string& given_type) const override;
 
+    /// @copydoc Reducer::return_typesize()
+    ///
+    /// The return type for ReducerArgmin is `int64`: `"q"` (32-bit systems
+    /// or Windows) or `"l"` (other systems), 8 bytes.
     ssize_t
       return_typesize(const std::string& given_type) const override;
 
@@ -1171,15 +1283,31 @@ namespace awkward {
     const std::string
       name() const override;
 
+    /// @copydoc Reducer::preferred_type()
+    ///
+    /// The preferred type for ReducerArgmax is `int64`: `"q"` (32-bit systems
+    /// or Windows) or `"l"` (other systems), 8 bytes.
     const std::string
       preferred_type() const override;
 
+    /// @copydoc Reducer::preferred_typesize()
+    ///
+    /// The preferred type for ReducerArgmax is `int64`: `"q"` (32-bit systems
+    /// or Windows) or `"l"` (other systems), 8 bytes.
     ssize_t
       preferred_typesize() const override;
 
+    /// @copydoc Reducer::return_type()
+    ///
+    /// The return type for ReducerArgmax is `int64`: `"q"` (32-bit systems
+    /// or Windows) or `"l"` (other systems), 8 bytes.
     const std::string
       return_type(const std::string& given_type) const override;
 
+    /// @copydoc Reducer::return_typesize()
+    ///
+    /// The return type for ReducerArgmax is `int64`: `"q"` (32-bit systems
+    /// or Windows) or `"l"` (other systems), 8 bytes.
     ssize_t
       return_typesize(const std::string& given_type) const override;
 
