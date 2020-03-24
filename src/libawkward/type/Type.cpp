@@ -12,11 +12,6 @@
 namespace rj = rapidjson;
 
 namespace awkward {
-  TypePtr
-  Type::none() {
-    return TypePtr(nullptr);
-  }
-
   Type::Type(const util::Parameters& parameters, const std::string& typestr)
       : parameters_(parameters)
       , typestr_(typestr) { }

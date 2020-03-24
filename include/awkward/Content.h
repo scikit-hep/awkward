@@ -19,6 +19,10 @@ namespace awkward {
   using ContentPtr    = std::shared_ptr<Content>;
   using ContentPtrVec = std::vector<std::shared_ptr<Content>>;
 
+  /// @class Content
+  ///
+  /// @brief Abstract superclass of all array node types (flat hierarchy).
+  /// Any Content can be nested within any other Content.
   class EXPORT_SYMBOL Content {
   public:
     /// @brief Called by all subclass constructors; assigns #identities and
