@@ -15,18 +15,35 @@ namespace awkward {
   class SliceItem;
   using SliceItemPtr = std::shared_ptr<SliceItem>;
 
+  /// @class SliceItem
+  ///
+  /// @brief Abstract class for slice items, which are elements of a tuple
+  /// passed to an array's `__getitem__` in Python.
   class EXPORT_SYMBOL SliceItem {
   public:
+    /// @brief Represents a missing {@link SliceRange#start start},
+    /// {@link SliceRange#stop stop}, or {@link SliceRange#step step}
+    /// in a SliceRange.
     static int64_t none();
 
+    /// @brief Empty destructor; required for some C++ reason.
     virtual ~SliceItem();
 
+    /// @brief Copies this node without copying any associated arrays.
     virtual const SliceItemPtr
       shallow_copy() const = 0;
 
+    /// @brief Returns a string representation of this slice item (single-line
+    /// custom format).
     virtual const std::string
       tostring() const = 0;
 
+    /// @brief Returns `true` if this slice would preserve an array's slice
+    /// and therefore should pass on
+    /// {@link Content#parameters Content::parameters}.
+    ///
+    /// @param advanced The index that is passed through
+    /// {@link Content#getitem_next Content::getitem_next}.
     virtual bool
       preserves_type(const Index64& advanced) const = 0;
   };
