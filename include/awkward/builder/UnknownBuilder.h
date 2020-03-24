@@ -17,6 +17,7 @@ namespace awkward {
 
     UnknownBuilder(const ArrayBuilderOptions& options, int64_t nullcount);
 
+    /// @brief User-friendly name of this class: `"UnknownBuilder"`.
     const std::string
       classname() const override;
 

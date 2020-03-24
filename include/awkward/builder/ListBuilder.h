@@ -22,6 +22,7 @@ namespace awkward {
                 const BuilderPtr& content,
                 bool begun);
 
+    /// @brief User-friendly name of this class: `"ListBuilder"`.
     const std::string
       classname() const override;
 

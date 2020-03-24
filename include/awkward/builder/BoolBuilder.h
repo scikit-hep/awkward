@@ -17,6 +17,7 @@ namespace awkward {
     BoolBuilder(const ArrayBuilderOptions& options,
                 const GrowableBuffer<uint8_t>& buffer);
 
+    /// @brief User-friendly name of this class: `"BoolBuilder"`.
     const std::string
       classname() const override;
 

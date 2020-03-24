@@ -21,6 +21,7 @@ namespace awkward {
    Float64Builder(const ArrayBuilderOptions& options,
                   const GrowableBuffer<double>& buffer);
 
+    /// @brief User-friendly name of this class: `"Float64Builder"`.
     const std::string
       classname() const override;
 

@@ -20,6 +20,7 @@ namespace awkward {
     const GrowableBuffer<int64_t>
       buffer() const;
 
+    /// @brief User-friendly name of this class: `"Int64Builder"`.
     const std::string
       classname() const override;
 

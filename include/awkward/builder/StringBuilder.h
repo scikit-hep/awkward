@@ -22,6 +22,7 @@ namespace awkward {
     const char*
       encoding() const;
 
+    /// @brief User-friendly name of this class: `"StringBuilder"`.
     const std::string
       classname() const override;
 

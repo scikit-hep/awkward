@@ -25,6 +25,7 @@ namespace awkward {
                  const GrowableBuffer<int64_t>& offsets,
                  std::vector<BuilderPtr>& contents);
 
+    /// @brief User-friendly name of this class: `"UnionBuilder"`.
     const std::string
       classname() const override;
 

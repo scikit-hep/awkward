@@ -26,6 +26,7 @@ namespace awkward {
                   const GrowableBuffer<int64_t>& offsets,
                   const BuilderPtr& content);
 
+    /// @brief User-friendly name of this class: `"OptionBuilder"`.
     const std::string
       classname() const override;
 

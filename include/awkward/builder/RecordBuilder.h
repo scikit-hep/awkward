@@ -34,6 +34,7 @@ namespace awkward {
     const char*
       nameptr() const;
 
+    /// @brief User-friendly name of this class: `"RecordBuilder"`.
     const std::string
       classname() const override;
 

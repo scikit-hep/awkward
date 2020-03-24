@@ -26,6 +26,7 @@ namespace awkward {
     int64_t
       numfields() const;
 
+    /// @brief User-friendly name of this class: `"TupleBuilder"`.
     const std::string
       classname() const override;
 
