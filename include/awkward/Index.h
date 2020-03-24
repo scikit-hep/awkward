@@ -65,7 +65,7 @@ namespace awkward {
     /// @param length Number of elements in the array.
     IndexOf<T>(const std::shared_ptr<T>& ptr, int64_t offset, int64_t length);
 
-    /// @brief Allocate a new integer array buffer with a given length.
+    /// @brief Allocates a new integer array buffer with a given #length.
     IndexOf<T>(int64_t length);
 
     /// @brief Reference-counted pointer to the integer array buffer.

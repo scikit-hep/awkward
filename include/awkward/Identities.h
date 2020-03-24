@@ -209,10 +209,15 @@ namespace awkward {
       tostring() const;
 
   protected:
+    /// @brief See #ref.
     const Ref ref_;
+    /// @brief See #fieldloc.
     const FieldLoc fieldloc_;
+    /// @brief See #offset.
     int64_t offset_;
+    /// @brief See #width.
     int64_t width_;
+    /// @brief See #length.
     int64_t length_;
   };
 
@@ -258,11 +263,19 @@ namespace awkward {
   template <typename T>
   class EXPORT_SYMBOL IdentitiesOf: public Identities {
   public:
-    IdentitiesOf<T>(const Ref ref,
-                    const FieldLoc& fieldloc,
-                    int64_t width,
-                    int64_t length);
-
+    /// @brief Creates an IdentitiesOf from a full set of parameters.
+    /// 
+    /// @param ref A globally unique reference to this set of identities.
+    /// @param fieldloc A list of integer-string pairs indicating the positions
+    /// of all tuple/record field indicators within the identity tuple.
+    /// @param offset Location of item zero in the buffer, relative to
+    /// `ptr`, measured in the number of elements. We keep this information in
+    /// two parameters (`ptr` and `offset`) rather than moving `ptr` so that
+    /// `ptr` can be reference counted among all arrays that use the same
+    /// buffer.
+    /// @param width The number of integers in each identity tuple.
+    /// @param length The number of identities in the array.
+    /// @param ptr Reference-counted pointer to the array buffer.
     IdentitiesOf<T>(const Ref ref,
                     const FieldLoc& fieldloc,
                     int64_t offset,
@@ -270,6 +283,14 @@ namespace awkward {
                     int64_t length,
                     const std::shared_ptr<T> ptr);
 
+    /// @brief Allocates a new array buffer with a given #ref, #fieldloc,
+    /// #length and #width.
+    IdentitiesOf<T>(const Ref ref,
+                    const FieldLoc& fieldloc,
+                    int64_t width,
+                    int64_t length);
+
+    /// @brief Reference-counted pointer to the array buffer.
     const std::shared_ptr<T>
       ptr() const;
 
@@ -308,16 +329,35 @@ namespace awkward {
     int64_t
       value(int64_t row, int64_t col) const override;
 
+    /// @brief Returns the element at a given position in the array, handling
+    /// negative indexing and bounds-checking like Python.
+    ///
+    /// The first item in the array is at `0`, the second at `1`, the last at
+    /// `-1`, the penultimate at `-2`, etc.
     const std::vector<T>
       getitem_at(int64_t at) const;
 
+    /// @brief Returns the element at a given position in the array, without
+    /// handling negative indexing or bounds-checking.
     const std::vector<T>
       getitem_at_nowrap(int64_t at) const;
 
+    /// @brief Subinterval of this array, handling negative indexing
+    /// and bounds-checking like Python.
+    ///
+    /// The first item in the array is at `0`, the second at `1`, the last at
+    /// `-1`, the penultimate at `-2`, etc.
+    ///
+    /// Ranges beyond the array are not an error; they are trimmed to
+    /// `start = 0` on the left and `stop = length() - 1` on the right.
+    ///
+    /// This operation only affects the node metadata; its calculation time
+    /// does not scale with the size of the array.
     const IdentitiesPtr
       getitem_range(int64_t start, int64_t stop) const;
 
   private:
+    /// @brief See #ptr.
     const std::shared_ptr<T> ptr_;
   };
 
