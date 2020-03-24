@@ -571,6 +571,13 @@ namespace awkward {
              int64_t depth) const = 0;
 
     /// @brief Returns a string representation of this array (multi-line XML).
+    ///
+    /// Although this XML string has detail about every node in the tree,
+    /// it does not show all elements in the array buffers and therefore
+    /// does not scale with the size of the dataset (i.e. it is safe to
+    /// print to the screen).
+    ///
+    /// Thus, it's also not a storage format: see #tojson.
     const std::string
       tostring() const;
 
@@ -580,6 +587,11 @@ namespace awkward {
     /// If `false`, return a compact representation.
     /// @param maxdecimals Maximum number of decimals for floating-point
     /// numbers or `-1` for no limit.
+    ///
+    /// Although the JSON output contains all of the data from the array
+    /// (and therefore might not be safe to print to the screen), it
+    /// does not preserve the type information of an array. In particular,
+    /// the distinction between ListType and RegularType is lost.
     const std::string
       tojson(bool pretty, int64_t maxdecimals) const;
 
@@ -591,6 +603,11 @@ namespace awkward {
     /// @param maxdecimals Maximum number of decimals for floating-point
     /// numbers or `-1` for no limit.
     /// @param buffersize Size of a temporary buffer in bytes.
+    ///
+    /// Although the JSON output contains all of the data from the array
+    /// (and therefore might not be safe to print to the screen), it
+    /// does not preserve the type information of an array. In particular,
+    /// the distinction between ListType and RegularType is lost.
     void
       tojson(FILE* destination,
              bool pretty,
