@@ -62,6 +62,9 @@ namespace awkward {
     /// pybind11). Note that 32-bit systems and Windows use "`q/Q`" for
     /// signed/unsigned 64-bit and "`l/L`" for 32-bit, while all other systems
     /// use "`l/L`" for 64-bit and "`i/I`" for 32-bit.
+    ///
+    /// Note that the integer type for all of these parameters is `ssize_t`,
+    /// for consistency with pybind11. Most integers in Awkward are `int64_t`.
     NumpyArray(const IdentitiesPtr& identities,
                const util::Parameters& parameters,
                const std::shared_ptr<void>& ptr,
@@ -109,6 +112,9 @@ namespace awkward {
     /// converted into a number in Python). Each element in shape must be
     /// non-negative. If not scalar, the total number of elements in the array
     /// is the product of the shape (which can be zero).
+    ///
+    /// Note that the integer type is `ssize_t` for consistency with pybind11.
+    /// Most integers in Awkward are `int64_t`.
     const std::vector<ssize_t>
       shape() const;
 
@@ -119,6 +125,9 @@ namespace awkward {
     /// negative, but they must be multiples of itemsize. An array is only
     /// "contiguous" if `strides[i] == itemsize * prod(shape[i + 1:])` for all
     /// valid `i`.
+    ///
+    /// Note that the integer type is `ssize_t` for consistency with pybind11.
+    /// Most integers in Awkward are `int64_t`.
     const std::vector<ssize_t>
       strides() const;
 
@@ -129,10 +138,16 @@ namespace awkward {
     /// We keep this information in two parameters
     /// (`ptr` and `byteoffset`) rather than moving `ptr` so that `ptr` can be
     /// reference counted among all arrays that use the same buffer.
+    ///
+    /// Note that the integer type is `ssize_t` for consistency with pybind11.
+    /// Most integers in Awkward are `int64_t`.
     ssize_t
       byteoffset() const;
 
     /// @brief Number of bytes per item; should agree with the format.
+    ///
+    /// Note that the integer type is `ssize_t` for consistency with pybind11.
+    /// Most integers in Awkward are `int64_t`.
     ssize_t
       itemsize() const;
 
@@ -146,6 +161,9 @@ namespace awkward {
       format() const;
 
     /// @brief The number of dimensions, which is `shape.size()`.
+    ///
+    /// Note that the integer type is `ssize_t` for consistency with pybind11.
+    /// Most integers in Awkward are `int64_t`.
     ssize_t
       ndim() const;
 
@@ -161,6 +179,9 @@ namespace awkward {
       byteptr() const;
 
     /// @brief An untyped pointer to item `at` in the buffer.
+    ///
+    /// Note that the integer type is `ssize_t` for consistency with pybind11.
+    /// Most integers in Awkward are `int64_t`.
     void*
       byteptr(ssize_t at) const;
 
@@ -173,46 +194,79 @@ namespace awkward {
       bytelength() const;
 
     /// @brief Dereferences a selected item as a `uint8_t`.
+    ///
+    /// Note that the integer type is `ssize_t` for consistency with pybind11.
+    /// Most integers in Awkward are `int64_t`.
     uint8_t
       getbyte(ssize_t at) const;
 
     /// @brief Dereferences a selected item as a `int8_t`.
+    ///
+    /// Note that the integer type is `ssize_t` for consistency with pybind11.
+    /// Most integers in Awkward are `int64_t`.
     int8_t
       getint8(ssize_t at) const;
 
     /// @brief Dereferences a selected item as a `uint8_t`.
+    ///
+    /// Note that the integer type is `ssize_t` for consistency with pybind11.
+    /// Most integers in Awkward are `int64_t`.
     uint8_t
       getuint8(ssize_t at) const;
 
     /// @brief Dereferences a selected item as a `int16_t`.
+    ///
+    /// Note that the integer type is `ssize_t` for consistency with pybind11.
+    /// Most integers in Awkward are `int64_t`.
     int16_t
       getint16(ssize_t at) const;
 
     /// @brief Dereferences a selected item as a `uint16_t`.
+    ///
+    /// Note that the integer type is `ssize_t` for consistency with pybind11.
+    /// Most integers in Awkward are `int64_t`.
     uint16_t
       getuint16(ssize_t at) const;
 
     /// @brief Dereferences a selected item as a `int32_t`.
+    ///
+    /// Note that the integer type is `ssize_t` for consistency with pybind11.
+    /// Most integers in Awkward are `int64_t`.
     int32_t
       getint32(ssize_t at) const;
 
     /// @brief Dereferences a selected item as a `uint32_t`.
+    ///
+    /// Note that the integer type is `ssize_t` for consistency with pybind11.
+    /// Most integers in Awkward are `int64_t`.
     uint32_t
       getuint32(ssize_t at) const;
 
     /// @brief Dereferences a selected item as a `int64_t`.
+    ///
+    /// Note that the integer type is `ssize_t` for consistency with pybind11.
+    /// Most integers in Awkward are `int64_t`.
     int64_t
       getint64(ssize_t at) const;
 
     /// @brief Dereferences a selected item as a `uint64_t`.
+    ///
+    /// Note that the integer type is `ssize_t` for consistency with pybind11.
+    /// Most integers in Awkward are `int64_t`.
     uint64_t
       getuint64(ssize_t at) const;
 
     /// @brief Dereferences a selected item as a `float`.
+    ///
+    /// Note that the integer type is `ssize_t` for consistency with pybind11.
+    /// Most integers in Awkward are `int64_t`.
     float_t
       getfloat(ssize_t at) const;
 
     /// @brief Dereferences a selected item as a `double`.
+    ///
+    /// Note that the integer type is `ssize_t` for consistency with pybind11.
+    /// Most integers in Awkward are `int64_t`.
     double_t
       getdouble(ssize_t at) const;
 
