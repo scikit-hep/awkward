@@ -12,11 +12,31 @@
 #include "awkward/builder/UnknownBuilder.h"
 
 namespace awkward {
+  /// @class RecordBuilder
+  ///
+  /// @brief Builder node for accumulated records.
   class EXPORT_SYMBOL RecordBuilder: public Builder {
   public:
+    /// @brief Create an empty RecordBuilder.
+    /// @param options Configuration options for building an array;
+    /// these are passed to every Builder's constructor.
     static const BuilderPtr
       fromempty(const ArrayBuilderOptions& options);
 
+    /// @brief Create a RecordBuilder from a full set of parameters.
+    ///
+    /// @param options Configuration options for building an array;
+    /// these are passed to every Builder's constructor.
+    /// @param contents A Builder for each record field.
+    /// @param keys Names for each record field.
+    /// @param pointers String pointers for each record field name.
+    /// @param names Strings for each record field name.
+    /// @param nameptr String pointer for the name of the record.
+    /// @param length Length of accumulated array (same as #length).
+    /// @param begun If `true`, the RecordBuilder is in an active state;
+    /// `false` otherwise.
+    /// @param nextindex The next field index to fill with data.
+    /// @param nexttotry The next field index to check against a key string.
     RecordBuilder(const ArrayBuilderOptions& options,
                   const std::vector<BuilderPtr>& contents,
                   const std::vector<std::string>& keys,
@@ -28,9 +48,11 @@ namespace awkward {
                   int64_t nextindex,
                   int64_t nexttotry);
 
+    /// @brief Name of the record (STL wrapped #nameptr).
     const std::string
       name() const;
 
+    /// @brief String pointer for the name of the record.
     const char*
       nameptr() const;
 

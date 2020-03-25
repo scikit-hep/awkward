@@ -12,14 +12,31 @@
 #include "awkward/builder/Builder.h"
 
 namespace awkward {
+  /// @class IndexedBuilder
+  ///
+  /// @brief Builder node for accumulated data that come from an existing
+  /// Content array.
   template <typename T>
   class EXPORT_SYMBOL IndexedBuilder: public Builder {
   public:
+    /// @brief Create an IndexedBuilder from a full set of parameters.
+    ///
+    /// @param options Configuration options for building an array;
+    /// these are passed to every Builder's constructor.
+    /// @param index Contains the accumulated index (like
+    /// {@link IndexedArrayOf#index IndexedArray::index}).
+    /// @param array The original Content array from which the new accumulated
+    /// data are drawn.
+    /// @param hasnull If `true`, some of the accumulated data are missing
+    /// and a #snapshot should produce an
+    /// {@link IndexedArrayOf IndexedOptionArray}, rather than an
+    /// {@link IndexedArrayOf IndexedArray}.
     IndexedBuilder(const ArrayBuilderOptions& options,
                    const GrowableBuffer<int64_t>& index,
                    const std::shared_ptr<T>& array,
                    bool hasnull);
 
+    /// @brief Raw pointer to the original Content `array`.
     const Content*
       arrayptr() const;
 

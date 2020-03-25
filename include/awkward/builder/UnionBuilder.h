@@ -14,15 +14,27 @@ namespace awkward {
   class TupleBuilder;
   class RecordBuilder;
 
+  /// @class UnionBuilder
+  ///
+  /// @brief Builder node for accumulated heterogeneous data.
   class EXPORT_SYMBOL UnionBuilder: public Builder {
   public:
     static const BuilderPtr
       fromsingle(const ArrayBuilderOptions& options,
                  const BuilderPtr& firstcontent);
 
+    /// @brief Create a UnionBuilder from a full set of parameters.
+    ///
+    /// @param options Configuration options for building an array;
+    /// these are passed to every Builder's constructor.
+    /// @param tags Contains the accumulated tags (like
+    /// {@link UnionArrayOf#tags UnionArray::tags}).
+    /// @param index Contains the accumulated index (like
+    /// {@link UnionArrayOf#index UnionArray::index}).
+    /// @param contents A Builder for each of the union's possibilities.
     UnionBuilder(const ArrayBuilderOptions& options,
-                 const GrowableBuffer<int8_t>& types,
-                 const GrowableBuffer<int64_t>& offsets,
+                 const GrowableBuffer<int8_t>& tags,
+                 const GrowableBuffer<int64_t>& index,
                  std::vector<BuilderPtr>& contents);
 
     /// @brief User-friendly name of this class: `"UnionBuilder"`.
@@ -89,8 +101,8 @@ namespace awkward {
 
   private:
     const ArrayBuilderOptions options_;
-    GrowableBuffer<int8_t> types_;
-    GrowableBuffer<int64_t> offsets_;
+    GrowableBuffer<int8_t> tags_;
+    GrowableBuffer<int64_t> index_;
     std::vector<BuilderPtr> contents_;
     int8_t current_;
   };
