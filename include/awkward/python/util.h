@@ -50,6 +50,7 @@ public:
     Py_DECREF(pyobj_);
   }
 private:
+  /// @brief The Python object that we hold a reference to.
   PyObject* pyobj_;
 };
 
