@@ -443,6 +443,12 @@ class AstWalker(NodeVisitor):
         # Isolate our docstring.
         self.docLines = self.lines[docstringStart: endLineNum]
 
+        # Awkward: dedent common indentation
+        import textwrap
+        self.docLines = (textwrap.dedent("".join(self.docLines))
+                                 .rstrip("\n")
+                                 .splitlines(True))
+
         # If we have a docstring, extract information from it.
         if self.docLines:
             # Get rid of the docstring delineators.
