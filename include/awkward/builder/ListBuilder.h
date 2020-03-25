@@ -12,11 +12,27 @@
 #include "awkward/builder/UnknownBuilder.h"
 
 namespace awkward {
+  /// @class ListBuilder
+  ///
+  /// @brief Builder node that accumulates lists.
   class EXPORT_SYMBOL ListBuilder: public Builder {
   public:
+    /// @brief Create an empty ListBuilder.
+    /// @param options Configuration options for building an array;
+    /// these are passed to every Builder's constructor.
     static const BuilderPtr
       fromempty(const ArrayBuilderOptions& options);
 
+    /// @brief Create a ListBuilder from a full set of parameters.
+    ///
+    /// @param options Configuration options for building an array;
+    /// these are passed to every Builder's constructor.
+    /// @param offsets Contains the accumulated offsets (like
+    /// {@link ListOffsetArrayOf#offsets ListOffsetArray::offsets}).
+    /// @param content Builder for the data in the nested lists.
+    /// @param begun If `true`, the ListBuilder is in a state after
+    /// #beginlist and before #endlist and is #active; if `false`,
+    /// it is not.
     ListBuilder(const ArrayBuilderOptions& options,
                 const GrowableBuffer<int64_t>& offsets,
                 const BuilderPtr& content,
@@ -35,6 +51,10 @@ namespace awkward {
     const ContentPtr
       snapshot() const override;
 
+    /// @copydoc Builder::active()
+    ///
+    /// Calling #beginlist makes a ListBuilder active; #endlist makes it
+    /// inactive.
     bool
       active() const override;
 

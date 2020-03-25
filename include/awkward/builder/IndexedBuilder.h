@@ -29,6 +29,9 @@ namespace awkward {
     void
       clear() override;
 
+    /// @copydoc Builder::active()
+    ///
+    /// An IndexedBuilder is never active.
     bool
       active() const override;
 

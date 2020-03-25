@@ -30,6 +30,9 @@ namespace awkward {
     const ContentPtr
       snapshot() const override;
 
+    /// @copydoc Builder::active()
+    ///
+    /// An UnknownBuilder is never active.
     bool
       active() const override;
 

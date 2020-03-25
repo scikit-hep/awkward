@@ -9,16 +9,39 @@
 #include "awkward/builder/Builder.h"
 
 namespace awkward {
+  /// @class StringBuilder
+  ///
+  /// @brief Builder node that accumulates strings.
   class EXPORT_SYMBOL StringBuilder: public Builder {
   public:
+    /// @brief Create an empty StringBuilder.
+    /// @param options Configuration options for building an array;
+    /// these are passed to every Builder's constructor.
+    /// @param encoding If `nullptr`, the string is an unencoded bytestring;
+    /// if `"utf-8"`, it is encoded with variable-width UTF-8.
+    /// Currently, no other encodings have been defined.
     static const BuilderPtr
       fromempty(const ArrayBuilderOptions& options, const char* encoding);
 
+    /// @brief Create a StringBuilder from a full set of parameters.
+    ///
+    /// @param options Configuration options for building an array;
+    /// these are passed to every Builder's constructor.
+    /// @param offsets Contains the accumulated offsets (like
+    /// {@link ListOffsetArrayOf#offsets ListOffsetArray::offsets}).
+    /// @param content Another GrowableBuffer, but for the characters in all
+    /// the strings.
+    /// @param encoding If `nullptr`, the string is an unencoded bytestring;
+    /// if `"utf-8"`, it is encoded with variable-width UTF-8.
+    /// Currently, no other encodings have been defined.
     StringBuilder(const ArrayBuilderOptions& options,
                   const GrowableBuffer<int64_t>& offsets,
                   const GrowableBuffer<uint8_t>& content,
                   const char* encoding);
 
+    /// @brief If `nullptr`, the string is an unencoded bytestring;
+    /// if `"utf-8"`, it is encoded with variable-width UTF-8.
+    /// Currently, no other encodings have been defined.
     const char*
       encoding() const;
 
@@ -35,6 +58,9 @@ namespace awkward {
     const ContentPtr
       snapshot() const override;
 
+    /// @copydoc Builder::active()
+    ///
+    /// A StringBuilder is never active.
     bool
       active() const override;
 

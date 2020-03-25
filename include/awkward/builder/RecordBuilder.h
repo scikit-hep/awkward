@@ -47,6 +47,10 @@ namespace awkward {
     const ContentPtr
       snapshot() const override;
 
+    /// @copydoc Builder::active()
+    ///
+    /// Calling #beginrecord makes a RecordBuilder active; #endrecord makes it
+    /// inactive.
     bool
       active() const override;
 
