@@ -22,26 +22,26 @@ namespace awkward {
   const BuilderPtr
   UnionBuilder::fromsingle(const ArrayBuilderOptions& options,
                            const BuilderPtr& firstcontent) {
-    GrowableBuffer<int8_t> types =
+    GrowableBuffer<int8_t> tags =
       GrowableBuffer<int8_t>::full(options, 0, firstcontent->length());
-    GrowableBuffer<int64_t> offsets =
+    GrowableBuffer<int64_t> index =
       GrowableBuffer<int64_t>::arange(options, firstcontent->length());
     std::vector<BuilderPtr> contents({ firstcontent });
     BuilderPtr out = std::make_shared<UnionBuilder>(options,
-                                                    types,
-                                                    offsets,
+                                                    tags,
+                                                    index,
                                                     contents);
     out.get()->setthat(out);
     return out;
   }
 
   UnionBuilder::UnionBuilder(const ArrayBuilderOptions& options,
-                             const GrowableBuffer<int8_t>& types,
-                             const GrowableBuffer<int64_t>& offsets,
+                             const GrowableBuffer<int8_t>& tags,
+                             const GrowableBuffer<int64_t>& index,
                              std::vector<BuilderPtr>& contents)
       : options_(options)
-      , types_(types)
-      , offsets_(offsets)
+      , tags_(tags)
+      , index_(index)
       , contents_(contents)
       , current_(-1) { }
 
@@ -52,13 +52,13 @@ namespace awkward {
 
   int64_t
   UnionBuilder::length() const {
-    return types_.length();
+    return tags_.length();
   }
 
   void
   UnionBuilder::clear() {
-    types_.clear();
-    offsets_.clear();
+    tags_.clear();
+    index_.clear();
     for (auto x : contents_) {
       x.get()->clear();
     }
@@ -66,8 +66,8 @@ namespace awkward {
 
   const ContentPtr
   UnionBuilder::snapshot() const {
-    Index8 tags(types_.ptr(), 0, types_.length());
-    Index64 index(offsets_.ptr(), 0, offsets_.length());
+    Index8 tags(tags_.ptr(), 0, tags_.length());
+    Index64 index(index_.ptr(), 0, index_.length());
     ContentPtrVec contents;
     for (auto content : contents_) {
       contents.push_back(content.get()->snapshot());
@@ -115,8 +115,8 @@ namespace awkward {
       }
       int64_t length = tofill.get()->length();
       tofill.get()->boolean(x);
-      types_.append(i);
-      offsets_.append(length);
+      tags_.append(i);
+      index_.append(length);
     }
     else {
       contents_[(size_t)current_].get()->boolean(x);
@@ -142,8 +142,8 @@ namespace awkward {
       }
       int64_t length = tofill.get()->length();
       tofill.get()->integer(x);
-      types_.append(i);
-      offsets_.append(length);
+      tags_.append(i);
+      index_.append(length);
     }
     else {
       contents_[(size_t)current_].get()->integer(x);
@@ -185,8 +185,8 @@ namespace awkward {
       }
       int64_t length = tofill.get()->length();
       tofill.get()->real(x);
-      types_.append(i);
-      offsets_.append(length);
+      tags_.append(i);
+      index_.append(length);
     }
     else {
       contents_[(size_t)current_].get()->real(x);
@@ -214,8 +214,8 @@ namespace awkward {
       }
       int64_t len = tofill.get()->length();
       tofill.get()->string(x, length, encoding);
-      types_.append(i);
-      offsets_.append(len);
+      tags_.append(i);
+      index_.append(len);
     }
     else {
       contents_[(size_t)current_].get()->string(x, length, encoding);
@@ -258,8 +258,8 @@ namespace awkward {
       int64_t length = contents_[(size_t)current_].get()->length();
       contents_[(size_t)current_].get()->endlist();
       if (length != contents_[(size_t)current_].get()->length()) {
-        types_.append(current_);
-        offsets_.append(length);
+        tags_.append(current_);
+        index_.append(length);
         current_ = -1;
       }
     }
@@ -315,8 +315,8 @@ namespace awkward {
       int64_t length = contents_[(size_t)current_].get()->length();
       contents_[(size_t)current_].get()->endtuple();
       if (length != contents_[(size_t)current_].get()->length()) {
-        types_.append(current_);
-        offsets_.append(length);
+        tags_.append(current_);
+        index_.append(length);
         current_ = -1;
       }
     }
@@ -375,8 +375,8 @@ namespace awkward {
       int64_t length = contents_[(size_t)current_].get()->length();
       contents_[(size_t)current_].get()->endrecord();
       if (length != contents_[(size_t)current_].get()->length()) {
-        types_.append(current_);
-        offsets_.append(length);
+        tags_.append(current_);
+        index_.append(length);
         current_ = -1;
       }
     }
@@ -439,8 +439,8 @@ namespace awkward {
       }
       int64_t length = tofill.get()->length();
       tofill.get()->append(array, at);
-      types_.append(i);
-      offsets_.append(length);
+      tags_.append(i);
+      index_.append(length);
     }
     else {
       contents_[(size_t)current_].get()->append(array, at);

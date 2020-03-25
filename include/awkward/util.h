@@ -16,32 +16,86 @@ namespace awkward {
   class IndexOf;
 
   namespace util {
+    /// @class array_deleter
+    ///
+    /// @brief Used as a `std::shared_ptr` deleter (second argument) to
+    /// overload `delete ptr` with `delete[] ptr`.
+    ///
+    /// This is necessary for `std::shared_ptr` to contain array buffers.
+    ///
+    /// See also
+    ///   - no_deleter, which does not free memory at all (for borrowed
+    ///     references).
+    ///   - pyobject_deleter, which reduces the reference count of a
+    ///     Python object when there are no more C++ shared pointers
+    ///     referencing it.
     template<typename T>
     class EXPORT_SYMBOL array_deleter {
     public:
+      /// @brief Called by `std::shared_ptr` when its reference count reaches
+      /// zero.
       void operator()(T const *p) {
         delete[] p;
       }
     };
 
+    /// @class no_deleter
+    ///
+    /// @brief Used as a `std::shared_ptr` deleter (second argument) to
+    /// overload `delete ptr` with nothing (no dereferencing).
+    ///
+    /// This could be used to pass borrowed references with the same
+    /// C++ type as owned references.
+    ///
+    /// See also
+    ///   - array_deleter, which frees array buffers, rather than objects.
+    ///   - pyobject_deleter, which reduces the reference count of a
+    ///     Python object when there are no more C++ shared pointers
+    ///     referencing it.
     template<typename T>
     class EXPORT_SYMBOL no_deleter {
     public:
+      /// @brief Called by `std::shared_ptr` when its reference count reaches
+      /// zero.
       void operator()(T const *p) { }
     };
 
+    /// @brief Puts quotation marks around a string and escapes the appropriate
+    /// characters.
+    ///
+    /// @param x The string to quote.
+    /// @param doublequote If `true`, apply double-quotes (`"`); if `false`,
+    /// apply single-quotes (`'`).
+    ///
+    /// @note The implementation does not yet escape characters: it only adds
+    /// strings. See issue
+    /// [scikit-hep/awkward-1.0#186](https://github.com/scikit-hep/awkward-1.0/issues/186).
     std::string
       quote(const std::string& x, bool doublequote);
 
+    /// @brief If the Error struct contains an error message (from a
+    /// cpu-kernel through the C interface), raise that error as a C++
+    /// exception.
+    ///
+    /// @param err The Error struct from a cpu-kernel.
+    /// @param classname The name of this class to include in the error
+    /// message.
+    /// @param id The Identities to include in the error message.
     void
       handle_error(const struct Error& err,
                    const std::string& classname,
                    const Identities* id);
 
+    /// @brief Converts an `offsets` index (from
+    /// {@link ListOffsetArrayOf ListOffsetArray}, for instance) into a
+    /// `starts` index by viewing it with the last element dropped.
     template <typename T>
     IndexOf<T>
       make_starts(const IndexOf<T>& offsets);
 
+    /// @brief Converts an `offsets` index (from
+    /// {@link ListOffsetArrayOf ListOffsetArray}, for instance) into a
+    /// `stops` index by viewing it with the first element dropped.
     template <typename T>
     IndexOf<T>
       make_stops(const IndexOf<T>& offsets);
@@ -49,43 +103,71 @@ namespace awkward {
     using RecordLookup    = std::vector<std::string>;
     using RecordLookupPtr = std::shared_ptr<RecordLookup>;
 
+    /// @brief Initializes a RecordLookup by assigning each element with
+    /// a string representation of its field index position.
+    ///
+    /// For example, if `numfields = 3`, the return value is `["0", "1", "2"]`.
     RecordLookupPtr
       init_recordlookup(int64_t numfields);
 
+    /// @brief Returns the field index associated with a key, given
+    /// a RecordLookup and a number of fields.
     int64_t
       fieldindex(const RecordLookupPtr& recordlookup,
                  const std::string& key,
                  int64_t numfields);
 
+    /// @brief Returns the key associated with a field index, given a
+    /// RecordLookup and a number of fields.
     const std::string
       key(const RecordLookupPtr& recordlookup,
           int64_t fieldindex,
           int64_t numfields);
 
+    /// @brief Returns `true` if a RecordLookup has a given `key`; `false`
+    /// otherwise.
     bool
       haskey(const RecordLookupPtr& recordlookup,
              const std::string& key,
              int64_t numfields);
 
+    /// @brief Returns a given RecordLookup as keys or generate anonymous ones
+    /// form a number of fields.
     const std::vector<std::string>
       keys(const RecordLookupPtr& recordlookup, int64_t numfields);
 
     using Parameters = std::map<std::string, std::string>;
 
+    /// @brief Returns `true` if the value associated with a `key` in
+    /// `parameters` is equal to the specified `value`.
+    ///
+    /// Keys are simple strings, but values are JSON-encoded strings.
+    /// For this reason, values that represent single strings are
+    /// double-quoted: e.g. `"\"actual_value\""`.
     bool
       parameter_equals(const Parameters& parameters,
                        const std::string& key,
                        const std::string& value);
 
+    /// @brief Returns `true` if all key-value pairs in `self` is equal to
+    /// all key-value pairs in `other`.
+    ///
+    /// Keys are simple strings, but values are JSON-encoded strings.
+    /// For this reason, values that represent single strings are
+    /// double-quoted: e.g. `"\"actual_value\""`.
     bool
       parameters_equal(const Parameters& self, const Parameters& other);
 
     using TypeStrs = std::map<std::string, std::string>;
 
+    /// @brief Extracts a custom type string from `typestrs` if required by
+    /// one of the `parameters` or an empty string if there is no match.
     std::string
       gettypestr(const Parameters& parameters,
                  const TypeStrs& typestrs);
 
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_identities32_from_listoffsetarray(
@@ -98,6 +180,8 @@ namespace awkward {
         int64_t fromlength,
         int64_t fromwidth);
 
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_identities64_from_listoffsetarray(
@@ -109,8 +193,9 @@ namespace awkward {
         int64_t tolength,
         int64_t fromlength,
         int64_t fromwidth);
-
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_identities32_from_listarray(
@@ -125,8 +210,9 @@ namespace awkward {
         int64_t tolength,
         int64_t fromlength,
         int64_t fromwidth);
-
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_identities64_from_listarray(
@@ -141,8 +227,9 @@ namespace awkward {
         int64_t tolength,
         int64_t fromlength,
         int64_t fromwidth);
-
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_identities32_from_indexedarray(
@@ -155,8 +242,9 @@ namespace awkward {
         int64_t tolength,
         int64_t fromlength,
         int64_t fromwidth);
-
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_identities64_from_indexedarray(
@@ -169,10 +257,10 @@ namespace awkward {
         int64_t tolength,
         int64_t fromlength,
         int64_t fromwidth);
-
     
-    template <typename T,
-              typename I>
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
+    template <typename T, typename I>
     ERROR
       awkward_identities32_from_unionarray(
         bool* uniquecontents,
@@ -187,10 +275,10 @@ namespace awkward {
         int64_t fromlength,
         int64_t fromwidth,
         int64_t which);
-
     
-    template <typename T,
-              typename I>
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
+    template <typename T, typename I>
     ERROR
       awkward_identities64_from_unionarray(
         bool* uniquecontents,
@@ -205,8 +293,9 @@ namespace awkward {
         int64_t fromlength,
         int64_t fromwidth,
         int64_t which);
-
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_index_carry_64(
@@ -216,8 +305,9 @@ namespace awkward {
         int64_t fromindexoffset,
         int64_t lenfromindex,
         int64_t length);
-
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_index_carry_nocheck_64(
@@ -226,8 +316,9 @@ namespace awkward {
         const int64_t* carry,
         int64_t fromindexoffset,
         int64_t length);
-
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_listarray_getitem_next_at_64(
@@ -238,8 +329,9 @@ namespace awkward {
         int64_t startsoffset,
         int64_t stopsoffset,
         int64_t at);
-
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_listarray_getitem_next_range_carrylength(
@@ -252,8 +344,9 @@ namespace awkward {
         int64_t start,
         int64_t stop,
         int64_t step);
-
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_listarray_getitem_next_range_64(
@@ -267,16 +360,18 @@ namespace awkward {
         int64_t start,
         int64_t stop,
         int64_t step);
-
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_listarray_getitem_next_range_counts_64(
         int64_t* total,
         const T* fromoffsets,
         int64_t lenstarts);
-
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_listarray_getitem_next_range_spreadadvanced_64(
@@ -284,8 +379,9 @@ namespace awkward {
         const int64_t* fromadvanced,
         const T* fromoffsets,
         int64_t lenstarts);
-
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_listarray_getitem_next_array_64(
@@ -299,8 +395,9 @@ namespace awkward {
         int64_t lenstarts,
         int64_t lenarray,
         int64_t lencontent);
-
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_listarray_getitem_next_array_advanced_64(
@@ -315,8 +412,9 @@ namespace awkward {
         int64_t lenstarts,
         int64_t lenarray,
         int64_t lencontent);
-
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_listarray_getitem_carry_64(
@@ -329,8 +427,9 @@ namespace awkward {
         int64_t stopsoffset,
         int64_t lenstarts,
         int64_t lencarry);
-
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_listarray_num_64(
@@ -340,8 +439,9 @@ namespace awkward {
         const T* fromstops,
         int64_t stopsoffset,
         int64_t length);
-
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_listoffsetarray_flatten_offsets_64(
@@ -352,8 +452,9 @@ namespace awkward {
         const int64_t* inneroffsets,
         int64_t inneroffsetsoffset,
         int64_t inneroffsetslen);
-
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_indexedarray_flatten_none2empty_64(
@@ -364,10 +465,10 @@ namespace awkward {
         const int64_t* offsets,
         int64_t offsetsoffset,
         int64_t offsetslength);
-
     
-    template <typename T,
-              typename I>
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
+    template <typename T, typename I>
     ERROR
       awkward_unionarray_flatten_length_64(
         int64_t* total_length,
@@ -378,10 +479,10 @@ namespace awkward {
         int64_t length,
         int64_t** offsetsraws,
         int64_t* offsetsoffsets);
-
     
-    template <typename T,
-              typename I>
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
+    template <typename T, typename I>
     ERROR
       awkward_unionarray_flatten_combine_64(
         int8_t* totags,
@@ -394,8 +495,9 @@ namespace awkward {
         int64_t length,
         int64_t** offsetsraws,
         int64_t* offsetsoffsets);
-
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_indexedarray_flatten_nextcarry_64(
@@ -404,8 +506,9 @@ namespace awkward {
         int64_t indexoffset,
         int64_t lenindex,
         int64_t lencontent);
-
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_indexedarray_numnull(
@@ -413,8 +516,9 @@ namespace awkward {
         const T* fromindex,
         int64_t indexoffset,
         int64_t lenindex);
-
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_indexedarray_getitem_nextcarry_outindex_64(
@@ -424,8 +528,9 @@ namespace awkward {
         int64_t indexoffset,
         int64_t lenindex,
         int64_t lencontent);
-
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_indexedarray_getitem_nextcarry_outindex_mask_64(
@@ -435,8 +540,9 @@ namespace awkward {
         int64_t indexoffset,
         int64_t lenindex,
         int64_t lencontent);
-
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_indexedarray_getitem_nextcarry_64(
@@ -445,8 +551,9 @@ namespace awkward {
         int64_t indexoffset,
         int64_t lenindex,
         int64_t lencontent);
-
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_indexedarray_getitem_carry_64(
@@ -456,8 +563,9 @@ namespace awkward {
         int64_t indexoffset,
         int64_t lenindex,
         int64_t lencarry);
-
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_indexedarray_overlay_mask8_to64(
@@ -467,8 +575,9 @@ namespace awkward {
         const T* fromindex,
         int64_t indexoffset,
         int64_t length);
-
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_indexedarray_mask8(
@@ -476,8 +585,9 @@ namespace awkward {
         const T* fromindex,
         int64_t indexoffset,
         int64_t length);
-
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_indexedarray_simplify32_to64(
@@ -488,8 +598,9 @@ namespace awkward {
         const int32_t* innerindex,
         int64_t inneroffset,
         int64_t innerlength);
-
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_indexedarray_simplifyU32_to64(
@@ -501,6 +612,8 @@ namespace awkward {
         int64_t inneroffset,
         int64_t innerlength);
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_indexedarray_simplify64_to64(
@@ -512,8 +625,9 @@ namespace awkward {
         int64_t inneroffset,
         int64_t innerlength);
     
-    template <typename T,
-              typename I>
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
+    template <typename T, typename I>
     ERROR
       awkward_unionarray_regular_index(
         I* toindex,
@@ -521,8 +635,9 @@ namespace awkward {
         int64_t tagsoffset,
         int64_t length);
     
-    template <typename T,
-              typename I>
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
+    template <typename T, typename I>
     ERROR
       awkward_unionarray_project_64(
         int64_t* lenout,
@@ -534,6 +649,8 @@ namespace awkward {
         int64_t length,
         int64_t which);
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_listarray_compact_offsets64(
@@ -544,6 +661,8 @@ namespace awkward {
         int64_t stopsoffset,
         int64_t length);
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_listoffsetarray_compact_offsets64(
@@ -552,6 +671,8 @@ namespace awkward {
         int64_t offsetsoffset,
         int64_t length);
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_listarray_broadcast_tooffsets64(
@@ -565,6 +686,8 @@ namespace awkward {
         int64_t stopsoffset,
         int64_t lencontent);
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_listoffsetarray_toRegularArray(
@@ -573,8 +696,9 @@ namespace awkward {
         int64_t offsetsoffset,
         int64_t offsetslength);
     
-    template <typename T,
-              typename I>
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
+    template <typename T, typename I>
     ERROR
       awkward_unionarray_simplify8_32_to8_64(
         int8_t* totags,
@@ -593,8 +717,9 @@ namespace awkward {
         int64_t length,
         int64_t base);
     
-    template <typename T,
-              typename I>
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
+    template <typename T, typename I>
     ERROR
       awkward_unionarray_simplify8_U32_to8_64(
         int8_t* totags,
@@ -613,8 +738,9 @@ namespace awkward {
         int64_t length,
         int64_t base);
     
-    template <typename T,
-              typename I>
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
+    template <typename T, typename I>
     ERROR
       awkward_unionarray_simplify8_64_to8_64(
         int8_t* totags,
@@ -633,8 +759,9 @@ namespace awkward {
         int64_t length,
         int64_t base);
     
-    template <typename T,
-              typename I>
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
+    template <typename T, typename I>
     ERROR
       awkward_unionarray_simplify_one_to8_64(
         int8_t* totags,
@@ -648,6 +775,8 @@ namespace awkward {
         int64_t length,
         int64_t base);
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_listarray_getitem_jagged_expand_64(
@@ -662,6 +791,8 @@ namespace awkward {
         int64_t jaggedsize,
         int64_t length);
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_listarray_getitem_jagged_apply_64(
@@ -681,6 +812,8 @@ namespace awkward {
         int64_t fromstopsoffset,
         int64_t contentlen);
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_listarray_getitem_jagged_descend_64(
@@ -695,6 +828,8 @@ namespace awkward {
         const T* fromstops,
         int64_t fromstopsoffset);
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_indexedarray_reduce_next_64(
@@ -707,6 +842,8 @@ namespace awkward {
         int64_t parentsoffset,
         int64_t length);
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_UnionArray_fillna_64(
@@ -714,8 +851,9 @@ namespace awkward {
         const T* fromindex,
         int64_t offset,
         int64_t length);
-
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_ListArray_min_range(
@@ -726,6 +864,8 @@ namespace awkward {
         int64_t startsoffset,
         int64_t stopsoffset);
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_ListArray_rpad_axis1_64(
@@ -739,6 +879,8 @@ namespace awkward {
         int64_t startsoffset,
         int64_t stopsoffset);
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_ListArray_rpad_and_clip_length_axis1(
@@ -750,6 +892,8 @@ namespace awkward {
         int64_t startsoffset,
         int64_t stopsoffset);
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_ListOffsetArray_rpad_length_axis1(
@@ -760,6 +904,8 @@ namespace awkward {
         int64_t target,
         int64_t* tolength);
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_ListOffsetArray_rpad_axis1_64(
@@ -769,6 +915,8 @@ namespace awkward {
         int64_t fromlength,
         int64_t target);
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_ListOffsetArray_rpad_and_clip_axis1_64(
@@ -778,6 +926,8 @@ namespace awkward {
         int64_t length,
         int64_t target);
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_listarray_validity(
@@ -788,6 +938,8 @@ namespace awkward {
         int64_t length,
         int64_t lencontent);
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_indexedarray_validity(
@@ -797,8 +949,9 @@ namespace awkward {
         int64_t lencontent,
         bool isoption);
     
-    template <typename T,
-              typename I>
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
+    template <typename T, typename I>
     ERROR
       awkward_unionarray_validity(
         const T* tags,
@@ -809,6 +962,8 @@ namespace awkward {
         int64_t numcontents,
         const int64_t* lencontents);
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_listarray_localindex_64(
@@ -817,6 +972,8 @@ namespace awkward {
         int64_t offsetsoffset,
         int64_t length);
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_listarray_choose_length_64(
@@ -830,6 +987,8 @@ namespace awkward {
         int64_t stopsoffset,
         int64_t length);
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
       awkward_listarray_choose_64(
@@ -842,6 +1001,8 @@ namespace awkward {
         int64_t stopsoffset,
         int64_t length);
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template<typename T>
     T
       awkward_index_getitem_at_nowrap(
@@ -849,6 +1010,8 @@ namespace awkward {
         int64_t offset,
         int64_t at);
     
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template<typename T>
     void
       awkward_index_setitem_at_nowrap(

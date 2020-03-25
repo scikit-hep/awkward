@@ -6,11 +6,29 @@
 #include "awkward/type/Type.h"
 
 namespace awkward {
+  /// @class OptionType
+  ///
+  /// @brief Describes the high level type of data with possible missing
+  /// values, represented by `None` in python.
+  ///
+  /// {@link IndexedArrayOf IndexedOptionArray}, ByteMaskedArray,
+  /// BitMaskedArray, and UnmaskedArray nodes have this type.
   class EXPORT_SYMBOL OptionType: public Type {
   public:
+    /// @brief Create an OptionType with a full set of parameters.
+    ///
+    /// @param parameters Custom parameters inherited from the Content that
+    /// this type describes.
+    /// @param typestr Optional string that overrides the default string
+    /// representation (missing if empty).
+    /// @param type The Type of the non-missing data.
     OptionType(const util::Parameters& parameters,
                const std::string& typestr,
                const TypePtr& type);
+
+    /// @brief The Type of the non-missing data.
+    const TypePtr
+      type() const;
 
     std::string
       tostring_part(const std::string& indent,
@@ -41,10 +59,8 @@ namespace awkward {
     const ContentPtr
       empty() const override;
 
-    const TypePtr
-      type() const;
-
   private:
+    /// @brief See #type.
     const TypePtr type_;
   };
 }

@@ -28,6 +28,7 @@
 #include "awkward/array/UnmaskedArray.h"
 
 namespace awkward {
+  /// @brief Internal function to fill JSON with boolean values.
   void
     tojson_boolean(ToJson& builder, bool* array, int64_t length) {
     for (int i = 0;  i < length;  i++) {
@@ -35,6 +36,7 @@ namespace awkward {
     }
   }
 
+  /// @brief Internal function to fill JSON with integer values.
   template <typename T>
   void
     tojson_integer(ToJson& builder, T* array, int64_t length) {
@@ -43,6 +45,7 @@ namespace awkward {
     }
   }
 
+  /// @brief Internal function to fill JSON with floating-point values.
   template <typename T>
   void
     tojson_real(ToJson& builder, T* array, int64_t length) {
@@ -51,9 +54,37 @@ namespace awkward {
     }
   }
 
+  /// @class RawArrayOf
+  ///
+  /// @brief Represents a one-dimensional array of type `T`, usable purely in
+  /// C++ and implemented entirely in include/awkward/array/RawArray.h.
+  ///
+  /// See #RawArrayOf for the meaning of each parameter.
+  ///
+  /// Arrays of any type `T` can be passed through Awkward Array operations,
+  /// even slicing, but operations that have to interpret the array's values
+  /// (such as reducers like "sum" and "max") only work on numeric types:
+  ///
+  ///  - 32-bit and 64-bit floating point numbers
+  ///  - 8-bit, 16-bit, 32-bit, and 64-bit signed and unsigned integers
+  ///  - 8-bit booleans
   template <typename T>
   class EXPORT_SYMBOL RawArrayOf: public Content {
   public:
+    /// @brief Creates a RawArray from a full set of parameters.
+    /// 
+    /// @param identities Optional Identities for each element of the array
+    /// (may be `nullptr`).
+    /// @param parameters String-to-JSON map that augments the meaning of this
+    /// array.
+    /// @param ptr Reference-counted pointer to the array buffer.
+    /// @param offset Location of item zero in the buffer, relative to
+    /// #ptr, measured in the number of elements. We keep this information in
+    /// two parameters (#ptr and #offset) rather than moving #ptr so that
+    /// #ptr can be reference counted among all arrays that use the same
+    /// buffer.
+    /// @param length Number of elements in the array.
+    /// @param itemsize Number of bytes per item; should agree with the format.
     RawArrayOf<T>(const IdentitiesPtr& identities,
                   const util::Parameters& parameters,
                   const std::shared_ptr<T>& ptr,
@@ -70,6 +101,9 @@ namespace awkward {
       }
     }
 
+    /// @brief Creates a RawArray without having to specify #itemsize.
+    ///
+    /// The #itemsize is computed as `sizeof(T)`.
     RawArrayOf<T>(const IdentitiesPtr& identities,
                   const util::Parameters& parameters,
                   const std::shared_ptr<T>& ptr,
@@ -80,6 +114,12 @@ namespace awkward {
         , length_(length)
         , itemsize_(sizeof(T)) { }
 
+    /// @brief Creates a RawArray without providing a #ptr to data and without
+    /// having to specify #itemsize.
+    ///
+    /// This constructor allocates a new buffer with `itemsize * length` bytes.
+    ///
+    /// The #itemsize is computed as `sizeof(T)`.
     RawArrayOf<T>(const IdentitiesPtr& identities,
                   const util::Parameters& parameters,
                   const int64_t length)
@@ -90,46 +130,60 @@ namespace awkward {
         , length_(length)
         , itemsize_(sizeof(T)) { }
 
+    /// @brief Reference-counted pointer to the array buffer.
     const std::shared_ptr<T>
       ptr() const {
       return ptr_;
     }
 
+    /// @brief Location of item zero in the buffer, relative to
+    /// #ptr, measured in the number of elements.
+    ///
+    /// We keep this information in two parameters
+    /// (#ptr and #offset) rather than moving #ptr so that #ptr can be
+    /// reference counted among all arrays that use the same buffer.
     const int64_t
       offset() const {
       return offset_;
     }
 
+    /// @brief Number of bytes per item; should be `sizeof(T)`.
     const int64_t
       itemsize() const {
       return itemsize_;
     }
 
-    bool
-      isempty() const {
-      return length_ == 0;
-    }
-
+    /// @brief Location of item zero in the buffer, relative to
+    /// `ptr`, measured in bytes, rather than number of elements; see #offset.
     ssize_t
       byteoffset() const {
       return (ssize_t)itemsize_*(ssize_t)offset_;
     }
 
-    uint8_t*
+    /// @brief An untyped pointer to item zero in the buffer.
+    void*
       byteptr() const {
-      return reinterpret_cast<uint8_t*>(reinterpret_cast<ssize_t>(ptr_.get())
+      return reinterpret_cast<void*>(reinterpret_cast<ssize_t>(ptr_.get())
                                         + byteoffset());
     }
+
+    /// @brief The length of the array in bytes.
     ssize_t
       bytelength() const {
       return (ssize_t)itemsize_*(ssize_t)length_;
     }
+
+    /// @brief Dereferences a selected item as a `uint8_t`.
     uint8_t
       getbyte(ssize_t at) const {
       return *reinterpret_cast<uint8_t*>(reinterpret_cast<ssize_t>(ptr_.get())
                                          + (ssize_t)(byteoffset() + at));
     }
 
+    /// @brief Dereferences a selected item as pointer to `T`.
+    ///
+    /// The name is a reminder that the reference is borrowed, not owned,
+    /// and should not be deleted by the caller.
     T*
       borrow(int64_t at) const {
       return reinterpret_cast<T*>(
@@ -137,6 +191,8 @@ namespace awkward {
         (ssize_t)itemsize_*(ssize_t)(offset_ + at));
     }
 
+    /// @brief User-friendly name of this class: `"RawArray<T>"` where `T` is
+    /// is `typeid(T).name()` (platform-dependent).
     const std::string
       classname() const override {
       return std::string("RawArrayOf<") + std::string(typeid(T).name()) +
@@ -225,11 +281,6 @@ namespace awkward {
         throw std::invalid_argument(std::string("RawArrayOf<") +
           typeid(T).name() + std::string("> does not have a known type"));
       }
-    }
-
-    const std::string
-      tostring() {
-      return tostring_part("", "", "");
     }
 
     const std::string
@@ -561,6 +612,10 @@ namespace awkward {
       return std::string();
     }
 
+    /// @copydoc Content::shallow_simplify()
+    ///
+    /// For {@link RawArrayOf RawArray}, this method returns #shallow_copy
+    /// (pass-through).
     const ContentPtr
       shallow_simplify() const override {
       return shallow_copy();

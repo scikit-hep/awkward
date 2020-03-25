@@ -8,12 +8,36 @@
 #include "awkward/type/Type.h"
 
 namespace awkward {
+  /// @class RegularType
+  ///
+  /// @brief Describes the high level type of lists of a given length, as
+  /// opposed to ListType.
+  ///
+  /// RegularArray nodes have this type.
   class EXPORT_SYMBOL RegularType: public Type {
   public:
+    /// @brief Create a RegularType with a full set of parameters.
+    ///
+    /// @param parameters Custom parameters inherited from the Content that
+    /// this type describes.
+    /// @param typestr Optional string that overrides the default string
+    /// representation (missing if empty).
+    /// @param type The Type of the nested lists.
+    /// @param size The length of each list (which is part of the type
+    /// specification).
     RegularType(const util::Parameters& parameters,
                 const std::string& typestr,
                 const TypePtr& type,
                 int64_t size);
+
+    /// @brief The Type of the nested lists.
+    const TypePtr
+      type() const;
+
+    /// @brief The length of each list (which is part of the type
+    /// specification).
+    int64_t
+      size() const;
 
     std::string
       tostring_part(const std::string& indent,
@@ -44,14 +68,10 @@ namespace awkward {
     const ContentPtr
       empty() const override;
 
-    const TypePtr
-      type() const;
-
-    int64_t
-      size() const;
-
   private:
+    /// @brief See #type.
     const TypePtr type_;
+    /// @brief See #size.
     const int64_t size_;
   };
 }

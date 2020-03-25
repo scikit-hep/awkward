@@ -13,39 +13,88 @@
 #include "awkward/Content.h"
 
 namespace awkward {
+  /// @class UnionArrayOf
+  ///
+  /// @brief Represents heterogeneous data by interleaving several #contents,
+  /// indicating which is relevant at a given position with #tags and
+  /// where to find each item in the #contents with an interleaved #index.
+  ///
+  /// See #UnionArrayOf for the meaning of each parameter.
+  ///
+  /// {@link UnionArrayOf UnionArrays} can be used to interleave data of the
+  /// same type, though #simplify_uniontype would combine such arrays to
+  /// simplify the representation.
   template <typename T, typename I>
   class EXPORT_SYMBOL UnionArrayOf: public Content {
   public:
     static const IndexOf<I>
       regular_index(const IndexOf<T>& tags);
 
+    /// @brief Creates a UnionArrayOf from a full set of parameters.
+    /// 
+    /// @param identities Optional Identities for each element of the array
+    /// (may be `nullptr`).
+    /// @param parameters String-to-JSON map that augments the meaning of this
+    /// array.
+    /// @param tags Small integers indicating which of the #contents to draw
+    /// from for each element of the heterogeneous array.
+    /// The #tags must all be non-negative and less than `len(contents)`.
+    /// @param index Positions within the #contents to find each item.
+    /// @param contents `std::vector` of Content instances representing each
+    /// of the possible types.
+    ///
+    /// For each `i`, this `array[i] = contents[tags[i]][index[i]]`.
     UnionArrayOf<T, I>(const IdentitiesPtr& identities,
                        const util::Parameters& parameters,
                        const IndexOf<T> tags,
                        const IndexOf<I>& index,
                        const ContentPtrVec& contents);
 
+    /// @brief Small integers indicating which of the #contents to draw
+    /// from for each element of the heterogeneous array.
+    ///
+    /// The #tags must all be non-negative and less than `len(contents)`.
+    ///
+    /// For each `i`, this `array[i] = contents[tags[i]][index[i]]`.
     const IndexOf<T>
       tags() const;
 
+    /// @brief Positions within the #contents to find each item.
+    ///
+    /// For each `i`, this `array[i] = contents[tags[i]][index[i]]`.
     const IndexOf<I>
       index() const;
 
+    /// @brief `std::vector` of Content instances representing each
+    /// of the possible types.
     const ContentPtrVec
       contents() const;
 
+    /// @brief The number of #contents.
     int64_t
       numcontents() const;
 
+    /// @brief Returns `contents[index]`.
     const ContentPtr
       content(int64_t index) const;
 
+    /// @brief Returns all items in the array corresponding to one of the
+    /// #contents, in the order that they appear in the array.
+    ///
+    /// Equivalent to `array[tags == index].shallow_simplify()`.
     const ContentPtr
       project(int64_t index) const;
 
+    /// @brief If any of the #contents is also a
+    /// {@link UnionArrayOf UnionArray}, combine this array and its #contents
+    /// into a single-level {@link UnionArrayOf UnionArray}.
+    ///
+    /// This is a shallow operation: it only checks the content one level deep.
     const ContentPtr
       simplify_uniontype(bool mergebool) const;
 
+    /// @brief User-friendly name of this class: `"UnionArray8_32"`,
+    /// `"UnionArray8_U32"`, or `"UnionArray8_64"`.
     const std::string
       classname() const override;
 
@@ -69,6 +118,9 @@ namespace awkward {
     void
       nbytes_part(std::map<size_t, int64_t>& largest) const override;
 
+    /// @copydoc Content::length()
+    ///
+    /// Equal to `len(tags)`.
     int64_t
       length() const override;
 
@@ -146,6 +198,10 @@ namespace awkward {
     const std::string
       validityerror(const std::string& path) const override;
 
+    /// @copydoc Content::shallow_simplify()
+    ///
+    /// For {@link UnionArrayOf UnionArray}, this method returns
+    /// #simplify_uniontype.
     const ContentPtr
       shallow_simplify() const override;
 
@@ -171,10 +227,10 @@ namespace awkward {
       fillna(const ContentPtr& value) const override;
 
     const ContentPtr
-      rpad(int64_t length, int64_t axis, int64_t depth) const override;
+      rpad(int64_t target, int64_t axis, int64_t depth) const override;
 
     const ContentPtr
-      rpad_and_clip(int64_t length,
+      rpad_and_clip(int64_t target,
                     int64_t axis,
                     int64_t depth) const override;
 

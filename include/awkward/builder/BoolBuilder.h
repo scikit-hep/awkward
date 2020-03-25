@@ -9,14 +9,26 @@
 #include "awkward/builder/Builder.h"
 
 namespace awkward {
+  /// @class BoolBuilder
+  ///
+  /// @brief Builder node that accumulates boolean values.
   class EXPORT_SYMBOL BoolBuilder: public Builder {
   public:
+    /// @brief Create an empty BoolBuilder.
+    /// @param options Configuration options for building an array;
+    /// these are passed to every Builder's constructor.
     static const BuilderPtr
       fromempty(const ArrayBuilderOptions& options);
 
+    /// @brief Create a BoolBuilder from a full set of parameters.
+    ///
+    /// @param options Configuration options for building an array;
+    /// these are passed to every Builder's constructor.
+    /// @param buffer Contains the accumulated boolean values.
     BoolBuilder(const ArrayBuilderOptions& options,
                 const GrowableBuffer<uint8_t>& buffer);
 
+    /// @brief User-friendly name of this class: `"BoolBuilder"`.
     const std::string
       classname() const override;
 
@@ -29,6 +41,9 @@ namespace awkward {
     const ContentPtr
       snapshot() const override;
 
+    /// @copydoc Builder::active()
+    ///
+    /// A BoolBuilder is never active.
     bool
       active() const override;
 

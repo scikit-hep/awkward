@@ -9,17 +9,30 @@
 #include "awkward/builder/Builder.h"
 
 namespace awkward {
+  /// @class Int64Builder
+  ///
+  /// @brief Builder node that accumulates integers (`int64_t`).
   class EXPORT_SYMBOL Int64Builder: public Builder {
   public:
+    /// @brief Create an empty Int64Builder.
+    /// @param options Configuration options for building an array;
+    /// these are passed to every Builder's constructor.
     static const BuilderPtr
       fromempty(const ArrayBuilderOptions& options);
 
+    /// @brief Create an Int64Builder from a full set of parameters.
+    ///
+    /// @param options Configuration options for building an array;
+    /// these are passed to every Builder's constructor.
+    /// @param buffer Contains the accumulated integers.
     Int64Builder(const ArrayBuilderOptions& options,
                  const GrowableBuffer<int64_t>& buffer);
 
+    /// @brief Contains the accumulated integers.
     const GrowableBuffer<int64_t>
       buffer() const;
 
+    /// @brief User-friendly name of this class: `"Int64Builder"`.
     const std::string
       classname() const override;
 
@@ -32,6 +45,9 @@ namespace awkward {
     const ContentPtr
       snapshot() const override;
 
+    /// @copydoc Builder::active()
+    ///
+    /// A Int64Builder is never active.
     bool
       active() const override;
 

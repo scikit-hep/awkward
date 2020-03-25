@@ -15,6 +15,7 @@
 #include "awkward/array/UnionArray.h"
 #include "awkward/array/NumpyArray.h"
 #include "awkward/array/IndexedArray.h"
+#include "awkward/array/ByteMaskedArray.h"
 #include "awkward/array/UnmaskedArray.h"
 
 #include "awkward/array/BitMaskedArray.h"

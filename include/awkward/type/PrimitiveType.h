@@ -6,8 +6,18 @@
 #include "awkward/type/Type.h"
 
 namespace awkward {
+  /// @class PrimitiveType
+  ///
+  /// @brief Describes the high level type of an array that contains fixed-size
+  /// items, such as numbers or booleans.
+  ///
+  /// NumpyArray and {@link RawArrayOf RawArray} nodes have this type.
   class EXPORT_SYMBOL PrimitiveType: public Type {
   public:
+    /// @brief Types that can be described by a PrimitiveType.
+    ///
+    /// Note that NumpyArray and {@link RawArrayOf RawArray} can hold types
+    /// of data that cannot be described by a PrimitiveType.
     enum DType {
       boolean,
       int8,
@@ -23,8 +33,19 @@ namespace awkward {
       numtypes
     };
 
+    /// Constructs a PrimitiveType with a full set of parameters.
+    ///
+    /// @param parameters Custom parameters inherited from the Content that
+    /// this type describes.
+    /// @param typestr Optional string that overrides the default string
+    /// representation (missing if empty).
+    /// @param dtype The tag that defines this PrimitiveType.
     PrimitiveType(const util::Parameters& parameters,
                   const std::string& typestr, DType dtype);
+
+    /// @brief The tag that defines this PrimitiveType.
+    const DType
+      dtype() const;
 
     std::string
       tostring_part(const std::string& indent,
@@ -55,10 +76,8 @@ namespace awkward {
     const ContentPtr
       empty() const override;
 
-  const DType
-    dtype() const;
-
   private:
+    /// @brief See #dtype.
     const DType dtype_;
   };
 

@@ -9,10 +9,13 @@
 namespace py = pybind11;
 namespace ak = awkward;
 
+/// @brief Creates a single identity as a Python tuple of integers and strings.
 template <typename T>
 py::tuple
   identity(const T& self);
 
+/// @brief Makes Identities32 and Identities64 classes in Python that mirror
+/// IdentitiesOf in C++.
 template <typename T>
 py::class_<ak::IdentitiesOf<T>>
   make_IdentitiesOf(const py::handle& m, const std::string& name);

@@ -11,38 +11,110 @@
 #include "awkward/Content.h"
 
 namespace awkward {
+  class RegularArray;
+
+  /// @class ListOffsetArrayOf
+  ///
+  /// @brief Represents an array of nested lists that can have different
+  /// lengths using one index named #offsets.
+  ///
+  /// A single #offsets index requires the #content to be contiguous, in-order,
+  /// and non-overlapping, though it need not start at zero (there can be
+  /// "unreachable" elements before the first visible item if
+  /// `offsets[0] != 0`).
+  ///
+  /// See #ListOffsetArrayOf for the meaning of each parameter.
   template <typename T>
   class EXPORT_SYMBOL ListOffsetArrayOf: public Content {
   public:
+    /// @brief Creates a ListOffsetArray from a full set of parameters.
+    ///
+    /// @param identities Optional Identities for each element of the array
+    /// (may be `nullptr`).
+    /// @param parameters String-to-JSON map that augments the meaning of this
+    /// array.
+    /// @param offsets Positions where one nested list stops and the next
+    /// starts in the #content; the `offsets` must be monotonically increasing.
+    /// The length of `offsets` is one greater than the length of the array it
+    /// represents, and as such must always have at least one element.
+    /// @param content Data contained within all nested lists as a contiguous
+    /// array.
+    /// Values in `content[i]` where `i < offsets[0]` are "unreachable," and
+    /// don't exist in the high level view, as are any where
+    /// `i >= offsets[len(offsets) - 1]`.
     ListOffsetArrayOf<T>(const IdentitiesPtr& identities,
                          const util::Parameters& parameters,
                          const IndexOf<T>& offsets,
                          const ContentPtr& content);
 
-    const IndexOf<T>
-      starts() const;
-
-    const IndexOf<T>
-      stops() const;
-
+    /// @brief Positions where one nested list stops and the next starts in
+    /// the #content; the `offsets` must be monotonically increasing.
+    ///
+    /// The length of `offsets` is one greater than the length of the array it
+    /// represents, and as such must always have at least one element.
     const IndexOf<T>
       offsets() const;
 
+    /// @brief Data contained within all nested lists as a contiguous array.
+    ///
+    /// Values in `content[i]` where `i < offsets[0]` are "unreachable," and
+    /// don't exist in the high level view, as are any where
+    /// `i >= offsets[len(offsets) - 1]`.
     const ContentPtr
       content() const;
 
+    /// @brief Starting positions of each nested list, similar to
+    /// {@link ListArrayOf#starts ListArray::starts}, but derived from
+    /// #offsets.
+    ///
+    /// This is a view of all but the last element of #offsets.
+    const IndexOf<T>
+      starts() const;
+
+    /// @brief Stopping positions of each nested list, similar to
+    /// {@link ListArrayOf#stops ListArray::stops}, but derived from
+    /// #offsets.
+    ///
+    /// This is a view of all but the first element of #offsets.
+    const IndexOf<T>
+      stops() const;
+
+    /// @brief Returns 64-bit offsets, possibly starting with `offsets[0] = 0`.
+    ///
+    /// If the #offsets of this array satisfies the constraint, it is not
+    /// copied. Otherwise, a new {@link IndexOf Index64} is returned.
+    ///
+    /// @param start_at_zero If `true`, the first offset will be `0`, meaning
+    /// there are no "unreachable" elements in the `content` that corresponds
+    /// to these offsets.
     Index64
       compact_offsets64(bool start_at_zero) const;
 
-    const ContentPtr
+    /// @brief Moves #content elements if necessary to match a given set of
+    /// `offsets` and return a {@link ListOffsetArrayOf ListOffsetArray} that
+    /// matches.
+    ///
+    /// As indicated by the name, this is a basic element of broadcasting.
+    const std::shared_ptr<ListOffsetArrayOf<int64_t>>
       broadcast_tooffsets64(const Index64& offsets) const;
 
-    const ContentPtr
+    /// @brief Converts this array to a RegularArray if all nested lists have
+    /// the same size (error otherwise).
+    const std::shared_ptr<RegularArray>
       toRegularArray() const;
 
-    const ContentPtr
+    /// @brief Returns a {@link ListOffsetArrayOf ListOffsetArray} with
+    /// 64-bit #offsets and possibly starting with `offsets[0] = 0`; a
+    /// #shallow_copy if possible.
+    ///
+    /// @param start_at_zero If `true`, the first offset will be `0`, meaning
+    /// there are no "unreachable" elements in the `content` that corresponds
+    /// to these offsets.
+    const std::shared_ptr<ListOffsetArrayOf<int64_t>>
       toListOffsetArray64(bool start_at_zero) const;
 
+    /// @brief User-friendly name of this class: `"ListOffsetArray32"`,
+    /// `"ListOffsetArrayU32"`, or `"ListOffsetArray64"`.
     const std::string
       classname() const override;
 
@@ -66,6 +138,9 @@ namespace awkward {
     void
       nbytes_part(std::map<size_t, int64_t>& largest) const override;
 
+    /// @copydoc Content::length()
+    ///
+    /// Equal to `len(offsets) - 1`.
     int64_t
       length() const override;
 
@@ -144,6 +219,10 @@ namespace awkward {
     const std::string
       validityerror(const std::string& path) const override;
 
+    /// @copydoc Content::shallow_simplify()
+    ///
+    /// For {@link ListOffsetArrayOf ListOffsetArray}, this method returns
+    /// #shallow_copy (pass-through).
     const ContentPtr
       shallow_simplify() const override;
 
@@ -166,10 +245,10 @@ namespace awkward {
       fillna(const ContentPtr& value) const override;
 
     const ContentPtr
-      rpad(int64_t length, int64_t axis, int64_t depth) const override;
+      rpad(int64_t target, int64_t axis, int64_t depth) const override;
 
     const ContentPtr
-      rpad_and_clip(int64_t length,
+      rpad_and_clip(int64_t target,
                     int64_t axis,
                     int64_t depth) const override;
 
@@ -232,7 +311,9 @@ namespace awkward {
                           const Slice& tail) const override;
 
   private:
+    /// @brief See #offsets.
     const IndexOf<T> offsets_;
+    /// @brief See #content.
     const ContentPtr content_;
   };
 

@@ -58,7 +58,7 @@ namespace awkward {
     return out;
   }
 
-  const ContentPtr
+  const std::shared_ptr<ListOffsetArray64>
   RegularArray::broadcast_tooffsets64(const Index64& offsets) const {
     if (offsets.length() == 0  ||  offsets.getitem_at_nowrap(0) != 0) {
       throw std::invalid_argument(
@@ -108,12 +108,12 @@ namespace awkward {
     }
   }
 
-  const ContentPtr
+  const std::shared_ptr<RegularArray>
   RegularArray::toRegularArray() const {
-    return shallow_copy();
+    return std::dynamic_pointer_cast<RegularArray>(shallow_copy());
   }
 
-  const ContentPtr
+  const std::shared_ptr<ListOffsetArray64>
   RegularArray::toListOffsetArray64(bool start_at_zero) const {
     Index64 offsets = compact_offsets64(start_at_zero);
     return broadcast_tooffsets64(offsets);

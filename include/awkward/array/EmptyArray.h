@@ -12,15 +12,32 @@
 #include "awkward/Content.h"
 
 namespace awkward {
+  class NumpyArray;
+
+  /// @class EmptyArray
+  ///
+  /// @brief Represents an array with length zero and (perhaps as a
+  /// consequence) UnknownType.
+  ///
+  /// See #EmptyArray for the meaning of each parameter.
   class EXPORT_SYMBOL EmptyArray: public Content {
   public:
+    /// @brief Creates an EmptyArray from a full set of parameters.
+    ///
+    /// @param identities Optional Identities for each element of the array
+    /// (may be `nullptr`).
+    /// @param parameters String-to-JSON map that augments the meaning of this
+    /// array.
     EmptyArray(const IdentitiesPtr& identities,
                const util::Parameters& parameters);
 
-    const ContentPtr
+    /// @brief Converts this array into a NumpyArray with a given
+    /// {NumpyArray#format format}.
+    const std::shared_ptr<NumpyArray>
       toNumpyArray(const std::string& format,
                    ssize_t itemsize) const;
 
+    /// @brief User-friendly name of this class: `"EmptyArray"`.
     const std::string
       classname() const override;
 
@@ -116,6 +133,9 @@ namespace awkward {
     const std::string
       validityerror(const std::string& path) const override;
 
+    /// @copydoc Content::shallow_simplify()
+    ///
+    /// For EmptyArray, this method returns #shallow_copy (pass-through).
     const ContentPtr
       shallow_simplify() const override;
 
@@ -138,10 +158,10 @@ namespace awkward {
       fillna(const ContentPtr& value) const override;
 
     const ContentPtr
-      rpad(int64_t length, int64_t axis, int64_t depth) const override;
+      rpad(int64_t target, int64_t axis, int64_t depth) const override;
 
     const ContentPtr
-      rpad_and_clip(int64_t length,
+      rpad_and_clip(int64_t target,
                     int64_t axis,
                     int64_t depth) const override;
 

@@ -12,20 +12,37 @@
 #include "awkward/builder/UnknownBuilder.h"
 
 namespace awkward {
+  /// @class TupleBuilder
+  ///
+  /// @brief Builder node for accumulated tuples.
   class EXPORT_SYMBOL TupleBuilder: public Builder {
   public:
+    /// @brief Create an empty TupleBuilder.
+    /// @param options Configuration options for building an array;
+    /// these are passed to every Builder's constructor.
     static const BuilderPtr
       fromempty(const ArrayBuilderOptions& options);
 
+    /// @brief Create a TupleBuilder from a full set of parameters.
+    ///
+    /// @param options Configuration options for building an array;
+    /// these are passed to every Builder's constructor.
+    /// @param contents A Builder for each tuple field.
+    /// @param length Length of accumulated array (same as #length).
+    /// @param begun If `true`, the TupleBuilder is in an active state;
+    /// `false` otherwise.
+    /// @param nextindex The next field index to fill with data.
     TupleBuilder(const ArrayBuilderOptions& options,
                  const std::vector<BuilderPtr>& contents,
                  int64_t length,
                  bool begun,
                  size_t nextindex);
 
+    /// @brief Current number of fields.
     int64_t
       numfields() const;
 
+    /// @brief User-friendly name of this class: `"TupleBuilder"`.
     const std::string
       classname() const override;
 
@@ -38,6 +55,10 @@ namespace awkward {
     const ContentPtr
       snapshot() const override;
 
+    /// @copydoc Builder::active()
+    ///
+    /// Calling #begintuple makes a TupleBuilder active; #endtuple makes it
+    /// inactive.
     bool
       active() const override;
 

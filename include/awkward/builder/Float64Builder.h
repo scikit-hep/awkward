@@ -9,18 +9,34 @@
 #include "awkward/builder/Builder.h"
 
 namespace awkward {
+  /// @class Float64Builder
+  ///
+  /// @brief Builder node that accumulates real numbers (`double`).
   class EXPORT_SYMBOL Float64Builder: public Builder {
   public:
+    /// @brief Create an empty Float64Builder.
+    /// @param options Configuration options for building an array;
+    /// these are passed to every Builder's constructor.
     static const BuilderPtr
       fromempty(const ArrayBuilderOptions& options);
 
+    /// @brief Create a Float64Builder from an existing Int64Builder.
+    /// @param options Configuration options for building an array;
+    /// these are passed to every Builder's constructor.
+    /// @param old The Int64Builder's buffer.
     static const BuilderPtr
       fromint64(const ArrayBuilderOptions& options,
                 const GrowableBuffer<int64_t>& old);
 
-   Float64Builder(const ArrayBuilderOptions& options,
-                  const GrowableBuffer<double>& buffer);
+    /// @brief Create a Float64Builder from a full set of parameters.
+    ///
+    /// @param options Configuration options for building an array;
+    /// these are passed to every Builder's constructor.
+    /// @param buffer Contains the accumulated real numbers.
+    Float64Builder(const ArrayBuilderOptions& options,
+                   const GrowableBuffer<double>& buffer);
 
+    /// @brief User-friendly name of this class: `"Float64Builder"`.
     const std::string
       classname() const override;
 
@@ -33,6 +49,9 @@ namespace awkward {
     const ContentPtr
       snapshot() const override;
 
+    /// @copydoc Builder::active()
+    ///
+    /// A Float64Builder is never active.
     bool
       active() const override;
 

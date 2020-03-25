@@ -10,13 +10,25 @@
 #include "awkward/builder/Builder.h"
 
 namespace awkward {
+  /// @class UnknownBuilder
+  ///
+  /// @brief Builder node for accumulated data whose type is not yet known.
   class EXPORT_SYMBOL UnknownBuilder: public Builder {
   public:
+    /// @brief Create an empty UnknownBuilder.
+    /// @param options Configuration options for building an array;
+    /// these are passed to every Builder's constructor.
     static const BuilderPtr
       fromempty(const ArrayBuilderOptions& options);
 
+    /// @brief Create a ListBuilder from a full set of parameters.
+    ///
+    /// @param options Configuration options for building an array;
+    /// these are passed to every Builder's constructor.
+    /// @param nullcount The number of null values encountered so far.
     UnknownBuilder(const ArrayBuilderOptions& options, int64_t nullcount);
 
+    /// @brief User-friendly name of this class: `"UnknownBuilder"`.
     const std::string
       classname() const override;
 
@@ -29,6 +41,9 @@ namespace awkward {
     const ContentPtr
       snapshot() const override;
 
+    /// @copydoc Builder::active()
+    ///
+    /// An UnknownBuilder is never active.
     bool
       active() const override;
 

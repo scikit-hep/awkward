@@ -12,14 +12,31 @@
 #include "awkward/builder/Builder.h"
 
 namespace awkward {
+  /// @class IndexedBuilder
+  ///
+  /// @brief Builder node for accumulated data that come from an existing
+  /// Content array.
   template <typename T>
   class EXPORT_SYMBOL IndexedBuilder: public Builder {
   public:
+    /// @brief Create an IndexedBuilder from a full set of parameters.
+    ///
+    /// @param options Configuration options for building an array;
+    /// these are passed to every Builder's constructor.
+    /// @param index Contains the accumulated index (like
+    /// {@link IndexedArrayOf#index IndexedArray::index}).
+    /// @param array The original Content array from which the new accumulated
+    /// data are drawn.
+    /// @param hasnull If `true`, some of the accumulated data are missing
+    /// and a #snapshot should produce an
+    /// {@link IndexedArrayOf IndexedOptionArray}, rather than an
+    /// {@link IndexedArrayOf IndexedArray}.
     IndexedBuilder(const ArrayBuilderOptions& options,
                    const GrowableBuffer<int64_t>& index,
                    const std::shared_ptr<T>& array,
                    bool hasnull);
 
+    /// @brief Raw pointer to the original Content `array`.
     const Content*
       arrayptr() const;
 
@@ -29,6 +46,9 @@ namespace awkward {
     void
       clear() override;
 
+    /// @copydoc Builder::active()
+    ///
+    /// An IndexedBuilder is never active.
     bool
       active() const override;
 
@@ -90,6 +110,7 @@ namespace awkward {
                           const ContentPtr& array,
                           bool hasnull);
 
+    /// @brief User-friendly name of this class: `"IndexedGenericBuilder"`.
     const std::string
       classname() const override;
 
@@ -107,6 +128,7 @@ namespace awkward {
                       const std::shared_ptr<IndexedArray32>& array,
                       bool hasnull);
 
+    /// @brief User-friendly name of this class: `"IndexedI32Builder"`.
     const std::string
       classname() const override;
 
@@ -124,6 +146,7 @@ namespace awkward {
                        const std::shared_ptr<IndexedArrayU32>& array,
                        bool hasnull);
 
+    /// @brief User-friendly name of this class: `"IndexedIU32Builder"`.
     const std::string
       classname() const override;
 
@@ -141,6 +164,7 @@ namespace awkward {
                       const std::shared_ptr<IndexedArray64>& array,
                       bool hasnull);
 
+    /// @brief User-friendly name of this class: `"IndexedI64Builder"`.
     const std::string
       classname() const override;
 
@@ -158,6 +182,7 @@ namespace awkward {
                        const std::shared_ptr<IndexedOptionArray32>& array,
                        bool hasnull);
 
+    /// @brief User-friendly name of this class: `"IndexedIO32Builder"`.
     const std::string
       classname() const override;
 
@@ -175,6 +200,7 @@ namespace awkward {
                        const std::shared_ptr<IndexedOptionArray64>& array,
                        bool hasnull);
 
+    /// @brief User-friendly name of this class: `"IndexedIO64Builder"`.
     const std::string
       classname() const override;
 

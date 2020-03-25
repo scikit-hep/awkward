@@ -24,34 +24,6 @@
 #include "awkward/array/NumpyArray.h"
 
 namespace awkward {
-  const TypePtr
-  NumpyArray::unwrap_regulartype(const TypePtr& type,
-                                 const std::vector<ssize_t>& shape) {
-    TypePtr out = type;
-    for (size_t i = 1;  i < shape.size();  i++) {
-      if (RegularType* raw = dynamic_cast<RegularType*>(out.get())) {
-        if (raw->size() == (int64_t)shape[i]) {
-          out = raw->type();
-        }
-        else {
-          throw std::invalid_argument(
-            std::string("NumpyArray cannot be converted to type ")
-            + type.get()->tostring()
-            + std::string(" because shape does not match sizes of "
-                          "RegularTypes"));
-        }
-      }
-      else {
-        throw std::invalid_argument(
-          std::string("NumpyArray cannot be converted to type ")
-          + type.get()->tostring()
-          + std::string(" because shape does not match level of RegularType "
-                        "nesting"));
-      }
-    }
-    return out;
-  }
-
   const std::unordered_map<std::type_index, std::string>
   NumpyArray::format_map = {
     { typeid(int8_t), "b"},

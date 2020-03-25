@@ -8,11 +8,35 @@
 #include "awkward/type/Type.h"
 
 namespace awkward {
+  /// @class UnionType
+  ///
+  /// @brief Describes the high level type of heterogeneous data.
+  ///
+  /// {@link UnionArrayOf UnionArray} nodes have this type.
   class EXPORT_SYMBOL UnionType: public Type {
   public:
+    /// @brief Create an UnionArray with a full set of parameters.
+    ///
+    /// @param parameters Custom parameters inherited from the Content that
+    /// this type describes.
+    /// @param typestr Optional string that overrides the default string
+    /// representation (missing if empty).
+    /// @param types The Type of each possibility.
     UnionType(const util::Parameters& parameters,
               const std::string& typestr,
               const std::vector<TypePtr>& types);
+
+    /// @brief The Type of each possibility.
+    const std::vector<TypePtr>
+      types() const;
+
+    /// @brief The number of possible types.
+    int64_t
+      numtypes() const;
+
+    /// @brief Returns the type at a given index.
+    const TypePtr
+      type(int64_t index) const;
 
     std::string
       tostring_part(const std::string& indent,
@@ -43,16 +67,8 @@ namespace awkward {
     const ContentPtr
       empty() const override;
 
-    int64_t
-      numtypes() const;
-
-    const std::vector<TypePtr>
-      types() const;
-
-    const TypePtr
-      type(int64_t index) const;
-
   private:
+    /// @brief See #types.
     const std::vector<TypePtr> types_;
   };
 }

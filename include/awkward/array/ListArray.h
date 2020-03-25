@@ -12,35 +12,121 @@
 
 namespace awkward {
   template <typename T>
+  class ListOffsetArrayOf;
+
+  class RegularArray;
+
+  /// @class ListArrayOf
+  ///
+  /// @brief Represents an array of nested lists that can have different
+  /// lengths using two indexes named #starts and #stops.
+  ///
+  /// The use of two indexes, #starts and #stops, allows the #content to be
+  /// non-contiguous, out-of-order, and possibly overlapping.
+  ///
+  /// See #ListArrayOf for the meaning of each parameter.
+  template <typename T>
   class EXPORT_SYMBOL ListArrayOf: public Content {
   public:
+    /// @brief Creates a ListArray from a full set of parameters.
+    ///
+    /// @param identities Optional Identities for each element of the array
+    /// (may be `nullptr`).
+    /// @param parameters String-to-JSON map that augments the meaning of this
+    /// array.
+    /// @param starts Positions where each nested list starts in the #content.
+    /// @param stops Positions where each nested list stops in the #content.
+    /// The `starts` and `stops` may be in any order, they may repeat elements,
+    /// may represent partially or completely overlapping ranges of the
+    /// #content, and they may leave "unreachable" gaps between lists.
+    /// If `starts[i] == stops[i]`, there is no constraint on the value of
+    /// `starts[i]`. Otherwise, `0 <= starts[i] < len(content)` and
+    /// `0 <= stops[i] <= len(content)`.
     ListArrayOf<T>(const IdentitiesPtr& identities,
                    const util::Parameters& parameters,
                    const IndexOf<T>& starts,
                    const IndexOf<T>& stops,
                    const ContentPtr& content);
 
+    /// @brief Positions where each nested list starts in the #content.
+    ///
+    /// The `starts` may be in any order, they may repeat elements, may
+    /// represent partially or completely overlapping ranges of the #content,
+    /// and they may leave "unreachable" gaps between lists.
+    ///
+    /// If `starts[i] == stops[i]`, there is no constraint on the value of
+    /// `starts[i]`. Otherwise, `0 <= starts[i] < len(content)`.
     const IndexOf<T>
       starts() const;
 
+    /// @brief Positions where each nested list stops in the #content.
+    ///
+    /// The `stops` may be in any order, they may repeat elements, may
+    /// represent partially or completely overlapping ranges of the #content,
+    /// and they may leave "unreachable" gaps between lists.
+    ///
+    /// If `starts[i] == stops[i]`, there is no constraint on the value of
+    /// `stops[i]`. Otherwise, `0 <= stops[i] <= len(content)`.
     const IndexOf<T>
       stops() const;
 
+    /// @brief Data referenced by the #starts and #stops to build nested lists.
+    /// 
+    /// The `content` does not necessarily represent a flattened version of
+    /// this array because a single element may belong to multiple lists or
+    /// no list at all.
     const ContentPtr
       content() const;
 
+    /// @brief Returns 64-bit offsets, possibly starting with `offsets[0] = 0`,
+    /// that would represent this array's #starts and #stops if the #content
+    /// were replaced by a contiguous copy.
+    ///
+    /// @param start_at_zero If `true`, the first offset will be `0`, meaning
+    /// there are no "unreachable" elements in the `content` that corresponds
+    /// to these offsets.
     Index64
       compact_offsets64(bool start_at_zero) const;
 
-    const ContentPtr
+    /// @brief Moves #content elements if necessary to match a given set of
+    /// `offsets` and return a {@link ListOffsetArrayOf ListOffsetArray} that
+    /// matches.
+    ///
+    /// As indicated by the name, this is a basic element of broadcasting.
+    ///
+    /// Since the output is a {@link ListOffsetArrayOf ListOffsetArray}, this
+    /// operation produces contiguous output, replacing multiply-referenced
+    /// items with copied items and removing unreachable gaps between items.
+    const std::shared_ptr<ListOffsetArrayOf<int64_t>>
       broadcast_tooffsets64(const Index64& offsets) const;
 
-    const ContentPtr
+    /// @brief Converts this array to a RegularArray if all nested lists have
+    /// the same size (error otherwise).
+    ///
+    /// Since the output is a RegularArray, this
+    /// operation produces contiguous output, replacing multiply-referenced
+    /// items with copied items and removing unreachable gaps before and
+    /// between items.
+    const std::shared_ptr<RegularArray>
       toRegularArray() const;
 
-    const ContentPtr
+    /// @brief Returns this array as a
+    /// {@link ListOffsetArrayOf ListOffsetArray} with
+    /// 64-bit #offsets and possibly starting with `offsets[0] = 0`; a
+    /// #shallow_copy if possible.
+    ///
+    /// @param start_at_zero If `true`, the first offset will be `0`, meaning
+    /// there are no "unreachable" elements in the `content` that corresponds
+    /// to these offsets.
+    ///
+    /// Since the output is a {@link ListOffsetArrayOf ListOffsetArray}, this
+    /// operation produces contiguous output, replacing multiply-referenced
+    /// items with copied items and removing unreachable gaps between items.
+    const std::shared_ptr<ListOffsetArrayOf<int64_t>>
       toListOffsetArray64(bool start_at_zero) const;
 
+    /// @brief User-friendly name of this class: `"ListArray32"`,
+    /// `"ListArrayU32"`, or `"ListArray64"`.
     const std::string
       classname() const override;
 
@@ -64,6 +150,9 @@ namespace awkward {
     void
       nbytes_part(std::map<size_t, int64_t>& largest) const override;
 
+    /// @copydoc Content::length()
+    ///
+    /// Equal to `len(starts)`.
     int64_t
       length() const override;
 
@@ -136,6 +225,10 @@ namespace awkward {
     const std::string
       validityerror(const std::string& path) const override;
 
+    /// @copydoc Content::shallow_simplify()
+    ///
+    /// For {@link ListArrayOf ListArray}, this method returns
+    /// #shallow_copy (pass-through).
     const ContentPtr
       shallow_simplify() const override;
 
@@ -158,10 +251,10 @@ namespace awkward {
       fillna(const ContentPtr& value) const override;
 
     const ContentPtr
-      rpad(int64_t length, int64_t axis, int64_t depth) const override;
+      rpad(int64_t target, int64_t axis, int64_t depth) const override;
 
     const ContentPtr
-      rpad_and_clip(int64_t length,
+      rpad_and_clip(int64_t target,
                     int64_t axis,
                     int64_t depth) const override;
 
@@ -224,8 +317,11 @@ namespace awkward {
                           const Slice& tail) const override;
 
   private:
+    /// @brief See #starts.
     const IndexOf<T> starts_;
+    /// @brief See #stops.
     const IndexOf<T> stops_;
+    /// @brief See #content.
     const ContentPtr content_;
   };
 

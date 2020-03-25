@@ -12,31 +12,82 @@
 #include "awkward/Content.h"
 
 namespace awkward {
+  template <typename T>
+  class ListOffsetArrayOf;
+
+  /// @class RegularArray
+  ///
+  /// @brief Represents an array of nested lists that all have the same
+  /// length using a scalar #size, rather than an index.
+  ///
+  /// The #content must be contiguous, in-order, and non-overlapping, and
+  /// it must also start at zero.
+  ///
+  /// See #RegularArray for the meaning of each parameter.
   class EXPORT_SYMBOL RegularArray: public Content {
   public:
+    /// @brief Creates a RegularArray from a full set of parameters.
+    ///
+    /// @param identities Optional Identities for each element of the array
+    /// (may be `nullptr`).
+    /// @param parameters String-to-JSON map that augments the meaning of this
+    /// array.
+    /// @param content Data contained within all nested lists as a contiguous
+    /// array.
+    /// Values in `content[i]` where `i >= length * size` are "unreachable,"
+    /// and don't exist in the high level view.
+    /// @param size Length of the equally sized nested lists.
     RegularArray(const IdentitiesPtr& identities,
                  const util::Parameters& parameters,
                  const ContentPtr& content,
                  int64_t size);
 
+    /// @brief Data contained within all nested lists as a contiguous array.
+    ///
+    /// Values in `content[i]` where `i >= length * size` are "unreachable,"
+    /// and don't exist in the high level view.
     const ContentPtr
       content() const;
 
+    /// @brief Length of the equally sized nested lists.
     int64_t
       size() const;
 
+    /// @brief Returns 64-bit offsets, possibly starting with `offsets[0] = 0`,
+    /// that would represent the spacing in this RegularArray.
+    ///
+    /// @param start_at_zero If `true`, the first offset will be `0`, meaning
+    /// there are no "unreachable" elements in the `content` that corresponds
+    /// to these offsets.
     Index64
       compact_offsets64(bool start_at_zero) const;
 
-    const ContentPtr
+    /// @brief Verify that a given set of `offsets` are regular
+    /// and return a {@link ListOffsetArrayOf ListOffsetArray} of this array
+    /// using those `offsets`.
+    ///
+    /// As indicated by the name, this is a basic element of broadcasting.
+    const std::shared_ptr<ListOffsetArrayOf<int64_t>>
       broadcast_tooffsets64(const Index64& offsets) const;
 
-    const ContentPtr
+    /// @brief Effectively the same as #shallow_copy, but with the same name
+    /// as the equivalent
+    /// {@link ListArrayOf#toRegularArray ListArray::toRegularArray} and
+    /// {@link ListOffsetArrayOf#toRegularArray ListOffsetArray::toRegularArray}.
+    const std::shared_ptr<RegularArray>
       toRegularArray() const;
 
-    const ContentPtr
+    /// @brief Converts this array into a
+    /// {@link ListOffsetArrayOf ListOffsetArray} by generating `offsets` that
+    /// are equivalent to its regular #size.
+    ///
+    /// @param start_at_zero If `true`, the first offset will be `0`, meaning
+    /// there are no "unreachable" elements in the `content` that corresponds
+    /// to these offsets. For a RegularArray, this would always be true.
+    const std::shared_ptr<ListOffsetArrayOf<int64_t>>
       toListOffsetArray64(bool start_at_zero) const;
 
+    /// @brief User-friendly name of this class: `"RegularArray"`.
     const std::string
       classname() const override;
 
@@ -60,6 +111,9 @@ namespace awkward {
     void
       nbytes_part(std::map<size_t, int64_t>& largest) const override;
 
+    /// @copydoc Content::length()
+    ///
+    /// Equal to `floor(len(content) / size)`.
     int64_t
       length() const override;
 
@@ -132,6 +186,9 @@ namespace awkward {
     const std::string
       validityerror(const std::string& path) const override;
 
+    /// @copydoc Content::shallow_simplify()
+    ///
+    /// For RegularArray, this method returns #shallow_copy (pass-through).
     const ContentPtr
       shallow_simplify() const override;
 
@@ -154,10 +211,10 @@ namespace awkward {
       fillna(const ContentPtr& value) const override;
 
     const ContentPtr
-      rpad(int64_t length, int64_t axis, int64_t depth) const override;
+      rpad(int64_t target, int64_t axis, int64_t depth) const override;
 
     const ContentPtr
-      rpad_and_clip(int64_t length,
+      rpad_and_clip(int64_t target,
                     int64_t axis,
                     int64_t depth) const override;
 
