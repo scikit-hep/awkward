@@ -12,7 +12,7 @@ generalizes when they're not.
   <tr>
     <td width="33%" valign="top">
       <a href="https://scikit-hep.org/awkward-1.0/index.html">
-        <img src="docs-images/logo/panel-data-analysts.png" width="268">
+        <img src="docs-images/panel-data-analysts.png" width="268">
       </a>
       <p align="center"><b>
         <a href="https://scikit-hep.org/awkward-1.0/index.html">
@@ -22,7 +22,7 @@ generalizes when they're not.
     </td>
     <td width="33%" valign="top">
       <a href="https://scikit-hep.org/awkward-1.0/index.html">
-        <img src="docs-images/logo/panel-developers.png" width="268">
+        <img src="docs-images/panel-developers.png" width="268">
       </a>
       <p align="center"><b>
         <a href="https://scikit-hep.org/awkward-1.0/index.html">
@@ -32,7 +32,7 @@ generalizes when they're not.
     </td>
     <td width="33%" valign="top">
       <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
-        <img src="docs-images/logo/panel-doxygen.png" width="268">
+        <img src="docs-images/panel-doxygen.png" width="268">
       </a>
       <p align="center"><b>
         <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
@@ -40,7 +40,7 @@ generalizes when they're not.
         </a>
       </b></p>
       <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
-        <img src="docs-images/logo/panel-sphinx.png" width="268">
+        <img src="docs-images/panel-sphinx.png" width="268">
       </a>
       <p align="center"><b>
         <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
