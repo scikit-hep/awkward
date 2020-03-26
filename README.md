@@ -3,23 +3,23 @@
 <table>
   <tr>
     <td width="33%" valign="top">
-      <img src="docs/content/images/logo/panel-data-analysts.png">
+      <img src="docs/content/images/logo/panel-data-analysts.png" width="268">
       <p align="center"><b>
         How-to documentation<br>for data analysts
       </b></p>
     </td>
     <td width="33%" valign="top">
-      <img src="docs/content/images/logo/panel-developers.png">
+      <img src="docs/content/images/logo/panel-developers.png" width="268">
       <p align="center"><b>
         How-it-works tutorials<br>for developers
       </b></p>
     </td>
     <td width="33%" valign="top">
-      <img src="docs/content/images/logo/panel-doxygen.png">
+      <img src="docs/content/images/logo/panel-doxygen.png" width="268">
       <p align="center"><b>
         Doxygen C++<br>API reference
       </b></p>
-      <img src="docs/content/images/logo/panel-sphinx.png">
+      <img src="docs/content/images/logo/panel-sphinx.png" width="268">
       <p align="center"><b>
         Sphinx Python<br>API reference
       </b></p>
