@@ -16,6 +16,7 @@ docs/_site
 docs-mkdocs/docs
 docs-sphinx/_build
 docs-sphinx/_static
+docs-sphinx/python
 
 ############################################################# IDEs
 .idea

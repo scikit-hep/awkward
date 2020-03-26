@@ -38,11 +38,6 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
     """
 
     def __init__(self, data, behavior=None, checkvalid=False):
-        """
-        Creates an Array from 
-
-        THEREIE
-        """
         if isinstance(data, awkward1.layout.Content):
             layout = data
         elif isinstance(data, Array):

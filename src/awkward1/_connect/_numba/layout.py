@@ -12,13 +12,13 @@ import awkward1._util
 import awkward1._connect._numba.arrayview
 
 @numba.extending.typeof_impl.register(awkward1.layout.NumpyArray)
-def typeof(obj, c):
+def typeof_NumpyArray(obj, c):
     return NumpyArrayType(numba.typeof(numpy.asarray(obj)),
                           numba.typeof(obj.identities),
                           obj.parameters)
 
 @numba.extending.typeof_impl.register(awkward1.layout.RegularArray)
-def typeof(obj, c):
+def typeof_RegularArray(obj, c):
     return RegularArrayType(numba.typeof(obj.content),
                             obj.size,
                             numba.typeof(obj.identities),
@@ -30,7 +30,7 @@ def typeof(obj, c):
 @numba.extending.typeof_impl.register(awkward1.layout.ListOffsetArray32)
 @numba.extending.typeof_impl.register(awkward1.layout.ListOffsetArrayU32)
 @numba.extending.typeof_impl.register(awkward1.layout.ListOffsetArray64)
-def typeof(obj, c):
+def typeof_ListArray(obj, c):
     return ListArrayType(numba.typeof(numpy.asarray(obj.starts)),
                          numba.typeof(obj.content),
                          numba.typeof(obj.identities),
@@ -39,7 +39,7 @@ def typeof(obj, c):
 @numba.extending.typeof_impl.register(awkward1.layout.IndexedArray32)
 @numba.extending.typeof_impl.register(awkward1.layout.IndexedArrayU32)
 @numba.extending.typeof_impl.register(awkward1.layout.IndexedArray64)
-def typeof(obj, c):
+def typeof_IndexedArray(obj, c):
     return IndexedArrayType(numba.typeof(numpy.asarray(obj.index)),
                             numba.typeof(obj.content),
                             numba.typeof(obj.identities),
@@ -47,14 +47,14 @@ def typeof(obj, c):
 
 @numba.extending.typeof_impl.register(awkward1.layout.IndexedOptionArray32)
 @numba.extending.typeof_impl.register(awkward1.layout.IndexedOptionArray64)
-def typeof(obj, c):
+def typeof_IndexedOptionArray(obj, c):
     return IndexedOptionArrayType(numba.typeof(numpy.asarray(obj.index)),
                                   numba.typeof(obj.content),
                                   numba.typeof(obj.identities),
                                   obj.parameters)
 
 @numba.extending.typeof_impl.register(awkward1.layout.ByteMaskedArray)
-def typeof(obj, c):
+def typeof_ByteMaskedArray(obj, c):
     return ByteMaskedArrayType(numba.typeof(numpy.asarray(obj.mask)),
                                numba.typeof(obj.content),
                                obj.validwhen,
@@ -62,7 +62,7 @@ def typeof(obj, c):
                                obj.parameters)
 
 @numba.extending.typeof_impl.register(awkward1.layout.BitMaskedArray)
-def typeof(obj, c):
+def typeof_BitMaskedArray(obj, c):
     return BitMaskedArrayType(numba.typeof(numpy.asarray(obj.mask)),
                               numba.typeof(obj.content),
                               obj.validwhen,
@@ -71,26 +71,26 @@ def typeof(obj, c):
                               obj.parameters)
 
 @numba.extending.typeof_impl.register(awkward1.layout.UnmaskedArray)
-def typeof(obj, c):
+def typeof_UnmaskedArray(obj, c):
     return UnmaskedArrayType(numba.typeof(obj.content),
                              numba.typeof(obj.identities),
                              obj.parameters)
 
 @numba.extending.typeof_impl.register(awkward1.layout.RecordArray)
-def typeof(obj, c):
+def typeof_RecordArray(obj, c):
     return RecordArrayType(tuple(numba.typeof(x) for x in obj.contents),
                            obj.recordlookup,
                            numba.typeof(obj.identities),
                            obj.parameters)
 
 @numba.extending.typeof_impl.register(awkward1.layout.Record)
-def typeof(obj, c):
+def typeof_Record(obj, c):
     return RecordType(numba.typeof(obj.array))
 
 @numba.extending.typeof_impl.register(awkward1.layout.UnionArray8_32)
 @numba.extending.typeof_impl.register(awkward1.layout.UnionArray8_U32)
 @numba.extending.typeof_impl.register(awkward1.layout.UnionArray8_64)
-def typeof(obj, c):
+def typeof_UnionArray(obj, c):
     return UnionArrayType(numba.typeof(numpy.asarray(obj.tags)),
                           numba.typeof(numpy.asarray(obj.index)),
                           tuple(numba.typeof(x) for x in obj.contents),
