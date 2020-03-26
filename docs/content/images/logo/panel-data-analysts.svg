@@ -10,8 +10,8 @@
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    width="70.681633mm"
-   height="131.93031mm"
-   viewBox="0 0 70.681633 131.93031"
+   height="105.47198mm"
+   viewBox="0 0 70.681633 105.47199"
    version="1.1"
    id="svg893"
    inkscape:version="0.92.3 (2405546, 2018-03-11)"
@@ -29,8 +29,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.98994949"
-     inkscape:cx="56.904807"
-     inkscape:cy="221.08518"
+     inkscape:cx="166.00128"
+     inkscape:cy="121.08524"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -38,10 +38,10 @@
      fit-margin-left="0"
      fit-margin-right="0"
      fit-margin-bottom="0"
-     inkscape:window-width="1703"
-     inkscape:window-height="984"
-     inkscape:window-x="2036"
-     inkscape:window-y="59"
+     inkscape:window-width="1037"
+     inkscape:window-height="932"
+     inkscape:window-x="778"
+     inkscape:window-y="124"
      inkscape:window-maximized="0" />
   <metadata
      id="metadata890">
@@ -59,33 +59,32 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(-68.224659,-67.749127)">
-    <rect
+     transform="translate(-68.22466,-67.749127)">
+    <path
        style="opacity:1;vector-effect:none;fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.52916676;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       d="M 68.489243,68.01371 H 138.64171 V 172.95653 H 68.489243 Z"
        id="rect870"
-       width="70.152466"
-       height="131.40115"
-       x="68.489243"
-       y="68.01371" />
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccc" />
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.3499999px;line-height:1.25;font-family:'Noto Sans';-inkscape-font-specification:'Noto Sans';text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
        x="103.35395"
-       y="179.90149"
+       y="77.537262"
        id="text1465"><tspan
          sodipodi:role="line"
          x="103.35395"
-         y="179.90149"
+         y="77.537262"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.3499999px;line-height:100%;font-family:'Noto Sans';-inkscape-font-specification:'Noto Sans';text-align:center;text-anchor:middle;stroke-width:0.26458332"
          id="tspan1469">How-to documentation</tspan><tspan
          sodipodi:role="line"
          x="103.35395"
-         y="187.83899"
+         y="85.474762"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05555534px;line-height:100%;font-family:'Noto Sans';-inkscape-font-specification:'Noto Sans';text-align:center;text-anchor:middle;stroke-width:0.26458332"
          id="tspan1475">for</tspan><tspan
          sodipodi:role="line"
          x="103.35395"
-         y="195.77649"
+         y="93.412262"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05555534px;line-height:100%;font-family:'Noto Sans';-inkscape-font-specification:'Noto Sans';text-align:center;text-anchor:middle;stroke-width:0.26458332"
          id="tspan1477">data analysts</tspan></text>
   </g>
