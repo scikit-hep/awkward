@@ -2,20 +2,20 @@
 
 <table>
   <tr>
-    <td width="33%" style="text-align: center; text-size: 20pt">
+    <td width="33%" style="fontsize: 20pt">
       <img src="docs/content/images/logo/panel-data-analysts.png">
-      How-to documentation<br>for<br>data analysts
+      <center>How-to documentation<br>for<br>data analysts</center>
     </td>
-    <td width="33%" style="text-align: center; text-size: 20pt">
+    <td width="33%" style="font-size: 20pt">
       <img src="docs/content/images/logo/panel-developers.png">
-      How-it-works tutorials<br>for<br>developers
+      <center>How-it-works tutorials<br>for<br>developers</center>
     </td>
-    <td width="33%" style="text-align: center; text-size: 20pt">
+    <td width="33%" style="font-size: 20pt">
       <img src="docs/content/images/logo/panel-doxygen.png">
-      Doxygen C++<br>API reference
+      <center>Doxygen C++<br>API reference</center>
       <br><br>
       <img src="docs/content/images/logo/panel-sphinx.png">
-      Sphinx Python<br>API reference
+      <center>Sphinx Python<br>API reference</center>
     </td>
   </tr>
 </table>
