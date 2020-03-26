@@ -6,6 +6,8 @@ import operator
 
 import numpy
 import numba
+import numba.core.typing
+import numba.core.typing.ctypes_utils
 
 import awkward1.operations.convert
 import awkward1._util
@@ -109,7 +111,7 @@ class LookupType(numba.types.Type):
         super(LookupType, self).__init__(name="LookupType()")
 
 @numba.extending.register_model(LookupType)
-class LookupModel(numba.datamodel.models.StructModel):
+class LookupModel(numba.core.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
         members = [("arrayptrs", fe_type.arraytype),
                    ("sharedptrs", fe_type.arraytype)]
@@ -129,7 +131,8 @@ def unbox_Lookup(lookuptype, lookupobj, c):
     c.pyapi.decref(arrayptrs_obj)
     c.pyapi.decref(sharedptrs_obj)
 
-    is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
+    is_error = numba.core.cgutils.is_not_null(c.builder,
+                                              c.pyapi.err_occurred())
     return numba.extending.NativeValue(proxyout._getvalue(), is_error)
 
 class ArrayView(object):
@@ -188,7 +191,7 @@ class ArrayViewType(numba.types.Type):
         self.fields = fields
 
 @numba.extending.register_model(ArrayViewType)
-class ArrayViewModel(numba.datamodel.models.StructModel):
+class ArrayViewModel(numba.core.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
         members = [("pos",        numba.intp),
                    ("start",      numba.intp),
@@ -234,7 +237,8 @@ def unbox_ArrayView(viewtype, view_obj, c):
     if c.context.enable_nrt:
         c.context.nrt.decref(c.builder, LookupType(), lookup_val)
 
-    is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
+    is_error = numba.core.cgutils.is_not_null(c.builder,
+                                              c.pyapi.err_occurred())
     return numba.extending.NativeValue(proxyout._getvalue(), is_error)
 
 @numba.extending.box(ArrayViewType)
@@ -298,8 +302,8 @@ def box_ArrayView(viewtype, viewval, c):
 
     return out
 
-@numba.typing.templates.infer_global(len)
-class type_len(numba.typing.templates.AbstractTemplate):
+@numba.core.typing.templates.infer_global(len)
+class type_len(numba.core.typing.templates.AbstractTemplate):
     def generic(self, args, kwargs):
         if (len(args) == 1 and
             len(kwargs) == 0 and isinstance(args[0], ArrayViewType)):
@@ -310,8 +314,8 @@ def lower_len(context, builder, sig, args):
     proxyin = context.make_helper(builder, sig.args[0], args[0])
     return builder.sub(proxyin.stop, proxyin.start)
 
-@numba.typing.templates.infer_global(operator.getitem)
-class type_getitem(numba.typing.templates.AbstractTemplate):
+@numba.core.typing.templates.infer_global(operator.getitem)
+class type_getitem(numba.core.typing.templates.AbstractTemplate):
     def generic(self, args, kwargs):
         if (len(args) == 2 and
             len(kwargs) == 0 and
@@ -382,8 +386,8 @@ def lower_getitem_field(context, builder, sig, args):
                                              viewval,
                                              wheretype.literal_value)
 
-@numba.typing.templates.infer_getattr
-class type_getattr(numba.typing.templates.AttributeTemplate):
+@numba.core.typing.templates.infer_getattr
+class type_getattr(numba.core.typing.templates.AttributeTemplate):
     key = ArrayViewType
 
     def generic_resolve(self, viewtype, attr):
@@ -405,8 +409,8 @@ class IteratorType(numba.types.common.SimpleIteratorType):
                 viewtype.name), viewtype.type.getitem_at_check(viewtype))
         self.viewtype = viewtype
 
-@numba.typing.templates.infer
-class type_getiter(numba.typing.templates.AbstractTemplate):
+@numba.core.typing.templates.infer
+class type_getiter(numba.core.typing.templates.AbstractTemplate):
     key = "getiter"
 
     def generic(self, args, kwargs):
@@ -415,8 +419,8 @@ class type_getiter(numba.typing.templates.AbstractTemplate):
             isinstance(args[0], ArrayViewType)):
             return IteratorType(args[0])(args[0])
 
-@numba.datamodel.registry.register_default(IteratorType)
-class IteratorModel(numba.datamodel.models.StructModel):
+@numba.core.datamodel.registry.register_default(IteratorType)
+class IteratorModel(numba.core.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
         members = [("view", fe_type.viewtype),
                    ("length", numba.intp),
@@ -431,17 +435,17 @@ def lower_getiter(context, builder, sig, args):
     proxyout = context.make_helper(builder, rettype)
     proxyout.view = viewval
     proxyout.length = builder.sub(viewproxy.stop, viewproxy.start)
-    proxyout.at = numba.cgutils.alloca_once_value(
+    proxyout.at = numba.core.cgutils.alloca_once_value(
                     builder, context.get_constant(numba.intp, 0))
     if context.enable_nrt:
         context.nrt.incref(builder, viewtype, viewval)
-    return numba.targets.imputils.impl_ret_new_ref(context,
-                                                   builder,
-                                                   rettype,
-                                                   proxyout._getvalue())
+    return numba.core.imputils.impl_ret_new_ref(context,
+                                                builder,
+                                                rettype,
+                                                proxyout._getvalue())
 
 @numba.extending.lower_builtin("iternext", IteratorType)
-@numba.targets.imputils.iternext_impl(numba.targets.imputils.RefType.BORROWED)
+@numba.core.imputils.iternext_impl(numba.core.imputils.RefType.BORROWED)
 def lower_iternext(context, builder, sig, args, result):
     itertype, = sig.args
     iterval, = args
@@ -457,7 +461,7 @@ def lower_iternext(context, builder, sig, args, result):
             builder,
             itertype.yield_type(itertype.viewtype, numba.intp),
             (proxyin.view, at)))
-        nextat = numba.cgutils.increment_index(builder, at)
+        nextat = numba.core.cgutils.increment_index(builder, at)
         builder.store(nextat, proxyin.at)
 
 class RecordView(object):
@@ -519,7 +523,7 @@ class RecordViewType(numba.types.Type):
                                                                   key)
 
 @numba.extending.register_model(RecordViewType)
-class RecordViewModel(numba.datamodel.models.StructModel):
+class RecordViewModel(numba.core.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
         members = [("arrayview", fe_type.arrayviewtype),
                    ("at",        numba.intp)]
@@ -547,7 +551,8 @@ def unbox_RecordView(recordviewtype, recordobj, c):
                              recordviewtype.arrayviewtype,
                              arrayview_val)
 
-    is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
+    is_error = numba.core.cgutils.is_not_null(c.builder,
+                                              c.pyapi.err_occurred())
     return numba.extending.NativeValue(proxyout._getvalue(), is_error)
 
 @numba.extending.box(RecordViewType)
@@ -572,8 +577,8 @@ def box_RecordView(recordviewtype, viewval, c):
 
     return out
 
-@numba.typing.templates.infer_global(operator.getitem)
-class type_getitem_record(numba.typing.templates.AbstractTemplate):
+@numba.core.typing.templates.infer_global(operator.getitem)
+class type_getitem_record(numba.core.typing.templates.AbstractTemplate):
     def generic(self, args, kwargs):
         if (len(args) == 2 and
             len(kwargs) == 0 and
@@ -601,8 +606,8 @@ def lower_getitem_field_record(context, builder, sig, args):
              recordviewval,
              wheretype.literal_value)
 
-@numba.typing.templates.infer_getattr
-class type_getattr_record(numba.typing.templates.AttributeTemplate):
+@numba.core.typing.templates.infer_getattr
+class type_getattr_record(numba.core.typing.templates.AttributeTemplate):
     key = RecordViewType
 
     def generic_resolve(self, recordviewtype, attr):
@@ -610,12 +615,14 @@ class type_getattr_record(numba.typing.templates.AttributeTemplate):
                                         recordviewtype.arrayviewtype.type,
                                         recordviewtype.arrayviewtype.behavior):
             if attr == methodname:
-                class type_method(numba.typing.templates.AbstractTemplate):
+                class type_method(
+                      numba.core.typing.templates.AbstractTemplate):
                     key = methodname
                     def generic(_, args, kwargs):
                         if len(kwargs) == 0:
                             sig = typer(recordviewtype, args)
-                            sig.recvr = recordviewtype
+                            sig = numba.core.typing.templates.Signature(
+                                sig.return_type, sig.args, recordviewtype)
                             numba.extending.lower_builtin(
                                 methodname,
                                 recordviewtype,
@@ -655,8 +662,8 @@ def lower_getattr_generic_record(context,
                                           attr)
 
 def register_unary_operator(unaryop):
-    @numba.typing.templates.infer_global(unaryop)
-    class type_binary_operator(numba.typing.templates.AbstractTemplate):
+    @numba.core.typing.templates.infer_global(unaryop)
+    class type_binary_operator(numba.core.typing.templates.AbstractTemplate):
         def generic(self, args, kwargs):
             if len(args) == 1 and len(kwargs) == 0:
                 behavior = None
@@ -681,8 +688,8 @@ for unaryop in (abs,
     register_unary_operator(unaryop)
 
 def register_binary_operator(binop):
-    @numba.typing.templates.infer_global(binop)
-    class type_binary_operator(numba.typing.templates.AbstractTemplate):
+    @numba.core.typing.templates.infer_global(binop)
+    class type_binary_operator(numba.core.typing.templates.AbstractTemplate):
         def generic(self, args, kwargs):
             if len(args) == 2 and len(kwargs) == 0:
                 behavior = None

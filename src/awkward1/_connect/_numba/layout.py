@@ -195,8 +195,8 @@ class ContentType(numba.types.Type):
                             wrapneg):
         length = builder.sub(viewproxy.stop, viewproxy.start)
 
-        regular_start = numba.cgutils.alloca_once_value(builder, start)
-        regular_stop = numba.cgutils.alloca_once_value(builder, stop)
+        regular_start = numba.core.cgutils.alloca_once_value(builder, start)
+        regular_stop = numba.core.cgutils.alloca_once_value(builder, stop)
 
         if wrapneg:
             with builder.if_then(builder.icmp_signed(
@@ -247,10 +247,10 @@ def getat(context, builder, baseptr, offset, rettype=None):
         bitwidth = numba.intp.bitwidth
     byteoffset = builder.mul(offset,
                              context.get_constant(numba.intp, bitwidth // 8))
-    return builder.load(numba.cgutils.pointer_add(builder,
-                                                  baseptr,
-                                                  byteoffset,
-                                                  ptrtype))
+    return builder.load(numba.core.cgutils.pointer_add(builder,
+                                                       baseptr,
+                                                       byteoffset,
+                                                       ptrtype))
 
 def regularize_atval(context,
                      builder,
@@ -272,7 +272,8 @@ def regularize_atval(context,
         length = builder.sub(viewproxy.stop, viewproxy.start)
 
         if wrapneg:
-            regular_atval = numba.cgutils.alloca_once_value(builder, atval)
+            regular_atval = numba.core.cgutils.alloca_once_value(builder,
+                                                                 atval)
             with builder.if_then(builder.icmp_signed(
                    "<", atval, context.get_constant(numba.intp, 0))):
                 builder.store(builder.add(atval, length), regular_atval)
@@ -798,8 +799,9 @@ class IndexedOptionArrayType(ContentType):
                context.get_constant(self.indextype.dtype, 0))) as (isnone,
                                                                    isvalid):
             with isnone:
-                output.valid = numba.cgutils.false_bit
-                output.data = numba.cgutils.get_null_value(output.data.type)
+                output.valid = numba.core.cgutils.false_bit
+                output.data = numba.core.cgutils.get_null_value(
+                                output.data.type)
 
             with isvalid:
                 nextviewtype = awkward1._connect._numba.arrayview.wrap(
@@ -833,7 +835,7 @@ class IndexedOptionArrayType(ContentType):
                             False,
                             False)
 
-                output.valid = numba.cgutils.true_bit
+                output.valid = numba.core.cgutils.true_bit
                 output.data = outdata
 
         return output._getvalue()
@@ -960,12 +962,13 @@ class ByteMaskedArrayType(ContentType):
                             False,
                             False)
 
-                output.valid = numba.cgutils.true_bit
+                output.valid = numba.core.cgutils.true_bit
                 output.data = outdata
 
             with isnone:
-                output.valid = numba.cgutils.false_bit
-                output.data = numba.cgutils.get_null_value(output.data.type)
+                output.valid = numba.core.cgutils.false_bit
+                output.data = numba.core.cgutils.get_null_value(
+                                output.data.type)
 
         return output._getvalue()
 
@@ -1113,12 +1116,13 @@ class BitMaskedArrayType(ContentType):
                             False,
                             False)
 
-                output.valid = numba.cgutils.true_bit
+                output.valid = numba.core.cgutils.true_bit
                 output.data = outdata
 
             with isnone:
-                output.valid = numba.cgutils.false_bit
-                output.data = numba.cgutils.get_null_value(output.data.type)
+                output.valid = numba.core.cgutils.false_bit
+                output.data = numba.core.cgutils.get_null_value(
+                                output.data.type)
 
         return output._getvalue()
 
@@ -1209,7 +1213,7 @@ class UnmaskedArrayType(ContentType):
                     False,
                     False)
 
-        output.valid = numba.cgutils.true_bit
+        output.valid = numba.core.cgutils.true_bit
         output.data = outdata
 
         return output._getvalue()
