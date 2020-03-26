@@ -3,25 +3,41 @@
 <table>
   <tr>
     <td width="33%" valign="top">
-      <img src="docs/content/images/logo/panel-data-analysts.png" width="268">
+      <a href="https://scikit-hep.org/awkward-1.0/index.html">
+        <img src="docs/content/images/logo/panel-data-analysts.png" width="268">
+      </a>
       <p align="center"><b>
+        <a href="https://scikit-hep.org/awkward-1.0/index.html">
         How-to documentation<br>for data analysts
+        </a>
       </b></p>
     </td>
     <td width="33%" valign="top">
-      <img src="docs/content/images/logo/panel-developers.png" width="268">
+      <a href="https://scikit-hep.org/awkward-1.0/index.html">
+        <img src="docs/content/images/logo/panel-developers.png" width="268">
+      </a>
       <p align="center"><b>
+        <a href="https://scikit-hep.org/awkward-1.0/index.html">
         How-it-works tutorials<br>for developers
+        </a>
       </b></p>
     </td>
     <td width="33%" valign="top">
-      <img src="docs/content/images/logo/panel-doxygen.png" width="268">
+      <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
+        <img src="docs/content/images/logo/panel-doxygen.png" width="268">
+      </a>
       <p align="center"><b>
+        <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
         Doxygen C++<br>API reference
+        </a>
       </b></p>
-      <img src="docs/content/images/logo/panel-sphinx.png" width="268">
+      <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
+        <img src="docs/content/images/logo/panel-sphinx.png" width="268">
+      </a>
       <p align="center"><b>
+        <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
         Sphinx Python<br>API reference
+        </a>
       </b></p>
     </td>
   </tr>
