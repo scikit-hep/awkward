@@ -1,14 +1,14 @@
 <img src="docs/content/images/logo/logo-300px.png">
 
-<table style="border: none;">
-  <tr style="border: none;">
-    <td style="border: none;">
+<table>
+  <tr>
+    <td  width="33%">
       <img src="docs/content/images/logo/panel-data-analysts.png">
     </td>
-    <td style="border: none;">
+    <td  width="33%">
       <img src="docs/content/images/logo/panel-developers.png">
     </td>
-    <td style="border: none;">
+    <td width="33%">
       <img src="docs/content/images/logo/panel-doxygen.png">
       <img src="docs/content/images/logo/panel-sphinx.png">
     </td>
