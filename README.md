@@ -1,6 +1,6 @@
 <img src="docs/content/images/logo/logo-300px.png">
 
-<table>
+<table style="border: none;">
   <tr style="border: none;">
     <td style="border: none;">
       <img src="docs/content/images/logo/panel-data-analysts.png">
