@@ -1,12 +1,18 @@
 <img src="docs/content/images/logo/logo-300px.png">
 
 <table>
-<tr>
-<td><img src="docs/content/images/logo/panel-data-analysts.png"></td>
-<td><img src="docs/content/images/logo/panel-developers.png"></td>
-<td><img src="docs/content/images/logo/panel-doxygen.png">
-    <img src="docs/content/images/logo/panel-sphinx.png"></td>
-</tr>
+  <tr style="border: none;">
+    <td style="border: none;">
+      <img src="docs/content/images/logo/panel-data-analysts.png">
+    </td>
+    <td style="border: none;">
+      <img src="docs/content/images/logo/panel-developers.png">
+    </td>
+    <td style="border: none;">
+      <img src="docs/content/images/logo/panel-doxygen.png">
+      <img src="docs/content/images/logo/panel-sphinx.png">
+    </td>
+  </tr>
 </table>
 
 # Installation
