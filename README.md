@@ -4,26 +4,26 @@
   <tr>
     <td width="33%">
       <img src="docs/content/images/logo/panel-data-analysts.png">
-      <p align="center"><font size="20pt">
+      <p align="center"><b>
         How-to documentation<br>for<br>data analysts
-      </font></p>
+      </b></p>
     </td>
     <td width="33%">
       <img src="docs/content/images/logo/panel-developers.png">
-      <p align="center"><font size="20pt">
+      <p align="center"><b>
         How-it-works tutorials<br>for<br>developers
-      </font></p>
+      </b></p>
     </td>
     <td width="33%">
       <img src="docs/content/images/logo/panel-doxygen.png">
-      <p align="center"><font size="20pt">
+      <p align="center"><b>
         Doxygen C++<br>API reference
-      </font></p>
+      </b></p>
       <br><br>
       <img src="docs/content/images/logo/panel-sphinx.png">
-      <p align="center"><font size="20pt">
+      <p align="center"><b>
         Sphinx Python<br>API reference
-      </font></p>
+      </b></p>
     </td>
   </tr>
 </table>
