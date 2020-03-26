@@ -5,8 +5,8 @@ arbitrary-length lists, records, mixed types, and missing data, using
 **NumPy-like idioms**.
 
 Arrays are **dynamically typed**, but operations on them are
-**compiled and fast**. Behavior coincides with NumPy when arrays are regular;
-generalizes when they're not.
+**compiled and fast**. Their behavior coincides with NumPy when array
+dimensions are regular and generalizes when they're not.
 
 <table>
   <tr>
