@@ -11,3 +11,5 @@ This is just a test.
 Link to `tutorials page <https://scikit-hep.org/awkward-1.0/>`__ and `index <https://scikit-hep.org/awkward-1.0/index.html>`__ and `another <https://scikit-hep.org/awkward-1.0/another.html>`__.
 
 Alternate link to `tutorials page <https://scikit-hep.github.io/awkward-1.0/>`__ and `index <https://scikit-hep.github.io/awkward-1.0/index.html>`__ and `another <https://scikit-hep.github.io/awkward-1.0/another.html>`__.
+
+.. include:: python/toctree.txt

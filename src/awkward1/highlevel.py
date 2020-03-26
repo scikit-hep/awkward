@@ -22,6 +22,21 @@ _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
 class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
             awkward1._connect._pandas.PandasMixin, Sequence):
+    """
+    High-level array of arbitrary data types.
+
+    This is the primary data type in the Awkward Array library from a typical
+    user's perspective.
+
+    The structure of the data is encoded in awkward.Content elements accessible
+    through the #layout.
+
+    The #ak.type.Type is described in #type.
+
+    Arrays can be given new methods and properties by associating
+    `__record__` and `__array__` properties with #behavior.
+    """
+
     def __init__(self, data, behavior=None, checkvalid=False):
         if isinstance(data, awkward1.layout.Content):
             layout = data
