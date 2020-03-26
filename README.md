@@ -47,7 +47,7 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
   </tr>
 </table>
 
-## Installation
+# Installation
 
 Awkward Array can be installed [from PyPI](https://pypi.org/project/awkward1/) using pip:
 
