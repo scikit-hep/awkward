@@ -19,7 +19,6 @@
       <p align="center"><b>
         Doxygen C++<br>API reference
       </b></p>
-      <br><br>
       <img src="docs/content/images/logo/panel-sphinx.png">
       <p align="center"><b>
         Sphinx Python<br>API reference
