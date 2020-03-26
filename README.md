@@ -9,7 +9,7 @@
       <img src="docs/content/images/logo/panel-developers.png">
     </td>
     <td width="33%">
-      <img src="docs/content/images/logo/panel-doxygen.png">
+      <img src="docs/content/images/logo/panel-doxygen.png"><br>
       <img src="docs/content/images/logo/panel-sphinx.png">
     </td>
   </tr>
