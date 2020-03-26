@@ -1,6 +1,13 @@
 <img src="docs/content/images/logo/logo-300px.png">
 
-I'm in the process of writing documentation; the "first page" will go here.
+<table>
+<tr>
+<td><img src="docs/content/images/logo/panel-data-analysts.png"></td>
+<td><img src="docs/content/images/logo/panel-developers.png"></td>
+<td><img src="docs/content/images/logo/panel-doxygen.png">
+    <img src="docs/content/images/logo/panel-sphinx.png"></td>
+</tr>
+</table>
 
 # Installation
 
