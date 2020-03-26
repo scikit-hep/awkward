@@ -1,4 +1,4 @@
-<img src="docs/content/images/logo/logo-300px.png">
+<img src="docs-images/logo/logo-300px.png">
 
 Awkward Array is a library for **nested, variable-sized data**, including
 arbitrary-length lists, records, mixed types, and missing data, using
@@ -12,7 +12,7 @@ generalizes when they're not.
   <tr>
     <td width="33%" valign="top">
       <a href="https://scikit-hep.org/awkward-1.0/index.html">
-        <img src="docs/content/images/logo/panel-data-analysts.png" width="268">
+        <img src="docs-images/logo/panel-data-analysts.png" width="268">
       </a>
       <p align="center"><b>
         <a href="https://scikit-hep.org/awkward-1.0/index.html">
@@ -22,7 +22,7 @@ generalizes when they're not.
     </td>
     <td width="33%" valign="top">
       <a href="https://scikit-hep.org/awkward-1.0/index.html">
-        <img src="docs/content/images/logo/panel-developers.png" width="268">
+        <img src="docs-images/logo/panel-developers.png" width="268">
       </a>
       <p align="center"><b>
         <a href="https://scikit-hep.org/awkward-1.0/index.html">
@@ -32,7 +32,7 @@ generalizes when they're not.
     </td>
     <td width="33%" valign="top">
       <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
-        <img src="docs/content/images/logo/panel-doxygen.png" width="268">
+        <img src="docs-images/logo/panel-doxygen.png" width="268">
       </a>
       <p align="center"><b>
         <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
@@ -40,7 +40,7 @@ generalizes when they're not.
         </a>
       </b></p>
       <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
-        <img src="docs/content/images/logo/panel-sphinx.png" width="268">
+        <img src="docs-images/logo/panel-sphinx.png" width="268">
       </a>
       <p align="center"><b>
         <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
