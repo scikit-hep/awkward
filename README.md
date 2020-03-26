@@ -2,15 +2,15 @@
 
 <table>
   <tr>
-    <td  width="33%">
+    <td width="33%" style="text-align: center; text-size: 20pt">
       <img src="docs/content/images/logo/panel-data-analysts.png">
       How-to documentation<br>for<br>data analysts
     </td>
-    <td  width="33%">
+    <td width="33%" style="text-align: center; text-size: 20pt">
       <img src="docs/content/images/logo/panel-developers.png">
       How-it-works tutorials<br>for<br>developers
     </td>
-    <td width="33%">
+    <td width="33%" style="text-align: center; text-size: 20pt">
       <img src="docs/content/images/logo/panel-doxygen.png">
       Doxygen C++<br>API reference
       <br><br>
