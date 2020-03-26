@@ -28,7 +28,7 @@
       </a>
       <p align="center"><b>
         <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
-        Doxygen C++<br>API reference
+        C++<br>API reference
         </a>
       </b></p>
       <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
@@ -36,7 +36,7 @@
       </a>
       <p align="center"><b>
         <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
-        Sphinx Python<br>API reference
+        Python<br>API reference
         </a>
       </b></p>
     </td>
