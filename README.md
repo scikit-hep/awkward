@@ -1,5 +1,13 @@
 <img src="docs/content/images/logo/logo-300px.png">
 
+Awkward Array is a library for **nested, variable-sized data**, including
+arbitrary-length lists, records, mixed types, and missing data, using
+**NumPy-like idioms**.
+
+Arrays are **dynamically typed**, but operations on them are
+**compiled and fast**. Behavior coincides with NumPy when arrays are regular;
+generalizes when they're not.
+
 <table>
   <tr>
     <td width="33%" valign="top">
