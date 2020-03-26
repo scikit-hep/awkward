@@ -31,10 +31,10 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
     The structure of the data is encoded in awkward.Content elements accessible
     through the #layout.
 
-    The awkward.Type is described in #type.
+    The #ak.type.Type is described in #type.
 
-    Arrays can be given new methods and properties by associating `__record__`
-    and `__array__` properties with #behavior.
+    Arrays can be given new methods and properties by associating
+    `__record__` and `__array__` properties with #behavior.
     """
 
     def __init__(self, data, behavior=None, checkvalid=False):
