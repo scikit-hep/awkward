@@ -201,8 +201,8 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
 </table>
 """,
       long_description_content_type = "text/markdown",
-      url = "https://github.com/jpivarski/awkward1",
-      download_url = "https://github.com/jpivarski/awkward1/releases",
+      url = "https://github.com/scikit-hep/awkward-1.0",
+      download_url = "https://github.com/scikit-hep/awkward-1.0/releases",
       license = "BSD 3-clause",
       entry_points = {
         "numba_extensions": ["init = awkward1._connect._numba:register"]
