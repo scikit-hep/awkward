@@ -2,19 +2,19 @@
 
 <table>
   <tr>
-    <td width="33%">
+    <td width="33%" valign="top">
       <img src="docs/content/images/logo/panel-data-analysts.png">
       <p align="center"><b>
         How-to documentation<br>for<br>data analysts
       </b></p>
     </td>
-    <td width="33%">
+    <td width="33%" valign="top">
       <img src="docs/content/images/logo/panel-developers.png">
       <p align="center"><b>
         How-it-works tutorials<br>for<br>developers
       </b></p>
     </td>
-    <td width="33%">
+    <td width="33%" valign="top">
       <img src="docs/content/images/logo/panel-doxygen.png">
       <p align="center"><b>
         Doxygen C++<br>API reference
