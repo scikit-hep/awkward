@@ -5,13 +5,13 @@
     <td width="33%" valign="top">
       <img src="docs/content/images/logo/panel-data-analysts.png">
       <p align="center"><b>
-        How-to documentation<br>for<br>data analysts
+        How-to documentation<br>for data analysts
       </b></p>
     </td>
     <td width="33%" valign="top">
       <img src="docs/content/images/logo/panel-developers.png">
       <p align="center"><b>
-        How-it-works tutorials<br>for<br>developers
+        How-it-works tutorials<br>for developers
       </b></p>
     </td>
     <td width="33%" valign="top">
