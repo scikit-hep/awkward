@@ -23,21 +23,72 @@ _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
             awkward1._connect._pandas.PandasMixin, Sequence):
     """
-    High-level array of arbitrary data types.
+    High-level array that can contain data of any type.
 
-    This is the primary data type in the Awkward Array library from a typical
-    user's perspective.
+    For most users, this is the only class in Awkward Array that matters: it
+    is the entry point for data analysis with an emphasis on usability. It
+    intentionally has a minimum of methods, preferring standalone functions
+    like
 
-    The structure of the data is encoded in awkward.Content elements accessible
-    through the #layout.
+        ak.cross([left, right])
 
-    The #ak.type.Type is described in #type.
+    instead of bound methods like
 
-    Arrays can be given new methods and properties by associating
-    `__record__` and `__array__` properties with #behavior.
+        left.cross(right)
+
+    because its namespace is valuable for domain-specific functionality.
+    For example, with
+
+        vectors = ak.Array([{"x": 0.1, "y": 1.0, "z": 10.0},
+                            {"x": 0.2, "y": 2.0, "z": 20.0},
+                            {"x": 0.3, "y": 3.0, "z": 30.0}])
+
+    we want to access fields `x`, `y`, `z` as attributes
+
+        vectors.x
+        # <Array [0.1, 0.2, 0.3] type='3 * float64'>
+        vectors.y
+        # <Array [1, 2, 3] type='3 * float64'>
+        vectors.z
+        # <Array [10, 20, 30] type='3 * float64'>
+
+    Additionally, we might want to add functionality,
+
+        class Vec3Array(ak.Array):
+            def cross(self, other):
+                x = self.y*other.z - self.z*other.y
+                y = self.z*other.x - self.x*other.z
+                z = self.x*other.y - self.y*other.x
+                return ak.zip({"x": x, "y": y, "z": z}, withname="vec3")
+
+        # Arrays of vec3 use subclass Vec3Array instead of ak.Array.
+        ak.behavior["*", "vec3"] = Vec3Array
+
+        # Records with name "vec3" are presented as having type "vec3".
+        ak.behavior["__typestr__", "vec3"] = "vec3"
+
+        vectors = ak.Array([{"x": 0.1, "y": 1.0, "z": 10.0},
+                            {"x": 0.2, "y": 2.0, "z": 20.0},
+                            {"x": 0.3, "y": 3.0, "z": 30.0}],
+                           withname="vec3")
+        more_vectors = ak.Array([{"x": 10.0, "y": 1.0, "z": 0.1},
+                                 {"x": 20.0, "y": 2.0, "z": 0.2},
+                                 {"x": 30.0, "y": 3.0, "z": 0.3}],
+                                withname="vec3")
+
+        vectors
+        # <Array [{x: 0.1, y: 1, z: 10, ... y: 3, z: 30}] type='3 * vec3'>
+        more_vectors
+        # <Array [{x: 10, y: 1, z: 0.1, ... z: 0.3}] type='3 * vec3'>
+
+        vectors.cross(more_vectors)
+        # <Array [{x: -9.9, y: 100, ... z: -89.1}] type='3 * vec3'>
+
+    If the ak.cross function were a method of ak.Array, then it would conflict
+    with applications where we might want `cross` to mean something else.
     """
 
-    def __init__(self, data, behavior=None, checkvalid=False):
+    def __init__(self, data, behavior=None, withname=None, checkvalid=False):
         if isinstance(data, awkward1.layout.Content):
             layout = data
         elif isinstance(data, Array):
@@ -58,6 +109,11 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
                                                           allowrecord=False)
         if not isinstance(layout, awkward1.layout.Content):
             raise TypeError("could not convert data into an awkward1.Array")
+
+        if withname is not None:
+            layout = awkward1.operations.structure.withname(layout,
+                                                            withname,
+                                                            highlevel=False)
 
         if self.__class__ is Array:
             self.__class__ = awkward1._util.arrayclass(layout, behavior)
@@ -226,7 +282,7 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         return numba.typeof(self._numbaview)
 
 class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
-    def __init__(self, data, behavior=None, checkvalid=False):
+    def __init__(self, data, behavior=None, withname=None, checkvalid=False):
         if isinstance(data, awkward1.layout.Record):
             layout = data
         elif isinstance(data, Record):
@@ -247,6 +303,11 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
 
         if self.__class__ is Record:
             self.__class__ = awkward1._util.recordclass(layout, behavior)
+
+        if withname is not None:
+            layout = awkward1.operations.structure.withname(layout,
+                                                            withname,
+                                                            highlevel=False)
 
         self.layout = layout
         self.behavior = behavior
@@ -382,15 +443,17 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
 
 class ArrayBuilder(Sequence):
     @classmethod
-    def _wrap(cls, layout, behavior=None):
+    def _wrap(cls, layout, behavior=None, withname=None):
         assert isinstance(layout, awkward1.layout.ArrayBuilder)
         out = cls.__new__(cls)
         out._layout = layout
+        out._withname = withname
         out.behavior = behavior
         return out
 
-    def __init__(self, behavior=None):
+    def __init__(self, behavior=None, withname=None):
         self._layout = awkward1.layout.ArrayBuilder()
+        self._withname = withname
         self.behavior = behavior
 
     @property
@@ -406,9 +469,7 @@ class ArrayBuilder(Sequence):
 
     @property
     def type(self):
-        tmp = self._layout.snapshot()
-        return awkward1.types.ArrayType(
-                 tmp.type(awkward1._util.typestrs(self._behavior)), len(tmp))
+        return self.snapshot().type
 
     def __len__(self):
         return len(self._layout)
@@ -417,8 +478,8 @@ class ArrayBuilder(Sequence):
         return awkward1._util.wrap(self._layout[where], self._behavior)
 
     def __iter__(self):
-        for x in self._layout.snapshot():
-            yield awkward1._util.wrap(x, self._behavior)
+        for x in self.snapshot():
+            yield x
 
     def __str__(self, limit_value=85, snapshot=None):
         if snapshot is None:
@@ -439,7 +500,7 @@ class ArrayBuilder(Sequence):
 
     def __array__(self, *args, **kwargs):
         return awkward1._connect._numpy.convert_to_array(
-                 self._layout.snapshot(), args, kwargs)
+                 self.snapshot(), args, kwargs)
 
     def __array_function__(self, func, types, args, kwargs):
         return awkward1._connect._numpy.array_function(func,
@@ -463,7 +524,12 @@ class ArrayBuilder(Sequence):
                  self._behavior)
 
     def snapshot(self):
-        return awkward1._util.wrap(self._layout.snapshot(), self._behavior)
+        layout = self._layout.snapshot()
+        if self._withname is not None:
+            layout = awkward1.operations.structure.withname(layout,
+                                                            self._withname,
+                                                            highlevel=False)
+        return awkward1._util.wrap(layout, self._behavior)
 
     def null(self):
         self._layout.null()

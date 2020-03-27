@@ -9,8 +9,8 @@ import sphinx.ext.napoleon
 config = sphinx.ext.napoleon.Config(napoleon_use_param=True,
                                     napoleon_use_rtype=True)
 
-if not os.path.exists("python"):
-    os.mkdir("python")
+if not os.path.exists("_auto"):
+    os.mkdir("_auto")
 
 toctree = []
 
@@ -132,7 +132,11 @@ def dodoc(docstring, qualname):
     step3 = re.sub(r"#([A-Za-z0-9_]+)",
                    r":py:meth:`\1 <" + qualname + r".\1>`",
                    step2)
-    return str(sphinx.ext.napoleon.GoogleDocstring(step3, config))
+    step4 = str(sphinx.ext.napoleon.GoogleDocstring(step3, config))
+    step5 = re.sub(r"([^\. \t].*\n[ \t]*\n)((    .*\n|[ \t]*\n)+)",
+                   "\\1.. code-block:: python\n\n\\2",
+                   step4)
+    return step5
 
 def doclass(link, shortname, name, astcls):
     qualname = shortname + "." + name
@@ -179,7 +183,7 @@ def doclass(link, shortname, name, astcls):
                                                dosig(node))
             outfile.write(".. py:method:: " + methodtext + "\n\n")
 
-    toctree.append(os.path.join("python", qualname + ".rst"))
+    toctree.append(os.path.join("_auto", qualname + ".rst"))
     out = outfile.getvalue()
     if not os.path.exists(toctree[-1]) or open(toctree[-1]).read() != out:
         print("writing", toctree[-1])
@@ -204,7 +208,7 @@ def dofunction(link, shortname, name, astfcn):
 
     out = outfile.getvalue()
 
-    toctree.append(os.path.join("python", qualname + ".rst"))
+    toctree.append(os.path.join("_auto", qualname + ".rst"))
     if not os.path.exists(toctree[-1]) or open(toctree[-1]).read() != out:
         print("writing", toctree[-1])
         with open(toctree[-1], "w") as outfile:
@@ -246,7 +250,7 @@ for x in toctree:
     outfile.write("    " + x + "\n")
 
 out = outfile.getvalue()
-outfilename = os.path.join("python", "toctree.txt")
+outfilename = os.path.join("_auto", "toctree.txt")
 if not os.path.exists(outfilename) or open(outfilename).read() != out:
     print("writing", outfilename)
     with open(outfilename, "w") as outfile:
