@@ -748,7 +748,7 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
     def __str__(self, limit_value=85):
         """
         Args:
-            limit_value (int): maximum number of characters to use when
+            limit_value (int): Maximum number of characters to use when
                 presenting the Array as a string.
 
         Presents the Array as a string without type or `"<Array ...>"`.
@@ -789,6 +789,9 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
 
             [[{x: 1.1, y: [1]}, {x: 2.2, y: [2, 2]}, ... [], [{x: 4.4, y: [4, 4, 4, 4]}]]
 
+        Floating point numbers are presented in `.3g` format (3 digits using
+        exponential notation if necessary).
+
         The string representation cannot be read as JSON or as an #ak.Array
         constructor.
 
@@ -800,6 +803,20 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
                                                         self._behavior)
 
     def __repr__(self, limit_value=40, limit_total=85):
+        """
+        Args:
+            limit_value (int): Maximum number of characters to use when
+                presenting the data of the Array.
+            limit_total (int): Maximum number of characters to use for
+                the whole string (should be larger than `limit_value`).
+
+        Presents the Array as a string with its type and `"<Array ...>"`.
+
+        See #__str__ for details of the string truncation algorithm.
+
+        The #type is truncated as well, but showing only the left side
+        of its string (the outermost data structures).
+        """
         value = awkward1._util.minimally_touching_string(limit_value,
                                                          self._layout,
                                                          self._behavior)
@@ -812,6 +829,24 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         return "<Array {0} type={1}>".format(value, type)
 
     def __array__(self, *args, **kwargs):
+        """
+        Converts the Awkward Array into a NumPy array, if possible.
+
+        If the data are numerical and regular (nested lists have equal lengths
+        in each dimension, as described by the #type), they can be losslessly
+        converted to a NumPy array and this function returns without an error.
+
+        Otherwise, the function raises an error. It does not create a NumPy
+        array with dtype `"O"` for `np.object_` (see the
+        [note on object_ type](https://docs.scipy.org/doc/numpy/reference/arrays.scalars.html#arrays-scalars-built-in))
+        since silent conversions to dtype `"O"` arrays would not only be a
+        significant performance hit, but would also break functionality, since
+        nested lists in a NumPy `"O"` array are severed from the array and
+        cannot be sliced as dimensions.
+
+        Only exception: Pandas can generate NumPy `"O"` arrays to print
+        Array fragments to the screen.
+        """
         if awkward1._util.called_by_module("pandas"):
             try:
                 return awkward1._connect._numpy.convert_to_array(self._layout,
@@ -827,21 +862,35 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
                                                              args,
                                                              kwargs)
 
-    def __array_function__(self, func, types, args, kwargs):
-        return awkward1._connect._numpy.array_function(func,
-                                                       types,
-                                                       args,
-                                                       kwargs)
-
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+        """
+
+        [NEP 13](https://numpy.org/neps/nep-0013-ufunc-overrides.html)
+        """
         return awkward1._connect._numpy.array_ufunc(ufunc,
                                                     method,
                                                     inputs,
                                                     kwargs,
                                                     self._behavior)
 
+    def __array_function__(self, func, types, args, kwargs):
+        """
+
+        [NEP 18](https://numpy.org/neps/nep-0018-array-function-protocol.html)
+        """
+        return awkward1._connect._numpy.array_function(func,
+                                                       types,
+                                                       args,
+                                                       kwargs)
+
     @property
     def numbatype(self):
+        """
+        The type of this Array when used in Numba.
+
+        See [Numba documentation](https://numba.pydata.org/numba-doc/dev/reference/types.html)
+        on types and signatures.
+        """
         import numba
         import awkward1._connect._numba
         awkward1._connect._numba.register()
@@ -1071,18 +1120,18 @@ class ArrayBuilder(Sequence):
         return awkward1._connect._numpy.convert_to_array(
                  self.snapshot(), args, kwargs)
 
-    def __array_function__(self, func, types, args, kwargs):
-        return awkward1._connect._numpy.array_function(func,
-                                                       types,
-                                                       args,
-                                                       kwargs)
-
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         return awkward1._connect._numpy.array_ufunc(ufunc,
                                                     method,
                                                     inputs,
                                                     kwargs,
                                                     self._behavior)
+
+    def __array_function__(self, func, types, args, kwargs):
+        return awkward1._connect._numpy.array_function(func,
+                                                       types,
+                                                       args,
+                                                       kwargs)
 
     @property
     def numbatype(self):
