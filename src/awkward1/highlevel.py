@@ -34,7 +34,7 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         behavior (None or dict): Custom #ak.behavior for this array only.
         withname (None or str): Gives tuples and records a name that can be
             used to override their behavior (see below).
-        checkvalid (bool): If `True`, verify that the #layout is valid.
+        checkvalid (bool): If True, verify that the #layout is valid.
 
     **High-level array that can contain data of any type.**
 
@@ -367,8 +367,8 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
              for broadcasting.
            * **A boolean array** with the same length as the current dimension
              (or any iterable, other than the top-level tuple) selects elements
-             corresponding to each `True` value in the array, dropping those
-             that correspond to each `False`. The behavior is similar to
+             corresponding to each True value in the array, dropping those
+             that correspond to each False. The behavior is similar to
              NumPy's
              [compress](https://docs.scipy.org/doc/numpy/reference/generated/numpy.compress.html)
              function.
@@ -388,7 +388,7 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
            * **An Array of nested lists**, ultimately containing booleans or
              integers and having the same lengths of lists at each level as
              the Array to which they're applied, selects by boolean or by
-             integer at the deeply nested level. See <<jagged indexing>> below.
+             integer at the deeply nested level. See <<nested indexing>> below.
 
         A tuple of the above applies each slice item to a dimension of the
         data, which can be very expressive. More than one flat boolean/integer
@@ -468,11 +468,106 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         Option indexing
         ***************
 
-        Jagged indexing
+        NumPy arrays can be sliced by all of the above slice types except
+        arrays with missing values and arrays with nested lists, both of
+        which are inexpressible in NumPy. Missing values, represented by
+        None in Python, are called option types (#ak.type.OptionType) in
+        Awkward Array and can be used as a slice.
+
+        For example, an `array` like
+
+            array = ak.Array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
+
+        can be sliced with a boolean array
+
+            >>> array[[False, False, False, False, True, False, True, False, True]]
+            <Array [5.5, 7.7, 9.9] type='3 * float64'>
+
+        or a boolean array containing None values:
+
+            >>> array[[False, False, False, False, True, None, True, None, True]]
+            <Array [5.5, None, 7.7, None, 9.9] type='5 * ?float64'>
+
+        Similarly for arrays of integers and None:        
+
+            >>> array[[0, 1, None, None, 7, 8]]
+            <Array [1.1, 2.2, None, None, 8.8, 9.9] type='6 * ?float64'>
+
+        This is the same behavior as pyarrow's
+        [Array.take](https://arrow.apache.org/docs/python/generated/pyarrow.Array.html#pyarrow.Array.take),
+        which establishes a convention for how to interpret slice arrays
+        with option type:
+
+            >>> import pyarrow as pa
+            >>> array = pa.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
+            >>> array.take(pa.array([0, 1, None, None, 7, 8]))
+            <pyarrow.lib.DoubleArray object at 0x7efc7f060210>
+            [
+              1.1,
+              2.2,
+              null,
+              null,
+              8.8,
+              9.9
+            ]
+
+        Nested indexing
         ***************
 
+        Awkward Array's nested lists can be used as slices as well, as long
+        as the type at the deepest level of nesting is boolean or integer.
 
-        
+        For example, the array
+
+            array = ak.Array([[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [], [[5.5]]])
+
+        can be sliced at the top level with one-dimensional arrays:
+
+            >>> array[[False, True, True]]
+            <Array [[], [[5.5]]] type='2 * var * var * float64'>
+            >>> array[[1, 2]]
+            <Array [[], [[5.5]]] type='2 * var * var * float64'>
+
+        with singly nested lists:
+
+            >>> array[[[False, True, True], [], [True]]]
+            <Array [[[], [3.3, 4.4]], [], [[5.5]]] type='3 * var * var * float64'>
+            >>> array[[[1, 2], [], [0]]]
+            <Array [[[], [3.3, 4.4]], [], [[5.5]]] type='3 * var * var * float64'>
+
+        and with doubly nested lists:
+
+            >>> array[[[[False, True, False], [], [True, False]], [], [[False]]]]
+            <Array [[[1.1], [], [3.3]], [], [[]]] type='3 * var * var * float64'>
+            >>> array[[[[1], [], [0]], [], [[]]]]
+            <Array [[[1.1], [], [3.3]], [], [[]]] type='3 * var * var * float64'>
+
+        The key thing is that the nested slice has the same number of elements
+        as the array it's slicing at every level of nesting that it reproduces.
+        This is similar to the requirement that boolean arrays have the same
+        length as the array they're filtering.
+
+        This kind of slicing is useful because NumPy's
+        [universal functions](https://docs.scipy.org/doc/numpy/reference/ufuncs.html)
+        produce arrays with the same structure as the original array, which
+        can then be used as filters.
+
+        >>> print((array * 10) % 2 == 1)
+        [[[False, True, False], [], [True, False]], [], [[True]]]
+        >>> print(array[(array * 10) % 2 == 1])
+        [[[1.1], [], [3.3]], [], [[5.5]]]
+
+        Functions whose names start with "arg" return index positions, which
+        can be used with the integer form.
+
+            >>> print(np.argmax(array, axis=-1))
+            [[2, None, 1], [], [0]]
+            >>> print(array[np.argmax(array, axis=-1)])
+            [[[3.3, 4.4], None, []], [], [[5.5]]]
+
+        Here, the `np.argmax` returns the integer position of the maximum
+        element or None for empty arrays. It's a nice example of
+        <<option indexing>> with <<nested indexing>>.
         """
         return awkward1._util.wrap(self._layout[where], self._behavior)
 

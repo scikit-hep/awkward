@@ -129,7 +129,7 @@ def dodoc(docstring, qualname, names):
     out = re.sub(r"\b_(.*)_\b",
                  r"*\1*",
                  out)
-    out = re.sub(r"<<(.*)>>",
+    out = re.sub(r"<<([^>]*)>>",
                  r"`\1`_",
                  out)
     out = re.sub(r"#(ak\.[A-Za-z0-9_\.]*[A-Za-z0-9_])",
