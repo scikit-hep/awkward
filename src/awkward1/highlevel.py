@@ -144,6 +144,45 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
 
     @property
     def layout(self):
+        """
+        The composable #ak.layout.Content elements that determine how the
+        array is structured.
+
+        This may be considered a "low-level" view, as it distinguishes between
+        arrays that have the same logical meaning (i.e. same JSON output and
+        high-level #type) but different
+
+           * node types, such as #ak.layout.ListArray64 and
+             #ak.layout.ListOffsetArray64,
+           * integer type specialization, such as #ak.layout.ListArray64
+             and #ak.layout.ListArray32,
+           * or specific values, such as gaps in a #ak.layout.ListArray64.
+
+        The #ak.layout.Content elements are fully composable, whereas an
+        Array is not; the high-level Array is a single-layer "shell" around
+        its layout.
+
+        Layouts are rendered as XML instead of a nested list. For example,
+
+            array = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
+
+        is presented as
+
+            <Array [[1.1, 2.2, 3.3], [], [4.4, 5.5]] type='3 * var * float64'>
+
+        but `array.layout` is presented as
+
+            <ListOffsetArray64>
+                <offsets>
+                    <Index64 i="[0 3 3 5]" offset="0" length="4" at="0x55a26df62590"/>
+                </offsets>
+                <content>
+                    <NumpyArray format="d" shape="5" data="1.1 2.2 3.3 4.4 5.5" at="0x55a26e0c5f50"/>
+                </content>
+            </ListOffsetArray64>
+
+        (with truncation for large arrays).
+        """
         return self._layout
 
     @layout.setter
@@ -157,6 +196,21 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
 
     @property
     def behavior(self):
+        """
+        The `behavior` parameter passed into this Array's constructor.
+
+           * If a dict, this `behavior` overrides the global #ak.behavior.
+             Any keys in the global #ak.behavior but not this `behavior` are
+             still valid, but any keys in both are overridden by this
+             `behavior`. Keys with a None value are equivalent to missing keys,
+             so this `behavior` can effectively remove keys from the
+             global #ak.behavior.
+
+           * If None, the Array defaults to the global #ak.behavior.
+
+        See #ak.behavior for a list of recognized key patterns and their
+        meanings.
+        """
         return self._behavior
 
     @behavior.setter
@@ -168,18 +222,119 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
 
     @property
     def type(self):
+        """
+        The high-level type of an array as #ak.types.Type objects.
+
+        The high-level type ignores #layout differences like
+        #ak.layout.ListArray64 versus #ak.layout.ListOffsetArray64, but
+        not differences like "regular-sized lists" (i.e.
+        #ak.layout.RegularArray) versus "variable-sized lists" (i.e.
+        #ak.layout.ListArray64 and similar).
+
+        Types are rendered as [Datashape](https://datashape.readthedocs.io/)
+        strings, which makes the same distinctions.
+
+        For example,
+
+            ak.Array([[{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}],
+                      [],
+                      [{"x": 3.3, "y": [3, 3, 3]}]])
+
+        has type
+
+            3 * var * {"x": float64, "y": var * int64}
+
+        but
+
+            ak.Array(np.arange(2*3*5).reshape(2, 3, 5))
+
+        has type
+
+            2 * 3 * 5 * int64
+
+        Some cases, like heterogeneous data, require [extensions beyond the
+        Datashape specification](https://github.com/blaze/datashape/issues/237).
+        For example,
+
+            ak.Array([1, "two", [3, 3, 3]])
+
+        has type
+
+            3 * union[int64, string, var * int64]
+
+        but "union" is not a Datashape type-constructor. (Its syntax is
+        similar to existing type-constructors, so it's a plausible addition
+        to the language.)
+        """
         return awkward1.types.ArrayType(
                  self._layout.type(awkward1._util.typestrs(self._behavior)),
                  len(self._layout))
 
     def __len__(self):
+        """
+        The length of the array, only counting the outermost structure.
+
+        For example, the length of
+
+            ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
+
+        is `3`, not `5`.
+        """
         return len(self._layout)
 
     def __iter__(self):
+        """
+        Iterates over the array in Python.
+
+        Note that this is the _slowest_ way to access data (even slower than
+        native Python objects, like lists and dicts). Usually, you should
+        express your problems in array-at-a-time operations.
+
+        In other words, do this:
+
+            >>> print(np.sqrt(ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])))
+            [[1.05, 1.48, 1.82], [], [2.1, 2.35]]
+
+        not this:
+
+            >>> for outer in ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]):
+            ...     for inner in outer:
+            ...         print(np.sqrt(inner))
+            ... 
+            1.0488088481701516
+            1.4832396974191326
+            1.816590212458495
+            2.0976176963403033
+            2.345207879911715
+
+        Iteration over Arrays exists so that they can be more easily inspected
+        as Python objects.
+
+        See also #ak.tolist.
+        """
         for x in self._layout:
             yield awkward1._util.wrap(x, self._behavior)
 
     def __getitem__(self, where):
+        """
+        Select items from the Array using an extension of NumPy's (already
+        quite extensive) rules.
+
+        All methods of selecting items described in
+        [NumPy indexing](https://docs.scipy.org/doc/numpy/reference/arrays.indexing.html)
+        are supported with one exception
+        ([combining advanced and basic indexing](https://docs.scipy.org/doc/numpy/reference/arrays.indexing.html#combining-advanced-and-basic-indexing)
+        with basic indexes _between_ two advanced indexes: the definition
+        NumPy chose for the result does not have a generalization beyond
+        rectilinear arrays).
+
+        The `where` parameter can be any of the following or a tuple of
+        the following.
+
+           * **An integer:** here
+
+
+        """
         return awkward1._util.wrap(self._layout[where], self._behavior)
 
     def __setitem__(self, where, what):

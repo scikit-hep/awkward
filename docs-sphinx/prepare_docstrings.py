@@ -124,36 +124,49 @@ def dosig(node):
         defaults = [""]*(len(argnames) - len(defaults)) + defaults
         return ", ".join(x + y for x, y in zip(argnames, defaults))
 
-def dodoc(docstring, qualname):
-    step1 = docstring.replace("`", "``")
-    step2 = re.sub(r"#(ak\.[A-Za-z0-9_\.]*[A-Za-z0-9_])",
-                   r":py:obj:`\1`",
-                   step1)
-    step3 = re.sub(r"#([A-Za-z0-9_]+)",
-                   r":py:meth:`\1 <" + qualname + r".\1>`",
-                   step2)
-    step4 = str(sphinx.ext.napoleon.GoogleDocstring(step3, config))
-    step5 = re.sub(r"([^\. \t].*\n[ \t]*\n)((    .*\n|[ \t]*\n)+)",
-                   "\\1.. code-block:: python\n\n\\2",
-                   step4)
-    step6 = re.sub(r"(\n:param|^:param)", "\n    :param", step5)
-    step7 = re.sub(r"(\n:type|^:type)", "\n    :type", step6)
-    return step7
+def dodoc(docstring, qualname, names):
+    out = docstring.replace("`", "``")
+    out = re.sub(r"\b_(.*)_\b",
+                 r"*\1*",
+                 out)
+    out = re.sub(r"#(ak\.[A-Za-z0-9_\.]*[A-Za-z0-9_])",
+                 r":py:obj:`\1`",
+                 out)
+    for x in names:
+        out = out.replace("#" + x,
+                          ":py:meth:`{1} <{0}.{1}>`".format(qualname, x))
+    # out = re.sub(r"#([A-Za-z0-9_]+)",
+    #              r":py:meth:`\1 <" + qualname + r".\1>`",
+    #              out)
+    out = re.sub(r"\[([^\]]*)\]\(([^\)]*)\)",
+                 r"`\1 <\2>`__",
+                 out)
+    out = str(sphinx.ext.napoleon.GoogleDocstring(out, config))
+    out = re.sub(r"([^\. \t].*\n[ \t]*\n)((    .*\n|[ \t]*\n)+)",
+                 "\\1.. code-block:: python\n\n\\2",
+                 out)
+    out = re.sub(r"(\n:param|^:param)",     "\n    :param",   out)
+    out = re.sub(r"(\n:type|^:type)",       "\n    :type",    out)
+    out = re.sub(r"(\n:returns|^:returns)", "\n    :returns", out)
+    out = re.sub(r"(\n:raises|^:raises)",   "\n    :raises",  out)
+    return out
 
 def doclass(link, shortname, name, astcls):
     qualname = shortname + "." + name
 
-    init, rest = None, []
+    init, rest, names = None, [], []
     for node in astcls.body:
         if isinstance(node, ast.FunctionDef):
             if node.name == "__init__":
                 init = node
             else:
                 rest.append(node)
+                names.append(node.name)
         elif (isinstance(node, ast.Assign) and
               len(node.targets) == 1 and
               isinstance(node.targets[0], ast.Name)):
             rest.append(node)
+            names.append(node.targets[0].id)
 
     outfile = io.StringIO()
     outfile.write(qualname + "\n" + "-"*len(qualname) + "\n\n")
@@ -162,28 +175,34 @@ def doclass(link, shortname, name, astcls):
 
     docstring = ast.get_docstring(astcls)
     if docstring is not None:
-        outfile.write(dodoc(docstring, qualname) + "\n\n")
+        outfile.write(dodoc(docstring, qualname, names) + "\n\n")
 
     for node in rest:
         if isinstance(node, ast.Assign):
             attrtext = "{0}.{1}".format(qualname, node.targets[0].id)
             outfile.write(".. py:attribute:: " + attrtext + "\n")
             outfile.write("    :value: {0}\n\n".format(tostr(node.value)))
+            docstring = None
 
         elif any(isinstance(x, ast.Name) and x.id == "property"
                  for x in node.decorator_list):
             attrtext = "{0}.{1}".format(qualname, node.name)
             outfile.write(".. py:attribute:: " + attrtext + "\n\n")
-
+            docstring = ast.get_docstring(node)
+            
         elif any(isinstance(x, ast.Attribute) and x.attr == "setter"
                  for x in node.decorator_list):
-            pass
+            docstring = None
 
         else:
             methodtext = "{0}.{1}({2})".format(qualname,
                                                node.name,
                                                dosig(node))
             outfile.write(".. py:method:: " + methodtext + "\n\n")
+            docstring = ast.get_docstring(node)
+        
+        if docstring is not None:
+            outfile.write(dodoc(docstring, qualname, names) + "\n\n")
 
     toctree.append(os.path.join("_auto", qualname + ".rst"))
     out = outfile.getvalue()
@@ -204,7 +223,7 @@ def dofunction(link, shortname, name, astfcn):
 
     docstring = ast.get_docstring(astfcn)
     if docstring is not None:
-        outfile.write(dodoc(docstring, qualname) + "\n\n")
+        outfile.write(dodoc(docstring, qualname, []) + "\n\n")
 
     out = outfile.getvalue()
 
