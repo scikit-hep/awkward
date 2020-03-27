@@ -331,9 +331,148 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         The `where` parameter can be any of the following or a tuple of
         the following.
 
-           * **An integer:** here
+           * **An integer** selects one element. Like Python/NumPy, it is
+             zero-indexed: `0` is the first item, `1` is the second, etc.
+             Negative indexes count from the end of the list: `-1` is the
+             last, `-2` is the second-to-last, etc.
+             Indexes beyond the size of the array, either because they're too
+             large or because they're too negative, raise errors. In
+             particular, some nested lists might contain a desired element
+             while others don't; this would raise an error.
+           * **A slice** (either a Python `slice` object or the
+             `start:stop:step` syntax) selects a range of elements. The
+             `start` and `stop` values are zero-indexed; `start` is inclusive
+             and `stop` is exclusive, like Python/NumPy. Negative `step`
+             values are allowed, but a `step` of `0` is an error. Slices
+             beyond the size of the array are not errors but are truncated,
+             like Python/NumPy.
+           * **A string** selects a tuple or record field, even if its
+             position in the tuple is to the left of the dimension where the
+             tuple/record is defined. (See <<projection>> below.) This is
+             similar to NumPy's
+             [field access](https://docs.scipy.org/doc/numpy/reference/arrays.indexing.html#field-access),
+             except that strings are allowed in the same tuple with other
+             slice types. While record fields have names, tuple fields are
+             integer strings, such as `"0"`, `"1"`, `"2"` (always
+             non-negative). Be careful to distinguish these from non-string
+             integers.
+           * **An iterable of strings** (not the top-level tuple) selects
+             multiple tuple/record fields.
+           * **An ellipsis** (either the Python `Ellipsis` object or the
+             `...` syntax) skips as many dimensions as needed to put the
+             rest of the slice items to the innermost dimensions.
+           * **A np.newaxis** or its equivalent, None, does not select items
+             but introduces a new regular dimension in the output with size
+             `1`. This is a convenient way to explicitly choose a dimension
+             for broadcasting.
+           * **A boolean array** with the same length as the current dimension
+             (or any iterable, other than the top-level tuple) selects elements
+             corresponding to each `True` value in the array, dropping those
+             that correspond to each `False`. The behavior is similar to
+             NumPy's
+             [compress](https://docs.scipy.org/doc/numpy/reference/generated/numpy.compress.html)
+             function.
+           * **An integer array** (or any iterable, other than the top-level
+             tuple) selects elements like a single integer, but produces a
+             regular dimension of as many as are desired. The array can have
+             any length, any order, and it can have duplicates and incomplete
+             coverage. The behavior is similar to NumPy's
+             [take](https://docs.scipy.org/doc/numpy/reference/generated/numpy.take.html)
+             function.
+           * **An integer Array with missing (None) items** selects multiple
+             values by index, as above, but None values are passed through
+             to the output. This behavior matches pyarrow's
+             [Array.take](https://arrow.apache.org/docs/python/generated/pyarrow.Array.html#pyarrow.Array.take)
+             which also manages arrays with missing values. See
+             <<option indexing>> below.
+           * **An Array of nested lists**, ultimately containing booleans or
+             integers and having the same lengths of lists at each level as
+             the Array to which they're applied, selects by boolean or by
+             integer at the deeply nested level. See <<jagged indexing>> below.
+
+        A tuple of the above applies each slice item to a dimension of the
+        data, which can be very expressive. More than one flat boolean/integer
+        array are "iterated as one" as described in the
+        [NumPy documentation](https://docs.scipy.org/doc/numpy/reference/arrays.indexing.html#integer-array-indexing).
+
+        Projection
+        **********
+
+        The following array
+
+            array = ak.Array([[{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}],
+                              [{"x": 3.3, "y": [3, 3, 3]}],
+                              [{"x": 0, "y": []}, {"x": 1.1, "y": [1, 1, 1]}]])
+
+        has records inside of nested lists:
+
+            >>> ak.typeof(array)
+            3 * var * {"x": float64, "y": var * int64}
+
+        In principle, one should select nested lists before record fields,
+
+            >>> array[2, :, "x"]
+            <Array [0, 1.1] type='2 * float64'>
+            >>> array[::2, :, "x"]
+            <Array [[1.1, 2.2], [0, 1.1]] type='2 * var * float64'>
+
+        but it's also possible to select record fields first.
+
+            >>> array["x"]
+            <Array [[1.1, 2.2], [3.3], [0, 1.1]] type='3 * var * float64'>
+
+        The string can "commute" to the left through integers and slices to
+        get the same result as it would in its "natural" position.
+
+            >>> array[2, :, "x"]
+            <Array [0, 1.1] type='2 * float64'>
+            >>> array[2, "x", :]
+            <Array [0, 1.1] type='2 * float64'>
+            >>> array["x", 2, :]
+            <Array [0, 1.1] type='2 * float64'>
+
+        The is analogous to selecting rows (integer indexes) before columns
+        (string names) or columns before rows, except that the rows are
+        more complex (like a Pandas
+        [MultiIndex](https://pandas.pydata.org/pandas-docs/stable/user_guide/advanced.html)).
+        This would be an expensive operation in a typical object-oriented
+        environment, in which the records with fields `"x"` and `"y"` are
+        akin to C structs, but for columnar Awkward Arrays, projecting
+        through all records to produce an array of nested lists of `"x"`
+        values just changes the metadata (no loop over data, and therefore
+        fast).
+
+        Thus, data analysts should think of records as fluid objects that
+        can be easily projected apart and zipped back together with
+        #ak.zip.
+
+        Note, however, that while a column string can "commute" with row
+        indexes to the left of its position in the tree, it can't commute
+        to the right. For example, it's possible to use slices inside
+        `"y"` because `"y"` is a list:
+
+            >>> array[0, :, "y"]
+            <Array [[1], [2, 2]] type='2 * var * int64'>
+            >>> array[0, :, "y", 0]
+            <Array [1, 2] type='2 * int64'>
+
+        but it's not possible to move `"y"` to the right
+
+            >>> array[0, :, 0, "y"]
+            ValueError: in NumpyArray, too many dimensions in slice
+
+        because the `array[0, :, 0, ...]` slice applies to both `"x"` and
+        `"y"` before `"y"` is selected, and `"x"` is a one-dimensional
+        NumpyArray that can't take more than its share of slices.
+
+        Option indexing
+        ***************
+
+        Jagged indexing
+        ***************
 
 
+        
         """
         return awkward1._util.wrap(self._layout[where], self._behavior)
 
