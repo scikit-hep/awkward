@@ -180,6 +180,7 @@ def doclass(link, shortname, name, astcls):
     for node in rest:
         if isinstance(node, ast.Assign):
             attrtext = "{0}.{1}".format(qualname, node.targets[0].id)
+            outfile.write(attrtext + "\n" + "="*len(attrtext) + "\n\n")
             outfile.write(".. py:attribute:: " + attrtext + "\n")
             outfile.write("    :value: {0}\n\n".format(tostr(node.value)))
             docstring = None
@@ -187,6 +188,7 @@ def doclass(link, shortname, name, astcls):
         elif any(isinstance(x, ast.Name) and x.id == "property"
                  for x in node.decorator_list):
             attrtext = "{0}.{1}".format(qualname, node.name)
+            outfile.write(attrtext + "\n" + "="*len(attrtext) + "\n\n")
             outfile.write(".. py:attribute:: " + attrtext + "\n\n")
             docstring = ast.get_docstring(node)
             
@@ -195,9 +197,9 @@ def doclass(link, shortname, name, astcls):
             docstring = None
 
         else:
-            methodtext = "{0}.{1}({2})".format(qualname,
-                                               node.name,
-                                               dosig(node))
+            methodname = "{0}.{1}".format(qualname, node.name)
+            methodtext = "{0}({1})".format(methodname, dosig(node))
+            outfile.write(methodname + "\n" + "="*len(methodname) + "\n\n")
             outfile.write(".. py:method:: " + methodtext + "\n\n")
             docstring = ast.get_docstring(node)
         
