@@ -25,16 +25,18 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
     """
     Args:
         data (#ak.layout.Content, #ak.Array, np.ndarray, str, or iterable):
-            Data to convert or wrap into an array.
-            If a NumPy array, the regularity of its dimensions is preserved.
+            Data to wrap or convert into an array.
+            If a NumPy array, the regularity of its dimensions is preserved
+            and the data are viewed, not copied.
             If a string, the data are assumed to be JSON.
-            If an iterable, calls #ak.fromiter.
+            If an iterable, calls #ak.fromiter, which assumes all dimensions
+            have irregular lengths.
         behavior (None or dict): Custom #ak.behavior for this array only.
         withname (None or str): Gives tuples and records a name that can be
-            used to override behavior (see below).
+            used to override their behavior (see below).
         checkvalid (bool): If `True`, verify that the #layout is valid.
 
-    High-level array that can contain data of any type.
+    **High-level array that can contain data of any type.**
 
     For most users, this is the only class in Awkward Array that matters: it
     is the entry point for data analysis with an emphasis on usability. It
@@ -47,8 +49,8 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
 
         left.cross(right)
 
-    because its namespace is valuable for domain-specific functionality.
-    For example, with
+    because its namespace is valuable for domain-specific parameters and
+    functionality. For example, with
 
         vectors = ak.Array([{"x": 0.1, "y": 1.0, "z": 10.0},
                             {"x": 0.2, "y": 2.0, "z": 20.0},
@@ -67,6 +69,7 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
 
         class Vec3Array(ak.Array):
             def cross(self, other):
+                "Computes the cross-product of 3D vectors."
                 x = self.y*other.z - self.z*other.y
                 y = self.z*other.x - self.x*other.z
                 z = self.x*other.y - self.y*other.x
@@ -99,8 +102,9 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         vectors.cross(more_vectors)
         # <Array [{x: -9.9, y: 100, ... z: -89.1}] type='3 * vec3'>
 
-    If the #ak.cross function were a method of ak.Array, then it would conflict
-    with applications where we might want `cross` to mean something else.
+    If the #ak.cross function were a method of this Array class, then it would
+    conflict with applications where we might want `array.cross` to mean
+    something else.
     """
 
     def __init__(self, data, behavior=None, withname=None, checkvalid=False):
