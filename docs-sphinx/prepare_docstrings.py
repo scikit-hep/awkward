@@ -2,6 +2,7 @@ import re
 import os
 import ast
 import glob
+import io
 
 import sphinx.ext.napoleon
 
@@ -148,55 +149,66 @@ def doclass(link, shortname, name, astcls):
               isinstance(node.targets[0], ast.Name)):
             rest.append(node)
 
+    outfile = io.StringIO()
+    outfile.write(qualname + "\n" + "-"*len(qualname) + "\n\n")
+    outfile.write("Defined in {0}.\n\n".format(link))
+    outfile.write(".. py:class:: {0}({1})\n\n".format(qualname, dosig(init)))
+
+    docstring = ast.get_docstring(astcls)
+    if docstring is not None:
+        outfile.write(dodoc(docstring, qualname) + "\n\n")
+
+    for node in rest:
+        if isinstance(node, ast.Assign):
+            attrtext = "{0}.{1}".format(qualname, node.targets[0].id)
+            outfile.write(".. py:attribute:: " + attrtext + "\n")
+            outfile.write("    :value: {0}\n\n".format(tostr(node.value)))
+
+        elif any(isinstance(x, ast.Name) and x.id == "property"
+                 for x in node.decorator_list):
+            attrtext = "{0}.{1}".format(qualname, node.name)
+            outfile.write(".. py:attribute:: " + attrtext + "\n\n")
+
+        elif any(isinstance(x, ast.Attribute) and x.attr == "setter"
+                 for x in node.decorator_list):
+            pass
+
+        else:
+            methodtext = "{0}.{1}({2})".format(qualname,
+                                               node.name,
+                                               dosig(node))
+            outfile.write(".. py:method:: " + methodtext + "\n\n")
+
     toctree.append(os.path.join("python", qualname + ".rst"))
-    with open(toctree[-1], "w") as outfile:
-        outfile.write(qualname + "\n" + "-"*len(qualname) + "\n\n")
-        outfile.write("Defined in {0}.\n\n".format(link))
-        outfile.write(".. py:class:: {0}({1})\n\n".format(qualname,
-                                                          dosig(init)))
-
-        docstring = ast.get_docstring(astcls)
-        if docstring is not None:
-            outfile.write(dodoc(docstring, qualname) + "\n\n")
-
-        for node in rest:
-            if isinstance(node, ast.Assign):
-                attrtext = "{0}.{1}".format(qualname,
-                                            node.targets[0].id)
-                outfile.write(".. py:attribute:: " + attrtext + "\n")
-                outfile.write("    :value: {0}\n\n".format(tostr(node.value)))
-
-            elif any(isinstance(x, ast.Name) and x.id == "property"
-                     for x in node.decorator_list):
-                attrtext = "{0}.{1}".format(qualname, node.name)
-                outfile.write(".. py:attribute:: " + attrtext + "\n\n")
-
-            elif any(isinstance(x, ast.Attribute) and x.attr == "setter"
-                     for x in node.decorator_list):
-                pass
-
-            else:
-                methodtext = "{0}.{1}({2})".format(qualname,
-                                                   node.name,
-                                                   dosig(node))
-                outfile.write(".. py:method:: " + methodtext + "\n\n")
+    out = outfile.getvalue()
+    if not os.path.exists(toctree[-1]) or open(toctree[-1]).read() != out:
+        print("writing", toctree[-1])
+        with open(toctree[-1], "w") as outfile:
+            outfile.write(out)
 
 def dofunction(link, shortname, name, astfcn):
     qualname = shortname + "." + name
 
+    outfile = io.StringIO()
+    outfile.write(qualname + "\n" + "-"*len(qualname) + "\n\n")
+    outfile.write("Defined in {0}.\n\n".format(link))
+
+    functiontext = "{0}.{1}({2})".format(qualname,
+                                         astfcn.name,
+                                         dosig(astfcn))
+    outfile.write(".. py:function:: " + functiontext + "\n\n")
+
+    docstring = ast.get_docstring(astfcn)
+    if docstring is not None:
+        outfile.write(dodoc(docstring, qualname) + "\n\n")
+
+    out = outfile.getvalue()
+
     toctree.append(os.path.join("python", qualname + ".rst"))
-    with open(toctree[-1], "w") as outfile:
-        outfile.write(qualname + "\n" + "-"*len(qualname) + "\n\n")
-        outfile.write("Defined in {0}.\n\n".format(link))
-
-        functiontext = "{0}.{1}({2})".format(qualname,
-                                             astfcn.name,
-                                             dosig(astfcn))
-        outfile.write(".. py:function:: " + functiontext + "\n\n")
-
-        docstring = ast.get_docstring(astfcn)
-        if docstring is not None:
-            outfile.write(dodoc(docstring, qualname) + "\n\n")
+    if not os.path.exists(toctree[-1]) or open(toctree[-1]).read() != out:
+        print("writing", toctree[-1])
+        with open(toctree[-1], "w") as outfile:
+            outfile.write(out)
 
 for filename in sorted(glob.glob("../src/awkward1/**/*.py", recursive=True),
                        key=lambda x: x.replace("/highlevel", "!")
@@ -228,7 +240,14 @@ for filename in sorted(glob.glob("../src/awkward1/**/*.py", recursive=True),
         if isinstance(toplevel, ast.FunctionDef):
             dofunction(link, shortname, toplevel.name, toplevel)
 
-    with open(os.path.join("python", "toctree.txt"), "w") as outfile:
-        outfile.write(".. toctree::\n    :hidden:\n\n")
-        for x in toctree:
-            outfile.write("    " + x + "\n")
+outfile = io.StringIO()
+outfile.write(".. toctree::\n    :hidden:\n\n")
+for x in toctree:
+    outfile.write("    " + x + "\n")
+
+out = outfile.getvalue()
+outfilename = os.path.join("python", "toctree.txt")
+if not os.path.exists(outfilename) or open(outfilename).read() != out:
+    print("writing", outfilename)
+    with open(outfilename, "w") as outfile:
+        outfile.write(out)
