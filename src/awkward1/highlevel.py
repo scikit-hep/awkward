@@ -286,7 +286,7 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         """
         Iterates over the array in Python.
 
-        Note that this is the _slowest_ way to access data (even slower than
+        Note that this is the *slowest* way to access data (even slower than
         native Python objects, like lists and dicts). Usually, you should
         express your problems in array-at-a-time operations.
 
@@ -317,6 +317,10 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
 
     def __getitem__(self, where):
         """
+        Args:
+            where (many types supported; see below): Index of positions to
+                select from the array.
+
         Select items from the Array using an extension of NumPy's (already
         quite extensive) rules.
 
@@ -324,7 +328,7 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         [NumPy indexing](https://docs.scipy.org/doc/numpy/reference/arrays.indexing.html)
         are supported with one exception
         ([combining advanced and basic indexing](https://docs.scipy.org/doc/numpy/reference/arrays.indexing.html#combining-advanced-and-basic-indexing)
-        with basic indexes _between_ two advanced indexes: the definition
+        with basic indexes *between* two advanced indexes: the definition
         NumPy chose for the result does not have a generalization beyond
         rectilinear arrays).
 
@@ -552,10 +556,10 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         produce arrays with the same structure as the original array, which
         can then be used as filters.
 
-        >>> print((array * 10) % 2 == 1)
-        [[[False, True, False], [], [True, False]], [], [[True]]]
-        >>> print(array[(array * 10) % 2 == 1])
-        [[[1.1], [], [3.3]], [], [[5.5]]]
+            >>> print((array * 10) % 2 == 1)
+            [[[False, True, False], [], [True, False]], [], [[True]]]
+            >>> print(array[(array * 10) % 2 == 1])
+            [[[1.1], [], [3.3]], [], [[5.5]]]
 
         Functions whose names start with "arg" return index positions, which
         can be used with the integer form.
@@ -572,6 +576,37 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         return awkward1._util.wrap(self._layout[where], self._behavior)
 
     def __setitem__(self, where, what):
+        """
+        Args:
+            where (str): Field name to add to records in the array.
+            what (#ak.Array): Array to add as the new field.
+
+        Unlike #__getitem__, which allows a wide variety of slice types,
+        only single field-slicing is supported for assignment.
+        (#ak.layout.Content arrays are immutable; field assignment replaces
+        the #layout with an array that has the new field using #ak.withfield.)
+
+        If necessary, the new field will be broadcasted to fit the array.
+        For example, given an `array` like
+
+            ak.Array([[{"x": 1.1}, {"x": 2.2}, {"x": 3.3}], [], [{"x": 4.4}, {"x": 5.5}]])
+
+        which has three elements with nested data in each, assigning
+
+            >>> array["y"] = [100, 200, 300]
+
+        will result in
+
+            >>> ak.tolist(array)
+            [[{'x': 1.1, 'y': 100}, {'x': 2.2, 'y': 100}, {'x': 3.3, 'y': 100}],
+             [],
+             [{'x': 4.4, 'y': 300}, {'x': 5.5, 'y': 300}]]
+
+        because the `100` in `what[0]` is broadcasted to all three nested
+        elements of `array[0]`, the `200` in `what[1]` is broadcasted to the
+        empty list `array[1]`, and the `300` in `what[2]` is broadcasted to
+        both elements of `array[2]`.
+        """
         if not isinstance(where, str):
             raise ValueError(
                     "only fields may be assigned in-place (by field name)")
@@ -581,6 +616,33 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         self._numbaview = None
 
     def __getattr__(self, where):
+        """
+        Whenever possible, fields can be accessed as attributes.
+
+        For example, the fields of an `array` like
+
+            ak.Array([[{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}],
+                      [],
+                      [{"x": 4.4, "y": [4, 4, 4, 4]}, {"x": 5.5, "y": [5, 5, 5, 5, 5]}]])
+
+        can be accessed as
+
+            >>> array.x
+            <Array [[1.1, 2.2, 3.3], [], [4.4, 5.5]] type='3 * var * float64'>
+            >>> array.y
+            <Array [[[1], [2, 2], ... [5, 5, 5, 5, 5]]] type='3 * var * var * int64'>
+
+        which are equivalent to `array["x"]` and `array["y"]`. (See
+        <<projection>>.)
+
+        Fields can't be accessed as attributes when
+
+           * #ak.Array methods or properties take precedence,
+           * a domain-specific behavior has methods or properties that take
+             precedence, or
+           * the field name is not a valid Python identifier or is a Python
+             keyword.
+        """
         if where in dir(type(self)):
             return super(Array, self).__getattribute__(where)
         else:
@@ -597,43 +659,142 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
                 raise AttributeError("no field named {0}".format(repr(where)))
 
     def __dir__(self):
+        """
+        Lists all methods, properties, and field names (see #__getattr__)
+        that can be accessed as attributes.
+        """
         return sorted(set(dir(super(Array, self))
                           + [x for x in self._layout.keys()
                                if _dir_pattern.match(x) and
                                   not keyword.iskeyword(x)]))
 
     @property
-    def i0(self):
+    def slot0(self):
+        """
+        Equivalent to #__getitem__ with `"0"`, which selects slot `0` from
+        all tuples.
+
+        Record fields can be accessed from #__getitem__ with strings (see
+        <<projection>>), but tuples only have slot positions, which are
+        0-indexed integers. However, they must also be quoted as strings
+        to avoid confusion with integers as array indexes. Sometimes, though,
+        interleaving integers in strings and integers outside of strings
+        can be confusing in analysis code.
+
+        Record fields can also be accessed as attributes (with limitations),
+        and the distinction between attributes (#__getattr__) and subscripts
+        (#__getitem__) shows up more clearly in dense code. But integers would
+        not be valid attribute names, so they're named #slot0 through #slot9.
+
+        (Tuples with more than 10 slots are rare and can defer to
+        #__getitem__.)
+        """
         return self["0"]
     @property
-    def i1(self):
+    def slot1(self):
+        """
+        Equivalent to #__getitem__ with `"1"`. See #slot0.
+        """
         return self["1"]
     @property
-    def i2(self):
+    def slot2(self):
+        """
+        Equivalent to #__getitem__ with `"2"`. See #slot0.
+        """
         return self["2"]
     @property
-    def i3(self):
+    def slot3(self):
+        """
+        Equivalent to #__getitem__ with `"3"`. See #slot0.
+        """
         return self["3"]
     @property
-    def i4(self):
+    def slot4(self):
+        """
+        Equivalent to #__getitem__ with `"4"`. See #slot0.
+        """
         return self["4"]
     @property
-    def i5(self):
+    def slot5(self):
+        """
+        Equivalent to #__getitem__ with `"5"`. See #slot0.
+        """
         return self["5"]
     @property
-    def i6(self):
+    def slot6(self):
+        """
+        Equivalent to #__getitem__ with `"6"`. See #slot0.
+        """
         return self["6"]
     @property
-    def i7(self):
+    def slot7(self):
+        """
+        Equivalent to #__getitem__ with `"7"`. See #slot0.
+        """
         return self["7"]
     @property
-    def i8(self):
+    def slot8(self):
+        """
+        Equivalent to #__getitem__ with `"8"`. See #slot0.
+        """
         return self["8"]
     @property
-    def i9(self):
+    def slot9(self):
+        """
+        Equivalent to #__getitem__ with `"9"`. See #slot0.
+        """
         return self["9"]
 
     def __str__(self, limit_value=85):
+        """
+        Args:
+            limit_value (int): maximum number of characters to use when
+                presenting the Array as a string.
+
+        Presents the Array as a string without type or `"<Array ...>"`.
+
+        Large Arrays are truncated to the first few elements and the last
+        few elements to fit within `limit_value` characters, using ellipsis
+        to indicate the break. For example, an `array` like
+
+            ak.Array([[1.1, 2.2, 3.3],
+                      [],
+                      [4.4, 5.5, 6.6],
+                      [7.7, 8.8, 9.9, 10.0],
+                      [],
+                      [],
+                      [],
+                      [11.1, 12.2]])
+
+        is shown as
+
+            [[1.1, 2.2, 3.3], [], [4.4, 5.5, 6.6], [7.7, 8.8, 9.9, ... [], [], [], [11.1, 12.2]]
+
+        The algorithm does not split tokens; it will not show half a number
+        (which can be very misleading), but it can lose structural elements
+        like the `]` that closes `[7.7, 8.8, 9.9, 10.0]`.
+
+        The algorithm also avoids reading data unnecessarily: most of the data
+        in the ellipsis are not even read. This can be particularly important
+        for datasets that contain #ak.layout.VirtualArray nodes that might
+        be expensive to read.
+
+        Note that the string also does not quote field names. An `array` like
+
+            ak.Array([[{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}],
+                      [],
+                      [{"x": 4.4, "y": [4, 4, 4, 4]}]])
+
+        is presented as
+
+            [[{x: 1.1, y: [1]}, {x: 2.2, y: [2, 2]}, ... [], [{x: 4.4, y: [4, 4, 4, 4]}]]
+
+        The string representation cannot be read as JSON or as an #ak.Array
+        constructor.
+
+        See #ak.tolist and #ak.tojson to convert whole Arrays into Python data
+        or JSON strings without loss (except for #type).
+        """
         return awkward1._util.minimally_touching_string(limit_value,
                                                         self._layout,
                                                         self._behavior)
@@ -785,34 +946,34 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
                                not keyword.iskeyword(x)]))
 
     @property
-    def i0(self):
+    def slot0(self):
         return self["0"]
     @property
-    def i1(self):
+    def slot1(self):
         return self["1"]
     @property
-    def i2(self):
+    def slot2(self):
         return self["2"]
     @property
-    def i3(self):
+    def slot3(self):
         return self["3"]
     @property
-    def i4(self):
+    def slot4(self):
         return self["4"]
     @property
-    def i5(self):
+    def slot5(self):
         return self["5"]
     @property
-    def i6(self):
+    def slot6(self):
         return self["6"]
     @property
-    def i7(self):
+    def slot7(self):
         return self["7"]
     @property
-    def i8(self):
+    def slot8(self):
         return self["8"]
     @property
-    def i9(self):
+    def slot9(self):
         return self["9"]
 
     def __str__(self, limit_value=85):

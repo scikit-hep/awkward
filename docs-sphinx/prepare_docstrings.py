@@ -126,9 +126,6 @@ def dosig(node):
 
 def dodoc(docstring, qualname, names):
     out = docstring.replace("`", "``")
-    out = re.sub(r"\b_(.*)_\b",
-                 r"*\1*",
-                 out)
     out = re.sub(r"<<([^>]*)>>",
                  r"`\1`_",
                  out)
@@ -142,8 +139,8 @@ def dodoc(docstring, qualname, names):
                  r"`\1 <\2>`__",
                  out)
     out = str(sphinx.ext.napoleon.GoogleDocstring(out, config))
-    out = re.sub(r"([^\. \t].*\n[ \t]*\n)((    .*\n|[ \t]*\n)+)",
-                 "\\1.. code-block:: python\n\n\\2",
+    out = re.sub(r"([^\. \t].*\n[ \t]*)((\n    .*[^ \t].*)(\n    .*[^ \t].*|\n[ \t]*)*)",
+                 "\\1\n.. code-block:: python\n\n\\2",
                  out)
     out = re.sub(r"(\n:param|^:param)",     "\n    :param",   out)
     out = re.sub(r"(\n:type|^:type)",       "\n    :type",    out)
