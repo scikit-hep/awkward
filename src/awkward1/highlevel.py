@@ -23,6 +23,17 @@ _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
             awkward1._connect._pandas.PandasMixin, Sequence):
     """
+    Args:
+        data (#ak.layout.Content, #ak.Array, np.ndarray, str, or iterable):
+            Data to convert or wrap into an array.
+            If a NumPy array, the regularity of its dimensions is preserved.
+            If a string, the data are assumed to be JSON.
+            If an iterable, calls #ak.fromiter.
+        behavior (None or dict): Custom #ak.behavior for this array only.
+        withname (None or str): Gives tuples and records a name that can be
+            used to override behavior (see below).
+        checkvalid (bool): If `True`, verify that the #layout is valid.
+
     High-level array that can contain data of any type.
 
     For most users, this is the only class in Awkward Array that matters: it
@@ -80,11 +91,15 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         # <Array [{x: 0.1, y: 1, z: 10, ... y: 3, z: 30}] type='3 * vec3'>
         more_vectors
         # <Array [{x: 10, y: 1, z: 0.1, ... z: 0.3}] type='3 * vec3'>
+        type(vectors)
+        # <class '__main__.Vec3Array'>
+        type(more_vectors)
+        # <class '__main__.Vec3Array'>
 
         vectors.cross(more_vectors)
         # <Array [{x: -9.9, y: 100, ... z: -89.1}] type='3 * vec3'>
 
-    If the ak.cross function were a method of ak.Array, then it would conflict
+    If the #ak.cross function were a method of ak.Array, then it would conflict
     with applications where we might want `cross` to mean something else.
     """
 

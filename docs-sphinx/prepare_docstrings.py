@@ -126,7 +126,7 @@ def dosig(node):
 
 def dodoc(docstring, qualname):
     step1 = docstring.replace("`", "``")
-    step2 = re.sub(r"#(ak\.[A-Za-z0-9_\.]+)",
+    step2 = re.sub(r"#(ak\.[A-Za-z0-9_\.]*[A-Za-z0-9_])",
                    r":py:obj:`\1`",
                    step1)
     step3 = re.sub(r"#([A-Za-z0-9_]+)",
@@ -136,7 +136,9 @@ def dodoc(docstring, qualname):
     step5 = re.sub(r"([^\. \t].*\n[ \t]*\n)((    .*\n|[ \t]*\n)+)",
                    "\\1.. code-block:: python\n\n\\2",
                    step4)
-    return step5
+    step6 = re.sub(r"(\n:param|^:param)", "\n    :param", step5)
+    step7 = re.sub(r"(\n:type|^:type)", "\n    :type", step6)
+    return step7
 
 def doclass(link, shortname, name, astcls):
     qualname = shortname + "." + name
@@ -197,9 +199,7 @@ def dofunction(link, shortname, name, astfcn):
     outfile.write(qualname + "\n" + "-"*len(qualname) + "\n\n")
     outfile.write("Defined in {0}.\n\n".format(link))
 
-    functiontext = "{0}.{1}({2})".format(qualname,
-                                         astfcn.name,
-                                         dosig(astfcn))
+    functiontext = "{0}({1})".format(qualname, dosig(astfcn))
     outfile.write(".. py:function:: " + functiontext + "\n\n")
 
     docstring = ast.get_docstring(astfcn)
