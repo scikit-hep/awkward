@@ -483,6 +483,24 @@ def tolayout(array,
              allowrecord=True,
              allowother=False,
              numpytype=(numpy.number,)):
+    """
+    Args:
+        array: Data to convert into an #ak.layout.Content and maybe
+            #ak.layout.Record and other types.
+        allowrecord (bool): If True, allow #ak.layout.Record as an output;
+            otherwise, if the output would be a scalar record, raise an error.
+        allowother (bool): If True, allow non-Awkward outputs; otherwise,
+            if the output would be another type, raise an error.
+        numpytype (tuple of NumPy types): Allowed NumPy types in
+            #ak.layout.NumpyArray outputs.
+
+    Converts `array` (many types supported, including all Awkward Arrays and
+    Records) into a #ak.layout.Content and maybe #ak.layout.Record and other
+    types.
+
+    This function is usually used to sanitize inputs for other functions; it
+    would rarely be used in a data analysis.
+    """
     import awkward1.highlevel
 
     if isinstance(array, awkward1.highlevel.Array):
@@ -540,6 +558,21 @@ def tolayout(array,
         return array
 
 def regularize_numpyarray(array, allowempty=True, highlevel=True):
+    """
+    Args:
+        array: Data to convert into an Awkward Array.
+        allowempty (bool): If True, allow #ak.layout.EmptyArray in the output;
+            otherwise, convert empty arrays into #ak.layout.NumpyArray.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+
+    Converts any multidimensional #ak.layout.NumpyArray.shape into nested
+    #ak.layout.RegularArray nodes. The output may have any Awkward data type:
+    this only changes the representation of #ak.layout.NumpyArray.
+
+    This function is usually used to sanitize inputs for other functions; it
+    would rarely be used in a data analysis.
+    """
     def getfunction(layout, depth):
         if isinstance(layout, awkward1.layout.NumpyArray) and layout.ndim != 1:
             return lambda: layout.toRegularArray()
@@ -558,6 +591,32 @@ def fromawkward0(array,
                  regulararray=False,
                  highlevel=True,
                  behavior=None):
+    """
+    Args:
+        array (Awkward 0.x or Awkward 1.x array): Data to convert to Awkward
+            1.x.
+        keeplayout (bool): If True, stay true to the Awkward 0.x layout,
+            ensuring zero-copy; otherwise, allow transformations that copy
+            data for more flexibility.
+        regulararray (bool): If True and the array is multidimensional,
+            the dimensions are represented by nested #ak.layout.RegularArray
+            nodes; if False and the array is multidimensional, the dimensions
+            are represented by a multivalued #ak.layout.NumpyArray.shape.
+            If the array is one-dimensional, this has no effect.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+        behavior (bool): Custom #ak.behavior for the output array, if
+            high-level.
+
+    Converts an array from Awkward 0.x to Awkward 1.x.
+
+    This is only needed during the transition from the old library to the
+    new library.
+
+    If `array` is already an Awkward 1.x Array, it is simply passed through
+    this function (so that interfaces that scripts don't need to remove this
+    function when their 0.x sources are replaced by 1.x).
+    """
     # See https://github.com/scikit-hep/awkward-0.x/blob/405b7eaeea51b60947a79c782b1abf0d72f6729b/specification.adoc
     import awkward as awkward0
 
@@ -841,6 +900,19 @@ fromawkward0.uint32max = numpy.iinfo(numpy.uint32).max
 fromawkward0.int64max = numpy.iinfo(numpy.int64).max
 
 def toawkward0(array, keeplayout=False):
+    """
+    Args:
+        array: Data to convert into an Awkward 0.x array.
+        keeplayout (bool): If True, stay true to the Awkward 1.x layout,
+            ensuring zero-copy; otherwise, allow transformations that copy
+            data for more flexibility.
+
+    Converts `array` (many types supported, including all Awkward Arrays and
+    Records) into an Awkward 0.x array.
+
+    This is only needed during the transition from the old library to the new
+    library.
+    """
     # See https://github.com/scikit-hep/awkward-0.x/blob/405b7eaeea51b60947a79c782b1abf0d72f6729b/specification.adoc
     import awkward as awkward0
 
