@@ -41,6 +41,8 @@ def fromnumpy(array, regulararray=False, highlevel=True, behavior=None):
        * #ak.layout.ByteMaskedArray or #ak.layout.UnmaskedArray if the
          `array` is an np.ma.MaskedArray.
        * #ak.layout.RegularArray if `regulararray=True`.
+
+    See also #ak.tonumpy.
     """
     def recurse(array, mask):
         if regulararray and len(array.shape) > 1:
@@ -123,6 +125,8 @@ def fromiter(iterable,
          (i.e. homogeneously typed records with the same sets of fields).
        * iterable, including np.ndarray: converted into
          #ak.layout.ListOffsetArray.
+
+    See also #ak.tolist.
     """
     if isinstance(iterable, dict):
         if allowrecord:
@@ -170,6 +174,8 @@ def fromjson(source,
     has the same flexibility and the same constraints. Any heterogeneous
     and deeply nested JSON can be converted, but the output will never have
     regular-typed array lengths.
+
+    See also #ak.tojson.
     """
     layout = awkward1._io.fromjson(source,
                                    initial=initial,
@@ -181,6 +187,26 @@ def fromjson(source,
         return layout
 
 def tonumpy(array):
+    """
+    Converts `array` (many types supported, including all Awkward Arrays and
+    Records) into a NumPy array, if possible.
+
+    If the data are numerical and regular (nested lists have equal lengths
+    in each dimension, as described by the #type), they can be losslessly
+    converted to a NumPy array and this function returns without an error.
+
+    Otherwise, the function raises an error. It does not create a NumPy
+    array with dtype `"O"` for `np.object_` (see the
+    [note on object_ type](https://docs.scipy.org/doc/numpy/reference/arrays.scalars.html#arrays-scalars-built-in))
+    since silent conversions to dtype `"O"` arrays would not only be a
+    significant performance hit, but would also break functionality, since
+    nested lists in a NumPy `"O"` array are severed from the array and
+    cannot be sliced as dimensions.
+
+    If `array` is a scalar, it is converted into a NumPy scalar.
+
+    See also #ak.fromnumpy.
+    """
     import awkward1.highlevel
 
     if isinstance(array, (bool, str, bytes, numbers.Number)):
@@ -294,6 +320,27 @@ def tonumpy(array):
             "cannot convert {0} into numpy.ndarray".format(array))
 
 def tolist(array):
+    """
+    Converts `array` (many types supported, including all Awkward Arrays and
+    Records) into Python objects.
+
+    Awkward Array types have the following Pythonic translations.
+
+       * #ak.types.PrimitiveType: converted into bool, int, float.
+       * #ak.types.OptionType: missing values are converted into None.
+       * #ak.types.ListType: converted into list.
+       * #ak.types.RegularType: also converted into list. Python (and JSON)
+         forms lose information about the regularity of list lengths.
+       * #ak.types.ListType with parameter `"__array__"` equal to
+         `"__bytestring__"`: converted into bytes.
+       * #ak.types.ListType with parameter `"__array__"` equal to
+         `"__string__"`: converted into str.
+       * #ak.types.RecordArray without field names: converted into tuple.
+       * #ak.types.RecordArray with field names: converted into dict.
+       * #ak.types.UnionArray: Python data are naturally heterogeneous.
+
+    See also #ak.fromiter.
+    """
     import awkward1.highlevel
 
     if array is None or isinstance(array, (bool, str, bytes, numbers.Number)):
@@ -357,6 +404,38 @@ def tojson(array,
            pretty=False,
            maxdecimals=None,
            buffersize=65536):
+    """
+    Args:
+        array: Data to convert to JSON.
+        destination (None or str): If None, this function returns a JSON str;
+            if a str, it uses that as a file name and writes (overwrites) that
+            file (returning None).
+        pretty (bool): If True, indent the output for human readability; if
+            False, output compact JSON without spaces.
+        maxdecimals (None or int): If an int, limit the number of
+            floating-point decimals to this number; if None, write all digits.
+        buffersize (int): Size (in bytes) of the buffer used by the JSON
+            parser.
+
+    Converts `array` (many types supported, including all Awkward Arrays and
+    Records) into a JSON string or file.
+
+    Awkward Array types have the following JSON translations.
+
+       * #ak.types.PrimitiveType: converted into JSON booleans and numbers.
+       * #ak.types.OptionType: missing values are converted into None.
+       * #ak.types.ListType: converted into JSON lists.
+       * #ak.types.RegularType: also converted into JSON lists. JSON (and
+         Python) forms lose information about the regularity of list lengths.
+       * #ak.types.ListType with parameter `"__array__"` equal to
+         `"__bytestring__"` or `"__string__"`: converted into JSON strings.
+       * #ak.types.RecordArray without field names: converted into JSON
+         objects with numbers as strings for keys.
+       * #ak.types.RecordArray with field names: converted into JSON objects.
+       * #ak.types.UnionArray: JSON data are naturally heterogeneous.
+
+    See also #ak.fromjson.
+    """
     import awkward1.highlevel
 
     if array is None or isinstance(array, (bool, str, bytes, numbers.Number)):
