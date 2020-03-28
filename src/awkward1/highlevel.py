@@ -1427,6 +1427,11 @@ class ArrayBuilder(Sequence):
     Args:
         behavior (None or dict): Custom #ak.behavior for arrays built by
             this ArrayBuilder.
+        initial (int): Initial size (in bytes) of buffers used by
+            #ak.layout.ArrayBuilder (see #ak.layout.ArrayBuilderOptions).
+        resize (float): Resize multiplier for buffers used by
+            #ak.layout.ArrayBuilder (see #ak.layout.ArrayBuilderOptions);
+            should be strictly greater than 1.
 
     General tool for building arrays of nested data structures from a sequence
     of commands. Most data types can be constructed by calling commands in the
@@ -1537,8 +1542,9 @@ class ArrayBuilder(Sequence):
     be considered the "least effort" approach.
     """
 
-    def __init__(self, behavior=None):
-        self._layout = awkward1.layout.ArrayBuilder()
+    def __init__(self, behavior=None, initial=1024, resize=2.0):
+        self._layout = awkward1.layout.ArrayBuilder(initial=initial,
+                                                    resize=resize)
         self.behavior = behavior
 
     @classmethod

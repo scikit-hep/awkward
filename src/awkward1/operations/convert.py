@@ -84,6 +84,46 @@ def fromiter(iterable,
              allowrecord=True,
              initial=1024,
              resize=2.0):
+    """
+    Args:
+        iterable (Python iterable): Data to convert into an Awkward Array.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+        behavior (bool): Custom #ak.behavior for the output array, if
+            high-level.
+        allowrecord (bool): If True, the outermost element may be a record
+            (returning #ak.Record or #ak.layout.Record type, depending on
+            `highlevel`); if False, the outermost element must be an array.
+        initial (int): Initial size (in bytes) of buffers used by
+            #ak.layout.ArrayBuilder (see #ak.layout.ArrayBuilderOptions).
+        resize (float): Resize multiplier for buffers used by
+            #ak.layout.ArrayBuilder (see #ak.layout.ArrayBuilderOptions);
+            should be strictly greater than 1.
+
+    Converts Python data into an Awkward Array.
+
+    Internally, this function uses #ak.layout.ArrayBuilder (see the high-level
+    #ak.ArrayBuilder documentation for a more complete description), so it
+    has the same flexibility and the same constraints. Any heterogeneous
+    and deeply nested Python data can be converted, but the output will never
+    have regular-typed array lengths.
+
+    The following Python types are supported.
+
+       * bool, including `np.bool_`: converted into #ak.layout.NumpyArray.
+       * int, including `np.integer`: converted into #ak.layout.NumpyArray.
+       * float, including `np.floating`: converted into #ak.layout.NumpyArray.
+       * bytes: converted into #ak.layout.ListOffsetArray with parameter
+         `"__array__"` equal to `"bytestring"` (unencoded bytes).
+       * str: converted into #ak.layout.ListOffsetArray with parameter
+         `"__array__"` equal to `"string"` (UTF-8 encoded string).
+       * tuple: converted into #ak.layout.RecordArray without field names
+         (i.e. homogeneously typed, uniform sized tuples).
+       * dict: converted into #ak.layout.RecordArray with field names
+         (i.e. homogeneously typed records with the same sets of fields).
+       * iterable, including np.ndarray: converted into
+         #ak.layout.ListOffsetArray.
+    """
     if isinstance(iterable, dict):
         if allowrecord:
             return fromiter([iterable],
@@ -108,6 +148,29 @@ def fromjson(source,
              initial=1024,
              resize=2.0,
              buffersize=65536):
+    """
+    Args:
+        source (str): JSON-formatted string to convert into an array.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+        behavior (bool): Custom #ak.behavior for the output array, if
+            high-level.
+        initial (int): Initial size (in bytes) of buffers used by
+            #ak.layout.ArrayBuilder (see #ak.layout.ArrayBuilderOptions).
+        resize (float): Resize multiplier for buffers used by
+            #ak.layout.ArrayBuilder (see #ak.layout.ArrayBuilderOptions);
+            should be strictly greater than 1.
+        buffersize (int): Size (in bytes) of the buffer used by the JSON
+            parser.
+
+    Converts a JSON string into an Awkward Array.
+
+    Internally, this function uses #ak.layout.ArrayBuilder (see the high-level
+    #ak.ArrayBuilder documentation for a more complete description), so it
+    has the same flexibility and the same constraints. Any heterogeneous
+    and deeply nested JSON can be converted, but the output will never have
+    regular-typed array lengths.
+    """
     layout = awkward1._io.fromjson(source,
                                    initial=initial,
                                    resize=resize,
