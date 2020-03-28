@@ -57,6 +57,51 @@ def parameters(array):
         return {}
 
 def typeof(array):
+    """
+    The high-level type of an `array` (many types supported, including all
+    Awkward Arrays and Records) as #ak.types.Type objects.
+
+    The high-level type ignores #layout differences like
+    #ak.layout.ListArray64 versus #ak.layout.ListOffsetArray64, but
+    not differences like "regular-sized lists" (i.e.
+    #ak.layout.RegularArray) versus "variable-sized lists" (i.e.
+    #ak.layout.ListArray64 and similar).
+
+    Types are rendered as [Datashape](https://datashape.readthedocs.io/)
+    strings, which makes the same distinctions.
+
+    For example,
+
+        ak.Array([[{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}],
+                  [],
+                  [{"x": 3.3, "y": [3, 3, 3]}]])
+
+    has type
+
+        3 * var * {"x": float64, "y": var * int64}
+
+    but
+
+        ak.Array(np.arange(2*3*5).reshape(2, 3, 5))
+
+    has type
+
+        2 * 3 * 5 * int64
+
+    Some cases, like heterogeneous data, require [extensions beyond the
+    Datashape specification](https://github.com/blaze/datashape/issues/237).
+    For example,
+
+        ak.Array([1, "two", [3, 3, 3]])
+
+    has type
+
+        3 * union[int64, string, var * int64]
+
+    but "union" is not a Datashape type-constructor. (Its syntax is
+    similar to existing type-constructors, so it's a plausible addition
+    to the language.)
+    """
     if array is None:
         return awkward1.types.UnknownType()
 
@@ -124,6 +169,22 @@ typeof.dtype2primitive = {
 }
 
 def validityerror(array, exception=False):
+    """
+    Args:
+        array (#ak.Array, #ak.Record, #ak.layout.Content, #ak.layout.Record,
+            #ak.ArrayBuilder, #ak.layout.ArrayBuilder): Array or record to
+            check.
+        exception (bool): If True, validity errors raise exceptions.
+    Returns:
+        None if there are no errors and a str containing the error message
+            if there are.
+
+    Checks for errors in the structure of the array, such as indexes that run
+    beyond the length of a node's `content`, etc. Either an error is raised or
+    a string describing the error is returned.
+
+    See also #ak.isvalid.
+    """
     if isinstance(array, (awkward1.highlevel.Array,
                           awkward1.highlevel.Record)):
         return validityerror(array.layout, exception=exception)
@@ -145,6 +206,21 @@ def validityerror(array, exception=False):
         raise TypeError("not an awkward array: {0}".format(repr(array)))
 
 def isvalid(array, exception=False):
+    """
+    Args:
+        array (#ak.Array, #ak.Record, #ak.layout.Content, #ak.layout.Record,
+            #ak.ArrayBuilder, #ak.layout.ArrayBuilder): Array or record to
+            check.
+        exception (bool): If True, validity errors raise exceptions.
+    Returns:
+        True if there are no errors and False if there is an error.
+
+    Checks for errors in the structure of the array, such as indexes that run
+    beyond the length of a node's `content`, etc. Either an error is raised or
+    the function returns a boolean.
+
+    See also #ak.validityerror.
+    """
     out = validityerror(array, exception=exception)
     return out is None
 
