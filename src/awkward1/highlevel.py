@@ -1744,68 +1744,186 @@ class ArrayBuilder(Sequence):
 
     def boolean(self, x):
         """
-        Appends a True or False at the current position in the accumulated
+        Appends a boolean value `x` at the current position in the accumulated
         array.
         """
         self._layout.boolean(x)
 
     def integer(self, x):
         """
-        Appends an integer at the current position in the accumulated array.
+        Appends an integer `x` at the current position in the accumulated
+        array.
         """
         self._layout.integer(x)
 
     def real(self, x):
         """
-        Appends a floating point number at the current position in the
+        Appends a floating point number `x` at the current position in the
         accumulated array.
         """
         self._layout.real(x)
 
     def bytestring(self, x):
         """
-        Appends an unencoded string (raw bytes) at the current position in the
-        accumulated array.
+        Appends an unencoded string (raw bytes) `x` at the current position
+        in the accumulated array.
         """
         self._layout.bytestring(x)
 
     def string(self, x):
         """
-        Appends a UTF-8 encoded string at the current position in the
+        Appends a UTF-8 encoded string `x` at the current position in the
         accumulated array.
         """
         self._layout.string(x)
 
     def beginlist(self):
         """
-        
+        Begins filling a list; must be closed with #endlist.
+
+        For example,
+
+            builder.beginlist()
+            builder.real(1.1)
+            builder.real(2.2)
+            builder.real(3.3)
+            builder.endlist()
+            builder.beginlist()
+            builder.endlist()
+            builder.beginlist()
+            builder.real(4.4)
+            builder.real(5.5)
+            builder.endlist()
+
+        produces
+
+            [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
         """
         self._layout.beginlist()
 
     def endlist(self):
+        """
+        Ends a list.
+        """
         self._layout.endlist()
 
     def begintuple(self, numfields):
+        """
+        Begins filling a tuple with `numfields` fields; must be closed with
+        #endtuple.
+
+        For example,
+
+            builder.begintuple(3)
+            builder.index(0).integer(1)
+            builder.index(1).real(1.1)
+            builder.index(2).string("one")
+            builder.endtuple()
+            builder.begintuple(3)
+            builder.index(0).integer(2)
+            builder.index(1).real(2.2)
+            builder.index(2).string("two")
+            builder.endtuple()
+
+        produces
+
+            [(1, 1.1, "one"), (2, 2.2, "two")]
+        """
         self._layout.begintuple(numfields)
 
     def index(self, i):
+        """
+        Args:
+            i (int): The tuple slot to fill.
+        Returns:
+            The #ak.ArrayBuilder, so that it can be chained with the value
+                that fills the slot.
+
+        Prepares to fill a tuple slot; see #begintuple for an example.
+        """
         self._layout.index(i)
         return self
 
     def endtuple(self):
+        """
+        Ends a tuple.
+        """
         self._layout.endtuple()
 
     def beginrecord(self, name=None):
+        """
+        Begins filling a record with an optional `name`; must be closed with
+        #endrecord.
+
+        For example,
+
+            builder.beginrecord("points")
+            builder.field("x").real(1)
+            builder.field("y").real(1.1)
+            builder.endrecord()
+            builder.beginrecord("points")
+            builder.field("x").real(2)
+            builder.field("y").real(2.2)
+            builder.endrecord()
+
+        produces
+
+            [{"x": 1.0, "y": 1.1}, {"x": 2.0, "y": 2.2}]
+
+        with type
+
+            2 * struct[["x", "y"], [float64, float64], parameters={"__record__": "points"}]
+
+        The `"__record__"` parameter can be used to add behavior to the records
+        in the array, as described in #ak.Array and #ak.Record.
+        """
         self._layout.beginrecord(name)
 
     def field(self, key):
+        """
+        Args:
+            key (str): The field key to fill.
+        Returns:
+            The #ak.ArrayBuilder, so that it can be chained with the value
+                that fills the slot.
+
+        Prepares to fill a field; see #beginrecord for an example.
+        """
         self._layout.field(key)
         return self
 
     def endrecord(self):
+        """
+        Ends a record.
+        """
         self._layout.endrecord()
 
     def append(self, obj, at=None):
+        """
+        Args:
+            obj: The object to append.
+            at (None or int): which value to select from `obj` if `obj` is
+                an #ak.Array.
+
+        Appends any type of object, which can be a shorthand for #null,
+        #boolean, #integer, #real, #bytestring, or #string, but also
+        an #ak.Array or #ak.Record to *reference* values from an existing
+        dataset, or any Python object to *convert* to Awkward Array.
+
+        If `obj` is an #ak.Array or #ak.Record, the output will be an
+        #ak.layout.IndexedArray64 (or #ak.layout.IndexedOptionArray64 if
+        there are any None values) that references the existing data. This
+        can be a more time and memory-efficient way to put old data in a
+        new structure, since it avoids copying and even walking over the
+        old data structure (matters more when the structures are large).
+
+        If `obj` is an arbitrary Python object, this is equivalent to
+        #ak.fromiter except that it fills an existing #ak.ArrayBuilder,
+        rather than creating a new one.
+
+        If `obj` is an #ak.Array and `at` is an int, this method fills the
+        ArrayBuilder with a reference to `obj[at]` instead of `obj`.
+        """
         if at is None:
             if isinstance(obj, Record):
                 self._layout.append(obj.layout.array, obj.layout.at)
@@ -1823,6 +1941,13 @@ class ArrayBuilder(Sequence):
                         "'obj' is an ak.Array")
 
     def extend(self, obj):
+        """
+        Args:
+            obj (#ak.Array): The Array to concatenate with the data in this
+                ArrayBuilder.
+
+        Appends every value from `obj`, by reference (see #append).
+        """
         if isinstance(obj, Array):
             self._layout.extend(obj.layout)
         else:
@@ -1858,6 +1983,27 @@ class ArrayBuilder(Sequence):
             self._arraybuilder.endlist()
 
     def list(self):
+        """
+        Context manager to prevent unpaired #beginlist and #endlist. The
+        example in the #beginlist documentation can be rewritten as
+
+            with builder.list():
+                builder.real(1.1)
+                builder.real(2.2)
+                builder.real(3.3)
+            with builder.list():
+                pass
+            with builder.list():
+                builder.real(4.4)
+                builder.real(5.5)
+
+        to produce the same result.
+
+            [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+
+        Since context managers aren't yet suppored by Numba, this method
+        can't be used in Numba.
+        """
         return self.List(self)
 
     class Tuple(_Nested):
@@ -1874,6 +2020,26 @@ class ArrayBuilder(Sequence):
             self._arraybuilder.endtuple()
 
     def tuple(self, numfields):
+        """
+        Context manager to prevent unpaired #begintuple and #endtuple. The
+        example in the #begintuple documentation can be rewritten as
+
+            with builder.tuple(3):
+                builder.index(0).integer(1)
+                builder.index(1).real(1.1)
+                builder.index(2).string("one")
+            with builder.tuple(3):
+                builder.index(0).integer(2)
+                builder.index(1).real(2.2)
+                builder.index(2).string("two")
+
+        to produce the same result.
+
+            [(1, 1.1, "one"), (2, 2.2, "two")]
+
+        Since context managers aren't yet suppored by Numba, this method
+        can't be used in Numba.
+        """
         return self.Tuple(self, numfields)
 
     class Record(_Nested):
@@ -1890,4 +2056,22 @@ class ArrayBuilder(Sequence):
             self._arraybuilder.endrecord()
 
     def record(self, name=None):
+        """
+        Context manager to prevent unpaired #beginrecord and #endrecord. The
+        example in the #beginrecord documentation can be rewritten as
+
+            with builder.record("points"):
+                builder.field("x").real(1)
+                builder.field("y").real(1.1)
+            with builder.record("points"):
+                builder.field("x").real(2)
+                builder.field("y").real(2.2)
+
+        to produce the same result.
+
+            [{"x": 1.0, "y": 1.1}, {"x": 2.0, "y": 2.2}]
+
+        Since context managers aren't yet suppored by Numba, this method
+        can't be used in Numba.
+        """
         return self.Record(self, name)
