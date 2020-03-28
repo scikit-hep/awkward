@@ -22,6 +22,6 @@ def test_field_names():
 def test_tuple_ids():
     array = awkward1.Array([[(1.1, [1], "one"), (2.2, [2, 2], "two"), (3.3, [3, 3, 3], "three")], [], [(4.4, [4, 4, 4, 4], "four"), (5.5, [5, 5, 5, 5, 5], "five")]], checkvalid=True)
 
-    assert awkward1.tolist(array.i0) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
-    assert awkward1.tolist(array.i1) == [[[1], [2, 2], [3, 3, 3]], [], [[4, 4, 4, 4], [5, 5, 5, 5, 5]]]
-    assert awkward1.tolist(array.i2) == [["one", "two", "three"], [], ["four", "five"]]
+    assert awkward1.tolist(array.slot0) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+    assert awkward1.tolist(array.slot1) == [[[1], [2, 2], [3, 3, 3]], [], [[4, 4, 4, 4], [5, 5, 5, 5, 5]]]
+    assert awkward1.tolist(array.slot2) == [["one", "two", "three"], [], ["four", "five"]]

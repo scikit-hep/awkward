@@ -42,6 +42,26 @@ def withfield(base, what, where=None, highlevel=True):
     else:
         return out[0]
 
+def withname(array, name, highlevel=True):
+    def getfunction(layout, depth):
+        if isinstance(layout, awkward1.layout.RecordArray):
+            parameters = dict(layout.parameters)
+            parameters["__record__"] = name
+            return lambda: awkward1.layout.RecordArray(
+                layout.contents,
+                layout.recordlookup,
+                len(layout),
+                layout.identities,
+                parameters)
+        else:
+            return None
+    out = awkward1._util.recursively_apply(
+            awkward1.operations.convert.tolayout(array), getfunction)
+    if highlevel:
+        return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
+    else:
+        return out
+
 def isna(array, highlevel=True):
     def apply(layout):
         if isinstance(layout, awkward1._util.unknowntypes):
@@ -321,7 +341,11 @@ def fillna(array, value, highlevel=True):
     else:
         return out
 
-def zip(arrays, depthlimit=None, parameters=None, highlevel=True):
+def zip(arrays,
+        depthlimit=None,
+        parameters=None,
+        withname=None,
+        highlevel=True):
     if depthlimit is not None and depthlimit <= 0:
         raise ValueError("depthlimit must be None or at least 1")
 
@@ -342,6 +366,13 @@ def zip(arrays, depthlimit=None, parameters=None, highlevel=True):
                 awkward1.operations.convert.tolayout(x,
                                                      allowrecord=False,
                                                      allowother=False))
+
+    if withname is not None:
+        if parameters is None:
+            parameters = {}
+        else:
+            parameters = dict(parameters)
+        parameters["__record__"] = withname
 
     def getfunction(inputs, depth):
         if ((depthlimit is None and
@@ -369,7 +400,12 @@ def unzip(array):
     else:
         return tuple(array[n] for n in keys)
 
-def argcross(arrays, axis=1, nested=None, parameters=None, highlevel=True):
+def argcross(arrays,
+             axis=1,
+             nested=None,
+             parameters=None,
+             withname=None,
+             highlevel=True):
     if axis < 0:
         raise ValueError("argcross's 'axis' must be non-negative")
 
@@ -385,6 +421,13 @@ def argcross(arrays, axis=1, nested=None, parameters=None, highlevel=True):
                          allowrecord=False,
                          allowother=False).localindex(axis) for x in arrays]
 
+        if withname is not None:
+            if parameters is None:
+                parameters = {}
+            else:
+                parameters = dict(parameters)
+            parameters["__record__"] = withname
+
         result = cross(layouts,
                        axis=axis,
                        nested=nested,
@@ -397,8 +440,20 @@ def argcross(arrays, axis=1, nested=None, parameters=None, highlevel=True):
         else:
             return result
 
-def cross(arrays, axis=1, nested=None, parameters=None, highlevel=True):
+def cross(arrays,
+          axis=1,
+          nested=None,
+          parameters=None,
+          withname=None,
+          highlevel=True):
     behavior = awkward1._util.behaviorof(*arrays)
+
+    if withname is not None:
+        if parameters is None:
+            parameters = {}
+        else:
+            parameters = dict(parameters)
+        parameters["__record__"] = withname
 
     if axis < 0:
         raise ValueError("cross's 'axis' must be non-negative")
@@ -554,9 +609,15 @@ def argchoose(array,
               axis=1,
               keys=None,
               parameters=None,
+              withname=None,
               highlevel=True):
     if parameters is None:
         parameters = {}
+    else:
+        parameters = dict(parameters)
+    if withname is not None:
+        parameters["__record__"] = withname
+
     if axis < 0:
         raise ValueError("argchoose's 'axis' must be non-negative")
     else:
@@ -579,9 +640,15 @@ def choose(array,
            axis=1,
            keys=None,
            parameters=None,
+           withname=None,
            highlevel=True):
     if parameters is None:
         parameters = {}
+    else:
+        parameters = dict(parameters)
+    if withname is not None:
+        parameters["__record__"] = withname
+
     layout = awkward1.operations.convert.tolayout(
                array, allowrecord=False, allowother=False)
     out = layout.choose(n,
