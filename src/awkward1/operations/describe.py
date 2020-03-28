@@ -9,12 +9,36 @@ import numpy
 import awkward1.layout
 
 def keys(array):
+    """
+    Extracts record or tuple keys from `array` (many types supported,
+    including all Awkward Arrays and Records).
+
+    If the array contains nested records, only the outermost record is
+    queried. If it contains tuples instead of records, the keys are
+    string representations of integers, such as `"0"`, `"1"`, `"2"`, etc.
+    The records or tuples may be within multiple layers of nested lists.
+
+    If the array contains neither tuples nor records, this returns an empty
+    list.
+    """
     layout = awkward1.operations.convert.tolayout(array,
                                                   allowrecord=True,
                                                   allowother=False)
     return layout.keys()
 
 def parameters(array):
+    """
+    Extracts parameters from the outermost array node of `array` (many types
+    supported, including all Awkward Arrays and Records).
+
+    Parameters are a dict from str to JSON-like objects, usually strings.
+    Every #ak.layout.Content node has a different set of parameters. Some
+    key names are special, such as `"__record__"` and `"__array__"` that name
+    particular records and arrays as capable of supporting special behaviors.
+
+    See #ak.Array and #ak.behavior for a more complete description of
+    behaviors.
+    """
     if isinstance(array, (awkward1.highlevel.Array,
                           awkward1.highlevel.Record)):
         return array.layout.parameters
