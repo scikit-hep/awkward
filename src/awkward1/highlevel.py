@@ -109,6 +109,12 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
     conflict with applications where we might want `array.cross` to mean
     something else.
 
+    Arrays can be used in [Numba](http://numba.pydata.org/): they can be
+    passed as arguments to a Numba-compiled function or returned as return
+    values. The only limitation is that Awkward Arrays cannot be *created*
+    inside the Numba-compiled function; to make outputs, consider
+    #ak.ArrayBuilder.
+
     See also #ak.Record.
     """
 
@@ -1023,6 +1029,12 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
     [universal functions](https://docs.scipy.org/doc/numpy/reference/ufuncs.html)
     are equally usable on scalars as they are on arrays.
 
+    Records can be used in [Numba](http://numba.pydata.org/): they can be
+    passed as arguments to a Numba-compiled function or returned as return
+    values. The only limitation is that they cannot be *created*
+    inside the Numba-compiled function; to make outputs, consider
+    #ak.ArrayBuilder.
+
     See also #ak.Array.
     """
     def __init__(self, data, behavior=None, withname=None, checkvalid=False):
@@ -1411,19 +1423,142 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         return numba.typeof(self._numbaview)
 
 class ArrayBuilder(Sequence):
+    """
+    Args:
+        behavior (None or dict): Custom #ak.behavior for arrays built by
+            this ArrayBuilder.
+
+    General tool for building arrays of nested data structures from a sequence
+    of commands. Most data types can be constructed by calling commands in the
+    right order, similar to printing tokens to construct JSON output.
+
+    To illustrate how this works, consider the following example.
+
+        b = ak.ArrayBuilder()
+
+        # fill commands  # as JSON   # current array type
+        ##########################################################################################
+        b.beginlist()    # [         # 0 * var * unknown     (initially, the type is unknown)
+        b.integer(1)     #   1,      # 0 * var * int64
+        b.integer(2)     #   2,      # 0 * var * int64
+        b.real(3)        #   3.0     # 0 * var * float64     (all the integers have become floats)
+        b.endlist()      # ],        # 1 * var * float64
+        b.beginlist()    # [         # 1 * var * float64
+        b.endlist()      # ],        # 2 * var * float64
+        b.beginlist()    # [         # 2 * var * float64
+        b.integer(4)     #   4,      # 2 * var * float64
+        b.null()         #   null,   # 2 * var * ?float64    (now the floats are nullable)
+        b.integer(5)     #   5       # 2 * var * ?float64
+        b.endlist()      # ],        # 3 * var * ?float64
+        b.beginlist()    # [         # 3 * var * ?float64
+        b.beginrecord()  #   {       # 3 * var * ?union[float64, {}]
+        b.field("x")     #     "x":  # 3 * var * ?union[float64, {"x": unknown}]
+        b.integer(1)     #      1,   # 3 * var * ?union[float64, {"x": int64}]
+        b.field("y")     #      "y": # 3 * var * ?union[float64, {"x": int64, "y": unknown}]
+        b.beginlist()    #      [    # 3 * var * ?union[float64, {"x": int64, "y": var * unknown}]
+        b.integer(2)     #        2, # 3 * var * ?union[float64, {"x": int64, "y": var * int64}]
+        b.integer(3)     #        3  # 3 * var * ?union[float64, {"x": int64, "y": var * int64}]
+        b.endlist()      #      ]    # 3 * var * ?union[float64, {"x": int64, "y": var * int64}]
+        b.endrecord()    #   }       # 3 * var * ?union[float64, {"x": int64, "y": var * int64}]
+        b.endlist()      # ]         # 4 * var * ?union[float64, {"x": int64, "y": var * int64}]
+
+    To get an array, we take a #snapshot of the ArrayBuilder's current state.
+
+        >>> ak.tolist(b.snapshot())
+        [[1.0, 2.0, 3.0], [], [4.0, None, 5.0], [{'x': 1, 'y': [2, 3]}]]
+
+    The full set of filling commands is the following.
+
+       * #null: appends a None value.
+       * #boolean: appends True or False.
+       * #integer: appends an integer.
+       * #real: appends a floating-point value.
+       * #bytestring: appends an unencoded string (raw bytes).
+       * #string: appends a UTF-8 encoded string.
+       * #beginlist: begins filling a list; must be closed with #endlist.
+       * #endlist: ends a list.
+       * #begintuple: begins filling a tuple; must be closed with #endtuple.
+       * #index: selects a tuple slot to fill; must be followed by a command
+         that actually fills that slot.
+       * #endtuple: ends a tuple.
+       * #beginrecord: begins filling a record; must be closed with #endrecord.
+       * #field: selects a record field to fill; must be followed by a command
+         that actually fills that field.
+       * #endrecord: ends a record.
+       * #append: generic method for filling #null, #boolean, #integer, #real,
+         #bytestring, #string, #ak.Array, #ak.Record, or arbitrary Python data.
+         When filling from #ak.Array or #ak.Record, the output holds references
+         to the original data, rather than copying.
+       * #extend: appends all the items from an #ak.Array (by reference).
+       * #list: context manager for #beginlist and #endlist.
+       * #tuple: context manager for #begintuple and #endtuple.
+       * #record: context manager for #beginrecord and #endrecord.
+
+    ArrayBuilders can be used in [Numba](http://numba.pydata.org/): they can
+    be passed as arguments to a Numba-compiled function or returned as return
+    values. (Since ArrayBuilder works by accumulating side-effects, it's not
+    strictly necessary to return the object.)
+
+    The primary limitation is that ArrayBuilders cannot be *created* and
+    #snapshot cannot be called inside the Numba-compiled function. Awkward
+    Array uses Numba as a transformer: #ak.Array and an empty #ak.ArrayBuilder
+    go in and a filled #ak.ArrayBuilder is the result; #snapshot can be called
+    outside of the compiled function.
+
+    Also, context managers (Python's `with` statement) are not supported in
+    Numba yet, so the #list, #tuple, and #record methods are not available
+    in Numba-compiled functions.
+
+    Here is an example of filling an ArrayBuilder in Numba, which makes a
+    tree of dynamic depth.
+
+        >>> import numba as nb
+        >>> @nb.njit
+        ... def deepnesting(builder, probability):
+        ...     if np.random.uniform(0, 1) > probability:
+        ...         builder.append(np.random.normal())
+        ...     else:
+        ...         builder.beginlist()
+        ...         for i in range(np.random.poisson(3)):
+        ...             deepnesting(builder, probability**2)
+        ...         builder.endlist()
+        ... 
+        >>> builder = ak.ArrayBuilder()
+        >>> deepnesting(builder, 0.9)
+        >>> builder.snapshot()
+        <Array [... 1.23, -0.498, 0.272], -0.0519]]]] type='1 * var * var * union[var * ...'>
+        >>> ak.tolist(builder)
+        [[[[2.052949634260401, 0.9522057655747124], [[[0.2560810133948006], 1.8668954120287653, 0.8933700720920406, 0.31709173110067773], 0.38515995466456676, -1.6259655150460695, [[0.18211022402412927], 0.46592679548320143, 0.39275072293709223], [-0.572569956850481, 1.3991748897028693, -0.15414122174138611, -0.20008742443379549]], [[[-0.7410750761192828, -0.34455689325781347], -0.8446675414135969], [-0.8139112572198548, -0.7250728258598154, -0.42851563653684244, [1.0498296931855706, 1.6969612860075955, -0.18093559189614564, 1.078608791657082]]], [[0.5172670690419124]]], [[-1.9731106633939228, 0.5778640337060391], [-1.2488533773832633, -2.1458066486349434, -0.5439318468515132, [[0.2419441207503176, -2.313974422156488, [-0.6811651539055098, 0.08323572953509818], 1.801261721511669, 0.16653718365329456], -0.6348811801078983, [0.016350096268563003, [-1.2867920376687112, 0.38205295881313484, 1.4093210810506318, -0.2698869943849985, -0.48804922126979045]]], -0.6297773736098737, -2.5333506573111424], [-1.6680144776019314, 0.5862818687707498]], [0.6266171347177766, [[-0.7660737060966999, -0.677432480564727, -1.1527197837522167], -0.5025371508398492, [0.3610998752041169, 0.4811870365139723, -0.8030689233086394, [1.1538103888031122, -1.0955905747145644], -1.3980944016010062, 1.2822990047991039]], 0.939566155023095, [1.3581048298505891, [0.36949478822799947, 1.096666130135532, -0.2769024331557954, -0.7993215902675834], [-0.4103823967097248], [0.6789480075462166, 0.8991579880810466, 0.7900472554969632]], [], [0.6772644918729233, [-0.48385354748861575, -0.39154812719778437], 1.069329510451712, 0.8057750827838897, -0.3440192823735095], [[1.5687828887524105, -1.6086288847970498, [-0.6907842744344904], -0.42627155869364414], 0.33605387861917574, -0.7329513818714791, 0.5040026160756554, -1.2529377572694538, -1.1566264096307166], [[0.6407540268295862], [-0.017540252205401917], -0.9530971110439417], [[0.41643810453893765, -0.682997865214066, 0.7930286671567052], 0.5142103949393788]], [[0.6271004836147108, [0.5895664560584991, -0.7563863809912544]], [1.6176958047983054, 0.5226854288884638, 0.24149248202497436], -1.0912185170716135, [-1.1122535648683918], 0.22727974012353094], [-0.4161362684360263, [[0.4234696267033054], 0.7866791657813567, [1.225201951430818, -0.49790730839958713, 0.2715010029532568], -0.051866117232298316]]]]
+        >>> ak.typeof(builder.snapshot())
+        1 * var * var * union[var * union[float64, var * union[var * union[float64, var * float64], float64]], float64]
+
+
+    """
+
+    def __init__(self, behavior=None):
+        self._layout = awkward1.layout.ArrayBuilder()
+        self.behavior = behavior
+
     @classmethod
-    def _wrap(cls, layout, behavior=None, withname=None):
+    def _wrap(cls, layout, behavior=None):
+        """
+        Args:
+            layout (#ak.layout.ArrayBuilder): Low-level builder to wrap.
+            behavior (None or dict): Custom #ak.behavior for arrays built by
+                this ArrayBuilder.
+
+        Wraps a low-level #ak.layout.ArrayBuilder as a high-level
+        #ak.ArrayBulider.
+
+        The #ak.ArrayBuilder constructor creates a new #ak.layout.ArrayBuilder
+        with no accumulated data, but Numba needs to wrap existing data
+        when returning from a lowered function.
+        """
         assert isinstance(layout, awkward1.layout.ArrayBuilder)
         out = cls.__new__(cls)
         out._layout = layout
-        out._withname = withname
         out.behavior = behavior
         return out
-
-    def __init__(self, behavior=None, withname=None):
-        self._layout = awkward1.layout.ArrayBuilder()
-        self._withname = withname
-        self.behavior = behavior
 
     @property
     def behavior(self):
@@ -1494,10 +1629,6 @@ class ArrayBuilder(Sequence):
 
     def snapshot(self):
         layout = self._layout.snapshot()
-        if self._withname is not None:
-            layout = awkward1.operations.structure.withname(layout,
-                                                            self._withname,
-                                                            highlevel=False)
         return awkward1._util.wrap(layout, self._behavior)
 
     def null(self):
