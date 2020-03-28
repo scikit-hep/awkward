@@ -338,7 +338,7 @@ ERROR awkward_unionarray_flatten_combine(
     for (int64_t j = start;  j < stop;  j++) {
       totags[k] = tag;
       toindex[k] = j;
-      k++;
+      k++
     }
   }
   return success();
