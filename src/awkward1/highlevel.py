@@ -36,7 +36,7 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
             used to override their behavior (see below).
         checkvalid (bool): If True, verify that the #layout is valid.
 
-    **High-level array that can contain data of any type.**
+    High-level array that can contain data of any type.
 
     For most users, this is the only class in Awkward Array that matters: it
     is the entry point for data analysis with an emphasis on usability. It
@@ -963,6 +963,50 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         return numba.typeof(self._numbaview)
 
 class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
+    """
+    Args:
+        data (#ak.layout.Record, #ak.Record, str, or dict):
+            Data to wrap or convert into a record.
+            If a string, the data are assumed to be JSON.
+            If a dict, calls #ak.fromiter, which assumes all inner
+            dimensions have irregular lengths.
+        behavior (None or dict): Custom #ak.behavior for this record only.
+        withname (None or str): Gives the record a name that can be
+            used to override its behavior (see below).
+        checkvalid (bool): If True, verify that the #layout is valid.
+
+    High-level record that can contain fields of any type.
+
+    Most users won't be creating Records manually. This class primarily exists
+    to be overridden in the same way as #ak.Array.
+
+    Following a very similar example,
+
+        class Vec3(ak.Record):
+            def cross(self, other):
+                "Computes the cross-product of 3D vectors."
+                x = self.y*other.z - self.z*other.y
+                y = self.z*other.x - self.x*other.z
+                z = self.x*other.y - self.y*other.x
+                return ak.Record({"x": x, "y": y, "z": z}, withname="vec3")
+
+        # Records of vec3 use subclass Vec3 instead of ak.Record.
+        ak.behavior["vec3"] = Vec3
+
+        vectors = ak.Array([{"x": 0.1, "y": 1.0, "z": 30.0},
+                            {"x": 0.2, "y": 2.0, "z": 20.0},
+                            {"x": 0.3, "y": 3.0, "z": 10.0}],
+                           withname="vec3")
+
+        >>> vectors[0].cross(vectors[1])
+        <Record {x: -40, y: 4, z: 0} type='vec3'>
+
+    Be sure to distinguish between records, which subclass #ak.Record, and
+    arrays, which subclass #ak.Array, even though the method implementations
+    can be very similar because NumPy's
+    [universal functions](https://docs.scipy.org/doc/numpy/reference/ufuncs.html)
+    are equally usable on scalars as they are on arrays.
+    """
     def __init__(self, data, behavior=None, withname=None, checkvalid=False):
         if isinstance(data, awkward1.layout.Record):
             layout = data
