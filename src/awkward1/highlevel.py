@@ -1562,6 +1562,21 @@ class ArrayBuilder(Sequence):
 
     @property
     def behavior(self):
+        """
+        The `behavior` parameter passed into this ArrayBuilder's constructor.
+
+           * If a dict, this `behavior` overrides the global #ak.behavior.
+             Any keys in the global #ak.behavior but not this `behavior` are
+             still valid, but any keys in both are overridden by this
+             `behavior`. Keys with a None value are equivalent to missing keys,
+             so this `behavior` can effectively remove keys from the
+             global #ak.behavior.
+
+           * If None, the Array defaults to the global #ak.behavior.
+
+        See #ak.behavior for a list of recognized key patterns and their
+        meanings.
+        """
         return self._behavior
 
     @behavior.setter
@@ -1573,24 +1588,71 @@ class ArrayBuilder(Sequence):
 
     @property
     def type(self):
+        """
+        The current high-level type of this ArrayBuilder as #ak.types.Type
+        objects.
+
+        Note that the type can change as data are accumulated.
+
+        See #ak.Array.type for a more complete description.
+        """
         return self.snapshot().type
 
     def __len__(self):
+        """
+        The current length of the accumulated array.
+        """
         return len(self._layout)
 
     def __getitem__(self, where):
+        """
+        Args:
+            where (many types supported; see below): Index of positions to
+                select from the array.
+
+        Takes a #snapshot and selects items from the array.
+
+        See #ak.Array.__getitem__ for a more complete description.
+        """
         return awkward1._util.wrap(self._layout[where], self._behavior)
 
     def __iter__(self):
+        """
+        Iterates over a #snapshot of the array in Python.
+
+        See #ak.Array.__iter__ for performance considerations.
+        """
         for x in self.snapshot():
             yield x
 
     def __str__(self, limit_value=85, snapshot=None):
+        """
+        Args:
+            limit_value (int): Maximum number of characters to use when
+                presenting the ArrayBuilder as a string.
+
+        Presents this ArrayBuilder as a string without type or
+        `"<ArrayBuilder ...>"`.
+
+        See #ak.Array.__str__ for a more complete description.
+        """
         if snapshot is None:
             snapshot = self.snapshot()
         return snapshot.__str__(limit_value=limit_value)
 
     def __repr__(self, limit_value=40, limit_total=85):
+        """
+        Args:
+            limit_value (int): Maximum number of characters to use when
+                presenting the data of the ArrayBuilder.
+            limit_total (int): Maximum number of characters to use for
+                the whole string (should be larger than `limit_value`).
+
+        Presents this ArrayBuilder as a string with its type and
+        `"<ArrayBuilder ...>"`.
+
+        See #ak.Array.__repr__ for a more complete description.
+        """
         snapshot = self.snapshot()
         value = self.__str__(limit_value=limit_value, snapshot=snapshot)
 
@@ -1603,10 +1665,24 @@ class ArrayBuilder(Sequence):
         return "<ArrayBuilder {0} type={1}>".format(value, type)
 
     def __array__(self, *args, **kwargs):
+        """
+        Intercepts attempts to convert a #snapshot of this array into a
+        NumPy array and either performs a zero-copy conversion or raises
+        an error.
+
+        See #ak.Array.__array__ for a more complete description.
+        """
         return awkward1._connect._numpy.convert_to_array(
                  self.snapshot(), args, kwargs)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+        """
+        Intercepts attempts to pass this ArrayBuilder to a NumPy
+        [universal functions](https://docs.scipy.org/doc/numpy/reference/ufuncs.html)
+        (ufuncs) and passes it through the structure of the array's #snapshot.
+
+        See #ak.Array.__array_ufunc__ for a more complete description.
+        """
         return awkward1._connect._numpy.array_ufunc(ufunc,
                                                     method,
                                                     inputs,
@@ -1614,6 +1690,12 @@ class ArrayBuilder(Sequence):
                                                     self._behavior)
 
     def __array_function__(self, func, types, args, kwargs):
+        """
+        Intercepts attempts to pass this ArrayBuilder to those NumPy functions
+        other than universal functions that have an Awkward equivalent.
+
+        See #ak.ArrayBuilder.__array_ufunc__ for a more complete description.
+        """
         return awkward1._connect._numpy.array_function(func,
                                                        types,
                                                        args,
@@ -1621,6 +1703,14 @@ class ArrayBuilder(Sequence):
 
     @property
     def numbatype(self):
+        """
+        The type of this Array when it is used in Numba. It contains enough
+        information to generate low-level code for accessing any element,
+        down to the leaves.
+
+        See [Numba documentation](https://numba.pydata.org/numba-doc/dev/reference/types.html)
+        on types and signatures.
+        """
         import numba
         import awkward1._connect._numba.builder
         awkward1._connect._numba.register()
@@ -1628,28 +1718,68 @@ class ArrayBuilder(Sequence):
                  self._behavior)
 
     def snapshot(self):
+        """
+        Converts the currently accumulated data into an #ak.Array.
+
+        This is almost always an *O(1)* operation (does not scale with the
+        size of the accumulated data, and therefore safe to call relatively
+        often).
+
+        The resulting #ak.Array shares memory with the accumulated data (it
+        is a zero-copy operation), but it is safe to continue filling the
+        ArrayBuilder because its append-only operations only affect data
+        outside the range viewed by old snapshots. If ArrayBuilder reallocates
+        an internal buffer, the data are no longer shared, but they're
+        reference-counted by the #ak.Array and the #ak.ArrayBuilder, so all
+        buffers are deleted exactly once.
+        """
         layout = self._layout.snapshot()
         return awkward1._util.wrap(layout, self._behavior)
 
     def null(self):
+        """
+        Appends a None value at the current position in the accumulated array.
+        """
         self._layout.null()
 
     def boolean(self, x):
+        """
+        Appends a True or False at the current position in the accumulated
+        array.
+        """
         self._layout.boolean(x)
 
     def integer(self, x):
+        """
+        Appends an integer at the current position in the accumulated array.
+        """
         self._layout.integer(x)
 
     def real(self, x):
+        """
+        Appends a floating point number at the current position in the
+        accumulated array.
+        """
         self._layout.real(x)
 
     def bytestring(self, x):
+        """
+        Appends an unencoded string (raw bytes) at the current position in the
+        accumulated array.
+        """
         self._layout.bytestring(x)
 
     def string(self, x):
+        """
+        Appends a UTF-8 encoded string at the current position in the
+        accumulated array.
+        """
         self._layout.string(x)
 
     def beginlist(self):
+        """
+        
+        """
         self._layout.beginlist()
 
     def endlist(self):
