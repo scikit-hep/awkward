@@ -1170,6 +1170,19 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         return awkward1._util.wrap(self._layout[where], self._behavior)
 
     def __setitem__(self, where, what):
+        """
+        Args:
+            where (str): Field name to add data to the record.
+            what: Data to add as the new field.
+
+        For example:
+
+            >>> record = ak.Record({"x": 3.3})
+            >>> record["y"] = 4
+            >>> record["z"] = {"another": "record"}
+            >>> print(record)
+            {x: 3.3, y: 4, z: {another: 'record'}}
+        """
         if not isinstance(where, str):
             raise ValueError(
                     "only fields may be assigned in-place (by field name)")

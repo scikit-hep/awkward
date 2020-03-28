@@ -18,9 +18,18 @@ def withfield(base, what, where=None, highlevel=True):
     base = awkward1.operations.convert.tolayout(base,
                                                 allowrecord=True,
                                                 allowother=False)
+    if base.numfields < 0:
+        raise ValueError("no tuples or records in array; cannot add a new "
+                "field")
+
     what = awkward1.operations.convert.tolayout(what,
                                                 allowrecord=True,
                                                 allowother=True)
+    
+    keys = base.keys()
+    if where in base.keys():
+        keys.remove(where)
+        base = base[keys]
 
     def getfunction(inputs, depth):
         base, what = inputs
