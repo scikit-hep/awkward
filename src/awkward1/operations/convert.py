@@ -18,6 +18,30 @@ import awkward1._io
 import awkward1._util
 
 def fromnumpy(array, regulararray=False, highlevel=True, behavior=None):
+    """
+    Args:
+        array (np.ndarray): The NumPy array to convert into an Awkward Array.
+            This array can be a np.ma.MaskedArray.
+        regulararray (bool): If True and the array is multidimensional,
+            the dimensions are represented by nested #ak.layout.RegularArray
+            nodes; if False and the array is multidimensional, the dimensions
+            are represented by a multivalued #ak.layout.NumpyArray.shape.
+            If the array is one-dimensional, this has no effect.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+        behavior (bool): Custom #ak.behavior for the output array, if
+            high-level.
+
+    Converts a NumPy array into an Awkward Array.
+
+    The resulting layout may involve the following #ak.layout.Content types
+    (only):
+
+       * #ak.layout.NumpyArray
+       * #ak.layout.ByteMaskedArray or #ak.layout.UnmaskedArray if the
+         `array` is an np.ma.MaskedArray.
+       * #ak.layout.RegularArray if `regulararray=True`.
+    """
     def recurse(array, mask):
         if regulararray and len(array.shape) > 1:
             return awkward1.layout.RegularArray(
