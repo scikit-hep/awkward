@@ -1532,7 +1532,9 @@ class ArrayBuilder(Sequence):
         >>> ak.typeof(builder.snapshot())
         1 * var * var * union[var * union[float64, var * union[var * union[float64, var * float64], float64]], float64]
 
-
+    Note that this is a *general* method for building arrays; if the type is
+    known in advance, more specialized procedures can be faster. This should
+    be considered the "least effort" approach.
     """
 
     def __init__(self, behavior=None):
