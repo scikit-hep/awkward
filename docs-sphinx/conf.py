@@ -52,8 +52,8 @@ html_static_path = ["_static"]
 # Additional stuff
 master_doc = "index"
 
-# import os
-# import subprocess
-# subprocess.check_call(["doxygen", os.path.join("docs-doxygen", "Doxyfile")], cwd="..")
+import os
+import subprocess
+subprocess.check_call(["doxygen", os.path.join("docs-doxygen", "Doxyfile")], cwd="..")
 
 exec(open("prepare_docstrings.py").read(), dict(globals()))

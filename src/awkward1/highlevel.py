@@ -1192,6 +1192,33 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         self._numbaview = None
 
     def __getattr__(self, where):
+        """
+        Whenever possible, fields can be accessed as attributes.
+
+        For example, the fields of an `record` like
+
+            ak.Record({"x": 1.1, "y": [2, 2], "z": "three"})
+
+        can be accessed as
+
+            >>> record.x
+            1.1
+            >>> record.y
+            <Array [2, 2] type='2 * int64'>
+            >>> record.z
+            'three'
+
+        which are equivalent to `record["x"]`, `record["y"]`, and
+        `record["z"]`.
+
+        Fields can't be accessed as attributes when
+
+           * #ak.Record methods or properties take precedence,
+           * a domain-specific behavior has methods or properties that take
+             precedence, or
+           * the field name is not a valid Python identifier or is a Python
+             keyword.
+        """
         if where in dir(type(self)):
             return super(Record, self).__getattribute__(where)
         else:
@@ -1208,6 +1235,10 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
                 raise AttributeError("no field named {0}".format(repr(where)))
 
     def __dir__(self):
+        """
+        Lists all methods, properties, and field names (see #__getattr__)
+        that can be accessed as attributes.
+        """
         return sorted(set(dir(super(Array, self))
                           + [x for x in self._layout.keys()
                                if _dir_pattern.match(x) and
@@ -1215,41 +1246,121 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
 
     @property
     def slot0(self):
+        """
+        Equivalent to #__getitem__ with `"0"`, which selects slot `0` from
+        the Record as a tuple.
+
+        See #ak.Array.slot0 for a more complete description.
+        """
         return self["0"]
     @property
     def slot1(self):
+        """
+        Equivalent to #__getitem__ with `"1"`, which selects slot `1` from
+        the Record as a tuple.
+
+        See #ak.Array.slot0 for a more complete description.
+        """
         return self["1"]
     @property
     def slot2(self):
+        """
+        Equivalent to #__getitem__ with `"2"`, which selects slot `2` from
+        the Record as a tuple.
+
+        See #ak.Array.slot0 for a more complete description.
+        """
         return self["2"]
     @property
     def slot3(self):
+        """
+        Equivalent to #__getitem__ with `"3"`, which selects slot `3` from
+        the Record as a tuple.
+
+        See #ak.Array.slot0 for a more complete description.
+        """
         return self["3"]
     @property
     def slot4(self):
+        """
+        Equivalent to #__getitem__ with `"4"`, which selects slot `4` from
+        the Record as a tuple.
+
+        See #ak.Array.slot0 for a more complete description.
+        """
         return self["4"]
     @property
     def slot5(self):
+        """
+        Equivalent to #__getitem__ with `"5"`, which selects slot `5` from
+        the Record as a tuple.
+
+        See #ak.Array.slot0 for a more complete description.
+        """
         return self["5"]
     @property
     def slot6(self):
+        """
+        Equivalent to #__getitem__ with `"6"`, which selects slot `6` from
+        the Record as a tuple.
+
+        See #ak.Array.slot0 for a more complete description.
+        """
         return self["6"]
     @property
     def slot7(self):
+        """
+        Equivalent to #__getitem__ with `"7"`, which selects slot `7` from
+        the Record as a tuple.
+
+        See #ak.Array.slot0 for a more complete description.
+        """
         return self["7"]
     @property
     def slot8(self):
+        """
+        Equivalent to #__getitem__ with `"8"`, which selects slot `8` from
+        the Record as a tuple.
+
+        See #ak.Array.slot0 for a more complete description.
+        """
         return self["8"]
     @property
     def slot9(self):
+        """
+        Equivalent to #__getitem__ with `"9"`, which selects slot `9` from
+        the Record as a tuple.
+
+        See #ak.Array.slot0 for a more complete description.
+        """
         return self["9"]
 
     def __str__(self, limit_value=85):
+        """
+        Args:
+            limit_value (int): Maximum number of characters to use when
+                presenting the Record as a string.
+
+        Presents this Record as a string without type or `"<Record ...>"`.
+
+        See #ak.Array.__str__ for a more complete description.
+        """
         return awkward1._util.minimally_touching_string(limit_value + 2,
                                                         self._layout,
                                                         self._behavior)[1:-1]
 
     def __repr__(self, limit_value=40, limit_total=85):
+        """
+        Args:
+            limit_value (int): Maximum number of characters to use when
+                presenting the data of the Record.
+            limit_total (int): Maximum number of characters to use for
+                the whole string (should be larger than `limit_value`).
+
+        Presents this Record as a string with its type and `"<Record ...>"`.
+
+        See #ak.Array.__repr__ for a more complete description.
+        """
         value = awkward1._util.minimally_touching_string(limit_value + 2,
                                                          self._layout,
                                                          self._behavior)[1:-1]
@@ -1262,6 +1373,19 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         return "<Record {0} type={1}>".format(value, type)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+        """
+        Intercepts attempts to pass this Record to a NumPy
+        [universal functions](https://docs.scipy.org/doc/numpy/reference/ufuncs.html)
+        (ufuncs) and passes it through the Record's structure.
+
+        This method conforms to NumPy's
+        [NEP 13](https://numpy.org/neps/nep-0013-ufunc-overrides.html)
+        for overriding ufuncs, which has been
+        [available since NumPy 1.13](https://numpy.org/devdocs/release/1.13.0-notes.html#array-ufunc-added)
+        (and thus NumPy 1.13 is the minimum allowed version).
+
+        See #ak.Array.__array_ufunc__ for a more complete description.
+        """
         return awkward1._connect._numpy.array_ufunc(ufunc,
                                                     method,
                                                     inputs,
@@ -1270,6 +1394,14 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
 
     @property
     def numbatype(self):
+        """
+        The type of this Record when it is used in Numba. It contains enough
+        information to generate low-level code for accessing any element,
+        down to the leaves.
+
+        See [Numba documentation](https://numba.pydata.org/numba-doc/dev/reference/types.html)
+        on types and signatures.
+        """
         import numba
         import awkward1._connect._numba
         awkward1._connect._numba.register()
