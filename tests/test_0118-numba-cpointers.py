@@ -898,6 +898,58 @@ def test_ArrayBuilder_list():
     assert awkward1.tolist(b.snapshot()) == []
     assert awkward1.tolist(c.snapshot()) == []
 
+def test_ArrayBuilder_tuple():
+    @numba.njit
+    def f1(x):
+        x.begintuple(2)
+        x.index(0).append(1)
+        x.index(1).append(1.1)
+        x.endtuple()
+        x.begintuple(2)
+        x.index(0).append(2)
+        x.index(1).append(2.2)
+        x.endtuple()
+        return x
+
+    a = awkward1.ArrayBuilder()
+    b = f1(a)
+    assert awkward1.tolist(a.snapshot()) == [(1, 1.1), (2, 2.2)]
+    assert awkward1.tolist(b.snapshot()) == [(1, 1.1), (2, 2.2)]
+    c = f1.py_func(a)
+    assert awkward1.tolist(a.snapshot()) == [(1, 1.1), (2, 2.2),
+                                             (1, 1.1), (2, 2.2)]
+    assert awkward1.tolist(c.snapshot()) == [(1, 1.1), (2, 2.2),
+                                             (1, 1.1), (2, 2.2)]
+
+def test_ArrayBuilder_record():
+    @numba.njit
+    def f1(x):
+        x.beginrecord()
+        x.field("x").append(1)
+        x.field("y").append(1.1)
+        x.endrecord()
+        x.beginrecord()
+        x.field("x").append(2)
+        x.field("y").append(2.2)
+        x.endrecord()
+        return x
+
+    a = awkward1.ArrayBuilder()
+    b = f1(a)
+    assert awkward1.tolist(a.snapshot()) == [{"x": 1, "y": 1.1},
+                                             {"x": 2, "y": 2.2}]
+    assert awkward1.tolist(b.snapshot()) == [{"x": 1, "y": 1.1},
+                                             {"x": 2, "y": 2.2}]
+    c = f1.py_func(a)
+    assert awkward1.tolist(a.snapshot()) == [{"x": 1, "y": 1.1},
+                                             {"x": 2, "y": 2.2},
+                                             {"x": 1, "y": 1.1},
+                                             {"x": 2, "y": 2.2}]
+    assert awkward1.tolist(c.snapshot()) == [{"x": 1, "y": 1.1},
+                                             {"x": 2, "y": 2.2},
+                                             {"x": 1, "y": 1.1},
+                                             {"x": 2, "y": 2.2}]
+                                            
 def dummy_typer(viewtype):
     return numba.float64
 

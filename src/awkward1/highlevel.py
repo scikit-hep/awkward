@@ -1524,11 +1524,12 @@ class ArrayBuilder(Sequence):
     def endlist(self):
         self._layout.endlist()
 
-    def begintuple(self):
-        self._layout.begintuple()
+    def begintuple(self, numfields):
+        self._layout.begintuple(numfields)
 
     def index(self, i):
         self._layout.index(i)
+        return self
 
     def endtuple(self):
         self._layout.endtuple()
@@ -1538,6 +1539,7 @@ class ArrayBuilder(Sequence):
 
     def field(self, key):
         self._layout.field(key)
+        return self
 
     def endrecord(self):
         self._layout.endrecord()
@@ -1564,3 +1566,67 @@ class ArrayBuilder(Sequence):
             self._layout.extend(obj.layout)
         else:
             raise TypeError("'extend' method requires an ak.Array")
+
+    class _Nested(object):
+        def __init__(self, arraybuilder):
+            self._arraybuilder = arraybuilder
+
+        def __repr__(self):
+            snapshot = self._arraybuilder.snapshot()
+            value = self._arraybuilder.__str__(limit_value=limit_value,
+                                               snapshot=snapshot)
+
+            limit_type = (limit_total - len(value)
+                          - len("<ArrayBuilder.  type=>") - len(self._name))
+            typestrs = awkward1._util.typestrs(self._arraybuilder._behavior)
+            type = repr(str(snapshot.type(typestrs)))
+            if len(type) > limit_type:
+                type = type[:(limit_type - 4)] + "..." + type[-1]
+
+            return "<ArrayBuilder.{0} {1} type={2}>".format(self._name,
+                                                            value,
+                                                            type)
+
+    class List(_Nested):
+        _name = "List"
+
+        def __enter__(self):
+            self._arraybuilder.beginlist()
+
+        def __exit__(self, type, value, traceback):
+            self._arraybuilder.endlist()
+
+    def list(self):
+        return self.List(self)
+
+    class Tuple(_Nested):
+        _name = "Tuple"
+
+        def __init__(self, arraybuilder, numfields):
+            super(ArrayBuilder.Tuple, self).__init__(arraybuilder)
+            self._numfields = numfields
+
+        def __enter__(self):
+            self._arraybuilder.begintuple(self._numfields)
+
+        def __exit__(self, type, value, traceback):
+            self._arraybuilder.endtuple()
+
+    def tuple(self, numfields):
+        return self.Tuple(self, numfields)
+
+    class Record(_Nested):
+        _name = "Record"
+
+        def __init__(self, arraybuilder, name):
+            super(ArrayBuilder.Record, self).__init__(arraybuilder)
+            self._name = name
+
+        def __enter__(self):
+            self._arraybuilder.beginrecord(name=self._name)
+
+        def __exit__(self, type, value, traceback):
+            self._arraybuilder.endrecord()
+
+    def record(self, name=None):
+        return self.Record(self, name)
