@@ -31,7 +31,7 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
             If a string, the data are assumed to be JSON.
             If an iterable, calls #ak.fromiter, which assumes all dimensions
             have irregular lengths.
-        behavior (None or dict): Custom #ak.behavior for this array only.
+        behavior (None or dict): Custom #ak.behavior for this Array only.
         withname (None or str): Gives tuples and records a name that can be
             used to override their behavior (see below).
         checkvalid (bool): If True, verify that the #layout is valid.
@@ -58,12 +58,12 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
 
     we want to access fields `x`, `y`, `z` as attributes
 
-        vectors.x
-        # <Array [0.1, 0.2, 0.3] type='3 * float64'>
-        vectors.y
-        # <Array [1, 2, 3] type='3 * float64'>
-        vectors.z
-        # <Array [10, 20, 30] type='3 * float64'>
+        >>> vectors.x
+        <Array [0.1, 0.2, 0.3] type='3 * float64'>
+        >>> vectors.y
+        <Array [1, 2, 3] type='3 * float64'>
+        >>> vectors.z
+        <Array [10, 20, 30] type='3 * float64'>
 
     Additionally, we might want to add functionality,
 
@@ -90,21 +90,26 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
                                  {"x": 30.0, "y": 3.0, "z": 0.3}],
                                 withname="vec3")
 
-        vectors
-        # <Array [{x: 0.1, y: 1, z: 10, ... y: 3, z: 30}] type='3 * vec3'>
-        more_vectors
-        # <Array [{x: 10, y: 1, z: 0.1, ... z: 0.3}] type='3 * vec3'>
-        type(vectors)
-        # <class '__main__.Vec3Array'>
-        type(more_vectors)
-        # <class '__main__.Vec3Array'>
+    Now the record types are presented as "vec3" and the Array has class
+    `Vec3Array`, so it has a `cross` method.
 
-        vectors.cross(more_vectors)
-        # <Array [{x: -9.9, y: 100, ... z: -89.1}] type='3 * vec3'>
+        >>> vectors
+        <Array [{x: 0.1, y: 1, z: 10, ... y: 3, z: 30}] type='3 * vec3'>
+        >>> more_vectors
+        <Array [{x: 10, y: 1, z: 0.1, ... z: 0.3}] type='3 * vec3'>
+        >>> type(vectors)
+        <class '__main__.Vec3Array'>
+        >>> type(more_vectors)
+        <class '__main__.Vec3Array'>
+
+        >>> vectors.cross(more_vectors)
+        <Array [{x: -9.9, y: 100, ... z: -89.1}] type='3 * vec3'>
 
     If the #ak.cross function were a method of this Array class, then it would
     conflict with applications where we might want `array.cross` to mean
     something else.
+
+    See also #ak.Record.
     """
 
     def __init__(self, data, behavior=None, withname=None, checkvalid=False):
@@ -145,8 +150,8 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
     @property
     def layout(self):
         """
-        The composable #ak.layout.Content elements that determine how the
-        array is structured.
+        The composable #ak.layout.Content elements that determine how this
+        Array is structured.
 
         This may be considered a "low-level" view, as it distinguishes between
         arrays that have the same logical meaning (i.e. same JSON output and
@@ -223,7 +228,7 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
     @property
     def type(self):
         """
-        The high-level type of an array as #ak.types.Type objects.
+        The high-level type of this Array as #ak.types.Type objects.
 
         The high-level type ignores #layout differences like
         #ak.layout.ListArray64 versus #ak.layout.ListOffsetArray64, but
@@ -272,7 +277,7 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
 
     def __len__(self):
         """
-        The length of the array, only counting the outermost structure.
+        The length of this Array, only counting the outermost structure.
 
         For example, the length of
 
@@ -284,7 +289,7 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
 
     def __iter__(self):
         """
-        Iterates over the array in Python.
+        Iterates over this Array in Python.
 
         Note that this is the *slowest* way to access data (even slower than
         native Python objects, like lists and dicts). Usually, you should
@@ -319,7 +324,7 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         """
         Args:
             where (many types supported; see below): Index of positions to
-                select from the array.
+                select from this Array.
 
         Select items from the Array using an extension of NumPy's (already
         quite extensive) rules.
@@ -402,7 +407,7 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         Projection
         **********
 
-        The following array
+        The following `array`
 
             array = ak.Array([[{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}],
                               [{"x": 3.3, "y": [3, 3, 3]}],
@@ -521,7 +526,7 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         Awkward Array's nested lists can be used as slices as well, as long
         as the type at the deepest level of nesting is boolean or integer.
 
-        For example, the array
+        For example, the `array`
 
             array = ak.Array([[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [], [[5.5]]])
 
@@ -751,7 +756,7 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
             limit_value (int): Maximum number of characters to use when
                 presenting the Array as a string.
 
-        Presents the Array as a string without type or `"<Array ...>"`.
+        Presents this Array as a string without type or `"<Array ...>"`.
 
         Large Arrays are truncated to the first few elements and the last
         few elements to fit within `limit_value` characters, using ellipsis
@@ -810,7 +815,7 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
             limit_total (int): Maximum number of characters to use for
                 the whole string (should be larger than `limit_value`).
 
-        Presents the Array as a string with its type and `"<Array ...>"`.
+        Presents this Array as a string with its type and `"<Array ...>"`.
 
         See #__str__ for details of the string truncation algorithm.
 
@@ -970,8 +975,8 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
             If a string, the data are assumed to be JSON.
             If a dict, calls #ak.fromiter, which assumes all inner
             dimensions have irregular lengths.
-        behavior (None or dict): Custom #ak.behavior for this record only.
-        withname (None or str): Gives the record a name that can be
+        behavior (None or dict): Custom #ak.behavior for this Record only.
+        withname (None or str): Gives the record type a name that can be
             used to override its behavior (see below).
         checkvalid (bool): If True, verify that the #layout is valid.
 
@@ -993,10 +998,21 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         # Records of vec3 use subclass Vec3 instead of ak.Record.
         ak.behavior["vec3"] = Vec3
 
+        # Records with name "vec3" are presented as having type "vec3".
+        ak.behavior["__typestr__", "vec3"] = "vec3"
+
         vectors = ak.Array([{"x": 0.1, "y": 1.0, "z": 30.0},
                             {"x": 0.2, "y": 2.0, "z": 20.0},
                             {"x": 0.3, "y": 3.0, "z": 10.0}],
                            withname="vec3")
+
+    Now the record types are presented as "vec3" and the Record has class
+    `Vec3`, so it has a `cross` method.
+
+        >>> vectors[0]
+        <Record {x: 0.1, y: 1, z: 30} type='vec3'>
+        >>> type(vectors[0])
+        <class '__main__.Vec3'>
 
         >>> vectors[0].cross(vectors[1])
         <Record {x: -40, y: 4, z: 0} type='vec3'>
@@ -1006,6 +1022,8 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
     can be very similar because NumPy's
     [universal functions](https://docs.scipy.org/doc/numpy/reference/ufuncs.html)
     are equally usable on scalars as they are on arrays.
+
+    See also #ak.Array.
     """
     def __init__(self, data, behavior=None, withname=None, checkvalid=False):
         if isinstance(data, awkward1.layout.Record):
@@ -1041,6 +1059,42 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
 
     @property
     def layout(self):
+        """
+        The #ak.layout.Record that contains composable #ak.layout.Content
+        elements to determine how the array is structured.
+
+        See #ak.Array.layout for a more complete description.
+
+        The #ak.layout.Record is not a subclass of #ak.layout.Content in
+        Python (note: [Record](../_static/classawkward_1_1Record.html) *is* a
+        subclass of [Content](../_static/classawkward_1_1Content.html) in
+        C++!) and it is not composable with them: #ak.layout.Record contains
+        one #ak.layout.RecordArray (which is a #ak.layout.Content), but
+        #ak.layout.Content nodes cannot contain a #ak.layout.Record.
+
+        A #ak.layout.Record is not an independent entity from its
+        #ak.layout.RecordArray; it's really just a marker indicating which
+        element to select. The XML representation reflects that:
+
+            >>> vectors = ak.Array([{"x": 0.1, "y": 1.0, "z": 30.0},
+            ...                     {"x": 0.2, "y": 2.0, "z": 20.0},
+            ...                     {"x": 0.3, "y": 3.0, "z": 10.0}])
+
+            >>> vectors[1].layout
+            <Record at="1">
+                <RecordArray>
+                    <field index="0" key="x">
+                        <NumpyArray format="d" shape="3" data="0.1 0.2 0.3" at="0x555660dfe7d0"/>
+                    </field>
+                    <field index="1" key="y">
+                        <NumpyArray format="d" shape="3" data="1 2 3" at="0x555660df4180"/>
+                    </field>
+                    <field index="2" key="z">
+                        <NumpyArray format="d" shape="3" data="30 20 10" at="0x555660df6190"/>
+                    </field>
+                </RecordArray>
+            </Record>
+        """
         return self._layout
 
     @layout.setter
@@ -1054,6 +1108,21 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
 
     @property
     def behavior(self):
+        """
+        The `behavior` parameter passed into this Record's constructor.
+
+           * If a dict, this `behavior` overrides the global #ak.behavior.
+             Any keys in the global #ak.behavior but not this `behavior` are
+             still valid, but any keys in both are overridden by this
+             `behavior`. Keys with a None value are equivalent to missing keys,
+             so this `behavior` can effectively remove keys from the
+             global #ak.behavior.
+
+           * If None, the Record defaults to the global #ak.behavior.
+
+        See #ak.behavior for a list of recognized key patterns and their
+        meanings.
+        """
         return self._behavior
 
     @behavior.setter
@@ -1065,9 +1134,39 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
 
     @property
     def type(self):
+        """
+        The high-level type of this Record as #ak.types.Type objects.
+
+        See #ak.Array.type for a more complete description.
+        """
         return self._layout.type(awkward1._util.typestrs(self._behavior))
 
     def __getitem__(self, where):
+        """
+        Args:
+            where (many types supported; see below): Index of positions to
+                select from this Record.
+
+        Select items from the Record using an extension of NumPy's (already
+        quite extensive) rules.
+
+        See #ak.Array.__getitem__ for a more complete description. Since
+        this is a record, the first item in the slice tuple must be a
+        string, selecting a field.
+
+        For example, with a `record` like
+
+            ak.Record({"x": 3.3, "y": [1, 2, 3]})
+
+        we can select
+
+            >>> record["x"]
+            3.3
+            >>> record["y"]
+            <Array [1, 2, 3] type='3 * int64'>
+            >>> record["y", 1]
+            2
+        """
         return awkward1._util.wrap(self._layout[where], self._behavior)
 
     def __setitem__(self, where, what):

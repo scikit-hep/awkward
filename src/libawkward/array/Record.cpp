@@ -433,6 +433,25 @@ namespace awkward {
   }
 
   const ContentPtr
+  Record::getitem(const Slice& where) const {
+    ContentPtr next = array_.get()->getitem_range_nowrap(at_, at_ + 1);
+
+    SliceItemPtr nexthead = where.head();
+    Slice nexttail = where.tail();
+    Index64 nextadvanced(0);
+    ContentPtr out = next.get()->getitem_next(nexthead,
+                                              nexttail,
+                                              nextadvanced);
+
+    if (out.get()->length() == 0) {
+      return out.get()->getitem_nothing();
+    }
+    else {
+      return out.get()->getitem_at_nowrap(0);
+    }
+  }
+
+  const ContentPtr
   Record::getitem_next(const SliceAt& at,
                        const Slice& tail,
                        const Index64& advanced) const {
