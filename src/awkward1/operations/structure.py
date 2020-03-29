@@ -527,6 +527,35 @@ def broadcast_arrays(*arrays, **kwargs):
 
 @awkward1._connect._numpy.implements(numpy.where)
 def where(condition, *args, **kwargs):
+    """
+    Args:
+        condition (np.ndarray or rectilinear #ak.Array of booleans): In the
+            three-argument form of this function (`condition`, `x`, `y`),
+            True values in `condition` select values from `x` and False
+            values in `condition` select values from `y`.
+        x: Data with the same length as `condition`.
+        y: Data with the same length as `condition`.
+        mergebool (bool, default is True): If True, boolean and nummeric data
+            can be combined into the same buffer, losing information about
+            False vs `0` and True vs `1`; otherwise, they are kept in separate
+            buffers with distinct types (using an #ak.layout.UnionArray8_64).
+        highlevel (bool, default is True): If True, return an #ak.Array;
+            otherwise, return a low-level #ak.layout.Content subclass.
+
+    This function has a one-argument form, `condition` without `x` or `y`, and
+    a three-argument form, `condition`, `x`, and `y`. In the one-argument form,
+    it is completely equivalent to NumPy's
+    [nonzero](https://docs.scipy.org/doc/numpy/reference/generated/numpy.nonzero.html)
+    function.
+
+    In the three-argument form, it acts as a vectorized ternary operator:
+    `condition`, `x`, and `y` must all have the same length and
+
+        output[i] = x[i] if condition[i] else y[i]
+
+    for all `i`. The structure of `x` and `y` do not need to be the same; if
+    they are incompatible types, the output will have #ak.type.UnionType.
+    """
     mergebool, highlevel = awkward1._util.extra((), kwargs, [
         ("mergebool", True),
         ("highlevel", True)])
