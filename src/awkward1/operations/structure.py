@@ -814,10 +814,45 @@ def rpad(array, target, axis=1, clip=False, highlevel=True):
         return out
 
 def fillna(array, value, highlevel=True):
+    """
+    Args:
+        array: Data in which to replace None with a given value.
+        value: Data with which to replace None.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+
+    Replaces missing values (None) with a given `value`.
+
+    For example, in the following `array`,
+
+        ak.Array([[1.1, None, 2.2], [], [None, 3.3, 4.4]])
+
+    The None values could be replaced with `0` by
+
+        >>> ak.fillna(array, 0)
+        <Array [[1.1, 0, 2.2], [], [0, 3.3, 4.4]] type='3 * var * float64'>
+
+    The replacement value doesn't strictly need the same type as the
+    surrounding data. For example, the None values could also be replaced
+    by a string.
+
+        >>> ak.fillna(array, "hi")
+        <Array [[1.1, 'hi', 2.2], ... ['hi', 3.3, 4.4]] type='3 * var * union[float64, s...'>
+
+    The list content now has a union type:
+
+        >>> ak.typeof(ak.fillna(array, "hi"))
+        3 * var * union[float64, string]
+
+    The values could be floating-point numbers or strings.
+    """
     arraylayout = awkward1.operations.convert.tolayout(array,
                                                        allowrecord=True,
                                                        allowother=False)
-    if isinstance(value, Iterable):
+
+    if (isinstance(value, Iterable) and
+        not (isinstance(value, (str, bytes)) or
+             (awkward1._util.py27 and isinstance(value, unicode)))):
         valuelayout = awkward1.operations.convert.tolayout(value,
                                                            allowrecord=True,
                                                            allowother=False)
