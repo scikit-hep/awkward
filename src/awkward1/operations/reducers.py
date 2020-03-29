@@ -680,37 +680,198 @@ def argmax(array, axis=None, keepdims=False, maskidentity=True):
 # The following are not strictly reducers, but are defined in terms of
 # reducers and ufuncs.
 
-def moment(x, n, weight=None, axis=None, keepdims=False):
+def moment(x, n, weight=None, axis=None, keepdims=False, maskidentity=True):
+    """
+    Args:
+        x: the data on which to compute the moment.
+        n (int): the choice of moment: `0` is a sum of weights, `1` is
+            #ak.mean, `2` is #ak.var without subtracting the mean, etc.
+        weight: data that can be broadcasted to `x` to give each value a
+            weight. Weighting values equally is the same as no weights;
+            weighting some values higher increases the significance of those
+            values. Weights can be zero or negative.
+        axis (None or int): If None, combine all values from the array into
+            a single scalar result; if an int, group by that axis: `0` is the
+            outermost, `1` is the first level of nested lists, etc., and
+            negative `axis` counts from the innermost: `-1` is the innermost,
+            `-2` is the next level up, etc.
+        keepdims (bool): If False, this function descreases the number of
+            dimensions by 1; if True, the output values are wrapped in a new
+            length-1 dimension so that the result of this operation may be
+            broadcasted with the original array.
+        maskidentity (bool): If True, the application of this function on
+            empty lists results in None (an option type); otherwise, the
+            calculation is followed through with the reducers' identities,
+            usually resulting in floating-point `nan`.
+
+    Computes the `n`th moment in each group of elements from `array` (many
+    types supported, including all Awkward Arrays and Records). The grouping
+    is performed the same way as for reducers, though this operation is not a
+    reducer and has no identity.
+
+    This function has no NumPy equivalent.
+
+    Passing all arguments to the reducers, the moment is calculated as
+
+        ak.sum((x*weight)**n) / ak.sum(weight)
+
+    The `n=2` moment differs from #ak.var in that #ak.var also subtracts the
+    mean (the `n=1` moment).
+
+    See #ak.sum for a complete description of handling nested lists and
+    missing values (None) in reducers, and #ak.mean for an example with another
+    non-reducer.
+    """
     with numpy.errstate(invalid="ignore"):
         if weight is None:
-            sumw   = count(x, axis=axis, keepdims=keepdims)
-            sumwxn = sum(x**n, axis=axis, keepdims=keepdims)
+            sumw   = count(x,
+                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+            sumwxn = sum(x**n,
+                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
         else:
-            sumw   = sum(x*0 + weight, axis=axis, keepdims=keepdims)
-            sumwxn = sum((x*weight)**n, axis=axis, keepdims=keepdims)
+            sumw   = sum(x*0 + weight,
+                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+            sumwxn = sum((x*weight)**n,
+                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
         return numpy.true_divide(sumwxn, sumw)
 
 @awkward1._connect._numpy.implements(numpy.mean)
-def mean(x, weight=None, axis=None, keepdims=False):
+def mean(x, weight=None, axis=None, keepdims=False, maskidentity=True):
+    """
+    Args:
+        x: the data on which to compute the mean.
+        weight: data that can be broadcasted to `x` to give each value a
+            weight. Weighting values equally is the same as no weights;
+            weighting some values higher increases the significance of those
+            values. Weights can be zero or negative.
+        axis (None or int): If None, combine all values from the array into
+            a single scalar result; if an int, group by that axis: `0` is the
+            outermost, `1` is the first level of nested lists, etc., and
+            negative `axis` counts from the innermost: `-1` is the innermost,
+            `-2` is the next level up, etc.
+        keepdims (bool): If False, this function descreases the number of
+            dimensions by 1; if True, the output values are wrapped in a new
+            length-1 dimension so that the result of this operation may be
+            broadcasted with the original array.
+        maskidentity (bool): If True, the application of this function on
+            empty lists results in None (an option type); otherwise, the
+            calculation is followed through with the reducers' identities,
+            usually resulting in floating-point `nan`.
+
+    Computes the mean in each group of elements from `array` (many
+    types supported, including all Awkward Arrays and Records). The grouping
+    is performed the same way as for reducers, though this operation is not a
+    reducer and has no identity. It is the same as NumPy's
+    [mean](https://docs.scipy.org/doc/numpy/reference/generated/numpy.mean.html)
+    if all lists at a given dimension have the same length and no None values,
+    but it generalizes to cases where they do not.
+
+    Passing all arguments to the reducers, the mean is calculated as
+
+        ak.sum(x*weight) / ak.sum(weight)
+
+    For example, with an `array` like
+
+        ak.Array([[0, 1, 2, 3],
+                  [          ],
+                  [4, 5      ]])
+
+    The mean of the innermost lists is
+
+        >>> ak.mean(array, axis=-1)
+        <Array [1.5, None, 4.5] type='3 * ?float64'>
+
+    because there are three lists, the first has mean `1.5`, the second is
+    empty, and the third has mean `4.5`.
+
+    The mean of the outermost lists is
+
+        >>> ak.mean(array, axis=0)
+        <Array [2, 3, 2, 3] type='4 * ?float64'>
+
+    because the longest list has length 4, the mean of `0` and `4` is `2.0`,
+    the mean of `1` and `5` is `3.0`, the mean of `2` (by itself) is `2.0`,
+    and the mean of `3` (by itself) is `3.0`. This follows the same grouping
+    behavior as reducers.
+
+    See #ak.sum for a complete description of handling nested lists and
+    missing values (None) in reducers.
+    """
     with numpy.errstate(invalid="ignore"):
         if weight is None:
-            sumw  = count(x, axis=axis, keepdims=keepdims)
-            sumwx = sum(x, axis=axis, keepdims=keepdims)
+            sumw  = count(x,
+                      axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+            sumwx = sum(x,
+                      axis=axis, keepdims=keepdims, maskidentity=maskidentity)
         else:
-            sumw  = sum(x*0 + weight, axis=axis, keepdims=keepdims)
-            sumwx = sum(x*weight, axis=axis, keepdims=keepdims)
+            sumw  = sum(x*0 + weight,
+                      axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+            sumwx = sum(x*weight,
+                      axis=axis, keepdims=keepdims, maskidentity=maskidentity)
         return numpy.true_divide(sumwx, sumw)
 
 @awkward1._connect._numpy.implements(numpy.var)
-def var(x, weight=None, ddof=0, axis=None, keepdims=False):
+def var(x, weight=None, ddof=0, axis=None, keepdims=False, maskidentity=True):
+    """
+    Args:
+        x: the data on which to compute the variance.
+        weight: data that can be broadcasted to `x` to give each value a
+            weight. Weighting values equally is the same as no weights;
+            weighting some values higher increases the significance of those
+            values. Weights can be zero or negative.
+        ddof (int): "delta degrees of freedom": the divisor used in the
+            calculation is `sum(weights) - ddof`. Use this for "reduced
+            variance."
+        axis (None or int): If None, combine all values from the array into
+            a single scalar result; if an int, group by that axis: `0` is the
+            outermost, `1` is the first level of nested lists, etc., and
+            negative `axis` counts from the innermost: `-1` is the innermost,
+            `-2` is the next level up, etc.
+        keepdims (bool): If False, this function descreases the number of
+            dimensions by 1; if True, the output values are wrapped in a new
+            length-1 dimension so that the result of this operation may be
+            broadcasted with the original array.
+        maskidentity (bool): If True, the application of this function on
+            empty lists results in None (an option type); otherwise, the
+            calculation is followed through with the reducers' identities,
+            usually resulting in floating-point `nan`.
+
+    Computes the variance in each group of elements from `array` (many
+    types supported, including all Awkward Arrays and Records). The grouping
+    is performed the same way as for reducers, though this operation is not a
+    reducer and has no identity. It is the same as NumPy's
+    [var](https://docs.scipy.org/doc/numpy/reference/generated/numpy.var.html)
+    if all lists at a given dimension have the same length and no None values,
+    but it generalizes to cases where they do not.
+
+    Passing all arguments to the reducers, the variance is calculated as
+
+        ak.sum((x - ak.mean(x))**2 * weight) / ak.sum(weight)
+
+    If `ddof` is not zero, the above is further corrected by a factor of
+
+        ak.sum(weight) / (ak.sum(weight) - ddof)
+
+    Even without `ddof`, #ak.var differs from #ak.moment with `n=2` because
+    the mean is subtracted from all points before summing their squares.
+
+    See #ak.sum for a complete description of handling nested lists and
+    missing values (None) in reducers, and #ak.mean for an example with another
+    non-reducer.
+    """
     with numpy.errstate(invalid="ignore"):
-        xmean = mean(x, weight=weight, axis=axis, keepdims=keepdims)
+        xmean = mean(x, weight=weight,
+                  axis=axis, keepdims=keepdims, maskidentity=maskidentity)
         if weight is None:
-            sumw   = count(x, axis=axis, keepdims=keepdims)
-            sumwxx = sum((x - xmean)**2, axis=axis, keepdims=keepdims)
+            sumw   = count(x,
+                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+            sumwxx = sum((x - xmean)**2,
+                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
         else:
-            sumw   = sum(x*0 + weight, axis=axis, keepdims=keepdims)
-            sumwxx = sum((x - xmean)**2 * weight, axis=axis, keepdims=keepdims)
+            sumw   = sum(x*0 + weight,
+                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+            sumwxx = sum((x - xmean)**2 * weight,
+                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
         if ddof != 0:
             return (numpy.true_divide(sumwxx, sumw) *
                     numpy.true_divide(sumw, sumw - ddof))
@@ -718,58 +879,83 @@ def var(x, weight=None, ddof=0, axis=None, keepdims=False):
             return numpy.true_divide(sumwxx, sumw)
 
 @awkward1._connect._numpy.implements(numpy.std)
-def std(x, weight=None, ddof=0, axis=None, keepdims=False):
+def std(x, weight=None, ddof=0, axis=None, keepdims=False, maskidentity=True):
     with numpy.errstate(invalid="ignore"):
         return numpy.sqrt(var(x,
                               weight=weight,
                               ddof=ddof,
                               axis=axis,
-                              keepdims=keepdims))
+                              keepdims=keepdims,
+                              maskidentity=maskidentity))
 
-def covar(x, y, weight=None, axis=None, keepdims=False):
+def covar(x, y, weight=None, axis=None, keepdims=False, maskidentity=True):
     with numpy.errstate(invalid="ignore"):
-        xmean = mean(x, weight=weight, axis=axis, keepdims=keepdims)
-        ymean = mean(y, weight=weight, axis=axis, keepdims=keepdims)
+        xmean = mean(x, weight=weight,
+                  axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+        ymean = mean(y, weight=weight,
+                  axis=axis, keepdims=keepdims, maskidentity=maskidentity)
         if weight is None:
-            sumw = count(x, axis=axis, keepdims=keepdims)
-            sumwxy = sum((x - xmean)*(y - ymean), axis=axis, keepdims=keepdims)
+            sumw = count(x,
+                     axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+            sumwxy = sum((x - xmean)*(y - ymean),
+                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
         else:
-            sumw = sum(x*0 + weight, axis=axis, keepdims=keepdims)
+            sumw = sum(x*0 + weight,
+                     axis=axis, keepdims=keepdims, maskidentity=maskidentity)
             sumwxy = sum((x - xmean)*(y - ymean)*weight,
                          axis=axis,
-                         keepdims=keepdims)
+                         keepdims=keepdims,
+                         maskidentity=maskidentity)
         return numpy.true_divide(sumwxy, sumw)
 
-def corr(x, y, weight=None, axis=None, keepdims=False):
+def corr(x, y, weight=None, axis=None, keepdims=False, maskidentity=True):
     with numpy.errstate(invalid="ignore"):
-        xmean = mean(x, weight=weight, axis=axis, keepdims=keepdims)
-        ymean = mean(y, weight=weight, axis=axis, keepdims=keepdims)
+        xmean = mean(x, weight=weight,
+                  axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+        ymean = mean(y, weight=weight,
+                  axis=axis, keepdims=keepdims, maskidentity=maskidentity)
         xdiff = x - xmean
         ydiff = y - ymean
         if weight is None:
-            sumwxx = sum(xdiff**2, axis=axis, keepdims=keepdims)
-            sumwyy = sum(ydiff**2, axis=axis, keepdims=keepdims)
-            sumwxy = sum(xdiff*ydiff, axis=axis, keepdims=keepdims)
+            sumwxx = sum(xdiff**2,
+                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+            sumwyy = sum(ydiff**2,
+                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+            sumwxy = sum(xdiff*ydiff,
+                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
         else:
-            sumwxx = sum((xdiff**2)*weight, axis=axis, keepdims=keepdims)
-            sumwyy = sum((ydiff**2)*weight, axis=axis, keepdims=keepdims)
-            sumwxy = sum((xdiff*ydiff)*weight, axis=axis, keepdims=keepdims)
+            sumwxx = sum((xdiff**2)*weight,
+                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+            sumwyy = sum((ydiff**2)*weight,
+                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+            sumwxy = sum((xdiff*ydiff)*weight,
+                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
         return numpy.true_divide(sumwxy, numpy.sqrt(sumwxx * sumwyy))
 
-def linearfit(x, y, weight=None, axis=None, keepdims=False):
+def linearfit(x, y, weight=None, axis=None, keepdims=False, maskidentity=True):
     with numpy.errstate(invalid="ignore"):
         if weight is None:
-            sumw = count(x, axis=axis, keepdims=keepdims)
-            sumwx  = sum(x, axis=axis, keepdims=keepdims)
-            sumwy  = sum(y, axis=axis, keepdims=keepdims)
-            sumwxx = sum(x**2, axis=axis, keepdims=keepdims)
-            sumwxy = sum(x*y, axis=axis, keepdims=keepdims)
+            sumw = count(x, axis=axis,
+                     keepdims=keepdims, maskidentity=maskidentity)
+            sumwx  = sum(x,
+                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+            sumwy  = sum(y,
+                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+            sumwxx = sum(x**2,
+                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+            sumwxy = sum(x*y,
+                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
         else:
-            sumw = sum(x*0 + weight, axis=axis, keepdims=keepdims)
-            sumwx  = sum(x*weight, axis=axis, keepdims=keepdims)
-            sumwy  = sum(y*weight, axis=axis, keepdims=keepdims)
-            sumwxx = sum((x**2)*weight, axis=axis, keepdims=keepdims)
-            sumwxy = sum(x*y*weight, axis=axis, keepdims=keepdims)
+            sumw = sum(x*0 + weight,
+                     axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+            sumwx  = sum(x*weight,
+                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+            sumwy  = sum(y*weight,
+                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+            sumwxx = sum((x**2)*weight,
+                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+            sumwxy = sum(x*y*weight,
+                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
         delta           = (sumw*sumwxx) - (sumwx*sumwx)
         intercept       = numpy.true_divide(((sumwxx*sumwy) - (sumwx*sumwxy)),
                                             delta)
@@ -821,10 +1007,11 @@ def linearfit(x, y, weight=None, axis=None, keepdims=False):
 
         return awkward1._util.wrap(out, awkward1._util.behaviorof(x, y))
 
-def softmax(x, axis=None, keepdims=False):
+def softmax(x, axis=None, keepdims=False, maskidentity=False):
     with numpy.errstate(invalid="ignore"):
         expx = numpy.exp(x)
-        denom = sum(expx, axis=axis, keepdims=keepdims)
+        denom = sum(expx,
+                  axis=axis, keepdims=keepdims, maskidentity=maskidentity)
         return numpy.true_divide(expx, denom)
 
 __all__ = [x for x in list(globals())
