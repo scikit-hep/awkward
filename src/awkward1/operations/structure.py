@@ -603,10 +603,87 @@ def where(condition, *args, **kwargs):
                 "given".format(len(args) + 1))
 
 def flatten(array, axis=1, highlevel=True):
+    """
+    Args:
+        array: Data containing nested lists to flatten.
+        axis (None or int): If None, the operation flattens all levels of
+            nesting, returning a 1-dimensional array. Otherwise, it flattens
+            at a specified depth. The outermost dimension is `0`, followed
+            by `1`, etc., and negative values count backward from the
+            innermost: `-1` is the innermost dimension, `-2` is the next
+            level up, etc.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+
+    Returns an array with one level of nesting removed by erasing the
+    boundaries between consecutive lists. Since this operates on a level of
+    nesting, `axis=0` is invalid.
+
+    Consider the following doubly nested `array`.
+
+        ak.Array([[
+                   [1.1, 2.2, 3.3],
+                   [],
+                   [4.4, 5.5],
+                   [6.6]],
+                  [],
+                  [
+                   [7.7],
+                   [8.8, 9.9]
+                  ]])
+
+    At `axis=1`, the outer lists (length 4, length 0, length 2) become a single
+    list (of length 6).
+
+        >>> print(ak.flatten(array, axis=1))
+        [[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7], [8.8, 9.9]]
+
+    At `axis=2`, the inner lists (lengths 3, 0, 2, 1, 1, and 2) become three
+    lists (of lengths 6, 0, and 3).
+
+        >>> print(ak.flatten(array, axis=2))
+        [[1.1, 2.2, 3.3, 4.4, 5.5, 6.6], [], [7.7, 8.8, 9.9]]
+
+    There's also an option to completely flatten the array with `axis=None`.
+    This is useful for passing the data to a function that doesn't care about
+    nested structure, such as a plotting routine.
+
+        >>> print(ak.flatten(array, axis=None))
+        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]
+
+    As a technical detail, the flattening operation can be trivial in a common
+    case, #ak.layout.ListOffsetArray in which the first `offset` is `0`.
+    In that case, the flattened data is simply the array node's `content`.
+
+        >>> array.layout
+        <ListOffsetArray64>
+            <offsets><Index64 i="[0 4 4 6]" offset="0" length="4"/></offsets>
+            <content><ListOffsetArray64>
+                <offsets><Index64 i="[0 3 3 5 6 7 9]" offset="0" length="7"/></offsets>
+                <content>
+                    <NumpyArray format="d" shape="9" data="1.1 2.2 3.3 4.4 5.5 6.6 7.7 8.8 9.9"/>
+                </content>
+            </ListOffsetArray64></content>
+        </ListOffsetArray64>
+        >>> np.asarray(array.layout.content.content)
+        array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
+
+    However, it is important to keep in mind that this is a special case:
+    #ak.flatten and `content` are not interchangeable!
+    """
     layout = awkward1.operations.convert.tolayout(array,
                                                   allowrecord=False,
                                                   allowother=False)
-    out = layout.flatten(axis)
+
+    if axis is None:
+        out = awkward1._util.completely_flatten(layout)
+        assert (isinstance(out, tuple) and
+                len(out) == 1 and
+                isinstance(out[0], numpy.ndarray))
+        out = awkward1.layout.NumpyArray(out[0])
+    else:
+        out = layout.flatten(axis)
+
     if highlevel:
         return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
     else:
