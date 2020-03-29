@@ -934,10 +934,10 @@ def covar(x, y, weight=None, axis=None, keepdims=False, maskidentity=True):
     Args:
         x: one coordinate to use in the covariance calculation.
         y: the other coordinate to use in the covariance calculation.
-        weight: data that can be broadcasted to `x` to give each value a
-            weight. Weighting values equally is the same as no weights;
-            weighting some values higher increases the significance of those
-            values. Weights can be zero or negative.
+        weight: data that can be broadcasted to `x` and `y` to give each point
+            a weight. Weighting points equally is the same as no weights;
+            weighting some points higher increases the significance of those
+            points. Weights can be zero or negative.
         axis (None or int): If None, combine all values from the array into
             a single scalar result; if an int, group by that axis: `0` is the
             outermost, `1` is the first level of nested lists, etc., and
@@ -987,6 +987,45 @@ def covar(x, y, weight=None, axis=None, keepdims=False, maskidentity=True):
         return numpy.true_divide(sumwxy, sumw)
 
 def corr(x, y, weight=None, axis=None, keepdims=False, maskidentity=True):
+    """
+    Args:
+        x: one coordinate to use in the correlation.
+        y: the other coordinate to use in the correlation.
+        weight: data that can be broadcasted to `x` and `y` to give each point
+            a weight. Weighting points equally is the same as no weights;
+            weighting some points higher increases the significance of those
+            points. Weights can be zero or negative.
+        axis (None or int): If None, combine all values from the array into
+            a single scalar result; if an int, group by that axis: `0` is the
+            outermost, `1` is the first level of nested lists, etc., and
+            negative `axis` counts from the innermost: `-1` is the innermost,
+            `-2` is the next level up, etc.
+        keepdims (bool): If False, this function descreases the number of
+            dimensions by 1; if True, the output values are wrapped in a new
+            length-1 dimension so that the result of this operation may be
+            broadcasted with the original array.
+        maskidentity (bool): If True, the application of this function on
+            empty lists results in None (an option type); otherwise, the
+            calculation is followed through with the reducers' identities,
+            usually resulting in floating-point `nan`.
+
+    Computes the correlation of `x` and `y` (many types supported, including
+    all Awkward Arrays and Records, must be broadcastable to each other).
+    The grouping is performed the same way as for reducers, though this
+    operation is not a reducer and has no identity.
+
+    This function has no NumPy equivalent.
+
+    Passing all arguments to the reducers, the correlation is calculated as
+
+        ak.sum((x - ak.mean(x))*(y - ak.mean(y))*weight)
+            / np.sqrt(ak.sum((x - ak.mean(x))**2))
+            / np.sqrt(ak.sum((y - ak.mean(y))**2))
+
+    See #ak.sum for a complete description of handling nested lists and
+    missing values (None) in reducers, and #ak.mean for an example with another
+    non-reducer.
+    """
     with numpy.errstate(invalid="ignore"):
         xmean = mean(x, weight=weight,
                   axis=axis, keepdims=keepdims, maskidentity=maskidentity)
@@ -1011,6 +1050,58 @@ def corr(x, y, weight=None, axis=None, keepdims=False, maskidentity=True):
         return numpy.true_divide(sumwxy, numpy.sqrt(sumwxx * sumwyy))
 
 def linearfit(x, y, weight=None, axis=None, keepdims=False, maskidentity=True):
+    """
+    Args:
+        x: one coordinate to use in the linear fit.
+        y: the other coordinate to use in the linear fit.
+        weight: data that can be broadcasted to `x` and `y` to give each point
+            a weight. Weighting points equally is the same as no weights;
+            weighting some points higher increases the significance of those
+            points. Weights can be zero or negative.
+        axis (None or int): If None, combine all values from the array into
+            a single scalar result; if an int, group by that axis: `0` is the
+            outermost, `1` is the first level of nested lists, etc., and
+            negative `axis` counts from the innermost: `-1` is the innermost,
+            `-2` is the next level up, etc.
+        keepdims (bool): If False, this function descreases the number of
+            dimensions by 1; if True, the output values are wrapped in a new
+            length-1 dimension so that the result of this operation may be
+            broadcasted with the original array.
+        maskidentity (bool): If True, the application of this function on
+            empty lists results in None (an option type); otherwise, the
+            calculation is followed through with the reducers' identities,
+            usually resulting in floating-point `nan`.
+
+    Computes the linear fit of `y` with respect to `x` (many types supported,
+    including all Awkward Arrays and Records, must be broadcastable to each
+    other). The grouping is performed the same way as for reducers, though
+    this operation is not a reducer and has no identity.
+
+    This function has no NumPy equivalent.
+
+    Passing all arguments to the reducers, the linear fit is calculated as
+
+        sumw            = ak.sum(weight)
+        sumwx           = ak.sum(weight * x)
+        sumwy           = ak.sum(weight * y)
+        sumwxx          = ak.sum(weight * x**2)
+        sumwxy          = ak.sum(weight * x * y)
+        delta           = (sumw*sumwxx) - (sumwx*sumwx)
+
+        intercept       = ((sumwxx*sumwy) - (sumwx*sumwxy)) / delta
+        slope           = ((sumw*sumwxy) - (sumwx*sumwy))   / delta
+        intercept_error = np.sqrt(sumwxx / delta)
+        slope_error     = np.sqrt(sumw   / delta)
+
+    The results, `intercept`, `slope`, `intercept_error`, and `slope_error`,
+    are given as an #ak.Record with four fields. The values of these fields
+    might be arrays or even nested arrays; they match the structure of `x` and
+    `y`.
+
+    See #ak.sum for a complete description of handling nested lists and
+    missing values (None) in reducers, and #ak.mean for an example with another
+    non-reducer.
+    """
     with numpy.errstate(invalid="ignore"):
         if weight is None:
             sumw = count(x, axis=axis,
@@ -1086,6 +1177,42 @@ def linearfit(x, y, weight=None, axis=None, keepdims=False, maskidentity=True):
         return awkward1._util.wrap(out, awkward1._util.behaviorof(x, y))
 
 def softmax(x, axis=None, keepdims=False, maskidentity=False):
+    """
+    Args:
+        x: the data on which to compute the softmax.
+        weight: data that can be broadcasted to `x` to give each value a
+            weight. Weighting values equally is the same as no weights;
+            weighting some values higher increases the significance of those
+            values. Weights can be zero or negative.
+        axis (None or int): If None, combine all values from the array into
+            a single scalar result; if an int, group by that axis: `0` is the
+            outermost, `1` is the first level of nested lists, etc., and
+            negative `axis` counts from the innermost: `-1` is the innermost,
+            `-2` is the next level up, etc.
+        keepdims (bool): If False, this function descreases the number of
+            dimensions by 1; if True, the output values are wrapped in a new
+            length-1 dimension so that the result of this operation may be
+            broadcasted with the original array.
+        maskidentity (bool): If True, the application of this function on
+            empty lists results in None (an option type); otherwise, the
+            calculation is followed through with the reducers' identities,
+            usually resulting in floating-point `nan`.
+
+    Computes the softmax in each group of elements from `x` (many
+    types supported, including all Awkward Arrays and Records). The grouping
+    is performed the same way as for reducers, though this operation is not a
+    reducer and has no identity.
+
+    This function has no NumPy equivalent.
+
+    Passing all arguments to the reducers, the softmax is calculated as
+
+        np.exp(x) / ak.sum(np.exp(x))
+
+    See #ak.sum for a complete description of handling nested lists and
+    missing values (None) in reducers, and #ak.mean for an example with another
+    non-reducer.
+    """
     with numpy.errstate(invalid="ignore"):
         expx = numpy.exp(x)
         denom = sum(expx,
