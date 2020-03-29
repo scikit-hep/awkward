@@ -10,6 +10,74 @@ import awkward1.layout
 import awkward1.operations.convert
 
 def count(array, axis=None, keepdims=False, maskidentity=False):
+    """
+    Args:
+        array: Data in which to count elements.
+        axis (None or int): If None, combine all values from the array into
+            a single scalar result; if an int, group by that axis: `0` is the
+            outermost, `1` is the first level of nested lists, etc., and
+            negative `axis` counts from the innermost: `-1` is the innermost,
+            `-2` is the next level up, etc.
+        keepdims (bool): If False, this reducer descreases the number of
+            dimensions by 1; if True, the reduced values are wrapped in a new
+            length-1 dimension so that the result of this operation may be
+            broadcasted with the original array.
+        maskidentity (bool): If True, reducing over empty lists results in
+            None (an option type); otherwise, reducing over empty lists
+            results in the operation's identity.
+
+    Counts elements of `array` (many types supported, including all
+    Awkward Arrays and Records). The identity of counting is `0` and it is
+    usually not masked.
+
+    This function has no analog in NumPy because counting values in a
+    rectilinear array would only result in elements of the NumPy array's
+    [shape](https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.shape.html).
+
+    However, for nested lists of variable dimension and missing values, the
+    result of counting is non-trivial. For example, with this `array`,
+
+        ak.Array([[ 0.1,  0.2      ],
+                  [None, 10.2, None],
+                  None,
+                  [20.1, 20.2, 20.3],
+                  [30.1, 30.2      ]])
+
+    the result of counting over the innermost dimension is
+
+        >>> ak.count(array, axis=-1)
+        <Array [2, 1, None, 3, 2] type='5 * ?int64'>
+
+    the outermost dimension is
+
+        >>> ak.count(array, axis=0)
+        <Array [3, 4, 1] type='3 * int64'>
+
+    and all dimensions is
+
+        >>> ak.count(array, axis=None)
+        8
+
+    The gaps and None values are not counted, and if a None value occurs at
+    a higher axis than the one being counted, it is kept as a placeholder
+    so that the outer list length does not change.
+
+    See #ak.sum for a more complete description of nested list and missing
+    value (None) handling.
+
+    Note also that this function is different from #ak.num, which counts
+    the number of values at a given depth, maintaining structure: #ak.num
+    never counts across different lists the way that reducers do (#ak.num
+    is not a reducer; #ak.count is). For the same `array`,
+
+        >>> ak.num(array, axis=0)
+        5
+        >>> ak.num(array, axis=1)
+        <Array [2, 3, None, 3, 2] type='5 * ?int64'>
+
+    If it is desirable to include None values in #ak.count, use #ak.fillna
+    to turn the None values into something that would be counted.
+    """
     layout = awkward1.operations.convert.tolayout(array,
                                                   allowrecord=False,
                                                   allowother=False)
@@ -30,6 +98,36 @@ def count(array, axis=None, keepdims=False, maskidentity=False):
 
 @awkward1._connect._numpy.implements(numpy.count_nonzero)
 def count_nonzero(array, axis=None, keepdims=False, maskidentity=False):
+    """
+    Args:
+        array: Data in which to count nonzero elements.
+        axis (None or int): If None, combine all values from the array into
+            a single scalar result; if an int, group by that axis: `0` is the
+            outermost, `1` is the first level of nested lists, etc., and
+            negative `axis` counts from the innermost: `-1` is the innermost,
+            `-2` is the next level up, etc.
+        keepdims (bool): If False, this reducer descreases the number of
+            dimensions by 1; if True, the reduced values are wrapped in a new
+            length-1 dimension so that the result of this operation may be
+            broadcasted with the original array.
+        maskidentity (bool): If True, reducing over empty lists results in
+            None (an option type); otherwise, reducing over empty lists
+            results in the operation's identity.
+
+    Counts nonzero elements of `array` (many types supported, including all
+    Awkward Arrays and Records). The identity of counting is `0` and it is
+    usually not masked. This operation is the same as NumPy's
+    [count_nonzero](https://docs.scipy.org/doc/numpy/reference/generated/numpy.count_nonzero.html)
+    if all lists at a given dimension have the same length and no None values,
+    but it generalizes to cases where they do not.
+
+    See #ak.sum for a more complete description of nested list and missing
+    value (None) handling.
+
+    Following the same rules as other reducers, #ak.count_nonzero does not
+    count None values. If it is desirable to count them, use #ak.fillna
+    to turn them into something that would be counted.
+    """
     layout = awkward1.operations.convert.tolayout(array,
                                                   allowrecord=False,
                                                   allowother=False)
