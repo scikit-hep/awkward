@@ -63,7 +63,7 @@ def count(array, axis=None, keepdims=False, maskidentity=False):
     so that the outer list length does not change.
 
     See #ak.sum for a more complete description of nested list and missing
-    value (None) handling.
+    value (None) handling in reducers.
 
     Note also that this function is different from #ak.num, which counts
     the number of values at a given depth, maintaining structure: #ak.num
@@ -122,7 +122,7 @@ def count_nonzero(array, axis=None, keepdims=False, maskidentity=False):
     but it generalizes to cases where they do not.
 
     See #ak.sum for a more complete description of nested list and missing
-    value (None) handling.
+    value (None) handling in reducers.
 
     Following the same rules as other reducers, #ak.count_nonzero does not
     count None values. If it is desirable to count them, use #ak.fillna
@@ -337,6 +337,32 @@ def sum(array, axis=None, keepdims=False, maskidentity=False):
 
 @awkward1._connect._numpy.implements(numpy.prod)
 def prod(array, axis=None, keepdims=False, maskidentity=False):
+    """
+    Args:
+        array: Data to multiply.
+        axis (None or int): If None, combine all values from the array into
+            a single scalar result; if an int, group by that axis: `0` is the
+            outermost, `1` is the first level of nested lists, etc., and
+            negative `axis` counts from the innermost: `-1` is the innermost,
+            `-2` is the next level up, etc.
+        keepdims (bool): If False, this reducer descreases the number of
+            dimensions by 1; if True, the reduced values are wrapped in a new
+            length-1 dimension so that the result of this operation may be
+            broadcasted with the original array.
+        maskidentity (bool): If True, reducing over empty lists results in
+            None (an option type); otherwise, reducing over empty lists
+            results in the operation's identity.
+
+    Multiplies elements of `array` (many types supported, including all
+    Awkward Arrays and Records). The identity of multiplication is `1` and it
+    is usually not masked. This operation is the same as NumPy's
+    [prod](https://docs.scipy.org/doc/numpy/reference/generated/numpy.prod.html)
+    if all lists at a given dimension have the same length and no None values,
+    but it generalizes to cases where they do not.
+
+    See #ak.sum for a more complete description of nested list and missing
+    value (None) handling in reducers.
+    """
     layout = awkward1.operations.convert.tolayout(array,
                                                   allowrecord=False,
                                                   allowother=False)
@@ -357,6 +383,34 @@ def prod(array, axis=None, keepdims=False, maskidentity=False):
 
 @awkward1._connect._numpy.implements(numpy.any)
 def any(array, axis=None, keepdims=False, maskidentity=False):
+    """
+    Args:
+        array: Data to combine with "logical or."
+        axis (None or int): If None, combine all values from the array into
+            a single scalar result; if an int, group by that axis: `0` is the
+            outermost, `1` is the first level of nested lists, etc., and
+            negative `axis` counts from the innermost: `-1` is the innermost,
+            `-2` is the next level up, etc.
+        keepdims (bool): If False, this reducer descreases the number of
+            dimensions by 1; if True, the reduced values are wrapped in a new
+            length-1 dimension so that the result of this operation may be
+            broadcasted with the original array.
+        maskidentity (bool): If True, reducing over empty lists results in
+            None (an option type); otherwise, reducing over empty lists
+            results in the operation's identity.
+
+    Returns True in each group of elements from `array` (many types supported,
+    including all Awkward Arrays and Records) if any values are True; False
+    otherwise. Thus, it represents reduction over the "logical or" operation,
+    whose identity is False (i.e. asking if there are any True values in an
+    empty list results in False). This operation is the same as NumPy's
+    [any](https://docs.scipy.org/doc/numpy/reference/generated/numpy.any.html)
+    if all lists at a given dimension have the same length and no None values,
+    but it generalizes to cases where they do not.
+
+    See #ak.sum for a more complete description of nested list and missing
+    value (None) handling in reducers.
+    """
     layout = awkward1.operations.convert.tolayout(array,
                                                   allowrecord=False,
                                                   allowother=False)
@@ -377,6 +431,34 @@ def any(array, axis=None, keepdims=False, maskidentity=False):
 
 @awkward1._connect._numpy.implements(numpy.all)
 def all(array, axis=None, keepdims=False, maskidentity=False):
+    """
+    Args:
+        array: Data to combine with "logical all."
+        axis (None or int): If None, combine all values from the array into
+            a single scalar result; if an int, group by that axis: `0` is the
+            outermost, `1` is the first level of nested lists, etc., and
+            negative `axis` counts from the innermost: `-1` is the innermost,
+            `-2` is the next level up, etc.
+        keepdims (bool): If False, this reducer descreases the number of
+            dimensions by 1; if True, the reduced values are wrapped in a new
+            length-1 dimension so that the result of this operation may be
+            broadcasted with the original array.
+        maskidentity (bool): If True, reducing over empty lists results in
+            None (an option type); otherwise, reducing over empty lists
+            results in the operation's identity.
+
+    Returns True in each group of elements from `array` (many types supported,
+    including all Awkward Arrays and Records) if all values are True; False
+    otherwise. Thus, it represents reduction over the "logical and" operation,
+    whose identity is True (i.e. asking if all the values are True in an
+    empty list results in True). This operation is the same as NumPy's
+    [all](https://docs.scipy.org/doc/numpy/reference/generated/numpy.all.html)
+    if all lists at a given dimension have the same length and no None values,
+    but it generalizes to cases where they do not.
+
+    See #ak.sum for a more complete description of nested list and missing
+    value (None) handling in reducers.
+    """
     layout = awkward1.operations.convert.tolayout(array,
                                                   allowrecord=False,
                                                   allowother=False)
@@ -397,6 +479,35 @@ def all(array, axis=None, keepdims=False, maskidentity=False):
 
 @awkward1._connect._numpy.implements(numpy.min)
 def min(array, axis=None, keepdims=False, maskidentity=True):
+    """
+    Args:
+        array: Data to minimize.
+        axis (None or int): If None, combine all values from the array into
+            a single scalar result; if an int, group by that axis: `0` is the
+            outermost, `1` is the first level of nested lists, etc., and
+            negative `axis` counts from the innermost: `-1` is the innermost,
+            `-2` is the next level up, etc.
+        keepdims (bool): If False, this reducer descreases the number of
+            dimensions by 1; if True, the reduced values are wrapped in a new
+            length-1 dimension so that the result of this operation may be
+            broadcasted with the original array.
+        maskidentity (bool): If True, reducing over empty lists results in
+            None (an option type); otherwise, reducing over empty lists
+            results in the operation's identity.
+
+    Returns the minimum value in each group of elements from `array` (many
+    types supported, including all Awkward Arrays and Records). The identity
+    of minimization is `inf` if floating-point or the largest integer value
+    if applied to integers. This identity is usually masked: the minimum of
+    an empty list is None, unless `maskidentity=False`.
+    This operation is the same as NumPy's
+    [amin](https://docs.scipy.org/doc/numpy/reference/generated/numpy.amin.html)
+    if all lists at a given dimension have the same length and no None values,
+    but it generalizes to cases where they do not.
+
+    See #ak.sum for a more complete description of nested list and missing
+    value (None) handling in reducers.
+    """
     layout = awkward1.operations.convert.tolayout(array,
                                                   allowrecord=False,
                                                   allowother=False)
@@ -420,6 +531,35 @@ def min(array, axis=None, keepdims=False, maskidentity=True):
 
 @awkward1._connect._numpy.implements(numpy.max)
 def max(array, axis=None, keepdims=False, maskidentity=True):
+    """
+    Args:
+        array: Data to maximize.
+        axis (None or int): If None, combine all values from the array into
+            a single scalar result; if an int, group by that axis: `0` is the
+            outermost, `1` is the first level of nested lists, etc., and
+            negative `axis` counts from the innermost: `-1` is the innermost,
+            `-2` is the next level up, etc.
+        keepdims (bool): If False, this reducer descreases the number of
+            dimensions by 1; if True, the reduced values are wrapped in a new
+            length-1 dimension so that the result of this operation may be
+            broadcasted with the original array.
+        maskidentity (bool): If True, reducing over empty lists results in
+            None (an option type); otherwise, reducing over empty lists
+            results in the operation's identity.
+
+    Returns the maximum value in each group of elements from `array` (many
+    types supported, including all Awkward Arrays and Records). The identity
+    of maximization is `-inf` if floating-point or the smallest integer value
+    if applied to integers. This identity is usually masked: the maximum of
+    an empty list is None, unless `maskidentity=False`.
+    This operation is the same as NumPy's
+    [amax](https://docs.scipy.org/doc/numpy/reference/generated/numpy.amax.html)
+    if all lists at a given dimension have the same length and no None values,
+    but it generalizes to cases where they do not.
+
+    See #ak.sum for a more complete description of nested list and missing
+    value (None) handling in reducers.
+    """
     layout = awkward1.operations.convert.tolayout(array,
                                                   allowrecord=False,
                                                   allowother=False)
@@ -443,6 +583,39 @@ def max(array, axis=None, keepdims=False, maskidentity=True):
 
 @awkward1._connect._numpy.implements(numpy.argmin)
 def argmin(array, axis=None, keepdims=False, maskidentity=True):
+    """
+    Args:
+        array: Data to find the index positions of the minimum values.
+        axis (None or int): If None, combine all values from the array into
+            a single scalar result; if an int, group by that axis: `0` is the
+            outermost, `1` is the first level of nested lists, etc., and
+            negative `axis` counts from the innermost: `-1` is the innermost,
+            `-2` is the next level up, etc.
+        keepdims (bool): If False, this reducer descreases the number of
+            dimensions by 1; if True, the reduced values are wrapped in a new
+            length-1 dimension so that the result of this operation may be
+            broadcasted with the original array.
+        maskidentity (bool): If True, reducing over empty lists results in
+            None (an option type); otherwise, reducing over empty lists
+            results in the operation's identity.
+
+    Returns the index position of the minimum value in each group of elements
+    from `array` (many types supported, including all Awkward Arrays and
+    Records). The identity of minimization would be infinity, but argmin
+    must return the position of the minimum element, which has no value for
+    empty lists. Therefore, the identity should be masked: the argmin of
+    an empty list is None. If `maskidentity=False`, the result would be `-1`,
+    which is distinct from all valid index positions, but care should be taken
+    that it is not misinterpreted as "the last element of the list."
+
+    This operation is the same as NumPy's
+    [argmin](https://docs.scipy.org/doc/numpy/reference/generated/numpy.argmin.html)
+    if all lists at a given dimension have the same length and no None values,
+    but it generalizes to cases where they do not.
+
+    See #ak.sum for a more complete description of nested list and missing
+    value (None) handling in reducers.
+    """
     layout = awkward1.operations.convert.tolayout(array,
                                                   allowrecord=False,
                                                   allowother=False)
@@ -458,6 +631,39 @@ def argmin(array, axis=None, keepdims=False, maskidentity=True):
 
 @awkward1._connect._numpy.implements(numpy.argmax)
 def argmax(array, axis=None, keepdims=False, maskidentity=True):
+    """
+    Args:
+        array: Data to find the index positions of the maximum values.
+        axis (None or int): If None, combine all values from the array into
+            a single scalar result; if an int, group by that axis: `0` is the
+            outermost, `1` is the first level of nested lists, etc., and
+            negative `axis` counts from the innermost: `-1` is the innermost,
+            `-2` is the next level up, etc.
+        keepdims (bool): If False, this reducer descreases the number of
+            dimensions by 1; if True, the reduced values are wrapped in a new
+            length-1 dimension so that the result of this operation may be
+            broadcasted with the original array.
+        maskidentity (bool): If True, reducing over empty lists results in
+            None (an option type); otherwise, reducing over empty lists
+            results in the operation's identity.
+
+    Returns the index position of the maximum value in each group of elements
+    from `array` (many types supported, including all Awkward Arrays and
+    Records). The identity of maximization would be negative infinity, but
+    argmax must return the position of the maximum element, which has no value
+    for empty lists. Therefore, the identity should be masked: the argmax of
+    an empty list is None. If `maskidentity=False`, the result would be `-1`,
+    which is distinct from all valid index positions, but care should be taken
+    that it is not misinterpreted as "the last element of the list."
+
+    This operation is the same as NumPy's
+    [argmax](https://docs.scipy.org/doc/numpy/reference/generated/numpy.argmax.html)
+    if all lists at a given dimension have the same length and no None values,
+    but it generalizes to cases where they do not.
+
+    See #ak.sum for a more complete description of nested list and missing
+    value (None) handling in reducers.
+    """
     layout = awkward1.operations.convert.tolayout(array,
                                                   allowrecord=False,
                                                   allowother=False)
