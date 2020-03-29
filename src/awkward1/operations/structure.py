@@ -236,6 +236,23 @@ def num(array, axis=1, highlevel=True):
 
 @awkward1._connect._numpy.implements(numpy.size)
 def size(array, axis=None):
+    """
+    Args:
+        array: Rectilinear array whose `shape` needs to be known.
+        axis (int): The dimension at which this operation is applied. The
+            outermost dimension is `0`, followed by `1`, etc., and negative
+            values count backward from the innermost: `-1` is the innermost
+            dimension, `-2` is the next level up, etc.
+    Returns:
+        An int or a list of ints, one for each regular dimension.
+
+    Implements NumPy's
+    [size](https://docs.scipy.org/doc/numpy/reference/generated/numpy.ma.size.html)
+    function in a way that accepts #ak.Array as the `array`.
+
+    If the `array` is not rectilinear (i.e. if #np.tonumpy would raise an
+    error), then this function raise an error.
+    """
     if axis is not None and axis < 0:
         raise NotImplementedError("ak.size with axis < 0")
 
@@ -316,11 +333,48 @@ def size(array, axis=None):
 
 @awkward1._connect._numpy.implements(numpy.atleast_1d)
 def atleast_1d(*arrays):
+    """
+    Args:
+        arrays: Rectilinear arrays to be converted to NumPy arrays of at
+            least 1 dimension.
+        axis (int): The dimension at which this operation is applied. The
+            outermost dimension is `0`, followed by `1`, etc., and negative
+            values count backward from the innermost: `-1` is the innermost
+            dimension, `-2` is the next level up, etc.
+    Returns:
+        A NumPy array, not an Awkward Array.
+
+    Implements NumPy's
+    [atleast_1d](https://docs.scipy.org/doc/numpy/reference/generated/numpy.atleast_1d.html)
+    function in a way that accepts #ak.Array objects as the `arrays`.
+
+    If the `arrays` are not all rectilinear (i.e. if #np.tonumpy would raise an
+    error), then this function raise an error.
+    """
     return numpy.atleast_1d(*[awkward1.operations.convert.tonumpy(x)
                                 for x in arrays])
 
 @awkward1._connect._numpy.implements(numpy.concatenate)
 def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
+    """
+    Args:
+        arrays: Arrays to concatenate along any dimension.
+        axis (int): The dimension at which this operation is applied. The
+            outermost dimension is `0`, followed by `1`, etc., and negative
+            values count backward from the innermost: `-1` is the innermost
+            dimension, `-2` is the next level up, etc.
+        mergebool (bool): If True, boolean and nummeric data can be combined
+            into the same buffer, losing information about False vs `0` and
+            True vs `1`; otherwise, they are kept in separate buffers with
+            distinct types (using an #ak.layout.UnionArray8_64).
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+
+    Returns an array with `arrays` concatenated. For `axis=0`, this means that
+    one whole array follows another. For `axis=1`, it means that the `arrays`
+    must have the same lengths and nested lists are each concatenated,
+    element for element, and similarly for deeper levels.
+    """
     if axis != 0:
         raise NotImplementedError("axis={0}".format(axis))
 
@@ -346,13 +400,116 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
 
 @awkward1._connect._numpy.implements(numpy.broadcast_arrays)
 def broadcast_arrays(*arrays, **kwargs):
+    """
+    Args:
+        arrays: Arrays to broadcast into the same structure.
+        highlevel (bool, default is True): If True, return an #ak.Array;
+            otherwise, return a low-level #ak.layout.Content subclass.
+
+    Like NumPy's
+    [broadcast_arrays](https://docs.scipy.org/doc/numpy/reference/generated/numpy.broadcast_arrays.html)
+    function, this function returns the input `arrays` with enough elements
+    duplicated that they can be combined element-by-element.
+
+    For NumPy arrays, this means that scalars are replaced with arrays with
+    the same scalar value repeated at every element of the array, and regular
+    dimensions are created to increase low-dimensional data into
+    high-dimensional data.
+
+    For example,
+
+        >>> ak.broadcast_arrays(5,
+                                [1, 2, 3, 4, 5])
+        [<Array [5, 5, 5, 5, 5] type='5 * int64'>,
+         <Array [1, 2, 3, 4, 5] type='5 * int64'>]
+
+    and
+
+        >>> ak.broadcast_arrays(np.array([1, 2, 3]),
+                                np.array([[0.1, 0.2, 0.3], [10, 20, 30]]))
+        [<Array [[  1,   2,   3], [ 1,  2,  3]] type='2 * 3 * int64'>,
+         <Array [[0.1, 0.2, 0.3], [10, 20, 30]] type='2 * 3 * float64'>]
+
+    Note that in the second example, when the `3 * int64` array is expanded
+    to match the `2 * 3 * float64` array, it is the deepest dimension that
+    is aligned. If we try to match a `2 * int64` with the `2 * 3 * float64`,
+
+        >>> ak.broadcast_arrays(np.array([1, 2]),
+                                np.array([[0.1, 0.2, 0.3], [10, 20, 30]]))
+        ValueError: cannot broadcast RegularArray of size 2 with RegularArray of size 3
+
+    NumPy has the same behavior: arrays with different numbers of dimensions
+    are aligned to the right before expansion. One can control this by
+    explicitly adding a new axis (reshape to add a dimension of length 1)
+    where the expansion is supposed to take place because a dimension of
+    length 1 can be expanded like a scalar.
+
+        >>> ak.broadcast_arrays(np.array([1, 2])[:, np.newaxis],
+                                np.array([[0.1, 0.2, 0.3], [10, 20, 30]]))
+        [<Array [[  1,   1,   1], [ 2,  2,  2]] type='2 * 3 * int64'>,
+         <Array [[0.1, 0.2, 0.3], [10, 20, 30]] type='2 * 3 * float64'>]
+
+    Again, NumPy does the same thing (`np.newaxis` is equal to None, so this
+    trick is often shown with None in the slice-tuple). Where the broadcasting
+    happens can be controlled, but numbers of dimensions that don't match are
+    implicitly aligned to the right (fitting innermost structure, not
+    outermost).
+
+    While that might be an arbitrary decision for rectilinear arrays, it is
+    much more natural for implicit broadcasting to align left for tree-like
+    structures. That is, the root of each data structure should agree and
+    leaves may be duplicated to match. For example,
+
+        >>> ak.broadcast_arrays([            100,   200,        300],
+                                [[1.1, 2.2, 3.3],    [], [4.4, 5.5]])
+        [<Array [[100, 100, 100], [], [300, 300]] type='3 * var * int64'>,
+         <Array [[1.1, 2.2, 3.3], [], [4.4, 5.5]] type='3 * var * float64'>]
+
+    One typically wants single-item-per-element data to be duplicated to
+    match multiple-items-per-element data. Operations on the broadcasted
+    arrays like
+
+        one_dimensional + nested_lists
+
+    would then have the same effect as the procedural code
+
+        for x, outer in zip(one_dimensional, nested_lists):
+            output = []
+            for inner in outer:
+                output.append(x + inner)
+            yield output
+
+    where `x` has the same value for each `inner` in the inner loop.
+
+    Awkward Array's broadcasting manages to have it both ways by applying the
+    following rules:
+
+        * If a dimension is regular (i.e. #ak.types.RegularType), like NumPy,
+          implicit broadcasting aligns to the right, like NumPy.
+        * If a dimension is variable (i.e. #ak.types.ListType), which can
+          never be true of NumPy, implicit broadcasting aligns to the left.
+        * Explicit broadcasting with a length-1 regular dimension always
+          broadcasts, like NumPy.
+
+    Thus, it is important to be aware of the distinction between a dimension
+    that is declared to be regular in the type specification and a dimension
+    that is allowed to be variable (even if it happens to have the same length
+    for all elements). This distinction is can be accessed through the
+    #ak.Array.type, but it is lost when converting an array into JSON or
+    Python objects.
+    """
     highlevel, = awkward1._util.extra((), kwargs, [
         ("highlevel", True)])
 
-    inputs = [awkward1.operations.convert.tolayout(x,
-                                                   allowrecord=True,
-                                                   allowother=False)
-                for x in arrays]
+    inputs = []
+    for x in arrays:
+        y = awkward1.operations.convert.tolayout(x,
+                                                 allowrecord=True,
+                                                 allowother=True)
+        if not isinstance(y, (awkward1.layout.Content,
+                              awkward1.layout.Record)):
+            y = awkward1.layout.NumpyArray(numpy.array([y]))
+        inputs.append(y)
 
     def getfunction(inputs, depth):
         if all(isinstance(x, awkward1.layout.NumpyArray) for x in inputs):
