@@ -174,8 +174,9 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         its layout.
 
         Layouts are rendered as XML instead of a nested list. For example,
+        the following `array`
 
-            array = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
+            ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
 
         is presented as
 
@@ -311,7 +312,7 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
             >>> for outer in ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]):
             ...     for inner in outer:
             ...         print(np.sqrt(inner))
-            ... 
+            ...
             1.0488088481701516
             1.4832396974191326
             1.816590212458495
@@ -410,14 +411,83 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         array are "iterated as one" as described in the
         [NumPy documentation](https://docs.scipy.org/doc/numpy/reference/arrays.indexing.html#integer-array-indexing).
 
+        Filtering
+        *********
+
+        A common use of selection by boolean arrays is to filter a dataset by
+        some property. For instance, to get the odd values of the `array`
+
+            ak.Array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+
+        one can put an array expression with True for each odd value inside
+        square brackets:
+
+            >>> array[array % 2 == 1]
+            <Array [1, 3, 5, 7, 9] type='5 * int64'>
+
+        This technique is so common in NumPy and Pandas data analysis that it
+        is often read as a syntax, rather than a consequence of array slicing.
+
+        The extension to nested arrays like
+
+            ak.Array([[[0, 1, 2], [], [3, 4], [5]], [[6, 7, 8], [9]]])
+
+        allows us to use the same syntax more generally.
+
+            >>> array[array % 2 == 1]
+            <Array [[[1], [], [3], [5]], [[7], [9]]] type='2 * var * var * int64'>
+
+        In this example, the boolean array is itself nested (see
+        <<nested indexing>> below).
+
+            >>> array % 2 == 1
+            <Array [[[False, True, False], ... [True]]] type='2 * var * var * bool'>
+
+        This also applies to data with record structures.
+
+        For nested data, we often need to select the first or first two
+        elements from variable-length lists. That can be a problem if some
+        lists are empty. A function like #ak.num can be useful for first
+        selecting by the lengths of lists.
+
+            >>> array = ak.Array([[1.1, 2.2, 3.3],
+            ...                   [],
+            ...                   [4.4, 5.5],
+            ...                   [6.6],
+            ...                   [],
+            ...                   [7.7, 8.8, 9.9]])
+            ...
+            >>> array[ak.num(array) > 0, 0]
+            <Array [1.1, 4.4, 6.6, 7.7] type='4 * float64'>
+            >>> array[ak.num(array) > 1, 1]
+            <Array [2.2, 5.5, 8.8] type='3 * float64'>
+
+        It's sometimes also a problem that "cleaning" the dataset by dropping
+        empty lists changes its alignment, so that it can no longer be used
+        in calculations with "uncleaned" data. For this, #ak.tomask can be
+        useful because it inserts None in positions that fail the filter,
+        rather than removing them.
+
+            >>> print(ak.tomask(array, ak.num(array) > 1))
+            [[1.1, 2.2, 3.3], None, [4.4, 5.5], None, None, [7.7, 8.8, 9.9]]
+
+        Note, however, that the `0` or `1` to pick the first or second
+        item of each nested list is in the second dimension, so the first
+        dimension of the slice must be a `:`.
+
+            >>> ak.tomask(array, ak.num(array) > 1)[:, 0]
+            <Array [1.1, None, 4.4, None, None, 7.7] type='6 * ?float64'>
+            >>> ak.tomask(array, ak.num(array) > 1)[:, 1]
+            <Array [2.2, None, 5.5, None, None, 8.8] type='6 * ?float64'>
+
         Projection
         **********
 
         The following `array`
 
-            array = ak.Array([[{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}],
-                              [{"x": 3.3, "y": [3, 3, 3]}],
-                              [{"x": 0, "y": []}, {"x": 1.1, "y": [1, 1, 1]}]])
+            ak.Array([[{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}],
+                      [{"x": 3.3, "y": [3, 3, 3]}],
+                      [{"x": 0, "y": []}, {"x": 1.1, "y": [1, 1, 1]}]])
 
         has records inside of nested lists:
 
@@ -491,7 +561,7 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
 
         For example, an `array` like
 
-            array = ak.Array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
+            ak.Array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
 
         can be sliced with a boolean array
 
@@ -503,7 +573,7 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
             >>> array[[False, False, False, False, True, None, True, None, True]]
             <Array [5.5, None, 7.7, None, 9.9] type='5 * ?float64'>
 
-        Similarly for arrays of integers and None:        
+        Similarly for arrays of integers and None:
 
             >>> array[[0, 1, None, None, 7, 8]]
             <Array [1.1, 2.2, None, None, 8.8, 9.9] type='6 * ?float64'>
@@ -534,7 +604,7 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
 
         For example, the `array`
 
-            array = ak.Array([[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [], [[5.5]]])
+            ak.Array([[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [], [[5.5]]])
 
         can be sliced at the top level with one-dimensional arrays:
 
@@ -617,6 +687,10 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         elements of `array[0]`, the `200` in `what[1]` is broadcasted to the
         empty list `array[1]`, and the `300` in `what[2]` is broadcasted to
         both elements of `array[2]`.
+
+        See #ak.withfield for a variant that does not change the #ak.Array
+        in-place. (Internally, this method uses #ak.withfield, so performance
+        is not a factor in choosing one over the other.)
         """
         if not isinstance(where, str):
             raise ValueError(
@@ -921,7 +995,7 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
             >>> @nb.vectorize([nb.float64(nb.float64)])
             ... def sqr(x):
             ...     return x * x
-            ... 
+            ...
             >>> print(sqr(array))
             [[{x: 0, y: []}, {x: 1.21, y: [1]}], [], [{x: 4.84, y: [4, 4]}]]
 
@@ -947,7 +1021,7 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         This is not crucial for Awkward Array to work correctly, as NumPy
         functions like np.concatenate can be manually replaced with
         #ak.concatenate for early versions of NumPy.
-        
+
         See also #__array_ufunc__.
         """
         return awkward1._connect._numpy.array_function(func,
@@ -1194,6 +1268,10 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
             >>> record["z"] = {"another": "record"}
             >>> print(record)
             {x: 3.3, y: 4, z: {another: 'record'}}
+
+        See #ak.withfield for a variant that does not change the #ak.Record
+        in-place. (Internally, this method uses #ak.withfield, so performance
+        is not a factor in choosing one over the other.)
         """
         if not isinstance(where, str):
             raise ValueError(
@@ -1527,7 +1605,7 @@ class ArrayBuilder(Sequence):
         ...         for i in range(np.random.poisson(3)):
         ...             deepnesting(builder, probability**2)
         ...         builder.endlist()
-        ... 
+        ...
         >>> builder = ak.ArrayBuilder()
         >>> deepnesting(builder, 0.9)
         >>> builder.snapshot()

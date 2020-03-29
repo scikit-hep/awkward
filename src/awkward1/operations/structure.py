@@ -15,6 +15,25 @@ import awkward1._connect._numpy
 import awkward1.operations.convert
 
 def withfield(base, what, where=None, highlevel=True):
+    """
+    Args:
+        base: Data containing records or tuples.
+        what: Data to add as a new field.
+        where (None or str): If None, the new field has no name (can be
+            accessed as an integer slot number in a string); otherwise, the
+            name of the new field.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+
+    Returns an #ak.Array or #ak.Record (or low-level equivalent, if
+    `highlevel=False`) with a new field attached. This function does not
+    change the array in-place.
+
+    See #ak.Array.__setitem__ and #ak.Record.__setitem__ for a variant that
+    changes the high-level object in-place. (These methods internally use
+    #ak.withfield, so performance is not a factor in choosing one over the
+    other.)
+    """
     base = awkward1.operations.convert.tolayout(base,
                                                 allowrecord=True,
                                                 allowother=False)
@@ -52,6 +71,25 @@ def withfield(base, what, where=None, highlevel=True):
         return out[0]
 
 def withname(array, name, highlevel=True):
+    """
+    Args:
+        base: Data containing records or tuples.
+        name (str): Name to give to the records or tuples; this assigns
+            the `"__record__"` parameter.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+
+    Returns an #ak.Array or #ak.Record (or low-level equivalent, if
+    `highlevel=False`) with a new name. This function does not change the
+    array in-place.
+
+    The records or tuples may be nested within multiple levels of nested lists.
+    If records are nested within records, only the outermost are affected.
+
+    Setting the `"__record__"` parameter makes it possible to add behaviors
+    to the data; see #ak.Array and #ak.behavior for a more complete
+    description.
+    """
     def getfunction(layout, depth):
         if isinstance(layout, awkward1.layout.RecordArray):
             parameters = dict(layout.parameters)
@@ -72,6 +110,17 @@ def withname(array, name, highlevel=True):
         return out
 
 def isna(array, highlevel=True):
+    """
+    Args:
+        array: Data to check for missing values (None).
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+
+    Returns an array whose value is True where an element of `array` is None;
+    False otherwise.
+
+    See also #ak.notna, the logical negation of #ak.isna.
+    """
     def apply(layout):
         if isinstance(layout, awkward1._util.unknowntypes):
             return apply(awkward1.layout.NumpyArray(numpy.array([])))
@@ -103,9 +152,78 @@ def isna(array, highlevel=True):
         return out
 
 def notna(array, highlevel=True):
+    """
+    Args:
+        array: Data to check for missing values (None).
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+
+    Returns an array whose value is False where an element of `array` is None;
+    True otherwise.
+
+    See also #ak.isna, the logical negation of #ak.notna.
+    """
     return ~isna(array, highlevel=highlevel)
 
 def num(array, axis=1, highlevel=True):
+    """
+    Args:
+        array: Data containing nested lists to count.
+        axis (int): The dimension at which this operation is applied. The
+            outermost dimension is `0`, followed by `1`, etc., and negative
+            values count backward from the innermost: `-1` is the innermost
+            dimension, `-2` is the next level up, etc.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+
+    Returns an array of integers specifying the number of elements at a
+    particular level.
+
+    For instance, given the following doubly nested `array`,
+
+        ak.Array([[
+                   [1.1, 2.2, 3.3],
+                   [],
+                   [4.4, 5.5],
+                   [6.6]
+                  ],
+                  [],
+                  [
+                   [7.7],
+                   [8.8, 9.9]]
+                  ])
+
+    The number of elements in `axis=1` is
+
+        >>> ak.num(array, axis=1)
+        <Array [4, 0, 2] type='3 * int64'>
+
+    and the number of elements at the next level down, `axis=2`, is
+
+        >>> ak.num(array, axis=2)
+        <Array [[3, 0, 2, 1], [], [1, 2]] type='3 * var * int64'>
+
+    The `axis=0` case is special: it returns a scalar, the length of the array.
+
+        >>> ak.num(array, axis=0)
+        3
+
+    This function is useful for ensuring that slices do not raise errors. For
+    instance, suppose that we want to select the first element from each
+    of the outermost nested lists of `array`. One of these lists is empty, so
+    selecting the first element (`0`) would raise an error. However, if our
+    first selection is `ak.num(array) > 0`, we are left with only those lists
+    that *do* have a first element:
+
+        >>> array[ak.num(array) > 0, 0]
+        <Array [[1.1, 2.2, 3.3], [7.7]] type='2 * var * float64'>
+
+    To keep a placeholder (None) in each place we do not want to select,
+    consider using #ak.tomask instead of a #ak.Array.__getitem__.
+
+        >>> ak.tomask(array, ak.num(array) > 0)[:, 0]
+        <Array [[1.1, 2.2, 3.3], None, [7.7]] type='3 * option[var * float64]'>
+    """
     layout = awkward1.operations.convert.tolayout(array,
                                                   allowrecord=False,
                                                   allowother=False)
