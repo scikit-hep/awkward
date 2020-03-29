@@ -882,6 +882,91 @@ def zip(arrays,
         parameters=None,
         withname=None,
         highlevel=True):
+    """
+    Args:
+        arrays (dict or iterable of arrays): Arrays to combine into a
+            record-containing structure (if a dict) or a tuple-containing
+            structure (if any other kind of iterable).
+        depthlimit (None or int): If None, attempt to fully broadcast the
+            `array` to all levels. If an int, limit the number of dimensions
+            that get broadcasted. The minimum value is `1`, for no
+            broadcasting.
+        parameters (dict): Parameters for the new #ak.layout.RecordArray node
+            that is created by this operation.
+        withname (None or str): Assigns a `"__record__"` name to the new
+            #ak.layout.RecordArray node that is created by this operation
+            (overriding `parameters`, if necessary).
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+
+    Combines `arrays` into a single structure as the fields of a collection
+    of records or the slots of a collection of tuples. If the `arrays` have
+    nested structure, they are broadcasted with one another to form the
+    records or tuples as deeply as possible, though this can be limited by
+    `depthlimit`.
+
+    This operation may be thought of as the opposite of projection in
+    #ak.Array.__getitem__.
+
+    Consider the following arrays, `one` and `two`.
+
+        >>> one = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]])
+        >>> two = ak.Array([["a", "b", "c"], [], ["d", "e"], ["f"]])
+
+    Zipping them together using a dict creates a collection of records with
+    the same nesting structure as `one` and `two`.
+
+        >>> ak.tolist(ak.zip({"x": one, "y": two}))
+        [
+         [{'x': 1.1, 'y': 'a'}, {'x': 2.2, 'y': 'b'}, {'x': 3.3, 'y': 'c'}],
+         [],
+         [{'x': 4.4, 'y': 'd'}, {'x': 5.5, 'y': 'e'}],
+         [{'x': 6.6, 'y': 'f'}]
+        ]
+
+    Doing so with a list creates tuples, whose fields are not named.
+
+        >>> ak.tolist(ak.zip([one, two]))
+        [
+         [(1.1, 'a'), (2.2, 'b'), (3.3, 'c')],
+         [],
+         [(4.4, 'd'), (5.5, 'e')],
+         [(6.6, 'f')]
+        ]
+
+    Adding a third array with the same length as `one` and `two` but less
+    internal structure is okay: it gets broadcasted to match the others.
+    (See #ak.broadcast_arrays for broadcasting rules.)
+
+        >>> three = ak.Array([100, 200, 300, 400])
+        >>> ak.tolist(ak.zip([one, two, three]))
+        [
+         [[(1.1, 97, 100)], [(2.2, 98, 100)], [(3.3, 99, 100)]],
+         [],
+         [[(4.4, 100, 300)], [(5.5, 101, 300)]],
+         [[(6.6, 102, 400)]]
+        ]
+
+    However, if arrays have the same depth but different lengths of nested
+    lists, attempting to zip them together is a broadcasting error.
+
+        >>> one = ak.Array([[[1, 2, 3], [], [4, 5], [6]], [], [[7, 8]]])
+        >>> two = ak.Array([[[1.1, 2.2], [3.3], [4.4], [5.5]], [], [[6.6]]])
+        >>> ak.zip([one, two])
+        ValueError: in ListArray64, cannot broadcast nested list
+
+    For this, one can set the `depthlimit` to prevent the operation from
+    attempting to broadcast what can't be broadcasted.
+
+        >>> ak.tolist(ak.zip([one, two], depthlimit=1))
+        [([[1, 2, 3], [], [4, 5], [6]], [[1.1, 2.2], [3.3], [4.4], [5.5]]),
+         ([], []),
+         ([[7, 8]], [[6.6]])]
+
+    As an extreme, `depthlimit=1` is a handy way to make a record structure
+    at the outermost level, regardless of whether the fields have matching
+    structure or not.
+    """
     if depthlimit is not None and depthlimit <= 0:
         raise ValueError("depthlimit must be None or at least 1")
 
@@ -912,7 +997,7 @@ def zip(arrays,
 
     def getfunction(inputs, depth):
         if ((depthlimit is None and
-             any(x.purelist_depth == 1 for x in inputs)) or
+             all(x.purelist_depth == 1 for x in inputs)) or
             (depthlimit == depth)):
             return lambda: (
                 awkward1.layout.RecordArray(inputs,

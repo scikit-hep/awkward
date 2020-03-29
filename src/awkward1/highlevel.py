@@ -987,6 +987,18 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
             >>> print(array**2)
             [[{x: 0, y: []}, {x: 1.21, y: [1]}], [], [{x: 4.84, y: [4, 4]}]]
 
+        In the above example, `array` is a nested list of records and `2` is
+        a scalar. Awkward Array applies the same broadcasting rules as NumPy
+        plus a few more to deal with nested structures. In addition to
+        broadcasting a scalar, as above, it is possible to broadcast
+        arrays with less depth into arrays with more depth, such as
+
+            >>> print(array + ak.Array([10, 20, 30]))
+            [[{x: 10, y: []}, {x: 11.1, y: [11]}], [], [{x: 32.2, y: [32, 32]}]]
+
+        See #ak.broadcast_arrays for details about broadcasting and the
+        generalized set of broadcasting rules.
+
         Third party libraries can create ufuncs, not just NumPy, so any library
         that "plays well" with the NumPy ecosystem can be used with Awkward
         Arrays:
