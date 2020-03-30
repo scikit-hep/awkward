@@ -32,27 +32,27 @@ namespace awkward {
     /// array.
     /// @param mask Mask in which each byte represents a missing value (`None`)
     /// or a valid value (from #content).
-    /// The interpretation depends on #validwhen; only boolean bytes that are
-    /// equal to #validwhen are not `None`.
+    /// The interpretation depends on #valid_when; only boolean bytes that are
+    /// equal to #valid_when are not `None`.
     /// @param content Data to be masked; `mask[i]` corresponds to `content[i]`
     /// for all `i`.
-    /// @param validwhen Interpretation of the boolean bytes in #mask as `None`
-    /// or valid values from #content. Only boolean bytes that are equal to
-    /// validwhen are not `None`.
+    /// @param valid_when Interpretation of the boolean bytes in #mask as
+    /// `None` or valid values from #content. Only boolean bytes that are
+    ///  equal to valid_when are not `None`.
     ///
-    /// Any non-zero value of a boolean byte and #validwhen are equivalent.
+    /// Any non-zero value of a boolean byte and #valid_when are equivalent.
     ByteMaskedArray(const IdentitiesPtr& identities,
                     const util::Parameters& parameters,
                     const Index8& mask,
                     const ContentPtr& content,
-                    bool validwhen);
+                    bool valid_when);
 
     /// @brief Mask in which each byte represents a missing value (`None`)
     /// or a valid value (from #content).
     ///
-    /// The interpretation depends on #validwhen; only boolean bytes that are
-    /// equal to #validwhen are not `None`. (Any non-zero value of a boolean
-    /// byte and #validwhen are equivalent.)
+    /// The interpretation depends on #valid_when; only boolean bytes that are
+    /// equal to #valid_when are not `None`. (Any non-zero value of a boolean
+    /// byte and #valid_when are equivalent.)
     const Index8
       mask() const;
 
@@ -63,10 +63,10 @@ namespace awkward {
 
     /// @brief Interpretation of the boolean bytes in #mask as `None` or
     /// valid values from #content. Only boolean bytes that are equal to
-    /// validwhen are not `None`. (Any non-zero value of a boolean byte
-    /// and `validwhen` are equivalent.)
+    /// valid_when are not `None`. (Any non-zero value of a boolean byte
+    /// and `valid_when` are equivalent.)
     bool
-      validwhen() const;
+      valid_when() const;
 
     /// @brief Return an array with the same type as #content with `None`
     /// values removed.
@@ -81,7 +81,7 @@ namespace awkward {
       project(const Index8& mask) const;
 
     /// @brief Returns a byte #mask with a fixed interpretation: missing
-    /// values are `1` and valid values are `0` (as though #validwhen were
+    /// values are `1` and valid values are `0` (as though #valid_when were
     /// `false`).
     const Index8
       bytemask() const;
@@ -312,8 +312,8 @@ namespace awkward {
     const Index8 mask_;
     /// @brief See #content.
     const ContentPtr content_;
-    /// @brief See #validwhen.
-    const bool validwhen_;
+    /// @brief See #valid_when.
+    const bool valid_when_;
   };
 
 }

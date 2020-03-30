@@ -16,21 +16,6 @@ if (distutils.version.LooseVersion(numpy.__version__) <
 import awkward1.layout
 import awkward1.types
 
-# high-level interface
-behavior = {}
-from awkward1.highlevel import Array
-from awkward1.highlevel import Record
-from awkward1.highlevel import ArrayBuilder
-
-# behaviors
-import awkward1.behaviors.string
-
-# operations
-from awkward1.operations.convert import *
-from awkward1.operations.describe import *
-from awkward1.operations.structure import *
-from awkward1.operations.reducers import *
-
 # third-party connectors
 import awkward1._connect._numba
 numba = type(awkward1.highlevel)("numba")
@@ -50,6 +35,21 @@ numexpr.re_evaluate = awkward1._connect._numexpr.re_evaluate
 import awkward1._connect._autograd
 autograd = type(awkward1.highlevel)("autograd")
 autograd.elementwise_grad = awkward1._connect._autograd.elementwise_grad
+
+# high-level interface
+behavior = {}
+from awkward1.highlevel import Array
+from awkward1.highlevel import Record
+from awkward1.highlevel import ArrayBuilder
+
+# behaviors
+import awkward1.behaviors.string
+
+# operations
+from awkward1.operations.convert import *
+from awkward1.operations.describe import *
+from awkward1.operations.structure import *
+from awkward1.operations.reducers import *
 
 # version
 __version__ = awkward1.layout.__version__

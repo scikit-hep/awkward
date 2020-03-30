@@ -29,11 +29,11 @@ namespace awkward {
                                    const util::Parameters& parameters,
                                    const Index8& mask,
                                    const ContentPtr& content,
-                                   bool validwhen)
+                                   bool valid_when)
       : Content(identities, parameters)
       , mask_(mask)
       , content_(content)
-      , validwhen_(validwhen != 0) {
+      , valid_when_(valid_when != 0) {
     if (content.get()->length() < mask.length()) {
       throw std::invalid_argument(
         "ByteMaskedArray content must not be shorter than its mask");
@@ -51,8 +51,8 @@ namespace awkward {
   }
 
   bool
-  ByteMaskedArray::validwhen() const {
-    return validwhen_;
+  ByteMaskedArray::valid_when() const {
+    return valid_when_;
   }
 
   const ContentPtr
@@ -63,7 +63,7 @@ namespace awkward {
       mask_.ptr().get(),
       mask_.offset(),
       length(),
-      validwhen_);
+      valid_when_);
     util::handle_error(err1, classname(), identities_.get());
 
     Index64 nextcarry(length() - numnull);
@@ -72,7 +72,7 @@ namespace awkward {
       mask_.ptr().get(),
       mask_.offset(),
       length(),
-      validwhen_);
+      valid_when_);
     util::handle_error(err2, classname(), identities_.get());
 
     return content_.get()->carry(nextcarry);
@@ -96,17 +96,17 @@ namespace awkward {
       mask_.ptr().get(),
       mask_.offset(),
       length(),
-      validwhen_);
+      valid_when_);
     util::handle_error(err, classname(), identities_.get());
 
-    //                                                       validwhen=false
+    //                                                       valid_when=false
     ByteMaskedArray next(identities_, parameters_, nextmask, content_, false);
     return next.project();
   }
 
   const Index8
   ByteMaskedArray::bytemask() const {
-    if (!validwhen_) {
+    if (!valid_when_) {
       return mask_;
     }
     else {
@@ -116,7 +116,7 @@ namespace awkward {
         mask_.ptr().get(),
         mask_.offset(),
         mask_.length(),
-        validwhen_);
+        valid_when_);
       util::handle_error(err, classname(), identities_.get());
       return out;
     }
@@ -150,7 +150,7 @@ namespace awkward {
       mask_.ptr().get(),
       mask_.offset(),
       mask_.length(),
-      validwhen_);
+      valid_when_);
     util::handle_error(err, classname(), identities_.get());
     return std::make_shared<IndexedOptionArray64>(identities_,
                                                   parameters_,
@@ -263,8 +263,8 @@ namespace awkward {
                                  const std::string& pre,
                                  const std::string& post) const {
     std::stringstream out;
-    out << indent << pre << "<" << classname() << " validwhen=\""
-        << (validwhen_ ? "true" : "false") << "\">\n";
+    out << indent << pre << "<" << classname() << " valid_when=\""
+        << (valid_when_ ? "true" : "false") << "\">\n";
     if (identities_.get() != nullptr) {
       out << identities_.get()->tostring_part(
                indent + std::string("    "), "", "\n");
@@ -311,7 +311,7 @@ namespace awkward {
                                              parameters_,
                                              mask_,
                                              content_,
-                                             validwhen_);
+                                             valid_when_);
   }
 
   const ContentPtr
@@ -330,7 +330,7 @@ namespace awkward {
                                              parameters_,
                                              mask,
                                              content,
-                                             validwhen_);
+                                             valid_when_);
   }
 
   void
@@ -367,7 +367,7 @@ namespace awkward {
   const ContentPtr
   ByteMaskedArray::getitem_at_nowrap(int64_t at) const {
     bool msk = (mask_.getitem_at_nowrap(at) != 0);
-    if (msk == validwhen_) {
+    if (msk == valid_when_) {
       return content_.get()->getitem_at_nowrap(at);
     }
     else {
@@ -402,7 +402,7 @@ namespace awkward {
       parameters_,
       mask_.getitem_range_nowrap(start, stop),
       content_.get()->getitem_range_nowrap(start, stop),
-      validwhen_);
+      valid_when_);
   }
 
   const ContentPtr
@@ -412,7 +412,7 @@ namespace awkward {
       util::Parameters(),
       mask_,
       content_.get()->getitem_field(key),
-      validwhen_);
+      valid_when_);
   }
 
   const ContentPtr
@@ -422,7 +422,7 @@ namespace awkward {
       util::Parameters(),
       mask_,
       content_.get()->getitem_fields(keys),
-      validwhen_);
+      valid_when_);
   }
 
   const ContentPtr
@@ -491,7 +491,7 @@ namespace awkward {
                                              parameters_,
                                              nextmask,
                                              content_.get()->carry(carry),
-                                             validwhen_);
+                                             valid_when_);
   }
 
   const std::string
@@ -731,7 +731,7 @@ namespace awkward {
         parameters_,
         mask_,
         content_.get()->rpad(target, toaxis, depth),
-        validwhen_);
+        valid_when_);
     }
   }
 
@@ -766,7 +766,7 @@ namespace awkward {
         parameters_,
         mask_,
         content_.get()->rpad_and_clip(target, toaxis, depth),
-        validwhen_);
+        valid_when_);
     }
   }
 
@@ -784,7 +784,7 @@ namespace awkward {
       mask_.ptr().get(),
       mask_.offset(),
       length(),
-      validwhen_);
+      valid_when_);
     util::handle_error(err1, classname(), identities_.get());
 
     Index64 nextparents(length() - numnull);
@@ -799,7 +799,7 @@ namespace awkward {
       parents.ptr().get(),
       parents.offset(),
       length(),
-      validwhen_);
+      valid_when_);
     util::handle_error(err2, classname(), identities_.get());
 
     ContentPtr next = content_.get()->carry(nextcarry);
@@ -1004,7 +1004,7 @@ namespace awkward {
       mask_.ptr().get(),
       mask_.offset(),
       mask_.length(),
-      validwhen_);
+      valid_when_);
     util::handle_error(err1, classname(), identities_.get());
 
     Index64 nextcarry(length() - numnull);
@@ -1015,7 +1015,7 @@ namespace awkward {
       mask_.ptr().get(),
       mask_.offset(),
       mask_.length(),
-      validwhen_);
+      valid_when_);
     util::handle_error(err2, classname(), identities_.get());
 
     return std::pair<Index64, Index64>(nextcarry, outindex);

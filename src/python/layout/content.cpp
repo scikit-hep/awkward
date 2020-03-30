@@ -394,9 +394,9 @@ toslice_part(ak::Slice& slice, py::object obj) {
             obj,
             py::module::import("numpy").attr("ma").attr("MaskedArray"))) {
         content = unbox_content(
-            py::module::import("awkward1").attr("fromnumpy")(obj,
-                                                             false,
-                                                             false));
+            py::module::import("awkward1").attr("from_numpy")(obj,
+                                                              false,
+                                                              false));
       }
       else if (py::isinstance(
             obj, py::module::import("numpy").attr("ndarray"))) {
@@ -435,7 +435,7 @@ toslice_part(ak::Slice& slice, py::object obj) {
         }
         if (bad) {
           content = unbox_content(py::module::import("awkward1")
-                    .attr("fromiter")(obj, false));
+                    .attr("from_iter")(obj, false));
         }
       }
 
@@ -443,7 +443,7 @@ toslice_part(ak::Slice& slice, py::object obj) {
         if (content.get()->parameter_equals("__array__", "\"string\"")  ||
             content.get()->parameter_equals("__array__", "\"bytestring\"")) {
           obj = box(content);
-          obj = py::module::import("awkward1").attr("tolist")(obj);
+          obj = py::module::import("awkward1").attr("to_list")(obj);
           std::vector<std::string> strings;
           for (auto x : obj) {
             strings.push_back(x.cast<std::string>());
@@ -1332,23 +1332,23 @@ make_ByteMaskedArray(const py::handle& m, const std::string& name) {
                          ak::Content>(m, name.c_str())
       .def(py::init([](const ak::Index8& mask,
                        const py::object& content,
-                       bool validwhen,
+                       bool valid_when,
                        const py::object& identities,
                        const py::object& parameters) -> ak::ByteMaskedArray {
         return ak::ByteMaskedArray(
           unbox_identities_none(identities),
           dict2parameters(parameters),
           mask,
-          std::shared_ptr<ak::Content>(unbox_content(content)), validwhen);
+          std::shared_ptr<ak::Content>(unbox_content(content)), valid_when);
       }), py::arg("mask"),
           py::arg("content"),
-          py::arg("validwhen"),
+          py::arg("valid_when"),
           py::arg("identities") = py::none(),
           py::arg("parameters") = py::none())
 
       .def_property_readonly("mask", &ak::ByteMaskedArray::mask)
       .def_property_readonly("content", &ak::ByteMaskedArray::content)
-      .def_property_readonly("validwhen", &ak::ByteMaskedArray::validwhen)
+      .def_property_readonly("valid_when", &ak::ByteMaskedArray::valid_when)
       .def("project",
            [](const ak::ByteMaskedArray& self, const py::object& mask) {
         if (mask.is(py::none())) {
@@ -1376,7 +1376,7 @@ make_BitMaskedArray(const py::handle& m, const std::string& name) {
                          ak::Content>(m, name.c_str())
       .def(py::init([](const ak::IndexU8& mask,
                        const py::object& content,
-                       bool validwhen,
+                       bool valid_when,
                        int64_t length,
                        bool lsb_order,
                        const py::object& identities,
@@ -1386,12 +1386,12 @@ make_BitMaskedArray(const py::handle& m, const std::string& name) {
           dict2parameters(parameters),
           mask,
           std::shared_ptr<ak::Content>(unbox_content(content)),
-          validwhen,
+          valid_when,
           length,
           lsb_order);
       }), py::arg("mask"),
           py::arg("content"),
-          py::arg("validwhen"),
+          py::arg("valid_when"),
           py::arg("length"),
           py::arg("lsb_order"),
           py::arg("identities") = py::none(),
@@ -1399,7 +1399,7 @@ make_BitMaskedArray(const py::handle& m, const std::string& name) {
 
       .def_property_readonly("mask", &ak::BitMaskedArray::mask)
       .def_property_readonly("content", &ak::BitMaskedArray::content)
-      .def_property_readonly("validwhen", &ak::BitMaskedArray::validwhen)
+      .def_property_readonly("valid_when", &ak::BitMaskedArray::valid_when)
       .def_property_readonly("lsb_order", &ak::BitMaskedArray::lsb_order)
       .def("project",
            [](const ak::BitMaskedArray& self, const py::object& mask) {

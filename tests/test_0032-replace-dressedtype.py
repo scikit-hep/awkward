@@ -44,11 +44,11 @@ def test_dress():
 
     x = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5]))
     x.setparameter("__array__", "Dummy")
-    a = awkward1.Array(x, behavior=ns, checkvalid=True)
+    a = awkward1.Array(x, behavior=ns, check_valid=True)
     assert repr(a) == "<Dummy [1.1, 2.2, 3.3, 4.4, 5.5]>"
 
     x2 = awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(numpy.array([0, 3, 3, 5], dtype=numpy.int64)), awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5]), parameters={"__array__": "Dummy"}))
-    a2 = awkward1.Array(x2, behavior=ns, checkvalid=True)
+    a2 = awkward1.Array(x2, behavior=ns, check_valid=True)
     assert repr(a2) == "<Array [<Dummy [1.1, 2.2, 3.3]>, ... ] type='3 * var * float64[parameters={\"__ar...'>"
     assert repr(a2[0]) == "<Dummy [1.1, 2.2, 3.3]>"
     assert repr(a2[1]) == "<Dummy []>"
@@ -88,8 +88,8 @@ def test_builder_string():
         assert str(a) == "['one', 'two', 'three']"
     else:
         assert str(a) == "[b'one', b'two', b'three']"
-    assert awkward1.tolist(a) == [b'one', b'two', b'three']
-    assert awkward1.tojson(a) == '["one","two","three"]'
+    assert awkward1.to_list(a) == [b'one', b'two', b'three']
+    assert awkward1.to_json(a) == '["one","two","three"]'
     if py27:
         assert repr(a) == "<Array ['one', 'two', 'three'] type='3 * bytes'>"
     else:
@@ -107,8 +107,8 @@ def test_builder_string():
         assert str(a) == "[u'one', u'two', u'three']"
     else:
         assert str(a) == "['one', 'two', 'three']"
-    assert awkward1.tolist(a) == ['one', 'two', 'three']
-    assert awkward1.tojson(a) == '["one","two","three"]'
+    assert awkward1.to_list(a) == ['one', 'two', 'three']
+    assert awkward1.to_json(a) == '["one","two","three"]'
     if py27:
         assert repr(a) == "<Array [u'one', u'two', u'three'] type='3 * string'>"
     else:
@@ -117,32 +117,32 @@ def test_builder_string():
 
     builder = awkward1.ArrayBuilder()
 
-    builder.beginlist()
+    builder.begin_list()
     builder.string("one")
     builder.string("two")
     builder.string("three")
-    builder.endlist()
+    builder.end_list()
 
-    builder.beginlist()
-    builder.endlist()
+    builder.begin_list()
+    builder.end_list()
 
-    builder.beginlist()
+    builder.begin_list()
     builder.string("four")
     builder.string("five")
-    builder.endlist()
+    builder.end_list()
 
     a = builder.snapshot()
     if py27:
         assert str(a) == "[[u'one', u'two', u'three'], [], [u'four', u'five']]"
     else:
         assert str(a) == "[['one', 'two', 'three'], [], ['four', 'five']]"
-    assert awkward1.tolist(a) == [['one', 'two', 'three'], [], ['four', 'five']]
-    assert awkward1.tojson(a) == '[["one","two","three"],[],["four","five"]]'
+    assert awkward1.to_list(a) == [['one', 'two', 'three'], [], ['four', 'five']]
+    assert awkward1.to_json(a) == '[["one","two","three"],[],["four","five"]]'
     assert repr(a.type) == "3 * var * string"
 
 def test_fromiter_fromjson():
-    assert awkward1.tolist(awkward1.fromiter(["one", "two", "three"])) == ["one", "two", "three"]
-    assert awkward1.tolist(awkward1.fromiter([["one", "two", "three"], [], ["four", "five"]])) == [["one", "two", "three"], [], ["four", "five"]]
+    assert awkward1.to_list(awkward1.from_iter(["one", "two", "three"])) == ["one", "two", "three"]
+    assert awkward1.to_list(awkward1.from_iter([["one", "two", "three"], [], ["four", "five"]])) == [["one", "two", "three"], [], ["four", "five"]]
 
-    assert awkward1.tolist(awkward1.fromjson('["one", "two", "three"]')) == ["one", "two", "three"]
-    assert awkward1.tolist(awkward1.fromjson('[["one", "two", "three"], [], ["four", "five"]]')) == [["one", "two", "three"], [], ["four", "five"]]
+    assert awkward1.to_list(awkward1.from_json('["one", "two", "three"]')) == ["one", "two", "three"]
+    assert awkward1.to_list(awkward1.from_json('[["one", "two", "three"], [], ["four", "five"]]')) == [["one", "two", "three"], [], ["four", "five"]]

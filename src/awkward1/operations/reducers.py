@@ -78,9 +78,9 @@ def count(array, axis=None, keepdims=False, maskidentity=False):
     If it is desirable to include None values in #ak.count, use #ak.fillna
     to turn the None values into something that would be counted.
     """
-    layout = awkward1.operations.convert.tolayout(array,
-                                                  allowrecord=False,
-                                                  allowother=False)
+    layout = awkward1.operations.convert.to_layout(array,
+                                                   allowrecord=False,
+                                                   allowother=False)
     if axis is None:
         def reduce(xs):
             if len(xs) == 1:
@@ -128,9 +128,9 @@ def count_nonzero(array, axis=None, keepdims=False, maskidentity=False):
     count None values. If it is desirable to count them, use #ak.fillna
     to turn them into something that would be counted.
     """
-    layout = awkward1.operations.convert.tolayout(array,
-                                                  allowrecord=False,
-                                                  allowother=False)
+    layout = awkward1.operations.convert.to_layout(array,
+                                                   allowrecord=False,
+                                                   allowother=False)
     if axis is None:
         def reduce(xs):
             if len(xs) == 1:
@@ -317,9 +317,9 @@ def sum(array, axis=None, keepdims=False, maskidentity=False):
     The third list is reduced to `0` if `maskidentity=False` because `0` is the
     identity of addition, but it is reduced to None if `maskidentity=True`.
     """
-    layout = awkward1.operations.convert.tolayout(array,
-                                                  allowrecord=False,
-                                                  allowother=False)
+    layout = awkward1.operations.convert.to_layout(array,
+                                                   allowrecord=False,
+                                                   allowother=False)
     if axis is None:
         def reduce(xs):
             if len(xs) == 1:
@@ -363,9 +363,9 @@ def prod(array, axis=None, keepdims=False, maskidentity=False):
     See #ak.sum for a more complete description of nested list and missing
     value (None) handling in reducers.
     """
-    layout = awkward1.operations.convert.tolayout(array,
-                                                  allowrecord=False,
-                                                  allowother=False)
+    layout = awkward1.operations.convert.to_layout(array,
+                                                   allowrecord=False,
+                                                   allowother=False)
     if axis is None:
         def reduce(xs):
             if len(xs) == 1:
@@ -411,9 +411,9 @@ def any(array, axis=None, keepdims=False, maskidentity=False):
     See #ak.sum for a more complete description of nested list and missing
     value (None) handling in reducers.
     """
-    layout = awkward1.operations.convert.tolayout(array,
-                                                  allowrecord=False,
-                                                  allowother=False)
+    layout = awkward1.operations.convert.to_layout(array,
+                                                   allowrecord=False,
+                                                   allowother=False)
     if axis is None:
         def reduce(xs):
             if len(xs) == 1:
@@ -459,9 +459,9 @@ def all(array, axis=None, keepdims=False, maskidentity=False):
     See #ak.sum for a more complete description of nested list and missing
     value (None) handling in reducers.
     """
-    layout = awkward1.operations.convert.tolayout(array,
-                                                  allowrecord=False,
-                                                  allowother=False)
+    layout = awkward1.operations.convert.to_layout(array,
+                                                   allowrecord=False,
+                                                   allowother=False)
     if axis is None:
         def reduce(xs):
             if len(xs) == 1:
@@ -508,9 +508,9 @@ def min(array, axis=None, keepdims=False, maskidentity=True):
     See #ak.sum for a more complete description of nested list and missing
     value (None) handling in reducers.
     """
-    layout = awkward1.operations.convert.tolayout(array,
-                                                  allowrecord=False,
-                                                  allowother=False)
+    layout = awkward1.operations.convert.to_layout(array,
+                                                   allowrecord=False,
+                                                   allowother=False)
     if axis is None:
         def reduce(xs):
             if len(xs) == 0:
@@ -560,9 +560,9 @@ def max(array, axis=None, keepdims=False, maskidentity=True):
     See #ak.sum for a more complete description of nested list and missing
     value (None) handling in reducers.
     """
-    layout = awkward1.operations.convert.tolayout(array,
-                                                  allowrecord=False,
-                                                  allowother=False)
+    layout = awkward1.operations.convert.to_layout(array,
+                                                   allowrecord=False,
+                                                   allowother=False)
     if axis is None:
         def reduce(xs):
             if len(xs) == 0:
@@ -616,9 +616,9 @@ def argmin(array, axis=None, keepdims=False, maskidentity=True):
     See #ak.sum for a more complete description of nested list and missing
     value (None) handling in reducers.
     """
-    layout = awkward1.operations.convert.tolayout(array,
-                                                  allowrecord=False,
-                                                  allowother=False)
+    layout = awkward1.operations.convert.to_layout(array,
+                                                   allowrecord=False,
+                                                   allowother=False)
     if axis is None:
         tmp = awkward1._util.completely_flatten(layout)
         return numpy.argmin(tmp, axis=None)
@@ -664,9 +664,9 @@ def argmax(array, axis=None, keepdims=False, maskidentity=True):
     See #ak.sum for a more complete description of nested list and missing
     value (None) handling in reducers.
     """
-    layout = awkward1.operations.convert.tolayout(array,
-                                                  allowrecord=False,
-                                                  allowother=False)
+    layout = awkward1.operations.convert.to_layout(array,
+                                                   allowrecord=False,
+                                                   allowother=False)
     if axis is None:
         tmp = awkward1._util.completely_flatten(layout)
         return numpy.argmax(tmp, axis=None)
@@ -1133,13 +1133,13 @@ def linearfit(x, y, weight=None, axis=None, keepdims=False, maskidentity=True):
         intercept_error = numpy.sqrt(numpy.true_divide(sumwxx, delta))
         slope_error     = numpy.sqrt(numpy.true_divide(sumw, delta))
 
-        intercept       = awkward1.operations.convert.tolayout(
+        intercept       = awkward1.operations.convert.to_layout(
                             intercept, allowrecord=True, allowother=True)
-        slope           = awkward1.operations.convert.tolayout(
+        slope           = awkward1.operations.convert.to_layout(
                             slope, allowrecord=True, allowother=True)
-        intercept_error = awkward1.operations.convert.tolayout(
+        intercept_error = awkward1.operations.convert.to_layout(
                             intercept_error, allowrecord=True, allowother=True)
-        slope_error     = awkward1.operations.convert.tolayout(
+        slope_error     = awkward1.operations.convert.to_layout(
                             slope_error, allowrecord=True, allowother=True)
 
         scalar = (not isinstance(intercept, awkward1.layout.Content) and

@@ -105,7 +105,7 @@ class PandasMixin(PandasNotImportedYet):
         dtype, copy = awkward1._util.extra(args, kwargs, [
             ("dtype", None),
             ("copy", False)])
-        return awkward1.operations.convert.fromiter(scalars)
+        return awkward1.operations.convert.from_iter(scalars)
 
     @classmethod
     def _from_factorized(cls, values, original):
@@ -164,7 +164,7 @@ class PandasMixin(PandasNotImportedYet):
                 tags = (indices >= 0).view(numpy.int8)
                 index = indices.copy()
                 index[~tags] = 0
-                content0 = awkward1.operations.convert.fromiter(
+                content0 = awkward1.operations.convert.from_iter(
                              [fill_value], highlevel=False)
                 content1 = self.layout
                 tags = awkward1.layout.Index8(tags)
@@ -298,16 +298,16 @@ def dfs(array,
 
         else:
             try:
-                return [(awkward1.operations.convert.tonumpy(layout),
+                return [(awkward1.operations.convert.to_numpy(layout),
                          row_arrays,
                          col_names)]
             except:
                 return [(layout, row_arrays, col_names)]
 
     behavior = awkward1._util.behaviorof(array)
-    layout = awkward1.operations.convert.tolayout(array,
-                                                  allowrecord=True,
-                                                  allowother=False)
+    layout = awkward1.operations.convert.to_layout(array,
+                                                   allowrecord=True,
+                                                   allowother=False)
     if isinstance(layout, awkward1.layout.Record):
         layout2 = layout.array[layout.at : layout.at + 1]
     else:

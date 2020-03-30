@@ -14,7 +14,7 @@ import awkward1.layout
 import awkward1._connect._numpy
 import awkward1.operations.convert
 
-def withfield(base, what, where=None, highlevel=True):
+def with_field(base, what, where=None, highlevel=True):
     """
     Args:
         base: Data containing records or tuples.
@@ -31,19 +31,19 @@ def withfield(base, what, where=None, highlevel=True):
 
     See #ak.Array.__setitem__ and #ak.Record.__setitem__ for a variant that
     changes the high-level object in-place. (These methods internally use
-    #ak.withfield, so performance is not a factor in choosing one over the
+    #ak.with_field, so performance is not a factor in choosing one over the
     other.)
     """
-    base = awkward1.operations.convert.tolayout(base,
-                                                allowrecord=True,
-                                                allowother=False)
+    base = awkward1.operations.convert.to_layout(base,
+                                                 allowrecord=True,
+                                                 allowother=False)
     if base.numfields < 0:
         raise ValueError("no tuples or records in array; cannot add a new "
                 "field")
 
-    what = awkward1.operations.convert.tolayout(what,
-                                                allowrecord=True,
-                                                allowother=True)
+    what = awkward1.operations.convert.to_layout(what,
+                                                 allowrecord=True,
+                                                 allowother=True)
     
     keys = base.keys()
     if where in base.keys():
@@ -103,7 +103,7 @@ def withname(array, name, highlevel=True):
         else:
             return None
     out = awkward1._util.recursively_apply(
-            awkward1.operations.convert.tolayout(array), getfunction)
+            awkward1.operations.convert.to_layout(array), getfunction)
     if highlevel:
         return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
     else:
@@ -144,7 +144,7 @@ def isna(array, highlevel=True):
         else:
             return numpy.zeros(len(layout), dtype=numpy.bool_)
 
-    out = apply(awkward1.operations.convert.tolayout(array, allowrecord=False))
+    out = apply(awkward1.operations.convert.to_layout(array, allowrecord=False))
     if highlevel:
         return awkward1._util.wrap(out,
                                    behavior=awkward1._util.behaviorof(array))
@@ -219,14 +219,14 @@ def num(array, axis=1, highlevel=True):
         <Array [[1.1, 2.2, 3.3], [7.7]] type='2 * var * float64'>
 
     To keep a placeholder (None) in each place we do not want to select,
-    consider using #ak.tomask instead of a #ak.Array.__getitem__.
+    consider using #ak.mask instead of a #ak.Array.__getitem__.
 
-        >>> ak.tomask(array, ak.num(array) > 0)[:, 0]
+        >>> ak.mask(array, ak.num(array) > 0)[:, 0]
         <Array [[1.1, 2.2, 3.3], None, [7.7]] type='3 * option[var * float64]'>
     """
-    layout = awkward1.operations.convert.tolayout(array,
-                                                  allowrecord=False,
-                                                  allowother=False)
+    layout = awkward1.operations.convert.to_layout(array,
+                                                   allowrecord=False,
+                                                   allowother=False)
     out = layout.num(axis=axis)
     if highlevel:
         return awkward1._util.wrap(out,
@@ -250,7 +250,7 @@ def size(array, axis=None):
     [size](https://docs.scipy.org/doc/numpy/reference/generated/numpy.ma.size.html)
     function in a way that accepts #ak.Array as the `array`.
 
-    If the `array` is not rectilinear (i.e. if #np.tonumpy would raise an
+    If the `array` is not rectilinear (i.e. if #np.to_numpy would raise an
     error), then this function raise an error.
     """
     if axis is not None and axis < 0:
@@ -304,7 +304,7 @@ def size(array, axis=None):
         else:
             raise AssertionError("unrecognized Content type")
 
-    layout = awkward1.operations.convert.tolayout(array, allowrecord=False)
+    layout = awkward1.operations.convert.to_layout(array, allowrecord=False)
     layout = awkward1.layout.RegularArray(layout, len(layout))
 
     sizes = []
@@ -316,8 +316,8 @@ def size(array, axis=None):
             if size is None:
                 raise ValueError(
                         "ak.size is ambiguous due to variable-length arrays "
-                        "(try ak.flatten to remove structure or ak.tonumpy to "
-                        "force regularity, if possible)")
+                        "(try ak.flatten to remove structure or ak.to_numpy "
+                        "to force regularity, if possible)")
             else:
                 out *= size
         return out
@@ -326,7 +326,7 @@ def size(array, axis=None):
             raise ValueError(
                     "ak.size is ambiguous due to variable-length arrays at "
                     "axis {0} (try ak.flatten to remove structure or "
-                    "ak.tonumpy to force regularity, if possible)".format(
+                    "ak.to_numpy to force regularity, if possible)".format(
                                                                         axis))
         else:
             return sizes[-1]
@@ -348,10 +348,10 @@ def atleast_1d(*arrays):
     [atleast_1d](https://docs.scipy.org/doc/numpy/reference/generated/numpy.atleast_1d.html)
     function in a way that accepts #ak.Array objects as the `arrays`.
 
-    If the `arrays` are not all rectilinear (i.e. if #np.tonumpy would raise an
+    If the `arrays` are not all rectilinear (i.e. if #np.to_numpy would raise an
     error), then this function raise an error.
     """
-    return numpy.atleast_1d(*[awkward1.operations.convert.tonumpy(x)
+    return numpy.atleast_1d(*[awkward1.operations.convert.to_numpy(x)
                                 for x in arrays])
 
 @awkward1._connect._numpy.implements(numpy.concatenate)
@@ -378,7 +378,7 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
     if axis != 0:
         raise NotImplementedError("axis={0}".format(axis))
 
-    contents = [awkward1.operations.convert.tolayout(x, allowrecord=False)
+    contents = [awkward1.operations.convert.to_layout(x, allowrecord=False)
                   for x in arrays]
 
     if len(contents) == 0:
@@ -503,9 +503,9 @@ def broadcast_arrays(*arrays, **kwargs):
 
     inputs = []
     for x in arrays:
-        y = awkward1.operations.convert.tolayout(x,
-                                                 allowrecord=True,
-                                                 allowother=True)
+        y = awkward1.operations.convert.to_layout(x,
+                                                  allowrecord=True,
+                                                  allowother=True)
         if not isinstance(y, (awkward1.layout.Content,
                               awkward1.layout.Record)):
             y = awkward1.layout.NumpyArray(numpy.array([y]))
@@ -560,7 +560,7 @@ def where(condition, *args, **kwargs):
         ("mergebool", True),
         ("highlevel", True)])
 
-    npcondition = awkward1.operations.convert.tonumpy(condition)
+    npcondition = awkward1.operations.convert.to_numpy(condition)
 
     if len(args) == 0:
         out = numpy.nonzero(npcondition)
@@ -580,8 +580,8 @@ def where(condition, *args, **kwargs):
             raise NotImplementedError(
                 "FIXME: ak.where(condition, x, y) where condition is not 1-d")
 
-        x = awkward1.operations.convert.tolayout(args[0], allowrecord=False)
-        y = awkward1.operations.convert.tolayout(args[1], allowrecord=False)
+        x = awkward1.operations.convert.to_layout(args[0], allowrecord=False)
+        y = awkward1.operations.convert.to_layout(args[1], allowrecord=False)
 
         tags = (npcondition == 0)
         assert tags.itemsize == 1
@@ -671,9 +671,9 @@ def flatten(array, axis=1, highlevel=True):
     However, it is important to keep in mind that this is a special case:
     #ak.flatten and `content` are not interchangeable!
     """
-    layout = awkward1.operations.convert.tolayout(array,
-                                                  allowrecord=False,
-                                                  allowother=False)
+    layout = awkward1.operations.convert.to_layout(array,
+                                                   allowrecord=False,
+                                                   allowother=False)
 
     if axis is None:
         out = awkward1._util.completely_flatten(layout)
@@ -725,7 +725,7 @@ def rpad(array, target, axis=1, clip=False, highlevel=True):
     At `axis=0`, this operation pads the whole array, adding None at the
     outermost level:
 
-        >>> ak.tolist(ak.rpad(array, 5, axis=0))
+        >>> ak.to_list(ak.rpad(array, 5, axis=0))
         [[
           [1.1, 2.2, 3.3],
           [],
@@ -741,7 +741,7 @@ def rpad(array, target, axis=1, clip=False, highlevel=True):
 
     At `axis=1`, this operation pads the first nested level:
 
-        >>> ak.tolist(ak.rpad(array, 3, axis=1))
+        >>> ak.to_list(ak.rpad(array, 3, axis=1))
         [[
           [1.1, 2.2, 3.3],
           [],
@@ -760,7 +760,7 @@ def rpad(array, target, axis=1, clip=False, highlevel=True):
 
     And so on for higher values of `axis`:
 
-        >>> ak.tolist(ak.rpad(array, 2, axis=2))
+        >>> ak.to_list(ak.rpad(array, 2, axis=2))
         [[
           [1.1, 2.2, 3.3],
           [None, None],
@@ -801,9 +801,9 @@ def rpad(array, target, axis=1, clip=False, highlevel=True):
         3 * var * var * ?float64
         3 * var *   2 * ?float64
     """
-    layout = awkward1.operations.convert.tolayout(array,
-                                                  allowrecord=False,
-                                                  allowother=False)
+    layout = awkward1.operations.convert.to_layout(array,
+                                                   allowrecord=False,
+                                                   allowother=False)
     if clip:
         out = layout.rpad_and_clip(target, axis)
     else:
@@ -841,21 +841,21 @@ def fillna(array, value, highlevel=True):
 
     The list content now has a union type:
 
-        >>> ak.typeof(ak.fillna(array, "hi"))
+        >>> ak.type(ak.fillna(array, "hi"))
         3 * var * union[float64, string]
 
     The values could be floating-point numbers or strings.
     """
-    arraylayout = awkward1.operations.convert.tolayout(array,
-                                                       allowrecord=True,
-                                                       allowother=False)
+    arraylayout = awkward1.operations.convert.to_layout(array,
+                                                        allowrecord=True,
+                                                        allowother=False)
 
     if (isinstance(value, Iterable) and
         not (isinstance(value, (str, bytes)) or
              (awkward1._util.py27 and isinstance(value, unicode)))):
-        valuelayout = awkward1.operations.convert.tolayout(value,
-                                                           allowrecord=True,
-                                                           allowother=False)
+        valuelayout = awkward1.operations.convert.to_layout(value,
+                                                            allowrecord=True,
+                                                            allowother=False)
         if isinstance(valuelayout, awkward1.layout.Record):
             valuelayout = valuelayout.array[valuelayout.at:valuelayout.at + 1]
         elif len(valuelayout) == 0:
@@ -867,9 +867,9 @@ def fillna(array, value, highlevel=True):
             valuelayout = awkward1.layout.RegularArray(valuelayout,
                                                        len(valuelayout))
     else:
-        valuelayout = awkward1.operations.convert.tolayout([value],
-                                                           allowrecord=True,
-                                                           allowother=False)
+        valuelayout = awkward1.operations.convert.to_layout([value],
+                                                            allowrecord=True,
+                                                            allowother=False)
 
     out = arraylayout.fillna(valuelayout)
     if highlevel:
@@ -917,7 +917,7 @@ def zip(arrays,
     Zipping them together using a dict creates a collection of records with
     the same nesting structure as `one` and `two`.
 
-        >>> ak.tolist(ak.zip({"x": one, "y": two}))
+        >>> ak.to_list(ak.zip({"x": one, "y": two}))
         [
          [{'x': 1.1, 'y': 'a'}, {'x': 2.2, 'y': 'b'}, {'x': 3.3, 'y': 'c'}],
          [],
@@ -927,7 +927,7 @@ def zip(arrays,
 
     Doing so with a list creates tuples, whose fields are not named.
 
-        >>> ak.tolist(ak.zip([one, two]))
+        >>> ak.to_list(ak.zip([one, two]))
         [
          [(1.1, 'a'), (2.2, 'b'), (3.3, 'c')],
          [],
@@ -940,7 +940,7 @@ def zip(arrays,
     (See #ak.broadcast_arrays for broadcasting rules.)
 
         >>> three = ak.Array([100, 200, 300, 400])
-        >>> ak.tolist(ak.zip([one, two, three]))
+        >>> ak.to_list(ak.zip([one, two, three]))
         [
          [[(1.1, 97, 100)], [(2.2, 98, 100)], [(3.3, 99, 100)]],
          [],
@@ -959,7 +959,7 @@ def zip(arrays,
     For this, one can set the `depthlimit` to prevent the operation from
     attempting to broadcast what can't be broadcasted.
 
-        >>> ak.tolist(ak.zip([one, two], depthlimit=1))
+        >>> ak.to_list(ak.zip([one, two], depthlimit=1))
         [([[1, 2, 3], [], [4, 5], [6]], [[1.1, 2.2], [3.3], [4.4], [5.5]]),
          ([], []),
          ([[7, 8]], [[6.6]])]
@@ -977,17 +977,17 @@ def zip(arrays,
         for n, x in arrays.items():
             recordlookup.append(n)
             layouts.append(
-                awkward1.operations.convert.tolayout(x,
-                                                     allowrecord=False,
-                                                     allowother=False))
+                awkward1.operations.convert.to_layout(x,
+                                                      allowrecord=False,
+                                                      allowother=False))
     else:
         recordlookup = None
         layouts = []
         for x in arrays:
             layouts.append(
-                awkward1.operations.convert.tolayout(x,
-                                                     allowrecord=False,
-                                                     allowother=False))
+                awkward1.operations.convert.to_layout(x,
+                                                      allowrecord=False,
+                                                      allowother=False))
 
     if withname is not None:
         if parameters is None:
@@ -1081,13 +1081,13 @@ def cross(arrays,
 
     is
 
-        >>> ak.tolist(ak.cross([one, two], axis=0))
+        >>> ak.to_list(ak.cross([one, two], axis=0))
         [(1, 'a'), (1, 'b'), (2, 'a'), (2, 'b'), (3, 'a'), (3, 'b')]
 
     With nesting, a new level of nested lists is created to group combinations
     that share the same element from `one` into the same list.
 
-        >>> ak.tolist(ak.cross([one, two], axis=0, nested=True))
+        >>> ak.to_list(ak.cross([one, two], axis=0, nested=True))
         [[(1, 'a'), (1, 'b')], [(2, 'a'), (2, 'b')], [(3, 'a'), (3, 'b')]]
 
     The primary purpose of this function, however, is to compute a different
@@ -1101,7 +1101,7 @@ def cross(arrays,
     and `["a", "b"]`, 0 pairs from `[]` and `["c"]`, 1 pair from `[4, 5]` and
     `["d"]`, and 1 pair from `[6]` and `["e", "f"]`.
 
-        >>> ak.tolist(ak.cross([one, two]))
+        >>> ak.to_list(ak.cross([one, two]))
         [[(1, 'a'), (1, 'b'), (2, 'a'), (2, 'b'), (3, 'a'), (3, 'b')],
          [],
          [(4, 'd'), (5, 'd')],
@@ -1111,7 +1111,7 @@ def cross(arrays,
     the nesting depth is increased by 1 and tuples are grouped by their
     first element.
 
-        >>> ak.tolist(ak.cross([one, two], nested=True))
+        >>> ak.to_list(ak.cross([one, two], nested=True))
         [[[(1, 'a'), (1, 'b')], [(2, 'a'), (2, 'b')], [(3, 'a'), (3, 'b')]],
          [],
          [[(4, 'd')], [(5, 'd')]],
@@ -1120,7 +1120,7 @@ def cross(arrays,
     These tuples are #ak.layout.RecordArray nodes with unnamed fields. To
     name the fields, we can pass `one` and `two` in a dict, rather than a list.
 
-        >>> ak.tolist(ak.cross({"x": one, "y": two}))
+        >>> ak.to_list(ak.cross({"x": one, "y": two}))
         [
          [{'x': 1, 'y': 'a'},
           {'x': 1, 'y': 'b'},
@@ -1144,7 +1144,7 @@ def cross(arrays,
 
     can be left entirely ungrouped:
 
-        >>> ak.tolist(ak.cross([one, two, three], axis=0))
+        >>> ak.to_list(ak.cross([one, two, three], axis=0))
         [
          (1, 1.1, 'a'),
          (1, 1.1, 'b'),
@@ -1174,7 +1174,7 @@ def cross(arrays,
 
     can be grouped by `one` (adding 1 more dimension):
 
-        >>> ak.tolist(ak.cross([one, two, three], axis=0, nested=[0]))
+        >>> ak.to_list(ak.cross([one, two, three], axis=0, nested=[0]))
         [
          [(1, 1.1, 'a'), (1, 1.1, 'b'), (1, 2.2, 'a')],
          [(1, 2.2, 'b'), (1, 3.3, 'a'), (1, 3.3, 'b')],
@@ -1188,7 +1188,7 @@ def cross(arrays,
 
     can be grouped by `one` and `two` (adding 2 more dimensions):
 
-        >>> ak.tolist(ak.cross([one, two, three], axis=0, nested=[0, 1]))
+        >>> ak.to_list(ak.cross([one, two, three], axis=0, nested=[0, 1]))
         [
          [
           [(1, 1.1, 'a'), (1, 1.1, 'b')],
@@ -1212,7 +1212,7 @@ def cross(arrays,
 
     or grouped by unique `one`-`two` pairs (adding 1 more dimension):
 
-        >>> ak.tolist(ak.cross([one, two, three], axis=0, nested=[1]))
+        >>> ak.to_list(ak.cross([one, two, three], axis=0, nested=[1]))
         [
          [(1, 1.1, 'a'), (1, 1.1, 'b')],
          [(1, 2.2, 'a'), (1, 2.2, 'b')],
@@ -1272,9 +1272,9 @@ def cross(arrays,
             for i, (n, x) in enumerate(arrays.items()):
                 recordlookup.append(n)
                 layouts.append(
-                    awkward1.operations.convert.tolayout(x,
-                                                         allowrecord=False,
-                                                         allowother=False))
+                    awkward1.operations.convert.to_layout(x,
+                                                          allowrecord=False,
+                                                          allowother=False))
                 if n in nested:
                     tonested.append(i)
             nested = tonested
@@ -1291,9 +1291,9 @@ def cross(arrays,
             layouts = []
             for x in arrays:
                 layouts.append(
-                    awkward1.operations.convert.tolayout(x,
-                                                         allowrecord=False,
-                                                         allowother=False))
+                    awkward1.operations.convert.to_layout(x,
+                                                          allowrecord=False,
+                                                          allowother=False))
 
         indexes = [awkward1.layout.Index64(x.reshape(-1))
                      for x in numpy.meshgrid(*[numpy.arange(
@@ -1338,9 +1338,9 @@ def cross(arrays,
 
         def apply(x, i):
             return awkward1._util.recursively_apply(
-                awkward1.operations.convert.tolayout(x,
-                                                     allowrecord=False,
-                                                     allowother=False),
+                awkward1.operations.convert.to_layout(x,
+                                                      allowrecord=False,
+                                                      allowother=False),
                 getfunction2,
                 args=(i,))
 
@@ -1441,12 +1441,12 @@ def argcross(arrays,
 
     is
 
-        >>> ak.tolist(ak.cross([one, two], axis=0))
+        >>> ak.to_list(ak.cross([one, two], axis=0))
         [(1.1, 'a'), (1.1, 'b'), (2.2, 'a'), (2.2, 'b'), (3.3, 'a'), (3.3, 'b')]
 
     But with argcross, only the indexes are returned.
 
-        >>> ak.tolist(ak.argcross([one, two], axis=0))
+        >>> ak.to_list(ak.argcross([one, two], axis=0))
         [(0, 0), (0, 1), (1, 0), (1, 1), (2, 0), (2, 1)]
 
     These are the indexes that can select the items that go into the actual
@@ -1466,12 +1466,12 @@ def argcross(arrays,
 
     else:
         if isinstance(arrays, dict):
-            layouts = dict((n, awkward1.operations.convert.tolayout(
+            layouts = dict((n, awkward1.operations.convert.to_layout(
                                  x, allowrecord=False, allowother=False)
                                .localindex(axis))
                            for n, x in arrays.items())
         else:
-            layouts = [awkward1.operations.convert.tolayout(
+            layouts = [awkward1.operations.convert.to_layout(
                          x,
                          allowrecord=False,
                          allowother=False).localindex(axis) for x in arrays]
@@ -1538,7 +1538,7 @@ def choose(array,
 
     The combinations choose `2` are:
 
-        >>> ak.tolist(ak.choose(array, 2, axis=0))
+        >>> ak.to_list(ak.choose(array, 2, axis=0))
         [('a', 'b'), ('a', 'c'), ('a', 'd'), ('a', 'e'),
                      ('b', 'c'), ('b', 'd'), ('b', 'e'),
                                  ('c', 'd'), ('c', 'e'),
@@ -1546,7 +1546,7 @@ def choose(array,
 
     Including the diagonal allows pairs like `('a', 'a')`.
 
-        >>> ak.tolist(ak.choose(array, 2, axis=0, diagonal=True))
+        >>> ak.to_list(ak.choose(array, 2, axis=0, diagonal=True))
         [('a', 'a'), ('a', 'b'), ('a', 'c'), ('a', 'd'), ('a', 'e'),
                      ('b', 'b'), ('b', 'c'), ('b', 'd'), ('b', 'e'),
                                  ('c', 'c'), ('c', 'd'), ('c', 'e'),
@@ -1556,7 +1556,7 @@ def choose(array,
     The combinations choose `3` can't be easily arranged as a triangle
     in two dimensions.
 
-        >>> ak.tolist(ak.choose(array, 3, axis=0))
+        >>> ak.to_list(ak.choose(array, 3, axis=0))
         [('a', 'b', 'c'), ('a', 'b', 'd'), ('a', 'b', 'e'), ('a', 'c', 'd'), ('a', 'c', 'e'),
          ('a', 'd', 'e'), ('b', 'c', 'd'), ('b', 'c', 'e'), ('b', 'd', 'e'), ('c', 'd', 'e')]
 
@@ -1565,7 +1565,7 @@ def choose(array,
     but not `('a', 'b', 'a')`. All combinations are in the same order as
     the original array.
 
-        >>> ak.tolist(ak.choose(array, 3, axis=0, diagonal=True))
+        >>> ak.to_list(ak.choose(array, 3, axis=0, diagonal=True))
         [('a', 'a', 'a'), ('a', 'a', 'b'), ('a', 'a', 'c'), ('a', 'a', 'd'), ('a', 'a', 'e'),
          ('a', 'b', 'b'), ('a', 'b', 'c'), ('a', 'b', 'd'), ('a', 'b', 'e'), ('a', 'c', 'c'),
          ('a', 'c', 'd'), ('a', 'c', 'e'), ('a', 'd', 'd'), ('a', 'd', 'e'), ('a', 'e', 'e'),
@@ -1584,7 +1584,7 @@ def choose(array,
     from 0 elements, 0 ways to choose pairs from 1 element, and 3 ways to
     choose pairs from 3 elements.
 
-        >>> ak.tolist(ak.choose(array, 2))
+        >>> ak.to_list(ak.choose(array, 2))
         [
          [(1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4)],
          [],
@@ -1598,7 +1598,7 @@ def choose(array,
     structure.
 
         >>> same = ak.Array([[7, 7, 7, 7], [], [7], [7, 7, 7]])
-        >>> ak.tolist(ak.choose(same, 2))
+        >>> ak.to_list(ak.choose(same, 2))
         [
          [(7, 7), (7, 7), (7, 7), (7, 7), (7, 7), (7, 7)],
          [],
@@ -1608,7 +1608,7 @@ def choose(array,
 
     To get records instead of tuples, pass a set of field names to `keys`.
 
-        >>> ak.tolist(ak.choose(array, 2, keys=["x", "y"]))
+        >>> ak.to_list(ak.choose(array, 2, keys=["x", "y"]))
         [
          [{'x': 1, 'y': 2}, {'x': 1, 'y': 3}, {'x': 1, 'y': 4},
                             {'x': 2, 'y': 3}, {'x': 2, 'y': 4},
@@ -1623,7 +1623,7 @@ def choose(array,
         >>> left, right = ak.unzip(ak.argcross([array, array]))
         >>> keep = left < right
         >>> result = ak.zip([array[left][keep], array[right][keep]])
-        >>> ak.tolist(result)
+        >>> ak.to_list(result)
         [
          [(1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4)],
          [],
@@ -1645,7 +1645,7 @@ def choose(array,
     if withname is not None:
         parameters["__record__"] = withname
 
-    layout = awkward1.operations.convert.tolayout(
+    layout = awkward1.operations.convert.to_layout(
                array, allowrecord=False, allowother=False)
     out = layout.choose(n,
                         diagonal=diagonal,
@@ -1707,7 +1707,7 @@ def argchoose(array,
     if axis < 0:
         raise ValueError("argchoose's 'axis' must be non-negative")
     else:
-        layout = awkward1.operations.convert.tolayout(
+        layout = awkward1.operations.convert.to_layout(
                    array, allowrecord=False, allowother=False).localindex(axis)
         out = layout.choose(n,
                             diagonal=diagonal,
@@ -1720,13 +1720,13 @@ def argchoose(array,
         else:
             return out
 
-def tomask(array, mask, validwhen=True, highlevel=True):
+def mask(array, mask, valid_when=True, highlevel=True):
     """
     Args:
         array: Data to mask, rather than filter.
         mask (array of booleans): The mask that overlays elements in the
             `array` with None. Must have the same length as `array`.
-        validwhen (bool): If True, True values in `mask` are considered
+        valid_when (bool): If True, True values in `mask` are considered
             valid (passed from `array` to the output); if False, False
             values in `mask` are considered valid.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
@@ -1734,7 +1734,7 @@ def tomask(array, mask, validwhen=True, highlevel=True):
 
     Returns an array for which
 
-        output[i] = array[i] if mask[i] == validwhen else None
+        output[i] = array[i] if mask[i] == valid_when else None
 
     Unlike filtering data with #ak.Array.__getitem__, this `output` has the
     same length as the original `array` and can therefore be used in
@@ -1758,16 +1758,16 @@ def tomask(array, mask, validwhen=True, highlevel=True):
         <Array [1, 3, 5, 7, 9] type='5 * int64'>
 
     However, this eliminates information about which elements were dropped and
-    where they were. If we instead use #ak.tomask,
+    where they were. If we instead use #ak.mask,
 
-        >>> ak.tomask(array, good)
+        >>> ak.mask(array, good)
         <Array [None, 1, None, 3, ... None, 7, None, 9] type='10 * ?int64'>
 
     this information and the length of the array is preserved, and it can be
     used in further calculations with the original `array` (or another with
     the same length).
 
-        >>> ak.tomask(array, good) + array
+        >>> ak.mask(array, good) + array
         <Array [None, 2, None, 6, ... 14, None, 18] type='10 * ?int64'>
 
     In particular, successive filters can be applied to the same array.
@@ -1779,10 +1779,10 @@ def tomask(array, mask, validwhen=True, highlevel=True):
         >>> good
         <Array [[[False, True, False], ... [True]]] type='2 * var * var * bool'>
 
-    it can still be used with #ak.tomask because the `array` and `mask`
+    it can still be used with #ak.mask because the `array` and `mask`
     parameters are broadcasted.
 
-        >>> ak.tomask(array, good)
+        >>> ak.mask(array, good)
         <Array [[[None, 1, None], ... None], [9]]] type='2 * var * var * ?int64'>
 
     See #ak.broadcast_arrays for details about broadcasting and the generalized
@@ -1800,16 +1800,16 @@ def tomask(array, mask, validwhen=True, highlevel=True):
             return lambda: (
                 awkward1.layout.ByteMaskedArray(bytemask,
                                                 layoutarray,
-                                                validwhen=validwhen),)
+                                                valid_when=valid_when),)
         else:
             return None
 
-    layoutarray = awkward1.operations.convert.tolayout(array,
+    layoutarray = awkward1.operations.convert.to_layout(array,
+                                                        allowrecord=True,
+                                                        allowother=False)
+    layoutmask = awkward1.operations.convert.to_layout(mask,
                                                        allowrecord=True,
                                                        allowother=False)
-    layoutmask = awkward1.operations.convert.tolayout(mask,
-                                                      allowrecord=True,
-                                                      allowother=False)
 
     behavior = awkward1._util.behaviorof(array, mask)
     out = awkward1._util.broadcast_and_apply([layoutarray, layoutmask],

@@ -29,12 +29,12 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
             If a NumPy array, the regularity of its dimensions is preserved
             and the data are viewed, not copied.
             If a string, the data are assumed to be JSON.
-            If an iterable, calls #ak.fromiter, which assumes all dimensions
+            If an iterable, calls #ak.from_iter, which assumes all dimensions
             have irregular lengths.
         behavior (None or dict): Custom #ak.behavior for this Array only.
-        withname (None or str): Gives tuples and records a name that can be
+        with_name (None or str): Gives tuples and records a name that can be
             used to override their behavior (see below).
-        checkvalid (bool): If True, verify that the #layout is valid.
+        check_valid (bool): If True, verify that the #layout is valid.
 
     High-level array that can contain data of any type.
 
@@ -73,7 +73,7 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
                 x = self.y*other.z - self.z*other.y
                 y = self.z*other.x - self.x*other.z
                 z = self.x*other.y - self.y*other.x
-                return ak.zip({"x": x, "y": y, "z": z}, withname="vec3")
+                return ak.zip({"x": x, "y": y, "z": z}, with_name="vec3")
 
         # Arrays of vec3 use subclass Vec3Array instead of ak.Array.
         ak.behavior["*", "vec3"] = Vec3Array
@@ -84,11 +84,11 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         vectors = ak.Array([{"x": 0.1, "y": 1.0, "z": 10.0},
                             {"x": 0.2, "y": 2.0, "z": 20.0},
                             {"x": 0.3, "y": 3.0, "z": 30.0}],
-                           withname="vec3")
+                           with_name="vec3")
         more_vectors = ak.Array([{"x": 10.0, "y": 1.0, "z": 0.1},
                                  {"x": 20.0, "y": 2.0, "z": 0.2},
                                  {"x": 30.0, "y": 3.0, "z": 0.3}],
-                                withname="vec3")
+                                with_name="vec3")
 
     Now the record types are presented as "vec3" and the Array has class
     `Vec3Array`, so it has a `cross` method.
@@ -118,40 +118,40 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
     See also #ak.Record.
     """
 
-    def __init__(self, data, behavior=None, withname=None, checkvalid=False):
+    def __init__(self, data, behavior=None, with_name=None, check_valid=False):
         if isinstance(data, awkward1.layout.Content):
             layout = data
         elif isinstance(data, Array):
             layout = data.layout
         elif isinstance(data, numpy.ndarray):
-            layout = awkward1.operations.convert.fromnumpy(data,
-                                                           highlevel=False)
+            layout = awkward1.operations.convert.from_numpy(data,
+                                                            highlevel=False)
         elif isinstance(data, str):
-            layout = awkward1.operations.convert.fromjson(data,
-                                                          highlevel=False)
+            layout = awkward1.operations.convert.from_json(data,
+                                                           highlevel=False)
         elif isinstance(data, dict):
             raise TypeError(
                     "could not convert dict into an awkward1.Array; "
                     "try awkward1.Record")
         else:
-            layout = awkward1.operations.convert.fromiter(data,
-                                                          highlevel=False,
-                                                          allowrecord=False)
+            layout = awkward1.operations.convert.from_iter(data,
+                                                           highlevel=False,
+                                                           allowrecord=False)
         if not isinstance(layout, awkward1.layout.Content):
             raise TypeError("could not convert data into an awkward1.Array")
 
-        if withname is not None:
-            layout = awkward1.operations.structure.withname(layout,
-                                                            withname,
-                                                            highlevel=False)
+        if with_name is not None:
+            layout = awkward1.operations.structure.with_name(layout,
+                                                             with_name,
+                                                             highlevel=False)
 
         if self.__class__ is Array:
             self.__class__ = awkward1._util.arrayclass(layout, behavior)
 
         self.layout = layout
         self.behavior = behavior
-        if checkvalid:
-            awkward1.operations.describe.validityerror(self, exception=True)
+        if check_valid:
+            awkward1.operations.describe.validity_error(self, exception=True)
 
     @property
     def layout(self):
@@ -322,7 +322,7 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         Iteration over Arrays exists so that they can be more easily inspected
         as Python objects.
 
-        See also #ak.tolist.
+        See also #ak.to_list.
         """
         for x in self._layout:
             yield awkward1._util.wrap(x, self._behavior)
@@ -464,20 +464,20 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
 
         It's sometimes also a problem that "cleaning" the dataset by dropping
         empty lists changes its alignment, so that it can no longer be used
-        in calculations with "uncleaned" data. For this, #ak.tomask can be
+        in calculations with "uncleaned" data. For this, #ak.mask can be
         useful because it inserts None in positions that fail the filter,
         rather than removing them.
 
-            >>> print(ak.tomask(array, ak.num(array) > 1))
+            >>> print(ak.mask(array, ak.num(array) > 1))
             [[1.1, 2.2, 3.3], None, [4.4, 5.5], None, None, [7.7, 8.8, 9.9]]
 
         Note, however, that the `0` or `1` to pick the first or second
         item of each nested list is in the second dimension, so the first
         dimension of the slice must be a `:`.
 
-            >>> ak.tomask(array, ak.num(array) > 1)[:, 0]
+            >>> ak.mask(array, ak.num(array) > 1)[:, 0]
             <Array [1.1, None, 4.4, None, None, 7.7] type='6 * ?float64'>
-            >>> ak.tomask(array, ak.num(array) > 1)[:, 1]
+            >>> ak.mask(array, ak.num(array) > 1)[:, 1]
             <Array [2.2, None, 5.5, None, None, 8.8] type='6 * ?float64'>
 
         Projection
@@ -491,7 +491,7 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
 
         has records inside of nested lists:
 
-            >>> ak.typeof(array)
+            >>> ak.type(array)
             3 * var * {"x": float64, "y": var * int64}
 
         In principle, one should select nested lists before record fields,
@@ -665,7 +665,7 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         Unlike #__getitem__, which allows a wide variety of slice types,
         only single field-slicing is supported for assignment.
         (#ak.layout.Content arrays are immutable; field assignment replaces
-        the #layout with an array that has the new field using #ak.withfield.)
+        the #layout with an array that has the new field using #ak.with_field.)
 
         If necessary, the new field will be broadcasted to fit the array.
         For example, given an `array` like
@@ -678,7 +678,7 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
 
         will result in
 
-            >>> ak.tolist(array)
+            >>> ak.to_list(array)
             [[{'x': 1.1, 'y': 100}, {'x': 2.2, 'y': 100}, {'x': 3.3, 'y': 100}],
              [],
              [{'x': 4.4, 'y': 300}, {'x': 5.5, 'y': 300}]]
@@ -688,16 +688,16 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         empty list `array[1]`, and the `300` in `what[2]` is broadcasted to
         both elements of `array[2]`.
 
-        See #ak.withfield for a variant that does not change the #ak.Array
-        in-place. (Internally, this method uses #ak.withfield, so performance
+        See #ak.with_field for a variant that does not change the #ak.Array
+        in-place. (Internally, this method uses #ak.with_field, so performance
         is not a factor in choosing one over the other.)
         """
         if not isinstance(where, str):
             raise ValueError(
                     "only fields may be assigned in-place (by field name)")
-        self._layout = awkward1.operations.structure.withfield(self._layout,
-                                                               what,
-                                                               where).layout
+        self._layout = awkward1.operations.structure.with_field(self._layout,
+                                                                what,
+                                                                where).layout
         self._numbaview = None
 
     def __getattr__(self, where):
@@ -880,8 +880,8 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         The string representation cannot be read as JSON or as an #ak.Array
         constructor.
 
-        See #ak.tolist and #ak.tojson to convert whole Arrays into Python data
-        or JSON strings without loss (except for #type).
+        See #ak.to_list and #ak.to_json to convert whole Arrays into Python
+        data or JSON strings without loss (except for #type).
         """
         return awkward1._util.minimally_touching_string(limit_value,
                                                         self._layout,
@@ -1042,7 +1042,7 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
                                                        kwargs)
 
     @property
-    def numbatype(self):
+    def numba_type(self):
         """
         The type of this Array when it is used in Numba. It contains enough
         information to generate low-level code for accessing any element,
@@ -1065,12 +1065,12 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         data (#ak.layout.Record, #ak.Record, str, or dict):
             Data to wrap or convert into a record.
             If a string, the data are assumed to be JSON.
-            If a dict, calls #ak.fromiter, which assumes all inner
+            If a dict, calls #ak.from_iter, which assumes all inner
             dimensions have irregular lengths.
         behavior (None or dict): Custom #ak.behavior for this Record only.
-        withname (None or str): Gives the record type a name that can be
+        with_name (None or str): Gives the record type a name that can be
             used to override its behavior (see below).
-        checkvalid (bool): If True, verify that the #layout is valid.
+        check_valid (bool): If True, verify that the #layout is valid.
 
     High-level record that can contain fields of any type.
 
@@ -1085,7 +1085,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
                 x = self.y*other.z - self.z*other.y
                 y = self.z*other.x - self.x*other.z
                 z = self.x*other.y - self.y*other.x
-                return ak.Record({"x": x, "y": y, "z": z}, withname="vec3")
+                return ak.Record({"x": x, "y": y, "z": z}, with_name="vec3")
 
         # Records of vec3 use subclass Vec3 instead of ak.Record.
         ak.behavior["vec3"] = Vec3
@@ -1096,7 +1096,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         vectors = ak.Array([{"x": 0.1, "y": 1.0, "z": 30.0},
                             {"x": 0.2, "y": 2.0, "z": 20.0},
                             {"x": 0.3, "y": 3.0, "z": 10.0}],
-                           withname="vec3")
+                           with_name="vec3")
 
     Now the record types are presented as "vec3" and the Record has class
     `Vec3`, so it has a `cross` method.
@@ -1123,17 +1123,17 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
 
     See also #ak.Array.
     """
-    def __init__(self, data, behavior=None, withname=None, checkvalid=False):
+    def __init__(self, data, behavior=None, with_name=None, check_valid=False):
         if isinstance(data, awkward1.layout.Record):
             layout = data
         elif isinstance(data, Record):
             layout = data.layout
         elif isinstance(data, str):
-            layout = awkward1.operations.convert.fromjson(data,
-                                                          highlevel=False)
+            layout = awkward1.operations.convert.from_json(data,
+                                                           highlevel=False)
         elif isinstance(data, dict):
-            layout = awkward1.operations.convert.fromiter([data],
-                                                          highlevel=False)[0]
+            layout = awkward1.operations.convert.from_iter([data],
+                                                           highlevel=False)[0]
         elif isinstance(data, Iterable):
             raise TypeError("could not convert non-dict into an "
                             "awkward1.Record; try awkward1.Array")
@@ -1145,15 +1145,15 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         if self.__class__ is Record:
             self.__class__ = awkward1._util.recordclass(layout, behavior)
 
-        if withname is not None:
-            layout = awkward1.operations.structure.withname(layout,
-                                                            withname,
-                                                            highlevel=False)
+        if with_name is not None:
+            layout = awkward1.operations.structure.with_name(layout,
+                                                             with_name,
+                                                             highlevel=False)
 
         self.layout = layout
         self.behavior = behavior
-        if checkvalid:
-            awkward1.operations.describe.validityerror(self, exception=True)
+        if check_valid:
+            awkward1.operations.describe.validity_error(self, exception=True)
 
     @property
     def layout(self):
@@ -1281,16 +1281,16 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
             >>> print(record)
             {x: 3.3, y: 4, z: {another: 'record'}}
 
-        See #ak.withfield for a variant that does not change the #ak.Record
-        in-place. (Internally, this method uses #ak.withfield, so performance
+        See #ak.with_field for a variant that does not change the #ak.Record
+        in-place. (Internally, this method uses #ak.with_field, so performance
         is not a factor in choosing one over the other.)
         """
         if not isinstance(where, str):
             raise ValueError(
                     "only fields may be assigned in-place (by field name)")
-        self._layout = awkward1.operations.structure.withfield(self._layout,
-                                                               what,
-                                                               where).layout
+        self._layout = awkward1.operations.structure.with_field(self._layout,
+                                                                what,
+                                                                where).layout
         self._numbaview = None
 
     def __getattr__(self, where):
@@ -1495,7 +1495,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
                                                     self._behavior)
 
     @property
-    def numbatype(self):
+    def numba_type(self):
         """
         The type of this Record when it is used in Numba. It contains enough
         information to generate low-level code for accessing any element,
@@ -1531,35 +1531,35 @@ class ArrayBuilder(Sequence):
 
         b = ak.ArrayBuilder()
 
-        # fill commands  # as JSON   # current array type
+        # fill commands   # as JSON   # current array type
         ##########################################################################################
-        b.beginlist()    # [         # 0 * var * unknown     (initially, the type is unknown)
-        b.integer(1)     #   1,      # 0 * var * int64
-        b.integer(2)     #   2,      # 0 * var * int64
-        b.real(3)        #   3.0     # 0 * var * float64     (all the integers have become floats)
-        b.endlist()      # ],        # 1 * var * float64
-        b.beginlist()    # [         # 1 * var * float64
-        b.endlist()      # ],        # 2 * var * float64
-        b.beginlist()    # [         # 2 * var * float64
-        b.integer(4)     #   4,      # 2 * var * float64
-        b.null()         #   null,   # 2 * var * ?float64    (now the floats are nullable)
-        b.integer(5)     #   5       # 2 * var * ?float64
-        b.endlist()      # ],        # 3 * var * ?float64
-        b.beginlist()    # [         # 3 * var * ?float64
-        b.beginrecord()  #   {       # 3 * var * ?union[float64, {}]
-        b.field("x")     #     "x":  # 3 * var * ?union[float64, {"x": unknown}]
-        b.integer(1)     #      1,   # 3 * var * ?union[float64, {"x": int64}]
-        b.field("y")     #      "y": # 3 * var * ?union[float64, {"x": int64, "y": unknown}]
-        b.beginlist()    #      [    # 3 * var * ?union[float64, {"x": int64, "y": var * unknown}]
-        b.integer(2)     #        2, # 3 * var * ?union[float64, {"x": int64, "y": var * int64}]
-        b.integer(3)     #        3  # 3 * var * ?union[float64, {"x": int64, "y": var * int64}]
-        b.endlist()      #      ]    # 3 * var * ?union[float64, {"x": int64, "y": var * int64}]
-        b.endrecord()    #   }       # 3 * var * ?union[float64, {"x": int64, "y": var * int64}]
-        b.endlist()      # ]         # 4 * var * ?union[float64, {"x": int64, "y": var * int64}]
+        b.begin_list()    # [         # 0 * var * unknown     (initially, the type is unknown)
+        b.integer(1)      #   1,      # 0 * var * int64
+        b.integer(2)      #   2,      # 0 * var * int64
+        b.real(3)         #   3.0     # 0 * var * float64     (all the integers have become floats)
+        b.end_list()      # ],        # 1 * var * float64
+        b.begin_list()    # [         # 1 * var * float64
+        b.end_list()      # ],        # 2 * var * float64
+        b.begin_list()    # [         # 2 * var * float64
+        b.integer(4)      #   4,      # 2 * var * float64
+        b.null()          #   null,   # 2 * var * ?float64    (now the floats are nullable)
+        b.integer(5)      #   5       # 2 * var * ?float64
+        b.end_list()      # ],        # 3 * var * ?float64
+        b.begin_list()    # [         # 3 * var * ?float64
+        b.begin_record()  #   {       # 3 * var * ?union[float64, {}]
+        b.field("x")      #     "x":  # 3 * var * ?union[float64, {"x": unknown}]
+        b.integer(1)      #      1,   # 3 * var * ?union[float64, {"x": int64}]
+        b.field("y")      #      "y": # 3 * var * ?union[float64, {"x": int64, "y": unknown}]
+        b.begin_list()    #      [    # 3 * var * ?union[float64, {"x": int64, "y": var * unknown}]
+        b.integer(2)      #        2, # 3 * var * ?union[float64, {"x": int64, "y": var * int64}]
+        b.integer(3)      #        3  # 3 * var * ?union[float64, {"x": int64, "y": var * int64}]
+        b.end_list()      #      ]    # 3 * var * ?union[float64, {"x": int64, "y": var * int64}]
+        b.end_record()    #   }       # 3 * var * ?union[float64, {"x": int64, "y": var * int64}]
+        b.end_list()      # ]         # 4 * var * ?union[float64, {"x": int64, "y": var * int64}]
 
     To get an array, we take a #snapshot of the ArrayBuilder's current state.
 
-        >>> ak.tolist(b.snapshot())
+        >>> ak.to_list(b.snapshot())
         [[1.0, 2.0, 3.0], [], [4.0, None, 5.0], [{'x': 1, 'y': [2, 3]}]]
 
     The full set of filling commands is the following.
@@ -1613,18 +1613,18 @@ class ArrayBuilder(Sequence):
         ...     if np.random.uniform(0, 1) > probability:
         ...         builder.append(np.random.normal())
         ...     else:
-        ...         builder.beginlist()
+        ...         builder.begin_list()
         ...         for i in range(np.random.poisson(3)):
         ...             deepnesting(builder, probability**2)
-        ...         builder.endlist()
+        ...         builder.end_list()
         ...
         >>> builder = ak.ArrayBuilder()
         >>> deepnesting(builder, 0.9)
         >>> builder.snapshot()
         <Array [... 1.23, -0.498, 0.272], -0.0519]]]] type='1 * var * var * union[var * ...'>
-        >>> ak.tolist(builder)
+        >>> ak.to_list(builder)
         [[[[2.052949634260401, 0.9522057655747124], [[[0.2560810133948006], 1.8668954120287653, 0.8933700720920406, 0.31709173110067773], 0.38515995466456676, -1.6259655150460695, [[0.18211022402412927], 0.46592679548320143, 0.39275072293709223], [-0.572569956850481, 1.3991748897028693, -0.15414122174138611, -0.20008742443379549]], [[[-0.7410750761192828, -0.34455689325781347], -0.8446675414135969], [-0.8139112572198548, -0.7250728258598154, -0.42851563653684244, [1.0498296931855706, 1.6969612860075955, -0.18093559189614564, 1.078608791657082]]], [[0.5172670690419124]]], [[-1.9731106633939228, 0.5778640337060391], [-1.2488533773832633, -2.1458066486349434, -0.5439318468515132, [[0.2419441207503176, -2.313974422156488, [-0.6811651539055098, 0.08323572953509818], 1.801261721511669, 0.16653718365329456], -0.6348811801078983, [0.016350096268563003, [-1.2867920376687112, 0.38205295881313484, 1.4093210810506318, -0.2698869943849985, -0.48804922126979045]]], -0.6297773736098737, -2.5333506573111424], [-1.6680144776019314, 0.5862818687707498]], [0.6266171347177766, [[-0.7660737060966999, -0.677432480564727, -1.1527197837522167], -0.5025371508398492, [0.3610998752041169, 0.4811870365139723, -0.8030689233086394, [1.1538103888031122, -1.0955905747145644], -1.3980944016010062, 1.2822990047991039]], 0.939566155023095, [1.3581048298505891, [0.36949478822799947, 1.096666130135532, -0.2769024331557954, -0.7993215902675834], [-0.4103823967097248], [0.6789480075462166, 0.8991579880810466, 0.7900472554969632]], [], [0.6772644918729233, [-0.48385354748861575, -0.39154812719778437], 1.069329510451712, 0.8057750827838897, -0.3440192823735095], [[1.5687828887524105, -1.6086288847970498, [-0.6907842744344904], -0.42627155869364414], 0.33605387861917574, -0.7329513818714791, 0.5040026160756554, -1.2529377572694538, -1.1566264096307166], [[0.6407540268295862], [-0.017540252205401917], -0.9530971110439417], [[0.41643810453893765, -0.682997865214066, 0.7930286671567052], 0.5142103949393788]], [[0.6271004836147108, [0.5895664560584991, -0.7563863809912544]], [1.6176958047983054, 0.5226854288884638, 0.24149248202497436], -1.0912185170716135, [-1.1122535648683918], 0.22727974012353094], [-0.4161362684360263, [[0.4234696267033054], 0.7866791657813567, [1.225201951430818, -0.49790730839958713, 0.2715010029532568], -0.051866117232298316]]]]
-        >>> ak.typeof(builder.snapshot())
+        >>> ak.type(builder.snapshot())
         1 * var * var * union[var * union[float64, var * union[var * union[float64, var * float64], float64]], float64]
 
     Note that this is a *general* method for building arrays; if the type is
@@ -1800,7 +1800,7 @@ class ArrayBuilder(Sequence):
                                                        kwargs)
 
     @property
-    def numbatype(self):
+    def numba_type(self):
         """
         The type of this Array when it is used in Numba. It contains enough
         information to generate low-level code for accessing any element,
@@ -1875,23 +1875,23 @@ class ArrayBuilder(Sequence):
         """
         self._layout.string(x)
 
-    def beginlist(self):
+    def begin_list(self):
         """
         Begins filling a list; must be closed with #endlist.
 
         For example,
 
-            builder.beginlist()
+            builder.begin_list()
             builder.real(1.1)
             builder.real(2.2)
             builder.real(3.3)
-            builder.endlist()
-            builder.beginlist()
-            builder.endlist()
-            builder.beginlist()
+            builder.end_list()
+            builder.begin_list()
+            builder.end_list()
+            builder.begin_list()
             builder.real(4.4)
             builder.real(5.5)
-            builder.endlist()
+            builder.end_list()
 
         produces
 
@@ -1899,29 +1899,29 @@ class ArrayBuilder(Sequence):
         """
         self._layout.beginlist()
 
-    def endlist(self):
+    def end_list(self):
         """
         Ends a list.
         """
         self._layout.endlist()
 
-    def begintuple(self, numfields):
+    def begin_tuple(self, numfields):
         """
         Begins filling a tuple with `numfields` fields; must be closed with
         #endtuple.
 
         For example,
 
-            builder.begintuple(3)
+            builder.begin_tuple(3)
             builder.index(0).integer(1)
             builder.index(1).real(1.1)
             builder.index(2).string("one")
-            builder.endtuple()
-            builder.begintuple(3)
+            builder.end_tuple()
+            builder.begin_tuple(3)
             builder.index(0).integer(2)
             builder.index(1).real(2.2)
             builder.index(2).string("two")
-            builder.endtuple()
+            builder.end_tuple()
 
         produces
 
@@ -1942,27 +1942,27 @@ class ArrayBuilder(Sequence):
         self._layout.index(i)
         return self
 
-    def endtuple(self):
+    def end_tuple(self):
         """
         Ends a tuple.
         """
         self._layout.endtuple()
 
-    def beginrecord(self, name=None):
+    def begin_record(self, name=None):
         """
         Begins filling a record with an optional `name`; must be closed with
         #endrecord.
 
         For example,
 
-            builder.beginrecord("points")
+            builder.begin_record("points")
             builder.field("x").real(1)
             builder.field("y").real(1.1)
-            builder.endrecord()
-            builder.beginrecord("points")
+            builder.end_record()
+            builder.begin_record("points")
             builder.field("x").real(2)
             builder.field("y").real(2.2)
-            builder.endrecord()
+            builder.end_record()
 
         produces
 
@@ -1990,7 +1990,7 @@ class ArrayBuilder(Sequence):
         self._layout.field(key)
         return self
 
-    def endrecord(self):
+    def end_record(self):
         """
         Ends a record.
         """
@@ -2016,7 +2016,7 @@ class ArrayBuilder(Sequence):
         old data structure (matters more when the structures are large).
 
         If `obj` is an arbitrary Python object, this is equivalent to
-        #ak.fromiter except that it fills an existing #ak.ArrayBuilder,
+        #ak.from_iter except that it fills an existing #ak.ArrayBuilder,
         rather than creating a new one.
 
         If `obj` is an #ak.Array and `at` is an int, this method fills the
@@ -2075,10 +2075,10 @@ class ArrayBuilder(Sequence):
         _name = "List"
 
         def __enter__(self):
-            self._arraybuilder.beginlist()
+            self._arraybuilder.begin_list()
 
         def __exit__(self, type, value, traceback):
-            self._arraybuilder.endlist()
+            self._arraybuilder.end_list()
 
     def list(self):
         """
@@ -2112,10 +2112,10 @@ class ArrayBuilder(Sequence):
             self._numfields = numfields
 
         def __enter__(self):
-            self._arraybuilder.begintuple(self._numfields)
+            self._arraybuilder.begin_tuple(self._numfields)
 
         def __exit__(self, type, value, traceback):
-            self._arraybuilder.endtuple()
+            self._arraybuilder.end_tuple()
 
     def tuple(self, numfields):
         """
@@ -2148,10 +2148,10 @@ class ArrayBuilder(Sequence):
             self._name = name
 
         def __enter__(self):
-            self._arraybuilder.beginrecord(name=self._name)
+            self._arraybuilder.begin_record(name=self._name)
 
         def __exit__(self, type, value, traceback):
-            self._arraybuilder.endrecord()
+            self._arraybuilder.end_record()
 
     def record(self, name=None):
         """
