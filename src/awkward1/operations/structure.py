@@ -1666,6 +1666,37 @@ def argchoose(array,
               parameters=None,
               withname=None,
               highlevel=True):
+    """
+    Args:
+        array: Array from which to choose `n` items without replacement.
+        n (int): The number of items to choose from each list: `2` chooses
+            unique pairs, `3` chooses unique triples, etc.
+        diagonal (bool): If True, pairs/triples/etc. that include the same
+            item more than once are allowed; otherwise each item in a
+            pair/triple/etc. is strictly unique.
+        axis (int): The dimension at which this operation is applied. The
+            outermost dimension is `0`, followed by `1`, etc., and negative
+            values count backward from the innermost: `-1` is the innermost
+            dimension, `-2` is the next level up, etc.
+        keys (None or list of str): If None, the pairs/triples/etc. are
+            tuples with unnamed fields; otherwise, these `keys` name the
+            fields. The number of `keys` must be equal to `n`.
+        parameters (dict): Parameters for the new #ak.layout.RecordArray node
+            that is created by this operation.
+        withname (None or str): Assigns a `"__record__"` name to the new
+            #ak.layout.RecordArray node that is created by this operation
+            (overriding `parameters`, if necessary).
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+
+    Computes a cross product of `array` with itself that is restricted to
+    combinations sampled without replacement, like #ak.choose, but returning
+    integer indexes for #ak.Array.__getitem__.
+
+    The motivation and uses of this function are similar to those of
+    #ak.argcross. See #ak.choose and #ak.argcross for a more complete
+    description.
+    """
     if parameters is None:
         parameters = {}
     else:
@@ -1690,6 +1721,73 @@ def argchoose(array,
             return out
 
 def tomask(array, mask, validwhen=True, highlevel=True):
+    """
+    Args:
+        array: Data to mask, rather than filter.
+        mask (array of booleans): The mask that overlays elements in the
+            `array` with None. Must have the same length as `array`.
+        validwhen (bool): If True, True values in `mask` are considered
+            valid (passed from `array` to the output); if False, False
+            values in `mask` are considered valid.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+
+    Returns an array for which
+
+        output[i] = array[i] if mask[i] == validwhen else None
+
+    Unlike filtering data with #ak.Array.__getitem__, this `output` has the
+    same length as the original `array` and can therefore be used in
+    calculations with it, such as
+    [universal functions](https://docs.scipy.org/doc/numpy/reference/ufuncs.html).
+
+    For example, with an `array` like
+
+        ak.Array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+
+    with a boolean selection of `good` elements like
+
+        >>> good = (array % 2 == 1)
+        >>> good
+        <Array [False, True, False, ... False, True] type='10 * bool'>
+
+    could be used to filter the original `array` (or another with the same
+    length).
+
+        >>> array[good]
+        <Array [1, 3, 5, 7, 9] type='5 * int64'>
+
+    However, this eliminates information about which elements were dropped and
+    where they were. If we instead use #ak.tomask,
+
+        >>> ak.tomask(array, good)
+        <Array [None, 1, None, 3, ... None, 7, None, 9] type='10 * ?int64'>
+
+    this information and the length of the array is preserved, and it can be
+    used in further calculations with the original `array` (or another with
+    the same length).
+
+        >>> ak.tomask(array, good) + array
+        <Array [None, 2, None, 6, ... 14, None, 18] type='10 * ?int64'>
+
+    In particular, successive filters can be applied to the same array.
+
+    Even if the `array` and/or the `mask` is nested,
+
+        >>> array = ak.Array([[[0, 1, 2], [], [3, 4], [5]], [[6, 7, 8], [9]]])
+        >>> good = (array % 2 == 1)
+        >>> good
+        <Array [[[False, True, False], ... [True]]] type='2 * var * var * bool'>
+
+    it can still be used with #ak.tomask because the `array` and `mask`
+    parameters are broadcasted.
+
+        >>> ak.tomask(array, good)
+        <Array [[[None, 1, None], ... None], [9]]] type='2 * var * var * ?int64'>
+
+    See #ak.broadcast_arrays for details about broadcasting and the generalized
+    set of broadcasting rules.
+    """
     def getfunction(inputs, depth):
         layoutarray, layoutmask = inputs
         if isinstance(layoutmask, awkward1.layout.NumpyArray):
