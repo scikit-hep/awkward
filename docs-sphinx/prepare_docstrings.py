@@ -248,8 +248,7 @@ for filename in sorted(glob.glob("../src/awkward1/**/*.py", recursive=True),
                            .replace(".operations.convert", "")
                            .replace(".operations.describe", "")
                            .replace(".operations.structure", "")
-                           .replace(".operations.reducers", "")
-                           .replace(".behaviors.string", ""))
+                           .replace(".operations.reducers", ""))
 
     link = ("`{0} <https://github.com/scikit-hep/awkward-1.0/blob/"
             "master/{1}>`__".format(modulename, filename.replace("../", "")))

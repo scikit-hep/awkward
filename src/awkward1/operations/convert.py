@@ -18,6 +18,32 @@ import awkward1._io
 import awkward1._util
 
 def fromnumpy(array, regulararray=False, highlevel=True, behavior=None):
+    """
+    Args:
+        array (np.ndarray): The NumPy array to convert into an Awkward Array.
+            This array can be a np.ma.MaskedArray.
+        regulararray (bool): If True and the array is multidimensional,
+            the dimensions are represented by nested #ak.layout.RegularArray
+            nodes; if False and the array is multidimensional, the dimensions
+            are represented by a multivalued #ak.layout.NumpyArray.shape.
+            If the array is one-dimensional, this has no effect.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+        behavior (bool): Custom #ak.behavior for the output array, if
+            high-level.
+
+    Converts a NumPy array into an Awkward Array.
+
+    The resulting layout may involve the following #ak.layout.Content types
+    (only):
+
+       * #ak.layout.NumpyArray
+       * #ak.layout.ByteMaskedArray or #ak.layout.UnmaskedArray if the
+         `array` is an np.ma.MaskedArray.
+       * #ak.layout.RegularArray if `regulararray=True`.
+
+    See also #ak.tonumpy.
+    """
     def recurse(array, mask):
         if regulararray and len(array.shape) > 1:
             return awkward1.layout.RegularArray(
@@ -60,6 +86,48 @@ def fromiter(iterable,
              allowrecord=True,
              initial=1024,
              resize=2.0):
+    """
+    Args:
+        iterable (Python iterable): Data to convert into an Awkward Array.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+        behavior (bool): Custom #ak.behavior for the output array, if
+            high-level.
+        allowrecord (bool): If True, the outermost element may be a record
+            (returning #ak.Record or #ak.layout.Record type, depending on
+            `highlevel`); if False, the outermost element must be an array.
+        initial (int): Initial size (in bytes) of buffers used by
+            #ak.layout.ArrayBuilder (see #ak.layout.ArrayBuilderOptions).
+        resize (float): Resize multiplier for buffers used by
+            #ak.layout.ArrayBuilder (see #ak.layout.ArrayBuilderOptions);
+            should be strictly greater than 1.
+
+    Converts Python data into an Awkward Array.
+
+    Internally, this function uses #ak.layout.ArrayBuilder (see the high-level
+    #ak.ArrayBuilder documentation for a more complete description), so it
+    has the same flexibility and the same constraints. Any heterogeneous
+    and deeply nested Python data can be converted, but the output will never
+    have regular-typed array lengths.
+
+    The following Python types are supported.
+
+       * bool, including `np.bool_`: converted into #ak.layout.NumpyArray.
+       * int, including `np.integer`: converted into #ak.layout.NumpyArray.
+       * float, including `np.floating`: converted into #ak.layout.NumpyArray.
+       * bytes: converted into #ak.layout.ListOffsetArray with parameter
+         `"__array__"` equal to `"bytestring"` (unencoded bytes).
+       * str: converted into #ak.layout.ListOffsetArray with parameter
+         `"__array__"` equal to `"string"` (UTF-8 encoded string).
+       * tuple: converted into #ak.layout.RecordArray without field names
+         (i.e. homogeneously typed, uniform sized tuples).
+       * dict: converted into #ak.layout.RecordArray with field names
+         (i.e. homogeneously typed records with the same sets of fields).
+       * iterable, including np.ndarray: converted into
+         #ak.layout.ListOffsetArray.
+
+    See also #ak.tolist.
+    """
     if isinstance(iterable, dict):
         if allowrecord:
             return fromiter([iterable],
@@ -84,6 +152,31 @@ def fromjson(source,
              initial=1024,
              resize=2.0,
              buffersize=65536):
+    """
+    Args:
+        source (str): JSON-formatted string to convert into an array.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+        behavior (bool): Custom #ak.behavior for the output array, if
+            high-level.
+        initial (int): Initial size (in bytes) of buffers used by
+            #ak.layout.ArrayBuilder (see #ak.layout.ArrayBuilderOptions).
+        resize (float): Resize multiplier for buffers used by
+            #ak.layout.ArrayBuilder (see #ak.layout.ArrayBuilderOptions);
+            should be strictly greater than 1.
+        buffersize (int): Size (in bytes) of the buffer used by the JSON
+            parser.
+
+    Converts a JSON string into an Awkward Array.
+
+    Internally, this function uses #ak.layout.ArrayBuilder (see the high-level
+    #ak.ArrayBuilder documentation for a more complete description), so it
+    has the same flexibility and the same constraints. Any heterogeneous
+    and deeply nested JSON can be converted, but the output will never have
+    regular-typed array lengths.
+
+    See also #ak.tojson.
+    """
     layout = awkward1._io.fromjson(source,
                                    initial=initial,
                                    resize=resize,
@@ -94,6 +187,26 @@ def fromjson(source,
         return layout
 
 def tonumpy(array):
+    """
+    Converts `array` (many types supported, including all Awkward Arrays and
+    Records) into a NumPy array, if possible.
+
+    If the data are numerical and regular (nested lists have equal lengths
+    in each dimension, as described by the #type), they can be losslessly
+    converted to a NumPy array and this function returns without an error.
+
+    Otherwise, the function raises an error. It does not create a NumPy
+    array with dtype `"O"` for `np.object_` (see the
+    [note on object_ type](https://docs.scipy.org/doc/numpy/reference/arrays.scalars.html#arrays-scalars-built-in))
+    since silent conversions to dtype `"O"` arrays would not only be a
+    significant performance hit, but would also break functionality, since
+    nested lists in a NumPy `"O"` array are severed from the array and
+    cannot be sliced as dimensions.
+
+    If `array` is a scalar, it is converted into a NumPy scalar.
+
+    See also #ak.fromnumpy.
+    """
     import awkward1.highlevel
 
     if isinstance(array, (bool, str, bytes, numbers.Number)):
@@ -207,6 +320,27 @@ def tonumpy(array):
             "cannot convert {0} into numpy.ndarray".format(array))
 
 def tolist(array):
+    """
+    Converts `array` (many types supported, including all Awkward Arrays and
+    Records) into Python objects.
+
+    Awkward Array types have the following Pythonic translations.
+
+       * #ak.types.PrimitiveType: converted into bool, int, float.
+       * #ak.types.OptionType: missing values are converted into None.
+       * #ak.types.ListType: converted into list.
+       * #ak.types.RegularType: also converted into list. Python (and JSON)
+         forms lose information about the regularity of list lengths.
+       * #ak.types.ListType with parameter `"__array__"` equal to
+         `"__bytestring__"`: converted into bytes.
+       * #ak.types.ListType with parameter `"__array__"` equal to
+         `"__string__"`: converted into str.
+       * #ak.types.RecordArray without field names: converted into tuple.
+       * #ak.types.RecordArray with field names: converted into dict.
+       * #ak.types.UnionArray: Python data are naturally heterogeneous.
+
+    See also #ak.fromiter.
+    """
     import awkward1.highlevel
 
     if array is None or isinstance(array, (bool, str, bytes, numbers.Number)):
@@ -270,6 +404,38 @@ def tojson(array,
            pretty=False,
            maxdecimals=None,
            buffersize=65536):
+    """
+    Args:
+        array: Data to convert to JSON.
+        destination (None or str): If None, this function returns a JSON str;
+            if a str, it uses that as a file name and writes (overwrites) that
+            file (returning None).
+        pretty (bool): If True, indent the output for human readability; if
+            False, output compact JSON without spaces.
+        maxdecimals (None or int): If an int, limit the number of
+            floating-point decimals to this number; if None, write all digits.
+        buffersize (int): Size (in bytes) of the buffer used by the JSON
+            parser.
+
+    Converts `array` (many types supported, including all Awkward Arrays and
+    Records) into a JSON string or file.
+
+    Awkward Array types have the following JSON translations.
+
+       * #ak.types.PrimitiveType: converted into JSON booleans and numbers.
+       * #ak.types.OptionType: missing values are converted into None.
+       * #ak.types.ListType: converted into JSON lists.
+       * #ak.types.RegularType: also converted into JSON lists. JSON (and
+         Python) forms lose information about the regularity of list lengths.
+       * #ak.types.ListType with parameter `"__array__"` equal to
+         `"__bytestring__"` or `"__string__"`: converted into JSON strings.
+       * #ak.types.RecordArray without field names: converted into JSON
+         objects with numbers as strings for keys.
+       * #ak.types.RecordArray with field names: converted into JSON objects.
+       * #ak.types.UnionArray: JSON data are naturally heterogeneous.
+
+    See also #ak.fromjson.
+    """
     import awkward1.highlevel
 
     if array is None or isinstance(array, (bool, str, bytes, numbers.Number)):
@@ -317,6 +483,24 @@ def tolayout(array,
              allowrecord=True,
              allowother=False,
              numpytype=(numpy.number,)):
+    """
+    Args:
+        array: Data to convert into an #ak.layout.Content and maybe
+            #ak.layout.Record and other types.
+        allowrecord (bool): If True, allow #ak.layout.Record as an output;
+            otherwise, if the output would be a scalar record, raise an error.
+        allowother (bool): If True, allow non-Awkward outputs; otherwise,
+            if the output would be another type, raise an error.
+        numpytype (tuple of NumPy types): Allowed NumPy types in
+            #ak.layout.NumpyArray outputs.
+
+    Converts `array` (many types supported, including all Awkward Arrays and
+    Records) into a #ak.layout.Content and maybe #ak.layout.Record and other
+    types.
+
+    This function is usually used to sanitize inputs for other functions; it
+    would rarely be used in a data analysis.
+    """
     import awkward1.highlevel
 
     if isinstance(array, awkward1.highlevel.Array):
@@ -374,6 +558,21 @@ def tolayout(array,
         return array
 
 def regularize_numpyarray(array, allowempty=True, highlevel=True):
+    """
+    Args:
+        array: Data to convert into an Awkward Array.
+        allowempty (bool): If True, allow #ak.layout.EmptyArray in the output;
+            otherwise, convert empty arrays into #ak.layout.NumpyArray.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+
+    Converts any multidimensional #ak.layout.NumpyArray.shape into nested
+    #ak.layout.RegularArray nodes. The output may have any Awkward data type:
+    this only changes the representation of #ak.layout.NumpyArray.
+
+    This function is usually used to sanitize inputs for other functions; it
+    would rarely be used in a data analysis.
+    """
     def getfunction(layout, depth):
         if isinstance(layout, awkward1.layout.NumpyArray) and layout.ndim != 1:
             return lambda: layout.toRegularArray()
@@ -392,6 +591,32 @@ def fromawkward0(array,
                  regulararray=False,
                  highlevel=True,
                  behavior=None):
+    """
+    Args:
+        array (Awkward 0.x or Awkward 1.x array): Data to convert to Awkward
+            1.x.
+        keeplayout (bool): If True, stay true to the Awkward 0.x layout,
+            ensuring zero-copy; otherwise, allow transformations that copy
+            data for more flexibility.
+        regulararray (bool): If True and the array is multidimensional,
+            the dimensions are represented by nested #ak.layout.RegularArray
+            nodes; if False and the array is multidimensional, the dimensions
+            are represented by a multivalued #ak.layout.NumpyArray.shape.
+            If the array is one-dimensional, this has no effect.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+        behavior (bool): Custom #ak.behavior for the output array, if
+            high-level.
+
+    Converts an array from Awkward 0.x to Awkward 1.x.
+
+    This is only needed during the transition from the old library to the
+    new library.
+
+    If `array` is already an Awkward 1.x Array, it is simply passed through
+    this function (so that interfaces that scripts don't need to remove this
+    function when their 0.x sources are replaced by 1.x).
+    """
     # See https://github.com/scikit-hep/awkward-0.x/blob/405b7eaeea51b60947a79c782b1abf0d72f6729b/specification.adoc
     import awkward as awkward0
 
@@ -675,6 +900,19 @@ fromawkward0.uint32max = numpy.iinfo(numpy.uint32).max
 fromawkward0.int64max = numpy.iinfo(numpy.int64).max
 
 def toawkward0(array, keeplayout=False):
+    """
+    Args:
+        array: Data to convert into an Awkward 0.x array.
+        keeplayout (bool): If True, stay true to the Awkward 1.x layout,
+            ensuring zero-copy; otherwise, allow transformations that copy
+            data for more flexibility.
+
+    Converts `array` (many types supported, including all Awkward Arrays and
+    Records) into an Awkward 0.x array.
+
+    This is only needed during the transition from the old library to the new
+    library.
+    """
     # See https://github.com/scikit-hep/awkward-0.x/blob/405b7eaeea51b60947a79c782b1abf0d72f6729b/specification.adoc
     import awkward as awkward0
 

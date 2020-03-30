@@ -275,6 +275,9 @@ namespace awkward {
     const std::shared_ptr<Record>
       astuple() const;
 
+    const ContentPtr
+      getitem(const Slice& where) const override;
+
     /// @copydoc Content::getitem_next()
     ///
     /// @exception std::runtime_error is always thrown

@@ -201,7 +201,7 @@ class type_methods(numba.typing.templates.AttributeTemplate):
         if (len(args) == 1 and
             len(kwargs) == 0 and
             isinstance(args[0], numba.types.Integer)):
-            return numba.types.none(args[0])
+            return arraybuildertype(args[0])
         else:
             raise TypeError(
                     "wrong number or types of arguments for "
@@ -233,7 +233,7 @@ class type_methods(numba.typing.templates.AttributeTemplate):
         if (len(args) == 1 and
             len(kwargs) == 0 and
             isinstance(args[0], numba.types.StringLiteral)):
-            return numba.types.none(args[0])
+            return arraybuildertype(args[0])
         else:
             raise TypeError(
                     "wrong number or types of arguments for "
@@ -445,7 +445,7 @@ def lower_index(context, builder, sig, args):
          builder,
          awkward1._libawkward.ArrayBuilder_index,
          (proxyin.rawptr, index))
-    return context.get_dummy_value()
+    return arraybuilderval
 
 @numba.extending.lower_builtin("endtuple",
                                ArrayBuilderType)
@@ -497,7 +497,7 @@ def lower_field(context, builder, sig, args):
          builder,
          awkward1._libawkward.ArrayBuilder_field_fast,
          (proxyin.rawptr, key))
-    return context.get_dummy_value()
+    return arraybuilderval
 
 @numba.extending.lower_builtin("endrecord",
                                ArrayBuilderType)

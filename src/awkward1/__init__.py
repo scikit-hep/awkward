@@ -22,12 +22,14 @@ from awkward1.highlevel import Array
 from awkward1.highlevel import Record
 from awkward1.highlevel import ArrayBuilder
 
-# operations and behaviors
+# behaviors
+import awkward1.behaviors.string
+
+# operations
 from awkward1.operations.convert import *
 from awkward1.operations.describe import *
 from awkward1.operations.structure import *
 from awkward1.operations.reducers import *
-from awkward1.behaviors.string import *
 
 # third-party connectors
 import awkward1._connect._numba
