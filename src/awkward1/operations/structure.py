@@ -906,7 +906,8 @@ def zip(arrays,
     `depthlimit`.
 
     This operation may be thought of as the opposite of projection in
-    #ak.Array.__getitem__.
+    #ak.Array.__getitem__, which extracts fields one at a time, or
+    #ak.unzip, which extracts them all in one call.
 
     Consider the following arrays, `one` and `two`.
 
@@ -1015,51 +1016,29 @@ def zip(arrays,
         return out[0]
 
 def unzip(array):
+    """
+    If the `array` contains tuples or records, this operation splits them
+    into a Python tuple of arrays, one for each field.
+
+    If the `array` does not contain tuples or records, the single `array`
+    is placed in a length 1 Python tuple.
+
+    For example,
+
+        >>> array = ak.Array([{"x": 1.1, "y": [1]},
+                              {"x": 2.2, "y": [2, 2]},
+                              {"x": 3.3, "y": [3, 3, 3]}])
+        >>> x, y = ak.unzip(array)
+        >>> x
+        <Array [1.1, 2.2, 3.3] type='3 * float64'>
+        >>> y
+        <Array [[1], [2, 2], [3, 3, 3]] type='3 * var * int64'>
+    """
     keys = awkward1.operations.describe.keys(array)
     if len(keys) == 0:
         return (array,)
     else:
         return tuple(array[n] for n in keys)
-
-def argcross(arrays,
-             axis=1,
-             nested=None,
-             parameters=None,
-             withname=None,
-             highlevel=True):
-    if axis < 0:
-        raise ValueError("argcross's 'axis' must be non-negative")
-
-    else:
-        if isinstance(arrays, dict):
-            layouts = dict((n, awkward1.operations.convert.tolayout(
-                                 x, allowrecord=False, allowother=False)
-                               .localindex(axis))
-                           for n, x in arrays.items())
-        else:
-            layouts = [awkward1.operations.convert.tolayout(
-                         x,
-                         allowrecord=False,
-                         allowother=False).localindex(axis) for x in arrays]
-
-        if withname is not None:
-            if parameters is None:
-                parameters = {}
-            else:
-                parameters = dict(parameters)
-            parameters["__record__"] = withname
-
-        result = cross(layouts,
-                       axis=axis,
-                       nested=nested,
-                       parameters=parameters,
-                       highlevel=False)
-
-        if highlevel:
-            return awkward1._util.wrap(result,
-                                       awkward1._util.behaviorof(*arrays))
-        else:
-            return result
 
 def cross(arrays,
           axis=1,
@@ -1067,6 +1046,204 @@ def cross(arrays,
           parameters=None,
           withname=None,
           highlevel=True):
+    """
+    Args:
+        arrays (dict or iterable of arrays): Arrays to compute the cross
+            product of.
+        axis (int): The dimension at which this operation is applied. The
+            outermost dimension is `0`, followed by `1`, etc., and negative
+            values count backward from the innermost: `-1` is the innermost
+            dimension, `-2` is the next level up, etc.
+        nested (None, True, False, or iterable of str or int): If None or
+            False, all combinations of elements from the `arrays` are
+            produced at the same level of nesting; if True, they are grouped
+            in nested lists by combinations that share a common item from
+            each of the `arrays`; if an iterable of str or int, group common
+            items for a chosen set of keys from the `array` dict or slots
+            of the `array` iterable.
+        parameters (dict): Parameters for the new #ak.layout.RecordArray node
+            that is created by this operation.
+        withname (None or str): Assigns a `"__record__"` name to the new
+            #ak.layout.RecordArray node that is created by this operation
+            (overriding `parameters`, if necessary).
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+
+    Computes a cross product (i.e. Cartesian product) of data from a set of
+    `arrays`. This operation creates records (if `arrays` is a dict) or tuples
+    (if `arrays` is another kind of iterable) that hold the combinations
+    of elements, and it can introduce new levels of nesting.
+
+    As a simple example with `axis=0`, the cross product of
+
+        >>> one = ak.Array([1, 2, 3])
+        >>> two = ak.Array(["a", "b"])
+
+    is
+
+        >>> ak.tolist(ak.cross([one, two], axis=0))
+        [(1, 'a'), (1, 'b'), (2, 'a'), (2, 'b'), (3, 'a'), (3, 'b')]
+
+    With nesting, a new level of nested lists is created to group combinations
+    that share the same element from `one` into the same list.
+
+        >>> ak.tolist(ak.cross([one, two], axis=0, nested=True))
+        [[(1, 'a'), (1, 'b')], [(2, 'a'), (2, 'b')], [(3, 'a'), (3, 'b')]]
+
+    The primary purpose of this function, however, is to compute a different
+    cross product for each element of an array: in other words, `axis=1`.
+    The following arrays each have four elements.
+
+        >>> one = ak.Array([[1, 2, 3], [], [4, 5], [6]])
+        >>> two = ak.Array([["a", "b"], ["c"], ["d"], ["e", "f"]])
+
+    The default `axis=1` produces 6 pairs from the cross-product of `[1, 2, 3]`
+    and `["a", "b"]`, 0 pairs from `[]` and `["c"]`, 1 pair from `[4, 5]` and
+    `["d"]`, and 1 pair from `[6]` and `["e", "f"]`.
+
+        >>> ak.tolist(ak.cross([one, two]))
+        [[(1, 'a'), (1, 'b'), (2, 'a'), (2, 'b'), (3, 'a'), (3, 'b')],
+         [],
+         [(4, 'd'), (5, 'd')],
+         [(6, 'e'), (6, 'f')]]
+
+    The nesting depth is the same as the original arrays; with `nested=True`,
+    the nesting depth is increased by 1 and tuples are grouped by their
+    first element.
+
+        >>> ak.tolist(ak.cross([one, two], nested=True))
+        [[[(1, 'a'), (1, 'b')], [(2, 'a'), (2, 'b')], [(3, 'a'), (3, 'b')]],
+         [],
+         [[(4, 'd')], [(5, 'd')]],
+         [[(6, 'e'), (6, 'f')]]]
+
+    These tuples are #ak.layout.RecordArray nodes with unnamed fields. To
+    name the fields, we can pass `one` and `two` in a dict, rather than a list.
+
+        >>> ak.tolist(ak.cross({"x": one, "y": two}))
+        [
+         [{'x': 1, 'y': 'a'},
+          {'x': 1, 'y': 'b'},
+          {'x': 2, 'y': 'a'},
+          {'x': 2, 'y': 'b'},
+          {'x': 3, 'y': 'a'},
+          {'x': 3, 'y': 'b'}],
+         [],
+         [{'x': 4, 'y': 'd'},
+          {'x': 5, 'y': 'd'}],
+         [{'x': 6, 'y': 'e'},
+          {'x': 6, 'y': 'f'}]
+        ]
+
+    With more than two elements in the cross product, `nested` can specify
+    which are grouped and which are not. For example,
+
+        >>> one = ak.Array([1, 2, 3, 4])
+        >>> two = ak.Array([1.1, 2.2, 3.3])
+        >>> three = ak.Array(["a", "b"])
+
+    can be left entirely ungrouped:
+
+        >>> ak.tolist(ak.cross([one, two, three], axis=0))
+        [
+         (1, 1.1, 'a'),
+         (1, 1.1, 'b'),
+         (1, 2.2, 'a'),
+         (1, 2.2, 'b'),
+         (1, 3.3, 'a'),
+         (1, 3.3, 'b'),
+         (2, 1.1, 'a'),
+         (2, 1.1, 'b'),
+         (2, 2.2, 'a'),
+         (2, 2.2, 'b'),
+         (2, 3.3, 'a'),
+         (2, 3.3, 'b'),
+         (3, 1.1, 'a'),
+         (3, 1.1, 'b'),
+         (3, 2.2, 'a'),
+         (3, 2.2, 'b'),
+         (3, 3.3, 'a'),
+         (3, 3.3, 'b'),
+         (4, 1.1, 'a'),
+         (4, 1.1, 'b'),
+         (4, 2.2, 'a'),
+         (4, 2.2, 'b'),
+         (4, 3.3, 'a'),
+         (4, 3.3, 'b')
+        ]
+
+    can be grouped by `one` (adding 1 more dimension):
+
+        >>> ak.tolist(ak.cross([one, two, three], axis=0, nested=[0]))
+        [
+         [(1, 1.1, 'a'), (1, 1.1, 'b'), (1, 2.2, 'a')],
+         [(1, 2.2, 'b'), (1, 3.3, 'a'), (1, 3.3, 'b')],
+         [(2, 1.1, 'a'), (2, 1.1, 'b'), (2, 2.2, 'a')],
+         [(2, 2.2, 'b'), (2, 3.3, 'a'), (2, 3.3, 'b')],
+         [(3, 1.1, 'a'), (3, 1.1, 'b'), (3, 2.2, 'a')],
+         [(3, 2.2, 'b'), (3, 3.3, 'a'), (3, 3.3, 'b')],
+         [(4, 1.1, 'a'), (4, 1.1, 'b'), (4, 2.2, 'a')],
+         [(4, 2.2, 'b'), (4, 3.3, 'a'), (4, 3.3, 'b')]
+        ]
+
+    can be grouped by `one` and `two` (adding 2 more dimensions):
+
+        >>> ak.tolist(ak.cross([one, two, three], axis=0, nested=[0, 1]))
+        [
+         [
+          [(1, 1.1, 'a'), (1, 1.1, 'b')],
+          [(1, 2.2, 'a'), (1, 2.2, 'b')],
+          [(1, 3.3, 'a'), (1, 3.3, 'b')]
+         ],
+         [
+          [(2, 1.1, 'a'), (2, 1.1, 'b')],
+          [(2, 2.2, 'a'), (2, 2.2, 'b')],
+          [(2, 3.3, 'a'), (2, 3.3, 'b')]
+         ],
+         [
+          [(3, 1.1, 'a'), (3, 1.1, 'b')],
+          [(3, 2.2, 'a'), (3, 2.2, 'b')],
+          [(3, 3.3, 'a'), (3, 3.3, 'b')]],
+         [
+          [(4, 1.1, 'a'), (4, 1.1, 'b')],
+          [(4, 2.2, 'a'), (4, 2.2, 'b')],
+          [(4, 3.3, 'a'), (4, 3.3, 'b')]]
+        ]
+
+    or grouped by unique `one`-`two` pairs (adding 1 more dimension):
+
+        >>> ak.tolist(ak.cross([one, two, three], axis=0, nested=[1]))
+        [
+         [(1, 1.1, 'a'), (1, 1.1, 'b')],
+         [(1, 2.2, 'a'), (1, 2.2, 'b')],
+         [(1, 3.3, 'a'), (1, 3.3, 'b')],
+         [(2, 1.1, 'a'), (2, 1.1, 'b')],
+         [(2, 2.2, 'a'), (2, 2.2, 'b')],
+         [(2, 3.3, 'a'), (2, 3.3, 'b')],
+         [(3, 1.1, 'a'), (3, 1.1, 'b')],
+         [(3, 2.2, 'a'), (3, 2.2, 'b')],
+         [(3, 3.3, 'a'), (3, 3.3, 'b')],
+         [(4, 1.1, 'a'), (4, 1.1, 'b')],
+         [(4, 2.2, 'a'), (4, 2.2, 'b')],
+         [(4, 3.3, 'a'), (4, 3.3, 'b')]
+        ]
+
+    The order of the output is fixed: it is always lexicographical in the
+    order that the `arrays` are written. (Before Python 3.6, the order of
+    keys in a dict were not guaranteed, so the dict interface is not
+    recommended for these versions of Python.) Thus, it is not possible to
+    group by `three` in the example above.
+
+    To emulate an SQL or Pandas "group by" operation, put the keys that you
+    wish to group by *first* and use `nested=[0]` or `nested=[n]` to group by
+    unique n-tuples. If necessary, record keys can later be reordered with a
+    list of strings in #ak.Array.__getitem__.
+
+    To get list index positions in the tuples/records, rather than data from
+    the original `arrays`, use #ak.argcross instead of #ak.cross. The
+    #ak.argcross form can be particularly useful as nested indexing in
+    #ak.Array.__getitem__.
+    """
     behavior = awkward1._util.behaviorof(*arrays)
 
     if withname is not None:
@@ -1224,6 +1401,74 @@ def cross(arrays,
     else:
         return result
 
+def argcross(arrays,
+             axis=1,
+             nested=None,
+             parameters=None,
+             withname=None,
+             highlevel=True):
+    if axis < 0:
+        raise ValueError("argcross's 'axis' must be non-negative")
+
+    else:
+        if isinstance(arrays, dict):
+            layouts = dict((n, awkward1.operations.convert.tolayout(
+                                 x, allowrecord=False, allowother=False)
+                               .localindex(axis))
+                           for n, x in arrays.items())
+        else:
+            layouts = [awkward1.operations.convert.tolayout(
+                         x,
+                         allowrecord=False,
+                         allowother=False).localindex(axis) for x in arrays]
+
+        if withname is not None:
+            if parameters is None:
+                parameters = {}
+            else:
+                parameters = dict(parameters)
+            parameters["__record__"] = withname
+
+        result = cross(layouts,
+                       axis=axis,
+                       nested=nested,
+                       parameters=parameters,
+                       highlevel=False)
+
+        if highlevel:
+            return awkward1._util.wrap(result,
+                                       awkward1._util.behaviorof(*arrays))
+        else:
+            return result
+
+def choose(array,
+           n,
+           diagonal=False,
+           axis=1,
+           keys=None,
+           parameters=None,
+           withname=None,
+           highlevel=True):
+    if parameters is None:
+        parameters = {}
+    else:
+        parameters = dict(parameters)
+    if withname is not None:
+        parameters["__record__"] = withname
+
+    layout = awkward1.operations.convert.tolayout(
+               array, allowrecord=False, allowother=False)
+    out = layout.choose(n,
+                        diagonal=diagonal,
+                        keys=keys,
+                        parameters=parameters,
+                        axis=axis)
+    if highlevel:
+        return awkward1._util.wrap(
+                 out, behavior=awkward1._util.behaviorof(array))
+    else:
+        return out
+
 def argchoose(array,
               n,
               diagonal=False,
@@ -1254,34 +1499,6 @@ def argchoose(array,
                 out, behavior=awkward1._util.behaviorof(array))
         else:
             return out
-
-def choose(array,
-           n,
-           diagonal=False,
-           axis=1,
-           keys=None,
-           parameters=None,
-           withname=None,
-           highlevel=True):
-    if parameters is None:
-        parameters = {}
-    else:
-        parameters = dict(parameters)
-    if withname is not None:
-        parameters["__record__"] = withname
-
-    layout = awkward1.operations.convert.tolayout(
-               array, allowrecord=False, allowother=False)
-    out = layout.choose(n,
-                        diagonal=diagonal,
-                        keys=keys,
-                        parameters=parameters,
-                        axis=axis)
-    if highlevel:
-        return awkward1._util.wrap(
-                 out, behavior=awkward1._util.behaviorof(array))
-    else:
-        return out
 
 def tomask(array, mask, validwhen=True, highlevel=True):
     def getfunction(inputs, depth):
