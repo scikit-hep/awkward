@@ -1407,6 +1407,60 @@ def argcross(arrays,
              parameters=None,
              withname=None,
              highlevel=True):
+    """
+    Args:
+        arrays (dict or iterable of arrays): Arrays to compute the cross
+            product of.
+        axis (int): The dimension at which this operation is applied. The
+            outermost dimension is `0`, followed by `1`, etc., and negative
+            values count backward from the innermost: `-1` is the innermost
+            dimension, `-2` is the next level up, etc.
+        nested (None, True, False, or iterable of str or int): If None or
+            False, all combinations of elements from the `arrays` are
+            produced at the same level of nesting; if True, they are grouped
+            in nested lists by combinations that share a common item from
+            each of the `arrays`; if an iterable of str or int, group common
+            items for a chosen set of keys from the `array` dict or slots
+            of the `array` iterable.
+        parameters (dict): Parameters for the new #ak.layout.RecordArray node
+            that is created by this operation.
+        withname (None or str): Assigns a `"__record__"` name to the new
+            #ak.layout.RecordArray node that is created by this operation
+            (overriding `parameters`, if necessary).
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+
+    Computes a cross product (i.e. Cartesian product) of data from a set of
+    `arrays`, like #ak.cross, but returning integer indexes for
+    #ak.Array.__getitem__.
+
+    For example, the cross product of
+
+        >>> one = ak.Array([1.1, 2.2, 3.3])
+        >>> two = ak.Array(["a", "b"])
+
+    is
+
+        >>> ak.tolist(ak.cross([one, two], axis=0))
+        [(1.1, 'a'), (1.1, 'b'), (2.2, 'a'), (2.2, 'b'), (3.3, 'a'), (3.3, 'b')]
+
+    But with argcross, only the indexes are returned.
+
+        >>> ak.tolist(ak.argcross([one, two], axis=0))
+        [(0, 0), (0, 1), (1, 0), (1, 1), (2, 0), (2, 1)]
+
+    These are the indexes that can select the items that go into the actual
+    cross product.
+
+        >>> one_index, two_index = ak.unzip(ak.argcross([one, two], axis=0))
+        >>> one[one_index]
+        <Array [1.1, 1.1, 2.2, 2.2, 3.3, 3.3] type='6 * float64'>
+        >>> two[two_index]
+        <Array ['a', 'b', 'a', 'b', 'a', 'b'] type='6 * string'>
+
+    All of the parameters for #ak.cross apply equally to #ak.argcross, so see
+    the #ak.cross documentation for a more complete description.
+    """
     if axis < 0:
         raise ValueError("argcross's 'axis' must be non-negative")
 
