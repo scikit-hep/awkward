@@ -1570,24 +1570,25 @@ class ArrayBuilder(Sequence):
        * #real: appends a floating-point value.
        * #bytestring: appends an unencoded string (raw bytes).
        * #string: appends a UTF-8 encoded string.
-       * #beginlist: begins filling a list; must be closed with #endlist.
-       * #endlist: ends a list.
-       * #begintuple: begins filling a tuple; must be closed with #endtuple.
+       * #begin_list: begins filling a list; must be closed with #end_list.
+       * #end_list: ends a list.
+       * #begin_tuple: begins filling a tuple; must be closed with #end_tuple.
        * #index: selects a tuple slot to fill; must be followed by a command
          that actually fills that slot.
-       * #endtuple: ends a tuple.
-       * #beginrecord: begins filling a record; must be closed with #endrecord.
+       * #end_tuple: ends a tuple.
+       * #begin_record: begins filling a record; must be closed with
+         #end_record.
        * #field: selects a record field to fill; must be followed by a command
          that actually fills that field.
-       * #endrecord: ends a record.
+       * #end_record: ends a record.
        * #append: generic method for filling #null, #boolean, #integer, #real,
          #bytestring, #string, #ak.Array, #ak.Record, or arbitrary Python data.
          When filling from #ak.Array or #ak.Record, the output holds references
          to the original data, rather than copying.
        * #extend: appends all the items from an #ak.Array (by reference).
-       * #list: context manager for #beginlist and #endlist.
-       * #tuple: context manager for #begintuple and #endtuple.
-       * #record: context manager for #beginrecord and #endrecord.
+       * #list: context manager for #begin_list and #end_list.
+       * #tuple: context manager for #begin_tuple and #end_tuple.
+       * #record: context manager for #begin_record and #end_record.
 
     ArrayBuilders can be used in [Numba](http://numba.pydata.org/): they can
     be passed as arguments to a Numba-compiled function or returned as return
@@ -1877,7 +1878,7 @@ class ArrayBuilder(Sequence):
 
     def begin_list(self):
         """
-        Begins filling a list; must be closed with #endlist.
+        Begins filling a list; must be closed with #end_list.
 
         For example,
 
@@ -1908,7 +1909,7 @@ class ArrayBuilder(Sequence):
     def begin_tuple(self, numfields):
         """
         Begins filling a tuple with `numfields` fields; must be closed with
-        #endtuple.
+        #end_tuple.
 
         For example,
 
@@ -1937,7 +1938,7 @@ class ArrayBuilder(Sequence):
             The #ak.ArrayBuilder, so that it can be chained with the value
                 that fills the slot.
 
-        Prepares to fill a tuple slot; see #begintuple for an example.
+        Prepares to fill a tuple slot; see #begin_tuple for an example.
         """
         self._layout.index(i)
         return self
@@ -1951,7 +1952,7 @@ class ArrayBuilder(Sequence):
     def begin_record(self, name=None):
         """
         Begins filling a record with an optional `name`; must be closed with
-        #endrecord.
+        #end_record.
 
         For example,
 
@@ -1985,7 +1986,7 @@ class ArrayBuilder(Sequence):
             The #ak.ArrayBuilder, so that it can be chained with the value
                 that fills the slot.
 
-        Prepares to fill a field; see #beginrecord for an example.
+        Prepares to fill a field; see #begin_record for an example.
         """
         self._layout.field(key)
         return self
@@ -2082,8 +2083,8 @@ class ArrayBuilder(Sequence):
 
     def list(self):
         """
-        Context manager to prevent unpaired #beginlist and #endlist. The
-        example in the #beginlist documentation can be rewritten as
+        Context manager to prevent unpaired #begin_list and #end_list. The
+        example in the #begin_list documentation can be rewritten as
 
             with builder.list():
                 builder.real(1.1)
@@ -2119,8 +2120,8 @@ class ArrayBuilder(Sequence):
 
     def tuple(self, numfields):
         """
-        Context manager to prevent unpaired #begintuple and #endtuple. The
-        example in the #begintuple documentation can be rewritten as
+        Context manager to prevent unpaired #begin_tuple and #end_tuple. The
+        example in the #begin_tuple documentation can be rewritten as
 
             with builder.tuple(3):
                 builder.index(0).integer(1)
@@ -2155,8 +2156,8 @@ class ArrayBuilder(Sequence):
 
     def record(self, name=None):
         """
-        Context manager to prevent unpaired #beginrecord and #endrecord. The
-        example in the #beginrecord documentation can be rewritten as
+        Context manager to prevent unpaired #begin_record and #end_record. The
+        example in the #begin_record documentation can be rewritten as
 
             with builder.record("points"):
                 builder.field("x").real(1)
