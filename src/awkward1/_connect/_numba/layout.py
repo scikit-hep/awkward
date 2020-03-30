@@ -57,7 +57,7 @@ def typeof_IndexedOptionArray(obj, c):
 def typeof_ByteMaskedArray(obj, c):
     return ByteMaskedArrayType(numba.typeof(numpy.asarray(obj.mask)),
                                numba.typeof(obj.content),
-                               obj.validwhen,
+                               obj.valid_when,
                                numba.typeof(obj.identities),
                                obj.parameters)
 
@@ -65,7 +65,7 @@ def typeof_ByteMaskedArray(obj, c):
 def typeof_BitMaskedArray(obj, c):
     return BitMaskedArrayType(numba.typeof(numpy.asarray(obj.mask)),
                               numba.typeof(obj.content),
-                              obj.validwhen,
+                              obj.valid_when,
                               obj.lsb_order,
                               numba.typeof(obj.identities),
                               obj.parameters)
@@ -863,19 +863,19 @@ class ByteMaskedArrayType(ContentType):
     def __init__(self,
                  masktype,
                  contenttype,
-                 validwhen,
+                 valid_when,
                  identitiestype,
                  parameters):
         super(ByteMaskedArrayType, self).__init__(
             name="awkward1.ByteMaskedArrayType({0}, {1}, {2}, {3}, "
             "{4})".format(masktype.name,
                           contenttype.name,
-                          validwhen,
+                          valid_when,
                           identitiestype.name,
                           json.dumps(parameters)))
         self.masktype = masktype
         self.contenttype = contenttype
-        self.validwhen = validwhen
+        self.valid_when = valid_when
         self.identitiestype = identitiestype
         self.parameters = parameters
 
@@ -886,7 +886,7 @@ class ByteMaskedArrayType(ContentType):
             lookup, lookup.positions[pos + self.CONTENT], fields)
         return awkward1.layout.ByteMaskedArray(mask,
                                                content,
-                                               self.validwhen,
+                                               self.valid_when,
                                                parameters=self.parameters)
 
     def hasfield(self, key):
@@ -935,7 +935,7 @@ class ByteMaskedArrayType(ContentType):
                                      byte,
                                      context.get_constant(numba.int8, 0)),
                                    context.get_constant(numba.int8,
-                                                        int(self.validwhen)
+                                                        int(self.valid_when)
                           ))) as (isvalid, isnone):
             with isvalid:
                 nextviewtype = awkward1._connect._numba.arrayview.wrap(
@@ -994,7 +994,7 @@ class BitMaskedArrayType(ContentType):
     def __init__(self,
                  masktype,
                  contenttype,
-                 validwhen,
+                 valid_when,
                  lsb_order,
                  identitiestype,
                  parameters):
@@ -1002,13 +1002,13 @@ class BitMaskedArrayType(ContentType):
             name="awkward1.BitMaskedArrayType({0}, {1}, {2}, {3}, {4}, "
             "{5})".format(masktype.name,
                           contenttype.name,
-                          validwhen,
+                          valid_when,
                           lsb_order,
                           identitiestype.name,
                           json.dumps(parameters)))
         self.masktype = masktype
         self.contenttype = contenttype
-        self.validwhen = validwhen
+        self.valid_when = valid_when
         self.lsb_order = lsb_order
         self.identitiestype = identitiestype
         self.parameters = parameters
@@ -1020,7 +1020,7 @@ class BitMaskedArrayType(ContentType):
             lookup, lookup.positions[pos + self.CONTENT], fields)
         return awkward1.layout.BitMaskedArray(mask,
                                               content,
-                                              self.validwhen,
+                                              self.valid_when,
                                               len(content),
                                               self.lsb_order,
                                               parameters=self.parameters)
@@ -1088,7 +1088,7 @@ class BitMaskedArrayType(ContentType):
                                      asbool,
                                      context.get_constant(numba.uint8, 0)),
                                    context.get_constant(numba.uint8,
-                                                        int(self.validwhen)
+                                                        int(self.valid_when)
                           ))) as (isvalid, isnone):
             with isvalid:
                 nextviewtype = awkward1._connect._numba.arrayview.wrap(

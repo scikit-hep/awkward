@@ -136,7 +136,7 @@ class ArrayView(object):
     @classmethod
     def fromarray(self, array):
         behavior = awkward1._util.behaviorof(array)
-        layout = awkward1.operations.convert.tolayout(
+        layout = awkward1.operations.convert.to_layout(
                    array,
                    allowrecord=False,
                    allowother=False,
@@ -464,7 +464,7 @@ class RecordView(object):
     @classmethod
     def fromrecord(self, record):
         behavior = awkward1._util.behaviorof(record)
-        layout = awkward1.operations.convert.tolayout(
+        layout = awkward1.operations.convert.to_layout(
                    record,
                    allowrecord=True,
                    allowother=False,

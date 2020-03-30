@@ -789,7 +789,7 @@ def recursively_apply(layout, getfunction, args=(), depth=1):
         return awkward1.layout.ByteMaskedArray(
             layout.mask,
             recursively_apply(layout.content, getfunction, args, depth),
-            layout.validwhen,
+            layout.valid_when,
             layout.identities,
             layout.parameters)
 
@@ -797,7 +797,7 @@ def recursively_apply(layout, getfunction, args=(), depth=1):
         return awkward1.layout.BitMaskedArray(
             layout.mask,
             recursively_apply(layout.content, getfunction, args, depth),
-            layout.validwhen,
+            layout.valid_when,
             len(layout),
             layout.lsb_order,
             layout.identities,

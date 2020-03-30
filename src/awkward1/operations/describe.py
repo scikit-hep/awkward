@@ -21,9 +21,9 @@ def keys(array):
     If the array contains neither tuples nor records, this returns an empty
     list.
     """
-    layout = awkward1.operations.convert.tolayout(array,
-                                                  allowrecord=True,
-                                                  allowother=False)
+    layout = awkward1.operations.convert.to_layout(array,
+                                                   allowrecord=True,
+                                                   allowother=False)
     return layout.keys()
 
 def parameters(array):
@@ -56,7 +56,7 @@ def parameters(array):
     else:
         return {}
 
-def typeof(array):
+def type(array):
     """
     The high-level type of an `array` (many types supported, including all
     Awkward Arrays and Records) as #ak.types.Type objects.
@@ -126,7 +126,7 @@ def typeof(array):
                      numpy.float32,
                      numpy.float64)):
         return awkward1.types.PrimitiveType(
-                 typeof.dtype2primitive[array.dtype.type])
+                 type.dtype2primitive[array.dtype.type])
 
     elif isinstance(array, (awkward1.highlevel.Array,
                             awkward1.highlevel.Record,
@@ -138,10 +138,10 @@ def typeof(array):
 
     elif isinstance(array, numpy.ndarray):
         if len(array.shape) == 0:
-            return typeof(array.reshape((1,))[0])
+            return type(array.reshape((1,))[0])
         else:
             out = awkward1.types.PrimitiveType(
-                    typeof.dtype2primitive[array.dtype.type])
+                    type.dtype2primitive[array.dtype.type])
             for x in array.shape[-1:0:-1]:
                 out = awkward1.types.RegularType(out, x)
             return awkward1.types.ArrayType(out, array.shape[0])
@@ -155,7 +155,7 @@ def typeof(array):
     else:
         raise TypeError("unrecognized array type: {0}".format(repr(array)))
 
-typeof.dtype2primitive = {
+type.dtype2primitive = {
     numpy.int8:    "int8",
     numpy.int16:   "int16",
     numpy.int32:   "int32",
@@ -168,7 +168,7 @@ typeof.dtype2primitive = {
     numpy.float64: "float64",
 }
 
-def validityerror(array, exception=False):
+def validity_error(array, exception=False):
     """
     Args:
         array (#ak.Array, #ak.Record, #ak.layout.Content, #ak.layout.Record,
@@ -183,14 +183,14 @@ def validityerror(array, exception=False):
     beyond the length of a node's `content`, etc. Either an error is raised or
     a string describing the error is returned.
 
-    See also #ak.isvalid.
+    See also #ak.is_valid.
     """
     if isinstance(array, (awkward1.highlevel.Array,
                           awkward1.highlevel.Record)):
-        return validityerror(array.layout, exception=exception)
+        return validity_error(array.layout, exception=exception)
 
     elif isinstance(array, awkward1.highlevel.ArrayBuilder):
-        return validityerror(array.snapshot().layout, exception=exception)
+        return validity_error(array.snapshot().layout, exception=exception)
 
     elif isinstance(array, (awkward1.layout.Content, awkward1.layout.Record)):
         out = array.validityerror()
@@ -200,12 +200,12 @@ def validityerror(array, exception=False):
             return out
 
     elif isinstance(array, awkward1.layout.ArrayBuilder):
-        return validityerror(array.snapshot(), exception=exception)
+        return validity_error(array.snapshot(), exception=exception)
 
     else:
         raise TypeError("not an awkward array: {0}".format(repr(array)))
 
-def isvalid(array, exception=False):
+def is_valid(array, exception=False):
     """
     Args:
         array (#ak.Array, #ak.Record, #ak.layout.Content, #ak.layout.Record,
@@ -219,9 +219,9 @@ def isvalid(array, exception=False):
     beyond the length of a node's `content`, etc. Either an error is raised or
     the function returns a boolean.
 
-    See also #ak.validityerror.
+    See also #ak.validity_error.
     """
-    out = validityerror(array, exception=exception)
+    out = validity_error(array, exception=exception)
     return out is None
 
 __all__ = [x for x in list(globals())
