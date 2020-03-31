@@ -33,7 +33,7 @@ that exhaustively checks validity in its constructor (see
 
 .. code-block:: python
 
-    class ListOffsetArray:
+    class ListOffsetArray(Content):
         def __init__(self, offsets, content):
             assert isinstance(offsets, list)
             assert isinstance(content, Content)
@@ -51,12 +51,12 @@ that exhaustively checks validity in its constructor (see
             self.content = content
 
         @staticmethod
-        def random(minlen=0, choices=None):
+        def random(minlen, choices):
             counts = [random_length() for i in range(random_length(minlen))]
             offsets = [random_length()]
             for x in counts:
                 offsets.append(offsets[-1] + x)
-            return ListOffsetArray(offsets, Content.random(offsets[-1], choices))
+            return ListOffsetArray(offsets, random.choice(choices).random(offsets[-1], choices))
             
         def __len__(self):
             return len(self.offsets) - 1
@@ -78,11 +78,11 @@ that exhaustively checks validity in its constructor (see
         def __repr__(self):
             return "ListOffsetArray(" + repr(self.offsets) + ", " + repr(self.content) + ")"
 
-        def toxml(self, indent="", pre="", post=""):
+        def xml(self, indent="", pre="", post=""):
             out = indent + pre + "<ListOffsetArray>\n"
             out += indent + "    <offsets>" + " ".join(str(x) for x in self.offsets)
             out += "</offsets>\n"
-            out += self.content.toxml(indent + "    ", "<content>", "</content>\n")
+            out += self.content.xml(indent + "    ", "<content>", "</content>\n")
             out += indent + "</ListOffsetArray>" + post
             return out
 

@@ -26,7 +26,7 @@ that exhaustively checks validity in its constructor (see
 
 .. code-block:: python
 
-    class RecordArray:
+    class RecordArray(Content):
         def __init__(self, contents, recordlookup, length):
             assert isinstance(contents, list)
             assert isinstance(length, int)
@@ -43,11 +43,11 @@ that exhaustively checks validity in its constructor (see
             self.length = length
 
         @staticmethod
-        def random(minlen=0, choices=None):
+        def random(minlen, choices):
             length = random_length(minlen)
             contents = []
             for i in range(random.randint(0, 2)):
-                contents.append(Content.random(length, choices))
+                contents.append(random.choice(choices).random(length, choices))
             if random.randint(0, 1) == 0:
                 recordlookup = None
             else:
@@ -99,19 +99,19 @@ that exhaustively checks validity in its constructor (see
             return ("RecordArray([" + ", ".join(repr(x) for x in self.contents) + "], "
                     + repr(self.recordlookup) + ", " + repr(self.length) + ")")
 
-        def toxml(self, indent="", pre="", post=""):
+        def xml(self, indent="", pre="", post=""):
             out = indent + pre + "<RecordArray>\n"
             if len(self.contents) == 0:
                 out += indent + "    <istuple>" + str(self.recordlookup is None) + "</istuple>\n"
             out += indent + "    <length>" + str(self.length) + "</length>\n"
             if self.recordlookup is None:
                 for i, content in enumerate(self.contents):
-                    out += content.toxml(indent + "    ", "<content i=\"" + str(i) + "\">",
-                                         "</content>\n")
+                    out += content.xml(indent + "    ", "<content i=\"" + str(i) + "\">",
+                                       "</content>\n")
             else:
                 for i, (key, content) in enumerate(zip(self.recordlookup, self.contents)):
-                    out += content.toxml(indent + "    ", "<content i=\"" + str(i) + "\" key=\""
-                                         + repr(key) + "\">", "</content>\n")
+                    out += content.xml(indent + "    ", "<content i=\"" + str(i) + "\" key=\""
+                                       + repr(key) + "\">", "</content>\n")
             out += indent + "</RecordArray>" + post
             return out
 

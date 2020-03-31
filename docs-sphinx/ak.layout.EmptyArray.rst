@@ -16,12 +16,12 @@ that exhaustively checks validity in its constructor (see
 
 .. code-block:: python
 
-    class EmptyArray:
+    class EmptyArray(Content):
         def __init__(self):
             pass
 
         @staticmethod
-        def random(minlen=0, choices=None):
+        def random(minlen, choices):
             assert minlen == 0
             return EmptyArray()
 
@@ -41,7 +41,7 @@ that exhaustively checks validity in its constructor (see
         def __repr__(self):
             return "EmptyArray()"
 
-        def toxml(self, indent="", pre="", post=""):
+        def xml(self, indent="", pre="", post=""):
             return indent + pre + "<EmptyArray/>" + post
 
 Here is an example:

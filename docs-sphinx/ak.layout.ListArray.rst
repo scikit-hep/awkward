@@ -43,7 +43,7 @@ that exhaustively checks validity in its constructor (see
 
 .. code-block:: python
 
-    class ListArray:
+    class ListArray(Content):
         def __init__(self, starts, stops, content):
             assert isinstance(starts, list)
             assert isinstance(stops, list)
@@ -63,8 +63,8 @@ that exhaustively checks validity in its constructor (see
             self.content = content
 
         @staticmethod
-        def random(minlen=0, choices=None):
-            content = Content.random(0, choices)
+        def random(minlen, choices):
+            content = random.choice(choices).random(0, choices)
             length = random_length(minlen)
             if len(content) == 0:
                 starts = [random.randint(0, 10) for i in range(length)]
@@ -94,12 +94,12 @@ that exhaustively checks validity in its constructor (see
             return ("ListArray(" + repr(self.starts) + ", " + repr(self.stops) + ", "
                     + repr(self.content) + ")")
 
-        def toxml(self, indent="", pre="", post=""):
+        def xml(self, indent="", pre="", post=""):
             out = indent + pre + "<ListArray>\n"
             out += indent + "    <starts>" + " ".join(str(x) for x in self.starts)
             out += "</starts>\n"
             out += indent + "    <stops>" + " ".join(str(x) for x in self.stops) + "</stops>\n"
-            out += self.content.toxml(indent + "    ", "<content>", "</content>\n")
+            out += self.content.xml(indent + "    ", "<content>", "</content>\n")
             out += indent + "</ListArray>" + post
             return out
 

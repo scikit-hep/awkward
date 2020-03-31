@@ -30,7 +30,7 @@ that exhaustively checks validity in its constructor (see
 
 .. code-block:: python
 
-    class IndexedArray:
+    class IndexedArray(Content):
         def __init__(self, index, content):
             assert isinstance(index, list)
             assert isinstance(content, Content)
@@ -41,11 +41,11 @@ that exhaustively checks validity in its constructor (see
             self.content = content
 
         @staticmethod
-        def random(minlen=0, choices=None):
+        def random(minlen, choices):
             if minlen == 0:
-                content = Content.random(0, choices)
+                content = random.choice(choices).random(0, choices)
             else:
-                content = Content.random(1, choices)
+                content = random.choice(choices).random(1, choices)
             if len(content) == 0:
                 index = []
             else:
@@ -70,10 +70,10 @@ that exhaustively checks validity in its constructor (see
         def __repr__(self):
             return "IndexedArray(" + repr(self.index) + ", " + repr(self.content) + ")"
 
-        def toxml(self, indent="", pre="", post=""):
+        def xml(self, indent="", pre="", post=""):
             out = indent + pre + "<IndexedArray>\n"
             out += indent + "    <index>" + " ".join(str(x) for x in self.index) + "</index>\n"
-            out += self.content.toxml(indent + "    ", "<content>", "</content>\n")
+            out += self.content.xml(indent + "    ", "<content>", "</content>\n")
             out += indent + "</IndexedArray>\n"
             return out
 

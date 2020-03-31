@@ -24,7 +24,7 @@ that exhaustively checks validity in its constructor (see
 
 .. code-block:: python
 
-    class RegularArray:
+    class RegularArray(Content):
         def __init__(self, content, size):
             assert isinstance(content, Content)
             assert isinstance(size, int)
@@ -33,9 +33,10 @@ that exhaustively checks validity in its constructor (see
             self.size = size
 
         @staticmethod
-        def random(minlen=0, choices=None):
+        def random(minlen, choices):
             size = random_length(1, 5)
-            return RegularArray(Content.random(random_length(minlen) * size, choices), size)
+            return RegularArray(
+                random.choice(choices).random(random_length(minlen) * size, choices), size)
 
         def __len__(self):
             return len(self.content) // self.size   # floor division
@@ -55,9 +56,9 @@ that exhaustively checks validity in its constructor (see
         def __repr__(self):
             return "RegularArray(" + repr(self.content) + ", " + repr(self.size) + ")"
 
-        def toxml(self, indent="", pre="", post=""):
+        def xml(self, indent="", pre="", post=""):
             out = indent + pre + "<RegularArray>\n"
-            out += self.content.toxml(indent + "    ", "<content>", "</content>\n")
+            out += self.content.xml(indent + "    ", "<content>", "</content>\n")
             out += indent + "    <size>" + str(self.size) + "</size>\n"
             out += indent + "</RegularArray>" + post
             return out

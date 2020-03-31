@@ -25,7 +25,7 @@ that exhaustively checks validity in its constructor (see
 
 .. code-block:: python
 
-    class IndexedOptionArray
+    class IndexedOptionArray(Content):
         def __init__(self, index, content):
             assert isinstance(index, list)
             assert isinstance(content, Content)
@@ -36,8 +36,8 @@ that exhaustively checks validity in its constructor (see
             self.content = content
 
         @staticmethod
-        def random(minlen=0, choices=None):
-            content = Content.random(0, choices)
+        def random(minlen, choices):
+            content = random.choice(choices).random(0, choices)
             index = []
             for i in range(random_length(minlen)):
                 if len(content) == 0 or random.randint(0, 4) == 0:
@@ -66,10 +66,10 @@ that exhaustively checks validity in its constructor (see
         def __repr__(self):
             return "IndexedOptionArray(" + repr(self.index) + ", " + repr(self.content) + ")"
 
-        def toxml(self, indent="", pre="", post=""):
+        def xml(self, indent="", pre="", post=""):
             out = indent + pre + "<IndexedOptionArray>\n"
             out += indent + "    <index>" + " ".join(str(x) for x in self.index) + "</index>\n"
-            out += self.content.toxml(indent + "    ", "<content>", "</content>\n")
+            out += self.content.xml(indent + "    ", "<content>", "</content>\n")
             out += indent + "</IndexedOptionArray>\n"
             return out
 

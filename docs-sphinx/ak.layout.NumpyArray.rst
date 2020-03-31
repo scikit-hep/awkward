@@ -29,7 +29,7 @@ that exhaustively checks validity in its constructor (see
 
 .. code-block:: python
 
-    class NumpyArray:
+    class NumpyArray(Content):
         def __init__(self, ptr, shape, strides, offset):
             assert isinstance(ptr, list)
             assert isinstance(shape, list)
@@ -56,7 +56,7 @@ that exhaustively checks validity in its constructor (see
             self.offset = offset
 
         @staticmethod
-        def random(minlen=0, choices=None):
+        def random(minlen, choices):
             shape = [random_length(minlen)]
             for i in range(random_length(0, 2)):
                 shape.append(random_length(1, 3))
@@ -92,7 +92,7 @@ that exhaustively checks validity in its constructor (see
             return ("NumpyArray(" + repr(self.ptr) + ", " + repr(self.shape) + ", " +
                     repr(self.strides) + ", " + repr(self.offset) + ")")
 
-        def toxml(self, indent="", pre="", post=""):
+        def xml(self, indent="", pre="", post=""):
             out = indent + pre + "<NumpyArray>\n"
             out += indent + "    <ptr>" + " ".join(str(x) for x in self.ptr) + "</ptr>\n"
             out += indent + "    <shape>" + " ".join(str(x) for x in self.shape) + "</shape>\n"

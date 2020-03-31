@@ -51,15 +51,15 @@ that exhaustively checks validity in its constructor (see
             self.contents = contents
 
         @staticmethod
-        def random(minlen=0, choices=None):
+        def random(minlen, choices):
             contents = []
             unshuffled_tags = []
             unshuffled_index = []
             for i in range(random.randint(1, 3)):
                 if minlen == 0:
-                    contents.append(Content.random(0, choices))
+                    contents.append(random.choice(choices).random(0, choices))
                 else:
-                    contents.append(Content.random(1, choices))
+                    contents.append(random.choice(choices).random(1, choices))
                 if len(contents[-1]) != 0:
                     thisindex = [random.randint(0, len(contents[-1]) - 1)
                                      for i in range(random_length(minlen))]
@@ -89,13 +89,13 @@ that exhaustively checks validity in its constructor (see
             return ("UnionArray(" + repr(self.tags) + ", " + repr(self.index)
                     + ", [" + ", ".join(repr(x) for x in self.contents) + "])")
 
-        def toxml(self, indent="", pre="", post=""):
+        def xml(self, indent="", pre="", post=""):
             out = indent + pre + "<UnionArray>\n"
             out += indent + "    <tags>" + " ".join(str(x) for x in self.tags) + "</tags>\n"
             out += indent + "    <index>" + " ".join(str(x) for x in self.index) + "</index>\n"
             for i, content in enumerate(self.contents):
-                out += content.toxml(indent + "    ", "<content i=\"" + str(i) + "\">",
-                                     "</content>\n")
+                out += content.xml(indent + "    ", "<content i=\"" + str(i) + "\">",
+                                   "</content>\n")
             out += indent + "</UnionArray>" + post
             return out
 
