@@ -136,6 +136,14 @@ extern "C" {
       int64_t length);
 
   EXPORT_SYMBOL struct Error
+    awkward_carry_arange_32(
+      int32_t* toptr,
+      int64_t length);
+  EXPORT_SYMBOL struct Error
+    awkward_carry_arange_U32(
+      uint32_t* toptr,
+      int64_t length);
+  EXPORT_SYMBOL struct Error
     awkward_carry_arange_64(
       int64_t* toptr,
       int64_t length);

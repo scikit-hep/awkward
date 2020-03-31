@@ -27,6 +27,11 @@ namespace awkward {
   template <typename T, typename I>
   class EXPORT_SYMBOL UnionArrayOf: public Content {
   public:
+    /// @brief Generates an index in which `index[i] = i`.
+    static const IndexOf<I>
+      sparse_index(int64_t len);
+
+    /// @brief Generates an index in which `index[tags == i][i] = i`.
     static const IndexOf<I>
       regular_index(const IndexOf<T>& tags);
 
