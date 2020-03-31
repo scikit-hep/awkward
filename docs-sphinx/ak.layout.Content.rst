@@ -43,100 +43,247 @@ In Python, :doc:`ak.layout.Record` is not a subclass of
 All :doc:`ak.layout.Content` nodes have the following properties and methods
 in common.
 
+ak.layout.Content.identities
+============================
+
 .. py:attribute:: ak.layout.Content.identities
+
+ak.layout.Content.identity
+==========================
 
 .. py:attribute:: ak.layout.Content.identity
 
+ak.layout.Content.nbytes
+========================
+
 .. py:attribute:: ak.layout.Content.nbytes
+
+ak.layout.Content.numfields
+===========================
 
 .. py:attribute:: ak.layout.Content.numfields
 
+ak.layout.Content.parameters
+============================
+
 .. py:attribute:: ak.layout.Content.parameters
+
+ak.layout.Content.purelist_depth
+================================
 
 .. py:attribute:: ak.layout.Content.purelist_depth
 
+ak.layout.Content.purelist_isregular
+====================================
+
 .. py:attribute:: ak.layout.Content.purelist_isregular
+
+ak.layout.Content.__getitem__
+=============================
 
 .. py:method:: ak.layout.Content.__getitem__(where)
 
+ak.layout.Content.__iter__
+==========================
+
 .. py:method:: ak.layout.Content.__iter__()
+
+ak.layout.Content.__len__
+=========================
 
 .. py:method:: ak.layout.Content.__len__()
 
+ak.layout.Content.__repr__
+==========================
+
 .. py:method:: ak.layout.Content.__repr__()
+
+ak.layout.Content.all
+=====================
 
 .. py:method:: ak.layout.Content.all(axis=-1, mask=False, keepdims=False)
 
+ak.layout.Content.any
+=====================
+
 .. py:method:: ak.layout.Content.any(axis=-1, mask=False, keepdims=False)
+
+ak.layout.Content.argmax
+========================
 
 .. py:method:: ak.layout.Content.argmax(axis=-1, mask=True, keepdims=False)
 
+ak.layout.Content.argmin
+========================
+
 .. py:method:: ak.layout.Content.argmin(axis=-1, mask=True, keepdims=False)
+
+ak.layout.Content.broadcast_tooffsets64
+=======================================
 
 .. py:method:: ak.layout.Content.broadcast_tooffsets64(arg0)
 
+ak.layout.Content.choose
+========================
+
 .. py:method:: ak.layout.Content.choose(n, diagonal=False, keys=None, parameters=None, axis=1)
+
+ak.layout.Content.compact_offsets64
+===================================
 
 .. py:method:: ak.layout.Content.compact_offsets64(start_at_zero=True)
 
+ak.layout.Content.count
+=======================
+
 .. py:method:: ak.layout.Content.count(axis=-1, mask=False, keepdims=False)
+
+ak.layout.Content.count_nonzero
+===============================
 
 .. py:method:: ak.layout.Content.count_nonzero(axis=-1, mask=False, keepdims=False)
 
+ak.layout.Content.deep_copy
+===========================
+
 .. py:method:: ak.layout.Content.deep_copy(copyarrays=True, copyindexes=True, copyidentities=True)
+
+ak.layout.Content.fieldindex
+============================
 
 .. py:method:: ak.layout.Content.fieldindex(arg0)
 
+ak.layout.Content.fillna
+========================
+
 .. py:method:: ak.layout.Content.fillna(arg0)
+
+ak.layout.Content.flatten
+=========================
 
 .. py:method:: ak.layout.Content.flatten(axis=1)
 
+ak.layout.Content.getitem_nothing
+=================================
+
 .. py:method:: ak.layout.Content.getitem_nothing()
+
+ak.layout.Content.haskey
+========================
 
 .. py:method:: ak.layout.Content.haskey(arg0)
 
+ak.layout.Content.key
+=====================
+
 .. py:method:: ak.layout.Content.key(arg0)
+
+ak.layout.Content.keys
+======================
 
 .. py:method:: ak.layout.Content.keys()
 
+ak.layout.Content.localindex
+============================
+
 .. py:method:: ak.layout.Content.localindex(axis=1)
+
+ak.layout.Content.max
+=====================
 
 .. py:method:: ak.layout.Content.max(axis=-1, mask=True, keepdims=False)
 
+ak.layout.Content.merge
+=======================
+
 .. py:method:: ak.layout.Content.merge(arg0)
+
+ak.layout.Content.merge_as_union
+================================
 
 .. py:method:: ak.layout.Content.merge_as_union(arg0)
 
+ak.layout.Content.mergeable
+===========================
+
 .. py:method:: ak.layout.Content.mergeable(other, mergebool=False)
+
+ak.layout.Content.min
+=====================
 
 .. py:method:: ak.layout.Content.min(axis=-1, mask=True, keepdims=False)
 
+ak.layout.Content.num
+=====================
+
 .. py:method:: ak.layout.Content.num(axis=1)
+
+ak.layout.Content.offsets_and_flatten
+=====================================
 
 .. py:method:: ak.layout.Content.offsets_and_flatten(axis=1)
 
+ak.layout.Content.parameter
+===========================
+
 .. py:method:: ak.layout.Content.parameter(arg0)
+
+ak.layout.Content.prod
+======================
 
 .. py:method:: ak.layout.Content.prod(axis=-1, mask=False, keepdims=False)
 
+ak.layout.Content.purelist_parameter
+====================================
+
 .. py:method:: ak.layout.Content.purelist_parameter(arg0)
+
+ak.layout.Content.rpad
+======================
 
 .. py:method:: ak.layout.Content.rpad(arg0, arg1)
 
+ak.layout.Content.rpad_and_clip
+===============================
+
 .. py:method:: ak.layout.Content.rpad_and_clip(arg0, arg1)
+
+ak.layout.Content.setidentities
+===============================
 
 .. py:method:: ak.layout.Content.setidentities(arg0)
 
+ak.layout.Content.setparameter
+==============================
+
 .. py:method:: ak.layout.Content.setparameter(arg0, arg1)
+
+ak.layout.Content.simplify
+==========================
 
 .. py:method:: ak.layout.Content.simplify()
 
+ak.layout.Content.sum
+=====================
+
 .. py:method:: ak.layout.Content.sum(axis=-1, mask=False, keepdims=False)
+
+ak.layout.Content.toRegularArray
+================================
 
 .. py:method:: ak.layout.Content.toRegularArray()
 
+ak.layout.Content.tojson
+========================
+
 .. py:method:: ak.layout.Content.tojson(pretty=False, maxdecimals=None)
 
+ak.layout.Content.tojson
+========================
+
 .. py:method:: ak.layout.Content.tojson(destination, pretty=False, maxdecimals=None, buffersize=65536)
+
+ak.layout.Content.type
+======================
 
 .. py:method:: ak.layout.Content.type()
