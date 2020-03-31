@@ -233,9 +233,15 @@ def dofunction(link, shortname, name, astfcn):
             outfile.write(out)
 
 for filename in sorted(glob.glob("../src/awkward1/**/*.py", recursive=True),
-                       key=lambda x: x.replace("/highlevel", "!")
-                                      .replace("/__init__.py", "#")
-                                      .replace("/operations", "$")
+                       key=lambda x: x.replace("/__init__.py",  "!")
+                                      .replace("/highlevel",    "#")
+                                      .replace("/operations",   "$")
+
+                                      .replace("/describe.py",  "#")
+                                      .replace("/convert.py",   "$")
+                                      .replace("/structure.py", "%")
+                                      .replace("/reducers.py",  "&")
+
                                       .replace("/_", "/~")):
 
     modulename = (filename.replace("../src/", "")

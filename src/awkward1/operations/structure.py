@@ -14,156 +14,106 @@ import awkward1.layout
 import awkward1._connect._numpy
 import awkward1.operations.convert
 
-def with_field(base, what, where=None, highlevel=True):
+def mask(array, mask, valid_when=True, highlevel=True):
     """
     Args:
-        base: Data containing records or tuples.
-        what: Data to add as a new field.
-        where (None or str): If None, the new field has no name (can be
-            accessed as an integer slot number in a string); otherwise, the
-            name of the new field.
+        array: Data to mask, rather than filter.
+        mask (array of booleans): The mask that overlays elements in the
+            `array` with None. Must have the same length as `array`.
+        valid_when (bool): If True, True values in `mask` are considered
+            valid (passed from `array` to the output); if False, False
+            values in `mask` are considered valid.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
 
-    Returns an #ak.Array or #ak.Record (or low-level equivalent, if
-    `highlevel=False`) with a new field attached. This function does not
-    change the array in-place.
+    Returns an array for which
 
-    See #ak.Array.__setitem__ and #ak.Record.__setitem__ for a variant that
-    changes the high-level object in-place. (These methods internally use
-    #ak.with_field, so performance is not a factor in choosing one over the
-    other.)
+        output[i] = array[i] if mask[i] == valid_when else None
+
+    Unlike filtering data with #ak.Array.__getitem__, this `output` has the
+    same length as the original `array` and can therefore be used in
+    calculations with it, such as
+    [universal functions](https://docs.scipy.org/doc/numpy/reference/ufuncs.html).
+
+    For example, with an `array` like
+
+        ak.Array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+
+    with a boolean selection of `good` elements like
+
+        >>> good = (array % 2 == 1)
+        >>> good
+        <Array [False, True, False, ... False, True] type='10 * bool'>
+
+    could be used to filter the original `array` (or another with the same
+    length).
+
+        >>> array[good]
+        <Array [1, 3, 5, 7, 9] type='5 * int64'>
+
+    However, this eliminates information about which elements were dropped and
+    where they were. If we instead use #ak.mask,
+
+        >>> ak.mask(array, good)
+        <Array [None, 1, None, 3, ... None, 7, None, 9] type='10 * ?int64'>
+
+    this information and the length of the array is preserved, and it can be
+    used in further calculations with the original `array` (or another with
+    the same length).
+
+        >>> ak.mask(array, good) + array
+        <Array [None, 2, None, 6, ... 14, None, 18] type='10 * ?int64'>
+
+    In particular, successive filters can be applied to the same array.
+
+    Even if the `array` and/or the `mask` is nested,
+
+        >>> array = ak.Array([[[0, 1, 2], [], [3, 4], [5]], [[6, 7, 8], [9]]])
+        >>> good = (array % 2 == 1)
+        >>> good
+        <Array [[[False, True, False], ... [True]]] type='2 * var * var * bool'>
+
+    it can still be used with #ak.mask because the `array` and `mask`
+    parameters are broadcasted.
+
+        >>> ak.mask(array, good)
+        <Array [[[None, 1, None], ... None], [9]]] type='2 * var * var * ?int64'>
+
+    See #ak.broadcast_arrays for details about broadcasting and the generalized
+    set of broadcasting rules.
     """
-    base = awkward1.operations.convert.to_layout(base,
-                                                 allowrecord=True,
-                                                 allowother=False)
-    if base.numfields < 0:
-        raise ValueError("no tuples or records in array; cannot add a new "
-                "field")
-
-    what = awkward1.operations.convert.to_layout(what,
-                                                 allowrecord=True,
-                                                 allowother=True)
-    
-    keys = base.keys()
-    if where in base.keys():
-        keys.remove(where)
-        base = base[keys]
-
     def getfunction(inputs, depth):
-        base, what = inputs
-        if isinstance(base, awkward1.layout.RecordArray):
-            if not isinstance(what, awkward1.layout.Content):
-                what = awkward1.layout.NumpyArray(
-                    numpy.lib.stride_tricks.as_strided(
-                      [what], shape=(len(base),), strides=(0,)))
-            return lambda: (base.setitem_field(where, what),)
+        layoutarray, layoutmask = inputs
+        if isinstance(layoutmask, awkward1.layout.NumpyArray):
+            m = numpy.asarray(layoutmask)
+            if not issubclass(m.dtype.type, (numpy.bool, numpy.bool_)):
+                raise ValueError(
+                    "mask must have boolean type, not "
+                    "{0}".format(repr(m.dtype)))
+            bytemask = awkward1.layout.Index8(m.view(numpy.int8))
+            return lambda: (
+                awkward1.layout.ByteMaskedArray(bytemask,
+                                                layoutarray,
+                                                valid_when=valid_when),)
         else:
             return None
 
-    behavior = awkward1._util.behaviorof(base, what)
-    out = awkward1._util.broadcast_and_apply(
-            [base, what], getfunction, behavior)
+    layoutarray = awkward1.operations.convert.to_layout(array,
+                                                        allowrecord=True,
+                                                        allowother=False)
+    layoutmask = awkward1.operations.convert.to_layout(mask,
+                                                       allowrecord=True,
+                                                       allowother=False)
+
+    behavior = awkward1._util.behaviorof(array, mask)
+    out = awkward1._util.broadcast_and_apply([layoutarray, layoutmask],
+                                             getfunction,
+                                             behavior)
     assert isinstance(out, tuple) and len(out) == 1
     if highlevel:
-        return awkward1._util.wrap(out[0], behavior=behavior)
+        return awkward1._util.wrap(out[0], behavior)
     else:
         return out[0]
-
-def withname(array, name, highlevel=True):
-    """
-    Args:
-        base: Data containing records or tuples.
-        name (str): Name to give to the records or tuples; this assigns
-            the `"__record__"` parameter.
-        highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
-
-    Returns an #ak.Array or #ak.Record (or low-level equivalent, if
-    `highlevel=False`) with a new name. This function does not change the
-    array in-place.
-
-    The records or tuples may be nested within multiple levels of nested lists.
-    If records are nested within records, only the outermost are affected.
-
-    Setting the `"__record__"` parameter makes it possible to add behaviors
-    to the data; see #ak.Array and #ak.behavior for a more complete
-    description.
-    """
-    def getfunction(layout, depth):
-        if isinstance(layout, awkward1.layout.RecordArray):
-            parameters = dict(layout.parameters)
-            parameters["__record__"] = name
-            return lambda: awkward1.layout.RecordArray(
-                layout.contents,
-                layout.recordlookup,
-                len(layout),
-                layout.identities,
-                parameters)
-        else:
-            return None
-    out = awkward1._util.recursively_apply(
-            awkward1.operations.convert.to_layout(array), getfunction)
-    if highlevel:
-        return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
-    else:
-        return out
-
-def isna(array, highlevel=True):
-    """
-    Args:
-        array: Data to check for missing values (None).
-        highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
-
-    Returns an array whose value is True where an element of `array` is None;
-    False otherwise.
-
-    See also #ak.notna, the logical negation of #ak.isna.
-    """
-    def apply(layout):
-        if isinstance(layout, awkward1._util.unknowntypes):
-            return apply(awkward1.layout.NumpyArray(numpy.array([])))
-
-        elif isinstance(layout, awkward1._util.indexedtypes):
-            return apply(layout.project())
-
-        elif isinstance(layout, awkward1._util.uniontypes):
-            contents = [apply(layout.project(i))
-                          for i in range(layout.numcontents)]
-            out = numpy.empty(len(layout), dtype=numpy.bool_)
-            tags = numpy.asarray(layout.tags)
-            for tag, content in enumerate(contents):
-                out[tags == tag] = content
-            return out
-
-        elif isinstance(layout, awkward1._util.optiontypes):
-            index = numpy.asarray(layout.index)
-            return (index < 0)
-
-        else:
-            return numpy.zeros(len(layout), dtype=numpy.bool_)
-
-    out = apply(awkward1.operations.convert.to_layout(array, allowrecord=False))
-    if highlevel:
-        return awkward1._util.wrap(out,
-                                   behavior=awkward1._util.behaviorof(array))
-    else:
-        return out
-
-def notna(array, highlevel=True):
-    """
-    Args:
-        array: Data to check for missing values (None).
-        highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
-
-    Returns an array whose value is False where an element of `array` is None;
-    True otherwise.
-
-    See also #ak.isna, the logical negation of #ak.notna.
-    """
-    return ~isna(array, highlevel=highlevel)
 
 def num(array, axis=1, highlevel=True):
     """
@@ -234,169 +184,263 @@ def num(array, axis=1, highlevel=True):
     else:
         return out
 
-@awkward1._connect._numpy.implements(numpy.size)
-def size(array, axis=None):
+def zip(arrays,
+        depthlimit=None,
+        parameters=None,
+        with_name=None,
+        highlevel=True):
     """
     Args:
-        array: Rectilinear array whose `shape` needs to be known.
-        axis (int): The dimension at which this operation is applied. The
-            outermost dimension is `0`, followed by `1`, etc., and negative
-            values count backward from the innermost: `-1` is the innermost
-            dimension, `-2` is the next level up, etc.
-    Returns:
-        An int or a list of ints, one for each regular dimension.
-
-    Implements NumPy's
-    [size](https://docs.scipy.org/doc/numpy/reference/generated/numpy.ma.size.html)
-    function in a way that accepts #ak.Array as the `array`.
-
-    If the `array` is not rectilinear (i.e. if #np.to_numpy would raise an
-    error), then this function raise an error.
-    """
-    if axis is not None and axis < 0:
-        raise NotImplementedError("ak.size with axis < 0")
-
-    def recurse(layout, axis, sizes):
-        if isinstance(layout, awkward1._util.unknowntypes):
-            pass
-        elif isinstance(layout, awkward1._util.indexedtypes):
-            recurse(layout.content, axis, sizes)
-        elif isinstance(layout, awkward1._util.uniontypes):
-            compare = None
-            for x in layout.contents:
-                inner = []
-                recurse(x, axis, inner)
-                if compare is None:
-                    compare = inner
-                elif compare != inner:
-                    raise ValueError(
-                            "ak.size is ambiguous due to union of different "
-                            "sizes")
-            sizes.extend(compare)
-        elif isinstance(layout, awkward1._util.optiontypes):
-            return recurse(layout.content, axis, sizes)
-        elif isinstance(layout, awkward1._util.listtypes):
-            if isinstance(layout, awkward1.layout.RegularArray):
-                sizes.append(layout.size)
-            else:
-                sizes.append(None)
-            if axis is None:
-                recurse(layout.content, axis, sizes)
-            elif axis > 0:
-                recurse(layout.content, axis - 1, sizes)
-        elif isinstance(layout, awkward1._util.recordtypes):
-            compare = None
-            for x in layout.contents:
-                inner = []
-                recurse(x, axis, inner)
-                if compare is None:
-                    compare = inner
-                elif compare != inner:
-                    raise ValueError(
-                            "ak.size is ambiguous due to record of different "
-                            "sizes")
-            sizes.extend(compare)
-        elif isinstance(layout, awkward1.layout.NumpyArray):
-            if axis is None:
-                sizes.extend(numpy.asarray(layout).shape[1:])
-            else:
-                sizes.extend(numpy.asarray(layout).shape[1:axis + 2])
-        else:
-            raise AssertionError("unrecognized Content type")
-
-    layout = awkward1.operations.convert.to_layout(array, allowrecord=False)
-    layout = awkward1.layout.RegularArray(layout, len(layout))
-
-    sizes = []
-    recurse(layout, axis, sizes)
-
-    if axis is None:
-        out = 1
-        for size in sizes:
-            if size is None:
-                raise ValueError(
-                        "ak.size is ambiguous due to variable-length arrays "
-                        "(try ak.flatten to remove structure or ak.to_numpy "
-                        "to force regularity, if possible)")
-            else:
-                out *= size
-        return out
-    else:
-        if sizes[-1] is None:
-            raise ValueError(
-                    "ak.size is ambiguous due to variable-length arrays at "
-                    "axis {0} (try ak.flatten to remove structure or "
-                    "ak.to_numpy to force regularity, if possible)".format(
-                                                                        axis))
-        else:
-            return sizes[-1]
-
-@awkward1._connect._numpy.implements(numpy.atleast_1d)
-def atleast_1d(*arrays):
-    """
-    Args:
-        arrays: Rectilinear arrays to be converted to NumPy arrays of at
-            least 1 dimension.
-        axis (int): The dimension at which this operation is applied. The
-            outermost dimension is `0`, followed by `1`, etc., and negative
-            values count backward from the innermost: `-1` is the innermost
-            dimension, `-2` is the next level up, etc.
-    Returns:
-        A NumPy array, not an Awkward Array.
-
-    Implements NumPy's
-    [atleast_1d](https://docs.scipy.org/doc/numpy/reference/generated/numpy.atleast_1d.html)
-    function in a way that accepts #ak.Array objects as the `arrays`.
-
-    If the `arrays` are not all rectilinear (i.e. if #np.to_numpy would raise an
-    error), then this function raise an error.
-    """
-    return numpy.atleast_1d(*[awkward1.operations.convert.to_numpy(x)
-                                for x in arrays])
-
-@awkward1._connect._numpy.implements(numpy.concatenate)
-def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
-    """
-    Args:
-        arrays: Arrays to concatenate along any dimension.
-        axis (int): The dimension at which this operation is applied. The
-            outermost dimension is `0`, followed by `1`, etc., and negative
-            values count backward from the innermost: `-1` is the innermost
-            dimension, `-2` is the next level up, etc.
-        mergebool (bool): If True, boolean and nummeric data can be combined
-            into the same buffer, losing information about False vs `0` and
-            True vs `1`; otherwise, they are kept in separate buffers with
-            distinct types (using an #ak.layout.UnionArray8_64).
+        arrays (dict or iterable of arrays): Arrays to combine into a
+            record-containing structure (if a dict) or a tuple-containing
+            structure (if any other kind of iterable).
+        depthlimit (None or int): If None, attempt to fully broadcast the
+            `array` to all levels. If an int, limit the number of dimensions
+            that get broadcasted. The minimum value is `1`, for no
+            broadcasting.
+        parameters (dict): Parameters for the new #ak.layout.RecordArray node
+            that is created by this operation.
+        with_name (None or str): Assigns a `"__record__"` name to the new
+            #ak.layout.RecordArray node that is created by this operation
+            (overriding `parameters`, if necessary).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
 
-    Returns an array with `arrays` concatenated. For `axis=0`, this means that
-    one whole array follows another. For `axis=1`, it means that the `arrays`
-    must have the same lengths and nested lists are each concatenated,
-    element for element, and similarly for deeper levels.
+    Combines `arrays` into a single structure as the fields of a collection
+    of records or the slots of a collection of tuples. If the `arrays` have
+    nested structure, they are broadcasted with one another to form the
+    records or tuples as deeply as possible, though this can be limited by
+    `depthlimit`.
+
+    This operation may be thought of as the opposite of projection in
+    #ak.Array.__getitem__, which extracts fields one at a time, or
+    #ak.unzip, which extracts them all in one call.
+
+    Consider the following arrays, `one` and `two`.
+
+        >>> one = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]])
+        >>> two = ak.Array([["a", "b", "c"], [], ["d", "e"], ["f"]])
+
+    Zipping them together using a dict creates a collection of records with
+    the same nesting structure as `one` and `two`.
+
+        >>> ak.to_list(ak.zip({"x": one, "y": two}))
+        [
+         [{'x': 1.1, 'y': 'a'}, {'x': 2.2, 'y': 'b'}, {'x': 3.3, 'y': 'c'}],
+         [],
+         [{'x': 4.4, 'y': 'd'}, {'x': 5.5, 'y': 'e'}],
+         [{'x': 6.6, 'y': 'f'}]
+        ]
+
+    Doing so with a list creates tuples, whose fields are not named.
+
+        >>> ak.to_list(ak.zip([one, two]))
+        [
+         [(1.1, 'a'), (2.2, 'b'), (3.3, 'c')],
+         [],
+         [(4.4, 'd'), (5.5, 'e')],
+         [(6.6, 'f')]
+        ]
+
+    Adding a third array with the same length as `one` and `two` but less
+    internal structure is okay: it gets broadcasted to match the others.
+    (See #ak.broadcast_arrays for broadcasting rules.)
+
+        >>> three = ak.Array([100, 200, 300, 400])
+        >>> ak.to_list(ak.zip([one, two, three]))
+        [
+         [[(1.1, 97, 100)], [(2.2, 98, 100)], [(3.3, 99, 100)]],
+         [],
+         [[(4.4, 100, 300)], [(5.5, 101, 300)]],
+         [[(6.6, 102, 400)]]
+        ]
+
+    However, if arrays have the same depth but different lengths of nested
+    lists, attempting to zip them together is a broadcasting error.
+
+        >>> one = ak.Array([[[1, 2, 3], [], [4, 5], [6]], [], [[7, 8]]])
+        >>> two = ak.Array([[[1.1, 2.2], [3.3], [4.4], [5.5]], [], [[6.6]]])
+        >>> ak.zip([one, two])
+        ValueError: in ListArray64, cannot broadcast nested list
+
+    For this, one can set the `depthlimit` to prevent the operation from
+    attempting to broadcast what can't be broadcasted.
+
+        >>> ak.to_list(ak.zip([one, two], depthlimit=1))
+        [([[1, 2, 3], [], [4, 5], [6]], [[1.1, 2.2], [3.3], [4.4], [5.5]]),
+         ([], []),
+         ([[7, 8]], [[6.6]])]
+
+    As an extreme, `depthlimit=1` is a handy way to make a record structure
+    at the outermost level, regardless of whether the fields have matching
+    structure or not.
     """
-    if axis != 0:
-        raise NotImplementedError("axis={0}".format(axis))
+    if depthlimit is not None and depthlimit <= 0:
+        raise ValueError("depthlimit must be None or at least 1")
 
-    contents = [awkward1.operations.convert.to_layout(x, allowrecord=False)
-                  for x in arrays]
+    if isinstance(arrays, dict):
+        recordlookup = []
+        layouts = []
+        for n, x in arrays.items():
+            recordlookup.append(n)
+            layouts.append(
+                awkward1.operations.convert.to_layout(x,
+                                                      allowrecord=False,
+                                                      allowother=False))
+    else:
+        recordlookup = None
+        layouts = []
+        for x in arrays:
+            layouts.append(
+                awkward1.operations.convert.to_layout(x,
+                                                      allowrecord=False,
+                                                      allowother=False))
 
-    if len(contents) == 0:
-        raise ValueError("need at least one array to concatenate")
-    out = contents[0]
-    for x in contents[1:]:
-        if not out.mergeable(x, mergebool=mergebool):
-            out = out.merge_as_union(x)
+    if with_name is not None:
+        if parameters is None:
+            parameters = {}
         else:
-            out = out.merge(x)
-        if isinstance(out, awkward1._util.uniontypes):
-            out = out.simplify(mergebool=mergebool)
+            parameters = dict(parameters)
+        parameters["__record__"] = with_name
 
+    def getfunction(inputs, depth):
+        if ((depthlimit is None and
+             all(x.purelist_depth == 1 for x in inputs)) or
+            (depthlimit == depth)):
+            return lambda: (
+                awkward1.layout.RecordArray(inputs,
+                                            recordlookup,
+                                            parameters=parameters),)
+        else:
+            return None
+
+    behavior = awkward1._util.behaviorof(*arrays)
+    out = awkward1._util.broadcast_and_apply(layouts, getfunction, behavior)
+    assert isinstance(out, tuple) and len(out) == 1
     if highlevel:
-        return awkward1._util.wrap(out,
-                                   behavior=awkward1._util.behaviorof(*arrays))
+        return awkward1._util.wrap(out[0], behavior)
+    else:
+        return out[0]
+
+def unzip(array):
+    """
+    If the `array` contains tuples or records, this operation splits them
+    into a Python tuple of arrays, one for each field.
+
+    If the `array` does not contain tuples or records, the single `array`
+    is placed in a length 1 Python tuple.
+
+    For example,
+
+        >>> array = ak.Array([{"x": 1.1, "y": [1]},
+                              {"x": 2.2, "y": [2, 2]},
+                              {"x": 3.3, "y": [3, 3, 3]}])
+        >>> x, y = ak.unzip(array)
+        >>> x
+        <Array [1.1, 2.2, 3.3] type='3 * float64'>
+        >>> y
+        <Array [[1], [2, 2], [3, 3, 3]] type='3 * var * int64'>
+    """
+    keys = awkward1.operations.describe.keys(array)
+    if len(keys) == 0:
+        return (array,)
+    else:
+        return tuple(array[n] for n in keys)
+
+def with_name(array, name, highlevel=True):
+    """
+    Args:
+        base: Data containing records or tuples.
+        name (str): Name to give to the records or tuples; this assigns
+            the `"__record__"` parameter.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+
+    Returns an #ak.Array or #ak.Record (or low-level equivalent, if
+    `highlevel=False`) with a new name. This function does not change the
+    array in-place.
+
+    The records or tuples may be nested within multiple levels of nested lists.
+    If records are nested within records, only the outermost are affected.
+
+    Setting the `"__record__"` parameter makes it possible to add behaviors
+    to the data; see #ak.Array and #ak.behavior for a more complete
+    description.
+    """
+    def getfunction(layout, depth):
+        if isinstance(layout, awkward1.layout.RecordArray):
+            parameters = dict(layout.parameters)
+            parameters["__record__"] = name
+            return lambda: awkward1.layout.RecordArray(
+                layout.contents,
+                layout.recordlookup,
+                len(layout),
+                layout.identities,
+                parameters)
+        else:
+            return None
+    out = awkward1._util.recursively_apply(
+            awkward1.operations.convert.to_layout(array), getfunction)
+    if highlevel:
+        return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
     else:
         return out
+
+def with_field(base, what, where=None, highlevel=True):
+    """
+    Args:
+        base: Data containing records or tuples.
+        what: Data to add as a new field.
+        where (None or str): If None, the new field has no name (can be
+            accessed as an integer slot number in a string); otherwise, the
+            name of the new field.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+
+    Returns an #ak.Array or #ak.Record (or low-level equivalent, if
+    `highlevel=False`) with a new field attached. This function does not
+    change the array in-place.
+
+    See #ak.Array.__setitem__ and #ak.Record.__setitem__ for a variant that
+    changes the high-level object in-place. (These methods internally use
+    #ak.with_field, so performance is not a factor in choosing one over the
+    other.)
+    """
+    base = awkward1.operations.convert.to_layout(base,
+                                                 allowrecord=True,
+                                                 allowother=False)
+    if base.numfields < 0:
+        raise ValueError("no tuples or records in array; cannot add a new "
+                "field")
+
+    what = awkward1.operations.convert.to_layout(what,
+                                                 allowrecord=True,
+                                                 allowother=True)
+    
+    keys = base.keys()
+    if where in base.keys():
+        keys.remove(where)
+        base = base[keys]
+
+    def getfunction(inputs, depth):
+        base, what = inputs
+        if isinstance(base, awkward1.layout.RecordArray):
+            if not isinstance(what, awkward1.layout.Content):
+                what = awkward1.layout.NumpyArray(
+                    numpy.lib.stride_tricks.as_strided(
+                      [what], shape=(len(base),), strides=(0,)))
+            return lambda: (base.setitem_field(where, what),)
+        else:
+            return None
+
+    behavior = awkward1._util.behaviorof(base, what)
+    out = awkward1._util.broadcast_and_apply(
+            [base, what], getfunction, behavior)
+    assert isinstance(out, tuple) and len(out) == 1
+    if highlevel:
+        return awkward1._util.wrap(out[0], behavior=behavior)
+    else:
+        return out[0]
 
 @awkward1._connect._numpy.implements(numpy.broadcast_arrays)
 def broadcast_arrays(*arrays, **kwargs):
@@ -524,6 +568,50 @@ def broadcast_arrays(*arrays, **kwargs):
         return [awkward1._util.wrap(x, behavior) for x in out]
     else:
         return list(out)
+
+@awkward1._connect._numpy.implements(numpy.concatenate)
+def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
+    """
+    Args:
+        arrays: Arrays to concatenate along any dimension.
+        axis (int): The dimension at which this operation is applied. The
+            outermost dimension is `0`, followed by `1`, etc., and negative
+            values count backward from the innermost: `-1` is the innermost
+            dimension, `-2` is the next level up, etc.
+        mergebool (bool): If True, boolean and nummeric data can be combined
+            into the same buffer, losing information about False vs `0` and
+            True vs `1`; otherwise, they are kept in separate buffers with
+            distinct types (using an #ak.layout.UnionArray8_64).
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+
+    Returns an array with `arrays` concatenated. For `axis=0`, this means that
+    one whole array follows another. For `axis=1`, it means that the `arrays`
+    must have the same lengths and nested lists are each concatenated,
+    element for element, and similarly for deeper levels.
+    """
+    if axis != 0:
+        raise NotImplementedError("axis={0}".format(axis))
+
+    contents = [awkward1.operations.convert.to_layout(x, allowrecord=False)
+                  for x in arrays]
+
+    if len(contents) == 0:
+        raise ValueError("need at least one array to concatenate")
+    out = contents[0]
+    for x in contents[1:]:
+        if not out.mergeable(x, mergebool=mergebool):
+            out = out.merge_as_union(x)
+        else:
+            out = out.merge(x)
+        if isinstance(out, awkward1._util.uniontypes):
+            out = out.simplify(mergebool=mergebool)
+
+    if highlevel:
+        return awkward1._util.wrap(out,
+                                   behavior=awkward1._util.behaviorof(*arrays))
+    else:
+        return out
 
 @awkward1._connect._numpy.implements(numpy.where)
 def where(condition, *args, **kwargs):
@@ -877,174 +965,67 @@ def fillna(array, value, highlevel=True):
     else:
         return out
 
-def zip(arrays,
-        depthlimit=None,
-        parameters=None,
-        withname=None,
-        highlevel=True):
+def isna(array, highlevel=True):
     """
     Args:
-        arrays (dict or iterable of arrays): Arrays to combine into a
-            record-containing structure (if a dict) or a tuple-containing
-            structure (if any other kind of iterable).
-        depthlimit (None or int): If None, attempt to fully broadcast the
-            `array` to all levels. If an int, limit the number of dimensions
-            that get broadcasted. The minimum value is `1`, for no
-            broadcasting.
-        parameters (dict): Parameters for the new #ak.layout.RecordArray node
-            that is created by this operation.
-        withname (None or str): Assigns a `"__record__"` name to the new
-            #ak.layout.RecordArray node that is created by this operation
-            (overriding `parameters`, if necessary).
+        array: Data to check for missing values (None).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
 
-    Combines `arrays` into a single structure as the fields of a collection
-    of records or the slots of a collection of tuples. If the `arrays` have
-    nested structure, they are broadcasted with one another to form the
-    records or tuples as deeply as possible, though this can be limited by
-    `depthlimit`.
+    Returns an array whose value is True where an element of `array` is None;
+    False otherwise.
 
-    This operation may be thought of as the opposite of projection in
-    #ak.Array.__getitem__, which extracts fields one at a time, or
-    #ak.unzip, which extracts them all in one call.
-
-    Consider the following arrays, `one` and `two`.
-
-        >>> one = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]])
-        >>> two = ak.Array([["a", "b", "c"], [], ["d", "e"], ["f"]])
-
-    Zipping them together using a dict creates a collection of records with
-    the same nesting structure as `one` and `two`.
-
-        >>> ak.to_list(ak.zip({"x": one, "y": two}))
-        [
-         [{'x': 1.1, 'y': 'a'}, {'x': 2.2, 'y': 'b'}, {'x': 3.3, 'y': 'c'}],
-         [],
-         [{'x': 4.4, 'y': 'd'}, {'x': 5.5, 'y': 'e'}],
-         [{'x': 6.6, 'y': 'f'}]
-        ]
-
-    Doing so with a list creates tuples, whose fields are not named.
-
-        >>> ak.to_list(ak.zip([one, two]))
-        [
-         [(1.1, 'a'), (2.2, 'b'), (3.3, 'c')],
-         [],
-         [(4.4, 'd'), (5.5, 'e')],
-         [(6.6, 'f')]
-        ]
-
-    Adding a third array with the same length as `one` and `two` but less
-    internal structure is okay: it gets broadcasted to match the others.
-    (See #ak.broadcast_arrays for broadcasting rules.)
-
-        >>> three = ak.Array([100, 200, 300, 400])
-        >>> ak.to_list(ak.zip([one, two, three]))
-        [
-         [[(1.1, 97, 100)], [(2.2, 98, 100)], [(3.3, 99, 100)]],
-         [],
-         [[(4.4, 100, 300)], [(5.5, 101, 300)]],
-         [[(6.6, 102, 400)]]
-        ]
-
-    However, if arrays have the same depth but different lengths of nested
-    lists, attempting to zip them together is a broadcasting error.
-
-        >>> one = ak.Array([[[1, 2, 3], [], [4, 5], [6]], [], [[7, 8]]])
-        >>> two = ak.Array([[[1.1, 2.2], [3.3], [4.4], [5.5]], [], [[6.6]]])
-        >>> ak.zip([one, two])
-        ValueError: in ListArray64, cannot broadcast nested list
-
-    For this, one can set the `depthlimit` to prevent the operation from
-    attempting to broadcast what can't be broadcasted.
-
-        >>> ak.to_list(ak.zip([one, two], depthlimit=1))
-        [([[1, 2, 3], [], [4, 5], [6]], [[1.1, 2.2], [3.3], [4.4], [5.5]]),
-         ([], []),
-         ([[7, 8]], [[6.6]])]
-
-    As an extreme, `depthlimit=1` is a handy way to make a record structure
-    at the outermost level, regardless of whether the fields have matching
-    structure or not.
+    See also #ak.notna, the logical negation of #ak.isna.
     """
-    if depthlimit is not None and depthlimit <= 0:
-        raise ValueError("depthlimit must be None or at least 1")
+    def apply(layout):
+        if isinstance(layout, awkward1._util.unknowntypes):
+            return apply(awkward1.layout.NumpyArray(numpy.array([])))
 
-    if isinstance(arrays, dict):
-        recordlookup = []
-        layouts = []
-        for n, x in arrays.items():
-            recordlookup.append(n)
-            layouts.append(
-                awkward1.operations.convert.to_layout(x,
-                                                      allowrecord=False,
-                                                      allowother=False))
-    else:
-        recordlookup = None
-        layouts = []
-        for x in arrays:
-            layouts.append(
-                awkward1.operations.convert.to_layout(x,
-                                                      allowrecord=False,
-                                                      allowother=False))
+        elif isinstance(layout, awkward1._util.indexedtypes):
+            return apply(layout.project())
 
-    if withname is not None:
-        if parameters is None:
-            parameters = {}
+        elif isinstance(layout, awkward1._util.uniontypes):
+            contents = [apply(layout.project(i))
+                          for i in range(layout.numcontents)]
+            out = numpy.empty(len(layout), dtype=numpy.bool_)
+            tags = numpy.asarray(layout.tags)
+            for tag, content in enumerate(contents):
+                out[tags == tag] = content
+            return out
+
+        elif isinstance(layout, awkward1._util.optiontypes):
+            index = numpy.asarray(layout.index)
+            return (index < 0)
+
         else:
-            parameters = dict(parameters)
-        parameters["__record__"] = withname
+            return numpy.zeros(len(layout), dtype=numpy.bool_)
 
-    def getfunction(inputs, depth):
-        if ((depthlimit is None and
-             all(x.purelist_depth == 1 for x in inputs)) or
-            (depthlimit == depth)):
-            return lambda: (
-                awkward1.layout.RecordArray(inputs,
-                                            recordlookup,
-                                            parameters=parameters),)
-        else:
-            return None
-
-    behavior = awkward1._util.behaviorof(*arrays)
-    out = awkward1._util.broadcast_and_apply(layouts, getfunction, behavior)
-    assert isinstance(out, tuple) and len(out) == 1
+    out = apply(awkward1.operations.convert.to_layout(array, allowrecord=False))
     if highlevel:
-        return awkward1._util.wrap(out[0], behavior)
+        return awkward1._util.wrap(out,
+                                   behavior=awkward1._util.behaviorof(array))
     else:
-        return out[0]
+        return out
 
-def unzip(array):
+def notna(array, highlevel=True):
     """
-    If the `array` contains tuples or records, this operation splits them
-    into a Python tuple of arrays, one for each field.
+    Args:
+        array: Data to check for missing values (None).
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
 
-    If the `array` does not contain tuples or records, the single `array`
-    is placed in a length 1 Python tuple.
+    Returns an array whose value is False where an element of `array` is None;
+    True otherwise.
 
-    For example,
-
-        >>> array = ak.Array([{"x": 1.1, "y": [1]},
-                              {"x": 2.2, "y": [2, 2]},
-                              {"x": 3.3, "y": [3, 3, 3]}])
-        >>> x, y = ak.unzip(array)
-        >>> x
-        <Array [1.1, 2.2, 3.3] type='3 * float64'>
-        >>> y
-        <Array [[1], [2, 2], [3, 3, 3]] type='3 * var * int64'>
+    See also #ak.isna, the logical negation of #ak.notna.
     """
-    keys = awkward1.operations.describe.keys(array)
-    if len(keys) == 0:
-        return (array,)
-    else:
-        return tuple(array[n] for n in keys)
+    return ~isna(array, highlevel=highlevel)
 
 def cross(arrays,
           axis=1,
           nested=None,
           parameters=None,
-          withname=None,
+          with_name=None,
           highlevel=True):
     """
     Args:
@@ -1063,7 +1044,7 @@ def cross(arrays,
             of the `array` iterable.
         parameters (dict): Parameters for the new #ak.layout.RecordArray node
             that is created by this operation.
-        withname (None or str): Assigns a `"__record__"` name to the new
+        with_name (None or str): Assigns a `"__record__"` name to the new
             #ak.layout.RecordArray node that is created by this operation
             (overriding `parameters`, if necessary).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
@@ -1246,12 +1227,12 @@ def cross(arrays,
     """
     behavior = awkward1._util.behaviorof(*arrays)
 
-    if withname is not None:
+    if with_name is not None:
         if parameters is None:
             parameters = {}
         else:
             parameters = dict(parameters)
-        parameters["__record__"] = withname
+        parameters["__record__"] = with_name
 
     if axis < 0:
         raise ValueError("cross's 'axis' must be non-negative")
@@ -1405,7 +1386,7 @@ def argcross(arrays,
              axis=1,
              nested=None,
              parameters=None,
-             withname=None,
+             with_name=None,
              highlevel=True):
     """
     Args:
@@ -1424,7 +1405,7 @@ def argcross(arrays,
             of the `array` iterable.
         parameters (dict): Parameters for the new #ak.layout.RecordArray node
             that is created by this operation.
-        withname (None or str): Assigns a `"__record__"` name to the new
+        with_name (None or str): Assigns a `"__record__"` name to the new
             #ak.layout.RecordArray node that is created by this operation
             (overriding `parameters`, if necessary).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
@@ -1476,12 +1457,12 @@ def argcross(arrays,
                          allowrecord=False,
                          allowother=False).localindex(axis) for x in arrays]
 
-        if withname is not None:
+        if with_name is not None:
             if parameters is None:
                 parameters = {}
             else:
                 parameters = dict(parameters)
-            parameters["__record__"] = withname
+            parameters["__record__"] = with_name
 
         result = cross(layouts,
                        axis=axis,
@@ -1501,7 +1482,7 @@ def choose(array,
            axis=1,
            keys=None,
            parameters=None,
-           withname=None,
+           with_name=None,
            highlevel=True):
     """
     Args:
@@ -1520,7 +1501,7 @@ def choose(array,
             fields. The number of `keys` must be equal to `n`.
         parameters (dict): Parameters for the new #ak.layout.RecordArray node
             that is created by this operation.
-        withname (None or str): Assigns a `"__record__"` name to the new
+        with_name (None or str): Assigns a `"__record__"` name to the new
             #ak.layout.RecordArray node that is created by this operation
             (overriding `parameters`, if necessary).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
@@ -1642,8 +1623,8 @@ def choose(array,
         parameters = {}
     else:
         parameters = dict(parameters)
-    if withname is not None:
-        parameters["__record__"] = withname
+    if with_name is not None:
+        parameters["__record__"] = with_name
 
     layout = awkward1.operations.convert.to_layout(
                array, allowrecord=False, allowother=False)
@@ -1664,7 +1645,7 @@ def argchoose(array,
               axis=1,
               keys=None,
               parameters=None,
-              withname=None,
+              with_name=None,
               highlevel=True):
     """
     Args:
@@ -1683,7 +1664,7 @@ def argchoose(array,
             fields. The number of `keys` must be equal to `n`.
         parameters (dict): Parameters for the new #ak.layout.RecordArray node
             that is created by this operation.
-        withname (None or str): Assigns a `"__record__"` name to the new
+        with_name (None or str): Assigns a `"__record__"` name to the new
             #ak.layout.RecordArray node that is created by this operation
             (overriding `parameters`, if necessary).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
@@ -1701,8 +1682,8 @@ def argchoose(array,
         parameters = {}
     else:
         parameters = dict(parameters)
-    if withname is not None:
-        parameters["__record__"] = withname
+    if with_name is not None:
+        parameters["__record__"] = with_name
 
     if axis < 0:
         raise ValueError("argchoose's 'axis' must be non-negative")
@@ -1720,106 +1701,125 @@ def argchoose(array,
         else:
             return out
 
-def mask(array, mask, valid_when=True, highlevel=True):
+@awkward1._connect._numpy.implements(numpy.size)
+def size(array, axis=None):
     """
     Args:
-        array: Data to mask, rather than filter.
-        mask (array of booleans): The mask that overlays elements in the
-            `array` with None. Must have the same length as `array`.
-        valid_when (bool): If True, True values in `mask` are considered
-            valid (passed from `array` to the output); if False, False
-            values in `mask` are considered valid.
-        highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+        array: Rectilinear array whose `shape` needs to be known.
+        axis (int): The dimension at which this operation is applied. The
+            outermost dimension is `0`, followed by `1`, etc., and negative
+            values count backward from the innermost: `-1` is the innermost
+            dimension, `-2` is the next level up, etc.
+    Returns:
+        An int or a list of ints, one for each regular dimension.
 
-    Returns an array for which
+    Implements NumPy's
+    [size](https://docs.scipy.org/doc/numpy/reference/generated/numpy.ma.size.html)
+    function in a way that accepts #ak.Array as the `array`.
 
-        output[i] = array[i] if mask[i] == valid_when else None
-
-    Unlike filtering data with #ak.Array.__getitem__, this `output` has the
-    same length as the original `array` and can therefore be used in
-    calculations with it, such as
-    [universal functions](https://docs.scipy.org/doc/numpy/reference/ufuncs.html).
-
-    For example, with an `array` like
-
-        ak.Array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-
-    with a boolean selection of `good` elements like
-
-        >>> good = (array % 2 == 1)
-        >>> good
-        <Array [False, True, False, ... False, True] type='10 * bool'>
-
-    could be used to filter the original `array` (or another with the same
-    length).
-
-        >>> array[good]
-        <Array [1, 3, 5, 7, 9] type='5 * int64'>
-
-    However, this eliminates information about which elements were dropped and
-    where they were. If we instead use #ak.mask,
-
-        >>> ak.mask(array, good)
-        <Array [None, 1, None, 3, ... None, 7, None, 9] type='10 * ?int64'>
-
-    this information and the length of the array is preserved, and it can be
-    used in further calculations with the original `array` (or another with
-    the same length).
-
-        >>> ak.mask(array, good) + array
-        <Array [None, 2, None, 6, ... 14, None, 18] type='10 * ?int64'>
-
-    In particular, successive filters can be applied to the same array.
-
-    Even if the `array` and/or the `mask` is nested,
-
-        >>> array = ak.Array([[[0, 1, 2], [], [3, 4], [5]], [[6, 7, 8], [9]]])
-        >>> good = (array % 2 == 1)
-        >>> good
-        <Array [[[False, True, False], ... [True]]] type='2 * var * var * bool'>
-
-    it can still be used with #ak.mask because the `array` and `mask`
-    parameters are broadcasted.
-
-        >>> ak.mask(array, good)
-        <Array [[[None, 1, None], ... None], [9]]] type='2 * var * var * ?int64'>
-
-    See #ak.broadcast_arrays for details about broadcasting and the generalized
-    set of broadcasting rules.
+    If the `array` is not rectilinear (i.e. if #np.to_numpy would raise an
+    error), then this function raise an error.
     """
-    def getfunction(inputs, depth):
-        layoutarray, layoutmask = inputs
-        if isinstance(layoutmask, awkward1.layout.NumpyArray):
-            m = numpy.asarray(layoutmask)
-            if not issubclass(m.dtype.type, (numpy.bool, numpy.bool_)):
-                raise ValueError(
-                    "mask must have boolean type, not "
-                    "{0}".format(repr(m.dtype)))
-            bytemask = awkward1.layout.Index8(m.view(numpy.int8))
-            return lambda: (
-                awkward1.layout.ByteMaskedArray(bytemask,
-                                                layoutarray,
-                                                valid_when=valid_when),)
+    if axis is not None and axis < 0:
+        raise NotImplementedError("ak.size with axis < 0")
+
+    def recurse(layout, axis, sizes):
+        if isinstance(layout, awkward1._util.unknowntypes):
+            pass
+        elif isinstance(layout, awkward1._util.indexedtypes):
+            recurse(layout.content, axis, sizes)
+        elif isinstance(layout, awkward1._util.uniontypes):
+            compare = None
+            for x in layout.contents:
+                inner = []
+                recurse(x, axis, inner)
+                if compare is None:
+                    compare = inner
+                elif compare != inner:
+                    raise ValueError(
+                            "ak.size is ambiguous due to union of different "
+                            "sizes")
+            sizes.extend(compare)
+        elif isinstance(layout, awkward1._util.optiontypes):
+            return recurse(layout.content, axis, sizes)
+        elif isinstance(layout, awkward1._util.listtypes):
+            if isinstance(layout, awkward1.layout.RegularArray):
+                sizes.append(layout.size)
+            else:
+                sizes.append(None)
+            if axis is None:
+                recurse(layout.content, axis, sizes)
+            elif axis > 0:
+                recurse(layout.content, axis - 1, sizes)
+        elif isinstance(layout, awkward1._util.recordtypes):
+            compare = None
+            for x in layout.contents:
+                inner = []
+                recurse(x, axis, inner)
+                if compare is None:
+                    compare = inner
+                elif compare != inner:
+                    raise ValueError(
+                            "ak.size is ambiguous due to record of different "
+                            "sizes")
+            sizes.extend(compare)
+        elif isinstance(layout, awkward1.layout.NumpyArray):
+            if axis is None:
+                sizes.extend(numpy.asarray(layout).shape[1:])
+            else:
+                sizes.extend(numpy.asarray(layout).shape[1:axis + 2])
         else:
-            return None
+            raise AssertionError("unrecognized Content type")
 
-    layoutarray = awkward1.operations.convert.to_layout(array,
-                                                        allowrecord=True,
-                                                        allowother=False)
-    layoutmask = awkward1.operations.convert.to_layout(mask,
-                                                       allowrecord=True,
-                                                       allowother=False)
+    layout = awkward1.operations.convert.to_layout(array, allowrecord=False)
+    layout = awkward1.layout.RegularArray(layout, len(layout))
 
-    behavior = awkward1._util.behaviorof(array, mask)
-    out = awkward1._util.broadcast_and_apply([layoutarray, layoutmask],
-                                             getfunction,
-                                             behavior)
-    assert isinstance(out, tuple) and len(out) == 1
-    if highlevel:
-        return awkward1._util.wrap(out[0], behavior)
+    sizes = []
+    recurse(layout, axis, sizes)
+
+    if axis is None:
+        out = 1
+        for size in sizes:
+            if size is None:
+                raise ValueError(
+                        "ak.size is ambiguous due to variable-length arrays "
+                        "(try ak.flatten to remove structure or ak.to_numpy "
+                        "to force regularity, if possible)")
+            else:
+                out *= size
+        return out
     else:
-        return out[0]
+        if sizes[-1] is None:
+            raise ValueError(
+                    "ak.size is ambiguous due to variable-length arrays at "
+                    "axis {0} (try ak.flatten to remove structure or "
+                    "ak.to_numpy to force regularity, if possible)".format(
+                                                                        axis))
+        else:
+            return sizes[-1]
+
+@awkward1._connect._numpy.implements(numpy.atleast_1d)
+def atleast_1d(*arrays):
+    """
+    Args:
+        arrays: Rectilinear arrays to be converted to NumPy arrays of at
+            least 1 dimension.
+        axis (int): The dimension at which this operation is applied. The
+            outermost dimension is `0`, followed by `1`, etc., and negative
+            values count backward from the innermost: `-1` is the innermost
+            dimension, `-2` is the next level up, etc.
+    Returns:
+        A NumPy array, not an Awkward Array.
+
+    Implements NumPy's
+    [atleast_1d](https://docs.scipy.org/doc/numpy/reference/generated/numpy.atleast_1d.html)
+    function in a way that accepts #ak.Array objects as the `arrays`.
+
+    If the `arrays` are not all rectilinear (i.e. if #np.to_numpy would raise an
+    error), then this function raise an error.
+    """
+    return numpy.atleast_1d(*[awkward1.operations.convert.to_numpy(x)
+                                for x in arrays])
 
 __all__ = [x for x in list(globals()) if not x.startswith("_") and
                                          x not in ("numpy", "awkward1")]
