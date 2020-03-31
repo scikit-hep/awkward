@@ -81,6 +81,16 @@ def mask(array, mask, valid_when=True, highlevel=True):
 
     See #ak.broadcast_arrays for details about broadcasting and the generalized
     set of broadcasting rules.
+
+    Another syntax for
+
+        ak.mask(array, array_of_booleans)
+
+    is
+
+        array.mask[array_of_booleans]
+
+    (which is 5 characters away from simply filtering the `array`).
     """
     def getfunction(inputs, depth):
         layoutarray, layoutmask = inputs

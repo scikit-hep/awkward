@@ -299,7 +299,7 @@ def to_list(array):
        * #ak.types.RecordArray with field names: converted into dict.
        * #ak.types.UnionArray: Python data are naturally heterogeneous.
 
-    See also #ak.from_iter.
+    See also #ak.from_iter and #ak.Array.to_list.
     """
     import awkward1.highlevel
 
@@ -434,7 +434,7 @@ def to_json(array,
        * #ak.types.RecordArray with field names: converted into JSON objects.
        * #ak.types.UnionArray: JSON data are naturally heterogeneous.
 
-    See also #ak.from_json.
+    See also #ak.from_json and #ak.Array.to_json.
     """
     import awkward1.highlevel
 

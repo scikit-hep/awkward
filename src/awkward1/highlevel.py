@@ -17,6 +17,7 @@ import awkward1._connect._numpy
 import awkward1._connect._pandas
 import awkward1.layout
 import awkward1.operations.convert
+import awkward1.operations.structure
 
 _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
@@ -282,6 +283,115 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
                  self._layout.type(awkward1._util.typestrs(self._behavior)),
                  len(self._layout))
 
+    class Mask(object):
+        def __init__(self, array, valid_when):
+            self._array = array
+            self._valid_when = valid_when
+
+        def __repr__(self, limit_value=40, limit_total=85):
+            value = awkward1._util.minimally_touching_string(limit_value,
+                                                             self._layout,
+                                                             self._behavior)
+
+            limit_type = limit_total - len(value) - len("<Array.mask  type=>")
+            type = repr(str(self.type))
+            if len(type) > limit_type:
+                type = type[:(limit_type - 4)] + "..." + type[-1]
+
+            return "<Array.mask {0} type={1}>".format(value, type)
+
+        def __getitem__(self, where):
+            return awkward1.operations.structure.mask(self._array,
+                                                      where,
+                                                      self._valid_when)
+
+    @property
+    def mask(self, valid_when=True):
+        """
+        Whereas
+
+            array[array_of_booleans]
+
+        removes elements from `array` in which `array_of_booleans` is False,
+
+            array.mask[array_of_booleans]
+
+        returns data with the same length as the original `array` but False
+        values in `array_of_booleans` are mapped to None. Such an output
+        can be used in mathematical expressions with the original `array`
+        because they are still aligned.
+
+        See <<filtering>> and #ak.mask.
+        """
+        return self.Mask(self, valid_when)
+
+    def to_list(self):
+        """
+        Converts this Array into Python objects.
+
+        Awkward Array types have the following Pythonic translations.
+
+           * #ak.types.PrimitiveType: converted into bool, int, float.
+           * #ak.types.OptionType: missing values are converted into None.
+           * #ak.types.ListType: converted into list.
+           * #ak.types.RegularType: also converted into list. Python (and JSON)
+             forms lose information about the regularity of list lengths.
+           * #ak.types.ListType with parameter `"__array__"` equal to
+             `"__bytestring__"`: converted into bytes.
+           * #ak.types.ListType with parameter `"__array__"` equal to
+             `"__string__"`: converted into str.
+           * #ak.types.RecordArray without field names: converted into tuple.
+           * #ak.types.RecordArray with field names: converted into dict.
+           * #ak.types.UnionArray: Python data are naturally heterogeneous.
+
+        See also #ak.to_list and #ak.from_iter.
+        """
+        return awkward1.operations.convert.to_list(self)
+
+    def to_json(self,
+                destination=None,
+                pretty=False,
+                maxdecimals=None,
+                buffersize=65536):
+        """
+        Args:
+            destination (None or str): If None, this method returns a JSON str;
+                if a str, it uses that as a file name and writes (overwrites)
+                that file (returning None).
+            pretty (bool): If True, indent the output for human readability; if
+                False, output compact JSON without spaces.
+            maxdecimals (None or int): If an int, limit the number of
+                floating-point decimals to this number; if None, write all
+                digits.
+            buffersize (int): Size (in bytes) of the buffer used by the JSON
+                parser.
+
+        Converts this Array into a JSON string or file.
+
+        Awkward Array types have the following JSON translations.
+
+           * #ak.types.PrimitiveType: converted into JSON booleans and numbers.
+           * #ak.types.OptionType: missing values are converted into None.
+           * #ak.types.ListType: converted into JSON lists.
+           * #ak.types.RegularType: also converted into JSON lists. JSON (and
+             Python) forms lose information about the regularity of list
+             lengths.
+           * #ak.types.ListType with parameter `"__array__"` equal to
+             `"__bytestring__"` or `"__string__"`: converted into JSON strings.
+           * #ak.types.RecordArray without field names: converted into JSON
+             objects with numbers as strings for keys.
+           * #ak.types.RecordArray with field names: converted into JSON
+             objects.
+           * #ak.types.UnionArray: JSON data are naturally heterogeneous.
+
+        See also #ak.to_json and #ak.from_json.
+        """
+        return awkward1.operations.convert.to_json(self,
+                                                   destination,
+                                                   pretty,
+                                                   maxdecimals,
+                                                   buffersize)
+
     def __len__(self):
         """
         The length of this Array, only counting the outermost structure.
@@ -479,6 +589,16 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
             <Array [1.1, None, 4.4, None, None, 7.7] type='6 * ?float64'>
             >>> ak.mask(array, ak.num(array) > 1)[:, 1]
             <Array [2.2, None, 5.5, None, None, 8.8] type='6 * ?float64'>
+
+        Another syntax for
+
+            ak.mask(array, array_of_booleans)
+
+        is
+
+            array.mask[array_of_booleans]
+
+        (which is 5 characters away from simply filtering the `array`).
 
         Projection
         **********
@@ -2056,7 +2176,7 @@ class ArrayBuilder(Sequence):
         def __init__(self, arraybuilder):
             self._arraybuilder = arraybuilder
 
-        def __repr__(self):
+        def __repr__(self, limit_value=40, limit_total=85):
             snapshot = self._arraybuilder.snapshot()
             value = self._arraybuilder.__str__(limit_value=limit_value,
                                                snapshot=snapshot)
@@ -2073,7 +2193,7 @@ class ArrayBuilder(Sequence):
                                                             type)
 
     class List(_Nested):
-        _name = "List"
+        _name = "list"
 
         def __enter__(self):
             self._arraybuilder.begin_list()
@@ -2106,7 +2226,7 @@ class ArrayBuilder(Sequence):
         return self.List(self)
 
     class Tuple(_Nested):
-        _name = "Tuple"
+        _name = "tuple"
 
         def __init__(self, arraybuilder, numfields):
             super(ArrayBuilder.Tuple, self).__init__(arraybuilder)
@@ -2142,7 +2262,7 @@ class ArrayBuilder(Sequence):
         return self.Tuple(self, numfields)
 
     class Record(_Nested):
-        _name = "Record"
+        _name = "record"
 
         def __init__(self, arraybuilder, name):
             super(ArrayBuilder.Record, self).__init__(arraybuilder)
