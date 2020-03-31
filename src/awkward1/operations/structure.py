@@ -473,14 +473,14 @@ def broadcast_arrays(*arrays, **kwargs):
     For example,
 
         >>> ak.broadcast_arrays(5,
-                                [1, 2, 3, 4, 5])
+        ...                     [1, 2, 3, 4, 5])
         [<Array [5, 5, 5, 5, 5] type='5 * int64'>,
          <Array [1, 2, 3, 4, 5] type='5 * int64'>]
 
     and
 
         >>> ak.broadcast_arrays(np.array([1, 2, 3]),
-                                np.array([[0.1, 0.2, 0.3], [10, 20, 30]]))
+        ...                     np.array([[0.1, 0.2, 0.3], [10, 20, 30]]))
         [<Array [[  1,   2,   3], [ 1,  2,  3]] type='2 * 3 * int64'>,
          <Array [[0.1, 0.2, 0.3], [10, 20, 30]] type='2 * 3 * float64'>]
 
@@ -499,7 +499,7 @@ def broadcast_arrays(*arrays, **kwargs):
     length 1 can be expanded like a scalar.
 
         >>> ak.broadcast_arrays(np.array([1, 2])[:, np.newaxis],
-                                np.array([[0.1, 0.2, 0.3], [10, 20, 30]]))
+        ...                     np.array([[0.1, 0.2, 0.3], [10, 20, 30]]))
         [<Array [[  1,   1,   1], [ 2,  2,  2]] type='2 * 3 * int64'>,
          <Array [[0.1, 0.2, 0.3], [10, 20, 30]] type='2 * 3 * float64'>]
 
@@ -515,7 +515,7 @@ def broadcast_arrays(*arrays, **kwargs):
     leaves may be duplicated to match. For example,
 
         >>> ak.broadcast_arrays([            100,   200,        300],
-                                [[1.1, 2.2, 3.3],    [], [4.4, 5.5]])
+        ...                     [[1.1, 2.2, 3.3],    [], [4.4, 5.5]])
         [<Array [[100, 100, 100], [], [300, 300]] type='3 * var * int64'>,
          <Array [[1.1, 2.2, 3.3], [], [4.4, 5.5]] type='3 * var * float64'>]
 
@@ -1720,8 +1720,8 @@ def size(array, axis=None):
             outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost
             dimension, `-2` is the next level up, etc.
-    Returns:
-        An int or a list of ints, one for each regular dimension.
+
+    Returns an int or a list of ints, one for each regular dimension.
 
     Implements NumPy's
     [size](https://docs.scipy.org/doc/numpy/reference/generated/numpy.ma.size.html)
@@ -1818,8 +1818,6 @@ def atleast_1d(*arrays):
             outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost
             dimension, `-2` is the next level up, etc.
-    Returns:
-        A NumPy array, not an Awkward Array.
 
     Implements NumPy's
     [atleast_1d](https://docs.scipy.org/doc/numpy/reference/generated/numpy.atleast_1d.html)
@@ -1827,6 +1825,8 @@ def atleast_1d(*arrays):
 
     If the `arrays` are not all rectilinear (i.e. if #np.to_numpy would raise an
     error), then this function raise an error.
+
+    Note: this function returns a NumPy array, not an Awkward Array.
     """
     return numpy.atleast_1d(*[awkward1.operations.convert.to_numpy(x)
                                 for x in arrays])

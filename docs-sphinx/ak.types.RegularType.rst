@@ -1,0 +1,4 @@
+ak.types.RegularType
+--------------------
+
+HERE

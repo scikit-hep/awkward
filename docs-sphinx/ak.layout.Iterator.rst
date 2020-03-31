@@ -1,0 +1,4 @@
+ak.layout.Iterator
+------------------
+
+HERE

@@ -2054,9 +2054,9 @@ class ArrayBuilder(Sequence):
         """
         Args:
             i (int): The tuple slot to fill.
-        Returns:
-            The #ak.ArrayBuilder, so that it can be chained with the value
-                that fills the slot.
+
+        This method also returns the #ak.ArrayBuilder, so that it can be
+        chained with the value that fills the slot.
 
         Prepares to fill a tuple slot; see #begin_tuple for an example.
         """
@@ -2102,9 +2102,9 @@ class ArrayBuilder(Sequence):
         """
         Args:
             key (str): The field key to fill.
-        Returns:
-            The #ak.ArrayBuilder, so that it can be chained with the value
-                that fills the slot.
+
+        This method also returns the #ak.ArrayBuilder, so that it can be
+        chained with the value that fills the slot.
 
         Prepares to fill a field; see #begin_record for an example.
         """
