@@ -11,7 +11,7 @@ ak.layout.ArrayBuilder.__getitem__
 ak.layout.ArrayBuilder.__init__
 ===============================
 
-.. py:method:: ak.layout.ArrayBuilder.__init__(initial=1024, resize=2.0)
+.. py:method:: ak.layout.ArrayBuilder.__init__(initial=1024, resize=1.5)
 
 ak.layout.ArrayBuilder.__iter__
 ===============================

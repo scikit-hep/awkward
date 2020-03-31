@@ -1753,7 +1753,7 @@ class ArrayBuilder(Sequence):
     be considered the "least effort" approach.
     """
 
-    def __init__(self, behavior=None, initial=1024, resize=2.0):
+    def __init__(self, behavior=None, initial=1024, resize=1.5):
         self._layout = awkward1.layout.ArrayBuilder(initial=initial,
                                                     resize=resize)
         self.behavior = behavior

@@ -218,7 +218,7 @@ def from_iter(iterable,
               behavior=None,
               allowrecord=True,
               initial=1024,
-              resize=2.0):
+              resize=1.5):
     """
     Args:
         iterable (Python iterable): Data to convert into an Awkward Array.
@@ -363,7 +363,7 @@ def from_json(source,
               highlevel=True,
               behavior=None,
               initial=1024,
-              resize=2.0,
+              resize=1.5,
               buffersize=65536):
     """
     Args:

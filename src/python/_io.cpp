@@ -63,7 +63,7 @@ make_fromjson(py::module& m, const std::string& name) {
     }
   }, py::arg("source"),
       py::arg("initial") = 1024,
-      py::arg("resize") = 2.0,
+      py::arg("resize") = 1.5,
       py::arg("buffersize") = 65536);
 }
 
@@ -91,7 +91,7 @@ make_fromroot_nestedvector(py::module& m, const std::string& name) {
      py::arg("itemsize"),
      py::arg("format"),
      py::arg("initial") = 1024,
-     py::arg("resize") = 2.0);
+     py::arg("resize") = 1.5);
 }
 
 ////////// module
