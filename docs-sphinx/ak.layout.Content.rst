@@ -48,15 +48,36 @@ ak.layout.Content.identities
 
 .. py:attribute:: ak.layout.Content.identities
 
+Returns the :doc:`ak.layout.Identities` object associated with this array node
+(if any).
+
 ak.layout.Content.identity
 ==========================
 
 .. py:attribute:: ak.layout.Content.identity
 
+Returns the single element of an :doc:`ak.layout.Identities` associated with
+this array node (if any).
+
 ak.layout.Content.nbytes
 ========================
 
 .. py:attribute:: ak.layout.Content.nbytes
+
+The total number of bytes in all the :doc:`ak.layout.Index`,
+:doc:`ak.layout.Identities`, and :doc:`ak.layout.NumpyArray` buffers in this
+array tree.
+
+Note: this calculation takes overlapping buffers into account, to the
+extent that overlaps are not double-counted, but overlaps are currently
+assumed to be complete subsets of one another, and so it is
+theoretically possible (though unlikely) that this number is an
+underestimate of the true usage.
+
+It also does not count buffers that must be kept in memory because
+of ownership, but are not directly used in the array. Nor does it count
+the (small) C++ nodes or Python objects that reference the (large)
+array buffers.
 
 ak.layout.Content.numfields
 ===========================

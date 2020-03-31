@@ -392,6 +392,26 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
                                                    maxdecimals,
                                                    buffersize)
 
+    @property
+    def nbytes(self):
+        """
+        The total number of bytes in all the #ak.layout.Index,
+        #ak.layout.Identities, and #ak.layout.NumpyArray buffers in this
+        array tree.
+
+        Note: this calculation takes overlapping buffers into account, to the
+        extent that overlaps are not double-counted, but overlaps are currently
+        assumed to be complete subsets of one another, and so it is
+        theoretically possible (though unlikely) that this number is an
+        underestimate of the true usage.
+
+        It also does not count buffers that must be kept in memory because
+        of ownership, but are not directly used in the array. Nor does it count
+        the (small) C++ nodes or Python objects that reference the (large)
+        array buffers.
+        """
+        return self._layout.nbytes
+
     def __len__(self):
         """
         The length of this Array, only counting the outermost structure.
@@ -1358,6 +1378,93 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         See #ak.Array.type for a more complete description.
         """
         return self._layout.type(awkward1._util.typestrs(self._behavior))
+
+    def to_list(self):
+        """
+        Converts this Record into Python objects.
+
+        Awkward Array types have the following Pythonic translations.
+
+           * #ak.types.PrimitiveType: converted into bool, int, float.
+           * #ak.types.OptionType: missing values are converted into None.
+           * #ak.types.ListType: converted into list.
+           * #ak.types.RegularType: also converted into list. Python (and JSON)
+             forms lose information about the regularity of list lengths.
+           * #ak.types.ListType with parameter `"__array__"` equal to
+             `"__bytestring__"`: converted into bytes.
+           * #ak.types.ListType with parameter `"__array__"` equal to
+             `"__string__"`: converted into str.
+           * #ak.types.RecordArray without field names: converted into tuple.
+           * #ak.types.RecordArray with field names: converted into dict.
+           * #ak.types.UnionArray: Python data are naturally heterogeneous.
+
+        See also #ak.to_list and #ak.from_iter.
+        """
+        return awkward1.operations.convert.to_list(self)
+
+    def to_json(self,
+                destination=None,
+                pretty=False,
+                maxdecimals=None,
+                buffersize=65536):
+        """
+        Args:
+            destination (None or str): If None, this method returns a JSON str;
+                if a str, it uses that as a file name and writes (overwrites)
+                that file (returning None).
+            pretty (bool): If True, indent the output for human readability; if
+                False, output compact JSON without spaces.
+            maxdecimals (None or int): If an int, limit the number of
+                floating-point decimals to this number; if None, write all
+                digits.
+            buffersize (int): Size (in bytes) of the buffer used by the JSON
+                parser.
+
+        Converts this Record into a JSON string or file.
+
+        Awkward Array types have the following JSON translations.
+
+           * #ak.types.PrimitiveType: converted into JSON booleans and numbers.
+           * #ak.types.OptionType: missing values are converted into None.
+           * #ak.types.ListType: converted into JSON lists.
+           * #ak.types.RegularType: also converted into JSON lists. JSON (and
+             Python) forms lose information about the regularity of list
+             lengths.
+           * #ak.types.ListType with parameter `"__array__"` equal to
+             `"__bytestring__"` or `"__string__"`: converted into JSON strings.
+           * #ak.types.RecordArray without field names: converted into JSON
+             objects with numbers as strings for keys.
+           * #ak.types.RecordArray with field names: converted into JSON
+             objects.
+           * #ak.types.UnionArray: JSON data are naturally heterogeneous.
+
+        See also #ak.to_json and #ak.from_json.
+        """
+        return awkward1.operations.convert.to_json(self,
+                                                   destination,
+                                                   pretty,
+                                                   maxdecimals,
+                                                   buffersize)
+
+    @property
+    def nbytes(self):
+        """
+        The total number of bytes in all the #ak.layout.Index,
+        #ak.layout.Identities, and #ak.layout.NumpyArray buffers in this
+        array tree.
+
+        Note: this calculation takes overlapping buffers into account, to the
+        extent that overlaps are not double-counted, but overlaps are currently
+        assumed to be complete subsets of one another, and so it is
+        theoretically possible (though unlikely) that this number is an
+        underestimate of the true usage.
+
+        It also does not count buffers that must be kept in memory because
+        of ownership, but are not directly used in the array. Nor does it count
+        the (small) C++ nodes or Python objects that reference the (large)
+        array buffers.
+        """
+        return self._layout.nbytes
 
     def __getitem__(self, where):
         """
