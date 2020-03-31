@@ -8,7 +8,96 @@ The IndexedArray concept is implemented in 3 specialized classes:
     * ``ak.layout.IndexArrayU32``: ``index`` values are 32-bit unsigned
       integers.
 
-HERE
+The IndexedArray class is a general-purpose tool for changing the order of
+and/or duplicating some ``content``. Its ``index`` array is a lazily applied
+`np.take <https://docs.scipy.org/doc/numpy/reference/generated/numpy.take.html>`__
+(integer-array slice, also known as "advanced indexing").
+
+It has many uses:
+
+   * representing a lazily applied slice.
+   * simulating pointers into another collection.
+   * emulating the dictionary encoding of Apache Arrow and Parquet.
+
+IndexedArray doesn't have a direct equivalent in Apache Arrow.
+
+Below is a simplified implementation of a IndexedArray class in pure Python
+that exhaustively checks validity in its constructor (see
+:doc:`_auto/ak.isvalid`) and can generate random valid arrays. The
+``random_number()`` function returns a random float and the
+``random_length(minlen)`` function returns a random int that is at least
+``minlen``. The ``RawArray`` class represents simple, one-dimensional data.
+
+.. code-block:: python
+
+    class IndexedArray:
+        def __init__(self, index, content):
+            assert isinstance(index, list)
+            assert isinstance(content, Content)
+            for x in index:
+                assert isinstance(x, int)
+                assert 0 <= x < len(content)   # index[i] must not be negative
+            self.index = index
+            self.content = content
+
+        @staticmethod
+        def random(minlen=0, choices=None):
+            if minlen == 0:
+                content = Content.random(0, choices)
+            else:
+                content = Content.random(1, choices)
+            if len(content) == 0:
+                index = []
+            else:
+                index = [random.randint(0, len(content) - 1)
+                             for i in range(random_length(minlen))]
+            return IndexedArray(index, content)
+
+        def __len__(self):
+            return len(self.index)
+
+        def __getitem__(self, where):
+            if isinstance(where, int):
+                assert 0 <= where < len(self)
+                return self.content[self.index[where]]
+            elif isinstance(where, slice) and where.step is None:
+                return IndexedArray(self.index[where.start:where.stop], self.content)
+            elif isinstance(where, str):
+                return IndexedArray(self.index, self.content[where])
+            else:
+                raise AssertionError(where)
+
+        def __repr__(self):
+            return "IndexedArray(" + repr(self.index) + ", " + repr(self.content) + ")"
+
+        def toxml(self, indent="", pre="", post=""):
+            out = indent + pre + "<IndexedArray>\n"
+            out += indent + "    <index>" + " ".join(str(x) for x in self.index) + "</index>\n"
+            out += self.content.toxml(indent + "    ", "<content>", "</content>\n")
+            out += indent + "</IndexedArray>\n"
+            return out
+
+Here is an example:
+
+.. code-block:: python
+
+    IndexedArray([3, 5, 1, 1, 5, 3],
+                 RawArray([8.9, 3.2, 5.4, 9.8, 7.5, 1.9]))
+
+.. code-block:: xml
+
+    <IndexedArray>
+        <index>3 5 1 1 5 3</index>
+        <content><RawArray>
+            <ptr>8.9 3.2 5.4 9.8 7.5 1.9</ptr>
+        </RawArray></content>
+    </IndexedArray>
+
+which represents the following logical data.
+
+.. code-block:: python
+
+    [9.8, 1.9, 3.2, 3.2, 1.9, 9.8]
 
 In addition to the properties and methods described in :doc:`ak.layout.Content`,
 an IndexedArray has the following.
