@@ -236,37 +236,56 @@ ak.layout.RecordArray.istuple
 
 .. py:attribute:: ak.layout.RecordArray.istuple
 
+Returns True if ``recordlookup`` does not exist; False if it does.
+
 ak.layout.RecordArray.astuple
 =============================
 
 .. py:attribute:: ak.layout.RecordArray.astuple
+
+Returns a RecordArray with the ``recordlookup`` removed.
 
 ak.layout.RecordArray.setitem_field
 ===================================
 
 .. py:method:: ak.layout.RecordArray.setitem_field(where, what)
 
+Sets a field in-place.
+
+**Do not use this function.** It is deprecated. Use :doc:`_auto/ak.with_field`
+instead.
+
 ak.layout.RecordArray.field
 ===========================
 
 .. py:method:: ak.layout.RecordArray.field(fieldindex)
+
+Gets a field by index number.
 
 ak.layout.RecordArray.field
 ===========================
 
 .. py:method:: ak.layout.RecordArray.field(key)
 
+Gets a field by str name.
+
 ak.layout.RecordArray.fields
 ============================
 
 .. py:method:: ak.layout.RecordArray.fields()
+
+Returns a list of the fields themselves; equivalent to ``contents``.
 
 ak.layout.RecordArray.fielditems
 ================================
 
 .. py:method:: ak.layout.RecordArray.fielditems()
 
+Returns a list of key-value pairs, where the values are ``contents``.
+
 ak.layout.RecordArray.simplify
 ==============================
 
 .. py:method:: ak.layout.RecordArray.simplify()
+
+Pass-through; returns the original array.

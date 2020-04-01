@@ -124,12 +124,23 @@ ak.layout.RegularArray.compact_offsets64
 
 .. py:method:: ak.layout.RegularArray.compact_offsets64(start_at_zero=True)
 
+Returns a 64-bit :doc:`ak.layout.Index` of ``offsets`` by prefix summing
+in steps of ``size``.
+
 ak.layout.RegularArray.broadcast_tooffsets64
 ============================================
 
 .. py:method:: ak.layout.RegularArray.broadcast_tooffsets64(offsets)
 
+Shifts ``contents`` to match a given set of ``offsets`` (if possible) and
+returns a :doc:`ak.layout.ListOffsetArray` with the results. This is used in
+broadcasting because a set of :doc:`ak.types.ListType` and :doc:`ak.types.RegularType`
+arrays have to be reordered to a common ``offsets`` before they can be directly
+operated upon.
+
 ak.layout.RegularArray.simplify
 ===============================
 
 .. py:method:: ak.layout.RegularArray.simplify()
+
+Pass-through; returns the original array.

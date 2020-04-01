@@ -73,7 +73,12 @@ ak.layout.EmptyArray.toNumpyArray
 
 .. py:method:: ak.layout.EmptyArray.toNumpyArray()
 
+Converts this EmptyArray into a :doc:`ak.layout.NumpyArray` with 64-bit
+floating-point type.
+
 ak.layout.EmptyArray.simplify
 =============================
 
 .. py:method:: ak.layout.EmptyArray.simplify()
+
+Pass-through; returns the original array.

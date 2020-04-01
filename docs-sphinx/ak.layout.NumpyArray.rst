@@ -16,6 +16,12 @@ as a NumPy ``np.ndarray``.
      of the array.
    * ``itemsize``: the number of bytes per item (i.e. 1 for characters, 4 for
      int32, 8 for double types).
+   * ``format``: a string representing the NumPy
+     `dtype <https://docs.scipy.org/doc/numpy/reference/arrays.dtypes.html>`__
+     constructed by pybind11. Note that on Windows and 32-bit systems,
+     ``"q"``/``"Q"`` mean signed/unsigned 64-bit and ``"l"``/``"L"`` mean
+     signed/unsigned 32-bit; on all other systems, ``"l"``/``"L"`` mean
+     signed/unsigned 64-bit and ``"i"``/``"I"`` mean 32-bit.
 
 If the ``shape`` is one-dimensional, a NumpyArray corresponds to an Apache
 Arrow `Primitive array <https://arrow.apache.org/docs/format/Columnar.html#fixed-size-primitive-layout>`__.
@@ -26,6 +32,10 @@ that exhaustively checks validity in its constructor (see
 ``random_number()`` function returns a random float and the
 ``random_length(minlen)`` function returns a random int that is at least
 ``minlen``. The ``RawArray`` class represents simple, one-dimensional data.
+
+For a real NumpyArray, ``strides`` and ``itemsize`` are measured in bytes;
+in the simplified code below, they are measured in number of elements, as
+though we were dealing with 1-byte data.
 
 .. code-block:: python
 
@@ -183,32 +193,63 @@ ak.layout.NumpyArray.ndim
 
 .. py:attribute:: ak.layout.NumpyArray.ndim
 
+Returns ``len(shape)``.
+
 ak.layout.NumpyArray.isscalar
 =============================
 
 .. py:attribute:: ak.layout.NumpyArray.isscalar
+
+Should always return False (``len(shape) == 0`` NumpyArrays in C++ are converted into
+scalar numbers and booleans before they appear in Python).
 
 ak.layout.NumpyArray.isempty
 ============================
 
 .. py:attribute:: ak.layout.NumpyArray.isempty
 
+Returns True if any ``shape`` element is ``0``; False otherwise.
+
 ak.layout.NumpyArray.iscontiguous
 =================================
 
 .. py:attribute:: ak.layout.NumpyArray.iscontiguous
+
+Contiguous arrays have no gaps between elements and are sequenced in increasing
+order in memory. This is the same as NumPy's notion of
+`"C contiguous" <https://docs.scipy.org/doc/numpy/reference/generated/numpy.ascontiguousarray.html>`__.
+
+A NumpyArray is contiguous if the following are true of its ``shape``, ``strides``,
+and ``itemsize``:
+
+.. code-block:: python
+
+    x = itemsize
+    for i in range(len(shape) - 1, 0, -1):
+        if x != strides[i]:
+            return False
+        x *= shape[i]
+    else:
+        return True
 
 ak.layout.NumpyArray.toRegularArray
 ===================================
 
 .. py:method:: ak.layout.NumpyArray.toRegularArray()
 
+Returns a contiguous version of this array with any multidimensional ``shape`` replaced by
+nested :doc:`ak.layout.RegularArray` nodes.
+
 ak.layout.NumpyArray.contiguous
 ===============================
 
 .. py:method:: ak.layout.NumpyArray.contiguous()
 
+Returns a contiguous version of this array (possibly the original array, unchanged).
+
 ak.layout.NumpyArray.simplify
 =============================
 
 .. py:method:: ak.layout.NumpyArray.simplify()
+
+Pass-through; returns the original array.

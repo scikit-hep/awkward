@@ -203,17 +203,36 @@ ak.layout.UnionArray.numcontents
 
 .. py:attribute:: ak.layout.UnionArray.numcontents
 
+Returns the number of ``contents``.
+
 ak.layout.UnionArray.content
 ============================
 
-.. py:method:: ak.layout.UnionArray.content(index)
+.. py:method:: ak.layout.UnionArray.content(i)
+
+Returns one of the ``contents`` by index.
 
 ak.layout.UnionArray.project
 ============================
 
-.. py:method:: ak.layout.UnionArray.project()
+.. py:method:: ak.layout.UnionArray.project(i)
+
+Returns an array of only one of the possibilities, like selecting
+
+.. code-block:: python
+
+    union_array[union_array.tags == i]
+
+Note that this is different from the ``content(i)`` method because this reindexes
+to present the result in its logical order, not its physical order.
 
 ak.layout.UnionArray.simplify
 =============================
 
 .. py:method:: ak.layout.UnionArray.simplify(mergebool=False)
+
+If any of the ``contents`` have :doc:`ak.types.UnionType` and/or any
+of the ``contents`` are :doc:`ak.layout.Content#ak-layout-content-mergeable`,
+they are combined to return the simplest possible node structure.
+
+This method only operates one level deep.

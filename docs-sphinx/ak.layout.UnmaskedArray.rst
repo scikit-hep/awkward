@@ -89,12 +89,27 @@ ak.layout.UnmaskedArray.project
 
 .. py:method:: ak.layout.UnmaskedArray.project(mask=None)
 
+Returns a non-:doc:`ak.types.OptionType` array containing only the valid elements.
+If ``mask`` is a signed 8-bit :doc:`ak.layout.Index` in which ``0`` means valid
+and ``1`` means missing, this ``mask`` is used to select the data. Otherwise, ``project``
+has no effect.
+
 ak.layout.UnmaskedArray.bytemask
 ================================
 
 .. py:method:: ak.layout.UnmaskedArray.bytemask()
 
+Returns an array of 8-bit values in which ``0`` means valid and ``1`` means missing.
+
+Since this array is unmasked, the output is all ``0``.
+
 ak.layout.UnmaskedArray.simplify
 ================================
 
 .. py:method:: ak.layout.UnmaskedArray.simplify()
+
+Combines this node with its ``content`` if the ``content`` also has
+:doc:`ak.types.OptionType`; otherwise, this is a pass-through.
+In all cases, the output has the same logical meaning as the input.
+
+This method only operates one level deep.

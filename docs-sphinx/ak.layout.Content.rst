@@ -407,6 +407,7 @@ ak.layout.Content.simplify
 
 Flattens one extraneous level of :doc:`ak.types.OptionType` or
 :doc:`ak.types.UnionType`. If there is no such level, this is a pass-through.
+In all cases, the output has the same logical meaning as the input.
 
 ak.layout.Content.sum
 =====================

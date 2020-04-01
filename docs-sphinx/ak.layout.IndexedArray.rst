@@ -122,17 +122,34 @@ ak.layout.IndexedArray.isoption
 
 .. py:attribute:: ak.layout.IndexedArray.isoption
 
+Returns False because this is not an IndexedOptionArray.
+
 ak.layout.IndexedArray.project
 ==============================
 
 .. py:method:: ak.layout.IndexedArray.project(mask=None)
+
+Returns an array with the ``index`` applied to reorder/duplicate elements.
+
+If ``mask`` is a signed 8-bit :doc:`ak.layout.Index` in which ``0`` means valid
+and ``1`` means missing, only valid elements according to this ``mask`` are
+returned.
 
 ak.layout.IndexedArray.bytemask
 ===============================
 
 .. py:method:: ak.layout.IndexedArray.bytemask()
 
+Returns an 8-bit signed :doc:`ak.layout.Index` of all zeros, because this
+IndexedArray does not have :doc:`ak.types.OptionType`.
+
 ak.layout.IndexedArray.simplify
 ===============================
 
 .. py:method:: ak.layout.IndexedArray.simplify()
+
+Combines this node with its ``content`` if the ``content`` also has
+:doc:`ak.types.OptionType` or is an :doc:`ak.layout.IndexedArray`; otherwise, this is
+a pass-through.  In all cases, the output has the same logical meaning as the input.
+
+This method only operates one level deep.
