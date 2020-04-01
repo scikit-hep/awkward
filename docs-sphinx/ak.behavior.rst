@@ -1,6 +1,16 @@
 ak.behavior
 -----------
 
+   * `Motivation <#motivation>`__
+   * `Parameters and behaviors <#parameters-and-behaviors>`__
+   * `Adding behavior to records <#adding-behavior-to-records>`__
+   * `Overriding NumPy ufuncs and binary operators <#overriding-numpy-ufuncs-and-binary-operators>`__
+   * `Adding behavior to arrays <#adding-behavior-to-arrays>`__
+   * `Custom type names <#custom-type-names>`__
+   * `Custom broadcasting <#custom-broadcasting>`__
+   * `Overriding behavior in Numba <#overriding-behavior-in-numba>`__
+   * `Complete example <#complete-example>`__
+
 Motivation
 ==========
 
@@ -95,16 +105,16 @@ and it may be accessed as the ``"__record__"`` property, through the
 
     >>> one.layout
     <ListOffsetArray64>
-        <offsets><Index64 i="[0 3 3 5 6 9]" offset="0" length="6" at="0x55eb8da65e90"/></offsets>
+        <offsets><Index64 i="[0 3 3 5 6 9]" offset="0" length="6"/></offsets>
         <content><RecordArray>
             <parameters>
                 <param key="__record__">"point"</param>
             </parameters>
             <field index="0" key="x">
-                <NumpyArray format="l" shape="9" data="1 2 3 4 5 6 7 8 9" at="0x55eb8da5c2e0"/>
+                <NumpyArray format="l" shape="9" data="1 2 3 4 5 6 7 8 9"/>
             </field>
             <field index="1" key="y">
-                <NumpyArray format="d" shape="9" data="1.1 2.2 3.3 4.4 5.5 6.6 7.7 8.8 9.9" at="0x55eb8da63370"/>
+                <NumpyArray format="d" shape="9" data="1.1 2.2 3.3 4.4 5.5 6.6 7.7 8.8 9.9"/>
             </field>
         </RecordArray></content>
     </ListOffsetArray64>
@@ -302,10 +312,10 @@ and all other ufuncs.
 Adding behavior to arrays
 =========================
 
-Less often, you may want to add behavior to an array that does not contain
-records. A good example of that is strings: strings are not a special data type
-in Awkward Array as they are in many other libraries, they are a behavior
-overlaid on arrays.
+Occasionally, you may want to add behavior to an array that does not contain
+records. A good example of this is to implement strings: strings are not a
+special data type in Awkward Array as they are in many other libraries, they
+are a behavior overlaid on arrays.
 
 There are four predefined string behaviors:
 
@@ -314,17 +324,210 @@ There are four predefined string behaviors:
    * :doc:`_auto/ak.behaviors.string.StringBehavior`: an array of variable-length UTF-8 encoded strings;
    * :doc:`_auto/ak.behaviors.string.ByteStringBehavior`: an array of variable-length unencoded bytestrings.
 
-The character behaviors add a screen representation (``__str__`` and
-``__repr__``) while the string behaviors additionally override equality
-(``__eq__`` and ``__ne__``) to compare strings as units, rather than letting
-the ``np.equal`` ufunc descend into bytes.
+All four override the string representations (``__str__`` and ``__repr__``),
+but the string behaviors additionally override equality:
 
 .. code-block:: python
 
     >>> ak.Array(["one", "two", "three"]) == ak.Array(["1", "TWO", "three"])
     <Array [False, False, True] type='3 * bool'>
 
-HERE
+The only difference here is the parameter: instead of setting ``"__record__"``,
+we set ``"__array__"``.
+
+.. code-block:: python
+
+    >>> ak.Array(["one", "two", "three"]).layout
+    <ListOffsetArray64>
+        <parameters>
+            <param key="__array__">"string"</param>
+        </parameters>
+        <offsets><Index64 i="[0 3 6 11]" offset="0" length="4""/></offsets>
+        <content><NumpyArray format="B" shape="11" data="0x 6f6e6574 776f7468 726565">
+            <parameters>
+                <param key="__array__">"char"</param>
+            </parameters>
+        </NumpyArray></content>
+    </ListOffsetArray64>
+
+In ``ak.behaviors.string``, string behaviors are assigned with lines like
+
+.. code-block:: python
+
+    ak.behavior["string"] = StringBehavior
+    ak.behavior[np.equal, "string", "string"] = _string_equal
+
+Custom type names
+=================
+
+To make the string type appear as ``string`` in type representations, a
+``"__typestr__"`` behavior is overriden (in ``ak.behaviors.string``):
+
+.. code-block:: python
+
+    ak.behavior["__typestr__", "string"] = "string"
+
+so that
+
+.. code-block:: python
+
+    >>> ak.type(ak.Array(["one", "two", "three"]))
+    3 * string
+
+Custom broadcasting
+===================
+
+In situations where we want to think about lists as objects, such as strings,
+we may even need to override the broadcasting rules. For instance, given
+
+.. code-block:: python
+
+    ak.Array(["HAL"]) + ak.Array([[1, 1, 1, 1, 1]])
+
+we might expect ``"HAL"`` to broadcast to each ``1``, like
+
+.. code-block:: python
+
+    [[[73, 66, 77], [73, 66, 77], [73, 66, 77], [73, 66, 77], [73, 66, 77]]]
+
+but (without custom broadcasting) instead it raises a broadcasting for any
+length of ``1`` list other than 3:
+
+.. code-block:: python
+
+    >>> # without custom broadcasting
+    >>> print(ak.Array(["HAL"]) + ak.Array([[1, 1, 1, 1, 1]]))
+    ValueError: in ListOffsetArray64, cannot broadcast nested list
+    >>> print(ak.Array(["HAL"]) + ak.Array([[1, 1, 1]]))
+    [[73, 66, 77]]
+
+It's matching each character of ``"HAL"`` with a number from the list, but we
+want the string to be taken as an object. That is fixed (in
+``ak.behaviors.string``) with a custom broadcasting rule:
+
+.. code-block:: python
+
+    def _string_broadcast(layout, offsets):
+        # layout:  an ak.layout.Content object
+        # offsets: an ak.layout.Index of offsets to match
+        # 
+        # should return: an ak.layout.Content object of the broadcasted result
+        ...
+
+    awkward1.behavior["__broadcast__", "string"] = _string_broadcast
+
+Very few applications would need to do this, but the ``ak.behavior`` object
+provides a lot of room for customization hooks like this.
 
 Overriding behavior in Numba
 ============================
+
+Awkward Arrays can be arguments and return values of functions compiled with
+`Numba <http://numba.pydata.org>`__. Since these functions run on low-level
+objects, most functionality must be reimplemented, including behavioral
+overrides.
+
+The documentation on
+`Extending Numba <https://numba.pydata.org/numba-doc/dev/extending/index.html>`__
+introduces **typing**, **lowering**, and **models**, which are necessary for
+reimplementing the behavior of a Python object in the compiled environment.
+To apply the same to records and arrays from an Awkward data structure, we
+use ``ak.behavior`` hooks that start with ``"__numba_typer__"`` and
+``"__numba_lower__"``.
+
+**Case 1:** Adding a property, such as ``rec.property_name``.
+
+.. code-block:: python
+
+    ak.behavior["__numba_typer__", record_name, property_name] = typer
+    ak.behavior["__numba_lower__", record_name, property_name] = lower
+
+The ``typer`` function takes an
+:doc:`_auto/ak._connect._numba.arrayview.ArrayViewType` as its only argument
+and returns the property's type.
+
+The ``lower`` function takes the standard ``context, builder, sig, args``
+arguments and returns the lowered value. Given a Python ``function`` that
+takes one record and returns the property, the ``lower`` can be
+
+.. code-block:: python
+
+    def lower(context, builder, sig, args):
+        return context.compile_internal(builder, function, sig, args)
+
+**Case 2:** Adding a method, such as ``rec.method_name(arg0, arg1)``.
+
+.. code-block:: python
+
+    ak.behavior["__numba_typer__", record_name, method_name, ()] = typer
+    ak.behavior["__numba_lower__", record_name, method_name, ()] = lower
+
+The last item is an *empty* tuple, ``()`` (regardless of whether the method
+takes any arguments).
+
+In this case, the ``typer`` takes an
+:doc:`_auto/ak._connect._numba.arrayview.ArrayViewType` as well as any arguments
+and returns the property's type, and the ``sig`` and ``args`` in ``lower``
+include these arguments.
+
+**Case 3:** Unary and binary operations, like ``-rec1`` and ``rec1 + rec2``.
+
+.. code-block:: python
+
+    ak.behavior["__numba_typer__", operator.neg, "rec1"] = typer
+    ak.behavior["__numba_lower__", operator.neg, "rec1"] = lower
+
+    ak.behavior["__numba_typer__", "rec1", operator.add, "rec2"] = typer
+    ak.behavior["__numba_lower__", "rec1", operator.add, "rec2"] = lower
+
+**Case 4:** Completely replacing the Awkward record with an object in Numba.
+
+If a fully defined model for the object already exists and Numba, we can
+have references to Awkward records or arrays simply *become* these objects,
+which implies some overhead from copying data and a loss of the functionality
+that Awkward would bring.
+
+Strings, for instance, are replaced by Numba's built-in string model so that
+all string operations will work, but Awkward operations like broadcasting
+characters will not.
+
+For this case, the signatures are
+
+.. code-block:: python
+
+    # parameters["__record__"] = record_name
+    ak.behavior["__numba_typer__", record_name] = typer
+    ak.behavior["__numba_lower__", record_name] = lower
+
+    # for an array one-level deep
+    ak.behavior["__numba_typer__", ".", record_name] = typer
+    ak.behavior["__numba_lower__", ".", record_name] = lower
+
+    # for an array any number of levels deep
+    ak.behavior["__numba_typer__", "*", record_name] = typer
+    ak.behavior["__numba_lower__", "*", record_name] = lower
+
+    # parameters["__array__"] = array_name
+    ak.behavior["__numba_typer__", array_name] = typer
+    ak.behavior["__numba_lower__", array_name] = lower
+
+The ``typer`` function takes an
+:doc:`_auto/ak._connect._numba.arrayview.ArrayViewType` as its only argument
+and returns the Numba type of its replacement, while the ``lower``
+function takes
+
+   * ``context``: Numba context
+   * ``builder``: Numba builder
+   * ``rettype``: the Numba type of its replacement
+   * ``viewtype``: an :doc:`_auto/ak._connect._numba.arrayview.ArrayViewType`
+   * ``viewval``: a Numba value of the view
+   * ``viewproxy``: a Numba proxy (``context.make_helper``) of the view
+   * ``attype``: the Numba integer type of the index position
+   * ``atval``: the Numba value of the index position
+
+Complete example
+================
+
+The
+`Vector design prototype <https://vector.readthedocs.io/en/latest/notebooks/VectorDesignPrototype.html>`__
+has a complete example, including Numba.
