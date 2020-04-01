@@ -713,6 +713,21 @@ namespace awkward {
     bool
       parameters_equal(const util::Parameters& other) const;
 
+    /// @brief Returns `true` if the parameter associated with `key` is a
+    /// string; `false` otherwise.
+    bool
+      parameter_isstring(const std::string& key) const;
+
+    /// @brief Returns `true` if the parameter associated with `key` is a
+    /// string that matches `[A-Za-z_][A-Za-z_0-9]*`; `false` otherwise.
+    bool
+      parameter_isname(const std::string& key) const;
+
+    /// @brief Returns the parameter associated with `key` as a string if
+    /// #parameter_isstring; raises an error otherwise.
+    const std::string
+      parameter_asstring(const std::string& key) const;
+
     /// @brief Concatenates this array with `other` by creating a
     /// {@link UnionArrayOf UnionArray} instead of actually merging the data.
     const ContentPtr

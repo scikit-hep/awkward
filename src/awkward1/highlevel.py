@@ -1261,7 +1261,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
     inside the Numba-compiled function; to make outputs, consider
     #ak.ArrayBuilder.
 
-    See also #ak.Array.
+    See also #ak.Array and #ak.behavior.
     """
     def __init__(self, data, behavior=None, with_name=None, check_valid=False):
         if isinstance(data, awkward1.layout.Record):
@@ -2183,25 +2183,34 @@ class ArrayBuilder(Sequence):
 
         For example,
 
-            builder.begin_record("points")
-            builder.field("x").real(1)
-            builder.field("y").real(1.1)
-            builder.end_record()
-            builder.begin_record("points")
-            builder.field("x").real(2)
-            builder.field("y").real(2.2)
-            builder.end_record()
+            >>> builder = ak.ArrayBuilder()
+            >>> builder.begin_record("points")
+            >>> builder.field("x").real(1)
+            >>> builder.field("y").real(1.1)
+            >>> builder.end_record()
+            >>> builder.begin_record("points")
+            >>> builder.field("x").real(2)
+            >>> builder.field("y").real(2.2)
+            >>> builder.end_record()
 
         produces
 
+            >>> ak.to_list(builder.snapshot())
             [{"x": 1.0, "y": 1.1}, {"x": 2.0, "y": 2.2}]
 
         with type
 
-            2 * struct[["x", "y"], [float64, float64], parameters={"__record__": "points"}]
+            >>> ak.type(builder.snapshot())
+            2 * points["x": float64, "y": float64]
+
+        The record type is named `"points"` because its `"__record__"`
+        parameter is set to that value:
+
+            >>> builder.snapshot().layout.parameters
+            {'__record__': 'points'}
 
         The `"__record__"` parameter can be used to add behavior to the records
-        in the array, as described in #ak.Array and #ak.Record.
+        in the array, as described in #ak.Array, #ak.Record, and #ak.behavior.
         """
         self._layout.beginrecord(name)
 

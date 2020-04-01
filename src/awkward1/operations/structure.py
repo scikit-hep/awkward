@@ -343,8 +343,8 @@ def unzip(array):
     For example,
 
         >>> array = ak.Array([{"x": 1.1, "y": [1]},
-                              {"x": 2.2, "y": [2, 2]},
-                              {"x": 3.3, "y": [3, 3, 3]}])
+        ...                   {"x": 2.2, "y": [2, 2]},
+        ...                   {"x": 3.3, "y": [3, 3, 3]}])
         >>> x, y = ak.unzip(array)
         >>> x
         <Array [1.1, 2.2, 3.3] type='3 * float64'>

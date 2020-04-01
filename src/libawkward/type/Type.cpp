@@ -58,6 +58,21 @@ namespace awkward {
     return util::parameters_equal(parameters_, other);
   }
 
+  bool
+  Type::parameter_isstring(const std::string& key) const {
+    return util::parameter_isstring(parameters_, key);
+  }
+
+  bool
+  Type::parameter_isname(const std::string& key) const {
+    return util::parameter_isname(parameters_, key);
+  }
+
+  const std::string
+  Type::parameter_asstring(const std::string& key) const {
+    return util::parameter_asstring(parameters_, key);
+  }
+
   const std::string
   Type::tostring() const {
     return tostring_part("", "", "");

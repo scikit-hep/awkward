@@ -158,6 +158,21 @@ namespace awkward {
     bool
       parameters_equal(const Parameters& self, const Parameters& other);
 
+    /// @brief Returns `true` if the parameter associated with `key` is a
+    /// string; `false` otherwise.
+    bool
+      parameter_isstring(const Parameters& parameters, const std::string& key);
+
+    /// @brief Returns `true` if the parameter associated with `key` is a
+    /// string that matches `[A-Za-z_][A-Za-z_0-9]*`; `false` otherwise.
+    bool
+      parameter_isname(const Parameters& parameters, const std::string& key);
+
+    /// @brief Returns the parameter associated with `key` as a string if
+    /// #parameter_isstring; raises an error otherwise.
+    const std::string
+      parameter_asstring(const Parameters& parameters, const std::string& key);
+
     using TypeStrs = std::map<std::string, std::string>;
 
     /// @brief Extracts a custom type string from `typestrs` if required by
