@@ -8,53 +8,59 @@ import numpy
 
 import awkward1.layout
 
-def keys(array):
+def is_valid(array, exception=False):
     """
-    Extracts record or tuple keys from `array` (many types supported,
-    including all Awkward Arrays and Records).
+    Args:
+        array (#ak.Array, #ak.Record, #ak.layout.Content, #ak.layout.Record,
+            #ak.ArrayBuilder, #ak.layout.ArrayBuilder): Array or record to check.
+        exception (bool): If True, validity errors raise exceptions.
 
-    If the array contains nested records, only the outermost record is
-    queried. If it contains tuples instead of records, the keys are
-    string representations of integers, such as `"0"`, `"1"`, `"2"`, etc.
-    The records or tuples may be within multiple layers of nested lists.
+    Returns True if there are no errors and False if there is an error.
 
-    If the array contains neither tuples nor records, this returns an empty
-    list.
+    Checks for errors in the structure of the array, such as indexes that run
+    beyond the length of a node's `content`, etc. Either an error is raised or
+    the function returns a boolean.
+
+    See also #ak.validity_error.
     """
-    layout = awkward1.operations.convert.to_layout(array,
-                                                   allowrecord=True,
-                                                   allowother=False)
-    return layout.keys()
+    out = validity_error(array, exception=exception)
+    return out is None
 
-def parameters(array):
+def validity_error(array, exception=False):
     """
-    Extracts parameters from the outermost array node of `array` (many types
-    supported, including all Awkward Arrays and Records).
+    Args:
+        array (#ak.Array, #ak.Record, #ak.layout.Content, #ak.layout.Record,
+            #ak.ArrayBuilder, #ak.layout.ArrayBuilder): Array or record to check.
+        exception (bool): If True, validity errors raise exceptions.
 
-    Parameters are a dict from str to JSON-like objects, usually strings.
-    Every #ak.layout.Content node has a different set of parameters. Some
-    key names are special, such as `"__record__"` and `"__array__"` that name
-    particular records and arrays as capable of supporting special behaviors.
+    Returns None if there are no errors and a str containing the error message
+    if there are.
 
-    See #ak.Array and #ak.behavior for a more complete description of
-    behaviors.
+    Checks for errors in the structure of the array, such as indexes that run
+    beyond the length of a node's `content`, etc. Either an error is raised or
+    a string describing the error is returned.
+
+    See also #ak.is_valid.
     """
     if isinstance(array, (awkward1.highlevel.Array,
                           awkward1.highlevel.Record)):
-        return array.layout.parameters
-
-    elif isinstance(array, (awkward1.layout.Content,
-                            awkward1.layout.Record)):
-        return array.parameters
+        return validity_error(array.layout, exception=exception)
 
     elif isinstance(array, awkward1.highlevel.ArrayBuilder):
-        return array.snapshot().layout.parameters
+        return validity_error(array.snapshot().layout, exception=exception)
+
+    elif isinstance(array, (awkward1.layout.Content, awkward1.layout.Record)):
+        out = array.validityerror()
+        if out is not None and exception:
+            raise ValueError(out)
+        else:
+            return out
 
     elif isinstance(array, awkward1.layout.ArrayBuilder):
-        return array.snapshot().parameters
+        return validity_error(array.snapshot(), exception=exception)
 
     else:
-        return {}
+        raise TypeError("not an awkward array: {0}".format(repr(array)))
 
 def type(array):
     """
@@ -168,61 +174,53 @@ type.dtype2primitive = {
     numpy.float64: "float64",
 }
 
-def validity_error(array, exception=False):
+def parameters(array):
     """
-    Args:
-        array (#ak.Array, #ak.Record, #ak.layout.Content, #ak.layout.Record,
-            #ak.ArrayBuilder, #ak.layout.ArrayBuilder): Array or record to
-            check.
-        exception (bool): If True, validity errors raise exceptions.
-    Returns:
-        None if there are no errors and a str containing the error message
-            if there are.
+    Extracts parameters from the outermost array node of `array` (many types
+    supported, including all Awkward Arrays and Records).
 
-    Checks for errors in the structure of the array, such as indexes that run
-    beyond the length of a node's `content`, etc. Either an error is raised or
-    a string describing the error is returned.
+    Parameters are a dict from str to JSON-like objects, usually strings.
+    Every #ak.layout.Content node has a different set of parameters. Some
+    key names are special, such as `"__record__"` and `"__array__"` that name
+    particular records and arrays as capable of supporting special behaviors.
 
-    See also #ak.is_valid.
+    See #ak.Array and #ak.behavior for a more complete description of
+    behaviors.
     """
     if isinstance(array, (awkward1.highlevel.Array,
                           awkward1.highlevel.Record)):
-        return validity_error(array.layout, exception=exception)
+        return array.layout.parameters
+
+    elif isinstance(array, (awkward1.layout.Content,
+                            awkward1.layout.Record)):
+        return array.parameters
 
     elif isinstance(array, awkward1.highlevel.ArrayBuilder):
-        return validity_error(array.snapshot().layout, exception=exception)
-
-    elif isinstance(array, (awkward1.layout.Content, awkward1.layout.Record)):
-        out = array.validityerror()
-        if out is not None and exception:
-            raise ValueError(out)
-        else:
-            return out
+        return array.snapshot().layout.parameters
 
     elif isinstance(array, awkward1.layout.ArrayBuilder):
-        return validity_error(array.snapshot(), exception=exception)
+        return array.snapshot().parameters
 
     else:
-        raise TypeError("not an awkward array: {0}".format(repr(array)))
+        return {}
 
-def is_valid(array, exception=False):
+def keys(array):
     """
-    Args:
-        array (#ak.Array, #ak.Record, #ak.layout.Content, #ak.layout.Record,
-            #ak.ArrayBuilder, #ak.layout.ArrayBuilder): Array or record to
-            check.
-        exception (bool): If True, validity errors raise exceptions.
-    Returns:
-        True if there are no errors and False if there is an error.
+    Extracts record or tuple keys from `array` (many types supported,
+    including all Awkward Arrays and Records).
 
-    Checks for errors in the structure of the array, such as indexes that run
-    beyond the length of a node's `content`, etc. Either an error is raised or
-    the function returns a boolean.
+    If the array contains nested records, only the outermost record is
+    queried. If it contains tuples instead of records, the keys are
+    string representations of integers, such as `"0"`, `"1"`, `"2"`, etc.
+    The records or tuples may be within multiple layers of nested lists.
 
-    See also #ak.validity_error.
+    If the array contains neither tuples nor records, this returns an empty
+    list.
     """
-    out = validity_error(array, exception=exception)
-    return out is None
+    layout = awkward1.operations.convert.to_layout(array,
+                                                   allowrecord=True,
+                                                   allowother=False)
+    return layout.keys()
 
 __all__ = [x for x in list(globals())
              if not x.startswith("_") and

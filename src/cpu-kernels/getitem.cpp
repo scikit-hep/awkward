@@ -342,6 +342,20 @@ ERROR awkward_carry_arange(
   }
   return success();
 }
+ERROR awkward_carry_arange_32(
+  int32_t* toptr,
+  int64_t length) {
+  return awkward_carry_arange<int32_t>(
+    toptr,
+    length);
+}
+ERROR awkward_carry_arange_U32(
+  uint32_t* toptr,
+  int64_t length) {
+  return awkward_carry_arange<uint32_t>(
+    toptr,
+    length);
+}
 ERROR awkward_carry_arange_64(
   int64_t* toptr,
   int64_t length) {

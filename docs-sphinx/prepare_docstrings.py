@@ -232,10 +232,17 @@ def dofunction(link, shortname, name, astfcn):
         with open(toctree[-1], "w") as outfile:
             outfile.write(out)
 
+done_extra = False
 for filename in sorted(glob.glob("../src/awkward1/**/*.py", recursive=True),
-                       key=lambda x: x.replace("/highlevel", "!")
-                                      .replace("/__init__.py", "#")
-                                      .replace("/operations", "$")
+                       key=lambda x: x.replace("/__init__.py",  "!")
+                                      .replace("/highlevel",    "#")
+                                      .replace("/operations",   "$")
+
+                                      .replace("/describe.py",  "#")
+                                      .replace("/convert.py",   "$")
+                                      .replace("/structure.py", "%")
+                                      .replace("/reducers.py",  "&")
+
                                       .replace("/_", "/~")):
 
     modulename = (filename.replace("../src/", "")
@@ -249,6 +256,41 @@ for filename in sorted(glob.glob("../src/awkward1/**/*.py", recursive=True),
                            .replace(".operations.describe", "")
                            .replace(".operations.structure", "")
                            .replace(".operations.reducers", ""))
+
+    if modulename == "awkward1.operations.describe":
+        toctree.append("ak.behavior.rst")
+    elif not done_extra and modulename.startswith("awkward1._"):
+        done_extra = True
+        toctree.extend(["ak.layout.Content.rst",
+                        "ak.layout.EmptyArray.rst",
+                        "ak.layout.NumpyArray.rst",
+                        "ak.layout.RegularArray.rst",
+                        "ak.layout.ListArray.rst",
+                        "ak.layout.ListOffsetArray.rst",
+                        "ak.layout.RecordArray.rst",
+                        "ak.layout.Record.rst",
+                        "ak.layout.IndexedArray.rst",
+                        "ak.layout.IndexedOptionArray.rst",
+                        "ak.layout.ByteMaskedArray.rst",
+                        "ak.layout.BitMaskedArray.rst",
+                        "ak.layout.UnmaskedArray.rst",
+                        "ak.layout.UnionArray.rst",
+                        "ak.layout.Iterator.rst",
+                        "ak.layout.ArrayBuilder.rst",
+                        "ak.layout.Index.rst",
+                        "ak.layout.Identities.rst",
+                        "ak.types.Type.rst",
+                        "ak.types.ArrayType.rst",
+                        "ak.types.UnknownType.rst",
+                        "ak.types.PrimitiveType.rst",
+                        "ak.types.RegularType.rst",
+                        "ak.types.ListType.rst",
+                        "ak.types.RecordType.rst",
+                        "ak.types.OptionType.rst",
+                        "ak.types.UnionType.rst",
+                        "ak._io.fromjson.rst",
+                        "ak._io.fromroot_nestedvector.rst",
+                        ])
 
     link = ("`{0} <https://github.com/scikit-hep/awkward-1.0/blob/"
             "master/{1}>`__".format(modulename, filename.replace("../", "")))

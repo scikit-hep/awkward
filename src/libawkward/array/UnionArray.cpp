@@ -18,6 +18,39 @@
 #include "awkward/array/UnionArray.h"
 
 namespace awkward {
+  template <>
+  const IndexOf<int32_t>
+  UnionArrayOf<int8_t, int32_t>::sparse_index(int64_t len) {
+    IndexOf<int32_t> outindex(len);
+    struct Error err = awkward_carry_arange_32(
+      outindex.ptr().get(),
+      len);
+    util::handle_error(err, "UnionArray", nullptr);
+    return outindex;
+  }
+
+  template <>
+  const IndexOf<uint32_t>
+  UnionArrayOf<int8_t, uint32_t>::sparse_index(int64_t len) {
+    IndexOf<uint32_t> outindex(len);
+    struct Error err = awkward_carry_arange_U32(
+      outindex.ptr().get(),
+      len);
+    util::handle_error(err, "UnionArray", nullptr);
+    return outindex;
+  }
+
+  template <>
+  const IndexOf<int64_t>
+  UnionArrayOf<int8_t, int64_t>::sparse_index(int64_t len) {
+    IndexOf<int64_t> outindex(len);
+    struct Error err = awkward_carry_arange_64(
+      outindex.ptr().get(),
+      len);
+    util::handle_error(err, "UnionArray", nullptr);
+    return outindex;
+  }
+
   template <typename T, typename I>
   const IndexOf<I>
   UnionArrayOf<T, I>::regular_index(const IndexOf<T>& tags) {

@@ -9,7 +9,7 @@ import awkward1._connect._numpy
 import awkward1.layout
 import awkward1.operations.convert
 
-def count(array, axis=None, keepdims=False, maskidentity=False):
+def count(array, axis=None, keepdims=False, mask_identity=False):
     """
     Args:
         array: Data in which to count elements.
@@ -22,7 +22,7 @@ def count(array, axis=None, keepdims=False, maskidentity=False):
             dimensions by 1; if True, the reduced values are wrapped in a new
             length-1 dimension so that the result of this operation may be
             broadcasted with the original array.
-        maskidentity (bool): If True, reducing over empty lists results in
+        mask_identity (bool): If True, reducing over empty lists results in
             None (an option type); otherwise, reducing over empty lists
             results in the operation's identity.
 
@@ -92,12 +92,12 @@ def count(array, axis=None, keepdims=False, maskidentity=False):
     else:
         behavior = awkward1._util.behaviorof(array)
         return awkward1._util.wrap(layout.count(axis=axis,
-                                                mask=maskidentity,
+                                                mask=mask_identity,
                                                 keepdims=keepdims),
                                    behavior)
 
 @awkward1._connect._numpy.implements(numpy.count_nonzero)
-def count_nonzero(array, axis=None, keepdims=False, maskidentity=False):
+def count_nonzero(array, axis=None, keepdims=False, mask_identity=False):
     """
     Args:
         array: Data in which to count nonzero elements.
@@ -110,7 +110,7 @@ def count_nonzero(array, axis=None, keepdims=False, maskidentity=False):
             dimensions by 1; if True, the reduced values are wrapped in a new
             length-1 dimension so that the result of this operation may be
             broadcasted with the original array.
-        maskidentity (bool): If True, reducing over empty lists results in
+        mask_identity (bool): If True, reducing over empty lists results in
             None (an option type); otherwise, reducing over empty lists
             results in the operation's identity.
 
@@ -142,12 +142,12 @@ def count_nonzero(array, axis=None, keepdims=False, maskidentity=False):
     else:
         behavior = awkward1._util.behaviorof(array)
         return awkward1._util.wrap(layout.count_nonzero(axis=axis,
-                                                        mask=maskidentity,
+                                                        mask=mask_identity,
                                                         keepdims=keepdims),
                                    behavior)
 
 @awkward1._connect._numpy.implements(numpy.sum)
-def sum(array, axis=None, keepdims=False, maskidentity=False):
+def sum(array, axis=None, keepdims=False, mask_identity=False):
     """
     Args:
         array: Data to sum over.
@@ -160,7 +160,7 @@ def sum(array, axis=None, keepdims=False, maskidentity=False):
             dimensions by 1; if True, the reduced values are wrapped in a new
             length-1 dimension so that the result of this operation may be
             broadcasted with the original array.
-        maskidentity (bool): If True, reducing over empty lists results in
+        mask_identity (bool): If True, reducing over empty lists results in
             None (an option type); otherwise, reducing over empty lists
             results in the operation's identity.
 
@@ -303,7 +303,7 @@ def sum(array, axis=None, keepdims=False, maskidentity=False):
         >>> ak.sum(array, axis=None)
         151.8
 
-    The `maskidentity`, which has no equivalent in NumPy, inserts None in
+    The `mask_identity`, which has no equivalent in NumPy, inserts None in
     the output wherever a reduction takes place over zero elements. This is
     different from reductions that are otherwise equal to the identity or
     are equal to the identity by cancellation.
@@ -311,11 +311,12 @@ def sum(array, axis=None, keepdims=False, maskidentity=False):
         >>> array = ak.Array([[2.2, 2.2], [4.4, -2.2, -2.2], [], [0.0]])
         >>> ak.sum(array, axis=-1)
         <Array [4.4, 0, 0, 0] type='4 * float64'>
-        >>> ak.sum(array, axis=-1, maskidentity=True)
+        >>> ak.sum(array, axis=-1, mask_identity=True)
         <Array [4.4, 0, None, 0] type='4 * ?float64'>
 
-    The third list is reduced to `0` if `maskidentity=False` because `0` is the
-    identity of addition, but it is reduced to None if `maskidentity=True`.
+    The third list is reduced to `0` if `mask_identity=False` because `0` is
+    the identity of addition, but it is reduced to None if
+    `mask_identity=True`.
     """
     layout = awkward1.operations.convert.to_layout(array,
                                                    allowrecord=False,
@@ -331,12 +332,12 @@ def sum(array, axis=None, keepdims=False, maskidentity=False):
     else:
         behavior = awkward1._util.behaviorof(array)
         return awkward1._util.wrap(layout.sum(axis=axis,
-                                              mask=maskidentity,
+                                              mask=mask_identity,
                                               keepdims=keepdims),
                                    behavior)
 
 @awkward1._connect._numpy.implements(numpy.prod)
-def prod(array, axis=None, keepdims=False, maskidentity=False):
+def prod(array, axis=None, keepdims=False, mask_identity=False):
     """
     Args:
         array: Data to multiply.
@@ -349,7 +350,7 @@ def prod(array, axis=None, keepdims=False, maskidentity=False):
             dimensions by 1; if True, the reduced values are wrapped in a new
             length-1 dimension so that the result of this operation may be
             broadcasted with the original array.
-        maskidentity (bool): If True, reducing over empty lists results in
+        mask_identity (bool): If True, reducing over empty lists results in
             None (an option type); otherwise, reducing over empty lists
             results in the operation's identity.
 
@@ -377,12 +378,12 @@ def prod(array, axis=None, keepdims=False, maskidentity=False):
     else:
         behavior = awkward1._util.behaviorof(array)
         return awkward1._util.wrap(layout.prod(axis=axis,
-                                               mask=maskidentity,
+                                               mask=mask_identity,
                                                keepdims=keepdims),
                                    behavior)
 
 @awkward1._connect._numpy.implements(numpy.any)
-def any(array, axis=None, keepdims=False, maskidentity=False):
+def any(array, axis=None, keepdims=False, mask_identity=False):
     """
     Args:
         array: Data to combine with "logical or."
@@ -395,7 +396,7 @@ def any(array, axis=None, keepdims=False, maskidentity=False):
             dimensions by 1; if True, the reduced values are wrapped in a new
             length-1 dimension so that the result of this operation may be
             broadcasted with the original array.
-        maskidentity (bool): If True, reducing over empty lists results in
+        mask_identity (bool): If True, reducing over empty lists results in
             None (an option type); otherwise, reducing over empty lists
             results in the operation's identity.
 
@@ -425,12 +426,12 @@ def any(array, axis=None, keepdims=False, maskidentity=False):
     else:
         behavior = awkward1._util.behaviorof(array)
         return awkward1._util.wrap(layout.any(axis=axis,
-                                              mask=maskidentity,
+                                              mask=mask_identity,
                                               keepdims=keepdims),
                                    behavior)
 
 @awkward1._connect._numpy.implements(numpy.all)
-def all(array, axis=None, keepdims=False, maskidentity=False):
+def all(array, axis=None, keepdims=False, mask_identity=False):
     """
     Args:
         array: Data to combine with "logical all."
@@ -443,7 +444,7 @@ def all(array, axis=None, keepdims=False, maskidentity=False):
             dimensions by 1; if True, the reduced values are wrapped in a new
             length-1 dimension so that the result of this operation may be
             broadcasted with the original array.
-        maskidentity (bool): If True, reducing over empty lists results in
+        mask_identity (bool): If True, reducing over empty lists results in
             None (an option type); otherwise, reducing over empty lists
             results in the operation's identity.
 
@@ -473,12 +474,12 @@ def all(array, axis=None, keepdims=False, maskidentity=False):
     else:
         behavior = awkward1._util.behaviorof(array)
         return awkward1._util.wrap(layout.all(axis=axis,
-                                              mask=maskidentity,
+                                              mask=mask_identity,
                                               keepdims=keepdims),
                                    behavior)
 
 @awkward1._connect._numpy.implements(numpy.min)
-def min(array, axis=None, keepdims=False, maskidentity=True):
+def min(array, axis=None, keepdims=False, mask_identity=True):
     """
     Args:
         array: Data to minimize.
@@ -491,7 +492,7 @@ def min(array, axis=None, keepdims=False, maskidentity=True):
             dimensions by 1; if True, the reduced values are wrapped in a new
             length-1 dimension so that the result of this operation may be
             broadcasted with the original array.
-        maskidentity (bool): If True, reducing over empty lists results in
+        mask_identity (bool): If True, reducing over empty lists results in
             None (an option type); otherwise, reducing over empty lists
             results in the operation's identity.
 
@@ -499,7 +500,7 @@ def min(array, axis=None, keepdims=False, maskidentity=True):
     types supported, including all Awkward Arrays and Records). The identity
     of minimization is `inf` if floating-point or the largest integer value
     if applied to integers. This identity is usually masked: the minimum of
-    an empty list is None, unless `maskidentity=False`.
+    an empty list is None, unless `mask_identity=False`.
     This operation is the same as NumPy's
     [amin](https://docs.scipy.org/doc/numpy/reference/generated/numpy.amin.html)
     if all lists at a given dimension have the same length and no None values,
@@ -525,12 +526,12 @@ def min(array, axis=None, keepdims=False, maskidentity=True):
     else:
         behavior = awkward1._util.behaviorof(array)
         return awkward1._util.wrap(layout.min(axis=axis,
-                                              mask=maskidentity,
+                                              mask=mask_identity,
                                               keepdims=keepdims),
                                    behavior)
 
 @awkward1._connect._numpy.implements(numpy.max)
-def max(array, axis=None, keepdims=False, maskidentity=True):
+def max(array, axis=None, keepdims=False, mask_identity=True):
     """
     Args:
         array: Data to maximize.
@@ -543,7 +544,7 @@ def max(array, axis=None, keepdims=False, maskidentity=True):
             dimensions by 1; if True, the reduced values are wrapped in a new
             length-1 dimension so that the result of this operation may be
             broadcasted with the original array.
-        maskidentity (bool): If True, reducing over empty lists results in
+        mask_identity (bool): If True, reducing over empty lists results in
             None (an option type); otherwise, reducing over empty lists
             results in the operation's identity.
 
@@ -551,7 +552,7 @@ def max(array, axis=None, keepdims=False, maskidentity=True):
     types supported, including all Awkward Arrays and Records). The identity
     of maximization is `-inf` if floating-point or the smallest integer value
     if applied to integers. This identity is usually masked: the maximum of
-    an empty list is None, unless `maskidentity=False`.
+    an empty list is None, unless `mask_identity=False`.
     This operation is the same as NumPy's
     [amax](https://docs.scipy.org/doc/numpy/reference/generated/numpy.amax.html)
     if all lists at a given dimension have the same length and no None values,
@@ -577,12 +578,12 @@ def max(array, axis=None, keepdims=False, maskidentity=True):
     else:
         behavior = awkward1._util.behaviorof(array)
         return awkward1._util.wrap(layout.max(axis=axis,
-                                              mask=maskidentity,
+                                              mask=mask_identity,
                                               keepdims=keepdims),
                                    behavior)
 
 @awkward1._connect._numpy.implements(numpy.argmin)
-def argmin(array, axis=None, keepdims=False, maskidentity=True):
+def argmin(array, axis=None, keepdims=False, mask_identity=True):
     """
     Args:
         array: Data to find the index positions of the minimum values.
@@ -595,7 +596,7 @@ def argmin(array, axis=None, keepdims=False, maskidentity=True):
             dimensions by 1; if True, the reduced values are wrapped in a new
             length-1 dimension so that the result of this operation may be
             broadcasted with the original array.
-        maskidentity (bool): If True, reducing over empty lists results in
+        mask_identity (bool): If True, reducing over empty lists results in
             None (an option type); otherwise, reducing over empty lists
             results in the operation's identity.
 
@@ -604,7 +605,7 @@ def argmin(array, axis=None, keepdims=False, maskidentity=True):
     Records). The identity of minimization would be infinity, but argmin
     must return the position of the minimum element, which has no value for
     empty lists. Therefore, the identity should be masked: the argmin of
-    an empty list is None. If `maskidentity=False`, the result would be `-1`,
+    an empty list is None. If `mask_identity=False`, the result would be `-1`,
     which is distinct from all valid index positions, but care should be taken
     that it is not misinterpreted as "the last element of the list."
 
@@ -625,12 +626,12 @@ def argmin(array, axis=None, keepdims=False, maskidentity=True):
     else:
         behavior = awkward1._util.behaviorof(array)
         return awkward1._util.wrap(layout.argmin(axis=axis,
-                                                 mask=maskidentity,
+                                                 mask=mask_identity,
                                                  keepdims=keepdims),
                                    behavior)
 
 @awkward1._connect._numpy.implements(numpy.argmax)
-def argmax(array, axis=None, keepdims=False, maskidentity=True):
+def argmax(array, axis=None, keepdims=False, mask_identity=True):
     """
     Args:
         array: Data to find the index positions of the maximum values.
@@ -643,7 +644,7 @@ def argmax(array, axis=None, keepdims=False, maskidentity=True):
             dimensions by 1; if True, the reduced values are wrapped in a new
             length-1 dimension so that the result of this operation may be
             broadcasted with the original array.
-        maskidentity (bool): If True, reducing over empty lists results in
+        mask_identity (bool): If True, reducing over empty lists results in
             None (an option type); otherwise, reducing over empty lists
             results in the operation's identity.
 
@@ -652,7 +653,7 @@ def argmax(array, axis=None, keepdims=False, maskidentity=True):
     Records). The identity of maximization would be negative infinity, but
     argmax must return the position of the maximum element, which has no value
     for empty lists. Therefore, the identity should be masked: the argmax of
-    an empty list is None. If `maskidentity=False`, the result would be `-1`,
+    an empty list is None. If `mask_identity=False`, the result would be `-1`,
     which is distinct from all valid index positions, but care should be taken
     that it is not misinterpreted as "the last element of the list."
 
@@ -673,14 +674,14 @@ def argmax(array, axis=None, keepdims=False, maskidentity=True):
     else:
         behavior = awkward1._util.behaviorof(array)
         return awkward1._util.wrap(layout.argmax(axis=axis,
-                                                 mask=maskidentity,
+                                                 mask=mask_identity,
                                                  keepdims=keepdims),
                                    behavior)
 
 # The following are not strictly reducers, but are defined in terms of
 # reducers and ufuncs.
 
-def moment(x, n, weight=None, axis=None, keepdims=False, maskidentity=True):
+def moment(x, n, weight=None, axis=None, keepdims=False, mask_identity=True):
     """
     Args:
         x: the data on which to compute the moment.
@@ -699,7 +700,7 @@ def moment(x, n, weight=None, axis=None, keepdims=False, maskidentity=True):
             dimensions by 1; if True, the output values are wrapped in a new
             length-1 dimension so that the result of this operation may be
             broadcasted with the original array.
-        maskidentity (bool): If True, the application of this function on
+        mask_identity (bool): If True, the application of this function on
             empty lists results in None (an option type); otherwise, the
             calculation is followed through with the reducers' identities,
             usually resulting in floating-point `nan`.
@@ -725,18 +726,26 @@ def moment(x, n, weight=None, axis=None, keepdims=False, maskidentity=True):
     with numpy.errstate(invalid="ignore"):
         if weight is None:
             sumw   = count(x,
-                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+                           axis=axis,
+                           keepdims=keepdims,
+                           mask_identity=mask_identity)
             sumwxn = sum(x**n,
-                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+                         axis=axis,
+                         keepdims=keepdims,
+                         mask_identity=mask_identity)
         else:
             sumw   = sum(x*0 + weight,
-                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+                         axis=axis,
+                         keepdims=keepdims,
+                         mask_identity=mask_identity)
             sumwxn = sum((x*weight)**n,
-                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+                         axis=axis,
+                         keepdims=keepdims,
+                         mask_identity=mask_identity)
         return numpy.true_divide(sumwxn, sumw)
 
 @awkward1._connect._numpy.implements(numpy.mean)
-def mean(x, weight=None, axis=None, keepdims=False, maskidentity=True):
+def mean(x, weight=None, axis=None, keepdims=False, mask_identity=True):
     """
     Args:
         x: the data on which to compute the mean.
@@ -753,7 +762,7 @@ def mean(x, weight=None, axis=None, keepdims=False, maskidentity=True):
             dimensions by 1; if True, the output values are wrapped in a new
             length-1 dimension so that the result of this operation may be
             broadcasted with the original array.
-        maskidentity (bool): If True, the application of this function on
+        mask_identity (bool): If True, the application of this function on
             empty lists results in None (an option type); otherwise, the
             calculation is followed through with the reducers' identities,
             usually resulting in floating-point `nan`.
@@ -800,18 +809,26 @@ def mean(x, weight=None, axis=None, keepdims=False, maskidentity=True):
     with numpy.errstate(invalid="ignore"):
         if weight is None:
             sumw  = count(x,
-                      axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+                          axis=axis,
+                          keepdims=keepdims,
+                          mask_identity=mask_identity)
             sumwx = sum(x,
-                      axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+                        axis=axis,
+                        keepdims=keepdims,
+                        mask_identity=mask_identity)
         else:
             sumw  = sum(x*0 + weight,
-                      axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+                        axis=axis,
+                        keepdims=keepdims,
+                        mask_identity=mask_identity)
             sumwx = sum(x*weight,
-                      axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+                        axis=axis,
+                        keepdims=keepdims,
+                        mask_identity=mask_identity)
         return numpy.true_divide(sumwx, sumw)
 
 @awkward1._connect._numpy.implements(numpy.var)
-def var(x, weight=None, ddof=0, axis=None, keepdims=False, maskidentity=True):
+def var(x, weight=None, ddof=0, axis=None, keepdims=False, mask_identity=True):
     """
     Args:
         x: the data on which to compute the variance.
@@ -831,7 +848,7 @@ def var(x, weight=None, ddof=0, axis=None, keepdims=False, maskidentity=True):
             dimensions by 1; if True, the output values are wrapped in a new
             length-1 dimension so that the result of this operation may be
             broadcasted with the original array.
-        maskidentity (bool): If True, the application of this function on
+        mask_identity (bool): If True, the application of this function on
             empty lists results in None (an option type); otherwise, the
             calculation is followed through with the reducers' identities,
             usually resulting in floating-point `nan`.
@@ -861,17 +878,25 @@ def var(x, weight=None, ddof=0, axis=None, keepdims=False, maskidentity=True):
     """
     with numpy.errstate(invalid="ignore"):
         xmean = mean(x, weight=weight,
-                  axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+                  axis=axis, keepdims=keepdims, mask_identity=mask_identity)
         if weight is None:
             sumw   = count(x,
-                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+                           axis=axis,
+                           keepdims=keepdims,
+                           mask_identity=mask_identity)
             sumwxx = sum((x - xmean)**2,
-                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+                         axis=axis,
+                         keepdims=keepdims,
+                         mask_identity=mask_identity)
         else:
             sumw   = sum(x*0 + weight,
-                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+                         axis=axis,
+                         keepdims=keepdims,
+                         mask_identity=mask_identity)
             sumwxx = sum((x - xmean)**2 * weight,
-                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+                         axis=axis,
+                         keepdims=keepdims,
+                         mask_identity=mask_identity)
         if ddof != 0:
             return (numpy.true_divide(sumwxx, sumw) *
                     numpy.true_divide(sumw, sumw - ddof))
@@ -879,7 +904,7 @@ def var(x, weight=None, ddof=0, axis=None, keepdims=False, maskidentity=True):
             return numpy.true_divide(sumwxx, sumw)
 
 @awkward1._connect._numpy.implements(numpy.std)
-def std(x, weight=None, ddof=0, axis=None, keepdims=False, maskidentity=True):
+def std(x, weight=None, ddof=0, axis=None, keepdims=False, mask_identity=True):
     """
     Args:
         x: the data on which to compute the standard deviation.
@@ -899,7 +924,7 @@ def std(x, weight=None, ddof=0, axis=None, keepdims=False, maskidentity=True):
             dimensions by 1; if True, the output values are wrapped in a new
             length-1 dimension so that the result of this operation may be
             broadcasted with the original array.
-        maskidentity (bool): If True, the application of this function on
+        mask_identity (bool): If True, the application of this function on
             empty lists results in None (an option type); otherwise, the
             calculation is followed through with the reducers' identities,
             usually resulting in floating-point `nan`.
@@ -927,9 +952,9 @@ def std(x, weight=None, ddof=0, axis=None, keepdims=False, maskidentity=True):
                               ddof=ddof,
                               axis=axis,
                               keepdims=keepdims,
-                              maskidentity=maskidentity))
+                              mask_identity=mask_identity))
 
-def covar(x, y, weight=None, axis=None, keepdims=False, maskidentity=True):
+def covar(x, y, weight=None, axis=None, keepdims=False, mask_identity=True):
     """
     Args:
         x: one coordinate to use in the covariance calculation.
@@ -947,7 +972,7 @@ def covar(x, y, weight=None, axis=None, keepdims=False, maskidentity=True):
             dimensions by 1; if True, the output values are wrapped in a new
             length-1 dimension so that the result of this operation may be
             broadcasted with the original array.
-        maskidentity (bool): If True, the application of this function on
+        mask_identity (bool): If True, the application of this function on
             empty lists results in None (an option type); otherwise, the
             calculation is followed through with the reducers' identities,
             usually resulting in floating-point `nan`.
@@ -969,24 +994,34 @@ def covar(x, y, weight=None, axis=None, keepdims=False, maskidentity=True):
     """
     with numpy.errstate(invalid="ignore"):
         xmean = mean(x, weight=weight,
-                  axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+                     axis=axis,
+                     keepdims=keepdims,
+                     mask_identity=mask_identity)
         ymean = mean(y, weight=weight,
-                  axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+                     axis=axis,
+                     keepdims=keepdims,
+                     mask_identity=mask_identity)
         if weight is None:
             sumw = count(x,
-                     axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+                         axis=axis,
+                         keepdims=keepdims,
+                         mask_identity=mask_identity)
             sumwxy = sum((x - xmean)*(y - ymean),
-                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+                         axis=axis,
+                         keepdims=keepdims,
+                         mask_identity=mask_identity)
         else:
             sumw = sum(x*0 + weight,
-                     axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+                       axis=axis,
+                       keepdims=keepdims,
+                       mask_identity=mask_identity)
             sumwxy = sum((x - xmean)*(y - ymean)*weight,
                          axis=axis,
                          keepdims=keepdims,
-                         maskidentity=maskidentity)
+                         mask_identity=mask_identity)
         return numpy.true_divide(sumwxy, sumw)
 
-def corr(x, y, weight=None, axis=None, keepdims=False, maskidentity=True):
+def corr(x, y, weight=None, axis=None, keepdims=False, mask_identity=True):
     """
     Args:
         x: one coordinate to use in the correlation.
@@ -1004,7 +1039,7 @@ def corr(x, y, weight=None, axis=None, keepdims=False, maskidentity=True):
             dimensions by 1; if True, the output values are wrapped in a new
             length-1 dimension so that the result of this operation may be
             broadcasted with the original array.
-        maskidentity (bool): If True, the application of this function on
+        mask_identity (bool): If True, the application of this function on
             empty lists results in None (an option type); otherwise, the
             calculation is followed through with the reducers' identities,
             usually resulting in floating-point `nan`.
@@ -1028,28 +1063,49 @@ def corr(x, y, weight=None, axis=None, keepdims=False, maskidentity=True):
     """
     with numpy.errstate(invalid="ignore"):
         xmean = mean(x, weight=weight,
-                  axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+                     axis=axis,
+                     keepdims=keepdims,
+                     mask_identity=mask_identity)
         ymean = mean(y, weight=weight,
-                  axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+                     axis=axis,
+                     keepdims=keepdims,
+                     mask_identity=mask_identity)
         xdiff = x - xmean
         ydiff = y - ymean
         if weight is None:
             sumwxx = sum(xdiff**2,
-                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+                         axis=axis,
+                         keepdims=keepdims,
+                         mask_identity=mask_identity)
             sumwyy = sum(ydiff**2,
-                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+                         axis=axis,
+                         keepdims=keepdims,
+                         mask_identity=mask_identity)
             sumwxy = sum(xdiff*ydiff,
-                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+                         axis=axis,
+                         keepdims=keepdims,
+                         mask_identity=mask_identity)
         else:
             sumwxx = sum((xdiff**2)*weight,
-                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+                         axis=axis,
+                         keepdims=keepdims,
+                         mask_identity=mask_identity)
             sumwyy = sum((ydiff**2)*weight,
-                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+                         axis=axis,
+                         keepdims=keepdims,
+                         mask_identity=mask_identity)
             sumwxy = sum((xdiff*ydiff)*weight,
-                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+                         axis=axis,
+                         keepdims=keepdims,
+                         mask_identity=mask_identity)
         return numpy.true_divide(sumwxy, numpy.sqrt(sumwxx * sumwyy))
 
-def linearfit(x, y, weight=None, axis=None, keepdims=False, maskidentity=True):
+def linear_fit(x,
+               y,
+               weight=None,
+               axis=None,
+               keepdims=False,
+               mask_identity=True):
     """
     Args:
         x: one coordinate to use in the linear fit.
@@ -1067,7 +1123,7 @@ def linearfit(x, y, weight=None, axis=None, keepdims=False, maskidentity=True):
             dimensions by 1; if True, the output values are wrapped in a new
             length-1 dimension so that the result of this operation may be
             broadcasted with the original array.
-        maskidentity (bool): If True, the application of this function on
+        mask_identity (bool): If True, the application of this function on
             empty lists results in None (an option type); otherwise, the
             calculation is followed through with the reducers' identities,
             usually resulting in floating-point `nan`.
@@ -1105,26 +1161,44 @@ def linearfit(x, y, weight=None, axis=None, keepdims=False, maskidentity=True):
     with numpy.errstate(invalid="ignore"):
         if weight is None:
             sumw = count(x, axis=axis,
-                     keepdims=keepdims, maskidentity=maskidentity)
+                     keepdims=keepdims, mask_identity=mask_identity)
             sumwx  = sum(x,
-                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+                         axis=axis,
+                         keepdims=keepdims,
+                         mask_identity=mask_identity)
             sumwy  = sum(y,
-                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+                         axis=axis,
+                         keepdims=keepdims,
+                         mask_identity=mask_identity)
             sumwxx = sum(x**2,
-                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+                         axis=axis,
+                         keepdims=keepdims,
+                         mask_identity=mask_identity)
             sumwxy = sum(x*y,
-                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+                         axis=axis,
+                         keepdims=keepdims,
+                         mask_identity=mask_identity)
         else:
             sumw = sum(x*0 + weight,
-                     axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+                       axis=axis,
+                       keepdims=keepdims,
+                       mask_identity=mask_identity)
             sumwx  = sum(x*weight,
-                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+                         axis=axis,
+                         keepdims=keepdims,
+                         mask_identity=mask_identity)
             sumwy  = sum(y*weight,
-                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+                         axis=axis,
+                         keepdims=keepdims,
+                         mask_identity=mask_identity)
             sumwxx = sum((x**2)*weight,
-                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+                         axis=axis,
+                         keepdims=keepdims,
+                         mask_identity=mask_identity)
             sumwxy = sum(x*y*weight,
-                       axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+                         axis=axis,
+                         keepdims=keepdims,
+                         mask_identity=mask_identity)
         delta           = (sumw*sumwxx) - (sumwx*sumwx)
         intercept       = numpy.true_divide(((sumwxx*sumwy) - (sumwx*sumwxy)),
                                             delta)
@@ -1176,7 +1250,7 @@ def linearfit(x, y, weight=None, axis=None, keepdims=False, maskidentity=True):
 
         return awkward1._util.wrap(out, awkward1._util.behaviorof(x, y))
 
-def softmax(x, axis=None, keepdims=False, maskidentity=False):
+def softmax(x, axis=None, keepdims=False, mask_identity=False):
     """
     Args:
         x: the data on which to compute the softmax.
@@ -1193,7 +1267,7 @@ def softmax(x, axis=None, keepdims=False, maskidentity=False):
             dimensions by 1; if True, the output values are wrapped in a new
             length-1 dimension so that the result of this operation may be
             broadcasted with the original array.
-        maskidentity (bool): If True, the application of this function on
+        mask_identity (bool): If True, the application of this function on
             empty lists results in None (an option type); otherwise, the
             calculation is followed through with the reducers' identities,
             usually resulting in floating-point `nan`.
@@ -1216,7 +1290,7 @@ def softmax(x, axis=None, keepdims=False, maskidentity=False):
     with numpy.errstate(invalid="ignore"):
         expx = numpy.exp(x)
         denom = sum(expx,
-                  axis=axis, keepdims=keepdims, maskidentity=maskidentity)
+                  axis=axis, keepdims=keepdims, mask_identity=mask_identity)
         return numpy.true_divide(expx, denom)
 
 __all__ = [x for x in list(globals())

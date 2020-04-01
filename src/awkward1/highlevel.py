@@ -17,6 +17,7 @@ import awkward1._connect._numpy
 import awkward1._connect._pandas
 import awkward1.layout
 import awkward1.operations.convert
+import awkward1.operations.structure
 
 _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
@@ -282,6 +283,135 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
                  self._layout.type(awkward1._util.typestrs(self._behavior)),
                  len(self._layout))
 
+    class Mask(object):
+        def __init__(self, array, valid_when):
+            self._array = array
+            self._valid_when = valid_when
+
+        def __repr__(self, limit_value=40, limit_total=85):
+            value = awkward1._util.minimally_touching_string(limit_value,
+                                                             self._layout,
+                                                             self._behavior)
+
+            limit_type = limit_total - len(value) - len("<Array.mask  type=>")
+            type = repr(str(self.type))
+            if len(type) > limit_type:
+                type = type[:(limit_type - 4)] + "..." + type[-1]
+
+            return "<Array.mask {0} type={1}>".format(value, type)
+
+        def __getitem__(self, where):
+            return awkward1.operations.structure.mask(self._array,
+                                                      where,
+                                                      self._valid_when)
+
+    @property
+    def mask(self, valid_when=True):
+        """
+        Whereas
+
+            array[array_of_booleans]
+
+        removes elements from `array` in which `array_of_booleans` is False,
+
+            array.mask[array_of_booleans]
+
+        returns data with the same length as the original `array` but False
+        values in `array_of_booleans` are mapped to None. Such an output
+        can be used in mathematical expressions with the original `array`
+        because they are still aligned.
+
+        See <<filtering>> and #ak.mask.
+        """
+        return self.Mask(self, valid_when)
+
+    def to_list(self):
+        """
+        Converts this Array into Python objects.
+
+        Awkward Array types have the following Pythonic translations.
+
+           * #ak.types.PrimitiveType: converted into bool, int, float.
+           * #ak.types.OptionType: missing values are converted into None.
+           * #ak.types.ListType: converted into list.
+           * #ak.types.RegularType: also converted into list. Python (and JSON)
+             forms lose information about the regularity of list lengths.
+           * #ak.types.ListType with parameter `"__array__"` equal to
+             `"__bytestring__"`: converted into bytes.
+           * #ak.types.ListType with parameter `"__array__"` equal to
+             `"__string__"`: converted into str.
+           * #ak.types.RecordArray without field names: converted into tuple.
+           * #ak.types.RecordArray with field names: converted into dict.
+           * #ak.types.UnionArray: Python data are naturally heterogeneous.
+
+        See also #ak.to_list and #ak.from_iter.
+        """
+        return awkward1.operations.convert.to_list(self)
+
+    def to_json(self,
+                destination=None,
+                pretty=False,
+                maxdecimals=None,
+                buffersize=65536):
+        """
+        Args:
+            destination (None or str): If None, this method returns a JSON str;
+                if a str, it uses that as a file name and writes (overwrites)
+                that file (returning None).
+            pretty (bool): If True, indent the output for human readability; if
+                False, output compact JSON without spaces.
+            maxdecimals (None or int): If an int, limit the number of
+                floating-point decimals to this number; if None, write all
+                digits.
+            buffersize (int): Size (in bytes) of the buffer used by the JSON
+                parser.
+
+        Converts this Array into a JSON string or file.
+
+        Awkward Array types have the following JSON translations.
+
+           * #ak.types.PrimitiveType: converted into JSON booleans and numbers.
+           * #ak.types.OptionType: missing values are converted into None.
+           * #ak.types.ListType: converted into JSON lists.
+           * #ak.types.RegularType: also converted into JSON lists. JSON (and
+             Python) forms lose information about the regularity of list
+             lengths.
+           * #ak.types.ListType with parameter `"__array__"` equal to
+             `"__bytestring__"` or `"__string__"`: converted into JSON strings.
+           * #ak.types.RecordArray without field names: converted into JSON
+             objects with numbers as strings for keys.
+           * #ak.types.RecordArray with field names: converted into JSON
+             objects.
+           * #ak.types.UnionArray: JSON data are naturally heterogeneous.
+
+        See also #ak.to_json and #ak.from_json.
+        """
+        return awkward1.operations.convert.to_json(self,
+                                                   destination,
+                                                   pretty,
+                                                   maxdecimals,
+                                                   buffersize)
+
+    @property
+    def nbytes(self):
+        """
+        The total number of bytes in all the #ak.layout.Index,
+        #ak.layout.Identities, and #ak.layout.NumpyArray buffers in this
+        array tree.
+
+        Note: this calculation takes overlapping buffers into account, to the
+        extent that overlaps are not double-counted, but overlaps are currently
+        assumed to be complete subsets of one another, and so it is
+        theoretically possible (though unlikely) that this number is an
+        underestimate of the true usage.
+
+        It also does not count buffers that must be kept in memory because
+        of ownership, but are not directly used in the array. Nor does it count
+        the (small) C++ nodes or Python objects that reference the (large)
+        array buffers.
+        """
+        return self._layout.nbytes
+
     def __len__(self):
         """
         The length of this Array, only counting the outermost structure.
@@ -479,6 +609,16 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
             <Array [1.1, None, 4.4, None, None, 7.7] type='6 * ?float64'>
             >>> ak.mask(array, ak.num(array) > 1)[:, 1]
             <Array [2.2, None, 5.5, None, None, 8.8] type='6 * ?float64'>
+
+        Another syntax for
+
+            ak.mask(array, array_of_booleans)
+
+        is
+
+            array.mask[array_of_booleans]
+
+        (which is 5 characters away from simply filtering the `array`).
 
         Projection
         **********
@@ -1239,6 +1379,93 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         """
         return self._layout.type(awkward1._util.typestrs(self._behavior))
 
+    def to_list(self):
+        """
+        Converts this Record into Python objects.
+
+        Awkward Array types have the following Pythonic translations.
+
+           * #ak.types.PrimitiveType: converted into bool, int, float.
+           * #ak.types.OptionType: missing values are converted into None.
+           * #ak.types.ListType: converted into list.
+           * #ak.types.RegularType: also converted into list. Python (and JSON)
+             forms lose information about the regularity of list lengths.
+           * #ak.types.ListType with parameter `"__array__"` equal to
+             `"__bytestring__"`: converted into bytes.
+           * #ak.types.ListType with parameter `"__array__"` equal to
+             `"__string__"`: converted into str.
+           * #ak.types.RecordArray without field names: converted into tuple.
+           * #ak.types.RecordArray with field names: converted into dict.
+           * #ak.types.UnionArray: Python data are naturally heterogeneous.
+
+        See also #ak.to_list and #ak.from_iter.
+        """
+        return awkward1.operations.convert.to_list(self)
+
+    def to_json(self,
+                destination=None,
+                pretty=False,
+                maxdecimals=None,
+                buffersize=65536):
+        """
+        Args:
+            destination (None or str): If None, this method returns a JSON str;
+                if a str, it uses that as a file name and writes (overwrites)
+                that file (returning None).
+            pretty (bool): If True, indent the output for human readability; if
+                False, output compact JSON without spaces.
+            maxdecimals (None or int): If an int, limit the number of
+                floating-point decimals to this number; if None, write all
+                digits.
+            buffersize (int): Size (in bytes) of the buffer used by the JSON
+                parser.
+
+        Converts this Record into a JSON string or file.
+
+        Awkward Array types have the following JSON translations.
+
+           * #ak.types.PrimitiveType: converted into JSON booleans and numbers.
+           * #ak.types.OptionType: missing values are converted into None.
+           * #ak.types.ListType: converted into JSON lists.
+           * #ak.types.RegularType: also converted into JSON lists. JSON (and
+             Python) forms lose information about the regularity of list
+             lengths.
+           * #ak.types.ListType with parameter `"__array__"` equal to
+             `"__bytestring__"` or `"__string__"`: converted into JSON strings.
+           * #ak.types.RecordArray without field names: converted into JSON
+             objects with numbers as strings for keys.
+           * #ak.types.RecordArray with field names: converted into JSON
+             objects.
+           * #ak.types.UnionArray: JSON data are naturally heterogeneous.
+
+        See also #ak.to_json and #ak.from_json.
+        """
+        return awkward1.operations.convert.to_json(self,
+                                                   destination,
+                                                   pretty,
+                                                   maxdecimals,
+                                                   buffersize)
+
+    @property
+    def nbytes(self):
+        """
+        The total number of bytes in all the #ak.layout.Index,
+        #ak.layout.Identities, and #ak.layout.NumpyArray buffers in this
+        array tree.
+
+        Note: this calculation takes overlapping buffers into account, to the
+        extent that overlaps are not double-counted, but overlaps are currently
+        assumed to be complete subsets of one another, and so it is
+        theoretically possible (though unlikely) that this number is an
+        underestimate of the true usage.
+
+        It also does not count buffers that must be kept in memory because
+        of ownership, but are not directly used in the array. Nor does it count
+        the (small) C++ nodes or Python objects that reference the (large)
+        array buffers.
+        """
+        return self._layout.nbytes
+
     def __getitem__(self, where):
         """
         Args:
@@ -1570,24 +1797,25 @@ class ArrayBuilder(Sequence):
        * #real: appends a floating-point value.
        * #bytestring: appends an unencoded string (raw bytes).
        * #string: appends a UTF-8 encoded string.
-       * #beginlist: begins filling a list; must be closed with #endlist.
-       * #endlist: ends a list.
-       * #begintuple: begins filling a tuple; must be closed with #endtuple.
+       * #begin_list: begins filling a list; must be closed with #end_list.
+       * #end_list: ends a list.
+       * #begin_tuple: begins filling a tuple; must be closed with #end_tuple.
        * #index: selects a tuple slot to fill; must be followed by a command
          that actually fills that slot.
-       * #endtuple: ends a tuple.
-       * #beginrecord: begins filling a record; must be closed with #endrecord.
+       * #end_tuple: ends a tuple.
+       * #begin_record: begins filling a record; must be closed with
+         #end_record.
        * #field: selects a record field to fill; must be followed by a command
          that actually fills that field.
-       * #endrecord: ends a record.
+       * #end_record: ends a record.
        * #append: generic method for filling #null, #boolean, #integer, #real,
          #bytestring, #string, #ak.Array, #ak.Record, or arbitrary Python data.
          When filling from #ak.Array or #ak.Record, the output holds references
          to the original data, rather than copying.
        * #extend: appends all the items from an #ak.Array (by reference).
-       * #list: context manager for #beginlist and #endlist.
-       * #tuple: context manager for #begintuple and #endtuple.
-       * #record: context manager for #beginrecord and #endrecord.
+       * #list: context manager for #begin_list and #end_list.
+       * #tuple: context manager for #begin_tuple and #end_tuple.
+       * #record: context manager for #begin_record and #end_record.
 
     ArrayBuilders can be used in [Numba](http://numba.pydata.org/): they can
     be passed as arguments to a Numba-compiled function or returned as return
@@ -1632,7 +1860,7 @@ class ArrayBuilder(Sequence):
     be considered the "least effort" approach.
     """
 
-    def __init__(self, behavior=None, initial=1024, resize=2.0):
+    def __init__(self, behavior=None, initial=1024, resize=1.5):
         self._layout = awkward1.layout.ArrayBuilder(initial=initial,
                                                     resize=resize)
         self.behavior = behavior
@@ -1877,7 +2105,7 @@ class ArrayBuilder(Sequence):
 
     def begin_list(self):
         """
-        Begins filling a list; must be closed with #endlist.
+        Begins filling a list; must be closed with #end_list.
 
         For example,
 
@@ -1908,7 +2136,7 @@ class ArrayBuilder(Sequence):
     def begin_tuple(self, numfields):
         """
         Begins filling a tuple with `numfields` fields; must be closed with
-        #endtuple.
+        #end_tuple.
 
         For example,
 
@@ -1933,11 +2161,11 @@ class ArrayBuilder(Sequence):
         """
         Args:
             i (int): The tuple slot to fill.
-        Returns:
-            The #ak.ArrayBuilder, so that it can be chained with the value
-                that fills the slot.
 
-        Prepares to fill a tuple slot; see #begintuple for an example.
+        This method also returns the #ak.ArrayBuilder, so that it can be
+        chained with the value that fills the slot.
+
+        Prepares to fill a tuple slot; see #begin_tuple for an example.
         """
         self._layout.index(i)
         return self
@@ -1951,7 +2179,7 @@ class ArrayBuilder(Sequence):
     def begin_record(self, name=None):
         """
         Begins filling a record with an optional `name`; must be closed with
-        #endrecord.
+        #end_record.
 
         For example,
 
@@ -1981,11 +2209,11 @@ class ArrayBuilder(Sequence):
         """
         Args:
             key (str): The field key to fill.
-        Returns:
-            The #ak.ArrayBuilder, so that it can be chained with the value
-                that fills the slot.
 
-        Prepares to fill a field; see #beginrecord for an example.
+        This method also returns the #ak.ArrayBuilder, so that it can be
+        chained with the value that fills the slot.
+
+        Prepares to fill a field; see #begin_record for an example.
         """
         self._layout.field(key)
         return self
@@ -2055,7 +2283,7 @@ class ArrayBuilder(Sequence):
         def __init__(self, arraybuilder):
             self._arraybuilder = arraybuilder
 
-        def __repr__(self):
+        def __repr__(self, limit_value=40, limit_total=85):
             snapshot = self._arraybuilder.snapshot()
             value = self._arraybuilder.__str__(limit_value=limit_value,
                                                snapshot=snapshot)
@@ -2072,7 +2300,7 @@ class ArrayBuilder(Sequence):
                                                             type)
 
     class List(_Nested):
-        _name = "List"
+        _name = "list"
 
         def __enter__(self):
             self._arraybuilder.begin_list()
@@ -2082,8 +2310,8 @@ class ArrayBuilder(Sequence):
 
     def list(self):
         """
-        Context manager to prevent unpaired #beginlist and #endlist. The
-        example in the #beginlist documentation can be rewritten as
+        Context manager to prevent unpaired #begin_list and #end_list. The
+        example in the #begin_list documentation can be rewritten as
 
             with builder.list():
                 builder.real(1.1)
@@ -2105,7 +2333,7 @@ class ArrayBuilder(Sequence):
         return self.List(self)
 
     class Tuple(_Nested):
-        _name = "Tuple"
+        _name = "tuple"
 
         def __init__(self, arraybuilder, numfields):
             super(ArrayBuilder.Tuple, self).__init__(arraybuilder)
@@ -2119,8 +2347,8 @@ class ArrayBuilder(Sequence):
 
     def tuple(self, numfields):
         """
-        Context manager to prevent unpaired #begintuple and #endtuple. The
-        example in the #begintuple documentation can be rewritten as
+        Context manager to prevent unpaired #begin_tuple and #end_tuple. The
+        example in the #begin_tuple documentation can be rewritten as
 
             with builder.tuple(3):
                 builder.index(0).integer(1)
@@ -2141,7 +2369,7 @@ class ArrayBuilder(Sequence):
         return self.Tuple(self, numfields)
 
     class Record(_Nested):
-        _name = "Record"
+        _name = "record"
 
         def __init__(self, arraybuilder, name):
             super(ArrayBuilder.Record, self).__init__(arraybuilder)
@@ -2155,8 +2383,8 @@ class ArrayBuilder(Sequence):
 
     def record(self, name=None):
         """
-        Context manager to prevent unpaired #beginrecord and #endrecord. The
-        example in the #beginrecord documentation can be rewritten as
+        Context manager to prevent unpaired #begin_record and #end_record. The
+        example in the #begin_record documentation can be rewritten as
 
             with builder.record("points"):
                 builder.field("x").real(1)

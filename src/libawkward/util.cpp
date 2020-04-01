@@ -3931,7 +3931,7 @@ namespace awkward {
         length);
     }
 
-    template<>
+    template <>
     int8_t awkward_index_getitem_at_nowrap<int8_t>(
       const int8_t* ptr,
       int64_t offset,
@@ -3941,7 +3941,7 @@ namespace awkward {
         offset,
         at);
     }
-    template<>
+    template <>
     uint8_t awkward_index_getitem_at_nowrap<uint8_t>(
       const uint8_t* ptr,
       int64_t offset,
@@ -3951,7 +3951,7 @@ namespace awkward {
         offset,
         at);
     }
-    template<>
+    template <>
     int32_t awkward_index_getitem_at_nowrap<int32_t>(
       const int32_t* ptr,
       int64_t offset,
@@ -3961,7 +3961,7 @@ namespace awkward {
         offset,
         at);
     }
-    template<>
+    template <>
     uint32_t awkward_index_getitem_at_nowrap<uint32_t>(
       const uint32_t* ptr,
       int64_t offset,
@@ -3971,7 +3971,7 @@ namespace awkward {
         offset,
         at);
     }
-    template<>
+    template <>
     int64_t awkward_index_getitem_at_nowrap<int64_t>(
       const int64_t* ptr,
       int64_t offset,
@@ -3982,7 +3982,7 @@ namespace awkward {
         at);
     }
 
-    template<>
+    template <>
     void awkward_index_setitem_at_nowrap<int8_t>(
       int8_t* ptr,
       int64_t offset,
@@ -3994,7 +3994,7 @@ namespace awkward {
         at,
         value);
     }
-    template<>
+    template <>
     void awkward_index_setitem_at_nowrap<uint8_t>(
       uint8_t* ptr,
       int64_t offset,
@@ -4006,7 +4006,7 @@ namespace awkward {
         at,
         value);
     }
-    template<>
+    template <>
     void awkward_index_setitem_at_nowrap<int32_t>(
       int32_t* ptr,
       int64_t offset,
@@ -4018,7 +4018,7 @@ namespace awkward {
         at,
         value);
     }
-    template<>
+    template <>
     void awkward_index_setitem_at_nowrap<uint32_t>(
       uint32_t* ptr,
       int64_t offset,
@@ -4030,7 +4030,7 @@ namespace awkward {
         at,
         value);
     }
-    template<>
+    template <>
     void awkward_index_setitem_at_nowrap<int64_t>(
       int64_t* ptr,
       int64_t offset,
