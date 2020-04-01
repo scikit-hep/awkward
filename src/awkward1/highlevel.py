@@ -293,12 +293,14 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
                                                              self._layout,
                                                              self._behavior)
 
-            limit_type = limit_total - len(value) - len("<Array.mask  type=>")
-            type = repr(str(self.type))
-            if len(type) > limit_type:
-                type = type[:(limit_type - 4)] + "..." + type[-1]
+            name = getattr(self, "__name__", type(self._array).__name__)
+            limit_type = limit_total - (len(value) + len(name)
+                                        + len("<.mask  type=>"))
+            typestr = repr(str(self.type))
+            if len(typestr) > limit_type:
+                typestr = typestr[:(limit_type - 4)] + "..." + typestr[-1]
 
-            return "<Array.mask {0} type={1}>".format(value, type)
+            return "<{0}.mask {1} type={2}>".format(name, value, typestr)
 
         def __getitem__(self, where):
             return awkward1.operations.structure.mask(self._array,
@@ -1046,12 +1048,13 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
                                                          self._layout,
                                                          self._behavior)
 
-        limit_type = limit_total - len(value) - len("<Array  type=>")
-        type = repr(str(self.type))
-        if len(type) > limit_type:
-            type = type[:(limit_type - 4)] + "..." + type[-1]
+        name = getattr(self, "__name__", type(self).__name__)
+        limit_type = limit_total - (len(value) + len(name) + len("<  type=>"))
+        typestr = repr(str(self.type))
+        if len(typestr) > limit_type:
+            typestr = typestr[:(limit_type - 4)] + "..." + typestr[-1]
 
-        return "<Array {0} type={1}>".format(value, type)
+        return "<{0} {1} type={2}>".format(name, value, typestr)
 
     def __array__(self, *args, **kwargs):
         """
@@ -1156,8 +1159,7 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         return awkward1._connect._numpy.array_ufunc(ufunc,
                                                     method,
                                                     inputs,
-                                                    kwargs,
-                                                    self._behavior)
+                                                    kwargs)
 
     def __array_function__(self, func, types, args, kwargs):
         """
@@ -1261,7 +1263,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
     inside the Numba-compiled function; to make outputs, consider
     #ak.ArrayBuilder.
 
-    See also #ak.Array.
+    See also #ak.Array and #ak.behavior.
     """
     def __init__(self, data, behavior=None, with_name=None, check_valid=False):
         if isinstance(data, awkward1.layout.Record):
@@ -1694,12 +1696,13 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
                                                          self._layout,
                                                          self._behavior)[1:-1]
 
-        limit_type = limit_total - len(value) - len("<Record  type=>")
-        type = repr(str(self.type))
-        if len(type) > limit_type:
-            type = type[:(limit_type - 4)] + "..." + type[-1]
+        name = getattr(self, "__name__", type(self).__name__)
+        limit_type = limit_total - (len(value) + len(name) + len("<  type=>"))
+        typestr = repr(str(self.type))
+        if len(typestr) > limit_type:
+            typestr = typestr[:(limit_type - 4)] + "..." + typestr[-1]
 
-        return "<Record {0} type={1}>".format(value, type)
+        return "<{0} {1} type={2}>".format(name, value, typestr)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         """
@@ -1718,8 +1721,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         return awkward1._connect._numpy.array_ufunc(ufunc,
                                                     method,
                                                     inputs,
-                                                    kwargs,
-                                                    self._behavior)
+                                                    kwargs)
 
     @property
     def numba_type(self):
@@ -1984,11 +1986,11 @@ class ArrayBuilder(Sequence):
 
         limit_type = limit_total - len(value) - len("<ArrayBuilder  type=>")
         typestrs = awkward1._util.typestrs(self._behavior)
-        type = repr(str(snapshot.type(typestrs)))
-        if len(type) > limit_type:
-            type = type[:(limit_type - 4)] + "..." + type[-1]
+        typestr = repr(str(snapshot.type(typestrs)))
+        if len(typestr) > limit_type:
+            typestr = typestr[:(limit_type - 4)] + "..." + typestr[-1]
 
-        return "<ArrayBuilder {0} type={1}>".format(value, type)
+        return "<ArrayBuilder {0} type={1}>".format(value, typestr)
 
     def __array__(self, *args, **kwargs):
         """
@@ -2012,8 +2014,7 @@ class ArrayBuilder(Sequence):
         return awkward1._connect._numpy.array_ufunc(ufunc,
                                                     method,
                                                     inputs,
-                                                    kwargs,
-                                                    self._behavior)
+                                                    kwargs)
 
     def __array_function__(self, func, types, args, kwargs):
         """
@@ -2183,25 +2184,34 @@ class ArrayBuilder(Sequence):
 
         For example,
 
-            builder.begin_record("points")
-            builder.field("x").real(1)
-            builder.field("y").real(1.1)
-            builder.end_record()
-            builder.begin_record("points")
-            builder.field("x").real(2)
-            builder.field("y").real(2.2)
-            builder.end_record()
+            >>> builder = ak.ArrayBuilder()
+            >>> builder.begin_record("points")
+            >>> builder.field("x").real(1)
+            >>> builder.field("y").real(1.1)
+            >>> builder.end_record()
+            >>> builder.begin_record("points")
+            >>> builder.field("x").real(2)
+            >>> builder.field("y").real(2.2)
+            >>> builder.end_record()
 
         produces
 
+            >>> ak.to_list(builder.snapshot())
             [{"x": 1.0, "y": 1.1}, {"x": 2.0, "y": 2.2}]
 
         with type
 
-            2 * struct[["x", "y"], [float64, float64], parameters={"__record__": "points"}]
+            >>> ak.type(builder.snapshot())
+            2 * points["x": float64, "y": float64]
+
+        The record type is named `"points"` because its `"__record__"`
+        parameter is set to that value:
+
+            >>> builder.snapshot().layout.parameters
+            {'__record__': 'points'}
 
         The `"__record__"` parameter can be used to add behavior to the records
-        in the array, as described in #ak.Array and #ak.Record.
+        in the array, as described in #ak.Array, #ak.Record, and #ak.behavior.
         """
         self._layout.beginrecord(name)
 
@@ -2291,13 +2301,13 @@ class ArrayBuilder(Sequence):
             limit_type = (limit_total - len(value)
                           - len("<ArrayBuilder.  type=>") - len(self._name))
             typestrs = awkward1._util.typestrs(self._arraybuilder._behavior)
-            type = repr(str(snapshot.type(typestrs)))
-            if len(type) > limit_type:
-                type = type[:(limit_type - 4)] + "..." + type[-1]
+            typestr = repr(str(snapshot.type(typestrs)))
+            if len(typestr) > limit_type:
+                typestr = typestr[:(limit_type - 4)] + "..." + typestr[-1]
 
             return "<ArrayBuilder.{0} {1} type={2}>".format(self._name,
                                                             value,
-                                                            type)
+                                                            typestr)
 
     class List(_Nested):
         _name = "list"

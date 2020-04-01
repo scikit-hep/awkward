@@ -179,6 +179,21 @@ namespace awkward {
     return util::parameters_equal(parameters_, other);
   }
 
+  bool
+  Content::parameter_isstring(const std::string& key) const {
+    return util::parameter_isstring(parameters_, key);
+  }
+
+  bool
+  Content::parameter_isname(const std::string& key) const {
+    return util::parameter_isname(parameters_, key);
+  }
+
+  const std::string
+  Content::parameter_asstring(const std::string& key) const {
+    return util::parameter_asstring(parameters_, key);
+  }
+
   const ContentPtr
   Content::merge_as_union(const ContentPtr& other) const {
     int64_t mylength = length();

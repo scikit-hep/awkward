@@ -96,6 +96,9 @@ Free-form parameters associated with every array node as a dict from parameter
 name to its JSON-like value. Some parameters are special and are used to assign
 behaviors to the data.
 
+Note that the dict returned by this property is a *copy* of the array node's
+parameters. *Changing the dict will not change the array!*
+
 See :doc:`ak.behavior` and :doc:`_auto/ak.Array`.
 
 ak.layout.Content.purelist_depth

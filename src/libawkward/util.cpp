@@ -200,6 +200,62 @@ namespace awkward {
       return true;
     }
 
+    bool
+    parameter_isstring(const Parameters& parameters, const std::string& key) {
+      auto item = parameters.find(key);
+      if (item == parameters.end()) {
+        return false;
+      }
+      rj::Document mine;
+      mine.Parse<rj::kParseNanAndInfFlag>(item->second.c_str());
+      return mine.IsString();
+    }
+
+    bool
+    parameter_isname(const Parameters& parameters, const std::string& key) {
+      auto item = parameters.find(key);
+      if (item == parameters.end()) {
+        return false;
+      }
+      rj::Document mine;
+      mine.Parse<rj::kParseNanAndInfFlag>(item->second.c_str());
+      if (!mine.IsString()) {
+        return false;
+      }
+      std::string value = mine.GetString();
+      if (value.empty()) {
+        return false;
+      }
+      if (!((value[0] >= 'a'  &&  value[0] <= 'z')  || 
+            (value[0] >= 'A'  &&  value[0] <= 'Z')  || 
+            (value[0] == '_'))) {
+        return false; 
+      }
+      for (size_t i = 1;  i < value.length();  i++) {
+        if (!((value[i] >= 'a'  &&  value[i] <= 'z')  || 
+              (value[i] >= 'A'  &&  value[i] <= 'Z')  || 
+              (value[i] >= '0'  &&  value[i] <= '9')  || 
+              (value[i] == '_'))) {
+          return false; 
+        }
+      }
+      return true;
+    }
+
+    const std::string
+    parameter_asstring(const Parameters& parameters, const std::string& key) {
+      auto item = parameters.find(key);
+      if (item == parameters.end()) {
+        throw std::runtime_error("parameter is null");
+      }
+      rj::Document mine;
+      mine.Parse<rj::kParseNanAndInfFlag>(item->second.c_str());
+      if (!mine.IsString()) {
+        throw std::runtime_error("parameter is not a string");
+      }
+      return mine.GetString();
+    }
+
     std::string
     gettypestr(const Parameters& parameters, const TypeStrs& typestrs) {
       auto item = parameters.find("__record__");
