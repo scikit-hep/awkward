@@ -1,6 +1,9 @@
 ak.behavior
 -----------
 
+Motivation
+==========
+
 A data structure is defined both in terms of the information it encodes and
 in how it can be used. For example, a hash-table is not just a buffer, it's
 also the "get" and "set" operations that make the buffer usable as a key-value
@@ -14,7 +17,7 @@ Object-oriented programming unites data with its operations. This is a
 conceptual improvement for data analysts because functions like "distance
 between this latitude-longitude point and another on a spherical globe" can
 be bound to the objects that represent latitude-longitude points. It
-matches the way that data analysts want to think about their data.
+matches the way that data analysts usually think about their data.
 
 However, if these methods are saved in the data, or are written in a way
 that will only work for one version of the data structures, then it becomes
@@ -32,13 +35,18 @@ they only require the ``"latlon"`` to have ``lat`` and ``lon`` fields, so
 different versions of the data can have additional fields or even be
 embedded in different structures.
 
-Metadata can be embedded in data using an array node's **parameters**, and
-parameter-dependent operations can be defined using **behavior**. A global
-mapping from parameters to behavior is in a dict called
+Parameters and behaviors
+========================
+
+In Awkward Array, metadata are embedded in data using an array node's
+**parameters**, and parameter-dependent operations can be defined using
+**behavior**. A global mapping from parameters to behavior is in a dict called
+``ak.behavior``:
 
 .. code-block:: python
 
-    ak.behavior
+    >>> import awkward1 as ak
+    >>> ak.behavior
 
 but behavior dicts can also be loaded into :doc:`_auto/ak.Array`,
 :doc:`_auto/ak.Record`, and :doc:`_auto/ak.ArrayBuilder` objects as a
@@ -72,11 +80,198 @@ In the following example, we create two nested arrays of records with fields
                     [{"x": 6.9, "y": 7}, {"x": 7.9, "y": 8}, {"x": 8.9, "y": 9}]],
                    with_name="point")
 
-The name is assigned through a special ``"__record__"`` parameter, which we can
-see in the array's type:
+The name appears in the way the type is presented as a string (a departure from
+`Datashape notation <https://datashape.readthedocs.io/>`__):
 
 .. code-block:: python
 
     >>> ak.type(one)
     5 * var * point["x": int64, "y": float64]
 
+and it may be accessed as the ``"__record__"`` property, through the
+`ak.Array.layout <_auto/ak.Array.html#ak-array-layout>`_:
+
+.. code-block:: python
+
+    >>> one.layout
+    <ListOffsetArray64>
+        <offsets><Index64 i="[0 3 3 5 6 9]" offset="0" length="6"/></offsets>
+        <content><RecordArray>
+            <parameters>
+                <param key="__record__">"point"</param>
+            </parameters>
+            <field index="0" key="x">
+                <NumpyArray format="l" shape="9" data="1 2 3 4 5 6 7 8 9"/>
+            </field>
+            <field index="1" key="y">
+                <NumpyArray format="d" shape="9" data="1.1 2.2 3.3 4.4 5.5 6.6 7.7 8.8 9.9"/>
+            </field>
+        </RecordArray></content>
+    </ListOffsetArray64>
+    >>> one.layout.content.parameters
+    {'__record__': 'point'}
+
+We have to dig into the layout's content because the ``"__record__"`` parameter
+is set on the :doc:`ak.layout.RecordArray`, which is buried inside of a
+:doc:`ak.layout.ListOffsetArray`.
+
+Alternatively, we can navigate to a single :doc:`_auto/ak.Record` first:
+
+.. code-block:: python
+
+    >>> one[0, 0]
+    <Record {x: 1, y: 1.1} type='point["x": int64, "y": float64]'>
+    >>> one[0, 0].layout.parameters
+    {'__record__': 'point'}
+
+Adding behavior to records
+==========================
+
+Suppose we want the points in the above example to be able to calculate
+distances to other points. We can do this by creating a subclass of
+:doc:`_auto/ak.Record` that has the new methods and associating it with
+the ``"__record__"`` name.
+
+.. code-block:: python
+
+    class Point(ak.Record):
+        def distance(self, other):
+            return np.sqrt((self.x - other.x)**2 + (self.y - other.y)**2)
+
+    ak.behavior["point"] = Point
+
+Now ``one[0, 0]`` is instantiated as a ``Point``, rather than a ``Record``,
+
+.. code-block:: python
+
+    >>> one[0, 0]
+    <Point {x: 1, y: 1.1} type='point["x": int64, "y": float64]'>
+
+and it has the ``distance`` method.
+
+.. code-block:: python
+
+    >>> for xs, ys in zip(one, two):
+    ...     for x, y in zip(xs, ys):
+    ...         print(x.distance(y))
+    0.14142135623730953
+    0.22360679774997916
+    0.31622776601683783
+    0.4123105625617664
+    0.5099019513592784
+    0.6082762530298216
+    0.7071067811865477
+    0.8062257748298556
+    0.905538513813742
+
+Looping over data in Python is inconvenient and slow; we want to compute
+quantities like this with array-at-a-time methods, but ``distance`` is
+bound to a :doc:`_auto/ak.Record`, not an :doc:`_auto/ak.Array` of records.
+
+.. code-block:: python
+
+    >>> one.distance(two)
+    AttributeError: no field named 'distance'
+
+To add ``distance`` as a method on arrays of points, create a subclass of
+:doc:`_auto/ak.Array` and attach that as ``ak.behavior[".", "point"]`` for
+"array of points."
+
+.. code-block:: python
+
+    class PointArray(ak.Array):
+        def distance(self, other):
+            return np.sqrt((self.x - other.x)**2 + (self.y - other.y)**2)
+
+    ak.behavior[".", "point"] = PointArray
+
+Now ``one[0]`` is a ``PointArray`` and can compute ``distance`` on arrays at a
+time. Thanks to NumPy's
+`universal function <https://docs.scipy.org/doc/numpy/reference/ufuncs.html>`__
+(ufunc) syntax, the expression is the same (and could perhaps be implemented
+once and used by both ``Point`` and ``PointArray``).
+
+.. code-block:: python
+
+    >>> one[0]
+    <PointArray [{x: 1, y: 1.1}, ... {x: 3, y: 3.3}] type='3 * point["x": int64, "y"...'>
+    >>> one[0].distance(two[0])
+    <Array [0.141, 0.224, 0.316] type='3 * float64'>
+
+But ``one`` itself is an ``Array`` of ``PointArrays``, and does not apply.
+
+.. code-block:: python
+
+    >>> one
+    <Array [[{x: 1, y: 1.1}, ... x: 9, y: 9.9}]] type='5 * var * point["x": int64, "...'>
+    >>> one.distance(two)
+    AttributeError: no field named 'distance'
+
+We can make the assignment work at all levels of list-depth by using a ``"*"``
+instead of a ``"."``.
+
+.. code-block:: python
+
+    ak.behavior["*", "point"] = PointArray
+
+One last caveat: our ``one`` array was created *before* this behavior was
+assigned, so it needs to be recreated to be a member of the new class. The
+normal :doc:`_auto/ak.Array` constructor is sufficient for this. This is only
+an issue if you're working interactively (but something to think about when
+debugging!).
+
+.. code-block:: python
+
+    >>> one = ak.Array(one)
+    >>> two = ak.Array(two)
+
+Now it works, and again we're taking advantage of the fact that the expression
+for ``distance`` based on ufuncs works equally well on Awkward Arrays.
+
+.. code-block:: python
+
+    >>> one
+    <PointArray [[{x: 1, y: 1.1}, ... x: 9, y: 9.9}]] type='5 * var * point["x": int...'>
+    >>> one.distance(two)
+    <Array [[0.141, 0.224, ... 0.806, 0.906]] type='5 * var * float64'>
+
+**In most cases, you want to apply array-of-records for all levels of list-depth:** use ``ak.behavior["*", record_name]``.
+
+Overriding NumPy ufuncs and binary operators
+============================================
+
+HERE
+
+
+
+
+
+Adding behavior to arrays
+=========================
+
+Less often, you may want to add behavior to an array that does not contain
+records. A good example of that is strings: strings are not a special data type
+in Awkward Array as they are in many other libraries, they are a behavior
+overlaid on arrays.
+
+There are four predefined string behaviors:
+
+   * :doc:`_auto/ak.behaviors.string.CharBehavior`: an array of UTF-8 encoded characters;
+   * :doc:`_auto/ak.behaviors.string.ByteBehavior`: an array of unencoded characters;
+   * :doc:`_auto/ak.behaviors.string.StringBehavior`: an array of variable-length UTF-8 encoded strings;
+   * :doc:`_auto/ak.behaviors.string.ByteStringBehavior`: an array of variable-length unencoded bytestrings.
+
+The character behaviors add a screen representation (``__str__`` and
+``__repr__``) while the string behaviors additionally override equality
+(``__eq__`` and ``__ne__``) to compare strings as units, rather than letting
+the ``np.equal`` ufunc descend into bytes.
+
+.. code-block:: python
+
+    >>> ak.Array(["one", "two", "three"]) == ak.Array(["1", "TWO", "three"])
+    <Array [False, False, True] type='3 * bool'>
+
+HERE
+
+Overriding behavior in Numba
+============================

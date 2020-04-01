@@ -293,12 +293,14 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
                                                              self._layout,
                                                              self._behavior)
 
-            limit_type = limit_total - len(value) - len("<Array.mask  type=>")
-            type = repr(str(self.type))
-            if len(type) > limit_type:
-                type = type[:(limit_type - 4)] + "..." + type[-1]
+            name = getattr(self, "__name__", type(self._array).__name__)
+            limit_type = limit_total - (len(value) + len(name)
+                                        + len("<.mask  type=>"))
+            typestr = repr(str(self.type))
+            if len(typestr) > limit_type:
+                typestr = typestr[:(limit_type - 4)] + "..." + typestr[-1]
 
-            return "<Array.mask {0} type={1}>".format(value, type)
+            return "<{0}.mask {1} type={2}>".format(name, value, typestr)
 
         def __getitem__(self, where):
             return awkward1.operations.structure.mask(self._array,
@@ -1046,12 +1048,13 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
                                                          self._layout,
                                                          self._behavior)
 
-        limit_type = limit_total - len(value) - len("<Array  type=>")
-        type = repr(str(self.type))
-        if len(type) > limit_type:
-            type = type[:(limit_type - 4)] + "..." + type[-1]
+        name = getattr(self, "__name__", type(self).__name__)
+        limit_type = limit_total - (len(value) + len(name) + len("<  type=>"))
+        typestr = repr(str(self.type))
+        if len(typestr) > limit_type:
+            typestr = typestr[:(limit_type - 4)] + "..." + typestr[-1]
 
-        return "<Array {0} type={1}>".format(value, type)
+        return "<{0} {1} type={2}>".format(name, value, typestr)
 
     def __array__(self, *args, **kwargs):
         """
@@ -1694,12 +1697,13 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
                                                          self._layout,
                                                          self._behavior)[1:-1]
 
-        limit_type = limit_total - len(value) - len("<Record  type=>")
-        type = repr(str(self.type))
-        if len(type) > limit_type:
-            type = type[:(limit_type - 4)] + "..." + type[-1]
+        name = getattr(self, "__name__", type(self).__name__)
+        limit_type = limit_total - (len(value) + len(name) + len("<  type=>"))
+        typestr = repr(str(self.type))
+        if len(typestr) > limit_type:
+            typestr = typestr[:(limit_type - 4)] + "..." + typestr[-1]
 
-        return "<Record {0} type={1}>".format(value, type)
+        return "<{0} {1} type={2}>".format(name, value, typestr)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         """
@@ -1984,11 +1988,11 @@ class ArrayBuilder(Sequence):
 
         limit_type = limit_total - len(value) - len("<ArrayBuilder  type=>")
         typestrs = awkward1._util.typestrs(self._behavior)
-        type = repr(str(snapshot.type(typestrs)))
-        if len(type) > limit_type:
-            type = type[:(limit_type - 4)] + "..." + type[-1]
+        typestr = repr(str(snapshot.type(typestrs)))
+        if len(typestr) > limit_type:
+            typestr = typestr[:(limit_type - 4)] + "..." + typestr[-1]
 
-        return "<ArrayBuilder {0} type={1}>".format(value, type)
+        return "<ArrayBuilder {0} type={1}>".format(value, typestr)
 
     def __array__(self, *args, **kwargs):
         """
@@ -2300,13 +2304,13 @@ class ArrayBuilder(Sequence):
             limit_type = (limit_total - len(value)
                           - len("<ArrayBuilder.  type=>") - len(self._name))
             typestrs = awkward1._util.typestrs(self._arraybuilder._behavior)
-            type = repr(str(snapshot.type(typestrs)))
-            if len(type) > limit_type:
-                type = type[:(limit_type - 4)] + "..." + type[-1]
+            typestr = repr(str(snapshot.type(typestrs)))
+            if len(typestr) > limit_type:
+                typestr = typestr[:(limit_type - 4)] + "..." + typestr[-1]
 
             return "<ArrayBuilder.{0} {1} type={2}>".format(self._name,
                                                             value,
-                                                            type)
+                                                            typestr)
 
     class List(_Nested):
         _name = "list"
