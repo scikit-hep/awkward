@@ -1159,8 +1159,7 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         return awkward1._connect._numpy.array_ufunc(ufunc,
                                                     method,
                                                     inputs,
-                                                    kwargs,
-                                                    self._behavior)
+                                                    kwargs)
 
     def __array_function__(self, func, types, args, kwargs):
         """
@@ -1722,8 +1721,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         return awkward1._connect._numpy.array_ufunc(ufunc,
                                                     method,
                                                     inputs,
-                                                    kwargs,
-                                                    self._behavior)
+                                                    kwargs)
 
     @property
     def numba_type(self):
@@ -2016,8 +2014,7 @@ class ArrayBuilder(Sequence):
         return awkward1._connect._numpy.array_ufunc(ufunc,
                                                     method,
                                                     inputs,
-                                                    kwargs,
-                                                    self._behavior)
+                                                    kwargs)
 
     def __array_function__(self, func, types, args, kwargs):
         """

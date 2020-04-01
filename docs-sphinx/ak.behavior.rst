@@ -73,11 +73,11 @@ In the following example, we create two nested arrays of records with fields
                     [{"x": 6, "y": 6.6}],
                     [{"x": 7, "y": 7.7}, {"x": 8, "y": 8.8}, {"x": 9, "y": 9.9}]],
                    with_name="point")
-    two = ak.Array([[{"x": 0.9, "y": 1}, {"x": 1.9, "y": 2}, {"x": 2.9, "y": 3}],
+    two = ak.Array([[{"x": 0.9, "y": 1}, {"x": 2, "y": 2.2}, {"x": 2.9, "y": 3}],
                     [],
-                    [{"x": 3.9, "y": 4}, {"x": 4.9, "y": 5}],
+                    [{"x": 3.9, "y": 4}, {"x": 5, "y": 5.5}],
                     [{"x": 5.9, "y": 6}],
-                    [{"x": 6.9, "y": 7}, {"x": 7.9, "y": 8}, {"x": 8.9, "y": 9}]],
+                    [{"x": 6.9, "y": 7}, {"x": 8, "y": 8.8}, {"x": 8.9, "y": 9}]],
                    with_name="point")
 
 The name appears in the way the type is presented as a string (a departure from
@@ -95,16 +95,16 @@ and it may be accessed as the ``"__record__"`` property, through the
 
     >>> one.layout
     <ListOffsetArray64>
-        <offsets><Index64 i="[0 3 3 5 6 9]" offset="0" length="6"/></offsets>
+        <offsets><Index64 i="[0 3 3 5 6 9]" offset="0" length="6" at="0x55eb8da65e90"/></offsets>
         <content><RecordArray>
             <parameters>
                 <param key="__record__">"point"</param>
             </parameters>
             <field index="0" key="x">
-                <NumpyArray format="l" shape="9" data="1 2 3 4 5 6 7 8 9"/>
+                <NumpyArray format="l" shape="9" data="1 2 3 4 5 6 7 8 9" at="0x55eb8da5c2e0"/>
             </field>
             <field index="1" key="y">
-                <NumpyArray format="d" shape="9" data="1.1 2.2 3.3 4.4 5.5 6.6 7.7 8.8 9.9"/>
+                <NumpyArray format="d" shape="9" data="1.1 2.2 3.3 4.4 5.5 6.6 7.7 8.8 9.9" at="0x55eb8da63370"/>
             </field>
         </RecordArray></content>
     </ListOffsetArray64>
@@ -155,13 +155,13 @@ and it has the ``distance`` method.
     ...     for x, y in zip(xs, ys):
     ...         print(x.distance(y))
     0.14142135623730953
-    0.22360679774997916
+    0.0
     0.31622776601683783
     0.4123105625617664
-    0.5099019513592784
+    0.0
     0.6082762530298216
     0.7071067811865477
-    0.8062257748298556
+    0.0
     0.905538513813742
 
 Looping over data in Python is inconvenient and slow; we want to compute
@@ -196,7 +196,7 @@ once and used by both ``Point`` and ``PointArray``).
     >>> one[0]
     <PointArray [{x: 1, y: 1.1}, ... {x: 3, y: 3.3}] type='3 * point["x": int64, "y"...'>
     >>> one[0].distance(two[0])
-    <Array [0.141, 0.224, 0.316] type='3 * float64'>
+    <Array [0.141, 0, 0.316] type='3 * float64'>
 
 But ``one`` itself is an ``Array`` of ``PointArrays``, and does not apply.
 
@@ -233,18 +233,71 @@ for ``distance`` based on ufuncs works equally well on Awkward Arrays.
     >>> one
     <PointArray [[{x: 1, y: 1.1}, ... x: 9, y: 9.9}]] type='5 * var * point["x": int...'>
     >>> one.distance(two)
-    <Array [[0.141, 0.224, ... 0.806, 0.906]] type='5 * var * float64'>
+    <Array [[0.141, 0, 0.316, ... 0.707, 0, 0.906]] type='5 * var * float64'>
 
 **In most cases, you want to apply array-of-records for all levels of list-depth:** use ``ak.behavior["*", record_name]``.
 
 Overriding NumPy ufuncs and binary operators
 ============================================
 
-HERE
+The :doc:`_auto/ak.Array` class overrides Python's binary operators with the
+equivalent ufuncs, so ``__eq__`` actually calls ``np.equal``, for instance.
+This is also true of other basic functions, like ``__abs__`` for overriding
+``abs`` with ``np.absolute``. Each ufunc is then passed down to the leaves
+(deepest sub-elements) of an Awkward data structure.
 
+For example,
 
+.. code-block:: python
 
+    >>> ak.to_list(one == two)
+    [[{'x': False, 'y': False}, {'x': True, 'y': True}, {'x': False, 'y': False}],
+     [],
+     [{'x': False, 'y': False}, {'x': True, 'y': True}],
+     [{'x': False, 'y': False}],
+     [{'x': False, 'y': False}, {'x': True, 'y': True}, {'x': False, 'y': False}]]
 
+We might want to take an object-oriented view in which the ``==`` operation
+applies to points, rather than their components. If we try to do it by adding
+``__eq__`` as a method on ``PointArray``, it would work if the ``PointArray``
+is the top of the data structure, but not if it's nested within another
+structure.
+
+Instead, we should override ``np.equal`` itself. Custom ufunc overrides are
+checked at every step in broadcasting, so the override would be applied if
+point objects are discovered at any level.
+
+.. code-block:: python
+
+    def point_equal(left, right):
+        return np.logical_and(left.x == right.x, left.y == right.y)
+
+    ak.behavior[np.equal, "point", "point"] = point_equal
+
+The above should be read as "override ``np.equal`` for cases in which both
+arguments are ``"point"``."
+
+.. code-block:: python
+
+    >>> ak.to_list(one == two)
+    [[False, True, False], [], [False, True], [False], [False, True, False]]
+
+Similarly for overriding ``abs``
+
+.. code-block:: python
+
+    >>> def point_abs(point):
+    ...     return np.sqrt(point.x**2 + point.y**2)
+    ... 
+    >>> ak.behavior[np.absolute, "point"] = point_abs
+    >>> ak.to_list(abs(one))
+    [[1.4866068747318506, 2.973213749463701, 4.459820624195552],
+     [],
+     [5.946427498927402, 7.433034373659253],
+     [8.919641248391104],
+     [10.406248123122953, 11.892854997854805, 13.379461872586655]]
+
+and all other ufuncs.
 
 Adding behavior to arrays
 =========================

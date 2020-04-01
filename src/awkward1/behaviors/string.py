@@ -66,6 +66,8 @@ awkward1.behavior["string"] = StringBehavior
 awkward1.behavior["__typestr__", "string"] = "string"
 
 def _string_equal(one, two):
+    one, two = one.layout, two.layout
+
     # first condition: string lengths must be the same
     counts1 = numpy.asarray(one.count(axis=-1))
     counts2 = numpy.asarray(two.count(axis=-1))
@@ -98,7 +100,7 @@ def _string_equal(one, two):
     # update strings of the same length with a verdict about their characters
     out[possible] = reduced
 
-    return awkward1.layout.NumpyArray(out)
+    return awkward1.highlevel.Array(awkward1.layout.NumpyArray(out))
 
 awkward1.behavior[numpy.equal, "bytestring", "bytestring"] = _string_equal
 awkward1.behavior[numpy.equal, "string", "string"] = _string_equal
