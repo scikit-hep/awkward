@@ -370,7 +370,7 @@ namespace awkward {
     virtual const ContentPtr
       num(int64_t axis, int64_t depth) const = 0;
 
-    /// @brief Returns (a) an offsets {@list IndexOf Index} and (b) a flattened
+    /// @brief Returns (a) an offsets {@link IndexOf Index} and (b) a flattened
     /// version of the array at some `axis` depth.
     ///
     /// If `axis > 1` (or its negative equivalent), the offsets is empty.
@@ -598,6 +598,7 @@ namespace awkward {
     /// @brief Writes a JSON representation of this array to a `destination`
     /// file.
     ///
+    /// @param destination The file to write into.
     /// @param pretty If `true`, add spacing to make the JSON human-readable.
     /// If `false`, return a compact representation.
     /// @param maxdecimals Maximum number of decimals for floating-point
@@ -741,7 +742,6 @@ namespace awkward {
     ///
     /// @param target The intended length. The output may be longer than this
     /// target length, but not shorter (using {@link ListArrayOf ListArray}).
-    /// @param axis The axis at which to apply padding.
     /// @param clip If `true`, do #rpad_and_clip; if `false`, do #rpad.
     const ContentPtr
       rpad_axis0(int64_t target, bool clip) const;

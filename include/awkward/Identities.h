@@ -148,7 +148,7 @@ namespace awkward {
     virtual const IdentitiesPtr
       getitem_range_nowrap(int64_t start, int64_t stop) const = 0;
 
-    /// @brief Internal function used to calculate #nbytes.
+    /// @brief Internal function used to calculate Content#nbytes.
     ///
     /// @param largest The largest range of bytes used in each
     /// reference-counted pointer (`size_t`).
@@ -156,7 +156,7 @@ namespace awkward {
     /// @note This method of accounting for overlapping buffers is
     /// insufficient: two nodes could use parts of the same buffer in which
     /// one doesn't completely overlap the other. It's not likely, but
-    /// currently the calculation of #nbytes is an underestimate.
+    /// currently the calculation of Content#nbytes is an underestimate.
     virtual void
       nbytes_part(std::map<size_t, int64_t>& largest) const = 0;
 
@@ -181,14 +181,15 @@ namespace awkward {
     /// 
     /// This operation is called
     /// [take](https://docs.scipy.org/doc/numpy/reference/generated/numpy.take.html)
-    /// in NumPy and Arrow, although this #carry is a low-level function that
+    /// in NumPy and Arrow, although this carry is a low-level function that
     /// does not handle negative indexes and is not exposed to the Python
     /// layer. It is used by many operations to pass
     /// filters/rearrangements/duplications from one typed array node to
     /// another without knowing the latter's type.
     ///
-    /// Taking #getitem_at_nowrap as a function from integers to the array's
-    /// item type, `A: [0, len(a)) → T`, and the `carry` array's 
+    /// Taking {@link IdentitiesOf#getitem_at_nowrap getitem_at_nowrap} as a
+    /// function from integers to the array's item type, `A: [0, len(a)) → T`,
+    /// and the `carry` array's
     /// {@link IndexOf#getitem_at_nowrap Index64::getitem_at_nowrap} as a
     /// function `C: [0, len(c)) → [0, len(a))`, this method represents
     /// function composition, `A ∘ C: [0, len(c)) → T`.

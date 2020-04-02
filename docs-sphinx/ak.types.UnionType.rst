@@ -1,7 +1,7 @@
 ak.types.UnionType
 ------------------
 
-HERE
+The type of a :doc:`ak.layout.UnionArray`.
 
 In addition to the properties and methods described in :doc:`ak.types.Type`,
 a UnionType has the following.

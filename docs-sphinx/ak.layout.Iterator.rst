@@ -1,7 +1,7 @@
 ak.layout.Iterator
 ------------------
 
-HERE
+Iterates over :doc:`ak.layout.Content` arrays.
 
 ak.layout.Iterator.__init__
 ===========================

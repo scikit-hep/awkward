@@ -40,7 +40,7 @@ namespace awkward {
     /// @param options Configuration options for building an array;
     /// these are passed to every Builder's constructor.
     /// @param index Contains the accumulated index (like
-    /// {@link IndexedArrayOf#offsets IndexedOptionArray::index}).
+    /// {@link IndexedArrayOf#index IndexedOptionArray::index}).
     /// @param content Builder for the non-missing data.
     OptionBuilder(const ArrayBuilderOptions& options,
                   const GrowableBuffer<int64_t>& index,

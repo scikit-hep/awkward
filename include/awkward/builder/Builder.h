@@ -109,7 +109,7 @@ namespace awkward {
     /// union of record arrays, rather than a record array with union
     /// fields and optional values) and it also sets the `"__record__"`
     /// parameter to later add custom behaviors in Python.
-    /// @check If `true`, actually do a string comparison to see if the
+    /// @param check If `true`, actually do a string comparison to see if the
     /// provided `name` matches the previous `name`; if `false`, assume
     /// that the same pointer means the same string (safe for string
     /// literals).

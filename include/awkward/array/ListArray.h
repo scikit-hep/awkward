@@ -42,6 +42,11 @@ namespace awkward {
     /// If `starts[i] == stops[i]`, there is no constraint on the value of
     /// `starts[i]`. Otherwise, `0 <= starts[i] < len(content)` and
     /// `0 <= stops[i] <= len(content)`.
+    /// @param content Data referenced by the #starts and #stops to build
+    /// nested lists.
+    /// The `content` does not necessarily represent a flattened version of
+    /// this array because a single element may belong to multiple lists or
+    /// no list at all.
     ListArrayOf<T>(const IdentitiesPtr& identities,
                    const util::Parameters& parameters,
                    const IndexOf<T>& starts,
@@ -112,8 +117,8 @@ namespace awkward {
 
     /// @brief Returns this array as a
     /// {@link ListOffsetArrayOf ListOffsetArray} with
-    /// 64-bit #offsets and possibly starting with `offsets[0] = 0`; a
-    /// #shallow_copy if possible.
+    /// 64-bit {@link ListOffsetArrayOf#offsets offsets} and possibly starting
+    ///  with `offsets[0] = 0`; a #shallow_copy if possible.
     ///
     /// @param start_at_zero If `true`, the first offset will be `0`, meaning
     /// there are no "unreachable" elements in the `content` that corresponds

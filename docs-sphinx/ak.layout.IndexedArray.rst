@@ -23,7 +23,7 @@ IndexedArray doesn't have a direct equivalent in Apache Arrow.
 
 Below is a simplified implementation of a IndexedArray class in pure Python
 that exhaustively checks validity in its constructor (see
-:doc:`_auto/ak.isvalid`) and can generate random valid arrays. The
+:doc:`_auto/ak.is_valid`) and can generate random valid arrays. The
 ``random_number()`` function returns a random float and the
 ``random_length(minlen)`` function returns a random int that is at least
 ``minlen``. The ``RawArray`` class represents simple, one-dimensional data.

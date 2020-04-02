@@ -1,7 +1,7 @@
 ak.types.ListType
 -----------------
 
-HERE
+The type of a :doc:`ak.layout.ListArray` or :doc:`ak.layout.ListOffsetArray`.
 
 In addition to the properties and methods described in :doc:`ak.types.Type`,
 a ListType has the following.
