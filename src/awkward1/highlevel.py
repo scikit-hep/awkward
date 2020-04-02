@@ -44,71 +44,35 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
     intentionally has a minimum of methods, preferring standalone functions
     like
 
-        ak.cross([left, right])
+        ak.num(array1)
+        ak.product([array1, array2])
+        ak.concatenate([array1, array2, array3])
 
     instead of bound methods like
 
-        left.cross(right)
+        array1.num()
+        array1.product(array2)
+        array1.concatenate([array2, array3])
 
     because its namespace is valuable for domain-specific parameters and
-    functionality. For example, with
+    functionality. For example, if records contain a field named `"num"`,
+    they can be accessed as
 
-        vectors = ak.Array([{"x": 0.1, "y": 1.0, "z": 10.0},
-                            {"x": 0.2, "y": 2.0, "z": 20.0},
-                            {"x": 0.3, "y": 3.0, "z": 30.0}])
+        array1.num
 
-    we want to access fields `x`, `y`, `z` as attributes
+    instead of
 
-        >>> vectors.x
-        <Array [0.1, 0.2, 0.3] type='3 * float64'>
-        >>> vectors.y
-        <Array [1, 2, 3] type='3 * float64'>
-        >>> vectors.z
-        <Array [10, 20, 30] type='3 * float64'>
+        array1["num"]
 
-    Additionally, we might want to add functionality,
+    without any confusion or interference from #ak.num. The same is true
+    for domain-specific methods that have been attached to the data. For
+    instance, an analysis of e-commerce might have a particular meaning in
+    mind for "product", something computed from the data when
 
-        class Vec3Array(ak.Array):
-            def cross(self, other):
-                "Computes the cross-product of 3D vectors."
-                x = self.y*other.z - self.z*other.y
-                y = self.z*other.x - self.x*other.z
-                z = self.x*other.y - self.y*other.x
-                return ak.zip({"x": x, "y": y, "z": z}, with_name="vec3")
+        array1.product(array2)
 
-        # Arrays of vec3 use subclass Vec3Array instead of ak.Array.
-        ak.behavior["*", "vec3"] = Vec3Array
-
-        # Records with name "vec3" are presented as having type "vec3".
-        ak.behavior["__typestr__", "vec3"] = "vec3"
-
-        vectors = ak.Array([{"x": 0.1, "y": 1.0, "z": 10.0},
-                            {"x": 0.2, "y": 2.0, "z": 20.0},
-                            {"x": 0.3, "y": 3.0, "z": 30.0}],
-                           with_name="vec3")
-        more_vectors = ak.Array([{"x": 10.0, "y": 1.0, "z": 0.1},
-                                 {"x": 20.0, "y": 2.0, "z": 0.2},
-                                 {"x": 30.0, "y": 3.0, "z": 0.3}],
-                                with_name="vec3")
-
-    Now the record types are presented as "vec3" and the Array has class
-    `Vec3Array`, so it has a `cross` method.
-
-        >>> vectors
-        <Array [{x: 0.1, y: 1, z: 10, ... y: 3, z: 30}] type='3 * vec3'>
-        >>> more_vectors
-        <Array [{x: 10, y: 1, z: 0.1, ... z: 0.3}] type='3 * vec3'>
-        >>> type(vectors)
-        <class '__main__.Vec3Array'>
-        >>> type(more_vectors)
-        <class '__main__.Vec3Array'>
-
-        >>> vectors.cross(more_vectors)
-        <Array [{x: -9.9, y: 100, ... z: -89.1}] type='3 * vec3'>
-
-    If the #ak.cross function were a method of this Array class, then it would
-    conflict with applications where we might want `array.cross` to mean
-    something else.
+    is typed. Custom methods like this can be added with #ak.behavior, and
+    the namespace of Array attributes must be kept clear for such applications.
 
     Arrays can be used in [Numba](http://numba.pydata.org/): they can be
     passed as arguments to a Numba-compiled function or returned as return
@@ -1218,44 +1182,6 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
 
     Most users won't be creating Records manually. This class primarily exists
     to be overridden in the same way as #ak.Array.
-
-    Following a very similar example,
-
-        class Vec3(ak.Record):
-            def cross(self, other):
-                "Computes the cross-product of 3D vectors."
-                x = self.y*other.z - self.z*other.y
-                y = self.z*other.x - self.x*other.z
-                z = self.x*other.y - self.y*other.x
-                return ak.Record({"x": x, "y": y, "z": z}, with_name="vec3")
-
-        # Records of vec3 use subclass Vec3 instead of ak.Record.
-        ak.behavior["vec3"] = Vec3
-
-        # Records with name "vec3" are presented as having type "vec3".
-        ak.behavior["__typestr__", "vec3"] = "vec3"
-
-        vectors = ak.Array([{"x": 0.1, "y": 1.0, "z": 30.0},
-                            {"x": 0.2, "y": 2.0, "z": 20.0},
-                            {"x": 0.3, "y": 3.0, "z": 10.0}],
-                           with_name="vec3")
-
-    Now the record types are presented as "vec3" and the Record has class
-    `Vec3`, so it has a `cross` method.
-
-        >>> vectors[0]
-        <Record {x: 0.1, y: 1, z: 30} type='vec3'>
-        >>> type(vectors[0])
-        <class '__main__.Vec3'>
-
-        >>> vectors[0].cross(vectors[1])
-        <Record {x: -40, y: 4, z: 0} type='vec3'>
-
-    Be sure to distinguish between records, which subclass #ak.Record, and
-    arrays, which subclass #ak.Array, even though the method implementations
-    can be very similar because NumPy's
-    [universal functions](https://docs.scipy.org/doc/numpy/reference/ufuncs.html)
-    are equally usable on scalars as they are on arrays.
 
     Records can be used in [Numba](http://numba.pydata.org/): they can be
     passed as arguments to a Numba-compiled function or returned as return

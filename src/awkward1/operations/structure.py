@@ -1033,12 +1033,12 @@ def notna(array, highlevel=True):
     """
     return ~isna(array, highlevel=highlevel)
 
-def cross(arrays,
-          axis=1,
-          nested=None,
-          parameters=None,
-          with_name=None,
-          highlevel=True):
+def product(arrays,
+            axis=1,
+            nested=None,
+            parameters=None,
+            with_name=None,
+            highlevel=True):
     """
     Args:
         arrays (dict or iterable of arrays): Arrays to compute the cross
@@ -1074,13 +1074,13 @@ def cross(arrays,
 
     is
 
-        >>> ak.to_list(ak.cross([one, two], axis=0))
+        >>> ak.to_list(ak.product([one, two], axis=0))
         [(1, 'a'), (1, 'b'), (2, 'a'), (2, 'b'), (3, 'a'), (3, 'b')]
 
     With nesting, a new level of nested lists is created to group combinations
     that share the same element from `one` into the same list.
 
-        >>> ak.to_list(ak.cross([one, two], axis=0, nested=True))
+        >>> ak.to_list(ak.product([one, two], axis=0, nested=True))
         [[(1, 'a'), (1, 'b')], [(2, 'a'), (2, 'b')], [(3, 'a'), (3, 'b')]]
 
     The primary purpose of this function, however, is to compute a different
@@ -1090,11 +1090,11 @@ def cross(arrays,
         >>> one = ak.Array([[1, 2, 3], [], [4, 5], [6]])
         >>> two = ak.Array([["a", "b"], ["c"], ["d"], ["e", "f"]])
 
-    The default `axis=1` produces 6 pairs from the cross-product of `[1, 2, 3]`
+    The default `axis=1` produces 6 pairs from the cross product of `[1, 2, 3]`
     and `["a", "b"]`, 0 pairs from `[]` and `["c"]`, 1 pair from `[4, 5]` and
     `["d"]`, and 1 pair from `[6]` and `["e", "f"]`.
 
-        >>> ak.to_list(ak.cross([one, two]))
+        >>> ak.to_list(ak.product([one, two]))
         [[(1, 'a'), (1, 'b'), (2, 'a'), (2, 'b'), (3, 'a'), (3, 'b')],
          [],
          [(4, 'd'), (5, 'd')],
@@ -1104,7 +1104,7 @@ def cross(arrays,
     the nesting depth is increased by 1 and tuples are grouped by their
     first element.
 
-        >>> ak.to_list(ak.cross([one, two], nested=True))
+        >>> ak.to_list(ak.product([one, two], nested=True))
         [[[(1, 'a'), (1, 'b')], [(2, 'a'), (2, 'b')], [(3, 'a'), (3, 'b')]],
          [],
          [[(4, 'd')], [(5, 'd')]],
@@ -1113,7 +1113,7 @@ def cross(arrays,
     These tuples are #ak.layout.RecordArray nodes with unnamed fields. To
     name the fields, we can pass `one` and `two` in a dict, rather than a list.
 
-        >>> ak.to_list(ak.cross({"x": one, "y": two}))
+        >>> ak.to_list(ak.product({"x": one, "y": two}))
         [
          [{'x': 1, 'y': 'a'},
           {'x': 1, 'y': 'b'},
@@ -1137,7 +1137,7 @@ def cross(arrays,
 
     can be left entirely ungrouped:
 
-        >>> ak.to_list(ak.cross([one, two, three], axis=0))
+        >>> ak.to_list(ak.product([one, two, three], axis=0))
         [
          (1, 1.1, 'a'),
          (1, 1.1, 'b'),
@@ -1167,7 +1167,7 @@ def cross(arrays,
 
     can be grouped by `one` (adding 1 more dimension):
 
-        >>> ak.to_list(ak.cross([one, two, three], axis=0, nested=[0]))
+        >>> ak.to_list(ak.product([one, two, three], axis=0, nested=[0]))
         [
          [(1, 1.1, 'a'), (1, 1.1, 'b'), (1, 2.2, 'a')],
          [(1, 2.2, 'b'), (1, 3.3, 'a'), (1, 3.3, 'b')],
@@ -1181,7 +1181,7 @@ def cross(arrays,
 
     can be grouped by `one` and `two` (adding 2 more dimensions):
 
-        >>> ak.to_list(ak.cross([one, two, three], axis=0, nested=[0, 1]))
+        >>> ak.to_list(ak.product([one, two, three], axis=0, nested=[0, 1]))
         [
          [
           [(1, 1.1, 'a'), (1, 1.1, 'b')],
@@ -1205,7 +1205,7 @@ def cross(arrays,
 
     or grouped by unique `one`-`two` pairs (adding 1 more dimension):
 
-        >>> ak.to_list(ak.cross([one, two, three], axis=0, nested=[1]))
+        >>> ak.to_list(ak.product([one, two, three], axis=0, nested=[1]))
         [
          [(1, 1.1, 'a'), (1, 1.1, 'b')],
          [(1, 2.2, 'a'), (1, 2.2, 'b')],
@@ -1233,8 +1233,8 @@ def cross(arrays,
     list of strings in #ak.Array.__getitem__.
 
     To get list index positions in the tuples/records, rather than data from
-    the original `arrays`, use #ak.argcross instead of #ak.cross. The
-    #ak.argcross form can be particularly useful as nested indexing in
+    the original `arrays`, use #ak.argproduct instead of #ak.product. The
+    #ak.argproduct form can be particularly useful as nested indexing in
     #ak.Array.__getitem__.
     """
     behavior = awkward1._util.behaviorof(*arrays)
@@ -1247,7 +1247,7 @@ def cross(arrays,
         parameters["__record__"] = with_name
 
     if axis < 0:
-        raise ValueError("cross's 'axis' must be non-negative")
+        raise ValueError("the 'axis' of product must be non-negative")
 
     elif axis == 0:
         if nested is None or nested is False:
@@ -1258,7 +1258,8 @@ def cross(arrays,
                 nested = list(arrays.keys())   # last key is ignored below
             if any(not (isinstance(n, str) and n in arrays) for x in nested):
                 raise ValueError(
-                    "cross's 'nested' must be dict keys for a dict of arrays")
+                    "the 'nested' parameter of product must be dict keys for "
+                    "a dict of arrays")
             recordlookup = []
             layouts = []
             tonested = []
@@ -1278,8 +1279,8 @@ def cross(arrays,
             if any(not (isinstance(x, int) and 0 <= x < len(arrays) - 1)
                      for x in nested):
                 raise ValueError(
-                    "cross's 'nested' must be integers in [0, len(arrays) - 1)"
-                    " for an iterable of arrays")
+                    "the 'nested' prarmeter of product must be integers in "
+                    "[0, len(arrays) - 1) for an iterable of arrays")
             recordlookup = None
             layouts = []
             for x in arrays:
@@ -1346,7 +1347,8 @@ def cross(arrays,
                 nested = list(arrays.keys())   # last key is ignored below
             if any(not (isinstance(n, str) and n in arrays) for x in nested):
                 raise ValueError(
-                    "cross's 'nested' must be dict keys for a dict of arrays")
+                    "the 'nested' parameter of product must be dict keys for "
+                    "a dict of arrays")
             recordlookup = []
             layouts = []
             for i, (n, x) in enumerate(arrays.items()):
@@ -1361,8 +1363,8 @@ def cross(arrays,
             if any(not (isinstance(x, int) and 0 <= x < len(arrays) - 1)
                    for x in nested):
                 raise ValueError(
-                    "cross's 'nested' must be integers in [0, len(arrays) - 1)"
-                    " for an iterable of arrays")
+                    "the 'nested' parameter of product must be integers in "
+                    "[0, len(arrays) - 1) for an iterable of arrays")
             recordlookup = None
             layouts = []
             for i, x in enumerate(arrays):
@@ -1394,7 +1396,7 @@ def cross(arrays,
     else:
         return result
 
-def argcross(arrays,
+def argproduct(arrays,
              axis=1,
              nested=None,
              parameters=None,
@@ -1424,7 +1426,7 @@ def argcross(arrays,
             a low-level #ak.layout.Content subclass.
 
     Computes a cross product (i.e. Cartesian product) of data from a set of
-    `arrays`, like #ak.cross, but returning integer indexes for
+    `arrays`, like #ak.product, but returning integer indexes for
     #ak.Array.__getitem__.
 
     For example, the cross product of
@@ -1434,28 +1436,28 @@ def argcross(arrays,
 
     is
 
-        >>> ak.to_list(ak.cross([one, two], axis=0))
+        >>> ak.to_list(ak.product([one, two], axis=0))
         [(1.1, 'a'), (1.1, 'b'), (2.2, 'a'), (2.2, 'b'), (3.3, 'a'), (3.3, 'b')]
 
-    But with argcross, only the indexes are returned.
+    But with argproduct, only the indexes are returned.
 
-        >>> ak.to_list(ak.argcross([one, two], axis=0))
+        >>> ak.to_list(ak.argproduct([one, two], axis=0))
         [(0, 0), (0, 1), (1, 0), (1, 1), (2, 0), (2, 1)]
 
     These are the indexes that can select the items that go into the actual
     cross product.
 
-        >>> one_index, two_index = ak.unzip(ak.argcross([one, two], axis=0))
+        >>> one_index, two_index = ak.unzip(ak.argproduct([one, two], axis=0))
         >>> one[one_index]
         <Array [1.1, 1.1, 2.2, 2.2, 3.3, 3.3] type='6 * float64'>
         >>> two[two_index]
         <Array ['a', 'b', 'a', 'b', 'a', 'b'] type='6 * string'>
 
-    All of the parameters for #ak.cross apply equally to #ak.argcross, so see
-    the #ak.cross documentation for a more complete description.
+    All of the parameters for #ak.product apply equally to #ak.argproduct, so
+    see the #ak.product documentation for a more complete description.
     """
     if axis < 0:
-        raise ValueError("argcross's 'axis' must be non-negative")
+        raise ValueError("the 'axis' of argproduct must be non-negative")
 
     else:
         if isinstance(arrays, dict):
@@ -1476,11 +1478,11 @@ def argcross(arrays,
                 parameters = dict(parameters)
             parameters["__record__"] = with_name
 
-        result = cross(layouts,
-                       axis=axis,
-                       nested=nested,
-                       parameters=parameters,
-                       highlevel=False)
+        result = product(layouts,
+                         axis=axis,
+                         nested=nested,
+                         parameters=parameters,
+                         highlevel=False)
 
         if highlevel:
             return awkward1._util.wrap(result,
@@ -1611,9 +1613,9 @@ def combinations(array,
          [{'x': 6, 'y': 7}, {'x': 6, 'y': 8},
                             {'x': 7, 'y': 8}]]
 
-    This operation can be constructed from #ak.argcross and other primitives:
+    This operation can be constructed from #ak.argproduct and other primitives:
 
-        >>> left, right = ak.unzip(ak.argcross([array, array]))
+        >>> left, right = ak.unzip(ak.argproduct([array, array]))
         >>> keep = left < right
         >>> result = ak.zip([array[left][keep], array[right][keep]])
         >>> ak.to_list(result)
@@ -1687,7 +1689,7 @@ def argcombinations(array,
     returning integer indexes for #ak.Array.__getitem__.
 
     The motivation and uses of this function are similar to those of
-    #ak.argcross. See #ak.combinations and #ak.argcross for a more complete
+    #ak.argproduct. See #ak.combinations and #ak.argproduct for a more complete
     description.
     """
     if parameters is None:
