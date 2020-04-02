@@ -3860,7 +3860,7 @@ namespace awkward {
     }
 
     template <>
-    Error awkward_listarray_choose_length_64<int32_t>(
+    Error awkward_listarray_combinations_length_64<int32_t>(
       int64_t* totallen,
       int64_t* tooffsets,
       int64_t n,
@@ -3870,7 +3870,7 @@ namespace awkward {
       const int32_t* stops,
       int64_t stopsoffset,
       int64_t length) {
-      return awkward_listarray32_choose_length_64(
+      return awkward_listarray32_combinations_length_64(
         totallen,
         tooffsets,
         n,
@@ -3882,7 +3882,7 @@ namespace awkward {
         length);
     }
     template <>
-    Error awkward_listarray_choose_length_64<uint32_t>(
+    Error awkward_listarray_combinations_length_64<uint32_t>(
       int64_t* totallen,
       int64_t* tooffsets,
       int64_t n,
@@ -3892,7 +3892,7 @@ namespace awkward {
       const uint32_t* stops,
       int64_t stopsoffset,
       int64_t length) {
-      return awkward_listarrayU32_choose_length_64(
+      return awkward_listarrayU32_combinations_length_64(
         totallen,
         tooffsets,
         n,
@@ -3904,7 +3904,7 @@ namespace awkward {
         length);
     }
     template <>
-    Error awkward_listarray_choose_length_64<int64_t>(
+    Error awkward_listarray_combinations_length_64<int64_t>(
       int64_t* totallen,
       int64_t* tooffsets,
       int64_t n,
@@ -3914,7 +3914,7 @@ namespace awkward {
       const int64_t* stops,
       int64_t stopsoffset,
       int64_t length) {
-      return awkward_listarray64_choose_length_64(
+      return awkward_listarray64_combinations_length_64(
         totallen,
         tooffsets,
         n,
@@ -3927,7 +3927,7 @@ namespace awkward {
     }
 
     template <>
-    Error awkward_listarray_choose_64<int32_t>(
+    Error awkward_listarray_combinations_64<int32_t>(
       int64_t** tocarry,
       int64_t n,
       bool diagonal,
@@ -3936,7 +3936,7 @@ namespace awkward {
       const int32_t* stops,
       int64_t stopsoffset,
       int64_t length) {
-      return awkward_listarray32_choose_64(
+      return awkward_listarray32_combinations_64(
         tocarry,
         n,
         diagonal,
@@ -3947,7 +3947,7 @@ namespace awkward {
         length);
     }
     template <>
-    Error awkward_listarray_choose_64<uint32_t>(
+    Error awkward_listarray_combinations_64<uint32_t>(
       int64_t** tocarry,
       int64_t n,
       bool diagonal,
@@ -3956,7 +3956,7 @@ namespace awkward {
       const uint32_t* stops,
       int64_t stopsoffset,
       int64_t length) {
-      return awkward_listarrayU32_choose_64(
+      return awkward_listarrayU32_combinations_64(
         tocarry,
         n,
         diagonal,
@@ -3967,7 +3967,7 @@ namespace awkward {
         length);
     }
     template <>
-    Error awkward_listarray_choose_64<int64_t>(
+    Error awkward_listarray_combinations_64<int64_t>(
       int64_t** tocarry,
       int64_t n,
       bool diagonal,
@@ -3976,7 +3976,7 @@ namespace awkward {
       const int64_t* stops,
       int64_t stopsoffset,
       int64_t length) {
-      return awkward_listarray64_choose_64(
+      return awkward_listarray64_combinations_64(
         tocarry,
         n,
         diagonal,

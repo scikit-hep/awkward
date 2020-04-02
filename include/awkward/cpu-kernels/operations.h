@@ -1220,14 +1220,14 @@ extern "C" {
       int64_t length);
 
   EXPORT_SYMBOL struct Error
-    awkward_choose_64(
+    awkward_combinations_64(
       int64_t* toindex,
       int64_t n,
       bool diagonal,
       int64_t singlelen);
 
   EXPORT_SYMBOL struct Error
-    awkward_listarray32_choose_length_64(
+    awkward_listarray32_combinations_length_64(
       int64_t* totallen,
       int64_t* tooffsets,
       int64_t n,
@@ -1238,7 +1238,7 @@ extern "C" {
       int64_t stopsoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_listarrayU32_choose_length_64(
+    awkward_listarrayU32_combinations_length_64(
       int64_t* totallen,
       int64_t* tooffsets,
       int64_t n,
@@ -1249,7 +1249,7 @@ extern "C" {
       int64_t stopsoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_listarray64_choose_length_64(
+    awkward_listarray64_combinations_length_64(
       int64_t* totallen,
       int64_t* tooffsets,
       int64_t n,
@@ -1261,7 +1261,7 @@ extern "C" {
       int64_t length);
 
   EXPORT_SYMBOL struct Error
-    awkward_listarray32_choose_64(
+    awkward_listarray32_combinations_64(
       int64_t** tocarry,
       int64_t n,
       bool diagonal,
@@ -1271,7 +1271,7 @@ extern "C" {
       int64_t stopsoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_listarrayU32_choose_64(
+    awkward_listarrayU32_combinations_64(
       int64_t** tocarry,
       int64_t n,
       bool diagonal,
@@ -1281,7 +1281,7 @@ extern "C" {
       int64_t stopsoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_listarray64_choose_64(
+    awkward_listarray64_combinations_64(
       int64_t** tocarry,
       int64_t n,
       bool diagonal,
@@ -1292,7 +1292,7 @@ extern "C" {
       int64_t length);
 
   EXPORT_SYMBOL struct Error
-    awkward_regulararray_choose_64(
+    awkward_regulararray_combinations_64(
       int64_t** tocarry,
       int64_t n,
       bool diagonal,

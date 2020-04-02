@@ -12,8 +12,8 @@ array (at every node of the tree) with the original ``__getitem__`` path
 from the root of a data structure to that element, the original "identity"
 of the element. As data are filtered with selections, shuffled with
 sorting operations, or duplicated in combinatorial functions like
-:doc:`_auto/ak.cross` and :doc:`_auto/ak.choose`, the Identities are selected,
-shuffled, and duplicated with them.
+:doc:`_auto/ak.cross` and :doc:`_auto/ak.combinations`, the Identities
+are selected, shuffled, and duplicated with them.
 
 The primary purpose of these Identities is to act as an index key for
 SQL-like join operations. At the time of this writing, such operations

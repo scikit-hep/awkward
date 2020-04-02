@@ -359,28 +359,28 @@ namespace awkward {
   }
 
   const ContentPtr
-  Record::choose(int64_t n,
-                 bool diagonal,
-                 const util::RecordLookupPtr& recordlookup,
-                 const util::Parameters& parameters,
-                 int64_t axis,
-                 int64_t depth) const {
+  Record::combinations(int64_t n,
+                       bool diagonal,
+                       const util::RecordLookupPtr& recordlookup,
+                       const util::Parameters& parameters,
+                       int64_t axis,
+                       int64_t depth) const {
     if (n < 1) {
-      throw std::invalid_argument("in choose, 'n' must be at least 1");
+      throw std::invalid_argument("in combinations, 'n' must be at least 1");
     }
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
       throw std::invalid_argument(
-        "cannot call 'choose' with an 'axis' of 0 on a Record");
+        "cannot call 'combinations' with an 'axis' of 0 on a Record");
     }
     else {
       ContentPtr singleton = array_.get()->getitem_range_nowrap(at_, at_ + 1);
-      return singleton.get()->choose(n,
-                                     diagonal,
-                                     recordlookup,
-                                     parameters,
-                                     axis,
-                                     depth).get()->getitem_at_nowrap(0);
+      return singleton.get()->combinations(n,
+                                           diagonal,
+                                           recordlookup,
+                                           parameters,
+                                           axis,
+                                           depth).get()->getitem_at_nowrap(0);
     }
   }
 

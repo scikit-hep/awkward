@@ -237,13 +237,13 @@ namespace awkward {
   }
 
   const ContentPtr
-  None::choose(int64_t n,
-               bool diagonal,
-               const util::RecordLookupPtr& recordlookup,
-               const util::Parameters& parameters,
-               int64_t axis,
-               int64_t depth) const {
-    throw std::runtime_error("undefined operation: None::choose");
+  None::combinations(int64_t n,
+                     bool diagonal,
+                     const util::RecordLookupPtr& recordlookup,
+                     const util::Parameters& parameters,
+                     int64_t axis,
+                     int64_t depth) const {
+    throw std::runtime_error("undefined operation: None::combinations");
   }
 
   const ContentPtr

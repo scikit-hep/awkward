@@ -1543,28 +1543,28 @@ namespace awkward {
 
   template <typename T, typename I>
   const ContentPtr
-  UnionArrayOf<T, I>::choose(int64_t n,
-                             bool diagonal,
-                             const util::RecordLookupPtr& recordlookup,
-                             const util::Parameters& parameters,
-                             int64_t axis,
-                             int64_t depth) const {
+  UnionArrayOf<T, I>::combinations(int64_t n,
+                                   bool diagonal,
+                                   const util::RecordLookupPtr& recordlookup,
+                                   const util::Parameters& parameters,
+                                   int64_t axis,
+                                   int64_t depth) const {
     if (n < 1) {
-      throw std::invalid_argument("in choose, 'n' must be at least 1");
+      throw std::invalid_argument("in combinations, 'n' must be at least 1");
     }
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (axis == depth) {
-      return choose_axis0(n, diagonal, recordlookup, parameters);
+      return combinations_axis0(n, diagonal, recordlookup, parameters);
     }
     else {
       ContentPtrVec contents;
       for (auto content : contents_) {
-        contents.push_back(content.get()->choose(n,
-                                                 diagonal,
-                                                 recordlookup,
-                                                 parameters,
-                                                 axis,
-                                                 depth));
+        contents.push_back(content.get()->combinations(n,
+                                                       diagonal,
+                                                       recordlookup,
+                                                       parameters,
+                                                       axis,
+                                                       depth));
       }
       return std::make_shared<UnionArrayOf<T, I>>(identities_,
                                                   util::Parameters(),

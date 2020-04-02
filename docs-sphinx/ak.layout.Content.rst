@@ -180,12 +180,12 @@ ak.layout.Content.argmin
 
 Implements :doc:`_auto/ak.argmin`.
 
-ak.layout.Content.choose
-========================
+ak.layout.Content.combinations
+==============================
 
-.. py:method:: ak.layout.Content.choose(n, diagonal=False, keys=None, parameters=None, axis=1)
+.. py:method:: ak.layout.Content.combinations(n, diagonal=False, keys=None, parameters=None, axis=1)
 
-Implements :doc:`_auto/ak.choose`.
+Implements :doc:`_auto/ak.combinations`.
 
 ak.layout.Content.count
 =======================

@@ -991,7 +991,7 @@ namespace awkward {
     /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
-      awkward_listarray_choose_length_64(
+      awkward_listarray_combinations_length_64(
         int64_t* totallen,
         int64_t* tooffsets,
         int64_t n,
@@ -1006,7 +1006,7 @@ namespace awkward {
     /// to make it easier and more type-safe to call.
     template <typename T>
     ERROR
-      awkward_listarray_choose_64(
+      awkward_listarray_combinations_64(
         int64_t** tocarry,
         int64_t n,
         bool diagonal,

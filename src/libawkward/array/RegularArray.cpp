@@ -787,19 +787,19 @@ namespace awkward {
   }
 
   const ContentPtr
-  RegularArray::choose(int64_t n,
-                       bool diagonal,
-                       const util::RecordLookupPtr& recordlookup,
-                       const util::Parameters& parameters,
-                       int64_t axis,
-                       int64_t depth) const {
+  RegularArray::combinations(int64_t n,
+                             bool diagonal,
+                             const util::RecordLookupPtr& recordlookup,
+                             const util::Parameters& parameters,
+                             int64_t axis,
+                             int64_t depth) const {
     if (n < 1) {
-      throw std::invalid_argument("in choose, 'n' must be at least 1");
+      throw std::invalid_argument("in combinations, 'n' must be at least 1");
     }
 
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
-      return choose_axis0(n, diagonal, recordlookup, parameters);
+      return combinations_axis0(n, diagonal, recordlookup, parameters);
     }
 
     else if (toaxis == depth + 1) {
@@ -808,25 +808,25 @@ namespace awkward {
         size += (n - 1);
       }
       int64_t thisn = n;
-      int64_t chooselen;
+      int64_t combinationslen;
       if (thisn > size) {
-        chooselen = 0;
+        combinationslen = 0;
       }
       else if (thisn == size) {
-        chooselen = 1;
+        combinationslen = 1;
       }
       else {
         if (thisn * 2 > size) {
           thisn = size - thisn;
         }
-        chooselen = size;
+        combinationslen = size;
         for (int64_t j = 2;  j <= thisn;  j++) {
-          chooselen *= (size - j + 1);
-          chooselen /= j;
+          combinationslen *= (size - j + 1);
+          combinationslen /= j;
         }
       }
 
-      int64_t totallen = chooselen * length();
+      int64_t totallen = combinationslen * length();
 
       std::vector<std::shared_ptr<int64_t>> tocarry;
       std::vector<int64_t*> tocarryraw;
@@ -836,7 +836,7 @@ namespace awkward {
         tocarry.push_back(ptr);
         tocarryraw.push_back(ptr.get());
       }
-      struct Error err = awkward_regulararray_choose_64(
+      struct Error err = awkward_regulararray_combinations_64(
         tocarryraw.data(),
         n,
         diagonal,
@@ -857,18 +857,18 @@ namespace awkward {
       return std::make_shared<RegularArray>(identities_,
                                             util::Parameters(),
                                             recordarray,
-                                            chooselen);
+                                            combinationslen);
     }
 
     else {
       ContentPtr next = content_.get()
                         ->getitem_range_nowrap(0, length()*size_).get()
-                        ->choose(n,
-                                 diagonal,
-                                 recordlookup,
-                                 parameters,
-                                 axis,
-                                 depth + 1);
+                        ->combinations(n,
+                                       diagonal,
+                                       recordlookup,
+                                       parameters,
+                                       axis,
+                                       depth + 1);
       return std::make_shared<RegularArray>(identities_,
                                             util::Parameters(),
                                             next,
