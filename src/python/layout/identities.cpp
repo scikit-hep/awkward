@@ -73,7 +73,7 @@ make_IdentitiesOf(const py::handle& m, const std::string& name) {
       })
       .def("identity_at_str", &ak::IdentitiesOf<T>::identity_at)
       .def("identity_at",
-           [](const ak::Identities& self, int64_t at) -> py::tuple {
+           [](const ak::IdentitiesOf<T>& self, int64_t at) -> py::tuple {
         ak::Identities::FieldLoc fieldloc = self.fieldloc();
         py::tuple out((size_t)self.width() + fieldloc.size());
         size_t j = 0;

@@ -1,7 +1,12 @@
 ak.layout.ArrayBuilder
 ----------------------
 
-HERE
+The low-level ArrayBuilder that builds :doc:`ak.layout.Content` arrays. This
+object is wrapped by :doc:`_auto/ak.ArrayBuilder`.
+
+(Method names in the high-level interface have been chnaged to include
+underscores after "begin" and "end," but that hasn't happened in the
+low-level interface, yet or possibly at all.)
 
 ak.layout.ArrayBuilder.__getitem__
 ==================================
