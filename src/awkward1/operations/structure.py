@@ -489,7 +489,7 @@ def broadcast_arrays(*arrays, **kwargs):
     is aligned. If we try to match a `2 * int64` with the `2 * 3 * float64`,
 
         >>> ak.broadcast_arrays(np.array([1, 2]),
-                                np.array([[0.1, 0.2, 0.3], [10, 20, 30]]))
+        ...                     np.array([[0.1, 0.2, 0.3], [10, 20, 30]]))
         ValueError: cannot broadcast RegularArray of size 2 with RegularArray of size 3
 
     NumPy has the same behavior: arrays with different numbers of dimensions
@@ -538,12 +538,12 @@ def broadcast_arrays(*arrays, **kwargs):
     Awkward Array's broadcasting manages to have it both ways by applying the
     following rules:
 
-        * If a dimension is regular (i.e. #ak.types.RegularType), like NumPy,
-          implicit broadcasting aligns to the right, like NumPy.
-        * If a dimension is variable (i.e. #ak.types.ListType), which can
-          never be true of NumPy, implicit broadcasting aligns to the left.
-        * Explicit broadcasting with a length-1 regular dimension always
-          broadcasts, like NumPy.
+       * If a dimension is regular (i.e. #ak.types.RegularType), like NumPy,
+         implicit broadcasting aligns to the right, like NumPy.
+       * If a dimension is variable (i.e. #ak.types.ListType), which can
+         never be true of NumPy, implicit broadcasting aligns to the left.
+       * Explicit broadcasting with a length-1 regular dimension always
+         broadcasts, like NumPy.
 
     Thus, it is important to be aware of the distinction between a dimension
     that is declared to be regular in the type specification and a dimension
@@ -896,7 +896,9 @@ def rpad(array, target, axis=1, clip=False, highlevel=True):
     is not just in the length of `[1.1, 2.2, 3.3]` vs `[1.1, 2.2]`, but also
     in the distinction between the following types.
 
+        >>> ak.type(ak.rpad(array, 2, axis=2))
         3 * var * var * ?float64
+        >>> ak.type(ak.rpad(array, 2, axis=2, clip=True))
         3 * var *   2 * ?float64
     """
     layout = awkward1.operations.convert.to_layout(array,

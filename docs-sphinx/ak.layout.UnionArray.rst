@@ -27,7 +27,7 @@ but an appropriate index may be generated with
 
 Below is a simplified implementation of a RecordArray class in pure Python
 that exhaustively checks validity in its constructor (see
-:doc:`_auto/ak.isvalid`) and can generate random valid arrays. The
+:doc:`_auto/ak.is_valid`) and can generate random valid arrays. The
 ``random_number()`` function returns a random float and the
 ``random_length(minlen)`` function returns a random int that is at least
 ``minlen``. The ``RawArray`` class represents simple, one-dimensional data.
@@ -232,7 +232,8 @@ ak.layout.UnionArray.simplify
 .. py:method:: ak.layout.UnionArray.simplify(mergebool=False)
 
 If any of the ``contents`` have :doc:`ak.types.UnionType` and/or any
-of the ``contents`` are :doc:`ak.layout.Content#ak-layout-content-mergeable`,
+of the ``contents`` are
+`ak.layout.Content.mergeable <ak.layout.Content.html#ak-layout-content-mergeable>`__,
 they are combined to return the simplest possible node structure.
 
 This method only operates one level deep.

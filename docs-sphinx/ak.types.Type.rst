@@ -2,7 +2,7 @@ ak.types.Type
 -------------
 
 Superclass of type nodes that describe a high-level data type (see
-:doc:`_auto/ak.Type` and
+:doc:`_auto/ak.type` and
 `ak.Array.layout <_auto/ak.Array.html#ak-array-layout>`_).
 
 Types are rendered as `Datashape <https://datashape.readthedocs.io/>`__ strings,

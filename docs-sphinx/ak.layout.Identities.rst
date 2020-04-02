@@ -1,5 +1,5 @@
 ak.layout.Identities
----------------
+--------------------
 
 The Identities concept is implemented in 2 specialized classes:
 
