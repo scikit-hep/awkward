@@ -265,11 +265,11 @@ namespace awkward {
 
   const ContentPtr
   Content::combinations_axis0(int64_t n,
-                              bool diagonal,
+                              bool replacement,
                               const util::RecordLookupPtr& recordlookup,
                               const util::Parameters& parameters) const {
     int64_t size = length();
-    if (diagonal) {
+    if (replacement) {
       size += (n - 1);
     }
     int64_t thisn = n;
@@ -302,7 +302,7 @@ namespace awkward {
     struct Error err = awkward_regulararray_combinations_64(
       tocarryraw.data(),
       n,
-      diagonal,
+      replacement,
       length(),
       1);
     util::handle_error(err, classname(), identities_.get());

@@ -1544,7 +1544,7 @@ namespace awkward {
   template <typename T, typename I>
   const ContentPtr
   UnionArrayOf<T, I>::combinations(int64_t n,
-                                   bool diagonal,
+                                   bool replacement,
                                    const util::RecordLookupPtr& recordlookup,
                                    const util::Parameters& parameters,
                                    int64_t axis,
@@ -1554,13 +1554,13 @@ namespace awkward {
     }
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (axis == depth) {
-      return combinations_axis0(n, diagonal, recordlookup, parameters);
+      return combinations_axis0(n, replacement, recordlookup, parameters);
     }
     else {
       ContentPtrVec contents;
       for (auto content : contents_) {
         contents.push_back(content.get()->combinations(n,
-                                                       diagonal,
+                                                       replacement,
                                                        recordlookup,
                                                        parameters,
                                                        axis,

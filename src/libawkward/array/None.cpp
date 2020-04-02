@@ -238,7 +238,7 @@ namespace awkward {
 
   const ContentPtr
   None::combinations(int64_t n,
-                     bool diagonal,
+                     bool replacement,
                      const util::RecordLookupPtr& recordlookup,
                      const util::Parameters& parameters,
                      int64_t axis,

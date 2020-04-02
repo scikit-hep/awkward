@@ -205,7 +205,7 @@ namespace awkward {
     /// @exception std::runtime_error is always thrown
     const ContentPtr
       combinations(int64_t n,
-                   bool diagonal,
+                   bool replacement,
                    const util::RecordLookupPtr& recordlookup,
                    const util::Parameters& parameters,
                    int64_t axis,

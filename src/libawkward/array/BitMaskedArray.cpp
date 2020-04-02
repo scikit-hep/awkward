@@ -637,13 +637,13 @@ namespace awkward {
 
   const ContentPtr
   BitMaskedArray::combinations(int64_t n,
-                               bool diagonal,
+                               bool replacement,
                                const util::RecordLookupPtr& recordlookup,
                                const util::Parameters& parameters,
                                int64_t axis,
                                int64_t depth) const {
     return toByteMaskedArray().get()->combinations(n,
-                                                   diagonal,
+                                                   replacement,
                                                    recordlookup,
                                                    parameters,
                                                    axis,

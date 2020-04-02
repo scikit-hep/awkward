@@ -1490,7 +1490,7 @@ def argcross(arrays,
 
 def combinations(array,
                  n,
-                 diagonal=False,
+                 replacement=False,
                  axis=1,
                  keys=None,
                  parameters=None,
@@ -1501,7 +1501,7 @@ def combinations(array,
         array: Array from which to choose `n` items without replacement.
         n (int): The number of items to choose in each list: `2` chooses
             unique pairs, `3` chooses unique triples, etc.
-        diagonal (bool): If True, combinations that include the same
+        replacement (bool): If True, combinations that include the same
             item more than once are allowed; otherwise each item in a
             combinations is strictly unique.
         axis (int): The dimension at which this operation is applied. The
@@ -1523,7 +1523,7 @@ def combinations(array,
     combinations sampled without replacement. If the normal cross product
     is thought of as an `n` dimensional tensor of combinations, these
     represent the "upper triangle" of sets without repetition. If
-    `diagonal=True`, the diagonal of this "upper triangle" is included.
+    `replacement=True`, the diagonal of this "upper triangle" is included.
 
     As a simple example with `axis=0`, consider the following `array`
 
@@ -1539,7 +1539,7 @@ def combinations(array,
 
     Including the diagonal allows pairs like `('a', 'a')`.
 
-        >>> ak.to_list(ak.combinations(array, 2, axis=0, diagonal=True))
+        >>> ak.to_list(ak.combinations(array, 2, axis=0, replacement=True))
         [('a', 'a'), ('a', 'b'), ('a', 'c'), ('a', 'd'), ('a', 'e'),
                      ('b', 'b'), ('b', 'c'), ('b', 'd'), ('b', 'e'),
                                  ('c', 'c'), ('c', 'd'), ('c', 'e'),
@@ -1558,7 +1558,7 @@ def combinations(array,
     but not `('a', 'b', 'a')`. All combinations are in the same order as
     the original array.
 
-        >>> ak.to_list(ak.combinations(array, 3, axis=0, diagonal=True))
+        >>> ak.to_list(ak.combinations(array, 3, axis=0, replacement=True))
         [('a', 'a', 'a'), ('a', 'a', 'b'), ('a', 'a', 'c'), ('a', 'a', 'd'), ('a', 'a', 'e'),
          ('a', 'b', 'b'), ('a', 'b', 'c'), ('a', 'b', 'd'), ('a', 'b', 'e'), ('a', 'c', 'c'),
          ('a', 'c', 'd'), ('a', 'c', 'e'), ('a', 'd', 'd'), ('a', 'd', 'e'), ('a', 'e', 'e'),
@@ -1641,7 +1641,7 @@ def combinations(array,
     layout = awkward1.operations.convert.to_layout(
                array, allowrecord=False, allowother=False)
     out = layout.combinations(n,
-                              diagonal=diagonal,
+                              replacement=replacement,
                               keys=keys,
                               parameters=parameters,
                               axis=axis)
@@ -1653,7 +1653,7 @@ def combinations(array,
 
 def argcombinations(array,
                     n,
-                    diagonal=False,
+                    replacement=False,
                     axis=1,
                     keys=None,
                     parameters=None,
@@ -1664,7 +1664,7 @@ def argcombinations(array,
         array: Array from which to choose `n` items without replacement.
         n (int): The number of items to choose from each list: `2` chooses
             unique pairs, `3` chooses unique triples, etc.
-        diagonal (bool): If True, combinations that include the same
+        replacement (bool): If True, combinations that include the same
             item more than once are allowed; otherwise each item in a
             combinations is strictly unique.
         axis (int): The dimension at which this operation is applied. The
@@ -1703,7 +1703,7 @@ def argcombinations(array,
         layout = awkward1.operations.convert.to_layout(
                    array, allowrecord=False, allowother=False).localindex(axis)
         out = layout.combinations(n,
-                                  diagonal=diagonal,
+                                  replacement=replacement,
                                   keys=keys,
                                   parameters=parameters,
                                   axis=axis)

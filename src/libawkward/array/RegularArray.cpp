@@ -788,7 +788,7 @@ namespace awkward {
 
   const ContentPtr
   RegularArray::combinations(int64_t n,
-                             bool diagonal,
+                             bool replacement,
                              const util::RecordLookupPtr& recordlookup,
                              const util::Parameters& parameters,
                              int64_t axis,
@@ -799,12 +799,12 @@ namespace awkward {
 
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
-      return combinations_axis0(n, diagonal, recordlookup, parameters);
+      return combinations_axis0(n, replacement, recordlookup, parameters);
     }
 
     else if (toaxis == depth + 1) {
       int64_t size = size_;
-      if (diagonal) {
+      if (replacement) {
         size += (n - 1);
       }
       int64_t thisn = n;
@@ -839,7 +839,7 @@ namespace awkward {
       struct Error err = awkward_regulararray_combinations_64(
         tocarryraw.data(),
         n,
-        diagonal,
+        replacement,
         size_,
         length());
       util::handle_error(err, classname(), identities_.get());
@@ -864,7 +864,7 @@ namespace awkward {
       ContentPtr next = content_.get()
                         ->getitem_range_nowrap(0, length()*size_).get()
                         ->combinations(n,
-                                       diagonal,
+                                       replacement,
                                        recordlookup,
                                        parameters,
                                        axis,

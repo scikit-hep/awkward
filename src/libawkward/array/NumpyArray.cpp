@@ -2280,7 +2280,7 @@ namespace awkward {
 
   const ContentPtr
   NumpyArray::combinations(int64_t n,
-                           bool diagonal,
+                           bool replacement,
                            const util::RecordLookupPtr& recordlookup,
                            const util::Parameters& parameters,
                            int64_t axis,
@@ -2291,7 +2291,7 @@ namespace awkward {
 
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
-      return combinations_axis0(n, diagonal, recordlookup, parameters);
+      return combinations_axis0(n, replacement, recordlookup, parameters);
     }
 
     else if (shape_.size() <= 1) {
@@ -2300,7 +2300,7 @@ namespace awkward {
 
     else {
       return toRegularArray().get()->combinations(n,
-                                                  diagonal,
+                                                  replacement,
                                                   recordlookup,
                                                   parameters,
                                                   axis,

@@ -1458,7 +1458,7 @@ namespace awkward {
   template <typename T>
   const ContentPtr
   ListOffsetArrayOf<T>::combinations(int64_t n,
-                                     bool diagonal,
+                                     bool replacement,
                                      const util::RecordLookupPtr& recordlookup,
                                      const util::Parameters& parameters,
                                      int64_t axis,
@@ -1469,7 +1469,7 @@ namespace awkward {
 
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
-      return combinations_axis0(n, diagonal, recordlookup, parameters);
+      return combinations_axis0(n, replacement, recordlookup, parameters);
     }
 
     else if (toaxis == depth + 1) {
@@ -1482,7 +1482,7 @@ namespace awkward {
         &totallen,
         offsets.ptr().get(),
         n,
-        diagonal,
+        replacement,
         starts.ptr().get(),
         starts.offset(),
         stops.ptr().get(),
@@ -1501,7 +1501,7 @@ namespace awkward {
       struct Error err2 = util::awkward_listarray_combinations_64<T>(
         tocarryraw.data(),
         n,
-        diagonal,
+        replacement,
         starts.ptr().get(),
         starts.offset(),
         stops.ptr().get(),
@@ -1527,7 +1527,7 @@ namespace awkward {
       ListOffsetArray64* rawcompact =
         dynamic_cast<ListOffsetArray64*>(compact.get());
       ContentPtr next = rawcompact->content().get()->combinations(n,
-                                                                  diagonal,
+                                                                  replacement,
                                                                   recordlookup,
                                                                   parameters,
                                                                   axis,

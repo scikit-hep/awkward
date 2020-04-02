@@ -995,7 +995,7 @@ namespace awkward {
         int64_t* totallen,
         int64_t* tooffsets,
         int64_t n,
-        bool diagonal,
+        bool replacement,
         const T* starts,
         int64_t startsoffset,
         const T* stops,
@@ -1009,7 +1009,7 @@ namespace awkward {
       awkward_listarray_combinations_64(
         int64_t** tocarry,
         int64_t n,
-        bool diagonal,
+        bool replacement,
         const T* starts,
         int64_t startsoffset,
         const T* stops,

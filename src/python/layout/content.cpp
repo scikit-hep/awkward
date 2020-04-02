@@ -1196,7 +1196,7 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
           .def("combinations",
                [](const T& self,
                   int64_t n,
-                  bool diagonal,
+                  bool replacement,
                   py::object keys,
                   py::object parameters,
                   int64_t axis) -> py::object {
@@ -1212,13 +1212,13 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
               }
             }
             return box(self.combinations(n,
-                                         diagonal,
+                                         replacement,
                                          recordlookup,
                                          dict2parameters(parameters),
                                          axis,
                                          0));
           }, py::arg("n"),
-             py::arg("diagonal") = false,
+             py::arg("replacement") = false,
              py::arg("keys") = py::none(),
              py::arg("parameters") = py::none(),
              py::arg("axis") = 1)

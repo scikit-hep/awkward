@@ -828,7 +828,7 @@ namespace awkward {
 
     const ContentPtr
       combinations(int64_t n,
-                   bool diagonal,
+                   bool replacement,
                    const util::RecordLookupPtr& recordlookup,
                    const util::Parameters& parameters,
                    int64_t axis,
@@ -838,7 +838,7 @@ namespace awkward {
       }
       int64_t toaxis = axis_wrap_if_negative(axis);
       if (toaxis == depth) {
-        return combinations_axis0(n, diagonal, recordlookup, parameters);
+        return combinations_axis0(n, replacement, recordlookup, parameters);
       }
       else {
         throw std::invalid_argument("'axis' out of range for combinations");

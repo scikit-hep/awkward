@@ -1223,7 +1223,7 @@ extern "C" {
     awkward_combinations_64(
       int64_t* toindex,
       int64_t n,
-      bool diagonal,
+      bool replacement,
       int64_t singlelen);
 
   EXPORT_SYMBOL struct Error
@@ -1231,7 +1231,7 @@ extern "C" {
       int64_t* totallen,
       int64_t* tooffsets,
       int64_t n,
-      bool diagonal,
+      bool replacement,
       const int32_t* starts,
       int64_t startsoffset,
       const int32_t* stops,
@@ -1242,7 +1242,7 @@ extern "C" {
       int64_t* totallen,
       int64_t* tooffsets,
       int64_t n,
-      bool diagonal,
+      bool replacement,
       const uint32_t* starts,
       int64_t startsoffset,
       const uint32_t* stops,
@@ -1253,7 +1253,7 @@ extern "C" {
       int64_t* totallen,
       int64_t* tooffsets,
       int64_t n,
-      bool diagonal,
+      bool replacement,
       const int64_t* starts,
       int64_t startsoffset,
       const int64_t* stops,
@@ -1264,7 +1264,7 @@ extern "C" {
     awkward_listarray32_combinations_64(
       int64_t** tocarry,
       int64_t n,
-      bool diagonal,
+      bool replacement,
       const int32_t* starts,
       int64_t startsoffset,
       const int32_t* stops,
@@ -1274,7 +1274,7 @@ extern "C" {
     awkward_listarrayU32_combinations_64(
       int64_t** tocarry,
       int64_t n,
-      bool diagonal,
+      bool replacement,
       const uint32_t* starts,
       int64_t startsoffset,
       const uint32_t* stops,
@@ -1284,7 +1284,7 @@ extern "C" {
     awkward_listarray64_combinations_64(
       int64_t** tocarry,
       int64_t n,
-      bool diagonal,
+      bool replacement,
       const int64_t* starts,
       int64_t startsoffset,
       const int64_t* stops,
@@ -1295,7 +1295,7 @@ extern "C" {
     awkward_regulararray_combinations_64(
       int64_t** tocarry,
       int64_t n,
-      bool diagonal,
+      bool replacement,
       int64_t size,
       int64_t length);
 

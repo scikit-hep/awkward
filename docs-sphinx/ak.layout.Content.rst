@@ -183,7 +183,7 @@ Implements :doc:`_auto/ak.argmin`.
 ak.layout.Content.combinations
 ==============================
 
-.. py:method:: ak.layout.Content.combinations(n, diagonal=False, keys=None, parameters=None, axis=1)
+.. py:method:: ak.layout.Content.combinations(n, replacement=False, keys=None, parameters=None, axis=1)
 
 Implements :doc:`_auto/ak.combinations`.
 

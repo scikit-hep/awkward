@@ -360,7 +360,7 @@ namespace awkward {
 
   const ContentPtr
   Record::combinations(int64_t n,
-                       bool diagonal,
+                       bool replacement,
                        const util::RecordLookupPtr& recordlookup,
                        const util::Parameters& parameters,
                        int64_t axis,
@@ -376,7 +376,7 @@ namespace awkward {
     else {
       ContentPtr singleton = array_.get()->getitem_range_nowrap(at_, at_ + 1);
       return singleton.get()->combinations(n,
-                                           diagonal,
+                                           replacement,
                                            recordlookup,
                                            parameters,
                                            axis,
