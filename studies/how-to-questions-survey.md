@@ -1,6 +1,6 @@
-= How-to questions survey
+# How-to questions survey
 
-== What are the most-asked about topics?
+## What are the most-asked about topics?
 
 | Frequency | Rough categories |
 |:---------:|:-----------------|
@@ -38,7 +38,7 @@
 | 1  | ak.sort |
 | 1  | ak.isnan |
 
-== References
+## References
 
    * ak.all: https://github.com/scikit-hep/awkward-array/issues/166
    * ak.all: https://github.com/scikit-hep/awkward-array/issues/53
@@ -148,7 +148,7 @@
    * To NumPy: https://github.com/scikit-hep/uproot/issues/208
    * Zip: https://github.com/scikit-hep/uproot/issues/252
 
-== Bugs in Awkward structures
+## Bugs in Awkward structures
 
    * ChunkedArray and jagged indexing: https://github.com/scikit-hep/awkward-array/issues/186
    * ChunkedArray and ObjectArray: https://github.com/scikit-hep/awkward-array/issues/229
