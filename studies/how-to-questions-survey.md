@@ -7,7 +7,7 @@
 | 20 | Pandas |
 | 10 | persistence, including HDF5 (4) and Parquet (2) |
 | 8  | Lorentz vectors and TVector3 |
-| 7  | reducing |
+| 8  | reducing |
 | 7  | jagged arrays |
 | 6  | ak.fillna and ak.rpad (regularizing) |
 | 6  | ak.concatenate and stack |
@@ -22,7 +22,6 @@
 | 2  | ak.where and np.choose |
 | 2  | ak.num (including axis=1) |
 | 1  | SQL-like join |
-| 1  | reducers |
 | 1  | reducer-like |
 | 1  | np.digitize |
 | 1  | non-ufuncs |
@@ -37,6 +36,15 @@
 | 1  | ak.zip |
 | 1  | ak.sort |
 | 1  | ak.isnan |
+
+## Categories of categories
+
+   * Data into other systems: Pandas (20), NumPy/regularizing (6), Histogramming (4), Arrow (2)
+   * Persistence (10), laziness (3)
+   * Physics objects/vectors (8)
+   * Restructuring: reducing (8), concatenate (6), getitem (5), cross (3), num (2), with_field (2), where (2), zip/sort (2)
+   * Types: Jagged arrays (7), strings (5)
+   * Fast code: Numba (4)
 
 ## References
 
