@@ -42,9 +42,12 @@
    * Data into other systems: Pandas (20), NumPy/regularizing (6), Histogramming (4), Arrow (2)
    * Persistence (10), laziness (3)
    * Physics objects/vectors (8)
-   * Restructuring: reducing (8), concatenate (6), getitem (5), cross (3), num (2), with_field (2), where (2), zip/sort (2)
+   * Restructuring: reducing (8), concatenate (6), getitem (5), cross (3), num (2), with_field (2), where (2), zip/sort (2), digitize (1)
    * Types: Jagged arrays (7), strings (5)
    * Fast code: Numba (4)
+   * Lazy arrays (3)
+   * SQL-like join (1)
+   * All the rest
 
 ## References
 
