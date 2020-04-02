@@ -92,11 +92,34 @@ What have people been asking about?
 
 == Uproot StackOverflow
 
-   * HERE
+   * Jagged array: https://stackoverflow.com/questions/60103825/retrieve-data-in-pandas
+   * Pandas: https://stackoverflow.com/questions/60058505/get-data-from-pandas-multiindex
+   * Pandas: https://stackoverflow.com/questions/58986029/reindex-panda-multiindex
+   * Pandas with TVector3: https://stackoverflow.com/questions/59930539/how-can-i-load-a-ttree-with-tvector3-branches-into-a-pandas-dataframe-using-upro
+   * Histograms: https://stackoverflow.com/questions/59166618/getting-a-histogram-of-a-jaggedarray
+   * HDF5, ak.rpad: https://stackoverflow.com/questions/59001209/read-a-tree-from-a-root-file-and-then-make-zero-padded-h5-file
+   * Pandas with strings: https://stackoverflow.com/questions/58937233/strings-in-pandas-dataframe-from-uproot
+   * ak.rpad and ak.fillna: https://stackoverflow.com/questions/58923496/zero-padding-variable-length-of-array-in-uproot
+   * Strings: https://stackoverflow.com/questions/58922824/arrays-of-strings-from-uproot
+   * Histograms: https://stackoverflow.com/questions/58503117/may-i-see-a-short-example-of-cutting-on-data-to-prepare-it-for-histogramming-in
+   * Lazy arrays: https://stackoverflow.com/questions/58747852/how-to-use-lazyarrays-in-uproot
 
 == Awkward0 StackOverflow
 
-   * HERE
+   * Parquet: https://stackoverflow.com/questions/59264202/awkward-array-how-to-get-numpy-array-after-storing-as-parquet-not-bitmasked
+   * np.choose: https://stackoverflow.com/questions/58750767/awkward-arrays-choosing-an-item-from-each-row-according-to-a-list-of-indices
+   * Arrow: https://stackoverflow.com/questions/59198577/arrow-listarray-from-pandas-has-very-different-structure-from-arrow-array-genera
+   * Parquet: https://stackoverflow.com/questions/59191959/awkwardarray-possible-to-append-an-array-to-an-exisitng-parquet-file
+   * Named axis: https://stackoverflow.com/questions/59150837/awkward-array-fancy-indexing-with-boolean-mask-along-named-axis
+   * Jagged arrays: https://stackoverflow.com/questions/58912123/python-collection-of-different-sized-arrays-jagged-arrays-dask
+   * Histograms: https://stackoverflow.com/questions/58503117/may-i-see-a-short-example-of-cutting-on-data-to-prepare-it-for-histogramming-in
+   * ak.num with axis=1: https://stackoverflow.com/questions/58459548/can-jaggedarray-counts-innermost-layer-and-return-another-jaggeredarray
+   * ak.concatenate: https://stackoverflow.com/questions/58440970/how-to-combine-two-uproot-jagged-arrays-into-one
+   * ak.rpad, ak.fillna: https://stackoverflow.com/questions/58308027/efficiently-sorting-and-filtering-a-jaggedarray-by-another-one
+   * ak.with_field: https://stackoverflow.com/questions/60569460/appending-columns-to-awkward-table
+   * Persistence as compact: https://stackoverflow.com/questions/60381016/how-to-copy-a-jagged-array-in-awkward-array
+   * np.stack: https://stackoverflow.com/questions/60336285/is-there-a-way-to-stack-jaggedarrays-without-fromiter
+   * ak.cross: https://stackoverflow.com/questions/60003131/propagating-a-selection-on-a-subset-of-awkward-array-back-up
 
 == Bugs in Awkward structures
 
@@ -117,4 +140,6 @@ What have people been asking about?
    * ChunkedArray: https://github.com/scikit-hep/awkward-array/issues/181
    * ChunkedArray: https://github.com/scikit-hep/awkward-array/issues/161
    * ObjectArray: https://github.com/scikit-hep/awkward-array/issues/103
-   * HERE
+   * ObjectArray: https://stackoverflow.com/questions/60250877/combine-awkward-array-jaggedarray-contents-and-offsets-into-nested-jaggedarray
+   * ChunkedArray: https://stackoverflow.com/questions/58921328/using-chunked-array-akwkard-lib-for-fancy-indexing-or-masking
+   * ChunkedArray: https://stackoverflow.com/questions/59277507/content-starts-and-stops-of-chunkedarray-built-from-lazyarray
