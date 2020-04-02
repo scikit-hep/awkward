@@ -1,7 +1,8 @@
 ak.types.PrimitiveType
 ----------------------
 
-HERE
+The type of some :doc:`ak.layout.NumpyArray` nodes, if its ``format`` is
+recognized.
 
 In addition to the properties and methods described in :doc:`ak.types.Type`,
 a PrimitiveType has the following.

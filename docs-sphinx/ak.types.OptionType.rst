@@ -1,7 +1,9 @@
 ak.types.OptionType
 -------------------
 
-HERE
+The type of an :doc:`ak.layout.IndexedOptionArray`,
+:doc:`ak.layout.ByteMaskedArray`, :doc:`ak.layout.BitMaskedArray`, or
+:doc:`ak.layout.UnmaskedArray`.
 
 In addition to the properties and methods described in :doc:`ak.types.Type`,
 an OptionType has the following.

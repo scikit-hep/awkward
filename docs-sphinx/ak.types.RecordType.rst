@@ -1,7 +1,7 @@
 ak.types.RecordType
 -------------------
 
-HERE
+The type of a :doc:`ak.layout.RecordArray`.
 
 In addition to the properties and methods described in :doc:`ak.types.Type`,
 a RecordType has the following.

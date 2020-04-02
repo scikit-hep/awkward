@@ -1,7 +1,7 @@
 ak.types.RegularType
 --------------------
 
-HERE
+The type of a :doc:`ak.layout.RegularArray`.
 
 In addition to the properties and methods described in :doc:`ak.types.Type`,
 a RegularType has the following.
