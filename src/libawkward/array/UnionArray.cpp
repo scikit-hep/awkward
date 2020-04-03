@@ -1229,8 +1229,14 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  const std::shared_ptr<Content> UnionArrayOf<T, I>::argsort(bool ascending, const std::string& kind, int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: UnionArrayOf<T, I>::argsort is not implemened");
+  const std::shared_ptr<Content> UnionArrayOf<T, I>::sort_next(int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool ascending, bool stable) const {
+    std::shared_ptr<Content> simplified = simplify_uniontype(true);
+    if (dynamic_cast<UnionArray8_32*>(simplified.get())  ||
+        dynamic_cast<UnionArray8_U32*>(simplified.get())  ||
+        dynamic_cast<UnionArray8_64*>(simplified.get())) {
+      throw std::invalid_argument(std::string("cannot sort ") + classname());
+    }
+    return simplified.get()->sort_next(negaxis, starts, parents, outlength, ascending, stable);
   }
 
   template <typename T, typename I>

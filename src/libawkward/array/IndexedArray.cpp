@@ -1254,8 +1254,8 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::argsort(bool ascending, const std::string& kind, int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: IndexedArrayOf<T, ISOPTION>::argsort is not implemened");
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::sort_next(int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool ascending, bool stable) const {
+    throw std::runtime_error("FIXME: IndexedArrayOf<T, ISOPTION>::sort_next is not implemened");
   }
 
   template <typename T, bool ISOPTION>

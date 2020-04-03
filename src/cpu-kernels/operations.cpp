@@ -1314,3 +1314,92 @@ ERROR awkward_bitmaskedarray_to_indexedoptionarray(T* toindex, const uint8_t* fr
 ERROR awkward_bitmaskedarray_to_indexedoptionarray_64(int64_t* toindex, const uint8_t* frombitmask, int64_t bitmaskoffset, int64_t bitmasklength, bool validwhen, bool lsb_order) {
   return awkward_bitmaskedarray_to_indexedoptionarray<int64_t>(toindex, frombitmask, bitmaskoffset, bitmasklength, validwhen, lsb_order);
 }
+
+// template <typename OUT, typename IN>
+// ERROR awkward_numpyarray_argsort(OUT* toptr, const IN* fromptr, const size_t* fromindex, size_t indexlength, int64_t fromptroffset, const int64_t* starts, int64_t startsoffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  // for( int64_t i = 0; i < outlength; i++) {
+  //   toptr[i] = -1;
+  // }
+  // for (int64_t i = 0;  i < lenparents;  i++) {
+  //   int64_t parent = parents[parentsoffset + i];
+  //   int64_t start = starts[parent];
+  //   if (toptr[parent] == -1  or  fromptr[fromptroffset + i] > fromptr[fromptroffset + toptr[parent] + start]) {
+  //     toptr[parent] = i - start;
+  //   }
+  // }
+  // int64_t j = 0;
+  // for (size_t i = 0; i < lenparents; i++, j++) {
+  //   toptr[j] = fromindex[i];
+  //   std::cout << i << " = " << fromindex[i] << ", ";
+  // }
+  // std::cout << "\n";
+//   return success();
+// }
+
+template <typename OUT, typename IN>
+ERROR awkward_argsort(OUT* toptr, const IN* fromptr, const size_t* fromindex, size_t indexlength, int64_t fromptroffset, const int64_t* starts, int64_t startsoffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  for (int64_t k = 0; k < lenparents;  k++) {
+    std::cout << "outindex " << fromindex[k] << ", fromptr " << fromptr[k] << "\n";
+  }
+  for (int64_t i = 0;  i < outlength;  i++) {
+    toptr[i] = -1;
+  }
+  for (int64_t i = 0;  i < lenparents;  i++) {
+    int64_t parent = parents[parentsoffset + i];
+    int64_t start = starts[parent];
+    int64_t indx = fromindex[i];
+    std::cout << " parent " << parent << ", start " << start << ",  fromoffset + i = " << (fromptroffset + i) << ": "<< fromptr[fromptroffset + i] << ", ";
+    toptr[i] = fromindex[i];
+    // if (toptr[parent] == -1  ||  fromptr[fromptroffset + i] > fromptr[fromptroffset + toptr[parent] + start]) {
+    //   toptr[parent] = i - start;
+    // }
+  }
+  std::cout << "\nFinale:\n";
+  for (int64_t i = 0;  i < lenparents;  i++) {
+    std::cout << toptr[i] << ", ";
+  }
+  return success();
+}
+ERROR awkward_argsort_bool_64(int64_t* toptr, const bool* fromptr, const size_t* fromindex, size_t indexlength, int64_t fromptroffset, const int64_t* starts, int64_t startsoffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  for (int64_t i = 0;  i < outlength;  i++) {
+    toptr[i] = -1;
+  }
+  for (int64_t i = 0;  i < lenparents;  i++) {
+    int64_t parent = parents[parentsoffset + i];
+    int64_t start = starts[parent];
+    if (toptr[parent] == -1  ||  (fromptr[fromptroffset + i] != 0) > (fromptr[fromptroffset + toptr[parent] + start] != 0)) {
+      toptr[parent] = i - start;
+    }
+  }
+  return success();
+}
+ERROR awkward_argsort_int8_64(int64_t* toptr, const int8_t* fromptr, const size_t* fromindex, size_t indexlength, int64_t fromptroffset, const int64_t* starts, int64_t startsoffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_argsort<int64_t, int8_t>(toptr, fromptr, fromindex, indexlength, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_argsort_uint8_64(int64_t* toptr, const uint8_t* fromptr, const size_t* fromindex, size_t indexlength, int64_t fromptroffset, const int64_t* starts, int64_t startsoffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_argsort<int64_t, uint8_t>(toptr, fromptr, fromindex, indexlength, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_argsort_int16_64(int64_t* toptr, const int16_t* fromptr, const size_t* fromindex, size_t indexlength, int64_t fromptroffset, const int64_t* starts, int64_t startsoffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_argsort<int64_t, int16_t>(toptr, fromptr, fromindex, indexlength, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_argsort_uint16_64(int64_t* toptr, const uint16_t* fromptr, const size_t* fromindex, size_t indexlength, int64_t fromptroffset, const int64_t* starts, int64_t startsoffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_argsort<int64_t, uint16_t>(toptr, fromptr, fromindex, indexlength, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_argsort_int32_64(int64_t* toptr, const int32_t* fromptr, const size_t* fromindex, size_t indexlength, int64_t fromptroffset, const int64_t* starts, int64_t startsoffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_argsort<int64_t, int32_t>(toptr, fromptr, fromindex, indexlength, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_argsort_uint32_64(int64_t* toptr, const uint32_t* fromptr, const size_t* fromindex, size_t indexlength, int64_t fromptroffset, const int64_t* starts, int64_t startsoffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_argsort<int64_t, uint32_t>(toptr, fromptr, fromindex, indexlength, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_argsort_int64_64(int64_t* toptr, const int64_t* fromptr, const size_t* fromindex, size_t indexlength, int64_t fromptroffset, const int64_t* starts, int64_t startsoffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_argsort<int64_t, int64_t>(toptr, fromptr, fromindex, indexlength, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_argsort_uint64_64(int64_t* toptr, const uint64_t* fromptr, const size_t* fromindex, size_t indexlength, int64_t fromptroffset, const int64_t* starts, int64_t startsoffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_argsort<int64_t, uint64_t>(toptr, fromptr, fromindex, indexlength, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_argsort_float32_64(int64_t* toptr, const float* fromptr, const size_t* fromindex, size_t indexlength, int64_t fromptroffset, const int64_t* starts, int64_t startsoffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_argsort<int64_t, float>(toptr, fromptr, fromindex, indexlength, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_argsort_float64_64(int64_t* toptr, const double* fromptr, const size_t* fromindex, size_t indexlength, int64_t fromptroffset, const int64_t* starts, int64_t startsoffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_argsort<int64_t, double>(toptr, fromptr, fromindex, indexlength, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength);
+}

@@ -3,8 +3,10 @@
 #ifndef AWKWARD_CONTENT_H_
 #define AWKWARD_CONTENT_H_
 
+#include <algorithm>
 #include <cstdio>
 #include <map>
+#include <numeric>
 
 #include "awkward/cpu-kernels/util.h"
 #include "awkward/Identities.h"
@@ -68,13 +70,14 @@ namespace awkward {
     virtual const std::shared_ptr<Content> reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const = 0;
     virtual const std::shared_ptr<Content> localindex(int64_t axis, int64_t depth) const = 0;
     virtual const std::shared_ptr<Content> choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const = 0;
-    virtual const std::shared_ptr<Content> argsort(bool ascending, const std::string& kind, int64_t axis, int64_t depth) const = 0;
+    virtual const std::shared_ptr<Content> sort_next(int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool ascending, bool stable) const = 0;
 
     const std::string tostring() const;
     const std::string tojson(bool pretty, int64_t maxdecimals) const;
     void tojson(FILE* destination, bool pretty, int64_t maxdecimals, int64_t buffersize) const;
     int64_t nbytes() const;
     const std::shared_ptr<Content> reduce(const Reducer& reducer, int64_t axis, bool mask, bool keepdims) const;
+    const std::shared_ptr<Content> sort(int64_t axis, bool ascending, bool stable) const;
 
     const util::Parameters parameters() const;
     void setparameters(const util::Parameters& parameters);

@@ -1,5 +1,6 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+#include <algorithm>
 #include <iomanip>
 #include <numeric>
 #include <sstream>
@@ -1527,8 +1528,91 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> NumpyArray::argsort(bool ascending, const std::string& kind, int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: NumpyArray::argsort is not implemened");
+  const std::shared_ptr<Content> NumpyArray::sort_next(int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool ascending, bool stable) const {
+    std::cout << "  ==> NumpyArray::sort_next my length: " << length() << " to outlength: " << outlength << " with starts:\n" << starts.tostring() << "\n and parents:\n" << parents.tostring() << "\n";
+    if (length() == 0) {
+      Index64 outindex(1);
+      outindex.ptr().get()[0] = -1;
+      return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), outindex, shallow_copy());
+    }
+    if (shape_.empty()) {
+      throw std::runtime_error("attempting to sort a scalar");
+    }
+    else if (shape_.size() != 1  ||  !iscontiguous()) {
+      return toRegularArray().get()->sort_next(negaxis, starts, parents, outlength, ascending, stable);
+    }
+    else {
+      std::shared_ptr<Content> out;
+      int64_t length = parents.length();
+      std::shared_ptr<void> ptr;
+      if (format_.compare("?") == 0) {
+        ptr = argsort<bool>(reinterpret_cast<bool*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength, ascending, stable);
+      }
+      else if (format_.compare("b") == 0) {
+        ptr = argsort<int8_t>(reinterpret_cast<int8_t*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength, ascending, stable);
+      }
+      else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
+        ptr = argsort<uint8_t>(reinterpret_cast<uint8_t*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength, ascending, stable);
+      }
+      else if (format_.compare("h") == 0) {
+        ptr = argsort<int16_t>(reinterpret_cast<int16_t*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength, ascending, stable);
+      }
+      else if (format_.compare("H") == 0) {
+        ptr = argsort<uint16_t>(reinterpret_cast<uint16_t*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength, ascending, stable);
+      }
+#if defined _MSC_VER || defined __i386__
+      else if (format_.compare("l") == 0) {
+#else
+      else if (format_.compare("i") == 0) {
+#endif
+        ptr = argsort<int32_t>(reinterpret_cast<int32_t*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength, ascending, stable);
+      }
+#if defined _MSC_VER || defined __i386__
+      else if (format_.compare("L") == 0) {
+#else
+      else if (format_.compare("I") == 0) {
+#endif
+        ptr = argsort<uint32_t>(reinterpret_cast<uint32_t*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength, ascending, stable);
+      }
+#if defined _MSC_VER || defined __i386__
+      else if (format_.compare("q") == 0) {
+#else
+      else if (format_.compare("l") == 0) {
+#endif
+        ptr = argsort<int64_t>(reinterpret_cast<int64_t*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength, ascending, stable);
+      }
+#if defined _MSC_VER || defined __i386__
+      else if (format_.compare("Q") == 0) {
+#else
+      else if (format_.compare("L") == 0) {
+#endif
+        ptr = argsort<uint64_t>(reinterpret_cast<uint64_t*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength, ascending, stable);
+      }
+      else if (format_.compare("f") == 0) {
+        ptr = argsort<float>(reinterpret_cast<float*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength, ascending, stable);
+      }
+      else if (format_.compare("d") == 0) {
+        ptr = argsort<double>(reinterpret_cast<double*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength, ascending, stable);
+      }
+      else {
+        throw std::invalid_argument(std::string("cannot sort NumpyArray with format \"") + format_ + std::string("\""));
+      }
+
+      std::string format;
+      #if defined _MSC_VER || defined __i386__
+          format = "q";
+      #else
+          format = "l";
+      #endif
+
+      ssize_t itemsize = 8;
+      std::vector<ssize_t> shape({ (ssize_t)outlength });
+      std::vector<ssize_t> strides({ itemsize });
+      out = std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), ptr, shape, strides, 0, itemsize, format);
+
+      out = std::make_shared<RegularArray>(Identities::none(), util::Parameters(), out, 1);
+      return out;
+    }
   }
 
   const std::shared_ptr<Content> NumpyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {

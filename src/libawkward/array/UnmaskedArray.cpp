@@ -450,8 +450,8 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> UnmaskedArray::argsort(bool ascending, const std::string& kind, int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: UnmaskedArray::argsort is not implemened");
+  const std::shared_ptr<Content> UnmaskedArray::sort_next(int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool ascending, bool stable) const {
+    throw std::runtime_error("FIXME: UnmaskedArray::sort_next is not implemened");
   }
 
   const std::shared_ptr<Content> UnmaskedArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {

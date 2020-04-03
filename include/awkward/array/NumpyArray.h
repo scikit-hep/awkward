@@ -102,7 +102,7 @@ namespace awkward {
     const std::shared_ptr<Content> reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const override;
     const std::shared_ptr<Content> localindex(int64_t axis, int64_t depth) const override;
     const std::shared_ptr<Content> choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const override;
-    const std::shared_ptr<Content> argsort(bool ascending, const std::string& kind, int64_t axis, int64_t depth) const override;
+    const std::shared_ptr<Content> sort_next(int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool ascending, bool stable) const override;
 
     bool iscontiguous() const;
     const NumpyArray contiguous() const;
@@ -139,6 +139,47 @@ namespace awkward {
   void tojson_string(ToJson& builder) const;
 
   private:
+
+    template<typename T>
+    const std::shared_ptr<void> argsort(const T* data, int64_t offset, const Index64& starts, const Index64& parents, int64_t outlength, bool ascending, bool stable) const {
+      std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength], util::array_deleter<int64_t>());
+      std::vector<size_t> result(parents.length());
+      std::iota(result.begin(), result.end(), 0);
+
+      if(ascending  and  not stable) {
+        std::sort(result.begin(), result.end(),
+             [&data](size_t i1, size_t i2) {return data[i1] < data[i2];});
+      }
+      else if(not ascending  and  not stable) {
+        std::sort(result.begin(), result.end(),
+             [&data](size_t i1, size_t i2) {return data[i1] > data[i2];});
+      }
+      else if(ascending  and  stable) {
+        std::stable_sort(result.begin(), result.end(),
+             [&data](size_t i1, size_t i2) {return data[i1] < data[i2];});
+      }
+      else if(not ascending  and  stable) {
+        std::stable_sort(result.begin(), result.end(),
+             [&data](size_t i1, size_t i2) {return data[i1] > data[i2];});
+      }
+
+      struct Error err = util::awkward_numpyarray_argsort_64<T>(
+        ptr.get(),
+        data,
+        &result[0],
+        result.size(),
+        offset,
+        starts.ptr().get(),
+        starts.offset(),
+        parents.ptr().get(),
+        parents.offset(),
+        parents.length(),
+        outlength);
+      util::handle_error(err, classname(), nullptr);
+
+      return ptr;
+    }
+
     std::shared_ptr<void> ptr_;
     std::vector<ssize_t> shape_;
     std::vector<ssize_t> strides_;

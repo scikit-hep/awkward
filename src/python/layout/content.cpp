@@ -983,6 +983,9 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
             }
             return box(self.choose(n, diagonal, recordlookup, dict2parameters(parameters), axis, 0));
           }, py::arg("n"), py::arg("diagonal") = false, py::arg("keys") = py::none(), py::arg("parameters") = py::none(), py::arg("axis") = 1)
+          .def("sort", [](const T&self, int64_t axis, bool ascending, bool stable) -> py::object {
+            return box(self.sort(axis, ascending, false));
+          })
 
   ;
 }

@@ -245,8 +245,11 @@ namespace awkward {
     return std::make_shared<EmptyArray>(identities_, util::Parameters());
   }
 
-  const std::shared_ptr<Content> EmptyArray::argsort(bool ascending, const std::string& kind, int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: EmptyArray::argsort is not implemened");
+  const std::shared_ptr<Content> EmptyArray::sort_next(int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool ascending, bool stable) const {
+    std::cout << "EmptyArray::sort_next\n";
+    std::shared_ptr<Content> asnumpy = toNumpyArray("d", 8);
+    std::cout << asnumpy.get()->tostring() << "\n";
+    return asnumpy.get()->sort_next(negaxis, starts, parents, outlength, ascending, stable);
   }
 
   const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {

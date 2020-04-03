@@ -586,8 +586,8 @@ namespace awkward {
         throw std::invalid_argument("'axis' out of range for choose");
       }
     }
-    
-    const std::shared_ptr<Content> argsort(bool ascending, const std::string& kind, int64_t axis, int64_t depth) const override {
+
+    const std::shared_ptr<Content> sort_next(int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool ascending, bool stable) const override {
       throw std::runtime_error("FIXME: RawArray::argsort is not implemened");
     }
 
