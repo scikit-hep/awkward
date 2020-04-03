@@ -787,7 +787,7 @@ def flatten(array, axis=1, highlevel=True):
     else:
         return out
 
-def rpad(array, target, axis=1, clip=False, highlevel=True):
+def pad_none(array, target, axis=1, clip=False, highlevel=True):
     """
     Args:
         array: Data containing nested lists to pad to a target length.
@@ -823,7 +823,7 @@ def rpad(array, target, axis=1, clip=False, highlevel=True):
     At `axis=0`, this operation pads the whole array, adding None at the
     outermost level:
 
-        >>> ak.to_list(ak.rpad(array, 5, axis=0))
+        >>> ak.to_list(ak.pad_none(array, 5, axis=0))
         [[
           [1.1, 2.2, 3.3],
           [],
@@ -839,7 +839,7 @@ def rpad(array, target, axis=1, clip=False, highlevel=True):
 
     At `axis=1`, this operation pads the first nested level:
 
-        >>> ak.to_list(ak.rpad(array, 3, axis=1))
+        >>> ak.to_list(ak.pad_none(array, 3, axis=1))
         [[
           [1.1, 2.2, 3.3],
           [],
@@ -858,7 +858,7 @@ def rpad(array, target, axis=1, clip=False, highlevel=True):
 
     And so on for higher values of `axis`:
 
-        >>> ak.to_list(ak.rpad(array, 2, axis=2))
+        >>> ak.to_list(ak.pad_none(array, 2, axis=2))
         [[
           [1.1, 2.2, 3.3],
           [None, None],
@@ -885,20 +885,20 @@ def rpad(array, target, axis=1, clip=False, highlevel=True):
 
     The difference between
 
-        >>> ak.rpad(array, 2, axis=2)
+        >>> ak.pad_none(array, 2, axis=2)
         <Array [[[1.1, 2.2, 3.3], ... [8.8, 9.9]]] type='3 * var * var * ?float64'>
 
     and
 
-        >>> ak.rpad(array, 2, axis=2, clip=True)
+        >>> ak.pad_none(array, 2, axis=2, clip=True)
         <Array [[[1.1, 2.2], [None, ... [8.8, 9.9]]] type='3 * var * 2 * ?float64'>
 
     is not just in the length of `[1.1, 2.2, 3.3]` vs `[1.1, 2.2]`, but also
     in the distinction between the following types.
 
-        >>> ak.type(ak.rpad(array, 2, axis=2))
+        >>> ak.type(ak.pad_none(array, 2, axis=2))
         3 * var * var * ?float64
-        >>> ak.type(ak.rpad(array, 2, axis=2, clip=True))
+        >>> ak.type(ak.pad_none(array, 2, axis=2, clip=True))
         3 * var *   2 * ?float64
     """
     layout = awkward1.operations.convert.to_layout(array,

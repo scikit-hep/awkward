@@ -372,14 +372,14 @@ ak.layout.Content.rpad
 
 .. py:method:: ak.layout.Content.rpad(arg0, arg1)
 
-Implements :doc:`_auto/ak.rpad` with ``clip=False``.
+Implements :doc:`_auto/ak.pad_none` with ``clip=False``.
 
 ak.layout.Content.rpad_and_clip
 ===============================
 
 .. py:method:: ak.layout.Content.rpad_and_clip(arg0, arg1)
 
-Implements :doc:`_auto/ak.rpad` with ``clip=True``.
+Implements :doc:`_auto/ak.pad_none` with ``clip=True``.
 
 ak.layout.Content.setidentities
 ===============================

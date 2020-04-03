@@ -126,27 +126,27 @@ def test_ByteMaskedArray_flatten():
     assert awkward1.to_list(awkward1.flatten(array, axis=1)) == [[0.0, 1.1, 2.2], [], [3.3, 4.4], [], [10.0, 11.1, 12.2]]
     assert awkward1.to_list(awkward1.flatten(array, axis=2)) == [[0.0, 1.1, 2.2, 3.3, 4.4], [], None, None, [10.0, 11.1, 12.2]]
 
-def test_IndexedOptionArray_rpad():
+def test_IndexedOptionArray_pad_none():
     array = awkward1.Array([[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [], None, None, [[], [10.0, 11.1, 12.2]]])
     assert awkward1.to_list(array) == [[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [], None, None, [[], [10.0, 11.1, 12.2]]]
-    assert awkward1.to_list(awkward1.rpad(array, 7, axis=0)) == [[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [], None, None, [[], [10.0, 11.1, 12.2]], None, None]
-    assert awkward1.to_list(awkward1.rpad(array, 3, axis=1)) == [[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [None, None, None], None, None, [[], [10.0, 11.1, 12.2], None]]
-    assert awkward1.to_list(awkward1.rpad(array, 3, axis=2)) == [[[0.0, 1.1, 2.2], [None, None, None], [3.3, 4.4, None]], [], None, None, [[None, None, None], [10.0, 11.1, 12.2]]]
-    assert awkward1.to_list(awkward1.rpad(array, 3, axis=0, clip=True)) == [[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [], None]
-    assert awkward1.to_list(awkward1.rpad(array, 2, axis=1, clip=True)) == [[[0.0, 1.1, 2.2], []], [None, None], None, None, [[], [10.0, 11.1, 12.2]]]
-    assert awkward1.to_list(awkward1.rpad(array, 2, axis=2, clip=True)) == [[[0.0, 1.1], [None, None], [3.3, 4.4]], [], None, None, [[None, None], [10.0, 11.1]]]
+    assert awkward1.to_list(awkward1.pad_none(array, 7, axis=0)) == [[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [], None, None, [[], [10.0, 11.1, 12.2]], None, None]
+    assert awkward1.to_list(awkward1.pad_none(array, 3, axis=1)) == [[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [None, None, None], None, None, [[], [10.0, 11.1, 12.2], None]]
+    assert awkward1.to_list(awkward1.pad_none(array, 3, axis=2)) == [[[0.0, 1.1, 2.2], [None, None, None], [3.3, 4.4, None]], [], None, None, [[None, None, None], [10.0, 11.1, 12.2]]]
+    assert awkward1.to_list(awkward1.pad_none(array, 3, axis=0, clip=True)) == [[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [], None]
+    assert awkward1.to_list(awkward1.pad_none(array, 2, axis=1, clip=True)) == [[[0.0, 1.1, 2.2], []], [None, None], None, None, [[], [10.0, 11.1, 12.2]]]
+    assert awkward1.to_list(awkward1.pad_none(array, 2, axis=2, clip=True)) == [[[0.0, 1.1], [None, None], [3.3, 4.4]], [], None, None, [[None, None], [10.0, 11.1]]]
 
-def test_ByteMaskedArray_rpad():
+def test_ByteMaskedArray_pad_none():
     content = awkward1.Array([[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [], [[5.5]], [[6.6, 7.7, 8.8, 9.9]], [[], [10.0, 11.1, 12.2]]]).layout
     mask = awkward1.layout.Index8(numpy.array([0, 0, 1, 1, 0], dtype=numpy.int8))
     array = awkward1.Array(awkward1.layout.ByteMaskedArray(mask, content, valid_when=False))
     assert awkward1.to_list(array) == [[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [], None, None, [[], [10.0, 11.1, 12.2]]]
-    assert awkward1.to_list(awkward1.rpad(array, 7, axis=0)) == [[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [], None, None, [[], [10.0, 11.1, 12.2]], None, None]
-    assert awkward1.to_list(awkward1.rpad(array, 3, axis=1)) == [[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [None, None, None], None, None, [[], [10.0, 11.1, 12.2], None]]
-    assert awkward1.to_list(awkward1.rpad(array, 3, axis=2)) == [[[0.0, 1.1, 2.2], [None, None, None], [3.3, 4.4, None]], [], None, None, [[None, None, None], [10.0, 11.1, 12.2]]]
-    assert awkward1.to_list(awkward1.rpad(array, 3, axis=0, clip=True)) == [[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [], None]
-    assert awkward1.to_list(awkward1.rpad(array, 2, axis=1, clip=True)) == [[[0.0, 1.1, 2.2], []], [None, None], None, None, [[], [10.0, 11.1, 12.2]]]
-    assert awkward1.to_list(awkward1.rpad(array, 2, axis=2, clip=True)) == [[[0.0, 1.1], [None, None], [3.3, 4.4]], [], None, None, [[None, None], [10.0, 11.1]]]
+    assert awkward1.to_list(awkward1.pad_none(array, 7, axis=0)) == [[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [], None, None, [[], [10.0, 11.1, 12.2]], None, None]
+    assert awkward1.to_list(awkward1.pad_none(array, 3, axis=1)) == [[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [None, None, None], None, None, [[], [10.0, 11.1, 12.2], None]]
+    assert awkward1.to_list(awkward1.pad_none(array, 3, axis=2)) == [[[0.0, 1.1, 2.2], [None, None, None], [3.3, 4.4, None]], [], None, None, [[None, None, None], [10.0, 11.1, 12.2]]]
+    assert awkward1.to_list(awkward1.pad_none(array, 3, axis=0, clip=True)) == [[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [], None]
+    assert awkward1.to_list(awkward1.pad_none(array, 2, axis=1, clip=True)) == [[[0.0, 1.1, 2.2], []], [None, None], None, None, [[], [10.0, 11.1, 12.2]]]
+    assert awkward1.to_list(awkward1.pad_none(array, 2, axis=2, clip=True)) == [[[0.0, 1.1], [None, None], [3.3, 4.4]], [], None, None, [[None, None], [10.0, 11.1]]]
 
 def test_ByteMaskedArray_reduce():
     content = awkward1.layout.NumpyArray(numpy.array([2, 3, 5, 7, 11, 0, 0, 0, 0, 0, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 0, 0, 0, 0, 0, 101, 103, 107, 109, 113], dtype=numpy.int64))
