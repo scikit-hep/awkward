@@ -74,13 +74,118 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
     is typed. Custom methods like this can be added with #ak.behavior, and
     the namespace of Array attributes must be kept clear for such applications.
 
+    See also #ak.Record.
+
+    Interfaces to other libraries
+    =============================
+
+    NumPy
+    *****
+
+    When NumPy
+    [universal functions](https://docs.scipy.org/doc/numpy/reference/ufuncs.html)
+    (ufuncs) are applied to an ak.Array, they are passed through the Awkward
+    data structure, applied to the numerical data at its leaves, and the output
+    maintains the original structure.
+
+    For example,
+
+        >>> array = ak.Array([[1, 4, 9], [], [16, 25]])
+        >>> np.sqrt(array)
+        <Array [[1, 2, 3], [], [4, 5]] type='3 * var * float64'>
+
+    See also #ak.Array.__array_ufunc__.
+
+    Some NumPy functions other than ufuncs are also handled properly in
+    NumPy >= 1.17 (see
+    [NEP 18](https://numpy.org/neps/nep-0018-array-function-protocol.html))
+    and if an Awkward override exists. That is,
+
+        np.concatenate
+
+    can be used on an Awkward Array because
+
+        ak.concatenate
+
+    exists. If your NumPy is older than 1.17, use `ak.concatenate` directly.
+
+    Pandas
+    ******
+
+    ak.Arrays can be used as [Pandas](https://pandas.pydata.org/) DataFrame
+    columns and Series, in place of NumPy arrays. Their data structures are not
+    copied or converted into Python objects (not even NumPy's `"O"` dtype), so
+    this is the most efficient way to fill DataFrames with arbitrary data
+    structures.
+
+    As a consequence, however, ak.Array must include the following methods in
+    its namespace (other than names with underscores):
+
+       * `columns`: Property like #ak.keys, except that the list cannot be
+         empty (a special placeholder is used instead).
+       * `dtype`: Property with the same value as
+         #ak._connect._pandas.get_dtype. It provides no information about
+         the type of data in the array.
+       * `ndim`: Property whose value is `1`, which does not reflect the
+         structure of the data in the array.
+       * `shape`: Property whose value is a single-item tuple containing
+         the length of the array (#ak.Array.__len__). It does not reflect
+         the structure of the data in the array.
+       * `isna()`: Method whose value is equal to #ak.is_none, implementing
+         [pd.Series.isna](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.isna.html)
+       * `take(indices, allow_fill=None, fill_value=None)`: method implementing
+         [pd.Series.take](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.take.html)
+         for the ak.Array.
+       * `copy()`: Method implementing
+         [pd.Series.copy](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.copy.html),
+         which completely copies the array (all nodes, all buffers).
+
+    It's also possible to convert Awkward data structures into Pandas
+    [MultiIndex](https://pandas.pydata.org/pandas-docs/stable/user_guide/advanced.html)
+    rows and columns. In this case, the data in Pandas are not Awkward Arrays.
+
+    See #ak.pandas.df to convert an ak.Array into one Pandas DataFrame (lossy).
+
+    See #ak.pandas.dfs to convert an ak.Array into as many DataFrames as are
+    needed to preserve its list structure.
+
+    Numba
+    *****
+
     Arrays can be used in [Numba](http://numba.pydata.org/): they can be
     passed as arguments to a Numba-compiled function or returned as return
     values. The only limitation is that Awkward Arrays cannot be *created*
     inside the Numba-compiled function; to make outputs, consider
     #ak.ArrayBuilder.
 
-    See also #ak.Record.
+    NumExpr
+    *******
+
+    [NumExpr](https://numexpr.readthedocs.io/en/latest/user_guide.html) can
+    calculate expressions on a set of ak.Arrays, but only if the functions in
+    `ak.numexpr` are used, not the functions in the `numexpr` library directly.
+
+    Like NumPy ufuncs, the expression is evaluated on the numeric leaves of the
+    data structure, maintaining structure in the output.
+
+    See #ak.numexpr.evaluate to calculate an expression.
+
+    See #ak.numexpr.re_evaluate to recalculate an expression without
+    rebuilding its virtual machine.
+
+    Autograd
+    ********
+
+    Derivatives of a calculation on a set of ak.Arrays can be calculated with
+    [Autograd](https://github.com/HIPS/autograd#readme), but only if the
+    function in `ak.autograd` is used, not the functions in the `autograd`
+    library directly.
+
+    Like NumPy ufuncs, the function and its derivatives are evaluated on the
+    numeric leaves of the data structure, maintaining structure in the output.
+
+    See #ak.autograd.elementwise_grad to calculate a function and its
+    derivatives elementwise on each numeric value in an ak.Array.
     """
 
     def __init__(self, data, behavior=None, with_name=None, check_valid=False):

@@ -3,7 +3,7 @@ ak.layout.Content
 
 Superclass of array nodes that build up the structure of an
 :doc:`_auto/ak.Array`; the array layout returned by the
-`ak.Array.layout <_auto/ak.Array.html#ak-array-layout>`_ property.
+`ak.Array.layout <_auto/ak.Array.html#ak-array-layout>`__ property.
 
 The array node types are listed below.
 
