@@ -44,71 +44,117 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
     intentionally has a minimum of methods, preferring standalone functions
     like
 
-        ak.cross([left, right])
+        ak.num(array1)
+        ak.combinations(array1)
+        ak.cartesian([array1, array2])
+        ak.zip({"x": array1, "y": array2, "z": array3})
 
     instead of bound methods like
 
-        left.cross(right)
+        array1.num()
+        array1.combinations()
+        array1.cartesian([array2, array3])
+        array1.zip(...)   # ?
 
     because its namespace is valuable for domain-specific parameters and
-    functionality. For example, with
+    functionality. For example, if records contain a field named `"num"`,
+    they can be accessed as
 
-        vectors = ak.Array([{"x": 0.1, "y": 1.0, "z": 10.0},
-                            {"x": 0.2, "y": 2.0, "z": 20.0},
-                            {"x": 0.3, "y": 3.0, "z": 30.0}])
+        array1.num
 
-    we want to access fields `x`, `y`, `z` as attributes
+    instead of
 
-        >>> vectors.x
-        <Array [0.1, 0.2, 0.3] type='3 * float64'>
-        >>> vectors.y
-        <Array [1, 2, 3] type='3 * float64'>
-        >>> vectors.z
-        <Array [10, 20, 30] type='3 * float64'>
+        array1["num"]
 
-    Additionally, we might want to add functionality,
+    without any confusion or interference from #ak.num. The same is true
+    for domain-specific methods that have been attached to the data. For
+    instance, an analysis of mailing addresses might have a function that
+    computes zip codes, which can be attached to the data with a method
+    like
 
-        class Vec3Array(ak.Array):
-            def cross(self, other):
-                "Computes the cross-product of 3D vectors."
-                x = self.y*other.z - self.z*other.y
-                y = self.z*other.x - self.x*other.z
-                z = self.x*other.y - self.y*other.x
-                return ak.zip({"x": x, "y": y, "z": z}, with_name="vec3")
+        latlon.zip()
 
-        # Arrays of vec3 use subclass Vec3Array instead of ak.Array.
-        ak.behavior["*", "vec3"] = Vec3Array
+    without any confusion or interference from #ak.zip. Custom methods like
+    this can be added with #ak.behavior, and so the namespace of Array
+    attributes must be kept clear for such applications.
 
-        # Records with name "vec3" are presented as having type "vec3".
-        ak.behavior["__typestr__", "vec3"] = "vec3"
+    See also #ak.Record.
 
-        vectors = ak.Array([{"x": 0.1, "y": 1.0, "z": 10.0},
-                            {"x": 0.2, "y": 2.0, "z": 20.0},
-                            {"x": 0.3, "y": 3.0, "z": 30.0}],
-                           with_name="vec3")
-        more_vectors = ak.Array([{"x": 10.0, "y": 1.0, "z": 0.1},
-                                 {"x": 20.0, "y": 2.0, "z": 0.2},
-                                 {"x": 30.0, "y": 3.0, "z": 0.3}],
-                                with_name="vec3")
+    Interfaces to other libraries
+    =============================
 
-    Now the record types are presented as "vec3" and the Array has class
-    `Vec3Array`, so it has a `cross` method.
+    NumPy
+    *****
 
-        >>> vectors
-        <Array [{x: 0.1, y: 1, z: 10, ... y: 3, z: 30}] type='3 * vec3'>
-        >>> more_vectors
-        <Array [{x: 10, y: 1, z: 0.1, ... z: 0.3}] type='3 * vec3'>
-        >>> type(vectors)
-        <class '__main__.Vec3Array'>
-        >>> type(more_vectors)
-        <class '__main__.Vec3Array'>
+    When NumPy
+    [universal functions](https://docs.scipy.org/doc/numpy/reference/ufuncs.html)
+    (ufuncs) are applied to an ak.Array, they are passed through the Awkward
+    data structure, applied to the numerical data at its leaves, and the output
+    maintains the original structure.
 
-        >>> vectors.cross(more_vectors)
-        <Array [{x: -9.9, y: 100, ... z: -89.1}] type='3 * vec3'>
+    For example,
 
-    If the #ak.cross function were a method of this Array class, then it would
-    conflict with applications where we might want `array.cross` to mean
-    something else.
+        >>> array = ak.Array([[1, 4, 9], [], [16, 25]])
+        >>> np.sqrt(array)
+        <Array [[1, 2, 3], [], [4, 5]] type='3 * var * float64'>
+
+    See also #ak.Array.__array_ufunc__.
+
+    Some NumPy functions other than ufuncs are also handled properly in
+    NumPy >= 1.17 (see
+    [NEP 18](https://numpy.org/neps/nep-0018-array-function-protocol.html))
+    and if an Awkward override exists. That is,
+
+        np.concatenate
+
+    can be used on an Awkward Array because
+
+        ak.concatenate
+
+    exists. If your NumPy is older than 1.17, use `ak.concatenate` directly.
+
+    Pandas
+    ******
+
+    ak.Arrays can be used as [Pandas](https://pandas.pydata.org/) DataFrame
+    columns and Series, in place of NumPy arrays. Their data structures are not
+    copied or converted into Python objects (not even NumPy's `"O"` dtype), so
+    this is the most efficient way to fill DataFrames with arbitrary data
+    structures.
+
+    As a consequence, however, ak.Array must include the following methods in
+    its namespace (other than names with underscores):
+
+       * `columns`: Property like #ak.keys, except that the list cannot be
+         empty (a special placeholder is used instead).
+       * `dtype`: Property with the same value as
+         #ak._connect._pandas.get_dtype. It provides no information about
+         the type of data in the array.
+       * `ndim`: Property whose value is `1`, which does not reflect the
+         structure of the data in the array.
+       * `shape`: Property whose value is a single-item tuple containing
+         the length of the array (#ak.Array.__len__). It does not reflect
+         the structure of the data in the array.
+       * `isna()`: Method whose value is equal to #ak.is_none, implementing
+         [pd.Series.isna](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.isna.html)
+       * `take(indices, allow_fill=None, fill_value=None)`: method implementing
+         [pd.Series.take](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.take.html)
+         for the ak.Array.
+       * `copy()`: Method implementing
+         [pd.Series.copy](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.copy.html),
+         which completely copies the array (all nodes, all buffers).
+
+    It's also possible to convert Awkward data structures into Pandas
+    [MultiIndex](https://pandas.pydata.org/pandas-docs/stable/user_guide/advanced.html)
+    rows and columns. In this case, the data in Pandas are not Awkward Arrays.
+
+    See #ak.pandas.df to convert an ak.Array into one Pandas DataFrame (lossy).
+
+    See #ak.pandas.dfs to convert an ak.Array into as many DataFrames as are
+    needed to preserve its list structure.
+
+    Numba
+    *****
 
     Arrays can be used in [Numba](http://numba.pydata.org/): they can be
     passed as arguments to a Numba-compiled function or returned as return
@@ -116,7 +162,34 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
     inside the Numba-compiled function; to make outputs, consider
     #ak.ArrayBuilder.
 
-    See also #ak.Record.
+    NumExpr
+    *******
+
+    [NumExpr](https://numexpr.readthedocs.io/en/latest/user_guide.html) can
+    calculate expressions on a set of ak.Arrays, but only if the functions in
+    `ak.numexpr` are used, not the functions in the `numexpr` library directly.
+
+    Like NumPy ufuncs, the expression is evaluated on the numeric leaves of the
+    data structure, maintaining structure in the output.
+
+    See #ak.numexpr.evaluate to calculate an expression.
+
+    See #ak.numexpr.re_evaluate to recalculate an expression without
+    rebuilding its virtual machine.
+
+    Autograd
+    ********
+
+    Derivatives of a calculation on a set of ak.Arrays can be calculated with
+    [Autograd](https://github.com/HIPS/autograd#readme), but only if the
+    function in `ak.autograd` is used, not the functions in the `autograd`
+    library directly.
+
+    Like NumPy ufuncs, the function and its derivatives are evaluated on the
+    numeric leaves of the data structure, maintaining structure in the output.
+
+    See #ak.autograd.elementwise_grad to calculate a function and its
+    derivatives elementwise on each numeric value in an ak.Array.
     """
 
     def __init__(self, data, behavior=None, with_name=None, check_valid=False):
@@ -327,9 +400,11 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         """
         return self.Mask(self, valid_when)
 
-    def to_list(self):
+    def tolist(self):
         """
-        Converts this Array into Python objects.
+        Converts this Array into Python objects; same as #ak.to_list
+        (but without the underscore, like NumPy's
+        [tolist](https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.tolist.html)).
 
         Awkward Array types have the following Pythonic translations.
 
@@ -350,11 +425,11 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         """
         return awkward1.operations.convert.to_list(self)
 
-    def to_json(self,
-                destination=None,
-                pretty=False,
-                maxdecimals=None,
-                buffersize=65536):
+    def tojson(self,
+               destination=None,
+               pretty=False,
+               maxdecimals=None,
+               buffersize=65536):
         """
         Args:
             destination (None or str): If None, this method returns a JSON str;
@@ -368,7 +443,8 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
             buffersize (int): Size (in bytes) of the buffer used by the JSON
                 parser.
 
-        Converts this Array into a JSON string or file.
+        Converts this Array into a JSON string or file; same as #ak.to_json
+        (but without the underscore, like #ak.Array.tolist).
 
         Awkward Array types have the following JSON translations.
 
@@ -869,6 +945,17 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
              precedence, or
            * the field name is not a valid Python identifier or is a Python
              keyword.
+
+        Note that while fields can be accessed as attributes, they cannot be
+        *assigned* as attributes: the following doesn't work.
+
+            array.z = new_field
+
+        Always use
+
+            array["z"] = new_field
+
+        to add a field.
         """
         if where in dir(type(self)):
             return super(Array, self).__getattribute__(where)
@@ -1218,44 +1305,6 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
 
     Most users won't be creating Records manually. This class primarily exists
     to be overridden in the same way as #ak.Array.
-
-    Following a very similar example,
-
-        class Vec3(ak.Record):
-            def cross(self, other):
-                "Computes the cross-product of 3D vectors."
-                x = self.y*other.z - self.z*other.y
-                y = self.z*other.x - self.x*other.z
-                z = self.x*other.y - self.y*other.x
-                return ak.Record({"x": x, "y": y, "z": z}, with_name="vec3")
-
-        # Records of vec3 use subclass Vec3 instead of ak.Record.
-        ak.behavior["vec3"] = Vec3
-
-        # Records with name "vec3" are presented as having type "vec3".
-        ak.behavior["__typestr__", "vec3"] = "vec3"
-
-        vectors = ak.Array([{"x": 0.1, "y": 1.0, "z": 30.0},
-                            {"x": 0.2, "y": 2.0, "z": 20.0},
-                            {"x": 0.3, "y": 3.0, "z": 10.0}],
-                           with_name="vec3")
-
-    Now the record types are presented as "vec3" and the Record has class
-    `Vec3`, so it has a `cross` method.
-
-        >>> vectors[0]
-        <Record {x: 0.1, y: 1, z: 30} type='vec3'>
-        >>> type(vectors[0])
-        <class '__main__.Vec3'>
-
-        >>> vectors[0].cross(vectors[1])
-        <Record {x: -40, y: 4, z: 0} type='vec3'>
-
-    Be sure to distinguish between records, which subclass #ak.Record, and
-    arrays, which subclass #ak.Array, even though the method implementations
-    can be very similar because NumPy's
-    [universal functions](https://docs.scipy.org/doc/numpy/reference/ufuncs.html)
-    are equally usable on scalars as they are on arrays.
 
     Records can be used in [Numba](http://numba.pydata.org/): they can be
     passed as arguments to a Numba-compiled function or returned as return
