@@ -140,7 +140,7 @@ class PandasMixin(PandasNotImportedYet):
     def isna(self):
         # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray.isna.html
         register()
-        return numpy.array(awkward1.operations.structure.isna(self))
+        return numpy.array(awkward1.operations.structure.is_none(self))
 
     def take(self, indices, *args, **kwargs):
         # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray.take.html

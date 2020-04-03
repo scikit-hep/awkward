@@ -977,7 +977,7 @@ def fill_none(array, value, highlevel=True):
     else:
         return out
 
-def isna(array, highlevel=True):
+def is_none(array, highlevel=True):
     """
     Args:
         array: Data to check for missing values (None).
@@ -986,8 +986,6 @@ def isna(array, highlevel=True):
 
     Returns an array whose value is True where an element of `array` is None;
     False otherwise.
-
-    See also #ak.notna, the logical negation of #ak.isna.
     """
     def apply(layout):
         if isinstance(layout, awkward1._util.unknowntypes):
@@ -1018,20 +1016,6 @@ def isna(array, highlevel=True):
                                    behavior=awkward1._util.behaviorof(array))
     else:
         return out
-
-def notna(array, highlevel=True):
-    """
-    Args:
-        array: Data to check for missing values (None).
-        highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
-
-    Returns an array whose value is False where an element of `array` is None;
-    True otherwise.
-
-    See also #ak.isna, the logical negation of #ak.notna.
-    """
-    return ~isna(array, highlevel=highlevel)
 
 def product(arrays,
             axis=1,
