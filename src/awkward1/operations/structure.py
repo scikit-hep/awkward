@@ -913,7 +913,7 @@ def pad_none(array, target, axis=1, clip=False, highlevel=True):
     else:
         return out
 
-def fillna(array, value, highlevel=True):
+def fill_none(array, value, highlevel=True):
     """
     Args:
         array: Data in which to replace None with a given value.
@@ -929,19 +929,19 @@ def fillna(array, value, highlevel=True):
 
     The None values could be replaced with `0` by
 
-        >>> ak.fillna(array, 0)
+        >>> ak.fill_none(array, 0)
         <Array [[1.1, 0, 2.2], [], [0, 3.3, 4.4]] type='3 * var * float64'>
 
     The replacement value doesn't strictly need the same type as the
     surrounding data. For example, the None values could also be replaced
     by a string.
 
-        >>> ak.fillna(array, "hi")
+        >>> ak.fill_none(array, "hi")
         <Array [[1.1, 'hi', 2.2], ... ['hi', 3.3, 4.4]] type='3 * var * union[float64, s...'>
 
     The list content now has a union type:
 
-        >>> ak.type(ak.fillna(array, "hi"))
+        >>> ak.type(ak.fill_none(array, "hi"))
         3 * var * union[float64, string]
 
     The values could be floating-point numbers or strings.

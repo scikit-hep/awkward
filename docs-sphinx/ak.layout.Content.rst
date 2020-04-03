@@ -231,7 +231,7 @@ ak.layout.Content.fillna
 
 .. py:method:: ak.layout.Content.fillna(value)
 
-Implements :doc:`_auto/ak.fillna`.
+Implements :doc:`_auto/ak.fill_none`.
 
 ak.layout.Content.flatten
 =========================
