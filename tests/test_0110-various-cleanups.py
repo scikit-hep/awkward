@@ -17,7 +17,7 @@ def test_na_union():
     array = awkward1.Array(awkward1.layout.UnionArray8_64(tags, index, [one, two]), check_valid=True)
     assert awkward1.to_list(array) == [1, [], [1], None, 3, None, [3, 3, 3]]
 
-    assert awkward1.to_list(awkward1.isna(array)) == [False, False, False, True, False, True, False]
+    assert awkward1.to_list(awkward1.is_none(array)) == [False, False, False, True, False, True, False]
 
 class DummyRecord(awkward1.Record):
     def __repr__(self):

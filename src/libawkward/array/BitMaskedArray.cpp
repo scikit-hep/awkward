@@ -636,18 +636,18 @@ namespace awkward {
   }
 
   const ContentPtr
-  BitMaskedArray::choose(int64_t n,
-                         bool diagonal,
-                         const util::RecordLookupPtr& recordlookup,
-                         const util::Parameters& parameters,
-                         int64_t axis,
-                         int64_t depth) const {
-    return toByteMaskedArray().get()->choose(n,
-                                             diagonal,
-                                             recordlookup,
-                                             parameters,
-                                             axis,
-                                             depth);
+  BitMaskedArray::combinations(int64_t n,
+                               bool replacement,
+                               const util::RecordLookupPtr& recordlookup,
+                               const util::Parameters& parameters,
+                               int64_t axis,
+                               int64_t depth) const {
+    return toByteMaskedArray().get()->combinations(n,
+                                                   replacement,
+                                                   recordlookup,
+                                                   parameters,
+                                                   axis,
+                                                   depth);
   }
 
   const ContentPtr

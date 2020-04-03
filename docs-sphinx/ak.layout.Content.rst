@@ -3,7 +3,7 @@ ak.layout.Content
 
 Superclass of array nodes that build up the structure of an
 :doc:`_auto/ak.Array`; the array layout returned by the
-`ak.Array.layout <_auto/ak.Array.html#ak-array-layout>`_ property.
+`ak.Array.layout <_auto/ak.Array.html#ak-array-layout>`__ property.
 
 The array node types are listed below.
 
@@ -180,12 +180,12 @@ ak.layout.Content.argmin
 
 Implements :doc:`_auto/ak.argmin`.
 
-ak.layout.Content.choose
-========================
+ak.layout.Content.combinations
+==============================
 
-.. py:method:: ak.layout.Content.choose(n, diagonal=False, keys=None, parameters=None, axis=1)
+.. py:method:: ak.layout.Content.combinations(n, replacement=False, keys=None, parameters=None, axis=1)
 
-Implements :doc:`_auto/ak.choose`.
+Implements :doc:`_auto/ak.combinations`.
 
 ak.layout.Content.count
 =======================
@@ -231,7 +231,7 @@ ak.layout.Content.fillna
 
 .. py:method:: ak.layout.Content.fillna(value)
 
-Implements :doc:`_auto/ak.fillna`.
+Implements :doc:`_auto/ak.fill_none`.
 
 ak.layout.Content.flatten
 =========================
@@ -280,8 +280,8 @@ ak.layout.Content.localindex
 Returns nested lists of integers (down to the chosen ``axis``) that count
 from `0` to the `length - 1` of the innermost list.
 
-This is used internally to generate :doc:`_auto/ak.argcross` from
-:doc:`_auto/ak.cross`, etc.
+This is used internally to generate :doc:`_auto/ak.argcartesian` from
+:doc:`_auto/ak.cartesian`, etc.
 
 ak.layout.Content.max
 =====================
@@ -372,14 +372,14 @@ ak.layout.Content.rpad
 
 .. py:method:: ak.layout.Content.rpad(arg0, arg1)
 
-Implements :doc:`_auto/ak.rpad` with ``clip=False``.
+Implements :doc:`_auto/ak.pad_none` with ``clip=False``.
 
 ak.layout.Content.rpad_and_clip
 ===============================
 
 .. py:method:: ak.layout.Content.rpad_and_clip(arg0, arg1)
 
-Implements :doc:`_auto/ak.rpad` with ``clip=True``.
+Implements :doc:`_auto/ak.pad_none` with ``clip=True``.
 
 ak.layout.Content.setidentities
 ===============================

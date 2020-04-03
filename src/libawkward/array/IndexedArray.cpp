@@ -1641,19 +1641,19 @@ namespace awkward {
 
   template <typename T, bool ISOPTION>
   const ContentPtr
-  IndexedArrayOf<T, ISOPTION>::choose(
+  IndexedArrayOf<T, ISOPTION>::combinations(
     int64_t n,
-    bool diagonal,
+    bool replacement,
     const util::RecordLookupPtr& recordlookup,
     const util::Parameters& parameters,
     int64_t axis,
     int64_t depth) const {
     if (n < 1) {
-      throw std::invalid_argument("in choose, 'n' must be at least 1");
+      throw std::invalid_argument("in combinations, 'n' must be at least 1");
     }
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (axis == depth) {
-      return choose_axis0(n, diagonal, recordlookup, parameters);
+      return combinations_axis0(n, replacement, recordlookup, parameters);
     }
     else {
       if (ISOPTION) {
@@ -1663,12 +1663,12 @@ namespace awkward {
         IndexOf<T> outindex = pair.second;
 
         ContentPtr next = content_.get()->carry(nextcarry);
-        ContentPtr out = next.get()->choose(n,
-                                            diagonal,
-                                            recordlookup,
-                                            parameters,
-                                            axis,
-                                            depth);
+        ContentPtr out = next.get()->combinations(n,
+                                                  replacement,
+                                                  recordlookup,
+                                                  parameters,
+                                                  axis,
+                                                  depth);
         IndexedArrayOf<T, ISOPTION> out2(identities_,
                                          util::Parameters(),
                                          outindex,
@@ -1676,12 +1676,12 @@ namespace awkward {
         return out2.simplify_optiontype();
       }
       else {
-        return project().get()->choose(n,
-                                       diagonal,
-                                       recordlookup,
-                                       parameters,
-                                       axis,
-                                       depth);
+        return project().get()->combinations(n,
+                                             replacement,
+                                             recordlookup,
+                                             parameters,
+                                             axis,
+                                             depth);
       }
     }
   }

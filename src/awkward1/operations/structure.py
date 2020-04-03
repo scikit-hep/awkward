@@ -787,7 +787,7 @@ def flatten(array, axis=1, highlevel=True):
     else:
         return out
 
-def rpad(array, target, axis=1, clip=False, highlevel=True):
+def pad_none(array, target, axis=1, clip=False, highlevel=True):
     """
     Args:
         array: Data containing nested lists to pad to a target length.
@@ -823,7 +823,7 @@ def rpad(array, target, axis=1, clip=False, highlevel=True):
     At `axis=0`, this operation pads the whole array, adding None at the
     outermost level:
 
-        >>> ak.to_list(ak.rpad(array, 5, axis=0))
+        >>> ak.to_list(ak.pad_none(array, 5, axis=0))
         [[
           [1.1, 2.2, 3.3],
           [],
@@ -839,7 +839,7 @@ def rpad(array, target, axis=1, clip=False, highlevel=True):
 
     At `axis=1`, this operation pads the first nested level:
 
-        >>> ak.to_list(ak.rpad(array, 3, axis=1))
+        >>> ak.to_list(ak.pad_none(array, 3, axis=1))
         [[
           [1.1, 2.2, 3.3],
           [],
@@ -858,7 +858,7 @@ def rpad(array, target, axis=1, clip=False, highlevel=True):
 
     And so on for higher values of `axis`:
 
-        >>> ak.to_list(ak.rpad(array, 2, axis=2))
+        >>> ak.to_list(ak.pad_none(array, 2, axis=2))
         [[
           [1.1, 2.2, 3.3],
           [None, None],
@@ -885,20 +885,20 @@ def rpad(array, target, axis=1, clip=False, highlevel=True):
 
     The difference between
 
-        >>> ak.rpad(array, 2, axis=2)
+        >>> ak.pad_none(array, 2, axis=2)
         <Array [[[1.1, 2.2, 3.3], ... [8.8, 9.9]]] type='3 * var * var * ?float64'>
 
     and
 
-        >>> ak.rpad(array, 2, axis=2, clip=True)
+        >>> ak.pad_none(array, 2, axis=2, clip=True)
         <Array [[[1.1, 2.2], [None, ... [8.8, 9.9]]] type='3 * var * 2 * ?float64'>
 
     is not just in the length of `[1.1, 2.2, 3.3]` vs `[1.1, 2.2]`, but also
     in the distinction between the following types.
 
-        >>> ak.type(ak.rpad(array, 2, axis=2))
+        >>> ak.type(ak.pad_none(array, 2, axis=2))
         3 * var * var * ?float64
-        >>> ak.type(ak.rpad(array, 2, axis=2, clip=True))
+        >>> ak.type(ak.pad_none(array, 2, axis=2, clip=True))
         3 * var *   2 * ?float64
     """
     layout = awkward1.operations.convert.to_layout(array,
@@ -913,7 +913,7 @@ def rpad(array, target, axis=1, clip=False, highlevel=True):
     else:
         return out
 
-def fillna(array, value, highlevel=True):
+def fill_none(array, value, highlevel=True):
     """
     Args:
         array: Data in which to replace None with a given value.
@@ -929,19 +929,19 @@ def fillna(array, value, highlevel=True):
 
     The None values could be replaced with `0` by
 
-        >>> ak.fillna(array, 0)
+        >>> ak.fill_none(array, 0)
         <Array [[1.1, 0, 2.2], [], [0, 3.3, 4.4]] type='3 * var * float64'>
 
     The replacement value doesn't strictly need the same type as the
     surrounding data. For example, the None values could also be replaced
     by a string.
 
-        >>> ak.fillna(array, "hi")
+        >>> ak.fill_none(array, "hi")
         <Array [[1.1, 'hi', 2.2], ... ['hi', 3.3, 4.4]] type='3 * var * union[float64, s...'>
 
     The list content now has a union type:
 
-        >>> ak.type(ak.fillna(array, "hi"))
+        >>> ak.type(ak.fill_none(array, "hi"))
         3 * var * union[float64, string]
 
     The values could be floating-point numbers or strings.
@@ -977,7 +977,7 @@ def fillna(array, value, highlevel=True):
     else:
         return out
 
-def isna(array, highlevel=True):
+def is_none(array, highlevel=True):
     """
     Args:
         array: Data to check for missing values (None).
@@ -986,8 +986,6 @@ def isna(array, highlevel=True):
 
     Returns an array whose value is True where an element of `array` is None;
     False otherwise.
-
-    See also #ak.notna, the logical negation of #ak.isna.
     """
     def apply(layout):
         if isinstance(layout, awkward1._util.unknowntypes):
@@ -1019,30 +1017,16 @@ def isna(array, highlevel=True):
     else:
         return out
 
-def notna(array, highlevel=True):
+def cartesian(arrays,
+              axis=1,
+              nested=None,
+              parameters=None,
+              with_name=None,
+              highlevel=True):
     """
     Args:
-        array: Data to check for missing values (None).
-        highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
-
-    Returns an array whose value is False where an element of `array` is None;
-    True otherwise.
-
-    See also #ak.isna, the logical negation of #ak.notna.
-    """
-    return ~isna(array, highlevel=highlevel)
-
-def cross(arrays,
-          axis=1,
-          nested=None,
-          parameters=None,
-          with_name=None,
-          highlevel=True):
-    """
-    Args:
-        arrays (dict or iterable of arrays): Arrays to compute the cross
-            product of.
+        arrays (dict or iterable of arrays): Arrays on which to compute the
+            Cartesian product.
         axis (int): The dimension at which this operation is applied. The
             outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost
@@ -1062,39 +1046,39 @@ def cross(arrays,
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
 
-    Computes a cross product (i.e. Cartesian product) of data from a set of
+    Computes a Cartesian product (i.e. cross product) of data from a set of
     `arrays`. This operation creates records (if `arrays` is a dict) or tuples
     (if `arrays` is another kind of iterable) that hold the combinations
     of elements, and it can introduce new levels of nesting.
 
-    As a simple example with `axis=0`, the cross product of
+    As a simple example with `axis=0`, the Cartesian product of
 
         >>> one = ak.Array([1, 2, 3])
         >>> two = ak.Array(["a", "b"])
 
     is
 
-        >>> ak.to_list(ak.cross([one, two], axis=0))
+        >>> ak.to_list(ak.cartesian([one, two], axis=0))
         [(1, 'a'), (1, 'b'), (2, 'a'), (2, 'b'), (3, 'a'), (3, 'b')]
 
     With nesting, a new level of nested lists is created to group combinations
     that share the same element from `one` into the same list.
 
-        >>> ak.to_list(ak.cross([one, two], axis=0, nested=True))
+        >>> ak.to_list(ak.cartesian([one, two], axis=0, nested=True))
         [[(1, 'a'), (1, 'b')], [(2, 'a'), (2, 'b')], [(3, 'a'), (3, 'b')]]
 
     The primary purpose of this function, however, is to compute a different
-    cross product for each element of an array: in other words, `axis=1`.
+    Cartesian product for each element of an array: in other words, `axis=1`.
     The following arrays each have four elements.
 
         >>> one = ak.Array([[1, 2, 3], [], [4, 5], [6]])
         >>> two = ak.Array([["a", "b"], ["c"], ["d"], ["e", "f"]])
 
-    The default `axis=1` produces 6 pairs from the cross-product of `[1, 2, 3]`
-    and `["a", "b"]`, 0 pairs from `[]` and `["c"]`, 1 pair from `[4, 5]` and
-    `["d"]`, and 1 pair from `[6]` and `["e", "f"]`.
+    The default `axis=1` produces 6 pairs from the Cartesian product of
+    `[1, 2, 3]` and `["a", "b"]`, 0 pairs from `[]` and `["c"]`, 1 pair from
+    `[4, 5]` and `["d"]`, and 1 pair from `[6]` and `["e", "f"]`.
 
-        >>> ak.to_list(ak.cross([one, two]))
+        >>> ak.to_list(ak.cartesian([one, two]))
         [[(1, 'a'), (1, 'b'), (2, 'a'), (2, 'b'), (3, 'a'), (3, 'b')],
          [],
          [(4, 'd'), (5, 'd')],
@@ -1104,7 +1088,7 @@ def cross(arrays,
     the nesting depth is increased by 1 and tuples are grouped by their
     first element.
 
-        >>> ak.to_list(ak.cross([one, two], nested=True))
+        >>> ak.to_list(ak.cartesian([one, two], nested=True))
         [[[(1, 'a'), (1, 'b')], [(2, 'a'), (2, 'b')], [(3, 'a'), (3, 'b')]],
          [],
          [[(4, 'd')], [(5, 'd')]],
@@ -1113,7 +1097,7 @@ def cross(arrays,
     These tuples are #ak.layout.RecordArray nodes with unnamed fields. To
     name the fields, we can pass `one` and `two` in a dict, rather than a list.
 
-        >>> ak.to_list(ak.cross({"x": one, "y": two}))
+        >>> ak.to_list(ak.cartesian({"x": one, "y": two}))
         [
          [{'x': 1, 'y': 'a'},
           {'x': 1, 'y': 'b'},
@@ -1128,7 +1112,7 @@ def cross(arrays,
           {'x': 6, 'y': 'f'}]
         ]
 
-    With more than two elements in the cross product, `nested` can specify
+    With more than two elements in the Cartesian product, `nested` can specify
     which are grouped and which are not. For example,
 
         >>> one = ak.Array([1, 2, 3, 4])
@@ -1137,7 +1121,7 @@ def cross(arrays,
 
     can be left entirely ungrouped:
 
-        >>> ak.to_list(ak.cross([one, two, three], axis=0))
+        >>> ak.to_list(ak.cartesian([one, two, three], axis=0))
         [
          (1, 1.1, 'a'),
          (1, 1.1, 'b'),
@@ -1167,7 +1151,7 @@ def cross(arrays,
 
     can be grouped by `one` (adding 1 more dimension):
 
-        >>> ak.to_list(ak.cross([one, two, three], axis=0, nested=[0]))
+        >>> ak.to_list(ak.cartesian([one, two, three], axis=0, nested=[0]))
         [
          [(1, 1.1, 'a'), (1, 1.1, 'b'), (1, 2.2, 'a')],
          [(1, 2.2, 'b'), (1, 3.3, 'a'), (1, 3.3, 'b')],
@@ -1181,7 +1165,7 @@ def cross(arrays,
 
     can be grouped by `one` and `two` (adding 2 more dimensions):
 
-        >>> ak.to_list(ak.cross([one, two, three], axis=0, nested=[0, 1]))
+        >>> ak.to_list(ak.cartesian([one, two, three], axis=0, nested=[0, 1]))
         [
          [
           [(1, 1.1, 'a'), (1, 1.1, 'b')],
@@ -1205,7 +1189,7 @@ def cross(arrays,
 
     or grouped by unique `one`-`two` pairs (adding 1 more dimension):
 
-        >>> ak.to_list(ak.cross([one, two, three], axis=0, nested=[1]))
+        >>> ak.to_list(ak.cartesian([one, two, three], axis=0, nested=[1]))
         [
          [(1, 1.1, 'a'), (1, 1.1, 'b')],
          [(1, 2.2, 'a'), (1, 2.2, 'b')],
@@ -1233,8 +1217,8 @@ def cross(arrays,
     list of strings in #ak.Array.__getitem__.
 
     To get list index positions in the tuples/records, rather than data from
-    the original `arrays`, use #ak.argcross instead of #ak.cross. The
-    #ak.argcross form can be particularly useful as nested indexing in
+    the original `arrays`, use #ak.argcartesian instead of #ak.cartesian. The
+    #ak.argcartesian form can be particularly useful as nested indexing in
     #ak.Array.__getitem__.
     """
     behavior = awkward1._util.behaviorof(*arrays)
@@ -1247,7 +1231,7 @@ def cross(arrays,
         parameters["__record__"] = with_name
 
     if axis < 0:
-        raise ValueError("cross's 'axis' must be non-negative")
+        raise ValueError("the 'axis' of cartesian must be non-negative")
 
     elif axis == 0:
         if nested is None or nested is False:
@@ -1258,7 +1242,8 @@ def cross(arrays,
                 nested = list(arrays.keys())   # last key is ignored below
             if any(not (isinstance(n, str) and n in arrays) for x in nested):
                 raise ValueError(
-                    "cross's 'nested' must be dict keys for a dict of arrays")
+                    "the 'nested' parameter of cartesian must be dict keys "
+                    "for a dict of arrays")
             recordlookup = []
             layouts = []
             tonested = []
@@ -1278,8 +1263,8 @@ def cross(arrays,
             if any(not (isinstance(x, int) and 0 <= x < len(arrays) - 1)
                      for x in nested):
                 raise ValueError(
-                    "cross's 'nested' must be integers in [0, len(arrays) - 1)"
-                    " for an iterable of arrays")
+                    "the 'nested' prarmeter of cartesian must be integers in "
+                    "[0, len(arrays) - 1) for an iterable of arrays")
             recordlookup = None
             layouts = []
             for x in arrays:
@@ -1346,7 +1331,8 @@ def cross(arrays,
                 nested = list(arrays.keys())   # last key is ignored below
             if any(not (isinstance(n, str) and n in arrays) for x in nested):
                 raise ValueError(
-                    "cross's 'nested' must be dict keys for a dict of arrays")
+                    "the 'nested' parameter of cartesian must be dict keys "
+                    "for a dict of arrays")
             recordlookup = []
             layouts = []
             for i, (n, x) in enumerate(arrays.items()):
@@ -1361,8 +1347,8 @@ def cross(arrays,
             if any(not (isinstance(x, int) and 0 <= x < len(arrays) - 1)
                    for x in nested):
                 raise ValueError(
-                    "cross's 'nested' must be integers in [0, len(arrays) - 1)"
-                    " for an iterable of arrays")
+                    "the 'nested' parameter of cartesian must be integers in "
+                    "[0, len(arrays) - 1) for an iterable of arrays")
             recordlookup = None
             layouts = []
             for i, x in enumerate(arrays):
@@ -1394,16 +1380,16 @@ def cross(arrays,
     else:
         return result
 
-def argcross(arrays,
-             axis=1,
-             nested=None,
-             parameters=None,
-             with_name=None,
-             highlevel=True):
+def argcartesian(arrays,
+                 axis=1,
+                 nested=None,
+                 parameters=None,
+                 with_name=None,
+                 highlevel=True):
     """
     Args:
-        arrays (dict or iterable of arrays): Arrays to compute the cross
-            product of.
+        arrays (dict or iterable of arrays): Arrays on which to compute the
+            Cartesian product.
         axis (int): The dimension at which this operation is applied. The
             outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost
@@ -1423,39 +1409,39 @@ def argcross(arrays,
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
 
-    Computes a cross product (i.e. Cartesian product) of data from a set of
-    `arrays`, like #ak.cross, but returning integer indexes for
+    Computes a Cartesian product (i.e. cross product) of data from a set of
+    `arrays`, like #ak.cartesian, but returning integer indexes for
     #ak.Array.__getitem__.
 
-    For example, the cross product of
+    For example, the Cartesian product of
 
         >>> one = ak.Array([1.1, 2.2, 3.3])
         >>> two = ak.Array(["a", "b"])
 
     is
 
-        >>> ak.to_list(ak.cross([one, two], axis=0))
+        >>> ak.to_list(ak.cartesian([one, two], axis=0))
         [(1.1, 'a'), (1.1, 'b'), (2.2, 'a'), (2.2, 'b'), (3.3, 'a'), (3.3, 'b')]
 
-    But with argcross, only the indexes are returned.
+    But with argcartesian, only the indexes are returned.
 
-        >>> ak.to_list(ak.argcross([one, two], axis=0))
+        >>> ak.to_list(ak.argcartesian([one, two], axis=0))
         [(0, 0), (0, 1), (1, 0), (1, 1), (2, 0), (2, 1)]
 
     These are the indexes that can select the items that go into the actual
-    cross product.
+    Cartesian product.
 
-        >>> one_index, two_index = ak.unzip(ak.argcross([one, two], axis=0))
+        >>> one_index, two_index = ak.unzip(ak.argcartesian([one, two], axis=0))
         >>> one[one_index]
         <Array [1.1, 1.1, 2.2, 2.2, 3.3, 3.3] type='6 * float64'>
         >>> two[two_index]
         <Array ['a', 'b', 'a', 'b', 'a', 'b'] type='6 * string'>
 
-    All of the parameters for #ak.cross apply equally to #ak.argcross, so see
-    the #ak.cross documentation for a more complete description.
+    All of the parameters for #ak.cartesian apply equally to #ak.argcartesian,
+    so see the #ak.cartesian documentation for a more complete description.
     """
     if axis < 0:
-        raise ValueError("argcross's 'axis' must be non-negative")
+        raise ValueError("the 'axis' of argcartesian must be non-negative")
 
     else:
         if isinstance(arrays, dict):
@@ -1476,11 +1462,11 @@ def argcross(arrays,
                 parameters = dict(parameters)
             parameters["__record__"] = with_name
 
-        result = cross(layouts,
-                       axis=axis,
-                       nested=nested,
-                       parameters=parameters,
-                       highlevel=False)
+        result = cartesian(layouts,
+                           axis=axis,
+                           nested=nested,
+                           parameters=parameters,
+                           highlevel=False)
 
         if highlevel:
             return awkward1._util.wrap(result,
@@ -1488,22 +1474,22 @@ def argcross(arrays,
         else:
             return result
 
-def choose(array,
-           n,
-           diagonal=False,
-           axis=1,
-           keys=None,
-           parameters=None,
-           with_name=None,
-           highlevel=True):
+def combinations(array,
+                 n,
+                 replacement=False,
+                 axis=1,
+                 keys=None,
+                 parameters=None,
+                 with_name=None,
+                 highlevel=True):
     """
     Args:
         array: Array from which to choose `n` items without replacement.
-        n (int): The number of items to choose from each list: `2` chooses
+        n (int): The number of items to choose in each list: `2` chooses
             unique pairs, `3` chooses unique triples, etc.
-        diagonal (bool): If True, pairs/triples/etc. that include the same
+        replacement (bool): If True, combinations that include the same
             item more than once are allowed; otherwise each item in a
-            pair/triple/etc. is strictly unique.
+            combinations is strictly unique.
         axis (int): The dimension at which this operation is applied. The
             outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost
@@ -1519,11 +1505,11 @@ def choose(array,
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
 
-    Computes a cross product of `array` with itself that is restricted to
-    combinations sampled without replacement. If the normal cross product
-    is thought of as an `n` dimensional tensor of combinations, these
+    Computes a Cartesian product (i.e. cross product) of `array` with itself
+    that is restricted to combinations sampled without replacement. If the
+    normal Cartesian product is thought of as an `n` dimensional tensor, these
     represent the "upper triangle" of sets without repetition. If
-    `diagonal=True`, the diagonal of this "upper triangle" is included.
+    `replacement=True`, the diagonal of this "upper triangle" is included.
 
     As a simple example with `axis=0`, consider the following `array`
 
@@ -1531,7 +1517,7 @@ def choose(array,
 
     The combinations choose `2` are:
 
-        >>> ak.to_list(ak.choose(array, 2, axis=0))
+        >>> ak.to_list(ak.combinations(array, 2, axis=0))
         [('a', 'b'), ('a', 'c'), ('a', 'd'), ('a', 'e'),
                      ('b', 'c'), ('b', 'd'), ('b', 'e'),
                                  ('c', 'd'), ('c', 'e'),
@@ -1539,7 +1525,7 @@ def choose(array,
 
     Including the diagonal allows pairs like `('a', 'a')`.
 
-        >>> ak.to_list(ak.choose(array, 2, axis=0, diagonal=True))
+        >>> ak.to_list(ak.combinations(array, 2, axis=0, replacement=True))
         [('a', 'a'), ('a', 'b'), ('a', 'c'), ('a', 'd'), ('a', 'e'),
                      ('b', 'b'), ('b', 'c'), ('b', 'd'), ('b', 'e'),
                                  ('c', 'c'), ('c', 'd'), ('c', 'e'),
@@ -1549,7 +1535,7 @@ def choose(array,
     The combinations choose `3` can't be easily arranged as a triangle
     in two dimensions.
 
-        >>> ak.to_list(ak.choose(array, 3, axis=0))
+        >>> ak.to_list(ak.combinations(array, 3, axis=0))
         [('a', 'b', 'c'), ('a', 'b', 'd'), ('a', 'b', 'e'), ('a', 'c', 'd'), ('a', 'c', 'e'),
          ('a', 'd', 'e'), ('b', 'c', 'd'), ('b', 'c', 'e'), ('b', 'd', 'e'), ('c', 'd', 'e')]
 
@@ -1558,7 +1544,7 @@ def choose(array,
     but not `('a', 'b', 'a')`. All combinations are in the same order as
     the original array.
 
-        >>> ak.to_list(ak.choose(array, 3, axis=0, diagonal=True))
+        >>> ak.to_list(ak.combinations(array, 3, axis=0, replacement=True))
         [('a', 'a', 'a'), ('a', 'a', 'b'), ('a', 'a', 'c'), ('a', 'a', 'd'), ('a', 'a', 'e'),
          ('a', 'b', 'b'), ('a', 'b', 'c'), ('a', 'b', 'd'), ('a', 'b', 'e'), ('a', 'c', 'c'),
          ('a', 'c', 'd'), ('a', 'c', 'e'), ('a', 'd', 'd'), ('a', 'd', 'e'), ('a', 'e', 'e'),
@@ -1577,7 +1563,7 @@ def choose(array,
     from 0 elements, 0 ways to choose pairs from 1 element, and 3 ways to
     choose pairs from 3 elements.
 
-        >>> ak.to_list(ak.choose(array, 2))
+        >>> ak.to_list(ak.combinations(array, 2))
         [
          [(1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4)],
          [],
@@ -1591,7 +1577,7 @@ def choose(array,
     structure.
 
         >>> same = ak.Array([[7, 7, 7, 7], [], [7], [7, 7, 7]])
-        >>> ak.to_list(ak.choose(same, 2))
+        >>> ak.to_list(ak.combinations(same, 2))
         [
          [(7, 7), (7, 7), (7, 7), (7, 7), (7, 7), (7, 7)],
          [],
@@ -1601,7 +1587,7 @@ def choose(array,
 
     To get records instead of tuples, pass a set of field names to `keys`.
 
-        >>> ak.to_list(ak.choose(array, 2, keys=["x", "y"]))
+        >>> ak.to_list(ak.combinations(array, 2, keys=["x", "y"]))
         [
          [{'x': 1, 'y': 2}, {'x': 1, 'y': 3}, {'x': 1, 'y': 4},
                             {'x': 2, 'y': 3}, {'x': 2, 'y': 4},
@@ -1611,9 +1597,10 @@ def choose(array,
          [{'x': 6, 'y': 7}, {'x': 6, 'y': 8},
                             {'x': 7, 'y': 8}]]
 
-    This operation can be constructed from #ak.argcross and other primitives:
+    This operation can be constructed from #ak.argcartesian and other
+    primitives:
 
-        >>> left, right = ak.unzip(ak.argcross([array, array]))
+        >>> left, right = ak.unzip(ak.argcartesian([array, array]))
         >>> keep = left < right
         >>> result = ak.zip([array[left][keep], array[right][keep]])
         >>> ak.to_list(result)
@@ -1627,9 +1614,9 @@ def choose(array,
     indexes to `keep` (above) gets increasingly complicated for large `n`.
 
     To get list index positions in the tuples/records, rather than data from
-    the original `array`, use #ak.argchoose instead of #ak.choose. The
-    #ak.argchoose form can be particularly useful as nested indexing in
-    #ak.Array.__getitem__.
+    the original `array`, use #ak.argcombinations instead of #ak.combinations.
+    The #ak.argcombinations form can be particularly useful as nested indexing
+    in #ak.Array.__getitem__.
     """
     if parameters is None:
         parameters = {}
@@ -1640,33 +1627,33 @@ def choose(array,
 
     layout = awkward1.operations.convert.to_layout(
                array, allowrecord=False, allowother=False)
-    out = layout.choose(n,
-                        diagonal=diagonal,
-                        keys=keys,
-                        parameters=parameters,
-                        axis=axis)
+    out = layout.combinations(n,
+                              replacement=replacement,
+                              keys=keys,
+                              parameters=parameters,
+                              axis=axis)
     if highlevel:
         return awkward1._util.wrap(
                  out, behavior=awkward1._util.behaviorof(array))
     else:
         return out
 
-def argchoose(array,
-              n,
-              diagonal=False,
-              axis=1,
-              keys=None,
-              parameters=None,
-              with_name=None,
-              highlevel=True):
+def argcombinations(array,
+                    n,
+                    replacement=False,
+                    axis=1,
+                    keys=None,
+                    parameters=None,
+                    with_name=None,
+                    highlevel=True):
     """
     Args:
         array: Array from which to choose `n` items without replacement.
         n (int): The number of items to choose from each list: `2` chooses
             unique pairs, `3` chooses unique triples, etc.
-        diagonal (bool): If True, pairs/triples/etc. that include the same
+        replacement (bool): If True, combinations that include the same
             item more than once are allowed; otherwise each item in a
-            pair/triple/etc. is strictly unique.
+            combinations is strictly unique.
         axis (int): The dimension at which this operation is applied. The
             outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost
@@ -1682,13 +1669,14 @@ def argchoose(array,
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
 
-    Computes a cross product of `array` with itself that is restricted to
-    combinations sampled without replacement, like #ak.choose, but returning
-    integer indexes for #ak.Array.__getitem__.
+    Computes a Cartesian product (i.e. cross product) of `array` with itself
+    that is restricted to combinations sampled without replacement,
+    like #ak.combinations, but returning integer indexes for
+    #ak.Array.__getitem__.
 
     The motivation and uses of this function are similar to those of
-    #ak.argcross. See #ak.choose and #ak.argcross for a more complete
-    description.
+    #ak.argcartesian. See #ak.combinations and #ak.argcartesian for a more
+    complete description.
     """
     if parameters is None:
         parameters = {}
@@ -1698,15 +1686,15 @@ def argchoose(array,
         parameters["__record__"] = with_name
 
     if axis < 0:
-        raise ValueError("argchoose's 'axis' must be non-negative")
+        raise ValueError("the 'axis' for argcombinations must be non-negative")
     else:
         layout = awkward1.operations.convert.to_layout(
                    array, allowrecord=False, allowother=False).localindex(axis)
-        out = layout.choose(n,
-                            diagonal=diagonal,
-                            keys=keys,
-                            parameters=parameters,
-                            axis=axis)
+        out = layout.combinations(n,
+                                  replacement=replacement,
+                                  keys=keys,
+                                  parameters=parameters,
+                                  axis=axis)
         if highlevel:
             return awkward1._util.wrap(
                 out, behavior=awkward1._util.behaviorof(array))

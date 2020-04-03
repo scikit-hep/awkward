@@ -878,18 +878,18 @@ namespace awkward {
   }
 
   const ContentPtr
-  ByteMaskedArray::choose(int64_t n,
-                          bool diagonal,
-                          const util::RecordLookupPtr& recordlookup,
-                          const util::Parameters& parameters,
-                          int64_t axis,
-                          int64_t depth) const {
+  ByteMaskedArray::combinations(int64_t n,
+                                bool replacement,
+                                const util::RecordLookupPtr& recordlookup,
+                                const util::Parameters& parameters,
+                                int64_t axis,
+                                int64_t depth) const {
     if (n < 1) {
-      throw std::invalid_argument("in choose, 'n' must be at least 1");
+      throw std::invalid_argument("in combinations, 'n' must be at least 1");
     }
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (axis == depth) {
-      return choose_axis0(n, diagonal, recordlookup, parameters);
+      return combinations_axis0(n, replacement, recordlookup, parameters);
     }
     else {
       int64_t numnull;
@@ -898,12 +898,12 @@ namespace awkward {
       Index64 outindex = pair.second;
 
       ContentPtr next = content_.get()->carry(nextcarry);
-      ContentPtr out = next.get()->choose(n,
-                                          diagonal,
-                                          recordlookup,
-                                          parameters,
-                                          axis,
-                                          depth);
+      ContentPtr out = next.get()->combinations(n,
+                                                replacement,
+                                                recordlookup,
+                                                parameters,
+                                                axis,
+                                                depth);
       IndexedOptionArray64 out2(Identities::none(),
                                 util::Parameters(),
                                 outindex,

@@ -1193,10 +1193,10 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
           .def("localindex", [](const T& self, int64_t axis) -> py::object {
             return box(self.localindex(axis, 0));
           }, py::arg("axis") = 1)
-          .def("choose",
+          .def("combinations",
                [](const T& self,
                   int64_t n,
-                  bool diagonal,
+                  bool replacement,
                   py::object keys,
                   py::object parameters,
                   int64_t axis) -> py::object {
@@ -1211,14 +1211,14 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
                   "if provided, the length of 'keys' must be 'n'");
               }
             }
-            return box(self.choose(n,
-                                   diagonal,
-                                   recordlookup,
-                                   dict2parameters(parameters),
-                                   axis,
-                                   0));
+            return box(self.combinations(n,
+                                         replacement,
+                                         recordlookup,
+                                         dict2parameters(parameters),
+                                         axis,
+                                         0));
           }, py::arg("n"),
-             py::arg("diagonal") = false,
+             py::arg("replacement") = false,
              py::arg("keys") = py::none(),
              py::arg("parameters") = py::none(),
              py::arg("axis") = 1)
