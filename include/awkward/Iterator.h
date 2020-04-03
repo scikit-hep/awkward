@@ -7,19 +7,58 @@
 #include "awkward/Content.h"
 
 namespace awkward {
+  /// @class Iterator
+  ///
+  /// @brief Represents the current state of iteration over a Content array.
+  ///
+  /// An Iterator is characterized by its #content (an input parameter) and
+  /// where it is #at (in-place mutable integer).
+  ///
+  /// It can only be modified by calling #next.
   class EXPORT_SYMBOL Iterator {
   public:
-    Iterator(const std::shared_ptr<Content>& content);
+    /// @brief Creates an Iterator from a full set of parameters.
+    /// 
+    /// @param content The array to iterate over.
+    Iterator(const ContentPtr& content);
 
-    const std::shared_ptr<Content> content() const;
-    const int64_t at() const;
-    const bool isdone() const;
-    const std::shared_ptr<Content> next();
-    const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const;
-    const std::string tostring() const;
+    /// @brief The array to iterate over.
+    const ContentPtr
+      content() const;
+
+    /// @brief The current position of the Iterator.
+    const int64_t
+      at() const;
+
+    /// @brief If `true`, the Iterator has reached the end of the array and
+    /// calling #next again would raise an error. If `false`, the Iterator
+    /// can still be moved forward.
+    const bool
+      isdone() const;
+
+    /// @brief Return the current item and then move the pointer to the next.
+    const ContentPtr
+      next();
+
+    /// @brief Internal function to build an output string for #tostring.
+    ///
+    /// @param indent Indentation depth as a string of spaces.
+    /// @param pre Prefix string, usually an opening XML tag.
+    /// @param post Postfix string, usually a closing XML tag and carriage
+    /// return.
+    const std::string
+      tostring_part(const std::string& indent,
+                    const std::string& pre,
+                    const std::string& post) const;
+
+    /// @brief Returns a string representation of this array (single-line XML).
+    const std::string
+      tostring() const;
 
   private:
-    const std::shared_ptr<Content> content_;
+    /// @brief See #content.
+    const ContentPtr content_;
+    /// @brief See #at.
     int64_t at_;
   };
 }

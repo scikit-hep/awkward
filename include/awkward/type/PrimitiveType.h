@@ -6,8 +6,18 @@
 #include "awkward/type/Type.h"
 
 namespace awkward {
+  /// @class PrimitiveType
+  ///
+  /// @brief Describes the high level type of an array that contains fixed-size
+  /// items, such as numbers or booleans.
+  ///
+  /// NumpyArray and {@link RawArrayOf RawArray} nodes have this type.
   class EXPORT_SYMBOL PrimitiveType: public Type {
   public:
+    /// @brief Types that can be described by a PrimitiveType.
+    ///
+    /// Note that NumpyArray and {@link RawArrayOf RawArray} can hold types
+    /// of data that cannot be described by a PrimitiveType.
     enum DType {
       boolean,
       int8,
@@ -23,23 +33,54 @@ namespace awkward {
       numtypes
     };
 
-    PrimitiveType(const util::Parameters& parameters, const std::string& typestr, DType dtype);
+    /// Constructs a PrimitiveType with a full set of parameters.
+    ///
+    /// @param parameters Custom parameters inherited from the Content that
+    /// this type describes.
+    /// @param typestr Optional string that overrides the default string
+    /// representation (missing if empty).
+    /// @param dtype The tag that defines this PrimitiveType.
+    PrimitiveType(const util::Parameters& parameters,
+                  const std::string& typestr, DType dtype);
 
-    std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override;
-    const std::shared_ptr<Type> shallow_copy() const override;
-    bool equal(const std::shared_ptr<Type>& other, bool check_parameters) const override;
-    int64_t numfields() const override;
-    int64_t fieldindex(const std::string& key) const override;
-    const std::string key(int64_t fieldindex) const override;
-    bool haskey(const std::string& key) const override;
-    const std::vector<std::string> keys() const override;
-    const std::shared_ptr<Content> empty() const override;
+    /// @brief The tag that defines this PrimitiveType.
+    const DType
+      dtype() const;
 
-  const DType dtype() const;
+    std::string
+      tostring_part(const std::string& indent,
+                    const std::string& pre,
+                    const std::string& post) const override;
+
+    const TypePtr
+      shallow_copy() const override;
+
+    bool
+      equal(const TypePtr& other, bool check_parameters) const override;
+
+    int64_t
+      numfields() const override;
+
+    int64_t
+      fieldindex(const std::string& key) const override;
+
+    const std::string
+      key(int64_t fieldindex) const override;
+
+    bool
+      haskey(const std::string& key) const override;
+
+    const std::vector<std::string>
+      keys() const override;
+
+    const ContentPtr
+      empty() const override;
 
   private:
+    /// @brief See #dtype.
     const DType dtype_;
   };
+
 }
 
 #endif // AWKWARD_PRIMITIVETYPE_H_

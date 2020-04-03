@@ -11,81 +11,323 @@
 #include "awkward/Content.h"
 
 namespace awkward {
+  class RegularArray;
+
+  /// @class ListOffsetArrayOf
+  ///
+  /// @brief Represents an array of nested lists that can have different
+  /// lengths using one index named #offsets.
+  ///
+  /// A single #offsets index requires the #content to be contiguous, in-order,
+  /// and non-overlapping, though it need not start at zero (there can be
+  /// "unreachable" elements before the first visible item if
+  /// `offsets[0] != 0`).
+  ///
+  /// See #ListOffsetArrayOf for the meaning of each parameter.
   template <typename T>
   class EXPORT_SYMBOL ListOffsetArrayOf: public Content {
   public:
-    ListOffsetArrayOf<T>(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const IndexOf<T>& offsets, const std::shared_ptr<Content>& content);
-    const IndexOf<T> starts() const;
-    const IndexOf<T> stops() const;
-    const IndexOf<T> offsets() const;
-    const std::shared_ptr<Content> content() const;
-    Index64 compact_offsets64(bool start_at_zero) const;
-    const std::shared_ptr<Content> broadcast_tooffsets64(const Index64& offsets) const;
-    const std::shared_ptr<Content> toRegularArray() const;
-    const std::shared_ptr<Content> toListOffsetArray64(bool start_at_zero) const;
+    /// @brief Creates a ListOffsetArray from a full set of parameters.
+    ///
+    /// @param identities Optional Identities for each element of the array
+    /// (may be `nullptr`).
+    /// @param parameters String-to-JSON map that augments the meaning of this
+    /// array.
+    /// @param offsets Positions where one nested list stops and the next
+    /// starts in the #content; the `offsets` must be monotonically increasing.
+    /// The length of `offsets` is one greater than the length of the array it
+    /// represents, and as such must always have at least one element.
+    /// @param content Data contained within all nested lists as a contiguous
+    /// array.
+    /// Values in `content[i]` where `i < offsets[0]` are "unreachable," and
+    /// don't exist in the high level view, as are any where
+    /// `i >= offsets[len(offsets) - 1]`.
+    ListOffsetArrayOf<T>(const IdentitiesPtr& identities,
+                         const util::Parameters& parameters,
+                         const IndexOf<T>& offsets,
+                         const ContentPtr& content);
 
-    const std::string classname() const override;
-    void setidentities() override;
-    void setidentities(const std::shared_ptr<Identities>& identities) override;
-    const std::shared_ptr<Type> type(const std::map<std::string, std::string>& typestrs) const override;
-    const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override;
-    void tojson_part(ToJson& builder) const override;
-    void nbytes_part(std::map<size_t, int64_t>& largest) const override;
-    int64_t length() const override;
-    const std::shared_ptr<Content> shallow_copy() const override;
-    const std::shared_ptr<Content> deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const override;
-    void check_for_iteration() const override;
-    const std::shared_ptr<Content> getitem_nothing() const override;
-    const std::shared_ptr<Content> getitem_at(int64_t at) const override;
-    const std::shared_ptr<Content> getitem_at_nowrap(int64_t at) const override;
-    const std::shared_ptr<Content> getitem_range(int64_t start, int64_t stop) const override;
-    const std::shared_ptr<Content> getitem_range_nowrap(int64_t start, int64_t stop) const override;
-    const std::shared_ptr<Content> getitem_field(const std::string& key) const override;
-    const std::shared_ptr<Content> getitem_fields(const std::vector<std::string>& keys) const override;
-    const std::shared_ptr<Content> getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const std::shared_ptr<SliceItem>& slicecontent, const Slice& tail) const override;
-    const std::shared_ptr<Content> carry(const Index64& carry) const override;
-    const std::string purelist_parameter(const std::string& key) const override;
-    bool purelist_isregular() const override;
-    int64_t purelist_depth() const override;
-    const std::pair<int64_t, int64_t> minmax_depth() const override;
-    const std::pair<bool, int64_t> branch_depth() const override;
-    int64_t numfields() const override;
-    int64_t fieldindex(const std::string& key) const override;
-    const std::string key(int64_t fieldindex) const override;
-    bool haskey(const std::string& key) const override;
-    const std::vector<std::string> keys() const override;
+    /// @brief Positions where one nested list stops and the next starts in
+    /// the #content; the `offsets` must be monotonically increasing.
+    ///
+    /// The length of `offsets` is one greater than the length of the array it
+    /// represents, and as such must always have at least one element.
+    const IndexOf<T>
+      offsets() const;
+
+    /// @brief Data contained within all nested lists as a contiguous array.
+    ///
+    /// Values in `content[i]` where `i < offsets[0]` are "unreachable," and
+    /// don't exist in the high level view, as are any where
+    /// `i >= offsets[len(offsets) - 1]`.
+    const ContentPtr
+      content() const;
+
+    /// @brief Starting positions of each nested list, similar to
+    /// {@link ListArrayOf#starts ListArray::starts}, but derived from
+    /// #offsets.
+    ///
+    /// This is a view of all but the last element of #offsets.
+    const IndexOf<T>
+      starts() const;
+
+    /// @brief Stopping positions of each nested list, similar to
+    /// {@link ListArrayOf#stops ListArray::stops}, but derived from
+    /// #offsets.
+    ///
+    /// This is a view of all but the first element of #offsets.
+    const IndexOf<T>
+      stops() const;
+
+    /// @brief Returns 64-bit offsets, possibly starting with `offsets[0] = 0`.
+    ///
+    /// If the #offsets of this array satisfies the constraint, it is not
+    /// copied. Otherwise, a new {@link IndexOf Index64} is returned.
+    ///
+    /// @param start_at_zero If `true`, the first offset will be `0`, meaning
+    /// there are no "unreachable" elements in the `content` that corresponds
+    /// to these offsets.
+    Index64
+      compact_offsets64(bool start_at_zero) const;
+
+    /// @brief Moves #content elements if necessary to match a given set of
+    /// `offsets` and return a {@link ListOffsetArrayOf ListOffsetArray} that
+    /// matches.
+    ///
+    /// As indicated by the name, this is a basic element of broadcasting.
+    const std::shared_ptr<ListOffsetArrayOf<int64_t>>
+      broadcast_tooffsets64(const Index64& offsets) const;
+
+    /// @brief Converts this array to a RegularArray if all nested lists have
+    /// the same size (error otherwise).
+    const std::shared_ptr<RegularArray>
+      toRegularArray() const;
+
+    /// @brief Returns a {@link ListOffsetArrayOf ListOffsetArray} with
+    /// 64-bit #offsets and possibly starting with `offsets[0] = 0`; a
+    /// #shallow_copy if possible.
+    ///
+    /// @param start_at_zero If `true`, the first offset will be `0`, meaning
+    /// there are no "unreachable" elements in the `content` that corresponds
+    /// to these offsets.
+    const std::shared_ptr<ListOffsetArrayOf<int64_t>>
+      toListOffsetArray64(bool start_at_zero) const;
+
+    /// @brief User-friendly name of this class: `"ListOffsetArray32"`,
+    /// `"ListOffsetArrayU32"`, or `"ListOffsetArray64"`.
+    const std::string
+      classname() const override;
+
+    void
+      setidentities() override;
+
+    void
+      setidentities(const IdentitiesPtr& identities) override;
+
+    const TypePtr
+      type(const util::TypeStrs& typestrs) const override;
+
+    const std::string
+      tostring_part(const std::string& indent,
+                    const std::string& pre,
+                    const std::string& post) const override;
+
+    void
+      tojson_part(ToJson& builder) const override;
+
+    void
+      nbytes_part(std::map<size_t, int64_t>& largest) const override;
+
+    /// @copydoc Content::length()
+    ///
+    /// Equal to `len(offsets) - 1`.
+    int64_t
+      length() const override;
+
+    const ContentPtr
+      shallow_copy() const override;
+
+    const ContentPtr
+      deep_copy(bool copyarrays,
+                bool copyindexes,
+                bool copyidentities) const override;
+
+    void
+      check_for_iteration() const override;
+
+    const ContentPtr
+      getitem_nothing() const override;
+
+    const ContentPtr
+      getitem_at(int64_t at) const override;
+
+    const ContentPtr
+      getitem_at_nowrap(int64_t at) const override;
+
+    const ContentPtr
+      getitem_range(int64_t start, int64_t stop) const override;
+
+    const ContentPtr
+      getitem_range_nowrap(int64_t start, int64_t stop) const override;
+
+    const ContentPtr
+      getitem_field(const std::string& key) const override;
+
+    const ContentPtr
+      getitem_fields(const std::vector<std::string>& keys) const override;
+
+    const ContentPtr
+      getitem_next_jagged(const Index64& slicestarts,
+                          const Index64& slicestops,
+                          const SliceItemPtr& slicecontent,
+                          const Slice& tail) const override;
+
+    const ContentPtr
+      carry(const Index64& carry) const override;
+
+    const std::string
+      purelist_parameter(const std::string& key) const override;
+
+    bool
+      purelist_isregular() const override;
+
+    int64_t
+      purelist_depth() const override;
+
+    const std::pair<int64_t, int64_t>
+      minmax_depth() const override;
+
+    const std::pair<bool, int64_t>
+      branch_depth() const override;
+
+    int64_t
+      numfields() const override;
+
+    int64_t
+      fieldindex(const std::string& key) const override;
+
+    const std::string
+      key(int64_t fieldindex) const override;
+
+    bool
+      haskey(const std::string& key) const override;
+
+    const std::vector<std::string>
+      keys() const override;
 
     // operations
-    const std::string validityerror(const std::string& path) const override;
-    const std::shared_ptr<Content> shallow_simplify() const override;
-    const std::shared_ptr<Content> num(int64_t axis, int64_t depth) const override;
-    const std::pair<Index64, std::shared_ptr<Content>> offsets_and_flattened(int64_t axis, int64_t depth) const override;
-    bool mergeable(const std::shared_ptr<Content>& other, bool mergebool) const override;
-    const std::shared_ptr<Content> merge(const std::shared_ptr<Content>& other) const override;
-    const std::shared_ptr<SliceItem> asslice() const override;
-    const std::shared_ptr<Content> rpad(int64_t length, int64_t axis, int64_t depth) const override;
-    const std::shared_ptr<Content> rpad_and_clip(int64_t length, int64_t axis, int64_t depth) const override;
-    const std::shared_ptr<Content> reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const override;
-    const std::shared_ptr<Content> localindex(int64_t axis, int64_t depth) const override;
-    const std::shared_ptr<Content> choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const override;
-    const std::shared_ptr<Content> sort_next(int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool ascending, bool stable) const override;
+    const std::string
+      validityerror(const std::string& path) const override;
 
-    const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const override;
-    const std::shared_ptr<Content> getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const override;
-    const std::shared_ptr<Content> getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const override;
-    const std::shared_ptr<Content> getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const override;
-    const std::shared_ptr<Content> getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const override;
-    const std::shared_ptr<Content> getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const override;
-    const std::shared_ptr<Content> getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const override;
+    /// @copydoc Content::shallow_simplify()
+    ///
+    /// For {@link ListOffsetArrayOf ListOffsetArray}, this method returns
+    /// #shallow_copy (pass-through).
+    const ContentPtr
+      shallow_simplify() const override;
+
+    const ContentPtr
+      num(int64_t axis, int64_t depth) const override;
+
+    const std::pair<Index64, ContentPtr>
+      offsets_and_flattened(int64_t axis, int64_t depth) const override;
+
+    bool
+      mergeable(const ContentPtr& other, bool mergebool) const override;
+
+    const ContentPtr
+      merge(const ContentPtr& other) const override;
+
+    const SliceItemPtr
+      asslice() const override;
+
+    const ContentPtr
+      fillna(const ContentPtr& value) const override;
+
+    const ContentPtr
+      rpad(int64_t target, int64_t axis, int64_t depth) const override;
+
+    const ContentPtr
+      rpad_and_clip(int64_t target,
+                    int64_t axis,
+                    int64_t depth) const override;
+
+    const ContentPtr
+      reduce_next(const Reducer& reducer,
+                  int64_t negaxis,
+                  const Index64& starts,
+                  const Index64& parents,
+                  int64_t outlength,
+                  bool mask,
+                  bool keepdims) const override;
+
+    const ContentPtr
+      sort_next(int64_t negaxis,
+                const Index64& starts,
+                const Index64& parents,
+                int64_t outlength,
+                bool ascending,
+                bool stable) const override;
+
+    const ContentPtr
+      localindex(int64_t axis, int64_t depth) const override;
+
+    const ContentPtr
+      choose(int64_t n,
+             bool diagonal,
+             const util::RecordLookupPtr& recordlookup,
+             const util::Parameters& parameters,
+             int64_t axis,
+             int64_t depth) const override;
+
+    const ContentPtr
+      getitem_next(const SliceAt& at,
+                   const Slice& tail,
+                   const Index64& advanced) const override;
+
+    const ContentPtr
+      getitem_next(const SliceRange& range,
+                   const Slice& tail,
+                   const Index64& advanced) const override;
+
+    const ContentPtr
+      getitem_next(const SliceArray64& array,
+                   const Slice& tail,
+                   const Index64& advanced) const override;
+
+    const ContentPtr
+      getitem_next(const SliceJagged64& jagged,
+                   const Slice& tail,
+                   const Index64& advanced) const override;
+
+    const ContentPtr
+      getitem_next_jagged(const Index64& slicestarts,
+                          const Index64& slicestops,
+                          const SliceArray64& slicecontent,
+                          const Slice& tail) const override;
+
+    const ContentPtr
+      getitem_next_jagged(const Index64& slicestarts,
+                          const Index64& slicestops,
+                          const SliceMissing64& slicecontent,
+                          const Slice& tail) const override;
+
+    const ContentPtr
+      getitem_next_jagged(const Index64& slicestarts,
+                          const Index64& slicestops,
+                          const SliceJagged64& slicecontent,
+                          const Slice& tail) const override;
 
   private:
+    /// @brief See #offsets.
     const IndexOf<T> offsets_;
-    const std::shared_ptr<Content> content_;
+    /// @brief See #content.
+    const ContentPtr content_;
   };
 
-  typedef ListOffsetArrayOf<int32_t>  ListOffsetArray32;
-  typedef ListOffsetArrayOf<uint32_t> ListOffsetArrayU32;
-  typedef ListOffsetArrayOf<int64_t>  ListOffsetArray64;
+  using ListOffsetArray32  = ListOffsetArrayOf<int32_t>;
+  using ListOffsetArrayU32 = ListOffsetArrayOf<uint32_t>;
+  using ListOffsetArray64  = ListOffsetArrayOf<int64_t>;
 }
 
 #endif // AWKWARD_LISTOFFSETARRAY_H_

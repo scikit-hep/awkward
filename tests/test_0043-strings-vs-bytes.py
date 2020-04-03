@@ -10,8 +10,8 @@ import numpy
 import awkward1
 
 def test():
-    array = awkward1.Array([{"x": "one"}, {"x": "two"}, {"x": "three"}], checkvalid=True)
-    assert awkward1.tolist(array) == [{"x": "one"}, {"x": "two"}, {"x": "three"}]
-    assert awkward1.tolist(awkward1.fromiter(awkward1.tolist(array))) == [{"x": "one"}, {"x": "two"}, {"x": "three"}]
-    assert awkward1.tolist(array.layout) == [{"x": "one"}, {"x": "two"}, {"x": "three"}]
-    assert awkward1.tolist(awkward1.fromiter(awkward1.tolist(array.layout))) == [{"x": "one"}, {"x": "two"}, {"x": "three"}]
+    array = awkward1.Array([{"x": "one"}, {"x": "two"}, {"x": "three"}], check_valid=True)
+    assert awkward1.to_list(array) == [{"x": "one"}, {"x": "two"}, {"x": "three"}]
+    assert awkward1.to_list(awkward1.from_iter(awkward1.to_list(array))) == [{"x": "one"}, {"x": "two"}, {"x": "three"}]
+    assert awkward1.to_list(array.layout) == [{"x": "one"}, {"x": "two"}, {"x": "three"}]
+    assert awkward1.to_list(awkward1.from_iter(awkward1.to_list(array.layout))) == [{"x": "one"}, {"x": "two"}, {"x": "three"}]

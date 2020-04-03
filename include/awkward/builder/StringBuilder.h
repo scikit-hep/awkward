@@ -9,33 +9,102 @@
 #include "awkward/builder/Builder.h"
 
 namespace awkward {
+  /// @class StringBuilder
+  ///
+  /// @brief Builder node that accumulates strings.
   class EXPORT_SYMBOL StringBuilder: public Builder {
   public:
-    static const std::shared_ptr<Builder> fromempty(const ArrayBuilderOptions& options, const char* encoding);
+    /// @brief Create an empty StringBuilder.
+    /// @param options Configuration options for building an array;
+    /// these are passed to every Builder's constructor.
+    /// @param encoding If `nullptr`, the string is an unencoded bytestring;
+    /// if `"utf-8"`, it is encoded with variable-width UTF-8.
+    /// Currently, no other encodings have been defined.
+    static const BuilderPtr
+      fromempty(const ArrayBuilderOptions& options, const char* encoding);
 
-    StringBuilder(const ArrayBuilderOptions& options, const GrowableBuffer<int64_t>& offsets, const GrowableBuffer<uint8_t>& content, const char* encoding);
-    const char* encoding() const;
+    /// @brief Create a StringBuilder from a full set of parameters.
+    ///
+    /// @param options Configuration options for building an array;
+    /// these are passed to every Builder's constructor.
+    /// @param offsets Contains the accumulated offsets (like
+    /// {@link ListOffsetArrayOf#offsets ListOffsetArray::offsets}).
+    /// @param content Another GrowableBuffer, but for the characters in all
+    /// the strings.
+    /// @param encoding If `nullptr`, the string is an unencoded bytestring;
+    /// if `"utf-8"`, it is encoded with variable-width UTF-8.
+    /// Currently, no other encodings have been defined.
+    StringBuilder(const ArrayBuilderOptions& options,
+                  const GrowableBuffer<int64_t>& offsets,
+                  const GrowableBuffer<uint8_t>& content,
+                  const char* encoding);
 
-    const std::string classname() const override;
-    int64_t length() const override;
-    void clear() override;
-    const std::shared_ptr<Content> snapshot() const override;
+    /// @brief If `nullptr`, the string is an unencoded bytestring;
+    /// if `"utf-8"`, it is encoded with variable-width UTF-8.
+    /// Currently, no other encodings have been defined.
+    const char*
+      encoding() const;
 
-    bool active() const override;
-    const std::shared_ptr<Builder> null() override;
-    const std::shared_ptr<Builder> boolean(bool x) override;
-    const std::shared_ptr<Builder> integer(int64_t x) override;
-    const std::shared_ptr<Builder> real(double x) override;
-    const std::shared_ptr<Builder> string(const char* x, int64_t length, const char* encoding) override;
-    const std::shared_ptr<Builder> beginlist() override;
-    const std::shared_ptr<Builder> endlist() override;
-    const std::shared_ptr<Builder> begintuple(int64_t numfields) override;
-    const std::shared_ptr<Builder> index(int64_t index) override;
-    const std::shared_ptr<Builder> endtuple() override;
-    const std::shared_ptr<Builder> beginrecord(const char* name, bool check) override;
-    const std::shared_ptr<Builder> field(const char* key, bool check) override;
-    const std::shared_ptr<Builder> endrecord() override;
-    const std::shared_ptr<Builder> append(const std::shared_ptr<Content>& array, int64_t at) override;
+    /// @brief User-friendly name of this class: `"StringBuilder"`.
+    const std::string
+      classname() const override;
+
+    int64_t
+      length() const override;
+
+    void
+      clear() override;
+
+    const ContentPtr
+      snapshot() const override;
+
+    /// @copydoc Builder::active()
+    ///
+    /// A StringBuilder is never active.
+    bool
+      active() const override;
+
+    const BuilderPtr
+      null() override;
+
+    const BuilderPtr
+      boolean(bool x) override;
+
+    const BuilderPtr
+      integer(int64_t x) override;
+
+    const BuilderPtr
+      real(double x) override;
+
+    const BuilderPtr
+      string(const char* x, int64_t length, const char* encoding) override;
+
+    const BuilderPtr
+      beginlist() override;
+
+    const BuilderPtr
+      endlist() override;
+
+    const BuilderPtr
+      begintuple(int64_t numfields) override;
+
+    const BuilderPtr
+      index(int64_t index) override;
+
+    const BuilderPtr
+      endtuple() override;
+
+    const BuilderPtr
+      beginrecord(const char* name, bool check) override;
+
+    const BuilderPtr
+      field(const char* key, bool check) override;
+
+    const BuilderPtr
+      endrecord() override;
+
+    const BuilderPtr
+      append(const ContentPtr& array, int64_t at) override;
 
   private:
     const ArrayBuilderOptions options_;
@@ -43,6 +112,7 @@ namespace awkward {
     GrowableBuffer<uint8_t> content_;
     const char* encoding_;
   };
+
 }
 
 #endif // AWKWARD_STRINGBUILDER_H_

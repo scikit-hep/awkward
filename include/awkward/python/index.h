@@ -12,7 +12,10 @@
 namespace py = pybind11;
 namespace ak = awkward;
 
+/// @brief Makes Index32, IndexU32, Index64 classes in Python that mirror
+/// IndexOf in C++.
 template <typename T>
-py::class_<ak::IndexOf<T>> make_IndexOf(const py::handle& m, const std::string& name);
+py::class_<ak::IndexOf<T>>
+  make_IndexOf(const py::handle& m, const std::string& name);
 
 #endif // AWKWARDPY_INDEX_H_

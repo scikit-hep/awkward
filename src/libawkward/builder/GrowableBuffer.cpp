@@ -4,12 +4,16 @@
 
 namespace awkward {
   template <typename T>
-  GrowableBuffer<T> GrowableBuffer<T>::empty(const ArrayBuilderOptions& options) {
-    return GrowableBuffer<T>::empty(options, 0);
+  GrowableBuffer<T>
+  GrowableBuffer<T>::empty(const ArrayBuilderOptions& options) {
+    return
+  GrowableBuffer<T>::empty(options, 0);
   }
 
   template <typename T>
-  GrowableBuffer<T> GrowableBuffer<T>::empty(const ArrayBuilderOptions& options, int64_t minreserve) {
+  GrowableBuffer<T>
+  GrowableBuffer<T>::empty(const ArrayBuilderOptions& options,
+                           int64_t minreserve) {
     size_t actual = (size_t)options.initial();
     if (actual < (size_t)minreserve) {
       actual = (size_t)minreserve;
@@ -19,7 +23,10 @@ namespace awkward {
   }
 
   template <typename T>
-  GrowableBuffer<T> GrowableBuffer<T>::full(const ArrayBuilderOptions& options, T value, int64_t length) {
+  GrowableBuffer<T>
+  GrowableBuffer<T>::full(const ArrayBuilderOptions& options,
+                          T value,
+                          int64_t length) {
     GrowableBuffer<T> out = empty(options, length);
     T* rawptr = out.ptr().get();
     for (int64_t i = 0;  i < length;  i++) {
@@ -29,7 +36,9 @@ namespace awkward {
   }
 
   template <typename T>
-  GrowableBuffer<T> GrowableBuffer<T>::arange(const ArrayBuilderOptions& options, int64_t length) {
+  GrowableBuffer<T>
+  GrowableBuffer<T>::arange(const ArrayBuilderOptions& options,
+                            int64_t length) {
     size_t actual = (size_t)options.initial();
     if (actual < (size_t)length) {
       actual = (size_t)length;
@@ -43,7 +52,10 @@ namespace awkward {
   }
 
   template <typename T>
-  GrowableBuffer<T>::GrowableBuffer(const ArrayBuilderOptions& options, std::shared_ptr<T> ptr, int64_t length, int64_t reserved)
+  GrowableBuffer<T>::GrowableBuffer(const ArrayBuilderOptions& options,
+                                    std::shared_ptr<T> ptr,
+                                    int64_t length,
+                                    int64_t reserved)
       : options_(options)
       , ptr_(ptr)
       , length_(length)
@@ -51,20 +63,27 @@ namespace awkward {
 
   template <typename T>
   GrowableBuffer<T>::GrowableBuffer(const ArrayBuilderOptions& options)
-      : GrowableBuffer(options, std::shared_ptr<T>(new T[(size_t)options.initial()], util::array_deleter<T>()), 0, options.initial()) { }
+      : GrowableBuffer(options,
+                       std::shared_ptr<T>(new T[(size_t)options.initial()],
+                                          util::array_deleter<T>()),
+                       0,
+                       options.initial()) { }
 
   template <typename T>
-  const std::shared_ptr<T> GrowableBuffer<T>::ptr() const {
+  const std::shared_ptr<T>
+  GrowableBuffer<T>::ptr() const {
     return ptr_;
   }
 
   template <typename T>
-  int64_t GrowableBuffer<T>::length() const {
+  int64_t
+  GrowableBuffer<T>::length() const {
     return length_;
   }
 
   template <typename T>
-  void GrowableBuffer<T>::set_length(int64_t newlength) {
+  void
+  GrowableBuffer<T>::set_length(int64_t newlength) {
     if (newlength > reserved_) {
       set_reserved(newlength);
     }
@@ -72,14 +91,17 @@ namespace awkward {
   }
 
   template <typename T>
-  int64_t GrowableBuffer<T>::reserved() const {
+  int64_t
+  GrowableBuffer<T>::reserved() const {
     return reserved_;
   }
 
   template <typename T>
-  void GrowableBuffer<T>::set_reserved(int64_t minreserved) {
+  void
+  GrowableBuffer<T>::set_reserved(int64_t minreserved) {
     if (minreserved > reserved_) {
-      std::shared_ptr<T> ptr(new T[(size_t)minreserved], util::array_deleter<T>());
+      std::shared_ptr<T> ptr(new T[(size_t)minreserved],
+                             util::array_deleter<T>());
       memcpy(ptr.get(), ptr_.get(), (size_t)(length_ * sizeof(T)));
       ptr_ = ptr;
       reserved_ = minreserved;
@@ -87,14 +109,17 @@ namespace awkward {
   }
 
   template <typename T>
-  void GrowableBuffer<T>::clear() {
+  void
+  GrowableBuffer<T>::clear() {
     length_ = 0;
     reserved_ = options_.initial();
-    ptr_ = std::shared_ptr<T>(new T[(size_t)options_.initial()], util::array_deleter<T>());
+    ptr_ = std::shared_ptr<T>(new T[(size_t)options_.initial()],
+                              util::array_deleter<T>());
   }
 
   template <typename T>
-  void GrowableBuffer<T>::append(T datum) {
+  void
+  GrowableBuffer<T>::append(T datum) {
     if (length_ == reserved_) {
       set_reserved((int64_t)ceil(reserved_ * options_.resize()));
     }
@@ -103,7 +128,8 @@ namespace awkward {
   }
 
   template <typename T>
-  T GrowableBuffer<T>::getitem_at_nowrap(int64_t at) const {
+  T
+  GrowableBuffer<T>::getitem_at_nowrap(int64_t at) const {
     return ptr_.get()[at];
   }
 

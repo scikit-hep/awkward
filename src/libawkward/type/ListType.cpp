@@ -10,11 +10,16 @@
 #include "awkward/type/ListType.h"
 
 namespace awkward {
-  ListType::ListType(const util::Parameters& parameters, const std::string& typestr, const std::shared_ptr<Type>& type)
+  ListType::ListType(const util::Parameters& parameters,
+                     const std::string& typestr,
+                     const TypePtr& type)
       : Type(parameters, typestr)
       , type_(type) { }
 
-  std::string ListType::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
+  std::string
+  ListType::tostring_part(const std::string& indent,
+                          const std::string& pre,
+                          const std::string& post) const {
     std::string typestr;
     if (get_typestr(typestr)) {
       return typestr;
@@ -22,19 +27,24 @@ namespace awkward {
 
     std::stringstream out;
     if (parameters_.empty()) {
-      out << indent << pre << "var * " << type_.get()->tostring_part(indent, "", "") << post;
+      out << indent << pre << "var * "
+          << type_.get()->tostring_part(indent, "", "") << post;
     }
     else {
-      out << indent << pre << "[var * " << type_.get()->tostring_part(indent, "", "") << ", " << string_parameters() << "]" << post;
+      out << indent << pre << "[var * "
+          << type_.get()->tostring_part(indent, "", "") << ", "
+          << string_parameters() << "]" << post;
     }
     return out.str();
   }
 
-  const std::shared_ptr<Type> ListType::shallow_copy() const {
+  const TypePtr
+  ListType::shallow_copy() const {
     return std::make_shared<ListType>(parameters_, typestr_, type_);
   }
 
-  bool ListType::equal(const std::shared_ptr<Type>& other, bool check_parameters) const {
+  bool
+  ListType::equal(const TypePtr& other, bool check_parameters) const {
     if (ListType* t = dynamic_cast<ListType*>(other.get())) {
       if (check_parameters  &&  !parameters_equal(other.get()->parameters())) {
         return false;
@@ -46,34 +56,44 @@ namespace awkward {
     }
   }
 
-  int64_t ListType::numfields() const {
+  int64_t
+  ListType::numfields() const {
     return type_.get()->numfields();
   }
 
-  int64_t ListType::fieldindex(const std::string& key) const {
+  int64_t
+  ListType::fieldindex(const std::string& key) const {
     return type_.get()->fieldindex(key);
   }
 
-  const std::string ListType::key(int64_t fieldindex) const {
+  const std::string
+  ListType::key(int64_t fieldindex) const {
     return type_.get()->key(fieldindex);
   }
 
-  bool ListType::haskey(const std::string& key) const {
+  bool
+  ListType::haskey(const std::string& key) const {
     return type_.get()->haskey(key);
   }
 
-  const std::vector<std::string> ListType::keys() const {
+  const std::vector<std::string>
+  ListType::keys() const {
     return type_.get()->keys();
   }
 
-  const std::shared_ptr<Content> ListType::empty() const {
+  const ContentPtr
+  ListType::empty() const {
     Index64 offsets(1);
-    offsets.ptr().get()[0] = 0;
-    std::shared_ptr<Content> content = type_.get()->empty();
-    return std::make_shared<ListOffsetArray64>(Identities::none(), parameters_, offsets, content);
+    offsets.setitem_at_nowrap(0, 0);
+    ContentPtr content = type_.get()->empty();
+    return std::make_shared<ListOffsetArray64>(Identities::none(),
+                                               parameters_,
+                                               offsets,
+                                               content);
   }
 
-  const std::shared_ptr<Type> ListType::type() const {
+  const TypePtr
+  ListType::type() const {
     return type_;
   }
 }

@@ -36,31 +36,31 @@ listarrayB64.setidentities()
 listarrayB32.setidentities()
 
 def test_basic():
-    assert awkward1.tolist(modelA) == awkward1.tolist(listoffsetarrayA64)
-    assert awkward1.tolist(modelA) == awkward1.tolist(listoffsetarrayA32)
-    assert awkward1.tolist(modelA) == awkward1.tolist(listarrayA64)
-    assert awkward1.tolist(modelA) == awkward1.tolist(listarrayA32)
-    assert awkward1.tolist(modelB) == awkward1.tolist(listoffsetarrayB64)
-    assert awkward1.tolist(modelB) == awkward1.tolist(listoffsetarrayB32)
-    assert awkward1.tolist(modelB) == awkward1.tolist(listarrayB64)
-    assert awkward1.tolist(modelB) == awkward1.tolist(listarrayB32)
+    assert awkward1.to_list(modelA) == awkward1.to_list(listoffsetarrayA64)
+    assert awkward1.to_list(modelA) == awkward1.to_list(listoffsetarrayA32)
+    assert awkward1.to_list(modelA) == awkward1.to_list(listarrayA64)
+    assert awkward1.to_list(modelA) == awkward1.to_list(listarrayA32)
+    assert awkward1.to_list(modelB) == awkward1.to_list(listoffsetarrayB64)
+    assert awkward1.to_list(modelB) == awkward1.to_list(listoffsetarrayB32)
+    assert awkward1.to_list(modelB) == awkward1.to_list(listarrayB64)
+    assert awkward1.to_list(modelB) == awkward1.to_list(listarrayB32)
 
 def test_listoffsetarrayA64():
     for depth in 0, 1, 2, 3:
         for cuts in itertools.permutations((0, 1, 4, -5), depth):
-            assert awkward1.tolist(modelA[cuts]) == awkward1.tolist(listoffsetarrayA64[cuts])
+            assert awkward1.to_list(modelA[cuts]) == awkward1.to_list(listoffsetarrayA64[cuts])
 
     for depth in 0, 1, 2, 3:
         for cuts in itertools.permutations((slice(None), slice(1, None), slice(None, -1), slice(None, None, 2)), depth):
-            assert awkward1.tolist(modelA[cuts]) == awkward1.tolist(listoffsetarrayA64[cuts])
+            assert awkward1.to_list(modelA[cuts]) == awkward1.to_list(listoffsetarrayA64[cuts])
 
     for depth in 0, 1, 2, 3:
         for cuts in itertools.permutations((slice(1, None), slice(None, -1), 2, -2), depth):
-            assert awkward1.tolist(modelA[cuts]) == awkward1.tolist(listoffsetarrayA64[cuts])
+            assert awkward1.to_list(modelA[cuts]) == awkward1.to_list(listoffsetarrayA64[cuts])
 
     for depth in 0, 1, 2, 3:
         for cuts in itertools.permutations(([2, 0, 0, 1], [1, -2, 0, -1], 2, -2), depth):
-            assert awkward1.tolist(modelA[cuts]) == awkward1.tolist(listoffsetarrayA64[cuts])
+            assert awkward1.to_list(modelA[cuts]) == awkward1.to_list(listoffsetarrayA64[cuts])
 
     for depth in 0, 1, 2, 3:
         for cuts in itertools.permutations(([2, 0, 0, 1], [1, -2, 0, -1], slice(1, None), slice(None, -1)), depth):
@@ -71,24 +71,24 @@ def test_listoffsetarrayA64():
                 cuts = cuts[:-1]
             if any(isinstance(x, slice) for x in cuts):
                 continue
-            assert awkward1.tolist(modelA[cuts]) == awkward1.tolist(listoffsetarrayA64[cuts])
+            assert awkward1.to_list(modelA[cuts]) == awkward1.to_list(listoffsetarrayA64[cuts])
 
 def test_listoffsetarrayA32():
     for depth in 0, 1, 2, 3:
         for cuts in itertools.permutations((0, 1, 4, -5), depth):
-            assert awkward1.tolist(modelA[cuts]) == awkward1.tolist(listoffsetarrayA32[cuts])
+            assert awkward1.to_list(modelA[cuts]) == awkward1.to_list(listoffsetarrayA32[cuts])
 
     for depth in 0, 1, 2, 3:
         for cuts in itertools.permutations((slice(None), slice(1, None), slice(None, -1), slice(None, None, 2)), depth):
-            assert awkward1.tolist(modelA[cuts]) == awkward1.tolist(listoffsetarrayA32[cuts])
+            assert awkward1.to_list(modelA[cuts]) == awkward1.to_list(listoffsetarrayA32[cuts])
 
     for depth in 0, 1, 2, 3:
         for cuts in itertools.permutations((slice(1, None), slice(None, -1), 2, -2), depth):
-            assert awkward1.tolist(modelA[cuts]) == awkward1.tolist(listoffsetarrayA32[cuts])
+            assert awkward1.to_list(modelA[cuts]) == awkward1.to_list(listoffsetarrayA32[cuts])
 
     for depth in 0, 1, 2, 3:
         for cuts in itertools.permutations(([2, 0, 0, 1], [1, -2, 0, -1], 2, -2), depth):
-            assert awkward1.tolist(modelA[cuts]) == awkward1.tolist(listoffsetarrayA32[cuts])
+            assert awkward1.to_list(modelA[cuts]) == awkward1.to_list(listoffsetarrayA32[cuts])
 
     for depth in 0, 1, 2, 3:
         for cuts in itertools.permutations(([2, 0, 0, 1], [1, -2, 0, -1], slice(1, None), slice(None, -1)), depth):
@@ -99,24 +99,24 @@ def test_listoffsetarrayA32():
                 cuts = cuts[:-1]
             if any(isinstance(x, slice) for x in cuts):
                 continue
-            assert awkward1.tolist(modelA[cuts]) == awkward1.tolist(listoffsetarrayA32[cuts])
+            assert awkward1.to_list(modelA[cuts]) == awkward1.to_list(listoffsetarrayA32[cuts])
 
 def test_listarrayA64():
     for depth in 0, 1, 2, 3:
         for cuts in itertools.permutations((0, 1, 4, -5), depth):
-            assert awkward1.tolist(modelA[cuts]) == awkward1.tolist(listarrayA64[cuts])
+            assert awkward1.to_list(modelA[cuts]) == awkward1.to_list(listarrayA64[cuts])
 
     for depth in 0, 1, 2, 3:
         for cuts in itertools.permutations((slice(None), slice(1, None), slice(None, -1), slice(None, None, 2)), depth):
-            assert awkward1.tolist(modelA[cuts]) == awkward1.tolist(listarrayA64[cuts])
+            assert awkward1.to_list(modelA[cuts]) == awkward1.to_list(listarrayA64[cuts])
 
     for depth in 0, 1, 2, 3:
         for cuts in itertools.permutations((slice(1, None), slice(None, -1), 2, -2), depth):
-            assert awkward1.tolist(modelA[cuts]) == awkward1.tolist(listarrayA64[cuts])
+            assert awkward1.to_list(modelA[cuts]) == awkward1.to_list(listarrayA64[cuts])
 
     for depth in 0, 1, 2, 3:
         for cuts in itertools.permutations(([2, 0, 0, 1], [1, -2, 0, -1], 2, -2), depth):
-            assert awkward1.tolist(modelA[cuts]) == awkward1.tolist(listarrayA64[cuts])
+            assert awkward1.to_list(modelA[cuts]) == awkward1.to_list(listarrayA64[cuts])
 
     for depth in 0, 1, 2, 3:
         for cuts in itertools.permutations(([2, 0, 0, 1], [1, -2, 0, -1], slice(1, None), slice(None, -1)), depth):
@@ -127,24 +127,24 @@ def test_listarrayA64():
                 cuts = cuts[:-1]
             if any(isinstance(x, slice) for x in cuts):
                 continue
-            assert awkward1.tolist(modelA[cuts]) == awkward1.tolist(listarrayA64[cuts])
+            assert awkward1.to_list(modelA[cuts]) == awkward1.to_list(listarrayA64[cuts])
 
 def test_listarrayA32():
     for depth in 0, 1, 2, 3:
         for cuts in itertools.permutations((0, 1, 4, -5), depth):
-            assert awkward1.tolist(modelA[cuts]) == awkward1.tolist(listarrayA32[cuts])
+            assert awkward1.to_list(modelA[cuts]) == awkward1.to_list(listarrayA32[cuts])
 
     for depth in 0, 1, 2, 3:
         for cuts in itertools.permutations((slice(None), slice(1, None), slice(None, -1), slice(None, None, 2)), depth):
-            assert awkward1.tolist(modelA[cuts]) == awkward1.tolist(listarrayA32[cuts])
+            assert awkward1.to_list(modelA[cuts]) == awkward1.to_list(listarrayA32[cuts])
 
     for depth in 0, 1, 2, 3:
         for cuts in itertools.permutations((slice(1, None), slice(None, -1), 2, -2), depth):
-            assert awkward1.tolist(modelA[cuts]) == awkward1.tolist(listarrayA32[cuts])
+            assert awkward1.to_list(modelA[cuts]) == awkward1.to_list(listarrayA32[cuts])
 
     for depth in 0, 1, 2, 3:
         for cuts in itertools.permutations(([2, 0, 0, 1], [1, -2, 0, -1], 2, -2), depth):
-            assert awkward1.tolist(modelA[cuts]) == awkward1.tolist(listarrayA32[cuts])
+            assert awkward1.to_list(modelA[cuts]) == awkward1.to_list(listarrayA32[cuts])
 
     for depth in 0, 1, 2, 3:
         for cuts in itertools.permutations(([2, 0, 0, 1], [1, -2, 0, -1], slice(1, None), slice(None, -1)), depth):
@@ -155,16 +155,16 @@ def test_listarrayA32():
                 cuts = cuts[:-1]
             if any(isinstance(x, slice) for x in cuts):
                 continue
-            assert awkward1.tolist(modelA[cuts]) == awkward1.tolist(listarrayA32[cuts])
+            assert awkward1.to_list(modelA[cuts]) == awkward1.to_list(listarrayA32[cuts])
 
 def test_listoffsetarrayB64():
     for depth in 0, 1, 2, 3, 4:
         for cuts in itertools.permutations((-2, -1, 0, 1, 1), depth):
-            assert awkward1.tolist(modelB[cuts]) == awkward1.tolist(listoffsetarrayB64[cuts])
+            assert awkward1.to_list(modelB[cuts]) == awkward1.to_list(listoffsetarrayB64[cuts])
 
     for depth in 0, 1, 2, 3, 4:
         for cuts in itertools.permutations((-1, 0, 1, slice(1, None), slice(None, -1)), depth):
-            assert awkward1.tolist(modelB[cuts]) == awkward1.tolist(listoffsetarrayB64[cuts])
+            assert awkward1.to_list(modelB[cuts]) == awkward1.to_list(listoffsetarrayB64[cuts])
 
     for depth in 0, 1, 2, 3, 4:
         for cuts in itertools.permutations((-1, 0, [1, 0, 0, 1], [0, 1, -1, 1], slice(None, -1)), depth):
@@ -175,16 +175,16 @@ def test_listoffsetarrayB64():
                 cuts = cuts[:-1]
             if any(isinstance(x, slice) for x in cuts):
                 continue
-            assert awkward1.tolist(modelB[cuts]) == awkward1.tolist(listoffsetarrayB64[cuts])
+            assert awkward1.to_list(modelB[cuts]) == awkward1.to_list(listoffsetarrayB64[cuts])
 
 def test_listoffsetarrayB32():
     for depth in 0, 1, 2, 3, 4:
         for cuts in itertools.permutations((-2, -1, 0, 1, 1), depth):
-            assert awkward1.tolist(modelB[cuts]) == awkward1.tolist(listoffsetarrayB64[cuts])
+            assert awkward1.to_list(modelB[cuts]) == awkward1.to_list(listoffsetarrayB64[cuts])
 
     for depth in 0, 1, 2, 3, 4:
         for cuts in itertools.permutations((-1, 0, 1, slice(1, None), slice(None, -1)), depth):
-            assert awkward1.tolist(modelB[cuts]) == awkward1.tolist(listoffsetarrayB64[cuts])
+            assert awkward1.to_list(modelB[cuts]) == awkward1.to_list(listoffsetarrayB64[cuts])
 
     for depth in 0, 1, 2, 3, 4:
         for cuts in itertools.permutations((-1, 0, [1, 0, 0, 1], [0, 1, -1, 1], slice(None, -1)), depth):
@@ -195,16 +195,16 @@ def test_listoffsetarrayB32():
                 cuts = cuts[:-1]
             if any(isinstance(x, slice) for x in cuts):
                 continue
-            assert awkward1.tolist(modelB[cuts]) == awkward1.tolist(listoffsetarrayB64[cuts])
+            assert awkward1.to_list(modelB[cuts]) == awkward1.to_list(listoffsetarrayB64[cuts])
 
 def test_listarrayB64():
     for depth in 0, 1, 2, 3, 4:
         for cuts in itertools.permutations((-2, -1, 0, 1, 1), depth):
-            assert awkward1.tolist(modelB[cuts]) == awkward1.tolist(listarrayB64[cuts])
+            assert awkward1.to_list(modelB[cuts]) == awkward1.to_list(listarrayB64[cuts])
 
     for depth in 0, 1, 2, 3, 4:
         for cuts in itertools.permutations((-1, 0, 1, slice(1, None), slice(None, -1)), depth):
-            assert awkward1.tolist(modelB[cuts]) == awkward1.tolist(listarrayB64[cuts])
+            assert awkward1.to_list(modelB[cuts]) == awkward1.to_list(listarrayB64[cuts])
 
     for depth in 0, 1, 2, 3, 4:
         for cuts in itertools.permutations((-1, 0, [1, 0, 0, 1], [0, 1, -1, 1], slice(None, -1)), depth):
@@ -215,16 +215,16 @@ def test_listarrayB64():
                 cuts = cuts[:-1]
             if any(isinstance(x, slice) for x in cuts):
                 continue
-            assert awkward1.tolist(modelB[cuts]) == awkward1.tolist(listarrayB64[cuts])
+            assert awkward1.to_list(modelB[cuts]) == awkward1.to_list(listarrayB64[cuts])
 
 def test_listarrayB32():
     for depth in 0, 1, 2, 3, 4:
         for cuts in itertools.permutations((-2, -1, 0, 1, 1), depth):
-            assert awkward1.tolist(modelB[cuts]) == awkward1.tolist(listarrayB64[cuts])
+            assert awkward1.to_list(modelB[cuts]) == awkward1.to_list(listarrayB64[cuts])
 
     for depth in 0, 1, 2, 3, 4:
         for cuts in itertools.permutations((-1, 0, 1, slice(1, None), slice(None, -1)), depth):
-            assert awkward1.tolist(modelB[cuts]) == awkward1.tolist(listarrayB64[cuts])
+            assert awkward1.to_list(modelB[cuts]) == awkward1.to_list(listarrayB64[cuts])
 
     for depth in 0, 1, 2, 3, 4:
         for cuts in itertools.permutations((-1, 0, [1, 0, 0, 1], [0, 1, -1, 1], slice(None, -1)), depth):
@@ -235,4 +235,4 @@ def test_listarrayB32():
                 cuts = cuts[:-1]
             if any(isinstance(x, slice) for x in cuts):
                 continue
-            assert awkward1.tolist(modelB[cuts]) == awkward1.tolist(listarrayB64[cuts])
+            assert awkward1.to_list(modelB[cuts]) == awkward1.to_list(listarrayB64[cuts])

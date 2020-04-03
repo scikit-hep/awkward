@@ -5,68 +5,87 @@
 #include "awkward/type/ArrayType.h"
 
 namespace awkward {
-  ArrayType::ArrayType(const util::Parameters& parameters, const std::string& typestr, const std::shared_ptr<Type>& type, int64_t length)
+  ArrayType::ArrayType(const util::Parameters& parameters,
+                       const std::string& typestr,
+                       const TypePtr& type,
+                       int64_t length)
       : Type(parameters, typestr)
       , type_(type)
       , length_(length) { }
 
-  std::string ArrayType::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
+  std::string
+  ArrayType::tostring_part(const std::string& indent,
+                           const std::string& pre,
+                           const std::string& post) const {
     std::string typestr;
     if (get_typestr(typestr)) {
       return typestr;
     }
-
-    return indent + pre + std::to_string(length_) + " * " + type_.get()->tostring_part(indent, "", "") + post;
+    return (indent + pre + std::to_string(length_) + " * "
+            + type_.get()->tostring_part(indent, "", "") + post);
   }
 
-  const std::shared_ptr<Type> ArrayType::shallow_copy() const {
+  const TypePtr
+  ArrayType::shallow_copy() const {
     return std::make_shared<ArrayType>(parameters_, typestr_, type_, length_);
   }
 
-  bool ArrayType::equal(const std::shared_ptr<Type>& other, bool check_parameters) const {
+  bool
+  ArrayType::equal(const TypePtr& other, bool check_parameters) const {
     if (ArrayType* t = dynamic_cast<ArrayType*>(other.get())) {
       if (check_parameters  &&  !parameters_equal(other.get()->parameters())) {
         return false;
       }
-      return length_ == t->length_  &&  type_.get()->equal(t->type_, check_parameters);
+      return (length_ == t->length_  &&
+              type_.get()->equal(t->type_, check_parameters));
     }
     else {
       return false;
     }
   }
 
-  int64_t ArrayType::numfields() const {
+  int64_t
+  ArrayType::numfields() const {
     return type_.get()->numfields();
   }
 
-  int64_t ArrayType::fieldindex(const std::string& key) const {
+  int64_t
+  ArrayType::fieldindex(const std::string& key) const {
     return type_.get()->fieldindex(key);
   }
 
-  const std::string ArrayType::key(int64_t fieldindex) const {
+  const std::string
+  ArrayType::key(int64_t fieldindex) const {
     return type_.get()->key(fieldindex);
   }
 
-  bool ArrayType::haskey(const std::string& key) const {
+  bool
+  ArrayType::haskey(const std::string& key) const {
     return type_.get()->haskey(key);
   }
 
-  const std::vector<std::string> ArrayType::keys() const {
+  const std::vector<std::string>
+  ArrayType::keys() const {
     return type_.get()->keys();
   }
 
-  const std::shared_ptr<Content> ArrayType::empty() const {
+  const ContentPtr
+  ArrayType::empty() const {
     if (length_ != 0) {
-      throw std::invalid_argument(std::string("ArrayType with length ") + std::to_string(length_) + std::string(" does not describe an empty array"));
+      throw std::invalid_argument(
+        std::string("ArrayType with length ") + std::to_string(length_)
+        + std::string(" does not describe an empty array"));
     }
     return type_.get()->empty();
   }
 
-  int64_t ArrayType::length() const {
+  int64_t
+  ArrayType::length() const {
     return length_;
   }
 
-  const std::shared_ptr<Type> ArrayType::type() const {
+  const TypePtr
+  ArrayType::type() const {
     return type_;
   }
 }

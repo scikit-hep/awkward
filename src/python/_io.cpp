@@ -14,10 +14,15 @@
 namespace py = pybind11;
 namespace ak = awkward;
 
-/////////////////////////////////////////////////////////////// fromjson
+////////// fromjson
 
-void make_fromjson(py::module& m, const std::string& name) {
-  m.def(name.c_str(), [](const std::string& source, int64_t initial, double resize, int64_t buffersize) -> std::shared_ptr<ak::Content> {
+void
+make_fromjson(py::module& m, const std::string& name) {
+  m.def(name.c_str(),
+        [](const std::string& source,
+           int64_t initial,
+           double resize,
+           int64_t buffersize) -> std::shared_ptr<ak::Content> {
     bool isarray = false;
     for (char const &x: source) {
       if (x != 9  &&  x != 10  &&  x != 13  &&  x != 32) {  // whitespace
@@ -28,7 +33,8 @@ void make_fromjson(py::module& m, const std::string& name) {
       }
     }
     if (isarray) {
-      return ak::FromJsonString(source.c_str(), ak::ArrayBuilderOptions(initial, resize));
+      return ak::FromJsonString(
+        source.c_str(), ak::ArrayBuilderOptions(initial, resize));
     }
     else {
 #ifdef _MSC_VER
@@ -38,11 +44,15 @@ void make_fromjson(py::module& m, const std::string& name) {
       FILE* file = fopen(source.c_str(), "rb");
       if (file == nullptr) {
 #endif
-        throw std::invalid_argument(std::string("file \"") + source + std::string("\" could not be opened for reading"));
+        throw std::invalid_argument(
+          std::string("file \"") + source
+          + std::string("\" could not be opened for reading"));
       }
       std::shared_ptr<ak::Content> out(nullptr);
       try {
-        out = FromJsonFile(file, ak::ArrayBuilderOptions(initial, resize), buffersize);
+        out = FromJsonFile(file,
+                           ak::ArrayBuilderOptions(initial, resize),
+                           buffersize);
       }
       catch (...) {
         fclose(file);
@@ -51,18 +61,40 @@ void make_fromjson(py::module& m, const std::string& name) {
       fclose(file);
       return out;
     }
-  }, py::arg("source"), py::arg("initial") = 1024, py::arg("resize") = 2.0, py::arg("buffersize") = 65536);
+  }, py::arg("source"),
+      py::arg("initial") = 1024,
+      py::arg("resize") = 1.5,
+      py::arg("buffersize") = 65536);
 }
 
-/////////////////////////////////////////////////////////////// fromroot
+////////// fromroot
 
-void make_fromroot_nestedvector(py::module& m, const std::string& name) {
-  m.def(name.c_str(), [](const ak::Index64& byteoffsets, const ak::NumpyArray& rawdata, int64_t depth, int64_t itemsize, const std::string& format, int64_t initial, double resize) -> std::shared_ptr<ak::Content> {
-      return FromROOT_nestedvector(byteoffsets, rawdata, depth, itemsize, format, ak::ArrayBuilderOptions(initial, resize));
-  }, py::arg("byteoffsets"), py::arg("rawdata"), py::arg("depth"), py::arg("itemsize"), py::arg("format"), py::arg("initial") = 1024, py::arg("resize") = 2.0);
+void
+make_fromroot_nestedvector(py::module& m, const std::string& name) {
+  m.def(name.c_str(),
+        [](const ak::Index64& byteoffsets,
+           const ak::NumpyArray& rawdata,
+           int64_t depth,
+           int64_t itemsize,
+           const std::string& format,
+           int64_t initial,
+           double resize) -> std::shared_ptr<ak::Content> {
+      return FromROOT_nestedvector(byteoffsets,
+                                   rawdata,
+                                   depth,
+                                   itemsize,
+                                   format,
+                                   ak::ArrayBuilderOptions(initial, resize));
+  }, py::arg("byteoffsets"),
+     py::arg("rawdata"),
+     py::arg("depth"),
+     py::arg("itemsize"),
+     py::arg("format"),
+     py::arg("initial") = 1024,
+     py::arg("resize") = 1.5);
 }
 
-/////////////////////////////////////////////////////////////// module
+////////// module
 
 namespace py = pybind11;
 PYBIND11_MODULE(_io, m) {

@@ -10,50 +10,73 @@
 #include "awkward/builder/OptionBuilder.h"
 
 namespace awkward {
-  const std::shared_ptr<Builder> OptionBuilder::fromnulls(const ArrayBuilderOptions& options, int64_t nullcount, const std::shared_ptr<Builder>& content) {
-    GrowableBuffer<int64_t> offsets = GrowableBuffer<int64_t>::full(options, -1, nullcount);
-    std::shared_ptr<Builder> out = std::make_shared<OptionBuilder>(options, offsets, content);
+  const BuilderPtr
+  OptionBuilder::fromnulls(const ArrayBuilderOptions& options,
+                           int64_t nullcount,
+                           const BuilderPtr& content) {
+    GrowableBuffer<int64_t> index = GrowableBuffer<int64_t>::full(options,
+                                                                  -1,
+                                                                  nullcount);
+    BuilderPtr out = std::make_shared<OptionBuilder>(options,
+                                                     index,
+                                                     content);
     out.get()->setthat(out);
     return out;
   }
 
-  const std::shared_ptr<Builder> OptionBuilder::fromvalids(const ArrayBuilderOptions& options, const std::shared_ptr<Builder>& content) {
-    GrowableBuffer<int64_t> offsets = GrowableBuffer<int64_t>::arange(options, content->length());
-    std::shared_ptr<Builder> out = std::make_shared<OptionBuilder>(options, offsets, content);
+  const BuilderPtr
+  OptionBuilder::fromvalids(const ArrayBuilderOptions& options,
+                            const BuilderPtr& content) {
+    GrowableBuffer<int64_t> index =
+      GrowableBuffer<int64_t>::arange(options, content->length());
+    BuilderPtr out = std::make_shared<OptionBuilder>(options,
+                                                     index,
+                                                     content);
     out.get()->setthat(out);
     return out;
   }
-
-  OptionBuilder::OptionBuilder(const ArrayBuilderOptions& options, const GrowableBuffer<int64_t>& offsets, const std::shared_ptr<Builder>& content)
-      : options_(options)
-      , offsets_(offsets)
+ 
+  OptionBuilder::OptionBuilder(const ArrayBuilderOptions& options,
+                               const GrowableBuffer<int64_t>& index,
+                               const BuilderPtr& content)
+    : options_(options)
+      , index_(index)
       , content_(content) { }
 
-  const std::string OptionBuilder::classname() const {
+  const std::string
+  OptionBuilder::classname() const {
     return "OptionBuilder";
   };
 
-  int64_t OptionBuilder::length() const {
-    return offsets_.length();
+  int64_t
+  OptionBuilder::length() const {
+    return index_.length();
   }
 
-  void OptionBuilder::clear() {
-    offsets_.clear();
+  void
+  OptionBuilder::clear() {
+    index_.clear();
     content_.get()->clear();
   }
 
-  const std::shared_ptr<Content> OptionBuilder::snapshot() const {
-    Index64 index(offsets_.ptr(), 0, offsets_.length());
-    return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, content_.get()->snapshot());
+  const ContentPtr
+  OptionBuilder::snapshot() const {
+    Index64 index(index_.ptr(), 0, index_.length());
+    return std::make_shared<IndexedOptionArray64>(Identities::none(),
+                                                  util::Parameters(),
+                                                  index,
+                                                  content_.get()->snapshot());
   }
 
-  bool OptionBuilder::active() const {
+  bool
+  OptionBuilder::active() const {
     return content_.get()->active();
   }
 
-  const std::shared_ptr<Builder> OptionBuilder::null() {
+  const BuilderPtr
+  OptionBuilder::null() {
     if (!content_.get()->active()) {
-      offsets_.append(-1);
+      index_.append(-1);
     }
     else {
       content_.get()->null();
@@ -61,11 +84,12 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> OptionBuilder::boolean(bool x) {
+  const BuilderPtr
+  OptionBuilder::boolean(bool x) {
     if (!content_.get()->active()) {
       int64_t length = content_.get()->length();
       maybeupdate(content_.get()->boolean(x));
-      offsets_.append(length);
+      index_.append(length);
     }
     else {
       content_.get()->boolean(x);
@@ -73,11 +97,12 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> OptionBuilder::integer(int64_t x) {
+  const BuilderPtr
+  OptionBuilder::integer(int64_t x) {
     if (!content_.get()->active()) {
       int64_t length = content_.get()->length();
       maybeupdate(content_.get()->integer(x));
-      offsets_.append(length);
+      index_.append(length);
     }
     else {
       content_.get()->integer(x);
@@ -85,11 +110,12 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> OptionBuilder::real(double x) {
+  const BuilderPtr
+  OptionBuilder::real(double x) {
     if (!content_.get()->active()) {
       int64_t length = content_.get()->length();
       maybeupdate(content_.get()->real(x));
-      offsets_.append(length);
+      index_.append(length);
     }
     else {
       content_.get()->real(x);
@@ -97,11 +123,12 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> OptionBuilder::string(const char* x, int64_t length, const char* encoding) {
+  const BuilderPtr
+  OptionBuilder::string(const char* x, int64_t length, const char* encoding) {
     if (!content_.get()->active()) {
       int64_t len = content_.get()->length();
       maybeupdate(content_.get()->string(x, length, encoding));
-      offsets_.append(len);
+      index_.append(len);
     }
     else {
       content_.get()->string(x, length, encoding);
@@ -109,7 +136,8 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> OptionBuilder::beginlist() {
+  const BuilderPtr
+  OptionBuilder::beginlist() {
     if (!content_.get()->active()) {
       maybeupdate(content_.get()->beginlist());
     }
@@ -119,21 +147,24 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> OptionBuilder::endlist() {
+  const BuilderPtr
+  OptionBuilder::endlist() {
     if (!content_.get()->active()) {
-      throw std::invalid_argument("called 'endlist' without 'beginlist' at the same level before it");
+      throw std::invalid_argument(
+        "called 'endlist' without 'beginlist' at the same level before it");
     }
     else {
       int64_t length = content_.get()->length();
       content_.get()->endlist();
       if (length != content_.get()->length()) {
-        offsets_.append(length);
+        index_.append(length);
       }
     }
     return that_;
   }
 
-  const std::shared_ptr<Builder> OptionBuilder::begintuple(int64_t numfields) {
+  const BuilderPtr
+  OptionBuilder::begintuple(int64_t numfields) {
     if (!content_.get()->active()) {
       maybeupdate(content_.get()->begintuple(numfields));
     }
@@ -143,9 +174,11 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> OptionBuilder::index(int64_t index) {
+  const BuilderPtr
+  OptionBuilder::index(int64_t index) {
     if (!content_.get()->active()) {
-      throw std::invalid_argument("called 'index' without 'begintuple' at the same level before it");
+      throw std::invalid_argument(
+        "called 'index' without 'begintuple' at the same level before it");
     }
     else {
       content_.get()->index(index);
@@ -153,21 +186,24 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> OptionBuilder::endtuple() {
+  const BuilderPtr
+  OptionBuilder::endtuple() {
     if (!content_.get()->active()) {
-      throw std::invalid_argument("called 'endtuple' without 'begintuple' at the same level before it");
+      throw std::invalid_argument(
+        "called 'endtuple' without 'begintuple' at the same level before it");
     }
     else {
       int64_t length = content_.get()->length();
       content_.get()->endtuple();
       if (length != content_.get()->length()) {
-        offsets_.append(length);
+        index_.append(length);
       }
     }
     return that_;
   }
 
-  const std::shared_ptr<Builder> OptionBuilder::beginrecord(const char* name, bool check) {
+  const BuilderPtr
+  OptionBuilder::beginrecord(const char* name, bool check) {
     if (!content_.get()->active()) {
       maybeupdate(content_.get()->beginrecord(name, check));
     }
@@ -177,9 +213,11 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> OptionBuilder::field(const char* key, bool check) {
+  const BuilderPtr
+  OptionBuilder::field(const char* key, bool check) {
     if (!content_.get()->active()) {
-      throw std::invalid_argument("called 'field' without 'beginrecord' at the same level before it");
+      throw std::invalid_argument(
+        "called 'field' without 'beginrecord' at the same level before it");
     }
     else {
       content_.get()->field(key, check);
@@ -187,25 +225,29 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> OptionBuilder::endrecord() {
+  const BuilderPtr
+  OptionBuilder::endrecord() {
     if (!content_.get()->active()) {
-      throw std::invalid_argument("called 'endrecord' without 'beginrecord' at the same level before it");
+      throw std::invalid_argument(
+        "called 'endrecord' without 'beginrecord' at the same level "
+        "before it");
     }
     else {
       int64_t length = content_.get()->length();
       content_.get()->endrecord();
       if (length != content_.get()->length()) {
-        offsets_.append(length);
+        index_.append(length);
       }
     }
     return that_;
   }
 
-  const std::shared_ptr<Builder> OptionBuilder::append(const std::shared_ptr<Content>& array, int64_t at) {
+  const BuilderPtr
+  OptionBuilder::append(const ContentPtr& array, int64_t at) {
     if (!content_.get()->active()) {
       int64_t length = content_.get()->length();
       maybeupdate(content_.get()->append(array, at));
-      offsets_.append(length);
+      index_.append(length);
     }
     else {
       content_.get()->append(array, at);
@@ -213,7 +255,8 @@ namespace awkward {
     return that_;
   }
 
-  void OptionBuilder::maybeupdate(const std::shared_ptr<Builder>& tmp) {
+  void
+  OptionBuilder::maybeupdate(const BuilderPtr& tmp) {
     if (tmp.get() != content_.get()) {
       content_ = tmp;
     }

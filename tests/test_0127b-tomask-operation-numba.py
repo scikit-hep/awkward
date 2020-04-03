@@ -14,8 +14,8 @@ numba = pytest.importorskip("numba")
 def test_ByteMaskedArray():
     content = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]).layout
     mask = awkward1.layout.Index8(numpy.array([0, 0, 1, 1, 0], dtype=numpy.int8))
-    array = awkward1.Array(awkward1.layout.ByteMaskedArray(mask, content, validwhen=False))
-    assert awkward1.tolist(array) == [[0.0, 1.1, 2.2], [], None, None, [6.6, 7.7, 8.8, 9.9]]
+    array = awkward1.Array(awkward1.layout.ByteMaskedArray(mask, content, valid_when=False))
+    assert awkward1.to_list(array) == [[0.0, 1.1, 2.2], [], None, None, [6.6, 7.7, 8.8, 9.9]]
 
     @numba.njit
     def f1(x):
@@ -29,23 +29,23 @@ def test_ByteMaskedArray():
 
     y = f2(array)
     assert isinstance(y.layout, awkward1.layout.ByteMaskedArray)
-    assert awkward1.tolist(y) == awkward1.tolist(array)
+    assert awkward1.to_list(y) == awkward1.to_list(array)
 
     @numba.njit
     def f3(x, i):
         return x[i]
 
-    assert awkward1.tolist(f3(array, 0)) == [0.0, 1.1, 2.2]
-    assert awkward1.tolist(f3(array, 1)) == []
+    assert awkward1.to_list(f3(array, 0)) == [0.0, 1.1, 2.2]
+    assert awkward1.to_list(f3(array, 1)) == []
     assert f3(array, 2) is None
     assert f3(array, 3) is None
-    assert awkward1.tolist(f3(array, 4)) == [6.6, 7.7, 8.8, 9.9]
+    assert awkward1.to_list(f3(array, 4)) == [6.6, 7.7, 8.8, 9.9]
 
 def test_BitMaskedArray():
     content = awkward1.layout.NumpyArray(numpy.arange(13))
     mask = awkward1.layout.IndexU8(numpy.array([58, 59], dtype=numpy.uint8))
-    array = awkward1.Array(awkward1.layout.BitMaskedArray(mask, content, validwhen=True, length=13, lsb_order=True))
-    assert awkward1.tolist(array) == [None, 1, None, 3, 4, 5, None, None, 8, 9, None, 11, 12]
+    array = awkward1.Array(awkward1.layout.BitMaskedArray(mask, content, valid_when=True, length=13, lsb_order=True))
+    assert awkward1.to_list(array) == [None, 1, None, 3, 4, 5, None, None, 8, 9, None, 11, 12]
 
     @numba.njit
     def f1(x):
@@ -59,7 +59,7 @@ def test_BitMaskedArray():
 
     y = f2(array)
     assert isinstance(y.layout, awkward1.layout.BitMaskedArray)
-    assert awkward1.tolist(y) == awkward1.tolist(array)
+    assert awkward1.to_list(y) == awkward1.to_list(array)
 
     @numba.njit
     def f3(x, i):
@@ -67,16 +67,16 @@ def test_BitMaskedArray():
 
     assert [f3(array, i) for i in range(len(array))] == [None, 1, None, 3, 4, 5, None, None, 8, 9, None, 11, 12]
 
-    array = awkward1.Array(awkward1.layout.BitMaskedArray(mask, content, validwhen=True, length=13, lsb_order=False))
-    assert awkward1.tolist(array) == [None, None, 2, 3, 4, None, 6, None, None, None, 10, 11, 12]
+    array = awkward1.Array(awkward1.layout.BitMaskedArray(mask, content, valid_when=True, length=13, lsb_order=False))
+    assert awkward1.to_list(array) == [None, None, 2, 3, 4, None, 6, None, None, None, 10, 11, 12]
 
     assert [f3(array, i) for i in range(len(array))] == [None, None, 2, 3, 4, None, 6, None, None, None, 10, 11, 12]
 
 def test_UnmaskedArray():
     content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5], dtype=numpy.float64))
     array = awkward1.Array(awkward1.layout.UnmaskedArray(content))
-    assert awkward1.tolist(array) == [1.1, 2.2, 3.3, 4.4, 5.5]
-    assert str(awkward1.typeof(array)) == "5 * ?float64"
+    assert awkward1.to_list(array) == [1.1, 2.2, 3.3, 4.4, 5.5]
+    assert str(awkward1.type(array)) == "5 * ?float64"
 
     @numba.njit
     def f1(x):
@@ -90,8 +90,8 @@ def test_UnmaskedArray():
 
     y = f2(array)
     assert isinstance(y.layout, awkward1.layout.UnmaskedArray)
-    assert awkward1.tolist(y) == awkward1.tolist(array)
-    assert str(awkward1.typeof(y)) == str(awkward1.typeof(array))
+    assert awkward1.to_list(y) == awkward1.to_list(array)
+    assert str(awkward1.type(y)) == str(awkward1.type(array))
 
     @numba.njit
     def f3(x, i):

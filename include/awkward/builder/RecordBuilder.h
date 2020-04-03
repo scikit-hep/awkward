@@ -12,42 +12,121 @@
 #include "awkward/builder/UnknownBuilder.h"
 
 namespace awkward {
+  /// @class RecordBuilder
+  ///
+  /// @brief Builder node for accumulated records.
   class EXPORT_SYMBOL RecordBuilder: public Builder {
   public:
-    static const std::shared_ptr<Builder> fromempty(const ArrayBuilderOptions& options);
+    /// @brief Create an empty RecordBuilder.
+    /// @param options Configuration options for building an array;
+    /// these are passed to every Builder's constructor.
+    static const BuilderPtr
+      fromempty(const ArrayBuilderOptions& options);
 
-    RecordBuilder(const ArrayBuilderOptions& options, const std::vector<std::shared_ptr<Builder>>& contents, const std::vector<std::string>& keys, const std::vector<const char*>& pointers, const std::string& name, const char* nameptr, int64_t length, bool begun, int64_t nextindex, int64_t nexttotry);
+    /// @brief Create a RecordBuilder from a full set of parameters.
+    ///
+    /// @param options Configuration options for building an array;
+    /// these are passed to every Builder's constructor.
+    /// @param contents A Builder for each record field.
+    /// @param keys Names for each record field.
+    /// @param pointers String pointers for each record field name.
+    /// @param name String name of the record.
+    /// @param nameptr String pointer for the name of the record.
+    /// @param length Length of accumulated array (same as #length).
+    /// @param begun If `true`, the RecordBuilder is in an active state;
+    /// `false` otherwise.
+    /// @param nextindex The next field index to fill with data.
+    /// @param nexttotry The next field index to check against a key string.
+    RecordBuilder(const ArrayBuilderOptions& options,
+                  const std::vector<BuilderPtr>& contents,
+                  const std::vector<std::string>& keys,
+                  const std::vector<const char*>& pointers,
+                  const std::string& name,
+                  const char* nameptr,
+                  int64_t length,
+                  bool begun,
+                  int64_t nextindex,
+                  int64_t nexttotry);
 
-    const std::string name() const;
-    const char* nameptr() const;
+    /// @brief Name of the record (STL wrapped #nameptr).
+    const std::string
+      name() const;
 
-    const std::string classname() const override;
-    int64_t length() const override;
-    void clear() override;
-    const std::shared_ptr<Content> snapshot() const override;
+    /// @brief String pointer for the name of the record.
+    const char*
+      nameptr() const;
 
-    bool active() const override;
-    const std::shared_ptr<Builder> null() override;
-    const std::shared_ptr<Builder> boolean(bool x) override;
-    const std::shared_ptr<Builder> integer(int64_t x) override;
-    const std::shared_ptr<Builder> real(double x) override;
-    const std::shared_ptr<Builder> string(const char* x, int64_t length, const char* encoding) override;
-    const std::shared_ptr<Builder> beginlist() override;
-    const std::shared_ptr<Builder> endlist() override;
-    const std::shared_ptr<Builder> begintuple(int64_t numfields) override;
-    const std::shared_ptr<Builder> index(int64_t index) override;
-    const std::shared_ptr<Builder> endtuple() override;
-    const std::shared_ptr<Builder> beginrecord(const char* name, bool check) override;
-    const std::shared_ptr<Builder> field(const char* key, bool check) override;
-    const std::shared_ptr<Builder> endrecord() override;
-    const std::shared_ptr<Builder> append(const std::shared_ptr<Content>& array, int64_t at) override;
+    /// @brief User-friendly name of this class: `"RecordBuilder"`.
+    const std::string
+      classname() const override;
+
+    int64_t
+      length() const override;
+
+    void
+      clear() override;
+
+    const ContentPtr
+      snapshot() const override;
+
+    /// @copydoc Builder::active()
+    ///
+    /// Calling #beginrecord makes a RecordBuilder active; #endrecord makes it
+    /// inactive.
+    bool
+      active() const override;
+
+    const BuilderPtr
+      null() override;
+
+    const BuilderPtr
+      boolean(bool x) override;
+
+    const BuilderPtr
+      integer(int64_t x) override;
+
+    const BuilderPtr
+      real(double x) override;
+
+    const BuilderPtr
+      string(const char* x, int64_t length, const char* encoding) override;
+
+    const BuilderPtr
+      beginlist() override;
+
+    const BuilderPtr
+      endlist() override;
+
+    const BuilderPtr
+      begintuple(int64_t numfields) override;
+
+    const BuilderPtr
+      index(int64_t index) override;
+
+    const BuilderPtr
+      endtuple() override;
+
+    const BuilderPtr
+      beginrecord(const char* name, bool check) override;
+
+    const BuilderPtr
+      field(const char* key, bool check) override;
+
+    const BuilderPtr
+      endrecord() override;
+
+    const BuilderPtr
+      append(const ContentPtr& array, int64_t at) override;
 
   private:
-    const std::shared_ptr<Builder> field_fast(const char* key);
-    const std::shared_ptr<Builder> field_check(const char* key);
+    const BuilderPtr
+      field_fast(const char* key);
+
+    const BuilderPtr
+      field_check(const char* key);
 
     const ArrayBuilderOptions options_;
-    std::vector<std::shared_ptr<Builder>> contents_;
+    std::vector<BuilderPtr> contents_;
     std::vector<std::string> keys_;
     std::vector<const char*> pointers_;
     std::string name_;
@@ -57,7 +136,8 @@ namespace awkward {
     int64_t nextindex_;
     int64_t nexttotry_;
 
-    void maybeupdate(int64_t i, const std::shared_ptr<Builder>& tmp);
+    void
+      maybeupdate(int64_t i, const BuilderPtr& tmp);
   };
 }
 

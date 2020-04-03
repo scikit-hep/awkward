@@ -14,7 +14,7 @@ PYBIND11_MODULE(layout, m) {
   m.attr("__version__") = "dev";
 #endif
 
-  /////////////////////////////////////////////////////////////// index.h
+  ////////// index.h
 
   make_IndexOf<int8_t>(m,   "Index8");
   make_IndexOf<uint8_t>(m,  "IndexU8");
@@ -22,12 +22,12 @@ PYBIND11_MODULE(layout, m) {
   make_IndexOf<uint32_t>(m, "IndexU32");
   make_IndexOf<int64_t>(m,  "Index64");
 
-  /////////////////////////////////////////////////////////////// identities.h
+  ////////// identities.h
 
   make_IdentitiesOf<int32_t>(m, "Identities32");
   make_IdentitiesOf<int64_t>(m, "Identities64");
 
-  /////////////////////////////////////////////////////////////// content.h
+  ////////// content.h
 
   make_Iterator(m, "Iterator");
   make_ArrayBuilder(m, "ArrayBuilder");

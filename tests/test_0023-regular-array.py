@@ -19,61 +19,61 @@ stops = awkward1.layout.Index64(numpy.array([2, 3]))
 listarray = awkward1.layout.ListArray64(starts, stops, regulararray)
 
 def test_type():
-    assert str(awkward1.typeof(regulararray)) == "2 * var * float64"
+    assert str(awkward1.type(regulararray)) == "2 * var * float64"
 
 def test_iteration():
-    assert awkward1.tolist(regulararray) == [[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]]
+    assert awkward1.to_list(regulararray) == [[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]]
 
 def test_tojson():
-    assert awkward1.tojson(regulararray) == "[[[0.0,1.1,2.2],[]],[[3.3,4.4],[5.5]],[[6.6,7.7,8.8,9.9],[]]]"
+    assert awkward1.to_json(regulararray) == "[[[0.0,1.1,2.2],[]],[[3.3,4.4],[5.5]],[[6.6,7.7,8.8,9.9],[]]]"
 
 def test_getitem_at():
-    assert awkward1.tolist(regulararray[0]) == [[0.0, 1.1, 2.2], []]
-    assert awkward1.tolist(regulararray[1]) == [[3.3, 4.4], [5.5]]
-    assert awkward1.tolist(regulararray[2]) == [[6.6, 7.7, 8.8, 9.9], []]
+    assert awkward1.to_list(regulararray[0]) == [[0.0, 1.1, 2.2], []]
+    assert awkward1.to_list(regulararray[1]) == [[3.3, 4.4], [5.5]]
+    assert awkward1.to_list(regulararray[2]) == [[6.6, 7.7, 8.8, 9.9], []]
 
 def test_getitem_range():
-    assert awkward1.tolist(regulararray[1:]) == [[[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]]
-    assert awkward1.tolist(regulararray[:-1]) == [[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]]]
+    assert awkward1.to_list(regulararray[1:]) == [[[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]]
+    assert awkward1.to_list(regulararray[:-1]) == [[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]]]
 
 def test_getitem():
-    assert awkward1.tolist(regulararray[(0,)]) == [[0.0, 1.1, 2.2], []]
-    assert awkward1.tolist(regulararray[(1,)]) == [[3.3, 4.4], [5.5]]
-    assert awkward1.tolist(regulararray[(2,)]) == [[6.6, 7.7, 8.8, 9.9], []]
-    assert awkward1.tolist(regulararray[(slice(1, None, None),)]) == [[[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]]
-    assert awkward1.tolist(regulararray[(slice(None, -1, None),)]) == [[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]]]
+    assert awkward1.to_list(regulararray[(0,)]) == [[0.0, 1.1, 2.2], []]
+    assert awkward1.to_list(regulararray[(1,)]) == [[3.3, 4.4], [5.5]]
+    assert awkward1.to_list(regulararray[(2,)]) == [[6.6, 7.7, 8.8, 9.9], []]
+    assert awkward1.to_list(regulararray[(slice(1, None, None),)]) == [[[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]]
+    assert awkward1.to_list(regulararray[(slice(None, -1, None),)]) == [[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]]]
 
 def test_getitem_deeper():
-    assert awkward1.tolist(listarray) == [[[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]]], [[[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]]]
+    assert awkward1.to_list(listarray) == [[[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]]], [[[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]]]
 
-    assert awkward1.tolist(listarray[0, 0, 0]) == [0.0, 1.1, 2.2]
-    assert awkward1.tolist(listarray[0, 0, 1]) == []
-    assert awkward1.tolist(listarray[0, 1, 0]) == [3.3, 4.4]
-    assert awkward1.tolist(listarray[0, 1, 1]) == [5.5]
-    assert awkward1.tolist(listarray[1, 0, 0]) == [3.3, 4.4]
-    assert awkward1.tolist(listarray[1, 0, 1]) == [5.5]
-    assert awkward1.tolist(listarray[1, 1, 0]) == [6.6, 7.7, 8.8, 9.9]
-    assert awkward1.tolist(listarray[1, 1, 1]) == []
+    assert awkward1.to_list(listarray[0, 0, 0]) == [0.0, 1.1, 2.2]
+    assert awkward1.to_list(listarray[0, 0, 1]) == []
+    assert awkward1.to_list(listarray[0, 1, 0]) == [3.3, 4.4]
+    assert awkward1.to_list(listarray[0, 1, 1]) == [5.5]
+    assert awkward1.to_list(listarray[1, 0, 0]) == [3.3, 4.4]
+    assert awkward1.to_list(listarray[1, 0, 1]) == [5.5]
+    assert awkward1.to_list(listarray[1, 1, 0]) == [6.6, 7.7, 8.8, 9.9]
+    assert awkward1.to_list(listarray[1, 1, 1]) == []
 
-    assert awkward1.tolist(listarray[0, 0, 0:]) == [[0.0, 1.1, 2.2], []]
-    assert awkward1.tolist(listarray[0, 0, 1:]) == [[]]
-    assert awkward1.tolist(listarray[0, 1, 0:]) == [[3.3, 4.4], [5.5]]
-    assert awkward1.tolist(listarray[0, 1, 1:]) == [[5.5]]
-    assert awkward1.tolist(listarray[1, 0, 0:]) == [[3.3, 4.4], [5.5]]
-    assert awkward1.tolist(listarray[1, 0, 1:]) == [[5.5]]
-    assert awkward1.tolist(listarray[1, 1, 0:]) == [[6.6, 7.7, 8.8, 9.9], []]
-    assert awkward1.tolist(listarray[1, 1, 1:]) == [[]]
+    assert awkward1.to_list(listarray[0, 0, 0:]) == [[0.0, 1.1, 2.2], []]
+    assert awkward1.to_list(listarray[0, 0, 1:]) == [[]]
+    assert awkward1.to_list(listarray[0, 1, 0:]) == [[3.3, 4.4], [5.5]]
+    assert awkward1.to_list(listarray[0, 1, 1:]) == [[5.5]]
+    assert awkward1.to_list(listarray[1, 0, 0:]) == [[3.3, 4.4], [5.5]]
+    assert awkward1.to_list(listarray[1, 0, 1:]) == [[5.5]]
+    assert awkward1.to_list(listarray[1, 1, 0:]) == [[6.6, 7.7, 8.8, 9.9], []]
+    assert awkward1.to_list(listarray[1, 1, 1:]) == [[]]
 
-    assert awkward1.tolist(listarray[[1], 0, 0:]) == [[[3.3, 4.4], [5.5]]]
-    assert awkward1.tolist(listarray[[1, 0], 0, 0:]) == [[[3.3, 4.4], [5.5]], [[0.0, 1.1, 2.2], []]]
+    assert awkward1.to_list(listarray[[1], 0, 0:]) == [[[3.3, 4.4], [5.5]]]
+    assert awkward1.to_list(listarray[[1, 0], 0, 0:]) == [[[3.3, 4.4], [5.5]], [[0.0, 1.1, 2.2], []]]
 
-    assert awkward1.tolist(listarray[:, :, [0, 1]]) == [[[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]]], [[[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]]]
-    assert awkward1.tolist(listarray[:, :, [1, 0]]) == [[[[], [0.0, 1.1, 2.2]], [[5.5], [3.3, 4.4]]], [[[5.5], [3.3, 4.4]], [[], [6.6, 7.7, 8.8, 9.9]]]]
-    assert awkward1.tolist(listarray[:, :, [1, 0, 1]]) == [[[[], [0.0, 1.1, 2.2], []], [[5.5], [3.3, 4.4], [5.5]]], [[[5.5], [3.3, 4.4], [5.5]], [[], [6.6, 7.7, 8.8, 9.9], []]]]
-    assert awkward1.tolist(listarray[:, :2, [0, 1]]) == [[[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]]], [[[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]]]
+    assert awkward1.to_list(listarray[:, :, [0, 1]]) == [[[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]]], [[[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]]]
+    assert awkward1.to_list(listarray[:, :, [1, 0]]) == [[[[], [0.0, 1.1, 2.2]], [[5.5], [3.3, 4.4]]], [[[5.5], [3.3, 4.4]], [[], [6.6, 7.7, 8.8, 9.9]]]]
+    assert awkward1.to_list(listarray[:, :, [1, 0, 1]]) == [[[[], [0.0, 1.1, 2.2], []], [[5.5], [3.3, 4.4], [5.5]]], [[[5.5], [3.3, 4.4], [5.5]], [[], [6.6, 7.7, 8.8, 9.9], []]]]
+    assert awkward1.to_list(listarray[:, :2, [0, 1]]) == [[[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]]], [[[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]]]
 
-    assert awkward1.tolist(listarray[:1, [0, 0, 1, 1], [0, 1, 0, 1]]) == [[[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5]]]
-    assert awkward1.tolist(listarray[:1, [1, 1, 0, 0], [1, 0, 1, 0]]) == [[[5.5], [3.3, 4.4], [], [0.0, 1.1, 2.2]]]
+    assert awkward1.to_list(listarray[:1, [0, 0, 1, 1], [0, 1, 0, 1]]) == [[[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5]]]
+    assert awkward1.to_list(listarray[:1, [1, 1, 0, 0], [1, 0, 1, 0]]) == [[[5.5], [3.3, 4.4], [], [0.0, 1.1, 2.2]]]
 
 content2 = awkward1.layout.NumpyArray(numpy.arange(2*3*5*7).reshape(-1, 7))
 regulararrayA = awkward1.layout.RegularArray(content2, 5)
@@ -82,24 +82,24 @@ modelA = numpy.arange(2*3*5*7).reshape(2*3, 5, 7)
 modelB = numpy.arange(2*3*5*7).reshape(2, 3, 5, 7)
 
 def test_numpy():
-    assert awkward1.tolist(regulararrayA) == awkward1.tolist(modelA)
-    assert awkward1.tolist(regulararrayB) == awkward1.tolist(modelB)
+    assert awkward1.to_list(regulararrayA) == awkward1.to_list(modelA)
+    assert awkward1.to_list(regulararrayB) == awkward1.to_list(modelB)
 
     for depth in 0, 1, 2, 3:
         for cuts in itertools.permutations((0, 1, 4, -5), depth):
-            assert awkward1.tolist(modelA[cuts]) == awkward1.tolist(regulararrayA[cuts])
+            assert awkward1.to_list(modelA[cuts]) == awkward1.to_list(regulararrayA[cuts])
 
     for depth in 0, 1, 2, 3:
         for cuts in itertools.permutations((slice(None), slice(1, None), slice(None, -1), slice(None, None, 2)), depth):
-            assert awkward1.tolist(modelA[cuts]) == awkward1.tolist(regulararrayA[cuts])
+            assert awkward1.to_list(modelA[cuts]) == awkward1.to_list(regulararrayA[cuts])
 
     for depth in 0, 1, 2, 3:
         for cuts in itertools.permutations((slice(1, None), slice(None, -1), 2, -2), depth):
-            assert awkward1.tolist(modelA[cuts]) == awkward1.tolist(regulararrayA[cuts])
+            assert awkward1.to_list(modelA[cuts]) == awkward1.to_list(regulararrayA[cuts])
 
     for depth in 0, 1, 2, 3:
         for cuts in itertools.permutations(([2, 0, 0, 1], [1, -2, 0, -1], 2, -2), depth):
-            assert awkward1.tolist(modelA[cuts]) == awkward1.tolist(regulararrayA[cuts])
+            assert awkward1.to_list(modelA[cuts]) == awkward1.to_list(regulararrayA[cuts])
 
     for depth in 0, 1, 2, 3:
         for cuts in itertools.permutations(([2, 0, 0, 1], [1, -2, 0, -1], slice(1, None), slice(None, -1)), depth):
@@ -110,15 +110,15 @@ def test_numpy():
                 cuts = cuts[:-1]
             if any(isinstance(x, slice) for x in cuts):
                 continue
-            assert awkward1.tolist(modelA[cuts]) == awkward1.tolist(regulararrayA[cuts])
+            assert awkward1.to_list(modelA[cuts]) == awkward1.to_list(regulararrayA[cuts])
 
     for depth in 0, 1, 2, 3, 4:
         for cuts in itertools.permutations((-2, -1, 0, 1, 1), depth):
-            assert awkward1.tolist(modelB[cuts]) == awkward1.tolist(regulararrayB[cuts])
+            assert awkward1.to_list(modelB[cuts]) == awkward1.to_list(regulararrayB[cuts])
 
     for depth in 0, 1, 2, 3, 4:
         for cuts in itertools.permutations((-1, 0, 1, slice(1, None), slice(None, -1)), depth):
-            assert awkward1.tolist(modelB[cuts]) == awkward1.tolist(regulararrayB[cuts])
+            assert awkward1.to_list(modelB[cuts]) == awkward1.to_list(regulararrayB[cuts])
 
     for depth in 0, 1, 2, 3, 4:
         for cuts in itertools.permutations((-1, 0, [1, 0, 0, 1], [0, 1, -1, 1], slice(None, -1)), depth):
@@ -129,7 +129,7 @@ def test_numpy():
                 cuts = cuts[:-1]
             if any(isinstance(x, slice) for x in cuts):
                 continue
-            assert awkward1.tolist(modelB[cuts]) == awkward1.tolist(regulararrayB[cuts])
+            assert awkward1.to_list(modelB[cuts]) == awkward1.to_list(regulararrayB[cuts])
 
 def test_setidentities():
     regulararray.setidentities()

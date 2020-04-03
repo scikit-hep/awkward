@@ -151,10 +151,58 @@ setup(name = "awkward1",
       maintainer = "Jim Pivarski",
       maintainer_email = "pivarski@princeton.edu",
       description = "Development of awkward 1.0, to replace scikit-hep/awkward-array in 2020.",
-      long_description = "",
+      long_description = """<a href="https://github.com/scikit-hep/awkward-1.0#readme"><img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-images/logo/logo-300px.png"></a>
+
+Awkward Array is a library for **nested, variable-sized data**, including arbitrary-length lists, records, mixed types, and missing data, using **NumPy-like idioms**.
+
+Arrays are **dynamically typed**, but operations on them are **compiled and fast**. Their behavior coincides with NumPy when array dimensions are regular and generalizes when they're not.
+
+<table>
+  <tr>
+    <td width="33%" valign="top">
+      <a href="https://scikit-hep.org/awkward-1.0/index.html">
+        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-images/panel-data-analysts.png" width="268">
+      </a>
+      <p align="center"><b>
+        <a href="https://scikit-hep.org/awkward-1.0/index.html">
+        How-to documentation<br>for data analysts
+        </a>
+      </b></p>
+    </td>
+    <td width="33%" valign="top">
+      <a href="https://scikit-hep.org/awkward-1.0/index.html">
+        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-images/panel-developers.png" width="268">
+      </a>
+      <p align="center"><b>
+        <a href="https://scikit-hep.org/awkward-1.0/index.html">
+        How-it-works tutorials<br>for developers
+        </a>
+      </b></p>
+    </td>
+    <td width="33%" valign="top">
+      <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
+        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-images/panel-doxygen.png" width="268">
+      </a>
+      <p align="center"><b>
+        <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
+        C++<br>API reference
+        </a>
+      </b></p>
+      <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
+        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-images/panel-sphinx.png" width="268">
+      </a>
+      <p align="center"><b>
+        <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
+        Python<br>API reference
+        </a>
+      </b></p>
+    </td>
+  </tr>
+</table>
+""",
       long_description_content_type = "text/markdown",
-      url = "https://github.com/jpivarski/awkward1",
-      download_url = "https://github.com/jpivarski/awkward1/releases",
+      url = "https://github.com/scikit-hep/awkward-1.0",
+      download_url = "https://github.com/scikit-hep/awkward-1.0/releases",
       license = "BSD 3-clause",
       entry_points = {
         "numba_extensions": ["init = awkward1._connect._numba:register"]

@@ -9,8 +9,18 @@ dependent-project/Makefile
 dependent-project/cmake_install.cmake
 dependent-project/cmake_pybind11
 
-############################################################# IDEs
+############################################################# JupyterBook and Doxygen
 
+docs/.sass-cache
+docs/_site
+docs-mkdocs/docs
+docs-sphinx/_build
+docs-sphinx/_static
+docs-sphinx/_auto
+
+############################################################# IDEs
+.idea
+cmake-build-debug
 # ...
 
 ############################################################# LaTeX
@@ -70,9 +80,6 @@ nosetests.xml
 coverage.xml
 *.cover
 .hypothesis/
-
-# Sphinx documentation
-docs/_build/
 
 # Jupyter Notebook
 .ipynb_checkpoints

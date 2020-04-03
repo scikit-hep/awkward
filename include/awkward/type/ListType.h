@@ -6,24 +6,62 @@
 #include "awkward/type/Type.h"
 
 namespace awkward {
+  /// @class ListType
+  ///
+  /// @brief Describes the high level type of lists of variable length, as
+  /// opposed to RegularType.
+  ///
+  /// {@link ListArrayOf ListArray} and
+  /// {@link ListOffsetArrayOf ListOffsetArray} nodes have this type.
   class EXPORT_SYMBOL ListType: public Type {
   public:
-    ListType(const util::Parameters& parameters, const std::string& typestr, const std::shared_ptr<Type>& type);
+    /// @brief Create a ListType with a full set of parameters.
+    ///
+    /// @param parameters Custom parameters inherited from the Content that
+    /// this type describes.
+    /// @param typestr Optional string that overrides the default string
+    /// representation (missing if empty).
+    /// @param type The Type of the nested lists.
+    ListType(const util::Parameters& parameters,
+             const std::string& typestr,
+             const TypePtr& type);
 
-    std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override;
-    const std::shared_ptr<Type> shallow_copy() const override;
-    bool equal(const std::shared_ptr<Type>& other, bool check_parameters) const override;
-    int64_t numfields() const override;
-    int64_t fieldindex(const std::string& key) const override;
-    const std::string key(int64_t fieldindex) const override;
-    bool haskey(const std::string& key) const override;
-    const std::vector<std::string> keys() const override;
-    const std::shared_ptr<Content> empty() const override;
+    /// @brief The Type of the nested lists.
+    const TypePtr
+      type() const;
 
-  const std::shared_ptr<Type> type() const;
+    std::string
+      tostring_part(const std::string& indent,
+                    const std::string& pre,
+                    const std::string& post) const override;
+
+    const TypePtr
+      shallow_copy() const override;
+
+    bool
+      equal(const TypePtr& other, bool check_parameters) const override;
+
+    int64_t
+      numfields() const override;
+
+    int64_t
+      fieldindex(const std::string& key) const override;
+
+    const std::string
+      key(int64_t fieldindex) const override;
+
+    bool
+      haskey(const std::string& key) const override;
+
+    const std::vector<std::string>
+      keys() const override;
+
+    const ContentPtr
+      empty() const override;
 
   private:
-    const std::shared_ptr<Type> type_;
+    /// @brief See #type.
+    const TypePtr type_;
   };
 }
 

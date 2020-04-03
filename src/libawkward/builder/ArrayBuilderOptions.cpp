@@ -7,11 +7,13 @@ namespace awkward {
       : initial_(initial)
       , resize_(resize) { }
 
-  int64_t ArrayBuilderOptions::initial() const {
+  int64_t
+  ArrayBuilderOptions::initial() const {
     return initial_;
   }
 
-  double ArrayBuilderOptions::resize() const {
+  double
+  ArrayBuilderOptions::resize() const {
     return resize_;
   }
 }
