@@ -45,14 +45,16 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
     like
 
         ak.num(array1)
-        ak.product([array1, array2])
-        ak.concatenate([array1, array2, array3])
+        ak.combinations(array1)
+        ak.cartesian([array1, array2])
+        ak.zip({"x": array1, "y": array2, "z": array3})
 
     instead of bound methods like
 
         array1.num()
-        array1.product(array2)
-        array1.concatenate([array2, array3])
+        array1.combinations()
+        array1.cartesian([array2, array3])
+        array1.zip(...)   # ?
 
     because its namespace is valuable for domain-specific parameters and
     functionality. For example, if records contain a field named `"num"`,
@@ -66,13 +68,15 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
 
     without any confusion or interference from #ak.num. The same is true
     for domain-specific methods that have been attached to the data. For
-    instance, an analysis of e-commerce might have a particular meaning in
-    mind for "product", something computed from the data when
+    instance, an analysis of mailing addresses might have a function that
+    computes zip codes, which can be attached to the data with a method
+    like
 
-        array1.product(array2)
+        latlon.zip()
 
-    is typed. Custom methods like this can be added with #ak.behavior, and
-    the namespace of Array attributes must be kept clear for such applications.
+    without any confusion or interference from #ak.zip. Custom methods like
+    this can be added with #ak.behavior, and so the namespace of Array
+    attributes must be kept clear for such applications.
 
     See also #ak.Record.
 

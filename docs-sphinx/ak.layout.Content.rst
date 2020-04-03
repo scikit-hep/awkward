@@ -280,8 +280,8 @@ ak.layout.Content.localindex
 Returns nested lists of integers (down to the chosen ``axis``) that count
 from `0` to the `length - 1` of the innermost list.
 
-This is used internally to generate :doc:`_auto/ak.argproduct` from
-:doc:`_auto/ak.product`, etc.
+This is used internally to generate :doc:`_auto/ak.argcartesian` from
+:doc:`_auto/ak.cartesian`, etc.
 
 ak.layout.Content.max
 =====================

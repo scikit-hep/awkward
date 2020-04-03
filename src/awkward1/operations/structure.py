@@ -1017,16 +1017,16 @@ def is_none(array, highlevel=True):
     else:
         return out
 
-def product(arrays,
-            axis=1,
-            nested=None,
-            parameters=None,
-            with_name=None,
-            highlevel=True):
+def cartesian(arrays,
+              axis=1,
+              nested=None,
+              parameters=None,
+              with_name=None,
+              highlevel=True):
     """
     Args:
-        arrays (dict or iterable of arrays): Arrays to compute the cross
-            product of.
+        arrays (dict or iterable of arrays): Arrays on which to compute the
+            Cartesian product.
         axis (int): The dimension at which this operation is applied. The
             outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost
@@ -1046,39 +1046,39 @@ def product(arrays,
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
 
-    Computes a cross product (i.e. Cartesian product) of data from a set of
+    Computes a Cartesian product (i.e. cross product) of data from a set of
     `arrays`. This operation creates records (if `arrays` is a dict) or tuples
     (if `arrays` is another kind of iterable) that hold the combinations
     of elements, and it can introduce new levels of nesting.
 
-    As a simple example with `axis=0`, the cross product of
+    As a simple example with `axis=0`, the Cartesian product of
 
         >>> one = ak.Array([1, 2, 3])
         >>> two = ak.Array(["a", "b"])
 
     is
 
-        >>> ak.to_list(ak.product([one, two], axis=0))
+        >>> ak.to_list(ak.cartesian([one, two], axis=0))
         [(1, 'a'), (1, 'b'), (2, 'a'), (2, 'b'), (3, 'a'), (3, 'b')]
 
     With nesting, a new level of nested lists is created to group combinations
     that share the same element from `one` into the same list.
 
-        >>> ak.to_list(ak.product([one, two], axis=0, nested=True))
+        >>> ak.to_list(ak.cartesian([one, two], axis=0, nested=True))
         [[(1, 'a'), (1, 'b')], [(2, 'a'), (2, 'b')], [(3, 'a'), (3, 'b')]]
 
     The primary purpose of this function, however, is to compute a different
-    cross product for each element of an array: in other words, `axis=1`.
+    Cartesian product for each element of an array: in other words, `axis=1`.
     The following arrays each have four elements.
 
         >>> one = ak.Array([[1, 2, 3], [], [4, 5], [6]])
         >>> two = ak.Array([["a", "b"], ["c"], ["d"], ["e", "f"]])
 
-    The default `axis=1` produces 6 pairs from the cross product of `[1, 2, 3]`
-    and `["a", "b"]`, 0 pairs from `[]` and `["c"]`, 1 pair from `[4, 5]` and
-    `["d"]`, and 1 pair from `[6]` and `["e", "f"]`.
+    The default `axis=1` produces 6 pairs from the Cartesian product of
+    `[1, 2, 3]` and `["a", "b"]`, 0 pairs from `[]` and `["c"]`, 1 pair from
+    `[4, 5]` and `["d"]`, and 1 pair from `[6]` and `["e", "f"]`.
 
-        >>> ak.to_list(ak.product([one, two]))
+        >>> ak.to_list(ak.cartesian([one, two]))
         [[(1, 'a'), (1, 'b'), (2, 'a'), (2, 'b'), (3, 'a'), (3, 'b')],
          [],
          [(4, 'd'), (5, 'd')],
@@ -1088,7 +1088,7 @@ def product(arrays,
     the nesting depth is increased by 1 and tuples are grouped by their
     first element.
 
-        >>> ak.to_list(ak.product([one, two], nested=True))
+        >>> ak.to_list(ak.cartesian([one, two], nested=True))
         [[[(1, 'a'), (1, 'b')], [(2, 'a'), (2, 'b')], [(3, 'a'), (3, 'b')]],
          [],
          [[(4, 'd')], [(5, 'd')]],
@@ -1097,7 +1097,7 @@ def product(arrays,
     These tuples are #ak.layout.RecordArray nodes with unnamed fields. To
     name the fields, we can pass `one` and `two` in a dict, rather than a list.
 
-        >>> ak.to_list(ak.product({"x": one, "y": two}))
+        >>> ak.to_list(ak.cartesian({"x": one, "y": two}))
         [
          [{'x': 1, 'y': 'a'},
           {'x': 1, 'y': 'b'},
@@ -1112,7 +1112,7 @@ def product(arrays,
           {'x': 6, 'y': 'f'}]
         ]
 
-    With more than two elements in the cross product, `nested` can specify
+    With more than two elements in the Cartesian product, `nested` can specify
     which are grouped and which are not. For example,
 
         >>> one = ak.Array([1, 2, 3, 4])
@@ -1121,7 +1121,7 @@ def product(arrays,
 
     can be left entirely ungrouped:
 
-        >>> ak.to_list(ak.product([one, two, three], axis=0))
+        >>> ak.to_list(ak.cartesian([one, two, three], axis=0))
         [
          (1, 1.1, 'a'),
          (1, 1.1, 'b'),
@@ -1151,7 +1151,7 @@ def product(arrays,
 
     can be grouped by `one` (adding 1 more dimension):
 
-        >>> ak.to_list(ak.product([one, two, three], axis=0, nested=[0]))
+        >>> ak.to_list(ak.cartesian([one, two, three], axis=0, nested=[0]))
         [
          [(1, 1.1, 'a'), (1, 1.1, 'b'), (1, 2.2, 'a')],
          [(1, 2.2, 'b'), (1, 3.3, 'a'), (1, 3.3, 'b')],
@@ -1165,7 +1165,7 @@ def product(arrays,
 
     can be grouped by `one` and `two` (adding 2 more dimensions):
 
-        >>> ak.to_list(ak.product([one, two, three], axis=0, nested=[0, 1]))
+        >>> ak.to_list(ak.cartesian([one, two, three], axis=0, nested=[0, 1]))
         [
          [
           [(1, 1.1, 'a'), (1, 1.1, 'b')],
@@ -1189,7 +1189,7 @@ def product(arrays,
 
     or grouped by unique `one`-`two` pairs (adding 1 more dimension):
 
-        >>> ak.to_list(ak.product([one, two, three], axis=0, nested=[1]))
+        >>> ak.to_list(ak.cartesian([one, two, three], axis=0, nested=[1]))
         [
          [(1, 1.1, 'a'), (1, 1.1, 'b')],
          [(1, 2.2, 'a'), (1, 2.2, 'b')],
@@ -1217,8 +1217,8 @@ def product(arrays,
     list of strings in #ak.Array.__getitem__.
 
     To get list index positions in the tuples/records, rather than data from
-    the original `arrays`, use #ak.argproduct instead of #ak.product. The
-    #ak.argproduct form can be particularly useful as nested indexing in
+    the original `arrays`, use #ak.argcartesian instead of #ak.cartesian. The
+    #ak.argcartesian form can be particularly useful as nested indexing in
     #ak.Array.__getitem__.
     """
     behavior = awkward1._util.behaviorof(*arrays)
@@ -1231,7 +1231,7 @@ def product(arrays,
         parameters["__record__"] = with_name
 
     if axis < 0:
-        raise ValueError("the 'axis' of product must be non-negative")
+        raise ValueError("the 'axis' of cartesian must be non-negative")
 
     elif axis == 0:
         if nested is None or nested is False:
@@ -1242,8 +1242,8 @@ def product(arrays,
                 nested = list(arrays.keys())   # last key is ignored below
             if any(not (isinstance(n, str) and n in arrays) for x in nested):
                 raise ValueError(
-                    "the 'nested' parameter of product must be dict keys for "
-                    "a dict of arrays")
+                    "the 'nested' parameter of cartesian must be dict keys "
+                    "for a dict of arrays")
             recordlookup = []
             layouts = []
             tonested = []
@@ -1263,7 +1263,7 @@ def product(arrays,
             if any(not (isinstance(x, int) and 0 <= x < len(arrays) - 1)
                      for x in nested):
                 raise ValueError(
-                    "the 'nested' prarmeter of product must be integers in "
+                    "the 'nested' prarmeter of cartesian must be integers in "
                     "[0, len(arrays) - 1) for an iterable of arrays")
             recordlookup = None
             layouts = []
@@ -1331,8 +1331,8 @@ def product(arrays,
                 nested = list(arrays.keys())   # last key is ignored below
             if any(not (isinstance(n, str) and n in arrays) for x in nested):
                 raise ValueError(
-                    "the 'nested' parameter of product must be dict keys for "
-                    "a dict of arrays")
+                    "the 'nested' parameter of cartesian must be dict keys "
+                    "for a dict of arrays")
             recordlookup = []
             layouts = []
             for i, (n, x) in enumerate(arrays.items()):
@@ -1347,7 +1347,7 @@ def product(arrays,
             if any(not (isinstance(x, int) and 0 <= x < len(arrays) - 1)
                    for x in nested):
                 raise ValueError(
-                    "the 'nested' parameter of product must be integers in "
+                    "the 'nested' parameter of cartesian must be integers in "
                     "[0, len(arrays) - 1) for an iterable of arrays")
             recordlookup = None
             layouts = []
@@ -1380,16 +1380,16 @@ def product(arrays,
     else:
         return result
 
-def argproduct(arrays,
-             axis=1,
-             nested=None,
-             parameters=None,
-             with_name=None,
-             highlevel=True):
+def argcartesian(arrays,
+                 axis=1,
+                 nested=None,
+                 parameters=None,
+                 with_name=None,
+                 highlevel=True):
     """
     Args:
-        arrays (dict or iterable of arrays): Arrays to compute the cross
-            product of.
+        arrays (dict or iterable of arrays): Arrays on which to compute the
+            Cartesian product.
         axis (int): The dimension at which this operation is applied. The
             outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost
@@ -1409,39 +1409,39 @@ def argproduct(arrays,
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
 
-    Computes a cross product (i.e. Cartesian product) of data from a set of
-    `arrays`, like #ak.product, but returning integer indexes for
+    Computes a Cartesian product (i.e. cross product) of data from a set of
+    `arrays`, like #ak.cartesian, but returning integer indexes for
     #ak.Array.__getitem__.
 
-    For example, the cross product of
+    For example, the Cartesian product of
 
         >>> one = ak.Array([1.1, 2.2, 3.3])
         >>> two = ak.Array(["a", "b"])
 
     is
 
-        >>> ak.to_list(ak.product([one, two], axis=0))
+        >>> ak.to_list(ak.cartesian([one, two], axis=0))
         [(1.1, 'a'), (1.1, 'b'), (2.2, 'a'), (2.2, 'b'), (3.3, 'a'), (3.3, 'b')]
 
-    But with argproduct, only the indexes are returned.
+    But with argcartesian, only the indexes are returned.
 
-        >>> ak.to_list(ak.argproduct([one, two], axis=0))
+        >>> ak.to_list(ak.argcartesian([one, two], axis=0))
         [(0, 0), (0, 1), (1, 0), (1, 1), (2, 0), (2, 1)]
 
     These are the indexes that can select the items that go into the actual
-    cross product.
+    Cartesian product.
 
-        >>> one_index, two_index = ak.unzip(ak.argproduct([one, two], axis=0))
+        >>> one_index, two_index = ak.unzip(ak.argcartesian([one, two], axis=0))
         >>> one[one_index]
         <Array [1.1, 1.1, 2.2, 2.2, 3.3, 3.3] type='6 * float64'>
         >>> two[two_index]
         <Array ['a', 'b', 'a', 'b', 'a', 'b'] type='6 * string'>
 
-    All of the parameters for #ak.product apply equally to #ak.argproduct, so
-    see the #ak.product documentation for a more complete description.
+    All of the parameters for #ak.cartesian apply equally to #ak.argcartesian,
+    so see the #ak.cartesian documentation for a more complete description.
     """
     if axis < 0:
-        raise ValueError("the 'axis' of argproduct must be non-negative")
+        raise ValueError("the 'axis' of argcartesian must be non-negative")
 
     else:
         if isinstance(arrays, dict):
@@ -1462,11 +1462,11 @@ def argproduct(arrays,
                 parameters = dict(parameters)
             parameters["__record__"] = with_name
 
-        result = product(layouts,
-                         axis=axis,
-                         nested=nested,
-                         parameters=parameters,
-                         highlevel=False)
+        result = cartesian(layouts,
+                           axis=axis,
+                           nested=nested,
+                           parameters=parameters,
+                           highlevel=False)
 
         if highlevel:
             return awkward1._util.wrap(result,
@@ -1505,9 +1505,9 @@ def combinations(array,
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
 
-    Computes a cross product of `array` with itself that is restricted to
-    combinations sampled without replacement. If the normal cross product
-    is thought of as an `n` dimensional tensor of combinations, these
+    Computes a Cartesian product (i.e. cross product) of `array` with itself
+    that is restricted to combinations sampled without replacement. If the
+    normal Cartesian product is thought of as an `n` dimensional tensor, these
     represent the "upper triangle" of sets without repetition. If
     `replacement=True`, the diagonal of this "upper triangle" is included.
 
@@ -1597,9 +1597,10 @@ def combinations(array,
          [{'x': 6, 'y': 7}, {'x': 6, 'y': 8},
                             {'x': 7, 'y': 8}]]
 
-    This operation can be constructed from #ak.argproduct and other primitives:
+    This operation can be constructed from #ak.argcartesian and other
+    primitives:
 
-        >>> left, right = ak.unzip(ak.argproduct([array, array]))
+        >>> left, right = ak.unzip(ak.argcartesian([array, array]))
         >>> keep = left < right
         >>> result = ak.zip([array[left][keep], array[right][keep]])
         >>> ak.to_list(result)
@@ -1668,13 +1669,14 @@ def argcombinations(array,
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
 
-    Computes a cross product of `array` with itself that is restricted to
-    combinations sampled without replacement, like #ak.combinations, but
-    returning integer indexes for #ak.Array.__getitem__.
+    Computes a Cartesian product (i.e. cross product) of `array` with itself
+    that is restricted to combinations sampled without replacement,
+    like #ak.combinations, but returning integer indexes for
+    #ak.Array.__getitem__.
 
     The motivation and uses of this function are similar to those of
-    #ak.argproduct. See #ak.combinations and #ak.argproduct for a more complete
-    description.
+    #ak.argcartesian. See #ak.combinations and #ak.argcartesian for a more
+    complete description.
     """
     if parameters is None:
         parameters = {}
