@@ -396,9 +396,11 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         """
         return self.Mask(self, valid_when)
 
-    def to_list(self):
+    def tolist(self):
         """
-        Converts this Array into Python objects.
+        Converts this Array into Python objects; same as #ak.to_list
+        (but without the underscore, like NumPy's
+        [tolist](https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.tolist.html)).
 
         Awkward Array types have the following Pythonic translations.
 
@@ -419,11 +421,11 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         """
         return awkward1.operations.convert.to_list(self)
 
-    def to_json(self,
-                destination=None,
-                pretty=False,
-                maxdecimals=None,
-                buffersize=65536):
+    def tojson(self,
+               destination=None,
+               pretty=False,
+               maxdecimals=None,
+               buffersize=65536):
         """
         Args:
             destination (None or str): If None, this method returns a JSON str;
@@ -437,7 +439,8 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
             buffersize (int): Size (in bytes) of the buffer used by the JSON
                 parser.
 
-        Converts this Array into a JSON string or file.
+        Converts this Array into a JSON string or file; same as #ak.to_json
+        (but without the underscore, like #ak.Array.tolist).
 
         Awkward Array types have the following JSON translations.
 
@@ -938,6 +941,17 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
              precedence, or
            * the field name is not a valid Python identifier or is a Python
              keyword.
+
+        Note that while fields can be accessed as attributes, they cannot be
+        *assigned* as attributes: the following doesn't work.
+
+            array.z = new_field
+
+        Always use
+
+            array["z"] = new_field
+
+        to add a field.
         """
         if where in dir(type(self)):
             return super(Array, self).__getattribute__(where)
