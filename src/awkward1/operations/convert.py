@@ -80,7 +80,7 @@ def from_numpy(array, regulararray=False, highlevel=True, behavior=None):
     else:
         return layout
 
-def to_numpy(array):
+def to_numpy(array, allowmissing=True):
     """
     Converts `array` (many types supported, including all Awkward Arrays and
     Records) into a NumPy array, if possible.
@@ -99,6 +99,11 @@ def to_numpy(array):
 
     If `array` is a scalar, it is converted into a NumPy scalar.
 
+    If `allowmissing` is True; NumPy
+    [masked arrays](https://docs.scipy.org/doc/numpy/reference/maskedarray.html)
+    are a possible result; otherwise, missing values (None) cause this
+    function to raise an error.
+
     See also #ak.from_numpy.
     """
     import awkward1.highlevel
@@ -113,25 +118,26 @@ def to_numpy(array):
         return array
 
     elif isinstance(array, awkward1.highlevel.Array):
-        return to_numpy(array.layout)
+        return to_numpy(array.layout, allowmissing=allowmissing)
 
     elif isinstance(array, awkward1.highlevel.Record):
         out = array.layout
-        return to_numpy(out.array[out.at : out.at + 1])[0]
+        return to_numpy(out.array[out.at : out.at + 1],
+                        allowmissing=allowmissing)[0]
 
     elif isinstance(array, awkward1.highlevel.ArrayBuilder):
-        return to_numpy(array.snapshot().layout)
+        return to_numpy(array.snapshot().layout, allowmissing=allowmissing)
 
     elif isinstance(array, awkward1.layout.ArrayBuilder):
-        return to_numpy(array.snapshot())
+        return to_numpy(array.snapshot(), allowmissing=allowmissing)
 
     elif (awkward1.operations.describe.parameters(array).get("__array__") ==
           "byte"):
-        return to_numpy(array.__bytes__())
+        return to_numpy(array.__bytes__(), allowmissing=allowmissing)
 
     elif (awkward1.operations.describe.parameters(array).get("__array__") ==
           "char"):
-        return to_numpy(array.__str__())
+        return to_numpy(array.__str__(), allowmissing=allowmissing)
 
     elif (awkward1.operations.describe.parameters(array).get("__array__") ==
           "bytestring"):
@@ -149,10 +155,10 @@ def to_numpy(array):
         return numpy.array([])
 
     elif isinstance(array, awkward1._util.indexedtypes):
-        return to_numpy(array.project())
+        return to_numpy(array.project(), allowmissing=allowmissing)
 
     elif isinstance(array, awkward1._util.uniontypes):
-        contents = [to_numpy(array.project(i))
+        contents = [to_numpy(array.project(i), allowmissing=allowmissing)
                       for i in range(array.numcontents)]
         try:
             out = numpy.concatenate(contents)
@@ -165,30 +171,49 @@ def to_numpy(array):
             out[mask] = content
         return out
 
+    elif isinstance(array, awkward1.layout.UnmaskedArray):
+        content = to_numpy(array.content, allowmissing=allowmissing)
+        if allowmissing:
+            return numpy.ma.MaskedArray(content)
+        else:
+            return content
+
     elif isinstance(array, awkward1._util.optiontypes):
-        content = to_numpy(array.project())
+        content = to_numpy(array.project(), allowmissing=allowmissing)
         shape = list(content.shape)
         shape[0] = len(array)
         data = numpy.empty(shape, dtype=content.dtype)
         mask0 = numpy.asarray(array.bytemask()).view(numpy.bool_)
-        mask = numpy.broadcast_to(
-                 mask0.reshape((shape[0],) + (1,)*(len(shape) - 1)), shape)
-        data[~mask0] = content
-        return numpy.ma.MaskedArray(data, mask)
+        if mask0.any():
+            if allowmissing:
+                mask = numpy.broadcast_to(
+                    mask0.reshape((shape[0],) + (1,)*(len(shape) - 1)), shape)
+                data[~mask0] = content
+                return numpy.ma.MaskedArray(data, mask)
+            else:
+                raise ValueError("to_numpy cannot convert 'None' values to "
+                                 "np.ma.MaskedArray unless the 'allowmissing' "
+                                 "parameter is set to True")
+        else:
+            if allowmissing:
+                return numpy.ma.MaskedArray(content)
+            else:
+                return content
 
     elif isinstance(array, awkward1.layout.RegularArray):
-        out = to_numpy(array.content)
+        out = to_numpy(array.content, allowmissing=allowmissing)
         head, tail = out.shape[0], out.shape[1:]
         shape = (head // array.size, array.size) + tail
         return out[:shape[0]*array.size].reshape(shape)
 
     elif isinstance(array, awkward1._util.listtypes):
-        return to_numpy(array.toRegularArray())
+        return to_numpy(array.toRegularArray(), allowmissing=allowmissing)
 
     elif isinstance(array, awkward1._util.recordtypes):
         if array.numfields == 0:
             return numpy.empty(len(array), dtype=[])
-        contents = [to_numpy(array.field(i)) for i in range(array.numfields)]
+        contents = [to_numpy(array.field(i), allowmissing=allowmissing)
+                      for i in range(array.numfields)]
         if any(len(x.shape) != 1 for x in contents):
             raise ValueError(
                     "cannot convert {0} into numpy.ndarray".format(array))

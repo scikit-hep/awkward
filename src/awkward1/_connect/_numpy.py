@@ -15,7 +15,7 @@ import awkward1.operations.convert
 import awkward1._util
 
 def convert_to_array(layout, args, kwargs):
-    out = awkward1.operations.convert.to_numpy(layout)
+    out = awkward1.operations.convert.to_numpy(layout, allowmissing=False)
     if args == () and kwargs == {}:
         return out
     else:

@@ -715,7 +715,8 @@ def flatten(array, axis=1, highlevel=True):
 
     Returns an array with one level of nesting removed by erasing the
     boundaries between consecutive lists. Since this operates on a level of
-    nesting, `axis=0` is invalid.
+    nesting, `axis=0` is a special case that only removes values at the
+    top level that are equal to None.
 
     Consider the following doubly nested `array`.
 
@@ -749,6 +750,19 @@ def flatten(array, axis=1, highlevel=True):
         >>> print(ak.flatten(array, axis=None))
         [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]
 
+    Missing values are eliminated by flattening: there is no distinction
+    between an empty list and a value of None at the level of flattening.
+
+        >>> array = ak.Array([[1.1, 2.2, 3.3], None, [4.4], [], [5.5]])
+        >>> ak.flatten(array, axis=1)
+        <Array [1.1, 2.2, 3.3, 4.4, 5.5] type='5 * float64'>
+
+    As a consequence, flattening at `axis=0` does only one thing: it removes
+    None values from the top level.
+
+        >>> ak.flatten(array, axis=0)
+        <Array [[1.1, 2.2, 3.3], [4.4], [], [5.5]] type='4 * var * float64'>
+
     As a technical detail, the flattening operation can be trivial in a common
     case, #ak.layout.ListOffsetArray in which the first `offset` is `0`.
     In that case, the flattened data is simply the array node's `content`.
@@ -778,6 +792,52 @@ def flatten(array, axis=1, highlevel=True):
         assert (isinstance(out, tuple) and
                 all(isinstance(x, numpy.ndarray) for x in out))
         out = awkward1.layout.NumpyArray(numpy.concatenate(out))
+
+    elif axis == 0:
+        def apply(layout):
+            if isinstance(layout, awkward1._util.unknowntypes):
+                return apply(awkward1.layout.NumpyArray(numpy.array([])))
+
+            elif isinstance(layout, awkward1._util.indexedtypes):
+                return apply(layout.project())
+
+            elif isinstance(layout, awkward1._util.uniontypes):
+                if not any(isinstance(x, awkward1._util.optiontypes) and not
+                           isinstance(x, awkward1.layout.UnmaskedArray)
+                             for x in layout.contents):
+                    return layout
+
+                tags = numpy.asarray(layout.tags)
+                index = numpy.array(numpy.asarray(layout.index), copy=True)
+                bigmask = numpy.empty(len(index), dtype=numpy.bool_)
+                for tag, content in enumerate(layout.contents):
+                    if (isinstance(content, awkward1._util.optiontypes) and not
+                        isinstance(content, awkward1.layout.UnmaskedArray)):
+                        bigmask[:] = False
+                        bigmask[tags == tag] = (
+                          numpy.asarray(content.bytemask()).view(numpy.bool_))
+                        index[bigmask] = -1
+
+                good = (index >= 0)
+                return awkward1.layout.UnionArray8_64(
+                           awkward1.layout.Index8(tags[good]),
+                           awkward1.layout.Index64(index[good]),
+                           layout.contents)
+                
+            elif isinstance(layout, awkward1._util.optiontypes):
+                return layout.project()
+
+            else:
+                return layout
+
+        out = apply(awkward1.operations.convert.to_layout(
+                       array, allowrecord=False))
+        if highlevel:
+            return awkward1._util.wrap(
+                       out, behavior=awkward1._util.behaviorof(array))
+        else:
+            return out
+
     else:
         out = layout.flatten(axis)
 
