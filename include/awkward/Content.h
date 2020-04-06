@@ -818,13 +818,13 @@ namespace awkward {
     /// defined universally in the Content class.
     const ContentPtr
       localindex_axis0() const;
-
+    
     /// @brief Internal function to handle the `axis = 0` case of
     /// #combinations.
     ///
     /// The `axis = 0` case does not depend on array node type, so it is
     /// defined universally in the Content class.
-    /// 
+    ///
     /// @param n The number of items in each tuple/record.
     /// @param replacement If `true`, the tuples/records are allowed to include
     /// the same item more than once, such as `(a, a, a)` and `(a, a, b)`.
