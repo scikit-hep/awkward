@@ -1003,13 +1003,70 @@ def is_none(array, highlevel=True):
             return out
 
         elif isinstance(layout, awkward1._util.optiontypes):
-            index = numpy.asarray(layout.index)
-            return (index < 0)
+            return numpy.asarray(layout.bytemask()).view(numpy.bool_)
 
         else:
             return numpy.zeros(len(layout), dtype=numpy.bool_)
 
-    out = apply(awkward1.operations.convert.to_layout(array, allowrecord=False))
+    out = apply(awkward1.operations.convert.to_layout(array,
+                                                      allowrecord=False))
+    if highlevel:
+        return awkward1._util.wrap(out,
+                                   behavior=awkward1._util.behaviorof(array))
+    else:
+        return out
+
+def singletons(array, highlevel=True):
+    """
+    Args:
+        array: Data to wrap in lists of length 1 if present and length 0
+            if missing (None).
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+
+    Returns a singleton list (length 1) wrapping each non-missing value and
+    an empty list (length 0) in place of each missing value.
+
+    For example,
+
+        >>> array = ak.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5])
+        >>> print(ak.singletons(array))
+        [[1.1], [2.2], [], [3.3], [], [], [4.4], [5.5]]
+    """
+    def apply(layout):
+        if isinstance(layout, awkward1._util.unknowntypes):
+            return apply(awkward1.layout.NumpyArray(numpy.array([])))
+
+        elif isinstance(layout, awkward1._util.indexedtypes):
+            return apply(layout.project())
+
+        elif isinstance(layout, awkward1._util.uniontypes):
+            contents = [apply(layout.project(i))
+                          for i in range(layout.numcontents)]
+            out = numpy.empty(len(layout), dtype=numpy.bool_)
+            tags = numpy.asarray(layout.tags)
+            for tag, content in enumerate(contents):
+                out[tags == tag] = content
+            return out
+
+        elif isinstance(layout, awkward1._util.optiontypes):
+            nulls = numpy.asarray(layout.bytemask()).view(numpy.bool_)
+            offsets = numpy.ones(len(layout) + 1, dtype=numpy.int64)
+            offsets[0] = 0
+            offsets[1:][nulls] = 0
+            numpy.cumsum(offsets, out=offsets)
+            return awkward1.layout.ListOffsetArray64(
+                       awkward1.layout.Index64(offsets),
+                       layout.project())
+            
+        else:
+            offsets = numpy.arange(len(layout) + 1, dtype=numpy.int64)
+            return awkward1.layout.ListOffsetArray64(
+                       awkward1.layout.Index64(offsets),
+                       layout.project())
+
+    out = apply(awkward1.operations.convert.to_layout(array,
+                                                      allowrecord=False))
     if highlevel:
         return awkward1._util.wrap(out,
                                    behavior=awkward1._util.behaviorof(array))
