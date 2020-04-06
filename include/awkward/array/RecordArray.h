@@ -30,7 +30,7 @@ namespace awkward {
     public std::enable_shared_from_this<RecordArray> {
   public:
     /// @brief Creates a RecordArray from a full set of parameters.
-    ///
+    /// 
     /// @param identities Optional Identities for each element of the array
     /// (may be `nullptr`).
     /// @param parameters String-to-JSON map that augments the meaning of this

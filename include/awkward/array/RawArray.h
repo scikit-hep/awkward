@@ -72,7 +72,7 @@ namespace awkward {
   class EXPORT_SYMBOL RawArrayOf: public Content {
   public:
     /// @brief Creates a RawArray from a full set of parameters.
-    ///
+    /// 
     /// @param identities Optional Identities for each element of the array
     /// (may be `nullptr`).
     /// @param parameters String-to-JSON map that augments the meaning of this
@@ -832,7 +832,7 @@ namespace awkward {
                    int64_t outlength,
                    bool ascending,
                    bool stable) const override {
-      throw std::runtime_error("FIXME: RawArray:sort_next");
+      throw std::runtime_error("FIXME: RawArray:argsort_next");
     }
 
     const ContentPtr

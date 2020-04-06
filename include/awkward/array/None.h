@@ -145,6 +145,7 @@ namespace awkward {
       keys() const override;
 
     // operations
+
     /// @exception std::runtime_error is always thrown
     const std::string
       validityerror(const std::string& path) const override;

@@ -36,7 +36,7 @@ namespace awkward {
       regular_index(const IndexOf<T>& tags);
 
     /// @brief Creates a UnionArrayOf from a full set of parameters.
-    ///
+    /// 
     /// @param identities Optional Identities for each element of the array
     /// (may be `nullptr`).
     /// @param parameters String-to-JSON map that augments the meaning of this

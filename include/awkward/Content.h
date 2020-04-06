@@ -3,10 +3,8 @@
 #ifndef AWKWARD_CONTENT_H_
 #define AWKWARD_CONTENT_H_
 
-#include <algorithm>
 #include <cstdio>
 #include <map>
-#include <numeric>
 
 #include "awkward/cpu-kernels/util.h"
 #include "awkward/Identities.h"
@@ -826,7 +824,7 @@ namespace awkward {
     ///
     /// The `axis = 0` case does not depend on array node type, so it is
     /// defined universally in the Content class.
-    ///
+    /// 
     /// @param n The number of items in each tuple/record.
     /// @param replacement If `true`, the tuples/records are allowed to include
     /// the same item more than once, such as `(a, a, a)` and `(a, a, b)`.

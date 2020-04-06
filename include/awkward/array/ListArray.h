@@ -76,7 +76,7 @@ namespace awkward {
       stops() const;
 
     /// @brief Data referenced by the #starts and #stops to build nested lists.
-    ///
+    /// 
     /// The `content` does not necessarily represent a flattened version of
     /// this array because a single element may belong to multiple lists or
     /// no list at all.
