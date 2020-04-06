@@ -75,7 +75,7 @@ def count(array, axis=None, keepdims=False, mask_identity=False):
         >>> ak.num(array, axis=1)
         <Array [2, 3, None, 3, 2] type='5 * ?int64'>
 
-    If it is desirable to include None values in #ak.count, use #ak.fillna
+    If it is desirable to include None values in #ak.count, use #ak.fill_none
     to turn the None values into something that would be counted.
     """
     layout = awkward1.operations.convert.to_layout(array,
@@ -125,7 +125,7 @@ def count_nonzero(array, axis=None, keepdims=False, mask_identity=False):
     value (None) handling in reducers.
 
     Following the same rules as other reducers, #ak.count_nonzero does not
-    count None values. If it is desirable to count them, use #ak.fillna
+    count None values. If it is desirable to count them, use #ak.fill_none
     to turn them into something that would be counted.
     """
     layout = awkward1.operations.convert.to_layout(array,

@@ -339,14 +339,14 @@ namespace awkward {
   }
 
   const ContentPtr
-  EmptyArray::choose(int64_t n,
-                     bool diagonal,
-                     const util::RecordLookupPtr& recordlookup,
-                     const util::Parameters& parameters,
-                     int64_t axis,
-                     int64_t depth) const {
+  EmptyArray::combinations(int64_t n,
+                           bool replacement,
+                           const util::RecordLookupPtr& recordlookup,
+                           const util::Parameters& parameters,
+                           int64_t axis,
+                           int64_t depth) const {
     if (n < 1) {
-      throw std::invalid_argument("in choose, 'n' must be at least 1");
+      throw std::invalid_argument("in combinations, 'n' must be at least 1");
     }
     return std::make_shared<EmptyArray>(identities_, util::Parameters());
   }

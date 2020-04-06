@@ -1457,19 +1457,19 @@ namespace awkward {
 
   template <typename T>
   const ContentPtr
-  ListOffsetArrayOf<T>::choose(int64_t n,
-                               bool diagonal,
-                               const util::RecordLookupPtr& recordlookup,
-                               const util::Parameters& parameters,
-                               int64_t axis,
-                               int64_t depth) const {
+  ListOffsetArrayOf<T>::combinations(int64_t n,
+                                     bool replacement,
+                                     const util::RecordLookupPtr& recordlookup,
+                                     const util::Parameters& parameters,
+                                     int64_t axis,
+                                     int64_t depth) const {
     if (n < 1) {
-      throw std::invalid_argument("in choose, 'n' must be at least 1");
+      throw std::invalid_argument("in combinations, 'n' must be at least 1");
     }
 
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
-      return choose_axis0(n, diagonal, recordlookup, parameters);
+      return combinations_axis0(n, replacement, recordlookup, parameters);
     }
 
     else if (toaxis == depth + 1) {
@@ -1478,11 +1478,11 @@ namespace awkward {
 
       int64_t totallen;
       Index64 offsets(length() + 1);
-      struct Error err1 = util::awkward_listarray_choose_length_64<T>(
+      struct Error err1 = util::awkward_listarray_combinations_length_64<T>(
         &totallen,
         offsets.ptr().get(),
         n,
-        diagonal,
+        replacement,
         starts.ptr().get(),
         starts.offset(),
         stops.ptr().get(),
@@ -1498,10 +1498,10 @@ namespace awkward {
         tocarry.push_back(ptr);
         tocarryraw.push_back(ptr.get());
       }
-      struct Error err2 = util::awkward_listarray_choose_64<T>(
+      struct Error err2 = util::awkward_listarray_combinations_64<T>(
         tocarryraw.data(),
         n,
-        diagonal,
+        replacement,
         starts.ptr().get(),
         starts.offset(),
         stops.ptr().get(),
@@ -1526,12 +1526,12 @@ namespace awkward {
       ContentPtr compact = toListOffsetArray64(true);
       ListOffsetArray64* rawcompact =
         dynamic_cast<ListOffsetArray64*>(compact.get());
-      ContentPtr next = rawcompact->content().get()->choose(n,
-                                                            diagonal,
-                                                            recordlookup,
-                                                            parameters,
-                                                            axis,
-                                                            depth + 1);
+      ContentPtr next = rawcompact->content().get()->combinations(n,
+                                                                  replacement,
+                                                                  recordlookup,
+                                                                  parameters,
+                                                                  axis,
+                                                                  depth + 1);
       return std::make_shared<ListOffsetArray64>(identities_,
                                                  util::Parameters(),
                                                  rawcompact->offsets(),

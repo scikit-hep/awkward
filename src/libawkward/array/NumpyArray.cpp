@@ -2280,32 +2280,32 @@ namespace awkward {
   }
 
   const ContentPtr
-  NumpyArray::choose(int64_t n,
-                     bool diagonal,
-                     const util::RecordLookupPtr& recordlookup,
-                     const util::Parameters& parameters,
-                     int64_t axis,
-                     int64_t depth) const {
+  NumpyArray::combinations(int64_t n,
+                           bool replacement,
+                           const util::RecordLookupPtr& recordlookup,
+                           const util::Parameters& parameters,
+                           int64_t axis,
+                           int64_t depth) const {
     if (n < 1) {
-      throw std::invalid_argument("in choose, 'n' must be at least 1");
+      throw std::invalid_argument("in combinations, 'n' must be at least 1");
     }
 
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
-      return choose_axis0(n, diagonal, recordlookup, parameters);
+      return combinations_axis0(n, replacement, recordlookup, parameters);
     }
 
     else if (shape_.size() <= 1) {
-      throw std::invalid_argument("'axis' out of range for choose");
+      throw std::invalid_argument("'axis' out of range for combinations");
     }
 
     else {
-      return toRegularArray().get()->choose(n,
-                                            diagonal,
-                                            recordlookup,
-                                            parameters,
-                                            axis,
-                                            depth);
+      return toRegularArray().get()->combinations(n,
+                                                  replacement,
+                                                  recordlookup,
+                                                  parameters,
+                                                  axis,
+                                                  depth);
     }
   }
 
