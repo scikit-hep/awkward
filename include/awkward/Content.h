@@ -509,6 +509,14 @@ namespace awkward {
                 bool ascending,
                 bool stable) const = 0;
 
+    virtual const ContentPtr
+      argsort_next(int64_t negaxis,
+                   const Index64& starts,
+                   const Index64& parents,
+                   int64_t outlength,
+                   bool ascending,
+                   bool stable) const = 0;
+
     /// @brief A (possibly nested) array of integers indicating the
     /// positions of elements within each nested list.
     ///
@@ -686,6 +694,22 @@ namespace awkward {
     /// equal keys (i.e. values).
     const ContentPtr
       sort(int64_t axis, bool ascending, bool stable) const;
+
+    /// @brief This array indices with one axis sorted by applying
+    ///        a sorting algorithm
+    ///
+    /// This operation is implemented on each node through #argsort_next.
+    ///
+    /// @param axis The axis to sort.
+    /// Negative `axis` counts backward from the deepest levels (`-1` is
+    /// the last valid `axis`).
+    /// @param ascending If `true`, the values will be sorted in an ascending
+    /// order.
+    /// @param stable If `true`, the values will be sorted by a
+    /// stable sort algorithm to maintain the relative order of records with
+    /// equal keys (i.e. values).
+    const ContentPtr
+      argsort(int64_t axis, bool ascending, bool stable) const;
 
     /// @brief String-to-JSON map that augments the meaning of this
     /// array.

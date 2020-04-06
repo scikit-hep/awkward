@@ -651,8 +651,27 @@ namespace awkward {
                            int64_t outlength,
                            bool ascending,
                            bool stable) const {
-    throw std::runtime_error(
-      "FIXME: UnmaskedArray::sort_next is not implemened");
+    return content_.get()->sort_next(negaxis,
+                                     starts,
+                                     parents,
+                                     outlength,
+                                     ascending,
+                                     stable);
+  }
+
+  const ContentPtr
+  UnmaskedArray::argsort_next(int64_t negaxis,
+                              const Index64& starts,
+                              const Index64& parents,
+                              int64_t outlength,
+                              bool ascending,
+                              bool stable) const {
+    return content_.get()->sort_next(negaxis,
+                                     starts,
+                                     parents,
+                                     outlength,
+                                     ascending,
+                                     stable);
   }
 
   const ContentPtr

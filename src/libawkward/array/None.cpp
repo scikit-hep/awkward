@@ -257,6 +257,16 @@ namespace awkward {
   }
 
   const ContentPtr
+  None::argsort_next(int64_t negaxis,
+                     const Index64& starts,
+                     const Index64& parents,
+                     int64_t outlength,
+                     bool ascending,
+                     bool stable) const {
+    throw std::runtime_error("undefined operation: None::argsort_next");
+  }
+
+  const ContentPtr
   None::getitem_next(const SliceAt& at,
                      const Slice& tail,
                      const Index64& advanced) const {

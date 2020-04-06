@@ -1229,6 +1229,13 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
                   bool stable) -> py::object {
                return box(self.sort(axis, ascending, false));
           })
+          .def("argsort",
+               [](const T&self,
+                  int64_t axis,
+                  bool ascending,
+                  bool stable) -> py::object {
+               return box(self.argsort(axis, ascending, false));
+          })
 
   ;
 }

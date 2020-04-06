@@ -1049,6 +1049,22 @@ namespace awkward {
         int64_t parentsoffset,
         int64_t lenparents,
         int64_t outlength);
+
+    template <typename T>
+    ERROR
+      awkward_numpyarray_sort_64(
+        int64_t* toptr,
+        const T* fromptr,
+        const size_t* fromindex,
+        size_t indexlength,
+        int64_t fromptroffset,
+        const int64_t* starts,
+        int64_t startsoffset,
+        const int64_t* parents,
+        int64_t parentsoffset,
+        int64_t lenparents,
+        int64_t outlength);
+
   }
 }
 

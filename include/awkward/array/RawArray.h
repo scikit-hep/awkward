@@ -826,6 +826,16 @@ namespace awkward {
     }
 
     const ContentPtr
+      argsort_next(int64_t negaxis,
+                   const Index64& starts,
+                   const Index64& parents,
+                   int64_t outlength,
+                   bool ascending,
+                   bool stable) const override {
+      throw std::runtime_error("FIXME: RawArray:sort_next");
+    }
+
+    const ContentPtr
       localindex(int64_t axis, int64_t depth) const override {
       int64_t toaxis = axis_wrap_if_negative(axis);
       if (axis == depth) {

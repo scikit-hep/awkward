@@ -358,10 +358,19 @@ namespace awkward {
                         int64_t outlength,
                         bool ascending,
                         bool stable) const {
-    std::cout << "EmptyArray::sort_next\n";
-    std::shared_ptr<Content> asnumpy = toNumpyArray("d", 8);
-    std::cout << asnumpy.get()->tostring() << "\n";
+    ContentPtr asnumpy = toNumpyArray("d", 8);
     return asnumpy.get()->sort_next(negaxis, starts, parents, outlength, ascending, stable);
+  }
+
+  const ContentPtr
+  EmptyArray::argsort_next(int64_t negaxis,
+                           const Index64& starts,
+                           const Index64& parents,
+                           int64_t outlength,
+                           bool ascending,
+                           bool stable) const {
+    ContentPtr asnumpy = toNumpyArray("d", 8);
+    return asnumpy.get()->argsort_next(negaxis, starts, parents, outlength, ascending, stable);
   }
 
   const ContentPtr

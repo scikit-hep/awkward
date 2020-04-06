@@ -1598,6 +1598,28 @@ namespace awkward {
 
   template <typename T, typename I>
   const ContentPtr
+  UnionArrayOf<T, I>::argsort_next(int64_t negaxis,
+                                   const Index64& starts,
+                                   const Index64& parents,
+                                   int64_t outlength,
+                                   bool ascending,
+                                   bool stable) const {
+    ContentPtr simplified = simplify_uniontype(true);
+    if (dynamic_cast<UnionArray8_32*>(simplified.get())  or
+        dynamic_cast<UnionArray8_U32*>(simplified.get())  or
+        dynamic_cast<UnionArray8_64*>(simplified.get())) {
+      throw std::invalid_argument(std::string("cannot sort ") + classname());
+    }
+    return simplified.get()->argsort_next(negaxis,
+                                          starts,
+                                          parents,
+                                          outlength,
+                                          ascending,
+                                          stable);
+  }
+
+  template <typename T, typename I>
+  const ContentPtr
   UnionArrayOf<T, I>::getitem_next(const SliceAt& at,
                                    const Slice& tail,
                                    const Index64& advanced) const {

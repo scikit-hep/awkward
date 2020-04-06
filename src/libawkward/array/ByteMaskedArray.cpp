@@ -923,6 +923,16 @@ namespace awkward {
   }
 
   const ContentPtr
+  ByteMaskedArray::argsort_next(int64_t negaxis,
+                                const Index64& starts,
+                                const Index64& parents,
+                                int64_t outlength,
+                                bool ascending,
+                                bool stable) const {
+    throw std::runtime_error("FIXME: ByteMaskedArray::argsort_next is not implemened");
+  }
+
+  const ContentPtr
   ByteMaskedArray::getitem_next(const SliceAt& at,
                                 const Slice& tail,
                                 const Index64& advanced) const {

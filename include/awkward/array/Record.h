@@ -159,37 +159,6 @@ namespace awkward {
       keys() const override;
 
     // operations
-<<<<<<< HEAD
-    const std::string validityerror(const std::string& path) const override;
-    const std::shared_ptr<Content> shallow_simplify() const override;
-    const std::shared_ptr<Content> num(int64_t axis, int64_t depth) const override;
-    const std::pair<Index64, std::shared_ptr<Content>> offsets_and_flattened(int64_t axis, int64_t depth) const override;
-    bool mergeable(const std::shared_ptr<Content>& other, bool mergebool) const override;
-    const std::shared_ptr<Content> merge(const std::shared_ptr<Content>& other) const override;
-    const std::shared_ptr<SliceItem> asslice() const override;
-    const std::shared_ptr<Content> rpad(int64_t length, int64_t axis, int64_t depth) const override;
-    const std::shared_ptr<Content> rpad_and_clip(int64_t length, int64_t axis, int64_t depth) const override;
-    const std::shared_ptr<Content> reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const override;
-    const std::shared_ptr<Content> localindex(int64_t axis, int64_t depth) const override;
-    const std::shared_ptr<Content> choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const override;
-    const std::shared_ptr<Content> sort_next(int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool ascending, bool stable) const override;
-
-    const std::shared_ptr<Content> field(int64_t fieldindex) const;
-    const std::shared_ptr<Content> field(const std::string& key) const;
-    const std::vector<std::shared_ptr<Content>> fields() const;
-    const std::vector<std::pair<std::string, std::shared_ptr<Content>>> fielditems() const;
-    const std::shared_ptr<Record> astuple() const;
-
-    const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const override;
-    const std::shared_ptr<Content> getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const override;
-    const std::shared_ptr<Content> getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const override;
-    const std::shared_ptr<Content> getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const override;
-    const std::shared_ptr<Content> getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const override;
-    const std::shared_ptr<Content> getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const override;
-    const std::shared_ptr<Content> getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const override;
-    const std::shared_ptr<Content> getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const override;
-    const std::shared_ptr<Content> getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const override;
-=======
     const std::string
       validityerror(const std::string& path) const override;
 
@@ -245,6 +214,14 @@ namespace awkward {
                 int64_t outlength,
                 bool ascending,
                 bool stable) const override;
+
+    const ContentPtr
+      argsort_next(int64_t negaxis,
+                   const Index64& starts,
+                   const Index64& parents,
+                   int64_t outlength,
+                   bool ascending,
+                   bool stable) const override;
 
     const ContentPtr
       localindex(int64_t axis, int64_t depth) const override;
@@ -343,7 +320,6 @@ namespace awkward {
                           const Index64& slicestops,
                           const SliceJagged64& slicecontent,
                           const Slice& tail) const override;
->>>>>>> a4211f2338b89fafbe926d21e9e4b798d504ef84
 
   private:
     /// @brief See #array.
