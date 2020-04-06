@@ -218,8 +218,8 @@ def keys(array):
     list.
     """
     layout = awkward1.operations.convert.to_layout(array,
-                                                   allowrecord=True,
-                                                   allowother=False)
+                                                   allow_record=True,
+                                                   allow_other=False)
     return layout.keys()
 
 __all__ = [x for x in list(globals())

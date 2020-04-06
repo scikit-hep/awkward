@@ -138,12 +138,12 @@ class ArrayView(object):
         behavior = awkward1._util.behaviorof(array)
         layout = awkward1.operations.convert.to_layout(
                    array,
-                   allowrecord=False,
-                   allowother=False,
+                   allow_record=False,
+                   allow_other=False,
                    numpytype=(numpy.number,))
         layout = awkward1.operations.convert.regularize_numpyarray(
                    layout,
-                   allowempty=False,
+                   allow_empty=False,
                    highlevel=False)
         return ArrayView(numba.typeof(layout),
                          behavior,
@@ -466,8 +466,8 @@ class RecordView(object):
         behavior = awkward1._util.behaviorof(record)
         layout = awkward1.operations.convert.to_layout(
                    record,
-                   allowrecord=True,
-                   allowother=False,
+                   allow_record=True,
+                   allow_other=False,
                    numpytype=(numpy.number,))
         assert isinstance(layout, awkward1.layout.Record)
         arraylayout = layout.array

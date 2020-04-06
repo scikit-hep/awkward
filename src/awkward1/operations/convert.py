@@ -80,7 +80,7 @@ def from_numpy(array, regulararray=False, highlevel=True, behavior=None):
     else:
         return layout
 
-def to_numpy(array, allowmissing=True):
+def to_numpy(array, allow_missing=True):
     """
     Converts `array` (many types supported, including all Awkward Arrays and
     Records) into a NumPy array, if possible.
@@ -99,7 +99,7 @@ def to_numpy(array, allowmissing=True):
 
     If `array` is a scalar, it is converted into a NumPy scalar.
 
-    If `allowmissing` is True; NumPy
+    If `allow_missing` is True; NumPy
     [masked arrays](https://docs.scipy.org/doc/numpy/reference/maskedarray.html)
     are a possible result; otherwise, missing values (None) cause this
     function to raise an error.
@@ -118,26 +118,26 @@ def to_numpy(array, allowmissing=True):
         return array
 
     elif isinstance(array, awkward1.highlevel.Array):
-        return to_numpy(array.layout, allowmissing=allowmissing)
+        return to_numpy(array.layout, allow_missing=allow_missing)
 
     elif isinstance(array, awkward1.highlevel.Record):
         out = array.layout
         return to_numpy(out.array[out.at : out.at + 1],
-                        allowmissing=allowmissing)[0]
+                        allow_missing=allow_missing)[0]
 
     elif isinstance(array, awkward1.highlevel.ArrayBuilder):
-        return to_numpy(array.snapshot().layout, allowmissing=allowmissing)
+        return to_numpy(array.snapshot().layout, allow_missing=allow_missing)
 
     elif isinstance(array, awkward1.layout.ArrayBuilder):
-        return to_numpy(array.snapshot(), allowmissing=allowmissing)
+        return to_numpy(array.snapshot(), allow_missing=allow_missing)
 
     elif (awkward1.operations.describe.parameters(array).get("__array__") ==
           "byte"):
-        return to_numpy(array.__bytes__(), allowmissing=allowmissing)
+        return to_numpy(array.__bytes__(), allow_missing=allow_missing)
 
     elif (awkward1.operations.describe.parameters(array).get("__array__") ==
           "char"):
-        return to_numpy(array.__str__(), allowmissing=allowmissing)
+        return to_numpy(array.__str__(), allow_missing=allow_missing)
 
     elif (awkward1.operations.describe.parameters(array).get("__array__") ==
           "bytestring"):
@@ -155,10 +155,10 @@ def to_numpy(array, allowmissing=True):
         return numpy.array([])
 
     elif isinstance(array, awkward1._util.indexedtypes):
-        return to_numpy(array.project(), allowmissing=allowmissing)
+        return to_numpy(array.project(), allow_missing=allow_missing)
 
     elif isinstance(array, awkward1._util.uniontypes):
-        contents = [to_numpy(array.project(i), allowmissing=allowmissing)
+        contents = [to_numpy(array.project(i), allow_missing=allow_missing)
                       for i in range(array.numcontents)]
         try:
             out = numpy.concatenate(contents)
@@ -172,47 +172,47 @@ def to_numpy(array, allowmissing=True):
         return out
 
     elif isinstance(array, awkward1.layout.UnmaskedArray):
-        content = to_numpy(array.content, allowmissing=allowmissing)
-        if allowmissing:
+        content = to_numpy(array.content, allow_missing=allow_missing)
+        if allow_missing:
             return numpy.ma.MaskedArray(content)
         else:
             return content
 
     elif isinstance(array, awkward1._util.optiontypes):
-        content = to_numpy(array.project(), allowmissing=allowmissing)
+        content = to_numpy(array.project(), allow_missing=allow_missing)
         shape = list(content.shape)
         shape[0] = len(array)
         data = numpy.empty(shape, dtype=content.dtype)
         mask0 = numpy.asarray(array.bytemask()).view(numpy.bool_)
         if mask0.any():
-            if allowmissing:
+            if allow_missing:
                 mask = numpy.broadcast_to(
                     mask0.reshape((shape[0],) + (1,)*(len(shape) - 1)), shape)
                 data[~mask0] = content
                 return numpy.ma.MaskedArray(data, mask)
             else:
                 raise ValueError("to_numpy cannot convert 'None' values to "
-                                 "np.ma.MaskedArray unless the 'allowmissing' "
-                                 "parameter is set to True")
+                                 "np.ma.MaskedArray unless the "
+                                 "'allow_missing' parameter is set to True")
         else:
-            if allowmissing:
+            if allow_missing:
                 return numpy.ma.MaskedArray(content)
             else:
                 return content
 
     elif isinstance(array, awkward1.layout.RegularArray):
-        out = to_numpy(array.content, allowmissing=allowmissing)
+        out = to_numpy(array.content, allow_missing=allow_missing)
         head, tail = out.shape[0], out.shape[1:]
         shape = (head // array.size, array.size) + tail
         return out[:shape[0]*array.size].reshape(shape)
 
     elif isinstance(array, awkward1._util.listtypes):
-        return to_numpy(array.toRegularArray(), allowmissing=allowmissing)
+        return to_numpy(array.toRegularArray(), allow_missing=allow_missing)
 
     elif isinstance(array, awkward1._util.recordtypes):
         if array.numfields == 0:
             return numpy.empty(len(array), dtype=[])
-        contents = [to_numpy(array.field(i), allowmissing=allowmissing)
+        contents = [to_numpy(array.field(i), allow_missing=allow_missing)
                       for i in range(array.numfields)]
         if any(len(x.shape) != 1 for x in contents):
             raise ValueError(
@@ -241,7 +241,7 @@ def to_numpy(array, allowmissing=True):
 def from_iter(iterable,
               highlevel=True,
               behavior=None,
-              allowrecord=True,
+              allow_record=True,
               initial=1024,
               resize=1.5):
     """
@@ -251,7 +251,7 @@ def from_iter(iterable,
             a low-level #ak.layout.Content subclass.
         behavior (bool): Custom #ak.behavior for the output array, if
             high-level.
-        allowrecord (bool): If True, the outermost element may be a record
+        allow_record (bool): If True, the outermost element may be a record
             (returning #ak.Record or #ak.layout.Record type, depending on
             `highlevel`); if False, the outermost element must be an array.
         initial (int): Initial size (in bytes) of buffers used by
@@ -287,7 +287,7 @@ def from_iter(iterable,
     See also #ak.to_list.
     """
     if isinstance(iterable, dict):
-        if allowrecord:
+        if allow_record:
             return from_iter([iterable],
                              highlevel=highlevel,
                              behavior=behavior,
@@ -998,22 +998,22 @@ def to_awkward0(array, keeplayout=False):
                     "missing converter for {0}".format(type(layout).__name__))
 
     layout = to_layout(array,
-                       allowrecord=True,
-                       allowother=False,
+                       allow_record=True,
+                       allow_other=False,
                        numpytype=(numpy.generic,))
     return recurse(layout)
 
 def to_layout(array,
-              allowrecord=True,
-              allowother=False,
+              allow_record=True,
+              allow_other=False,
               numpytype=(numpy.number,)):
     """
     Args:
         array: Data to convert into an #ak.layout.Content and maybe
             #ak.layout.Record and other types.
-        allowrecord (bool): If True, allow #ak.layout.Record as an output;
+        allow_record (bool): If True, allow #ak.layout.Record as an output;
             otherwise, if the output would be a scalar record, raise an error.
-        allowother (bool): If True, allow non-Awkward outputs; otherwise,
+        allow_other (bool): If True, allow non-Awkward outputs; otherwise,
             if the output would be another type, raise an error.
         numpytype (tuple of NumPy types): Allowed NumPy types in
             #ak.layout.NumpyArray outputs.
@@ -1030,7 +1030,7 @@ def to_layout(array,
     if isinstance(array, awkward1.highlevel.Array):
         return array.layout
 
-    elif allowrecord and isinstance(array, awkward1.highlevel.Record):
+    elif allow_record and isinstance(array, awkward1.highlevel.Record):
         return array.layout
 
     elif isinstance(array, awkward1.highlevel.ArrayBuilder):
@@ -1042,7 +1042,7 @@ def to_layout(array,
     elif isinstance(array, awkward1.layout.Content):
         return array
 
-    elif allowrecord and isinstance(array, awkward1.layout.Record):
+    elif allow_record and isinstance(array, awkward1.layout.Record):
         return array
 
     elif isinstance(array, numpy.ma.MaskedArray):
@@ -1074,18 +1074,18 @@ def to_layout(array,
     elif isinstance(array, Iterable):
         return from_iter(array, highlevel=False)
 
-    elif not allowother:
+    elif not allow_other:
         raise TypeError(
             "{0} cannot be converted into an Awkward Array".format(array))
 
     else:
         return array
 
-def regularize_numpyarray(array, allowempty=True, highlevel=True):
+def regularize_numpyarray(array, allow_empty=True, highlevel=True):
     """
     Args:
         array: Data to convert into an Awkward Array.
-        allowempty (bool): If True, allow #ak.layout.EmptyArray in the output;
+        allow_empty (bool): If True, allow #ak.layout.EmptyArray in the output;
             otherwise, convert empty arrays into #ak.layout.NumpyArray.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
@@ -1098,9 +1098,11 @@ def regularize_numpyarray(array, allowempty=True, highlevel=True):
     would rarely be used in a data analysis.
     """
     def getfunction(layout, depth):
-        if isinstance(layout, awkward1.layout.NumpyArray) and layout.ndim != 1:
+        if (isinstance(layout, awkward1.layout.NumpyArray) and
+            layout.ndim != 1):
             return lambda: layout.toRegularArray()
-        elif isinstance(layout, awkward1.layout.EmptyArray) and not allowempty:
+        elif (isinstance(layout, awkward1.layout.EmptyArray) and
+              not allow_empty):
             return lambda: layout.toNumpyArray()
         else:
             return None

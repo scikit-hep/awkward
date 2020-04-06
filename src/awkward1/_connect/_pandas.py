@@ -306,8 +306,8 @@ def dfs(array,
 
     behavior = awkward1._util.behaviorof(array)
     layout = awkward1.operations.convert.to_layout(array,
-                                                   allowrecord=True,
-                                                   allowother=False)
+                                                   allow_record=True,
+                                                   allow_other=False)
     if isinstance(layout, awkward1.layout.Record):
         layout2 = layout.array[layout.at : layout.at + 1]
     else:

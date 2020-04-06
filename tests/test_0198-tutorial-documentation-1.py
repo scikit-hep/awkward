@@ -13,11 +13,11 @@ def test_singletons():
     array = awkward1.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5])
     assert awkward1.to_list(awkward1.singletons(array)) == [[1.1], [2.2], [], [3.3], [], [], [4.4], [5.5]]
 
-def test_allowmissing():
+def test_allow_missing():
     array = awkward1.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5])
     awkward1.to_numpy(array)
     with pytest.raises(ValueError):
-        awkward1.to_numpy(array, allowmissing=False)
+        awkward1.to_numpy(array, allow_missing=False)
 
 def test_flatten0():
     array = awkward1.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5])
