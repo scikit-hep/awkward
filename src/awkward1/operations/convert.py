@@ -170,7 +170,7 @@ def to_numpy(array):
         shape = list(content.shape)
         shape[0] = len(array)
         data = numpy.empty(shape, dtype=content.dtype)
-        mask0 = (numpy.asarray(array.index) < 0)
+        mask0 = numpy.asarray(array.bytemask()).view(numpy.bool_)
         mask = numpy.broadcast_to(
                  mask0.reshape((shape[0],) + (1,)*(len(shape) - 1)), shape)
         data[~mask0] = content
