@@ -776,9 +776,8 @@ def flatten(array, axis=1, highlevel=True):
     if axis is None:
         out = awkward1._util.completely_flatten(layout)
         assert (isinstance(out, tuple) and
-                len(out) == 1 and
-                isinstance(out[0], numpy.ndarray))
-        out = awkward1.layout.NumpyArray(out[0])
+                all(isinstance(x, numpy.ndarray) for x in out))
+        out = awkward1.layout.NumpyArray(numpy.concatenate(out))
     else:
         out = layout.flatten(axis)
 
