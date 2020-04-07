@@ -140,7 +140,7 @@ class ArrayView(object):
                    array,
                    allow_record=False,
                    allow_other=False,
-                   numpytype=(numpy.number,))
+                   numpytype=(numpy.number, numpy.bool_, numpy.bool))
         layout = awkward1.operations.convert.regularize_numpyarray(
                    layout,
                    allow_empty=False,
@@ -468,7 +468,7 @@ class RecordView(object):
                    record,
                    allow_record=True,
                    allow_other=False,
-                   numpytype=(numpy.number,))
+                   numpytype=(numpy.number, numpy.bool_, numpy.bool))
         assert isinstance(layout, awkward1.layout.Record)
         arraylayout = layout.array
         return RecordView(ArrayView(numba.typeof(arraylayout),

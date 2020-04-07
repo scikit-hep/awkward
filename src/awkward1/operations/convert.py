@@ -1006,7 +1006,7 @@ def to_awkward0(array, keeplayout=False):
 def to_layout(array,
               allow_record=True,
               allow_other=False,
-              numpytype=(numpy.number,)):
+              numpytype=(numpy.number, numpy.bool_, numpy.bool)):
     """
     Args:
         array: Data to convert into an #ak.layout.Content and maybe
