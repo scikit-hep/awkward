@@ -210,7 +210,7 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         else:
             layout = awkward1.operations.convert.from_iter(data,
                                                            highlevel=False,
-                                                           allowrecord=False)
+                                                           allow_record=False)
         if not isinstance(layout, awkward1.layout.Content):
             raise TypeError("could not convert data into an awkward1.Array")
 

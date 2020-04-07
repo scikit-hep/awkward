@@ -324,7 +324,7 @@ def called_by_module(modulename):
             (name == modulename or name.startswith(modulename + "."))):
             return True
         frame = frame.f_back
-    return True
+    return False
 
 def key2index(keys, key):
     if keys is None:

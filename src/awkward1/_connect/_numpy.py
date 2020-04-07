@@ -15,7 +15,7 @@ import awkward1.operations.convert
 import awkward1._util
 
 def convert_to_array(layout, args, kwargs):
-    out = awkward1.operations.convert.to_numpy(layout)
+    out = awkward1.operations.convert.to_numpy(layout, allow_missing=False)
     if args == () and kwargs == {}:
         return out
     else:
@@ -44,8 +44,8 @@ def array_ufunc(ufunc, method, inputs, kwargs):
 
     behavior = awkward1._util.behaviorof(*inputs)
     inputs = [awkward1.operations.convert.to_layout(x,
-                                                    allowrecord=True,
-                                                    allowother=True)
+                                                    allow_record=True,
+                                                    allow_other=True)
                 for x in inputs]
 
     def adjust(custom, inputs, kwargs):

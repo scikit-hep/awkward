@@ -126,9 +126,9 @@ def test_numpy_array():
     array = awkward1.Array(awkward1.layout.UnionArray8_64(tags, index, [content0, content1]), check_valid=True)
     assert numpy.array_equal(numpy.asarray(array), numpy.array([1.1, 1, 2, 2.2, 3.3, 4.4, 3, 5.5]))
 
-    assert numpy.ma.asarray(awkward1.Array([1.1, 2.2, None, None, 3.3], check_valid=True)).tolist() == [1.1, 2.2, None, None, 3.3]
-    assert numpy.ma.asarray(awkward1.Array([[1.1, 2.2], [None, None], [3.3, 4.4]], check_valid=True)).tolist() == [[1.1, 2.2], [None, None], [3.3, 4.4]]
-    assert numpy.ma.asarray(awkward1.Array([[1.1, 2.2], None, [3.3, 4.4]], check_valid=True)).tolist() == [[1.1, 2.2], [None, None], [3.3, 4.4]]
+    assert awkward1.to_numpy(awkward1.Array([1.1, 2.2, None, None, 3.3], check_valid=True)).tolist() == [1.1, 2.2, None, None, 3.3]
+    assert awkward1.to_numpy(awkward1.Array([[1.1, 2.2], [None, None], [3.3, 4.4]], check_valid=True)).tolist() == [[1.1, 2.2], [None, None], [3.3, 4.4]]
+    assert awkward1.to_numpy(awkward1.Array([[1.1, 2.2], None, [3.3, 4.4]], check_valid=True)).tolist() == [[1.1, 2.2], [None, None], [3.3, 4.4]]
 
     assert numpy.array_equal(numpy.asarray(awkward1.Array([{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}], check_valid=True)), numpy.array([(1, 1.1), (2, 2.2), (3, 3.3)], dtype=[("x", numpy.int64), ("y", numpy.float64)]))
     assert numpy.array_equal(numpy.asarray(awkward1.Array([(1, 1.1), (2, 2.2), (3, 3.3)], check_valid=True)), numpy.array([(1, 1.1), (2, 2.2), (3, 3.3)], dtype=[("0", numpy.int64), ("1", numpy.float64)]))

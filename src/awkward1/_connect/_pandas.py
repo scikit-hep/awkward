@@ -306,8 +306,8 @@ def dfs(array,
 
     behavior = awkward1._util.behaviorof(array)
     layout = awkward1.operations.convert.to_layout(array,
-                                                   allowrecord=True,
-                                                   allowother=False)
+                                                   allow_record=True,
+                                                   allow_other=False)
     if isinstance(layout, awkward1.layout.Record):
         layout2 = layout.array[layout.at : layout.at + 1]
     else:
@@ -329,7 +329,10 @@ def dfs(array,
             all(numpy.array_equal(x, y)
                   for x, y in zip(last_row_arrays, row_arrays))):
             oldcolumns = tables[-1].columns
-            numold = len(oldcolumns.levels)
+            if isinstance(oldcolumns, pandas.MultiIndex):
+                numold = len(oldcolumns.levels)
+            else:
+                numold = max(len(x) for x in oldcolumns)
             numnew = len(columns.levels)
             maxnum = max(numold, numnew)
             if numold != maxnum:
@@ -339,7 +342,7 @@ def dfs(array,
                 tables[-1].columns = oldcolumns
             if numnew != maxnum:
                 columns = pandas.MultiIndex.from_tuples(
-                            [x + ("",)*(maxnum - numold)
+                            [x + ("",)*(maxnum - numnew)
                                for x in columns])
 
             newframe = pandas.DataFrame(data=column,

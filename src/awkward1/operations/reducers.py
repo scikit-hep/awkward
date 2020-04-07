@@ -79,8 +79,8 @@ def count(array, axis=None, keepdims=False, mask_identity=False):
     to turn the None values into something that would be counted.
     """
     layout = awkward1.operations.convert.to_layout(array,
-                                                   allowrecord=False,
-                                                   allowother=False)
+                                                   allow_record=False,
+                                                   allow_other=False)
     if axis is None:
         def reduce(xs):
             if len(xs) == 1:
@@ -129,8 +129,8 @@ def count_nonzero(array, axis=None, keepdims=False, mask_identity=False):
     to turn them into something that would be counted.
     """
     layout = awkward1.operations.convert.to_layout(array,
-                                                   allowrecord=False,
-                                                   allowother=False)
+                                                   allow_record=False,
+                                                   allow_other=False)
     if axis is None:
         def reduce(xs):
             if len(xs) == 1:
@@ -319,8 +319,8 @@ def sum(array, axis=None, keepdims=False, mask_identity=False):
     `mask_identity=True`.
     """
     layout = awkward1.operations.convert.to_layout(array,
-                                                   allowrecord=False,
-                                                   allowother=False)
+                                                   allow_record=False,
+                                                   allow_other=False)
     if axis is None:
         def reduce(xs):
             if len(xs) == 1:
@@ -365,8 +365,8 @@ def prod(array, axis=None, keepdims=False, mask_identity=False):
     value (None) handling in reducers.
     """
     layout = awkward1.operations.convert.to_layout(array,
-                                                   allowrecord=False,
-                                                   allowother=False)
+                                                   allow_record=False,
+                                                   allow_other=False)
     if axis is None:
         def reduce(xs):
             if len(xs) == 1:
@@ -413,8 +413,8 @@ def any(array, axis=None, keepdims=False, mask_identity=False):
     value (None) handling in reducers.
     """
     layout = awkward1.operations.convert.to_layout(array,
-                                                   allowrecord=False,
-                                                   allowother=False)
+                                                   allow_record=False,
+                                                   allow_other=False)
     if axis is None:
         def reduce(xs):
             if len(xs) == 1:
@@ -461,8 +461,8 @@ def all(array, axis=None, keepdims=False, mask_identity=False):
     value (None) handling in reducers.
     """
     layout = awkward1.operations.convert.to_layout(array,
-                                                   allowrecord=False,
-                                                   allowother=False)
+                                                   allow_record=False,
+                                                   allow_other=False)
     if axis is None:
         def reduce(xs):
             if len(xs) == 1:
@@ -510,8 +510,8 @@ def min(array, axis=None, keepdims=False, mask_identity=True):
     value (None) handling in reducers.
     """
     layout = awkward1.operations.convert.to_layout(array,
-                                                   allowrecord=False,
-                                                   allowother=False)
+                                                   allow_record=False,
+                                                   allow_other=False)
     if axis is None:
         def reduce(xs):
             if len(xs) == 0:
@@ -562,8 +562,8 @@ def max(array, axis=None, keepdims=False, mask_identity=True):
     value (None) handling in reducers.
     """
     layout = awkward1.operations.convert.to_layout(array,
-                                                   allowrecord=False,
-                                                   allowother=False)
+                                                   allow_record=False,
+                                                   allow_other=False)
     if axis is None:
         def reduce(xs):
             if len(xs) == 0:
@@ -618,8 +618,8 @@ def argmin(array, axis=None, keepdims=False, mask_identity=True):
     value (None) handling in reducers.
     """
     layout = awkward1.operations.convert.to_layout(array,
-                                                   allowrecord=False,
-                                                   allowother=False)
+                                                   allow_record=False,
+                                                   allow_other=False)
     if axis is None:
         tmp = awkward1._util.completely_flatten(layout)
         return numpy.argmin(tmp, axis=None)
@@ -666,8 +666,8 @@ def argmax(array, axis=None, keepdims=False, mask_identity=True):
     value (None) handling in reducers.
     """
     layout = awkward1.operations.convert.to_layout(array,
-                                                   allowrecord=False,
-                                                   allowother=False)
+                                                   allow_record=False,
+                                                   allow_other=False)
     if axis is None:
         tmp = awkward1._util.completely_flatten(layout)
         return numpy.argmax(tmp, axis=None)
@@ -1208,13 +1208,13 @@ def linear_fit(x,
         slope_error     = numpy.sqrt(numpy.true_divide(sumw, delta))
 
         intercept       = awkward1.operations.convert.to_layout(
-                            intercept, allowrecord=True, allowother=True)
+                          intercept, allow_record=True, allow_other=True)
         slope           = awkward1.operations.convert.to_layout(
-                            slope, allowrecord=True, allowother=True)
+                          slope, allow_record=True, allow_other=True)
         intercept_error = awkward1.operations.convert.to_layout(
-                            intercept_error, allowrecord=True, allowother=True)
+                          intercept_error, allow_record=True, allow_other=True)
         slope_error     = awkward1.operations.convert.to_layout(
-                            slope_error, allowrecord=True, allowother=True)
+                          slope_error, allow_record=True, allow_other=True)
 
         scalar = (not isinstance(intercept, awkward1.layout.Content) and
                   not isinstance(slope, awkward1.layout.Content) and
