@@ -1092,47 +1092,62 @@ def singletons(array, highlevel=True):
         >>> array = ak.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5])
         >>> print(ak.singletons(array))
         [[1.1], [2.2], [], [3.3], [], [], [4.4], [5.5]]
+
+    See #ak.firsts to invert this function.
     """
-    def apply(layout):
-        if isinstance(layout, awkward1._util.unknowntypes):
-            return apply(awkward1.layout.NumpyArray(numpy.array([])))
-
-        elif isinstance(layout, awkward1._util.indexedtypes):
-            return apply(layout.project())
-
-        elif isinstance(layout, awkward1._util.uniontypes):
-            contents = [apply(layout.project(i))
-                          for i in range(layout.numcontents)]
-            out = numpy.empty(len(layout), dtype=numpy.bool_)
-            tags = numpy.asarray(layout.tags)
-            for tag, content in enumerate(contents):
-                out[tags == tag] = content
-            return out
-
-        elif isinstance(layout, awkward1._util.optiontypes):
+    def getfunction(layout, depth):
+        if isinstance(layout, awkward1._util.optiontypes):
             nulls = numpy.asarray(layout.bytemask()).view(numpy.bool_)
             offsets = numpy.ones(len(layout) + 1, dtype=numpy.int64)
             offsets[0] = 0
             offsets[1:][nulls] = 0
             numpy.cumsum(offsets, out=offsets)
-            return awkward1.layout.ListOffsetArray64(
-                       awkward1.layout.Index64(offsets),
-                       layout.project())
-            
+            return lambda: awkward1.layout.ListOffsetArray64(
+                               awkward1.layout.Index64(offsets),
+                               layout.project())
         else:
-            offsets = numpy.arange(len(layout) + 1, dtype=numpy.int64)
-            return awkward1.layout.ListOffsetArray64(
-                       awkward1.layout.Index64(offsets),
-                       layout.project())
+            return None
 
-    out = apply(awkward1.operations.convert.to_layout(array,
-                                                      allow_record=False))
+    out = awkward1._util.recursively_apply(
+            awkward1.operations.convert.to_layout(array), getfunction)
     if highlevel:
-        return awkward1._util.wrap(out,
-                                   behavior=awkward1._util.behaviorof(array))
+        return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
     else:
         return out
 
+def firsts(array, axis=1, highlevel=True):
+    """
+    Args:
+        array: Data from which to select the first elements from nested lists.
+        axis (int): The dimension at which this operation is applied. The
+            outermost dimension is `0`, followed by `1`, etc., and negative
+            values count backward from the innermost: `-1` is the innermost
+            dimension, `-2` is the next level up, etc.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+
+    Selects the first element of each non-empty list and inserts None for each
+    empty list.
+
+    For example,
+
+        >>> array = ak.Array([[1.1], [2.2], [], [3.3], [], [], [4.4], [5.5]])
+        >>> print(ak.firsts(array))
+        [1.1, 2.2, None, 3.3, None, None, 4.4, 5.5]
+
+    See #ak.singletons to invert this function.
+    """
+    if axis <= 0:
+        raise NotImplementedError("ak.firsts with axis={0}".format(axis))
+    toslice = (slice(None, None, None),) * axis + (0,)
+    out = awkward1.mask(array,
+                        awkward1.num(array, axis=axis) > 0,
+                        highlevel=False)[toslice]
+    if highlevel:
+        return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
+    else:
+        return out
+    
 def cartesian(arrays,
               axis=1,
               nested=None,
