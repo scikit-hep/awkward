@@ -1539,20 +1539,191 @@ namespace awkward {
     }
   }
 
-  template <>
+  template <typename T>
   const ContentPtr
-  ListOffsetArrayOf<int64_t>::sort_next(int64_t negaxis,
-                                        const Index64& starts,
-                                        const Index64& parents,
-                                        int64_t outlength,
-                                        bool ascending,
-                                        bool stable) const {
+  ListOffsetArrayOf<T>::sort_next(int64_t negaxis,
+                                  const Index64& starts,
+                                  const Index64& parents,
+                                  int64_t outlength,
+                                  bool ascending,
+                                  bool stable) const {
+    return toListOffsetArray64(true).get()->sort_next(negaxis,
+                                                      starts,
+                                                      parents,
+                                                      outlength,
+                                                      ascending,
+                                                      stable);
+  }
+
+  template <>
+  const ContentPtr ListOffsetArrayOf<int64_t>::sort_next(
+    int64_t negaxis,
+    const Index64& starts,
+    const Index64& parents,
+    int64_t outlength,
+    bool ascending,
+    bool stable) const {
     std::pair<bool, int64_t> branchdepth = branch_depth();
 
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
       if (offsets_.length() - 1 != parents.length()) {
         throw std::runtime_error("offsets_.length() - 1 != parents.length()");
       }
+      int64_t globalstart;
+      int64_t globalstop;
+      struct Error err1 = awkward_listoffsetarray_reduce_global_startstop_64(
+        &globalstart,
+        &globalstop,
+        offsets_.ptr().get(),
+        offsets_.offset(),
+        offsets_.length() - 1);
+      util::handle_error(err1, classname(), identities_.get());
+      int64_t nextlen = globalstop - globalstart;
+
+      int64_t maxcount;
+      Index64 offsetscopy(offsets_.length());
+      struct Error err2 = awkward_listoffsetarray_reduce_nonlocal_maxcount_offsetscopy_64(
+        &maxcount,
+        offsetscopy.ptr().get(),
+        offsets_.ptr().get(),
+        offsets_.offset(),
+        offsets_.length() - 1);
+      util::handle_error(err2, classname(), identities_.get());
+
+      Index64 nextcarry(nextlen);
+      Index64 nextparents(nextlen);
+      int64_t maxnextparents;
+      Index64 distincts(maxcount * outlength);
+      struct Error err3 = awkward_listoffsetarray_reduce_nonlocal_preparenext_64(
+        nextcarry.ptr().get(),
+        nextparents.ptr().get(),
+        nextlen,
+        &maxnextparents,
+        distincts.ptr().get(),
+        maxcount * outlength,
+        offsetscopy.ptr().get(),
+        offsets_.ptr().get(),
+        offsets_.offset(),
+        offsets_.length() - 1,
+        parents.ptr().get(),
+        parents.offset(),
+        maxcount);
+      util::handle_error(err3, classname(), identities_.get());
+
+      Index64 nextstarts(maxnextparents + 1);
+      struct Error err4 =
+        awkward_listoffsetarray_reduce_nonlocal_nextstarts_64(
+        nextstarts.ptr().get(),
+        nextparents.ptr().get(),
+        nextlen);
+      util::handle_error(err4, classname(), identities_.get());
+
+      ContentPtr nextcontent = content_.get()->carry(nextcarry);
+      ContentPtr outcontent = nextcontent.get()->sort_next(
+        negaxis - 1, nextstarts, nextparents, nextcontent.get()->length(),
+        ascending, stable);
+
+      Index64 gaps(outlength);
+      struct Error err5 = awkward_listoffsetarray_nonlocal_findgaps_64(
+        gaps.ptr().get(),
+        parents.ptr().get(),
+        parents.offset(),
+        parents.length());
+      util::handle_error(err5, classname(), identities_.get());
+
+      Index64 outstarts(outlength);
+      Index64 outstops(outlength);
+      struct Error err6 =
+        awkward_listoffsetarray_nonlocal_outstartsstops_64(
+        outstarts.ptr().get(),
+        outstops.ptr().get(),
+        distincts.ptr().get(),
+        maxcount * outlength,
+        gaps.ptr().get());
+      util::handle_error(err6, classname(), identities_.get());
+
+      ContentPtr out = std::make_shared<ListArray64>(Identities::none(),
+                                                     util::Parameters(),
+                                                     outstarts,
+                                                     outstops,
+                                                     outcontent);
+      return std::make_shared<RegularArray>(Identities::none(),
+                                            util::Parameters(),
+                                            out,
+                                            outlength);
+    }
+    else {
+      int64_t globalstart;
+      int64_t globalstop;
+      struct Error err1 = awkward_listoffsetarray_reduce_global_startstop_64(
+        &globalstart,
+        &globalstop,
+        offsets_.ptr().get(),
+        offsets_.offset(),
+        offsets_.length() - 1);
+      util::handle_error(err1, classname(), identities_.get());
+
+      Index64 nextparents(globalstop - globalstart);
+      struct Error err2 = awkward_listoffsetarray_reduce_local_nextparents_64(
+        nextparents.ptr().get(),
+        offsets_.ptr().get(),
+        offsets_.offset(),
+        offsets_.length() - 1);
+      util::handle_error(err2, classname(), identities_.get());
+
+      ContentPtr trimmed = content_.get()->getitem_range_nowrap(globalstart,
+                                                                globalstop);
+      ContentPtr outcontent = trimmed.get()->sort_next(
+        negaxis, util::make_starts(offsets_), nextparents,
+        offsets_.length() - 1, ascending, stable);
+
+      Index64 outoffsets(outlength + 1);
+      struct Error err3 = awkward_listoffsetarray_reduce_local_outoffsets_64(
+        outoffsets.ptr().get(),
+        parents.ptr().get(),
+        parents.offset(),
+        parents.length(),
+        outlength);
+      util::handle_error(err3, classname(), identities_.get());
+
+      return std::make_shared<ListOffsetArray64>(Identities::none(),
+                                                 util::Parameters(),
+                                                 outoffsets,
+                                                 outcontent);
+    }
+  }
+
+  template <typename T>
+  const ContentPtr
+  ListOffsetArrayOf<T>::argsort_next(int64_t negaxis,
+                                     const Index64& starts,
+                                     const Index64& parents,
+                                     int64_t outlength,
+                                     bool ascending,
+                                     bool stable) const {
+    return toListOffsetArray64(true).get()->argsort_next(negaxis,
+                                                         starts,
+                                                         parents,
+                                                         outlength,
+                                                         ascending,
+                                                         stable);
+  }
+
+  template <>
+  const ContentPtr
+  ListOffsetArrayOf<int64_t>::argsort_next(int64_t negaxis,
+                                           const Index64& starts,
+                                           const Index64& parents,
+                                           int64_t outlength,
+                                           bool ascending,
+                                           bool stable) const {
+    std::pair<bool, int64_t> branchdepth = branch_depth();
+
+    if (!branchdepth.first  &&  negaxis == branchdepth.second) {
+      if (offsets_.length() - 1 != parents.length()) {
+        throw std::runtime_error("offsets_.length() - 1 != parents.length()");
+      }
+
       int64_t globalstart;
       int64_t globalstop;
       struct Error err1 = awkward_listoffsetarray_reduce_global_startstop_64(
@@ -1602,7 +1773,9 @@ namespace awkward {
       util::handle_error(err4, classname(), identities_.get());
 
       ContentPtr nextcontent = content_.get()->carry(nextcarry);
-      ContentPtr outcontent = nextcontent.get()->sort_next(negaxis - 1, nextstarts, nextparents, maxnextparents + 1, ascending, stable);
+      ContentPtr outcontent = nextcontent.get()->argsort_next(
+        negaxis - 1, nextstarts, nextparents, maxnextparents + 1,
+        ascending, stable);
 
       Index64 gaps(outlength);
       struct Error err5 = awkward_listoffsetarray_reduce_nonlocal_findgaps_64(
@@ -1622,8 +1795,15 @@ namespace awkward {
         gaps.ptr().get());
       util::handle_error(err6, classname(), identities_.get());
 
-      ContentPtr out = std::make_shared<ListArray64>(Identities::none(), util::Parameters(), outstarts, outstops, outcontent);
-      return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), out, outlength);
+      ContentPtr out = std::make_shared<ListArray64>(Identities::none(),
+                                                     util::Parameters(),
+                                                     outstarts,
+                                                     outstops,
+                                                     outcontent);
+      return std::make_shared<RegularArray>(Identities::none(),
+                                            util::Parameters(),
+                                            out,
+                                            outlength);
     }
     else {
       int64_t globalstart;
@@ -1644,8 +1824,11 @@ namespace awkward {
         offsets_.length() - 1);
       util::handle_error(err2, classname(), identities_.get());
 
-      ContentPtr trimmed = content_.get()->getitem_range_nowrap(0, globalstop);
-      ContentPtr outcontent = trimmed.get()->sort_next(negaxis, util::make_starts(offsets_), nextparents, offsets_.length() - 1, ascending, stable);
+      ContentPtr trimmed = content_.get()->getitem_range_nowrap(globalstart,
+                                                                globalstop);
+      ContentPtr outcontent = trimmed.get()->argsort_next(
+        negaxis, util::make_starts(offsets_), nextparents,
+        offsets_.length() - 1, ascending, stable);
 
       Index64 outoffsets(outlength + 1);
       struct Error err3 = awkward_listoffsetarray_reduce_local_outoffsets_64(
@@ -1656,160 +1839,10 @@ namespace awkward {
         outlength);
       util::handle_error(err3, classname(), identities_.get());
 
-      return std::make_shared<ListOffsetArray64>(Identities::none(), util::Parameters(), outoffsets, outcontent);
-    }
-  }
-
-  template <typename T>
-  const ContentPtr
-  ListOffsetArrayOf<T>::sort_next(int64_t negaxis,
-                                  const Index64& starts,
-                                  const Index64& parents,
-                                  int64_t outlength,
-                                  bool ascending,
-                                  bool stable) const {
-    return toListOffsetArray64(true).get()->sort_next(negaxis,
-                                                      starts,
-                                                      parents,
-                                                      outlength,
-                                                      ascending,
-                                                      stable);
-  }
-
-  template <typename T>
-  const ContentPtr
-  ListOffsetArrayOf<T>::argsort_next(int64_t negaxis,
-                                     const Index64& starts,
-                                     const Index64& parents,
-                                     int64_t outlength,
-                                     bool ascending,
-                                     bool stable) const {
-    return toListOffsetArray64(true).get()->argsort_next(negaxis,
-                                                         starts,
-                                                         parents,
-                                                         outlength,
-                                                         ascending,
-                                                         stable);
-  }
-
-  template <>
-  const ContentPtr
-  ListOffsetArrayOf<int64_t>::argsort_next(int64_t negaxis,
-                                           const Index64& starts,
-                                           const Index64& parents,
-                                           int64_t outlength,
-                                           bool ascending,
-                                           bool stable) const {
-    std::pair<bool, int64_t> branchdepth = branch_depth();
-
-    if (!branchdepth.first  &&  negaxis == branchdepth.second) {
-      if (offsets_.length() - 1 != parents.length()) {
-        throw std::runtime_error("offsets_.length() - 1 != parents.length()");
-      }
-    int64_t globalstart;
-    int64_t globalstop;
-    struct Error err1 = awkward_listoffsetarray_reduce_global_startstop_64(
-      &globalstart,
-      &globalstop,
-      offsets_.ptr().get(),
-      offsets_.offset(),
-      offsets_.length() - 1);
-    util::handle_error(err1, classname(), identities_.get());
-    int64_t nextlen = globalstop - globalstart;
-
-    int64_t maxcount;
-    Index64 offsetscopy(offsets_.length());
-    struct Error err2 = awkward_listoffsetarray_reduce_nonlocal_maxcount_offsetscopy_64(
-      &maxcount,
-      offsetscopy.ptr().get(),
-      offsets_.ptr().get(),
-      offsets_.offset(),
-      offsets_.length() - 1);
-    util::handle_error(err2, classname(), identities_.get());
-
-    Index64 nextcarry(nextlen);
-    Index64 nextparents(nextlen);
-    int64_t maxnextparents;
-    Index64 distincts(maxcount * outlength);
-    struct Error err3 = awkward_listoffsetarray_reduce_nonlocal_preparenext_64(
-      nextcarry.ptr().get(),
-      nextparents.ptr().get(),
-      nextlen,
-      &maxnextparents,
-      distincts.ptr().get(),
-      maxcount * outlength,
-      offsetscopy.ptr().get(),
-      offsets_.ptr().get(),
-      offsets_.offset(),
-      offsets_.length() - 1,
-      parents.ptr().get(),
-      parents.offset(),
-      maxcount);
-    util::handle_error(err3, classname(), identities_.get());
-
-    Index64 nextstarts(maxnextparents + 1);
-    struct Error err4 = awkward_listoffsetarray_reduce_nonlocal_nextstarts_64(
-      nextstarts.ptr().get(),
-      nextparents.ptr().get(),
-      nextlen);
-    util::handle_error(err4, classname(), identities_.get());
-
-    ContentPtr nextcontent = content_.get()->carry(nextcarry);
-    ContentPtr outcontent = nextcontent.get()->sort_next(negaxis - 1, nextstarts, nextparents, maxnextparents + 1, ascending, stable);
-
-    Index64 gaps(outlength);
-    struct Error err5 = awkward_listoffsetarray_reduce_nonlocal_findgaps_64(
-      gaps.ptr().get(),
-      parents.ptr().get(),
-      parents.offset(),
-      parents.length());
-    util::handle_error(err5, classname(), identities_.get());
-
-    Index64 outstarts(outlength);
-    Index64 outstops(outlength);
-    struct Error err6 = awkward_listoffsetarray_reduce_nonlocal_outstartsstops_64(
-      outstarts.ptr().get(),
-      outstops.ptr().get(),
-      distincts.ptr().get(),
-      maxcount * outlength,
-      gaps.ptr().get());
-    util::handle_error(err6, classname(), identities_.get());
-
-    ContentPtr out = std::make_shared<ListArray64>(Identities::none(), util::Parameters(), outstarts, outstops, outcontent);
-      return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), out, outlength);
-    }
-    else {
-      int64_t globalstart;
-      int64_t globalstop;
-      struct Error err1 = awkward_listoffsetarray_reduce_global_startstop_64(
-        &globalstart,
-        &globalstop,
-        offsets_.ptr().get(),
-        offsets_.offset(),
-        offsets_.length() - 1);
-      util::handle_error(err1, classname(), identities_.get());
-
-      Index64 nextparents(globalstop - globalstart);
-      struct Error err2 = awkward_listoffsetarray_reduce_local_nextparents_64(
-        nextparents.ptr().get(),
-        offsets_.ptr().get(),
-        offsets_.offset(),
-        offsets_.length() - 1);
-      util::handle_error(err2, classname(), identities_.get());
-
-      ContentPtr trimmed = content_.get()->getitem_range_nowrap(0, globalstop);
-      ContentPtr outcontent = trimmed.get()->sort_next(negaxis, util::make_starts(offsets_), nextparents, offsets_.length() - 1, ascending, stable);
-
-      Index64 outoffsets(outlength + 1);
-      struct Error err3 = awkward_listoffsetarray_reduce_local_outoffsets_64(
-        outoffsets.ptr().get(),
-        parents.ptr().get(),
-        parents.offset(),
-        parents.length(),
-        outlength);
-      util::handle_error(err3, classname(), identities_.get());
-
-      return std::make_shared<ListOffsetArray64>(Identities::none(), util::Parameters(), outoffsets, outcontent);
+      return std::make_shared<ListOffsetArray64>(Identities::none(),
+                                                 util::Parameters(),
+                                                 outoffsets,
+                                                 outcontent);
     }
   }
 

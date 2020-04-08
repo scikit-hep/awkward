@@ -15,12 +15,12 @@ def test_sort_emptyarray():
     assert awkward1.to_list(array.argsort(0, True, False)) == []
 
 def test_sort_numpyarray():
-    array = awkward1.layout.NumpyArray(numpy.array([3, 2, 1, 5, 4]))
+    array = awkward1.layout.NumpyArray(numpy.array([3.3, 2.2, 1.1, 5.5, 4.4]))
     assert awkward1.to_list(array.argsort(0, True, False)) == [2, 1, 0, 4, 3]
     assert awkward1.to_list(array.argsort(0, False, False)) == [3, 4, 0, 1, 2]
 
-    assert awkward1.to_list(array.sort(0, True, False)) == [1, 2, 3, 4, 5]
-    assert awkward1.to_list(array.sort(0, False, False)) == [5, 4, 3, 2, 1]
+    assert awkward1.to_list(array.sort(0, True, False)) == [1.1, 2.2, 3.3, 4.4, 5.5]
+    assert awkward1.to_list(array.sort(0, False, False)) == [5.5, 4.4, 3.3, 2.2, 1.1]
 
     array = awkward1.layout.NumpyArray(numpy.array([[3.3, 2.2, 4.4], [1.1, 5.5, 3.3]]))
     assert awkward1.to_list(array.sort(0, True, False)) == [[2.2, 3.3, 4.4], [1.1, 3.3, 5.5]]

@@ -1052,8 +1052,8 @@ namespace awkward {
 
     template <typename T>
     ERROR
-      awkward_numpyarray_sort_64(
-        int64_t* toptr,
+      awkward_numpyarray_sort(
+        T* toptr,
         const T* fromptr,
         const size_t* fromindex,
         size_t indexlength,

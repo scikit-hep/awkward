@@ -2320,68 +2320,152 @@ namespace awkward {
       throw std::runtime_error("attempting to sort a scalar");
     }
     else if (shape_.size() != 1  ||  !iscontiguous()) {
-      return toRegularArray().get()->sort_next(negaxis, starts, parents, outlength, ascending, stable);
+      return toRegularArray().get()->sort_next(negaxis,
+                                               starts,
+                                               parents,
+                                               outlength,
+                                               ascending,
+                                               stable);
     }
     else {
       std::shared_ptr<Content> out;
       int64_t length = parents.length();
+      int64_t offset = byteoffset_ / itemsize_;
       std::shared_ptr<void> ptr;
       if (format_.compare("?") == 0) {
-        ptr = array_sort<bool>(reinterpret_cast<bool*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength, ascending, stable);
+        ptr = array_sort<bool>(reinterpret_cast<bool*>(ptr_.get()),
+                               offset,
+                               starts,
+                               parents,
+                               length,
+                               ascending,
+                               stable);
       }
       else if (format_.compare("b") == 0) {
-        ptr = array_sort<int8_t>(reinterpret_cast<int8_t*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength, ascending, stable);
+        ptr = array_sort<int8_t>(reinterpret_cast<int8_t*>(ptr_.get()),
+                                 offset,
+                                 starts,
+                                 parents,
+                                 length,
+                                 ascending,
+                                 stable);
       }
-      else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
-        ptr = array_sort<uint8_t>(reinterpret_cast<uint8_t*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength, ascending, stable);
+      else if (format_.compare("B") == 0  or  format_.compare("c") == 0) {
+        ptr = array_sort<uint8_t>(reinterpret_cast<uint8_t*>(ptr_.get()),
+                                  offset,
+                                  starts,
+                                  parents,
+                                  length,
+                                  ascending,
+                                  stable);
       }
       else if (format_.compare("h") == 0) {
-        ptr = array_sort<int16_t>(reinterpret_cast<int16_t*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength, ascending, stable);
+        ptr = array_sort<int16_t>(reinterpret_cast<int16_t*>(ptr_.get()),
+                                  offset,
+                                  starts,
+                                  parents,
+                                  length,
+                                  ascending,
+                                  stable);
       }
       else if (format_.compare("H") == 0) {
-        ptr = array_sort<uint16_t>(reinterpret_cast<uint16_t*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength, ascending, stable);
+        ptr = array_sort<uint16_t>(reinterpret_cast<uint16_t*>(ptr_.get()),
+                                   offset,
+                                   starts,
+                                   parents,
+                                   length,
+                                   ascending,
+                                   stable);
       }
 #if defined _MSC_VER || defined __i386__
       else if (format_.compare("l") == 0) {
 #else
       else if (format_.compare("i") == 0) {
 #endif
-        ptr = array_sort<int32_t>(reinterpret_cast<int32_t*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength, ascending, stable);
+        ptr = array_sort<int32_t>(reinterpret_cast<int32_t*>(ptr_.get()),
+                                  offset,
+                                  starts,
+                                  parents,
+                                  length,
+                                  ascending,
+                                  stable);
       }
 #if defined _MSC_VER || defined __i386__
       else if (format_.compare("L") == 0) {
 #else
       else if (format_.compare("I") == 0) {
 #endif
-        ptr = array_sort<uint32_t>(reinterpret_cast<uint32_t*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength, ascending, stable);
+        ptr = array_sort<uint32_t>(reinterpret_cast<uint32_t*>(ptr_.get()),
+                                   offset,
+                                   starts,
+                                   parents,
+                                   length,
+                                   ascending,
+                                   stable);
       }
 #if defined _MSC_VER || defined __i386__
       else if (format_.compare("q") == 0) {
 #else
       else if (format_.compare("l") == 0) {
 #endif
-        ptr = array_sort<int64_t>(reinterpret_cast<int64_t*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength, ascending, stable);
+        ptr = array_sort<int64_t>(reinterpret_cast<int64_t*>(ptr_.get()),
+                                  offset,
+                                  starts,
+                                  parents,
+                                  length,
+                                  ascending,
+                                  stable);
       }
 #if defined _MSC_VER || defined __i386__
       else if (format_.compare("Q") == 0) {
 #else
       else if (format_.compare("L") == 0) {
 #endif
-        ptr = array_sort<uint64_t>(reinterpret_cast<uint64_t*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength, ascending, stable);
+        ptr = array_sort<uint64_t>(reinterpret_cast<uint64_t*>(ptr_.get()),
+                                   offset,
+                                   starts,
+                                   parents,
+                                   length,
+                                   ascending,
+                                   stable);
       }
       else if (format_.compare("f") == 0) {
-        ptr = array_sort<float>(reinterpret_cast<float*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength, ascending, stable);
+        ptr = array_sort<float>(reinterpret_cast<float*>(ptr_.get()),
+                                offset,
+                                starts,
+                                parents,
+                                length,
+                                ascending,
+                                stable);
       }
       else if (format_.compare("d") == 0) {
-        ptr = array_sort<double>(reinterpret_cast<double*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength, ascending, stable);
+        ptr = array_sort<double>(reinterpret_cast<double*>(ptr_.get()),
+                                 offset,
+                                 starts,
+                                 parents,
+                                 length,
+                                 ascending,
+                                 stable);
       }
       else {
-        throw std::invalid_argument(std::string("cannot sort NumpyArray with format \"") + format_ + std::string("\""));
+        throw std::invalid_argument(
+          std::string("cannot sort NumpyArray with format \"")
+          + format_ + std::string("\""));
       }
 
-      out = std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), ptr, shape_, strides_, 0, itemsize_, format_);
+      out = std::make_shared<NumpyArray>(Identities::none(),
+                                         util::Parameters(),
+                                         ptr,
+                                         shape_,
+                                         strides_,
+                                         byteoffset_,
+                                         itemsize_,
+                                         format_);
 
-      out = std::make_shared<RegularArray>(Identities::none(), util::Parameters(), out, outlength);
+      out = std::make_shared<RegularArray>(Identities::none(),
+                                           util::Parameters(),
+                                           out,
+                                           length);
       return out;
     }
   }
@@ -2397,63 +2481,137 @@ namespace awkward {
       throw std::runtime_error("attempting to argsort a scalar");
     }
     else if (shape_.size() != 1  ||  !iscontiguous()) {
-      return toRegularArray().get()->sort_next(negaxis, starts, parents, outlength, ascending, stable);
+      return toRegularArray().get()->argsort_next(negaxis,
+                                                  starts,
+                                                  parents,
+                                                  outlength,
+                                                  ascending,
+                                                  stable);
     }
     else {
       std::shared_ptr<Content> out;
       int64_t length = parents.length();
+      int64_t offset = byteoffset_ / itemsize_;
       std::shared_ptr<void> ptr;
       if (format_.compare("?") == 0) {
-        ptr = index_sort<bool>(reinterpret_cast<bool*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength, ascending, stable);
+        ptr = index_sort<bool>(reinterpret_cast<bool*>(ptr_.get()),
+                               offset,
+                               starts,
+                               parents,
+                               outlength,
+                               ascending,
+                               stable);
       }
       else if (format_.compare("b") == 0) {
-        ptr = index_sort<int8_t>(reinterpret_cast<int8_t*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength, ascending, stable);
+        ptr = index_sort<int8_t>(reinterpret_cast<int8_t*>(ptr_.get()),
+                                 offset,
+                                 starts,
+                                 parents,
+                                 outlength,
+                                 ascending,
+                                 stable);
       }
-      else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
-        ptr = index_sort<uint8_t>(reinterpret_cast<uint8_t*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength, ascending, stable);
+      else if (format_.compare("B") == 0  or  format_.compare("c") == 0) {
+        ptr = index_sort<uint8_t>(reinterpret_cast<uint8_t*>(ptr_.get()),
+                                  offset,
+                                  starts,
+                                  parents,
+                                  outlength,
+                                  ascending,
+                                  stable);
       }
       else if (format_.compare("h") == 0) {
-        ptr = index_sort<int16_t>(reinterpret_cast<int16_t*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength, ascending, stable);
+        ptr = index_sort<int16_t>(reinterpret_cast<int16_t*>(ptr_.get()),
+                                  offset,
+                                  starts,
+                                  parents,
+                                  outlength,
+                                  ascending,
+                                  stable);
       }
       else if (format_.compare("H") == 0) {
-        ptr = index_sort<uint16_t>(reinterpret_cast<uint16_t*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength, ascending, stable);
+        ptr = index_sort<uint16_t>(reinterpret_cast<uint16_t*>(ptr_.get()),
+                                   offset,
+                                   starts,
+                                   parents,
+                                   outlength,
+                                   ascending,
+                                   stable);
       }
 #if defined _MSC_VER || defined __i386__
       else if (format_.compare("l") == 0) {
 #else
       else if (format_.compare("i") == 0) {
 #endif
-        ptr = index_sort<int32_t>(reinterpret_cast<int32_t*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength, ascending, stable);
+        ptr = index_sort<int32_t>(reinterpret_cast<int32_t*>(ptr_.get()),
+                                  offset,
+                                  starts,
+                                  parents,
+                                  outlength,
+                                  ascending,
+                                  stable);
       }
 #if defined _MSC_VER || defined __i386__
       else if (format_.compare("L") == 0) {
 #else
       else if (format_.compare("I") == 0) {
 #endif
-        ptr = index_sort<uint32_t>(reinterpret_cast<uint32_t*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength, ascending, stable);
+        ptr = index_sort<uint32_t>(reinterpret_cast<uint32_t*>(ptr_.get()),
+                                   offset,
+                                   starts,
+                                   parents,
+                                   outlength,
+                                   ascending,
+                                   stable);
       }
 #if defined _MSC_VER || defined __i386__
       else if (format_.compare("q") == 0) {
 #else
       else if (format_.compare("l") == 0) {
 #endif
-        ptr = index_sort<int64_t>(reinterpret_cast<int64_t*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength, ascending, stable);
+        ptr = index_sort<int64_t>(reinterpret_cast<int64_t*>(ptr_.get()),
+                                  offset,
+                                  starts,
+                                  parents,
+                                  outlength,
+                                  ascending,
+                                  stable);
       }
 #if defined _MSC_VER || defined __i386__
       else if (format_.compare("Q") == 0) {
 #else
       else if (format_.compare("L") == 0) {
 #endif
-        ptr = index_sort<uint64_t>(reinterpret_cast<uint64_t*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength, ascending, stable);
+        ptr = index_sort<uint64_t>(reinterpret_cast<uint64_t*>(ptr_.get()),
+                                   offset,
+                                   starts,
+                                   parents,
+                                   outlength,
+                                   ascending,
+                                   stable);
       }
       else if (format_.compare("f") == 0) {
-        ptr = index_sort<float>(reinterpret_cast<float*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength, ascending, stable);
+        ptr = index_sort<float>(reinterpret_cast<float*>(ptr_.get()),
+                                offset,
+                                starts,
+                                parents,
+                                outlength,
+                                ascending,
+                                stable);
       }
       else if (format_.compare("d") == 0) {
-        ptr = index_sort<double>(reinterpret_cast<double*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength, ascending, stable);
+        ptr = index_sort<double>(reinterpret_cast<double*>(ptr_.get()),
+                                 offset,
+                                 starts,
+                                 parents,
+                                 outlength,
+                                 ascending,
+                                 stable);
       }
       else {
-        throw std::invalid_argument(std::string("cannot sort NumpyArray with format \"") + format_ + std::string("\""));
+        throw std::invalid_argument(
+          std::string("cannot sort NumpyArray with format \"")
+          + format_ + std::string("\""));
       }
 
       std::string format;
@@ -2466,9 +2624,19 @@ namespace awkward {
       ssize_t itemsize = 8;
       std::vector<ssize_t> shape({ (ssize_t)outlength });
       std::vector<ssize_t> strides({ itemsize });
-      out = std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), ptr, shape, strides, 0, itemsize, format);
+      out = std::make_shared<NumpyArray>(Identities::none(),
+                                         util::Parameters(),
+                                         ptr,
+                                         shape,
+                                         strides,
+                                         0,
+                                         itemsize,
+                                         format);
 
-      out = std::make_shared<RegularArray>(Identities::none(), util::Parameters(), out, outlength);
+      out = std::make_shared<RegularArray>(Identities::none(),
+                                           util::Parameters(),
+                                           out,
+                                           outlength);
       return out;
     }
   }

@@ -193,7 +193,9 @@ namespace awkward {
   }
 
   const ContentPtr
-  Content::sort(int64_t axis, bool ascending, bool stable) const {
+  Content::sort(int64_t axis,
+                bool ascending,
+                bool stable) const {
     int64_t negaxis = -axis;
     std::pair<bool, int64_t> branchdepth = branch_depth();
     bool branch = branchdepth.first;
@@ -201,15 +203,17 @@ namespace awkward {
 
     if (branch) {
       if (negaxis <= 0) {
-        throw std::invalid_argument("cannot use non-negative axis on a nested "
-        "list structure of variable depth (negative axis counts from "
-        "the leaves of the tree; non-negative from the root)");
+        throw std::invalid_argument(
+          "cannot use non-negative axis on a nested list structure "
+          "of variable depth (negative axis counts from the leaves of the tree; "
+          "non-negative from the root)");
       }
       if (negaxis > depth) {
-        throw std::invalid_argument(std::string("cannot use axis=") +
-        std::to_string(axis) + std::string(" on a nested list structure "
-        "that splits into different depths, the minimum of which is depth=") +
-        std::to_string(depth) + std::string(" from the leaves"));
+        throw std::invalid_argument(
+          std::string("cannot use axis=") + std::to_string(axis)
+          + std::string(" on a nested list structure that splits into "
+                        "different depths, the minimum of which is depth=")
+          + std::to_string(depth) + std::string(" from the leaves"));
       }
     }
     else {
@@ -217,9 +221,11 @@ namespace awkward {
         negaxis += depth;
       }
       if (!(0 < negaxis  &&  negaxis <= depth)) {
-        throw std::invalid_argument(std::string("axis=") +
-        std::to_string(axis) + std::string(" exceeds the depth of the nested "
-        "list structure (which is ") + std::to_string(depth) + std::string(")"));
+        throw std::invalid_argument(
+          std::string("axis=") + std::to_string(axis)
+          + std::string(" exceeds the depth of the nested list structure "
+                        "(which is ")
+          + std::to_string(depth) + std::string(")"));
       }
     }
 
@@ -231,10 +237,11 @@ namespace awkward {
       parents.ptr().get(),
       length());
     util::handle_error(err, classname(), identities_.get());
+
     ContentPtr next = sort_next(negaxis,
                                 starts,
                                 parents,
-                                length(),
+                                1,
                                 ascending,
                                 stable);
     return next.get()->getitem_at_nowrap(0);

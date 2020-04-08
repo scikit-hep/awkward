@@ -37,7 +37,7 @@ namespace awkward {
   public:
 
     /// @brief Creates a NumpyArray from a full set of parameters.
-    /// 
+    ///
     /// @param identities Optional Identities for each element of the array
     /// (may be `nullptr`).
     /// @param parameters String-to-JSON map that augments the meaning of this
@@ -723,8 +723,15 @@ namespace awkward {
   /// @brief std::sort uses intro-sort
   ///        std::stable_sort uses mergesort
     template<typename T>
-    const std::shared_ptr<void> index_sort(const T* data, int64_t offset, const Index64& starts, const Index64& parents, int64_t outlength, bool ascending, bool stable) const {
-      std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength], util::array_deleter<int64_t>());
+    const std::shared_ptr<void> index_sort(const T* data,
+                                           int64_t offset,
+                                           const Index64& starts,
+                                           const Index64& parents,
+                                           int64_t outlength,
+                                           bool ascending,
+                                           bool stable) const {
+      std::shared_ptr<int64_t> ptr(
+        new int64_t[(size_t)outlength], util::array_deleter<int64_t>());
       std::vector<size_t> result(parents.length());
       std::iota(result.begin(), result.end(), 0);
 
@@ -763,8 +770,15 @@ namespace awkward {
     }
 
     template<typename T>
-    const std::shared_ptr<void> array_sort(const T* data, int64_t offset, const Index64& starts, const Index64& parents, int64_t outlength, bool ascending, bool stable) const {
-      std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength], util::array_deleter<int64_t>());
+    const std::shared_ptr<void> array_sort(const T* data,
+                                           int64_t offset,
+                                           const Index64& starts,
+                                           const Index64& parents,
+                                           int64_t outlength,
+                                           bool ascending,
+                                           bool stable) const {
+      std::shared_ptr<T> ptr(
+        new T[(size_t)outlength], util::array_deleter<T>());
       std::vector<size_t> result(parents.length());
       std::iota(result.begin(), result.end(), 0);
 
@@ -785,7 +799,7 @@ namespace awkward {
              [&data](size_t i1, size_t i2) {return data[i1] > data[i2];});
       }
 
-      struct Error err = util::awkward_numpyarray_sort_64<T>(
+      struct Error err = util::awkward_numpyarray_sort<T>(
         ptr.get(),
         data,
         &result[0],
