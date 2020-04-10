@@ -1619,7 +1619,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         Lists all methods, properties, and field names (see #__getattr__)
         that can be accessed as attributes.
         """
-        return sorted(set(dir(super(Array, self))
+        return sorted(set(dir(super(Record, self))
                           + [x for x in self._layout.keys()
                                if _dir_pattern.match(x) and
                                not keyword.iskeyword(x)]))
