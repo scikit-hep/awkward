@@ -16,6 +16,8 @@ else()
 endif()
 message(STATUS "Compiler ${CMAKE_CXX_COMPILER_ID}")
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -fvisibility-inlines-hidden")
+
 # This is a C++11 project, but Windows starts at C++14.
 if(MSVC)
   set(CMAKE_CXX_STANDARD 14)
