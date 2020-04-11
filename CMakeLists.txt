@@ -23,10 +23,6 @@ endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# This should be set by "PROPERTIES CXX_VISIBILITY_PRESET hidden" in every project,
-# but MacOS doesn't seem to be getting it.
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden -fvisibility-inlines-hidden")
-
 # VERSION_INFO is the version stamp for everything (all C++, all Python).
 file(READ "VERSION_INFO" VERSION_INFO)
 string(STRIP ${VERSION_INFO} VERSION_INFO)
