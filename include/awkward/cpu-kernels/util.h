@@ -24,8 +24,8 @@
   #define ERROR Error
 #else
   #define EXPORT_SYMBOL __attribute__((visibility("default")))
-  #if __has_attribute(__type_visibility__)
-    #define EXPORT_TYPE __attribute__((__type_visibility__("default")))
+  #if __has_attribute(type_visibility)
+    #define EXPORT_TYPE __attribute__((type_visibility("default")))
   #else
     #define EXPORT_TYPE
   #endif
