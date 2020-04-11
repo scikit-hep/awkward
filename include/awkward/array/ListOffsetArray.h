@@ -25,7 +25,7 @@ namespace awkward {
   ///
   /// See #ListOffsetArrayOf for the meaning of each parameter.
   template <typename T>
-  class EXPORT_SYMBOL EXPORT_TYPE ListOffsetArrayOf: public Content {
+  class EXPORT_TYPE EXPORT_SYMBOL ListOffsetArrayOf: public Content {
   public:
     /// @brief Creates a ListOffsetArray from a full set of parameters.
     ///

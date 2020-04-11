@@ -15,7 +15,7 @@ namespace awkward {
   /// where it is #at (in-place mutable integer).
   ///
   /// It can only be modified by calling #next.
-  class EXPORT_SYMBOL EXPORT_TYPE Iterator {
+  class EXPORT_TYPE EXPORT_SYMBOL Iterator {
   public:
     /// @brief Creates an Iterator from a full set of parameters.
     /// 

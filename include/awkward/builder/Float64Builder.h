@@ -12,7 +12,7 @@ namespace awkward {
   /// @class Float64Builder
   ///
   /// @brief Builder node that accumulates real numbers (`double`).
-  class EXPORT_SYMBOL EXPORT_TYPE Float64Builder: public Builder {
+  class EXPORT_TYPE EXPORT_SYMBOL Float64Builder: public Builder {
   public:
     /// @brief Create an empty Float64Builder.
     /// @param options Configuration options for building an array;

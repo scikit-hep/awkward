@@ -14,7 +14,7 @@ namespace awkward {
   /// @class OptionBuilder
   ///
   /// @brief Builder node that accumulates data with missing values (`None`).
-  class EXPORT_SYMBOL EXPORT_TYPE OptionBuilder: public Builder {
+  class EXPORT_TYPE EXPORT_SYMBOL OptionBuilder: public Builder {
   public:
     /// @brief Create an OptionBuilder from a number of nulls (all missing).
     /// @param options Configuration options for building an array;

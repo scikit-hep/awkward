@@ -19,7 +19,7 @@ namespace awkward {
   /// values happen to be valid.
   ///
   /// See #UnmaskedArray for the meaning of each parameter.
-  class EXPORT_SYMBOL EXPORT_TYPE UnmaskedArray: public Content {
+  class EXPORT_TYPE EXPORT_SYMBOL UnmaskedArray: public Content {
   public:
     /// @brief Creates an UnmaskedArray from a full set of parameters.
     ///

@@ -24,7 +24,7 @@ namespace awkward {
   ///
   /// See #IndexedArrayOf for the meaning of each parameter.
   template <typename T, bool ISOPTION>
-  class EXPORT_SYMBOL EXPORT_TYPE IndexedArrayOf: public Content {
+  class EXPORT_TYPE EXPORT_SYMBOL IndexedArrayOf: public Content {
   public:
     /// @brief Creates an IndexedArray or IndexedOptionArray from a full set
     /// of parameters.
