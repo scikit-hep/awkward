@@ -12,7 +12,7 @@ namespace awkward {
   /// @class Int64Builder
   ///
   /// @brief Builder node that accumulates integers (`int64_t`).
-  class EXPORT_TYPE Int64Builder: public Builder {
+  class EXPORT_SYMBOL EXPORT_TYPE Int64Builder: public Builder {
   public:
     /// @brief Create an empty Int64Builder.
     /// @param options Configuration options for building an array;

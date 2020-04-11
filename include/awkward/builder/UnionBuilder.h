@@ -17,7 +17,7 @@ namespace awkward {
   /// @class UnionBuilder
   ///
   /// @brief Builder node for accumulated heterogeneous data.
-  class EXPORT_TYPE UnionBuilder: public Builder {
+  class EXPORT_SYMBOL EXPORT_TYPE UnionBuilder: public Builder {
   public:
     static const BuilderPtr
       fromsingle(const ArrayBuilderOptions& options,

@@ -13,7 +13,7 @@ namespace awkward {
   /// @class UnknownBuilder
   ///
   /// @brief Builder node for accumulated data whose type is not yet known.
-  class EXPORT_TYPE UnknownBuilder: public Builder {
+  class EXPORT_SYMBOL EXPORT_TYPE UnknownBuilder: public Builder {
   public:
     /// @brief Create an empty UnknownBuilder.
     /// @param options Configuration options for building an array;

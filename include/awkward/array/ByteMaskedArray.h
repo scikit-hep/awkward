@@ -22,7 +22,7 @@ namespace awkward {
   /// over its #content.
   ///
   /// See #ByteMaskedArray for the meaning of each parameter.
-  class EXPORT_TYPE ByteMaskedArray: public Content {
+  class EXPORT_SYMBOL EXPORT_TYPE ByteMaskedArray: public Content {
   public:
     /// @brief Creates an ByteMaskedArray from a full set of parameters.
     ///

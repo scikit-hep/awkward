@@ -27,7 +27,7 @@
   #if __has_attribute(type_visibility)
     #define EXPORT_TYPE __attribute__((type_visibility("default")))
   #else
-    #define EXPORT_TYPE __attribute__((visibility("default")))
+    #define EXPORT_TYPE
   #endif
   #include <cstddef>
   #include <cstdint>

@@ -12,7 +12,7 @@ namespace awkward {
   /// @class StringBuilder
   ///
   /// @brief Builder node that accumulates strings.
-  class EXPORT_TYPE StringBuilder: public Builder {
+  class EXPORT_SYMBOL EXPORT_TYPE StringBuilder: public Builder {
   public:
     /// @brief Create an empty StringBuilder.
     /// @param options Configuration options for building an array;

@@ -25,7 +25,7 @@ namespace awkward {
   /// with each field.
   ///
   /// Fields are always ordered, whether tuples or records.
-  class EXPORT_TYPE RecordArray:
+  class EXPORT_SYMBOL EXPORT_TYPE RecordArray:
     public Content,
     public std::enable_shared_from_this<RecordArray> {
   public:

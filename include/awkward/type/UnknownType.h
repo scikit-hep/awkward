@@ -13,7 +13,7 @@ namespace awkward {
   /// to sample.
   ///
   /// EmptyArray nodes have this type.
-  class EXPORT_TYPE UnknownType: public Type {
+  class EXPORT_SYMBOL EXPORT_TYPE UnknownType: public Type {
   public:
     /// @brief Create an OptionType with a full set of parameters.
     ///

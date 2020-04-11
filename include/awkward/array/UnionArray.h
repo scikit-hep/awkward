@@ -25,7 +25,7 @@ namespace awkward {
   /// same type, though #simplify_uniontype would combine such arrays to
   /// simplify the representation.
   template <typename T, typename I>
-  class EXPORT_TYPE UnionArrayOf: public Content {
+  class EXPORT_SYMBOL EXPORT_TYPE UnionArrayOf: public Content {
   public:
     /// @brief Generates an index in which `index[i] = i`.
     static const IndexOf<I>

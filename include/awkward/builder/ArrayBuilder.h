@@ -16,7 +16,7 @@ namespace awkward {
   /// @brief User interface to the Builder system: the ArrayBuilder is a
   /// fixed reference while the Builder subclass instances change in
   /// response to accumulating data.
-  class EXPORT_TYPE ArrayBuilder {
+  class EXPORT_SYMBOL EXPORT_TYPE ArrayBuilder {
   public:
     /// @brief Creates an ArrayBuilder from a full set of parameters.
     ///
