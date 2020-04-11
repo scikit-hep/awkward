@@ -1,13 +1,17 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+#include <string>
+
 #include <pybind11/pybind11.h>
 
 #include "awkward/python/index.h"
 #include "awkward/python/identities.h"
 #include "awkward/python/content.h"
+#include "awkward/python/types.h"
+#include "awkward/python/_io.h"
 
 namespace py = pybind11;
-PYBIND11_MODULE(layout, m) {
+PYBIND11_MODULE(_ext, m) {
 #ifdef VERSION_INFO
   m.attr("__version__") = VERSION_INFO;
 #else
@@ -68,4 +72,17 @@ PYBIND11_MODULE(layout, m) {
   m.def("_slice_tostring", [](py::object obj) -> std::string {
     return toslice(obj).tostring();
   });
+
+  make_Type(m, "Type");
+  make_ArrayType(m, "ArrayType");
+  make_PrimitiveType(m, "PrimitiveType");
+  make_RegularType(m, "RegularType");
+  make_UnknownType(m, "UnknownType");
+  make_ListType(m, "ListType");
+  make_OptionType(m, "OptionType");
+  make_UnionType(m, "UnionType");
+  make_RecordType(m, "RecordType");
+
+  make_fromjson(m, "fromjson");
+  make_fromroot_nestedvector(m, "fromroot_nestedvector");
 }
