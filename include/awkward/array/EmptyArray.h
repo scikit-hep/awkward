@@ -20,7 +20,7 @@ namespace awkward {
   /// consequence) UnknownType.
   ///
   /// See #EmptyArray for the meaning of each parameter.
-  class EXPORT_TYPE EXPORT_SYMBOL EmptyArray: public Content {
+  class EXPORT_TYPE EmptyArray: public Content {
   public:
     /// @brief Creates an EmptyArray from a full set of parameters.
     ///

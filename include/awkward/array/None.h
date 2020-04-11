@@ -18,7 +18,7 @@ namespace awkward {
   ///
   /// Nearly all of the methods raise runtime errors. See
   /// {@link Content#isscalar Content::isscalar}.
-  class EXPORT_TYPE EXPORT_SYMBOL None: public Content {
+  class EXPORT_TYPE None: public Content {
   public:
     /// @brief Creates a None instance.
     None();

@@ -13,7 +13,7 @@ namespace awkward {
   /// @brief Describes the high level type of heterogeneous data.
   ///
   /// {@link UnionArrayOf UnionArray} nodes have this type.
-  class EXPORT_TYPE EXPORT_SYMBOL UnionType: public Type {
+  class EXPORT_TYPE UnionType: public Type {
   public:
     /// @brief Create an UnionArray with a full set of parameters.
     ///

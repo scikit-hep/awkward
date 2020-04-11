@@ -52,7 +52,7 @@ namespace awkward {
   ///    - {@link IndexOf IndexU32}, which is `IndexOf<uint32_t>`
   ///    - {@link IndexOf Index64}, which is `IndexOf<int64_t>`
   template <typename T>
-  class EXPORT_TYPE EXPORT_SYMBOL IndexOf: public Index {
+  class EXPORT_TYPE IndexOf: public Index {
   public:
     /// @brief Creates an IndexOf from a full set of parameters.
     /// 

@@ -244,7 +244,7 @@ namespace awkward {
   /// Reducers have no parameters or state. They are classes for convenience,
   /// to separate {@link Content#reduce_next Content::reduce_next}, determining
   /// which values to combine, from the choice of reducer algorithm.
-  class EXPORT_TYPE EXPORT_SYMBOL ReducerCount: public Reducer {
+  class EXPORT_TYPE ReducerCount: public Reducer {
   public:
     /// @brief Name of the reducer algorithm: `"count"`.
     const std::string
@@ -361,7 +361,7 @@ namespace awkward {
   /// Reducers have no parameters or state. They are classes for convenience,
   /// to separate {@link Content#reduce_next Content::reduce_next}, determining
   /// which values to combine, from the choice of reducer algorithm.
-  class EXPORT_TYPE EXPORT_SYMBOL ReducerCountNonzero: public Reducer {
+  class EXPORT_TYPE ReducerCountNonzero: public Reducer {
   public:
     /// @brief Name of the reducer algorithm: `"count_nonzero"`.
     const std::string
@@ -480,7 +480,7 @@ namespace awkward {
   /// Reducers have no parameters or state. They are classes for convenience,
   /// to separate {@link Content#reduce_next Content::reduce_next}, determining
   /// which values to combine, from the choice of reducer algorithm.
-  class EXPORT_TYPE EXPORT_SYMBOL ReducerSum: public Reducer {
+  class EXPORT_TYPE ReducerSum: public Reducer {
   public:
     /// @brief Name of the reducer algorithm: `"sum"`.
     const std::string
@@ -597,7 +597,7 @@ namespace awkward {
   /// Reducers have no parameters or state. They are classes for convenience,
   /// to separate {@link Content#reduce_next Content::reduce_next}, determining
   /// which values to combine, from the choice of reducer algorithm.
-  class EXPORT_TYPE EXPORT_SYMBOL ReducerProd: public Reducer {
+  class EXPORT_TYPE ReducerProd: public Reducer {
   public:
     /// @brief Name of the reducer algorithm: `"prod"`.
     const std::string
@@ -717,7 +717,7 @@ namespace awkward {
   /// Reducers have no parameters or state. They are classes for convenience,
   /// to separate {@link Content#reduce_next Content::reduce_next}, determining
   /// which values to combine, from the choice of reducer algorithm.
-  class EXPORT_TYPE EXPORT_SYMBOL ReducerAny: public Reducer {
+  class EXPORT_TYPE ReducerAny: public Reducer {
   public:
     /// @brief Name of the reducer algorithm: `"any"`.
     const std::string
@@ -833,7 +833,7 @@ namespace awkward {
   /// Reducers have no parameters or state. They are classes for convenience,
   /// to separate {@link Content#reduce_next Content::reduce_next}, determining
   /// which values to combine, from the choice of reducer algorithm.
-  class EXPORT_TYPE EXPORT_SYMBOL ReducerAll: public Reducer {
+  class EXPORT_TYPE ReducerAll: public Reducer {
   public:
     /// @brief Name of the reducer algorithm: `"all"`.
     const std::string
@@ -949,7 +949,7 @@ namespace awkward {
   /// Reducers have no parameters or state. They are classes for convenience,
   /// to separate {@link Content#reduce_next Content::reduce_next}, determining
   /// which values to combine, from the choice of reducer algorithm.
-  class EXPORT_TYPE EXPORT_SYMBOL ReducerMin: public Reducer {
+  class EXPORT_TYPE ReducerMin: public Reducer {
   public:
     /// @brief Name of the reducer algorithm: `"min"`.
     const std::string
@@ -1053,7 +1053,7 @@ namespace awkward {
   /// Reducers have no parameters or state. They are classes for convenience,
   /// to separate {@link Content#reduce_next Content::reduce_next}, determining
   /// which values to combine, from the choice of reducer algorithm.
-  class EXPORT_TYPE EXPORT_SYMBOL ReducerMax: public Reducer {
+  class EXPORT_TYPE ReducerMax: public Reducer {
   public:
     /// @brief Name of the reducer algorithm: `"max"`.
     const std::string
@@ -1157,7 +1157,7 @@ namespace awkward {
   /// Reducers have no parameters or state. They are classes for convenience,
   /// to separate {@link Content#reduce_next Content::reduce_next}, determining
   /// which values to combine, from the choice of reducer algorithm.
-  class EXPORT_TYPE EXPORT_SYMBOL ReducerArgmin: public Reducer {
+  class EXPORT_TYPE ReducerArgmin: public Reducer {
   public:
     /// @brief Name of the reducer algorithm: `"argmin"`.
     const std::string
@@ -1277,7 +1277,7 @@ namespace awkward {
   /// Reducers have no parameters or state. They are classes for convenience,
   /// to separate {@link Content#reduce_next Content::reduce_next}, determining
   /// which values to combine, from the choice of reducer algorithm.
-  class EXPORT_TYPE EXPORT_SYMBOL ReducerArgmax: public Reducer {
+  class EXPORT_TYPE ReducerArgmax: public Reducer {
   public:
     /// @brief Name of the reducer algorithm: `"argmax"`.
     const std::string
