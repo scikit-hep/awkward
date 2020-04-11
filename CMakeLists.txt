@@ -23,7 +23,7 @@ endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -frtti")   #  -fvisibility=hidden -fvisibility-inlines-hidden
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -frtti -fvisibility=hidden -fvisibility-inlines-hidden")
 
 # VERSION_INFO is the version stamp for everything (all C++, all Python).
 file(READ "VERSION_INFO" VERSION_INFO)
