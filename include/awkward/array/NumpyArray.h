@@ -31,7 +31,7 @@ namespace awkward {
   ///  - 8-bit booleans
   ///
   ///(native endian only).
-  class EXPORT_SYMBOL NumpyArray: public Content {
+  class EXPORT_SYMBOL EXPORT_TYPE NumpyArray: public Content {
   public:
 
     /// @brief Creates a NumpyArray from a full set of parameters.

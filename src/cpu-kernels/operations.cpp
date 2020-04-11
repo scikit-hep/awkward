@@ -3437,7 +3437,7 @@ ERROR awkward_bytemaskedarray_overlay_mask(
   for (int64_t i = 0;  i < length;  i++) {
     bool theirs = theirmask[theirmaskoffset + i];
     bool mine = ((mymask[mymaskoffset + i] != 0) != validwhen);
-    tomask[i] = (theirs | mine ? 1 : 0);
+    tomask[i] = ((theirs | mine) ? 1 : 0);
   }
   return success();
 }

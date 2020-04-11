@@ -13,7 +13,7 @@ namespace awkward {
   ///
   /// {@link IndexedArrayOf IndexedOptionArray}, ByteMaskedArray,
   /// BitMaskedArray, and UnmaskedArray nodes have this type.
-  class EXPORT_SYMBOL OptionType: public Type {
+  class EXPORT_SYMBOL EXPORT_TYPE OptionType: public Type {
   public:
     /// @brief Create an OptionType with a full set of parameters.
     ///

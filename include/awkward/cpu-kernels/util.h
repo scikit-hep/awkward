@@ -5,6 +5,7 @@
 
 #ifdef _MSC_VER
   #define EXPORT_SYMBOL __declspec(dllexport)
+  #define EXPORT_TYPE
   #ifdef _WIN64
     typedef signed   __int64 ssize_t;
     typedef unsigned __int64 size_t;
@@ -23,6 +24,11 @@
   #define ERROR Error
 #else
   #define EXPORT_SYMBOL __attribute__((visibility("default")))
+  #if __has_attribute(type_visibility)
+    #define EXPORT_TYPE __attribute__((type_visibility("default")))
+  #else
+    #define EXPORT_TYPE
+  #endif
   #include <cstddef>
   #include <cstdint>
   #define ERROR struct Error

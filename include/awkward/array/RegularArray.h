@@ -24,7 +24,7 @@ namespace awkward {
   /// it must also start at zero.
   ///
   /// See #RegularArray for the meaning of each parameter.
-  class EXPORT_SYMBOL RegularArray: public Content {
+  class EXPORT_SYMBOL EXPORT_TYPE RegularArray: public Content {
   public:
     /// @brief Creates a RegularArray from a full set of parameters.
     ///

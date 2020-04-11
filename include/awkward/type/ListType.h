@@ -13,7 +13,7 @@ namespace awkward {
   ///
   /// {@link ListArrayOf ListArray} and
   /// {@link ListOffsetArrayOf ListOffsetArray} nodes have this type.
-  class EXPORT_SYMBOL ListType: public Type {
+  class EXPORT_SYMBOL EXPORT_TYPE ListType: public Type {
   public:
     /// @brief Create a ListType with a full set of parameters.
     ///

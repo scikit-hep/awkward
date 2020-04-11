@@ -18,7 +18,7 @@ namespace awkward {
   /// records.
   ///
   /// RecordArray nodes have this type.
-  class EXPORT_SYMBOL RecordType: public Type {
+  class EXPORT_SYMBOL EXPORT_TYPE RecordType: public Type {
   public:
     /// @brief Create an RecordArray with a full set of parameters.
     ///

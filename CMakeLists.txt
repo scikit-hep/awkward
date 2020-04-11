@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
 cmake_minimum_required(VERSION 3.10...3.16)
+option(USE_CLANG "build application with clang" ON)
 
 # Project must be near the top
 project(awkward LANGUAGES CXX)
@@ -13,6 +14,7 @@ if(CMAKE_BUILD_TYPE IN_LIST SIMPLE_TYPES)
 else()
   message(STATUS "CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
 endif()
+message(STATUS "Compiler ${CMAKE_CXX_COMPILER_ID}")
 
 # This is a C++11 project, but Windows starts at C++14.
 if(MSVC)
@@ -22,8 +24,6 @@ else()
 endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -frtti -fvisibility=hidden -fvisibility-inlines-hidden")
 
 # VERSION_INFO is the version stamp for everything (all C++, all Python).
 file(READ "VERSION_INFO" VERSION_INFO)
@@ -49,8 +49,8 @@ macro(addtest name filename)
   if(BUILD_TESTING)
     add_executable(${name} ${filename})
     target_link_libraries(${name} PRIVATE awkward-static awkward-cpu-kernels-static)
-    set_target_properties(${name} PROPERTIES CXX_VISIBILITY_PRESET hidden)
-    set_target_properties(${name} PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
+    # set_target_properties(${name} PROPERTIES CXX_VISIBILITY_PRESET hidden)
+    # set_target_properties(${name} PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
     add_test(${name} ${name})
   endif()
 endmacro(addtest)
@@ -61,12 +61,12 @@ set_target_properties(awkward-cpu-kernels-objects PROPERTIES POSITION_INDEPENDEN
 add_library(awkward-cpu-kernels-static STATIC $<TARGET_OBJECTS:awkward-cpu-kernels-objects>)
 set_property(TARGET awkward-cpu-kernels-static PROPERTY POSITION_INDEPENDENT_CODE ON)
 add_library(awkward-cpu-kernels        SHARED $<TARGET_OBJECTS:awkward-cpu-kernels-objects>)
-set_target_properties(awkward-cpu-kernels-objects PROPERTIES CXX_VISIBILITY_PRESET hidden)
-set_target_properties(awkward-cpu-kernels-objects PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
-set_target_properties(awkward-cpu-kernels-static PROPERTIES CXX_VISIBILITY_PRESET hidden)
-set_target_properties(awkward-cpu-kernels-static PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
-set_target_properties(awkward-cpu-kernels PROPERTIES CXX_VISIBILITY_PRESET hidden)
-set_target_properties(awkward-cpu-kernels PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
+# set_target_properties(awkward-cpu-kernels-objects PROPERTIES CXX_VISIBILITY_PRESET hidden)
+# set_target_properties(awkward-cpu-kernels-objects PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
+# set_target_properties(awkward-cpu-kernels-static PROPERTIES CXX_VISIBILITY_PRESET hidden)
+# set_target_properties(awkward-cpu-kernels-static PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
+# set_target_properties(awkward-cpu-kernels PROPERTIES CXX_VISIBILITY_PRESET hidden)
+# set_target_properties(awkward-cpu-kernels PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
 
 # Second tier: libawkward (object files, static library, and dynamic library).
 add_library(awkward-objects OBJECT ${LIBAWKWARD_SOURCES})
@@ -76,12 +76,12 @@ set_property(TARGET awkward-static PROPERTY POSITION_INDEPENDENT_CODE ON)
 add_library(awkward        SHARED $<TARGET_OBJECTS:awkward-objects>)
 target_link_libraries(awkward-static PRIVATE awkward-cpu-kernels-static)
 target_link_libraries(awkward        PRIVATE awkward-cpu-kernels-static)
-set_target_properties(awkward-objects PROPERTIES CXX_VISIBILITY_PRESET hidden)
-set_target_properties(awkward-objects PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
-set_target_properties(awkward-static PROPERTIES CXX_VISIBILITY_PRESET hidden)
-set_target_properties(awkward-static PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
-set_target_properties(awkward PROPERTIES CXX_VISIBILITY_PRESET hidden)
-set_target_properties(awkward PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
+# set_target_properties(awkward-objects PROPERTIES CXX_VISIBILITY_PRESET hidden)
+# set_target_properties(awkward-objects PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
+# set_target_properties(awkward-static PROPERTIES CXX_VISIBILITY_PRESET hidden)
+# set_target_properties(awkward-static PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
+# set_target_properties(awkward PROPERTIES CXX_VISIBILITY_PRESET hidden)
+# set_target_properties(awkward PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
 
 # Tests for second tier (these do not depend on Python).
 addtest(test0016 tests/test_0016-finish-getitem-for-rawarray.cpp)
@@ -94,18 +94,18 @@ if (PYBUILD)
 
   file(GLOB LAYOUT_SOURCES "src/python/layout/*.cpp")
   pybind11_add_module(layout src/python/layout.cpp ${LAYOUT_SOURCES})
-  set_target_properties(layout PROPERTIES CXX_VISIBILITY_PRESET hidden)
-  set_target_properties(layout PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
+  # set_target_properties(layout PROPERTIES CXX_VISIBILITY_PRESET hidden)
+  # set_target_properties(layout PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
   target_link_libraries(layout PRIVATE awkward-static)
 
   pybind11_add_module(types src/python/types.cpp)
-  set_target_properties(types PROPERTIES CXX_VISIBILITY_PRESET hidden)
-  set_target_properties(types PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
+  # set_target_properties(types PROPERTIES CXX_VISIBILITY_PRESET hidden)
+  # set_target_properties(types PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
   target_link_libraries(types PRIVATE awkward-static)
 
   pybind11_add_module(_io src/python/_io.cpp)
-  set_target_properties(_io PROPERTIES CXX_VISIBILITY_PRESET hidden)
-  set_target_properties(_io PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
+  # set_target_properties(_io PROPERTIES CXX_VISIBILITY_PRESET hidden)
+  # set_target_properties(_io PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
   target_link_libraries(_io PRIVATE awkward-static)
 
   install(TARGETS awkward-static awkward awkward-cpu-kernels awkward-cpu-kernels-static

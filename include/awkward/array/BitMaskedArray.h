@@ -24,7 +24,7 @@ namespace awkward {
   /// over its #content.
   ///
   /// See #BitMaskedArray for the meaning of each parameter.
-  class EXPORT_SYMBOL BitMaskedArray: public Content {
+  class EXPORT_SYMBOL EXPORT_TYPE BitMaskedArray: public Content {
   public:
     /// @brief Creates an BitMaskedArray from a full set of parameters.
     ///

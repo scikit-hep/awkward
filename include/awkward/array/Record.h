@@ -12,7 +12,7 @@ namespace awkward {
   ///
   /// Many of the methods raise runtime errors. See
   /// {@link Content#isscalar Content::isscalar}.
-  class EXPORT_SYMBOL Record: public Content {
+  class EXPORT_SYMBOL EXPORT_TYPE Record: public Content {
   public:
     /// @brief Creates a Record from a full set of parameters.
     /// 
