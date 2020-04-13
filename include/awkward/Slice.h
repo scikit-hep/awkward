@@ -22,7 +22,7 @@ namespace awkward {
   class EXPORT_SYMBOL SliceItem {
   public:
     /// @brief Empty destructor; required for some C++ reason.
-    virtual ~SliceItem();
+    virtual ~SliceItem() { }
 
     /// @brief Copies this node without copying any associated arrays.
     virtual const SliceItemPtr

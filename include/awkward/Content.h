@@ -31,7 +31,7 @@ namespace awkward {
             const util::Parameters& parameters);
 
     /// @brief Empty destructor; required for some C++ reason.
-    virtual ~Content();
+    virtual ~Content() { }
 
     /// @brief Returns `true` if the data represented by this node is scalar,
     /// not a true array.

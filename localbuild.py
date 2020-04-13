@@ -100,7 +100,7 @@ if args.buildpython:
     shutil.copytree("src/awkward1", "awkward1")
 
     # The extension modules must be copied into the same directory.
-    for x in glob.glob("localbuild/layout*") + glob.glob("localbuild/types*") + glob.glob("localbuild/_io*") + glob.glob("localbuild/libawkward*"):
+    for x in glob.glob("localbuild/_ext*") + glob.glob("localbuild/libawkward*"):
         shutil.copyfile(x, os.path.join("awkward1", os.path.split(x)[1]))
 
     # localbuild must be in the library path for some operations.

@@ -11,11 +11,6 @@
 #include "awkward/Content.h"
 
 namespace awkward {
-  template <typename T>
-  class ListOffsetArrayOf;
-
-  class RegularArray;
-
   /// @class ListArrayOf
   ///
   /// @brief Represents an array of nested lists that can have different
@@ -102,7 +97,7 @@ namespace awkward {
     /// Since the output is a {@link ListOffsetArrayOf ListOffsetArray}, this
     /// operation produces contiguous output, replacing multiply-referenced
     /// items with copied items and removing unreachable gaps between items.
-    const std::shared_ptr<ListOffsetArrayOf<int64_t>>
+    const ContentPtr
       broadcast_tooffsets64(const Index64& offsets) const;
 
     /// @brief Converts this array to a RegularArray if all nested lists have
@@ -112,7 +107,7 @@ namespace awkward {
     /// operation produces contiguous output, replacing multiply-referenced
     /// items with copied items and removing unreachable gaps before and
     /// between items.
-    const std::shared_ptr<RegularArray>
+    const ContentPtr
       toRegularArray() const;
 
     /// @brief Returns this array as a
@@ -127,7 +122,7 @@ namespace awkward {
     /// Since the output is a {@link ListOffsetArrayOf ListOffsetArray}, this
     /// operation produces contiguous output, replacing multiply-referenced
     /// items with copied items and removing unreachable gaps between items.
-    const std::shared_ptr<ListOffsetArrayOf<int64_t>>
+    const ContentPtr
       toListOffsetArray64(bool start_at_zero) const;
 
     /// @brief User-friendly name of this class: `"ListArray32"`,

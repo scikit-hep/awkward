@@ -21,7 +21,7 @@ namespace awkward {
   class EXPORT_SYMBOL Builder {
   public:
     /// @brief Empty destructor; required for some C++ reason.
-    virtual ~Builder();
+    virtual ~Builder() { }
 
     /// @brief User-friendly name of this class.
     virtual const std::string

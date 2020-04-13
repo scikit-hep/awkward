@@ -12,28 +12,28 @@ if (distutils.version.LooseVersion(numpy.__version__) <
     distutils.version.LooseVersion("1.13.1")):
     raise ImportError("Numpy 1.13.1 or later required")
 
-# C++ modules
+# shims for C++ (now everything is compiled into one 'awkward1._ext' module)
 import awkward1.layout
 import awkward1.types
 
 # third-party connectors
 import awkward1._connect._numba
-numba = type(awkward1.highlevel)("numba")
+numba = type(awkward1._connect._numba)("numba")
 numba.register = awkward1._connect._numba.register
 
 import awkward1._connect._pandas
-pandas = type(awkward1.highlevel)("pandas")
+pandas = type(awkward1._connect._pandas)("pandas")
 pandas.register = awkward1._connect._pandas.register
 pandas.df = awkward1._connect._pandas.df
 pandas.dfs = awkward1._connect._pandas.dfs
 
 import awkward1._connect._numexpr
-numexpr = type(awkward1.highlevel)("numexpr")
+numexpr = type(awkward1._connect._numexpr)("numexpr")
 numexpr.evaluate = awkward1._connect._numexpr.evaluate
 numexpr.re_evaluate = awkward1._connect._numexpr.re_evaluate
 
 import awkward1._connect._autograd
-autograd = type(awkward1.highlevel)("autograd")
+autograd = type(awkward1._connect._autograd)("autograd")
 autograd.elementwise_grad = awkward1._connect._autograd.elementwise_grad
 
 # high-level interface
@@ -52,7 +52,7 @@ from awkward1.operations.structure import *
 from awkward1.operations.reducers import *
 
 # version
-__version__ = awkward1.layout.__version__
+__version__ = awkward1._ext.__version__
 
 __all__ = [x for x in list(globals())
              if not x.startswith("_") and x not in ("distutils", "numpy")]
