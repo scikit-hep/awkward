@@ -87,10 +87,13 @@ namespace awkward {
   }
 
   void
-  EmptyArray::tojson_part(ToJson& builder) const {
+  EmptyArray::tojson_part(ToJson& builder,
+                          bool include_beginendlist) const {
     check_for_iteration();
-    builder.beginlist();
-    builder.endlist();
+    if (include_beginendlist) {
+      builder.beginlist();
+      builder.endlist();
+    }
   }
 
   void

@@ -207,8 +207,9 @@ namespace awkward {
   }
 
   void
-  UnmaskedArray::tojson_part(ToJson& builder) const {
-    content_.get()->tojson_part(builder);
+  UnmaskedArray::tojson_part(ToJson& builder,
+                             bool include_beginendlist) const {
+    content_.get()->tojson_part(builder, include_beginendlist);
   }
 
   void

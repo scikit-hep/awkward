@@ -109,7 +109,7 @@ namespace awkward {
     /// @brief Internal function to produce a JSON representation one node at
     /// a time.
     virtual void
-      tojson_part(ToJson& builder) const = 0;
+      tojson_part(ToJson& builder, bool include_beginendlist) const = 0;
 
     /// @brief Internal function used to calculate #nbytes.
     ///
@@ -254,7 +254,7 @@ namespace awkward {
     /// The output has the same length as the `carry` index, not the `array`
     /// that is being manipulated. For each item `i` in `carry`, the output
     /// is `array[index[i]]`.
-    /// 
+    ///
     /// This operation is called
     /// [take](https://docs.scipy.org/doc/numpy/reference/generated/numpy.take.html)
     /// in NumPy and Arrow, although this #carry is a low-level function that
@@ -264,7 +264,7 @@ namespace awkward {
     /// another without knowing the latter's type.
     ///
     /// Taking #getitem_at_nowrap as a function from integers to the array's
-    /// item type, `A: [0, len(a)) → T`, and the `carry` array's 
+    /// item type, `A: [0, len(a)) → T`, and the `carry` array's
     /// {@link IndexOf#getitem_at_nowrap Index64::getitem_at_nowrap} as a
     /// function `C: [0, len(c)) → [0, len(a))`, this method represents
     /// function composition, `A ∘ C: [0, len(c)) → T`.
@@ -516,7 +516,7 @@ namespace awkward {
     /// @endcode
     ///
     /// and the `n = 3` combinations at `axis = 1` of
-    /// 
+    ///
     /// @code{.py}
     /// [[a, b, c, d], [], [e, f], [g, h, i]]
     /// @endcode
@@ -752,13 +752,13 @@ namespace awkward {
     /// defined universally in the Content class.
     const ContentPtr
       localindex_axis0() const;
-    
+
     /// @brief Internal function to handle the `axis = 0` case of
     /// #combinations.
     ///
     /// The `axis = 0` case does not depend on array node type, so it is
     /// defined universally in the Content class.
-    /// 
+    ///
     /// @param n The number of items in each tuple/record.
     /// @param replacement If `true`, the tuples/records are allowed to include
     /// the same item more than once, such as `(a, a, a)` and `(a, a, b)`.

@@ -42,12 +42,12 @@ namespace awkward {
   Content::tojson(bool pretty, int64_t maxdecimals) const {
     if (pretty) {
       ToJsonPrettyString builder(maxdecimals);
-      tojson_part(builder);
+      tojson_part(builder, true);
       return builder.tostring();
     }
     else {
       ToJsonString builder(maxdecimals);
-      tojson_part(builder);
+      tojson_part(builder, true);
       return builder.tostring();
     }
   }
@@ -60,13 +60,13 @@ namespace awkward {
     if (pretty) {
       ToJsonPrettyFile builder(destination, maxdecimals, buffersize);
       builder.beginlist();
-      tojson_part(builder);
+      tojson_part(builder, true);
       builder.endlist();
     }
     else {
       ToJsonFile builder(destination, maxdecimals, buffersize);
       builder.beginlist();
-      tojson_part(builder);
+      tojson_part(builder, true);
       builder.endlist();
     }
   }
@@ -74,7 +74,7 @@ namespace awkward {
   int64_t
   Content::nbytes() const {
     // FIXME: this is only accurate if all subintervals of allocated arrays are
-    // nested (which is likely, but not guaranteed). In general, it's <= the 
+    // nested (which is likely, but not guaranteed). In general, it's <= the
     // correct nbytes.
     std::map<size_t, int64_t> largest;
     nbytes_part(largest);

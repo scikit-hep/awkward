@@ -33,16 +33,69 @@ namespace awkward {
     const ContentPtr
       partition(int64_t partitionid) const;
 
+    /// @brieg Logical starting index for a given partitionid.
+    virtual int64_t
+      start(int64_t partitionid) const = 0;
+
+    /// @brieg Logical stopping index for a given partitionid.
+    virtual int64_t
+      stop(int64_t partitionid) const = 0;
+
     /// @brief Get the partitionid and index for a given logical position in
     /// the full array, without handling negative indexing or bounds-checking.
     virtual void
       partitionid_index_at(int64_t at,
                            int64_t& partitionid,
-                           int64_t& index) const override;
+                           int64_t& index) const = 0;
 
     /// @brief User-friendly name of this class.
     virtual const std::string
       classname() const = 0;
+
+    /// @brief Returns a string representation of this array (multi-line XML).
+    ///
+    /// Although this XML string has detail about every node in the tree,
+    /// it does not show all elements in the array buffers and therefore
+    /// does not scale with the size of the dataset (i.e. it is safe to
+    /// print to the screen).
+    ///
+    /// Thus, it's also not a storage format: see #tojson.
+    virtual const std::string
+      tostring() const = 0;
+
+    /// @brief Returns a JSON representation of this array.
+    ///
+    /// @param pretty If `true`, add spacing to make the JSON human-readable.
+    /// If `false`, return a compact representation.
+    /// @param maxdecimals Maximum number of decimals for floating-point
+    /// numbers or `-1` for no limit.
+    ///
+    /// Although the JSON output contains all of the data from the array
+    /// (and therefore might not be safe to print to the screen), it
+    /// does not preserve the type information of an array. In particular,
+    /// the distinction between ListType and RegularType is lost.
+    const std::string
+      tojson(bool pretty, int64_t maxdecimals) const;
+
+    /// @brief Writes a JSON representation of this array to a `destination`
+    /// file.
+    ///
+    /// @param destination The file to write into.
+    /// @param pretty If `true`, add spacing to make the JSON human-readable.
+    /// If `false`, return a compact representation.
+    /// @param maxdecimals Maximum number of decimals for floating-point
+    /// numbers or `-1` for no limit.
+    /// @param buffersize Size of a temporary buffer in bytes.
+    ///
+    /// Although the JSON output contains all of the data from the array
+    /// (and therefore might not be safe to print to the screen), it
+    /// does not preserve the type information of an array. In particular,
+    /// the distinction between ListType and RegularType is lost.
+    void
+      tojson(FILE* destination,
+             bool pretty,
+             int64_t maxdecimals,
+             int64_t buffersize) const;
 
     /// @brief The length of the full array, summed over all partitions.
     virtual int64_t
@@ -81,7 +134,7 @@ namespace awkward {
     ///
     /// This operation only affects the node metadata; its calculation time
     /// does not scale with the size of the array.
-    const ContentPtr
+    const PartitionedArrayPtr
       getitem_range(int64_t start, int64_t stop) const;
 
     /// @brief Subinterval of this array, without handling negative
@@ -91,10 +144,10 @@ namespace awkward {
     ///
     /// This operation only affects the node metadata; its calculation time
     /// does not scale with the size of the array.
-    const ContentPtr
+    const PartitionedArrayPtr
       getitem_range_nowrap(int64_t start, int64_t stop) const;
 
-  private:
+  protected:
     const ContentPtrVec partitions_;
   };
 }

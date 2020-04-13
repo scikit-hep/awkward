@@ -9,7 +9,7 @@ namespace awkward {
   /// @class IrregularlyPartitionedArray
   ///
   /// @brief PartitionedArray of arbitrary length partitions.
-  class EXPORT_SYMBOL IrregularlyPartitionedArray {
+  class EXPORT_SYMBOL IrregularlyPartitionedArray: public PartitionedArray {
   public:
     IrregularlyPartitionedArray(const ContentPtrVec& partitions,
                                 const std::vector<int64_t> stops);
@@ -20,7 +20,16 @@ namespace awkward {
     /// {@link ListOffsetArrayOf#offsets ListOffsetArray::offsets},
     /// but the first entry would always be zero. Hence,
     /// {@link ListArrayOf#stops ListArray::stops} is sufficient.
-    const std::vector<int64_t> stops() const;
+    const std::vector<int64_t>
+      stops() const;
+
+    /// @brieg Logical starting index for a given partitionid.
+    int64_t
+      start(int64_t partitionid) const override;
+
+    /// @brieg Logical stopping index for a given partitionid.
+    int64_t
+      stop(int64_t partitionid) const override;
 
     void
       partitionid_index_at(int64_t at,
@@ -29,6 +38,9 @@ namespace awkward {
 
     const std::string
       classname() const override;
+
+    const std::string
+      tostring() const override;
 
     int64_t
       length() const override;

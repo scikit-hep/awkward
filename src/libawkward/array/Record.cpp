@@ -103,7 +103,7 @@ namespace awkward {
   }
 
   void
-  Record::tojson_part(ToJson& builder) const {
+  Record::tojson_part(ToJson& builder, bool include_beginendlist) const {
     size_t cols = (size_t)numfields();
     util::RecordLookupPtr keys = array_.get()->recordlookup();
     if (istuple()) {
@@ -116,7 +116,8 @@ namespace awkward {
     builder.beginrecord();
     for (size_t j = 0;  j < cols;  j++) {
       builder.field(keys.get()->at(j).c_str());
-      contents[j].get()->getitem_at_nowrap(at_).get()->tojson_part(builder);
+      contents[j].get()->getitem_at_nowrap(at_).get()->tojson_part(builder,
+                                                                   true);
     }
     builder.endrecord();
   }
