@@ -13,7 +13,7 @@ namespace awkward {
   /// is part of its type.
   ///
   /// No Content nodes have this type. The #length makes it non-composable.
-  class EXPORT_SYMBOL EXPORT_TYPE ArrayType: public Type {
+  class EXPORT_SYMBOL ArrayType: public Type {
   public:
     /// @brief Create an ArrayType with a full set of parameters.
     ///

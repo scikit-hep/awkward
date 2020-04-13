@@ -15,7 +15,7 @@ namespace awkward {
   /// @class ListBuilder
   ///
   /// @brief Builder node that accumulates lists.
-  class EXPORT_SYMBOL EXPORT_TYPE ListBuilder: public Builder {
+  class EXPORT_SYMBOL ListBuilder: public Builder {
   public:
     /// @brief Create an empty ListBuilder.
     /// @param options Configuration options for building an array;

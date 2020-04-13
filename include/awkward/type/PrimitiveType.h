@@ -12,7 +12,7 @@ namespace awkward {
   /// items, such as numbers or booleans.
   ///
   /// NumpyArray and {@link RawArrayOf RawArray} nodes have this type.
-  class EXPORT_SYMBOL EXPORT_TYPE PrimitiveType: public Type {
+  class EXPORT_SYMBOL PrimitiveType: public Type {
   public:
     /// @brief Types that can be described by a PrimitiveType.
     ///

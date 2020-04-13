@@ -262,7 +262,7 @@ namespace awkward {
   ///    - {@link IdentitiesOf Identities32}, which is `IdentitiesOf<int32_t>`
   ///    - {@link IdentitiesOf Identities64}, which is `IdentitiesOf<int64_t>`
   template <typename T>
-  class EXPORT_SYMBOL EXPORT_TYPE IdentitiesOf: public Identities {
+  class EXPORT_SYMBOL IdentitiesOf: public Identities {
   public:
     /// @brief Creates an IdentitiesOf from a full set of parameters.
     /// 

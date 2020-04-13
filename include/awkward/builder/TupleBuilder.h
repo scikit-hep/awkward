@@ -15,7 +15,7 @@ namespace awkward {
   /// @class TupleBuilder
   ///
   /// @brief Builder node for accumulated tuples.
-  class EXPORT_SYMBOL EXPORT_TYPE TupleBuilder: public Builder {
+  class EXPORT_SYMBOL TupleBuilder: public Builder {
   public:
     /// @brief Create an empty TupleBuilder.
     /// @param options Configuration options for building an array;

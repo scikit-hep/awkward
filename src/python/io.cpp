@@ -9,7 +9,7 @@
 #include "awkward/io/json.h"
 #include "awkward/io/root.h"
 
-#include "awkward/python/_io.h"
+#include "awkward/python/io.h"
 
 namespace ak = awkward;
 

@@ -14,7 +14,7 @@ namespace awkward {
   /// opposed to ListType.
   ///
   /// RegularArray nodes have this type.
-  class EXPORT_SYMBOL EXPORT_TYPE RegularType: public Type {
+  class EXPORT_SYMBOL RegularType: public Type {
   public:
     /// @brief Create a RegularType with a full set of parameters.
     ///

@@ -69,7 +69,7 @@ namespace awkward {
   ///  - 8-bit, 16-bit, 32-bit, and 64-bit signed and unsigned integers
   ///  - 8-bit booleans
   template <typename T>
-  class EXPORT_SYMBOL EXPORT_TYPE RawArrayOf: public Content {
+  class EXPORT_SYMBOL RawArrayOf: public Content {
   public:
     /// @brief Creates a RawArray from a full set of parameters.
     /// 

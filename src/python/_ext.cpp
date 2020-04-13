@@ -8,7 +8,7 @@
 #include "awkward/python/identities.h"
 #include "awkward/python/content.h"
 #include "awkward/python/types.h"
-#include "awkward/python/_io.h"
+#include "awkward/python/io.h"
 
 namespace py = pybind11;
 PYBIND11_MODULE(_ext, m) {

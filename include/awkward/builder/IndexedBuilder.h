@@ -17,7 +17,7 @@ namespace awkward {
   /// @brief Builder node for accumulated data that come from an existing
   /// Content array.
   template <typename T>
-  class EXPORT_SYMBOL EXPORT_TYPE IndexedBuilder: public Builder {
+  class EXPORT_SYMBOL IndexedBuilder: public Builder {
   public:
     /// @brief Create an IndexedBuilder from a full set of parameters.
     ///

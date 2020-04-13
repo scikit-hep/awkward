@@ -26,7 +26,7 @@ namespace awkward {
   ///
   /// See #ListArrayOf for the meaning of each parameter.
   template <typename T>
-  class EXPORT_SYMBOL EXPORT_TYPE ListArrayOf: public Content {
+  class EXPORT_SYMBOL ListArrayOf: public Content {
   public:
     /// @brief Creates a ListArray from a full set of parameters.
     ///

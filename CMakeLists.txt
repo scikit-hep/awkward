@@ -1,7 +1,6 @@
 # BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
 cmake_minimum_required(VERSION 3.10...3.16)
-option(USE_CLANG "build application with clang" ON)
 
 # Project must be near the top
 project(awkward LANGUAGES CXX)
@@ -14,7 +13,6 @@ if(CMAKE_BUILD_TYPE IN_LIST SIMPLE_TYPES)
 else()
   message(STATUS "CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
 endif()
-message(STATUS "Compiler ${CMAKE_CXX_COMPILER_ID}")
 
 # This is a C++11 project, but Windows starts at C++14.
 if(MSVC)
@@ -67,6 +65,11 @@ set_target_properties(awkward-cpu-kernels-static PROPERTIES CXX_VISIBILITY_PRESE
 set_target_properties(awkward-cpu-kernels-static PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
 set_target_properties(awkward-cpu-kernels PROPERTIES CXX_VISIBILITY_PRESET hidden)
 set_target_properties(awkward-cpu-kernels PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
+if (APPLE)
+  set_target_properties(awkward-cpu-kernels PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE INSTALL_RPATH "@loader_path")
+else()
+  set_target_properties(awkward-cpu-kernels PROPERTIES BUILD_RPATH_USE_ORIGIN TRUE)
+endif()
 
 # Second tier: libawkward (object files, static library, and dynamic library).
 add_library(awkward-objects OBJECT ${LIBAWKWARD_SOURCES})
@@ -82,6 +85,11 @@ set_target_properties(awkward-static PROPERTIES CXX_VISIBILITY_PRESET hidden)
 set_target_properties(awkward-static PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
 set_target_properties(awkward PROPERTIES CXX_VISIBILITY_PRESET hidden)
 set_target_properties(awkward PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
+if (APPLE)
+  set_target_properties(awkward PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE INSTALL_RPATH "@loader_path")
+else()
+  set_target_properties(awkward PROPERTIES BUILD_RPATH_USE_ORIGIN TRUE)
+endif()
 
 # Tests for second tier (these do not depend on Python).
 addtest(test0016 tests/test_0016-finish-getitem-for-rawarray.cpp)
@@ -97,6 +105,11 @@ if (PYBUILD)
   set_target_properties(_ext PROPERTIES CXX_VISIBILITY_PRESET hidden)
   set_target_properties(_ext PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
   target_link_libraries(_ext PRIVATE awkward-static)
+  if (APPLE)
+    set_target_properties(_ext PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE INSTALL_RPATH "@loader_path")
+  else()
+    set_target_properties(_ext PROPERTIES BUILD_RPATH_USE_ORIGIN TRUE)
+  endif()
 
   install(TARGETS awkward-static awkward awkward-cpu-kernels awkward-cpu-kernels-static
           _ext

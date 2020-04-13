@@ -14,7 +14,7 @@ except ImportError:
 import numpy
 
 import awkward1.layout
-import awkward1._io
+import awkward1._ext
 import awkward1._util
 
 def from_numpy(array, regulararray=False, highlevel=True, behavior=None):
@@ -415,10 +415,10 @@ def from_json(source,
 
     See also #ak.to_json.
     """
-    layout = awkward1._io.fromjson(source,
-                                   initial=initial,
-                                   resize=resize,
-                                   buffersize=buffersize)
+    layout = awkward1._ext.fromjson(source,
+                                    initial=initial,
+                                    resize=resize,
+                                    buffersize=buffersize)
     if highlevel:
         return awkward1._util.wrap(layout, behavior)
     else:

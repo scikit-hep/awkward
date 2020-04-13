@@ -40,7 +40,7 @@ namespace awkward {
   /// to be rewritten; under normal circumstances, it would soon be replaced
   /// by a more appropriately sized buffer.
   template <typename T>
-  class EXPORT_SYMBOL EXPORT_TYPE GrowableBuffer {
+  class EXPORT_SYMBOL GrowableBuffer {
   public:
     /// @brief Creates an empty GrowableBuffer.
     ///
