@@ -3,8 +3,6 @@
 #include "awkward/builder/Builder.h"
 
 namespace awkward {
-  Builder::~Builder() { }
-
   void
   Builder::setthat(const BuilderPtr& that) {
     that_ = that;

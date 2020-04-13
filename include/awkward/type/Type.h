@@ -26,7 +26,7 @@ namespace awkward {
     Type(const util::Parameters& parameters, const std::string& typestr);
 
     /// @brief Empty destructor; required for some C++ reason.
-    virtual ~Type();
+    virtual ~Type() { }
 
     /// @brief Internal function to build an output string for #tostring.
     ///

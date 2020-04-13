@@ -23,8 +23,6 @@ namespace awkward {
       : identities_(identities)
       , parameters_(parameters) { }
 
-  Content::~Content() { }
-
   bool
   Content::isscalar() const {
     return false;
