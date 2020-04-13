@@ -142,8 +142,8 @@ namespace awkward {
   const ContentPtr
   IndexedArrayOf<T, ISOPTION>::simplify_optiontype() const {
     if (ISOPTION) {
-      if (IndexedArray32* rawcontent =
-          dynamic_cast<IndexedArray32*>(content_.get())) {
+      if (IndexedArrayOf<int32_t, false>* rawcontent =
+          dynamic_cast<IndexedArrayOf<int32_t, false>*>(content_.get())) {
         Index32 inner = rawcontent->index();
         Index64 result(index_.length());
         struct Error err = util::awkward_indexedarray_simplify32_to64(
@@ -160,8 +160,9 @@ namespace awkward {
                                                       result,
                                                       rawcontent->content());
       }
-      else if (IndexedArrayU32* rawcontent =
-               dynamic_cast<IndexedArrayU32*>(content_.get())) {
+      else if (IndexedArrayOf<uint32_t, false>* rawcontent =
+               dynamic_cast<IndexedArrayOf<uint32_t, false>*>(
+                 content_.get())) {
         IndexU32 inner = rawcontent->index();
         Index64 result(index_.length());
         struct Error err = util::awkward_indexedarray_simplifyU32_to64(
@@ -178,8 +179,8 @@ namespace awkward {
                                                       result,
                                                       rawcontent->content());
       }
-      else if (IndexedArray64* rawcontent =
-               dynamic_cast<IndexedArray64*>(content_.get())) {
+      else if (IndexedArrayOf<int64_t, false>* rawcontent =
+               dynamic_cast<IndexedArrayOf<int64_t, false>*>(content_.get())) {
         Index64 inner = rawcontent->index();
         Index64 result(index_.length());
         struct Error err = util::awkward_indexedarray_simplify64_to64(
@@ -196,8 +197,8 @@ namespace awkward {
                                                       result,
                                                       rawcontent->content());
       }
-      else if (IndexedOptionArray32* rawcontent =
-               dynamic_cast<IndexedOptionArray32*>(content_.get())) {
+      else if (IndexedArrayOf<int32_t, true>* rawcontent =
+               dynamic_cast<IndexedArrayOf<int32_t, true>*>(content_.get())) {
         Index32 inner = rawcontent->index();
         Index64 result(index_.length());
         struct Error err = util::awkward_indexedarray_simplify32_to64(
@@ -214,8 +215,8 @@ namespace awkward {
                                                       result,
                                                       rawcontent->content());
       }
-      else if (IndexedOptionArray64* rawcontent =
-               dynamic_cast<IndexedOptionArray64*>(content_.get())) {
+      else if (IndexedArrayOf<int64_t, true>* rawcontent =
+               dynamic_cast<IndexedArrayOf<int64_t, true>*>(content_.get())) {
         Index64 inner = rawcontent->index();
         Index64 result(index_.length());
         struct Error err = util::awkward_indexedarray_simplify64_to64(
@@ -235,8 +236,8 @@ namespace awkward {
       else if (ByteMaskedArray* step1 =
                dynamic_cast<ByteMaskedArray*>(content_.get())) {
         ContentPtr step2 = step1->toIndexedOptionArray64();
-        IndexedOptionArray64* rawcontent =
-          dynamic_cast<IndexedOptionArray64*>(step2.get());
+        IndexedArrayOf<int64_t, true>* rawcontent =
+          dynamic_cast<IndexedArrayOf<int64_t, true>*>(step2.get());
         Index64 inner = rawcontent->index();
         Index64 result(index_.length());
         struct Error err = util::awkward_indexedarray_simplify64_to64(
@@ -256,8 +257,8 @@ namespace awkward {
       else if (BitMaskedArray* step1 =
                dynamic_cast<BitMaskedArray*>(content_.get())) {
         ContentPtr step2 = step1->toIndexedOptionArray64();
-        IndexedOptionArray64* rawcontent =
-          dynamic_cast<IndexedOptionArray64*>(step2.get());
+        IndexedArrayOf<int64_t, true>* rawcontent =
+          dynamic_cast<IndexedArrayOf<int64_t, true>*>(step2.get());
         Index64 inner = rawcontent->index();
         Index64 result(index_.length());
         struct Error err = util::awkward_indexedarray_simplify64_to64(
@@ -277,8 +278,8 @@ namespace awkward {
       else if (UnmaskedArray* step1 =
                dynamic_cast<UnmaskedArray*>(content_.get())) {
         ContentPtr step2 = step1->toIndexedOptionArray64();
-        IndexedOptionArray64* rawcontent =
-          dynamic_cast<IndexedOptionArray64*>(step2.get());
+        IndexedArrayOf<int64_t, true>* rawcontent =
+          dynamic_cast<IndexedArrayOf<int64_t, true>*>(step2.get());
         Index64 inner = rawcontent->index();
         Index64 result(index_.length());
         struct Error err = util::awkward_indexedarray_simplify64_to64(
@@ -300,8 +301,8 @@ namespace awkward {
       }
     }
     else {
-      if (IndexedArray32* rawcontent =
-          dynamic_cast<IndexedArray32*>(content_.get())) {
+      if (IndexedArrayOf<int32_t, false>* rawcontent =
+          dynamic_cast<IndexedArrayOf<int32_t, false>*>(content_.get())) {
         Index32 inner = rawcontent->index();
         Index64 result(index_.length());
         struct Error err = util::awkward_indexedarray_simplify32_to64(
@@ -318,8 +319,9 @@ namespace awkward {
                                                 result,
                                                 rawcontent->content());
       }
-      else if (IndexedArrayU32* rawcontent =
-               dynamic_cast<IndexedArrayU32*>(content_.get())) {
+      else if (IndexedArrayOf<uint32_t, false>* rawcontent =
+               dynamic_cast<IndexedArrayOf<uint32_t, false>*>(
+                 content_.get())) {
         IndexU32 inner = rawcontent->index();
         Index64 result(index_.length());
         struct Error err = util::awkward_indexedarray_simplifyU32_to64(
@@ -336,8 +338,8 @@ namespace awkward {
                                                 result,
                                                 rawcontent->content());
       }
-      else if (IndexedArray64* rawcontent =
-               dynamic_cast<IndexedArray64*>(content_.get())) {
+      else if (IndexedArrayOf<int64_t, false>* rawcontent =
+               dynamic_cast<IndexedArrayOf<int64_t, false>*>(content_.get())) {
         Index64 inner = rawcontent->index();
         Index64 result(index_.length());
         struct Error err = util::awkward_indexedarray_simplify64_to64(
@@ -354,8 +356,8 @@ namespace awkward {
                                                 result,
                                                 rawcontent->content());
       }
-      else if (IndexedOptionArray32* rawcontent =
-               dynamic_cast<IndexedOptionArray32*>(content_.get())) {
+      else if (IndexedArrayOf<int32_t, true>* rawcontent =
+               dynamic_cast<IndexedArrayOf<int32_t, true>*>(content_.get())) {
         Index32 inner = rawcontent->index();
         Index64 result(index_.length());
         struct Error err = util::awkward_indexedarray_simplify32_to64(
@@ -372,8 +374,8 @@ namespace awkward {
                                                       result,
                                                       rawcontent->content());
       }
-      else if (IndexedOptionArray64* rawcontent =
-               dynamic_cast<IndexedOptionArray64*>(content_.get())) {
+      else if (IndexedArrayOf<int64_t, true>* rawcontent =
+               dynamic_cast<IndexedArrayOf<int64_t, true>*>(content_.get())) {
         Index64 inner = rawcontent->index();
         Index64 result(index_.length());
         struct Error err = util::awkward_indexedarray_simplify64_to64(
@@ -393,8 +395,8 @@ namespace awkward {
       else if (ByteMaskedArray* step1 =
                dynamic_cast<ByteMaskedArray*>(content_.get())) {
         ContentPtr step2 = step1->toIndexedOptionArray64();
-        IndexedOptionArray64* rawcontent =
-          dynamic_cast<IndexedOptionArray64*>(step2.get());
+        IndexedArrayOf<int64_t, true>* rawcontent =
+          dynamic_cast<IndexedArrayOf<int64_t, true>*>(step2.get());
         Index64 inner = rawcontent->index();
         Index64 result(index_.length());
         struct Error err = util::awkward_indexedarray_simplify64_to64(
@@ -414,8 +416,8 @@ namespace awkward {
       else if (BitMaskedArray* step1 =
                dynamic_cast<BitMaskedArray*>(content_.get())) {
         ContentPtr step2 = step1->toIndexedOptionArray64();
-        IndexedOptionArray64* rawcontent =
-          dynamic_cast<IndexedOptionArray64*>(step2.get());
+        IndexedArrayOf<int64_t, true>* rawcontent =
+          dynamic_cast<IndexedArrayOf<int64_t, true>*>(step2.get());
         Index64 inner = rawcontent->index();
         Index64 result(index_.length());
         struct Error err = util::awkward_indexedarray_simplify64_to64(
@@ -435,8 +437,8 @@ namespace awkward {
       else if (UnmaskedArray* step1 =
                dynamic_cast<UnmaskedArray*>(content_.get())) {
         ContentPtr step2 = step1->toIndexedOptionArray64();
-        IndexedOptionArray64* rawcontent =
-          dynamic_cast<IndexedOptionArray64*>(step2.get());
+        IndexedArrayOf<int64_t, true>* rawcontent =
+          dynamic_cast<IndexedArrayOf<int64_t, true>*>(step2.get());
         Index64 inner = rawcontent->index();
         Index64 result(index_.length());
         struct Error err = util::awkward_indexedarray_simplify64_to64(
@@ -1082,24 +1084,24 @@ namespace awkward {
       return true;
     }
 
-    if (IndexedArray32* rawother =
-        dynamic_cast<IndexedArray32*>(other.get())) {
+    if (IndexedArrayOf<int32_t, false>* rawother =
+        dynamic_cast<IndexedArrayOf<int32_t, false>*>(other.get())) {
       return content_.get()->mergeable(rawother->content(), mergebool);
     }
-    else if (IndexedArrayU32* rawother =
-             dynamic_cast<IndexedArrayU32*>(other.get())) {
+    else if (IndexedArrayOf<uint32_t, false>* rawother =
+             dynamic_cast<IndexedArrayOf<uint32_t, false>*>(other.get())) {
       return content_.get()->mergeable(rawother->content(), mergebool);
     }
-    else if (IndexedArray64* rawother =
-             dynamic_cast<IndexedArray64*>(other.get())) {
+    else if (IndexedArrayOf<int64_t, false>* rawother =
+             dynamic_cast<IndexedArrayOf<int64_t, false>*>(other.get())) {
       return content_.get()->mergeable(rawother->content(), mergebool);
     }
-    else if (IndexedOptionArray32* rawother =
-             dynamic_cast<IndexedOptionArray32*>(other.get())) {
+    else if (IndexedArrayOf<int32_t, true>* rawother =
+             dynamic_cast<IndexedArrayOf<int32_t, true>*>(other.get())) {
       return content_.get()->mergeable(rawother->content(), mergebool);
     }
-    else if (IndexedOptionArray64* rawother =
-             dynamic_cast<IndexedOptionArray64*>(other.get())) {
+    else if (IndexedArrayOf<int64_t, true>* rawother =
+             dynamic_cast<IndexedArrayOf<int64_t, true>*>(other.get())) {
       return content_.get()->mergeable(rawother->content(), mergebool);
     }
     else if (ByteMaskedArray* rawother =
@@ -1240,8 +1242,8 @@ namespace awkward {
     int64_t mycontentlength = content_.get()->length();
     ContentPtr content;
     bool other_isoption = false;
-    if (IndexedArray32* rawother =
-        dynamic_cast<IndexedArray32*>(other.get())) {
+    if (IndexedArrayOf<int32_t, false>* rawother =
+        dynamic_cast<IndexedArrayOf<int32_t, false>*>(other.get())) {
       content = content_.get()->merge(rawother->content());
       Index32 other_index = rawother->index();
       struct Error err = awkward_indexedarray_fill_to64_from32(
@@ -1255,8 +1257,8 @@ namespace awkward {
                          rawother->classname(),
                          rawother->identities().get());
     }
-    else if (IndexedArrayU32* rawother =
-             dynamic_cast<IndexedArrayU32*>(other.get())) {
+    else if (IndexedArrayOf<uint32_t, false>* rawother =
+             dynamic_cast<IndexedArrayOf<uint32_t, false>*>(other.get())) {
       content = content_.get()->merge(rawother->content());
       IndexU32 other_index = rawother->index();
       struct Error err = awkward_indexedarray_fill_to64_fromU32(
@@ -1270,8 +1272,8 @@ namespace awkward {
                          rawother->classname(),
                          rawother->identities().get());
     }
-    else if (IndexedArray64* rawother =
-             dynamic_cast<IndexedArray64*>(other.get())) {
+    else if (IndexedArrayOf<int64_t, false>* rawother =
+             dynamic_cast<IndexedArrayOf<int64_t, false>*>(other.get())) {
       content = content_.get()->merge(rawother->content());
       Index64 other_index = rawother->index();
       struct Error err = awkward_indexedarray_fill_to64_from64(
@@ -1285,8 +1287,8 @@ namespace awkward {
                          rawother->classname(),
                          rawother->identities().get());
     }
-    else if (IndexedOptionArray32* rawother =
-             dynamic_cast<IndexedOptionArray32*>(other.get())) {
+    else if (IndexedArrayOf<int32_t, true>* rawother =
+             dynamic_cast<IndexedArrayOf<int32_t, true>*>(other.get())) {
       content = content_.get()->merge(rawother->content());
       Index32 other_index = rawother->index();
       struct Error err = awkward_indexedarray_fill_to64_from32(
@@ -1301,8 +1303,8 @@ namespace awkward {
                          rawother->identities().get());
       other_isoption = true;
     }
-    else if (IndexedOptionArray64* rawother =
-             dynamic_cast<IndexedOptionArray64*>(other.get())) {
+    else if (IndexedArrayOf<int64_t, true>* rawother =
+             dynamic_cast<IndexedArrayOf<int64_t, true>*>(other.get())) {
       content = content_.get()->merge(rawother->content());
       Index64 other_index = rawother->index();
       struct Error err = awkward_indexedarray_fill_to64_from64(
