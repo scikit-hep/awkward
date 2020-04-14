@@ -42,6 +42,11 @@ namespace awkward {
   IrregularlyPartitionedArray::partitionid_index_at(int64_t at,
                                                     int64_t& partitionid,
                                                     int64_t& index) const {
+    if (at < 0) {
+      partitionid = -1;
+      index = 0;
+      return;
+    }
     int64_t start = 0;
     for (int64_t i = 0;  i < numpartitions();  i++) {
       if (at < stops_[(size_t)i]) {

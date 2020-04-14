@@ -181,7 +181,7 @@ def test_getitem_basic():
     assert array["y"].tojson() == "[[],[1],[2,2],[3,3,3],[4,4,4,4]]"
     assert array[["x"]].tojson() == '[{"x":0.0},{"x":1.1},{"x":2.2},{"x":3.3},{"x":4.4}]'
 
-def test_getitem_first_dimension():
+def test_getitem_first_dimension_int():
     one = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
     two = awkward1.Array([[6.6], [], [], [], [7.7, 8.8, 9.9]]).layout
     array = awkward1.partition.IrregularlyPartitionedArray([one, two])
@@ -198,3 +198,11 @@ def test_getitem_first_dimension():
     assert array[-1, 1] == 8.8
     assert awkward1.to_list(array[7, [-1, 0]]) == [9.9, 7.7]
     assert awkward1.to_list(array[7, [False, True, True]]) == [8.8, 9.9]
+
+def test_getitem_first_dimension_slice():
+    one = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
+    two = awkward1.Array([[6.6], [], [], [], [7.7, 8.8, 9.9]]).layout
+    array = awkward1.partition.IrregularlyPartitionedArray([one, two])
+
+    print(array[2:6,])
+    raise Exception
