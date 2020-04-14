@@ -2,10 +2,13 @@
 
 from __future__ import absolute_import
 
+import numbers
 try:
     from collections.abc import Iterable
 except ImportError:
     from collections import Iterable
+
+import numpy
 
 import awkward1._ext
 import awkward1._util
@@ -76,7 +79,8 @@ class PartitionedArray(object):
         return self.from_ext(self._ext.repartition(*args, **kwargs))
 
     def __getitem__(self, where):
-        if isinstance(where, int):
+        if (not isinstance(where, bool) and
+            isinstance(where, (numbers.Integral, numpy.integer))):
             return self._ext.getitem_at(where)
 
         elif isinstance(where, slice) and (where.step is None or
@@ -89,18 +93,39 @@ class PartitionedArray(object):
 
         elif (isinstance(where, Iterable) and
               all((isinstance(x, str) or
-                   (awkward._util.py27 and isinstance(x, unicode)))
+                   (awkward1._util.py27 and isinstance(x, unicode)))
                   for x in where)):
             return self.replace_partitions([x[where] for x in self.partitions])
 
         else:
             if not isinstance(where, tuple):
                 where = (where,)
-            raise NotImplementedError
+            head, tail = where[0], where[1:]
+
+            if (not isinstance(head, bool) and
+                isinstance(head, (numbers.Integral, numpy.integer))):
+                original_head = head
+                if head < 0:
+                    head += len(self)
+                if not 0 <= head < len(self):
+                    raise ValueError(
+                        "{0} index out of range".format(type(self).__name__))
+                partitionid, index = self._ext.partitionid_index_at(head)
+                return self.partition(partitionid)[(index,) + tail]
+
+            else:
+                raise NotImplementedError
+
+
+            return IrregularlyPartitionedArray(partitions)
 
 class IrregularlyPartitionedArray(PartitionedArray):
-    def __init__(self, partitions):
-        self._ext = awkward1._ext.IrregularlyPartitionedArray(partitions)
+    def __init__(self, partitions, stops=None):
+        if stops is None:
+            self._ext = awkward1._ext.IrregularlyPartitionedArray(partitions)
+        else:
+            self._ext = awkward1._ext.IrregularlyPartitionedArray(partitions,
+                                                                  stops)
 
     @property
     def stops(self):

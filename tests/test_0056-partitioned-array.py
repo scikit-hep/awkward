@@ -112,7 +112,7 @@ def test_repartition():
     assert [list(x) for x in array.repartition([2, 8]).partitions] == [[0, 1], [2, 100, 200, 300, 400, 500]]
     assert [list(x) for x in array.repartition([2, 5, 8]).partitions] == [[0, 1], [2, 100, 200], [300, 400, 500]]
 
-def test_getitem():
+def test_getitem_basic():
     one = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
     two = awkward1.Array([[6.6], [], [], [], [7.7, 8.8, 9.9]]).layout
     array = awkward1.partition.IrregularlyPartitionedArray([one, two])
@@ -172,11 +172,29 @@ def test_getitem():
     assert array[:7].tojson()  == "[[1.1,2.2,3.3],[],[4.4,5.5],[6.6],[],[],[]]"
     assert array[:8].tojson()  == "[[1.1,2.2,3.3],[],[4.4,5.5],[6.6],[],[],[],[7.7,8.8,9.9]]"
 
-    onerec = awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}]).layout
-    tworec = awkward1.Array([{"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}]).layout
-    arrayrec = awkward1.partition.IrregularlyPartitionedArray([onerec, tworec])
+    one = awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}]).layout
+    two = awkward1.Array([{"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}]).layout
+    array = awkward1.partition.IrregularlyPartitionedArray([one, two])
 
-    assert arrayrec.tojson() == '[{"x":0.0,"y":[]},{"x":1.1,"y":[1]},{"x":2.2,"y":[2,2]},{"x":3.3,"y":[3,3,3]},{"x":4.4,"y":[4,4,4,4]}]'
-    assert arrayrec["x"].tojson() == "[0.0,1.1,2.2,3.3,4.4]"
-    assert arrayrec["y"].tojson() == "[[],[1],[2,2],[3,3,3],[4,4,4,4]]"
-    assert arrayrec[["x"]].tojson() == '[{"x":0.0},{"x":1.1},{"x":2.2},{"x":3.3},{"x":4.4}]'
+    assert array.tojson() == '[{"x":0.0,"y":[]},{"x":1.1,"y":[1]},{"x":2.2,"y":[2,2]},{"x":3.3,"y":[3,3,3]},{"x":4.4,"y":[4,4,4,4]}]'
+    assert array["x"].tojson() == "[0.0,1.1,2.2,3.3,4.4]"
+    assert array["y"].tojson() == "[[],[1],[2,2],[3,3,3],[4,4,4,4]]"
+    assert array[["x"]].tojson() == '[{"x":0.0},{"x":1.1},{"x":2.2},{"x":3.3},{"x":4.4}]'
+
+def test_getitem_first_dimension():
+    one = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
+    two = awkward1.Array([[6.6], [], [], [], [7.7, 8.8, 9.9]]).layout
+    array = awkward1.partition.IrregularlyPartitionedArray([one, two])
+
+    assert awkward1.to_list(array[0,]) == [1.1, 2.2, 3.3]
+    assert awkward1.to_list(array[-8,]) == [1.1, 2.2, 3.3]
+    assert array[0, 1] == 2.2
+    assert array[-8, 1] == 2.2
+    assert awkward1.to_list(array[0, [-1, 0]]) == [3.3, 1.1]
+    assert awkward1.to_list(array[0, [False, True, True]]) == [2.2, 3.3]
+    assert awkward1.to_list(array[7,]) == [7.7, 8.8, 9.9]
+    assert awkward1.to_list(array[-1,]) == [7.7, 8.8, 9.9]
+    assert array[7, 1] == 8.8
+    assert array[-1, 1] == 8.8
+    assert awkward1.to_list(array[7, [-1, 0]]) == [9.9, 7.7]
+    assert awkward1.to_list(array[7, [False, True, True]]) == [8.8, 9.9]
