@@ -17,6 +17,7 @@ import numpy
 import awkward1.layout
 
 py27 = (sys.version_info[0] < 3)
+py35 = (sys.version_info[0] == 3 and sys.version_info[1] <= 5)
 win  = (os.name == "nt")
 
 unknowntypes = (awkward1.layout.EmptyArray,)
@@ -177,7 +178,7 @@ def typestrs(behavior):
              (py27 and isinstance(typestr, unicode)))):
             out[key[1]] = typestr
     return out
-    
+
 def numba_record_typer(layouttype, behavior):
     import awkward1
     behavior = Behavior(awkward1.behavior, behavior)

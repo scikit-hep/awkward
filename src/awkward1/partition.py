@@ -76,9 +76,13 @@ class PartitionedArray(object):
         return out
 
     def repartition(self, *args, **kwargs):
-        return self.from_ext(self._ext.repartition(*args, **kwargs))
+        return PartitionedArray.from_ext(self._ext.repartition(*args, **kwargs))
 
     def __getitem__(self, where):
+        import awkward1.operations.convert
+        import awkward1.operations.describe
+        from awkward1.types import PrimitiveType, OptionType
+
         if (not isinstance(where, bool) and
             isinstance(where, (numbers.Integral, numpy.integer))):
             return self._ext.getitem_at(where)
@@ -117,12 +121,69 @@ class PartitionedArray(object):
                                                      head.stop,
                                                      head.step).partitions
                 return IrregularlyPartitionedArray([x[(slice(None),) + tail]
-                                                        for x in partitions])
+                                                      for x in partitions])
+
+            elif ((head is Ellipsis) or
+                  (isinstance(where, str) or
+                   (awkward1._util.py27 and isinstance(where, unicode))) or
+                  (isinstance(head, Iterable) and
+                   all((isinstance(x, str) or
+                        (awkward1._util.py27 and isinstance(x, unicode)))
+                       for x in head))):
+                return IrregularlyPartitionedArray([x[(head,) + tail]
+                                                      for x in self.partitions])
+
+            elif head is numpy.newaxis:
+                return self.toContent()[(head,) + tail]
 
             else:
-                raise NotImplementedError
+                layout = awkward1.operations.convert.to_layout(head,
+                             allow_record=False, allow_other=False,
+                             numpytype=(numpy.integer, numpy.bool_, numpy.bool))
+                t = awkward1.operations.describe.type(layout)
+                if t in (PrimitiveType("int8"),
+                         PrimitiveType("uint8"),
+                         PrimitiveType("int16"),
+                         PrimitiveType("uint16"),
+                         PrimitiveType("int32"),
+                         PrimitiveType("uint32"),
+                         PrimitiveType("int64"),
+                         PrimitiveType("uint64"),
+                         OptionType(PrimitiveType("int8")),
+                         OptionType(PrimitiveType("uint8")),
+                         OptionType(PrimitiveType("int16")),
+                         OptionType(PrimitiveType("uint16")),
+                         OptionType(PrimitiveType("int32")),
+                         OptionType(PrimitiveType("uint32")),
+                         OptionType(PrimitiveType("int64")),
+                         OptionType(PrimitiveType("uint64"))):
+                    if isinstance(layout, PartitionedArray):
+                        layout = layout.toContent()
+                    return self.toContent()[(layout,) + tail]
+                else:
+                    stops = self.stops
+                    if isinstance(layout, PartitionedArray):
+                        layout = layout.repartition(stops)
+                    else:
+                        layout = IrregularlyPartitionedArray.toPartitioned(
+                                     layout, stops)
+                    inparts = self.partitions
+                    headparts = layout.partitions
+                    outparts = []
+                    for i in range(len(inparts)):
+                        outparts.append(inparts[i][(headparts[i],) + tail])
+                    return IrregularlyPartitionedArray(outparts, stops)
 
 class IrregularlyPartitionedArray(PartitionedArray):
+    @classmethod
+    def toPartitioned(cls, layout, stops):
+        partitions = []
+        start = 0
+        for stop in stops:
+            partitions.append(layout[start:stop])
+            start = stop
+        return IrregularlyPartitionedArray(partitions, stops)
+
     def __init__(self, partitions, stops=None):
         if stops is None:
             self._ext = awkward1._ext.IrregularlyPartitionedArray(partitions)
