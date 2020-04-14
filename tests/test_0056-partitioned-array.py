@@ -223,10 +223,11 @@ def test_getitem_basic():
     two = awkward1.Array([{"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}]).layout
     array = awkward1.partition.IrregularlyPartitionedArray([one, two])
 
-    assert array.tojson() == '[{"x":0.0,"y":[]},{"x":1.1,"y":[1]},{"x":2.2,"y":[2,2]},{"x":3.3,"y":[3,3,3]},{"x":4.4,"y":[4,4,4,4]}]'
-    assert array["x"].tojson() == "[0.0,1.1,2.2,3.3,4.4]"
-    assert array["y"].tojson() == "[[],[1],[2,2],[3,3,3],[4,4,4,4]]"
-    assert array[["x"]].tojson() == '[{"x":0.0},{"x":1.1},{"x":2.2},{"x":3.3},{"x":4.4}]'
+    if not awkward1._util.py27:
+        assert array.tojson() == '[{"x":0.0,"y":[]},{"x":1.1,"y":[1]},{"x":2.2,"y":[2,2]},{"x":3.3,"y":[3,3,3]},{"x":4.4,"y":[4,4,4,4]}]'
+        assert array["x"].tojson() == "[0.0,1.1,2.2,3.3,4.4]"
+        assert array["y"].tojson() == "[[],[1],[2,2],[3,3,3],[4,4,4,4]]"
+        assert array[["x"]].tojson() == '[{"x":0.0},{"x":1.1},{"x":2.2},{"x":3.3},{"x":4.4}]'
 
 def test_getitem_first_dimension_int():
     one = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
@@ -246,10 +247,12 @@ def test_getitem_first_dimension_int():
     assert awkward1.to_list(array[7, [-1, 0]]) == [9.9, 7.7]
     assert awkward1.to_list(array[7, [False, True, True]]) == [8.8, 9.9]
 
-# def test_getitem_first_dimension_slice():
-#     one = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
-#     two = awkward1.Array([[6.6], [], [], [], [7.7, 8.8, 9.9]]).layout
-#     array = awkward1.partition.IrregularlyPartitionedArray([one, two])
-#
-#     print(array[2:6,])
-#     raise Exception
+def test_getitem_first_dimension_slice():
+    one = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
+    two = awkward1.Array([[6.6], [], [], [], [7.7, 8.8, 9.9]]).layout
+    array = awkward1.partition.IrregularlyPartitionedArray([one, two])
+
+    assert array[2:6,].tojson() == "[[4.4,5.5],[6.6],[],[]]"
+    assert array[::-1,].tojson() == "[[7.7,8.8,9.9],[],[],[],[6.6],[4.4,5.5],[],[1.1,2.2,3.3]]"
+    assert array[::-1, :2].tojson() == "[[7.7,8.8],[],[],[],[6.6],[4.4,5.5],[],[1.1,2.2]]"
+    assert array[::-1, :1].tojson() == "[[7.7],[],[],[],[6.6],[4.4],[],[1.1]]"
