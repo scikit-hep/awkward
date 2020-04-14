@@ -39,6 +39,24 @@ class PartitionedArray(object):
             for x in partition:
                 yield x
 
+    def __array__(self):
+        raise NotImplementedError
+
+    def toContent(self):
+        contents = self._ext.partitions
+        out = contents[0]
+        for x in contents[1:]:
+            if not out.mergeable(x, mergebool=False):
+                out = out.merge_as_union(x)
+            else:
+                out = out.merge(x)
+            if isinstance(out, awkward1._util.uniontypes):
+                out = out.simplify(mergebool=mergebool)
+
+        print("returning", out)
+
+        return out
+
 class IrregularlyPartitionedArray(PartitionedArray):
     def __init__(self, partitions):
         self._ext = awkward1._ext.IrregularlyPartitionedArray(partitions)

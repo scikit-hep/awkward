@@ -9,7 +9,7 @@ import numpy
 
 import awkward1
 
-def test():
+def test_basic():
     one = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
     two = awkward1.Array([[6.6], [], [], [], [7.7, 8.8, 9.9]]).layout
     array = awkward1.partition.IrregularlyPartitionedArray([one, two])
@@ -89,3 +89,13 @@ def test():
     assert array._ext.getitem_range(0, -1).tojson() == "[[1.1,2.2,3.3],[],[4.4,5.5],[6.6],[],[],[]]"
 
     assert [awkward1.to_list(x) for x in array] == [[1.1,2.2,3.3],[],[4.4,5.5],[6.6],[],[],[],[7.7,8.8,9.9]]
+
+    assert awkward1.to_list(array.toContent()) == [[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [], [], [], [7.7, 8.8, 9.9]]
+
+def test_as_slice():
+    one = awkward1.Array([False, True, False]).layout
+    two = awkward1.Array([True, True, True, False, False]).layout
+    array = awkward1.partition.IrregularlyPartitionedArray([one, two])
+
+    target = awkward1.Array([0, 1, 2, 100, 200, 300, 400, 500])
+    assert awkward1.to_list(target[array]) == [1, 100, 200, 300]
