@@ -99,6 +99,26 @@ def test_basic():
     assert array._ext.getitem_range(2, 8, 3).tojson()  == "[[4.4,5.5],[]]"
     assert array._ext.getitem_range(3, 8, 3).tojson()  == "[[6.6],[]]"
 
+    assert array._ext.getitem_range(2, 0, -1).tojson()  == "[[4.4,5.5],[]]"
+    assert array._ext.getitem_range(2, None, -1).tojson()  == "[[4.4,5.5],[],[1.1,2.2,3.3]]"
+    assert array._ext.getitem_range(1, None, -1).tojson()  == "[[],[1.1,2.2,3.3]]"
+    assert array._ext.getitem_range(3, None, -1).tojson()  == "[[6.6],[4.4,5.5],[],[1.1,2.2,3.3]]"
+    assert array._ext.getitem_range(None, None, -1).tojson()  == "[[7.7,8.8,9.9],[],[],[],[6.6],[4.4,5.5],[],[1.1,2.2,3.3]]"
+    assert array._ext.getitem_range(-1, None, -1).tojson()  == "[[7.7,8.8,9.9],[],[],[],[6.6],[4.4,5.5],[],[1.1,2.2,3.3]]"
+    assert array._ext.getitem_range(-2, None, -1).tojson()  == "[[],[],[],[6.6],[4.4,5.5],[],[1.1,2.2,3.3]]"
+    assert array._ext.getitem_range(-2, 0, -1).tojson()  == "[[],[],[],[6.6],[4.4,5.5],[]]"
+    assert array._ext.getitem_range(-2, 1, -1).tojson()  == "[[],[],[],[6.6],[4.4,5.5]]"
+    assert array._ext.getitem_range(-2, 2, -1).tojson()  == "[[],[],[],[6.6]]"
+    assert array._ext.getitem_range(-1, 3, -1).tojson()  == "[[7.7,8.8,9.9],[],[],[]]"
+    assert array._ext.getitem_range(-1, None, -2).tojson()  == "[[7.7,8.8,9.9],[],[6.6],[]]"
+    assert array._ext.getitem_range(-2, None, -2).tojson()  == "[[],[],[4.4,5.5],[1.1,2.2,3.3]]"
+    assert array._ext.getitem_range(-1, None, -3).tojson()  == "[[7.7,8.8,9.9],[],[]]"
+    assert array._ext.getitem_range(-2, None, -3).tojson()  == "[[],[6.6],[1.1,2.2,3.3]]"
+    assert array._ext.getitem_range(-3, None, -3).tojson()  == "[[],[4.4,5.5]]"
+    assert array._ext.getitem_range(-4, None, -3).tojson()  == "[[],[]]"
+    assert array._ext.getitem_range(-5, None, -3).tojson()  == "[[6.6],[1.1,2.2,3.3]]"
+    assert array._ext.getitem_range(-2, 0, -2).tojson()  == "[[],[],[4.4,5.5]]"
+
     assert [awkward1.to_list(x) for x in array] == [[1.1,2.2,3.3],[],[4.4,5.5],[6.6],[],[],[],[7.7,8.8,9.9]]
 
     assert awkward1.to_list(array.toContent()) == [[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [], [], [], [7.7, 8.8, 9.9]]
@@ -115,8 +135,7 @@ def test_range_slices():
 
     for start in range(10):
         for stop in range(10):
-            for step in (1, 2, 3, 4, 5):
-                # print("full[{}:{}:{}] = {}".format(start, stop, step, aslist[start:stop:step]))
+            for step in (1, 2, 3, 4, 5, -1, -2, -3, -4, -5):
                 assert awkward1.to_list(asfull[start:stop:step]) == aslist[start:stop:step]
                 assert aspart._ext.getitem_range(start, stop, step).tojson() == asfull[start:stop:step].tojson()
 

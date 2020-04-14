@@ -131,15 +131,8 @@ namespace awkward {
     int64_t offset = 0;
 
     if (step > 0) {
-      if (index_stop == 0) {
-        partitionid_last--;
-        if (partitionid_last >= 0) {
-          index_stop = partitions_[(size_t)partitionid_last].get()->length();
-        }
-      }
-
       for (int64_t partitionid = partitionid_first;
-           partitionid <= partitionid_last;
+           partitionid < numpartitions()  &&  partitionid <= partitionid_last;
            partitionid++) {
         ContentPtr p = partitions_[(size_t)partitionid];
         int64_t plen = p.get()->length();
@@ -196,8 +189,52 @@ namespace awkward {
     }
 
     else if (step < 0) {
-      if (partitionid_last < 0) {
-        throw std::invalid_argument("asdf");
+      for (int64_t partitionid = partitionid_first;
+           partitionid >= 0  &&  partitionid >= partitionid_last;
+           partitionid--) {
+        ContentPtr p = partitions_[(size_t)partitionid];
+        int64_t plen = p.get()->length();
+
+        int64_t a;
+        int64_t b;
+        if (partitionid == partitionid_first  &&
+            partitionid == partitionid_last) {
+          a = index_start;
+          b = index_stop;
+        }
+        else if (partitionid == partitionid_first) {
+          a = index_start;
+          b = -plen - 1;
+          offset = (((-1 - index_start) % -step + -step) % -step);
+        }
+        else if (partitionid == partitionid_last) {
+          a = plen - 1 - offset;
+          b = index_stop;
+        }
+        else {
+          a = plen - 1 - offset;
+          b = -plen - 1;
+          offset = (((-1 - (plen - 1 - offset)) % -step + -step) % -step);
+        }
+        // Avoid Python-like negative index handling of -1 by setting them to
+        // a sufficiently negative value to mean "all the way to the edge."
+        if (a < 0) {
+          a = -plen - 1;
+        }
+        if (b < 0) {
+          b = -plen - 1;
+        }
+
+        Slice slice;
+        slice.append(SliceRange(a, b, step));
+        slice.become_sealed();
+        p = p.get()->getitem(slice);
+
+        total_length += p.get()->length();
+        if (p.get()->length() > 0) {
+          partitions.push_back(p);
+          stops.push_back(total_length);
+        }
       }
     }
 
