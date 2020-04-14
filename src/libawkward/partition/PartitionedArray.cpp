@@ -100,55 +100,90 @@ namespace awkward {
   }
 
   const PartitionedArrayPtr
-  PartitionedArray::getitem_range(int64_t start, int64_t stop) const {
+  PartitionedArray::getitem_range(int64_t start,
+                                  int64_t stop,
+                                  int64_t step) const {
     int64_t regular_start = start;
     int64_t regular_stop = stop;
-    awkward_regularize_rangeslice(&regular_start, &regular_stop,
-      true, start != Slice::none(), stop != Slice::none(), length());
-    if (regular_stop > length()) {
-      util::handle_error(
-        failure("len(stops) < len(starts)", kSliceNone, kSliceNone),
-        classname(),
-        nullptr);
+    int64_t regular_step = step;
+    if (regular_step == Slice::none()) {
+      regular_step = 1;
     }
-    return getitem_range_nowrap(regular_start, regular_stop);
+    awkward_regularize_rangeslice(&regular_start, &regular_stop,
+      step > 0, start != Slice::none(), stop != Slice::none(), length());
+    return getitem_range_nowrap(regular_start, regular_stop, regular_step);
   }
 
   const PartitionedArrayPtr
-  PartitionedArray::getitem_range_nowrap(int64_t start, int64_t stop) const {
+  PartitionedArray::getitem_range_nowrap(int64_t start,
+                                         int64_t stop,
+                                         int64_t step) const {
     int64_t partitionid_first;
     int64_t index_start;
     partitionid_index_at(start, partitionid_first, index_start);
     int64_t partitionid_last;
     int64_t index_stop;
     partitionid_index_at(stop, partitionid_last, index_stop);
-    if (index_stop == 0) {
-      partitionid_last--;
-      if (partitionid_last >= 0) {
-        index_stop = partitions_[(size_t)partitionid_last].get()->length();
-      }
-    }
+
     ContentPtrVec partitions;
     std::vector<int64_t> stops;
     int64_t total_length = 0;
-    for (int64_t partitionid = partitionid_first;
-         partitionid <= partitionid_last;
-         partitionid++) {
-      ContentPtr p = partitions_[(size_t)partitionid];
-      if (partitionid == partitionid_first  &&
-          partitionid == partitionid_last) {
-        p = p.get()->getitem_range_nowrap(index_start, index_stop);
+    int64_t offset = 0;
+
+    if (step > 0) {
+      if (index_stop == 0) {
+        partitionid_last--;
+        if (partitionid_last >= 0) {
+          index_stop = partitions_[(size_t)partitionid_last].get()->length();
+        }
       }
-      else if (partitionid == partitionid_first) {
-        p = p.get()->getitem_range_nowrap(index_start, p.get()->length());
+      for (int64_t partitionid = partitionid_first;
+           partitionid <= partitionid_last;
+           partitionid++) {
+        ContentPtr p = partitions_[(size_t)partitionid];
+        int64_t plen = p.get()->length();
+        if (partitionid == partitionid_first  &&
+            partitionid == partitionid_last) {
+          // p = p.get()->getitem_range_nowrap(index_start, index_stop);
+          Slice slice;
+          slice.append(SliceRange(index_start, index_stop, step));
+          slice.become_sealed();
+          p = p.get()->getitem(slice);
+        }
+        else if (partitionid == partitionid_first) {
+          // p = p.get()->getitem_range_nowrap(index_start, plen);
+          Slice slice;
+          slice.append(SliceRange(index_start, plen, step));
+          slice.become_sealed();
+          p = p.get()->getitem(slice);
+          offset = ((index_start - plen) % step + step) % step;
+        }
+        else if (partitionid == partitionid_last) {
+          // p = p.get()->getitem_range_nowrap(0, index_stop);
+          Slice slice;
+          slice.append(SliceRange(offset, index_stop, step));
+          slice.become_sealed();
+          p = p.get()->getitem(slice);
+        }
+        else {
+          offset = ((offset - plen) % step + step) % step;
+        }
+        total_length += p.get()->length();
+        if (p.get()->length() > 0) {
+          partitions.push_back(p);
+        }
+        stops.push_back(total_length);
       }
-      else if (partitionid == partitionid_last) {
-        p = p.get()->getitem_range_nowrap(0, index_stop);
-      }
-      total_length += p.get()->length();
-      partitions.push_back(p);
-      stops.push_back(total_length);
     }
+
+    else if (step < 0) {
+      throw std::runtime_error("not implemented");
+    }
+
+    else {
+      throw std::invalid_argument("slice step must not be zero");
+    }
+
     if (partitions.empty()) {
       partitions.push_back(partitions_[0].get()->getitem_nothing());
       stops.push_back(0);

@@ -83,9 +83,8 @@ class PartitionedArray(object):
             isinstance(where, (numbers.Integral, numpy.integer))):
             return self._ext.getitem_at(where)
 
-        elif isinstance(where, slice) and (where.step is None or
-                                           where.step == 1):
-            return self._ext.getitem_range(where.start, where.stop)
+        elif isinstance(where, slice):
+            return self._ext.getitem_range(where.start, where.stop, where.step)
 
         elif (isinstance(where, str) or
               (awkward1._util.py27 and isinstance(where, unicode))):
@@ -114,53 +113,55 @@ class PartitionedArray(object):
                 return self.partition(partitionid)[(index,) + tail]
 
             elif isinstance(head, slice):
-                start, stop, step = head.start, head.stop, head.step
-                if step is None:
-                    step = 1
+                raise NotImplementedError
 
-                if step > 0:
-                    if start is None:         start = 0
-                    elif start < 0:           start += len(self)
-                    if start < 0:             start = 0
-                    if start > len(self):     start = len(self)
-                    if stop is None:          stop = len(self)
-                    elif stop < 0:            stop += len(self)
-                    if stop < 0:              stop = 0
-                    if stop > len(self):      stop = len(self)
-                    if stop < start:          stop = start
-
-                elif step < 0:
-                    if start is None:         start = len(self) - 1
-                    elif start < 0:           start += len(self)
-                    if start < -1:            start = -1
-                    if start > len(self) - 1: start = len(self) - 1
-                    if stop is None:          stop = -1
-                    elif stop < 0:            stop += len(self)
-                    if stop < -1:             stop = -1
-                    if stop > len(self) - 1:  stop = len(self) - 1
-                    if stop > start:          stop = start
-
-                else:
-                    raise ValueError("slice step cannot be zero")
-
-                partitions = []
-                offset = 0
-                first, index_start = self._ext.partitionid_index_at(start)
-                last, index_stop = self._ext.partitionid_index_at(stop)
-
-                print("first", first, "index_start", index_start, "last", last, "index_stop", index_stop)
-
-                raise Exception("STOP")
-
-                if step > 0:
-                    for part in self.partitions:
-                        HERE
-
-                else:
-                    for part in reversed(self.partitions):
-                        raise NotImplementedError
-
-                return IrregularlyPartitionedArray(partitions)
+                # start, stop, step = head.start, head.stop, head.step
+                # if step is None:
+                #     step = 1
+                #
+                # if step > 0:
+                #     if start is None:         start = 0
+                #     elif start < 0:           start += len(self)
+                #     if start < 0:             start = 0
+                #     if start > len(self):     start = len(self)
+                #     if stop is None:          stop = len(self)
+                #     elif stop < 0:            stop += len(self)
+                #     if stop < 0:              stop = 0
+                #     if stop > len(self):      stop = len(self)
+                #     if stop < start:          stop = start
+                #
+                # elif step < 0:
+                #     if start is None:         start = len(self) - 1
+                #     elif start < 0:           start += len(self)
+                #     if start < -1:            start = -1
+                #     if start > len(self) - 1: start = len(self) - 1
+                #     if stop is None:          stop = -1
+                #     elif stop < 0:            stop += len(self)
+                #     if stop < -1:             stop = -1
+                #     if stop > len(self) - 1:  stop = len(self) - 1
+                #     if stop > start:          stop = start
+                #
+                # else:
+                #     raise ValueError("slice step cannot be zero")
+                #
+                # partitions = []
+                # offset = 0
+                # first, index_start = self._ext.partitionid_index_at(start)
+                # last, index_stop = self._ext.partitionid_index_at(stop)
+                #
+                # print("first", first, "index_start", index_start, "last", last, "index_stop", index_stop)
+                #
+                # raise Exception("STOP")
+                #
+                # if step > 0:
+                #     for part in self.partitions:
+                #         HERE
+                #
+                # else:
+                #     for part in reversed(self.partitions):
+                #         raise NotImplementedError
+                #
+                # return IrregularlyPartitionedArray(partitions)
 
             else:
                 raise NotImplementedError

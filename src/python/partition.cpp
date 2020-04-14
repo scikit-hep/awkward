@@ -96,16 +96,21 @@ partitionedarray_methods(py::class_<T, std::shared_ptr<T>,
           .def("getitem_at", &T::getitem_at)
           .def("getitem_range", [](const T& self,
                                    py::object start,
-                                   py::object stop) -> ak::PartitionedArrayPtr {
+                                   py::object stop,
+                                   py::object step) -> ak::PartitionedArrayPtr {
             int64_t intstart = ak::Slice::none();
             int64_t intstop = ak::Slice::none();
+            int64_t intstep = ak::Slice::none();
             if (!start.is(py::none())) {
               intstart = start.cast<int64_t>();
             }
             if (!stop.is(py::none())) {
               intstop = stop.cast<int64_t>();
             }
-            return self.getitem_range(intstart, intstop);
+            if (!step.is(py::none())) {
+              intstep = step.cast<int64_t>();
+            }
+            return self.getitem_range(intstart, intstop, intstep);
           })
 
   ;

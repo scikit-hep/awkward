@@ -139,7 +139,7 @@ namespace awkward {
     /// This operation only affects the node metadata; its calculation time
     /// does not scale with the size of the array.
     const PartitionedArrayPtr
-      getitem_range(int64_t start, int64_t stop) const;
+      getitem_range(int64_t start, int64_t stop, int64_t step) const;
 
     /// @brief Subinterval of this array, without handling negative
     /// indexing or bounds-checking.
@@ -149,7 +149,7 @@ namespace awkward {
     /// This operation only affects the node metadata; its calculation time
     /// does not scale with the size of the array.
     const PartitionedArrayPtr
-      getitem_range_nowrap(int64_t start, int64_t stop) const;
+      getitem_range_nowrap(int64_t start, int64_t stop, int64_t step) const;
 
   protected:
     const ContentPtrVec partitions_;

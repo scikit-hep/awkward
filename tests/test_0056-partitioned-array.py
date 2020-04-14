@@ -52,41 +52,51 @@ def test_basic():
     assert awkward1.to_list(array._ext.getitem_at(-7)) == []
     assert awkward1.to_list(array._ext.getitem_at(-8)) == [1.1, 2.2, 3.3]
 
-    assert array._ext.getitem_range(0, 8).tojson()  == "[[1.1,2.2,3.3],[],[4.4,5.5],[6.6],[],[],[],[7.7,8.8,9.9]]"
-    assert array._ext.getitem_range(1, 8).tojson()  == "[[],[4.4,5.5],[6.6],[],[],[],[7.7,8.8,9.9]]"
-    assert array._ext.getitem_range(2, 8).tojson()  == "[[4.4,5.5],[6.6],[],[],[],[7.7,8.8,9.9]]"
-    assert array._ext.getitem_range(3, 8).tojson()  == "[[6.6],[],[],[],[7.7,8.8,9.9]]"
-    assert array._ext.getitem_range(4, 8).tojson()  == "[[],[],[],[7.7,8.8,9.9]]"
-    assert array._ext.getitem_range(5, 8).tojson()  == "[[],[],[7.7,8.8,9.9]]"
-    assert array._ext.getitem_range(6, 8).tojson()  == "[[],[7.7,8.8,9.9]]"
-    assert array._ext.getitem_range(7, 8).tojson()  == "[[7.7,8.8,9.9]]"
-    assert array._ext.getitem_range(8, 8).tojson()  == "[]"
-    assert array._ext.getitem_range(-1, 8).tojson() == "[[7.7,8.8,9.9]]"
-    assert array._ext.getitem_range(-2, 8).tojson() == "[[],[7.7,8.8,9.9]]"
-    assert array._ext.getitem_range(-3, 8).tojson() == "[[],[],[7.7,8.8,9.9]]"
-    assert array._ext.getitem_range(-4, 8).tojson() == "[[],[],[],[7.7,8.8,9.9]]"
-    assert array._ext.getitem_range(-5, 8).tojson() == "[[6.6],[],[],[],[7.7,8.8,9.9]]"
-    assert array._ext.getitem_range(-6, 8).tojson() == "[[4.4,5.5],[6.6],[],[],[],[7.7,8.8,9.9]]"
-    assert array._ext.getitem_range(-7, 8).tojson() == "[[],[4.4,5.5],[6.6],[],[],[],[7.7,8.8,9.9]]"
-    assert array._ext.getitem_range(-8, 8).tojson() == "[[1.1,2.2,3.3],[],[4.4,5.5],[6.6],[],[],[],[7.7,8.8,9.9]]"
+    assert array._ext.getitem_range(0, 8, 1).tojson()  == "[[1.1,2.2,3.3],[],[4.4,5.5],[6.6],[],[],[],[7.7,8.8,9.9]]"
+    assert array._ext.getitem_range(1, 8, 1).tojson()  == "[[],[4.4,5.5],[6.6],[],[],[],[7.7,8.8,9.9]]"
+    assert array._ext.getitem_range(2, 8, 1).tojson()  == "[[4.4,5.5],[6.6],[],[],[],[7.7,8.8,9.9]]"
+    assert array._ext.getitem_range(3, 8, 1).tojson()  == "[[6.6],[],[],[],[7.7,8.8,9.9]]"
+    assert array._ext.getitem_range(4, 8, 1).tojson()  == "[[],[],[],[7.7,8.8,9.9]]"
+    assert array._ext.getitem_range(5, 8, 1).tojson()  == "[[],[],[7.7,8.8,9.9]]"
+    assert array._ext.getitem_range(6, 8, 1).tojson()  == "[[],[7.7,8.8,9.9]]"
+    assert array._ext.getitem_range(7, 8, 1).tojson()  == "[[7.7,8.8,9.9]]"
+    assert array._ext.getitem_range(8, 8, 1).tojson()  == "[]"
+    assert array._ext.getitem_range(-1, 8, 1).tojson() == "[[7.7,8.8,9.9]]"
+    assert array._ext.getitem_range(-2, 8, 1).tojson() == "[[],[7.7,8.8,9.9]]"
+    assert array._ext.getitem_range(-3, 8, 1).tojson() == "[[],[],[7.7,8.8,9.9]]"
+    assert array._ext.getitem_range(-4, 8, 1).tojson() == "[[],[],[],[7.7,8.8,9.9]]"
+    assert array._ext.getitem_range(-5, 8, 1).tojson() == "[[6.6],[],[],[],[7.7,8.8,9.9]]"
+    assert array._ext.getitem_range(-6, 8, 1).tojson() == "[[4.4,5.5],[6.6],[],[],[],[7.7,8.8,9.9]]"
+    assert array._ext.getitem_range(-7, 8, 1).tojson() == "[[],[4.4,5.5],[6.6],[],[],[],[7.7,8.8,9.9]]"
+    assert array._ext.getitem_range(-8, 8, 1).tojson() == "[[1.1,2.2,3.3],[],[4.4,5.5],[6.6],[],[],[],[7.7,8.8,9.9]]"
 
-    assert array._ext.getitem_range(0, 8).tojson()  == "[[1.1,2.2,3.3],[],[4.4,5.5],[6.6],[],[],[],[7.7,8.8,9.9]]"
-    assert array._ext.getitem_range(0, 7).tojson()  == "[[1.1,2.2,3.3],[],[4.4,5.5],[6.6],[],[],[]]"
-    assert array._ext.getitem_range(0, 6).tojson()  == "[[1.1,2.2,3.3],[],[4.4,5.5],[6.6],[],[]]"
-    assert array._ext.getitem_range(0, 5).tojson()  == "[[1.1,2.2,3.3],[],[4.4,5.5],[6.6],[]]"
-    assert array._ext.getitem_range(0, 4).tojson()  == "[[1.1,2.2,3.3],[],[4.4,5.5],[6.6]]"
-    assert array._ext.getitem_range(0, 3).tojson()  == "[[1.1,2.2,3.3],[],[4.4,5.5]]"
-    assert array._ext.getitem_range(0, 2).tojson()  == "[[1.1,2.2,3.3],[]]"
-    assert array._ext.getitem_range(0, 1).tojson()  == "[[1.1,2.2,3.3]]"
-    assert array._ext.getitem_range(0, 0).tojson()  == "[]"
-    assert array._ext.getitem_range(0, -8).tojson() == "[]"
-    assert array._ext.getitem_range(0, -7).tojson() == "[[1.1,2.2,3.3]]"
-    assert array._ext.getitem_range(0, -6).tojson() == "[[1.1,2.2,3.3],[]]"
-    assert array._ext.getitem_range(0, -5).tojson() == "[[1.1,2.2,3.3],[],[4.4,5.5]]"
-    assert array._ext.getitem_range(0, -4).tojson() == "[[1.1,2.2,3.3],[],[4.4,5.5],[6.6]]"
-    assert array._ext.getitem_range(0, -3).tojson() == "[[1.1,2.2,3.3],[],[4.4,5.5],[6.6],[]]"
-    assert array._ext.getitem_range(0, -2).tojson() == "[[1.1,2.2,3.3],[],[4.4,5.5],[6.6],[],[]]"
-    assert array._ext.getitem_range(0, -1).tojson() == "[[1.1,2.2,3.3],[],[4.4,5.5],[6.6],[],[],[]]"
+    assert array._ext.getitem_range(0, 8, 1).tojson()  == "[[1.1,2.2,3.3],[],[4.4,5.5],[6.6],[],[],[],[7.7,8.8,9.9]]"
+    assert array._ext.getitem_range(0, 7, 1).tojson()  == "[[1.1,2.2,3.3],[],[4.4,5.5],[6.6],[],[],[]]"
+    assert array._ext.getitem_range(0, 6, 1).tojson()  == "[[1.1,2.2,3.3],[],[4.4,5.5],[6.6],[],[]]"
+    assert array._ext.getitem_range(0, 5, 1).tojson()  == "[[1.1,2.2,3.3],[],[4.4,5.5],[6.6],[]]"
+    assert array._ext.getitem_range(0, 4, 1).tojson()  == "[[1.1,2.2,3.3],[],[4.4,5.5],[6.6]]"
+    assert array._ext.getitem_range(0, 3, 1).tojson()  == "[[1.1,2.2,3.3],[],[4.4,5.5]]"
+    assert array._ext.getitem_range(0, 2, 1).tojson()  == "[[1.1,2.2,3.3],[]]"
+    assert array._ext.getitem_range(0, 1, 1).tojson()  == "[[1.1,2.2,3.3]]"
+    assert array._ext.getitem_range(0, 0, 1).tojson()  == "[]"
+    assert array._ext.getitem_range(0, -8, 1).tojson() == "[]"
+    assert array._ext.getitem_range(0, -7, 1).tojson() == "[[1.1,2.2,3.3]]"
+    assert array._ext.getitem_range(0, -6, 1).tojson() == "[[1.1,2.2,3.3],[]]"
+    assert array._ext.getitem_range(0, -5, 1).tojson() == "[[1.1,2.2,3.3],[],[4.4,5.5]]"
+    assert array._ext.getitem_range(0, -4, 1).tojson() == "[[1.1,2.2,3.3],[],[4.4,5.5],[6.6]]"
+    assert array._ext.getitem_range(0, -3, 1).tojson() == "[[1.1,2.2,3.3],[],[4.4,5.5],[6.6],[]]"
+    assert array._ext.getitem_range(0, -2, 1).tojson() == "[[1.1,2.2,3.3],[],[4.4,5.5],[6.6],[],[]]"
+    assert array._ext.getitem_range(0, -1, 1).tojson() == "[[1.1,2.2,3.3],[],[4.4,5.5],[6.6],[],[],[]]"
+
+    assert array._ext.getitem_range(0, 8, 2).tojson()  == "[[1.1,2.2,3.3],[4.4,5.5],[],[]]"
+    assert array._ext.getitem_range(1, 8, 2).tojson()  == "[[],[6.6],[],[7.7,8.8,9.9]]"
+    assert array._ext.getitem_range(1, 7, 2).tojson()  == "[[],[6.6],[]]"
+    assert array._ext.getitem_range(2, 8, 2).tojson()  == "[[4.4,5.5],[],[]]"
+    assert array._ext.getitem_range(0, 8, 3).tojson()  == "[[1.1,2.2,3.3],[6.6],[]]"
+    assert array._ext.getitem_range(1, 8, 3).tojson()  == "[[],[],[7.7,8.8,9.9]]"
+    assert array._ext.getitem_range(1, 7, 3).tojson()  == "[[],[]]"
+    assert array._ext.getitem_range(2, 8, 3).tojson()  == "[[4.4,5.5],[]]"
+    assert array._ext.getitem_range(3, 8, 3).tojson()  == "[[6.6],[]]"
 
     assert [awkward1.to_list(x) for x in array] == [[1.1,2.2,3.3],[],[4.4,5.5],[6.6],[],[],[],[7.7,8.8,9.9]]
 
@@ -199,10 +209,10 @@ def test_getitem_first_dimension_int():
     assert awkward1.to_list(array[7, [-1, 0]]) == [9.9, 7.7]
     assert awkward1.to_list(array[7, [False, True, True]]) == [8.8, 9.9]
 
-def test_getitem_first_dimension_slice():
-    one = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
-    two = awkward1.Array([[6.6], [], [], [], [7.7, 8.8, 9.9]]).layout
-    array = awkward1.partition.IrregularlyPartitionedArray([one, two])
-
-    print(array[2:6,])
-    raise Exception
+# def test_getitem_first_dimension_slice():
+#     one = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
+#     two = awkward1.Array([[6.6], [], [], [], [7.7, 8.8, 9.9]]).layout
+#     array = awkward1.partition.IrregularlyPartitionedArray([one, two])
+#
+#     print(array[2:6,])
+#     raise Exception
