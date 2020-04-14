@@ -171,3 +171,12 @@ def test_getitem():
     assert array[:6].tojson()  == "[[1.1,2.2,3.3],[],[4.4,5.5],[6.6],[],[]]"
     assert array[:7].tojson()  == "[[1.1,2.2,3.3],[],[4.4,5.5],[6.6],[],[],[]]"
     assert array[:8].tojson()  == "[[1.1,2.2,3.3],[],[4.4,5.5],[6.6],[],[],[],[7.7,8.8,9.9]]"
+
+    onerec = awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}]).layout
+    tworec = awkward1.Array([{"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}]).layout
+    arrayrec = awkward1.partition.IrregularlyPartitionedArray([onerec, tworec])
+
+    assert arrayrec.tojson() == '[{"x":0.0,"y":[]},{"x":1.1,"y":[1]},{"x":2.2,"y":[2,2]},{"x":3.3,"y":[3,3,3]},{"x":4.4,"y":[4,4,4,4]}]'
+    assert arrayrec["x"].tojson() == "[0.0,1.1,2.2,3.3,4.4]"
+    assert arrayrec["y"].tojson() == "[[],[1],[2,2],[3,3,3],[4,4,4,4]]"
+    assert arrayrec[["x"]].tojson() == '[{"x":0.0},{"x":1.1},{"x":2.2},{"x":3.3},{"x":4.4}]'

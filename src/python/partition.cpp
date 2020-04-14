@@ -144,5 +144,7 @@ make_IrregularlyPartitionedArray(const py::handle& m, const std::string& name) {
         }
         return ak::IrregularlyPartitionedArray(partitions, stops);
       }))
+      .def_property_readonly("stops", &ak::IrregularlyPartitionedArray::stops)
+
   );
 }

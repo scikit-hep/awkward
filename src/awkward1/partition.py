@@ -85,13 +85,13 @@ class PartitionedArray(object):
 
         elif (isinstance(where, str) or
               (awkward1._util.py27 and isinstance(where, unicode))):
-            raise NotImplementedError
+            return self.replace_partitions([x[where] for x in self.partitions])
 
-        elif (instance(where, Iterable) and
+        elif (isinstance(where, Iterable) and
               all((isinstance(x, str) or
                    (awkward._util.py27 and isinstance(x, unicode)))
                   for x in where)):
-            raise NotImplementedError
+            return self.replace_partitions([x[where] for x in self.partitions])
 
         else:
             if not isinstance(where, tuple):
@@ -101,3 +101,10 @@ class PartitionedArray(object):
 class IrregularlyPartitionedArray(PartitionedArray):
     def __init__(self, partitions):
         self._ext = awkward1._ext.IrregularlyPartitionedArray(partitions)
+
+    @property
+    def stops(self):
+        return self._ext.stops
+
+    def replace_partitions(self, partitions):
+        return awkward1._ext.IrregularlyPartitionedArray(partitions, self.stops)
