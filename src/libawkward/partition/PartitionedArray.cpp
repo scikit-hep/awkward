@@ -137,47 +137,68 @@ namespace awkward {
           index_stop = partitions_[(size_t)partitionid_last].get()->length();
         }
       }
+
       for (int64_t partitionid = partitionid_first;
            partitionid <= partitionid_last;
            partitionid++) {
         ContentPtr p = partitions_[(size_t)partitionid];
         int64_t plen = p.get()->length();
+
         if (partitionid == partitionid_first  &&
             partitionid == partitionid_last) {
-          // p = p.get()->getitem_range_nowrap(index_start, index_stop);
-          Slice slice;
-          slice.append(SliceRange(index_start, index_stop, step));
-          slice.become_sealed();
-          p = p.get()->getitem(slice);
+          if (step == 1) {
+            p = p.get()->getitem_range_nowrap(index_start, index_stop);
+          }
+          else {
+            Slice slice;
+            slice.append(SliceRange(index_start, index_stop, step));
+            slice.become_sealed();
+            p = p.get()->getitem(slice);
+          }
         }
         else if (partitionid == partitionid_first) {
-          // p = p.get()->getitem_range_nowrap(index_start, plen);
-          Slice slice;
-          slice.append(SliceRange(index_start, plen, step));
-          slice.become_sealed();
-          p = p.get()->getitem(slice);
-          offset = ((index_start - plen) % step + step) % step;
+          if (step == 1) {
+            p = p.get()->getitem_range_nowrap(index_start, plen);
+          }
+          else {
+            Slice slice;
+            slice.append(SliceRange(index_start, plen, step));
+            slice.become_sealed();
+            p = p.get()->getitem(slice);
+            offset = ((index_start - plen) % step + step) % step;
+          }
         }
         else if (partitionid == partitionid_last) {
-          // p = p.get()->getitem_range_nowrap(0, index_stop);
+          if (step == 1) {
+            p = p.get()->getitem_range_nowrap(0, index_stop);
+          }
+          else {
+            Slice slice;
+            slice.append(SliceRange(offset, index_stop, step));
+            slice.become_sealed();
+            p = p.get()->getitem(slice);
+          }
+        }
+        else if (step != 1) {
           Slice slice;
-          slice.append(SliceRange(offset, index_stop, step));
+          slice.append(SliceRange(offset, plen, step));
           slice.become_sealed();
           p = p.get()->getitem(slice);
-        }
-        else {
           offset = ((offset - plen) % step + step) % step;
         }
+
         total_length += p.get()->length();
         if (p.get()->length() > 0) {
           partitions.push_back(p);
+          stops.push_back(total_length);
         }
-        stops.push_back(total_length);
       }
     }
 
     else if (step < 0) {
-      throw std::runtime_error("not implemented");
+      if (partitionid_last < 0) {
+        throw std::invalid_argument("asdf");
+      }
     }
 
     else {

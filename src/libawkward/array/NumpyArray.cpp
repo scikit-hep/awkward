@@ -3230,11 +3230,12 @@ namespace awkward {
     }
     else if (ndim() == 1) {
       bool* array = reinterpret_cast<bool*>(byteptr());
+      int64_t stride = (int64_t)(strides_[0]);
       if (include_beginendlist) {
         builder.beginlist();
       }
       for (int64_t i = 0;  i < length();  i++) {
-        builder.boolean(array[i]);
+        builder.boolean(array[i*stride]);
       }
       if (include_beginendlist) {
         builder.endlist();
@@ -3270,11 +3271,12 @@ namespace awkward {
     }
     else if (ndim() == 1) {
       T* array = reinterpret_cast<T*>(byteptr());
+      int64_t stride = (int64_t)(strides_[0] / sizeof(T));
       if (include_beginendlist) {
         builder.beginlist();
       }
       for (int64_t i = 0;  i < length();  i++) {
-        builder.integer(array[i]);
+        builder.integer(array[i*stride]);
       }
       if (include_beginendlist) {
         builder.endlist();
@@ -3310,11 +3312,12 @@ namespace awkward {
     }
     else if (ndim() == 1) {
       T* array = reinterpret_cast<T*>(byteptr());
+      int64_t stride = (int64_t)(strides_[0] / sizeof(T));
       if (include_beginendlist) {
         builder.beginlist();
       }
       for (int64_t i = 0;  i < length();  i++) {
-        builder.real(array[i]);
+        builder.real(array[i*stride]);
       }
       if (include_beginendlist) {
         builder.endlist();

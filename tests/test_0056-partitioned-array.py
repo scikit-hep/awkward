@@ -92,6 +92,7 @@ def test_basic():
     assert array._ext.getitem_range(1, 8, 2).tojson()  == "[[],[6.6],[],[7.7,8.8,9.9]]"
     assert array._ext.getitem_range(1, 7, 2).tojson()  == "[[],[6.6],[]]"
     assert array._ext.getitem_range(2, 8, 2).tojson()  == "[[4.4,5.5],[],[]]"
+    assert array._ext.getitem_range(3, 8, 2).tojson()  == "[[6.6],[],[7.7,8.8,9.9]]"
     assert array._ext.getitem_range(0, 8, 3).tojson()  == "[[1.1,2.2,3.3],[6.6],[]]"
     assert array._ext.getitem_range(1, 8, 3).tojson()  == "[[],[],[7.7,8.8,9.9]]"
     assert array._ext.getitem_range(1, 7, 3).tojson()  == "[[],[]]"
@@ -101,6 +102,23 @@ def test_basic():
     assert [awkward1.to_list(x) for x in array] == [[1.1,2.2,3.3],[],[4.4,5.5],[6.6],[],[],[],[7.7,8.8,9.9]]
 
     assert awkward1.to_list(array.toContent()) == [[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [], [], [], [7.7, 8.8, 9.9]]
+
+def test_range_slices():
+    a1 = awkward1.Array(numpy.array([0, 1, 2], dtype=numpy.int64)).layout
+    a2 = awkward1.Array(numpy.array([3, 4], dtype=numpy.int64)).layout
+    a3 = awkward1.Array(numpy.array([5], dtype=numpy.int64)).layout
+    a4 = awkward1.Array(numpy.array([], dtype=numpy.int64)).layout
+    a5 = awkward1.Array(numpy.array([6, 7, 8, 9], dtype=numpy.int64)).layout
+    aspart = awkward1.partition.IrregularlyPartitionedArray([a1, a2, a3, a4, a5])
+    asfull = awkward1.concatenate([a1, a2, a3, a4, a5], highlevel=False)
+    aslist = awkward1.to_list(asfull)
+
+    for start in range(10):
+        for stop in range(10):
+            for step in (1, 2, 3, 4, 5):
+                # print("full[{}:{}:{}] = {}".format(start, stop, step, aslist[start:stop:step]))
+                assert awkward1.to_list(asfull[start:stop:step]) == aslist[start:stop:step]
+                assert aspart._ext.getitem_range(start, stop, step).tojson() == asfull[start:stop:step].tojson()
 
 def test_as_slice():
     one = awkward1.Array([False, True, False]).layout

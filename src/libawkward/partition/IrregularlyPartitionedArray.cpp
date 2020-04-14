@@ -44,7 +44,7 @@ namespace awkward {
                                                     int64_t& index) const {
     if (at < 0) {
       partitionid = -1;
-      index = 0;
+      index = -1;
       return;
     }
     int64_t start = 0;
