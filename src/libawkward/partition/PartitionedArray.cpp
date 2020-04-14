@@ -35,16 +35,20 @@ namespace awkward {
   PartitionedArray::tojson(bool pretty, int64_t maxdecimals) const {
     if (pretty) {
       ToJsonPrettyString builder(maxdecimals);
+      builder.beginlist();
       for (auto p : partitions_) {
         p.get()->tojson_part(builder, false);
       }
+      builder.endlist();
       return builder.tostring();
     }
     else {
       ToJsonString builder(maxdecimals);
+      builder.beginlist();
       for (auto p : partitions_) {
         p.get()->tojson_part(builder, false);
       }
+      builder.endlist();
       return builder.tostring();
     }
   }
@@ -84,7 +88,7 @@ namespace awkward {
         classname(),
         nullptr);
     }
-    return getitem_at_nowrap(at);
+    return getitem_at_nowrap(regular_at);
   }
 
   const ContentPtr
@@ -118,9 +122,11 @@ namespace awkward {
     int64_t partitionid_last;
     int64_t index_stop;
     partitionid_index_at(stop, partitionid_last, index_stop);
-    if (index_stop == 0  &&  partitionid_last > partitionid_first) {
+    if (index_stop == 0) {
       partitionid_last--;
-      index_stop = partitions_[(size_t)partitionid_last].get()->length();
+      if (partitionid_last >= 0) {
+        index_stop = partitions_[(size_t)partitionid_last].get()->length();
+      }
     }
     ContentPtrVec partitions;
     std::vector<int64_t> stops;
@@ -142,6 +148,10 @@ namespace awkward {
       total_length += p.get()->length();
       partitions.push_back(p);
       stops.push_back(total_length);
+    }
+    if (partitions.empty()) {
+      partitions.push_back(partitions_[0].get()->getitem_nothing());
+      stops.push_back(0);
     }
     return std::make_shared<IrregularlyPartitionedArray>(partitions, stops);
   }

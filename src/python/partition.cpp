@@ -11,12 +11,52 @@
 // }
 
 template <typename T>
+std::string
+tojson_string(const T& self,
+              bool pretty,
+              const py::object& maxdecimals) {
+  return self.tojson(pretty,
+                     check_maxdecimals(maxdecimals));
+}
+
+template <typename T>
+void
+tojson_file(const T& self,
+            const std::string& destination,
+            bool pretty,
+            py::object maxdecimals,
+            int64_t buffersize) {
+#ifdef _MSC_VER
+  FILE* file;
+  if (fopen_s(&file, destination.c_str(), "wb") != 0) {
+#else
+  FILE* file = fopen(destination.c_str(), "wb");
+  if (file == nullptr) {
+#endif
+    throw std::invalid_argument(
+      std::string("file \"") + destination
+      + std::string("\" could not be opened for writing"));
+  }
+  try {
+    self.tojson(file,
+                pretty,
+                check_maxdecimals(maxdecimals),
+                buffersize);
+  }
+  catch (...) {
+    fclose(file);
+    throw;
+  }
+  fclose(file);
+}
+
+template <typename T>
 py::class_<T, std::shared_ptr<T>, ak::PartitionedArray>
 partitionedarray_methods(py::class_<T, std::shared_ptr<T>,
                          ak::PartitionedArray>& x) {
   return x.def("__repr__", &repr<T>)
           .def("__len__", &len<T>)
-          .def("partitions", [](const T& self) -> py::object {
+          .def_property_readonly("partitions", [](const T& self) -> py::object {
             py::list out;
             std::vector<ak::ContentPtr> partitions = self.partitions();
             for (auto item : partitions) {
@@ -77,5 +117,15 @@ make_IrregularlyPartitionedArray(const py::handle& m, const std::string& name) {
                     -> ak::IrregularlyPartitionedArray {
         return ak::IrregularlyPartitionedArray(partitions, stops);
       }), py::arg("partitions"), py::arg("stops"))
+      .def(py::init([](const std::vector<ak::ContentPtr>& partitions)
+                    -> ak::IrregularlyPartitionedArray {
+        int64_t total_length = 0;
+        std::vector<int64_t> stops;
+        for (auto p : partitions) {
+          total_length += p.get()->length();
+          stops.push_back(total_length);
+        }
+        return ak::IrregularlyPartitionedArray(partitions, stops);
+      }))
   );
 }

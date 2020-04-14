@@ -49,8 +49,8 @@ namespace awkward {
       }
       start = stops_[(size_t)i];
     }
-    throw std::invalid_argument(
-      "index out of range for IrregularlyPartitionedArray");
+    partitionid = numpartitions();
+    index = 0;
   }
 
   const std::string
@@ -64,7 +64,7 @@ namespace awkward {
     out << "<" << classname() << ">\n";
     for (int64_t i = 0;  i < numpartitions();  i++) {
       out << "    <partition start=\"" << start(i) << "\" stop=\""
-          << stop(i) << "\">";
+          << stop(i) << "\">\n";
       out << partition(i).get()->tostring_part("        ", "", "\n");
       out << "    </partition>\n";
     }
