@@ -2,7 +2,13 @@
 
 from __future__ import absolute_import
 
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
+
 import awkward1._ext
+import awkward1._util
 
 class PartitionedArray(object):
     @classmethod
@@ -68,6 +74,29 @@ class PartitionedArray(object):
 
     def repartition(self, *args, **kwargs):
         return self.from_ext(self._ext.repartition(*args, **kwargs))
+
+    def __getitem__(self, where):
+        if isinstance(where, int):
+            return self._ext.getitem_at(where)
+
+        elif isinstance(where, slice) and (where.step is None or
+                                           where.step == 1):
+            return self._ext.getitem_range(where.start, where.stop)
+
+        elif (isinstance(where, str) or
+              (awkward1._util.py27 and isinstance(where, unicode))):
+            raise NotImplementedError
+
+        elif (instance(where, Iterable) and
+              all((isinstance(x, str) or
+                   (awkward._util.py27 and isinstance(x, unicode)))
+                  for x in where)):
+            raise NotImplementedError
+
+        else:
+            if not isinstance(where, tuple):
+                where = (where,)
+            raise NotImplementedError
 
 class IrregularlyPartitionedArray(PartitionedArray):
     def __init__(self, partitions):

@@ -94,7 +94,19 @@ partitionedarray_methods(py::class_<T, std::shared_ptr<T>,
                py::arg("maxdecimals") = py::none(),
                py::arg("buffersize") = 65536)
           .def("getitem_at", &T::getitem_at)
-          .def("getitem_range", &T::getitem_range)
+          .def("getitem_range", [](const T& self,
+                                   py::object start,
+                                   py::object stop) -> ak::PartitionedArrayPtr {
+            int64_t intstart = ak::Slice::none();
+            int64_t intstop = ak::Slice::none();
+            if (!start.is(py::none())) {
+              intstart = start.cast<int64_t>();
+            }
+            if (!stop.is(py::none())) {
+              intstop = stop.cast<int64_t>();
+            }
+            return self.getitem_range(intstart, intstop);
+          })
 
   ;
 }

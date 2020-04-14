@@ -111,3 +111,63 @@ def test_repartition():
     assert [list(x) for x in array.repartition([4, 5, 5, 8]).partitions] == [[0, 1, 2, 100], [200], [], [300, 400, 500]]
     assert [list(x) for x in array.repartition([2, 8]).partitions] == [[0, 1], [2, 100, 200, 300, 400, 500]]
     assert [list(x) for x in array.repartition([2, 5, 8]).partitions] == [[0, 1], [2, 100, 200], [300, 400, 500]]
+
+def test_getitem():
+    one = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
+    two = awkward1.Array([[6.6], [], [], [], [7.7, 8.8, 9.9]]).layout
+    array = awkward1.partition.IrregularlyPartitionedArray([one, two])
+
+    assert awkward1.to_list(array[0]) == [1.1, 2.2, 3.3]
+    assert awkward1.to_list(array[1]) == []
+    assert awkward1.to_list(array[2]) == [4.4, 5.5]
+    assert awkward1.to_list(array[3]) == [6.6]
+    assert awkward1.to_list(array[4]) == []
+    assert awkward1.to_list(array[5]) == []
+    assert awkward1.to_list(array[6]) == []
+    assert awkward1.to_list(array[7]) == [7.7, 8.8, 9.9]
+    assert awkward1.to_list(array[-1]) == [7.7, 8.8, 9.9]
+    assert awkward1.to_list(array[-2]) == []
+    assert awkward1.to_list(array[-3]) == []
+    assert awkward1.to_list(array[-4]) == []
+    assert awkward1.to_list(array[-5]) == [6.6]
+    assert awkward1.to_list(array[-6]) == [4.4, 5.5]
+    assert awkward1.to_list(array[-7]) == []
+    assert awkward1.to_list(array[-8]) == [1.1, 2.2, 3.3]
+
+    assert array[:].tojson()   == "[[1.1,2.2,3.3],[],[4.4,5.5],[6.6],[],[],[],[7.7,8.8,9.9]]"
+    assert array[2:6].tojson() == "[[4.4,5.5],[6.6],[],[]]"
+
+    assert array[1:].tojson()  == "[[],[4.4,5.5],[6.6],[],[],[],[7.7,8.8,9.9]]"
+    assert array[2:].tojson()  == "[[4.4,5.5],[6.6],[],[],[],[7.7,8.8,9.9]]"
+    assert array[3:].tojson()  == "[[6.6],[],[],[],[7.7,8.8,9.9]]"
+    assert array[4:].tojson()  == "[[],[],[],[7.7,8.8,9.9]]"
+    assert array[5:].tojson()  == "[[],[],[7.7,8.8,9.9]]"
+    assert array[6:].tojson()  == "[[],[7.7,8.8,9.9]]"
+    assert array[7:].tojson()  == "[[7.7,8.8,9.9]]"
+    assert array[8:].tojson()  == "[]"
+    assert array[-1:].tojson() == "[[7.7,8.8,9.9]]"
+    assert array[-2:].tojson() == "[[],[7.7,8.8,9.9]]"
+    assert array[-3:].tojson() == "[[],[],[7.7,8.8,9.9]]"
+    assert array[-4:].tojson() == "[[],[],[],[7.7,8.8,9.9]]"
+    assert array[-5:].tojson() == "[[6.6],[],[],[],[7.7,8.8,9.9]]"
+    assert array[-6:].tojson() == "[[4.4,5.5],[6.6],[],[],[],[7.7,8.8,9.9]]"
+    assert array[-7:].tojson() == "[[],[4.4,5.5],[6.6],[],[],[],[7.7,8.8,9.9]]"
+    assert array[-8:].tojson() == "[[1.1,2.2,3.3],[],[4.4,5.5],[6.6],[],[],[],[7.7,8.8,9.9]]"
+
+    assert array[:-1].tojson() == "[[1.1,2.2,3.3],[],[4.4,5.5],[6.6],[],[],[]]"
+    assert array[:-2].tojson() == "[[1.1,2.2,3.3],[],[4.4,5.5],[6.6],[],[]]"
+    assert array[:-3].tojson() == "[[1.1,2.2,3.3],[],[4.4,5.5],[6.6],[]]"
+    assert array[:-4].tojson() == "[[1.1,2.2,3.3],[],[4.4,5.5],[6.6]]"
+    assert array[:-5].tojson() == "[[1.1,2.2,3.3],[],[4.4,5.5]]"
+    assert array[:-6].tojson() == "[[1.1,2.2,3.3],[]]"
+    assert array[:-7].tojson() == "[[1.1,2.2,3.3]]"
+    assert array[:-8].tojson() == "[]"
+    assert array[:0].tojson()  == "[]"
+    assert array[:1].tojson()  == "[[1.1,2.2,3.3]]"
+    assert array[:2].tojson()  == "[[1.1,2.2,3.3],[]]"
+    assert array[:3].tojson()  == "[[1.1,2.2,3.3],[],[4.4,5.5]]"
+    assert array[:4].tojson()  == "[[1.1,2.2,3.3],[],[4.4,5.5],[6.6]]"
+    assert array[:5].tojson()  == "[[1.1,2.2,3.3],[],[4.4,5.5],[6.6],[]]"
+    assert array[:6].tojson()  == "[[1.1,2.2,3.3],[],[4.4,5.5],[6.6],[],[]]"
+    assert array[:7].tojson()  == "[[1.1,2.2,3.3],[],[4.4,5.5],[6.6],[],[],[]]"
+    assert array[:8].tojson()  == "[[1.1,2.2,3.3],[],[4.4,5.5],[6.6],[],[],[],[7.7,8.8,9.9]]"
