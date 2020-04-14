@@ -26,6 +26,58 @@
 namespace py = pybind11;
 namespace ak = awkward;
 
+py::object
+box(const std::shared_ptr<ak::Content>& content);
+
+template <typename T>
+std::string
+repr(const T& self) {
+  return self.tostring();
+}
+
+template <typename T>
+int64_t
+len(const T& self) {
+  return self.length();
+}
+
+int64_t
+check_maxdecimals(const py::object& maxdecimals);
+
+template <typename T>
+std::string
+tojson_string(const T& self, bool pretty, const py::object& maxdecimals) {
+  return self.tojson(pretty, check_maxdecimals(maxdecimals));
+}
+
+template <typename T>
+void
+tojson_file(const T& self,
+            const std::string& destination,
+            bool pretty,
+            py::object maxdecimals,
+            int64_t buffersize) {
+#ifdef _MSC_VER
+  FILE* file;
+  if (fopen_s(&file, destination.c_str(), "wb") != 0) {
+#else
+  FILE* file = fopen(destination.c_str(), "wb");
+  if (file == nullptr) {
+#endif
+    throw std::invalid_argument(
+      std::string("file \"") + destination
+      + std::string("\" could not be opened for writing"));
+  }
+  try {
+    self.tojson(file, pretty, check_maxdecimals(maxdecimals), buffersize);
+  }
+  catch (...) {
+    fclose(file);
+    throw;
+  }
+  fclose(file);
+}
+
 ak::util::Parameters
 dict2parameters(const py::object& in);
 

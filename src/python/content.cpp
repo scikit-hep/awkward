@@ -564,6 +564,19 @@ toslice(py::object obj) {
   return out;
 }
 
+int64_t
+check_maxdecimals(const py::object& maxdecimals) {
+  if (maxdecimals.is(py::none())) {
+    return -1;
+  }
+  try {
+    return maxdecimals.cast<int64_t>();
+  }
+  catch (py::cast_error err) {
+    throw std::invalid_argument("maxdecimals must be None or an integer");
+  }
+}
+
 template <typename T>
 py::object
 getitem(const T& self, const py::object& obj) {
@@ -856,18 +869,6 @@ identity(const T& self) {
 }
 
 template <typename T>
-std::string
-repr(const T& self) {
-  return self.tostring();
-}
-
-template <typename T>
-int64_t
-len(const T& self) {
-  return self.length();
-}
-
-template <typename T>
 ak::Iterator
 iter(const T& self) {
   return ak::Iterator(self.shallow_copy());
@@ -946,53 +947,6 @@ void
 setparameter(T& self, const std::string& key, const py::object& value) {
   py::object valuestr = py::module::import("json").attr("dumps")(value);
   self.setparameter(key, valuestr.cast<std::string>());
-}
-
-int64_t
-check_maxdecimals(const py::object& maxdecimals) {
-  if (maxdecimals.is(py::none())) {
-    return -1;
-  }
-  try {
-    return maxdecimals.cast<int64_t>();
-  }
-  catch (py::cast_error err) {
-    throw std::invalid_argument("maxdecimals must be None or an integer");
-  }
-}
-
-template <typename T>
-std::string
-tojson_string(const T& self, bool pretty, const py::object& maxdecimals) {
-  return self.tojson(pretty, check_maxdecimals(maxdecimals));
-}
-
-template <typename T>
-void
-tojson_file(const T& self,
-            const std::string& destination,
-            bool pretty,
-            py::object maxdecimals,
-            int64_t buffersize) {
-#ifdef _MSC_VER
-  FILE* file;
-  if (fopen_s(&file, destination.c_str(), "wb") != 0) {
-#else
-  FILE* file = fopen(destination.c_str(), "wb");
-  if (file == nullptr) {
-#endif
-    throw std::invalid_argument(
-      std::string("file \"") + destination
-      + std::string("\" could not be opened for writing"));
-  }
-  try {
-    self.tojson(file, pretty, check_maxdecimals(maxdecimals), buffersize);
-  }
-  catch (...) {
-    fclose(file);
-    throw;
-  }
-  fclose(file);
 }
 
 template <typename T>

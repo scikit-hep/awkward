@@ -9,6 +9,7 @@
 #include "awkward/python/content.h"
 #include "awkward/python/types.h"
 #include "awkward/python/io.h"
+#include "awkward/python/partition.h"
 
 namespace py = pybind11;
 PYBIND11_MODULE(_ext, m) {
@@ -73,6 +74,8 @@ PYBIND11_MODULE(_ext, m) {
     return toslice(obj).tostring();
   });
 
+  ////////// types.h
+
   make_Type(m, "Type");
   make_ArrayType(m, "ArrayType");
   make_PrimitiveType(m, "PrimitiveType");
@@ -83,6 +86,14 @@ PYBIND11_MODULE(_ext, m) {
   make_UnionType(m, "UnionType");
   make_RecordType(m, "RecordType");
 
+  ////////// io.h
+
   make_fromjson(m, "fromjson");
   make_fromroot_nestedvector(m, "fromroot_nestedvector");
+
+  ////////// partition.h
+
+  make_PartitionedArray(m, "PartitionedArray");
+  make_IrregularlyPartitionedArray(m, "IrregularlyPartitionedArray");
+
 }
