@@ -278,8 +278,32 @@ def test_getitem_first_dimension_intarray():
     assert isinstance(array[[-1, 3, 2, 0, 2, 3, 7]], awkward1.layout.ListArray64)
     assert awkward1.to_list(array[[-1, 3, 2, 0, 2, 3, 7]]) == [[7.7, 8.8, 9.9], [6.6], [4.4, 5.5], [1.1, 2.2, 3.3], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]
 
+    m1a = awkward1.Array([-1, 3, 2]).layout
+    m2a = awkward1.Array([0, 2, 3, 7]).layout
+    ma = awkward1.partition.IrregularlyPartitionedArray([m1a, m2a])
+    assert isinstance(array[ma], awkward1.layout.ListArray64)
+    assert awkward1.to_list(array[ma]) == [[7.7, 8.8, 9.9], [6.6], [4.4, 5.5], [1.1, 2.2, 3.3], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]
+
+    m1b = awkward1.Array([-1, 3, 2, 0, 2]).layout
+    m2b = awkward1.Array([3, 7]).layout
+    mb = awkward1.partition.IrregularlyPartitionedArray([m1b, m2b])
+    assert isinstance(array[mb], awkward1.layout.ListArray64)
+    assert awkward1.to_list(array[mb]) == [[7.7, 8.8, 9.9], [6.6], [4.4, 5.5], [1.1, 2.2, 3.3], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]
+
     assert isinstance(array[[-1, 3, None, 0, 2, 3, 7]], awkward1.layout.IndexedOptionArray64)
     assert awkward1.to_list(array[[-1, 3, None, 0, 2, 3, 7]]) == [[7.7, 8.8, 9.9], [6.6], None, [1.1, 2.2, 3.3], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]
+
+    m1a = awkward1.Array([-1, 3, 2]).layout
+    m2a = awkward1.Array([0, None, 3, 7]).layout
+    ma = awkward1.partition.IrregularlyPartitionedArray([m1a, m2a])
+    assert isinstance(array[ma], awkward1.layout.IndexedOptionArray64)
+    assert awkward1.to_list(array[ma]) == [[7.7, 8.8, 9.9], [6.6], [4.4, 5.5], [1.1, 2.2, 3.3], None, [6.6], [7.7, 8.8, 9.9]]
+
+    m1b = awkward1.Array([-1, 3, 2, 0, None]).layout
+    m2b = awkward1.Array([3, 7]).layout
+    mb = awkward1.partition.IrregularlyPartitionedArray([m1b, m2b])
+    assert isinstance(array[mb], awkward1.layout.IndexedOptionArray64)
+    assert awkward1.to_list(array[mb]) == [[7.7, 8.8, 9.9], [6.6], [4.4, 5.5], [1.1, 2.2, 3.3], None, [6.6], [7.7, 8.8, 9.9]]
 
 def test_getitem_first_dimension_boolarray():
     one = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
@@ -289,6 +313,18 @@ def test_getitem_first_dimension_boolarray():
     assert isinstance(array[[True, False, True, True, False, True, False, True]], awkward1.partition.IrregularlyPartitionedArray)
     assert array[[True, False, True, True, False, True, False, True]].tojson() == "[[1.1,2.2,3.3],[4.4,5.5],[6.6],[],[7.7,8.8,9.9]]"
 
+    m1a = awkward1.Array([True, False, True]).layout
+    m2a = awkward1.Array([True, False, True, False, True]).layout
+    ma = awkward1.partition.IrregularlyPartitionedArray([m1a, m2a])
+    assert isinstance(array[ma], awkward1.partition.IrregularlyPartitionedArray)
+    assert array[ma].tojson() == "[[1.1,2.2,3.3],[4.4,5.5],[6.6],[],[7.7,8.8,9.9]]"
+
+    m1b = awkward1.Array([True, False, True, True, False]).layout
+    m2b = awkward1.Array([True, False, True]).layout
+    mb = awkward1.partition.IrregularlyPartitionedArray([m1b, m2b])
+    assert isinstance(array[mb], awkward1.partition.IrregularlyPartitionedArray)
+    assert array[mb].tojson() == "[[1.1,2.2,3.3],[4.4,5.5],[6.6],[],[7.7,8.8,9.9]]"
+
 def test_getitem_first_dimension_jaggedarray():
     one = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
     two = awkward1.Array([[6.6], [], [], [], [7.7, 8.8, 9.9]]).layout
@@ -296,3 +332,15 @@ def test_getitem_first_dimension_jaggedarray():
 
     assert isinstance(array[[[2, 0], [], [1], [0, 0], [], [], [], [2, 1, 1, 2]]], awkward1.partition.IrregularlyPartitionedArray)
     assert array[[[2, 0], [], [1], [0, 0], [], [], [], [2, 1, 1, 2]]].tojson() == "[[3.3,1.1],[],[5.5],[6.6,6.6],[],[],[],[9.9,8.8,8.8,9.9]]"
+
+    m1a = awkward1.Array([[2, 0], [], [1]]).layout
+    m2a = awkward1.Array([[0, 0], [], [], [], [2, 1, 1, 2]]).layout
+    ma = awkward1.partition.IrregularlyPartitionedArray([m1a, m2a])
+    assert isinstance(array[ma], awkward1.partition.IrregularlyPartitionedArray)
+    assert array[ma].tojson() == "[[3.3,1.1],[],[5.5],[6.6,6.6],[],[],[],[9.9,8.8,8.8,9.9]]"
+
+    m1b = awkward1.Array([[2, 0], [], [1], [0, 0], []]).layout
+    m2b = awkward1.Array([[], [], [2, 1, 1, 2]]).layout
+    mb = awkward1.partition.IrregularlyPartitionedArray([m1b, m2b])
+    assert isinstance(array[mb], awkward1.partition.IrregularlyPartitionedArray)
+    assert array[mb].tojson() == "[[3.3,1.1],[],[5.5],[6.6,6.6],[],[],[],[9.9,8.8,8.8,9.9]]"

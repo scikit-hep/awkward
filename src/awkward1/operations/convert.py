@@ -1045,6 +1045,9 @@ def to_layout(array,
     elif allow_record and isinstance(array, awkward1.layout.Record):
         return array
 
+    elif isinstance(array, awkward1.partition.PartitionedArray):
+        return array
+
     elif isinstance(array, numpy.ma.MaskedArray):
         mask = numpy.ma.getmask(array)
         data = numpy.ma.getdata(array)
