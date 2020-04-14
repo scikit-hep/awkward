@@ -23,10 +23,10 @@ def test_sort_numpyarray():
     assert awkward1.to_list(array.sort(0, False, False)) == [5.5, 4.4, 3.3, 2.2, 1.1]
 
     array = awkward1.layout.NumpyArray(numpy.array([[3.3, 2.2, 4.4], [1.1, 5.5, 3.3]]))
-    assert awkward1.to_list(array.sort(0, True, False)) == [[2.2, 3.3, 4.4], [1.1, 3.3, 5.5]]
-    assert awkward1.to_list(array.sort(1, True, False)) == [[1.1, 2.2, 3.3], [3.3, 4.4, 5.5]]
+    assert awkward1.to_list(array.sort(1, True, False)) == [[2.2, 3.3, 4.4], [1.1, 3.3, 5.5]]
+    assert awkward1.to_list(array.sort(2, True, False)) == [[1.1, 2.2, 3.3], [3.3, 4.4, 5.5]]
 
 def test_sort_indexoffsetarray():
     array = awkward1.Array([[2.2, 1.1, 3.3], [], [4.4, 5.5], [5.5], [-4.4, -5.5, -6.6]]).layout
-    assert awkward1.to_list(array.argsort(0, True, False)) == [[1, 0, 2], [None], [0, 1], [0], [2, 1, 0]]
-    assert awkward1.to_list(array.argsort(1, True, False)) == [9, 8, 7, 1, 0, 2, 4, 5, 6, 3]
+    assert awkward1.to_list(array.argsort(1, True, False)) == [[1, 0, 2], [None], [0, 1], [0], [2, 1, 0]]
+    assert awkward1.to_list(array.argsort(0, True, False)) == [9, 8, 7, 1, 0, 2, 4, 5, 6, 3]

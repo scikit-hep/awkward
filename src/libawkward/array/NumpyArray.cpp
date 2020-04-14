@@ -2622,7 +2622,7 @@ namespace awkward {
 #endif
 
       ssize_t itemsize = 8;
-      std::vector<ssize_t> shape({ (ssize_t)outlength });
+      std::vector<ssize_t> shape({ (ssize_t)length });
       std::vector<ssize_t> strides({ itemsize });
       out = std::make_shared<NumpyArray>(Identities::none(),
                                          util::Parameters(),
@@ -2636,7 +2636,7 @@ namespace awkward {
       out = std::make_shared<RegularArray>(Identities::none(),
                                            util::Parameters(),
                                            out,
-                                           outlength);
+                                           length);
       return out;
     }
   }

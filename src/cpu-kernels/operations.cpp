@@ -3668,13 +3668,7 @@ ERROR awkward_argsort(
   int64_t parentsoffset,
   int64_t lenparents,
   int64_t outlength) {
-  for (int64_t i = 0;  i < outlength;  i++) {
-    toptr[i] = -1;
-  }
   for (int64_t i = 0;  i < lenparents;  i++) {
-    int64_t parent = parents[parentsoffset + i];
-    int64_t start = starts[parent];
-    int64_t indx = fromindex[i];
     toptr[i] = fromindex[i];
   }
   return success();
@@ -3967,9 +3961,6 @@ ERROR awkward_sort(
   int64_t lenparents,
   int64_t outlength) {
   for (int64_t i = 0;  i < lenparents;  i++) {
-    int64_t parent = parents[parentsoffset + i];
-    int64_t start = starts[parent];
-    int64_t indx = fromindex[i];
     toptr[i] = fromptr[fromindex[i]];
   }
   return success();

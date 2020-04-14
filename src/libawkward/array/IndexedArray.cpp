@@ -1694,6 +1694,8 @@ namespace awkward {
                                          int64_t outlength,
                                          bool ascending,
                                          bool stable) const {
+    std::cout << "starts " << starts.tostring() << "\n";
+    std::cout << "parents " << parents.tostring() << "\n";
     int64_t numnull;
     struct Error err1 = util::awkward_indexedarray_numnull<T>(
       &numnull,

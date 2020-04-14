@@ -186,7 +186,7 @@ namespace awkward {
     ContentPtr next = argsort_next(negaxis,
                                    starts,
                                    parents,
-                                   length(),
+                                   1,
                                    ascending,
                                    stable);
     return next.get()->getitem_at_nowrap(0);

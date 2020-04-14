@@ -733,23 +733,35 @@ namespace awkward {
       std::shared_ptr<int64_t> ptr(
         new int64_t[(size_t)outlength], util::array_deleter<int64_t>());
       std::vector<size_t> result(parents.length());
-      std::iota(result.begin(), result.end(), 0);
 
-      if(ascending  and  not stable) {
-        std::sort(result.begin(), result.end(),
-             [&data](size_t i1, size_t i2) {return data[i1] < data[i2];});
-      }
-      else if(not ascending  and  not stable) {
-        std::sort(result.begin(), result.end(),
-             [&data](size_t i1, size_t i2) {return data[i1] > data[i2];});
-      }
-      else if(ascending  and  stable) {
-        std::stable_sort(result.begin(), result.end(),
-             [&data](size_t i1, size_t i2) {return data[i1] < data[i2];});
-      }
-      else if(not ascending  and  stable) {
-        std::stable_sort(result.begin(), result.end(),
-             [&data](size_t i1, size_t i2) {return data[i1] > data[i2];});
+      std::iota(result.begin(), result.end(), 0);
+      int64_t last_stop = parents.length();
+      int64_t index(0);
+      int64_t next_start = starts.getitem_at_nowrap(index);
+      int64_t next_stop = (starts.length() > index + 1) ?
+                           starts.getitem_at_nowrap(index + 1) :
+                           last_stop;
+
+      while(next_start < last_stop) {
+        if(ascending  and  not stable) {
+          std::sort(result.begin() + next_start, result.begin() + next_stop,
+            [&data](size_t i1, size_t i2) {return data[i1] < data[i2];});
+        }
+        else if(not ascending  and  not stable) {
+          std::sort(result.begin() + next_start, result.begin() + next_stop,
+            [&data](size_t i1, size_t i2) {return data[i1] > data[i2];});
+        }
+        else if(ascending  and  stable) {
+          std::stable_sort(result.begin() + next_start, result.begin() + next_stop,
+            [&data](size_t i1, size_t i2) {return data[i1] < data[i2];});
+        }
+        else if(not ascending  and  stable) {
+          std::stable_sort(result.begin() + next_start, result.begin() + next_stop,
+            [&data](size_t i1, size_t i2) {return data[i1] > data[i2];});
+        }
+        index++;
+        next_start = next_stop;
+        next_stop = (starts.length() > index + 1) ? starts.getitem_at_nowrap(index + 1) : last_stop;
       }
 
       struct Error err = util::awkward_numpyarray_argsort_64<T>(
@@ -782,21 +794,35 @@ namespace awkward {
       std::vector<size_t> result(parents.length());
       std::iota(result.begin(), result.end(), 0);
 
-      if(ascending  and  not stable) {
-        std::sort(result.begin(), result.end(),
-             [&data](size_t i1, size_t i2) {return data[i1] < data[i2];});
-      }
-      else if(not ascending  and  not stable) {
-        std::sort(result.begin(), result.end(),
-             [&data](size_t i1, size_t i2) {return data[i1] > data[i2];});
-      }
-      else if(ascending  and  stable) {
-        std::stable_sort(result.begin(), result.end(),
-             [&data](size_t i1, size_t i2) {return data[i1] < data[i2];});
-      }
-      else if(not ascending  and  stable) {
-        std::stable_sort(result.begin(), result.end(),
-             [&data](size_t i1, size_t i2) {return data[i1] > data[i2];});
+      int64_t last_stop = parents.length();
+      int64_t index(0);
+      int64_t next_start = starts.getitem_at_nowrap(index);
+      int64_t next_stop = (starts.length() > index + 1) ?
+                           starts.getitem_at_nowrap(index + 1) :
+                           last_stop;
+
+      while(next_start < last_stop) {
+        if(ascending  and  not stable) {
+          std::sort(result.begin() + next_start, result.begin() + next_stop,
+            [&data](size_t i1, size_t i2) {return data[i1] < data[i2];});
+        }
+        else if(not ascending  and  not stable) {
+          std::sort(result.begin() + next_start, result.begin() + next_stop,
+            [&data](size_t i1, size_t i2) {return data[i1] > data[i2];});
+        }
+        else if(ascending  and  stable) {
+          std::stable_sort(result.begin() + next_start, result.begin() + next_stop,
+            [&data](size_t i1, size_t i2) {return data[i1] < data[i2];});
+        }
+        else if(not ascending  and  stable) {
+          std::stable_sort(result.begin() + next_start, result.begin() + next_stop,
+            [&data](size_t i1, size_t i2) {return data[i1] > data[i2];});
+        }
+        index++;
+        next_start = next_stop;
+        next_stop = (starts.length() > index + 1) ?
+                     starts.getitem_at_nowrap(index + 1) :
+                     last_stop;
       }
 
       struct Error err = util::awkward_numpyarray_sort<T>(
