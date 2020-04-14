@@ -99,3 +99,15 @@ def test_as_slice():
 
     target = awkward1.Array([0, 1, 2, 100, 200, 300, 400, 500])
     assert awkward1.to_list(target[array]) == [1, 100, 200, 300]
+
+def test_repartition():
+    one = awkward1.Array([0, 1, 2]).layout
+    two = awkward1.Array([100, 200, 300, 400, 500]).layout
+    array = awkward1.partition.IrregularlyPartitionedArray([one, two])
+
+    assert [list(x) for x in array.repartition([3, 8]).partitions] == [[0, 1, 2], [100, 200, 300, 400, 500]]
+    assert [list(x) for x in array.repartition([8]).partitions] == [[0, 1, 2, 100, 200, 300, 400, 500]]
+    assert [list(x) for x in array.repartition([4, 5, 8]).partitions] == [[0, 1, 2, 100], [200], [300, 400, 500]]
+    assert [list(x) for x in array.repartition([4, 5, 5, 8]).partitions] == [[0, 1, 2, 100], [200], [], [300, 400, 500]]
+    assert [list(x) for x in array.repartition([2, 8]).partitions] == [[0, 1], [2, 100, 200, 300, 400, 500]]
+    assert [list(x) for x in array.repartition([2, 5, 8]).partitions] == [[0, 1], [2, 100, 200], [300, 400, 500]]

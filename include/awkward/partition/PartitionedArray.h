@@ -33,20 +33,24 @@ namespace awkward {
     const ContentPtr
       partition(int64_t partitionid) const;
 
-    /// @brieg Logical starting index for a given partitionid.
+    /// @brief Logical starting index for a given partitionid.
     virtual int64_t
       start(int64_t partitionid) const = 0;
 
-    /// @brieg Logical stopping index for a given partitionid.
+    /// @brief Logical stopping index for a given partitionid.
     virtual int64_t
       stop(int64_t partitionid) const = 0;
 
-    /// @brief Get the partitionid and index for a given logical position in
+    /// @brief Gets the partitionid and index for a given logical position in
     /// the full array, without handling negative indexing or bounds-checking.
     virtual void
       partitionid_index_at(int64_t at,
                            int64_t& partitionid,
                            int64_t& index) const = 0;
+
+    /// @brief Returns this array with a specified (irregular) partitioning.
+    virtual PartitionedArrayPtr
+      repartition(const std::vector<int64_t>& stops) const = 0;
 
     /// @brief User-friendly name of this class.
     virtual const std::string

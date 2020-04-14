@@ -23,11 +23,9 @@ namespace awkward {
     const std::vector<int64_t>
       stops() const;
 
-    /// @brieg Logical starting index for a given partitionid.
     int64_t
       start(int64_t partitionid) const override;
 
-    /// @brieg Logical stopping index for a given partitionid.
     int64_t
       stop(int64_t partitionid) const override;
 
@@ -35,6 +33,9 @@ namespace awkward {
       partitionid_index_at(int64_t at,
                            int64_t& partitionid,
                            int64_t& index) const override;
+
+    PartitionedArrayPtr
+      repartition(const std::vector<int64_t>& stops) const override;
 
     const std::string
       classname() const override;

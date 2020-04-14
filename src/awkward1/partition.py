@@ -5,6 +5,18 @@ from __future__ import absolute_import
 import awkward1._ext
 
 class PartitionedArray(object):
+    @classmethod
+    def from_ext(cls, obj):
+        if isinstance(obj, awkward1._ext.IrregularlyPartitionedArray):
+            subcls = IrregularlyPartitionedArray
+        else:
+            raise AssertionError("unrecognized PartitionedArray: {0}".format(
+                                     str(type(obj))))
+
+        out = subcls.__new__(subcls)
+        out._ext = obj
+        return out
+
     def __repr__(self):
         return repr(self._ext)
 
@@ -52,10 +64,10 @@ class PartitionedArray(object):
                 out = out.merge(x)
             if isinstance(out, awkward1._util.uniontypes):
                 out = out.simplify(mergebool=mergebool)
-
-        print("returning", out)
-
         return out
+
+    def repartition(self, *args, **kwargs):
+        return self.from_ext(self._ext.repartition(*args, **kwargs))
 
 class IrregularlyPartitionedArray(PartitionedArray):
     def __init__(self, partitions):

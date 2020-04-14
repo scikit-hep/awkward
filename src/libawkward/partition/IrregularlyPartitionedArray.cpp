@@ -2,6 +2,8 @@
 
 #include <sstream>
 
+#include "awkward/array/UnionArray.h"
+
 #include "awkward/partition/IrregularlyPartitionedArray.h"
 
 namespace awkward {
@@ -53,6 +55,75 @@ namespace awkward {
     index = 0;
   }
 
+  PartitionedArrayPtr
+  IrregularlyPartitionedArray::repartition(
+    const std::vector<int64_t>& stops) const {
+    if (stops == stops_) {
+      return shallow_copy();
+    }
+    if (stops.back() != stops_.back()) {
+      throw std::invalid_argument(
+        std::string("cannot repartition array of length ")
+        + std::to_string(stops_.back()) + std::string(" to length ")
+        + std::to_string(stops.back()));
+    }
+
+    int64_t partitionid = 0;
+    int64_t index = 0;
+    ContentPtrVec partitions;
+    for (int64_t i = 0;  i < (int64_t)stops.size();  i++) {
+      ContentPtr dst(nullptr);
+      int64_t length = (i == 0 ? stops[(int64_t)i]
+                               : stops[(int64_t)i] - stops[(int64_t)(i - 1)]);
+
+      while (dst.get() == nullptr  ||  dst.get()->length() < length) {
+        ContentPtr piece(nullptr);
+        ContentPtr src = partitions_[(size_t)partitionid];
+        int64_t available = src.get()->length() - index;
+        int64_t desired = (dst.get() == nullptr ? length
+                                                : length - dst.get()->length());
+
+        if (available <= desired) {
+          piece = src.get()->getitem_range_nowrap(index, src.get()->length());
+          partitionid++;
+          index = 0;
+        }
+        else {
+          piece = src.get()->getitem_range_nowrap(index, index + desired);
+          index += desired;
+        }
+
+        if (dst.get() == nullptr) {
+          dst = piece;
+        }
+        else {
+          if (!dst.get()->mergeable(piece, false)) {
+            dst = dst.get()->merge_as_union(piece);
+          }
+          else {
+            dst = dst.get()->merge(piece);
+          }
+          if (UnionArray8_32* raw
+                  = dynamic_cast<UnionArray8_32*>(dst.get())) {
+            dst = raw->simplify_uniontype(false);
+          }
+          else if (UnionArray8_U32* raw
+                       = dynamic_cast<UnionArray8_U32*>(dst.get())) {
+            dst = raw->simplify_uniontype(false);
+          }
+          else if (UnionArray8_64* raw
+                       = dynamic_cast<UnionArray8_64*>(dst.get())) {
+            dst = raw->simplify_uniontype(false);
+          }
+        }
+      }
+
+      partitions.push_back(dst);
+    }
+
+    return std::make_shared<IrregularlyPartitionedArray>(partitions, stops);
+  }
+
   const std::string
   IrregularlyPartitionedArray::classname() const {
     return "IrregularlyPartitionedArray";
@@ -74,7 +145,7 @@ namespace awkward {
 
   int64_t
   IrregularlyPartitionedArray::length() const {
-    return stops_[(size_t)((int64_t)stops_.size() - 1)];
+    return stops_.back();
   }
 
   const PartitionedArrayPtr

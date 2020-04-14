@@ -78,6 +78,11 @@ partitionedarray_methods(py::class_<T, std::shared_ptr<T>,
             out[1] = py::cast(index);
             return out;
           })
+          .def("repartition", [](const T& self,
+                                 const std::vector<int64_t>& stops)
+                              -> ak::PartitionedArrayPtr {
+            return self.repartition(stops);
+          })
           .def("tojson",
                &tojson_string<T>,
                py::arg("pretty") = false,
