@@ -132,14 +132,6 @@ def to_numpy(array, allow_missing=True):
         return to_numpy(array.snapshot(), allow_missing=allow_missing)
 
     elif (awkward1.operations.describe.parameters(array).get("__array__") ==
-          "byte"):
-        return to_numpy(array.__bytes__(), allow_missing=allow_missing)
-
-    elif (awkward1.operations.describe.parameters(array).get("__array__") ==
-          "char"):
-        return to_numpy(array.__str__(), allow_missing=allow_missing)
-
-    elif (awkward1.operations.describe.parameters(array).get("__array__") ==
           "bytestring"):
         return numpy.array([awkward1.behaviors.string.ByteBehavior(
                               array[i]).__bytes__()

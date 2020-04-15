@@ -1051,6 +1051,14 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
           .def("keys", &T::keys)
           .def_property_readonly("purelist_isregular", &T::purelist_isregular)
           .def_property_readonly("purelist_depth", &T::purelist_depth)
+          .def_property_readonly("branch_depth", [](const T& self)
+                                                 -> py::object {
+            std::pair<bool, int64_t> branch_depth = self.branch_depth();
+            py::tuple pair(2);
+            pair[0] = branch_depth.first;
+            pair[1] = branch_depth.second;
+            return pair;
+          })
           .def("getitem_nothing", &T::getitem_nothing)
           .def_property_readonly(
             "_persistent_shared_ptr",

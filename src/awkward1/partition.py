@@ -176,6 +176,30 @@ class PartitionedArray(object):
     def getitem_nothing(self, *args, **kwargs):
         return first(self).getitem_nothing(*args, **kwargs)
 
+    def argmin(self, axis, mask, keepdims):
+        branch, depth = first(self).branch_depth
+        negaxis = -axis
+        if not branch and negaxis <= 0:
+            negaxis += depth
+
+        if not branch and negaxis == depth:
+            return self.toContent().argmin(axis, mask, keepdims)
+        else:
+            return self.replace_partitions([x.argmin(axis, mask, keepdims)
+                                              for x in self.partitions])
+
+    def argmax(self, axis, mask, keepdims):
+        branch, depth = first(self).branch_depth
+        negaxis = -axis
+        if not branch and negaxis <= 0:
+            negaxis += depth
+
+        if not branch and negaxis == depth:
+            return self.toContent().argmax(axis, mask, keepdims)
+        else:
+            return self.replace_partitions([x.argmax(axis, mask, keepdims)
+                                              for x in self.partitions])
+
     def __len__(self):
         return len(self._ext)
 
@@ -185,7 +209,16 @@ class PartitionedArray(object):
                 yield x
 
     def __array__(self):
-        raise NotImplementedError
+        tocat = []
+        for x in self.partitions:
+            y = awkward1.operations.convert.to_numpy(x)
+            if len(y) > 0:
+                tocat.append(y)
+
+        if len(tocat) > 0:
+            return numpy.concatenate(tocat)
+        else:
+            return y
 
     def toContent(self):
         contents = self._ext.partitions
@@ -338,4 +371,4 @@ class IrregularlyPartitionedArray(PartitionedArray):
         return None
 
     def replace_partitions(self, partitions):
-        return awkward1._ext.IrregularlyPartitionedArray(partitions, self.stops)
+        return IrregularlyPartitionedArray(partitions, self.stops)

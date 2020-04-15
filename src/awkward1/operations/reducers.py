@@ -620,9 +620,31 @@ def argmin(array, axis=None, keepdims=False, mask_identity=True):
     layout = awkward1.operations.convert.to_layout(array,
                                                    allow_record=False,
                                                    allow_other=False)
+
     if axis is None:
-        tmp = awkward1._util.completely_flatten(layout)
-        return numpy.argmin(tmp, axis=None)
+        if isinstance(layout, awkward1.partition.PartitionedArray):
+            start = 0
+            best_index = None
+            best_value = None
+            for partition in layout.partitions:
+                for tmp in awkward1._util.completely_flatten(partition):
+                    out = numpy.argmin(tmp, axis=None)
+                    if best_index is None or tmp[out] < best_value:
+                        best_index = start + out
+                        best_value = tmp[out]
+                start += len(partition)
+            return best_index
+
+        else:
+            best_index = None
+            best_value = None
+            for tmp in awkward1._util.completely_flatten(partition):
+                out = numpy.argmin(tmp, axis=None)
+                if best_index is None or tmp[out] < best_value:
+                    best_index = out
+                    best_value = tmp[out]
+            return best_index
+
     else:
         behavior = awkward1._util.behaviorof(array)
         return awkward1._util.wrap(layout.argmin(axis=axis,
@@ -668,9 +690,31 @@ def argmax(array, axis=None, keepdims=False, mask_identity=True):
     layout = awkward1.operations.convert.to_layout(array,
                                                    allow_record=False,
                                                    allow_other=False)
+
     if axis is None:
-        tmp = awkward1._util.completely_flatten(layout)
-        return numpy.argmax(tmp, axis=None)
+        if isinstance(layout, awkward1.partition.PartitionedArray):
+            start = 0
+            best_index = None
+            best_value = None
+            for partition in layout.partitions:
+                for tmp in awkward1._util.completely_flatten(partition):
+                    out = numpy.argmax(tmp, axis=None)
+                    if best_index is None or tmp[out] > best_value:
+                        best_index = start + out
+                        best_value = tmp[out]
+                start += len(partition)
+            return best_index
+
+        else:
+            best_index = None
+            best_value = None
+            for tmp in awkward1._util.completely_flatten(partition):
+                out = numpy.argmax(tmp, axis=None)
+                if best_index is None or tmp[out] > best_value:
+                    best_index = out
+                    best_value = tmp[out]
+            return best_index
+
     else:
         behavior = awkward1._util.behaviorof(array)
         return awkward1._util.wrap(layout.argmax(axis=axis,

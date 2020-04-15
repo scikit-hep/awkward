@@ -343,12 +343,19 @@ def key2index(keys, key):
 key2index._pattern = re.compile(r"^[1-9][0-9]*$")
 
 def completely_flatten(array):
+    # if isinstance(array, awkward1.partition.PartitionedArray):
+    #     outs = [completely_flatten(x) for x in awkward1.partition.every(array)]
+    #     out = ()
+    #     for i in range(max(len(x) for x in outs)):
+    #         out = out + (numpy.concatenate([x[i] for x in outs]),)
+    #     return out
+
     if isinstance(array, awkward1.partition.PartitionedArray):
-        outs = [completely_flatten(x) for x in awkward1.partition.every(array)]
-        out = ()
-        for i in range(max(len(x) for x in outs)):
-            out = out + (numpy.concatenate([x[i] for x in outs]),)
-        return out
+        out = []
+        for partition in array.partitions:
+            for outi in completely_flatten(partition):
+                out.append(outi)
+        return tuple(out)
 
     elif isinstance(array, unknowntypes):
         return (numpy.array([], dtype=numpy.bool_),)
@@ -357,10 +364,10 @@ def completely_flatten(array):
         return completely_flatten(array.project())
 
     elif isinstance(array, uniontypes):
-        out = ()
+        out = []
         for i in range(array.numcontents):
-            out = out + completely_flatten(array.project(i))
-        return out
+            out.append(completely_flatten(array.project(i)))
+        return tuple(out)
 
     elif isinstance(array, optiontypes):
         return completely_flatten(array.project())
@@ -369,10 +376,10 @@ def completely_flatten(array):
         return completely_flatten(array.flatten(axis=1))
 
     elif isinstance(array, recordtypes):
-        out = ()
+        out = []
         for i in range(array.numfields):
-            out = out + completely_flatten(array.field(i))
-        return out
+            out.append(completely_flatten(array.field(i)))
+        return tuple(out)
 
     elif isinstance(array, awkward1.layout.NumpyArray):
         return (numpy.asarray(array),)
