@@ -82,7 +82,8 @@ def array_ufunc(ufunc, method, inputs, kwargs):
             return lambda: adjust(custom, inputs, kwargs)
 
         if all(isinstance(x, awkward1.layout.NumpyArray) or
-               not isinstance(x, awkward1.layout.Content)
+               not isinstance(x, (awkward1.layout.Content,
+                                  awkward1.partition.PartitionedArray))
                  for x in inputs):
             return lambda: (awkward1.layout.NumpyArray(
                               getattr(ufunc, method)(*inputs, **kwargs)),)

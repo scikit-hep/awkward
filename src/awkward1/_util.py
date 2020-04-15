@@ -412,8 +412,8 @@ def broadcast_and_apply(inputs, getfunction, behavior):
                     return apply(nextinputs, depth)
 
         # now all lengths must agree
-        checklength([x for x in inputs
-                       if isinstance(x, awkward1.layout.Content)])
+        checklength([x for x in inputs if isinstance(x, (
+            awkward1.layout.Content, awkward1.partition.PartitionedArray))])
 
         function = getfunction(inputs, depth)
 
@@ -430,9 +430,12 @@ def broadcast_and_apply(inputs, getfunction, behavior):
                     break
             inputs = awkward1.partition.partition_as(sample, inputs)
             outputs = []
-            for partition in zip(inputs):
-                outputs.append(apply(inputs, depth))
-            return awkward1.partition.IrregularlyPartitionedArray(outputs)
+            for part_inputs in awkward1.partition.iterate(sample.numpartitions,
+                                                          inputs):
+                out = apply(part_inputs, depth)
+                assert isinstance(out, tuple) and len(out) == 1
+                outputs.append(out[0])
+            return (awkward1.partition.IrregularlyPartitionedArray(outputs),)
 
         elif any(isinstance(x, unknowntypes) for x in inputs):
             return apply([x if not isinstance(x, unknowntypes)
@@ -700,6 +703,9 @@ def broadcast_unpack(x, isscalar):
             return x.getitem_nothing().getitem_nothing()
         else:
             return x[0][0]
+    elif isinstance(x, awkward1.partition.PartitionedArray):
+        return awkward1.partition.apply(
+            lambda y: y.getitem_nothing() if len(y) == 0 else y[0], x)
     else:
         if len(x) == 0:
             return x.getitem_nothing()

@@ -29,11 +29,23 @@ def partition_as(sample, arrays):
     stops = sample.stops
     out = []
     for x in arrays:
-        if isinstance(out, PartitionedArray):
+        if isinstance(x, PartitionedArray):
             out.append(x.repartition(stops))
-        else:
+        elif isinstance(x, awkward1.layout.Content):
             out.append(IrregularlyPartitionedArray.toPartitioned(x, stops))
+        else:
+            out.append(x)
     return out
+
+def iterate(numpartitions, arrays):
+    for partitionid in range(numpartitions):
+        line = []
+        for x in arrays:
+            if isinstance(x, PartitionedArray):
+                line.append(x.partition(partitionid))
+            else:
+                line.append(x)
+        yield line
 
 def apply(function, array):
     return IrregularlyPartitionedArray([function(x) for x in array.partitions])
@@ -154,6 +166,9 @@ class PartitionedArray(object):
             if out is not None:
                 return out
         return None
+
+    def getitem_nothing(self, *args, **kwargs):
+        return first(self).getitem_nothing(*args, **kwargs)
 
     def __len__(self):
         return len(self._ext)
