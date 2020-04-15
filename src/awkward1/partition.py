@@ -13,6 +13,12 @@ import numpy
 import awkward1._ext
 import awkward1._util
 
+def single(obj):
+    if isinstance(obj, awkward1.layout.Content):
+        return IrregularlyPartitionedArray([obj])
+    else:
+        return obj
+
 def first(obj):
     if isinstance(obj, PartitionedArray):
         return obj.partition(0)

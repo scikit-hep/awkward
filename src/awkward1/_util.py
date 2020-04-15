@@ -394,6 +394,8 @@ def broadcast_and_apply(inputs, getfunction, behavior):
                                             len(x)))
 
     def apply(inputs, depth):
+        print("apply", [type(x) for x in inputs], [len(x) for x in inputs])
+
         # handle implicit right-broadcasting (i.e. NumPy-like)
         if any(isinstance(x, listtypes) for x in inputs):
             maxdepth = max(x.purelist_depth
@@ -429,6 +431,10 @@ def broadcast_and_apply(inputs, getfunction, behavior):
                     sample = x
                     break
             inputs = awkward1.partition.partition_as(sample, inputs)
+
+            print(inputs[0])
+            print(inputs[1])
+
             outputs = []
             for part_inputs in awkward1.partition.iterate(sample.numpartitions,
                                                           inputs):
@@ -673,11 +679,18 @@ def broadcast_and_apply(inputs, getfunction, behavior):
 
 def broadcast_pack(inputs, isscalar):
     maxlen = -1
+    any_partitioned = False
     for x in inputs:
         if isinstance(x, awkward1.layout.Content):
             maxlen = max(maxlen, len(x))
+        if isinstance(x, awkward1.partition.PartitionedArray):
+            any_partitioned = True
+
     if maxlen < 0:
         maxlen = 1
+    if any_partitioned:
+        inputs = [awkward1.partition.single(x) for x in inputs]
+
     nextinputs = []
     for x in inputs:
         if isinstance(x, awkward1.layout.Record):
@@ -695,6 +708,7 @@ def broadcast_pack(inputs, isscalar):
         else:
             nextinputs.append(x)
             isscalar.append(True)
+
     return nextinputs
 
 def broadcast_unpack(x, isscalar):

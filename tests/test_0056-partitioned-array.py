@@ -352,3 +352,8 @@ def test_highlevel():
     array = awkward1.Array(layout)
 
     assert awkward1.to_list(array) == [[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [], [], [], [7.7, 8.8, 9.9]]
+
+def test_mask():
+    array = awkward1.Array([1, 2, 3, 4, 5])
+    mask = awkward1.Array([False, True, True, True, False])
+    assert awkward1.to_list(awkward1.mask(array, mask)) == [None, 2, 3, 4, None]
