@@ -1717,9 +1717,6 @@ namespace awkward {
                                            int64_t outlength,
                                            bool ascending,
                                            bool stable) const {
-    std::cout << "starts " << starts.tostring() << "\n";
-    std::cout << "parents " << parents.tostring() << "\n";
-
     std::pair<bool, int64_t> branchdepth = branch_depth();
 
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
@@ -1818,10 +1815,6 @@ namespace awkward {
         offsets_.offset(),
         offsets_.length() - 1);
       util::handle_error(err1, classname(), identities_.get());
-      std::cout << "global start " << globalstart
-                << " and stop " << globalstop << "\n";
-      std::cout << "offsets_ " << offsets_.length() << ": " << offsets_.tostring() << "\n";
-      std::cout << util::make_starts(offsets_).tostring() << "\n";
 
       Index64 nextparents(globalstop - globalstart);
       struct Error err2 = awkward_listoffsetarray_reduce_local_nextparents_64(
@@ -1833,13 +1826,10 @@ namespace awkward {
 
       ContentPtr trimmed = content_.get()->getitem_range_nowrap(globalstart,
                                                                 globalstop);
-      std::cout << "trimmed:\n" << trimmed.get()->tostring() << "\n";
       ContentPtr outcontent = trimmed.get()->argsort_next(
         negaxis, util::make_starts(offsets_), nextparents,
         offsets_.length() - 1, ascending, stable);
 
-      std::cout << "argsorted:\n" << outcontent.get()->tostring() << "\n";
-      std::cout << outlength + 1 << ":" << offsets_.length() << "\n";
       Index64 outoffsets(outlength + 1);
       struct Error err3 = awkward_listoffsetarray_reduce_local_outoffsets_64(
         outoffsets.ptr().get(),
@@ -1849,7 +1839,6 @@ namespace awkward {
         outlength);
       util::handle_error(err3, classname(), identities_.get());
 
-      std::cout << "Outoffsets:\n" << outoffsets.tostring() << "\n";
       return std::make_shared<ListOffsetArray64>(Identities::none(),
                                                  util::Parameters(),
                                                  outoffsets,

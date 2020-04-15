@@ -731,7 +731,7 @@ namespace awkward {
                                            bool ascending,
                                            bool stable) const {
       std::shared_ptr<int64_t> ptr(
-        new int64_t[(size_t)outlength], util::array_deleter<int64_t>());
+        new int64_t[(size_t)parents.length()], util::array_deleter<int64_t>());
       std::vector<size_t> result(parents.length());
 
       std::iota(result.begin(), result.end(), 0);
@@ -790,7 +790,7 @@ namespace awkward {
                                            bool ascending,
                                            bool stable) const {
       std::shared_ptr<T> ptr(
-        new T[(size_t)outlength], util::array_deleter<T>());
+        new T[(size_t)parents.length()], util::array_deleter<T>());
       std::vector<size_t> result(parents.length());
       std::iota(result.begin(), result.end(), 0);
 

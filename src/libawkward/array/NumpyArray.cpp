@@ -14,6 +14,7 @@
 #include "awkward/type/RegularType.h"
 #include "awkward/type/ArrayType.h"
 #include "awkward/array/RegularArray.h"
+#include "awkward/array/ListOffsetArray.h"
 #include "awkward/array/EmptyArray.h"
 #include "awkward/array/IndexedArray.h"
 #include "awkward/array/UnionArray.h"
@@ -2461,11 +2462,19 @@ namespace awkward {
                                          byteoffset_,
                                          itemsize_,
                                          format_);
+      Index64 outoffsets(outlength + 1);
+      struct Error err = awkward_listoffsetarray_reduce_local_outoffsets_64(
+        outoffsets.ptr().get(),
+        parents.ptr().get(),
+        parents.offset(),
+        parents.length(),
+        outlength);
+      util::handle_error(err, classname(), identities_.get());
 
-      out = std::make_shared<RegularArray>(Identities::none(),
-                                           util::Parameters(),
-                                           out,
-                                           length);
+      out = std::make_shared<ListOffsetArray64>(Identities::none(),
+                                                util::Parameters(),
+                                                outoffsets,
+                                                out);
       return out;
     }
   }
@@ -2633,10 +2642,19 @@ namespace awkward {
                                          itemsize,
                                          format);
 
-      out = std::make_shared<RegularArray>(Identities::none(),
-                                           util::Parameters(),
-                                           out,
-                                           length);
+      Index64 outoffsets(outlength + 1);
+      struct Error err = awkward_listoffsetarray_reduce_local_outoffsets_64(
+        outoffsets.ptr().get(),
+        parents.ptr().get(),
+        parents.offset(),
+        parents.length(),
+        outlength);
+      util::handle_error(err, classname(), identities_.get());
+
+      out = std::make_shared<ListOffsetArray64>(Identities::none(),
+                                                util::Parameters(),
+                                                outoffsets,
+                                                out);
       return out;
     }
   }
