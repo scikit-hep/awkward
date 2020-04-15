@@ -226,7 +226,7 @@ def test_setidentities():
     assert recordarray2[2, "outer", "two", 1] == 5.5
     with pytest.raises(ValueError) as excinfo:
         recordarray2["outer", "two", 0, 99]
-    assert str(excinfo.value) == 'in ListArray64 with identity [0, "outer", "two"] attempting to get 99, index out of range'
+    assert str(excinfo.value).endswith(' with identity [0, "outer", "two"] attempting to get 99, index out of range')
     assert recordarray2.identity == ()
     assert recordarray2[2].identity == (2,)
     assert recordarray2[2, "outer"].identity == (2, "outer")
@@ -249,7 +249,7 @@ def test_setidentities():
 
     with pytest.raises(ValueError) as excinfo:
         recordarray2["outer", 2, "two", 0, 99]
-    assert str(excinfo.value) == 'in ListArray64 with identity [2, "outer", 0, "two"] attempting to get 99, index out of range'
+    assert str(excinfo.value).endswith(' with identity [2, "outer", 0, "two"] attempting to get 99, index out of range')
     assert recordarray2.identity == ()
     assert recordarray2[2].identity == (2,)
     assert recordarray2[2, "outer"].identity == (2, "outer")

@@ -151,6 +151,9 @@ def to_numpy(array, allow_missing=True):
                               array[i]).__str__()
                             for i in range(len(array))])
 
+    elif isinstance(array, awkward1.partition.PartitionedArray):
+        return numpy.concatenate([to_numpy(x) for x in array.partitions])
+
     elif isinstance(array, awkward1._util.unknowntypes):
         return numpy.array([])
 
@@ -372,7 +375,8 @@ def to_list(array):
     elif isinstance(array, awkward1.layout.NumpyArray):
         return numpy.asarray(array).tolist()
 
-    elif isinstance(array, awkward1.layout.Content):
+    elif isinstance(array, (awkward1.layout.Content,
+                            awkward1.partition.PartitionedArray)):
         return [to_list(x) for x in array]
 
     elif isinstance(array, dict):
@@ -382,7 +386,7 @@ def to_list(array):
         return [to_list(x) for x in array]
 
     else:
-        raise TypeError("unrecognized array type: {0}".format(repr(array)))
+        raise TypeError("unrecognized array type: {0}".format(type(array)))
 
 def from_json(source,
               highlevel=True,
@@ -490,7 +494,8 @@ def to_json(array,
     elif isinstance(array, awkward1.layout.ArrayBuilder):
         out = array.snapshot()
 
-    elif isinstance(array, awkward1.layout.Content):
+    elif isinstance(array, (awkward1.layout.Content,
+                            awkward1.partition.PartitionedArray)):
         out = array
 
     else:
@@ -562,7 +567,7 @@ def from_awkward0(array,
         else:
             return array.snapshot()
 
-    def recurse(array):
+    def recurse(array, level):
         if isinstance(array, dict):
             keys = []
             values = []
@@ -573,7 +578,7 @@ def from_awkward0(array,
                                   numpy.ma.MaskedArray,
                                   numpy.ndarray,
                                   awkward0.array.base.AwkwardArray)):
-                    values.append(recurse(x)[numpy.newaxis])
+                    values.append(recurse(x, level + 1)[numpy.newaxis])
                 else:
                     values.append(awkward1.layout.NumpyArray(numpy.array([x])))
             return awkward1.layout.RecordArray(values, keys)[0]
@@ -586,7 +591,7 @@ def from_awkward0(array,
                                   numpy.ma.MaskedArray,
                                   numpy.ndarray,
                                   awkward0.array.base.AwkwardArray)):
-                    values.append(recurse(x)[numpy.newaxis])
+                    values.append(recurse(x, level + 1)[numpy.newaxis])
                 else:
                     values.append(awkward1.layout.NumpyArray(numpy.array([x])))
             return awkward1.layout.RecordArray(values)[0]
@@ -613,15 +618,15 @@ def from_awkward0(array,
                 if startsmax >= from_awkward0.int64max:
                     offsets = awkward1.layout.Index64(array.offsets)
                     return awkward1.layout.ListOffsetArray64(
-                             offsets, recurse(array.content))
+                             offsets, recurse(array.content, level + 1))
                 elif startsmax >= from_awkward0.uint32max:
                     offsets = awkward1.layout.IndexU32(array.offsets)
                     return awkward1.layout.ListOffsetArrayU32(
-                             offsets, recurse(array.content))
+                             offsets, recurse(array.content, level + 1))
                 else:
                     offsets = awkward1.layout.Index32(array.offsets)
                     return awkward1.layout.ListOffsetArray32(
-                             offsets, recurse(array.content))
+                             offsets, recurse(array.content, level + 1))
 
             else:
                 if (startsmax >= from_awkward0.int64max or
@@ -630,20 +635,23 @@ def from_awkward0(array,
                     stops = awkward1.layout.Index64(array.stops.reshape(-1))
                     out = awkward1.layout.ListArray64(starts,
                                                       stops,
-                                                      recurse(array.content))
+                                                      recurse(array.content,
+                                                              level + 1))
                 elif (startsmax >= from_awkward0.uint32max or
                       stopsmax >= from_awkward0.uint32max):
                     starts = awkward1.layout.IndexU32(array.starts.reshape(-1))
                     stops = awkward1.layout.IndexU32(array.stops.reshape(-1))
                     out = awkward1.layout.ListArrayU32(starts,
                                                        stops,
-                                                       recurse(array.content))
+                                                       recurse(array.content,
+                                                               level + 1))
                 else:
                     starts = awkward1.layout.Index32(array.starts.reshape(-1))
                     stops = awkward1.layout.Index32(array.stops.reshape(-1))
                     out = awkward1.layout.ListArray32(starts,
                                                       stops,
-                                                      recurse(array.content))
+                                                      recurse(array.content,
+                                                              level + 1))
                 for size in array.starts.shape[:0:-1]:
                     out = awkward1.layout.RegularArray(out, size)
                 return out
@@ -652,13 +660,13 @@ def from_awkward0(array,
             # contents
             if array.istuple:
                 return awkward1.layout.RecordArray(
-                         [recurse(x) for x in array.contents.values()])
+                         [recurse(x, level + 1) for x in array.contents.values()])
             else:
                 keys = []
                 values = []
                 for n, x in array.contents.items():
                     keys.append(n)
-                    values.append(recurse(x))
+                    values.append(recurse(x, level + 1))
                 return awkward1.layout.RecordArray(values, keys)
 
         elif isinstance(array, awkward0.UnionArray):
@@ -667,18 +675,18 @@ def from_awkward0(array,
             if indexmax >= from_awkward0.int64max:
                 tags = awkward1.layout.Index8(array.tags.reshape(-1))
                 index = awkward1.layout.Index64(array.index.reshape(-1))
-                out = awkward1.layout.UnionArray8_64(
-                        tags, index, [recurse(x) for x in array.contents])
+                out = awkward1.layout.UnionArray8_64(tags, index,
+                        [recurse(x, level + 1) for x in array.contents])
             elif indexmax >= from_awkward0.uint32max:
                 tags = awkward1.layout.Index8(array.tags.reshape(-1))
                 index = awkward1.layout.IndexU32(array.index.reshape(-1))
-                out = awkward1.layout.UnionArray8_U32(
-                        tags, index, [recurse(x) for x in array.contents])
+                out = awkward1.layout.UnionArray8_U32(tags, index,
+                        [recurse(x, level + 1) for x in array.contents])
             else:
                 tags = awkward1.layout.Index8(array.tags.reshape(-1))
                 index = awkward1.layout.Index32(array.index.reshape(-1))
-                out = awkward1.layout.UnionArray8_32(
-                        tags, index, [recurse(x) for x in array.contents])
+                out = awkward1.layout.UnionArray8_32(tags, index,
+                        [recurse(x, level + 1) for x in array.contents])
 
             for size in array.tags.shape[:0:-1]:
                 out = awkward1.layout.RegularArray(out, size)
@@ -690,7 +698,7 @@ def from_awkward0(array,
                      array.mask.view(numpy.int8).reshape(-1))
             out = awkward1.layout.ByteMaskedArray(
                     mask,
-                    recurse(array.content),
+                    recurse(array.content, level + 1),
                     valid_when=(not array.maskedwhen))
             for size in array.mask.shape[:0:-1]:
                 out = awkward1.layout.RegularArray(out, size)
@@ -701,7 +709,7 @@ def from_awkward0(array,
             mask = awkward.layout.IndexU8(array.mask.view(numpy.uint8))
             return awkward1.layout.BitMaskedArray(
                      mask,
-                     recurse(array.content),
+                     recurse(array.content, level + 1),
                      valid_when=(not array.maskedwhen),
                      length=len(array.content),
                      lsb_order=array.lsborder)
@@ -712,15 +720,15 @@ def from_awkward0(array,
             if indexmax >= from_awkward0.int64max:
                 index = awkward1.layout.Index64(array.index.reshape(-1))
                 out = awkward1.layout.IndexedOptionArray64(
-                        index, recurse(array.content))
+                        index, recurse(array.content, level + 1))
             elif indexmax >= from_awkward0.uint32max:
                 index = awkward1.layout.IndexU32(array.index.reshape(-1))
                 out = awkward1.layout.IndexedOptionArrayU32(
-                        index, recurse(array.content))
+                        index, recurse(array.content, level + 1))
             else:
                 index = awkward1.layout.Index32(array.index.reshape(-1))
                 out = awkward1.layout.IndexedOptionArray32(
-                        index, recurse(array.content))
+                        index, recurse(array.content, level + 1))
 
             for size in array.tags.shape[:0:-1]:
                 out = awkward1.layout.RegularArray(out, size)
@@ -732,15 +740,18 @@ def from_awkward0(array,
             if indexmax >= from_awkward0.int64max:
                 index = awkward1.layout.Index64(array.index.reshape(-1))
                 out = awkward1.layout.IndexedArray64(index,
-                                                     recurse(array.content))
+                                                     recurse(array.content,
+                                                             level + 1))
             elif indexmax >= from_awkward0.uint32max:
                 index = awkward1.layout.IndexU32(array.index.reshape(-1))
                 out = awkward1.layout.IndexedArrayU32(index,
-                                                      recurse(array.content))
+                                                      recurse(array.content,
+                                                              level + 1))
             else:
                 index = awkward1.layout.Index32(array.index.reshape(-1))
                 out = awkward1.layout.IndexedArray32(index,
-                                                     recurse(array.content))
+                                                     recurse(array.content,
+                                                             level + 1))
 
             for size in array.tags.shape[:0:-1]:
                 out = awkward1.layout.RegularArray(out, size)
@@ -752,11 +763,11 @@ def from_awkward0(array,
                 raise ValueError(
                     "awkward1.SparseArray hasn't been written (if at all); "
                     "try keeplayout=False")
-            return recurse(array.dense)
+            return recurse(array.dense, level + 1)
 
         elif isinstance(array, awkward0.StringArray):
             # starts, stops, content, encoding
-            out = recurse(array._content)
+            out = recurse(array._content, level + 1)
             if array.encoding is None:
                 out.content.setparameter("__array__", "byte")
                 out.setparameter("__array__", "bytestring")
@@ -775,7 +786,7 @@ def from_awkward0(array,
                 raise ValueError(
                     "there isn't (and won't ever be) an awkward1 equivalent "
                     "of awkward0.ObjectArray; try keeplayout=False")
-            out = recurse(array.content)
+            out = recurse(array.content, level + 1)
             out.setparameter("__record__",
                              getattr(array.generator,
                                      "__qualname__",
@@ -786,11 +797,16 @@ def from_awkward0(array,
 
         if isinstance(array, awkward0.ChunkedArray):
             # chunks, chunksizes
-            if keeplayout:
-                raise ValueError("awkward1.ChunkedArray hasn't been written "
-                                 "yet; try keeplayout=False")
-            return awkward1.operations.structure.concatenate(
-                     [recurse(x) for x in array.chunks])
+            if keeplayout and level != 0:
+                raise ValueError("awkward1 PartitionedArrays are only allowed "
+                                 "at the root of a data structure, unlike "
+                                 "awkward0.ChunkedArray; try keeplayout=False")
+            elif level == 0:
+                return awkward1.partition.IrregularlyPartitionedArray(
+                         [recurse(x, level + 1) for x in array.chunks])
+            else:
+                return awkward1.operations.structure.concatenate(
+                         [recurse(x, level + 1) for x in array.chunks])
 
         elif isinstance(array, awkward0.AppendableArray):
             # chunkshape, dtype, chunks
@@ -805,12 +821,12 @@ def from_awkward0(array,
                 raise ValueError(
                         "awkward1.VirtualArray hasn't been written yet; "
                         "try keeplayout=False")
-            return recurse(array.array)
+            return recurse(array.array, level + 1)
 
         else:
             raise TypeError("not an awkward0 array: {0}".format(repr(array)))
 
-    out = recurse(array)
+    out = recurse(array, 0)
     if highlevel:
         return awkward1._util.wrap(out, behavior)
     else:
@@ -839,7 +855,11 @@ def to_awkward0(array, keeplayout=False):
     import awkward as awkward0
 
     def recurse(layout):
-        if isinstance(layout, awkward1.layout.NumpyArray):
+        if isinstance(layout, awkward1.partition.PartitionedArray):
+            return awkward0.ChunkedArray(
+                       [recurse(x) for x in layout.partitions])
+
+        elif isinstance(layout, awkward1.layout.NumpyArray):
             return numpy.asarray(layout)
 
         elif isinstance(layout, awkward1.layout.EmptyArray):
@@ -1039,13 +1059,11 @@ def to_layout(array,
     elif isinstance(array, awkward1.layout.ArrayBuilder):
         return array.snapshot()
 
-    elif isinstance(array, awkward1.layout.Content):
+    elif isinstance(array, (awkward1.layout.Content,
+                            awkward1.partition.PartitionedArray)):
         return array
 
     elif allow_record and isinstance(array, awkward1.layout.Record):
-        return array
-
-    elif isinstance(array, awkward1.partition.PartitionedArray):
         return array
 
     elif isinstance(array, numpy.ma.MaskedArray):

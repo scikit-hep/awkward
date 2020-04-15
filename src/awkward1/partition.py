@@ -214,7 +214,11 @@ class PartitionedArray(object):
               (awkward1._util.py27 and isinstance(where, unicode))):
             return self.replace_partitions([x[where] for x in self.partitions])
 
+        elif isinstance(where, tuple) and len(where) == 0:
+            return self
+
         elif (isinstance(where, Iterable) and
+              len(where) > 0 and
               all((isinstance(x, str) or
                    (awkward1._util.py27 and isinstance(x, unicode)))
                   for x in where)):
