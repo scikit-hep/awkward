@@ -394,8 +394,6 @@ def broadcast_and_apply(inputs, getfunction, behavior):
                                             len(x)))
 
     def apply(inputs, depth):
-        print("apply", [type(x) for x in inputs], [len(x) for x in inputs])
-
         # handle implicit right-broadcasting (i.e. NumPy-like)
         if any(isinstance(x, listtypes) for x in inputs):
             maxdepth = max(x.purelist_depth
@@ -414,34 +412,14 @@ def broadcast_and_apply(inputs, getfunction, behavior):
                     return apply(nextinputs, depth)
 
         # now all lengths must agree
-        checklength([x for x in inputs if isinstance(x, (
-            awkward1.layout.Content, awkward1.partition.PartitionedArray))])
+        checklength([x for x in inputs
+                       if isinstance(x, awkward1.layout.Content)])
 
         function = getfunction(inputs, depth)
 
         # the rest of this is one switch statement
         if function is not None:
             return function()
-
-        elif any(isinstance(x, awkward1.partition.PartitionedArray)
-                   for x in inputs):
-            sample = None
-            for x in inputs:
-                if isinstance(x, awkward1.partition.PartitionedArray):
-                    sample = x
-                    break
-            inputs = awkward1.partition.partition_as(sample, inputs)
-
-            print(inputs[0])
-            print(inputs[1])
-
-            outputs = []
-            for part_inputs in awkward1.partition.iterate(sample.numpartitions,
-                                                          inputs):
-                out = apply(part_inputs, depth)
-                assert isinstance(out, tuple) and len(out) == 1
-                outputs.append(out[0])
-            return (awkward1.partition.IrregularlyPartitionedArray(outputs),)
 
         elif any(isinstance(x, unknowntypes) for x in inputs):
             return apply([x if not isinstance(x, unknowntypes)
@@ -672,24 +650,41 @@ def broadcast_and_apply(inputs, getfunction, behavior):
                 "cannot broadcast: {0}".format(
                   ", ".join(repr(type(x)) for x in inputs)))
 
-    isscalar = []
-    out = apply(broadcast_pack(inputs, isscalar), 0)
-    assert isinstance(out, tuple)
-    return tuple(broadcast_unpack(x, isscalar) for x in out)
+    if any(isinstance(x, awkward1.partition.PartitionedArray) for x in inputs):
+        sample = None
+        for x in inputs:
+            if isinstance(x, awkward1.partition.PartitionedArray):
+                sample = x
+                break
+        nextinputs = awkward1.partition.partition_as(sample, inputs)
+
+        outputs = []
+        for part_inputs in awkward1.partition.iterate(sample.numpartitions,
+                                                      nextinputs):
+            isscalar = []
+            part = apply(broadcast_pack(part_inputs, isscalar), 0)
+            assert isinstance(part, tuple)
+            outputs.append(tuple(broadcast_unpack(x, isscalar) for x in part))
+
+        out = ()
+        for i in range(len(part)):
+            out = out + (awkward1.partition.IrregularlyPartitionedArray(
+                             [x[i] for x in outputs]),)
+        return out
+
+    else:
+        isscalar = []
+        out = apply(broadcast_pack(inputs, isscalar), 0)
+        assert isinstance(out, tuple)
+        return tuple(broadcast_unpack(x, isscalar) for x in out)
 
 def broadcast_pack(inputs, isscalar):
     maxlen = -1
-    any_partitioned = False
     for x in inputs:
         if isinstance(x, awkward1.layout.Content):
             maxlen = max(maxlen, len(x))
-        if isinstance(x, awkward1.partition.PartitionedArray):
-            any_partitioned = True
-
     if maxlen < 0:
         maxlen = 1
-    if any_partitioned:
-        inputs = [awkward1.partition.single(x) for x in inputs]
 
     nextinputs = []
     for x in inputs:
@@ -700,10 +695,6 @@ def broadcast_pack(inputs, isscalar):
             isscalar.append(True)
         elif isinstance(x, awkward1.layout.Content):
             nextinputs.append(awkward1.layout.RegularArray(x, len(x)))
-            isscalar.append(False)
-        elif isinstance(x, awkward1.partition.PartitionedArray):
-            nextinputs.append(awkward1.partition.apply(
-                lambda y: awkward1.layout.RegularArray(y, len(y)), x))
             isscalar.append(False)
         else:
             nextinputs.append(x)
@@ -717,9 +708,6 @@ def broadcast_unpack(x, isscalar):
             return x.getitem_nothing().getitem_nothing()
         else:
             return x[0][0]
-    elif isinstance(x, awkward1.partition.PartitionedArray):
-        return awkward1.partition.apply(
-            lambda y: y.getitem_nothing() if len(y) == 0 else y[0], x)
     else:
         if len(x) == 0:
             return x.getitem_nothing()
