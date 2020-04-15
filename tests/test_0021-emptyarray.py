@@ -12,13 +12,13 @@ import numpy
 import awkward1
 
 def test_unknown():
-    a = awkward1.from_json("[[], [], []]").layout
+    a = awkward1.from_json("[[], [], []]", highlevel=False)
     assert awkward1.to_list(a) == [[], [], []]
     assert str(awkward1.type(a)) == "var * unknown"
     assert awkward1.type(a) == awkward1.types.ListType(awkward1.types.UnknownType())
     assert not awkward1.type(a) == awkward1.types.PrimitiveType("float64")
 
-    a = awkward1.from_json("[[], [[], []], [[], [], []]]").layout
+    a = awkward1.from_json("[[], [[], []], [[], [], []]]", highlevel=False)
     assert awkward1.to_list(a) == [[], [[], []], [[], [], []]]
     assert str(awkward1.type(a)) == "var * var * unknown"
     assert awkward1.type(a) == awkward1.types.ListType(awkward1.types.ListType(awkward1.types.UnknownType()))

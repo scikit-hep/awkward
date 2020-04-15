@@ -282,8 +282,8 @@ def test_rpad_and_clip_list_array():
     assert awkward1.to_list(array.rpad_and_clip(2,1)) == [[0.0, 1.1], [None, None], [4.4, 5.5], [5.5, 6.6], [8.8, None]]
 
 def test_rpad_indexed_array():
-    listoffsetarray = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]).layout
-    backward = awkward1.Array([[6.6, 7.7, 8.8, 9.9], [5.5], [3.3, 4.4], [], [0.0, 1.1, 2.2]]).layout
+    listoffsetarray = awkward1.from_iter([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False)
+    backward = awkward1.from_iter([[6.6, 7.7, 8.8, 9.9], [5.5], [3.3, 4.4], [], [0.0, 1.1, 2.2]], highlevel=False)
 
     index = awkward1.layout.Index64(numpy.array([4, 3, 2, 1, 0], dtype=numpy.int64))
     indexedarray = awkward1.layout.IndexedArray64(index, listoffsetarray)
@@ -299,8 +299,8 @@ def test_rpad_indexed_array():
     assert awkward1.to_list(indexedarray.rpad(7, 0)) == [[6.6, 7.7, 8.8, 9.9], [5.5], [3.3, 4.4], [], [0.0, 1.1, 2.2], None, None]
 
 def test_rpad_and_clip_indexed_array():
-    listoffsetarray = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]).layout
-    backward = awkward1.Array([[6.6, 7.7, 8.8, 9.9], [5.5], [3.3, 4.4], [], [0.0, 1.1, 2.2]]).layout
+    listoffsetarray = awkward1.from_iter([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False)
+    backward = awkward1.from_iter([[6.6, 7.7, 8.8, 9.9], [5.5], [3.3, 4.4], [], [0.0, 1.1, 2.2]], highlevel=False)
 
     index = awkward1.layout.Index64(numpy.array([4, 3, 2, 1, 0], dtype=numpy.int64))
     indexedarray = awkward1.layout.IndexedArray64(index, listoffsetarray)
@@ -323,8 +323,8 @@ def test_rpad_and_clip_indexed_array():
     assert awkward1.to_list(indexedarray.rpad_and_clip(5, 1)) == [[6.6, 7.7, 8.8, 9.9, None], [5.5, None, None, None, None], [3.3, 4.4, None, None, None], [None, None, None, None, None], [0.0, 1.1, 2.2, None, None]]
 
 def test_rpad_indexed_option_array():
-    listoffsetarray = awkward1.Array([[0.0, None, None], None, [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]).layout
-    backward = awkward1.Array([[6.6, 7.7, 8.8, 9.9], [5.5], [3.3, 4.4], None, [0.0, None, None]]).layout
+    listoffsetarray = awkward1.from_iter([[0.0, None, None], None, [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False)
+    backward = awkward1.from_iter([[6.6, 7.7, 8.8, 9.9], [5.5], [3.3, 4.4], None, [0.0, None, None]], highlevel=False)
 
     index = awkward1.layout.Index64(numpy.array([4, 3, 2, -1, 0], dtype=numpy.int64))
     indexedarray = awkward1.layout.IndexedOptionArray64(index, listoffsetarray)
@@ -344,15 +344,15 @@ def test_rpad_indexed_option_array():
     assert awkward1.to_list(indexedarray.rpad_and_clip(1, 1)) == [[6.6], [5.5], [3.3], None, [0.0]]
 
 def test_rpad_recordarray():
-    array = awkward1.Array([{"x": [], "y": [2, 2]}, {"x": [1.1], "y": [1]}, {"x": [2.2, 2.2], "y": []}]).layout
+    array = awkward1.from_iter([{"x": [], "y": [2, 2]}, {"x": [1.1], "y": [1]}, {"x": [2.2, 2.2], "y": []}], highlevel=False)
 
     assert awkward1.to_list(array.rpad(5, 0)) == [{"x": [], "y": [2, 2]}, {"x": [1.1], "y": [1]}, {"x": [2.2, 2.2], "y": []}, None, None]
 
     assert awkward1.to_list(array.rpad(2, 1)) == [{"x": [None, None], "y": [2, 2]}, {"x": [1.1, None], "y": [1, None]}, {"x": [2.2, 2.2], "y": [None, None]}]
 
 def test_rpad_unionarray():
-    content1 = awkward1.Array([[], [1.1], [2.2, 2.2]]).layout
-    content2 = awkward1.Array([[2, 2], [1], []]).layout
+    content1 = awkward1.from_iter([[], [1.1], [2.2, 2.2]], highlevel=False)
+    content2 = awkward1.from_iter([[2, 2], [1], []], highlevel=False)
     tags = awkward1.layout.Index8(numpy.array([0, 1, 0, 1, 0, 1], dtype=numpy.int8))
     index = awkward1.layout.Index64(numpy.array([0, 0, 1, 1, 2, 2], dtype=numpy.int64))
     array = awkward1.layout.UnionArray8_64(tags, index, [content1, content2])

@@ -33,8 +33,8 @@ def test_flatten0():
     array = awkward1.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5])
     assert awkward1.to_list(awkward1.flatten(array, axis=0)) == [1.1, 2.2, 3.3, 4.4, 5.5]
 
-    content0 = awkward1.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5]).layout
-    content1 = awkward1.Array(["one", None, "two", None, "three"]).layout
+    content0 = awkward1.from_iter([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5], highlevel=False)
+    content1 = awkward1.from_iter(["one", None, "two", None, "three"], highlevel=False)
     array = awkward1.Array(awkward1.layout.UnionArray8_64(
                 awkward1.layout.Index8(numpy.array([0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0], dtype=numpy.int8)),
                 awkward1.layout.Index64(numpy.array([0, 0, 1, 1, 2, 2, 3, 3, 4, 5, 6, 4, 7], dtype=numpy.int64)),

@@ -154,8 +154,8 @@ def test_regulararray_merge():
 
     np1 = numpy.arange(2*7*5).reshape(2, 7, 5)
     np2 = numpy.arange(3*7*5).reshape(3, 7, 5)
-    ak1 = awkward1.Array(np1, check_valid=True).layout
-    ak2 = awkward1.Array(np2, check_valid=True).layout
+    ak1 = awkward1.from_iter(np1, highlevel=False)
+    ak2 = awkward1.from_iter(np2, highlevel=False)
 
     assert awkward1.to_list(ak1.merge(ak2)) == awkward1.to_list(numpy.concatenate([np1, np2]))
     assert awkward1.to_list(ak1.merge(emptyarray)) == awkward1.to_list(ak1)
@@ -252,21 +252,21 @@ def test_listoffsetarray_merge():
 def test_recordarray_merge():
     emptyarray = awkward1.layout.EmptyArray()
 
-    arrayr1 = awkward1.Array([{"x": 0, "y": []}, {"x": 1, "y": [1, 1]}, {"x": 2, "y": [2, 2]}], check_valid=True).layout
-    arrayr2 = awkward1.Array([{"x": 2.2, "y": [2.2, 2.2]}, {"x": 1.1, "y": [1.1, 1.1]}, {"x": 0.0, "y": [0.0, 0.0]}], check_valid=True).layout
-    arrayr3 = awkward1.Array([{"x": 0, "y": 0.0}, {"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}], check_valid=True).layout
-    arrayr4 = awkward1.Array([{"y": [], "x": 0}, {"y": [1, 1], "x": 1}, {"y": [2, 2], "x": 2}], check_valid=True).layout
-    arrayr5 = awkward1.Array([{"x": 0, "y": [], "z": 0}, {"x": 1, "y": [1, 1], "z": 1}, {"x": 2, "y": [2, 2], "z": 2}], check_valid=True).layout
-    arrayr6 = awkward1.Array([{"z": 0, "x": 0, "y": []}, {"z": 1, "x": 1, "y": [1, 1]}, {"z": 2, "x": 2, "y": [2, 2]}], check_valid=True).layout
-    arrayr7 = awkward1.Array([{"x": 0}, {"x": 1}, {"x": 2}], check_valid=True).layout
+    arrayr1 = awkward1.from_iter([{"x": 0, "y": []}, {"x": 1, "y": [1, 1]}, {"x": 2, "y": [2, 2]}], highlevel=False)
+    arrayr2 = awkward1.from_iter([{"x": 2.2, "y": [2.2, 2.2]}, {"x": 1.1, "y": [1.1, 1.1]}, {"x": 0.0, "y": [0.0, 0.0]}], highlevel=False)
+    arrayr3 = awkward1.from_iter([{"x": 0, "y": 0.0}, {"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}], highlevel=False)
+    arrayr4 = awkward1.from_iter([{"y": [], "x": 0}, {"y": [1, 1], "x": 1}, {"y": [2, 2], "x": 2}], highlevel=False)
+    arrayr5 = awkward1.from_iter([{"x": 0, "y": [], "z": 0}, {"x": 1, "y": [1, 1], "z": 1}, {"x": 2, "y": [2, 2], "z": 2}], highlevel=False)
+    arrayr6 = awkward1.from_iter([{"z": 0, "x": 0, "y": []}, {"z": 1, "x": 1, "y": [1, 1]}, {"z": 2, "x": 2, "y": [2, 2]}], highlevel=False)
+    arrayr7 = awkward1.from_iter([{"x": 0}, {"x": 1}, {"x": 2}], highlevel=False)
 
-    arrayt1 = awkward1.Array([(0, []), (1, [1.1]), (2, [2, 2])], check_valid=True).layout
-    arrayt2 = awkward1.Array([(2.2, [2.2, 2.2]), (1.1, [1.1, 1.1]), (0.0, [0.0, 0.0])], check_valid=True).layout
-    arrayt3 = awkward1.Array([(0, 0.0), (1, 1.1), (2, 2.2)], check_valid=True).layout
-    arrayt4 = awkward1.Array([([], 0), ([1.1], 1), ([2.2, 2.2], 2)], check_valid=True).layout
-    arrayt5 = awkward1.Array([(0, [], 0), (1, [1], 1), (2, [2, 2], 2)], check_valid=True).layout
-    arrayt6 = awkward1.Array([(0, 0, []), (1, 1, [1]), (2, 2, [2, 2])], check_valid=True).layout
-    arrayt7 = awkward1.Array([(0,), (1,), (2,)], check_valid=True).layout
+    arrayt1 = awkward1.from_iter([(0, []), (1, [1.1]), (2, [2, 2])], highlevel=False)
+    arrayt2 = awkward1.from_iter([(2.2, [2.2, 2.2]), (1.1, [1.1, 1.1]), (0.0, [0.0, 0.0])], highlevel=False)
+    arrayt3 = awkward1.from_iter([(0, 0.0), (1, 1.1), (2, 2.2)], highlevel=False)
+    arrayt4 = awkward1.from_iter([([], 0), ([1.1], 1), ([2.2, 2.2], 2)], highlevel=False)
+    arrayt5 = awkward1.from_iter([(0, [], 0), (1, [1], 1), (2, [2, 2], 2)], highlevel=False)
+    arrayt6 = awkward1.from_iter([(0, 0, []), (1, 1, [1]), (2, 2, [2, 2])], highlevel=False)
+    arrayt7 = awkward1.from_iter([(0,), (1,), (2,)], highlevel=False)
 
     assert arrayr1.mergeable(arrayr2)
     assert arrayr2.mergeable(arrayr1)
@@ -335,8 +335,8 @@ def test_recordarray_merge():
 def test_indexedarray_merge():
     emptyarray = awkward1.layout.EmptyArray()
 
-    content1 = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], check_valid=True).layout
-    content2 = awkward1.Array([[1, 2], [], [3, 4]], check_valid=True).layout
+    content1 = awkward1.from_iter([[1.1, 2.2, 3.3], [], [4.4, 5.5]], highlevel=False)
+    content2 = awkward1.from_iter([[1, 2], [], [3, 4]], highlevel=False)
     index1 = awkward1.layout.Index64(numpy.array([2, 0, -1, 0, 1, 2], dtype=numpy.int64))
     indexedarray1 = awkward1.layout.IndexedOptionArray64(index1, content1)
     assert awkward1.to_list(indexedarray1) == [[4.4, 5.5], [1.1, 2.2, 3.3], None, [1.1, 2.2, 3.3], [], [4.4, 5.5]]
@@ -348,9 +348,9 @@ def test_indexedarray_merge():
 def test_unionarray_merge():
     emptyarray = awkward1.layout.EmptyArray()
 
-    one = awkward1.Array([0.0, 1.1, 2.2, [], [1], [2, 2]], check_valid=True).layout
-    two = awkward1.Array([{"x": 1, "y": 1.1}, 999, 123, {"x": 2, "y": 2.2}], check_valid=True).layout
-    three = awkward1.Array(["one", "two", "three"], check_valid=True).layout
+    one = awkward1.from_iter([0.0, 1.1, 2.2, [], [1], [2, 2]], highlevel=False)
+    two = awkward1.from_iter([{"x": 1, "y": 1.1}, 999, 123, {"x": 2, "y": 2.2}], highlevel=False)
+    three = awkward1.from_iter(["one", "two", "three"], highlevel=False)
 
     assert awkward1.to_list(one.merge(two)) == [0.0, 1.1, 2.2, [], [1], [2, 2], {"x": 1, "y": 1.1}, 999, 123, {"x": 2, "y": 2.2}]
     assert awkward1.to_list(two.merge(one)) == [{"x": 1, "y": 1.1}, 999, 123, {"x": 2, "y": 2.2}, 0.0, 1.1, 2.2, [], [1], [2, 2]]
@@ -364,14 +364,14 @@ def test_unionarray_merge():
     assert awkward1.to_list(three.merge(two)) == ["one", "two", "three", {"x": 1, "y": 1.1}, 999, 123, {"x": 2, "y": 2.2}]
 
 def test_merge_parameters():
-    one = awkward1.Array([[121, 117, 99, 107, 121], [115, 116, 117, 102, 102]], check_valid=True).layout
-    two = awkward1.Array(["good", "stuff"], check_valid=True).layout
+    one = awkward1.from_iter([[121, 117, 99, 107, 121], [115, 116, 117, 102, 102]], highlevel=False)
+    two = awkward1.from_iter(["good", "stuff"], highlevel=False)
 
     assert awkward1.to_list(one.merge(two)) == [[121, 117, 99, 107, 121], [115, 116, 117, 102, 102], "good", "stuff"]
     assert awkward1.to_list(two.merge(one)) == ["good", "stuff", [121, 117, 99, 107, 121], [115, 116, 117, 102, 102]]
 
 def test_bytemask():
-    array = awkward1.Array(["one", "two", None, "three", None, None, "four"], check_valid=True).layout
+    array = awkward1.from_iter(["one", "two", None, "three", None, None, "four"], highlevel=False)
     assert numpy.asarray(array.bytemask()).tolist() == [0, 0, 1, 0, 1, 1, 0]
 
     index2 = awkward1.layout.Index64(numpy.array([2, 2, 1, 5, 0], dtype=numpy.int64))
@@ -379,7 +379,7 @@ def test_bytemask():
     assert numpy.asarray(array2.bytemask()).tolist() == [0, 0, 0, 0, 0]
 
 def test_indexedarray_simplify():
-    array = awkward1.Array(["one", "two", None, "three", None, None, "four", "five"], check_valid=True).layout
+    array = awkward1.from_iter(["one", "two", None, "three", None, None, "four", "five"], highlevel=False)
     assert numpy.asarray(array.index).tolist() == [0, 1, -1, 2, -1, -1, 3, 4]
 
     index2 = awkward1.layout.Index64(numpy.array([2, 2, 1, 6, 5], dtype=numpy.int64))
@@ -564,9 +564,9 @@ def test_indexedarray_simplify_more():
     assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
 
 def test_unionarray_simplify_one():
-    one = awkward1.Array([5, 4, 3, 2, 1], check_valid=True).layout
-    two = awkward1.Array([[], [1], [2, 2], [3, 3, 3]], check_valid=True).layout
-    three = awkward1.Array([1.1, 2.2, 3.3], check_valid=True).layout
+    one = awkward1.from_iter([5, 4, 3, 2, 1], highlevel=False)
+    two = awkward1.from_iter([[], [1], [2, 2], [3, 3, 3]], highlevel=False)
+    three = awkward1.from_iter([1.1, 2.2, 3.3], highlevel=False)
     tags  =  awkward1.layout.Index8(numpy.array([0, 0, 1, 2, 1, 0, 2, 1, 1, 0, 2, 0], dtype=numpy.int8))
     index = awkward1.layout.Index64(numpy.array([0, 1, 0, 0, 1, 2, 1, 2, 3, 3, 2, 4], dtype=numpy.int64))
     array = awkward1.layout.UnionArray8_64(tags, index, [one, two, three])
@@ -577,9 +577,9 @@ def test_unionarray_simplify_one():
     assert len(array.simplify().contents) == 2
 
 def test_unionarray_simplify():
-    one = awkward1.Array([5, 4, 3, 2, 1], check_valid=True).layout
-    two = awkward1.Array([[], [1], [2, 2], [3, 3, 3]], check_valid=True).layout
-    three = awkward1.Array([1.1, 2.2, 3.3], check_valid=True).layout
+    one = awkward1.from_iter([5, 4, 3, 2, 1], highlevel=False)
+    two = awkward1.from_iter([[], [1], [2, 2], [3, 3, 3]], highlevel=False)
+    three = awkward1.from_iter([1.1, 2.2, 3.3], highlevel=False)
 
     tags2  =  awkward1.layout.Index8(numpy.array([0, 1, 0, 1, 0, 0, 1], dtype=numpy.int8))
     index2 = awkward1.layout.Index32(numpy.array([0, 0, 1, 1, 2, 3, 2], dtype=numpy.int32))
@@ -609,8 +609,8 @@ def test_concatenate():
     three = awkward1.Array([True, False, False, True, True], check_valid=True)
 
     assert awkward1.to_list(awkward1.concatenate([one, two, three])) == [1.1, 2.2, 3.3, 4.4, 5.5, [], [1], [2, 2], [3, 3, 3], 1.0, 0.0, 0.0, 1.0, 1.0]
-    assert isinstance(awkward1.concatenate([one, two, three]).layout, awkward1.layout.UnionArray8_64)
-    assert len(awkward1.concatenate([one, two, three]).layout.contents) == 2
+    assert isinstance(awkward1.from_iter([one, two, three], highlevel=False), awkward1.layout.UnionArray8_64)
+    assert len(awkward1.from_iter([one, two, three], highlevel=False).contents) == 2
 
 def test_where():
     condition = awkward1.Array([True, False, True, False, True], check_valid=True)

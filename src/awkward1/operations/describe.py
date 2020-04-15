@@ -49,7 +49,9 @@ def validity_error(array, exception=False):
     elif isinstance(array, awkward1.highlevel.ArrayBuilder):
         return validity_error(array.snapshot().layout, exception=exception)
 
-    elif isinstance(array, (awkward1.layout.Content, awkward1.layout.Record)):
+    elif isinstance(array, (awkward1.layout.Content,
+                            awkward1.layout.Record,
+                            awkward1.partition.PartitionedArray)):
         out = array.validityerror()
         if out is not None and exception:
             raise ValueError(out)
@@ -155,38 +157,9 @@ def type(array):
     elif isinstance(array, awkward1.layout.ArrayBuilder):
         return array.type(awkward1._util.typestrs(None))
 
-    elif isinstance(array, awkward1.layout.Content):
+    elif isinstance(array, (awkward1.layout.Content,
+                            awkward1.partition.PartitionedArray)):
         return array.type(awkward1._util.typestrs(None))
-
-    elif isinstance(array, awkward1.partition.PartitionedArray):
-        partitions = array.partitions
-        ts = []
-        for x in partitions:
-            t = x.type(awkward1._util.typestrs(None))
-            if not isinstance(t, awkward1.types.UnknownType):
-                option = None
-                for i, ti in enumerate(ts):
-                    if t == ti:
-                        break
-                    elif t == awkward1.types.OptionType(ti):
-                        option = t
-                        break
-                    elif awkward1.types.OptionType(t) == ti:
-                        option = ti
-                        break
-                else:
-                    ts.append(t)
-
-                if option is not None:
-                    del ts[i]
-                    ts.append(option)
-
-        if len(ts) == 0:
-            return awkward1.types.UnknownType()
-        elif len(ts) == 1:
-            return ts[0]
-        else:
-            return awkward1.types.UnionType(ts)
 
     else:
         raise TypeError("unrecognized array type: {0}".format(repr(array)))
@@ -222,7 +195,8 @@ def parameters(array):
         return array.layout.parameters
 
     elif isinstance(array, (awkward1.layout.Content,
-                            awkward1.layout.Record)):
+                            awkward1.layout.Record,
+                            awkward1.partition.PartitionedArray)):
         return array.parameters
 
     elif isinstance(array, awkward1.highlevel.ArrayBuilder):

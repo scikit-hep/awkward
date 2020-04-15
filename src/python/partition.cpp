@@ -93,7 +93,9 @@ partitionedarray_methods(py::class_<T, std::shared_ptr<T>,
                py::arg("pretty") = false,
                py::arg("maxdecimals") = py::none(),
                py::arg("buffersize") = 65536)
-          .def("getitem_at", &T::getitem_at)
+          .def("getitem_at", [](const T& self, int64_t at) -> py::object {
+            return box(self.getitem_at(at));
+          })
           .def("getitem_range", [](const T& self,
                                    py::object start,
                                    py::object stop,

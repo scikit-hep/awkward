@@ -129,22 +129,22 @@ def test_indexedoptionarray():
     assert str(err.value) == "'axis' out of range for 'num'"
 
 def test_recordarray():
-    array = awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}]).layout
+    array = awkward1.from_iter([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}], highlevel=False)
     assert awkward1.to_list(array.num(0)) == {"x": 4, "y": 4}
 
-    array = awkward1.Array([{"x": [3.3, 3.3, 3.3], "y": []}, {"x": [2.2, 2.2], "y": [1]}, {"x": [1.1], "y": [2, 2]}, {"x": [], "y": [3, 3, 3]}]).layout
+    array = awkward1.from_iter([{"x": [3.3, 3.3, 3.3], "y": []}, {"x": [2.2, 2.2], "y": [1]}, {"x": [1.1], "y": [2, 2]}, {"x": [], "y": [3, 3, 3]}], highlevel=False)
     assert awkward1.to_list(array.num(0)) == {"x": 4, "y": 4}
     assert awkward1.to_list(array.num(1)) == [{"x": 3, "y": 0}, {"x": 2, "y": 1}, {"x": 1, "y": 2}, {"x": 0, "y": 3}]
     assert awkward1.to_list(array.num(1)[2]) == {"x": 1, "y": 2}
 
-    array = awkward1.Array([{"x": [[3.3, 3.3, 3.3]], "y": []}, {"x": [[2.2, 2.2]], "y": [1]}, {"x": [[1.1]], "y": [2, 2]}, {"x": [[]], "y": [3, 3, 3]}]).layout
+    array = awkward1.from_iter([{"x": [[3.3, 3.3, 3.3]], "y": []}, {"x": [[2.2, 2.2]], "y": [1]}, {"x": [[1.1]], "y": [2, 2]}, {"x": [[]], "y": [3, 3, 3]}], highlevel=False)
     assert awkward1.to_list(array.num(0)) == {"x": 4, "y": 4}
     assert awkward1.to_list(array.num(1)) == [{"x": 1, "y": 0}, {"x": 1, "y": 1}, {"x": 1, "y": 2}, {"x": 1, "y": 3}]
     assert awkward1.to_list(array.num(1)[2]) == {"x": 1, "y": 2}
 
 def test_unionarray():
-    content1 = awkward1.Array([[], [1], [2, 2], [3, 3, 3]]).layout
-    content2 = awkward1.Array([[3.3, 3.3, 3.3], [2.2, 2.2], [1.1], []]).layout
+    content1 = awkward1.from_iter([[], [1], [2, 2], [3, 3, 3]], highlevel=False)
+    content2 = awkward1.from_iter([[3.3, 3.3, 3.3], [2.2, 2.2], [1.1], []], highlevel=False)
     tags = awkward1.layout.Index8(numpy.array([0, 1, 0, 1, 0, 1, 0, 1], dtype=numpy.int8))
     index = awkward1.layout.Index64(numpy.array([0, 0, 1, 1, 2, 2, 3, 3], dtype=numpy.int64))
     array = awkward1.layout.UnionArray8_64(tags, index, [content1, content2])
@@ -192,7 +192,7 @@ def test_flatten_ListOffsetArray():
         else:
             return x
 
-    array = awkward1.Array(toListArray(awkward1.Array(numpy.arange(2*3*5*7).reshape(2, 3, 5, 7).tolist()).layout))
+    array = awkward1.Array(toListArray(awkward1.from_iter(numpy.arange(2*3*5*7).reshape(2, 3, 5, 7).tolist(), highlevel=False)))
     assert awkward1.to_list(awkward1.flatten(array, axis=1)) == numpy.arange(2*3*5*7).reshape(2 * 3, 5, 7).tolist()
     assert awkward1.to_list(awkward1.flatten(array, axis=2)) == numpy.arange(2*3*5*7).reshape(2, 3 * 5, 7).tolist()
     assert awkward1.to_list(awkward1.flatten(array, axis=3)) == numpy.arange(2*3*5*7).reshape(2, 3, 5 * 7).tolist()
@@ -223,13 +223,13 @@ def test_flatten_IndexedArray():
     assert awkward1.to_list(awkward1.flatten(array[1:], axis=2)) == [None, [], [5.5], None, [6.6, None, 7.7, 8.8, 9.9]]
     assert awkward1.to_list(awkward1.flatten(array[:, 1:], axis=2)) == [[3.3, 4.4], None, [], [], None, [6.6, None, 7.7, 8.8, 9.9]]
 
-    content = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]).layout
+    content = awkward1.from_iter([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False)
     index = awkward1.layout.Index64(numpy.array([2, 1, 0, 3, 3, 4], dtype=numpy.int64))
     array = awkward1.Array(awkward1.layout.IndexedArray64(index, content))
     assert awkward1.to_list(array) == [[3.3, 4.4], [], [0.0, 1.1, 2.2], [5.5], [5.5], [6.6, 7.7, 8.8, 9.9]]
     assert awkward1.to_list(awkward1.flatten(array)) == [3.3, 4.4, 0.0, 1.1, 2.2, 5.5, 5.5, 6.6, 7.7, 8.8, 9.9]
 
-    content = awkward1.Array([[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [], [[5.5]], [[], [6.6, 7.7, 8.8, 9.9]]]).layout
+    content = awkward1.from_iter([[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [], [[5.5]], [[], [6.6, 7.7, 8.8, 9.9]]], highlevel=False)
     index = awkward1.layout.Index64(numpy.array([2, 2, 1, 0, 3], dtype=numpy.int64))
     array = awkward1.Array(awkward1.layout.IndexedArray64(index, content))
     assert awkward1.to_list(array) == [[[5.5]], [[5.5]], [], [[0.0, 1.1, 2.2], [], [3.3, 4.4]], [[], [6.6, 7.7, 8.8, 9.9]]]
@@ -242,8 +242,8 @@ def test_flatten_RecordArray():
     assert awkward1.to_list(awkward1.flatten(array[:, 1:], axis=2)) == [{"x": [], "y": []}, {"x": [], "y": []}, {"x": [2], "y": []}, {"x": [3, 3], "y": []}]
 
 def test_flatten_UnionArray():
-    content1 = awkward1.Array([[1.1], [2.2, 2.2], [3.3, 3.3, 3.3]]).layout
-    content2 = awkward1.Array([[[3, 3, 3], [3, 3, 3], [3, 3, 3]], [[2, 2], [2, 2]], [[1]]]).layout
+    content1 = awkward1.from_iter([[1.1], [2.2, 2.2], [3.3, 3.3, 3.3]], highlevel=False)
+    content2 = awkward1.from_iter([[[3, 3, 3], [3, 3, 3], [3, 3, 3]], [[2, 2], [2, 2]], [[1]]], highlevel=False)
     tags = awkward1.layout.Index8(numpy.array([0, 1, 0, 1, 0, 1], dtype=numpy.int8))
     index= awkward1.layout.Index64(numpy.array([0, 0, 1, 1, 2, 2], dtype=numpy.int64))
     array = awkward1.Array(awkward1.layout.UnionArray8_64(tags, index, [content1, content2]))

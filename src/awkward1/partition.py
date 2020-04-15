@@ -13,18 +13,41 @@ import numpy
 import awkward1._ext
 import awkward1._util
 
+def first(obj):
+    if isinstance(obj, PartitionedArray):
+        return obj.partition(0)
+    else:
+        return obj
+
+def every(obj):
+    if isinstance(obj, PartitionedArray):
+        return obj.partitions
+    else:
+        return [obj]
+
+def partition_as(sample, arrays):
+    stops = sample.stops
+    out = []
+    for x in arrays:
+        if isinstance(out, PartitionedArray):
+            out.append(x.repartition(stops))
+        else:
+            out.append(IrregularlyPartitionedArray.toPartitioned(x, stops))
+    return out
+
+def apply(function, array):
+    return IrregularlyPartitionedArray([function(x) for x in array.partitions])
+
 class PartitionedArray(object):
     @classmethod
     def from_ext(cls, obj):
         if isinstance(obj, awkward1._ext.IrregularlyPartitionedArray):
             subcls = IrregularlyPartitionedArray
+            out = subcls.__new__(subcls)
+            out._ext = obj
+            return out
         else:
-            raise AssertionError("unrecognized PartitionedArray: {0}".format(
-                                     str(type(obj))))
-
-        out = subcls.__new__(subcls)
-        out._ext = obj
-        return out
+            return obj
 
     def __repr__(self):
         return repr(self._ext)
@@ -49,8 +72,88 @@ class PartitionedArray(object):
     def partitionid_index_at(self, at):
         return self._ext.partitionid_index_at(at)
 
+    def type(self, typestrs):
+        ts = []
+        for x in self.partitions:
+            t = x.type(typestrs)
+            if not isinstance(t, awkward1.types.UnknownType):
+                option = None
+                for i, ti in enumerate(ts):
+                    if t == ti:
+                        break
+                    elif t == awkward1.types.OptionType(ti):
+                        option = t
+                        break
+                    elif awkward1.types.OptionType(t) == ti:
+                        option = ti
+                        break
+                else:
+                    ts.append(t)
+
+                if option is not None:
+                    del ts[i]
+                    ts.append(option)
+
+        if len(ts) == 0:
+            return awkward1.types.UnknownType()
+        elif len(ts) == 1:
+            return ts[0]
+        else:
+            return awkward1.types.UnionType(ts)
+
+    @property
+    def parameters(self):
+        return first(self).parameters
+
+    def parameter(self, *args, **kwargs):
+        return first(self).parameter(*args, **kwargs)
+
+    def purelist_parameter(self, *args, **kwargs):
+        return first(self).purelist_parameter(*args, **kwargs)
+
     def tojson(self, *args, **kwargs):
         return self._ext.tojson(*args, **kwargs)
+
+    @property
+    def nbytes(self):
+        return sum(x.nbytes for x in self.partitions)
+
+    def deep_copy(self, *args, **kwargs):
+        out = type(self).__new__(type(self))
+        out.__dict__.update(self.__dict__)
+        out.partitions = [x.deep_copy(*args, **kwargs) for x in out.partitions]
+        return out
+
+    @property
+    def numfields(self):
+        return first(self).numfields
+
+    def fieldindex(self, *args, **kwargs):
+        return first(self).fieldindex(*args, **kwargs)
+
+    def key(self, *args, **kwargs):
+        return first(self).key(*args, **kwargs)
+
+    def haskey(self, *args, **kwargs):
+        return first(self).haskey(*args, **kwargs)
+
+    def keys(self, *args, **kwargs):
+        return first(self).keys(*args, **kwargs)
+
+    @property
+    def purelist_isregular(self):
+        return first(self).purelist_isregular
+
+    @property
+    def purelist_depth(self):
+        return first(self).purelist_depth
+
+    def validityerror(self, *args, **kwargs):
+        for x in self.partitions:
+            out = x.validityerror(*args, **kwargs)
+            if out is not None:
+                return out
+        return None
 
     def __len__(self):
         return len(self._ext)
@@ -76,7 +179,8 @@ class PartitionedArray(object):
         return out
 
     def repartition(self, *args, **kwargs):
-        return PartitionedArray.from_ext(self._ext.repartition(*args, **kwargs))
+        return PartitionedArray.from_ext(
+                   self._ext.repartition(*args, **kwargs))
 
     def __getitem__(self, where):
         import awkward1.operations.convert
@@ -85,10 +189,11 @@ class PartitionedArray(object):
 
         if (not isinstance(where, bool) and
             isinstance(where, (numbers.Integral, numpy.integer))):
-            return self._ext.getitem_at(where)
+            return PartitionedArray.from_ext(self._ext.getitem_at(where))
 
         elif isinstance(where, slice):
-            return self._ext.getitem_range(where.start, where.stop, where.step)
+            return PartitionedArray.from_ext(self._ext.getitem_range(
+                       where.start, where.stop, where.step))
 
         elif (isinstance(where, str) or
               (awkward1._util.py27 and isinstance(where, unicode))):
@@ -194,6 +299,18 @@ class IrregularlyPartitionedArray(PartitionedArray):
     @property
     def stops(self):
         return self._ext.stops
+
+    def validityerror(self):
+        total_length = 0
+        for x, stop in zip(self.partitions, self.stops):
+            total_length += len(x)
+            if total_length != stop:
+                return ("IrregularlyPartitionedArray stops do not match "
+                        "partition lengths")
+            out = x.validityerror()
+            if out is not None:
+                return out
+        return None
 
     def replace_partitions(self, partitions):
         return awkward1._ext.IrregularlyPartitionedArray(partitions, self.stops)

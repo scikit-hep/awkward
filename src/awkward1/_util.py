@@ -15,6 +15,7 @@ except ImportError:
 import numpy
 
 import awkward1.layout
+import awkward1.partition
 
 py27 = (sys.version_info[0] < 3)
 py35 = (sys.version_info[0] == 3 and sys.version_info[1] <= 5)
@@ -78,7 +79,7 @@ class Behavior(Mapping):
         return len(set(self.defaults) | set(self.overrides))
 
 def arrayclass(layout, behavior):
-    import awkward1
+    layout = awkward1.partition.first(layout)
     behavior = Behavior(awkward1.behavior, behavior)
     arr = layout.parameter("__array__")
     if isinstance(arr, str) or (py27 and isinstance(arr, unicode)):
@@ -98,7 +99,7 @@ def arrayclass(layout, behavior):
     return awkward1.highlevel.Array
 
 def custom_broadcast(layout, behavior):
-    import awkward1
+    layout = awkward1.partition.first(layout)
     behavior = Behavior(awkward1.behavior, behavior)
     custom = layout.parameter("__array__")
     if not (isinstance(custom, str) or (py27 and isinstance(custom, unicode))):
@@ -114,7 +115,7 @@ def custom_broadcast(layout, behavior):
     return None
 
 def numba_array_typer(layouttype, behavior):
-    import awkward1
+    layout = awkward1.partition.first(layout)
     behavior = Behavior(awkward1.behavior, behavior)
     arr = layouttype.parameters.get("__array__")
     if isinstance(arr, str) or (py27 and isinstance(arr, unicode)):
@@ -134,7 +135,7 @@ def numba_array_typer(layouttype, behavior):
     return None
 
 def numba_array_lower(layouttype, behavior):
-    import awkward1
+    layout = awkward1.partition.first(layout)
     behavior = Behavior(awkward1.behavior, behavior)
     arr = layouttype.parameters.get("__array__")
     if isinstance(arr, str) or (py27 and isinstance(arr, unicode)):
@@ -154,7 +155,7 @@ def numba_array_lower(layouttype, behavior):
     return None
 
 def recordclass(layout, behavior):
-    import awkward1
+    layout = awkward1.partition.first(layout)
     behavior = Behavior(awkward1.behavior, behavior)
     rec = layout.parameter("__record__")
     if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
@@ -165,7 +166,6 @@ def recordclass(layout, behavior):
     return awkward1.highlevel.Record
 
 def typestrs(behavior):
-    import awkward1
     behavior = Behavior(awkward1.behavior, behavior)
     out = {}
     for key, typestr in behavior.items():
@@ -180,7 +180,6 @@ def typestrs(behavior):
     return out
 
 def numba_record_typer(layouttype, behavior):
-    import awkward1
     behavior = Behavior(awkward1.behavior, behavior)
     rec = layouttype.parameters.get("__record__")
     if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
@@ -190,7 +189,6 @@ def numba_record_typer(layouttype, behavior):
     return None
 
 def numba_record_lower(layouttype, behavior):
-    import awkward1
     behavior = Behavior(awkward1.behavior, behavior)
     rec = layouttype.parameters.get("__record__")
     if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
@@ -200,12 +198,10 @@ def numba_record_lower(layouttype, behavior):
     return None
 
 def overload(behavior, signature):
-    import awkward1
     behavior = Behavior(awkward1.behavior, behavior)
     return behavior[signature]
 
 def numba_attrs(layouttype, behavior):
-    import awkward1
     behavior = Behavior(awkward1.behavior, behavior)
     rec = layouttype.parameters.get("__record__")
     if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
@@ -218,7 +214,6 @@ def numba_attrs(layouttype, behavior):
                 yield key[2], typer, lower
 
 def numba_methods(layouttype, behavior):
-    import awkward1
     behavior = Behavior(awkward1.behavior, behavior)
     rec = layouttype.parameters.get("__record__")
     if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
@@ -232,7 +227,6 @@ def numba_methods(layouttype, behavior):
                 yield key[2], typer, lower
 
 def numba_unaryops(unaryop, left, behavior):
-    import awkward1
     import awkward1._connect._numba.layout
     behavior = Behavior(awkward1.behavior, behavior)
     done = False
@@ -253,7 +247,6 @@ def numba_unaryops(unaryop, left, behavior):
                 yield typer, lower
 
 def numba_binops(binop, left, right, behavior):
-    import awkward1
     import awkward1._connect._numba.layout
     behavior = Behavior(awkward1.behavior, behavior)
     done = False
@@ -296,7 +289,8 @@ def behaviorof(*arrays):
 def wrap(content, behavior):
     import awkward1.highlevel
 
-    if isinstance(content, awkward1.layout.Content):
+    if isinstance(content, (awkward1.layout.Content,
+                            awkward1.partition.PartitionedArray)):
         return awkward1.highlevel.Array(content, behavior=behavior)
 
     elif isinstance(content, awkward1.layout.Record):
@@ -349,7 +343,14 @@ def key2index(keys, key):
 key2index._pattern = re.compile(r"^[1-9][0-9]*$")
 
 def completely_flatten(array):
-    if isinstance(array, unknowntypes):
+    if isinstance(array, awkward1.partition.PartitionedArray):
+        outs = [completely_flatten(x) for x in awkward1.partition.every(array)]
+        out = ()
+        for i in range(max(len(x) for x in outs)):
+            out = out + (numpy.concatenate([x[i] for x in outs]),)
+        return out
+
+    elif isinstance(array, unknowntypes):
         return (numpy.array([], dtype=numpy.bool_),)
 
     elif isinstance(array, indexedtypes):
@@ -419,6 +420,19 @@ def broadcast_and_apply(inputs, getfunction, behavior):
         # the rest of this is one switch statement
         if function is not None:
             return function()
+
+        elif any(isinstance(x, awkward1.partition.PartitionedArray)
+                   for x in inputs):
+            sample = None
+            for x in inputs:
+                if isinstance(x, awkward1.partition.PartitionedArray):
+                    sample = x
+                    break
+            inputs = awkward1.partition.partition_as(sample, inputs)
+            outputs = []
+            for partition in zip(inputs):
+                outputs.append(apply(inputs, depth))
+            return awkward1.partition.IrregularlyPartitionedArray(outputs)
 
         elif any(isinstance(x, unknowntypes) for x in inputs):
             return apply([x if not isinstance(x, unknowntypes)
@@ -671,6 +685,10 @@ def broadcast_pack(inputs, isscalar):
         elif isinstance(x, awkward1.layout.Content):
             nextinputs.append(awkward1.layout.RegularArray(x, len(x)))
             isscalar.append(False)
+        elif isinstance(x, awkward1.partition.PartitionedArray):
+            nextinputs.append(awkward1.partition.apply(
+                lambda y: awkward1.layout.RegularArray(y, len(y)), x))
+            isscalar.append(False)
         else:
             nextinputs.append(x)
             isscalar.append(True)
@@ -692,6 +710,11 @@ def recursively_apply(layout, getfunction, args=(), depth=1):
     custom = getfunction(layout, depth, *args)
     if custom is not None:
         return custom()
+
+    elif isinstance(layout, awkward1.partition.PartitionedArray):
+        return awkward1.partition.IrregularlyPartitionedArray(
+            [recursively_apply(x, getfunction, args, depth)
+               for x in layout.partitions])
 
     elif isinstance(layout, awkward1.layout.NumpyArray):
         return layout
@@ -866,7 +889,8 @@ def minimally_touching_string(limit_length, layout, behavior):
 
     def forward(x, space, brackets=True, wrap=True):
         done = False
-        if wrap and isinstance(x, awkward1.layout.Content):
+        if wrap and isinstance(x, (awkward1.layout.Content,
+                                   awkward1.partition.PartitionedArray)):
             cls = arrayclass(x, behavior)
             if cls is not awkward1.highlevel.Array:
                 y = cls(x, behavior=behavior)
@@ -881,7 +905,8 @@ def minimally_touching_string(limit_length, layout, behavior):
                     yield space + repr(y)
                     done = True
         if not done:
-            if isinstance(x, awkward1.layout.Content):
+            if isinstance(x, (awkward1.layout.Content,
+                              awkward1.partition.PartitionedArray)):
                 if brackets:
                     yield space + "["
                 sp = ""
@@ -918,7 +943,8 @@ def minimally_touching_string(limit_length, layout, behavior):
 
     def backward(x, space, brackets=True, wrap=True):
         done = False
-        if wrap and isinstance(x, awkward1.layout.Content):
+        if wrap and isinstance(x, (awkward1.layout.Content,
+                                   awkward1.partition.PartitionedArray)):
             cls = arrayclass(x, behavior)
             if cls is not awkward1.highlevel.Array:
                 y = cls(x, behavior=behavior)
@@ -933,7 +959,8 @@ def minimally_touching_string(limit_length, layout, behavior):
                     yield repr(y) + space
                     done = True
         if not done:
-            if isinstance(x, awkward1.layout.Content):
+            if isinstance(x, (awkward1.layout.Content,
+                              awkward1.partition.PartitionedArray)):
                 if brackets:
                     yield "]" + space
                 sp = ""

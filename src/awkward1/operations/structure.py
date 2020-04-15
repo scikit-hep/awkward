@@ -1009,28 +1009,34 @@ def fill_none(array, value, highlevel=True):
                                                         allow_record=True,
                                                         allow_other=False)
 
-    if (isinstance(value, Iterable) and
-        not (isinstance(value, (str, bytes)) or
-             (awkward1._util.py27 and isinstance(value, unicode)))):
-        valuelayout = awkward1.operations.convert.to_layout(value,
-                                                            allow_record=True,
-                                                            allow_other=False)
-        if isinstance(valuelayout, awkward1.layout.Record):
-            valuelayout = valuelayout.array[valuelayout.at:valuelayout.at + 1]
-        elif len(valuelayout) == 0:
-            offsets = awkward1.layout.Index64(numpy.array([0, 0],
-                                                          dtype=numpy.int64))
-            valuelayout = awkward1.layout.ListOffsetArray64(offsets,
-                                                            valuelayout)
-        else:
-            valuelayout = awkward1.layout.RegularArray(valuelayout,
-                                                       len(valuelayout))
-    else:
-        valuelayout = awkward1.operations.convert.to_layout([value],
-                                                            allow_record=True,
-                                                            allow_other=False)
+    if isinstance(arraylayout, awkward1.partition.PartitionedArray):
+        out = awkward1.partition.apply(
+            lambda x: fill_none(x, value, highlevel=False), arraylayout)
 
-    out = arraylayout.fillna(valuelayout)
+    else:
+        if (isinstance(value, Iterable) and
+            not (isinstance(value, (str, bytes)) or
+                 (awkward1._util.py27 and isinstance(value, unicode)))):
+            valuelayout = awkward1.operations.convert.to_layout(value,
+                                                                allow_record=True,
+                                                                allow_other=False)
+            if isinstance(valuelayout, awkward1.layout.Record):
+                valuelayout = valuelayout.array[valuelayout.at:valuelayout.at + 1]
+            elif len(valuelayout) == 0:
+                offsets = awkward1.layout.Index64(numpy.array([0, 0],
+                                                              dtype=numpy.int64))
+                valuelayout = awkward1.layout.ListOffsetArray64(offsets,
+                                                                valuelayout)
+            else:
+                valuelayout = awkward1.layout.RegularArray(valuelayout,
+                                                           len(valuelayout))
+        else:
+            valuelayout = awkward1.operations.convert.to_layout([value],
+                                                                allow_record=True,
+                                                                allow_other=False)
+
+        out = arraylayout.fillna(valuelayout)
+
     if highlevel:
         return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
     else:
