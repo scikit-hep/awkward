@@ -891,6 +891,26 @@ namespace awkward {
                           const SliceJagged64& slicecontent,
                           const Slice& tail) const = 0;
 
+    /// @brief Internal function defining the negative axis handling for many
+    /// operations.
+    ///
+    /// Returns a non-negative equivalent `axis` if unambiguous and passes
+    /// the negative `axis` through if ambiguous. A negative `axis` can be
+    /// ambiguous if the list-depth "branches" in a RecordArray or a
+    /// {@link UnionArrayOf UnionArray} with different `contents` having
+    /// different depths. As an operation descends through the nodes of
+    /// an array, it repeatedly calls `axis_wrap_if_negative` until an
+    /// unambiguous non-negative `axis` can be identified.
+    ///
+    /// This allows a RecordArray or {@link UnionArrayOf UnionArray} with
+    /// different depths to accept `axis = -1` as the last axis, regardless
+    /// of how deep that is in different record fields or union possibilities.
+    ///
+    /// @note This function has not been implemented:
+    /// [scikit-hep/awkward-1.0#163](https://github.com/scikit-hep/awkward-1.0/issues/163).
+    const int64_t
+      axis_wrap_if_negative(int64_t axis) const;
+
   protected:
     /// @brief Internal function to wrap putative #getitem output with enough
     /// RegularArray nodes to satisfy a given `shape`.
@@ -912,26 +932,6 @@ namespace awkward {
       parameters_tostring(const std::string& indent,
                           const std::string& pre,
                           const std::string& post) const;
-
-    /// @brief Internal function defining the negative axis handling for many
-    /// operations.
-    ///
-    /// Returns a non-negative equivalent `axis` if unambiguous and passes
-    /// the negative `axis` through if ambiguous. A negative `axis` can be
-    /// ambiguous if the list-depth "branches" in a RecordArray or a
-    /// {@link UnionArrayOf UnionArray} with different `contents` having
-    /// different depths. As an operation descends through the nodes of
-    /// an array, it repeatedly calls `axis_wrap_if_negative` until an
-    /// unambiguous non-negative `axis` can be identified.
-    ///
-    /// This allows a RecordArray or {@link UnionArrayOf UnionArray} with
-    /// different depths to accept `axis = -1` as the last axis, regardless
-    /// of how deep that is in different record fields or union possibilities.
-    ///
-    /// @note This function has not been implemented:
-    /// [scikit-hep/awkward-1.0#163](https://github.com/scikit-hep/awkward-1.0/issues/163).
-    const int64_t
-      axis_wrap_if_negative(int64_t axis) const;
 
   protected:
     /// @brief See #identities.

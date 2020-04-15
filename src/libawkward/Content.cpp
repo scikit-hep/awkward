@@ -641,6 +641,14 @@ namespace awkward {
     }
   }
 
+  const int64_t
+  Content::axis_wrap_if_negative(int64_t axis) const {
+    if (axis < 0) {
+      throw std::runtime_error("FIXME: negative axis not implemented yet");
+    }
+    return axis;
+  }
+
   const ContentPtr
   Content::getitem_next_array_wrap(const ContentPtr& outcontent,
                                    const std::vector<int64_t>& shape) const {
@@ -675,13 +683,5 @@ namespace awkward {
       out << indent << "</parameters>" << post;
       return out.str();
     }
-  }
-
-  const int64_t
-  Content::axis_wrap_if_negative(int64_t axis) const {
-    if (axis < 0) {
-      throw std::runtime_error("FIXME: negative axis not implemented yet");
-    }
-    return axis;
   }
 }

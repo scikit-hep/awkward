@@ -426,7 +426,7 @@ def with_field(base, what, where=None, highlevel=True):
     what = awkward1.operations.convert.to_layout(what,
                                                  allow_record=True,
                                                  allow_other=True)
-    
+
     keys = base.keys()
     if where in base.keys():
         keys.remove(where)
@@ -823,7 +823,7 @@ def flatten(array, axis=1, highlevel=True):
                            awkward1.layout.Index8(tags[good]),
                            awkward1.layout.Index64(index[good]),
                            layout.contents)
-                
+
             elif isinstance(layout, awkward1._util.optiontypes):
                 return layout.project()
 
@@ -1153,7 +1153,7 @@ def firsts(array, axis=1, highlevel=True):
         return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
     else:
         return out
-    
+
 def cartesian(arrays,
               axis=1,
               nested=None,
@@ -1360,6 +1360,22 @@ def cartesian(arrays,
     """
     behavior = awkward1._util.behaviorof(*arrays)
 
+    is_partitioned = False
+    if isinstance(arrays, dict):
+        new_arrays = {}
+        for n, x in arrays.items():
+            new_arrays[n] = awkward1.operations.convert.to_layout(
+                              x, allow_record=False, allow_other=False)
+            if isinstance(new_arrays[n], awkward1.partition.PartitionedArray):
+                is_partitioned = True
+    else:
+        new_arrays = []
+        for x in arrays:
+            new_arrays.append(awkward1.operations.convert.to_layout(
+                              x, allow_record=False, allow_other=False))
+            if isinstance(new_arrays[-1], awkward1.partition.PartitionedArray):
+                is_partitioned = True
+
     if with_name is not None:
         if parameters is None:
             parameters = {}
@@ -1374,41 +1390,40 @@ def cartesian(arrays,
         if nested is None or nested is False:
             nested = []
 
-        if isinstance(arrays, dict):
+        if isinstance(new_arrays, dict):
             if nested is True:
-                nested = list(arrays.keys())   # last key is ignored below
-            if any(not (isinstance(n, str) and n in arrays) for x in nested):
+                nested = list(new_arrays.keys())   # last key is ignored below
+            if any(not (isinstance(n, str) and n in new_arrays) for x in nested):
                 raise ValueError(
                     "the 'nested' parameter of cartesian must be dict keys "
                     "for a dict of arrays")
             recordlookup = []
             layouts = []
             tonested = []
-            for i, (n, x) in enumerate(arrays.items()):
+            for i, (n, x) in enumerate(new_arrays.items()):
                 recordlookup.append(n)
-                layouts.append(
-                    awkward1.operations.convert.to_layout(x,
-                                                          allow_record=False,
-                                                          allow_other=False))
+                layouts.append(x)
                 if n in nested:
                     tonested.append(i)
             nested = tonested
 
         else:
             if nested is True:
-                nested = list(range(len(arrays) - 1))
-            if any(not (isinstance(x, int) and 0 <= x < len(arrays) - 1)
+                nested = list(range(len(new_arrays) - 1))
+            if any(not (isinstance(x, int) and 0 <= x < len(new_arrays) - 1)
                      for x in nested):
                 raise ValueError(
                     "the 'nested' prarmeter of cartesian must be integers in "
                     "[0, len(arrays) - 1) for an iterable of arrays")
             recordlookup = None
             layouts = []
-            for x in arrays:
-                layouts.append(
-                    awkward1.operations.convert.to_layout(x,
-                                                          allow_record=False,
-                                                          allow_other=False))
+            for x in new_arrays:
+                layouts.append(x)
+
+        layouts = [x.toContent()
+                     if isinstance(x, awkward1.partition.PartitionedArray)
+                     else x
+                   for x in layouts]
 
         indexes = [awkward1.layout.Index64(x.reshape(-1))
                      for x in numpy.meshgrid(*[numpy.arange(
@@ -1422,12 +1437,44 @@ def cartesian(arrays,
         result = awkward1.layout.RecordArray(outs,
                                              recordlookup,
                                              parameters=parameters)
-        for i in range(len(arrays) - 1, -1, -1):
+        for i in range(len(new_arrays) - 1, -1, -1):
             if i in nested:
                 result = awkward1.layout.RegularArray(result,
                                                       len(layouts[i + 1]))
 
+    elif is_partitioned:
+        sample = None
+        if isinstance(new_arrays, dict):
+            for x in new_arrays.values():
+                if isinstance(x, awkward1.partition.PartitionedArray):
+                    sample = x
+                    break
+        else:
+            for x in new_arrays:
+                if isinstance(x, awkward1.partition.PartitionedArray):
+                    sample = x
+                    break
+
+        partition_arrays = awkward1.partition.partition_as(sample, new_arrays)
+
+        output = []
+        for part_arrays in awkward1.partition.iterate(sample.numpartitions,
+                                                      partition_arrays):
+            output.append(cartesian(part_arrays,
+                                    axis=axis,
+                                    nested=nested,
+                                    parameters=parameters,
+                                    with_name=None,    # already set: see above
+                                    highlevel=False))
+
+        result = awkward1.partition.IrregularlyPartitionedArray(output)
+
     else:
+        if isinstance(new_arrays, dict):
+            print("new_arrays", {n: type(x) for n, x in new_arrays.items()})
+        else:
+            print("new_arrays", [type(x) for x in new_arrays])
+
         def newaxis(layout, i):
             if i == 0:
                 return layout
@@ -1442,7 +1489,7 @@ def cartesian(arrays,
 
         def getfunction2(layout, depth, i):
             if depth == axis:
-                inside = len(arrays) - i - 1
+                inside = len(new_arrays) - i - 1
                 outside = i
                 return lambda: newaxis(
                     awkward1._util.recursively_apply(layout,
@@ -1463,38 +1510,38 @@ def cartesian(arrays,
         if nested is None or nested is False:
             nested = []
 
-        if isinstance(arrays, dict):
+        if isinstance(new_arrays, dict):
             if nested is True:
-                nested = list(arrays.keys())   # last key is ignored below
-            if any(not (isinstance(n, str) and n in arrays) for x in nested):
+                nested = list(new_arrays.keys())   # last key is ignored below
+            if any(not (isinstance(n, str) and n in new_arrays) for x in nested):
                 raise ValueError(
                     "the 'nested' parameter of cartesian must be dict keys "
                     "for a dict of arrays")
             recordlookup = []
             layouts = []
-            for i, (n, x) in enumerate(arrays.items()):
+            for i, (n, x) in enumerate(new_arrays.items()):
                 recordlookup.append(n)
                 layouts.append(apply(x, i))
-                if i < len(arrays) - 1 and n not in nested:
+                if i < len(new_arrays) - 1 and n not in nested:
                     toflatten.append(axis + i + 1)
 
         else:
             if nested is True:
-                nested = list(range(len(arrays) - 1))
-            if any(not (isinstance(x, int) and 0 <= x < len(arrays) - 1)
+                nested = list(range(len(new_arrays) - 1))
+            if any(not (isinstance(x, int) and 0 <= x < len(new_arrays) - 1)
                    for x in nested):
                 raise ValueError(
                     "the 'nested' parameter of cartesian must be integers in "
                     "[0, len(arrays) - 1) for an iterable of arrays")
             recordlookup = None
             layouts = []
-            for i, x in enumerate(arrays):
+            for i, x in enumerate(new_arrays):
                 layouts.append(apply(x, i))
-                if i < len(arrays) - 1 and i not in nested:
+                if i < len(new_arrays) - 1 and i not in nested:
                     toflatten.append(axis + i + 1)
 
         def getfunction3(inputs, depth):
-            if depth == axis + len(arrays):
+            if depth == axis + len(new_arrays):
                 return lambda: (
                     awkward1.layout.RecordArray(inputs,
                                                 recordlookup,

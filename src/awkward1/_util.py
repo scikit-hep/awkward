@@ -343,13 +343,6 @@ def key2index(keys, key):
 key2index._pattern = re.compile(r"^[1-9][0-9]*$")
 
 def completely_flatten(array):
-    # if isinstance(array, awkward1.partition.PartitionedArray):
-    #     outs = [completely_flatten(x) for x in awkward1.partition.every(array)]
-    #     out = ()
-    #     for i in range(max(len(x) for x in outs)):
-    #         out = out + (numpy.concatenate([x[i] for x in outs]),)
-    #     return out
-
     if isinstance(array, awkward1.partition.PartitionedArray):
         out = []
         for partition in array.partitions:

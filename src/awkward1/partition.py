@@ -33,25 +33,46 @@ def every(obj):
 
 def partition_as(sample, arrays):
     stops = sample.stops
-    out = []
-    for x in arrays:
-        if isinstance(x, PartitionedArray):
-            out.append(x.repartition(stops))
-        elif isinstance(x, awkward1.layout.Content):
-            out.append(IrregularlyPartitionedArray.toPartitioned(x, stops))
-        else:
-            out.append(x)
-    return out
-
-def iterate(numpartitions, arrays):
-    for partitionid in range(numpartitions):
-        line = []
+    if isinstance(arrays, dict):
+        out = {}
+        for n, x in arrays.items():
+            if isinstance(x, PartitionedArray):
+                out[n] = x.repartition(stops)
+            elif isinstance(x, awkward1.layout.Content):
+                out[n] = IrregularlyPartitionedArray.toPartitioned(x, stops)
+            else:
+                out[n] = x
+        return out
+    else:
+        out = []
         for x in arrays:
             if isinstance(x, PartitionedArray):
-                line.append(x.partition(partitionid))
+                out.append(x.repartition(stops))
+            elif isinstance(x, awkward1.layout.Content):
+                out.append(IrregularlyPartitionedArray.toPartitioned(x, stops))
             else:
-                line.append(x)
-        yield line
+                out.append(x)
+        return out
+
+def iterate(numpartitions, arrays):
+    if isinstance(arrays, dict):
+        for partitionid in range(numpartitions):
+            out = {}
+            for n, x in arrays.items():
+                if isinstance(x, PartitionedArray):
+                    out[n] = x.partition(partitionid)
+                else:
+                    out[n] = x
+            yield out
+    else:
+        for partitionid in range(numpartitions):
+            out = []
+            for x in arrays:
+                if isinstance(x, PartitionedArray):
+                    out.append(x.partition(partitionid))
+                else:
+                    out.append(x)
+            yield out
 
 def apply(function, array):
     return IrregularlyPartitionedArray([function(x) for x in array.partitions])
@@ -166,6 +187,9 @@ class PartitionedArray(object):
     def purelist_depth(self):
         return first(self).purelist_depth
 
+    def getitem_nothing(self, *args, **kwargs):
+        return first(self).getitem_nothing(*args, **kwargs)
+
     def validityerror(self, *args, **kwargs):
         for x in self.partitions:
             out = x.validityerror(*args, **kwargs)
@@ -173,8 +197,8 @@ class PartitionedArray(object):
                 return out
         return None
 
-    def getitem_nothing(self, *args, **kwargs):
-        return first(self).getitem_nothing(*args, **kwargs)
+    def flatten(self, *args, **kwargs):
+        return apply(lambda x: x.flatten(*args, **kwargs), self)
 
     def argmin(self, axis, mask, keepdims):
         branch, depth = first(self).branch_depth
@@ -198,6 +222,20 @@ class PartitionedArray(object):
             return self.toContent().argmax(axis, mask, keepdims)
         else:
             return self.replace_partitions([x.argmax(axis, mask, keepdims)
+                                              for x in self.partitions])
+
+    def localindex(self, axis):
+        if first(self).axis_wrap_if_negative(axis) == 0:
+            start = 0
+            output = []
+            for x in self.partitions:
+                output.append(awkward1.layout.NumpyArray(
+                    numpy.arange(start, start + len(x), dtype=numpy.int64)))
+                start += len(x)
+            return self.replace_partitions(output)
+
+        else:
+            return self.replace_partitions([x.localindex(axis)
                                               for x in self.partitions])
 
     def __len__(self):
