@@ -875,10 +875,8 @@ py::class_<ak::Content, std::shared_ptr<ak::Content>>
 make_Content(const py::handle& m, const std::string& name) {
   return py::class_<ak::Content, std::shared_ptr<ak::Content>>(m,
                                                                name.c_str())
-          .def("axis_wrap_if_negative", [](const ak::Content& self,
-                                           int64_t axis) -> int64_t {
-            return self.axis_wrap_if_negative(axis);
-          })
+          .def_static("axis_wrap_if_negative",
+                      &ak::Content::axis_wrap_if_negative)
 
   ;
 }

@@ -908,8 +908,8 @@ namespace awkward {
     ///
     /// @note This function has not been implemented:
     /// [scikit-hep/awkward-1.0#163](https://github.com/scikit-hep/awkward-1.0/issues/163).
-    const int64_t
-      axis_wrap_if_negative(int64_t axis) const;
+    static int64_t
+      axis_wrap_if_negative(int64_t axis);
 
   protected:
     /// @brief Internal function to wrap putative #getitem output with enough

@@ -560,6 +560,8 @@ def broadcast_arrays(*arrays, **kwargs):
         y = awkward1.operations.convert.to_layout(x,
                                                   allow_record=True,
                                                   allow_other=True)
+        if isinstance(y, awkward1.partition.PartitionedArray):
+            y = y.toContent()
         if not isinstance(y, (awkward1.layout.Content,
                               awkward1.layout.Record)):
             y = awkward1.layout.NumpyArray(numpy.array([y]))
@@ -828,7 +830,7 @@ def flatten(array, axis=1, highlevel=True):
         else:
             out = awkward1.layout.NumpyArray(numpy.concatenate(out))
 
-    elif axis == 0:
+    elif awkward1.layout.Content.axis_wrap_if_negative(axis) == 0:
         def apply(layout):
             if isinstance(layout, awkward1._util.unknowntypes):
                 return apply(awkward1.layout.NumpyArray(numpy.array([])))
@@ -865,8 +867,12 @@ def flatten(array, axis=1, highlevel=True):
             else:
                 return layout
 
-        out = apply(awkward1.operations.convert.to_layout(
-                       array, allow_record=False))
+        if isinstance(layout, awkward1.partition.PartitionedArray):
+            out = awkward1.partition.IrregularlyPartitionedArray(
+                [apply(x) for x in layout.partitions])
+        else:
+            out = apply(layout)
+
         if highlevel:
             return awkward1._util.wrap(
                        out, behavior=awkward1._util.behaviorof(array))
@@ -1427,7 +1433,7 @@ def cartesian(arrays,
     if axis < 0:
         raise ValueError("the 'axis' of cartesian must be non-negative")
 
-    elif axis == 0:
+    elif awkward1.layout.Content.axis_wrap_if_negative(axis) == 0:
         if nested is None or nested is False:
             nested = []
 

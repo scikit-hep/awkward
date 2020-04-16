@@ -144,7 +144,8 @@ def to_numpy(array, allow_missing=True):
                             for i in range(len(array))])
 
     elif isinstance(array, awkward1.partition.PartitionedArray):
-        tocat = [to_numpy(x) for x in array.partitions]
+        tocat = [to_numpy(x, allow_missing=allow_missing)
+                   for x in array.partitions]
         if any(isinstance(x, numpy.ma.MaskedArray) for x in tocat):
             return numpy.ma.concatenate(tocat)
         else:

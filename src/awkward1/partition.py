@@ -198,8 +198,29 @@ class PartitionedArray(object):
                 return out
         return None
 
+    def num(self, axis):
+        if first(self).axis_wrap_if_negative(axis) == 0:
+            return sum(x.num(axis) for x in self.partitions)
+        else:
+            return self.replace_partitions(
+                [x.num(axis) for x in self.partitions])
+
     def flatten(self, *args, **kwargs):
         return apply(lambda x: x.flatten(*args, **kwargs), self)
+
+    def rpad(self, length, axis):
+        if first(self).axis_wrap_if_negative(axis) == 0:
+            return self.toContent().rpad(length, axis)
+        else:
+            return self.replace_partitions(
+                [x.rpad(length, axis) for x in self.partitions])
+
+    def rpad_and_clip(self, length, axis):
+        if first(self).axis_wrap_if_negative(axis) == 0:
+            return self.toContent().rpad_and_clip(length, axis)
+        else:
+            return self.replace_partitions(
+                [x.rpad_and_clip(length, axis) for x in self.partitions])
 
     def reduce(self, name, axis, mask, keepdims):
         branch, depth = first(self).branch_depth
