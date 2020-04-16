@@ -112,33 +112,13 @@ class PartitionedArray(object):
         return self._ext.partitionid_index_at(at)
 
     def type(self, typestrs):
-        ts = []
+        out = None
         for x in self.partitions:
-            t = x.type(typestrs)
-            if not isinstance(t, awkward1.types.UnknownType):
-                option = None
-                for i, ti in enumerate(ts):
-                    if t == ti:
-                        break
-                    elif t == awkward1.types.OptionType(ti):
-                        option = t
-                        break
-                    elif awkward1.types.OptionType(t) == ti:
-                        option = ti
-                        break
-                else:
-                    ts.append(t)
-
-                if option is not None:
-                    del ts[i]
-                    ts.append(option)
-
-        if len(ts) == 0:
-            return awkward1.types.UnknownType()
-        elif len(ts) == 1:
-            return ts[0]
-        else:
-            return awkward1.types.UnionType(ts)
+            if out is None:
+                out = x.type(typestrs)
+            elif out != x.type(typestrs):
+                raise ValueError("inconsistent types in PartitionedArray")
+        return out
 
     @property
     def parameters(self):
@@ -192,7 +172,12 @@ class PartitionedArray(object):
         return first(self).getitem_nothing(*args, **kwargs)
 
     def validityerror(self, *args, **kwargs):
+        t = None
         for x in self.partitions:
+            if t is None:
+                t = x.type({})
+            elif t != x.type({}):
+                return "inconsistent types in PartitionedArray"
             out = x.validityerror(*args, **kwargs)
             if out is not None:
                 return out
@@ -399,8 +384,8 @@ class PartitionedArray(object):
                 layout = awkward1.operations.convert.to_layout(head,
                             allow_record=False, allow_other=False,
                             numpytype=(numpy.integer, numpy.bool_, numpy.bool))
-                t = awkward1.operations.describe.type(layout)
 
+                t = awkward1.operations.describe.type(layout)
                 int_types = [PrimitiveType("int8"),  PrimitiveType("uint8"),
                              PrimitiveType("int16"), PrimitiveType("uint16"),
                              PrimitiveType("int32"), PrimitiveType("uint32"),

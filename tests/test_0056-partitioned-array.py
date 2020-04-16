@@ -293,14 +293,14 @@ def test_getitem_first_dimension_intarray():
     assert isinstance(array[[-1, 3, None, 0, 2, 3, 7]], awkward1.layout.IndexedOptionArray64)
     assert awkward1.to_list(array[[-1, 3, None, 0, 2, 3, 7]]) == [[7.7, 8.8, 9.9], [6.6], None, [1.1, 2.2, 3.3], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]
 
-    m1a = awkward1.from_iter([-1, 3, 2], highlevel=False)
+    m1a = awkward1.layout.UnmaskedArray(awkward1.from_iter([-1, 3, 2], highlevel=False))
     m2a = awkward1.from_iter([0, None, 3, 7], highlevel=False)
     ma = awkward1.partition.IrregularlyPartitionedArray([m1a, m2a])
     assert isinstance(array[ma], awkward1.layout.IndexedOptionArray64)
     assert awkward1.to_list(array[ma]) == [[7.7, 8.8, 9.9], [6.6], [4.4, 5.5], [1.1, 2.2, 3.3], None, [6.6], [7.7, 8.8, 9.9]]
 
     m1b = awkward1.from_iter([-1, 3, 2, 0, None], highlevel=False)
-    m2b = awkward1.from_iter([3, 7], highlevel=False)
+    m2b = awkward1.layout.UnmaskedArray(awkward1.from_iter([3, 7], highlevel=False))
     mb = awkward1.partition.IrregularlyPartitionedArray([m1b, m2b])
     assert isinstance(array[mb], awkward1.layout.IndexedOptionArray64)
     assert awkward1.to_list(array[mb]) == [[7.7, 8.8, 9.9], [6.6], [4.4, 5.5], [1.1, 2.2, 3.3], None, [6.6], [7.7, 8.8, 9.9]]

@@ -1033,8 +1033,8 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
           .def("purelist_parameter", &purelist_parameter<T>)
           .def("type",
                [](const T& self,
-                  const std::map<std::string,
-                  std::string>& typestrs) -> std::shared_ptr<ak::Type> {
+                  const std::map<std::string, std::string>& typestrs)
+               -> std::shared_ptr<ak::Type> {
             return self.type(typestrs);
           })
           .def("__len__", &len<T>)

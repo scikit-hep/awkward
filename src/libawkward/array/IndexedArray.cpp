@@ -1242,11 +1242,25 @@ namespace awkward {
       throw std::runtime_error("unrecognized IndexedArray specialization");
     }
 
+    ContentPtr replaced_other = other;
+    if (ByteMaskedArray* rawother =
+        dynamic_cast<ByteMaskedArray*>(other.get())) {
+      replaced_other = rawother->toIndexedOptionArray64();
+    }
+    else if (BitMaskedArray* rawother =
+        dynamic_cast<BitMaskedArray*>(other.get())) {
+      replaced_other = rawother->toIndexedOptionArray64();
+    }
+    else if (UnmaskedArray* rawother =
+        dynamic_cast<UnmaskedArray*>(other.get())) {
+      replaced_other = rawother->toIndexedOptionArray64();
+    }
+
     int64_t mycontentlength = content_.get()->length();
     ContentPtr content;
     bool other_isoption = false;
     if (IndexedArray32* rawother =
-        dynamic_cast<IndexedArray32*>(other.get())) {
+        dynamic_cast<IndexedArray32*>(replaced_other.get())) {
       content = content_.get()->merge(rawother->content());
       Index32 other_index = rawother->index();
       struct Error err = awkward_indexedarray_fill_to64_from32(
@@ -1261,7 +1275,7 @@ namespace awkward {
                          rawother->identities().get());
     }
     else if (IndexedArrayU32* rawother =
-             dynamic_cast<IndexedArrayU32*>(other.get())) {
+             dynamic_cast<IndexedArrayU32*>(replaced_other.get())) {
       content = content_.get()->merge(rawother->content());
       IndexU32 other_index = rawother->index();
       struct Error err = awkward_indexedarray_fill_to64_fromU32(
@@ -1276,7 +1290,7 @@ namespace awkward {
                          rawother->identities().get());
     }
     else if (IndexedArray64* rawother =
-             dynamic_cast<IndexedArray64*>(other.get())) {
+             dynamic_cast<IndexedArray64*>(replaced_other.get())) {
       content = content_.get()->merge(rawother->content());
       Index64 other_index = rawother->index();
       struct Error err = awkward_indexedarray_fill_to64_from64(
@@ -1291,7 +1305,7 @@ namespace awkward {
                          rawother->identities().get());
     }
     else if (IndexedOptionArray32* rawother =
-             dynamic_cast<IndexedOptionArray32*>(other.get())) {
+             dynamic_cast<IndexedOptionArray32*>(replaced_other.get())) {
       content = content_.get()->merge(rawother->content());
       Index32 other_index = rawother->index();
       struct Error err = awkward_indexedarray_fill_to64_from32(
@@ -1307,7 +1321,7 @@ namespace awkward {
       other_isoption = true;
     }
     else if (IndexedOptionArray64* rawother =
-             dynamic_cast<IndexedOptionArray64*>(other.get())) {
+             dynamic_cast<IndexedOptionArray64*>(replaced_other.get())) {
       content = content_.get()->merge(rawother->content());
       Index64 other_index = rawother->index();
       struct Error err = awkward_indexedarray_fill_to64_from64(
@@ -1323,7 +1337,7 @@ namespace awkward {
       other_isoption = true;
     }
     else {
-      content = content_.get()->merge(other);
+      content = content_.get()->merge(replaced_other);
       struct Error err = awkward_indexedarray_fill_to64_count(
         index.ptr().get(),
         mylength,
