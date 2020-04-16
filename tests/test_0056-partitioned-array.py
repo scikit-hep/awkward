@@ -369,3 +369,26 @@ def test_indexed():
     array2 = array.repartition([5, 6, 8, 10, 10, 15])
     assert array2.numpartitions == 6
     assert awkward1.to_list(array2) == [3.3, 2.2, 2.2, 4.4, 9.9, 8.8, 0.0, 7.7, 7.7, 5.5, 2.2, 2.2, 6.6, 7.7, 3.3]
+
+def test_repartition():
+    array = awkward1.Array([[], [1.1, 2.2, 3.3], [], [], [4.4, 5.5], [], [6.6], [7.7, 8.8, 9.9], []])
+    array2 = awkward1.repartition(array, 2)
+    array3 = awkward1.repartition(array, 3)
+    array4 = awkward1.repartition(array, [3, 2, 3, 1])
+    array5 = awkward1.repartition(array2, None)
+
+    assert isinstance(array.layout, awkward1.layout.Content)
+    assert isinstance(array2.layout, awkward1.partition.PartitionedArray)
+    assert isinstance(array3.layout, awkward1.partition.PartitionedArray)
+    assert isinstance(array4.layout, awkward1.partition.PartitionedArray)
+    assert isinstance(array5.layout, awkward1.layout.Content)
+
+    assert awkward1.to_list(array) == [[], [1.1, 2.2, 3.3], [], [], [4.4, 5.5], [], [6.6], [7.7, 8.8, 9.9], []]
+    assert awkward1.to_list(array2) == [[], [1.1, 2.2, 3.3], [], [], [4.4, 5.5], [], [6.6], [7.7, 8.8, 9.9], []]
+    assert awkward1.to_list(array3) == [[], [1.1, 2.2, 3.3], [], [], [4.4, 5.5], [], [6.6], [7.7, 8.8, 9.9], []]
+    assert awkward1.to_list(array4) == [[], [1.1, 2.2, 3.3], [], [], [4.4, 5.5], [], [6.6], [7.7, 8.8, 9.9], []]
+    assert awkward1.to_list(array5) == [[], [1.1, 2.2, 3.3], [], [], [4.4, 5.5], [], [6.6], [7.7, 8.8, 9.9], []]
+
+    assert [awkward1.to_list(x) for x in array2.layout.partitions] == [[[], [1.1, 2.2, 3.3]], [[], []], [[4.4, 5.5], []], [[6.6], [7.7, 8.8, 9.9]], [[]]]
+    assert [awkward1.to_list(x) for x in array3.layout.partitions] == [[[], [1.1, 2.2, 3.3], []], [[], [4.4, 5.5], []], [[6.6], [7.7, 8.8, 9.9], []]]
+    assert [awkward1.to_list(x) for x in array4.layout.partitions] == [[[], [1.1, 2.2, 3.3], []], [[], [4.4, 5.5]], [[], [6.6], [7.7, 8.8, 9.9]], [[]]]

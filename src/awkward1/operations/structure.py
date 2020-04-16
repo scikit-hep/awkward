@@ -1933,14 +1933,21 @@ def argcombinations(array,
 def partitions(array):
     """
     Args:
-        array: a possibly-partitioned array
+        array: A possibly-partitioned array.
 
     Returns a list of partition lengths if the array is a PartitionedArray;
     returns None otherwise.
+
+    Partitioning is an internal aspect of an array: it should behave
+    identically to a non-partitioned array, but possibly with different
+    performance characteristics.
+
+    Arrays can only be partitioned in the first dimension; it is intended
+    for performing calculations in memory-sized chunks.
     """
-    layout = awkward1.convert.to_layout(array,
-                                        allow_record=False,
-                                        allow_other=False)
+    layout = awkward1.operations.convert.to_layout(array,
+                                                   allow_record=False,
+                                                   allow_other=False)
     if isinstance(layout, awkward1.partition.PartitionedArray):
         return layout.lengths
     else:
@@ -1948,10 +1955,32 @@ def partitions(array):
 
 def repartition(array, lengths, highlevel=True):
     """
+    Args:
+        array: A possibly-partitioned array.
+        lengths (None, int, or iterable of int): If None, concatenate the
+            pieces of a partitioned array into a non-partitioned array.
+            If an integer, split or repartition into partitions of the
+            given number of entries (except the last, if the length of the
+            array doesn't fit an integer number of equal-sized chunks).
+            If an iterable of integers, split or repartition into the given
+            sequence of lengths.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content or #ak.partition.PartitionedArray
+            subclass.
+
+    Returns a possibly-partitioned array: unpartitioned if `lengths` is None;
+    partitioned otherwise.
+
+    Partitioning is an internal aspect of an array: it should behave
+    identically to a non-partitioned array, but possibly with different
+    performance characteristics.
+
+    Arrays can only be partitioned in the first dimension; it is intended
+    for performing calculations in memory-sized chunks.
     """
-    layout = awkward1.convert.to_layout(array,
-                                        allow_record=False,
-                                        allow_other=False)
+    layout = awkward1.operations.convert.to_layout(array,
+                                                   allow_record=False,
+                                                   allow_other=False)
 
     if lengths is None:
         if isinstance(layout, awkward1.partition.PartitionedArray):
@@ -1978,10 +2007,15 @@ def repartition(array, lengths, highlevel=True):
             total_length += x
             stops.append(total_length)
 
+        if total_length != len(layout):
+            raise ValueError("cannot repartition array of length {0} into "
+                             "these lengths".format(len(layout)))
+
         if isinstance(layout, awkward1.partition.PartitionedArray):
             out = layout.repartition(stops)
         else:
-            out = awkward1.partition.IrregularlyPartitionedArray(layout, stops)
+            out = awkward1.partition.IrregularlyPartitionedArray.toPartitioned(
+                    layout, stops)
 
     if highlevel:
         return awkward1._util.wrap(
