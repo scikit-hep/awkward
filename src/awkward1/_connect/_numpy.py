@@ -58,21 +58,11 @@ def array_ufunc(ufunc, method, inputs, kwargs):
         if not isinstance(out, tuple):
             out = (out,)
 
-        ########################## TEMPORARY ##########################
-
-        return tuple(x.layout.partition(0)
+        return tuple(x.layout
                          if isinstance(x, (awkward1.highlevel.Array,
                                            awkward1.highlevel.Record))
                          else x
                          for x in out)
-
-        ########################## TEMPORARY ##########################
-
-        # return tuple(x.layout
-        #                  if isinstance(x, (awkward1.highlevel.Array,
-        #                                    awkward1.highlevel.Record))
-        #                  else x
-        #                  for x in out)
 
     def getfunction(inputs, depth):
         signature = (ufunc,) + tuple(

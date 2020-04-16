@@ -68,12 +68,6 @@ awkward1.behavior["__typestr__", "string"] = "string"
 def _string_equal(one, two):
     one, two = one.layout, two.layout
 
-    ########################## TEMPORARY ##########################
-
-    one, two = one.partition(0), two.partition(0)
-
-    ########################## TEMPORARY ##########################
-
     # first condition: string lengths must be the same
     counts1 = numpy.asarray(one.count(axis=-1))
     counts2 = numpy.asarray(two.count(axis=-1))

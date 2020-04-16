@@ -638,7 +638,7 @@ def argmin(array, axis=None, keepdims=False, mask_identity=True):
         else:
             best_index = None
             best_value = None
-            for tmp in awkward1._util.completely_flatten(partition):
+            for tmp in awkward1._util.completely_flatten(layout):
                 out = numpy.argmin(tmp, axis=None)
                 if best_index is None or tmp[out] < best_value:
                     best_index = out
@@ -708,7 +708,7 @@ def argmax(array, axis=None, keepdims=False, mask_identity=True):
         else:
             best_index = None
             best_value = None
-            for tmp in awkward1._util.completely_flatten(partition):
+            for tmp in awkward1._util.completely_flatten(layout):
                 out = numpy.argmax(tmp, axis=None)
                 if best_index is None or tmp[out] > best_value:
                     best_index = out

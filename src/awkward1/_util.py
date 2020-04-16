@@ -115,7 +115,6 @@ def custom_broadcast(layout, behavior):
     return None
 
 def numba_array_typer(layouttype, behavior):
-    layout = awkward1.partition.first(layout)
     behavior = Behavior(awkward1.behavior, behavior)
     arr = layouttype.parameters.get("__array__")
     if isinstance(arr, str) or (py27 and isinstance(arr, unicode)):
@@ -135,7 +134,6 @@ def numba_array_typer(layouttype, behavior):
     return None
 
 def numba_array_lower(layouttype, behavior):
-    layout = awkward1.partition.first(layout)
     behavior = Behavior(awkward1.behavior, behavior)
     arr = layouttype.parameters.get("__array__")
     if isinstance(arr, str) or (py27 and isinstance(arr, unicode)):

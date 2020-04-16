@@ -216,13 +216,6 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
                                    awkward1.partition.PartitionedArray)):
             raise TypeError("could not convert data into an awkward1.Array")
 
-        ########################## TEMPORARY ##########################
-
-        if not isinstance(layout, awkward1.partition.PartitionedArray):
-            layout = awkward1.partition.IrregularlyPartitionedArray([layout])
-
-        ########################## TEMPORARY ##########################
-
         if with_name is not None:
             layout = awkward1.operations.structure.with_name(layout,
                                                              with_name,
