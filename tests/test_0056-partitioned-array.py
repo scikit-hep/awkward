@@ -362,6 +362,7 @@ def test_indexed():
     content = awkward1.from_iter([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], highlevel=False)
     index = awkward1.layout.Index64(numpy.array([3, 2, 2, 4, 9, 8, 0, 7, 7, 5, 2, 2, 6, 7, 3], dtype=numpy.int64))
     indexedarray = awkward1.layout.IndexedArray64(index, content)
+
     array = awkward1.partition.IrregularlyPartitionedArray([indexedarray])
     assert awkward1.to_list(array) == [3.3, 2.2, 2.2, 4.4, 9.9, 8.8, 0.0, 7.7, 7.7, 5.5, 2.2, 2.2, 6.6, 7.7, 3.3]
 
