@@ -410,7 +410,16 @@ toslice_part(ak::Slice& slice, py::object obj) {
       }
       else if (py::isinstance(obj, py::module::import("awkward1")
                                               .attr("Array"))) {
-        content = unbox_content(obj.attr("layout"));
+        py::object tmp = obj.attr("layout");
+        if (py::isinstance(tmp, py::module::import("awkward1")
+                                           .attr("partition")
+                                           .attr("PartitionedArray"))) {
+          content = unbox_content(tmp.attr("toContent")());
+          obj = box(content);
+        }
+        else {
+          content = unbox_content(tmp);
+        }
       }
       else if (py::isinstance(obj, py::module::import("awkward1")
                                               .attr("ArrayBuilder"))) {

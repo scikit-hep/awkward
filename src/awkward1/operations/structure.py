@@ -606,6 +606,11 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
     contents = [awkward1.operations.convert.to_layout(x, allow_record=False)
                   for x in arrays]
 
+    contents = [x.toContent()
+                  if isinstance(x, awkward1.partition.PartitionedArray)
+                  else x
+                for x in contents]
+
     if len(contents) == 0:
         raise ValueError("need at least one array to concatenate")
     out = contents[0]
@@ -1104,8 +1109,14 @@ def is_none(array, highlevel=True):
         else:
             return numpy.zeros(len(layout), dtype=numpy.bool_)
 
-    out = apply(awkward1.operations.convert.to_layout(array,
-                                                      allow_record=False))
+    layout = awkward1.operations.convert.to_layout(array, allow_record=False)
+
+    if isinstance(layout, awkward1.partition.PartitionedArray):
+        out = awkward1.partition.apply(
+            lambda x: awkward1.layout.NumpyArray(apply(x)), layout)
+    else:
+        out = awkward1.layout.NumpyArray(apply(layout))
+
     if highlevel:
         return awkward1._util.wrap(out,
                                    behavior=awkward1._util.behaviorof(array))

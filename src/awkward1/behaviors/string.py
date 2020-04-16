@@ -70,11 +70,7 @@ def _string_equal(one, two):
 
     ########################## TEMPORARY ##########################
 
-    print("HERE ", type(one), type(two))
-
     one, two = one.partition(0), two.partition(0)
-
-    print("THERE", type(one), type(two))
 
     ########################## TEMPORARY ##########################
 

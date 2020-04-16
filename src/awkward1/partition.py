@@ -160,7 +160,8 @@ class PartitionedArray(object):
     def deep_copy(self, *args, **kwargs):
         out = type(self).__new__(type(self))
         out.__dict__.update(self.__dict__)
-        out.partitions = [x.deep_copy(*args, **kwargs) for x in out.partitions]
+        out._partitions = [x.deep_copy(*args, **kwargs)
+                               for x in out.partitions]
         return out
 
     @property
@@ -200,29 +201,47 @@ class PartitionedArray(object):
     def flatten(self, *args, **kwargs):
         return apply(lambda x: x.flatten(*args, **kwargs), self)
 
-    def argmin(self, axis, mask, keepdims):
+    def reduce(self, name, axis, mask, keepdims):
         branch, depth = first(self).branch_depth
         negaxis = -axis
         if not branch and negaxis <= 0:
             negaxis += depth
-
         if not branch and negaxis == depth:
-            return self.toContent().argmin(axis, mask, keepdims)
+            return getattr(self.toContent(), name)(axis, mask, keepdims)
         else:
-            return self.replace_partitions([x.argmin(axis, mask, keepdims)
-                                              for x in self.partitions])
+            return self.replace_partitions([
+                            getattr(x, name)(axis, mask, keepdims)
+                                for x in self.partitions])
+
+    def count(self, axis, mask, keepdims):
+        return self.reduce("count", axis, mask, keepdims)
+
+    def count_nonzero(self, axis, mask, keepdims):
+        return self.reduce("count_nonzero", axis, mask, keepdims)
+
+    def sum(self, axis, mask, keepdims):
+        return self.reduce("sum", axis, mask, keepdims)
+
+    def prod(self, axis, mask, keepdims):
+        return self.reduce("prod", axis, mask, keepdims)
+
+    def any(self, axis, mask, keepdims):
+        return self.reduce("any", axis, mask, keepdims)
+
+    def all(self, axis, mask, keepdims):
+        return self.reduce("all", axis, mask, keepdims)
+
+    def min(self, axis, mask, keepdims):
+        return self.reduce("min", axis, mask, keepdims)
+
+    def max(self, axis, mask, keepdims):
+        return self.reduce("max", axis, mask, keepdims)
+
+    def argmin(self, axis, mask, keepdims):
+        return self.reduce("argmin", axis, mask, keepdims)
 
     def argmax(self, axis, mask, keepdims):
-        branch, depth = first(self).branch_depth
-        negaxis = -axis
-        if not branch and negaxis <= 0:
-            negaxis += depth
-
-        if not branch and negaxis == depth:
-            return self.toContent().argmax(axis, mask, keepdims)
-        else:
-            return self.replace_partitions([x.argmax(axis, mask, keepdims)
-                                              for x in self.partitions])
+        return self.reduce("argmax", axis, mask, keepdims)
 
     def localindex(self, axis):
         if first(self).axis_wrap_if_negative(axis) == 0:
@@ -295,7 +314,7 @@ class PartitionedArray(object):
     def __getitem__(self, where):
         import awkward1.operations.convert
         import awkward1.operations.describe
-        from awkward1.types import PrimitiveType, OptionType
+        from awkward1.types import PrimitiveType, OptionType, UnionType
 
         if (not isinstance(where, bool) and
             isinstance(where, (numbers.Integral, numpy.integer))):
@@ -350,35 +369,35 @@ class PartitionedArray(object):
                         (awkward1._util.py27 and isinstance(x, unicode)))
                        for x in head))):
                 return IrregularlyPartitionedArray([x[(head,) + tail]
-                                                      for x in self.partitions])
+                                                     for x in self.partitions])
 
             elif head is numpy.newaxis:
                 return self.toContent()[(head,) + tail]
 
             else:
                 layout = awkward1.operations.convert.to_layout(head,
-                             allow_record=False, allow_other=False,
-                             numpytype=(numpy.integer, numpy.bool_, numpy.bool))
+                            allow_record=False, allow_other=False,
+                            numpytype=(numpy.integer, numpy.bool_, numpy.bool))
                 t = awkward1.operations.describe.type(layout)
-                if t in (PrimitiveType("int8"),
-                         PrimitiveType("uint8"),
-                         PrimitiveType("int16"),
-                         PrimitiveType("uint16"),
-                         PrimitiveType("int32"),
-                         PrimitiveType("uint32"),
-                         PrimitiveType("int64"),
-                         PrimitiveType("uint64"),
-                         OptionType(PrimitiveType("int8")),
-                         OptionType(PrimitiveType("uint8")),
-                         OptionType(PrimitiveType("int16")),
-                         OptionType(PrimitiveType("uint16")),
-                         OptionType(PrimitiveType("int32")),
-                         OptionType(PrimitiveType("uint32")),
-                         OptionType(PrimitiveType("int64")),
-                         OptionType(PrimitiveType("uint64"))):
+
+                int_types = [PrimitiveType("int8"),  PrimitiveType("uint8"),
+                             PrimitiveType("int16"), PrimitiveType("uint16"),
+                             PrimitiveType("int32"), PrimitiveType("uint32"),
+                             PrimitiveType("int64"), PrimitiveType("uint64")]
+                opt_types = [OptionType(p) for p in int_types]
+
+                if (isinstance(t, OptionType) or
+                    t in int_types + opt_types or
+                    (isinstance(t, UnionType) and
+                     all(ti in int_types for ti in t.types)) or
+                    (isinstance(t, OptionType) and
+                     isinstance(t.type, UnionType) and
+                     all(ti in int_types for ti in t.type.types))):
+
                     if isinstance(layout, PartitionedArray):
                         layout = layout.toContent()
                     return self.toContent()[(layout,) + tail]
+
                 else:
                     stops = self.stops
                     if isinstance(layout, PartitionedArray):
