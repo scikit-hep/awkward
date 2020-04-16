@@ -1983,6 +1983,8 @@ def size(array, axis=None):
             raise AssertionError("unrecognized Content type")
 
     layout = awkward1.operations.convert.to_layout(array, allow_record=False)
+    if isinstance(layout, awkward1.partition.PartitionedArray):
+        layout = layout.toContent()
     layout = awkward1.layout.RegularArray(layout, len(layout))
 
     sizes = []

@@ -686,11 +686,15 @@ def broadcast_and_apply(inputs, getfunction, behavior):
             outputs = []
             for part_inputs in awkward1.partition.iterate(sample.numpartitions,
                                                           nextinputs):
+                print("part_inputs", [type(x) for x in part_inputs])
+
                 isscalar = []
                 part = apply(broadcast_pack(part_inputs, isscalar), 0)
                 assert isinstance(part, tuple)
                 outputs.append(tuple(broadcast_unpack(x, isscalar)
                                      for x in part))
+
+            print("outputs", [type(x) for x in outputs])
 
             out = ()
             for i in range(len(part)):
