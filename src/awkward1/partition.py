@@ -102,6 +102,19 @@ class PartitionedArray(object):
     def partition(self, partitionid):
         return self._ext.partition(partitionid)
 
+    @property
+    def stops(self):
+        total_length = 0
+        out = []
+        for x in self.partitions:
+            total_length += len(x)
+            out.append(total_length)
+        return out
+
+    @property
+    def lengths(self):
+        return [len(x) for x in self.partitions]
+
     def start(self, partitionid):
         return self._ext.start(partitionid)
 

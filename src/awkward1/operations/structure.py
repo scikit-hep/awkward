@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import
 
+import numbers
 try:
     from collections.abc import Iterable
 except ImportError:
@@ -1928,6 +1929,65 @@ def argcombinations(array,
                 out, behavior=awkward1._util.behaviorof(array))
         else:
             return out
+
+def partitions(array):
+    """
+    Args:
+        array: a possibly-partitioned array
+
+    Returns a list of partition lengths if the array is a PartitionedArray;
+    returns None otherwise.
+    """
+    layout = awkward1.convert.to_layout(array,
+                                        allow_record=False,
+                                        allow_other=False)
+    if isinstance(layout, awkward1.partition.PartitionedArray):
+        return layout.lengths
+    else:
+        return None
+
+def repartition(array, lengths, highlevel=True):
+    """
+    """
+    layout = awkward1.convert.to_layout(array,
+                                        allow_record=False,
+                                        allow_other=False)
+
+    if lengths is None:
+        if isinstance(layout, awkward1.partition.PartitionedArray):
+            out = layout.toContent()
+        else:
+            out = layout
+
+    else:
+        if isinstance(lengths, (int, numbers.Integral, numpy.integer)):
+            if lengths < 1:
+                raise ValueError("lengths must be at least 1 (and probably "
+                                 "considerably more)")
+
+            howmany = len(layout) // lengths
+            remainder = len(layout) - howmany*lengths
+            if remainder == 0:
+                lengths = [lengths]*howmany
+            else:
+                lengths = [lengths]*howmany + [remainder]
+
+        total_length = 0
+        stops = []
+        for x in lengths:
+            total_length += x
+            stops.append(total_length)
+
+        if isinstance(layout, awkward1.partition.PartitionedArray):
+            out = layout.repartition(stops)
+        else:
+            out = awkward1.partition.IrregularlyPartitionedArray(layout, stops)
+
+    if highlevel:
+        return awkward1._util.wrap(
+            out, behavior=awkward1._util.behaviorof(array))
+    else:
+        return out
 
 @awkward1._connect._numpy.implements(numpy.size)
 def size(array, axis=None):
