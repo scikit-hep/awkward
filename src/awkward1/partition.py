@@ -238,6 +238,21 @@ class PartitionedArray(object):
             return self.replace_partitions([x.localindex(axis)
                                               for x in self.partitions])
 
+    def combinations(self, n, replacement, keys, parameters, axis):
+        if first(self).axis_wrap_if_negative(axis) == 0:
+            return self.toContent().combinations(n,
+                                                 replacement,
+                                                 keys,
+                                                 parameters,
+                                                 axis)
+        else:
+            return self.replace_partitions([x.combinations(n,
+                                                           replacement,
+                                                           keys,
+                                                           parameters,
+                                                           axis)
+                                              for x in self.partitions])
+
     def __len__(self):
         return len(self._ext)
 
@@ -254,7 +269,10 @@ class PartitionedArray(object):
                 tocat.append(y)
 
         if len(tocat) > 0:
-            return numpy.concatenate(tocat)
+            if any(isinstance(x, numpy.ma.MaskedArray) for x in tocat):
+                return numpy.ma.concatenate(tocat)
+            else:
+                return numpy.concatenate(tocat)
         else:
             return y
 

@@ -658,10 +658,19 @@ def where(condition, *args, **kwargs):
         ("mergebool", True),
         ("highlevel", True)])
 
-    npcondition = awkward1.operations.convert.to_numpy(condition)
+    akcondition = awkward1.operations.convert.to_layout(condition,
+                                                        allow_record=False)
+
+    if isinstance(akcondition, awkward1.partition.PartitionedArray):
+        akcondition = akcondition.replace_partitions(
+           [awkward1.layout.NumpyArray(awkward1.operations.convert.to_numpy(x))
+                          for x in akcondition.partitions])
+    else:
+        akcondition = awkward1.layout.NumpyArray(
+            awkward1.operations.convert.to_numpy(akcondition))
 
     if len(args) == 0:
-        out = numpy.nonzero(npcondition)
+        out = numpy.nonzero(awkward1.operations.convert.to_numpy(akcondition))
         if highlevel:
             return tuple(
                 awkward1._util.wrap(awkward1.layout.NumpyArray(x),
@@ -674,26 +683,43 @@ def where(condition, *args, **kwargs):
         raise ValueError("either both or neither of x and y should be given")
 
     elif len(args) == 2:
-        if len(npcondition.shape) != 1:
-            raise NotImplementedError(
-                "FIXME: ak.where(condition, x, y) where condition is not 1-d")
-
         x = awkward1.operations.convert.to_layout(args[0], allow_record=False)
         y = awkward1.operations.convert.to_layout(args[1], allow_record=False)
 
-        tags = (npcondition == 0)
-        assert tags.itemsize == 1
-        index = numpy.empty(len(tags), dtype=numpy.int64)
-        index = numpy.arange(len(npcondition), dtype=numpy.int64)
+        def do_one(akcondition, x, y):
+            tags = (numpy.asarray(akcondition) == 0)
+            assert tags.itemsize == 1
+            index = numpy.empty(len(tags), dtype=numpy.int64)
+            index = numpy.arange(len(akcondition), dtype=numpy.int64)
 
-        tags = awkward1.layout.Index8(tags.view(numpy.int8))
-        index = awkward1.layout.Index64(index)
-        tmp = awkward1.layout.UnionArray8_64(tags, index, [x, y])
-        out = tmp.simplify(mergebool=mergebool)
+            tags = awkward1.layout.Index8(tags.view(numpy.int8))
+            index = awkward1.layout.Index64(index)
+            tmp = awkward1.layout.UnionArray8_64(tags, index, [x, y])
+            return tmp.simplify(mergebool=mergebool)
+
+        sample = None
+        if isinstance(akcondition, awkward1.partition.PartitionedArray):
+            sample = akcondition
+        elif isinstance(x, awkward1.partition.PartitionedArray):
+            sample = x
+        elif isinstance(y, awkward1.partition.PartitionedArray):
+            sample = y
+
+        if sample is not None:
+            akcondition, x, y = awkward1.partition.partition_as(sample,
+                                                         (akcondition, x, y))
+            output = []
+            for part in awkward1.partition.iterate(sample.numpartitions,
+                                                         (akcondition, x, y)):
+                output.append(do_one(*part))
+
+            out = awkward1.partition.IrregularlyPartitionedArray(output)
+
+        else:
+            out = do_one(akcondition, x, y)
 
         return awkward1._util.wrap(
-                 out, behavior=awkward1._util.behaviorof(*((npcondition,)
-                                                           + args)))
+                 out, behavior=awkward1._util.behaviorof(condition, *args))
 
     else:
         raise TypeError(
@@ -791,7 +817,11 @@ def flatten(array, axis=1, highlevel=True):
         out = awkward1._util.completely_flatten(layout)
         assert (isinstance(out, tuple) and
                 all(isinstance(x, numpy.ndarray) for x in out))
-        out = awkward1.layout.NumpyArray(numpy.concatenate(out))
+
+        if any(isinstance(x, numpy.ma.MaskedArray) for x in out):
+            out = awkward1.layout.NumpyArray(numpy.ma.concatenate(out))
+        else:
+            out = awkward1.layout.NumpyArray(numpy.concatenate(out))
 
     elif axis == 0:
         def apply(layout):
@@ -1470,11 +1500,6 @@ def cartesian(arrays,
         result = awkward1.partition.IrregularlyPartitionedArray(output)
 
     else:
-        if isinstance(new_arrays, dict):
-            print("new_arrays", {n: type(x) for n, x in new_arrays.items()})
-        else:
-            print("new_arrays", [type(x) for x in new_arrays])
-
         def newaxis(layout, i):
             if i == 0:
                 return layout

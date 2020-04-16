@@ -651,32 +651,59 @@ def broadcast_and_apply(inputs, getfunction, behavior):
                   ", ".join(repr(type(x)) for x in inputs)))
 
     if any(isinstance(x, awkward1.partition.PartitionedArray) for x in inputs):
-        sample = None
+        purelist_isregular = True
+        purelist_depths = set()
         for x in inputs:
-            if isinstance(x, awkward1.partition.PartitionedArray):
-                sample = x
-                break
-        nextinputs = awkward1.partition.partition_as(sample, inputs)
+            if isinstance(x, (awkward1.layout.Content,
+                              awkward1.partition.PartitionedArray)):
+                if not x.purelist_isregular:
+                    purelist_isregular = False
+                    break
+                purelist_depths.add(x.purelist_depth)
 
-        outputs = []
-        for part_inputs in awkward1.partition.iterate(sample.numpartitions,
-                                                      nextinputs):
+        if purelist_isregular and len(purelist_depths) > 1:
+            nextinputs = []
+            for x in inputs:
+                if isinstance(x, awkward1.partition.PartitionedArray):
+                    nextinputs.append(x.toContent())
+                else:
+                    nextinputs.append(x)
+
             isscalar = []
-            part = apply(broadcast_pack(part_inputs, isscalar), 0)
-            assert isinstance(part, tuple)
-            outputs.append(tuple(broadcast_unpack(x, isscalar) for x in part))
+            out = apply(broadcast_pack(nextinputs, isscalar), 0)
+            assert isinstance(out, tuple)
+            return tuple(broadcast_unpack(x, isscalar)
+                         for x in out)
 
-        out = ()
-        for i in range(len(part)):
-            out = out + (awkward1.partition.IrregularlyPartitionedArray(
-                             [x[i] for x in outputs]),)
-        return out
+        else:
+            sample = None
+            for x in inputs:
+                if isinstance(x, awkward1.partition.PartitionedArray):
+                    sample = x
+                    break
+            nextinputs = awkward1.partition.partition_as(sample, inputs)
+
+            outputs = []
+            for part_inputs in awkward1.partition.iterate(sample.numpartitions,
+                                                          nextinputs):
+                isscalar = []
+                part = apply(broadcast_pack(part_inputs, isscalar), 0)
+                assert isinstance(part, tuple)
+                outputs.append(tuple(broadcast_unpack(x, isscalar)
+                                     for x in part))
+
+            out = ()
+            for i in range(len(part)):
+                out = out + (awkward1.partition.IrregularlyPartitionedArray(
+                                 [x[i] for x in outputs]),)
+            return out
 
     else:
         isscalar = []
         out = apply(broadcast_pack(inputs, isscalar), 0)
         assert isinstance(out, tuple)
-        return tuple(broadcast_unpack(x, isscalar) for x in out)
+        return tuple(broadcast_unpack(x, isscalar)
+                     for x in out)
 
 def broadcast_pack(inputs, isscalar):
     maxlen = -1

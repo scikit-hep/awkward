@@ -144,7 +144,11 @@ def to_numpy(array, allow_missing=True):
                             for i in range(len(array))])
 
     elif isinstance(array, awkward1.partition.PartitionedArray):
-        return numpy.concatenate([to_numpy(x) for x in array.partitions])
+        tocat = [to_numpy(x) for x in array.partitions]
+        if any(isinstance(x, numpy.ma.MaskedArray) for x in tocat):
+            return numpy.ma.concatenate(tocat)
+        else:
+            return numpy.concatenate(tocat)
 
     elif isinstance(array, awkward1._util.unknowntypes):
         return numpy.array([])
@@ -155,11 +159,20 @@ def to_numpy(array, allow_missing=True):
     elif isinstance(array, awkward1._util.uniontypes):
         contents = [to_numpy(array.project(i), allow_missing=allow_missing)
                       for i in range(array.numcontents)]
-        try:
-            out = numpy.concatenate(contents)
-        except:
-            raise ValueError(
-                "cannot convert {0} into numpy.ndarray".format(array))
+
+        if any(isinstance(x, numpy.ma.MaskedArray) for x in contents):
+            try:
+                out = numpy.ma.concatenate(contents)
+            except:
+                raise ValueError(
+                    "cannot convert {0} into numpy.ma.MaskedArray".format(array))
+        else:
+            try:
+                out = numpy.concatenate(contents)
+            except:
+                raise ValueError(
+                    "cannot convert {0} into numpy.ndarray".format(array))
+
         tags = numpy.asarray(array.tags)
         for tag, content in enumerate(contents):
             mask = (tags == tag)
