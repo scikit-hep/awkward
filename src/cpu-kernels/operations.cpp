@@ -3669,7 +3669,10 @@ ERROR awkward_argsort(
   int64_t lenparents,
   int64_t outlength) {
   for (int64_t i = 0;  i < lenparents;  i++) {
-    toptr[i] = fromindex[i];
+    int64_t parent = parents[parentsoffset + i];
+    int64_t start = starts[parent];
+
+    toptr[i] = fromindex[i] - start;
   }
   return success();
 }

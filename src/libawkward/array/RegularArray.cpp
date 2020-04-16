@@ -898,6 +898,8 @@ namespace awkward {
                              int64_t outlength,
                              bool ascending,
                              bool stable) const {
+    std::cout << "RegularArray::argsort_next\n";
+
     return toListOffsetArray64(true).get()->argsort_next(negaxis,
                                                          starts,
                                                          parents,

@@ -724,6 +724,7 @@ namespace awkward {
   ///        std::stable_sort uses mergesort
     template<typename T>
     const std::shared_ptr<void> index_sort(const T* data,
+                                           int64_t length,
                                            int64_t offset,
                                            const Index64& starts,
                                            const Index64& parents,
@@ -731,18 +732,17 @@ namespace awkward {
                                            bool ascending,
                                            bool stable) const {
       std::shared_ptr<int64_t> ptr(
-        new int64_t[(size_t)parents.length()], util::array_deleter<int64_t>());
-      std::vector<size_t> result(parents.length());
+        new int64_t[(size_t)length], util::array_deleter<int64_t>());
+      std::vector<size_t> result(length);
 
       std::iota(result.begin(), result.end(), 0);
-      int64_t last_stop = parents.length();
       int64_t index(0);
       int64_t next_start = starts.getitem_at_nowrap(index);
       int64_t next_stop = (starts.length() > index + 1) ?
                            starts.getitem_at_nowrap(index + 1) :
-                           last_stop;
+                           length;
 
-      while(next_start < last_stop) {
+      while(next_start < length) {
         if(ascending  and  not stable) {
           std::sort(result.begin() + next_start, result.begin() + next_stop,
             [&data](size_t i1, size_t i2) {return data[i1] < data[i2];});
@@ -760,8 +760,8 @@ namespace awkward {
             [&data](size_t i1, size_t i2) {return data[i1] > data[i2];});
         }
         index++;
-        next_start = next_stop;
-        next_stop = (starts.length() > index + 1) ? starts.getitem_at_nowrap(index + 1) : last_stop;
+        next_start = starts.getitem_at_nowrap(index);
+        next_stop = (starts.length() > index + 1) ? starts.getitem_at_nowrap(index + 1) : length;
       }
 
       struct Error err = util::awkward_numpyarray_argsort_64<T>(
@@ -774,7 +774,7 @@ namespace awkward {
         starts.offset(),
         parents.ptr().get(),
         parents.offset(),
-        parents.length(),
+        length,
         outlength);
       util::handle_error(err, classname(), nullptr);
 

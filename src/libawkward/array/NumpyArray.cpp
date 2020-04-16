@@ -2486,10 +2486,25 @@ namespace awkward {
                            int64_t outlength,
                            bool ascending,
                            bool stable) const {
+    std::cout << "NumpyArray::argsort_next\n";
+    std::cout << "Starts:\n" << starts.tostring() << "\n";
+    std::cout << "Parents:\n" << parents.tostring() << "\n";
+    std::cout << "outlength: " << outlength << "\n";
+    std::cout << "length: " << length() << "\n";
+    std::cout << "shape[0]: " << shape_[0] << ", "
+              << "strides[0]: " << strides_[0] << "\n";
+    std::cout << "Total length? " << shape_[0]*strides_[0] << "\n";
+    for(auto s : shape_) {
+      std::cout << s << ", ";
+    }
+    std::cout << "\n";
+    
     if (shape_.empty()) {
       throw std::runtime_error("attempting to argsort a scalar");
     }
     else if (shape_.size() != 1  ||  !iscontiguous()) {
+      std::cout << "shape_.size() != 1\n";
+
       return toRegularArray().get()->argsort_next(negaxis,
                                                   starts,
                                                   parents,
@@ -2499,11 +2514,12 @@ namespace awkward {
     }
     else {
       std::shared_ptr<Content> out;
-      int64_t length = parents.length();
+      int64_t parents_length = parents.length();
       int64_t offset = byteoffset_ / itemsize_;
       std::shared_ptr<void> ptr;
       if (format_.compare("?") == 0) {
         ptr = index_sort<bool>(reinterpret_cast<bool*>(ptr_.get()),
+                               length(),
                                offset,
                                starts,
                                parents,
@@ -2513,6 +2529,7 @@ namespace awkward {
       }
       else if (format_.compare("b") == 0) {
         ptr = index_sort<int8_t>(reinterpret_cast<int8_t*>(ptr_.get()),
+                                 length(),
                                  offset,
                                  starts,
                                  parents,
@@ -2522,6 +2539,7 @@ namespace awkward {
       }
       else if (format_.compare("B") == 0  or  format_.compare("c") == 0) {
         ptr = index_sort<uint8_t>(reinterpret_cast<uint8_t*>(ptr_.get()),
+                                  length(),
                                   offset,
                                   starts,
                                   parents,
@@ -2531,6 +2549,7 @@ namespace awkward {
       }
       else if (format_.compare("h") == 0) {
         ptr = index_sort<int16_t>(reinterpret_cast<int16_t*>(ptr_.get()),
+                                  length(),
                                   offset,
                                   starts,
                                   parents,
@@ -2540,6 +2559,7 @@ namespace awkward {
       }
       else if (format_.compare("H") == 0) {
         ptr = index_sort<uint16_t>(reinterpret_cast<uint16_t*>(ptr_.get()),
+                                   length(),
                                    offset,
                                    starts,
                                    parents,
@@ -2553,6 +2573,7 @@ namespace awkward {
       else if (format_.compare("i") == 0) {
 #endif
         ptr = index_sort<int32_t>(reinterpret_cast<int32_t*>(ptr_.get()),
+                                  length(),
                                   offset,
                                   starts,
                                   parents,
@@ -2566,6 +2587,7 @@ namespace awkward {
       else if (format_.compare("I") == 0) {
 #endif
         ptr = index_sort<uint32_t>(reinterpret_cast<uint32_t*>(ptr_.get()),
+                                   length(),
                                    offset,
                                    starts,
                                    parents,
@@ -2579,6 +2601,7 @@ namespace awkward {
       else if (format_.compare("l") == 0) {
 #endif
         ptr = index_sort<int64_t>(reinterpret_cast<int64_t*>(ptr_.get()),
+                                  shape_[0],
                                   offset,
                                   starts,
                                   parents,
@@ -2592,6 +2615,7 @@ namespace awkward {
       else if (format_.compare("L") == 0) {
 #endif
         ptr = index_sort<uint64_t>(reinterpret_cast<uint64_t*>(ptr_.get()),
+                                   length(),
                                    offset,
                                    starts,
                                    parents,
@@ -2601,6 +2625,7 @@ namespace awkward {
       }
       else if (format_.compare("f") == 0) {
         ptr = index_sort<float>(reinterpret_cast<float*>(ptr_.get()),
+                                length(),
                                 offset,
                                 starts,
                                 parents,
@@ -2610,6 +2635,7 @@ namespace awkward {
       }
       else if (format_.compare("d") == 0) {
         ptr = index_sort<double>(reinterpret_cast<double*>(ptr_.get()),
+                                 length(),
                                  offset,
                                  starts,
                                  parents,
@@ -2631,7 +2657,7 @@ namespace awkward {
 #endif
 
       ssize_t itemsize = 8;
-      std::vector<ssize_t> shape({ (ssize_t)length });
+      std::vector<ssize_t> shape({ (ssize_t)shape_[0] });
       std::vector<ssize_t> strides({ itemsize });
       out = std::make_shared<NumpyArray>(Identities::none(),
                                          util::Parameters(),

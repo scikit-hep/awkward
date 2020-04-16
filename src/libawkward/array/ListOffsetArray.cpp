@@ -1701,6 +1701,7 @@ namespace awkward {
                                      int64_t outlength,
                                      bool ascending,
                                      bool stable) const {
+    std::cout << "ListOffsetArrayOf<T>::argsort_next\n";
     return toListOffsetArray64(true).get()->argsort_next(negaxis,
                                                          starts,
                                                          parents,
@@ -1717,6 +1718,8 @@ namespace awkward {
                                            int64_t outlength,
                                            bool ascending,
                                            bool stable) const {
+    std::cout << "ListOffsetArrayOf<int64_t>::argsort_next\n";
+
     std::pair<bool, int64_t> branchdepth = branch_depth();
 
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
@@ -1773,6 +1776,8 @@ namespace awkward {
       util::handle_error(err4, classname(), identities_.get());
 
       ContentPtr nextcontent = content_.get()->carry(nextcarry);
+      std::cout << "nextcontent:\n" << nextcontent.get()->tostring() << "\n";
+
       ContentPtr outcontent = nextcontent.get()->argsort_next(
         negaxis - 1, nextstarts, nextparents, maxnextparents + 1,
         ascending, stable);
