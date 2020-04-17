@@ -11,11 +11,6 @@
 #include "awkward/Content.h"
 
 namespace awkward {
-  template <typename T>
-  class ListOffsetArrayOf;
-
-  class RegularArray;
-
   /// @class ListArrayOf
   ///
   /// @brief Represents an array of nested lists that can have different
@@ -42,6 +37,11 @@ namespace awkward {
     /// If `starts[i] == stops[i]`, there is no constraint on the value of
     /// `starts[i]`. Otherwise, `0 <= starts[i] < len(content)` and
     /// `0 <= stops[i] <= len(content)`.
+    /// @param content Data referenced by the #starts and #stops to build
+    /// nested lists.
+    /// The `content` does not necessarily represent a flattened version of
+    /// this array because a single element may belong to multiple lists or
+    /// no list at all.
     ListArrayOf<T>(const IdentitiesPtr& identities,
                    const util::Parameters& parameters,
                    const IndexOf<T>& starts,
@@ -97,7 +97,7 @@ namespace awkward {
     /// Since the output is a {@link ListOffsetArrayOf ListOffsetArray}, this
     /// operation produces contiguous output, replacing multiply-referenced
     /// items with copied items and removing unreachable gaps between items.
-    const std::shared_ptr<ListOffsetArrayOf<int64_t>>
+    const ContentPtr
       broadcast_tooffsets64(const Index64& offsets) const;
 
     /// @brief Converts this array to a RegularArray if all nested lists have
@@ -107,13 +107,13 @@ namespace awkward {
     /// operation produces contiguous output, replacing multiply-referenced
     /// items with copied items and removing unreachable gaps before and
     /// between items.
-    const std::shared_ptr<RegularArray>
+    const ContentPtr
       toRegularArray() const;
 
     /// @brief Returns this array as a
     /// {@link ListOffsetArrayOf ListOffsetArray} with
-    /// 64-bit #offsets and possibly starting with `offsets[0] = 0`; a
-    /// #shallow_copy if possible.
+    /// 64-bit {@link ListOffsetArrayOf#offsets offsets} and possibly starting
+    ///  with `offsets[0] = 0`; a #shallow_copy if possible.
     ///
     /// @param start_at_zero If `true`, the first offset will be `0`, meaning
     /// there are no "unreachable" elements in the `content` that corresponds
@@ -122,7 +122,7 @@ namespace awkward {
     /// Since the output is a {@link ListOffsetArrayOf ListOffsetArray}, this
     /// operation produces contiguous output, replacing multiply-referenced
     /// items with copied items and removing unreachable gaps between items.
-    const std::shared_ptr<ListOffsetArrayOf<int64_t>>
+    const ContentPtr
       toListOffsetArray64(bool start_at_zero) const;
 
     /// @brief User-friendly name of this class: `"ListArray32"`,
@@ -271,12 +271,12 @@ namespace awkward {
       localindex(int64_t axis, int64_t depth) const override;
 
     const ContentPtr
-      choose(int64_t n,
-             bool diagonal,
-             const util::RecordLookupPtr& recordlookup,
-             const util::Parameters& parameters,
-             int64_t axis,
-             int64_t depth) const override;
+      combinations(int64_t n,
+                   bool replacement,
+                   const util::RecordLookupPtr& recordlookup,
+                   const util::Parameters& parameters,
+                   int64_t axis,
+                   int64_t depth) const override;
 
     const ContentPtr
       getitem_next(const SliceAt& at,

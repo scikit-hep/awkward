@@ -62,14 +62,10 @@ namespace awkward {
     const IdentitiesPtr
       identities() const override;
 
-    /// @copydoc Content::setidentities()
-    ///
     /// @exception std::runtime_error is always thrown
     void
       setidentities() override;
 
-    /// @copydoc Content::setidentities()
-    ///
     /// @exception std::runtime_error is always thrown
     void
       setidentities(const IdentitiesPtr& identities) override;
@@ -102,32 +98,22 @@ namespace awkward {
     void
       check_for_iteration() const override;
 
-    /// @copydoc Content::getitem_nothing()
-    ///
     /// @exception std::runtime_error is always thrown
     const ContentPtr
       getitem_nothing() const override;
 
-    /// @copydoc Content::getitem_at()
-    ///
     /// @exception std::runtime_error is always thrown
     const ContentPtr
       getitem_at(int64_t at) const override;
 
-    /// @copydoc Content::getitem_at_nowrap()
-    ///
     /// @exception std::runtime_error is always thrown
     const ContentPtr
       getitem_at_nowrap(int64_t at) const override;
 
-    /// @copydoc Content::getitem_range()
-    ///
     /// @exception std::runtime_error is always thrown
     const ContentPtr
       getitem_range(int64_t start, int64_t stop) const override;
 
-    /// @copydoc Content::getitem_range_nowrap()
-    ///
     /// @exception std::runtime_error is always thrown
     const ContentPtr
       getitem_range_nowrap(int64_t start, int64_t stop) const override;
@@ -138,8 +124,6 @@ namespace awkward {
     const ContentPtr
       getitem_fields(const std::vector<std::string>& keys) const override;
 
-    /// @copydoc Content::carry()
-    ///
     /// @exception std::runtime_error is always thrown
     const ContentPtr
       carry(const Index64& carry) const override;
@@ -178,8 +162,6 @@ namespace awkward {
     const std::string
       validityerror(const std::string& path) const override;
 
-    /// @copydoc Content::shallow_simplify()
-    ///
     /// For Record, this method returns #shallow_copy (pass-through).
     const ContentPtr
       shallow_simplify() const override;
@@ -187,26 +169,18 @@ namespace awkward {
     const ContentPtr
       num(int64_t axis, int64_t depth) const override;
 
-    /// @copydoc Content::offsets_and_flattened()
-    ///
     /// @exception std::runtime_error is always thrown
     const std::pair<Index64, ContentPtr>
       offsets_and_flattened(int64_t axis, int64_t depth) const override;
 
-    /// @copydoc Content::mergeable()
-    ///
     /// @exception std::runtime_error is always thrown
     bool
       mergeable(const ContentPtr& other, bool mergebool) const override;
 
-    /// @copydoc Content::merge()
-    ///
     /// @exception std::runtime_error is always thrown
     const ContentPtr
       merge(const ContentPtr& other) const override;
 
-    /// @copydoc Content::asslice()
-    ///
     /// @exception std::runtime_error is always thrown
     const SliceItemPtr
       asslice() const override;
@@ -214,14 +188,10 @@ namespace awkward {
     const ContentPtr
       fillna(const ContentPtr& value) const override;
 
-    /// @copydoc Content::rpad()
-    ///
     /// @exception std::runtime_error is always thrown
     const ContentPtr
       rpad(int64_t target, int64_t axis, int64_t depth) const override;
 
-    /// @copydoc Content::rpad_and_clip()
-    ///
     /// @exception std::runtime_error is always thrown
     const ContentPtr
       rpad_and_clip(int64_t target,
@@ -241,12 +211,12 @@ namespace awkward {
       localindex(int64_t axis, int64_t depth) const override;
 
     const ContentPtr
-      choose(int64_t n,
-             bool diagonal,
-             const util::RecordLookupPtr& recordlookup,
-             const util::Parameters& parameters,
-             int64_t axis,
-             int64_t depth) const override;
+      combinations(int64_t n,
+                   bool replacement,
+                   const util::RecordLookupPtr& recordlookup,
+                   const util::Parameters& parameters,
+                   int64_t axis,
+                   int64_t depth) const override;
 
     /// @brief Returns the field at a given index.
     ///
@@ -275,56 +245,45 @@ namespace awkward {
     const std::shared_ptr<Record>
       astuple() const;
 
-    /// @copydoc Content::getitem_next()
-    ///
+    const ContentPtr
+      getitem(const Slice& where) const override;
+
     /// @exception std::runtime_error is always thrown
     const ContentPtr
       getitem_next(const SliceAt& at,
                    const Slice& tail,
                    const Index64& advanced) const override;
 
-    /// @copydoc Content::getitem_next()
-    ///
     /// @exception std::runtime_error is always thrown
     const ContentPtr
       getitem_next(const SliceRange& range,
                    const Slice& tail,
                    const Index64& advanced) const override;
 
-    /// @copydoc Content::getitem_next()
-    ///
     /// @exception std::runtime_error is always thrown
     const ContentPtr
       getitem_next(const SliceArray64& array,
                    const Slice& tail,
                    const Index64& advanced) const override;
 
-    /// @copydoc Content::getitem_next()
-    ///
     /// @exception std::runtime_error is always thrown
     const ContentPtr
       getitem_next(const SliceField& field,
                    const Slice& tail,
                    const Index64& advanced) const override;
 
-    /// @copydoc Content::getitem_next()
-    ///
     /// @exception std::runtime_error is always thrown
     const ContentPtr
       getitem_next(const SliceFields& fields,
                    const Slice& tail,
                    const Index64& advanced) const override;
 
-    /// @copydoc Content::getitem_next()
-    ///
     /// @exception std::runtime_error is always thrown
     const ContentPtr
       getitem_next(const SliceJagged64& jagged,
                    const Slice& tail,
                    const Index64& advanced) const override;
 
-    /// @copydoc Content::getitem_next_jagged()
-    ///
     /// @exception std::runtime_error is always thrown
     const ContentPtr
       getitem_next_jagged(const Index64& slicestarts,
@@ -332,8 +291,6 @@ namespace awkward {
                           const SliceArray64& slicecontent,
                           const Slice& tail) const override;
 
-    /// @copydoc Content::getitem_next_jagged()
-    ///
     /// @exception std::runtime_error is always thrown
     const ContentPtr
       getitem_next_jagged(const Index64& slicestarts,
@@ -341,8 +298,6 @@ namespace awkward {
                           const SliceMissing64& slicecontent,
                           const Slice& tail) const override;
 
-    /// @copydoc Content::getitem_next_jagged()
-    ///
     /// @exception std::runtime_error is always thrown
     const ContentPtr
       getitem_next_jagged(const Index64& slicestarts,

@@ -18,6 +18,39 @@
 #include "awkward/array/UnionArray.h"
 
 namespace awkward {
+  template <>
+  const IndexOf<int32_t>
+  UnionArrayOf<int8_t, int32_t>::sparse_index(int64_t len) {
+    IndexOf<int32_t> outindex(len);
+    struct Error err = awkward_carry_arange_32(
+      outindex.ptr().get(),
+      len);
+    util::handle_error(err, "UnionArray", nullptr);
+    return outindex;
+  }
+
+  template <>
+  const IndexOf<uint32_t>
+  UnionArrayOf<int8_t, uint32_t>::sparse_index(int64_t len) {
+    IndexOf<uint32_t> outindex(len);
+    struct Error err = awkward_carry_arange_U32(
+      outindex.ptr().get(),
+      len);
+    util::handle_error(err, "UnionArray", nullptr);
+    return outindex;
+  }
+
+  template <>
+  const IndexOf<int64_t>
+  UnionArrayOf<int8_t, int64_t>::sparse_index(int64_t len) {
+    IndexOf<int64_t> outindex(len);
+    struct Error err = awkward_carry_arange_64(
+      outindex.ptr().get(),
+      len);
+    util::handle_error(err, "UnionArray", nullptr);
+    return outindex;
+  }
+
   template <typename T, typename I>
   const IndexOf<I>
   UnionArrayOf<T, I>::regular_index(const IndexOf<T>& tags) {
@@ -1510,28 +1543,28 @@ namespace awkward {
 
   template <typename T, typename I>
   const ContentPtr
-  UnionArrayOf<T, I>::choose(int64_t n,
-                             bool diagonal,
-                             const util::RecordLookupPtr& recordlookup,
-                             const util::Parameters& parameters,
-                             int64_t axis,
-                             int64_t depth) const {
+  UnionArrayOf<T, I>::combinations(int64_t n,
+                                   bool replacement,
+                                   const util::RecordLookupPtr& recordlookup,
+                                   const util::Parameters& parameters,
+                                   int64_t axis,
+                                   int64_t depth) const {
     if (n < 1) {
-      throw std::invalid_argument("in choose, 'n' must be at least 1");
+      throw std::invalid_argument("in combinations, 'n' must be at least 1");
     }
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (axis == depth) {
-      return choose_axis0(n, diagonal, recordlookup, parameters);
+      return combinations_axis0(n, replacement, recordlookup, parameters);
     }
     else {
       ContentPtrVec contents;
       for (auto content : contents_) {
-        contents.push_back(content.get()->choose(n,
-                                                 diagonal,
-                                                 recordlookup,
-                                                 parameters,
-                                                 axis,
-                                                 depth));
+        contents.push_back(content.get()->combinations(n,
+                                                       replacement,
+                                                       recordlookup,
+                                                       parameters,
+                                                       axis,
+                                                       depth));
       }
       return std::make_shared<UnionArrayOf<T, I>>(identities_,
                                                   util::Parameters(),

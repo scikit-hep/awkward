@@ -26,7 +26,7 @@ namespace awkward {
     Type(const util::Parameters& parameters, const std::string& typestr);
 
     /// @brief Empty destructor; required for some C++ reason.
-    virtual ~Type();
+    virtual ~Type() { }
 
     /// @brief Internal function to build an output string for #tostring.
     ///
@@ -157,6 +157,21 @@ namespace awkward {
     /// value.
     bool
       parameters_equal(const util::Parameters& other) const;
+
+    /// @brief Returns `true` if the parameter associated with `key` is a
+    /// string; `false` otherwise.
+    bool
+      parameter_isstring(const std::string& key) const;
+
+    /// @brief Returns `true` if the parameter associated with `key` is a
+    /// string that matches `[A-Za-z_][A-Za-z_0-9]*`; `false` otherwise.
+    bool
+      parameter_isname(const std::string& key) const;
+
+    /// @brief Returns the parameter associated with `key` as a string if
+    /// #parameter_isstring; raises an error otherwise.
+    const std::string
+      parameter_asstring(const std::string& key) const;
 
     /// @brief Returns a string representation of the type as a
     /// [Datashape](https://datashape.readthedocs.io/en/latest/) or its

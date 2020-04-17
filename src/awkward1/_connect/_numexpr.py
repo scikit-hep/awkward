@@ -51,9 +51,9 @@ def evaluate(expression,
     names, ex_uses_vml = numexpr.necompiler._names_cache[expr_key]
     arguments = getArguments(names, local_dict, global_dict)
 
-    arrays = [awkward1.operations.convert.tolayout(x,
-                                                   allowrecord=True,
-                                                   allowother=True)
+    arrays = [awkward1.operations.convert.to_layout(x,
+                                                    allow_record=True,
+                                                    allow_other=True)
                 for x in arguments]
 
     def getfunction(inputs, depth):
@@ -87,9 +87,9 @@ def re_evaluate(local_dict=None):
     names = numexpr.necompiler._numexpr_last["argnames"]
     arguments = getArguments(names, local_dict)
 
-    arrays = [awkward1.operations.convert.tolayout(x,
-                                                   allowrecord=True,
-                                                   allowother=True)
+    arrays = [awkward1.operations.convert.to_layout(x,
+                                                    allow_record=True,
+                                                    allow_other=True)
                 for x in arguments]
 
     def getfunction(inputs, depth):

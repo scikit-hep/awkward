@@ -27,6 +27,11 @@ namespace awkward {
   template <typename T, typename I>
   class EXPORT_SYMBOL UnionArrayOf: public Content {
   public:
+    /// @brief Generates an index in which `index[i] = i`.
+    static const IndexOf<I>
+      sparse_index(int64_t len);
+
+    /// @brief Generates an index in which `index[tags == i][i] = i`.
     static const IndexOf<I>
       regular_index(const IndexOf<T>& tags);
 
@@ -247,12 +252,12 @@ namespace awkward {
       localindex(int64_t axis, int64_t depth) const override;
 
     const ContentPtr
-      choose(int64_t n,
-             bool diagonal,
-             const util::RecordLookupPtr& recordlookup,
-             const util::Parameters& parameters,
-             int64_t axis,
-             int64_t depth) const override;
+      combinations(int64_t n,
+                   bool replacement,
+                   const util::RecordLookupPtr& recordlookup,
+                   const util::Parameters& parameters,
+                   int64_t axis,
+                   int64_t depth) const override;
 
     const ContentPtr
       getitem_next(const SliceAt& at,

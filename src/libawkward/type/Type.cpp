@@ -16,8 +16,6 @@ namespace awkward {
       : parameters_(parameters)
       , typestr_(typestr) { }
 
-  Type::~Type() { }
-
   const util::Parameters
   Type::parameters() const {
     return parameters_;
@@ -56,6 +54,21 @@ namespace awkward {
   bool
   Type::parameters_equal(const util::Parameters& other) const {
     return util::parameters_equal(parameters_, other);
+  }
+
+  bool
+  Type::parameter_isstring(const std::string& key) const {
+    return util::parameter_isstring(parameters_, key);
+  }
+
+  bool
+  Type::parameter_isname(const std::string& key) const {
+    return util::parameter_isname(parameters_, key);
+  }
+
+  const std::string
+  Type::parameter_asstring(const std::string& key) const {
+    return util::parameter_asstring(parameters_, key);
   }
 
   const std::string

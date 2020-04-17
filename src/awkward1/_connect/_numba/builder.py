@@ -172,24 +172,24 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
             raise TypeError(
                     "wrong number or types of arguments for ArrayBuilder.real")
 
-    @numba.core.typing.templates.bound_function("beginlist")
-    def resolve_beginlist(self, arraybuildertype, args, kwargs):
+    @numba.core.typing.templates.bound_function("begin_list")
+    def resolve_begin_list(self, arraybuildertype, args, kwargs):
         if len(args) == 0 and len(kwargs) == 0:
             return numba.types.none()
         else:
             raise TypeError(
-                    "wrong number of arguments for ArrayBuilder.beginlist")
+                    "wrong number of arguments for ArrayBuilder.begin_list")
 
-    @numba.core.typing.templates.bound_function("endlist")
-    def resolve_endlist(self, arraybuildertype, args, kwargs):
+    @numba.core.typing.templates.bound_function("end_list")
+    def resolve_end_list(self, arraybuildertype, args, kwargs):
         if len(args) == 0 and len(kwargs) == 0:
             return numba.types.none()
         else:
             raise TypeError(
-                    "wrong number of arguments for ArrayBuilder.endlist")
+                    "wrong number of arguments for ArrayBuilder.end_list")
 
-    @numba.core.typing.templates.bound_function("begintuple")
-    def resolve_begintuple(self, arraybuildertype, args, kwargs):
+    @numba.core.typing.templates.bound_function("begin_tuple")
+    def resolve_begin_tuple(self, arraybuildertype, args, kwargs):
         if (len(args) == 1 and
             len(kwargs) == 0 and
             isinstance(args[0], numba.types.Integer)):
@@ -197,29 +197,29 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         else:
             raise TypeError(
                     "wrong number or types of arguments for "
-                    "ArrayBuilder.begintuple")
+                    "ArrayBuilder.begin_tuple")
 
     @numba.core.typing.templates.bound_function("index")
     def resolve_index(self, arraybuildertype, args, kwargs):
         if (len(args) == 1 and
             len(kwargs) == 0 and
             isinstance(args[0], numba.types.Integer)):
-            return numba.types.none(args[0])
+            return arraybuildertype(args[0])
         else:
             raise TypeError(
                     "wrong number or types of arguments for "
                     "ArrayBuilder.index")
 
-    @numba.core.typing.templates.bound_function("endtuple")
-    def resolve_endtuple(self, arraybuildertype, args, kwargs):
+    @numba.core.typing.templates.bound_function("end_tuple")
+    def resolve_end_tuple(self, arraybuildertype, args, kwargs):
         if len(args) == 0 and len(kwargs) == 0:
             return numba.types.none()
         else:
             raise TypeError(
-                    "wrong number of arguments for ArrayBuilder.endtuple")
+                    "wrong number of arguments for ArrayBuilder.end_tuple")
 
-    @numba.core.typing.templates.bound_function("beginrecord")
-    def resolve_beginrecord(self, arraybuildertype, args, kwargs):
+    @numba.core.typing.templates.bound_function("begin_record")
+    def resolve_begin_record(self, arraybuildertype, args, kwargs):
         if len(args) == 0 and len(kwargs) == 0:
             return numba.types.none()
         elif (len(args) == 1 and
@@ -229,26 +229,26 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         else:
             raise TypeError(
                     "wrong number or types of arguments for "
-                    "ArrayBuilder.beginrecord")
+                    "ArrayBuilder.begin_record")
 
     @numba.core.typing.templates.bound_function("field")
     def resolve_field(self, arraybuildertype, args, kwargs):
         if (len(args) == 1 and
             len(kwargs) == 0 and
             isinstance(args[0], numba.types.StringLiteral)):
-            return numba.types.none(args[0])
+            return arraybuildertype(args[0])
         else:
             raise TypeError(
                     "wrong number or types of arguments for "
                     "ArrayBuilder.field")
 
-    @numba.core.typing.templates.bound_function("endrecord")
-    def resolve_endrecord(self, arraybuildertype, args, kwargs):
+    @numba.core.typing.templates.bound_function("end_record")
+    def resolve_end_record(self, arraybuildertype, args, kwargs):
         if len(args) == 0 and len(kwargs) == 0:
             return numba.types.none()
         else:
             raise TypeError(
-                    "wrong number of arguments for ArrayBuilder.endrecord")
+                    "wrong number of arguments for ArrayBuilder.end_record")
 
     @numba.core.typing.templates.bound_function("append")
     def resolve_append(self, arraybuildertype, args, kwargs):
@@ -391,7 +391,7 @@ def lower_real(context, builder, sig, args):
          (proxyin.rawptr, x))
     return context.get_dummy_value()
 
-@numba.extending.lower_builtin("beginlist", ArrayBuilderType)
+@numba.extending.lower_builtin("begin_list", ArrayBuilderType)
 def lower_beginlist(context, builder, sig, args):
     arraybuildertype, = sig.args
     arraybuilderval, = args
@@ -402,7 +402,7 @@ def lower_beginlist(context, builder, sig, args):
          (proxyin.rawptr,))
     return context.get_dummy_value()
 
-@numba.extending.lower_builtin("endlist", ArrayBuilderType)
+@numba.extending.lower_builtin("end_list", ArrayBuilderType)
 def lower_endlist(context, builder, sig, args):
     arraybuildertype, = sig.args
     arraybuilderval, = args
@@ -413,7 +413,7 @@ def lower_endlist(context, builder, sig, args):
          (proxyin.rawptr,))
     return context.get_dummy_value()
 
-@numba.extending.lower_builtin("begintuple",
+@numba.extending.lower_builtin("begin_tuple",
                                ArrayBuilderType,
                                numba.types.Integer)
 def lower_begintuple(context, builder, sig, args):
@@ -448,9 +448,9 @@ def lower_index(context, builder, sig, args):
          builder,
          awkward1._libawkward.ArrayBuilder_index,
          (proxyin.rawptr, index))
-    return context.get_dummy_value()
+    return arraybuilderval
 
-@numba.extending.lower_builtin("endtuple",
+@numba.extending.lower_builtin("end_tuple",
                                ArrayBuilderType)
 def lower_endtuple(context, builder, sig, args):
     arraybuildertype, = sig.args
@@ -462,7 +462,7 @@ def lower_endtuple(context, builder, sig, args):
          (proxyin.rawptr,))
     return context.get_dummy_value()
 
-@numba.extending.lower_builtin("beginrecord",
+@numba.extending.lower_builtin("begin_record",
                                ArrayBuilderType)
 def lower_beginrecord(context, builder, sig, args):
     arraybuildertype, = sig.args
@@ -474,7 +474,7 @@ def lower_beginrecord(context, builder, sig, args):
          (proxyin.rawptr,))
     return context.get_dummy_value()
 
-@numba.extending.lower_builtin("beginrecord",
+@numba.extending.lower_builtin("begin_record",
                                ArrayBuilderType,
                                numba.types.StringLiteral)
 def lower_beginrecord(context, builder, sig, args):
@@ -500,9 +500,9 @@ def lower_field(context, builder, sig, args):
          builder,
          awkward1._libawkward.ArrayBuilder_field_fast,
          (proxyin.rawptr, key))
-    return context.get_dummy_value()
+    return arraybuilderval
 
-@numba.extending.lower_builtin("endrecord",
+@numba.extending.lower_builtin("end_record",
                                ArrayBuilderType)
 def lower_endrecord(context, builder, sig, args):
     arraybuildertype, = sig.args

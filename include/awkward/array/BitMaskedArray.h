@@ -34,14 +34,14 @@ namespace awkward {
     /// array.
     /// @param mask Mask in which each bit represents a missing value (`None`)
     /// or a valid value (from #content).
-    /// The interpretation depends on #validwhen; only bits that are
-    /// equal to #validwhen are not `None`. (Any non-zero value of #validwhen
+    /// The interpretation depends on #valid_when; only bits that are
+    /// equal to #valid_when are not `None`. (Any non-zero value of #valid_when
     /// is equivalent to a `1` bit.)
     /// @param content Data to be masked; `mask[i]` corresponds to `content[i]`
     /// for all `i`.
-    /// @param validwhen Interpretation of the boolean bytes in #mask as `None`
-    /// or valid values from #content. Only boolean bytes that are equal to
-    /// validwhen are not `None`.
+    /// @param valid_when Interpretation of the boolean bytes in #mask as
+    /// `None` or valid values from #content. Only boolean bytes that are
+    /// equal to valid_when are not `None`.
     /// @param length Length of the array, since it cannot be determined from
     /// the #mask without an 8-fold ambiguity.
     /// @param lsb_order If `true`, the bits in each byte of the #mask are
@@ -51,20 +51,20 @@ namespace awkward {
     /// [Most Significant Bit (MSB)](https://en.wikipedia.org/wiki/Bit_numbering#MSB_0_bit_numbering)
     /// order.
     ///
-    /// Any non-zero value of a boolean byte and #validwhen are equivalent.
+    /// Any non-zero value of a boolean byte and #valid_when are equivalent.
     BitMaskedArray(const IdentitiesPtr& identities,
                    const util::Parameters& parameters,
                    const IndexU8& mask,
                    const ContentPtr& content,
-                   bool validwhen,
+                   bool valid_when,
                    int64_t length,
                    bool lsb_order);
 
     /// @brief Mask in which each bit represents a missing value (`None`)
     /// or a valid value (from #content).
     ///
-    /// The interpretation depends on #validwhen; only bits that are
-    /// equal to #validwhen are not `None`. (Any non-zero value of #validwhen
+    /// The interpretation depends on #valid_when; only bits that are
+    /// equal to #valid_when are not `None`. (Any non-zero value of #valid_when
     /// is equivalent to a `1` bit.)
     const IndexU8
       mask() const;
@@ -76,10 +76,10 @@ namespace awkward {
 
     /// @brief Interpretation of the boolean bytes in #mask as `None` or
     /// valid values from #content. Only boolean bytes that are equal to
-    /// validwhen are not `None`. (Any non-zero value of a boolean byte
-    /// and `validwhen` are equivalent.)
+    /// valid_when are not `None`. (Any non-zero value of a boolean byte
+    /// and `valid_when` are equivalent.)
     bool
-      validwhen() const;
+      valid_when() const;
 
     /// @brief If `true`, the bits in each byte of the #mask are
     /// taken to be in
@@ -104,7 +104,7 @@ namespace awkward {
 
     /// @brief Expands the #mask to a byte-valued mask with a fixed
     /// interpretation: missing values are `1` and valid values are `0`
-    /// (as though #validwhen were `false`).
+    /// (as though #valid_when were `false`).
     const Index8
       bytemask() const;
 
@@ -277,12 +277,12 @@ namespace awkward {
       localindex(int64_t axis, int64_t depth) const override;
 
     const ContentPtr
-      choose(int64_t n,
-             bool diagonal,
-             const util::RecordLookupPtr& recordlookup,
-             const util::Parameters& parameters,
-             int64_t axis,
-             int64_t depth) const override;
+      combinations(int64_t n,
+                   bool replacement,
+                   const util::RecordLookupPtr& recordlookup,
+                   const util::Parameters& parameters,
+                   int64_t axis,
+                   int64_t depth) const override;
 
     const ContentPtr
       getitem_next(const SliceAt& at,
@@ -327,8 +327,8 @@ namespace awkward {
     const IndexU8 mask_;
     /// @brief See #content.
     const ContentPtr content_;
-    /// @brief See #validwhen.
-    const bool validwhen_;
+    /// @brief See #valid_when.
+    const bool valid_when_;
     /// @brief See #length.
     const int64_t length_;
     /// @brief See #order.

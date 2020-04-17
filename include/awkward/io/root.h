@@ -26,7 +26,7 @@ namespace awkward {
   /// @param itemsize The number of bytes in each numerical value in the
   /// deepest `std::vector`.
   /// @param format The pybind11 format string for the data type.
-  /// param options Configuration options for building an ArrayBuilder array.
+  /// @param options Configuration options for building an ArrayBuilder array.
   EXPORT_SYMBOL const ContentPtr
     FromROOT_nestedvector(const Index64& byteoffsets,
                           const NumpyArray& rawdata,

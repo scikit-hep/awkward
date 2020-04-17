@@ -10,6 +10,8 @@ import awkward1.highlevel
 import awkward1.operations.convert
 
 class ByteBehavior(awkward1.highlevel.Array):
+    __name__ = "Array"
+
     def __bytes__(self):
         return numpy.asarray(self.layout).tostring()
 
@@ -24,6 +26,8 @@ class ByteBehavior(awkward1.highlevel.Array):
             yield x
 
 class CharBehavior(awkward1.highlevel.Array):
+    __name__ = "Array"
+
     def __bytes__(self):
         return numpy.asarray(self.layout).tostring()
 
@@ -43,11 +47,15 @@ awkward1.behavior["char"] = CharBehavior
 awkward1.behavior["__typestr__", "char"] = "char"
 
 class ByteStringBehavior(awkward1.highlevel.Array):
+    __name__ = "Array"
+
     def __iter__(self):
         for x in super(ByteStringBehavior, self).__iter__():
             yield x.__bytes__()
 
 class StringBehavior(awkward1.highlevel.Array):
+    __name__ = "Array"
+
     def __iter__(self):
         for x in super(StringBehavior, self).__iter__():
             yield x.__str__()
@@ -57,7 +65,9 @@ awkward1.behavior["__typestr__", "bytestring"] = "bytes"
 awkward1.behavior["string"] = StringBehavior
 awkward1.behavior["__typestr__", "string"] = "string"
 
-def string_equal(one, two):
+def _string_equal(one, two):
+    one, two = one.layout, two.layout
+
     # first condition: string lengths must be the same
     counts1 = numpy.asarray(one.count(axis=-1))
     counts2 = numpy.asarray(two.count(axis=-1))
@@ -71,6 +81,9 @@ def string_equal(one, two):
     chars1 = numpy.asarray(one[possible].flatten(axis=1))
     chars2 = numpy.asarray(two[possible].flatten(axis=1))
     samechars = (chars1 == chars2)
+
+    # FIXME: Awkward has fully implemented reducers now; we can use ak.all
+    # instead of this NumPy-based implementation.
 
     # ufunc.reduceat requires a weird "offsets" that
     #    (a) lacks a final value (end of array is taken as boundary)
@@ -87,12 +100,12 @@ def string_equal(one, two):
     # update strings of the same length with a verdict about their characters
     out[possible] = reduced
 
-    return awkward1.layout.NumpyArray(out)
+    return awkward1.highlevel.Array(awkward1.layout.NumpyArray(out))
 
-awkward1.behavior[numpy.equal, "bytestring", "bytestring"] = string_equal
-awkward1.behavior[numpy.equal, "string", "string"] = string_equal
+awkward1.behavior[numpy.equal, "bytestring", "bytestring"] = _string_equal
+awkward1.behavior[numpy.equal, "string", "string"] = _string_equal
 
-def string_broadcast(layout, offsets):
+def _string_broadcast(layout, offsets):
     offsets = numpy.asarray(offsets)
     counts = offsets[1:] - offsets[:-1]
     if awkward1._util.win:
@@ -102,21 +115,21 @@ def string_broadcast(layout, offsets):
     return awkward1.layout.IndexedArray64(awkward1.layout.Index64(parents),
                                           layout).project()
 
-awkward1.behavior["__broadcast__", "bytestring"] = string_broadcast
-awkward1.behavior["__broadcast__", "string"] = string_broadcast
+awkward1.behavior["__broadcast__", "bytestring"] = _string_broadcast
+awkward1.behavior["__broadcast__", "string"] = _string_broadcast
 
-def string_numba_typer(viewtype):
+def _string_numba_typer(viewtype):
     import numba
     return numba.types.string
 
-def string_numba_lower(context,
-                       builder,
-                       rettype,
-                       viewtype,
-                       viewval,
-                       viewproxy,
-                       attype,
-                       atval):
+def _string_numba_lower(context,
+                        builder,
+                        rettype,
+                        viewtype,
+                        viewval,
+                        viewproxy,
+                        attype,
+                        atval):
     import numba
     import llvmlite.llvmpy.core
     import awkward1._connect._numba.layout
@@ -198,7 +211,7 @@ def string_numba_lower(context,
 
     return out
 
-# awkward1.behavior["__numba_typer__", "bytestring"] = string_numba_typer
-# awkward1.behavior["__numba_lower__", "bytestring"] = string_numba_lower
-awkward1.behavior["__numba_typer__", "string"] = string_numba_typer
-awkward1.behavior["__numba_lower__", "string"] = string_numba_lower
+# awkward1.behavior["__numba_typer__", "bytestring"] = _string_numba_typer
+# awkward1.behavior["__numba_lower__", "bytestring"] = _string_numba_lower
+awkward1.behavior["__numba_typer__", "string"] = _string_numba_typer
+awkward1.behavior["__numba_lower__", "string"] = _string_numba_lower

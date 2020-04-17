@@ -2,6 +2,7 @@
 
 #include <string>
 #include <sstream>
+#include <algorithm>
 
 #include "awkward/array/RecordArray.h"
 #include "awkward/type/UnknownType.h"
@@ -47,6 +48,16 @@ namespace awkward {
     return recordlookup_.get() == nullptr;
   }
 
+  const std::vector<std::string> datashape_keywords({
+      "var", "option",
+      "bool", "int8", "int16", "int32", "int64", "int128",
+      "uint8", "uint16", "uint32", "uint64", "uint128",
+      "float16", "float32", "float64", "float128",
+      "decimal32", "decimal64", "decimal128",
+      "bignum", "int", "real", "complex", "intptr", "uintptr",
+      "string", "char", "bytes", "date", "json",
+      "void", "datetime", "categorical", "pointer"});
+
   std::string
   RecordType::tostring_part(const std::string& indent,
                             const std::string& pre,
@@ -57,6 +68,27 @@ namespace awkward {
     }
 
     std::stringstream out;
+    if (parameters_.size() == 1  &&  parameter_isname("__record__")) {
+      std::string name = parameter_asstring("__record__");
+      auto item = std::find(datashape_keywords.begin(),
+                            datashape_keywords.end(),
+                            name);
+      if (item == datashape_keywords.end()) {
+        out << name << "[";
+        for (size_t j = 0;  j < types_.size();  j++) {
+          if (j != 0) {
+            out << ", ";
+          }
+          if (recordlookup_.get() != nullptr) {
+            out << util::quote(recordlookup_.get()->at(j), true) << ": ";
+          }
+          out << types_[j].get()->tostring_part("", "", "");
+        }
+        out << "]";
+        return out.str();
+      }
+    }
+
     if (parameters_.empty()) {
       if (recordlookup_.get() != nullptr) {
         out << "{";

@@ -18,8 +18,10 @@ from setuptools import setup, Extension
 install_requires = open("requirements.txt").read().strip().split()
 
 extras = {"test": open("requirements-test.txt").read().strip().split(),
-          "docs": open("requirements-docs.txt").read().strip().split(),
-          "dev":  open("requirements-dev.txt").read().strip().split()}
+          "dev":  ['numba>=0.46.0;python_version>="3"',
+                   'pandas>=0.24.0;python_version>="3"',
+                   'numexpr;python_version>="3"',
+                   'autograd;python_version>="3"']}
 extras["all"] = sum(extras.values(), [])
 
 tests_require = extras["test"]

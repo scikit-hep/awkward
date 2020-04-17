@@ -23,8 +23,6 @@ namespace awkward {
       : identities_(identities)
       , parameters_(parameters) { }
 
-  Content::~Content() { }
-
   bool
   Content::isscalar() const {
     return false;
@@ -179,6 +177,21 @@ namespace awkward {
     return util::parameters_equal(parameters_, other);
   }
 
+  bool
+  Content::parameter_isstring(const std::string& key) const {
+    return util::parameter_isstring(parameters_, key);
+  }
+
+  bool
+  Content::parameter_isname(const std::string& key) const {
+    return util::parameter_isname(parameters_, key);
+  }
+
+  const std::string
+  Content::parameter_asstring(const std::string& key) const {
+    return util::parameter_asstring(parameters_, key);
+  }
+
   const ContentPtr
   Content::merge_as_union(const ContentPtr& other) const {
     int64_t mylength = length();
@@ -249,45 +262,45 @@ namespace awkward {
   }
 
   const ContentPtr
-  Content::choose_axis0(int64_t n,
-                        bool diagonal,
-                        const util::RecordLookupPtr& recordlookup,
-                        const util::Parameters& parameters) const {
+  Content::combinations_axis0(int64_t n,
+                              bool replacement,
+                              const util::RecordLookupPtr& recordlookup,
+                              const util::Parameters& parameters) const {
     int64_t size = length();
-    if (diagonal) {
+    if (replacement) {
       size += (n - 1);
     }
     int64_t thisn = n;
-    int64_t chooselen;
+    int64_t combinationslen;
     if (thisn > size) {
-      chooselen = 0;
+      combinationslen = 0;
     }
     else if (thisn == size) {
-      chooselen = 1;
+      combinationslen = 1;
     }
     else {
       if (thisn * 2 > size) {
         thisn = size - thisn;
       }
-      chooselen = size;
+      combinationslen = size;
       for (int64_t j = 2;  j <= thisn;  j++) {
-        chooselen *= (size - j + 1);
-        chooselen /= j;
+        combinationslen *= (size - j + 1);
+        combinationslen /= j;
       }
     }
 
     std::vector<std::shared_ptr<int64_t>> tocarry;
     std::vector<int64_t*> tocarryraw;
     for (int64_t j = 0;  j < n;  j++) {
-      std::shared_ptr<int64_t> ptr(new int64_t[(size_t)chooselen],
+      std::shared_ptr<int64_t> ptr(new int64_t[(size_t)combinationslen],
                                    util::array_deleter<int64_t>());
       tocarry.push_back(ptr);
       tocarryraw.push_back(ptr.get());
     }
-    struct Error err = awkward_regulararray_choose_64(
+    struct Error err = awkward_regulararray_combinations_64(
       tocarryraw.data(),
       n,
-      diagonal,
+      replacement,
       length(),
       1);
     util::handle_error(err, classname(), identities_.get());
@@ -297,7 +310,7 @@ namespace awkward {
       contents.push_back(std::make_shared<IndexedArray64>(
         Identities::none(),
         util::Parameters(),
-        Index64(ptr, 0, chooselen),
+        Index64(ptr, 0, combinationslen),
         shallow_copy()));
     }
     return std::make_shared<RecordArray>(Identities::none(),

@@ -22,7 +22,7 @@ namespace awkward {
   class EXPORT_SYMBOL SliceItem {
   public:
     /// @brief Empty destructor; required for some C++ reason.
-    virtual ~SliceItem();
+    virtual ~SliceItem() { }
 
     /// @brief Copies this node without copying any associated arrays.
     virtual const SliceItemPtr
@@ -484,12 +484,12 @@ namespace awkward {
     const IndexOf<T>
       offsets() const;
 
-    /// @param content The contiguous content of the nested lists, like
+    /// @brief The contiguous content of the nested lists, like
     /// ListOffsetArray's {@link ListOffsetArrayOf#content content}.
     const SliceItemPtr
       content() const;
 
-    /// @param length The length of the array: `len(offsets) - 1`.
+    /// @brief The length of the array: `len(offsets) - 1`.
     int64_t
       length() const;
 

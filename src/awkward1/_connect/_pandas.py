@@ -105,7 +105,7 @@ class PandasMixin(PandasNotImportedYet):
         dtype, copy = awkward1._util.extra(args, kwargs, [
             ("dtype", None),
             ("copy", False)])
-        return awkward1.operations.convert.fromiter(scalars)
+        return awkward1.operations.convert.from_iter(scalars)
 
     @classmethod
     def _from_factorized(cls, values, original):
@@ -140,7 +140,7 @@ class PandasMixin(PandasNotImportedYet):
     def isna(self):
         # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray.isna.html
         register()
-        return numpy.array(awkward1.operations.structure.isna(self))
+        return numpy.array(awkward1.operations.structure.is_none(self))
 
     def take(self, indices, *args, **kwargs):
         # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray.take.html
@@ -164,7 +164,7 @@ class PandasMixin(PandasNotImportedYet):
                 tags = (indices >= 0).view(numpy.int8)
                 index = indices.copy()
                 index[~tags] = 0
-                content0 = awkward1.operations.convert.fromiter(
+                content0 = awkward1.operations.convert.from_iter(
                              [fill_value], highlevel=False)
                 content1 = self.layout
                 tags = awkward1.layout.Index8(tags)
@@ -298,16 +298,16 @@ def dfs(array,
 
         else:
             try:
-                return [(awkward1.operations.convert.tonumpy(layout),
+                return [(awkward1.operations.convert.to_numpy(layout),
                          row_arrays,
                          col_names)]
             except:
                 return [(layout, row_arrays, col_names)]
 
     behavior = awkward1._util.behaviorof(array)
-    layout = awkward1.operations.convert.tolayout(array,
-                                                  allowrecord=True,
-                                                  allowother=False)
+    layout = awkward1.operations.convert.to_layout(array,
+                                                   allow_record=True,
+                                                   allow_other=False)
     if isinstance(layout, awkward1.layout.Record):
         layout2 = layout.array[layout.at : layout.at + 1]
     else:
@@ -329,7 +329,10 @@ def dfs(array,
             all(numpy.array_equal(x, y)
                   for x, y in zip(last_row_arrays, row_arrays))):
             oldcolumns = tables[-1].columns
-            numold = len(oldcolumns.levels)
+            if isinstance(oldcolumns, pandas.MultiIndex):
+                numold = len(oldcolumns.levels)
+            else:
+                numold = max(len(x) for x in oldcolumns)
             numnew = len(columns.levels)
             maxnum = max(numold, numnew)
             if numold != maxnum:
@@ -339,7 +342,7 @@ def dfs(array,
                 tables[-1].columns = oldcolumns
             if numnew != maxnum:
                 columns = pandas.MultiIndex.from_tuples(
-                            [x + ("",)*(maxnum - numold)
+                            [x + ("",)*(maxnum - numnew)
                                for x in columns])
 
             newframe = pandas.DataFrame(data=column,

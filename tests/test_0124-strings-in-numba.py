@@ -14,7 +14,7 @@ numba = pytest.importorskip("numba")
 py27 = (sys.version_info[0] < 3)
 
 def test_string():
-    array = awkward1.Array(["one", "two", "three", "four", "five"], checkvalid=True)
+    array = awkward1.Array(["one", "two", "three", "four", "five"], check_valid=True)
 
     @numba.njit
     def f1(x, i):

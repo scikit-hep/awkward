@@ -12,9 +12,6 @@
 #include "awkward/Content.h"
 
 namespace awkward {
-  template <typename T>
-  class ListOffsetArrayOf;
-
   /// @class RegularArray
   ///
   /// @brief Represents an array of nested lists that all have the same
@@ -67,14 +64,14 @@ namespace awkward {
     /// using those `offsets`.
     ///
     /// As indicated by the name, this is a basic element of broadcasting.
-    const std::shared_ptr<ListOffsetArrayOf<int64_t>>
+    const ContentPtr
       broadcast_tooffsets64(const Index64& offsets) const;
 
     /// @brief Effectively the same as #shallow_copy, but with the same name
     /// as the equivalent
     /// {@link ListArrayOf#toRegularArray ListArray::toRegularArray} and
     /// {@link ListOffsetArrayOf#toRegularArray ListOffsetArray::toRegularArray}.
-    const std::shared_ptr<RegularArray>
+    const ContentPtr
       toRegularArray() const;
 
     /// @brief Converts this array into a
@@ -84,7 +81,7 @@ namespace awkward {
     /// @param start_at_zero If `true`, the first offset will be `0`, meaning
     /// there are no "unreachable" elements in the `content` that corresponds
     /// to these offsets. For a RegularArray, this would always be true.
-    const std::shared_ptr<ListOffsetArrayOf<int64_t>>
+    const ContentPtr
       toListOffsetArray64(bool start_at_zero) const;
 
     /// @brief User-friendly name of this class: `"RegularArray"`.
@@ -231,12 +228,12 @@ namespace awkward {
       localindex(int64_t axis, int64_t depth) const override;
 
     const ContentPtr
-      choose(int64_t n,
-             bool diagonal,
-             const util::RecordLookupPtr& recordlookup,
-             const util::Parameters& parameters,
-             int64_t axis,
-             int64_t depth) const override;
+      combinations(int64_t n,
+                   bool replacement,
+                   const util::RecordLookupPtr& recordlookup,
+                   const util::Parameters& parameters,
+                   int64_t axis,
+                   int64_t depth) const override;
 
     const ContentPtr
       getitem_next(const SliceAt& at,

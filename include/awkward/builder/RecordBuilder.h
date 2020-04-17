@@ -30,7 +30,7 @@ namespace awkward {
     /// @param contents A Builder for each record field.
     /// @param keys Names for each record field.
     /// @param pointers String pointers for each record field name.
-    /// @param names Strings for each record field name.
+    /// @param name String name of the record.
     /// @param nameptr String pointer for the name of the record.
     /// @param length Length of accumulated array (same as #length).
     /// @param begun If `true`, the RecordBuilder is in an active state;

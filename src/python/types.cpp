@@ -3,19 +3,9 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "awkward/type/Type.h"
-#include "awkward/type/ArrayType.h"
-#include "awkward/type/ListType.h"
-#include "awkward/type/OptionType.h"
-#include "awkward/type/PrimitiveType.h"
-#include "awkward/type/RecordType.h"
-#include "awkward/type/RegularType.h"
-#include "awkward/type/UnionType.h"
-#include "awkward/type/UnknownType.h"
-#include "awkward/python/util.h"
+#include "awkward/python/content.h"
 
-namespace py = pybind11;
-namespace ak = awkward;
+#include "awkward/python/types.h"
 
 ////////// boxing
 
@@ -58,7 +48,8 @@ box(const std::shared_ptr<ak::Type>& t) {
   }
 }
 
-std::shared_ptr<ak::Type> unbox_type(const py::handle& obj) {
+std::shared_ptr<ak::Type>
+unbox_type(const py::handle& obj) {
   try {
     return obj.cast<ak::ArrayType*>()->shallow_copy();
   }
@@ -110,42 +101,6 @@ make_Type(const py::handle& m, const std::string& name) {
   );
 }
 
-ak::util::Parameters
-dict2parameters(const py::object& in) {
-  ak::util::Parameters out;
-  if (in.is(py::none())) {
-    // None is equivalent to an empty dict
-  }
-  else if (py::isinstance<py::dict>(in)) {
-    for (auto pair : in.cast<py::dict>()) {
-      std::string key = pair.first.cast<std::string>();
-      py::object value = py::module::import("json").attr("dumps")(pair.second);
-      out[key] = value.cast<std::string>();
-    }
-  }
-  else {
-    throw std::invalid_argument("type parameters must be a dict (or None)");
-  }
-  return out;
-}
-
-py::dict
-parameters2dict(const ak::util::Parameters& in) {
-  py::dict out;
-  for (auto pair : in) {
-    std::string cppkey = pair.first;
-    std::string cppvalue = pair.second;
-    py::str pykey(PyUnicode_DecodeUTF8(cppkey.data(),
-                                       cppkey.length(),
-                                       "surrogateescape"));
-    py::str pyvalue(PyUnicode_DecodeUTF8(cppvalue.data(),
-                                         cppvalue.length(),
-                                         "surrogateescape"));
-    out[pykey] = py::module::import("json").attr("loads")(pyvalue);
-  }
-  return out;
-}
-
 template <typename T>
 py::dict getparameters(const T& self) {
   return parameters2dict(self.parameters());
@@ -184,7 +139,8 @@ setparameter(T& self, const std::string& key, const py::object& value) {
   self.setparameter(key, valuestr.cast<std::string>());
 }
 
-std::string typestr2str(const py::object& in) {
+std::string
+typestr2str(const py::object& in) {
   if (in.is(py::none())) {
     return std::string();
   }
@@ -669,25 +625,4 @@ make_UnknownType(const py::handle& m, const std::string& name) {
                                typestr2str(state[1]));
       }))
   );
-}
-
-////////// module
-
-namespace py = pybind11;
-PYBIND11_MODULE(types, m) {
-#ifdef VERSION_INFO
-  m.attr("__version__") = VERSION_INFO;
-#else
-  m.attr("__version__") = "dev";
-#endif
-
-  make_Type(m, "Type");
-  make_ArrayType(m, "ArrayType");
-  make_PrimitiveType(m, "PrimitiveType");
-  make_RegularType(m, "RegularType");
-  make_UnknownType(m, "UnknownType");
-  make_ListType(m, "ListType");
-  make_OptionType(m, "OptionType");
-  make_UnionType(m, "UnionType");
-  make_RecordType(m, "RecordType");
 }

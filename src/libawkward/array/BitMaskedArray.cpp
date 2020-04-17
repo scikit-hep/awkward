@@ -25,13 +25,13 @@ namespace awkward {
                                  const util::Parameters& parameters,
                                  const IndexU8& mask,
                                  const ContentPtr& content,
-                                 bool validwhen,
+                                 bool valid_when,
                                  int64_t length,
                                  bool lsb_order)
       : Content(identities, parameters)
       , mask_(mask)
       , content_(content)
-      , validwhen_(validwhen != 0)
+      , valid_when_(valid_when != 0)
       , length_(length)
       , lsb_order_(lsb_order) {
     int64_t bitlength = ((length / 8) + ((length % 8) != 0));
@@ -56,8 +56,8 @@ namespace awkward {
   }
 
   bool
-  BitMaskedArray::validwhen() const {
-    return validwhen_;
+  BitMaskedArray::valid_when() const {
+    return valid_when_;
   }
 
   bool
@@ -117,7 +117,7 @@ namespace awkward {
       mask_.ptr().get(),
       mask_.offset(),
       mask_.length(),
-      validwhen_,
+      valid_when_,
       lsb_order_);
     util::handle_error(err, classname(), identities_.get());
     return std::make_shared<ByteMaskedArray>(
@@ -125,7 +125,7 @@ namespace awkward {
       parameters_,
       bytemask.getitem_range_nowrap(0, length_),
       content_,
-      validwhen_);
+      valid_when_);
   }
 
   const std::shared_ptr<IndexedOptionArray64>
@@ -136,7 +136,7 @@ namespace awkward {
       mask_.ptr().get(),
       mask_.offset(),
       mask_.length(),
-      validwhen_,
+      valid_when_,
       lsb_order_);
     util::handle_error(err, classname(), identities_.get());
     return std::make_shared<IndexedOptionArray64>(
@@ -251,8 +251,8 @@ namespace awkward {
                                 const std::string& pre,
                                 const std::string& post) const {
     std::stringstream out;
-    out << indent << pre << "<" << classname() << " validwhen=\""
-        << (validwhen_ ? "true" : "false") << "\" length=\"" << length_
+    out << indent << pre << "<" << classname() << " valid_when=\""
+        << (valid_when_ ? "true" : "false") << "\" length=\"" << length_
         << "\" lsb_order=\"" << (lsb_order_ ? "true" : "false") << "\">\n";
     if (identities_.get() != nullptr) {
       out << identities_.get()->tostring_part(
@@ -300,7 +300,7 @@ namespace awkward {
                                             parameters_,
                                             mask_,
                                             content_,
-                                            validwhen_,
+                                            valid_when_,
                                             length_,
                                             lsb_order_);
   }
@@ -321,7 +321,7 @@ namespace awkward {
                                             parameters_,
                                             mask,
                                             content,
-                                            validwhen_,
+                                            valid_when_,
                                             length_,
                                             lsb_order_);
   }
@@ -365,7 +365,7 @@ namespace awkward {
     uint8_t asbool = (lsb_order_
                           ? ((byte >> ((uint8_t)shift)) & ((uint8_t)1))
                           : ((byte << ((uint8_t)shift)) & ((uint8_t)128)));
-    if ((asbool != 0) == validwhen_) {
+    if ((asbool != 0) == valid_when_) {
       return content_.get()->getitem_at_nowrap(at);
     }
     else {
@@ -407,7 +407,7 @@ namespace awkward {
         parameters_,
         mask_.getitem_range_nowrap(bitstart, bitstop),
         content_.get()->getitem_range_nowrap(start, stop),
-        validwhen_,
+        valid_when_,
         length,
         lsb_order_);
     }
@@ -423,7 +423,7 @@ namespace awkward {
       util::Parameters(),
       mask_,
       content_.get()->getitem_field(key),
-      validwhen_,
+      valid_when_,
       length_,
       lsb_order_);
   }
@@ -435,7 +435,7 @@ namespace awkward {
       util::Parameters(),
       mask_,
       content_.get()->getitem_fields(keys),
-      validwhen_,
+      valid_when_,
       length_,
       lsb_order_);
   }
@@ -636,18 +636,18 @@ namespace awkward {
   }
 
   const ContentPtr
-  BitMaskedArray::choose(int64_t n,
-                         bool diagonal,
-                         const util::RecordLookupPtr& recordlookup,
-                         const util::Parameters& parameters,
-                         int64_t axis,
-                         int64_t depth) const {
-    return toByteMaskedArray().get()->choose(n,
-                                             diagonal,
-                                             recordlookup,
-                                             parameters,
-                                             axis,
-                                             depth);
+  BitMaskedArray::combinations(int64_t n,
+                               bool replacement,
+                               const util::RecordLookupPtr& recordlookup,
+                               const util::Parameters& parameters,
+                               int64_t axis,
+                               int64_t depth) const {
+    return toByteMaskedArray().get()->combinations(n,
+                                                   replacement,
+                                                   recordlookup,
+                                                   parameters,
+                                                   axis,
+                                                   depth);
   }
 
   const ContentPtr

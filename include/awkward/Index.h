@@ -148,7 +148,7 @@ namespace awkward {
     IndexOf<T>
       getitem_range_nowrap(int64_t start, int64_t stop) const;
 
-    /// @brief Internal function used to calculate #nbytes.
+    /// @brief Internal function used to calculate Content#nbytes.
     ///
     /// @param largest The largest range of bytes used in each
     /// reference-counted pointer (`size_t`).
@@ -156,7 +156,7 @@ namespace awkward {
     /// @note This method of accounting for overlapping buffers is
     /// insufficient: two nodes could use parts of the same buffer in which
     /// one doesn't completely overlap the other. It's not likely, but
-    /// currently the calculation of #nbytes is an underestimate.
+    /// currently the calculation of Content#nbytes is an underestimate.
     void
       nbytes_part(std::map<size_t, int64_t>& largest) const;
 

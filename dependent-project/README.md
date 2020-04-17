@@ -26,7 +26,7 @@ and used like this (it picks one item from an Awkward Array):
 # [4.4,5.5]
 ```
 
-If you want your C++ code to have a Python interface, compile it with the same version of pybind11 as Awkward (see release notes) as shown in [CMakeLists.txt](CMakeLists.txt) and [through-python.cpp](through-python.cpp), which can be compiled like this:
+If you want your C++ code to have a Python interface, compile it with the same version of pybind11 as Awkward (see release notes) as shown in [CMakeLists.txt](CMakeLists.txt) and [dependent.cpp](dependent.cpp), which can be compiled like this:
 
 ```bash
 cmake -S . -B build

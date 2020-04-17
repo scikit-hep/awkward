@@ -2,8 +2,6 @@
 
 #include <string>
 
-#include <pybind11/pybind11.h>
-
 #include "awkward/Content.h"
 #include "awkward/Index.h"
 #include "awkward/array/NumpyArray.h"
@@ -11,7 +9,8 @@
 #include "awkward/io/json.h"
 #include "awkward/io/root.h"
 
-namespace py = pybind11;
+#include "awkward/python/io.h"
+
 namespace ak = awkward;
 
 ////////// fromjson
@@ -63,7 +62,7 @@ make_fromjson(py::module& m, const std::string& name) {
     }
   }, py::arg("source"),
       py::arg("initial") = 1024,
-      py::arg("resize") = 2.0,
+      py::arg("resize") = 1.5,
       py::arg("buffersize") = 65536);
 }
 
@@ -91,19 +90,5 @@ make_fromroot_nestedvector(py::module& m, const std::string& name) {
      py::arg("itemsize"),
      py::arg("format"),
      py::arg("initial") = 1024,
-     py::arg("resize") = 2.0);
-}
-
-////////// module
-
-namespace py = pybind11;
-PYBIND11_MODULE(_io, m) {
-#ifdef VERSION_INFO
-  m.attr("__version__") = VERSION_INFO;
-#else
-  m.attr("__version__") = "dev";
-#endif
-
-  make_fromjson(m, "fromjson");
-  make_fromroot_nestedvector(m, "fromroot_nestedvector");
+     py::arg("resize") = 1.5);
 }

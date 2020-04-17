@@ -38,15 +38,15 @@ except ImportError:
 else:
     @numba.extending.typeof_impl.register(awkward1.highlevel.Array)
     def typeof_Array(obj, c):
-        return obj.numbatype
+        return obj.numba_type
 
     @numba.extending.typeof_impl.register(awkward1.highlevel.Record)
     def typeof_Record(obj, c):
-        return obj.numbatype
+        return obj.numba_type
 
     @numba.extending.typeof_impl.register(awkward1.highlevel.ArrayBuilder)
     def typeof_ArrayBuilder(obj, c):
-        return obj.numbatype
+        return obj.numba_type
 
 def repr_behavior(behavior):
     return repr(behavior)

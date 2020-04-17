@@ -15,7 +15,7 @@ import awkward1.operations.convert
 import awkward1._util
 
 def convert_to_array(layout, args, kwargs):
-    out = awkward1.operations.convert.tonumpy(layout)
+    out = awkward1.operations.convert.to_numpy(layout, allow_missing=False)
     if args == () and kwargs == {}:
         return out
     else:
@@ -36,23 +36,32 @@ def implements(numpy_function):
         return function
     return decorator
 
-def array_ufunc(ufunc, method, inputs, kwargs, behavior):
+def array_ufunc(ufunc, method, inputs, kwargs):
     import awkward1.highlevel
 
     if method != "__call__" or len(inputs) == 0 or "out" in kwargs:
         return NotImplemented
 
-    inputs = [awkward1.operations.convert.tolayout(x,
-                                                   allowrecord=True,
-                                                   allowother=True)
+    behavior = awkward1._util.behaviorof(*inputs)
+    inputs = [awkward1.operations.convert.to_layout(x,
+                                                    allow_record=True,
+                                                    allow_other=True)
                 for x in inputs]
 
     def adjust(custom, inputs, kwargs):
-        tmp = custom(*inputs, **kwargs)
-        if not isinstance(tmp, tuple):
-            return (tmp,)
-        else:
-            return tmp
+        args = [awkward1._util.wrap(x, behavior)
+                    if isinstance(x, (awkward1.layout.Content,
+                                      awkward1.layout.Record))
+                    else x
+                    for x in inputs]
+        out = custom(*args, **kwargs)
+        if not isinstance(out, tuple):
+            out = (out,)
+        return tuple(x.layout
+                         if isinstance(x, (awkward1.highlevel.Array,
+                                           awkward1.highlevel.Record))
+                         else x
+                         for x in out)
 
     def getfunction(inputs, depth):
         signature = (ufunc,) + tuple(

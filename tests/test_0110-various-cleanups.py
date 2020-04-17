@@ -10,14 +10,14 @@ import numpy
 import awkward1
 
 def test_na_union():
-    one = awkward1.Array([1, None, 3], checkvalid=True).layout
-    two = awkward1.Array([[], [1], None, [3, 3, 3]], checkvalid=True).layout
+    one = awkward1.Array([1, None, 3], check_valid=True).layout
+    two = awkward1.Array([[], [1], None, [3, 3, 3]], check_valid=True).layout
     tags = awkward1.layout.Index8(numpy.array([0, 1, 1, 0, 0, 1, 1], dtype=numpy.int8))
     index = awkward1.layout.Index64(numpy.array([0, 0, 1, 1, 2, 2, 3], dtype=numpy.int64))
-    array = awkward1.Array(awkward1.layout.UnionArray8_64(tags, index, [one, two]), checkvalid=True)
-    assert awkward1.tolist(array) == [1, [], [1], None, 3, None, [3, 3, 3]]
+    array = awkward1.Array(awkward1.layout.UnionArray8_64(tags, index, [one, two]), check_valid=True)
+    assert awkward1.to_list(array) == [1, [], [1], None, 3, None, [3, 3, 3]]
 
-    assert awkward1.tolist(awkward1.isna(array)) == [False, False, False, True, False, True, False]
+    assert awkward1.to_list(awkward1.is_none(array)) == [False, False, False, True, False, True, False]
 
 class DummyRecord(awkward1.Record):
     def __repr__(self):
@@ -41,14 +41,14 @@ def test_behaviors():
     recordarray = awkward1.layout.RecordArray({"x": content})
     recordarray.setparameter("__record__", "Dummy")
 
-    array = awkward1.Array(recordarray, behavior=behavior, checkvalid=True)
+    array = awkward1.Array(recordarray, behavior=behavior, check_valid=True)
     assert repr(array) == "<DummyArray <1.1> <2.2> <3.3> <4.4> <5.5>>"
     assert repr(array[0]) == "<1.1>"
 
     offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5], dtype=numpy.int64))
     listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, recordarray)
 
-    array2 = awkward1.Array(listoffsetarray, behavior=behavior, checkvalid=True)
+    array2 = awkward1.Array(listoffsetarray, behavior=behavior, check_valid=True)
 
     assert array2.layout.parameter("__record__") is None
     assert array2.layout.purelist_parameter("__record__") == "Dummy"
@@ -59,13 +59,13 @@ def test_behaviors():
 
     recordarray2 = awkward1.layout.RecordArray({"outer": listoffsetarray})
 
-    array3 = awkward1.Array(recordarray2, behavior=behavior, checkvalid=True)
+    array3 = awkward1.Array(recordarray2, behavior=behavior, check_valid=True)
     assert type(array3) is awkward1.Array
     assert type(array3["outer"]) is DeepDummyArray
     assert repr(array3["outer"]) == "<DeepDummyArray <DummyArray <1.1> <2.2> <3.3>> <DummyArray > <DummyArray <4.4> <5.5>>>"
 
 def test_flatten():
-    assert awkward1.tolist(awkward1.flatten(awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], checkvalid=True), axis=1)) == [1.1, 2.2, 3.3, 4.4, 5.5]
+    assert awkward1.to_list(awkward1.flatten(awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], check_valid=True), axis=1)) == [1.1, 2.2, 3.3, 4.4, 5.5]
 
 def test_string_equal():
     trials = [
@@ -101,7 +101,7 @@ def test_string_equal():
         ]
 
     for left, right in trials:
-        assert awkward1.tolist(awkward1.Array(left, checkvalid=True) == awkward1.Array(right, checkvalid=True)) == [x == y for x, y in zip(left, right)]
+        assert awkward1.to_list(awkward1.Array(left, check_valid=True) == awkward1.Array(right, check_valid=True)) == [x == y for x, y in zip(left, right)]
 
 def test_string_equal2():
-    assert awkward1.tolist(awkward1.Array(["one", "two", "three", "two", "two", "one"], checkvalid=True) == "two") == [False, True, False, True, True, False]
+    assert awkward1.to_list(awkward1.Array(["one", "two", "three", "two", "two", "one"], check_valid=True) == "two") == [False, True, False, True, True, False]

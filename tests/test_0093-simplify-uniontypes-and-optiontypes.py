@@ -17,8 +17,8 @@ def test_numpyarray_merge():
     ak1 = awkward1.layout.NumpyArray(np1)
     ak2 = awkward1.layout.NumpyArray(np2)
 
-    assert awkward1.tolist(ak1.merge(ak2)) == awkward1.tolist(numpy.concatenate([np1, np2]))
-    assert awkward1.tolist(ak1[1:, :-1, ::-1].merge(ak2[1:, :-1, ::-1])) == awkward1.tolist(numpy.concatenate([np1[1:, :-1, ::-1], np2[1:, :-1, ::-1]]))
+    assert awkward1.to_list(ak1.merge(ak2)) == awkward1.to_list(numpy.concatenate([np1, np2]))
+    assert awkward1.to_list(ak1[1:, :-1, ::-1].merge(ak2[1:, :-1, ::-1])) == awkward1.to_list(numpy.concatenate([np1[1:, :-1, ::-1], np2[1:, :-1, ::-1]]))
 
     for x, y, z in [(numpy.double, numpy.double, numpy.double),
                     (numpy.double, numpy.float,  numpy.double),
@@ -145,21 +145,21 @@ def test_numpyarray_merge():
         two = awkward1.layout.NumpyArray(numpy.array([4, 5], dtype=y))
         three = one.merge(two)
         assert numpy.asarray(three).dtype == numpy.dtype(z)
-        assert awkward1.tolist(three) == awkward1.tolist(numpy.concatenate([numpy.asarray(one), numpy.asarray(two)]))
-        assert awkward1.tolist(one.merge(emptyarray)) == awkward1.tolist(one)
-        assert awkward1.tolist(emptyarray.merge(one)) == awkward1.tolist(one)
+        assert awkward1.to_list(three) == awkward1.to_list(numpy.concatenate([numpy.asarray(one), numpy.asarray(two)]))
+        assert awkward1.to_list(one.merge(emptyarray)) == awkward1.to_list(one)
+        assert awkward1.to_list(emptyarray.merge(one)) == awkward1.to_list(one)
 
 def test_regulararray_merge():
     emptyarray = awkward1.layout.EmptyArray()
 
     np1 = numpy.arange(2*7*5).reshape(2, 7, 5)
     np2 = numpy.arange(3*7*5).reshape(3, 7, 5)
-    ak1 = awkward1.Array(np1, checkvalid=True).layout
-    ak2 = awkward1.Array(np2, checkvalid=True).layout
+    ak1 = awkward1.Array(np1, check_valid=True).layout
+    ak2 = awkward1.Array(np2, check_valid=True).layout
 
-    assert awkward1.tolist(ak1.merge(ak2)) == awkward1.tolist(numpy.concatenate([np1, np2]))
-    assert awkward1.tolist(ak1.merge(emptyarray)) == awkward1.tolist(ak1)
-    assert awkward1.tolist(emptyarray.merge(ak1)) == awkward1.tolist(ak1)
+    assert awkward1.to_list(ak1.merge(ak2)) == awkward1.to_list(numpy.concatenate([np1, np2]))
+    assert awkward1.to_list(ak1.merge(emptyarray)) == awkward1.to_list(ak1)
+    assert awkward1.to_list(emptyarray.merge(ak1)) == awkward1.to_list(ak1)
 
 def test_listarray_merge():
     emptyarray = awkward1.layout.EmptyArray()
@@ -183,18 +183,18 @@ def test_listarray_merge():
         stops2  = Index2(numpy.array([6, 99, 3], dtype=dtype2))
         array1 = ListArray1(starts1, stops1, content1)
         array2 = ListArray2(starts2, stops2, content2)
-        assert awkward1.tolist(array1) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
-        assert awkward1.tolist(array2) == [[3, 4, 5, 6], [], [1, 2, 3]]
+        assert awkward1.to_list(array1) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+        assert awkward1.to_list(array2) == [[3, 4, 5, 6], [], [1, 2, 3]]
 
-        assert awkward1.tolist(array1.merge(array2)) == [[1.1, 2.2, 3.3], [], [4.4, 5.5], [3, 4, 5, 6], [], [1, 2, 3]]
-        assert awkward1.tolist(array2.merge(array1)) == [[3, 4, 5, 6], [], [1, 2, 3], [1.1, 2.2, 3.3], [], [4.4, 5.5]]
-        assert awkward1.tolist(array1.merge(emptyarray)) == awkward1.tolist(array1)
-        assert awkward1.tolist(emptyarray.merge(array1)) == awkward1.tolist(array1)
+        assert awkward1.to_list(array1.merge(array2)) == [[1.1, 2.2, 3.3], [], [4.4, 5.5], [3, 4, 5, 6], [], [1, 2, 3]]
+        assert awkward1.to_list(array2.merge(array1)) == [[3, 4, 5, 6], [], [1, 2, 3], [1.1, 2.2, 3.3], [], [4.4, 5.5]]
+        assert awkward1.to_list(array1.merge(emptyarray)) == awkward1.to_list(array1)
+        assert awkward1.to_list(emptyarray.merge(array1)) == awkward1.to_list(array1)
 
     regulararray = awkward1.layout.RegularArray(content2, 2)
-    assert awkward1.tolist(regulararray) == [[1, 2], [3, 4], [5, 6]]
-    assert awkward1.tolist(regulararray.merge(emptyarray)) == awkward1.tolist(regulararray)
-    assert awkward1.tolist(emptyarray.merge(regulararray)) == awkward1.tolist(regulararray)
+    assert awkward1.to_list(regulararray) == [[1, 2], [3, 4], [5, 6]]
+    assert awkward1.to_list(regulararray.merge(emptyarray)) == awkward1.to_list(regulararray)
+    assert awkward1.to_list(emptyarray.merge(regulararray)) == awkward1.to_list(regulararray)
 
     for (dtype1, Index1, ListArray1) in [
             (numpy.int32, awkward1.layout.Index32, awkward1.layout.ListArray32),
@@ -204,8 +204,8 @@ def test_listarray_merge():
         stops1  = Index1(numpy.array([3, 3, 5], dtype=dtype1))
         array1 = ListArray1(starts1, stops1, content1)
 
-        assert awkward1.tolist(array1.merge(regulararray)) == [[1.1, 2.2, 3.3], [], [4.4, 5.5], [1, 2], [3, 4], [5, 6]]
-        assert awkward1.tolist(regulararray.merge(array1)) == [[1, 2], [3, 4], [5, 6], [1.1, 2.2, 3.3], [], [4.4, 5.5]]
+        assert awkward1.to_list(array1.merge(regulararray)) == [[1.1, 2.2, 3.3], [], [4.4, 5.5], [1, 2], [3, 4], [5, 6]]
+        assert awkward1.to_list(regulararray.merge(array1)) == [[1, 2], [3, 4], [5, 6], [1.1, 2.2, 3.3], [], [4.4, 5.5]]
 
 def test_listoffsetarray_merge():
     emptyarray = awkward1.layout.EmptyArray()
@@ -227,16 +227,16 @@ def test_listoffsetarray_merge():
         offsets2 = Index2(numpy.array([1, 3, 3, 3, 5], dtype=dtype2))
         array1 = ListOffsetArray1(offsets1, content1)
         array2 = ListOffsetArray2(offsets2, content2)
-        assert awkward1.tolist(array1) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
-        assert awkward1.tolist(array2) == [[2, 3], [], [], [4, 5]]
+        assert awkward1.to_list(array1) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+        assert awkward1.to_list(array2) == [[2, 3], [], [], [4, 5]]
 
-        assert awkward1.tolist(array1.merge(array2)) == [[1.1, 2.2, 3.3], [], [4.4, 5.5], [2, 3], [], [], [4, 5]]
-        assert awkward1.tolist(array2.merge(array1)) == [[2, 3], [], [], [4, 5], [1.1, 2.2, 3.3], [], [4.4, 5.5]]
-        assert awkward1.tolist(array1.merge(emptyarray)) == awkward1.tolist(array1)
-        assert awkward1.tolist(emptyarray.merge(array1)) == awkward1.tolist(array1)
+        assert awkward1.to_list(array1.merge(array2)) == [[1.1, 2.2, 3.3], [], [4.4, 5.5], [2, 3], [], [], [4, 5]]
+        assert awkward1.to_list(array2.merge(array1)) == [[2, 3], [], [], [4, 5], [1.1, 2.2, 3.3], [], [4.4, 5.5]]
+        assert awkward1.to_list(array1.merge(emptyarray)) == awkward1.to_list(array1)
+        assert awkward1.to_list(emptyarray.merge(array1)) == awkward1.to_list(array1)
 
     regulararray = awkward1.layout.RegularArray(content2, 2)
-    assert awkward1.tolist(regulararray) == [[1, 2], [3, 4], [5, 6]]
+    assert awkward1.to_list(regulararray) == [[1, 2], [3, 4], [5, 6]]
 
     for (dtype1, Index1, ListArray1) in [
             (numpy.int32, awkward1.layout.Index32, awkward1.layout.ListArray32),
@@ -246,27 +246,27 @@ def test_listoffsetarray_merge():
         stops1  = Index1(numpy.array([3, 3, 5], dtype=dtype1))
         array1 = ListArray1(starts1, stops1, content1)
 
-        assert awkward1.tolist(array1.merge(regulararray)) == [[1.1, 2.2, 3.3], [], [4.4, 5.5], [1, 2], [3, 4], [5, 6]]
-        assert awkward1.tolist(regulararray.merge(array1)) == [[1, 2], [3, 4], [5, 6], [1.1, 2.2, 3.3], [], [4.4, 5.5]]
+        assert awkward1.to_list(array1.merge(regulararray)) == [[1.1, 2.2, 3.3], [], [4.4, 5.5], [1, 2], [3, 4], [5, 6]]
+        assert awkward1.to_list(regulararray.merge(array1)) == [[1, 2], [3, 4], [5, 6], [1.1, 2.2, 3.3], [], [4.4, 5.5]]
 
 def test_recordarray_merge():
     emptyarray = awkward1.layout.EmptyArray()
 
-    arrayr1 = awkward1.Array([{"x": 0, "y": []}, {"x": 1, "y": [1, 1]}, {"x": 2, "y": [2, 2]}], checkvalid=True).layout
-    arrayr2 = awkward1.Array([{"x": 2.2, "y": [2.2, 2.2]}, {"x": 1.1, "y": [1.1, 1.1]}, {"x": 0.0, "y": [0.0, 0.0]}], checkvalid=True).layout
-    arrayr3 = awkward1.Array([{"x": 0, "y": 0.0}, {"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}], checkvalid=True).layout
-    arrayr4 = awkward1.Array([{"y": [], "x": 0}, {"y": [1, 1], "x": 1}, {"y": [2, 2], "x": 2}], checkvalid=True).layout
-    arrayr5 = awkward1.Array([{"x": 0, "y": [], "z": 0}, {"x": 1, "y": [1, 1], "z": 1}, {"x": 2, "y": [2, 2], "z": 2}], checkvalid=True).layout
-    arrayr6 = awkward1.Array([{"z": 0, "x": 0, "y": []}, {"z": 1, "x": 1, "y": [1, 1]}, {"z": 2, "x": 2, "y": [2, 2]}], checkvalid=True).layout
-    arrayr7 = awkward1.Array([{"x": 0}, {"x": 1}, {"x": 2}], checkvalid=True).layout
+    arrayr1 = awkward1.Array([{"x": 0, "y": []}, {"x": 1, "y": [1, 1]}, {"x": 2, "y": [2, 2]}], check_valid=True).layout
+    arrayr2 = awkward1.Array([{"x": 2.2, "y": [2.2, 2.2]}, {"x": 1.1, "y": [1.1, 1.1]}, {"x": 0.0, "y": [0.0, 0.0]}], check_valid=True).layout
+    arrayr3 = awkward1.Array([{"x": 0, "y": 0.0}, {"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}], check_valid=True).layout
+    arrayr4 = awkward1.Array([{"y": [], "x": 0}, {"y": [1, 1], "x": 1}, {"y": [2, 2], "x": 2}], check_valid=True).layout
+    arrayr5 = awkward1.Array([{"x": 0, "y": [], "z": 0}, {"x": 1, "y": [1, 1], "z": 1}, {"x": 2, "y": [2, 2], "z": 2}], check_valid=True).layout
+    arrayr6 = awkward1.Array([{"z": 0, "x": 0, "y": []}, {"z": 1, "x": 1, "y": [1, 1]}, {"z": 2, "x": 2, "y": [2, 2]}], check_valid=True).layout
+    arrayr7 = awkward1.Array([{"x": 0}, {"x": 1}, {"x": 2}], check_valid=True).layout
 
-    arrayt1 = awkward1.Array([(0, []), (1, [1.1]), (2, [2, 2])], checkvalid=True).layout
-    arrayt2 = awkward1.Array([(2.2, [2.2, 2.2]), (1.1, [1.1, 1.1]), (0.0, [0.0, 0.0])], checkvalid=True).layout
-    arrayt3 = awkward1.Array([(0, 0.0), (1, 1.1), (2, 2.2)], checkvalid=True).layout
-    arrayt4 = awkward1.Array([([], 0), ([1.1], 1), ([2.2, 2.2], 2)], checkvalid=True).layout
-    arrayt5 = awkward1.Array([(0, [], 0), (1, [1], 1), (2, [2, 2], 2)], checkvalid=True).layout
-    arrayt6 = awkward1.Array([(0, 0, []), (1, 1, [1]), (2, 2, [2, 2])], checkvalid=True).layout
-    arrayt7 = awkward1.Array([(0,), (1,), (2,)], checkvalid=True).layout
+    arrayt1 = awkward1.Array([(0, []), (1, [1.1]), (2, [2, 2])], check_valid=True).layout
+    arrayt2 = awkward1.Array([(2.2, [2.2, 2.2]), (1.1, [1.1, 1.1]), (0.0, [0.0, 0.0])], check_valid=True).layout
+    arrayt3 = awkward1.Array([(0, 0.0), (1, 1.1), (2, 2.2)], check_valid=True).layout
+    arrayt4 = awkward1.Array([([], 0), ([1.1], 1), ([2.2, 2.2], 2)], check_valid=True).layout
+    arrayt5 = awkward1.Array([(0, [], 0), (1, [1], 1), (2, [2, 2], 2)], check_valid=True).layout
+    arrayt6 = awkward1.Array([(0, 0, []), (1, 1, [1]), (2, 2, [2, 2])], check_valid=True).layout
+    arrayt7 = awkward1.Array([(0,), (1,), (2,)], check_valid=True).layout
 
     assert arrayr1.mergeable(arrayr2)
     assert arrayr2.mergeable(arrayr1)
@@ -288,90 +288,90 @@ def test_recordarray_merge():
     assert not arrayt5.mergeable(arrayt6)
     assert not arrayt1.mergeable(arrayt7)
 
-    assert awkward1.tolist(arrayr1.merge(arrayr2)) == [{"x": 0.0, "y": []}, {"x": 1.0, "y": [1.0, 1.0]}, {"x": 2.0, "y": [2.0, 2.0]}, {"x": 2.2, "y": [2.2, 2.2]}, {"x": 1.1, "y": [1.1, 1.1]}, {"x": 0.0, "y": [0.0, 0.0]}]
-    assert awkward1.tolist(arrayr2.merge(arrayr1)) == [{"x": 2.2, "y": [2.2, 2.2]}, {"x": 1.1, "y": [1.1, 1.1]}, {"x": 0.0, "y": [0.0, 0.0]}, {"x": 0.0, "y": []}, {"x": 1.0, "y": [1.0, 1.0]}, {"x": 2.0, "y": [2.0, 2.0]}]
+    assert awkward1.to_list(arrayr1.merge(arrayr2)) == [{"x": 0.0, "y": []}, {"x": 1.0, "y": [1.0, 1.0]}, {"x": 2.0, "y": [2.0, 2.0]}, {"x": 2.2, "y": [2.2, 2.2]}, {"x": 1.1, "y": [1.1, 1.1]}, {"x": 0.0, "y": [0.0, 0.0]}]
+    assert awkward1.to_list(arrayr2.merge(arrayr1)) == [{"x": 2.2, "y": [2.2, 2.2]}, {"x": 1.1, "y": [1.1, 1.1]}, {"x": 0.0, "y": [0.0, 0.0]}, {"x": 0.0, "y": []}, {"x": 1.0, "y": [1.0, 1.0]}, {"x": 2.0, "y": [2.0, 2.0]}]
 
-    assert awkward1.tolist(arrayr1.merge(arrayr4)) == [{"x": 0, "y": []}, {"x": 1, "y": [1, 1]}, {"x": 2, "y": [2, 2]}, {"x": 0, "y": []}, {"x": 1, "y": [1, 1]}, {"x": 2, "y": [2, 2]}]
-    assert awkward1.tolist(arrayr4.merge(arrayr1)) == [{"x": 0, "y": []}, {"x": 1, "y": [1, 1]}, {"x": 2, "y": [2, 2]}, {"x": 0, "y": []}, {"x": 1, "y": [1, 1]}, {"x": 2, "y": [2, 2]}]
+    assert awkward1.to_list(arrayr1.merge(arrayr4)) == [{"x": 0, "y": []}, {"x": 1, "y": [1, 1]}, {"x": 2, "y": [2, 2]}, {"x": 0, "y": []}, {"x": 1, "y": [1, 1]}, {"x": 2, "y": [2, 2]}]
+    assert awkward1.to_list(arrayr4.merge(arrayr1)) == [{"x": 0, "y": []}, {"x": 1, "y": [1, 1]}, {"x": 2, "y": [2, 2]}, {"x": 0, "y": []}, {"x": 1, "y": [1, 1]}, {"x": 2, "y": [2, 2]}]
 
-    assert awkward1.tolist(arrayr5.merge(arrayr6)) == [{"x": 0, "y": [], "z": 0}, {"x": 1, "y": [1, 1], "z": 1}, {"x": 2, "y": [2, 2], "z": 2}, {"x": 0, "y": [], "z": 0}, {"x": 1, "y": [1, 1], "z": 1}, {"x": 2, "y": [2, 2], "z": 2}]
-    assert awkward1.tolist(arrayr6.merge(arrayr5)) == [{"x": 0, "y": [], "z": 0}, {"x": 1, "y": [1, 1], "z": 1}, {"x": 2, "y": [2, 2], "z": 2}, {"x": 0, "y": [], "z": 0}, {"x": 1, "y": [1, 1], "z": 1}, {"x": 2, "y": [2, 2], "z": 2}]
+    assert awkward1.to_list(arrayr5.merge(arrayr6)) == [{"x": 0, "y": [], "z": 0}, {"x": 1, "y": [1, 1], "z": 1}, {"x": 2, "y": [2, 2], "z": 2}, {"x": 0, "y": [], "z": 0}, {"x": 1, "y": [1, 1], "z": 1}, {"x": 2, "y": [2, 2], "z": 2}]
+    assert awkward1.to_list(arrayr6.merge(arrayr5)) == [{"x": 0, "y": [], "z": 0}, {"x": 1, "y": [1, 1], "z": 1}, {"x": 2, "y": [2, 2], "z": 2}, {"x": 0, "y": [], "z": 0}, {"x": 1, "y": [1, 1], "z": 1}, {"x": 2, "y": [2, 2], "z": 2}]
 
-    assert awkward1.tolist(arrayt1.merge(arrayt2)) == [(0.0, []), (1.0, [1.1]), (2.0, [2.0, 2.0]), (2.2, [2.2, 2.2]), (1.1, [1.1, 1.1]), (0.0, [0.0, 0.0])]
-    assert awkward1.tolist(arrayt2.merge(arrayt1)) == [(2.2, [2.2, 2.2]), (1.1, [1.1, 1.1]), (0.0, [0.0, 0.0]), (0.0, []), (1.0, [1.1]), (2.0, [2.0, 2.0])]
+    assert awkward1.to_list(arrayt1.merge(arrayt2)) == [(0.0, []), (1.0, [1.1]), (2.0, [2.0, 2.0]), (2.2, [2.2, 2.2]), (1.1, [1.1, 1.1]), (0.0, [0.0, 0.0])]
+    assert awkward1.to_list(arrayt2.merge(arrayt1)) == [(2.2, [2.2, 2.2]), (1.1, [1.1, 1.1]), (0.0, [0.0, 0.0]), (0.0, []), (1.0, [1.1]), (2.0, [2.0, 2.0])]
 
-    assert awkward1.tolist(arrayr1.merge(emptyarray)) == awkward1.tolist(arrayr1)
-    assert awkward1.tolist(arrayr2.merge(emptyarray)) == awkward1.tolist(arrayr2)
-    assert awkward1.tolist(arrayr3.merge(emptyarray)) == awkward1.tolist(arrayr3)
-    assert awkward1.tolist(arrayr4.merge(emptyarray)) == awkward1.tolist(arrayr4)
-    assert awkward1.tolist(arrayr5.merge(emptyarray)) == awkward1.tolist(arrayr5)
-    assert awkward1.tolist(arrayr6.merge(emptyarray)) == awkward1.tolist(arrayr6)
-    assert awkward1.tolist(arrayr7.merge(emptyarray)) == awkward1.tolist(arrayr7)
+    assert awkward1.to_list(arrayr1.merge(emptyarray)) == awkward1.to_list(arrayr1)
+    assert awkward1.to_list(arrayr2.merge(emptyarray)) == awkward1.to_list(arrayr2)
+    assert awkward1.to_list(arrayr3.merge(emptyarray)) == awkward1.to_list(arrayr3)
+    assert awkward1.to_list(arrayr4.merge(emptyarray)) == awkward1.to_list(arrayr4)
+    assert awkward1.to_list(arrayr5.merge(emptyarray)) == awkward1.to_list(arrayr5)
+    assert awkward1.to_list(arrayr6.merge(emptyarray)) == awkward1.to_list(arrayr6)
+    assert awkward1.to_list(arrayr7.merge(emptyarray)) == awkward1.to_list(arrayr7)
 
-    assert awkward1.tolist(emptyarray.merge(arrayr1)) == awkward1.tolist(arrayr1)
-    assert awkward1.tolist(emptyarray.merge(arrayr2)) == awkward1.tolist(arrayr2)
-    assert awkward1.tolist(emptyarray.merge(arrayr3)) == awkward1.tolist(arrayr3)
-    assert awkward1.tolist(emptyarray.merge(arrayr4)) == awkward1.tolist(arrayr4)
-    assert awkward1.tolist(emptyarray.merge(arrayr5)) == awkward1.tolist(arrayr5)
-    assert awkward1.tolist(emptyarray.merge(arrayr6)) == awkward1.tolist(arrayr6)
-    assert awkward1.tolist(emptyarray.merge(arrayr7)) == awkward1.tolist(arrayr7)
+    assert awkward1.to_list(emptyarray.merge(arrayr1)) == awkward1.to_list(arrayr1)
+    assert awkward1.to_list(emptyarray.merge(arrayr2)) == awkward1.to_list(arrayr2)
+    assert awkward1.to_list(emptyarray.merge(arrayr3)) == awkward1.to_list(arrayr3)
+    assert awkward1.to_list(emptyarray.merge(arrayr4)) == awkward1.to_list(arrayr4)
+    assert awkward1.to_list(emptyarray.merge(arrayr5)) == awkward1.to_list(arrayr5)
+    assert awkward1.to_list(emptyarray.merge(arrayr6)) == awkward1.to_list(arrayr6)
+    assert awkward1.to_list(emptyarray.merge(arrayr7)) == awkward1.to_list(arrayr7)
 
-    assert awkward1.tolist(arrayt1.merge(emptyarray)) == awkward1.tolist(arrayt1)
-    assert awkward1.tolist(arrayt2.merge(emptyarray)) == awkward1.tolist(arrayt2)
-    assert awkward1.tolist(arrayt3.merge(emptyarray)) == awkward1.tolist(arrayt3)
-    assert awkward1.tolist(arrayt4.merge(emptyarray)) == awkward1.tolist(arrayt4)
-    assert awkward1.tolist(arrayt5.merge(emptyarray)) == awkward1.tolist(arrayt5)
-    assert awkward1.tolist(arrayt6.merge(emptyarray)) == awkward1.tolist(arrayt6)
-    assert awkward1.tolist(arrayt7.merge(emptyarray)) == awkward1.tolist(arrayt7)
+    assert awkward1.to_list(arrayt1.merge(emptyarray)) == awkward1.to_list(arrayt1)
+    assert awkward1.to_list(arrayt2.merge(emptyarray)) == awkward1.to_list(arrayt2)
+    assert awkward1.to_list(arrayt3.merge(emptyarray)) == awkward1.to_list(arrayt3)
+    assert awkward1.to_list(arrayt4.merge(emptyarray)) == awkward1.to_list(arrayt4)
+    assert awkward1.to_list(arrayt5.merge(emptyarray)) == awkward1.to_list(arrayt5)
+    assert awkward1.to_list(arrayt6.merge(emptyarray)) == awkward1.to_list(arrayt6)
+    assert awkward1.to_list(arrayt7.merge(emptyarray)) == awkward1.to_list(arrayt7)
 
-    assert awkward1.tolist(emptyarray.merge(arrayt1)) == awkward1.tolist(arrayt1)
-    assert awkward1.tolist(emptyarray.merge(arrayt2)) == awkward1.tolist(arrayt2)
-    assert awkward1.tolist(emptyarray.merge(arrayt3)) == awkward1.tolist(arrayt3)
-    assert awkward1.tolist(emptyarray.merge(arrayt4)) == awkward1.tolist(arrayt4)
-    assert awkward1.tolist(emptyarray.merge(arrayt5)) == awkward1.tolist(arrayt5)
-    assert awkward1.tolist(emptyarray.merge(arrayt6)) == awkward1.tolist(arrayt6)
-    assert awkward1.tolist(emptyarray.merge(arrayt7)) == awkward1.tolist(arrayt7)
+    assert awkward1.to_list(emptyarray.merge(arrayt1)) == awkward1.to_list(arrayt1)
+    assert awkward1.to_list(emptyarray.merge(arrayt2)) == awkward1.to_list(arrayt2)
+    assert awkward1.to_list(emptyarray.merge(arrayt3)) == awkward1.to_list(arrayt3)
+    assert awkward1.to_list(emptyarray.merge(arrayt4)) == awkward1.to_list(arrayt4)
+    assert awkward1.to_list(emptyarray.merge(arrayt5)) == awkward1.to_list(arrayt5)
+    assert awkward1.to_list(emptyarray.merge(arrayt6)) == awkward1.to_list(arrayt6)
+    assert awkward1.to_list(emptyarray.merge(arrayt7)) == awkward1.to_list(arrayt7)
 
 def test_indexedarray_merge():
     emptyarray = awkward1.layout.EmptyArray()
 
-    content1 = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], checkvalid=True).layout
-    content2 = awkward1.Array([[1, 2], [], [3, 4]], checkvalid=True).layout
+    content1 = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], check_valid=True).layout
+    content2 = awkward1.Array([[1, 2], [], [3, 4]], check_valid=True).layout
     index1 = awkward1.layout.Index64(numpy.array([2, 0, -1, 0, 1, 2], dtype=numpy.int64))
     indexedarray1 = awkward1.layout.IndexedOptionArray64(index1, content1)
-    assert awkward1.tolist(indexedarray1) == [[4.4, 5.5], [1.1, 2.2, 3.3], None, [1.1, 2.2, 3.3], [], [4.4, 5.5]]
+    assert awkward1.to_list(indexedarray1) == [[4.4, 5.5], [1.1, 2.2, 3.3], None, [1.1, 2.2, 3.3], [], [4.4, 5.5]]
 
-    assert awkward1.tolist(indexedarray1.merge(content2)) == [[4.4, 5.5], [1.1, 2.2, 3.3], None, [1.1, 2.2, 3.3], [], [4.4, 5.5], [1.0, 2.0], [], [3.0, 4.0]]
-    assert awkward1.tolist(content2.merge(indexedarray1)) == [[1.0, 2.0], [], [3.0, 4.0], [4.4, 5.5], [1.1, 2.2, 3.3], None, [1.1, 2.2, 3.3], [], [4.4, 5.5]]
-    assert awkward1.tolist(indexedarray1.merge(indexedarray1)) == [[4.4, 5.5], [1.1, 2.2, 3.3], None, [1.1, 2.2, 3.3], [], [4.4, 5.5], [4.4, 5.5], [1.1, 2.2, 3.3], None, [1.1, 2.2, 3.3], [], [4.4, 5.5]]
+    assert awkward1.to_list(indexedarray1.merge(content2)) == [[4.4, 5.5], [1.1, 2.2, 3.3], None, [1.1, 2.2, 3.3], [], [4.4, 5.5], [1.0, 2.0], [], [3.0, 4.0]]
+    assert awkward1.to_list(content2.merge(indexedarray1)) == [[1.0, 2.0], [], [3.0, 4.0], [4.4, 5.5], [1.1, 2.2, 3.3], None, [1.1, 2.2, 3.3], [], [4.4, 5.5]]
+    assert awkward1.to_list(indexedarray1.merge(indexedarray1)) == [[4.4, 5.5], [1.1, 2.2, 3.3], None, [1.1, 2.2, 3.3], [], [4.4, 5.5], [4.4, 5.5], [1.1, 2.2, 3.3], None, [1.1, 2.2, 3.3], [], [4.4, 5.5]]
 
 def test_unionarray_merge():
     emptyarray = awkward1.layout.EmptyArray()
 
-    one = awkward1.Array([0.0, 1.1, 2.2, [], [1], [2, 2]], checkvalid=True).layout
-    two = awkward1.Array([{"x": 1, "y": 1.1}, 999, 123, {"x": 2, "y": 2.2}], checkvalid=True).layout
-    three = awkward1.Array(["one", "two", "three"], checkvalid=True).layout
+    one = awkward1.Array([0.0, 1.1, 2.2, [], [1], [2, 2]], check_valid=True).layout
+    two = awkward1.Array([{"x": 1, "y": 1.1}, 999, 123, {"x": 2, "y": 2.2}], check_valid=True).layout
+    three = awkward1.Array(["one", "two", "three"], check_valid=True).layout
 
-    assert awkward1.tolist(one.merge(two)) == [0.0, 1.1, 2.2, [], [1], [2, 2], {"x": 1, "y": 1.1}, 999, 123, {"x": 2, "y": 2.2}]
-    assert awkward1.tolist(two.merge(one)) == [{"x": 1, "y": 1.1}, 999, 123, {"x": 2, "y": 2.2}, 0.0, 1.1, 2.2, [], [1], [2, 2]]
+    assert awkward1.to_list(one.merge(two)) == [0.0, 1.1, 2.2, [], [1], [2, 2], {"x": 1, "y": 1.1}, 999, 123, {"x": 2, "y": 2.2}]
+    assert awkward1.to_list(two.merge(one)) == [{"x": 1, "y": 1.1}, 999, 123, {"x": 2, "y": 2.2}, 0.0, 1.1, 2.2, [], [1], [2, 2]]
 
-    assert awkward1.tolist(one.merge(emptyarray)) == [0.0, 1.1, 2.2, [], [1], [2, 2]]
-    assert awkward1.tolist(emptyarray.merge(one)) == [0.0, 1.1, 2.2, [], [1], [2, 2]]
+    assert awkward1.to_list(one.merge(emptyarray)) == [0.0, 1.1, 2.2, [], [1], [2, 2]]
+    assert awkward1.to_list(emptyarray.merge(one)) == [0.0, 1.1, 2.2, [], [1], [2, 2]]
 
-    assert awkward1.tolist(one.merge(three)) == [0.0, 1.1, 2.2, [], [1], [2, 2], "one", "two", "three"]
-    assert awkward1.tolist(two.merge(three)) == [{"x": 1, "y": 1.1}, 999, 123, {"x": 2, "y": 2.2}, "one", "two", "three"]
-    assert awkward1.tolist(three.merge(one)) == ["one", "two", "three", 0.0, 1.1, 2.2, [], [1], [2, 2]]
-    assert awkward1.tolist(three.merge(two)) == ["one", "two", "three", {"x": 1, "y": 1.1}, 999, 123, {"x": 2, "y": 2.2}]
+    assert awkward1.to_list(one.merge(three)) == [0.0, 1.1, 2.2, [], [1], [2, 2], "one", "two", "three"]
+    assert awkward1.to_list(two.merge(three)) == [{"x": 1, "y": 1.1}, 999, 123, {"x": 2, "y": 2.2}, "one", "two", "three"]
+    assert awkward1.to_list(three.merge(one)) == ["one", "two", "three", 0.0, 1.1, 2.2, [], [1], [2, 2]]
+    assert awkward1.to_list(three.merge(two)) == ["one", "two", "three", {"x": 1, "y": 1.1}, 999, 123, {"x": 2, "y": 2.2}]
 
 def test_merge_parameters():
-    one = awkward1.Array([[121, 117, 99, 107, 121], [115, 116, 117, 102, 102]], checkvalid=True).layout
-    two = awkward1.Array(["good", "stuff"], checkvalid=True).layout
+    one = awkward1.Array([[121, 117, 99, 107, 121], [115, 116, 117, 102, 102]], check_valid=True).layout
+    two = awkward1.Array(["good", "stuff"], check_valid=True).layout
 
-    assert awkward1.tolist(one.merge(two)) == [[121, 117, 99, 107, 121], [115, 116, 117, 102, 102], "good", "stuff"]
-    assert awkward1.tolist(two.merge(one)) == ["good", "stuff", [121, 117, 99, 107, 121], [115, 116, 117, 102, 102]]
+    assert awkward1.to_list(one.merge(two)) == [[121, 117, 99, 107, 121], [115, 116, 117, 102, 102], "good", "stuff"]
+    assert awkward1.to_list(two.merge(one)) == ["good", "stuff", [121, 117, 99, 107, 121], [115, 116, 117, 102, 102]]
 
 def test_bytemask():
-    array = awkward1.Array(["one", "two", None, "three", None, None, "four"], checkvalid=True).layout
+    array = awkward1.Array(["one", "two", None, "three", None, None, "four"], check_valid=True).layout
     assert numpy.asarray(array.bytemask()).tolist() == [0, 0, 1, 0, 1, 1, 0]
 
     index2 = awkward1.layout.Index64(numpy.array([2, 2, 1, 5, 0], dtype=numpy.int64))
@@ -379,12 +379,12 @@ def test_bytemask():
     assert numpy.asarray(array2.bytemask()).tolist() == [0, 0, 0, 0, 0]
 
 def test_indexedarray_simplify():
-    array = awkward1.Array(["one", "two", None, "three", None, None, "four", "five"], checkvalid=True).layout
+    array = awkward1.Array(["one", "two", None, "three", None, None, "four", "five"], check_valid=True).layout
     assert numpy.asarray(array.index).tolist() == [0, 1, -1, 2, -1, -1, 3, 4]
 
     index2 = awkward1.layout.Index64(numpy.array([2, 2, 1, 6, 5], dtype=numpy.int64))
     array2 = awkward1.layout.IndexedArray64(index2, array)
-    assert awkward1.tolist(array2.simplify()) == awkward1.tolist(array2) == [None, None, "two", "four", None]
+    assert awkward1.to_list(array2.simplify()) == awkward1.to_list(array2) == [None, None, "two", "four", None]
 
 def test_indexedarray_simplify_more():
     content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
@@ -397,56 +397,56 @@ def test_indexedarray_simplify_more():
     index2_64 = awkward1.layout.Index64(numpy.array([0, 2, 4, 6], dtype=numpy.int64))
 
     array = awkward1.layout.IndexedArray32(index2_32, awkward1.layout.IndexedArray32(index1_32, content))
-    assert awkward1.tolist(array) == [6.6, 4.4, 2.2, 0.0]
-    assert awkward1.tolist(array.simplify()) == [6.6, 4.4, 2.2, 0.0]
+    assert awkward1.to_list(array) == [6.6, 4.4, 2.2, 0.0]
+    assert awkward1.to_list(array.simplify()) == [6.6, 4.4, 2.2, 0.0]
     assert isinstance(array.simplify(), awkward1.layout.IndexedArray64)
     assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
 
     array = awkward1.layout.IndexedArray32(index2_32, awkward1.layout.IndexedArrayU32(index1_U32, content))
-    assert awkward1.tolist(array) == [6.6, 4.4, 2.2, 0.0]
-    assert awkward1.tolist(array.simplify()) == [6.6, 4.4, 2.2, 0.0]
+    assert awkward1.to_list(array) == [6.6, 4.4, 2.2, 0.0]
+    assert awkward1.to_list(array.simplify()) == [6.6, 4.4, 2.2, 0.0]
     assert isinstance(array.simplify(), awkward1.layout.IndexedArray64)
     assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
 
     array = awkward1.layout.IndexedArray32(index2_32, awkward1.layout.IndexedArray64(index1_64, content))
-    assert awkward1.tolist(array) == [6.6, 4.4, 2.2, 0.0]
-    assert awkward1.tolist(array.simplify()) == [6.6, 4.4, 2.2, 0.0]
+    assert awkward1.to_list(array) == [6.6, 4.4, 2.2, 0.0]
+    assert awkward1.to_list(array.simplify()) == [6.6, 4.4, 2.2, 0.0]
     assert isinstance(array.simplify(), awkward1.layout.IndexedArray64)
     assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
 
     array = awkward1.layout.IndexedArrayU32(index2_U32, awkward1.layout.IndexedArray32(index1_32, content))
-    assert awkward1.tolist(array) == [6.6, 4.4, 2.2, 0.0]
-    assert awkward1.tolist(array.simplify()) == [6.6, 4.4, 2.2, 0.0]
+    assert awkward1.to_list(array) == [6.6, 4.4, 2.2, 0.0]
+    assert awkward1.to_list(array.simplify()) == [6.6, 4.4, 2.2, 0.0]
     assert isinstance(array.simplify(), awkward1.layout.IndexedArray64)
     assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
 
     array = awkward1.layout.IndexedArrayU32(index2_U32, awkward1.layout.IndexedArrayU32(index1_U32, content))
-    assert awkward1.tolist(array) == [6.6, 4.4, 2.2, 0.0]
-    assert awkward1.tolist(array.simplify()) == [6.6, 4.4, 2.2, 0.0]
+    assert awkward1.to_list(array) == [6.6, 4.4, 2.2, 0.0]
+    assert awkward1.to_list(array.simplify()) == [6.6, 4.4, 2.2, 0.0]
     assert isinstance(array.simplify(), awkward1.layout.IndexedArray64)
     assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
 
     array = awkward1.layout.IndexedArrayU32(index2_U32, awkward1.layout.IndexedArray64(index1_64, content))
-    assert awkward1.tolist(array) == [6.6, 4.4, 2.2, 0.0]
-    assert awkward1.tolist(array.simplify()) == [6.6, 4.4, 2.2, 0.0]
+    assert awkward1.to_list(array) == [6.6, 4.4, 2.2, 0.0]
+    assert awkward1.to_list(array.simplify()) == [6.6, 4.4, 2.2, 0.0]
     assert isinstance(array.simplify(), awkward1.layout.IndexedArray64)
     assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
 
     array = awkward1.layout.IndexedArray64(index2_64, awkward1.layout.IndexedArray32(index1_32, content))
-    assert awkward1.tolist(array) == [6.6, 4.4, 2.2, 0.0]
-    assert awkward1.tolist(array.simplify()) == [6.6, 4.4, 2.2, 0.0]
+    assert awkward1.to_list(array) == [6.6, 4.4, 2.2, 0.0]
+    assert awkward1.to_list(array.simplify()) == [6.6, 4.4, 2.2, 0.0]
     assert isinstance(array.simplify(), awkward1.layout.IndexedArray64)
     assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
 
     array = awkward1.layout.IndexedArray64(index2_64, awkward1.layout.IndexedArrayU32(index1_U32, content))
-    assert awkward1.tolist(array) == [6.6, 4.4, 2.2, 0.0]
-    assert awkward1.tolist(array.simplify()) == [6.6, 4.4, 2.2, 0.0]
+    assert awkward1.to_list(array) == [6.6, 4.4, 2.2, 0.0]
+    assert awkward1.to_list(array.simplify()) == [6.6, 4.4, 2.2, 0.0]
     assert isinstance(array.simplify(), awkward1.layout.IndexedArray64)
     assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
 
     array = awkward1.layout.IndexedArray64(index2_64, awkward1.layout.IndexedArray64(index1_64, content))
-    assert awkward1.tolist(array) == [6.6, 4.4, 2.2, 0.0]
-    assert awkward1.tolist(array.simplify()) == [6.6, 4.4, 2.2, 0.0]
+    assert awkward1.to_list(array) == [6.6, 4.4, 2.2, 0.0]
+    assert awkward1.to_list(array.simplify()) == [6.6, 4.4, 2.2, 0.0]
     assert isinstance(array.simplify(), awkward1.layout.IndexedArray64)
     assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
 
@@ -457,38 +457,38 @@ def test_indexedarray_simplify_more():
     index2_64 = awkward1.layout.Index64(numpy.array([0, 2, 4, 6], dtype=numpy.int64))
 
     array = awkward1.layout.IndexedArray32(index2_32, awkward1.layout.IndexedOptionArray32(index1_32, content))
-    assert awkward1.tolist(array) == [6.6, None, None, 0.0]
-    assert awkward1.tolist(array.simplify()) == [6.6, None, None, 0.0]
+    assert awkward1.to_list(array) == [6.6, None, None, 0.0]
+    assert awkward1.to_list(array.simplify()) == [6.6, None, None, 0.0]
     assert isinstance(array.simplify(), awkward1.layout.IndexedOptionArray64)
     assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
 
     array = awkward1.layout.IndexedArray32(index2_32, awkward1.layout.IndexedOptionArray64(index1_64, content))
-    assert awkward1.tolist(array) == [6.6, None, None, 0.0]
-    assert awkward1.tolist(array.simplify()) == [6.6, None, None, 0.0]
+    assert awkward1.to_list(array) == [6.6, None, None, 0.0]
+    assert awkward1.to_list(array.simplify()) == [6.6, None, None, 0.0]
     assert isinstance(array.simplify(), awkward1.layout.IndexedOptionArray64)
     assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
 
     array = awkward1.layout.IndexedArrayU32(index2_U32, awkward1.layout.IndexedOptionArray32(index1_32, content))
-    assert awkward1.tolist(array) == [6.6, None, None, 0.0]
-    assert awkward1.tolist(array.simplify()) == [6.6, None, None, 0.0]
+    assert awkward1.to_list(array) == [6.6, None, None, 0.0]
+    assert awkward1.to_list(array.simplify()) == [6.6, None, None, 0.0]
     assert isinstance(array.simplify(), awkward1.layout.IndexedOptionArray64)
     assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
 
     array = awkward1.layout.IndexedArrayU32(index2_U32, awkward1.layout.IndexedOptionArray64(index1_64, content))
-    assert awkward1.tolist(array) == [6.6, None, None, 0.0]
-    assert awkward1.tolist(array.simplify()) == [6.6, None, None, 0.0]
+    assert awkward1.to_list(array) == [6.6, None, None, 0.0]
+    assert awkward1.to_list(array.simplify()) == [6.6, None, None, 0.0]
     assert isinstance(array.simplify(), awkward1.layout.IndexedOptionArray64)
     assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
 
     array = awkward1.layout.IndexedArray64(index2_64, awkward1.layout.IndexedOptionArray32(index1_32, content))
-    assert awkward1.tolist(array) == [6.6, None, None, 0.0]
-    assert awkward1.tolist(array.simplify()) == [6.6, None, None, 0.0]
+    assert awkward1.to_list(array) == [6.6, None, None, 0.0]
+    assert awkward1.to_list(array.simplify()) == [6.6, None, None, 0.0]
     assert isinstance(array.simplify(), awkward1.layout.IndexedOptionArray64)
     assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
 
     array = awkward1.layout.IndexedArray64(index2_64, awkward1.layout.IndexedOptionArray64(index1_64, content))
-    assert awkward1.tolist(array) == [6.6, None, None, 0.0]
-    assert awkward1.tolist(array.simplify()) == [6.6, None, None, 0.0]
+    assert awkward1.to_list(array) == [6.6, None, None, 0.0]
+    assert awkward1.to_list(array.simplify()) == [6.6, None, None, 0.0]
     assert isinstance(array.simplify(), awkward1.layout.IndexedOptionArray64)
     assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
 
@@ -499,38 +499,38 @@ def test_indexedarray_simplify_more():
     index2_64 = awkward1.layout.Index64(numpy.array([0, -1, 4, -1], dtype=numpy.int64))
 
     array = awkward1.layout.IndexedOptionArray32(index2_32, awkward1.layout.IndexedArray32(index1_32, content))
-    assert awkward1.tolist(array) == [6.6, None, 2.2, None]
-    assert awkward1.tolist(array.simplify()) == [6.6, None, 2.2, None]
+    assert awkward1.to_list(array) == [6.6, None, 2.2, None]
+    assert awkward1.to_list(array.simplify()) == [6.6, None, 2.2, None]
     assert isinstance(array.simplify(), awkward1.layout.IndexedOptionArray64)
     assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
 
     array = awkward1.layout.IndexedOptionArray32(index2_32, awkward1.layout.IndexedArrayU32(index1_U32, content))
-    assert awkward1.tolist(array) == [6.6, None, 2.2, None]
-    assert awkward1.tolist(array.simplify()) == [6.6, None, 2.2, None]
+    assert awkward1.to_list(array) == [6.6, None, 2.2, None]
+    assert awkward1.to_list(array.simplify()) == [6.6, None, 2.2, None]
     assert isinstance(array.simplify(), awkward1.layout.IndexedOptionArray64)
     assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
 
     array = awkward1.layout.IndexedOptionArray32(index2_32, awkward1.layout.IndexedArray64(index1_64, content))
-    assert awkward1.tolist(array) == [6.6, None, 2.2, None]
-    assert awkward1.tolist(array.simplify()) == [6.6, None, 2.2, None]
+    assert awkward1.to_list(array) == [6.6, None, 2.2, None]
+    assert awkward1.to_list(array.simplify()) == [6.6, None, 2.2, None]
     assert isinstance(array.simplify(), awkward1.layout.IndexedOptionArray64)
     assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
 
     array = awkward1.layout.IndexedOptionArray64(index2_64, awkward1.layout.IndexedArray32(index1_32, content))
-    assert awkward1.tolist(array) == [6.6, None, 2.2, None]
-    assert awkward1.tolist(array.simplify()) == [6.6, None, 2.2, None]
+    assert awkward1.to_list(array) == [6.6, None, 2.2, None]
+    assert awkward1.to_list(array.simplify()) == [6.6, None, 2.2, None]
     assert isinstance(array.simplify(), awkward1.layout.IndexedOptionArray64)
     assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
 
     array = awkward1.layout.IndexedOptionArray64(index2_64, awkward1.layout.IndexedArrayU32(index1_U32, content))
-    assert awkward1.tolist(array) == [6.6, None, 2.2, None]
-    assert awkward1.tolist(array.simplify()) == [6.6, None, 2.2, None]
+    assert awkward1.to_list(array) == [6.6, None, 2.2, None]
+    assert awkward1.to_list(array.simplify()) == [6.6, None, 2.2, None]
     assert isinstance(array.simplify(), awkward1.layout.IndexedOptionArray64)
     assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
 
     array = awkward1.layout.IndexedOptionArray64(index2_64, awkward1.layout.IndexedArray64(index1_64, content))
-    assert awkward1.tolist(array) == [6.6, None, 2.2, None]
-    assert awkward1.tolist(array.simplify()) == [6.6, None, 2.2, None]
+    assert awkward1.to_list(array) == [6.6, None, 2.2, None]
+    assert awkward1.to_list(array.simplify()) == [6.6, None, 2.2, None]
     assert isinstance(array.simplify(), awkward1.layout.IndexedOptionArray64)
     assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
 
@@ -540,46 +540,46 @@ def test_indexedarray_simplify_more():
     index2_64 = awkward1.layout.Index64(numpy.array([0, -1, 4, -1], dtype=numpy.int64))
 
     array = awkward1.layout.IndexedOptionArray32(index2_32, awkward1.layout.IndexedOptionArray32(index1_32, content))
-    assert awkward1.tolist(array) == [6.6, None, None, None]
-    assert awkward1.tolist(array.simplify()) == [6.6, None, None, None]
+    assert awkward1.to_list(array) == [6.6, None, None, None]
+    assert awkward1.to_list(array.simplify()) == [6.6, None, None, None]
     assert isinstance(array.simplify(), awkward1.layout.IndexedOptionArray64)
     assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
 
     array = awkward1.layout.IndexedOptionArray32(index2_32, awkward1.layout.IndexedOptionArray64(index1_64, content))
-    assert awkward1.tolist(array) == [6.6, None, None, None]
-    assert awkward1.tolist(array.simplify()) == [6.6, None, None, None]
+    assert awkward1.to_list(array) == [6.6, None, None, None]
+    assert awkward1.to_list(array.simplify()) == [6.6, None, None, None]
     assert isinstance(array.simplify(), awkward1.layout.IndexedOptionArray64)
     assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
 
     array = awkward1.layout.IndexedOptionArray64(index2_64, awkward1.layout.IndexedOptionArray32(index1_32, content))
-    assert awkward1.tolist(array) == [6.6, None, None, None]
-    assert awkward1.tolist(array.simplify()) == [6.6, None, None, None]
+    assert awkward1.to_list(array) == [6.6, None, None, None]
+    assert awkward1.to_list(array.simplify()) == [6.6, None, None, None]
     assert isinstance(array.simplify(), awkward1.layout.IndexedOptionArray64)
     assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
 
     array = awkward1.layout.IndexedOptionArray64(index2_64, awkward1.layout.IndexedOptionArray64(index1_64, content))
-    assert awkward1.tolist(array) == [6.6, None, None, None]
-    assert awkward1.tolist(array.simplify()) == [6.6, None, None, None]
+    assert awkward1.to_list(array) == [6.6, None, None, None]
+    assert awkward1.to_list(array.simplify()) == [6.6, None, None, None]
     assert isinstance(array.simplify(), awkward1.layout.IndexedOptionArray64)
     assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
 
 def test_unionarray_simplify_one():
-    one = awkward1.Array([5, 4, 3, 2, 1], checkvalid=True).layout
-    two = awkward1.Array([[], [1], [2, 2], [3, 3, 3]], checkvalid=True).layout
-    three = awkward1.Array([1.1, 2.2, 3.3], checkvalid=True).layout
+    one = awkward1.Array([5, 4, 3, 2, 1], check_valid=True).layout
+    two = awkward1.Array([[], [1], [2, 2], [3, 3, 3]], check_valid=True).layout
+    three = awkward1.Array([1.1, 2.2, 3.3], check_valid=True).layout
     tags  =  awkward1.layout.Index8(numpy.array([0, 0, 1, 2, 1, 0, 2, 1, 1, 0, 2, 0], dtype=numpy.int8))
     index = awkward1.layout.Index64(numpy.array([0, 1, 0, 0, 1, 2, 1, 2, 3, 3, 2, 4], dtype=numpy.int64))
     array = awkward1.layout.UnionArray8_64(tags, index, [one, two, three])
 
-    assert awkward1.tolist(array) == [5, 4, [], 1.1, [1], 3, 2.2, [2, 2], [3, 3, 3], 2, 3.3, 1]
-    assert awkward1.tolist(array.simplify()) == [5.0, 4.0, [], 1.1, [1], 3.0, 2.2, [2, 2], [3, 3, 3], 2.0, 3.3, 1.0]
+    assert awkward1.to_list(array) == [5, 4, [], 1.1, [1], 3, 2.2, [2, 2], [3, 3, 3], 2, 3.3, 1]
+    assert awkward1.to_list(array.simplify()) == [5.0, 4.0, [], 1.1, [1], 3.0, 2.2, [2, 2], [3, 3, 3], 2.0, 3.3, 1.0]
     assert len(array.contents) == 3
     assert len(array.simplify().contents) == 2
 
 def test_unionarray_simplify():
-    one = awkward1.Array([5, 4, 3, 2, 1], checkvalid=True).layout
-    two = awkward1.Array([[], [1], [2, 2], [3, 3, 3]], checkvalid=True).layout
-    three = awkward1.Array([1.1, 2.2, 3.3], checkvalid=True).layout
+    one = awkward1.Array([5, 4, 3, 2, 1], check_valid=True).layout
+    two = awkward1.Array([[], [1], [2, 2], [3, 3, 3]], check_valid=True).layout
+    three = awkward1.Array([1.1, 2.2, 3.3], check_valid=True).layout
 
     tags2  =  awkward1.layout.Index8(numpy.array([0, 1, 0, 1, 0, 0, 1], dtype=numpy.int8))
     index2 = awkward1.layout.Index32(numpy.array([0, 0, 1, 1, 2, 3, 2], dtype=numpy.int32))
@@ -587,9 +587,9 @@ def test_unionarray_simplify():
     tags1  =  awkward1.layout.Index8(numpy.array([0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0], dtype=numpy.int8))
     index1 = awkward1.layout.Index64(numpy.array([0, 1, 0, 1, 2, 2, 3, 4, 5, 3, 6, 4], dtype=numpy.int64))
     outer = awkward1.layout.UnionArray8_64(tags1, index1, [one, inner])
-    assert awkward1.tolist(outer) == [5, 4, [], 1.1, [1], 3, 2.2, [2, 2], [3, 3, 3], 2, 3.3, 1]
+    assert awkward1.to_list(outer) == [5, 4, [], 1.1, [1], 3, 2.2, [2, 2], [3, 3, 3], 2, 3.3, 1]
 
-    assert awkward1.tolist(outer.simplify()) == [5.0, 4.0, [], 1.1, [1], 3.0, 2.2, [2, 2], [3, 3, 3], 2.0, 3.3, 1.0]
+    assert awkward1.to_list(outer.simplify()) == [5.0, 4.0, [], 1.1, [1], 3.0, 2.2, [2, 2], [3, 3, 3], 2.0, 3.3, 1.0]
     assert isinstance(outer.content(1), awkward1.layout.UnionArray8_32)
     assert isinstance(outer.simplify().content(0), awkward1.layout.NumpyArray)
     assert isinstance(outer.simplify().content(1), awkward1.layout.ListOffsetArray64)
@@ -601,22 +601,22 @@ def test_unionarray_simplify():
     tags1  =  awkward1.layout.Index8(numpy.array([1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1], dtype=numpy.int8))
     index1 = awkward1.layout.Index32(numpy.array([0, 1, 0, 1, 2, 2, 3, 4, 5, 3, 6, 4], dtype=numpy.int32))
     outer = awkward1.layout.UnionArray8_32(tags1, index1, [inner, one])
-    assert awkward1.tolist(outer) == [5, 4, [], 1.1, [1], 3, 2.2, [2, 2], [3, 3, 3], 2, 3.3, 1]
+    assert awkward1.to_list(outer) == [5, 4, [], 1.1, [1], 3, 2.2, [2, 2], [3, 3, 3], 2, 3.3, 1]
 
 def test_concatenate():
-    one = awkward1.Array([1.1, 2.2, 3.3, 4.4, 5.5], checkvalid=True)
-    two = awkward1.Array([[], [1], [2, 2], [3, 3, 3]], checkvalid=True)
-    three = awkward1.Array([True, False, False, True, True], checkvalid=True)
+    one = awkward1.Array([1.1, 2.2, 3.3, 4.4, 5.5], check_valid=True)
+    two = awkward1.Array([[], [1], [2, 2], [3, 3, 3]], check_valid=True)
+    three = awkward1.Array([True, False, False, True, True], check_valid=True)
 
-    assert awkward1.tolist(awkward1.concatenate([one, two, three])) == [1.1, 2.2, 3.3, 4.4, 5.5, [], [1], [2, 2], [3, 3, 3], 1.0, 0.0, 0.0, 1.0, 1.0]
+    assert awkward1.to_list(awkward1.concatenate([one, two, three])) == [1.1, 2.2, 3.3, 4.4, 5.5, [], [1], [2, 2], [3, 3, 3], 1.0, 0.0, 0.0, 1.0, 1.0]
     assert isinstance(awkward1.concatenate([one, two, three]).layout, awkward1.layout.UnionArray8_64)
     assert len(awkward1.concatenate([one, two, three]).layout.contents) == 2
 
 def test_where():
-    condition = awkward1.Array([True, False, True, False, True], checkvalid=True)
-    one = awkward1.Array([1.1, 2.2, 3.3, 4.4, 5.5], checkvalid=True)
-    two = awkward1.Array([False, False, False, True, True], checkvalid=True)
-    three = awkward1.Array([[], [1], [2, 2], [3, 3, 3], [4, 4, 4, 4]], checkvalid=True)
+    condition = awkward1.Array([True, False, True, False, True], check_valid=True)
+    one = awkward1.Array([1.1, 2.2, 3.3, 4.4, 5.5], check_valid=True)
+    two = awkward1.Array([False, False, False, True, True], check_valid=True)
+    three = awkward1.Array([[], [1], [2, 2], [3, 3, 3], [4, 4, 4, 4]], check_valid=True)
 
-    assert awkward1.tolist(awkward1.where(condition, one, two)) == [1.1, 0.0, 3.3, 1.0, 5.5]
-    assert awkward1.tolist(awkward1.where(condition, one, three)) == [1.1, [1], 3.3, [3, 3, 3], 5.5]
+    assert awkward1.to_list(awkward1.where(condition, one, two)) == [1.1, 0.0, 3.3, 1.0, 5.5]
+    assert awkward1.to_list(awkward1.where(condition, one, three)) == [1.1, [1], 3.3, [3, 3, 3], 5.5]

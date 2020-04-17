@@ -97,7 +97,7 @@ namespace awkward {
                    int64_t reserved);
 
     /// @brief Creates a GrowableBuffer by allocating a new buffer, taking an
-    /// initial #reservation from
+    /// initial #reserved from
     /// {@link ArrayBuilderOptions#initial ArrayBuilderOptions::initial}.
     GrowableBuffer(const ArrayBuilderOptions& options);
 
@@ -148,7 +148,7 @@ namespace awkward {
     /// reallocation.
     ///
     /// This increases the #length by 1; if the new #length is larger than
-    /// #reservation, a new #ptr will be allocated.
+    /// #reserved, a new #ptr will be allocated.
     void
       append(T datum);
 
