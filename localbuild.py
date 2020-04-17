@@ -96,8 +96,18 @@ if args.buildpython:
     if os.path.exists("awkward1"):
         shutil.rmtree("awkward1")
 
-    # Copy (don't link) the Python files into a built directory.
-    shutil.copytree("src/awkward1", "awkward1")
+    # Link (don't copy) the Python files into a built directory.
+    for x in glob.glob("src/awkward1/**", recursive=True):
+        olddir, oldfile = os.path.split(x)
+        newdir  = olddir[3 + len(os.sep):]
+        newfile = x[3 + len(os.sep):]
+        if not os.path.exists(newdir):
+            os.mkdir(newdir)
+        if not os.path.isdir(x):
+            where = x
+            for i in range(olddir.count(os.sep)):
+                where = os.path.join("..", where)
+            os.symlink(where, newfile)
 
     # The extension modules must be copied into the same directory.
     for x in glob.glob("localbuild/_ext*") + glob.glob("localbuild/libawkward*"):
@@ -117,9 +127,7 @@ if args.buildpython:
     # If you'll be using it interactively, you'll need awkward1 in the library path (for some operations).
     if reminder:
         print("")
-        print("Remember to")
+        print("If you plan to use awkward1 outside of this tool, be sure to")
         print("")
         print("    export LD_LIBRARY_PATH=awkward1:$LD_LIBRARY_PATH")
-        print("")
-        print("if you plan to use awkward1 outside of this tool.")
         print("")
