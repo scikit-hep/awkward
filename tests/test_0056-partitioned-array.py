@@ -462,8 +462,9 @@ def test_zip():
     assert isinstance(yy.layout, awkward1.layout.Content)
     assert awkward1.to_list(one) == [[{"x": 1, "y": 1.1}, {"x": 2, "y": 1.1}, {"x": 3, "y": 1.1}], [], [{"x": 4, "y": 3.3}, {"x": 5, "y": 3.3}], [{"x": 6, "y": 4.4}], [{"x": 7, "y": 5.5}, {"x": 8, "y": 5.5}, {"x": 9, "y": 5.5}, {"x": 10, "y": 5.5}]]
     assert awkward1.to_list(two) == [{"x": [1, 2, 3], "y": 1.1}, {"x": [], "y": 2.2}, {"x": [4, 5], "y": 3.3}, {"x": [6], "y": 4.4}, {"x": [7, 8, 9, 10], "y": 5.5}]
-    assert awkward1.to_list(xx) == [[1, 2, 3], [], [4, 5], [6], [7, 8, 9, 10]]
-    assert awkward1.to_list(yy) == [1.1, 2.2, 3.3, 4.4, 5.5]
+    if not awkward1._util.py27 and not awkward1._util.py35:
+        assert awkward1.to_list(xx) == [[1, 2, 3], [], [4, 5], [6], [7, 8, 9, 10]]
+        assert awkward1.to_list(yy) == [1.1, 2.2, 3.3, 4.4, 5.5]
 
     x = awkward1.repartition(x, 3)
     assert isinstance(x.layout, awkward1.partition.PartitionedArray)
@@ -478,8 +479,9 @@ def test_zip():
     assert isinstance(yy.layout, awkward1.partition.PartitionedArray)
     assert awkward1.to_list(one) == [[{"x": 1, "y": 1.1}, {"x": 2, "y": 1.1}, {"x": 3, "y": 1.1}], [], [{"x": 4, "y": 3.3}, {"x": 5, "y": 3.3}], [{"x": 6, "y": 4.4}], [{"x": 7, "y": 5.5}, {"x": 8, "y": 5.5}, {"x": 9, "y": 5.5}, {"x": 10, "y": 5.5}]]
     assert awkward1.to_list(two) == [{"x": [1, 2, 3], "y": 1.1}, {"x": [], "y": 2.2}, {"x": [4, 5], "y": 3.3}, {"x": [6], "y": 4.4}, {"x": [7, 8, 9, 10], "y": 5.5}]
-    assert awkward1.to_list(xx) == [[1, 2, 3], [], [4, 5], [6], [7, 8, 9, 10]]
-    assert awkward1.to_list(yy) == [1.1, 2.2, 3.3, 4.4, 5.5]
+    if not awkward1._util.py27 and not awkward1._util.py35:
+        assert awkward1.to_list(xx) == [[1, 2, 3], [], [4, 5], [6], [7, 8, 9, 10]]
+        assert awkward1.to_list(yy) == [1.1, 2.2, 3.3, 4.4, 5.5]
 
     y = awkward1.repartition(y, 2)
     assert isinstance(x.layout, awkward1.partition.PartitionedArray)
@@ -494,8 +496,9 @@ def test_zip():
     assert isinstance(yy.layout, awkward1.partition.PartitionedArray)
     assert awkward1.to_list(one) == [[{"x": 1, "y": 1.1}, {"x": 2, "y": 1.1}, {"x": 3, "y": 1.1}], [], [{"x": 4, "y": 3.3}, {"x": 5, "y": 3.3}], [{"x": 6, "y": 4.4}], [{"x": 7, "y": 5.5}, {"x": 8, "y": 5.5}, {"x": 9, "y": 5.5}, {"x": 10, "y": 5.5}]]
     assert awkward1.to_list(two) == [{"x": [1, 2, 3], "y": 1.1}, {"x": [], "y": 2.2}, {"x": [4, 5], "y": 3.3}, {"x": [6], "y": 4.4}, {"x": [7, 8, 9, 10], "y": 5.5}]
-    assert awkward1.to_list(xx) == [[1, 2, 3], [], [4, 5], [6], [7, 8, 9, 10]]
-    assert awkward1.to_list(yy) == [1.1, 2.2, 3.3, 4.4, 5.5]
+    if not awkward1._util.py27 and not awkward1._util.py35:
+        assert awkward1.to_list(xx) == [[1, 2, 3], [], [4, 5], [6], [7, 8, 9, 10]]
+        assert awkward1.to_list(yy) == [1.1, 2.2, 3.3, 4.4, 5.5]
 
     x = awkward1.repartition(x, None)
     assert isinstance(x.layout, awkward1.layout.Content)
@@ -510,8 +513,9 @@ def test_zip():
     assert isinstance(yy.layout, awkward1.partition.PartitionedArray)
     assert awkward1.to_list(one) == [[{"x": 1, "y": 1.1}, {"x": 2, "y": 1.1}, {"x": 3, "y": 1.1}], [], [{"x": 4, "y": 3.3}, {"x": 5, "y": 3.3}], [{"x": 6, "y": 4.4}], [{"x": 7, "y": 5.5}, {"x": 8, "y": 5.5}, {"x": 9, "y": 5.5}, {"x": 10, "y": 5.5}]]
     assert awkward1.to_list(two) == [{"x": [1, 2, 3], "y": 1.1}, {"x": [], "y": 2.2}, {"x": [4, 5], "y": 3.3}, {"x": [6], "y": 4.4}, {"x": [7, 8, 9, 10], "y": 5.5}]
-    assert awkward1.to_list(xx) == [[1, 2, 3], [], [4, 5], [6], [7, 8, 9, 10]]
-    assert awkward1.to_list(yy) == [1.1, 2.2, 3.3, 4.4, 5.5]
+    if not awkward1._util.py27 and not awkward1._util.py35:
+        assert awkward1.to_list(xx) == [[1, 2, 3], [], [4, 5], [6], [7, 8, 9, 10]]
+        assert awkward1.to_list(yy) == [1.1, 2.2, 3.3, 4.4, 5.5]
 
     y = awkward1.repartition(y, None)
     assert isinstance(y.layout, awkward1.layout.Content)
@@ -526,8 +530,9 @@ def test_zip():
     assert isinstance(yy.layout, awkward1.layout.Content)
     assert awkward1.to_list(one) == [[{"x": 1, "y": 1.1}, {"x": 2, "y": 1.1}, {"x": 3, "y": 1.1}], [], [{"x": 4, "y": 3.3}, {"x": 5, "y": 3.3}], [{"x": 6, "y": 4.4}], [{"x": 7, "y": 5.5}, {"x": 8, "y": 5.5}, {"x": 9, "y": 5.5}, {"x": 10, "y": 5.5}]]
     assert awkward1.to_list(two) == [{"x": [1, 2, 3], "y": 1.1}, {"x": [], "y": 2.2}, {"x": [4, 5], "y": 3.3}, {"x": [6], "y": 4.4}, {"x": [7, 8, 9, 10], "y": 5.5}]
-    assert awkward1.to_list(xx) == [[1, 2, 3], [], [4, 5], [6], [7, 8, 9, 10]]
-    assert awkward1.to_list(yy) == [1.1, 2.2, 3.3, 4.4, 5.5]
+    if not awkward1._util.py27 and not awkward1._util.py35:
+        assert awkward1.to_list(xx) == [[1, 2, 3], [], [4, 5], [6], [7, 8, 9, 10]]
+        assert awkward1.to_list(yy) == [1.1, 2.2, 3.3, 4.4, 5.5]
 
 def test_with_name_field():
     array = awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}])
