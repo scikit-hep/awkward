@@ -108,10 +108,6 @@ def test_ArrayBuilder_append():
     builder.append(array, 4)
     builder.append(array, 5)
     builder.end_list()
-
-    print(builder._layout.snapshot())
-
-
     assert awkward1.to_list(builder.snapshot()) == [["one", "two", "three"], [], ["four", "five"]]
 
     builder.append(array, -1)
@@ -711,9 +707,6 @@ def test_ListArray_deep_at():
     listarray2 = awkward1.layout.ListOffsetArray64(offsets2, listarray1)
     offsets3 = awkward1.layout.Index32(numpy.array([0, 2, 4], dtype=numpy.int32))
     listarray3 = awkward1.layout.ListOffsetArray32(offsets3, listarray2)
-
-    print(listarray3)
-
     array = awkward1.Array(listarray3, check_valid=True)
 
     @numba.njit
@@ -949,7 +942,7 @@ def test_ArrayBuilder_record():
                                              {"x": 2, "y": 2.2},
                                              {"x": 1, "y": 1.1},
                                              {"x": 2, "y": 2.2}]
-                                            
+
 def dummy_typer(viewtype):
     return numba.float64
 
