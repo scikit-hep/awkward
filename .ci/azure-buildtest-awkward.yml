@@ -161,14 +161,14 @@ jobs:
           python.version: "3.5"
           python.architecture: "x64"
           numpy.version: "1.13.1"
-        "py36-np14":
+        "py36-np*":
           python.version: "3.6"
           python.architecture: "x64"
-          numpy.version: "1.14.5"
-        "py37-np14":
+          numpy.version: "latest"
+        "py37-np*":
           python.version: "3.7"
           python.architecture: "x64"
-          numpy.version: "1.14.5"
+          numpy.version: "latest"
         "py38-np*":
           python.version: "3.8"
           python.architecture: "x64"
