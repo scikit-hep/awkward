@@ -1272,6 +1272,7 @@ namespace awkward {
     const Index64& starts,
     const Index64& parents,
     int64_t outlength, bool mask, bool keepdims) const {
+
     std::pair<bool, int64_t> branchdepth = branch_depth();
 
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {

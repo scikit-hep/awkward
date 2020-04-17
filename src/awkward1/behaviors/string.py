@@ -78,27 +78,28 @@ def _string_equal(one, two):
     possible = numpy.logical_and(out, counts1)
     possible_counts = counts1[possible]
 
-    chars1 = numpy.asarray(one[possible].flatten(axis=1))
-    chars2 = numpy.asarray(two[possible].flatten(axis=1))
-    samechars = (chars1 == chars2)
+    if len(possible_counts) > 0:
+        chars1 = numpy.asarray(one[possible].flatten(axis=1))
+        chars2 = numpy.asarray(two[possible].flatten(axis=1))
+        samechars = (chars1 == chars2)
 
-    # FIXME: Awkward has fully implemented reducers now; we can use ak.all
-    # instead of this NumPy-based implementation.
+        # FIXME: Awkward has fully implemented reducers now; we can use ak.all
+        # instead of this NumPy-based implementation.
 
-    # ufunc.reduceat requires a weird "offsets" that
-    #    (a) lacks a final value (end of array is taken as boundary)
-    #    (b) fails on Windows if it's not 32-bit
-    #    (c) starts with a zero, which cumsum does not provide
-    #    (d) doesn't handle offset[i] == offset[i + 1] with an identity
-    dtype = numpy.int32 if awkward1._util.win else numpy.int64
-    offsets = numpy.empty(len(possible_counts), dtype=dtype)
-    offsets[0] = 0
-    numpy.cumsum(possible_counts[:-1], out=offsets[1:])
+        # ufunc.reduceat requires a weird "offsets" that
+        #    (a) lacks a final value (end of array is taken as boundary)
+        #    (b) fails on Windows if it's not 32-bit
+        #    (c) starts with a zero, which cumsum does not provide
+        #    (d) doesn't handle offset[i] == offset[i + 1] with an identity
+        dtype = numpy.int32 if awkward1._util.win else numpy.int64
+        offsets = numpy.empty(len(possible_counts), dtype=dtype)
+        offsets[0] = 0
+        numpy.cumsum(possible_counts[:-1], out=offsets[1:])
 
-    reduced = numpy.bitwise_and.reduceat(samechars, offsets)
+        reduced = numpy.bitwise_and.reduceat(samechars, offsets)
 
-    # update strings of the same length with a verdict about their characters
-    out[possible] = reduced
+        # update same-length strings with a verdict about their characters
+        out[possible] = reduced
 
     return awkward1.highlevel.Array(awkward1.layout.NumpyArray(out))
 

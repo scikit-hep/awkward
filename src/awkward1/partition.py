@@ -38,6 +38,9 @@ def partition_as(sample, arrays):
         for n, x in arrays.items():
             if isinstance(x, PartitionedArray):
                 out[n] = x.repartition(stops)
+            elif (isinstance(x, awkward1.layout.Content) and
+                  x.parameter("__array__") == "string"):
+                out[n] = x
             elif isinstance(x, awkward1.layout.Content):
                 out[n] = IrregularlyPartitionedArray.toPartitioned(x, stops)
             else:
@@ -48,6 +51,9 @@ def partition_as(sample, arrays):
         for x in arrays:
             if isinstance(x, PartitionedArray):
                 out.append(x.repartition(stops))
+            elif (isinstance(x, awkward1.layout.Content) and
+                  x.parameter("__array__") == "string"):
+                out.append(x)
             elif isinstance(x, awkward1.layout.Content):
                 out.append(IrregularlyPartitionedArray.toPartitioned(x, stops))
             else:
