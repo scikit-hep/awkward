@@ -67,7 +67,7 @@ namespace awkward {
   Index64
   ListOffsetArrayOf<int64_t>::compact_offsets64(bool start_at_zero) const {
     if (!start_at_zero  ||
-        offsets_.getitem_at_nowrap(offsets_.offset()) == 0) {
+        offsets_.getitem_at_nowrap(0) == 0) {
       return offsets_;
     }
     else {
@@ -168,7 +168,7 @@ namespace awkward {
   ListOffsetArrayOf<T>::toListOffsetArray64(bool start_at_zero) const {
     if (std::is_same<T, int64_t>::value  &&
         (!start_at_zero  ||
-         offsets_.getitem_at_nowrap(offsets_.offset()) == 0)) {
+         offsets_.getitem_at_nowrap(0) == 0)) {
       return shallow_copy();
     }
     else {
@@ -1436,8 +1436,7 @@ namespace awkward {
     }
     else if (axis == depth + 1) {
       Index64 offsets = compact_offsets64(true);
-      int64_t innerlength = offsets.getitem_at_nowrap(
-        offsets.offset() + offsets.length() - 1);
+      int64_t innerlength = offsets.getitem_at_nowrap(offsets.length() - 1);
       Index64 localindex(innerlength);
       struct Error err = util::awkward_listarray_localindex_64(
         localindex.ptr().get(),

@@ -392,3 +392,80 @@ def test_repartition():
     assert [awkward1.to_list(x) for x in array2.layout.partitions] == [[[], [1.1, 2.2, 3.3]], [[], []], [[4.4, 5.5], []], [[6.6], [7.7, 8.8, 9.9]], [[]]]
     assert [awkward1.to_list(x) for x in array3.layout.partitions] == [[[], [1.1, 2.2, 3.3], []], [[], [4.4, 5.5], []], [[6.6], [7.7, 8.8, 9.9], []]]
     assert [awkward1.to_list(x) for x in array4.layout.partitions] == [[[], [1.1, 2.2, 3.3], []], [[], [4.4, 5.5]], [[], [6.6], [7.7, 8.8, 9.9]], [[]]]
+
+def test_firsts_singletons():
+    array = awkward1.Array([None, 1.1, 2.2, None, 3.3, None, None, 4.4, 5.5, None])
+
+    one = awkward1.singletons(array)
+    assert awkward1.to_list(one) == [[], [1.1], [2.2], [], [3.3], [], [], [4.4], [5.5], []]
+    two = awkward1.firsts(one)
+    assert awkward1.to_list(two) == [None, 1.1, 2.2, None, 3.3, None, None, 4.4, 5.5, None]
+
+    array = awkward1.repartition(array, 3)
+    assert isinstance(array.layout, awkward1.partition.PartitionedArray)
+
+    one = awkward1.singletons(array)
+    assert isinstance(one.layout, awkward1.partition.PartitionedArray)
+    assert awkward1.to_list(one) == [[], [1.1], [2.2], [], [3.3], [], [], [4.4], [5.5], []]
+    two = awkward1.firsts(one)
+    assert isinstance(two.layout, awkward1.partition.PartitionedArray)
+    assert awkward1.to_list(two) == [None, 1.1, 2.2, None, 3.3, None, None, 4.4, 5.5, None]
+
+def test_mask2():
+    array = awkward1.Array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
+    assert isinstance(array.layout, awkward1.layout.Content)
+    mask = awkward1.Array([False, False, True, True, False, True, True, False, True])
+    assert isinstance(mask.layout, awkward1.layout.Content)
+
+    one = array.mask[mask]
+    assert isinstance(one.layout, awkward1.layout.Content)
+    assert awkward1.to_list(one) == [None, None, 3.3, 4.4, None, 6.6, 7.7, None, 9.9]
+
+    array = awkward1.repartition(array, 4)
+    assert isinstance(array.layout, awkward1.partition.PartitionedArray)
+
+    one = array.mask[mask]
+    assert isinstance(one.layout, awkward1.partition.PartitionedArray)
+    assert awkward1.to_list(one) == [None, None, 3.3, 4.4, None, 6.6, 7.7, None, 9.9]
+
+    mask = awkward1.repartition(mask, 3)
+    assert isinstance(mask.layout, awkward1.partition.PartitionedArray)
+
+    one = array.mask[mask]
+    assert isinstance(one.layout, awkward1.partition.PartitionedArray)
+    assert awkward1.to_list(one) == [None, None, 3.3, 4.4, None, 6.6, 7.7, None, 9.9]
+
+    array = awkward1.repartition(array, None)
+    assert isinstance(array.layout, awkward1.layout.Content)
+
+    one = array.mask[mask]
+    assert isinstance(one.layout, awkward1.partition.PartitionedArray)
+    assert awkward1.to_list(one) == [None, None, 3.3, 4.4, None, 6.6, 7.7, None, 9.9]
+
+    mask = awkward1.repartition(mask, None)
+    assert isinstance(mask.layout, awkward1.layout.Content)
+
+    one = array.mask[mask]
+    assert isinstance(one.layout, awkward1.layout.Content)
+    assert awkward1.to_list(one) == [None, None, 3.3, 4.4, None, 6.6, 7.7, None, 9.9]
+
+def test_zip():
+    x = awkward1.Array([[1, 2, 3], [], [4, 5], [6], [7, 8, 9, 10]])
+    y = awkward1.Array([1.1, 2.2, 3.3, 4.4, 5.5])
+
+    one = awkward1.zip({"x": x, "y": y})
+    two = awkward1.zip({"x": x, "y": y}, depthlimit=1)
+    assert isinstance(one.layout, awkward1.layout.Content)
+    assert isinstance(two.layout, awkward1.layout.Content)
+    assert awkward1.to_list(one) == [[{"x": 1, "y": 1.1}, {"x": 2, "y": 1.1}, {"x": 3, "y": 1.1}], [], [{"x": 4, "y": 3.3}, {"x": 5, "y": 3.3}], [{"x": 6, "y": 4.4}], [{"x": 7, "y": 5.5}, {"x": 8, "y": 5.5}, {"x": 9, "y": 5.5}, {"x": 10, "y": 5.5}]]
+    assert awkward1.to_list(two) == [{"x": [1, 2, 3], "y": 1.1}, {"x": [], "y": 2.2}, {"x": [4, 5], "y": 3.3}, {"x": [6], "y": 4.4}, {"x": [7, 8, 9, 10], "y": 5.5}]
+
+    x = awkward1.repartition(x, 3)
+    assert isinstance(x.layout, awkward1.partition.PartitionedArray)
+
+    one = awkward1.zip({"x": x, "y": y})
+    two = awkward1.zip({"x": x, "y": y}, depthlimit=1)
+    assert isinstance(one.layout, awkward1.partition.PartitionedArray)
+    assert isinstance(two.layout, awkward1.partition.PartitionedArray)
+    assert awkward1.to_list(one) == [[{"x": 1, "y": 1.1}, {"x": 2, "y": 1.1}, {"x": 3, "y": 1.1}], [], [{"x": 4, "y": 3.3}, {"x": 5, "y": 3.3}], [{"x": 6, "y": 4.4}], [{"x": 7, "y": 5.5}, {"x": 8, "y": 5.5}, {"x": 9, "y": 5.5}, {"x": 10, "y": 5.5}]]
+    assert awkward1.to_list(two) == [{"x": [1, 2, 3], "y": 1.1}, {"x": [], "y": 2.2}, {"x": [4, 5], "y": 3.3}, {"x": [6], "y": 4.4}, {"x": [7, 8, 9, 10], "y": 5.5}]

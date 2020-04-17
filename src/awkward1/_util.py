@@ -579,7 +579,7 @@ def broadcast_and_apply(inputs, getfunction, behavior):
                             first = x
                             break
 
-                offsets = first.compact_offsets64()
+                offsets = first.compact_offsets64(True)
 
                 nextinputs = []
                 for x, fcn in zip(inputs, fcns):

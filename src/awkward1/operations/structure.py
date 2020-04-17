@@ -1162,8 +1162,9 @@ def singletons(array, highlevel=True):
         else:
             return None
 
-    out = awkward1._util.recursively_apply(
-            awkward1.operations.convert.to_layout(array), getfunction)
+    layout = awkward1.operations.convert.to_layout(array)
+    out = awkward1._util.recursively_apply(layout, getfunction)
+
     if highlevel:
         return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
     else:

@@ -1127,7 +1127,7 @@ namespace awkward {
     else if (axis == depth + 1) {
       Index64 offsets = compact_offsets64(true);
       int64_t innerlength =
-        offsets.getitem_at_nowrap(offsets.offset() + offsets.length() - 1);
+        offsets.getitem_at_nowrap(offsets.length() - 1);
       Index64 localindex(innerlength);
       struct Error err = util::awkward_listarray_localindex_64(
         localindex.ptr().get(),

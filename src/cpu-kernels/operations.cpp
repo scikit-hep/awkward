@@ -6,11 +6,11 @@
 
 template <typename T, typename C>
 ERROR awkward_listarray_num(
-  T* tonum, 
-  const C* fromstarts, 
-  int64_t startsoffset, 
-  const C* fromstops, 
-  int64_t stopsoffset, 
+  T* tonum,
+  const C* fromstarts,
+  int64_t startsoffset,
+  const C* fromstops,
+  int64_t stopsoffset,
   int64_t length) {
   for (int64_t i = 0;  i < length;  i++) {
     C start = fromstarts[startsoffset + i];
@@ -20,55 +20,55 @@ ERROR awkward_listarray_num(
   return success();
 }
 ERROR awkward_listarray32_num_64(
-  int64_t* tonum, 
-  const int32_t* fromstarts, 
-  int64_t startsoffset, 
-  const int32_t* fromstops, 
-  int64_t stopsoffset, 
+  int64_t* tonum,
+  const int32_t* fromstarts,
+  int64_t startsoffset,
+  const int32_t* fromstops,
+  int64_t stopsoffset,
   int64_t length) {
   return awkward_listarray_num<int64_t, int32_t>(
-    tonum, 
-    fromstarts, 
-    startsoffset, 
-    fromstops, 
-    stopsoffset, 
+    tonum,
+    fromstarts,
+    startsoffset,
+    fromstops,
+    stopsoffset,
     length);
 }
 ERROR awkward_listarrayU32_num_64(
-  int64_t* tonum, 
-  const uint32_t* fromstarts, 
-  int64_t startsoffset, 
-  const uint32_t* fromstops, 
-  int64_t stopsoffset, 
+  int64_t* tonum,
+  const uint32_t* fromstarts,
+  int64_t startsoffset,
+  const uint32_t* fromstops,
+  int64_t stopsoffset,
   int64_t length) {
   return awkward_listarray_num<int64_t, uint32_t>(
-    tonum, 
-    fromstarts, 
-    startsoffset, 
-    fromstops, 
-    stopsoffset, 
+    tonum,
+    fromstarts,
+    startsoffset,
+    fromstops,
+    stopsoffset,
     length);
 }
 ERROR awkward_listarray64_num_64(
-  int64_t* tonum, 
-  const int64_t* fromstarts, 
-  int64_t startsoffset, 
-  const int64_t* fromstops, 
-  int64_t stopsoffset, 
+  int64_t* tonum,
+  const int64_t* fromstarts,
+  int64_t startsoffset,
+  const int64_t* fromstops,
+  int64_t stopsoffset,
   int64_t length) {
   return awkward_listarray_num<int64_t, int64_t>(
-    tonum, 
-    fromstarts, 
-    startsoffset, 
-    fromstops, 
-    stopsoffset, 
+    tonum,
+    fromstarts,
+    startsoffset,
+    fromstops,
+    stopsoffset,
     length);
 }
 
 template <typename T>
 ERROR awkward_regulararray_num(
-  T* tonum, 
-  int64_t size, 
+  T* tonum,
+  int64_t size,
   int64_t length) {
   for (int64_t i = 0;  i < length;  i++) {
     tonum[i] = size;
@@ -76,23 +76,23 @@ ERROR awkward_regulararray_num(
   return success();
 }
 ERROR awkward_regulararray_num_64(
-  int64_t* tonum, 
-  int64_t size, 
+  int64_t* tonum,
+  int64_t size,
   int64_t length) {
   return awkward_regulararray_num<int64_t>(
-    tonum, 
-    size, 
+    tonum,
+    size,
     length);
 }
 
 template <typename T, typename C>
 ERROR awkward_listoffsetarray_flatten_offsets(
-  T* tooffsets, 
-  const C* outeroffsets, 
-  int64_t outeroffsetsoffset, 
-  int64_t outeroffsetslen, 
-  const T* inneroffsets, 
-  int64_t inneroffsetsoffset, 
+  T* tooffsets,
+  const C* outeroffsets,
+  int64_t outeroffsetsoffset,
+  int64_t outeroffsetslen,
+  const T* inneroffsets,
+  int64_t inneroffsetsoffset,
   int64_t inneroffsetslen) {
   for (int64_t i = 0;  i < outeroffsetslen;  i++) {
     tooffsets[i] =
@@ -101,65 +101,65 @@ ERROR awkward_listoffsetarray_flatten_offsets(
   return success();
 }
 ERROR awkward_listoffsetarray32_flatten_offsets_64(
-  int64_t* tooffsets, 
+  int64_t* tooffsets,
   const int32_t* outeroffsets,
-  int64_t outeroffsetsoffset, 
-  int64_t outeroffsetslen, 
+  int64_t outeroffsetsoffset,
+  int64_t outeroffsetslen,
   const int64_t* inneroffsets,
-  int64_t inneroffsetsoffset, 
+  int64_t inneroffsetsoffset,
   int64_t inneroffsetslen) {
   return awkward_listoffsetarray_flatten_offsets<int64_t, int32_t>(
-    tooffsets, 
-    outeroffsets, 
-    outeroffsetsoffset, 
-    outeroffsetslen, 
-    inneroffsets, 
-    inneroffsetsoffset, 
+    tooffsets,
+    outeroffsets,
+    outeroffsetsoffset,
+    outeroffsetslen,
+    inneroffsets,
+    inneroffsetsoffset,
     inneroffsetslen);
 }
 ERROR awkward_listoffsetarrayU32_flatten_offsets_64(
-  int64_t* tooffsets, 
-  const uint32_t* outeroffsets, 
-  int64_t outeroffsetsoffset, 
-  int64_t outeroffsetslen, 
-  const int64_t* inneroffsets, 
-  int64_t inneroffsetsoffset, 
+  int64_t* tooffsets,
+  const uint32_t* outeroffsets,
+  int64_t outeroffsetsoffset,
+  int64_t outeroffsetslen,
+  const int64_t* inneroffsets,
+  int64_t inneroffsetsoffset,
   int64_t inneroffsetslen) {
   return awkward_listoffsetarray_flatten_offsets<int64_t, uint32_t>(
-    tooffsets, 
-    outeroffsets, 
-    outeroffsetsoffset, 
-    outeroffsetslen, 
-    inneroffsets, 
-    inneroffsetsoffset, 
+    tooffsets,
+    outeroffsets,
+    outeroffsetsoffset,
+    outeroffsetslen,
+    inneroffsets,
+    inneroffsetsoffset,
     inneroffsetslen);
 }
 ERROR awkward_listoffsetarray64_flatten_offsets_64(
-  int64_t* tooffsets, 
-  const int64_t* outeroffsets, 
-  int64_t outeroffsetsoffset, 
-  int64_t outeroffsetslen, 
-  const int64_t* inneroffsets, 
-  int64_t inneroffsetsoffset, 
+  int64_t* tooffsets,
+  const int64_t* outeroffsets,
+  int64_t outeroffsetsoffset,
+  int64_t outeroffsetslen,
+  const int64_t* inneroffsets,
+  int64_t inneroffsetsoffset,
   int64_t inneroffsetslen) {
   return awkward_listoffsetarray_flatten_offsets<int64_t, int64_t>(
-    tooffsets, 
-    outeroffsets, 
-    outeroffsetsoffset, 
-    outeroffsetslen, 
-    inneroffsets, 
-    inneroffsetsoffset, 
+    tooffsets,
+    outeroffsets,
+    outeroffsetsoffset,
+    outeroffsetslen,
+    inneroffsets,
+    inneroffsetsoffset,
     inneroffsetslen);
 }
 
 template <typename T, typename C>
 ERROR awkward_indexedarray_flatten_none2empty(
-  T* outoffsets, 
-  const C* outindex, 
-  int64_t outindexoffset, 
-  int64_t outindexlength, 
-  const T* offsets, 
-  int64_t offsetsoffset, 
+  T* outoffsets,
+  const C* outindex,
+  int64_t outindexoffset,
+  int64_t outindexlength,
+  const T* offsets,
+  int64_t offsetsoffset,
   int64_t offsetslength) {
   outoffsets[0] = offsets[offsetsoffset + 0];
   int64_t k = 1;
@@ -182,66 +182,66 @@ ERROR awkward_indexedarray_flatten_none2empty(
   return success();
 }
 ERROR awkward_indexedarray32_flatten_none2empty_64(
-  int64_t* outoffsets, 
-  const int32_t* outindex, 
-  int64_t outindexoffset, 
-  int64_t outindexlength, 
-  const int64_t* offsets, 
-  int64_t offsetsoffset, 
+  int64_t* outoffsets,
+  const int32_t* outindex,
+  int64_t outindexoffset,
+  int64_t outindexlength,
+  const int64_t* offsets,
+  int64_t offsetsoffset,
   int64_t offsetslength) {
   return awkward_indexedarray_flatten_none2empty<int64_t, int32_t>(
-    outoffsets, 
-    outindex, 
-    outindexoffset, 
-    outindexlength, 
-    offsets, 
-    offsetsoffset, 
+    outoffsets,
+    outindex,
+    outindexoffset,
+    outindexlength,
+    offsets,
+    offsetsoffset,
     offsetslength);
 }
 ERROR awkward_indexedarrayU32_flatten_none2empty_64(
-  int64_t* outoffsets, 
-  const uint32_t* outindex, 
-  int64_t outindexoffset, 
-  int64_t outindexlength, 
-  const int64_t* offsets, 
-  int64_t offsetsoffset, 
+  int64_t* outoffsets,
+  const uint32_t* outindex,
+  int64_t outindexoffset,
+  int64_t outindexlength,
+  const int64_t* offsets,
+  int64_t offsetsoffset,
   int64_t offsetslength) {
   return awkward_indexedarray_flatten_none2empty<int64_t, uint32_t>(
-    outoffsets, 
-    outindex, 
-    outindexoffset, 
-    outindexlength, 
-    offsets, 
-    offsetsoffset, 
+    outoffsets,
+    outindex,
+    outindexoffset,
+    outindexlength,
+    offsets,
+    offsetsoffset,
     offsetslength);
 }
 ERROR awkward_indexedarray64_flatten_none2empty_64(
-  int64_t* outoffsets, 
-  const int64_t* outindex, 
-  int64_t outindexoffset, 
-  int64_t outindexlength, 
-  const int64_t* offsets, 
-  int64_t offsetsoffset, 
+  int64_t* outoffsets,
+  const int64_t* outindex,
+  int64_t outindexoffset,
+  int64_t outindexlength,
+  const int64_t* offsets,
+  int64_t offsetsoffset,
   int64_t offsetslength) {
   return awkward_indexedarray_flatten_none2empty<int64_t, int64_t>(
-    outoffsets, 
-    outindex, 
-    outindexoffset, 
-    outindexlength, 
-    offsets, 
-    offsetsoffset, 
+    outoffsets,
+    outindex,
+    outindexoffset,
+    outindexlength,
+    offsets,
+    offsetsoffset,
     offsetslength);
 }
 
 template <typename FROMTAGS, typename FROMINDEX, typename T>
 ERROR awkward_unionarray_flatten_length(
-  int64_t* total_length, 
-  const FROMTAGS* fromtags, 
-  int64_t fromtagsoffset, 
-  const FROMINDEX* fromindex, 
-  int64_t fromindexoffset, 
-  int64_t length, 
-  T** offsetsraws, 
+  int64_t* total_length,
+  const FROMTAGS* fromtags,
+  int64_t fromtagsoffset,
+  const FROMINDEX* fromindex,
+  int64_t fromindexoffset,
+  int64_t length,
+  T** offsetsraws,
   int64_t* offsetsoffsets) {
   *total_length = 0;
   for (int64_t i = 0;  i < length;  i++) {
@@ -254,60 +254,60 @@ ERROR awkward_unionarray_flatten_length(
   return success();
 }
 ERROR awkward_unionarray32_flatten_length_64(
-  int64_t* total_length, 
-  const int8_t* fromtags, 
-  int64_t fromtagsoffset, 
-  const int32_t* fromindex, 
-  int64_t fromindexoffset, 
-  int64_t length, 
-  int64_t** offsetsraws, 
+  int64_t* total_length,
+  const int8_t* fromtags,
+  int64_t fromtagsoffset,
+  const int32_t* fromindex,
+  int64_t fromindexoffset,
+  int64_t length,
+  int64_t** offsetsraws,
   int64_t* offsetsoffsets) {
   return awkward_unionarray_flatten_length<int8_t, int32_t, int64_t>(
-    total_length, 
-    fromtags, 
-    fromtagsoffset, 
-    fromindex, 
-    fromindexoffset, 
-    length, 
-    offsetsraws, 
+    total_length,
+    fromtags,
+    fromtagsoffset,
+    fromindex,
+    fromindexoffset,
+    length,
+    offsetsraws,
     offsetsoffsets);
 }
 ERROR awkward_unionarrayU32_flatten_length_64(
-  int64_t* total_length, 
-  const int8_t* fromtags, 
-  int64_t fromtagsoffset, 
-  const uint32_t* fromindex, 
-  int64_t fromindexoffset, 
-  int64_t length, 
-  int64_t** offsetsraws, 
+  int64_t* total_length,
+  const int8_t* fromtags,
+  int64_t fromtagsoffset,
+  const uint32_t* fromindex,
+  int64_t fromindexoffset,
+  int64_t length,
+  int64_t** offsetsraws,
   int64_t* offsetsoffsets) {
   return awkward_unionarray_flatten_length<int8_t, uint32_t, int64_t>(
-    total_length, 
-    fromtags, 
-    fromtagsoffset, 
-    fromindex, 
-    fromindexoffset, 
-    length, 
-    offsetsraws, 
+    total_length,
+    fromtags,
+    fromtagsoffset,
+    fromindex,
+    fromindexoffset,
+    length,
+    offsetsraws,
     offsetsoffsets);
 }
 ERROR awkward_unionarray64_flatten_length_64(
-  int64_t* total_length, 
-  const int8_t* fromtags, 
-  int64_t fromtagsoffset, 
-  const int64_t* fromindex, 
-  int64_t fromindexoffset, 
-  int64_t length, 
-  int64_t** offsetsraws, 
+  int64_t* total_length,
+  const int8_t* fromtags,
+  int64_t fromtagsoffset,
+  const int64_t* fromindex,
+  int64_t fromindexoffset,
+  int64_t length,
+  int64_t** offsetsraws,
   int64_t* offsetsoffsets) {
   return awkward_unionarray_flatten_length<int8_t, int64_t, int64_t>(
-    total_length, 
-    fromtags, 
-    fromtagsoffset, 
-    fromindex, 
-    fromindexoffset, 
-    length, 
-    offsetsraws, 
+    total_length,
+    fromtags,
+    fromtagsoffset,
+    fromindex,
+    fromindexoffset,
+    length,
+    offsetsraws,
     offsetsoffsets);
 }
 
@@ -317,15 +317,15 @@ template <typename FROMTAGS,
           typename TOINDEX,
           typename T>
 ERROR awkward_unionarray_flatten_combine(
-  TOTAGS* totags, 
-  TOINDEX* toindex, 
-  T* tooffsets, 
-  const FROMTAGS* fromtags, 
-  int64_t fromtagsoffset, 
-  const FROMINDEX* fromindex, 
-  int64_t fromindexoffset, 
-  int64_t length, 
-  T** offsetsraws, 
+  TOTAGS* totags,
+  TOINDEX* toindex,
+  T* tooffsets,
+  const FROMTAGS* fromtags,
+  int64_t fromtagsoffset,
+  const FROMINDEX* fromindex,
+  int64_t fromindexoffset,
+  int64_t length,
+  T** offsetsraws,
   int64_t* offsetsoffsets) {
   tooffsets[0] = 0;
   int64_t k = 0;
@@ -344,93 +344,93 @@ ERROR awkward_unionarray_flatten_combine(
   return success();
 }
 ERROR awkward_unionarray32_flatten_combine_64(
-  int8_t* totags, 
-  int64_t* toindex, 
-  int64_t* tooffsets, 
-  const int8_t* fromtags, 
-  int64_t fromtagsoffset, 
-  const int32_t* fromindex, 
-  int64_t fromindexoffset, 
-  int64_t length, 
-  int64_t** offsetsraws, 
+  int8_t* totags,
+  int64_t* toindex,
+  int64_t* tooffsets,
+  const int8_t* fromtags,
+  int64_t fromtagsoffset,
+  const int32_t* fromindex,
+  int64_t fromindexoffset,
+  int64_t length,
+  int64_t** offsetsraws,
   int64_t* offsetsoffsets) {
-  return awkward_unionarray_flatten_combine<int8_t, 
-                                            int32_t, 
-                                            int8_t, 
-                                            int64_t, 
+  return awkward_unionarray_flatten_combine<int8_t,
+                                            int32_t,
+                                            int8_t,
+                                            int64_t,
                                             int64_t>(
-    totags, 
-    toindex, 
-    tooffsets, 
-    fromtags, 
-    fromtagsoffset, 
-    fromindex, 
-    fromindexoffset, 
-    length, 
-    offsetsraws, 
+    totags,
+    toindex,
+    tooffsets,
+    fromtags,
+    fromtagsoffset,
+    fromindex,
+    fromindexoffset,
+    length,
+    offsetsraws,
     offsetsoffsets);
 }
 ERROR awkward_unionarrayU32_flatten_combine_64(
-  int8_t* totags, 
-  int64_t* toindex, 
-  int64_t* tooffsets, 
-  const int8_t* fromtags, 
-  int64_t fromtagsoffset, 
-  const uint32_t* fromindex, 
-  int64_t fromindexoffset, 
-  int64_t length, 
-  int64_t** offsetsraws, 
+  int8_t* totags,
+  int64_t* toindex,
+  int64_t* tooffsets,
+  const int8_t* fromtags,
+  int64_t fromtagsoffset,
+  const uint32_t* fromindex,
+  int64_t fromindexoffset,
+  int64_t length,
+  int64_t** offsetsraws,
   int64_t* offsetsoffsets) {
-  return awkward_unionarray_flatten_combine<int8_t, 
-                                            uint32_t, 
-                                            int8_t, 
-                                            int64_t, 
+  return awkward_unionarray_flatten_combine<int8_t,
+                                            uint32_t,
+                                            int8_t,
+                                            int64_t,
                                             int64_t>(
-    totags, 
-    toindex, 
-    tooffsets, 
-    fromtags, 
-    fromtagsoffset, 
-    fromindex, 
-    fromindexoffset, 
-    length, 
-    offsetsraws, 
+    totags,
+    toindex,
+    tooffsets,
+    fromtags,
+    fromtagsoffset,
+    fromindex,
+    fromindexoffset,
+    length,
+    offsetsraws,
     offsetsoffsets);
 }
 ERROR awkward_unionarray64_flatten_combine_64(
-  int8_t* totags, 
-  int64_t* toindex, 
-  int64_t* tooffsets, 
-  const int8_t* fromtags, 
-  int64_t fromtagsoffset, 
-  const int64_t* fromindex, 
-  int64_t fromindexoffset, 
-  int64_t length, 
-  int64_t** offsetsraws, 
+  int8_t* totags,
+  int64_t* toindex,
+  int64_t* tooffsets,
+  const int8_t* fromtags,
+  int64_t fromtagsoffset,
+  const int64_t* fromindex,
+  int64_t fromindexoffset,
+  int64_t length,
+  int64_t** offsetsraws,
   int64_t* offsetsoffsets) {
-  return awkward_unionarray_flatten_combine<int8_t, 
-                                            int64_t, 
-                                            int8_t, 
-                                            int64_t, 
+  return awkward_unionarray_flatten_combine<int8_t,
+                                            int64_t,
+                                            int8_t,
+                                            int64_t,
                                             int64_t>(
-    totags, 
-    toindex, 
-    tooffsets, 
-    fromtags, 
-    fromtagsoffset, 
-    fromindex, 
-    fromindexoffset, 
-    length, 
-    offsetsraws, 
+    totags,
+    toindex,
+    tooffsets,
+    fromtags,
+    fromtagsoffset,
+    fromindex,
+    fromindexoffset,
+    length,
+    offsetsraws,
     offsetsoffsets);
 }
 
 template <typename C, typename T>
 ERROR awkward_indexedarray_flatten_nextcarry(
-  T* tocarry, 
-  const C* fromindex, 
-  int64_t indexoffset, 
-  int64_t lenindex, 
+  T* tocarry,
+  const C* fromindex,
+  int64_t indexoffset,
+  int64_t lenindex,
   int64_t lencontent) {
   int64_t k = 0;
   for (int64_t i = 0;  i < lenindex;  i++) {
@@ -446,52 +446,52 @@ ERROR awkward_indexedarray_flatten_nextcarry(
   return success();
 }
 ERROR awkward_indexedarray32_flatten_nextcarry_64(
-  int64_t* tocarry, 
-  const int32_t* fromindex, 
-  int64_t indexoffset, 
-  int64_t lenindex, 
+  int64_t* tocarry,
+  const int32_t* fromindex,
+  int64_t indexoffset,
+  int64_t lenindex,
   int64_t lencontent) {
   return awkward_indexedarray_flatten_nextcarry<int32_t, int64_t>(
-    tocarry, 
-    fromindex, 
-    indexoffset, 
-    lenindex, 
+    tocarry,
+    fromindex,
+    indexoffset,
+    lenindex,
     lencontent);
 }
 ERROR awkward_indexedarrayU32_flatten_nextcarry_64(
-  int64_t* tocarry, 
-  const uint32_t* fromindex, 
-  int64_t indexoffset, 
-  int64_t lenindex, 
+  int64_t* tocarry,
+  const uint32_t* fromindex,
+  int64_t indexoffset,
+  int64_t lenindex,
   int64_t lencontent) {
   return awkward_indexedarray_flatten_nextcarry<uint32_t, int64_t>(
-    tocarry, 
-    fromindex, 
-    indexoffset, 
-    lenindex, 
+    tocarry,
+    fromindex,
+    indexoffset,
+    lenindex,
     lencontent);
 }
 ERROR awkward_indexedarray64_flatten_nextcarry_64(
-  int64_t* tocarry, 
-  const int64_t* fromindex, 
-  int64_t indexoffset, 
-  int64_t lenindex, 
+  int64_t* tocarry,
+  const int64_t* fromindex,
+  int64_t indexoffset,
+  int64_t lenindex,
   int64_t lencontent) {
   return awkward_indexedarray_flatten_nextcarry<int64_t, int64_t>(
-    tocarry, 
-    fromindex, 
-    indexoffset, 
-    lenindex, 
+    tocarry,
+    fromindex,
+    indexoffset,
+    lenindex,
     lencontent);
 }
 
 template <typename C, typename M, typename TO>
 ERROR awkward_indexedarray_overlay_mask(
-  TO* toindex, 
-  const M* mask, 
-  int64_t maskoffset, 
-  const C* fromindex, 
-  int64_t indexoffset, 
+  TO* toindex,
+  const M* mask,
+  int64_t maskoffset,
+  const C* fromindex,
+  int64_t indexoffset,
   int64_t length) {
   for (int64_t i = 0;  i < length;  i++) {
     M m = mask[maskoffset + i];
@@ -500,56 +500,56 @@ ERROR awkward_indexedarray_overlay_mask(
   return success();
 }
 ERROR awkward_indexedarray32_overlay_mask8_to64(
-  int64_t* toindex, 
-  const int8_t* mask, 
-  int64_t maskoffset, 
-  const int32_t* fromindex, 
-  int64_t indexoffset, 
+  int64_t* toindex,
+  const int8_t* mask,
+  int64_t maskoffset,
+  const int32_t* fromindex,
+  int64_t indexoffset,
   int64_t length) {
   return awkward_indexedarray_overlay_mask<int32_t, int8_t, int64_t>(
-    toindex, 
-    mask, 
-    maskoffset, 
-    fromindex, 
-    indexoffset, 
+    toindex,
+    mask,
+    maskoffset,
+    fromindex,
+    indexoffset,
     length);
 }
 ERROR awkward_indexedarrayU32_overlay_mask8_to64(
-  int64_t* toindex, 
-  const int8_t* mask, 
-  int64_t maskoffset, 
-  const uint32_t* fromindex, 
-  int64_t indexoffset, 
+  int64_t* toindex,
+  const int8_t* mask,
+  int64_t maskoffset,
+  const uint32_t* fromindex,
+  int64_t indexoffset,
   int64_t length) {
   return awkward_indexedarray_overlay_mask<uint32_t, int8_t, int64_t>(
-    toindex, 
-    mask, 
-    maskoffset, 
-    fromindex, 
-    indexoffset, 
+    toindex,
+    mask,
+    maskoffset,
+    fromindex,
+    indexoffset,
     length);
 }
 ERROR awkward_indexedarray64_overlay_mask8_to64(
-  int64_t* toindex, 
-  const int8_t* mask, 
-  int64_t maskoffset, 
-  const int64_t* fromindex, 
-  int64_t indexoffset, 
+  int64_t* toindex,
+  const int8_t* mask,
+  int64_t maskoffset,
+  const int64_t* fromindex,
+  int64_t indexoffset,
   int64_t length) {
   return awkward_indexedarray_overlay_mask<int64_t, int8_t, int64_t>(
-    toindex, 
-    mask, 
-    maskoffset, 
-    fromindex, 
-    indexoffset, 
+    toindex,
+    mask,
+    maskoffset,
+    fromindex,
+    indexoffset,
     length);
 }
 
 template <typename C, typename M>
 ERROR awkward_indexedarray_mask(
-  M* tomask, 
-  const C* fromindex, 
-  int64_t indexoffset, 
+  M* tomask,
+  const C* fromindex,
+  int64_t indexoffset,
   int64_t length) {
   for (int64_t i = 0;  i < length;  i++) {
     tomask[i] = (fromindex[indexoffset + i] < 0);
@@ -557,45 +557,45 @@ ERROR awkward_indexedarray_mask(
   return success();
 }
 ERROR awkward_indexedarray32_mask8(
-  int8_t* tomask, 
-  const int32_t* fromindex, 
-  int64_t indexoffset, 
+  int8_t* tomask,
+  const int32_t* fromindex,
+  int64_t indexoffset,
   int64_t length) {
   return awkward_indexedarray_mask<int32_t, int8_t>(
-    tomask, 
-    fromindex, 
-    indexoffset, 
+    tomask,
+    fromindex,
+    indexoffset,
     length);
 }
 ERROR awkward_indexedarrayU32_mask8(
-  int8_t* tomask, 
-  const uint32_t* fromindex, 
-  int64_t indexoffset, 
+  int8_t* tomask,
+  const uint32_t* fromindex,
+  int64_t indexoffset,
   int64_t length) {
   return awkward_indexedarray_mask<uint32_t, int8_t>(
-    tomask, 
-    fromindex, 
-    indexoffset, 
+    tomask,
+    fromindex,
+    indexoffset,
     length);
 }
 ERROR awkward_indexedarray64_mask8(
-  int8_t* tomask, 
-  const int64_t* fromindex, 
-  int64_t indexoffset, 
+  int8_t* tomask,
+  const int64_t* fromindex,
+  int64_t indexoffset,
   int64_t length) {
   return awkward_indexedarray_mask<int64_t, int8_t>(
-    tomask, 
-    fromindex, 
-    indexoffset, 
+    tomask,
+    fromindex,
+    indexoffset,
     length);
 }
 
 template <typename M>
 ERROR awkward_bytemaskedarray_mask(
-  M* tomask, 
-  const M* frommask, 
-  int64_t maskoffset, 
-  int64_t length, 
+  M* tomask,
+  const M* frommask,
+  int64_t maskoffset,
+  int64_t length,
   bool validwhen) {
   for (int64_t i = 0;  i < length;  i++) {
     tomask[i] = ((frommask[maskoffset + i] != 0) != validwhen);
@@ -603,16 +603,16 @@ ERROR awkward_bytemaskedarray_mask(
   return success();
 }
 ERROR awkward_bytemaskedarray_mask8(
-  int8_t* tomask, 
-  const int8_t* frommask, 
-  int64_t maskoffset, 
-  int64_t length, 
+  int8_t* tomask,
+  const int8_t* frommask,
+  int64_t maskoffset,
+  int64_t length,
   bool validwhen) {
   return awkward_bytemaskedarray_mask(
-    tomask, 
-    frommask, 
-    maskoffset, 
-    length, 
+    tomask,
+    frommask,
+    maskoffset,
+    length,
     validwhen);
 }
 
