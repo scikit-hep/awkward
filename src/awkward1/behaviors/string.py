@@ -79,24 +79,10 @@ def _string_equal(one, two):
     possible_counts = counts1[possible]
 
     if len(possible_counts) > 0:
-        chars1 = numpy.asarray(one[possible].flatten(axis=1))
-        chars2 = numpy.asarray(two[possible].flatten(axis=1))
-        samechars = (chars1 == chars2)
+        onepossible = awkward1.without_parameters(one[possible])
+        twopossible = awkward1.without_parameters(two[possible])
 
-        # FIXME: Awkward has fully implemented reducers now; we can use ak.all
-        # instead of this NumPy-based implementation.
-
-        # ufunc.reduceat requires a weird "offsets" that
-        #    (a) lacks a final value (end of array is taken as boundary)
-        #    (b) fails on Windows if it's not 32-bit
-        #    (c) starts with a zero, which cumsum does not provide
-        #    (d) doesn't handle offset[i] == offset[i + 1] with an identity
-        dtype = numpy.int32 if awkward1._util.win else numpy.int64
-        offsets = numpy.empty(len(possible_counts), dtype=dtype)
-        offsets[0] = 0
-        numpy.cumsum(possible_counts[:-1], out=offsets[1:])
-
-        reduced = numpy.bitwise_and.reduceat(samechars, offsets)
+        reduced = awkward1.all(onepossible == twopossible, axis=-1).layout
 
         # update same-length strings with a verdict about their characters
         out[possible] = reduced

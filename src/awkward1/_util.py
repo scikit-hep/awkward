@@ -739,173 +739,252 @@ def broadcast_unpack(x, isscalar):
         else:
             return x[0]
 
-def recursively_apply(layout, getfunction, args=(), depth=1):
+def recursively_apply(layout,
+                      getfunction,
+                      args=(),
+                      depth=1,
+                      keep_parameters=True):
     custom = getfunction(layout, depth, *args)
     if custom is not None:
         return custom()
 
     elif isinstance(layout, awkward1.partition.PartitionedArray):
         return awkward1.partition.IrregularlyPartitionedArray(
-            [recursively_apply(x, getfunction, args, depth)
+            [recursively_apply(x, getfunction, args, depth, keep_parameters)
                for x in layout.partitions])
 
     elif isinstance(layout, awkward1.layout.NumpyArray):
-        return layout
+        if keep_parameters:
+            return layout
+        else:
+            return awkward1.layout.NumpyArray(
+                numpy.asarray(layout),
+                layout.identities,
+                None)
 
     elif isinstance(layout, awkward1.layout.EmptyArray):
-        return layout
+        if keep_parameters:
+            return layout
+        else:
+            return awkward1.layout.EmptyArray(
+                layout.identities,
+                None)
 
     elif isinstance(layout, awkward1.layout.RegularArray):
         return awkward1.layout.RegularArray(
-            recursively_apply(layout.content, getfunction, args, depth + 1),
+            recursively_apply(layout.content,
+                              getfunction,
+                              args,
+                              depth + 1,
+                              keep_parameters),
             layout.size,
             layout.identities,
-            layout.parameters)
+            layout.parameters if keep_parameters else None)
 
     elif isinstance(layout, awkward1.layout.ListArray32):
         return awkward1.layout.ListArray32(
             layout.starts,
             layout.stops,
-            recursively_apply(layout.content, getfunction, args, depth + 1),
+            recursively_apply(layout.content,
+                              getfunction,
+                              args,
+                              depth + 1,
+                              keep_parameters),
             layout.identities,
-            layout.parameters)
+            layout.parameters if keep_parameters else None)
 
     elif isinstance(layout, awkward1.layout.ListArrayU32):
         return awkward1.layout.ListArrayU32(
             layout.starts,
             layout.stops,
-            recursively_apply(layout.content, getfunction, args, depth + 1),
+            recursively_apply(layout.content,
+                              getfunction,
+                              args,
+                              depth + 1,
+                              keep_parameters),
             layout.identities,
-            layout.parameters)
+            layout.parameters if keep_parameters else None)
 
     elif isinstance(layout, awkward1.layout.ListArray64):
         return awkward1.layout.ListArray64(
             layout.starts,
             layout.stops,
-            recursively_apply(layout.content, getfunction, args, depth + 1),
+            recursively_apply(layout.content,
+                              getfunction,
+                              args,
+                              depth + 1,
+                              keep_parameters),
             layout.identities,
-            layout.parameters)
+            layout.parameters if keep_parameters else None)
 
     elif isinstance(layout, awkward1.layout.ListOffsetArray32):
         return awkward1.layout.ListOffsetArray32(
             layout.offsets,
-            recursively_apply(layout.content, getfunction, args, depth + 1),
+            recursively_apply(layout.content,
+                              getfunction,
+                              args,
+                              depth + 1,
+                              keep_parameters),
             layout.identities,
-            layout.parameters)
+            layout.parameters if keep_parameters else None)
 
     elif isinstance(layout, awkward1.layout.ListOffsetArrayU32):
         return awkward1.layout.ListOffsetArrayU32(
             layout.offsets,
-            recursively_apply(layout.content, getfunction, args, depth + 1),
+            recursively_apply(layout.content,
+                              getfunction,
+                              args,
+                              depth + 1,
+                              keep_parameters),
             layout.identities,
-            layout.parameters)
+            layout.parameters if keep_parameters else None)
 
     elif isinstance(layout, awkward1.layout.ListOffsetArray64):
         return awkward1.layout.ListOffsetArray64(
             layout.offsets,
-            recursively_apply(layout.content, getfunction, args, depth + 1),
+            recursively_apply(layout.content,
+                              getfunction,
+                              args,
+                              depth + 1,
+                              keep_parameters),
             layout.identities,
-            layout.parameters)
+            layout.parameters if keep_parameters else None)
 
     elif isinstance(layout, awkward1.layout.IndexedArray32):
         return awkward1.layout.IndexedArray32(
             layout.index,
-            recursively_apply(layout.content, getfunction, args, depth),
+            recursively_apply(layout.content,
+                              getfunction,
+                              args,
+                              depth,
+                              keep_parameters),
             layout.identities,
-            layout.parameters)
+            layout.parameters if keep_parameters else None)
 
     elif isinstance(layout, awkward1.layout.IndexedArrayU32):
         return awkward1.layout.IndexedArrayU32(
             layout.index,
-            recursively_apply(layout.content, getfunction, args, depth),
+            recursively_apply(layout.content,
+                              getfunction,
+                              args,
+                              depth,
+                              keep_parameters),
             layout.identities,
-            layout.parameters)
+            layout.parameters if keep_parameters else None)
 
     elif isinstance(layout, awkward1.layout.IndexedArray64):
         return awkward1.layout.IndexedArray64(
             layout.index,
-            recursively_apply(layout.content, getfunction, args, depth),
+            recursively_apply(layout.content,
+                              getfunction,
+                              args,
+                              depth,
+                              keep_parameters),
             layout.identities,
-            layout.parameters)
+            layout.parameters if keep_parameters else None)
 
     elif isinstance(layout, awkward1.layout.IndexedOptionArray32):
         return awkward1.layout.IndexedOptionArray32(
             layout.index,
-            recursively_apply(layout.content, getfunction, args, depth),
+            recursively_apply(layout.content,
+                              getfunction,
+                              args,
+                              depth,
+                              keep_parameters),
             layout.identities,
-            layout.parameters)
+            layout.parameters if keep_parameters else None)
 
     elif isinstance(layout, awkward1.layout.IndexedOptionArray64):
         return awkward1.layout.IndexedOptionArray64(
             layout.index,
-            recursively_apply(layout.content, getfunction, args, depth),
+            recursively_apply(layout.content,
+                              getfunction,
+                              args,
+                              depth,
+                              keep_parameters),
             layout.identities,
-            layout.parameters)
+            layout.parameters if keep_parameters else None)
 
     elif isinstance(layout, awkward1.layout.ByteMaskedArray):
         return awkward1.layout.ByteMaskedArray(
             layout.mask,
-            recursively_apply(layout.content, getfunction, args, depth),
+            recursively_apply(layout.content,
+                              getfunction,
+                              args,
+                              depth,
+                              keep_parameters),
             layout.valid_when,
             layout.identities,
-            layout.parameters)
+            layout.parameters if keep_parameters else None)
 
     elif isinstance(layout, awkward1.layout.BitMaskedArray):
         return awkward1.layout.BitMaskedArray(
             layout.mask,
-            recursively_apply(layout.content, getfunction, args, depth),
+            recursively_apply(layout.content,
+                              getfunction,
+                              args,
+                              depth,
+                              keep_parameters),
             layout.valid_when,
             len(layout),
             layout.lsb_order,
             layout.identities,
-            layout.parameters)
+            layout.parameters if keep_parameters else None)
 
     elif isinstance(layout, awkward1.layout.UnmaskedArray):
         return awkward1.layout.UnmaskedArray(
-            recursively_apply(layout.content, getfunction, args, depth),
+            recursively_apply(layout.content,
+                              getfunction,
+                              args,
+                              depth,
+                              keep_parameters),
             layout.identities,
-            layout.parameters)
+            layout.parameters if keep_parameters else None)
 
     elif isinstance(layout, awkward1.layout.RecordArray):
         return awkward1.layout.RecordArray(
-            [recursively_apply(x, getfunction, args, depth)
+            [recursively_apply(x, getfunction, args, depth, keep_parameters)
                for x in layout.contents],
             layout.recordlookup,
             len(layout),
             layout.identities,
-            layout.parameters)
+            layout.parameters if keep_parameters else None)
 
     elif isinstance(layout, awkward1.layout.Record):
         return awkward1.layout.Record(
-            recursively_apply(layout.array, getfunction, args, depth),
+            recursively_apply(layout.array,
+                              getfunction,
+                              args,
+                              depth,
+                              keep_parameters),
             layout.at)
 
     elif isinstance(layout, awkward1.layout.UnionArray8_32):
         return awkward1.layout.UnionArray8_32(
             layout.tags,
             layout.index,
-            [recursively_apply(x, getfunction, args, depth)
+            [recursively_apply(x, getfunction, args, depth, keep_parameters)
                for x in layout.contents],
             layout.identities,
-            layout.parameters)
+            layout.parameters if keep_parameters else None)
 
     elif isinstance(layout, awkward1.layout.UnionArray8_U32):
         return awkward1.layout.UnionArray8_U32(
             layout.tags,
             layout.index,
-            [recursively_apply(x, getfunction, args, depth)
+            [recursively_apply(x, getfunction, args, depth, keep_parameters)
                for x in layout.contents],
             layout.identities,
-            layout.parameters)
+            layout.parameters if keep_parameters else None)
 
     elif isinstance(layout, awkward1.layout.UnionArray8_64):
         return awkward1.layout.UnionArray8_64(
             layout.tags,
             layout.index,
-            [recursively_apply(x, getfunction, args, depth)
+            [recursively_apply(x, getfunction, args, depth, keep_parameters)
                for x in layout.contents],
             layout.identities,
-            layout.parameters)
+            layout.parameters if keep_parameters else None)
 
     else:
         raise AssertionError(

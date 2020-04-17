@@ -163,7 +163,12 @@ namespace awkward {
 
   void
   Content::setparameter(const std::string& key, const std::string& value) {
-    parameters_[key] = value;
+    if (value == std::string("null")) {
+      parameters_.erase(key);
+    }
+    else {
+      parameters_[key] = value;
+    }
   }
 
   bool

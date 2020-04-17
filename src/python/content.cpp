@@ -1009,6 +1009,15 @@ setparameter(T& self, const std::string& key, const py::object& value) {
 }
 
 template <typename T>
+py::object
+withparameter(T& self, const std::string& key, const py::object& value) {
+  py::object valuestr = py::module::import("json").attr("dumps")(value);
+  ak::ContentPtr out = self.shallow_copy();
+  out.get()->setparameter(key, valuestr.cast<std::string>());
+  return box(out);
+}
+
+template <typename T>
 py::class_<T, std::shared_ptr<T>, ak::Content>
 content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
   return x.def("__repr__", &repr<T>)
@@ -1029,6 +1038,7 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
           })
           .def_property("parameters", &getparameters<T>, &setparameters<T>)
           .def("setparameter", &setparameter<T>)
+          .def("withparameter", &withparameter<T>)
           .def("parameter", &parameter<T>)
           .def("purelist_parameter", &purelist_parameter<T>)
           .def("type",

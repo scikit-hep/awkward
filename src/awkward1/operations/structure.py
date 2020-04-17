@@ -454,6 +454,67 @@ def with_field(base, what, where=None, highlevel=True):
     else:
         return out[0]
 
+def with_parameter(array, parameter, value, highlevel=True):
+    """
+    Args:
+        array: Data convertible into an Awkward Array.
+        parameter (str): Name of the parameter to set on that array.
+        value (JSON): Value of the parameter to set on that array.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+
+    This function returns a new array with a parameter set on the outermost
+    node of its #ak.Array.layout.
+
+    Note that a "new array" is a lightweight shallow copy, not a duplication
+    of large data buffers.
+
+    You can also remove a single parameter with this function, since setting
+    a parameter to None is equivalent to removing it.
+    """
+    layout = awkward1.operations.convert.to_layout(array,
+                                                   allow_record=True,
+                                                   allow_other=False)
+
+    if isinstance(layout, awkward1.partition.PartitionedArray):
+        out = layout.replace_partitions(x.withparameter(parameter, value)
+                                           for x in layout.partitions)
+    else:
+        out = layout.withparameter(parameter, value)
+
+    if highlevel:
+        return awkward1._util.wrap(out,
+                   behavior=awkward1._util.behaviorof(array))
+    else:
+        return out
+
+def without_parameters(array, highlevel=True):
+    """
+    Args:
+        array: Data convertible into an Awkward Array.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+
+    This function returns a new array without any parameters in its
+    #ak.Array.layout, on nodes of any level of depth.
+
+    Note that a "new array" is a lightweight shallow copy, not a duplication
+    of large data buffers.
+    """
+    layout = awkward1.operations.convert.to_layout(array,
+                                                   allow_record=True,
+                                                   allow_other=False)
+
+    out = awkward1._util.recursively_apply(layout,
+                                           lambda layout, depth: None,
+                                           keep_parameters=False)
+
+    if highlevel:
+        return awkward1._util.wrap(out,
+                   behavior=awkward1._util.behaviorof(array))
+    else:
+        return out
+
 @awkward1._connect._numpy.implements(numpy.broadcast_arrays)
 def broadcast_arrays(*arrays, **kwargs):
     """
