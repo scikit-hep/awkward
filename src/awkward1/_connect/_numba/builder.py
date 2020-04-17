@@ -4,7 +4,8 @@ from __future__ import absolute_import
 
 import numpy
 import numba
-import numba.typing.ctypes_utils
+import numba.core.typing
+import numba.core.typing.ctypes_utils
 
 import awkward1.operations.convert
 import awkward1._util
@@ -37,7 +38,7 @@ class ArrayBuilderType(numba.types.Type):
         self.behavior = behavior
 
 @numba.extending.register_model(ArrayBuilderType)
-class ArrayBuilderModel(numba.datamodel.models.StructModel):
+class ArrayBuilderModel(numba.core.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
         members= [("rawptr", numba.types.voidptr),
                   ("pyptr", numba.types.pyobject)]
@@ -55,7 +56,8 @@ def unbox_ArrayBuilder(arraybuildertype, arraybuilderobj, c):
     c.pyapi.decref(inner_obj)
     c.pyapi.decref(rawptr_obj)
 
-    is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
+    is_error = numba.core.cgutils.is_not_null(c.builder,
+                                              c.pyapi.err_occurred())
     return numba.extending.NativeValue(proxyout._getvalue(), is_error)
 
 @numba.extending.box(ArrayBuilderType)
@@ -83,7 +85,7 @@ def box_ArrayBuilder(arraybuildertype, arraybuilderval, c):
     return out
 
 def call(context, builder, fcn, args):
-    numbatype = numba.typing.ctypes_utils.make_function_type(fcn)
+    numbatype = numba.core.typing.ctypes_utils.make_function_type(fcn)
     fcntype = context.get_function_pointer_type(numbatype)
     fcnval = context.add_dynamic_addr(builder,
                                       numbatype.get_pointer(fcn),
@@ -96,8 +98,8 @@ def call(context, builder, fcn, args):
                                           ValueError,
                                           (fcn.name + " failed",))
 
-@numba.typing.templates.infer_global(len)
-class type_len(numba.typing.templates.AbstractTemplate):
+@numba.core.typing.templates.infer_global(len)
+class type_len(numba.core.typing.templates.AbstractTemplate):
     def generic(self, args, kwargs):
         if (len(args) == 1 and
             len(kwargs) == 0 and
@@ -109,8 +111,9 @@ def lower_len(context, builder, sig, args):
     arraybuildertype, = sig.args
     arraybuilderval, = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
-    result = numba.cgutils.alloca_once(builder,
-                                       context.get_value_type(numba.int64))
+    result = numba.core.cgutils.alloca_once(
+        builder,
+        context.get_value_type(numba.int64))
     call(context, builder, awkward1._libawkward.ArrayBuilder_length,
          (proxyin.rawptr, result))
     return awkward1._connect._numba.castint(context,
@@ -119,25 +122,25 @@ def lower_len(context, builder, sig, args):
                                             numba.intp,
                                             builder.load(result))
 
-@numba.typing.templates.infer_getattr
-class type_methods(numba.typing.templates.AttributeTemplate):
+@numba.core.typing.templates.infer_getattr
+class type_methods(numba.core.typing.templates.AttributeTemplate):
     key = ArrayBuilderType
 
-    @numba.typing.templates.bound_function("clear")
+    @numba.core.typing.templates.bound_function("clear")
     def resolve_clear(self, arraybuildertype, args, kwargs):
         if len(args) == 0 and len(kwargs) == 0:
             return numba.types.none()
         else:
             raise TypeError("wrong number of arguments for ArrayBuilder.clear")
 
-    @numba.typing.templates.bound_function("null")
+    @numba.core.typing.templates.bound_function("null")
     def resolve_null(self, arraybuildertype, args, kwargs):
         if len(args) == 0 and len(kwargs) == 0:
             return numba.types.none()
         else:
             raise TypeError("wrong number of arguments for ArrayBuilder.null")
 
-    @numba.typing.templates.bound_function("boolean")
+    @numba.core.typing.templates.bound_function("boolean")
     def resolve_boolean(self, arraybuildertype, args, kwargs):
         if (len(args) == 1 and
             len(kwargs) == 0 and
@@ -148,7 +151,7 @@ class type_methods(numba.typing.templates.AttributeTemplate):
                     "wrong number or types of arguments for "
                     "ArrayBuilder.boolean")
 
-    @numba.typing.templates.bound_function("integer")
+    @numba.core.typing.templates.bound_function("integer")
     def resolve_integer(self, arraybuildertype, args, kwargs):
         if (len(args) == 1 and
             len(kwargs) == 0 and
@@ -159,7 +162,7 @@ class type_methods(numba.typing.templates.AttributeTemplate):
                     "wrong number or types of arguments for "
                     "ArrayBuilder.integer")
 
-    @numba.typing.templates.bound_function("real")
+    @numba.core.typing.templates.bound_function("real")
     def resolve_real(self, arraybuildertype, args, kwargs):
         if (len(args) == 1 and
             len(kwargs) == 0 and
@@ -169,7 +172,7 @@ class type_methods(numba.typing.templates.AttributeTemplate):
             raise TypeError(
                     "wrong number or types of arguments for ArrayBuilder.real")
 
-    @numba.typing.templates.bound_function("begin_list")
+    @numba.core.typing.templates.bound_function("begin_list")
     def resolve_begin_list(self, arraybuildertype, args, kwargs):
         if len(args) == 0 and len(kwargs) == 0:
             return numba.types.none()
@@ -177,7 +180,7 @@ class type_methods(numba.typing.templates.AttributeTemplate):
             raise TypeError(
                     "wrong number of arguments for ArrayBuilder.begin_list")
 
-    @numba.typing.templates.bound_function("end_list")
+    @numba.core.typing.templates.bound_function("end_list")
     def resolve_end_list(self, arraybuildertype, args, kwargs):
         if len(args) == 0 and len(kwargs) == 0:
             return numba.types.none()
@@ -185,7 +188,7 @@ class type_methods(numba.typing.templates.AttributeTemplate):
             raise TypeError(
                     "wrong number of arguments for ArrayBuilder.end_list")
 
-    @numba.typing.templates.bound_function("begin_tuple")
+    @numba.core.typing.templates.bound_function("begin_tuple")
     def resolve_begin_tuple(self, arraybuildertype, args, kwargs):
         if (len(args) == 1 and
             len(kwargs) == 0 and
@@ -196,7 +199,7 @@ class type_methods(numba.typing.templates.AttributeTemplate):
                     "wrong number or types of arguments for "
                     "ArrayBuilder.begin_tuple")
 
-    @numba.typing.templates.bound_function("index")
+    @numba.core.typing.templates.bound_function("index")
     def resolve_index(self, arraybuildertype, args, kwargs):
         if (len(args) == 1 and
             len(kwargs) == 0 and
@@ -207,7 +210,7 @@ class type_methods(numba.typing.templates.AttributeTemplate):
                     "wrong number or types of arguments for "
                     "ArrayBuilder.index")
 
-    @numba.typing.templates.bound_function("end_tuple")
+    @numba.core.typing.templates.bound_function("end_tuple")
     def resolve_end_tuple(self, arraybuildertype, args, kwargs):
         if len(args) == 0 and len(kwargs) == 0:
             return numba.types.none()
@@ -215,7 +218,7 @@ class type_methods(numba.typing.templates.AttributeTemplate):
             raise TypeError(
                     "wrong number of arguments for ArrayBuilder.end_tuple")
 
-    @numba.typing.templates.bound_function("begin_record")
+    @numba.core.typing.templates.bound_function("begin_record")
     def resolve_begin_record(self, arraybuildertype, args, kwargs):
         if len(args) == 0 and len(kwargs) == 0:
             return numba.types.none()
@@ -228,7 +231,7 @@ class type_methods(numba.typing.templates.AttributeTemplate):
                     "wrong number or types of arguments for "
                     "ArrayBuilder.begin_record")
 
-    @numba.typing.templates.bound_function("field")
+    @numba.core.typing.templates.bound_function("field")
     def resolve_field(self, arraybuildertype, args, kwargs):
         if (len(args) == 1 and
             len(kwargs) == 0 and
@@ -239,7 +242,7 @@ class type_methods(numba.typing.templates.AttributeTemplate):
                     "wrong number or types of arguments for "
                     "ArrayBuilder.field")
 
-    @numba.typing.templates.bound_function("end_record")
+    @numba.core.typing.templates.bound_function("end_record")
     def resolve_end_record(self, arraybuildertype, args, kwargs):
         if len(args) == 0 and len(kwargs) == 0:
             return numba.types.none()
@@ -247,7 +250,7 @@ class type_methods(numba.typing.templates.AttributeTemplate):
             raise TypeError(
                     "wrong number of arguments for ArrayBuilder.end_record")
 
-    @numba.typing.templates.bound_function("append")
+    @numba.core.typing.templates.bound_function("append")
     def resolve_append(self, arraybuildertype, args, kwargs):
         import awkward1.highlevel
 
@@ -295,7 +298,7 @@ class type_methods(numba.typing.templates.AttributeTemplate):
                     "wrong number or types of arguments for "
                     "ArrayBuilder.append")
 
-    @numba.typing.templates.bound_function("extend")
+    @numba.core.typing.templates.bound_function("extend")
     def resolve_extend(self, arraybuildertype, args, kwargs):
         if (len(args) == 1 and
             len(kwargs) == 0 and
@@ -639,7 +642,7 @@ def lower_append_optional(context, builder, sig, args):
     arraybuilderval, optval = args
 
     optproxy = context.make_helper(builder, opttype, optval)
-    validbit = numba.cgutils.as_bool_bit(builder, optproxy.valid)
+    validbit = numba.core.cgutils.as_bool_bit(builder, optproxy.valid)
 
     with builder.if_else(validbit) as (is_valid, is_not_valid):
         with is_valid:
@@ -695,9 +698,9 @@ def lower_extend_array(context, builder, sig, args):
                                                       viewproxy.pos)
 
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
-    with numba.cgutils.for_range(builder,
-                                 viewproxy.stop,
-                                 viewproxy.start) as loop:
+    with numba.core.cgutils.for_range(builder,
+                                      viewproxy.stop,
+                                      viewproxy.start) as loop:
         atval = awkward1._connect._numba.castint(context,
                                                  builder,
                                                  numba.intp,
