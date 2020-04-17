@@ -448,6 +448,7 @@ def with_field(base, what, where=None, highlevel=True):
     out = awkward1._util.broadcast_and_apply(
             [base, what], getfunction, behavior)
     assert isinstance(out, tuple) and len(out) == 1
+
     if highlevel:
         return awkward1._util.wrap(out[0], behavior=behavior)
     else:
