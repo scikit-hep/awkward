@@ -823,11 +823,16 @@ class PartitionedViewType(numba.types.Type):
         self.behavior = behavior
         self.fields = fields
 
+    def getitem_field(self, key):
+        return PartitionedViewType(self.type,
+                                   self.behavior,
+                                   self.fields + (key,))
+
 @numba.extending.register_model(PartitionedViewType)
 class PartitionedViewModel(numba.core.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
         members = [("pylookups", numba.types.pyobject),
-                   # ("lookups",   PartitionedViewType.lookupstype),
+                   ("lookups",   PartitionedViewType.lookupstype),
                    ("stops",     PartitionedViewType.stopstype),
                    ("start",     numba.intp),
                    ("stop",      numba.intp)]
@@ -848,8 +853,8 @@ def unbox_PartitionedView(partviewtype, partview_obj, c):
 
     proxyout = c.context.make_helper(c.builder, partviewtype)
     proxyout.pylookups = lookups_obj
-    # proxyout.lookups   = c.pyapi.to_native_value(
-    #                        PartitionedViewType.lookupstype, lookups_obj).value
+    proxyout.lookups   = c.pyapi.to_native_value(
+                           PartitionedViewType.lookupstype, lookups_obj).value
     proxyout.stops     = c.pyapi.to_native_value(
                            PartitionedViewType.stopstype, stops_obj).value
     proxyout.start     = c.pyapi.number_as_ssize_t(start_obj)
@@ -914,3 +919,167 @@ def box_PartitionedView(partviewtype, partviewval, c):
     c.pyapi.decref(stop_obj)
 
     return out
+
+@numba.core.typing.templates.infer_global(operator.getitem)
+class type_getitem_partitioned(numba.core.typing.templates.AbstractTemplate):
+    def generic(self, args, kwargs):
+        if (len(args) == 2 and
+            len(kwargs) == 0 and
+            isinstance(args[0], PartitionedViewType)):
+            partviewtype, wheretype = args
+            if isinstance(wheretype, numba.types.Integer):
+                return partviewtype.type.getitem_at_check(
+                           partviewtype)(partviewtype, wheretype)
+            elif (isinstance(wheretype, numba.types.SliceType) and
+                  not wheretype.has_step):
+                return partviewtype
+            elif isinstance(wheretype, numba.types.StringLiteral):
+                return partviewtype.getitem_field(wheretype)
+            else:
+                raise TypeError(
+                        "only an integer, start:stop range, or a *constant* "
+                        "field name string may be used as awkward1.Array "
+                        "slices in compiled code")
+
+@numba.extending.lower_builtin(operator.getitem,
+                               PartitionedViewType,
+                               numba.types.Integer)
+def lower_getitem_at(context, builder, sig, args):
+    rettype, (partviewtype, wheretype) = sig.return_type, sig.args
+    partviewval, whereval = args
+    partviewproxy = context.make_helper(builder, partviewtype, partviewval)
+
+    searchsorted_sig = numba.intp(PartitionedViewType.stopstype, wheretype)
+    searchsorted_args = (partviewproxy.stops, whereval)
+    def searchsorted_impl(stops, where):
+        return numpy.searchsorted(stops, where, side="right")
+    partitionid_val = context.compile_internal(builder,
+                                               searchsorted_impl,
+                                               searchsorted_sig,
+                                               searchsorted_args)
+
+    getitemlist_sig = LookupType()(PartitionedViewType.lookupstype, numba.intp)
+    getitemlist_args = (partviewproxy.lookups, partitionid_val)
+    lookup_val = numba.cpython.listobj.getitem_list(context,
+                                                    builder,
+                                                    getitemlist_sig,
+                                                    getitemlist_args)
+    lookupproxy = context.make_helper(builder, LookupType(), value=lookup_val)
+
+    startval_ptr = numba.core.cgutils.alloca_once_value(
+                       builder, context.get_constant(numba.intp, 0))
+    with builder.if_then(builder.icmp_signed(
+                             "!=",
+                             partitionid_val,
+                             context.get_constant(numba.intp, 0)),
+                         likely=True):
+        arrayproxy = context.make_helper(builder,
+                                         PartitionedViewType.stopstype,
+                                         partviewproxy.stops)
+        minus_one = builder.sub(partitionid_val,
+                                context.get_constant(numba.intp, 1))
+        realstartval = numba.np.arrayobj._getitem_array_single_int(
+                           context,
+                           builder,
+                           numba.intp,
+                           PartitionedViewType.stopstype,
+                           arrayproxy,
+                           minus_one)
+        builder.store(realstartval, startval_ptr)
+
+    startval = builder.load(startval_ptr)
+    atval = builder.sub(whereval, startval)
+
+    viewtype = ArrayViewType(partviewtype.type,
+                             partviewtype.behavior,
+                             partviewtype.fields)
+    viewproxy = context.make_helper(builder, viewtype)
+    viewproxy.pos = context.get_constant(numba.intp, 0)
+    viewproxy.start = context.get_constant(numba.intp, 0)
+    viewproxy.stop = builder.add(atval, context.get_constant(numba.intp, 1))
+    viewproxy.arrayptrs = context.make_helper(builder,
+                                              LookupType.arraytype,
+                                              lookupproxy.arrayptrs).data
+    viewproxy.sharedptrs = context.make_helper(builder,
+                                               LookupType.arraytype,
+                                               lookupproxy.sharedptrs).data
+
+    return viewtype.type.lower_getitem_at_check(context,
+                                                builder,
+                                                rettype,
+                                                viewtype,
+                                                viewproxy._getvalue(),
+                                                viewproxy,
+                                                numba.intp,
+                                                atval,
+                                                False,
+                                                False)
+
+
+
+
+
+# @numba.extending.lower_builtin(operator.getitem,
+#                                ArrayViewType,
+#                                numba.types.Integer)
+# def lower_getitem_at(context, builder, sig, args):
+#     rettype, (viewtype, wheretype) = sig.return_type, sig.args
+#     viewval, whereval = args
+#     viewproxy = context.make_helper(builder, viewtype, viewval)
+#     return viewtype.type.lower_getitem_at_check(context,
+#                                                 builder,
+#                                                 rettype,
+#                                                 viewtype,
+#                                                 viewval,
+#                                                 viewproxy,
+#                                                 wheretype,
+#                                                 whereval,
+#                                                 True,
+#                                                 True)
+
+# @numba.extending.lower_builtin(operator.getitem,
+#                                ArrayViewType,
+#                                numba.types.slice2_type)
+# def lower_getitem_range(context, builder, sig, args):
+#     rettype, (viewtype, wheretype) = sig.return_type, sig.args
+#     viewval, whereval = args
+#     viewproxy = context.make_helper(builder, viewtype, viewval)
+#     whereproxy = context.make_helper(builder, wheretype, whereval)
+#     return viewtype.type.lower_getitem_range(context,
+#                                              builder,
+#                                              rettype,
+#                                              viewtype,
+#                                              viewval,
+#                                              viewproxy,
+#                                              whereproxy.start,
+#                                              whereproxy.stop,
+#                                              True)
+
+# @numba.extending.lower_builtin(operator.getitem,
+#                                ArrayViewType,
+#                                numba.types.StringLiteral)
+# def lower_getitem_field(context, builder, sig, args):
+#     rettype, (viewtype, wheretype) = sig.return_type, sig.args
+#     viewval, whereval = args
+#     return viewtype.type.lower_getitem_field(context,
+#                                              builder,
+#                                              viewtype,
+#                                              viewval,
+#                                              wheretype.literal_value)
+
+# @numba.core.typing.templates.infer_getattr
+# class type_getattr(numba.core.typing.templates.AttributeTemplate):
+#     key = ArrayViewType
+
+#     def generic_resolve(self, viewtype, attr):
+#         # if attr == "???":
+#         #     do_something_specific
+#         return viewtype.type.getitem_field(viewtype, attr)
+
+# @numba.extending.lower_getattr_generic(ArrayViewType)
+# def lower_getattr_generic(context, builder, viewtype, viewval, attr):
+#     return viewtype.type.lower_getitem_field(context,
+#                                              builder,
+#                                              viewtype,
+#                                              viewval,
+#                                              attr)
