@@ -173,20 +173,21 @@ def test_getitem():
 
     assert [f5a(asarray, i) for i in range(-9, 9)]
 
-# def test_me():
-#     aslist = [{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]},
-#               {"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}, {"x": 5.5, "y": [5, 5, 5]},
-#               {"x": 6.6, "y": [6, 6]}, {"x": 7.7, "y": [7]}, {"x": 8.8, "y": []}]
-#     asarray = awkward1.repartition(awkward1.Array(aslist), 2)
+    @numba.njit
+    def f5b(x, i):
+        return x[i]["x"]
 
-#     @numba.njit
-#     def f5b(x, i):
-#         return x[i]["x"]
+    assert [f5b(asarray, i) for i in range(-9, 9)]
 
-#     assert [f5b(asarray, i) for i in range(-9, 9)]
+def test_me():
+    aslist = [{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]},
+              {"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}, {"x": 5.5, "y": [5, 5, 5]},
+              {"x": 6.6, "y": [6, 6]}, {"x": 7.7, "y": [7]}, {"x": 8.8, "y": []}]
+    asarray = awkward1.repartition(awkward1.Array(aslist), 2)
 
-#     # @numba.njit
-#     # def f6(x, i):
-#     #     return x["y"][i]
+    @numba.njit
+    def f6a(x, i):
+        return x["y"][i]
 
-#     # assert awkward1.to_list(f6(asarray, -3)) == [6, 6]
+    assert awkward1.to_list(f6a(asarray, 6)) == [6, 6]
+    # assert awkward1.to_list(f6a(asarray, -3)) == [6, 6]

@@ -177,7 +177,14 @@ class ArrayView(object):
                 len(layout),
                 ())
 
-    def __init__(self, type, behavior, lookup, pos, start, stop, fields):
+    def __init__(self, *args):
+        print("ArrayView init")
+        for x in args:
+            print(repr(x))
+
+        print()
+        type, behavior, lookup, pos, start, stop, fields = args
+
         self.type = type
         self.behavior = behavior
         self.lookup = lookup
@@ -282,6 +289,8 @@ def serializable2dict(obj):
         return dict(obj)
 
 def box_ArrayView(viewtype, viewval, c):
+    print("box_ArrayView")
+
     serializable2dict_obj = c.pyapi.unserialize(
                               c.pyapi.serialize_object(serializable2dict))
     behavior2_obj = c.pyapi.unserialize(
@@ -302,6 +311,8 @@ def box_ArrayView(viewtype, viewval, c):
     stop_obj   = c.pyapi.long_from_ssize_t(proxyin.stop)
     lookup_obj = proxyin.pylookup
 
+    c.pyapi.print_object(ArrayView_obj)
+
     out = c.pyapi.call_function_objargs(ArrayView_obj,
                                         (type_obj,
                                          behavior_obj,
@@ -310,6 +321,8 @@ def box_ArrayView(viewtype, viewval, c):
                                          start_obj,
                                          stop_obj,
                                          fields_obj))
+
+    c.pyapi.print_object(ArrayView_obj)
 
     c.pyapi.decref(serializable2dict_obj)
     c.pyapi.decref(behavior2_obj)
@@ -823,11 +836,13 @@ class PartitionedViewType(numba.types.Type):
         self.behavior = behavior
         self.fields = fields
 
+    def toArrayViewType(self):
+        return ArrayViewType(self.type, self.behavior, self.fields)
+
     def getitem_field(self, key):
-        out = PartitionedViewType(self.type,
-                                  self.behavior,
-                                  self.fields + (key.literal_value,))
-        return out(self, key)
+        return PartitionedViewType(self.type,
+                                   self.behavior,
+                                   self.fields + (key,))
 
 @numba.extending.register_model(PartitionedViewType)
 class PartitionedViewModel(numba.core.datamodel.models.StructModel):
@@ -933,14 +948,20 @@ class type_getitem_partitioned(numba.core.typing.templates.AbstractTemplate):
             len(kwargs) == 0 and
             isinstance(args[0], PartitionedViewType)):
             partviewtype, wheretype = args
+
             if isinstance(wheretype, numba.types.Integer):
-                return partviewtype.type.getitem_at_check(
-                           partviewtype)(partviewtype, wheretype)
+                arrayviewtype = partviewtype.toArrayViewType()
+                rettype = partviewtype.type.getitem_at_check(arrayviewtype)
+                return rettype(partviewtype, wheretype)
+
             elif (isinstance(wheretype, numba.types.SliceType) and
                   not wheretype.has_step):
                 return partviewtype(partviewtype, wheretype)
+
             elif isinstance(wheretype, numba.types.StringLiteral):
-                return partviewtype.getitem_field(wheretype)
+                rettype = partviewtype.getitem_field(wheretype.literal_value)
+                return rettype(partviewtype, wheretype)
+
             else:
                 raise TypeError(
                         "only an integer, start:stop range, or a *constant* "
@@ -1012,9 +1033,7 @@ def lower_getitem_at_partitioned(context, builder, sig, args):
     startval = builder.load(startval_ptr)
     subatval = builder.sub(atval, startval)
 
-    viewtype = ArrayViewType(partviewtype.type,
-                             partviewtype.behavior,
-                             partviewtype.fields)
+    viewtype = partviewtype.toArrayViewType()
     viewproxy = context.make_helper(builder, viewtype)
     viewproxy.pos = context.get_constant(numba.intp, 0)
     viewproxy.start = context.get_constant(numba.intp, 0)
@@ -1025,6 +1044,8 @@ def lower_getitem_at_partitioned(context, builder, sig, args):
     viewproxy.sharedptrs = context.make_helper(builder,
                                                LookupType.arraytype,
                                                lookupproxy.sharedptrs).data
+
+    print("partitioned getitem_at")
 
     return viewtype.type.lower_getitem_at_check(context,
                                                 builder,
@@ -1098,7 +1119,7 @@ def lower_getitem_field_partitioned(context, builder, sig, args):
     partviewval, whereval = args
 
     if context.enable_nrt:
-        context.nrt.incref(builder, partviewtype, partviewval)
+        context.nrt.incref(builder, rettype, partviewval)
 
     return partviewval
 
