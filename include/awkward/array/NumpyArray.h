@@ -737,10 +737,15 @@ namespace awkward {
 
       std::iota(result.begin(), result.end(), 0);
       int64_t index(0);
-      int64_t next_start = starts.getitem_at_nowrap(index);
-      int64_t next_stop = (starts.length() > index + 1) ?
-                           starts.getitem_at_nowrap(index + 1) :
-                           length;
+      std::vector<int64_t> ranges(starts.length() + 1);
+      for (int64_t i = 0; i < starts.length(); i++) {
+        ranges[i] = starts.getitem_at_nowrap(i);
+      }
+      ranges[starts.length()] = length;
+      std::sort(begin(ranges), end(ranges));
+
+      int64_t next_start = ranges[index];
+      int64_t next_stop = ranges[index + 1];
 
       while(next_start < length) {
         if(ascending  and  not stable) {
@@ -760,8 +765,8 @@ namespace awkward {
             [&data](size_t i1, size_t i2) {return data[i1] > data[i2];});
         }
         index++;
-        next_start = starts.getitem_at_nowrap(index);
-        next_stop = (starts.length() > index + 1) ? starts.getitem_at_nowrap(index + 1) : length;
+        next_start = next_stop;
+        next_stop = (ranges.size() > index + 1) ?  ranges[index + 1] : length;
       }
 
       struct Error err = util::awkward_numpyarray_argsort_64<T>(

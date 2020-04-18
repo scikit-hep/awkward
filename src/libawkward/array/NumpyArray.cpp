@@ -2486,25 +2486,10 @@ namespace awkward {
                            int64_t outlength,
                            bool ascending,
                            bool stable) const {
-    std::cout << "NumpyArray::argsort_next\n";
-    std::cout << "Starts:\n" << starts.tostring() << "\n";
-    std::cout << "Parents:\n" << parents.tostring() << "\n";
-    std::cout << "outlength: " << outlength << "\n";
-    std::cout << "length: " << length() << "\n";
-    std::cout << "shape[0]: " << shape_[0] << ", "
-              << "strides[0]: " << strides_[0] << "\n";
-    std::cout << "Total length? " << shape_[0]*strides_[0] << "\n";
-    for(auto s : shape_) {
-      std::cout << s << ", ";
-    }
-    std::cout << "\n";
-    
     if (shape_.empty()) {
       throw std::runtime_error("attempting to argsort a scalar");
     }
     else if (shape_.size() != 1  ||  !iscontiguous()) {
-      std::cout << "shape_.size() != 1\n";
-
       return toRegularArray().get()->argsort_next(negaxis,
                                                   starts,
                                                   parents,

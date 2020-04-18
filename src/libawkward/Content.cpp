@@ -146,7 +146,6 @@ namespace awkward {
 
   const ContentPtr
   Content::argsort(int64_t axis, bool ascending, bool stable) const {
-    std::cout << "Content::argsort\n";
     int64_t negaxis = -axis;
     std::pair<bool, int64_t> branchdepth = branch_depth();
     bool branch = branchdepth.first;
@@ -189,7 +188,7 @@ namespace awkward {
                                    1,
                                    ascending,
                                    stable);
-    std::cout << "Next:\n" << next.get()->tostring() << "\n";
+
     return next.get()->getitem_at_nowrap(0);
   }
 
