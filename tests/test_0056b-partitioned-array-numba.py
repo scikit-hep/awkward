@@ -136,15 +136,57 @@ def test_getitem():
         return x[i]
 
     assert [f1(array, i) for i in range(10)] == [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]
+    assert [f1(array, -i) for i in range(1, 11)] == [9.9, 8.8, 7.7, 6.6, 5.5, 4.4, 3.3, 2.2, 1.1, 0.0]
 
-    # @numba.njit
-    # def f2(x, i1, i2):
-    #     return x[i1:i2]
+    @numba.njit
+    def f2(x, i1, i2):
+        return x[i1:i2]
 
-    # assert isinstance(f2(array, 0, 10).layout, awkward1.partition.PartitionedArray)
-    # assert isinstance(f2(array, 4, 5).layout, awkward1.partition.PartitionedArray)
-    # assert isinstance(f2(array, 5, 5).layout, awkward1.partition.PartitionedArray)
+    assert isinstance(f2(array, 0, 10).layout, awkward1.partition.PartitionedArray)
+    assert isinstance(f2(array, 4, 5).layout, awkward1.partition.PartitionedArray)
+    assert isinstance(f2(array, 5, 5).layout, awkward1.partition.PartitionedArray)
 
-    # for start in range(10):
-    #     for stop in range(10):
-    #         assert f2(array, start, stop) == [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9][start:stop]
+    for start in range(-10, 10):
+        for stop in range(-10, 10):
+            assert awkward1.to_list(f2(array, start, stop)) == [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9][start:stop]
+
+    aslist = [{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]},
+              {"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}, {"x": 5.5, "y": [5, 5, 5]},
+              {"x": 6.6, "y": [6, 6]}, {"x": 7.7, "y": [7]}, {"x": 8.8, "y": []}]
+    asarray = awkward1.repartition(awkward1.Array(aslist), 2)
+
+    @numba.njit
+    def f3(x):
+        return x["x"]
+
+    assert awkward1.to_list(f3(asarray)) == [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8]
+
+    @numba.njit
+    def f4(x):
+        return x["y"]
+
+    assert awkward1.to_list(f4(asarray)) == [[], [1], [2, 2], [3, 3, 3], [4, 4, 4, 4], [5, 5, 5], [6, 6], [7], []]
+
+    @numba.njit
+    def f5a(x, i):
+        return x["x"][i]
+
+    assert [f5a(asarray, i) for i in range(-9, 9)]
+
+# def test_me():
+#     aslist = [{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]},
+#               {"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}, {"x": 5.5, "y": [5, 5, 5]},
+#               {"x": 6.6, "y": [6, 6]}, {"x": 7.7, "y": [7]}, {"x": 8.8, "y": []}]
+#     asarray = awkward1.repartition(awkward1.Array(aslist), 2)
+
+#     @numba.njit
+#     def f5b(x, i):
+#         return x[i]["x"]
+
+#     assert [f5b(asarray, i) for i in range(-9, 9)]
+
+#     # @numba.njit
+#     # def f6(x, i):
+#     #     return x["y"][i]
+
+#     # assert awkward1.to_list(f6(asarray, -3)) == [6, 6]
