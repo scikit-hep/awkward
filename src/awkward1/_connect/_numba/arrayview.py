@@ -148,13 +148,34 @@ class ArrayView(object):
                    layout,
                    allow_empty=False,
                    highlevel=False)
-        return ArrayView(numba.typeof(layout),
-                         behavior,
-                         Lookup(layout),
-                         0,
-                         0,
-                         len(layout),
-                         ())
+
+        if isinstance(layout, awkward1.partition.PartitionedArray):
+            numba_type = None
+            for part in layout.partitions:
+                if numba_type is None:
+                    numba_type = numba.typeof(part)
+                elif numba_type != numba.typeof(part):
+                    raise ValueError(
+                        "partitioned arrays can only be used in Numba if all "
+                        "partitions have the same numba_type")
+            return PartitionedView(
+                numba.typeof(part),
+                behavior,
+                [Lookup(x) for x in layout.partitions],
+                numpy.asarray(layout.stops, dtype=numpy.intp),
+                0,
+                len(layout),
+                ())
+
+        else:
+            return ArrayView(
+                numba.typeof(layout),
+                behavior,
+                Lookup(layout),
+                0,
+                0,
+                len(layout),
+                ())
 
     def __init__(self, type, behavior, lookup, pos, start, stop, fields):
         self.type = type
@@ -732,3 +753,52 @@ for binop in ((operator.add,
               + (() if not hasattr(operator, "matmul")
                     else (operator.matmul,))):
     register_binary_operator(binop)
+
+class PartitionedView(object):
+    def __init__(self,
+                 type,
+                 behavior,
+                 lookups,
+                 stops,
+                 start,
+                 stop,
+                 fields):
+        self.type = type
+        self.behavior = behavior
+        self.lookups = lookups
+        self.stops = stops
+        self.start = start
+        self.stop = stop
+        self.fields = fields
+
+    def toarray(self):
+        output = []
+        partition_start = 0
+        for partitionid, lookup in enumerate(self.lookups):
+            partition_stop = self.stops[partitionid]
+
+            if partition_start <= self.start and self.stop <= partition_stop:
+                layout = self.type.tolayout(lookup, 0, self.fields)
+                output.append(layout[self.start - partition_start :
+                                     self.stop - partition_start])
+                break
+
+            elif partition_start <= self.start < partition_stop:
+                layout = self.type.tolayout(lookup, 0, self.fields)
+                output.append(layout[self.start - partition_start :
+                                     partition_stop - partition_start])
+
+            elif partition_stop < self.stop <= partition_stop:
+                layout = self.type.tolayout(lookup, 0, self.fields)
+                output.append(layout[0 :
+                                     self.stop - partition_start])
+                break
+
+            elif self.start < partition_start and partition_stop < self.stop:
+                layout = self.type.tolayout(lookup, 0, self.fields)
+                output.append(layout[0 :
+                                     partition_stop - partition_start])
+
+            partition_start = partition_stop
+
+        return awkward1.partition.IrregularlyPartitionedArray(output)
