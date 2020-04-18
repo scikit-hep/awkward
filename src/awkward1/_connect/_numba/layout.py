@@ -528,8 +528,6 @@ class ListArrayType(ContentType):
                          atval,
                          wrapneg,
                          checkbounds):
-        print("list getitem_at")
-
         whichpos = posat(context, builder, viewproxy.pos, self.CONTENT)
         nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
 
@@ -576,9 +574,6 @@ class ListArrayType(ContentType):
         proxyout.arrayptrs  = viewproxy.arrayptrs
         proxyout.sharedptrs = viewproxy.sharedptrs
         proxyout.pylookup   = viewproxy.pylookup
-
-        print("rettype", rettype)
-
         return proxyout._getvalue()
 
 class IndexedArrayType(ContentType):
@@ -1379,9 +1374,6 @@ class RecordArrayType(ContentType):
                                atval,
                                wrapneg,
                                checkbounds):
-
-        print("recordarray getitem_at")
-
         out = self.lower_getitem_at(context,
                                     builder,
                                     rettype,
@@ -1422,8 +1414,6 @@ class RecordArrayType(ContentType):
                                  checkbounds)
 
         if len(viewtype.fields) == 0:
-            print("fields is empty")
-
             proxyout = context.make_helper(
                          builder,
                          awkward1._connect._numba.arrayview.RecordViewType(
@@ -1433,8 +1423,6 @@ class RecordArrayType(ContentType):
             return proxyout._getvalue()
 
         else:
-            print("fields is", viewtype.fields)
-
             index = self.fieldindex(viewtype.fields[0])
             contenttype = self.contenttypes[index]
 
@@ -1469,8 +1457,6 @@ class RecordArrayType(ContentType):
                                                       False)
 
     def lower_getitem_field(self, context, builder, viewtype, viewval, key):
-        print("recordarray getitem_field")
-
         viewproxy = context.make_helper(builder, viewtype, viewval)
 
         index = self.fieldindex(key)
@@ -1499,8 +1485,6 @@ class RecordArrayType(ContentType):
                                    recordviewtype,
                                    recordviewval,
                                    key):
-        print("recordarray getitem_field_record")
-
         arrayviewtype = recordviewtype.arrayviewtype
         recordviewproxy = context.make_helper(builder,
                                               recordviewtype,

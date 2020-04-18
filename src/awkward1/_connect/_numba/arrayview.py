@@ -113,8 +113,9 @@ class LookupType(numba.types.Type):
 @numba.extending.register_model(LookupType)
 class LookupModel(numba.core.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
-        members = [("arrayptrs", fe_type.arraytype),
-                   ("sharedptrs", fe_type.arraytype)]
+        members = [("arrayptrs",  fe_type.arraytype),
+                   ("sharedptrs", fe_type.arraytype),
+                   ("pyself",     numba.types.pyobject)]
         super(LookupModel, self).__init__(dmm, fe_type, members)
 
 @numba.extending.unbox(LookupType)
@@ -127,6 +128,7 @@ def unbox_Lookup(lookuptype, lookupobj, c):
                                                  arrayptrs_obj).value
     proxyout.sharedptrs = c.pyapi.to_native_value(lookuptype.arraytype,
                                                   sharedptrs_obj).value
+    proxyout.pyself = lookupobj
 
     c.pyapi.decref(arrayptrs_obj)
     c.pyapi.decref(sharedptrs_obj)
@@ -177,14 +179,7 @@ class ArrayView(object):
                 len(layout),
                 ())
 
-    def __init__(self, *args):
-        print("ArrayView init")
-        for x in args:
-            print(repr(x))
-
-        print()
-        type, behavior, lookup, pos, start, stop, fields = args
-
+    def __init__(self, type, behavior, lookup, pos, start, stop, fields):
         self.type = type
         self.behavior = behavior
         self.lookup = lookup
@@ -289,8 +284,6 @@ def serializable2dict(obj):
         return dict(obj)
 
 def box_ArrayView(viewtype, viewval, c):
-    print("box_ArrayView")
-
     serializable2dict_obj = c.pyapi.unserialize(
                               c.pyapi.serialize_object(serializable2dict))
     behavior2_obj = c.pyapi.unserialize(
@@ -311,8 +304,6 @@ def box_ArrayView(viewtype, viewval, c):
     stop_obj   = c.pyapi.long_from_ssize_t(proxyin.stop)
     lookup_obj = proxyin.pylookup
 
-    c.pyapi.print_object(ArrayView_obj)
-
     out = c.pyapi.call_function_objargs(ArrayView_obj,
                                         (type_obj,
                                          behavior_obj,
@@ -321,8 +312,6 @@ def box_ArrayView(viewtype, viewval, c):
                                          start_obj,
                                          stop_obj,
                                          fields_obj))
-
-    c.pyapi.print_object(ArrayView_obj)
 
     c.pyapi.decref(serializable2dict_obj)
     c.pyapi.decref(behavior2_obj)
@@ -1044,8 +1033,7 @@ def lower_getitem_at_partitioned(context, builder, sig, args):
     viewproxy.sharedptrs = context.make_helper(builder,
                                                LookupType.arraytype,
                                                lookupproxy.sharedptrs).data
-
-    print("partitioned getitem_at")
+    viewproxy.pylookup = lookupproxy.pyself
 
     return viewtype.type.lower_getitem_at_check(context,
                                                 builder,
