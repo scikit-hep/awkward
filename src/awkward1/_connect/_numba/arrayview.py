@@ -949,7 +949,7 @@ class type_getitem_partitioned(numba.core.typing.templates.AbstractTemplate):
 @numba.extending.lower_builtin(operator.getitem,
                                PartitionedViewType,
                                numba.types.Integer)
-def lower_getitem_at(context, builder, sig, args):
+def lower_getitem_at_partitioned(context, builder, sig, args):
     rettype, (partviewtype, wheretype) = sig.return_type, sig.args
     partviewval, whereval = args
     partviewproxy = context.make_helper(builder, partviewtype, partviewval)
@@ -1020,27 +1020,19 @@ def lower_getitem_at(context, builder, sig, args):
                                                 False,
                                                 False)
 
-
-
-
-
 # @numba.extending.lower_builtin(operator.getitem,
-#                                ArrayViewType,
-#                                numba.types.Integer)
-# def lower_getitem_at(context, builder, sig, args):
-#     rettype, (viewtype, wheretype) = sig.return_type, sig.args
-#     viewval, whereval = args
-#     viewproxy = context.make_helper(builder, viewtype, viewval)
-#     return viewtype.type.lower_getitem_at_check(context,
-#                                                 builder,
-#                                                 rettype,
-#                                                 viewtype,
-#                                                 viewval,
-#                                                 viewproxy,
-#                                                 wheretype,
-#                                                 whereval,
-#                                                 True,
-#                                                 True)
+#                                PartitionedViewType,
+#                                numba.types.slice2_type)
+# def lower_getitem_range(context, builder, sig, args):
+#     rettype, (partviewtype, wheretype) = sig.return_type, sig.args
+#     partviewval, whereval = args
+#     partviewproxy = context.make_helper(builder, viewtype, partviewval)
+#     whereproxy = context.make_helper(builder, wheretype, whereval)
+
+
+
+
+
 
 # @numba.extending.lower_builtin(operator.getitem,
 #                                ArrayViewType,

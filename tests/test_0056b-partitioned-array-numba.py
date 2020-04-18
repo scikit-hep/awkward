@@ -137,3 +137,14 @@ def test_getitem():
 
     assert [f1(array, i) for i in range(10)] == [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]
 
+    # @numba.njit
+    # def f2(x, i1, i2):
+    #     return x[i1:i2]
+
+    # assert isinstance(f2(array, 0, 10).layout, awkward1.partition.PartitionedArray)
+    # assert isinstance(f2(array, 4, 5).layout, awkward1.partition.PartitionedArray)
+    # assert isinstance(f2(array, 5, 5).layout, awkward1.partition.PartitionedArray)
+
+    # for start in range(10):
+    #     for stop in range(10):
+    #         assert f2(array, start, stop) == [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9][start:stop]
