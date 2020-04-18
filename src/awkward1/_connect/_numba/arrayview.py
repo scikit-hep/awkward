@@ -860,6 +860,11 @@ def unbox_PartitionedView(partviewtype, partview_obj, c):
     proxyout.start     = c.pyapi.number_as_ssize_t(start_obj)
     proxyout.stop      = c.pyapi.number_as_ssize_t(stop_obj)
 
+    if c.context.enable_nrt:
+        c.context.nrt.incref(c.builder,
+                             PartitionedViewType.lookupstype,
+                             proxyout.lookups)
+
     c.pyapi.decref(lookups_obj)
     c.pyapi.decref(stops_obj)
     c.pyapi.decref(start_obj)
