@@ -826,17 +826,18 @@ class PartitionedViewType(numba.types.Type):
 @numba.extending.register_model(PartitionedViewType)
 class PartitionedViewModel(numba.core.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
-        members = [("lookups", PartitionedViewType.lookupstype),
-                   ("stops",   PartitionedViewType.stopstype),
-                   ("start",   numba.intp),
-                   ("stop",    numba.intp)]
+        members = [("pylookups", numba.types.pyobject),
+                   # ("lookups",   PartitionedViewType.lookupstype),
+                   ("stops",     PartitionedViewType.stopstype),
+                   ("start",     numba.intp),
+                   ("stop",      numba.intp)]
         super(PartitionedViewModel, self).__init__(dmm, fe_type, members)
 
 @numba.extending.unbox(PartitionedViewType)
 def unbox_PartitionedArray(partviewtype, arrayobj, c):
     partview_obj = c.pyapi.object_getattr_string(arrayobj, "_numbaview")
     out = unbox_PartitionedView(partviewtype, partview_obj, c)
-    # c.pyapi.decref(partview_obj)
+    c.pyapi.decref(partview_obj)
     return out
 
 def unbox_PartitionedView(partviewtype, partview_obj, c):
@@ -846,12 +847,18 @@ def unbox_PartitionedView(partviewtype, partview_obj, c):
     stop_obj    = c.pyapi.object_getattr_string(partview_obj, "stop")
 
     proxyout = c.context.make_helper(c.builder, partviewtype)
-    proxyout.lookups = c.pyapi.to_native_value(
-                           PartitionedViewType.lookupstype, lookups_obj).value
-    proxyout.stops   = c.pyapi.to_native_value(
+    proxyout.pylookups = lookups_obj
+    # proxyout.lookups   = c.pyapi.to_native_value(
+    #                        PartitionedViewType.lookupstype, lookups_obj).value
+    proxyout.stops     = c.pyapi.to_native_value(
                            PartitionedViewType.stopstype, stops_obj).value
-    proxyout.start   = c.pyapi.number_as_ssize_t(start_obj)
-    proxyout.stop    = c.pyapi.number_as_ssize_t(stop_obj)
+    proxyout.start     = c.pyapi.number_as_ssize_t(start_obj)
+    proxyout.stop      = c.pyapi.number_as_ssize_t(stop_obj)
+
+    c.pyapi.decref(lookups_obj)
+    c.pyapi.decref(stops_obj)
+    c.pyapi.decref(start_obj)
+    c.pyapi.decref(stop_obj)
 
     is_error = numba.core.cgutils.is_not_null(c.builder,
                                               c.pyapi.err_occurred())
@@ -860,9 +867,8 @@ def unbox_PartitionedView(partviewtype, partview_obj, c):
 @numba.extending.box(PartitionedViewType)
 def box_PartitionedArray(partviewtype, partviewval, c):
     arrayview_obj = box_PartitionedView(partviewtype, partviewval, c)
-    # out = c.pyapi.call_method(arrayview_obj, "toarray", ())
-    out = arrayview_obj
-    # c.pyapi.decref(arrayview_obj)
+    out = c.pyapi.call_method(arrayview_obj, "toarray", ())
+    c.pyapi.decref(arrayview_obj)
     return out
 
 def box_PartitionedView(partviewtype, partviewval, c):
@@ -881,22 +887,30 @@ def box_PartitionedView(partviewtype, partviewval, c):
                             c.pyapi.serialize_object(partviewtype.fields))
 
     proxyin = c.context.make_helper(c.builder, partviewtype, partviewval)
-    # lookups_obj = c.pyapi.from_native_value(PartitionedViewType.lookupstype,
-    #                                         proxyin.lookups,
-    #                                         c.env_manager)
+    lookups_obj = proxyin.pylookups
     stops_obj   = c.pyapi.from_native_value(PartitionedViewType.stopstype,
                                             proxyin.stops,
                                             c.env_manager)
     start_obj  = c.pyapi.long_from_ssize_t(proxyin.start)
     stop_obj   = c.pyapi.long_from_ssize_t(proxyin.stop)
 
-    # out = c.pyapi.call_function_objargs(PartitionedView_obj,
-    #                                     (type_obj,
-    #                                      behavior_obj,
-    #                                      lookups_obj,
-    #                                      stops_obj,
-    #                                      start_obj,
-    #                                      stop_obj,
-    #                                      fields_obj))
+    out = c.pyapi.call_function_objargs(PartitionedView_obj,
+                                        (type_obj,
+                                         behavior_obj,
+                                         lookups_obj,
+                                         stops_obj,
+                                         start_obj,
+                                         stop_obj,
+                                         fields_obj))
 
-    return type_obj
+    c.pyapi.decref(serializable2dict_obj)
+    c.pyapi.decref(behavior2_obj)
+    c.pyapi.decref(behavior_obj)
+    c.pyapi.decref(PartitionedView_obj)
+    c.pyapi.decref(type_obj)
+    c.pyapi.decref(fields_obj)
+    c.pyapi.decref(stops_obj)
+    c.pyapi.decref(start_obj)
+    c.pyapi.decref(stop_obj)
+
+    return out
