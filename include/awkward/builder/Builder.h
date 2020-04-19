@@ -20,8 +20,10 @@ namespace awkward {
   /// cumulatively discover an array's type and fill it.
   class EXPORT_SYMBOL Builder {
   public:
-    /// @brief Empty destructor; required for some C++ reason.
-    virtual ~Builder() { }
+    /// @brief Virtual destructor acts as a first non-inline virtual function
+    /// that determines a specific translation unit in which vtable shall be
+    /// emitted.
+    virtual ~Builder();
 
     /// @brief User-friendly name of this class.
     virtual const std::string

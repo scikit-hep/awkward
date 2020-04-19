@@ -28,6 +28,13 @@ namespace awkward {
   ///    - {@link IndexOf IndexU32}, which is `IndexOf<uint32_t>`
   ///    - {@link IndexOf Index64}, which is `IndexOf<int64_t>`
   class EXPORT_SYMBOL Index {
+  public:
+    /// @brief Virtual destructor acts as a first non-inline virtual function
+    /// that determines a specific translation unit in which vtable shall be
+    /// emitted.
+    virtual ~Index();
+
+  private:
     /// @brief Copies this Index node without copying its buffer.
     ///
     /// See also #deep_copy.

@@ -91,6 +91,11 @@ namespace awkward {
                int64_t width,
                int64_t length);
 
+    /// @brief Virtual destructor acts as a first non-inline virtual function
+    /// that determines a specific translation unit in which vtable shall be
+    /// emitted.
+    virtual ~Identities();
+
     /// @brief A globally unique reference to this set of identities.
     const Ref
       ref() const;

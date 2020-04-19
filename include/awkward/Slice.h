@@ -21,8 +21,10 @@ namespace awkward {
   /// passed to an array's `__getitem__` in Python.
   class EXPORT_SYMBOL SliceItem {
   public:
-    /// @brief Empty destructor; required for some C++ reason.
-    virtual ~SliceItem() { }
+    /// @brief Virtual destructor acts as a first non-inline virtual function
+    /// that determines a specific translation unit in which vtable shall be
+    /// emitted.
+    virtual ~SliceItem();
 
     /// @brief Copies this node without copying any associated arrays.
     virtual const SliceItemPtr

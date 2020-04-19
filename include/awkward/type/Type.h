@@ -25,8 +25,10 @@ namespace awkward {
     /// #typestr upon construction.
     Type(const util::Parameters& parameters, const std::string& typestr);
 
-    /// @brief Empty destructor; required for some C++ reason.
-    virtual ~Type() { }
+    /// @brief Virtual destructor acts as a first non-inline virtual function
+    /// that determines a specific translation unit in which vtable shall be
+    /// emitted.
+    virtual ~Type();
 
     /// @brief Internal function to build an output string for #tostring.
     ///

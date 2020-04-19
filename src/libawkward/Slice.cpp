@@ -10,6 +10,10 @@
 #include "awkward/Slice.h"
 
 namespace awkward {
+  ////////// SliceItem
+
+  SliceItem::~SliceItem() = default;
+
   ////////// SliceAt
 
   SliceAt::SliceAt(int64_t at)

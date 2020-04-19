@@ -36,6 +36,8 @@ namespace awkward {
       , width_(width)
       , length_(length) { }
 
+  Identities::~Identities() = default;
+
   const Identities::Ref
   Identities::ref() const {
     return ref_;
