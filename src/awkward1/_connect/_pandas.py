@@ -120,7 +120,12 @@ class PandasMixin(PandasNotImportedYet):
     def dtype(self):
         # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray.dtype.html
         register()
-        return AwkwardDtype()
+
+        if isinstance(self.layout, awkward1.partition.PartitionedArray):
+            raise ValueError("partitioned arrays cannot be Pandas columns; "
+                             "try ak.repartition(array, None)")
+        else:
+            return AwkwardDtype()
 
     @property
     def nbytes(self):
@@ -150,12 +155,16 @@ class PandasMixin(PandasNotImportedYet):
         register()
 
         if allow_fill:
+            content1 = self.layout
+            if isinstance(content1, awkward1.partition.PartitionedArray):
+                content1 = content1.toContent()
+
             indices = numpy.asarray(indices, dtype=numpy.int64)
             if fill_value is None:
                 index = awkward1.layout.Index64(indices)
                 layout = awkward1.layout.IndexedOptionArray64(
                            index,
-                           self.layout,
+                           content1,
                            parameters=self.layout.parameters)
                 return awkward1._util.wrap(layout,
                                            awkward1._util.behaviorof(self))
@@ -166,7 +175,6 @@ class PandasMixin(PandasNotImportedYet):
                 index[~tags] = 0
                 content0 = awkward1.operations.convert.from_iter(
                              [fill_value], highlevel=False)
-                content1 = self.layout
                 tags = awkward1.layout.Index8(tags)
                 index = awkward1.layout.Index64(index)
                 layout = awkward1.layout.UnionArray8_64(tags,
@@ -308,6 +316,9 @@ def dfs(array,
     layout = awkward1.operations.convert.to_layout(array,
                                                    allow_record=True,
                                                    allow_other=False)
+    if isinstance(layout, awkward1.partition.PartitionedArray):
+        layout = layout.toContent()
+
     if isinstance(layout, awkward1.layout.Record):
         layout2 = layout.array[layout.at : layout.at + 1]
     else:

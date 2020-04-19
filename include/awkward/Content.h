@@ -109,7 +109,7 @@ namespace awkward {
     /// @brief Internal function to produce a JSON representation one node at
     /// a time.
     virtual void
-      tojson_part(ToJson& builder) const = 0;
+      tojson_part(ToJson& builder, bool include_beginendlist) const = 0;
 
     /// @brief Internal function used to calculate #nbytes.
     ///
@@ -254,7 +254,7 @@ namespace awkward {
     /// The output has the same length as the `carry` index, not the `array`
     /// that is being manipulated. For each item `i` in `carry`, the output
     /// is `array[index[i]]`.
-    /// 
+    ///
     /// This operation is called
     /// [take](https://docs.scipy.org/doc/numpy/reference/generated/numpy.take.html)
     /// in NumPy and Arrow, although this #carry is a low-level function that
@@ -264,7 +264,7 @@ namespace awkward {
     /// another without knowing the latter's type.
     ///
     /// Taking #getitem_at_nowrap as a function from integers to the array's
-    /// item type, `A: [0, len(a)) → T`, and the `carry` array's 
+    /// item type, `A: [0, len(a)) → T`, and the `carry` array's
     /// {@link IndexOf#getitem_at_nowrap Index64::getitem_at_nowrap} as a
     /// function `C: [0, len(c)) → [0, len(a))`, this method represents
     /// function composition, `A ∘ C: [0, len(c)) → T`.
@@ -516,7 +516,7 @@ namespace awkward {
     /// @endcode
     ///
     /// and the `n = 3` combinations at `axis = 1` of
-    /// 
+    ///
     /// @code{.py}
     /// [[a, b, c, d], [], [e, f], [g, h, i]]
     /// @endcode
@@ -752,13 +752,13 @@ namespace awkward {
     /// defined universally in the Content class.
     const ContentPtr
       localindex_axis0() const;
-    
+
     /// @brief Internal function to handle the `axis = 0` case of
     /// #combinations.
     ///
     /// The `axis = 0` case does not depend on array node type, so it is
     /// defined universally in the Content class.
-    /// 
+    ///
     /// @param n The number of items in each tuple/record.
     /// @param replacement If `true`, the tuples/records are allowed to include
     /// the same item more than once, such as `(a, a, a)` and `(a, a, b)`.
@@ -891,6 +891,26 @@ namespace awkward {
                           const SliceJagged64& slicecontent,
                           const Slice& tail) const = 0;
 
+    /// @brief Internal function defining the negative axis handling for many
+    /// operations.
+    ///
+    /// Returns a non-negative equivalent `axis` if unambiguous and passes
+    /// the negative `axis` through if ambiguous. A negative `axis` can be
+    /// ambiguous if the list-depth "branches" in a RecordArray or a
+    /// {@link UnionArrayOf UnionArray} with different `contents` having
+    /// different depths. As an operation descends through the nodes of
+    /// an array, it repeatedly calls `axis_wrap_if_negative` until an
+    /// unambiguous non-negative `axis` can be identified.
+    ///
+    /// This allows a RecordArray or {@link UnionArrayOf UnionArray} with
+    /// different depths to accept `axis = -1` as the last axis, regardless
+    /// of how deep that is in different record fields or union possibilities.
+    ///
+    /// @note This function has not been implemented:
+    /// [scikit-hep/awkward-1.0#163](https://github.com/scikit-hep/awkward-1.0/issues/163).
+    static int64_t
+      axis_wrap_if_negative(int64_t axis);
+
   protected:
     /// @brief Internal function to wrap putative #getitem output with enough
     /// RegularArray nodes to satisfy a given `shape`.
@@ -912,26 +932,6 @@ namespace awkward {
       parameters_tostring(const std::string& indent,
                           const std::string& pre,
                           const std::string& post) const;
-
-    /// @brief Internal function defining the negative axis handling for many
-    /// operations.
-    ///
-    /// Returns a non-negative equivalent `axis` if unambiguous and passes
-    /// the negative `axis` through if ambiguous. A negative `axis` can be
-    /// ambiguous if the list-depth "branches" in a RecordArray or a
-    /// {@link UnionArrayOf UnionArray} with different `contents` having
-    /// different depths. As an operation descends through the nodes of
-    /// an array, it repeatedly calls `axis_wrap_if_negative` until an
-    /// unambiguous non-negative `axis` can be identified.
-    ///
-    /// This allows a RecordArray or {@link UnionArrayOf UnionArray} with
-    /// different depths to accept `axis = -1` as the last axis, regardless
-    /// of how deep that is in different record fields or union possibilities.
-    ///
-    /// @note This function has not been implemented:
-    /// [scikit-hep/awkward-1.0#163](https://github.com/scikit-hep/awkward-1.0/issues/163).
-    const int64_t
-      axis_wrap_if_negative(int64_t axis) const;
 
   protected:
     /// @brief See #identities.

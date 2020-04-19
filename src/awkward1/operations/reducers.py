@@ -620,9 +620,31 @@ def argmin(array, axis=None, keepdims=False, mask_identity=True):
     layout = awkward1.operations.convert.to_layout(array,
                                                    allow_record=False,
                                                    allow_other=False)
+
     if axis is None:
-        tmp = awkward1._util.completely_flatten(layout)
-        return numpy.argmin(tmp, axis=None)
+        if isinstance(layout, awkward1.partition.PartitionedArray):
+            start = 0
+            best_index = None
+            best_value = None
+            for partition in layout.partitions:
+                for tmp in awkward1._util.completely_flatten(partition):
+                    out = numpy.argmin(tmp, axis=None)
+                    if best_index is None or tmp[out] < best_value:
+                        best_index = start + out
+                        best_value = tmp[out]
+                start += len(partition)
+            return best_index
+
+        else:
+            best_index = None
+            best_value = None
+            for tmp in awkward1._util.completely_flatten(layout):
+                out = numpy.argmin(tmp, axis=None)
+                if best_index is None or tmp[out] < best_value:
+                    best_index = out
+                    best_value = tmp[out]
+            return best_index
+
     else:
         behavior = awkward1._util.behaviorof(array)
         return awkward1._util.wrap(layout.argmin(axis=axis,
@@ -668,9 +690,31 @@ def argmax(array, axis=None, keepdims=False, mask_identity=True):
     layout = awkward1.operations.convert.to_layout(array,
                                                    allow_record=False,
                                                    allow_other=False)
+
     if axis is None:
-        tmp = awkward1._util.completely_flatten(layout)
-        return numpy.argmax(tmp, axis=None)
+        if isinstance(layout, awkward1.partition.PartitionedArray):
+            start = 0
+            best_index = None
+            best_value = None
+            for partition in layout.partitions:
+                for tmp in awkward1._util.completely_flatten(partition):
+                    out = numpy.argmax(tmp, axis=None)
+                    if best_index is None or tmp[out] > best_value:
+                        best_index = start + out
+                        best_value = tmp[out]
+                start += len(partition)
+            return best_index
+
+        else:
+            best_index = None
+            best_value = None
+            for tmp in awkward1._util.completely_flatten(layout):
+                out = numpy.argmax(tmp, axis=None)
+                if best_index is None or tmp[out] > best_value:
+                    best_index = out
+                    best_value = tmp[out]
+            return best_index
+
     else:
         behavior = awkward1._util.behaviorof(array)
         return awkward1._util.wrap(layout.argmax(axis=axis,
@@ -1216,37 +1260,76 @@ def linear_fit(x,
         slope_error     = awkward1.operations.convert.to_layout(
                           slope_error, allow_record=True, allow_other=True)
 
-        scalar = (not isinstance(intercept, awkward1.layout.Content) and
-                  not isinstance(slope, awkward1.layout.Content) and
-                  not isinstance(intercept_error, awkward1.layout.Content) and
-                  not isinstance(slope_error, awkward1.layout.Content))
-
-        if not isinstance(intercept, (awkward1.layout.Content,
-                                      awkward1.layout.Record)):
+        scalar = False
+        if not isinstance(intercept,
+                          (awkward1.layout.Content,
+                           awkward1.layout.Record,
+                           awkward1.partition.PartitionedArray)):
             intercept = awkward1.layout.NumpyArray(numpy.array([intercept]))
-        if not isinstance(slope, (awkward1.layout.Content,
-                                  awkward1.layout.Record)):
+            scalar = True
+        if not isinstance(slope,
+                          (awkward1.layout.Content,
+                           awkward1.layout.Record,
+                           awkward1.partition.PartitionedArray)):
             slope = awkward1.layout.NumpyArray(numpy.array([slope]))
-        if not isinstance(intercept_error, (awkward1.layout.Content,
-                                            awkward1.layout.Record)):
+            scalar = True
+        if not isinstance(intercept_error,
+                          (awkward1.layout.Content,
+                           awkward1.layout.Record,
+                           awkward1.partition.PartitionedArray)):
             intercept_error = awkward1.layout.NumpyArray(
                                 numpy.array([intercept_error]))
-        if not isinstance(slope_error, (awkward1.layout.Content,
-                                        awkward1.layout.Record)):
+            scalar = True
+        if not isinstance(slope_error,
+                          (awkward1.layout.Content,
+                           awkward1.layout.Record,
+                           awkward1.partition.PartitionedArray)):
             slope_error = awkward1.layout.NumpyArray(
                             numpy.array([slope_error]))
+            scalar = True
 
-        out = awkward1.layout.RecordArray([intercept,
-                                           slope,
-                                           intercept_error,
-                                           slope_error],
-                                          ["intercept",
-                                           "slope",
-                                           "intercept_error",
-                                           "slope_error"])
-        out.setparameter("__record__", "LinearFit")
-        if scalar:
-            out = out[0]
+        sample = None
+        if isinstance(intercept, awkward1.partition.PartitionedArray):
+            sample = intercept
+        elif isinstance(slope, awkward1.partition.PartitionedArray):
+            sample = slope
+        elif isinstance(intercept_error, awkward1.partition.PartitionedArray):
+            sample = intercept_error
+        elif isinstance(slope_error, awkward1.partition.PartitionedArray):
+            sample = slope_error
+
+        if sample is not None:
+            intercept, slope, intercept_error, slope_error = \
+                awkward1.partition.partition_as(sample, (intercept,
+                                                         slope,
+                                                         intercept_error,
+                                                         slope_error))
+            output = []
+            for a, b, c, d in awkward1.partition.iterate(sample.numpartitions,
+                                                         (intercept,
+                                                          slope,
+                                                          intercept_error,
+                                                          slope_error)):
+                output.append(awkward1.layout.RecordArray([a, b, c, d],
+                                                          ["intercept",
+                                                           "slope",
+                                                           "intercept_error",
+                                                           "slope_error"],
+                                      parameters={"__record__": "LinearFit"}))
+            out = awkward1.partition.IrregularlyPartitionedArray(output)
+
+        else:
+            out = awkward1.layout.RecordArray([intercept,
+                                               slope,
+                                               intercept_error,
+                                               slope_error],
+                                              ["intercept",
+                                               "slope",
+                                               "intercept_error",
+                                               "slope_error"],
+                                      parameters={"__record__": "LinearFit"})
+            if scalar:
+                out = out[0]
 
         return awkward1._util.wrap(out, awkward1._util.behaviorof(x, y))
 

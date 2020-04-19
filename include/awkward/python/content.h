@@ -26,6 +26,24 @@
 namespace py = pybind11;
 namespace ak = awkward;
 
+py::object
+box(const std::shared_ptr<ak::Content>& content);
+
+template <typename T>
+std::string
+repr(const T& self) {
+  return self.tostring();
+}
+
+template <typename T>
+int64_t
+len(const T& self) {
+  return self.length();
+}
+
+int64_t
+check_maxdecimals(const py::object& maxdecimals);
+
 ak::util::Parameters
 dict2parameters(const py::object& in);
 

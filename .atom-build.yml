@@ -1,8 +1,0 @@
-cmd: python
-args:
-  - localbuild.py
-  - '-j 1'
-  - '--pytest {FILE_ACTIVE}'
-errorMatch:
-  - '(?<file>[/0-9a-zA-Z\._-]*awkward[/0-9a-zA-Z\._-]*):(?<line>\d+):(?<col>\d+):\s+error:\s+(?<message>.+)'
-  - '(?<file>[/0-9a-zA-Z\._-]*awkward[/0-9a-zA-Z\._-]*):(?<line>\d+):(?<col>\d+):\s+required from'

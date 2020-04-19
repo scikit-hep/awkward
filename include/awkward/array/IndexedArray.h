@@ -119,7 +119,7 @@ namespace awkward {
                     const std::string& post) const override;
 
     void
-      tojson_part(ToJson& builder) const override;
+      tojson_part(ToJson& builder, bool include_beginendlist) const override;
 
     void
       nbytes_part(std::map<size_t, int64_t>& largest) const override;

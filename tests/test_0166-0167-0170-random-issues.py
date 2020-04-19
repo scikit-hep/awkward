@@ -23,19 +23,19 @@ def test_0166_IndexedOptionArray():
     assert awkward1.to_list(awkward1.prod(array, axis=-1)) == [30, 1, 77, 13, 323]
 
 def test_0166_ByteMaskedArray():
-    content = awkward1.Array([[2, 3, 5], [999], [], [7, 11], [], [13], [123, 999], [17, 19]]).layout
+    content = awkward1.from_iter([[2, 3, 5], [999], [], [7, 11], [], [13], [123, 999], [17, 19]], highlevel=False)
     mask = awkward1.layout.Index8(numpy.array([0, 1, 0, 0, 1, 0, 1, 0], dtype=numpy.int8))
     array = awkward1.Array(awkward1.layout.ByteMaskedArray(mask, content, valid_when=False))
     assert awkward1.to_list(array) == [[2, 3, 5], None, [], [7, 11], None, [13], None, [17, 19]]
     assert awkward1.to_list(awkward1.prod(array, axis=-1)) == [30, None, 1, 77, None, 13, None, 323]
 
-    content = awkward1.Array([[[2, 3], [5]], [[999]], [], [[7], [11]], [], [[13]], [[123], [999]], [[17, 19]]]).layout
+    content = awkward1.from_iter([[[2, 3], [5]], [[999]], [], [[7], [11]], [], [[13]], [[123], [999]], [[17, 19]]], highlevel=False)
     mask = awkward1.layout.Index8(numpy.array([0, 1, 0, 0, 1, 0, 1, 0], dtype=numpy.int8))
     array = awkward1.Array(awkward1.layout.ByteMaskedArray(mask, content, valid_when=False))
     assert awkward1.to_list(array) == [[[2, 3], [5]], None, [], [[7], [11]], None, [[13]], None, [[17, 19]]]
     assert awkward1.to_list(awkward1.prod(array, axis=-1)) == [[6, 5], None, [], [7, 11], None, [13], None, [323]]
 
-    content = awkward1.Array([[2, 3], [999], [5], [7], [11], [13], [], [17], [19]]).layout
+    content = awkward1.from_iter([[2, 3], [999], [5], [7], [11], [13], [], [17], [19]], highlevel=False)
     mask = awkward1.layout.Index8(numpy.array([0, 1, 0, 0, 0, 0, 1, 0, 0], dtype=numpy.int8))
     bytemasked = awkward1.layout.ByteMaskedArray(mask, content, valid_when=False)
     offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 9], dtype=numpy.int64))
@@ -43,7 +43,7 @@ def test_0166_ByteMaskedArray():
     array = awkward1.Array([[[2, 3], None, [5]], [], [[7], [11]], [[13]], [None, [17], [19]]])
     assert awkward1.to_list(awkward1.prod(array, axis=-1)) == [[6, None, 5], [], [7, 11], [13], [None, 17, 19]]
 
-    content = awkward1.Array([6, None, 5, 7, 11, 13, None, 17, 19]).layout
+    content = awkward1.from_iter([6, None, 5, 7, 11, 13, None, 17, 19], highlevel=False)
     mask = awkward1.layout.Index8(numpy.array([0, 1, 0, 0, 0, 0, 1, 0, 0], dtype=numpy.int8))
     bytemasked = awkward1.layout.ByteMaskedArray(mask, content, valid_when=False)
     offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 9], dtype=numpy.int64))

@@ -18,8 +18,9 @@ def test():
     behavior = {}
     behavior["Dummy"] = Dummy
 
-    array = awkward1.Array([{"x": 1}, {"x": 2}, {"x": 3}], behavior=behavior)
-    array.layout.setparameter("__record__", "Dummy")
+    recordarray = awkward1.from_iter([{"x": 1}, {"x": 2}, {"x": 3}], highlevel=False)
+    recordarray.setparameter("__record__", "Dummy")
+    array = awkward1.Array(recordarray, behavior=behavior)
 
     with pytest.raises(AttributeError) as err:
         array[1].broken

@@ -391,7 +391,7 @@ def test_ListArray_getitem():
     assert awkward1.to_list(f2(array, 1, 4)) == [[], [3.3, 4.4], [5.5]]
 
 def test_IndexedArray_getitem():
-    content = awkward1.Array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], check_valid=True).layout
+    content = awkward1.from_iter([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], highlevel=False)
     index = awkward1.layout.Index64(numpy.array([3, 2, 2, 5, 0, 7], dtype=numpy.int64))
     array = awkward1.Array(awkward1.layout.IndexedArray64(index, content), check_valid=True)
 

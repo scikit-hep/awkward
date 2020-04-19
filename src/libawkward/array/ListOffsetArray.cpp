@@ -67,7 +67,7 @@ namespace awkward {
   Index64
   ListOffsetArrayOf<int64_t>::compact_offsets64(bool start_at_zero) const {
     if (!start_at_zero  ||
-        offsets_.getitem_at_nowrap(offsets_.offset()) == 0) {
+        offsets_.getitem_at_nowrap(0) == 0) {
       return offsets_;
     }
     else {
@@ -168,7 +168,7 @@ namespace awkward {
   ListOffsetArrayOf<T>::toListOffsetArray64(bool start_at_zero) const {
     if (std::is_same<T, int64_t>::value  &&
         (!start_at_zero  ||
-         offsets_.getitem_at_nowrap(offsets_.offset()) == 0)) {
+         offsets_.getitem_at_nowrap(0) == 0)) {
       return shallow_copy();
     }
     else {
@@ -327,14 +327,19 @@ namespace awkward {
 
   template <typename T>
   void
-  ListOffsetArrayOf<T>::tojson_part(ToJson& builder) const {
+  ListOffsetArrayOf<T>::tojson_part(ToJson& builder,
+                                    bool include_beginendlist) const {
     int64_t len = length();
     check_for_iteration();
-    builder.beginlist();
-    for (int64_t i = 0;  i < len;  i++) {
-      getitem_at_nowrap(i).get()->tojson_part(builder);
+    if (include_beginendlist) {
+      builder.beginlist();
     }
-    builder.endlist();
+    for (int64_t i = 0;  i < len;  i++) {
+      getitem_at_nowrap(i).get()->tojson_part(builder, true);
+    }
+    if (include_beginendlist) {
+      builder.endlist();
+    }
   }
 
   template <typename T>
@@ -1267,6 +1272,7 @@ namespace awkward {
     const Index64& starts,
     const Index64& parents,
     int64_t outlength, bool mask, bool keepdims) const {
+
     std::pair<bool, int64_t> branchdepth = branch_depth();
 
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
@@ -1431,8 +1437,7 @@ namespace awkward {
     }
     else if (axis == depth + 1) {
       Index64 offsets = compact_offsets64(true);
-      int64_t innerlength = offsets.getitem_at_nowrap(
-        offsets.offset() + offsets.length() - 1);
+      int64_t innerlength = offsets.getitem_at_nowrap(offsets.length() - 1);
       Index64 localindex(innerlength);
       struct Error err = util::awkward_listarray_localindex_64(
         localindex.ptr().get(),

@@ -51,7 +51,7 @@ namespace awkward {
                     const std::string& post) const override;
 
     void
-      tojson_part(ToJson& builder) const override;
+      tojson_part(ToJson& builder, bool include_beginendlist) const override;
 
     /// @exception std::runtime_error is always thrown
     void

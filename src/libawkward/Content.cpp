@@ -42,12 +42,12 @@ namespace awkward {
   Content::tojson(bool pretty, int64_t maxdecimals) const {
     if (pretty) {
       ToJsonPrettyString builder(maxdecimals);
-      tojson_part(builder);
+      tojson_part(builder, true);
       return builder.tostring();
     }
     else {
       ToJsonString builder(maxdecimals);
-      tojson_part(builder);
+      tojson_part(builder, true);
       return builder.tostring();
     }
   }
@@ -60,13 +60,13 @@ namespace awkward {
     if (pretty) {
       ToJsonPrettyFile builder(destination, maxdecimals, buffersize);
       builder.beginlist();
-      tojson_part(builder);
+      tojson_part(builder, true);
       builder.endlist();
     }
     else {
       ToJsonFile builder(destination, maxdecimals, buffersize);
       builder.beginlist();
-      tojson_part(builder);
+      tojson_part(builder, true);
       builder.endlist();
     }
   }
@@ -74,7 +74,7 @@ namespace awkward {
   int64_t
   Content::nbytes() const {
     // FIXME: this is only accurate if all subintervals of allocated arrays are
-    // nested (which is likely, but not guaranteed). In general, it's <= the 
+    // nested (which is likely, but not guaranteed). In general, it's <= the
     // correct nbytes.
     std::map<size_t, int64_t> largest;
     nbytes_part(largest);
@@ -163,7 +163,12 @@ namespace awkward {
 
   void
   Content::setparameter(const std::string& key, const std::string& value) {
-    parameters_[key] = value;
+    if (value == std::string("null")) {
+      parameters_.erase(key);
+    }
+    else {
+      parameters_[key] = value;
+    }
   }
 
   bool
@@ -641,6 +646,14 @@ namespace awkward {
     }
   }
 
+  int64_t
+  Content::axis_wrap_if_negative(int64_t axis) {
+    if (axis < 0) {
+      throw std::runtime_error("FIXME: negative axis not implemented yet");
+    }
+    return axis;
+  }
+
   const ContentPtr
   Content::getitem_next_array_wrap(const ContentPtr& outcontent,
                                    const std::vector<int64_t>& shape) const {
@@ -675,13 +688,5 @@ namespace awkward {
       out << indent << "</parameters>" << post;
       return out.str();
     }
-  }
-
-  const int64_t
-  Content::axis_wrap_if_negative(int64_t axis) const {
-    if (axis < 0) {
-      throw std::runtime_error("FIXME: negative axis not implemented yet");
-    }
-    return axis;
   }
 }

@@ -10,8 +10,8 @@ import numpy
 import awkward1
 
 def test_na_union():
-    one = awkward1.Array([1, None, 3], check_valid=True).layout
-    two = awkward1.Array([[], [1], None, [3, 3, 3]], check_valid=True).layout
+    one = awkward1.from_iter([1, None, 3], highlevel=False)
+    two = awkward1.from_iter([[], [1], None, [3, 3, 3]], highlevel=False)
     tags = awkward1.layout.Index8(numpy.array([0, 1, 1, 0, 0, 1, 1], dtype=numpy.int8))
     index = awkward1.layout.Index64(numpy.array([0, 0, 1, 1, 2, 2, 3], dtype=numpy.int64))
     array = awkward1.Array(awkward1.layout.UnionArray8_64(tags, index, [one, two]), check_valid=True)

@@ -562,14 +562,14 @@ def test_IndexedOptionArray():
         [  53*2,   59*3,   61*5,   67*7,  71*11]]
 
 def test_UnionArray():
-    content1 = awkward1.Array([
+    content1 = awkward1.from_iter([
         [[  2,   3,   5,   7,  11],
          [ 13,  17,  19,  23,  29],
-         [ 31,  37,  41,  43,  47]]], check_valid=True).layout
-    content2 = awkward1.Array([
+         [ 31,  37,  41,  43,  47]]], highlevel=False)
+    content2 = awkward1.from_iter([
         [[ 53,  59,  61,  67,  71],
          [ 73,  79,  83,  89,  97],
-         [101, 103, 107, 109, 113]]], check_valid=True).layout
+         [101, 103, 107, 109, 113]]], highlevel=False)
 
     tags = awkward1.layout.Index8(numpy.array([0, 1], dtype=numpy.int8))
     index = awkward1.layout.Index64(numpy.array([0, 0], dtype=numpy.int64))

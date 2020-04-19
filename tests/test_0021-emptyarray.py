@@ -12,13 +12,13 @@ import numpy
 import awkward1
 
 def test_unknown():
-    a = awkward1.from_json("[[], [], []]").layout
+    a = awkward1.from_json("[[], [], []]", highlevel=False)
     assert awkward1.to_list(a) == [[], [], []]
     assert str(awkward1.type(a)) == "var * unknown"
     assert awkward1.type(a) == awkward1.types.ListType(awkward1.types.UnknownType())
     assert not awkward1.type(a) == awkward1.types.PrimitiveType("float64")
 
-    a = awkward1.from_json("[[], [[], []], [[], [], []]]").layout
+    a = awkward1.from_json("[[], [[], []], [[], [], []]]", highlevel=False)
     assert awkward1.to_list(a) == [[], [[], []], [[], [], []]]
     assert str(awkward1.type(a)) == "var * var * unknown"
     assert awkward1.type(a) == awkward1.types.ListType(awkward1.types.ListType(awkward1.types.UnknownType()))
@@ -48,29 +48,29 @@ def test_getitem():
     assert awkward1.to_list(a[2, 1]) == []
     with pytest.raises(ValueError) as excinfo:
         a[2, 1, 0]
-    assert str(excinfo.value) == "in ListArray64 attempting to get 0, index out of range"
+    assert str(excinfo.value).endswith(" attempting to get 0, index out of range")
     assert awkward1.to_list(a[2, 1][()]) == []
     with pytest.raises(ValueError) as excinfo:
         a[2, 1][0]
-    assert str(excinfo.value) == "in EmptyArray attempting to get 0, index out of range"
+    assert str(excinfo.value).endswith(" attempting to get 0, index out of range")
     assert awkward1.to_list(a[2, 1][100:200]) == []
     assert awkward1.to_list(a[2, 1, 100:200]) == []
     assert awkward1.to_list(a[2, 1][numpy.array([], dtype=int)]) == []
     assert awkward1.to_list(a[2, 1, numpy.array([], dtype=int)]) == []
     with pytest.raises(ValueError) as excinfo:
         a[2, 1, numpy.array([0], dtype=int)]
-    assert str(excinfo.value) == "in ListArray64 attempting to get 0, index out of range"
+    assert str(excinfo.value).endswith(" attempting to get 0, index out of range")
     with pytest.raises(ValueError) as excinfo:
         a[2, 1][100:200, 0]
-    assert str(excinfo.value) == "in EmptyArray, too many dimensions in slice"
+    assert str(excinfo.value).endswith(", too many dimensions in slice")
     with pytest.raises(ValueError) as excinfo:
         a[2, 1][100:200, 200:300]
-    assert str(excinfo.value) == "in EmptyArray, too many dimensions in slice"
+    assert str(excinfo.value).endswith(", too many dimensions in slice")
     with pytest.raises(ValueError) as excinfo:
         a[2, 1][100:200, numpy.array([], dtype=int)]
-    assert str(excinfo.value) == "in EmptyArray, too many dimensions in slice"
+    assert str(excinfo.value).endswith(", too many dimensions in slice")
 
     assert awkward1.to_list(a[1:, 1:]) == [[[]], [[], []]]
     with pytest.raises(ValueError) as excinfo:
         a[1:, 1:, 0]
-    assert str(excinfo.value) == "in ListArray64 attempting to get 0, index out of range"
+    assert str(excinfo.value).endswith(" attempting to get 0, index out of range")
