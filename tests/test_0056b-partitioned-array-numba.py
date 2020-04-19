@@ -192,3 +192,16 @@ def test_getitem():
 
     assert awkward1.to_list(f6b(asarray, 6)) == [6, 6]
     assert awkward1.to_list(f6b(asarray, -3)) == [6, 6]
+
+# def test_iter():
+#     array = awkward1.repartition(awkward1.Array([1, 2, 3, 4, 5, 6, 7, 8, 9]), 3)
+
+#     @numba.njit
+#     def f1(x):
+#         out = 0
+#         for xi in x:
+#             out += xi
+#         return out
+
+#     print(f1(array))
+#     raise Exception

@@ -13,6 +13,8 @@ import awkward1.operations.convert
 import awkward1._util
 import awkward1._connect._numba.layout
 
+########## Lookup
+
 class Lookup(object):
     def __init__(self, layout):
         positions = []
@@ -108,7 +110,7 @@ class LookupType(numba.types.Type):
     arraytype = numba.types.Array(numba.intp, 1, "C")
 
     def __init__(self):
-        super(LookupType, self).__init__(name="LookupType()")
+        super(LookupType, self).__init__(name="awkward1.LookupType()")
 
 @numba.extending.register_model(LookupType)
 class LookupModel(numba.core.datamodel.models.StructModel):
@@ -136,6 +138,8 @@ def unbox_Lookup(lookuptype, lookupobj, c):
     is_error = numba.core.cgutils.is_not_null(c.builder,
                                               c.pyapi.err_occurred())
     return numba.extending.NativeValue(proxyout._getvalue(), is_error)
+
+########## ArrayView
 
 class ArrayView(object):
     @classmethod
@@ -487,6 +491,8 @@ def lower_iternext(context, builder, sig, args, result):
         nextat = numba.core.cgutils.increment_index(builder, at)
         builder.store(nextat, proxyin.at)
 
+########## RecordView
+
 class RecordView(object):
     @classmethod
     def fromrecord(self, record):
@@ -524,7 +530,7 @@ def typeof_RecordView(obj, c):
 class RecordViewType(numba.types.Type):
     def __init__(self, arrayviewtype):
         super(RecordViewType, self).__init__(
-            name="RecordViewType({0})".format(arrayviewtype.name))
+            name="awkward1.RecordViewType({0})".format(arrayviewtype.name))
         self.arrayviewtype = arrayviewtype
 
     @property
@@ -755,6 +761,8 @@ for binop in ((operator.add,
               + (() if not hasattr(operator, "matmul")
                     else (operator.matmul,))):
     register_binary_operator(binop)
+
+########## PartitionedView
 
 class PartitionedView(object):
     def __init__(self,
@@ -1111,8 +1119,7 @@ def lower_getitem_field_partitioned(context, builder, sig, args):
 
     return partviewval
 
-
-
+# Don't forget __len__!
 
 # @numba.core.typing.templates.infer_getattr
 # class type_getattr(numba.core.typing.templates.AttributeTemplate):
@@ -1130,3 +1137,177 @@ def lower_getitem_field_partitioned(context, builder, sig, args):
 #                                              viewtype,
 #                                              viewval,
 #                                              attr)
+
+class PartitionedIteratorType(numba.types.common.SimpleIteratorType):
+    def __init__(self, partviewtype):
+        super(PartitionedIteratorType, self).__init__(
+            "awkward1.PartitionedIterator({0})".format(partviewtype.name),
+            partviewtype.type.getitem_at_check(partviewtype.toArrayViewType()))
+        self.partviewtype = partviewtype
+
+@numba.core.typing.templates.infer
+class type_getiter_partitioned(numba.core.typing.templates.AbstractTemplate):
+    key = "getiter"
+
+    def generic(self, args, kwargs):
+        if (len(args) == 1 and
+            len(kwargs) == 0 and
+            isinstance(args[0], PartitionedViewType)):
+            return PartitionedIteratorType(args[0])(args[0])
+
+@numba.core.datamodel.registry.register_default(PartitionedIteratorType)
+class PartitionedIteratorModel(numba.core.datamodel.models.StructModel):
+    def __init__(self, dmm, fe_type):
+        members = [("partview",    fe_type.partviewtype),
+                   ("view",        numba.types.EphemeralPointer(
+                                     fe_type.partviewtype.toArrayViewType())),
+                   ("length",      numba.intp),
+                   ("stop",        numba.types.EphemeralPointer(numba.intp)),
+                   ("partitionid", numba.types.EphemeralPointer(numba.intp)),
+                   ("at",          numba.types.EphemeralPointer(numba.intp))]
+        super(PartitionedIteratorModel, self).__init__(dmm, fe_type, members)
+
+@numba.extending.lower_builtin("getiter", PartitionedViewType)
+def lower_getiter_partitioned(context, builder, sig, args):
+    rettype, (partviewtype,) = sig.return_type, sig.args
+    partviewval, = args
+    partviewproxy = context.make_helper(builder, partviewtype, partviewval)
+
+    stopsproxy = context.make_helper(builder,
+                                     PartitionedViewType.stopstype,
+                                     partviewproxy.stops)
+    stopval = numba.np.arrayobj._getitem_array_single_int(
+                                     context,
+                                     builder,
+                                     numba.intp,
+                                     PartitionedViewType.stopstype,
+                                     stopsproxy,
+                                     context.get_constant(numba.intp, 0))
+
+    getitemlist_sig = LookupType()(PartitionedViewType.lookupstype, numba.intp)
+    getitemlist_args = (partviewproxy.lookups,
+                        context.get_constant(numba.intp, 0))
+    lookup_val = numba.cpython.listobj.getitem_list(context,
+                                                    builder,
+                                                    getitemlist_sig,
+                                                    getitemlist_args)
+    lookupproxy = context.make_helper(builder, LookupType(), value=lookup_val)
+
+    viewtype = partviewtype.toArrayViewType()
+    viewproxy = context.make_helper(builder, viewtype)
+    viewproxy.pos = context.get_constant(numba.intp, 0)
+    viewproxy.start = context.get_constant(numba.intp, 0)
+    viewproxy.stop = stopval
+    viewproxy.arrayptrs = context.make_helper(builder,
+                                              LookupType.arraytype,
+                                              lookupproxy.arrayptrs).data
+    viewproxy.sharedptrs = context.make_helper(builder,
+                                               LookupType.arraytype,
+                                               lookupproxy.sharedptrs).data
+    viewproxy.pylookup = lookupproxy.pyself
+    viewval = viewproxy._getvalue()
+
+    proxyout = context.make_helper(builder, rettype)
+    proxyout.partview    = partviewval
+    proxyout.view        = numba.core.cgutils.alloca_once_value(
+                               builder, viewval)
+    proxyout.length      = builder.sub(partviewproxy.stop, partviewproxy.start)
+    proxyout.stop        = numba.core.cgutils.alloca_once_value(
+                               builder, stopval)
+    proxyout.partitionid = numba.core.cgutils.alloca_once_value(
+                               builder, context.get_constant(numba.intp, 0))
+    proxyout.at          = numba.core.cgutils.alloca_once_value(
+                               builder, context.get_constant(numba.intp, 0))
+
+    if context.enable_nrt:
+        context.nrt.incref(builder, partviewtype, partviewval)
+        context.nrt.incref(builder, viewtype, viewval)
+
+    return numba.core.imputils.impl_ret_new_ref(context,
+                                                builder,
+                                                rettype,
+                                                proxyout._getvalue())
+
+@numba.extending.lower_builtin("iternext", PartitionedIteratorType)
+@numba.core.imputils.iternext_impl(numba.core.imputils.RefType.BORROWED)
+def lower_iternext_partitioned(context, builder, sig, args, result):
+    itertype, = sig.args
+    iterval, = args
+
+    proxyin = context.make_helper(builder, itertype, iterval)
+    stop        = builder.load(proxyin.stop)
+    partitionid = builder.load(proxyin.partitionid)
+    at          = builder.load(proxyin.at)
+
+    partviewproxy = context.make_helper(builder,
+                                        itertype.partviewtype,
+                                        proxyin.partview)
+
+    is_valid = builder.icmp_signed("<", at, proxyin.length)
+    result.set_valid(is_valid)
+
+    with builder.if_then(is_valid, likely=True):
+        with builder.if_then(builder.icmp_signed("==", at, stop), likely=False):
+            new_partitionid = builder.add(partitionid,
+                                          context.get_constant(numba.intp, 1))
+            stopsproxy = context.make_helper(builder,
+                                             PartitionedViewType.stopstype,
+                                             partviewproxy.stops)
+            new_stop = numba.np.arrayobj._getitem_array_single_int(
+                                             context,
+                                             builder,
+                                             numba.intp,
+                                             PartitionedViewType.stopstype,
+                                             stopsproxy,
+                                             new_partitionid)
+
+            getitemlist_sig = LookupType()(PartitionedViewType.lookupstype,
+                                           numba.intp)
+            getitemlist_args = (partviewproxy.lookups, new_partitionid)
+            lookup_val = numba.cpython.listobj.getitem_list(context,
+                                                            builder,
+                                                            getitemlist_sig,
+                                                            getitemlist_args)
+            lookupproxy = context.make_helper(builder,
+                                              LookupType(),
+                                              value=lookup_val)
+
+            viewtype = itertype.partviewtype.toArrayViewType()
+            viewproxy = context.make_helper(builder, viewtype)
+            viewproxy.pos = context.get_constant(numba.intp, 0)
+            viewproxy.start = stop
+            viewproxy.stop = new_stop
+            viewproxy.arrayptrs = context.make_helper(
+                                      builder,
+                                      LookupType.arraytype,
+                                      lookupproxy.arrayptrs).data
+            viewproxy.sharedptrs = context.make_helper(
+                                      builder,
+                                      LookupType.arraytype,
+                                      lookupproxy.sharedptrs).data
+            viewproxy.pylookup = lookupproxy.pyself
+
+            builder.store(viewproxy._getvalue(), proxyin.view)
+            builder.store(new_stop, proxyin.stop)
+            builder.store(new_partitionid, proxyin.partitionid)
+
+        outview = builder.load(proxyin.view)
+        outviewproxy = context.make_helper(
+                           builder,
+                           itertype.partviewtype.toArrayViewType(),
+                           outview)
+        result.yield_(itertype.partviewtype.type.lower_getitem_at_check(
+                           context,
+                           builder,
+                           itertype.partviewtype.type.getitem_at_check(
+                               itertype.partviewtype.toArrayViewType()),
+                           itertype.partviewtype.toArrayViewType(),
+                           outview,
+                           outviewproxy,
+                           numba.intp,
+                           at,
+                           False,
+                           False))
+
+        nextat = builder.add(at, context.get_constant(numba.intp, 1))
+        builder.store(nextat, proxyin.at)
