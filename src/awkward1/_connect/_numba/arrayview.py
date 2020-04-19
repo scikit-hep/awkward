@@ -1119,24 +1119,36 @@ def lower_getitem_field_partitioned(context, builder, sig, args):
 
     return partviewval
 
-# Don't forget __len__!
+@numba.core.typing.templates.infer_global(len)
+class type_len_partitioned(numba.core.typing.templates.AbstractTemplate):
+    def generic(self, args, kwargs):
+        if (len(args) == 1 and
+            len(kwargs) == 0 and isinstance(args[0], PartitionedViewType)):
+            return numba.intp(args[0])
 
-# @numba.core.typing.templates.infer_getattr
-# class type_getattr(numba.core.typing.templates.AttributeTemplate):
-#     key = ArrayViewType
+@numba.extending.lower_builtin(len, PartitionedViewType)
+def lower_len_partitioned(context, builder, sig, args):
+    proxyin = context.make_helper(builder, sig.args[0], args[0])
+    return builder.sub(proxyin.stop, proxyin.start)
 
-#     def generic_resolve(self, viewtype, attr):
-#         # if attr == "???":
-#         #     do_something_specific
-#         return viewtype.type.getitem_field(viewtype, attr)
+@numba.core.typing.templates.infer_getattr
+class type_getattr_partitioned(numba.core.typing.templates.AttributeTemplate):
+    key = PartitionedViewType
 
-# @numba.extending.lower_getattr_generic(ArrayViewType)
-# def lower_getattr_generic(context, builder, viewtype, viewval, attr):
-#     return viewtype.type.lower_getitem_field(context,
-#                                              builder,
-#                                              viewtype,
-#                                              viewval,
-#                                              attr)
+    def generic_resolve(self, partviewtype, attr):
+        # if attr == "???":
+        #     do_something_specific
+        return partviewtype.getitem_field(attr)
+
+@numba.extending.lower_getattr_generic(PartitionedViewType)
+def lower_getattr_generic_partitioned(context,
+                                      builder,
+                                      partviewtype,
+                                      partviewval,
+                                      attr):
+    if context.enable_nrt:
+        context.nrt.incref(builder, partviewtype, partviewval)
+    return partviewval
 
 class PartitionedIteratorType(numba.types.common.SimpleIteratorType):
     def __init__(self, partviewtype):
