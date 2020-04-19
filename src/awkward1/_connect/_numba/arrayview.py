@@ -1162,6 +1162,7 @@ class PartitionedIteratorModel(numba.core.datamodel.models.StructModel):
                    ("view",        numba.types.EphemeralPointer(
                                      fe_type.partviewtype.toArrayViewType())),
                    ("length",      numba.intp),
+                   ("start",       numba.types.EphemeralPointer(numba.intp)),
                    ("stop",        numba.types.EphemeralPointer(numba.intp)),
                    ("partitionid", numba.types.EphemeralPointer(numba.intp)),
                    ("at",          numba.types.EphemeralPointer(numba.intp))]
@@ -1212,6 +1213,8 @@ def lower_getiter_partitioned(context, builder, sig, args):
     proxyout.view        = numba.core.cgutils.alloca_once_value(
                                builder, viewval)
     proxyout.length      = builder.sub(partviewproxy.stop, partviewproxy.start)
+    proxyout.start       = numba.core.cgutils.alloca_once_value(
+                               builder, context.get_constant(numba.intp, 0))
     proxyout.stop        = numba.core.cgutils.alloca_once_value(
                                builder, stopval)
     proxyout.partitionid = numba.core.cgutils.alloca_once_value(
@@ -1275,8 +1278,8 @@ def lower_iternext_partitioned(context, builder, sig, args, result):
             viewtype = itertype.partviewtype.toArrayViewType()
             viewproxy = context.make_helper(builder, viewtype)
             viewproxy.pos = context.get_constant(numba.intp, 0)
-            viewproxy.start = stop
-            viewproxy.stop = new_stop
+            viewproxy.start = context.get_constant(numba.intp, 0)
+            viewproxy.stop = builder.sub(new_stop, stop)
             viewproxy.arrayptrs = context.make_helper(
                                       builder,
                                       LookupType.arraytype,
@@ -1288,14 +1291,16 @@ def lower_iternext_partitioned(context, builder, sig, args, result):
             viewproxy.pylookup = lookupproxy.pyself
 
             builder.store(viewproxy._getvalue(), proxyin.view)
-            builder.store(new_stop, proxyin.stop)
-            builder.store(new_partitionid, proxyin.partitionid)
+            builder.store(stop,                  proxyin.start)
+            builder.store(new_stop,              proxyin.stop)
+            builder.store(new_partitionid,       proxyin.partitionid)
 
         outview = builder.load(proxyin.view)
         outviewproxy = context.make_helper(
                            builder,
                            itertype.partviewtype.toArrayViewType(),
                            outview)
+
         result.yield_(itertype.partviewtype.type.lower_getitem_at_check(
                            context,
                            builder,
@@ -1305,7 +1310,7 @@ def lower_iternext_partitioned(context, builder, sig, args, result):
                            outview,
                            outviewproxy,
                            numba.intp,
-                           at,
+                           builder.sub(at, builder.load(proxyin.start)),
                            False,
                            False))
 
