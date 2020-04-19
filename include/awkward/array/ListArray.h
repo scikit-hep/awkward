@@ -325,6 +325,12 @@ namespace awkward {
     const ContentPtr content_;
   };
 
+#ifndef AWKWARD_LISTARRAY_NO_EXTERN_TEMPLATE
+  extern template class ListArrayOf<int32_t>;
+  extern template class ListArrayOf<uint32_t>;
+  extern template class ListArrayOf<int64_t>;
+#endif
+
   using ListArray32  = ListArrayOf<int32_t>;
   using ListArrayU32 = ListArrayOf<uint32_t>;
   using ListArray64  = ListArrayOf<int64_t>;

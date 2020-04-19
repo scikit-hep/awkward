@@ -5,6 +5,7 @@
 #include <sstream>
 #include <type_traits>
 
+#define AWKWARD_INDEX_NO_EXTERN_TEMPLATE
 #include "awkward/Slice.h"
 
 #include "awkward/Index.h"

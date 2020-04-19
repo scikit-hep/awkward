@@ -302,6 +302,10 @@ namespace awkward {
     bool frombool_;
   };
 
+#ifndef AWKWARD_SLICE_NO_EXTERN_TEMPLATE
+  extern template class SliceArrayOf<int64_t>;
+#endif
+
   using SliceArray64 = SliceArrayOf<int64_t>;
 
   /// @class SliceField

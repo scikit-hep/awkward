@@ -188,6 +188,14 @@ namespace awkward {
     const int64_t length_;
   };
 
+#ifndef AWKWARD_INDEX_NO_EXTERN_TEMPLATE
+  extern template class IndexOf<int8_t>;
+  extern template class IndexOf<uint8_t>;
+  extern template class IndexOf<int32_t>;
+  extern template class IndexOf<uint32_t>;
+  extern template class IndexOf<int64_t>;
+#endif
+
   using Index8   = IndexOf<int8_t>;
   using IndexU8  = IndexOf<uint8_t>;
   using Index32  = IndexOf<int32_t>;

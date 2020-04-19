@@ -311,6 +311,12 @@ namespace awkward {
     const ContentPtrVec contents_;
   };
 
+#ifndef AWKWARD_UNIONARRAY_NO_EXTERN_TEMPLATE
+  extern template class UnionArrayOf<int8_t, int32_t>;
+  extern template class UnionArrayOf<int8_t, uint32_t>;
+  extern template class UnionArrayOf<int8_t, int64_t>;
+#endif
+
   using UnionArray8_32  = UnionArrayOf<int8_t, int32_t>;
   using UnionArray8_U32 = UnionArrayOf<int8_t, uint32_t>;
   using UnionArray8_64  = UnionArrayOf<int8_t, int64_t>;

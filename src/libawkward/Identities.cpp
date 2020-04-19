@@ -10,6 +10,7 @@
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/Slice.h"
 
+#define AWKWARD_IDENTITIES_NO_EXTERN_TEMPLATE
 #include "awkward/Identities.h"
 
 namespace awkward {
