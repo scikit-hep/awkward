@@ -1824,6 +1824,7 @@ namespace awkward {
 
       ContentPtr trimmed = content_.get()->getitem_range_nowrap(globalstart,
                                                                 globalstop);
+
       ContentPtr outcontent = trimmed.get()->argsort_next(
         negaxis, util::make_starts(offsets_), nextparents,
         offsets_.length() - 1, ascending, stable);

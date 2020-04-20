@@ -741,7 +741,7 @@ namespace awkward {
       for (int64_t i = 0; i < starts.length(); i++) {
         ranges[i] = starts.getitem_at_nowrap(i);
       }
-      ranges[starts.length()] = length;
+      ranges[starts.length()] = (int64_t)length;
       std::sort(begin(ranges), end(ranges));
 
       int64_t next_start = ranges[index];

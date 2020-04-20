@@ -2392,16 +2392,28 @@ ERROR awkward_listoffsetarray_reduce_local_outoffsets_64(
   int64_t parentsoffset,
   int64_t lenparents,
   int64_t outlength) {
-  outoffsets[outlength] = lenparents;
+  // FIXME: outoffsets[outlength] = lenparents;
+  // for parents:
+  // <Index64 i="[1 2 2 3 3 ... 5 5 6 6 7]" offset="0" length="16" at="0x7f9559c59e90"/>
+  //
+  // what looks like an intermittent memory corruption:
+  // <Index64 i="[0 0 1 3 6 10 13 15 2305851785543483394 16]" of...rmat="l" shape="16" data="0 0 1 0 1 ... 1 2 0 1 0" at="0x7fb6605f2910"/>
+  //
+  // in the following case:
+  // [[], [1], [2, 2], [3, 3, 3], [4, 4, 4, 4], [5, 5, 5], [6, 6], [7], []]
+  for(int64_t i = 0; i < outlength + 1; i++) {
+    outoffsets[i] = lenparents;
+  }
   int64_t k = 0;
   int64_t last = -1;
-  for (int64_t i = 0;  i < lenparents;  i++) {
-    while (last < parents[parentsoffset + i]) {
-      outoffsets[k] = i;
-      k++;
-      last++;
+    for (int64_t i = 0;  i < lenparents;  i++) {
+      while (last < parents[parentsoffset + i]) {
+        outoffsets[k] = i;
+        k++;
+        last++;
     }
   }
+
   return success();
 }
 
