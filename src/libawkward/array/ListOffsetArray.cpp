@@ -1678,7 +1678,7 @@ namespace awkward {
         offsets_.length() - 1, ascending, stable);
 
       Index64 outoffsets(outlength + 1);
-      struct Error err3 = awkward_listoffsetarray_reduce_local_outoffsets_64(
+      struct Error err3 = awkward_listoffsetarray_local_outoffsets_64(
         outoffsets.ptr().get(),
         parents.ptr().get(),
         parents.offset(),
@@ -1830,7 +1830,7 @@ namespace awkward {
         offsets_.length() - 1, ascending, stable);
 
       Index64 outoffsets(outlength + 1);
-      struct Error err3 = awkward_listoffsetarray_reduce_local_outoffsets_64(
+      struct Error err3 = awkward_listoffsetarray_local_outoffsets_64(
         outoffsets.ptr().get(),
         parents.ptr().get(),
         parents.offset(),

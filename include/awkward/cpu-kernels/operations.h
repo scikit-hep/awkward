@@ -1615,6 +1615,14 @@ extern "C" {
       int64_t outlength);
 
   EXPORT_SYMBOL struct Error
+    awkward_listoffsetarray_local_outoffsets_64(
+      int64_t* outoffsets,
+      const int64_t* parents,
+      int64_t parentsoffset,
+      int64_t lenparents,
+      int64_t outlength);
+
+  EXPORT_SYMBOL struct Error
     awkward_listoffsetarray_nonlocal_findgaps_64(
       int64_t* gaps,
       const int64_t* parents,

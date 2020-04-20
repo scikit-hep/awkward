@@ -69,6 +69,7 @@ def test_3d():
         [[4, 3, 2, 1, 0],
          [4, 3, 2, 1, 0],
          [4, 3, 2, 1, 0]]]
+    # FIXME: this is what I get:
     assert awkward1.to_list(array.argsort(1, True, False)) == [
         [[0, 1, 2], [], [], [], []],
          [[2, 1, 0, 0, 1, 2],
@@ -76,11 +77,14 @@ def test_3d():
           [2, 1, 0, 0, 1, 2],
           [2, 1, 0, 0, 1, 2],
           [2, 1, 0]]]
+    # This is what I think I should get:
        # [[[5, 4, 3, 0, 1, 2],
        #   [5, 4, 3, 0, 1, 2],
        #   [5, 4, 3, 0, 1, 2],
        #   [5, 4, 3, 0, 1, 2],
        #   [5, 4, 3, 0, 1, 2]]]
+
+    # FIXME: this is what I get:
     assert awkward1.to_list(array.argsort(0, True, False)) == [
          [[1, 0], [], [], [], []],
          [[1, 0], [], [], [], []],
@@ -89,6 +93,7 @@ def test_3d():
           [1, 0, 1, 0, 1, 0],
           [1, 0, 1, 0, 1, 0],
           [1, 0]]]
+    # This is what I think I should get:
         # [[[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         #  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]]
 
