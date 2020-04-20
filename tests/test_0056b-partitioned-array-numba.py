@@ -57,7 +57,7 @@ def test_boxing1():
     def f1(x):
         return 3.14
 
-    for i in range(10):
+    for i in range(5):
         f1(asarray)
         assert (sys.getrefcount(asnumpy), sys.getrefcount(aslayout), sys.getrefcount(aspart)) == (3, 2, 3)
 
@@ -128,7 +128,7 @@ def test_boxing3():
     gc.collect()
     assert sys.getrefcount(asnumpy) == 2
 
-def test_getitem_1():
+def test_getitem_1a():
     array = awkward1.repartition(awkward1.Array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]), 3)
 
     @numba.njit
@@ -138,9 +138,16 @@ def test_getitem_1():
     assert [f1(array, i) for i in range(10)] == [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]
     assert [f1(array, -i) for i in range(1, 11)] == [9.9, 8.8, 7.7, 6.6, 5.5, 4.4, 3.3, 2.2, 1.1, 0.0]
 
+def test_getitem_1b():
+    asnumpy = numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
+    array = awkward1.repartition(awkward1.Array(asnumpy), 3)
+
+    assert sys.getrefcount(asnumpy) == 3
+
     @numba.njit
     def f2(x, i1, i2):
-        return x[i1:i2]
+        out = x[i1:i2]
+        return out
 
     assert isinstance(f2(array, 0, 10).layout, awkward1.partition.PartitionedArray)
     assert isinstance(f2(array, 4, 5).layout, awkward1.partition.PartitionedArray)
@@ -149,6 +156,11 @@ def test_getitem_1():
     for start in range(-10, 10):
         for stop in range(-10, 10):
             assert awkward1.to_list(f2(array, start, stop)) == [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9][start:stop]
+
+    assert sys.getrefcount(asnumpy) == 3
+
+    del array
+    assert sys.getrefcount(asnumpy) == 2
 
 def test_getitem_2():
     aslist = [{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]},
@@ -249,7 +261,13 @@ def test_len():
     assert f1(asarray) == 9
 
 def test_iter():
-    array = awkward1.repartition(awkward1.Array([1, 2, 3, 4, 5, 6, 7, 8, 9]), 3)
+    asnumpy = numpy.array([1, 2, 3, 4, 5, 6, 7, 8, 9])
+
+    assert sys.getrefcount(asnumpy) == 2
+
+    array = awkward1.repartition(awkward1.Array(asnumpy), 3)
+
+    assert sys.getrefcount(asnumpy) == 3
 
     @numba.njit
     def f1(x):
@@ -258,7 +276,12 @@ def test_iter():
             out += xi
         return out
 
-    assert f1(array) == 45
+    for i in range(10):
+        assert f1(array) == 45
+        assert sys.getrefcount(asnumpy) == 3
+
+    del array
+    assert sys.getrefcount(asnumpy) == 2
 
     aslist = [{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]},
               {"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}, {"x": 5.5, "y": [5, 5, 5]},
