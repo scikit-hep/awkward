@@ -25,6 +25,46 @@
 #include "awkward/array/ListOffsetArray.h"
 
 namespace awkward {
+  ////////// ListOffsetForm
+
+  ListOffsetForm::ListOffsetForm(bool has_identities,
+                                 const util::Parameters& parameters,
+                                 Index::Form offsets,
+                                 const FormPtr& content)
+      : Form(has_identities, parameters)
+      , offsets_(offsets)
+      , content_(content) { }
+
+  Index::Form
+  ListOffsetForm::offsets() const {
+    return offsets_;
+  }
+
+  const FormPtr
+  ListOffsetForm::content() const {
+    return content_;
+  }
+
+  const TypePtr
+  ListOffsetForm::type(const util::TypeStrs& typestrs) const {
+    throw std::runtime_error("ListOffsetForm::type");
+  }
+
+  void
+  ListOffsetForm::tojson_part(ToJson& builder) const {
+    throw std::runtime_error("ListOffsetForm::tojson_part");
+  }
+
+  const FormPtr
+  ListOffsetForm::shallow_copy() const {
+    return std::make_shared<ListOffsetForm>(has_identities_,
+                                            parameters_,
+                                            offsets_,
+                                            content_);
+  }
+
+  ////////// ListOffsetArray
+
   template <typename T>
   ListOffsetArrayOf<T>::ListOffsetArrayOf(const IdentitiesPtr& identities,
                                           const util::Parameters& parameters,

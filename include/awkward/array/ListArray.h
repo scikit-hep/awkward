@@ -16,18 +16,22 @@ namespace awkward {
   /// @brief Form describing ListArray.
   class EXPORT_SYMBOL ListForm: public Form {
   public:
-    /// @brief Creates a ListForm. See ListArray for documentation.
+    /// @brief Creates a ListForm. See {@link ListArrayOf LinkArray} for
+    /// documentation.
     ListForm(bool has_identities,
              const util::Parameters& parameters,
              Index::Form starts,
              Index::Form stpos,
              const FormPtr& content);
 
-    Index::Form starts() const;
+    Index::Form
+      starts() const;
 
-    Index::Form stops() const;
+    Index::Form
+      stops() const;
 
-    const FormPtr content() const;
+    const FormPtr
+      content() const;
 
     const TypePtr
       type(const util::TypeStrs& typestrs) const override;
@@ -41,7 +45,7 @@ namespace awkward {
   private:
     Index::Form starts_;
     Index::Form stops_;
-    const FormPtr& content_;
+    const FormPtr content_;
   };
 
   /// @class ListArrayOf

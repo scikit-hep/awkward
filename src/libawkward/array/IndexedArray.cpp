@@ -25,6 +25,84 @@
 #include "awkward/array/IndexedArray.h"
 
 namespace awkward {
+  ////////// IndexedForm
+
+  IndexedForm::IndexedForm(bool has_identities,
+                           const util::Parameters& parameters,
+                           Index::Form index,
+                           const FormPtr& content)
+      : Form(has_identities, parameters)
+      , index_(index)
+      , content_(content) { }
+
+  Index::Form
+  IndexedForm::index() const {
+    return index_;
+  }
+
+  const FormPtr
+  IndexedForm::content() const {
+    return content_;
+  }
+
+  const TypePtr
+  IndexedForm::type(const util::TypeStrs& typestrs) const {
+    throw std::runtime_error("IndexedForm::type");
+  }
+
+  void
+  IndexedForm::tojson_part(ToJson& builder) const {
+    throw std::runtime_error("IndexedForm::tojson_part");
+  }
+
+  const FormPtr
+  IndexedForm::shallow_copy() const {
+    return std::make_shared<IndexedForm>(has_identities_,
+                                         parameters_,
+                                         index_,
+                                         content_);
+  }
+
+  ////////// IndexedOptionForm
+
+  IndexedOptionForm::IndexedOptionForm(bool has_identities,
+                                       const util::Parameters& parameters,
+                                       Index::Form index,
+                                       const FormPtr& content)
+      : Form(has_identities, parameters)
+      , index_(index)
+      , content_(content) { }
+
+  Index::Form
+  IndexedOptionForm::index() const {
+    return index_;
+  }
+
+  const FormPtr
+  IndexedOptionForm::content() const {
+    return content_;
+  }
+
+  const TypePtr
+  IndexedOptionForm::type(const util::TypeStrs& typestrs) const {
+    throw std::runtime_error("IndexedOptionForm::type");
+  }
+
+  void
+  IndexedOptionForm::tojson_part(ToJson& builder) const {
+    throw std::runtime_error("IndexedOptionForm::tojson_part");
+  }
+
+  const FormPtr
+  IndexedOptionForm::shallow_copy() const {
+    return std::make_shared<IndexedOptionForm>(has_identities_,
+                                               parameters_,
+                                               index_,
+                                               content_);
+  }
+
+  ////////// IndexedArray
+
   template <typename T, bool ISOPTION>
   IndexedArrayOf<T, ISOPTION>::IndexedArrayOf(
     const IdentitiesPtr& identities,

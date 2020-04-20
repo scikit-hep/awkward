@@ -18,6 +18,54 @@
 #include "awkward/array/UnionArray.h"
 
 namespace awkward {
+  ////////// UnionForm
+
+  UnionForm::UnionForm(bool has_identities,
+                       const util::Parameters& parameters,
+                       Index::Form tags,
+                       Index::Form index,
+                       const std::vector<FormPtr>& contents)
+      : Form(has_identities, parameters)
+      , tags_(tags)
+      , index_(index)
+      , contents_(contents) { }
+
+  Index::Form
+  UnionForm::tags() const {
+    return tags_;
+  }
+
+  Index::Form
+  UnionForm::index() const {
+    return index_;
+  }
+
+  const std::vector<FormPtr>
+  UnionForm::contents() const {
+    return contents_;
+  }
+
+  const TypePtr
+  UnionForm::type(const util::TypeStrs& typestrs) const {
+    throw std::runtime_error("UnionForm::type");
+  }
+
+  void
+  UnionForm::tojson_part(ToJson& builder) const {
+    throw std::runtime_error("UnionForm::tojson_part");
+  }
+
+  const FormPtr
+  UnionForm::shallow_copy() const {
+    return std::make_shared<UnionForm>(has_identities_,
+                                       parameters_,
+                                       tags_,
+                                       index_,
+                                       contents_);
+  }
+
+  ////////// UnionArray
+
   template <>
   const IndexOf<int32_t>
   UnionArrayOf<int8_t, int32_t>::sparse_index(int64_t len) {

@@ -31,13 +31,17 @@ namespace awkward {
                   bool valid_when,
                   bool lsb_order);
 
-    Index::Form mask() const;
+    Index::Form
+      mask() const;
 
-    const FormPtr content() const;
+    const FormPtr
+      content() const;
 
-    bool valid_when() const;
+    bool
+      valid_when() const;
 
-    bool lsb_order() const;
+    bool
+      lsb_order() const;
 
     const TypePtr
       type(const util::TypeStrs& typestrs) const override;
@@ -50,7 +54,7 @@ namespace awkward {
 
   private:
     Index::Form mask_;
-    const FormPtr& content_;
+    const FormPtr content_;
     bool valid_when_;
     bool lsb_order_;
   };

@@ -14,6 +14,30 @@
 #include "awkward/array/EmptyArray.h"
 
 namespace awkward {
+  ////////// EmptyForm
+
+  EmptyForm::EmptyForm(bool has_identities,
+                       const util::Parameters& parameters)
+      : Form(has_identities, parameters) { }
+
+  const TypePtr
+  EmptyForm::type(const util::TypeStrs& typestrs) const {
+    throw std::runtime_error("EmptyForm::type");
+  }
+
+  void
+  EmptyForm::tojson_part(ToJson& builder) const {
+    throw std::runtime_error("EmptyForm::tojson_part");
+  }
+
+  const FormPtr
+  EmptyForm::shallow_copy() const {
+    return std::make_shared<EmptyForm>(has_identities_,
+                                       parameters_);
+  }
+
+  ////////// EmptyArray
+
   EmptyArray::EmptyArray(const IdentitiesPtr& identities,
                          const util::Parameters& parameters)
       : Content(identities, parameters) { }

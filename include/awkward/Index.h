@@ -28,6 +28,7 @@ namespace awkward {
   ///    - {@link IndexOf IndexU32}, which is `IndexOf<uint32_t>`
   ///    - {@link IndexOf Index64}, which is `IndexOf<int64_t>`
   class EXPORT_SYMBOL Index {
+  public:
     /// @brief Integer type of an Index, used by ListForm, IndexedForm, etc.
     enum Form {i8, u8, i32, u32, i64, kNumIndexForm};
 

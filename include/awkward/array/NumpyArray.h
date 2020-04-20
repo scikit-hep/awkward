@@ -14,6 +14,41 @@
 #include "awkward/Content.h"
 
 namespace awkward {
+  /// @class NumpyForm
+  ///
+  /// @brief Form describing NumpyArray.
+  class EXPORT_SYMBOL NumpyForm: public Form {
+  public:
+    /// @brief Creates a NumpyForm. See NumpyArray for documentation.
+    NumpyForm(bool has_identities,
+              const util::Parameters& parameters,
+              const std::vector<int64_t>& inner_shape,
+              int64_t itemsize,
+              const std::string& format);
+
+    const std::vector<int64_t>
+      inner_shape() const;
+
+    int64_t
+      itemsize() const;
+
+    const std::string format() const;
+
+    const TypePtr
+      type(const util::TypeStrs& typestrs) const override;
+
+    void
+      tojson_part(ToJson& builder) const override;
+
+    const FormPtr
+      shallow_copy() const;
+
+  private:
+    const std::vector<int64_t> inner_shape_;
+    int64_t itemsize_;
+    const std::string format_;
+  };
+
   /// @class NumpyArray
   ///
   /// @brief Represents a rectilinear numerical array that can be converted to

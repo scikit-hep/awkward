@@ -21,6 +21,62 @@
 #include "awkward/array/BitMaskedArray.h"
 
 namespace awkward {
+  ////////// BitMaskedForm
+
+  BitMaskedForm::BitMaskedForm(bool has_identities,
+                               const util::Parameters& parameters,
+                               Index::Form mask,
+                               const FormPtr& content,
+                               bool valid_when,
+                               bool lsb_order)
+      : Form(has_identities, parameters)
+      , mask_(mask)
+      , content_(content)
+      , valid_when_(valid_when)
+      , lsb_order_(lsb_order) { }
+
+  Index::Form
+  BitMaskedForm::mask() const {
+    return mask_;
+  }
+
+  const FormPtr
+  BitMaskedForm::content() const {
+    return content_;
+  }
+
+  bool
+  BitMaskedForm::valid_when() const {
+    return valid_when_;
+  }
+
+  bool
+  BitMaskedForm::lsb_order() const {
+    return lsb_order_;
+  }
+
+  const TypePtr
+  BitMaskedForm::type(const util::TypeStrs& typestrs) const {
+    throw std::runtime_error("BitMaskedForm::type");
+  }
+
+  void
+  BitMaskedForm::tojson_part(ToJson& builder) const {
+    throw std::runtime_error("BitMaskedForm::tojson_part");
+  }
+
+  const FormPtr
+  BitMaskedForm::shallow_copy() const {
+    return std::make_shared<BitMaskedForm>(has_identities_,
+                                           parameters_,
+                                           mask_,
+                                           content_,
+                                           valid_when_,
+                                           lsb_order_);
+  }
+
+  ////////// BitMaskedArray
+
   BitMaskedArray::BitMaskedArray(const IdentitiesPtr& identities,
                                  const util::Parameters& parameters,
                                  const IndexU8& mask,

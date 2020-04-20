@@ -18,15 +18,18 @@ namespace awkward {
   /// @brief Form describing IndexedArray (with `OPTION = false`).
   class EXPORT_SYMBOL IndexedForm: public Form {
   public:
-    /// @brief Creates a IndexedForm. See IndexedArray for documentation.
+    /// @brief Creates a IndexedForm. See {@link IndexedArrayOf IndexedArray}
+    /// for documentation.
     IndexedForm(bool has_identities,
                 const util::Parameters& parameters,
                 Index::Form index,
                 const FormPtr& content);
 
-    Index::Form index() const;
+    Index::Form
+      index() const;
 
-    const FormPtr content() const;
+    const FormPtr
+      content() const;
 
     const TypePtr
       type(const util::TypeStrs& typestrs) const override;
@@ -38,8 +41,8 @@ namespace awkward {
       shallow_copy() const;
 
   private:
-    Index::Form mask_;
-    const FormPtr& content_;
+    Index::Form index_;
+    const FormPtr content_;
   };
 
   /// @class IndexedOptionForm
@@ -67,8 +70,8 @@ namespace awkward {
       shallow_copy() const;
 
   private:
-    Index::Form mask_;
-    const FormPtr& content_;
+    Index::Form index_;
+    const FormPtr content_;
   };
 
   /// @class IndexedArrayOf

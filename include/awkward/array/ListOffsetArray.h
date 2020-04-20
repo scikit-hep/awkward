@@ -11,6 +11,38 @@
 #include "awkward/Content.h"
 
 namespace awkward {
+  /// @class ListOffsetForm
+  ///
+  /// @brief Form describing ListOffsetArray.
+  class EXPORT_SYMBOL ListOffsetForm: public Form {
+  public:
+    /// @brief Creates a ListOffsetForm. See
+    /// {@link ListOffsetArrayOf ListOffsetArray} for documentation.
+    ListOffsetForm(bool has_identities,
+                   const util::Parameters& parameters,
+                   Index::Form offsets,
+                   const FormPtr& content);
+
+    Index::Form
+      offsets() const;
+
+    const FormPtr
+      content() const;
+
+    const TypePtr
+      type(const util::TypeStrs& typestrs) const override;
+
+    void
+      tojson_part(ToJson& builder) const override;
+
+    const FormPtr
+      shallow_copy() const;
+
+  private:
+    Index::Form offsets_;
+    const FormPtr content_;
+  };
+
   /// @class ListOffsetArrayOf
   ///
   /// @brief Represents an array of nested lists that can have different

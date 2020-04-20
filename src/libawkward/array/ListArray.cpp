@@ -24,6 +24,54 @@
 #include "awkward/array/ListArray.h"
 
 namespace awkward {
+  ////////// ListForm
+
+  ListForm::ListForm(bool has_identities,
+                     const util::Parameters& parameters,
+                     Index::Form starts,
+                     Index::Form stops,
+                     const FormPtr& content)
+      : Form(has_identities, parameters)
+      , starts_(starts)
+      , stops_(stops)
+      , content_(content) { }
+
+  Index::Form
+  ListForm::starts() const {
+    return starts_;
+  }
+
+  Index::Form
+  ListForm::stops() const {
+    return stops_;
+  }
+
+  const FormPtr
+  ListForm::content() const {
+    return content_;
+  }
+
+  const TypePtr
+  ListForm::type(const util::TypeStrs& typestrs) const {
+    throw std::runtime_error("ListForm::type");
+  }
+
+  void
+  ListForm::tojson_part(ToJson& builder) const {
+    throw std::runtime_error("ListForm::tojson_part");
+  }
+
+  const FormPtr
+  ListForm::shallow_copy() const {
+    return std::make_shared<ListForm>(has_identities_,
+                                      parameters_,
+                                      starts_,
+                                      stops_,
+                                      content_);
+  }
+
+  ////////// ListArray
+
   template <typename T>
   ListArrayOf<T>::ListArrayOf(const IdentitiesPtr& identities,
                               const util::Parameters& parameters,

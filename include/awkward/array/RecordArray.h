@@ -12,6 +12,38 @@
 #include "awkward/Content.h"
 
 namespace awkward {
+  /// @class RecordForm
+  ///
+  /// @brief Form describing RecordArray (not a Record).
+  class EXPORT_SYMBOL RecordForm: public Form {
+  public:
+    /// @brief Creates a RecordForm. See RecordArray (not Record) for
+    /// documentation.
+    RecordForm(bool has_identities,
+               const util::Parameters& parameters,
+               const util::RecordLookupPtr& recordlookup,
+               const std::vector<FormPtr>& contents);
+
+    const util::RecordLookupPtr
+      recordlookup() const;
+
+    const std::vector<FormPtr>
+      contents() const;
+
+    const TypePtr
+      type(const util::TypeStrs& typestrs) const override;
+
+    void
+      tojson_part(ToJson& builder) const override;
+
+    const FormPtr
+      shallow_copy() const;
+
+  private:
+    const util::RecordLookupPtr recordlookup_;
+    const std::vector<FormPtr> contents_;
+  };
+
   /// @class RecordArray
   ///
   /// @brief Represents an array of tuples or records, in which a tuple
@@ -30,7 +62,7 @@ namespace awkward {
     public std::enable_shared_from_this<RecordArray> {
   public:
     /// @brief Creates a RecordArray from a full set of parameters.
-    /// 
+    ///
     /// @param identities Optional Identities for each element of the array
     /// (may be `nullptr`).
     /// @param parameters String-to-JSON map that augments the meaning of this

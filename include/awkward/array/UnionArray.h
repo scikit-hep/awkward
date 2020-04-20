@@ -13,6 +13,43 @@
 #include "awkward/Content.h"
 
 namespace awkward {
+  /// @class UnionForm
+  ///
+  /// @brief Form describing UnionArray.
+  class EXPORT_SYMBOL UnionForm: public Form {
+  public:
+    /// @brief Creates a UnionForm. See {@link UnionArrayOf UnionArray} for
+    /// documentation.
+    UnionForm(bool has_identities,
+              const util::Parameters& parameters,
+              Index::Form tags,
+              Index::Form index,
+              const std::vector<FormPtr>& contents);
+
+    Index::Form
+      tags() const;
+
+    Index::Form
+      index() const;
+
+    const std::vector<FormPtr>
+      contents() const;
+
+    const TypePtr
+      type(const util::TypeStrs& typestrs) const override;
+
+    void
+      tojson_part(ToJson& builder) const override;
+
+    const FormPtr
+      shallow_copy() const;
+
+  private:
+    Index::Form tags_;
+    Index::Form index_;
+    const std::vector<FormPtr> contents_;
+  };
+
   /// @class UnionArrayOf
   ///
   /// @brief Represents heterogeneous data by interleaving several #contents,
@@ -36,7 +73,7 @@ namespace awkward {
       regular_index(const IndexOf<T>& tags);
 
     /// @brief Creates a UnionArrayOf from a full set of parameters.
-    /// 
+    ///
     /// @param identities Optional Identities for each element of the array
     /// (may be `nullptr`).
     /// @param parameters String-to-JSON map that augments the meaning of this

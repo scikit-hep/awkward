@@ -18,6 +18,43 @@
 #include "awkward/Content.h"
 
 namespace awkward {
+  ////////// Form
+
+  Form::Form(bool has_identities, const util::Parameters& parameters)
+      : has_identities_(has_identities)
+      , parameters_(parameters) { }
+
+  const std::string
+  Form::tostring() const {
+    return tojson(true);
+  }
+
+  const std::string
+  Form::tojson(bool pretty) const {
+    throw std::runtime_error("FIXME: Form::tojson");
+  }
+
+  bool
+  Form::has_identities() const {
+    return has_identities_;
+  }
+
+  const util::Parameters
+  Form::parameters() const {
+    return parameters_;
+  }
+
+  const std::string
+  Form::parameter(const std::string& key) const {
+    auto item = parameters_.find(key);
+    if (item == parameters_.end()) {
+      return "null";
+    }
+    return item->second;
+  }
+
+  ////////// Content
+
   Content::Content(const IdentitiesPtr& identities,
                    const util::Parameters& parameters)
       : identities_(identities)

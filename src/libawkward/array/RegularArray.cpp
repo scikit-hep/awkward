@@ -24,6 +24,46 @@
 #include "awkward/array/RegularArray.h"
 
 namespace awkward {
+  ////////// RegularForm
+
+  RegularForm::RegularForm(bool has_identities,
+                           const util::Parameters& parameters,
+                           const FormPtr& content,
+                           int64_t size)
+      : Form(has_identities, parameters)
+      , content_(content)
+      , size_(size) { }
+
+  const FormPtr
+  RegularForm::content() const {
+    return content_;
+  }
+
+  int64_t
+  RegularForm::size() const {
+    return size_;
+  }
+
+  const TypePtr
+  RegularForm::type(const util::TypeStrs& typestrs) const {
+    throw std::runtime_error("RegularForm::type");
+  }
+
+  void
+  RegularForm::tojson_part(ToJson& builder) const {
+    throw std::runtime_error("RegularForm::tojson_part");
+  }
+
+  const FormPtr
+  RegularForm::shallow_copy() const {
+    return std::make_shared<RegularForm>(has_identities_,
+                                         parameters_,
+                                         content_,
+                                         size_);
+  }
+
+  ////////// RegularArray
+
   RegularArray::RegularArray(const IdentitiesPtr& identities,
                              const util::Parameters& parameters,
                              const ContentPtr& content,

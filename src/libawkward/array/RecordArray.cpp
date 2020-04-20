@@ -20,6 +20,46 @@
 #include "awkward/array/RecordArray.h"
 
 namespace awkward {
+  ////////// RecordForm
+
+  RecordForm::RecordForm(bool has_identities,
+                         const util::Parameters& parameters,
+                         const util::RecordLookupPtr& recordlookup,
+                         const std::vector<FormPtr>& contents)
+      : Form(has_identities, parameters)
+      , recordlookup_(recordlookup)
+      , contents_(contents) { }
+
+  const util::RecordLookupPtr
+  RecordForm::recordlookup() const {
+    return recordlookup_;
+  }
+
+  const std::vector<FormPtr>
+  RecordForm::contents() const {
+    return contents_;
+  }
+
+  const TypePtr
+  RecordForm::type(const util::TypeStrs& typestrs) const {
+    throw std::runtime_error("RecordForm::type");
+  }
+
+  void
+  RecordForm::tojson_part(ToJson& builder) const {
+    throw std::runtime_error("RecordForm::tojson_part");
+  }
+
+  const FormPtr
+  RecordForm::shallow_copy() const {
+    return std::make_shared<RecordForm>(has_identities_,
+                                        parameters_,
+                                        recordlookup_,
+                                        contents_);
+  }
+
+  ////////// RecordArray
+
   RecordArray::RecordArray(const IdentitiesPtr& identities,
                            const util::Parameters& parameters,
                            const ContentPtrVec& contents,

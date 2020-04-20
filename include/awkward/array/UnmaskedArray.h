@@ -13,6 +13,32 @@
 #include "awkward/Content.h"
 
 namespace awkward {
+  /// @class UnmaskedForm
+  ///
+  /// @brief Form describing UnmaskedArray.
+  class EXPORT_SYMBOL UnmaskedForm: public Form {
+  public:
+    /// @brief Creates a UnmaskedForm. See UnmaskedArray for documentation.
+    UnmaskedForm(bool has_identities,
+                 const util::Parameters& parameters,
+                 const FormPtr& content);
+
+    const FormPtr
+      content() const;
+
+    const TypePtr
+      type(const util::TypeStrs& typestrs) const override;
+
+    void
+      tojson_part(ToJson& builder) const override;
+
+    const FormPtr
+      shallow_copy() const;
+
+  private:
+    const FormPtr content_;
+  };
+
   /// @class UnmaskedArray
   ///
   /// @brief Converts #content of any type into an OptionType in which all

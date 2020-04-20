@@ -28,6 +28,42 @@
 #include "awkward/array/UnmaskedArray.h"
 
 namespace awkward {
+  /// @class RawForm
+  ///
+  /// @brief Form describing RawArray.
+  class EXPORT_SYMBOL RawForm: public Form {
+  public:
+    /// @brief Creates a RawForm. See RawArray for documentation.
+    RawForm(bool has_identities,
+            const util::Parameters& parameters,
+            const std::string& T)
+        : Form(has_identities, parameters)
+        , T_(T) { }
+
+    const std::string
+      T() const;
+
+    const TypePtr
+      type(const util::TypeStrs& typestrs) const override {
+      throw std::runtime_error("RawForm::type");
+    }
+
+    void
+      tojson_part(ToJson& builder) const override {
+      throw std::runtime_error("NumpyForm::tojson_part");
+    }
+
+    const FormPtr
+      shallow_copy() const {
+      return std::make_shared<RawForm>(has_identities_,
+                                       parameters_,
+                                       T_);
+    }
+
+  private:
+    const std::string T_;
+  };
+
   /// @brief Internal function to fill JSON with boolean values.
   void
     tojson_boolean(ToJson& builder, bool* array, int64_t length) {
@@ -72,7 +108,7 @@ namespace awkward {
   class EXPORT_SYMBOL RawArrayOf: public Content {
   public:
     /// @brief Creates a RawArray from a full set of parameters.
-    /// 
+    ///
     /// @param identities Optional Identities for each element of the array
     /// (may be `nullptr`).
     /// @param parameters String-to-JSON map that augments the meaning of this

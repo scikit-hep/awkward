@@ -21,6 +21,38 @@
 #include "awkward/array/UnmaskedArray.h"
 
 namespace awkward {
+  ////////// UnmaskedForm
+
+  UnmaskedForm::UnmaskedForm(bool has_identities,
+                             const util::Parameters& parameters,
+                             const FormPtr& content)
+      : Form(has_identities, parameters)
+      , content_(content) { }
+
+  const FormPtr
+  UnmaskedForm::content() const {
+    return content_;
+  }
+
+  const TypePtr
+  UnmaskedForm::type(const util::TypeStrs& typestrs) const {
+    throw std::runtime_error("UnmaskedForm::type");
+  }
+
+  void
+  UnmaskedForm::tojson_part(ToJson& builder) const {
+    throw std::runtime_error("UnmaskedForm::tojson_part");
+  }
+
+  const FormPtr
+  UnmaskedForm::shallow_copy() const {
+    return std::make_shared<UnmaskedForm>(has_identities_,
+                                          parameters_,
+                                          content_);
+  }
+
+  ////////// UnmaskedArray
+
   UnmaskedArray::UnmaskedArray(const IdentitiesPtr& identities,
                                const util::Parameters& parameters,
                                const ContentPtr& content)

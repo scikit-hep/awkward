@@ -25,6 +25,54 @@
 #include "awkward/array/ByteMaskedArray.h"
 
 namespace awkward {
+  ////////// ByteMaskedForm
+
+  ByteMaskedForm::ByteMaskedForm(bool has_identities,
+                                 const util::Parameters& parameters,
+                                 Index::Form mask,
+                                 const FormPtr& content,
+                                 bool valid_when)
+      : Form(has_identities, parameters)
+      , mask_(mask)
+      , content_(content)
+      , valid_when_(valid_when) { }
+
+  Index::Form
+  ByteMaskedForm::mask() const {
+    return mask_;
+  }
+
+  const FormPtr
+  ByteMaskedForm::content() const {
+    return content_;
+  }
+
+  bool
+  ByteMaskedForm::valid_when() const {
+    return valid_when_;
+  }
+
+  const TypePtr
+  ByteMaskedForm::type(const util::TypeStrs& typestrs) const {
+    throw std::runtime_error("ByteMaskedForm::type");
+  }
+
+  void
+  ByteMaskedForm::tojson_part(ToJson& builder) const {
+    throw std::runtime_error("ByteMaskedForm::tojson_part");
+  }
+
+  const FormPtr
+  ByteMaskedForm::shallow_copy() const {
+    return std::make_shared<ByteMaskedForm>(has_identities_,
+                                            parameters_,
+                                            mask_,
+                                            content_,
+                                            valid_when_);
+  }
+
+  ////////// ByteMaskedArray
+
   ByteMaskedArray::ByteMaskedArray(const IdentitiesPtr& identities,
                                    const util::Parameters& parameters,
                                    const Index8& mask,

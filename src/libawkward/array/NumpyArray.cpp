@@ -24,6 +24,54 @@
 #include "awkward/array/NumpyArray.h"
 
 namespace awkward {
+  ////////// NumpyForm
+
+  NumpyForm::NumpyForm(bool has_identities,
+                       const util::Parameters& parameters,
+                       const std::vector<int64_t>& inner_shape,
+                       int64_t itemsize,
+                       const std::string& format)
+      : Form(has_identities, parameters)
+      , inner_shape_(inner_shape)
+      , itemsize_(itemsize)
+      , format_(format) { }
+
+  const std::vector<int64_t>
+  NumpyForm::inner_shape() const {
+    return inner_shape_;
+  }
+
+  int64_t
+  NumpyForm::itemsize() const {
+    return itemsize_;
+  }
+
+  const std::string
+  NumpyForm::format() const {
+    return format_;
+  }
+
+  const TypePtr
+  NumpyForm::type(const util::TypeStrs& typestrs) const {
+    throw std::runtime_error("NumpyForm::type");
+  }
+
+  void
+  NumpyForm::tojson_part(ToJson& builder) const {
+    throw std::runtime_error("NumpyForm::tojson_part");
+  }
+
+  const FormPtr
+  NumpyForm::shallow_copy() const {
+    return std::make_shared<NumpyForm>(has_identities_,
+                                       parameters_,
+                                       inner_shape_,
+                                       itemsize_,
+                                       format_);
+  }
+
+  ////////// NumpyArray
+
   const std::unordered_map<std::type_index, std::string>
   NumpyArray::format_map = {
     { typeid(int8_t), "b"},
