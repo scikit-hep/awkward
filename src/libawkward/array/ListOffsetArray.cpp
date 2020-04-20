@@ -344,6 +344,15 @@ namespace awkward {
   }
 
   template <typename T>
+  const FormPtr
+  ListOffsetArrayOf<T>::form() const {
+    return std::make_shared<ListOffsetForm>(identities_.get() != nullptr,
+                                            parameters_,
+                                            offsets_.form(),
+                                            content_.get()->form());
+  }
+
+  template <typename T>
   const std::string
   ListOffsetArrayOf<T>::tostring_part(const std::string& indent,
                                       const std::string& pre,

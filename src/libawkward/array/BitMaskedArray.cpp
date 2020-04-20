@@ -302,6 +302,16 @@ namespace awkward {
       content_.get()->type(typestrs));
   }
 
+  const FormPtr
+  BitMaskedArray::form() const {
+    return std::make_shared<BitMaskedForm>(identities_.get() != nullptr,
+                                           parameters_,
+                                           mask_.form(),
+                                           content_.get()->form(),
+                                           valid_when_,
+                                           lsb_order_);
+  }
+
   const std::string
   BitMaskedArray::tostring_part(const std::string& indent,
                                 const std::string& pre,

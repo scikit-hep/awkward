@@ -274,6 +274,18 @@ namespace awkward {
       types, recordlookup_);
   }
 
+  const FormPtr
+  RecordArray::form() const {
+    std::vector<FormPtr> contents;
+    for (auto x : contents_) {
+      contents.push_back(x.get()->form());
+    }
+    return std::make_shared<RecordForm>(identities_.get() != nullptr,
+                                        parameters_,
+                                        recordlookup_,
+                                        contents);
+  }
+
   const std::string
   RecordArray::tostring_part(const std::string& indent,
                              const std::string& pre,

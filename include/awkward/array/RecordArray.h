@@ -130,6 +130,9 @@ namespace awkward {
     void
       setidentities(const IdentitiesPtr& identities) override;
 
+    const FormPtr
+      form() const override;
+
     const std::string
       tostring_part(const std::string& indent,
                     const std::string& pre,

@@ -45,6 +45,10 @@ namespace awkward {
     const TypePtr
       type(const util::TypeStrs& typestrs) const override;
 
+    /// @exception std::runtime_error is always thrown
+    const FormPtr
+      form() const override;
+
     const std::string
       tostring_part(const std::string& indent,
                     const std::string& pre,

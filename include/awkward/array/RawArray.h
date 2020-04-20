@@ -319,6 +319,13 @@ namespace awkward {
       }
     }
 
+    const FormPtr
+      form() const override {
+      return std::make_shared<RawForm>(identities_.get() != nullptr,
+                                       parameters_,
+                                       typeid(T).name());
+    }
+
     const std::string
       tostring_part(const std::string& indent,
                     const std::string& pre,

@@ -268,6 +268,14 @@ namespace awkward {
       size_);
   }
 
+  const FormPtr
+  RegularArray::form() const {
+    return std::make_shared<RegularForm>(identities_.get() != nullptr,
+                                         parameters_,
+                                         content_.get()->form(),
+                                         size_);
+  }
+
   const std::string
   RegularArray::tostring_part(const std::string& indent,
                               const std::string& pre,

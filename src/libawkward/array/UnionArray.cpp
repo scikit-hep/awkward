@@ -603,6 +603,20 @@ namespace awkward {
   }
 
   template <typename T, typename I>
+  const FormPtr
+  UnionArrayOf<T, I>::form() const {
+    std::vector<FormPtr> contents;
+    for (auto x : contents_) {
+      contents.push_back(x.get()->form());
+    }
+    return std::make_shared<UnionForm>(identities_.get() != nullptr,
+                                       parameters_,
+                                       tags_.form(),
+                                       index_.form(),
+                                       contents);
+  }
+
+  template <typename T, typename I>
   const std::string
   UnionArrayOf<T, I>::tostring_part(const std::string& indent,
                                     const std::string& pre,

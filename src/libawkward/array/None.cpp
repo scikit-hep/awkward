@@ -39,6 +39,11 @@ namespace awkward {
     throw std::runtime_error("undefined operation: None::type()");
   }
 
+  const FormPtr
+  None::form() const {
+    throw std::runtime_error("undefined operation: None::form()");
+  }
+
   const std::string
   None::tostring_part(const std::string& indent,
                       const std::string& pre,

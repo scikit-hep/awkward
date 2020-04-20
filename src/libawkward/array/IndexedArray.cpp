@@ -700,6 +700,23 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
+  const FormPtr
+  IndexedArrayOf<T, ISOPTION>::form() const {
+    if (ISOPTION) {
+      return std::make_shared<IndexedOptionForm>(identities_.get() != nullptr,
+                                                 parameters_,
+                                                 index_.form(),
+                                                 content_.get()->form());
+    }
+    else {
+      return std::make_shared<IndexedForm>(identities_.get() != nullptr,
+                                           parameters_,
+                                           index_.form(),
+                                           content_.get()->form());
+    }
+  }
+
+  template <typename T, bool ISOPTION>
   const std::string
   IndexedArrayOf<T, ISOPTION>::tostring_part(const std::string& indent,
                                              const std::string& pre,

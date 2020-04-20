@@ -86,6 +86,12 @@ namespace awkward {
                                                           typestrs));
   }
 
+  const FormPtr
+  EmptyArray::form() const {
+    return std::make_shared<EmptyForm>(identities_.get() != nullptr,
+                                       parameters_);
+  }
+
   const std::string
   EmptyArray::tostring_part(const std::string& indent,
                             const std::string& pre,

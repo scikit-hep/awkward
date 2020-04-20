@@ -174,6 +174,14 @@ namespace awkward {
     virtual const TypePtr
       type(const util::TypeStrs& typestrs) const = 0;
 
+    /// @brief Low-level Form describing all the features of this array
+    /// except the actual data buffers ({@link IndexOf Index},
+    /// {@link IdentitiesOf Identities},
+    /// {@link NumpyArray#ptr NumpyArray::ptr}, and
+    /// {@link RawArrayOf#ptr RawArray::ptr}).
+    virtual const FormPtr
+      form() const = 0;
+
     /// @brief Internal function to build an output string for #tostring.
     ///
     /// @param indent Indentation depth as a string of spaces.

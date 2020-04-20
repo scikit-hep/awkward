@@ -112,6 +112,29 @@ namespace awkward {
   }
 
   template <typename T>
+  Index::Form
+  IndexOf<T>::form() const {
+    if (std::is_same<T, int8_t>::value) {
+      return Index::Form::i8;
+    }
+    else if (std::is_same<T, uint8_t>::value) {
+      return Index::Form::u8;
+    }
+    else if (std::is_same<T, int32_t>::value) {
+      return Index::Form::i32;
+    }
+    else if (std::is_same<T, uint32_t>::value) {
+      return Index::Form::u32;
+    }
+    else if (std::is_same<T, int64_t>::value) {
+      return Index::Form::i64;
+    }
+    else {
+      throw std::runtime_error("unrecognized Index specialization");
+    }
+  }
+
+  template <typename T>
   T
   IndexOf<T>::getitem_at(int64_t at) const {
     int64_t regular_at = at;

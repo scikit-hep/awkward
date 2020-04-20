@@ -323,6 +323,16 @@ namespace awkward {
   }
 
   template <typename T>
+  const FormPtr
+  ListArrayOf<T>::form() const {
+    return std::make_shared<ListForm>(identities_.get() != nullptr,
+                                      parameters_,
+                                      starts_.form(),
+                                      stops_.form(),
+                                      content_.get()->form());
+  }
+
+  template <typename T>
   const std::string
   ListArrayOf<T>::tostring_part(const std::string& indent,
                                 const std::string& pre,

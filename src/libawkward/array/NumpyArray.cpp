@@ -522,6 +522,19 @@ namespace awkward {
     return out;
   }
 
+  const FormPtr
+  NumpyArray::form() const {
+    std::vector<int64_t> inner_shape;
+    for (size_t i = 1;  i < shape_.size();  i++) {
+      inner_shape.push_back((int64_t)shape_[i]);
+    }
+    return std::make_shared<NumpyForm>(identities_.get() != nullptr,
+                                       parameters_,
+                                       inner_shape,
+                                       (int64_t)itemsize_,
+                                       format_);
+  }
+
   const std::string
   NumpyArray::tostring_part(const std::string& indent,
                             const std::string& pre,

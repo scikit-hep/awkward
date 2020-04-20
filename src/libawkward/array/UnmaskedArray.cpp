@@ -219,6 +219,13 @@ namespace awkward {
       content_.get()->type(typestrs));
   }
 
+  const FormPtr
+  UnmaskedArray::form() const {
+    return std::make_shared<UnmaskedForm>(identities_.get() != nullptr,
+                                          parameters_,
+                                          content_.get()->form());
+  }
+
   const std::string
   UnmaskedArray::tostring_part(const std::string& indent,
                                const std::string& pre,

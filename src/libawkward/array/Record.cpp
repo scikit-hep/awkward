@@ -88,6 +88,11 @@ namespace awkward {
     return out;
   }
 
+  const FormPtr
+  Record::form() const {
+    return array_.get()->form();
+  }
+
   const std::string
   Record::tostring_part(const std::string& indent,
                         const std::string& pre,

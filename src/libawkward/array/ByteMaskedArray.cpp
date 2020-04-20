@@ -306,6 +306,15 @@ namespace awkward {
              content_.get()->type(typestrs));
   }
 
+  const FormPtr
+  ByteMaskedArray::form() const {
+    return std::make_shared<ByteMaskedForm>(identities_.get() != nullptr,
+                                            parameters_,
+                                            mask_.form(),
+                                            content_.get()->form(),
+                                            valid_when_);
+  }
+
   const std::string
   ByteMaskedArray::tostring_part(const std::string& indent,
                                  const std::string& pre,
