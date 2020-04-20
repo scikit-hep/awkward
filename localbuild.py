@@ -86,7 +86,7 @@ if (os.stat("CMakeLists.txt").st_mtime >= localbuild_time or
     json.dump(thisstate, open("localbuild/laststate.json", "w"))
 
 # Build C++ normally; this might be a no-op if make/ninja determines that the build is up-to-date.
-check_call(["cmake", "--build", "localbuild"])
+check_call(["cmake", "--build", "localbuild", "--", "-j" + args.j])
 
 if args.ctest:
     check_call(["cmake", "--build", "localbuild", "--target", "test", "--", "CTEST_OUTPUT_ON_FAILURE=1", "--no-print-directory"])
