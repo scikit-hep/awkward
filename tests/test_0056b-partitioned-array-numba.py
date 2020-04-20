@@ -128,7 +128,7 @@ def test_boxing3():
     gc.collect()
     assert sys.getrefcount(asnumpy) == 2
 
-def test_getitem_1():
+def test_getitem_1a():
     array = awkward1.repartition(awkward1.Array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]), 3)
 
     @numba.njit
@@ -137,6 +137,9 @@ def test_getitem_1():
 
     assert [f1(array, i) for i in range(10)] == [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]
     assert [f1(array, -i) for i in range(1, 11)] == [9.9, 8.8, 7.7, 6.6, 5.5, 4.4, 3.3, 2.2, 1.1, 0.0]
+
+def test_getitem_1b():
+    array = awkward1.repartition(awkward1.Array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]), 3)
 
     @numba.njit
     def f2(x, i1, i2):
