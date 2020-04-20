@@ -1352,7 +1352,8 @@ namespace awkward {
         outstops.ptr().get(),
         distincts.ptr().get(),
         maxcount * outlength,
-        gaps.ptr().get());
+        gaps.ptr().get(),
+        outlength);
       util::handle_error(err6, classname(), identities_.get());
 
       ContentPtr out = std::make_shared<ListArray64>(Identities::none(),
