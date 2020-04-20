@@ -139,11 +139,19 @@ def test_getitem_1a():
     assert [f1(array, -i) for i in range(1, 11)] == [9.9, 8.8, 7.7, 6.6, 5.5, 4.4, 3.3, 2.2, 1.1, 0.0]
 
 def test_getitem_1b():
-    array = awkward1.repartition(awkward1.Array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]), 3)
+    asnumpy = numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
+    array = awkward1.repartition(awkward1.Array(asnumpy), 3)
+
+    assert sys.getrefcount(asnumpy) == 3
+
+    import numba.core.unsafe.refcount
 
     @numba.njit
     def f2(x, i1, i2):
-        return x[i1:i2]
+        numba.core.unsafe.refcount.dump_refcount(x)
+        out = x[i1:i2]
+        numba.core.unsafe.refcount.dump_refcount(out)
+        return out
 
     assert isinstance(f2(array, 0, 10).layout, awkward1.partition.PartitionedArray)
     assert isinstance(f2(array, 4, 5).layout, awkward1.partition.PartitionedArray)
@@ -152,6 +160,11 @@ def test_getitem_1b():
     for start in range(-10, 10):
         for stop in range(-10, 10):
             assert awkward1.to_list(f2(array, start, stop)) == [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9][start:stop]
+
+    assert sys.getrefcount(asnumpy) == 3
+
+    del array
+    assert sys.getrefcount(asnumpy) == 2
 
 def test_getitem_2():
     aslist = [{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]},
