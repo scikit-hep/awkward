@@ -11,6 +11,39 @@
 #include "awkward/Content.h"
 
 namespace awkward {
+  /// @class ListForm
+  ///
+  /// @brief Form describing ListArray.
+  class EXPORT_SYMBOL ListForm: public Form {
+  public:
+    /// @brief Creates a ListForm. See ListArray for documentation.
+    ListForm(bool has_identities,
+             const util::Parameters& parameters,
+             Index::Form starts,
+             Index::Form stpos,
+             const FormPtr& content);
+
+    Index::Form starts() const;
+
+    Index::Form stops() const;
+
+    const FormPtr content() const;
+
+    const TypePtr
+      type(const util::TypeStrs& typestrs) const override;
+
+    void
+      tojson_part(ToJson& builder) const override;
+
+    const FormPtr
+      shallow_copy() const;
+
+  private:
+    Index::Form starts_;
+    Index::Form stops_;
+    const FormPtr& content_;
+  };
+
   /// @class ListArrayOf
   ///
   /// @brief Represents an array of nested lists that can have different

@@ -18,6 +18,43 @@ namespace awkward {
 
   class ByteMaskedArray;
 
+  /// @class BitMaskedForm
+  ///
+  /// @brief Form describing BitMaskedArray.
+  class EXPORT_SYMBOL BitMaskedForm: public Form {
+  public:
+    /// @brief Creates a BitMaskedForm. See BitMaskedArray for documentation.
+    BitMaskedForm(bool has_identities,
+                  const util::Parameters& parameters,
+                  Index::Form mask,
+                  const FormPtr& content,
+                  bool valid_when,
+                  bool lsb_order);
+
+    Index::Form mask() const;
+
+    const FormPtr content() const;
+
+    bool valid_when() const;
+
+    bool lsb_order() const;
+
+    const TypePtr
+      type(const util::TypeStrs& typestrs) const override;
+
+    void
+      tojson_part(ToJson& builder) const override;
+
+    const FormPtr
+      shallow_copy() const;
+
+  private:
+    Index::Form mask_;
+    const FormPtr& content_;
+    bool valid_when_;
+    bool lsb_order_;
+  };
+
   /// @class BitMaskedArray
   ///
   /// @brief Represents potentially missing data by overlaying a bit #mask

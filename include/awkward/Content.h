@@ -18,6 +18,85 @@ namespace awkward {
   class Content;
   using ContentPtr    = std::shared_ptr<Content>;
   using ContentPtrVec = std::vector<std::shared_ptr<Content>>;
+  class Form;
+  using FormPtr       = std::shared_ptr<Form>;
+
+  /// @class Form
+  ///
+  /// @brief Abstract superclass of all array node forms, which expresses the
+  /// nesting structure without any large {@link IndexOf Index} or data
+  /// buffers.
+  ///
+  /// Forms may be thought of as low-level types, whereas Type is a high-level
+  /// type. There is a one-to-many relationship from Type to Form.
+  class EXPORT_SYMBOL Form {
+  public:
+    /// @brief Called by subclass constructors; assigns #has_identities
+    /// and #parameters upon construction.
+    Form(bool has_identities, const util::Parameters& parameters);
+
+    /// @brief Empty destructor; required for some C++ reason.
+    virtual ~Form() { }
+
+    /// @brief High-level Type describing this Form.
+    ///
+    /// @param typestrs A mapping from `"__record__"` parameters to string
+    /// representations of those types, to override the derived strings.
+    virtual const TypePtr
+      type(const util::TypeStrs& typestrs) const = 0;
+
+    /// @brief Internal function to produce a JSON representation one node at
+    /// a time.
+    virtual void
+      tojson_part(ToJson& builder) const = 0;
+
+    /// @brief Copies this node without copying any nodes hierarchically
+    /// nested within it.
+    virtual const FormPtr
+      shallow_copy() const = 0;
+
+    /// @brief Returns a string representation of this Form (#tojson with
+    /// `pretty = true`).
+    const std::string
+      tostring() const;
+
+    /// @brief Returns a JSON representation of this array.
+    ///
+    /// @param pretty If `true`, add spacing to make the JSON human-readable.
+    /// If `false`, return a compact representation.
+    const std::string
+      tojson(bool pretty) const;
+
+    /// @brief Returns `true` if the corresponding array has associated
+    /// {@link IdentitiesOf Identities}.
+    bool
+      has_identities() const;
+
+    /// @brief String-to-JSON map that augments the meaning of this
+    /// Form.
+    ///
+    /// Keys are simple strings, but values are JSON-encoded strings.
+    /// For this reason, values that represent single strings are
+    /// double-quoted: e.g. `"\"actual_value\""`.
+    const util::Parameters
+      parameters() const;
+
+    /// @brief Get one parameter from this Form.
+    ///
+    /// If the `key` does not exist, this function returns `"null"`.
+    ///
+    /// Keys are simple strings, but values are JSON-encoded strings.
+    /// For this reason, values that represent single strings are
+    /// double-quoted: e.g. `"\"actual_value\""`.
+    const std::string
+      parameter(const std::string& key) const;
+
+    protected:
+    /// @brief See #has_identities;
+    bool has_identities_;
+    /// @brief See #parameters;
+    util::Parameters parameters_;
+  };
 
   /// @class Content
   ///

@@ -13,6 +13,64 @@
 #include "awkward/Content.h"
 
 namespace awkward {
+  /// @class IndexedForm
+  ///
+  /// @brief Form describing IndexedArray (with `OPTION = false`).
+  class EXPORT_SYMBOL IndexedForm: public Form {
+  public:
+    /// @brief Creates a IndexedForm. See IndexedArray for documentation.
+    IndexedForm(bool has_identities,
+                const util::Parameters& parameters,
+                Index::Form index,
+                const FormPtr& content);
+
+    Index::Form index() const;
+
+    const FormPtr content() const;
+
+    const TypePtr
+      type(const util::TypeStrs& typestrs) const override;
+
+    void
+      tojson_part(ToJson& builder) const override;
+
+    const FormPtr
+      shallow_copy() const;
+
+  private:
+    Index::Form mask_;
+    const FormPtr& content_;
+  };
+
+  /// @class IndexedOptionForm
+  ///
+  /// @brief Form describing IndexedOptionArray.
+  class EXPORT_SYMBOL IndexedOptionForm: public Form {
+  public:
+    /// @brief Creates a IndexedOptionForm. See IndexedArray for documentation.
+    IndexedOptionForm(bool has_identities,
+                      const util::Parameters& parameters,
+                      Index::Form index,
+                      const FormPtr& content);
+
+    Index::Form index() const;
+
+    const FormPtr content() const;
+
+    const TypePtr
+      type(const util::TypeStrs& typestrs) const override;
+
+    void
+      tojson_part(ToJson& builder) const override;
+
+    const FormPtr
+      shallow_copy() const;
+
+  private:
+    Index::Form mask_;
+    const FormPtr& content_;
+  };
+
   /// @class IndexedArrayOf
   ///
   /// @brief Filters, rearranges, and/or duplicates items in its #content

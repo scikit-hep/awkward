@@ -28,6 +28,9 @@ namespace awkward {
   ///    - {@link IndexOf IndexU32}, which is `IndexOf<uint32_t>`
   ///    - {@link IndexOf Index64}, which is `IndexOf<int64_t>`
   class EXPORT_SYMBOL Index {
+    /// @brief Integer type of an Index, used by ListForm, IndexedForm, etc.
+    enum Form {i8, u8, i32, u32, i64, kNumIndexForm};
+
     /// @brief Copies this Index node without copying its buffer.
     ///
     /// See also #deep_copy.
@@ -55,7 +58,7 @@ namespace awkward {
   class EXPORT_SYMBOL IndexOf: public Index {
   public:
     /// @brief Creates an IndexOf from a full set of parameters.
-    /// 
+    ///
     /// @param ptr Reference-counted pointer to the integer array buffer.
     /// @param offset Location of item zero in the buffer, relative to
     /// `ptr`, measured in the number of elements. We keep this information in

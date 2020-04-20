@@ -16,6 +16,39 @@ namespace awkward {
   template <typename T, bool ISOPTION>
   class IndexedArrayOf;
 
+  /// @class ByteMaskedForm
+  ///
+  /// @brief Form describing ByteMaskedArray.
+  class EXPORT_SYMBOL ByteMaskedForm: public Form {
+  public:
+    /// @brief Creates a ByteMaskedForm. See ByteMaskedArray for documentation.
+    BitMaskedForm(bool has_identities,
+                  const util::Parameters& parameters,
+                  Index::Form mask,
+                  const FormPtr& content,
+                  bool valid_when);
+
+    Index::Form mask() const;
+
+    const FormPtr content() const;
+
+    bool valid_when() const;
+
+    const TypePtr
+      type(const util::TypeStrs& typestrs) const override;
+
+    void
+      tojson_part(ToJson& builder) const override;
+
+    const FormPtr
+      shallow_copy() const;
+
+  private:
+    Index::Form mask_;
+    const FormPtr& content_;
+    bool valid_when_;
+  };
+
   /// @class ByteMaskedArray
   ///
   /// @brief Represents potentially missing data by overlaying a byte #mask
