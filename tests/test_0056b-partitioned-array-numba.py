@@ -144,13 +144,9 @@ def test_getitem_1b():
 
     assert sys.getrefcount(asnumpy) == 3
 
-    import numba.core.unsafe.refcount
-
     @numba.njit
     def f2(x, i1, i2):
-        numba.core.unsafe.refcount.dump_refcount(x)
         out = x[i1:i2]
-        numba.core.unsafe.refcount.dump_refcount(out)
         return out
 
     assert isinstance(f2(array, 0, 10).layout, awkward1.partition.PartitionedArray)
@@ -267,11 +263,11 @@ def test_len():
 def test_iter():
     asnumpy = numpy.array([1, 2, 3, 4, 5, 6, 7, 8, 9])
 
-    print(sys.getrefcount(asnumpy))
+    assert sys.getrefcount(asnumpy) == 2
 
     array = awkward1.repartition(awkward1.Array(asnumpy), 3)
 
-    print(sys.getrefcount(asnumpy))
+    assert sys.getrefcount(asnumpy) == 3
 
     @numba.njit
     def f1(x):
@@ -282,34 +278,32 @@ def test_iter():
 
     for i in range(10):
         assert f1(array) == 45
-        print(sys.getrefcount(asnumpy))
+        assert sys.getrefcount(asnumpy) == 3
 
     del array
-    print(sys.getrefcount(asnumpy))
+    assert sys.getrefcount(asnumpy) == 2
 
-    raise Exception
+    aslist = [{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]},
+              {"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}, {"x": 5.5, "y": [5, 5, 5]},
+              {"x": 6.6, "y": [6, 6]}, {"x": 7.7, "y": [7]}, {"x": 8.8, "y": []}]
+    asarray = awkward1.repartition(awkward1.Array(aslist), 2)
 
-    # aslist = [{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]},
-    #           {"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}, {"x": 5.5, "y": [5, 5, 5]},
-    #           {"x": 6.6, "y": [6, 6]}, {"x": 7.7, "y": [7]}, {"x": 8.8, "y": []}]
-    # asarray = awkward1.repartition(awkward1.Array(aslist), 2)
+    @numba.njit
+    def f2(x):
+        i = 0
+        for xi in x:
+            if i == 6:
+                return xi["y"]
+            i += 1
 
-    # @numba.njit
-    # def f2(x):
-    #     i = 0
-    #     for xi in x:
-    #         if i == 6:
-    #             return xi["y"]
-    #         i += 1
+    assert awkward1.to_list(f2(asarray)) == [6, 6]
 
-    # assert awkward1.to_list(f2(asarray)) == [6, 6]
+    @numba.njit
+    def f3(x):
+        i = 0
+        for xi in x:
+            if i == 6:
+                return xi
+            i += 1
 
-    # @numba.njit
-    # def f3(x):
-    #     i = 0
-    #     for xi in x:
-    #         if i == 6:
-    #             return xi
-    #         i += 1
-
-    # assert awkward1.to_list(f3(asarray)) == {"x": 6.6, "y": [6, 6]}
+    assert awkward1.to_list(f3(asarray)) == {"x": 6.6, "y": [6, 6]}
