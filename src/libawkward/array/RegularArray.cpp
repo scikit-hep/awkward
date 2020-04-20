@@ -846,7 +846,7 @@ namespace awkward {
 
       ContentPtrVec contents;
       for (auto ptr : tocarry) {
-std::shared_ptr<IndexedArray64> indexedarray =
+        std::shared_ptr<IndexedArray64> indexedarray =
         std::make_shared<IndexedArray64>(
         Identities::none(),
         util::Parameters(),
