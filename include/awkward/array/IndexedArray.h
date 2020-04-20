@@ -317,19 +317,19 @@ namespace awkward {
     const ContentPtr content_;
   };
 
-#ifndef AWKWARD_INDEXEDARRAY_NO_EXTERN_TEMPLATE
-  extern template class IndexedArrayOf<int32_t, false>;
+#if !defined AWKWARD_INDEXEDARRAY_NO_EXTERN_TEMPLATE && !defined _MSC_VER
+  extern template class IndexedArrayOf<int32_t,  false>;
   extern template class IndexedArrayOf<uint32_t, false>;
-  extern template class IndexedArrayOf<int64_t, false>;
-  extern template class IndexedArrayOf<int32_t, true>;
-  extern template class IndexedArrayOf<int64_t, true>;
+  extern template class IndexedArrayOf<int64_t,  false>;
+  extern template class IndexedArrayOf<int32_t,  true>;
+  extern template class IndexedArrayOf<int64_t,  true>;
 #endif
 
-  using IndexedArray32       = IndexedArrayOf<int32_t, false>;
+  using IndexedArray32       = IndexedArrayOf<int32_t,  false>;
   using IndexedArrayU32      = IndexedArrayOf<uint32_t, false>;
-  using IndexedArray64       = IndexedArrayOf<int64_t, false>;
-  using IndexedOptionArray32 = IndexedArrayOf<int32_t, true>;
-  using IndexedOptionArray64 = IndexedArrayOf<int64_t, true>;
+  using IndexedArray64       = IndexedArrayOf<int64_t,  false>;
+  using IndexedOptionArray32 = IndexedArrayOf<int32_t,  true>;
+  using IndexedOptionArray64 = IndexedArrayOf<int64_t,  true>;
 }
 
 #endif // AWKWARD_INDEXEDARRAY_H_

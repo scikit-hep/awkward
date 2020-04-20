@@ -315,7 +315,7 @@ namespace awkward {
     const ContentPtr content_;
   };
 
-#ifndef AWKWARD_LISTOFFSETARRAY_NO_EXTERN_TEMPLATE
+#if !defined AWKWARD_LISTOFFSETARRAY_NO_EXTERN_TEMPLATE && !defined _MSC_VER
   extern template class ListOffsetArrayOf<int32_t>;
   extern template class ListOffsetArrayOf<uint32_t>;
   extern template class ListOffsetArrayOf<int64_t>;

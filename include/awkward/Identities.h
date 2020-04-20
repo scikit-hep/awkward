@@ -367,7 +367,7 @@ namespace awkward {
     const std::shared_ptr<T> ptr_;
   };
 
-#ifndef AWKWARD_IDENTITIES_NO_EXTERN_TEMPLATE
+#if !defined AWKWARD_IDENTITIES_NO_EXTERN_TEMPLATE && !defined _MSC_VER
   extern template class IdentitiesOf<int32_t>;
   extern template class IdentitiesOf<int64_t>;
 #endif

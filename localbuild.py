@@ -24,13 +24,8 @@ args = arguments.parse_args()
 args.buildpython = not args.no_buildpython
 args.dependencies = not args.no_dependencies
 
-try:
-    git_config = open(".git/config").read()
-except:
-    git_config = ""
-
-if "github.com/scikit-hep/awkward-1.0" not in git_config:
-    arguments.error("localbuild must be executed in the head of the awkward-1.0 tree")
+git_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], stdout=subprocess.PIPE)
+os.chdir(git_root.stdout.decode().strip())
 
 if args.clean:
     for x in ("localbuild", "awkward1", ".pytest_cache", "tests/__pycache__"):

@@ -208,7 +208,7 @@ namespace awkward {
         int64_t tolength,
         int64_t fromlength,
         int64_t fromwidth);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -225,7 +225,7 @@ namespace awkward {
         int64_t tolength,
         int64_t fromlength,
         int64_t fromwidth);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -242,7 +242,7 @@ namespace awkward {
         int64_t tolength,
         int64_t fromlength,
         int64_t fromwidth);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -257,7 +257,7 @@ namespace awkward {
         int64_t tolength,
         int64_t fromlength,
         int64_t fromwidth);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -272,7 +272,7 @@ namespace awkward {
         int64_t tolength,
         int64_t fromlength,
         int64_t fromwidth);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T, typename I>
@@ -290,7 +290,7 @@ namespace awkward {
         int64_t fromlength,
         int64_t fromwidth,
         int64_t which);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T, typename I>
@@ -308,7 +308,7 @@ namespace awkward {
         int64_t fromlength,
         int64_t fromwidth,
         int64_t which);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -320,7 +320,7 @@ namespace awkward {
         int64_t fromindexoffset,
         int64_t lenfromindex,
         int64_t length);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -331,7 +331,7 @@ namespace awkward {
         const int64_t* carry,
         int64_t fromindexoffset,
         int64_t length);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -344,7 +344,7 @@ namespace awkward {
         int64_t startsoffset,
         int64_t stopsoffset,
         int64_t at);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -359,7 +359,7 @@ namespace awkward {
         int64_t start,
         int64_t stop,
         int64_t step);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -375,7 +375,7 @@ namespace awkward {
         int64_t start,
         int64_t stop,
         int64_t step);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -384,7 +384,7 @@ namespace awkward {
         int64_t* total,
         const T* fromoffsets,
         int64_t lenstarts);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -394,7 +394,7 @@ namespace awkward {
         const int64_t* fromadvanced,
         const T* fromoffsets,
         int64_t lenstarts);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -410,7 +410,7 @@ namespace awkward {
         int64_t lenstarts,
         int64_t lenarray,
         int64_t lencontent);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -427,7 +427,7 @@ namespace awkward {
         int64_t lenstarts,
         int64_t lenarray,
         int64_t lencontent);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -442,7 +442,7 @@ namespace awkward {
         int64_t stopsoffset,
         int64_t lenstarts,
         int64_t lencarry);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -454,7 +454,7 @@ namespace awkward {
         const T* fromstops,
         int64_t stopsoffset,
         int64_t length);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -467,7 +467,7 @@ namespace awkward {
         const int64_t* inneroffsets,
         int64_t inneroffsetsoffset,
         int64_t inneroffsetslen);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -480,7 +480,7 @@ namespace awkward {
         const int64_t* offsets,
         int64_t offsetsoffset,
         int64_t offsetslength);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T, typename I>
@@ -494,7 +494,7 @@ namespace awkward {
         int64_t length,
         int64_t** offsetsraws,
         int64_t* offsetsoffsets);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T, typename I>
@@ -510,7 +510,7 @@ namespace awkward {
         int64_t length,
         int64_t** offsetsraws,
         int64_t* offsetsoffsets);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -521,7 +521,7 @@ namespace awkward {
         int64_t indexoffset,
         int64_t lenindex,
         int64_t lencontent);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -531,7 +531,7 @@ namespace awkward {
         const T* fromindex,
         int64_t indexoffset,
         int64_t lenindex);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -543,7 +543,7 @@ namespace awkward {
         int64_t indexoffset,
         int64_t lenindex,
         int64_t lencontent);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -555,7 +555,7 @@ namespace awkward {
         int64_t indexoffset,
         int64_t lenindex,
         int64_t lencontent);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -566,7 +566,7 @@ namespace awkward {
         int64_t indexoffset,
         int64_t lenindex,
         int64_t lencontent);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -578,7 +578,7 @@ namespace awkward {
         int64_t indexoffset,
         int64_t lenindex,
         int64_t lencarry);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -590,7 +590,7 @@ namespace awkward {
         const T* fromindex,
         int64_t indexoffset,
         int64_t length);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -600,7 +600,7 @@ namespace awkward {
         const T* fromindex,
         int64_t indexoffset,
         int64_t length);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -613,7 +613,7 @@ namespace awkward {
         const int32_t* innerindex,
         int64_t inneroffset,
         int64_t innerlength);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -626,7 +626,7 @@ namespace awkward {
         const uint32_t* innerindex,
         int64_t inneroffset,
         int64_t innerlength);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -639,7 +639,7 @@ namespace awkward {
         const int64_t* innerindex,
         int64_t inneroffset,
         int64_t innerlength);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T, typename I>
@@ -649,7 +649,7 @@ namespace awkward {
         const T* fromtags,
         int64_t tagsoffset,
         int64_t length);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T, typename I>
@@ -663,7 +663,7 @@ namespace awkward {
         int64_t indexoffset,
         int64_t length,
         int64_t which);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -675,7 +675,7 @@ namespace awkward {
         int64_t startsoffset,
         int64_t stopsoffset,
         int64_t length);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -685,7 +685,7 @@ namespace awkward {
         const T* fromoffsets,
         int64_t offsetsoffset,
         int64_t length);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -700,7 +700,7 @@ namespace awkward {
         const T* fromstops,
         int64_t stopsoffset,
         int64_t lencontent);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -710,7 +710,7 @@ namespace awkward {
         const T* fromoffsets,
         int64_t offsetsoffset,
         int64_t offsetslength);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T, typename I>
@@ -731,7 +731,7 @@ namespace awkward {
         int64_t outerwhich,
         int64_t length,
         int64_t base);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T, typename I>
@@ -752,7 +752,7 @@ namespace awkward {
         int64_t outerwhich,
         int64_t length,
         int64_t base);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T, typename I>
@@ -773,7 +773,7 @@ namespace awkward {
         int64_t outerwhich,
         int64_t length,
         int64_t base);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T, typename I>
@@ -789,7 +789,7 @@ namespace awkward {
         int64_t fromwhich,
         int64_t length,
         int64_t base);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -805,7 +805,7 @@ namespace awkward {
         int64_t fromstopsoffset,
         int64_t jaggedsize,
         int64_t length);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -826,7 +826,7 @@ namespace awkward {
         const T* fromstops,
         int64_t fromstopsoffset,
         int64_t contentlen);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -842,7 +842,7 @@ namespace awkward {
         int64_t fromstartsoffset,
         const T* fromstops,
         int64_t fromstopsoffset);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -856,7 +856,7 @@ namespace awkward {
         int64_t* parents,
         int64_t parentsoffset,
         int64_t length);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -866,7 +866,7 @@ namespace awkward {
         const T* fromindex,
         int64_t offset,
         int64_t length);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -878,7 +878,7 @@ namespace awkward {
         int64_t lenstarts,
         int64_t startsoffset,
         int64_t stopsoffset);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -893,7 +893,7 @@ namespace awkward {
         int64_t length,
         int64_t startsoffset,
         int64_t stopsoffset);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -906,7 +906,7 @@ namespace awkward {
         int64_t lenstarts,
         int64_t startsoffset,
         int64_t stopsoffset);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -918,7 +918,7 @@ namespace awkward {
         int64_t fromlength,
         int64_t target,
         int64_t* tolength);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -929,7 +929,7 @@ namespace awkward {
         int64_t offsetsoffset,
         int64_t fromlength,
         int64_t target);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -940,7 +940,7 @@ namespace awkward {
         int64_t offsetsoffset,
         int64_t length,
         int64_t target);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -952,7 +952,7 @@ namespace awkward {
         int64_t stopsoffset,
         int64_t length,
         int64_t lencontent);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -963,7 +963,7 @@ namespace awkward {
         int64_t length,
         int64_t lencontent,
         bool isoption);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T, typename I>
@@ -976,7 +976,7 @@ namespace awkward {
         int64_t length,
         int64_t numcontents,
         const int64_t* lencontents);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -986,7 +986,7 @@ namespace awkward {
         const T* offsets,
         int64_t offsetsoffset,
         int64_t length);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -1001,7 +1001,7 @@ namespace awkward {
         const T* stops,
         int64_t stopsoffset,
         int64_t length);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template <typename T>
@@ -1015,7 +1015,7 @@ namespace awkward {
         const T* stops,
         int64_t stopsoffset,
         int64_t length);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template<typename T>
@@ -1024,7 +1024,7 @@ namespace awkward {
         const T* ptr,
         int64_t offset,
         int64_t at);
-    
+
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
     template<typename T>

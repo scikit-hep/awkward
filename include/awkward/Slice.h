@@ -302,7 +302,7 @@ namespace awkward {
     bool frombool_;
   };
 
-#ifndef AWKWARD_SLICE_NO_EXTERN_TEMPLATE
+#if !defined AWKWARD_SLICE_NO_EXTERN_TEMPLATE && !defined _MSC_VER
   extern template class SliceArrayOf<int64_t>;
 #endif
 
@@ -456,6 +456,10 @@ namespace awkward {
     const SliceItemPtr content_;
   };
 
+#if !defined AWKWARD_SLICE_NO_EXTERN_TEMPLATE && !defined _MSC_VER
+  extern template class SliceMissingOf<int64_t>;
+#endif
+
   using SliceMissing64 = SliceMissingOf<int64_t>;
 
   /// @class SliceJaggedOf
@@ -522,6 +526,10 @@ namespace awkward {
     /// @brief See #content.
     const SliceItemPtr content_;
   };
+
+#if !defined AWKWARD_SLICE_NO_EXTERN_TEMPLATE && !defined _MSC_VER
+  extern template class SliceJaggedOf<int64_t>;
+#endif
 
   using SliceJagged64 = SliceJaggedOf<int64_t>;
 
