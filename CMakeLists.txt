@@ -74,6 +74,10 @@ endif()
 # Second tier: libawkward (object files, static library, and dynamic library).
 add_library(awkward-objects OBJECT ${LIBAWKWARD_SOURCES})
 set_target_properties(awkward-objects PROPERTIES POSITION_INDEPENDENT_CODE 1)
+if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
+  # Avoid emitting vtables in the dependent libraries
+  target_compile_options(awkward-objects PRIVATE -Werror=weak-vtables -Wweak-vtables)
+endif()
 add_library(awkward-static STATIC $<TARGET_OBJECTS:awkward-objects>)
 set_property(TARGET awkward-static PROPERTY POSITION_INDEPENDENT_CODE ON)
 add_library(awkward        SHARED $<TARGET_OBJECTS:awkward-objects>)

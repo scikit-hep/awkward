@@ -15,7 +15,7 @@ namespace awkward {
   class EXPORT_SYMBOL Record: public Content {
   public:
     /// @brief Creates a Record from a full set of parameters.
-    /// 
+    ///
     /// @param array A reference to the array in which this tuple/record
     /// resides (not a copy, shares reference count).
     /// @param at The position in the #array where this tuple/record

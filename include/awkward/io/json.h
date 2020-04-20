@@ -39,6 +39,11 @@ namespace awkward {
   /// Abstract base class for producing JSON data.
   class EXPORT_SYMBOL ToJson {
   public:
+    /// @brief Virtual destructor acts as a first non-inline virtual function
+    /// that determines a specific translation unit in which vtable shall be
+    /// emitted.
+    virtual ~ToJson();
+
     /// @brief Append a `null` value.
     virtual void
       null() = 0;
