@@ -1137,7 +1137,8 @@ extern "C" {
       int64_t* outstops,
       const int64_t* distincts,
       int64_t lendistincts,
-      const int64_t* gaps);
+      const int64_t* gaps,
+      int64_t outlength);
 
   EXPORT_SYMBOL struct Error
     awkward_listoffsetarray_reduce_local_nextparents_64(
