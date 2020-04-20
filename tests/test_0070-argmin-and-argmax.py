@@ -10,21 +10,21 @@ import numpy
 import awkward1
 
 def test_2d():
-    array = awkward1.Array([
+    array = awkward1.from_iter([
         [3.3, 2.2, 5.5, 1.1, 4.4],
         [4.4, 2.2, 1.1, 3.3, 5.5],
-        [2.2, 1.1, 4.4, 3.3, 5.5]]).layout
+        [2.2, 1.1, 4.4, 3.3, 5.5]], highlevel=False)
     assert awkward1.to_list(array.argmin(axis=0)) == [2, 2, 1, 0, 0]
     assert awkward1.to_list(array.argmin(axis=1)) == [3, 2, 1]
 
 def test_3d():
-    array = awkward1.Array([
+    array = awkward1.from_iter([
         [[ 3.3,  2.2,  5.5,  1.1,  4.4],
          [ 4.4,  2.2,  1.1,  3.3,  5.5],
          [ 2.2,  1.1,  4.4,  3.3,  5.5]],
         [[-3.3,  2.2, -5.5,  1.1,  4.4],
          [ 4.4, -2.2,  1.1, -3.3,  5.5],
-         [ 2.2,  1.1,  4.4,  3.3, -5.5]]]).layout
+         [ 2.2,  1.1,  4.4,  3.3, -5.5]]], highlevel=False)
     assert awkward1.to_list(array.argmin(axis=0)) == [
         [1, 0, 1, 0, 0],
         [0, 1, 0, 1, 0],
@@ -37,7 +37,7 @@ def test_3d():
         [2, 3, 4]]
 
 def test_jagged():
-    array = awkward1.Array([[2.2, 1.1, 3.3], [], [4.4, 5.5], [5.5], [-4.4, -5.5, -6.6]]).layout
+    array = awkward1.from_iter([[2.2, 1.1, 3.3], [], [4.4, 5.5], [5.5], [-4.4, -5.5, -6.6]], highlevel=False)
     assert awkward1.to_list(array.argmin(axis=1)) == [1, None, 0, 0, 2]
 
     index2 = awkward1.layout.Index64(numpy.array([4, 3, 2, 1, 0], dtype=numpy.int64))
@@ -49,7 +49,7 @@ def test_jagged():
     assert awkward1.to_list(array2.argmin(axis=1)) == [2, 0, None, 2, 1]
 
 def test_missing():
-    array = awkward1.Array([[[2.2, 1.1, 3.3]], [[]], [None, None, None], [[-4.4, -5.5, -6.6]]]).layout
+    array = awkward1.from_iter([[[2.2, 1.1, 3.3]], [[]], [None, None, None], [[-4.4, -5.5, -6.6]]], highlevel=False)
     assert awkward1.to_list(array.argmin(axis=2)) == [[1], [None], [None, None, None], [2]]
 
 def test_highlevel():

@@ -408,13 +408,28 @@ toslice_part(ak::Slice& slice, py::object obj) {
       else if (py::isinstance<ak::ArrayBuilder>(obj)) {
         content = unbox_content(obj.attr("snapshot")());
       }
-      else if (py::isinstance(
-                 obj, py::module::import("awkward1").attr("Array"))) {
-        content = unbox_content(obj.attr("layout"));
+      else if (py::isinstance(obj, py::module::import("awkward1")
+                                              .attr("Array"))) {
+        py::object tmp = obj.attr("layout");
+        if (py::isinstance(tmp, py::module::import("awkward1")
+                                           .attr("partition")
+                                           .attr("PartitionedArray"))) {
+          content = unbox_content(tmp.attr("toContent")());
+          obj = box(content);
+        }
+        else {
+          content = unbox_content(tmp);
+        }
       }
-      else if (py::isinstance(
-                 obj, py::module::import("awkward1").attr("ArrayBuilder"))) {
+      else if (py::isinstance(obj, py::module::import("awkward1")
+                                              .attr("ArrayBuilder"))) {
         content = unbox_content(obj.attr("snapshot")().attr("layout"));
+      }
+      else if (py::isinstance(obj, py::module::import("awkward1")
+                                              .attr("partition")
+                                              .attr("PartitionedArray"))) {
+        content = unbox_content(obj.attr("toContent")());
+        obj = box(content);
       }
       else {
         bool bad = false;
@@ -562,6 +577,59 @@ toslice(py::object obj) {
   }
   out.become_sealed();
   return out;
+}
+
+int64_t
+check_maxdecimals(const py::object& maxdecimals) {
+  if (maxdecimals.is(py::none())) {
+    return -1;
+  }
+  try {
+    return maxdecimals.cast<int64_t>();
+  }
+  catch (py::cast_error err) {
+    throw std::invalid_argument("maxdecimals must be None or an integer");
+  }
+}
+
+template <typename T>
+std::string
+tojson_string(const T& self,
+              bool pretty,
+              const py::object& maxdecimals) {
+  return self.tojson(pretty,
+                     check_maxdecimals(maxdecimals));
+}
+
+template <typename T>
+void
+tojson_file(const T& self,
+            const std::string& destination,
+            bool pretty,
+            py::object maxdecimals,
+            int64_t buffersize) {
+#ifdef _MSC_VER
+  FILE* file;
+  if (fopen_s(&file, destination.c_str(), "wb") != 0) {
+#else
+  FILE* file = fopen(destination.c_str(), "wb");
+  if (file == nullptr) {
+#endif
+    throw std::invalid_argument(
+      std::string("file \"") + destination
+      + std::string("\" could not be opened for writing"));
+  }
+  try {
+    self.tojson(file,
+                pretty,
+                check_maxdecimals(maxdecimals),
+                buffersize);
+  }
+  catch (...) {
+    fclose(file);
+    throw;
+  }
+  fclose(file);
 }
 
 template <typename T>
@@ -806,7 +874,11 @@ make_PersistentSharedPtr(const py::handle& m, const std::string& name) {
 py::class_<ak::Content, std::shared_ptr<ak::Content>>
 make_Content(const py::handle& m, const std::string& name) {
   return py::class_<ak::Content, std::shared_ptr<ak::Content>>(m,
-                                                               name.c_str());
+                                                               name.c_str())
+          .def_static("axis_wrap_if_negative",
+                      &ak::Content::axis_wrap_if_negative)
+
+  ;
 }
 
 template <typename T>
@@ -853,18 +925,6 @@ identity(const T& self) {
     }
     return out;
   }
-}
-
-template <typename T>
-std::string
-repr(const T& self) {
-  return self.tostring();
-}
-
-template <typename T>
-int64_t
-len(const T& self) {
-  return self.length();
 }
 
 template <typename T>
@@ -948,51 +1008,13 @@ setparameter(T& self, const std::string& key, const py::object& value) {
   self.setparameter(key, valuestr.cast<std::string>());
 }
 
-int64_t
-check_maxdecimals(const py::object& maxdecimals) {
-  if (maxdecimals.is(py::none())) {
-    return -1;
-  }
-  try {
-    return maxdecimals.cast<int64_t>();
-  }
-  catch (py::cast_error err) {
-    throw std::invalid_argument("maxdecimals must be None or an integer");
-  }
-}
-
 template <typename T>
-std::string
-tojson_string(const T& self, bool pretty, const py::object& maxdecimals) {
-  return self.tojson(pretty, check_maxdecimals(maxdecimals));
-}
-
-template <typename T>
-void
-tojson_file(const T& self,
-            const std::string& destination,
-            bool pretty,
-            py::object maxdecimals,
-            int64_t buffersize) {
-#ifdef _MSC_VER
-  FILE* file;
-  if (fopen_s(&file, destination.c_str(), "wb") != 0) {
-#else
-  FILE* file = fopen(destination.c_str(), "wb");
-  if (file == nullptr) {
-#endif
-    throw std::invalid_argument(
-      std::string("file \"") + destination
-      + std::string("\" could not be opened for writing"));
-  }
-  try {
-    self.tojson(file, pretty, check_maxdecimals(maxdecimals), buffersize);
-  }
-  catch (...) {
-    fclose(file);
-    throw;
-  }
-  fclose(file);
+py::object
+withparameter(T& self, const std::string& key, const py::object& value) {
+  py::object valuestr = py::module::import("json").attr("dumps")(value);
+  ak::ContentPtr out = self.shallow_copy();
+  out.get()->setparameter(key, valuestr.cast<std::string>());
+  return box(out);
 }
 
 template <typename T>
@@ -1016,12 +1038,13 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
           })
           .def_property("parameters", &getparameters<T>, &setparameters<T>)
           .def("setparameter", &setparameter<T>)
+          .def("withparameter", &withparameter<T>)
           .def("parameter", &parameter<T>)
           .def("purelist_parameter", &purelist_parameter<T>)
           .def("type",
                [](const T& self,
-                  const std::map<std::string,
-                  std::string>& typestrs) -> std::shared_ptr<ak::Type> {
+                  const std::map<std::string, std::string>& typestrs)
+               -> std::shared_ptr<ak::Type> {
             return self.type(typestrs);
           })
           .def("__len__", &len<T>)
@@ -1051,6 +1074,14 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
           .def("keys", &T::keys)
           .def_property_readonly("purelist_isregular", &T::purelist_isregular)
           .def_property_readonly("purelist_depth", &T::purelist_depth)
+          .def_property_readonly("branch_depth", [](const T& self)
+                                                 -> py::object {
+            std::pair<bool, int64_t> branch_depth = self.branch_depth();
+            py::tuple pair(2);
+            pair[0] = branch_depth.first;
+            pair[1] = branch_depth.second;
+            return pair;
+          })
           .def("getitem_nothing", &T::getitem_nothing)
           .def_property_readonly(
             "_persistent_shared_ptr",

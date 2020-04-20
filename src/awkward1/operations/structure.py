@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import
 
+import numbers
 try:
     from collections.abc import Iterable
 except ImportError:
@@ -109,11 +110,11 @@ def mask(array, mask, valid_when=True, highlevel=True):
             return None
 
     layoutarray = awkward1.operations.convert.to_layout(array,
-                                                        allowrecord=True,
-                                                        allowother=False)
+                                                        allow_record=True,
+                                                        allow_other=False)
     layoutmask = awkward1.operations.convert.to_layout(mask,
-                                                       allowrecord=True,
-                                                       allowother=False)
+                                                       allow_record=True,
+                                                       allow_other=False)
 
     behavior = awkward1._util.behaviorof(array, mask)
     out = awkward1._util.broadcast_and_apply([layoutarray, layoutmask],
@@ -185,8 +186,8 @@ def num(array, axis=1, highlevel=True):
         <Array [[1.1, 2.2, 3.3], None, [7.7]] type='3 * option[var * float64]'>
     """
     layout = awkward1.operations.convert.to_layout(array,
-                                                   allowrecord=False,
-                                                   allowother=False)
+                                                   allow_record=False,
+                                                   allow_other=False)
     out = layout.num(axis=axis)
     if highlevel:
         return awkward1._util.wrap(out,
@@ -295,16 +296,16 @@ def zip(arrays,
             recordlookup.append(n)
             layouts.append(
                 awkward1.operations.convert.to_layout(x,
-                                                      allowrecord=False,
-                                                      allowother=False))
+                                                      allow_record=False,
+                                                      allow_other=False))
     else:
         recordlookup = None
         layouts = []
         for x in arrays:
             layouts.append(
                 awkward1.operations.convert.to_layout(x,
-                                                      allowrecord=False,
-                                                      allowother=False))
+                                                      allow_record=False,
+                                                      allow_other=False))
 
     if with_name is not None:
         if parameters is None:
@@ -417,16 +418,16 @@ def with_field(base, what, where=None, highlevel=True):
     other.)
     """
     base = awkward1.operations.convert.to_layout(base,
-                                                 allowrecord=True,
-                                                 allowother=False)
+                                                 allow_record=True,
+                                                 allow_other=False)
     if base.numfields < 0:
         raise ValueError("no tuples or records in array; cannot add a new "
                 "field")
 
     what = awkward1.operations.convert.to_layout(what,
-                                                 allowrecord=True,
-                                                 allowother=True)
-    
+                                                 allow_record=True,
+                                                 allow_other=True)
+
     keys = base.keys()
     if where in base.keys():
         keys.remove(where)
@@ -447,10 +448,72 @@ def with_field(base, what, where=None, highlevel=True):
     out = awkward1._util.broadcast_and_apply(
             [base, what], getfunction, behavior)
     assert isinstance(out, tuple) and len(out) == 1
+
     if highlevel:
         return awkward1._util.wrap(out[0], behavior=behavior)
     else:
         return out[0]
+
+def with_parameter(array, parameter, value, highlevel=True):
+    """
+    Args:
+        array: Data convertible into an Awkward Array.
+        parameter (str): Name of the parameter to set on that array.
+        value (JSON): Value of the parameter to set on that array.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+
+    This function returns a new array with a parameter set on the outermost
+    node of its #ak.Array.layout.
+
+    Note that a "new array" is a lightweight shallow copy, not a duplication
+    of large data buffers.
+
+    You can also remove a single parameter with this function, since setting
+    a parameter to None is equivalent to removing it.
+    """
+    layout = awkward1.operations.convert.to_layout(array,
+                                                   allow_record=True,
+                                                   allow_other=False)
+
+    if isinstance(layout, awkward1.partition.PartitionedArray):
+        out = layout.replace_partitions(x.withparameter(parameter, value)
+                                           for x in layout.partitions)
+    else:
+        out = layout.withparameter(parameter, value)
+
+    if highlevel:
+        return awkward1._util.wrap(out,
+                   behavior=awkward1._util.behaviorof(array))
+    else:
+        return out
+
+def without_parameters(array, highlevel=True):
+    """
+    Args:
+        array: Data convertible into an Awkward Array.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+
+    This function returns a new array without any parameters in its
+    #ak.Array.layout, on nodes of any level of depth.
+
+    Note that a "new array" is a lightweight shallow copy, not a duplication
+    of large data buffers.
+    """
+    layout = awkward1.operations.convert.to_layout(array,
+                                                   allow_record=True,
+                                                   allow_other=False)
+
+    out = awkward1._util.recursively_apply(layout,
+                                           lambda layout, depth: None,
+                                           keep_parameters=False)
+
+    if highlevel:
+        return awkward1._util.wrap(out,
+                   behavior=awkward1._util.behaviorof(array))
+    else:
+        return out
 
 @awkward1._connect._numpy.implements(numpy.broadcast_arrays)
 def broadcast_arrays(*arrays, **kwargs):
@@ -558,8 +621,10 @@ def broadcast_arrays(*arrays, **kwargs):
     inputs = []
     for x in arrays:
         y = awkward1.operations.convert.to_layout(x,
-                                                  allowrecord=True,
-                                                  allowother=True)
+                                                  allow_record=True,
+                                                  allow_other=True)
+        if isinstance(y, awkward1.partition.PartitionedArray):
+            y = y.toContent()
         if not isinstance(y, (awkward1.layout.Content,
                               awkward1.layout.Record)):
             y = awkward1.layout.NumpyArray(numpy.array([y]))
@@ -603,8 +668,13 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
     if axis != 0:
         raise NotImplementedError("axis={0}".format(axis))
 
-    contents = [awkward1.operations.convert.to_layout(x, allowrecord=False)
+    contents = [awkward1.operations.convert.to_layout(x, allow_record=False)
                   for x in arrays]
+
+    contents = [x.toContent()
+                  if isinstance(x, awkward1.partition.PartitionedArray)
+                  else x
+                for x in contents]
 
     if len(contents) == 0:
         raise ValueError("need at least one array to concatenate")
@@ -658,10 +728,19 @@ def where(condition, *args, **kwargs):
         ("mergebool", True),
         ("highlevel", True)])
 
-    npcondition = awkward1.operations.convert.to_numpy(condition)
+    akcondition = awkward1.operations.convert.to_layout(condition,
+                                                        allow_record=False)
+
+    if isinstance(akcondition, awkward1.partition.PartitionedArray):
+        akcondition = akcondition.replace_partitions(
+           [awkward1.layout.NumpyArray(awkward1.operations.convert.to_numpy(x))
+                          for x in akcondition.partitions])
+    else:
+        akcondition = awkward1.layout.NumpyArray(
+            awkward1.operations.convert.to_numpy(akcondition))
 
     if len(args) == 0:
-        out = numpy.nonzero(npcondition)
+        out = numpy.nonzero(awkward1.operations.convert.to_numpy(akcondition))
         if highlevel:
             return tuple(
                 awkward1._util.wrap(awkward1.layout.NumpyArray(x),
@@ -674,26 +753,43 @@ def where(condition, *args, **kwargs):
         raise ValueError("either both or neither of x and y should be given")
 
     elif len(args) == 2:
-        if len(npcondition.shape) != 1:
-            raise NotImplementedError(
-                "FIXME: ak.where(condition, x, y) where condition is not 1-d")
+        x = awkward1.operations.convert.to_layout(args[0], allow_record=False)
+        y = awkward1.operations.convert.to_layout(args[1], allow_record=False)
 
-        x = awkward1.operations.convert.to_layout(args[0], allowrecord=False)
-        y = awkward1.operations.convert.to_layout(args[1], allowrecord=False)
+        def do_one(akcondition, x, y):
+            tags = (numpy.asarray(akcondition) == 0)
+            assert tags.itemsize == 1
+            index = numpy.empty(len(tags), dtype=numpy.int64)
+            index = numpy.arange(len(akcondition), dtype=numpy.int64)
 
-        tags = (npcondition == 0)
-        assert tags.itemsize == 1
-        index = numpy.empty(len(tags), dtype=numpy.int64)
-        index = numpy.arange(len(npcondition), dtype=numpy.int64)
+            tags = awkward1.layout.Index8(tags.view(numpy.int8))
+            index = awkward1.layout.Index64(index)
+            tmp = awkward1.layout.UnionArray8_64(tags, index, [x, y])
+            return tmp.simplify(mergebool=mergebool)
 
-        tags = awkward1.layout.Index8(tags.view(numpy.int8))
-        index = awkward1.layout.Index64(index)
-        tmp = awkward1.layout.UnionArray8_64(tags, index, [x, y])
-        out = tmp.simplify(mergebool=mergebool)
+        sample = None
+        if isinstance(akcondition, awkward1.partition.PartitionedArray):
+            sample = akcondition
+        elif isinstance(x, awkward1.partition.PartitionedArray):
+            sample = x
+        elif isinstance(y, awkward1.partition.PartitionedArray):
+            sample = y
+
+        if sample is not None:
+            akcondition, x, y = awkward1.partition.partition_as(sample,
+                                                         (akcondition, x, y))
+            output = []
+            for part in awkward1.partition.iterate(sample.numpartitions,
+                                                         (akcondition, x, y)):
+                output.append(do_one(*part))
+
+            out = awkward1.partition.IrregularlyPartitionedArray(output)
+
+        else:
+            out = do_one(akcondition, x, y)
 
         return awkward1._util.wrap(
-                 out, behavior=awkward1._util.behaviorof(*((npcondition,)
-                                                           + args)))
+                 out, behavior=awkward1._util.behaviorof(condition, *args))
 
     else:
         raise TypeError(
@@ -715,7 +811,8 @@ def flatten(array, axis=1, highlevel=True):
 
     Returns an array with one level of nesting removed by erasing the
     boundaries between consecutive lists. Since this operates on a level of
-    nesting, `axis=0` is invalid.
+    nesting, `axis=0` is a special case that only removes values at the
+    top level that are equal to None.
 
     Consider the following doubly nested `array`.
 
@@ -749,6 +846,19 @@ def flatten(array, axis=1, highlevel=True):
         >>> print(ak.flatten(array, axis=None))
         [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]
 
+    Missing values are eliminated by flattening: there is no distinction
+    between an empty list and a value of None at the level of flattening.
+
+        >>> array = ak.Array([[1.1, 2.2, 3.3], None, [4.4], [], [5.5]])
+        >>> ak.flatten(array, axis=1)
+        <Array [1.1, 2.2, 3.3, 4.4, 5.5] type='5 * float64'>
+
+    As a consequence, flattening at `axis=0` does only one thing: it removes
+    None values from the top level.
+
+        >>> ak.flatten(array, axis=0)
+        <Array [[1.1, 2.2, 3.3], [4.4], [], [5.5]] type='4 * var * float64'>
+
     As a technical detail, the flattening operation can be trivial in a common
     case, #ak.layout.ListOffsetArray in which the first `offset` is `0`.
     In that case, the flattened data is simply the array node's `content`.
@@ -770,15 +880,68 @@ def flatten(array, axis=1, highlevel=True):
     #ak.flatten and `content` are not interchangeable!
     """
     layout = awkward1.operations.convert.to_layout(array,
-                                                   allowrecord=False,
-                                                   allowother=False)
+                                                   allow_record=False,
+                                                   allow_other=False)
 
     if axis is None:
         out = awkward1._util.completely_flatten(layout)
         assert (isinstance(out, tuple) and
-                len(out) == 1 and
-                isinstance(out[0], numpy.ndarray))
-        out = awkward1.layout.NumpyArray(out[0])
+                all(isinstance(x, numpy.ndarray) for x in out))
+
+        if any(isinstance(x, numpy.ma.MaskedArray) for x in out):
+            out = awkward1.layout.NumpyArray(numpy.ma.concatenate(out))
+        else:
+            out = awkward1.layout.NumpyArray(numpy.concatenate(out))
+
+    elif awkward1.layout.Content.axis_wrap_if_negative(axis) == 0:
+        def apply(layout):
+            if isinstance(layout, awkward1._util.unknowntypes):
+                return apply(awkward1.layout.NumpyArray(numpy.array([])))
+
+            elif isinstance(layout, awkward1._util.indexedtypes):
+                return apply(layout.project())
+
+            elif isinstance(layout, awkward1._util.uniontypes):
+                if not any(isinstance(x, awkward1._util.optiontypes) and not
+                           isinstance(x, awkward1.layout.UnmaskedArray)
+                             for x in layout.contents):
+                    return layout
+
+                tags = numpy.asarray(layout.tags)
+                index = numpy.array(numpy.asarray(layout.index), copy=True)
+                bigmask = numpy.empty(len(index), dtype=numpy.bool_)
+                for tag, content in enumerate(layout.contents):
+                    if (isinstance(content, awkward1._util.optiontypes) and not
+                        isinstance(content, awkward1.layout.UnmaskedArray)):
+                        bigmask[:] = False
+                        bigmask[tags == tag] = (
+                          numpy.asarray(content.bytemask()).view(numpy.bool_))
+                        index[bigmask] = -1
+
+                good = (index >= 0)
+                return awkward1.layout.UnionArray8_64(
+                           awkward1.layout.Index8(tags[good]),
+                           awkward1.layout.Index64(index[good]),
+                           layout.contents)
+
+            elif isinstance(layout, awkward1._util.optiontypes):
+                return layout.project()
+
+            else:
+                return layout
+
+        if isinstance(layout, awkward1.partition.PartitionedArray):
+            out = awkward1.partition.IrregularlyPartitionedArray(
+                [apply(x) for x in layout.partitions])
+        else:
+            out = apply(layout)
+
+        if highlevel:
+            return awkward1._util.wrap(
+                       out, behavior=awkward1._util.behaviorof(array))
+        else:
+            return out
+
     else:
         out = layout.flatten(axis)
 
@@ -902,8 +1065,8 @@ def pad_none(array, target, axis=1, clip=False, highlevel=True):
         3 * var *   2 * ?float64
     """
     layout = awkward1.operations.convert.to_layout(array,
-                                                   allowrecord=False,
-                                                   allowother=False)
+                                                   allow_record=False,
+                                                   allow_other=False)
     if clip:
         out = layout.rpad_and_clip(target, axis)
     else:
@@ -947,31 +1110,37 @@ def fill_none(array, value, highlevel=True):
     The values could be floating-point numbers or strings.
     """
     arraylayout = awkward1.operations.convert.to_layout(array,
-                                                        allowrecord=True,
-                                                        allowother=False)
+                                                        allow_record=True,
+                                                        allow_other=False)
 
-    if (isinstance(value, Iterable) and
-        not (isinstance(value, (str, bytes)) or
-             (awkward1._util.py27 and isinstance(value, unicode)))):
-        valuelayout = awkward1.operations.convert.to_layout(value,
-                                                            allowrecord=True,
-                                                            allowother=False)
-        if isinstance(valuelayout, awkward1.layout.Record):
-            valuelayout = valuelayout.array[valuelayout.at:valuelayout.at + 1]
-        elif len(valuelayout) == 0:
-            offsets = awkward1.layout.Index64(numpy.array([0, 0],
-                                                          dtype=numpy.int64))
-            valuelayout = awkward1.layout.ListOffsetArray64(offsets,
-                                                            valuelayout)
-        else:
-            valuelayout = awkward1.layout.RegularArray(valuelayout,
-                                                       len(valuelayout))
+    if isinstance(arraylayout, awkward1.partition.PartitionedArray):
+        out = awkward1.partition.apply(
+            lambda x: fill_none(x, value, highlevel=False), arraylayout)
+
     else:
-        valuelayout = awkward1.operations.convert.to_layout([value],
-                                                            allowrecord=True,
-                                                            allowother=False)
+        if (isinstance(value, Iterable) and
+            not (isinstance(value, (str, bytes)) or
+                 (awkward1._util.py27 and isinstance(value, unicode)))):
+            valuelayout = awkward1.operations.convert.to_layout(value,
+                                                                allow_record=True,
+                                                                allow_other=False)
+            if isinstance(valuelayout, awkward1.layout.Record):
+                valuelayout = valuelayout.array[valuelayout.at:valuelayout.at + 1]
+            elif len(valuelayout) == 0:
+                offsets = awkward1.layout.Index64(numpy.array([0, 0],
+                                                              dtype=numpy.int64))
+                valuelayout = awkward1.layout.ListOffsetArray64(offsets,
+                                                                valuelayout)
+            else:
+                valuelayout = awkward1.layout.RegularArray(valuelayout,
+                                                           len(valuelayout))
+        else:
+            valuelayout = awkward1.operations.convert.to_layout([value],
+                                                                allow_record=True,
+                                                                allow_other=False)
 
-    out = arraylayout.fillna(valuelayout)
+        out = arraylayout.fillna(valuelayout)
+
     if highlevel:
         return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
     else:
@@ -1004,16 +1173,95 @@ def is_none(array, highlevel=True):
             return out
 
         elif isinstance(layout, awkward1._util.optiontypes):
-            index = numpy.asarray(layout.index)
-            return (index < 0)
+            return numpy.asarray(layout.bytemask()).view(numpy.bool_)
 
         else:
             return numpy.zeros(len(layout), dtype=numpy.bool_)
 
-    out = apply(awkward1.operations.convert.to_layout(array, allowrecord=False))
+    layout = awkward1.operations.convert.to_layout(array, allow_record=False)
+
+    if isinstance(layout, awkward1.partition.PartitionedArray):
+        out = awkward1.partition.apply(
+            lambda x: awkward1.layout.NumpyArray(apply(x)), layout)
+    else:
+        out = awkward1.layout.NumpyArray(apply(layout))
+
     if highlevel:
         return awkward1._util.wrap(out,
                                    behavior=awkward1._util.behaviorof(array))
+    else:
+        return out
+
+def singletons(array, highlevel=True):
+    """
+    Args:
+        array: Data to wrap in lists of length 1 if present and length 0
+            if missing (None).
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+
+    Returns a singleton list (length 1) wrapping each non-missing value and
+    an empty list (length 0) in place of each missing value.
+
+    For example,
+
+        >>> array = ak.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5])
+        >>> print(ak.singletons(array))
+        [[1.1], [2.2], [], [3.3], [], [], [4.4], [5.5]]
+
+    See #ak.firsts to invert this function.
+    """
+    def getfunction(layout, depth):
+        if isinstance(layout, awkward1._util.optiontypes):
+            nulls = numpy.asarray(layout.bytemask()).view(numpy.bool_)
+            offsets = numpy.ones(len(layout) + 1, dtype=numpy.int64)
+            offsets[0] = 0
+            offsets[1:][nulls] = 0
+            numpy.cumsum(offsets, out=offsets)
+            return lambda: awkward1.layout.ListOffsetArray64(
+                               awkward1.layout.Index64(offsets),
+                               layout.project())
+        else:
+            return None
+
+    layout = awkward1.operations.convert.to_layout(array)
+    out = awkward1._util.recursively_apply(layout, getfunction)
+
+    if highlevel:
+        return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
+    else:
+        return out
+
+def firsts(array, axis=1, highlevel=True):
+    """
+    Args:
+        array: Data from which to select the first elements from nested lists.
+        axis (int): The dimension at which this operation is applied. The
+            outermost dimension is `0`, followed by `1`, etc., and negative
+            values count backward from the innermost: `-1` is the innermost
+            dimension, `-2` is the next level up, etc.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+
+    Selects the first element of each non-empty list and inserts None for each
+    empty list.
+
+    For example,
+
+        >>> array = ak.Array([[1.1], [2.2], [], [3.3], [], [], [4.4], [5.5]])
+        >>> print(ak.firsts(array))
+        [1.1, 2.2, None, 3.3, None, None, 4.4, 5.5]
+
+    See #ak.singletons to invert this function.
+    """
+    if axis <= 0:
+        raise NotImplementedError("ak.firsts with axis={0}".format(axis))
+    toslice = (slice(None, None, None),) * axis + (0,)
+    out = awkward1.mask(array,
+                        awkward1.num(array, axis=axis) > 0,
+                        highlevel=False)[toslice]
+    if highlevel:
+        return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
     else:
         return out
 
@@ -1223,6 +1471,22 @@ def cartesian(arrays,
     """
     behavior = awkward1._util.behaviorof(*arrays)
 
+    is_partitioned = False
+    if isinstance(arrays, dict):
+        new_arrays = {}
+        for n, x in arrays.items():
+            new_arrays[n] = awkward1.operations.convert.to_layout(
+                              x, allow_record=False, allow_other=False)
+            if isinstance(new_arrays[n], awkward1.partition.PartitionedArray):
+                is_partitioned = True
+    else:
+        new_arrays = []
+        for x in arrays:
+            new_arrays.append(awkward1.operations.convert.to_layout(
+                              x, allow_record=False, allow_other=False))
+            if isinstance(new_arrays[-1], awkward1.partition.PartitionedArray):
+                is_partitioned = True
+
     if with_name is not None:
         if parameters is None:
             parameters = {}
@@ -1233,45 +1497,44 @@ def cartesian(arrays,
     if axis < 0:
         raise ValueError("the 'axis' of cartesian must be non-negative")
 
-    elif axis == 0:
+    elif awkward1.layout.Content.axis_wrap_if_negative(axis) == 0:
         if nested is None or nested is False:
             nested = []
 
-        if isinstance(arrays, dict):
+        if isinstance(new_arrays, dict):
             if nested is True:
-                nested = list(arrays.keys())   # last key is ignored below
-            if any(not (isinstance(n, str) and n in arrays) for x in nested):
+                nested = list(new_arrays.keys())   # last key is ignored below
+            if any(not (isinstance(n, str) and n in new_arrays) for x in nested):
                 raise ValueError(
                     "the 'nested' parameter of cartesian must be dict keys "
                     "for a dict of arrays")
             recordlookup = []
             layouts = []
             tonested = []
-            for i, (n, x) in enumerate(arrays.items()):
+            for i, (n, x) in enumerate(new_arrays.items()):
                 recordlookup.append(n)
-                layouts.append(
-                    awkward1.operations.convert.to_layout(x,
-                                                          allowrecord=False,
-                                                          allowother=False))
+                layouts.append(x)
                 if n in nested:
                     tonested.append(i)
             nested = tonested
 
         else:
             if nested is True:
-                nested = list(range(len(arrays) - 1))
-            if any(not (isinstance(x, int) and 0 <= x < len(arrays) - 1)
+                nested = list(range(len(new_arrays) - 1))
+            if any(not (isinstance(x, int) and 0 <= x < len(new_arrays) - 1)
                      for x in nested):
                 raise ValueError(
                     "the 'nested' prarmeter of cartesian must be integers in "
                     "[0, len(arrays) - 1) for an iterable of arrays")
             recordlookup = None
             layouts = []
-            for x in arrays:
-                layouts.append(
-                    awkward1.operations.convert.to_layout(x,
-                                                          allowrecord=False,
-                                                          allowother=False))
+            for x in new_arrays:
+                layouts.append(x)
+
+        layouts = [x.toContent()
+                     if isinstance(x, awkward1.partition.PartitionedArray)
+                     else x
+                   for x in layouts]
 
         indexes = [awkward1.layout.Index64(x.reshape(-1))
                      for x in numpy.meshgrid(*[numpy.arange(
@@ -1285,10 +1548,37 @@ def cartesian(arrays,
         result = awkward1.layout.RecordArray(outs,
                                              recordlookup,
                                              parameters=parameters)
-        for i in range(len(arrays) - 1, -1, -1):
+        for i in range(len(new_arrays) - 1, -1, -1):
             if i in nested:
                 result = awkward1.layout.RegularArray(result,
                                                       len(layouts[i + 1]))
+
+    elif is_partitioned:
+        sample = None
+        if isinstance(new_arrays, dict):
+            for x in new_arrays.values():
+                if isinstance(x, awkward1.partition.PartitionedArray):
+                    sample = x
+                    break
+        else:
+            for x in new_arrays:
+                if isinstance(x, awkward1.partition.PartitionedArray):
+                    sample = x
+                    break
+
+        partition_arrays = awkward1.partition.partition_as(sample, new_arrays)
+
+        output = []
+        for part_arrays in awkward1.partition.iterate(sample.numpartitions,
+                                                      partition_arrays):
+            output.append(cartesian(part_arrays,
+                                    axis=axis,
+                                    nested=nested,
+                                    parameters=parameters,
+                                    with_name=None,    # already set: see above
+                                    highlevel=False))
+
+        result = awkward1.partition.IrregularlyPartitionedArray(output)
 
     else:
         def newaxis(layout, i):
@@ -1305,7 +1595,7 @@ def cartesian(arrays,
 
         def getfunction2(layout, depth, i):
             if depth == axis:
-                inside = len(arrays) - i - 1
+                inside = len(new_arrays) - i - 1
                 outside = i
                 return lambda: newaxis(
                     awkward1._util.recursively_apply(layout,
@@ -1317,8 +1607,8 @@ def cartesian(arrays,
         def apply(x, i):
             return awkward1._util.recursively_apply(
                 awkward1.operations.convert.to_layout(x,
-                                                      allowrecord=False,
-                                                      allowother=False),
+                                                      allow_record=False,
+                                                      allow_other=False),
                 getfunction2,
                 args=(i,))
 
@@ -1326,38 +1616,38 @@ def cartesian(arrays,
         if nested is None or nested is False:
             nested = []
 
-        if isinstance(arrays, dict):
+        if isinstance(new_arrays, dict):
             if nested is True:
-                nested = list(arrays.keys())   # last key is ignored below
-            if any(not (isinstance(n, str) and n in arrays) for x in nested):
+                nested = list(new_arrays.keys())   # last key is ignored below
+            if any(not (isinstance(n, str) and n in new_arrays) for x in nested):
                 raise ValueError(
                     "the 'nested' parameter of cartesian must be dict keys "
                     "for a dict of arrays")
             recordlookup = []
             layouts = []
-            for i, (n, x) in enumerate(arrays.items()):
+            for i, (n, x) in enumerate(new_arrays.items()):
                 recordlookup.append(n)
                 layouts.append(apply(x, i))
-                if i < len(arrays) - 1 and n not in nested:
+                if i < len(new_arrays) - 1 and n not in nested:
                     toflatten.append(axis + i + 1)
 
         else:
             if nested is True:
-                nested = list(range(len(arrays) - 1))
-            if any(not (isinstance(x, int) and 0 <= x < len(arrays) - 1)
+                nested = list(range(len(new_arrays) - 1))
+            if any(not (isinstance(x, int) and 0 <= x < len(new_arrays) - 1)
                    for x in nested):
                 raise ValueError(
                     "the 'nested' parameter of cartesian must be integers in "
                     "[0, len(arrays) - 1) for an iterable of arrays")
             recordlookup = None
             layouts = []
-            for i, x in enumerate(arrays):
+            for i, x in enumerate(new_arrays):
                 layouts.append(apply(x, i))
-                if i < len(arrays) - 1 and i not in nested:
+                if i < len(new_arrays) - 1 and i not in nested:
                     toflatten.append(axis + i + 1)
 
         def getfunction3(inputs, depth):
-            if depth == axis + len(arrays):
+            if depth == axis + len(new_arrays):
                 return lambda: (
                     awkward1.layout.RecordArray(inputs,
                                                 recordlookup,
@@ -1446,14 +1736,14 @@ def argcartesian(arrays,
     else:
         if isinstance(arrays, dict):
             layouts = dict((n, awkward1.operations.convert.to_layout(
-                                 x, allowrecord=False, allowother=False)
+                                 x, allow_record=False, allow_other=False)
                                .localindex(axis))
                            for n, x in arrays.items())
         else:
             layouts = [awkward1.operations.convert.to_layout(
                          x,
-                         allowrecord=False,
-                         allowother=False).localindex(axis) for x in arrays]
+                         allow_record=False,
+                         allow_other=False).localindex(axis) for x in arrays]
 
         if with_name is not None:
             if parameters is None:
@@ -1626,7 +1916,7 @@ def combinations(array,
         parameters["__record__"] = with_name
 
     layout = awkward1.operations.convert.to_layout(
-               array, allowrecord=False, allowother=False)
+               array, allow_record=False, allow_other=False)
     out = layout.combinations(n,
                               replacement=replacement,
                               keys=keys,
@@ -1688,8 +1978,10 @@ def argcombinations(array,
     if axis < 0:
         raise ValueError("the 'axis' for argcombinations must be non-negative")
     else:
-        layout = awkward1.operations.convert.to_layout(
-                   array, allowrecord=False, allowother=False).localindex(axis)
+        layout = (awkward1.operations.convert.to_layout(array,
+                                                        allow_record=False,
+                                                        allow_other=False)
+                          .localindex(axis))
         out = layout.combinations(n,
                                   replacement=replacement,
                                   keys=keys,
@@ -1700,6 +1992,99 @@ def argcombinations(array,
                 out, behavior=awkward1._util.behaviorof(array))
         else:
             return out
+
+def partitions(array):
+    """
+    Args:
+        array: A possibly-partitioned array.
+
+    Returns a list of partition lengths if the array is a PartitionedArray;
+    returns None otherwise.
+
+    Partitioning is an internal aspect of an array: it should behave
+    identically to a non-partitioned array, but possibly with different
+    performance characteristics.
+
+    Arrays can only be partitioned in the first dimension; it is intended
+    for performing calculations in memory-sized chunks.
+    """
+    layout = awkward1.operations.convert.to_layout(array,
+                                                   allow_record=False,
+                                                   allow_other=False)
+    if isinstance(layout, awkward1.partition.PartitionedArray):
+        return layout.lengths
+    else:
+        return None
+
+def repartition(array, lengths, highlevel=True):
+    """
+    Args:
+        array: A possibly-partitioned array.
+        lengths (None, int, or iterable of int): If None, concatenate the
+            pieces of a partitioned array into a non-partitioned array.
+            If an integer, split or repartition into partitions of the
+            given number of entries (except the last, if the length of the
+            array doesn't fit an integer number of equal-sized chunks).
+            If an iterable of integers, split or repartition into the given
+            sequence of lengths.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content or #ak.partition.PartitionedArray
+            subclass.
+
+    Returns a possibly-partitioned array: unpartitioned if `lengths` is None;
+    partitioned otherwise.
+
+    Partitioning is an internal aspect of an array: it should behave
+    identically to a non-partitioned array, but possibly with different
+    performance characteristics.
+
+    Arrays can only be partitioned in the first dimension; it is intended
+    for performing calculations in memory-sized chunks.
+    """
+    layout = awkward1.operations.convert.to_layout(array,
+                                                   allow_record=False,
+                                                   allow_other=False)
+
+    if lengths is None:
+        if isinstance(layout, awkward1.partition.PartitionedArray):
+            out = layout.toContent()
+        else:
+            out = layout
+
+    else:
+        if isinstance(lengths, (int, numbers.Integral, numpy.integer)):
+            if lengths < 1:
+                raise ValueError("lengths must be at least 1 (and probably "
+                                 "considerably more)")
+
+            howmany = len(layout) // lengths
+            remainder = len(layout) - howmany*lengths
+            if remainder == 0:
+                lengths = [lengths]*howmany
+            else:
+                lengths = [lengths]*howmany + [remainder]
+
+        total_length = 0
+        stops = []
+        for x in lengths:
+            total_length += x
+            stops.append(total_length)
+
+        if total_length != len(layout):
+            raise ValueError("cannot repartition array of length {0} into "
+                             "these lengths".format(len(layout)))
+
+        if isinstance(layout, awkward1.partition.PartitionedArray):
+            out = layout.repartition(stops)
+        else:
+            out = awkward1.partition.IrregularlyPartitionedArray.toPartitioned(
+                    layout, stops)
+
+    if highlevel:
+        return awkward1._util.wrap(
+            out, behavior=awkward1._util.behaviorof(array))
+    else:
+        return out
 
 @awkward1._connect._numpy.implements(numpy.size)
 def size(array, axis=None):
@@ -1771,7 +2156,9 @@ def size(array, axis=None):
         else:
             raise AssertionError("unrecognized Content type")
 
-    layout = awkward1.operations.convert.to_layout(array, allowrecord=False)
+    layout = awkward1.operations.convert.to_layout(array, allow_record=False)
+    if isinstance(layout, awkward1.partition.PartitionedArray):
+        layout = layout.toContent()
     layout = awkward1.layout.RegularArray(layout, len(layout))
 
     sizes = []

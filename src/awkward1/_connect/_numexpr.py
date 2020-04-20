@@ -52,8 +52,8 @@ def evaluate(expression,
     arguments = getArguments(names, local_dict, global_dict)
 
     arrays = [awkward1.operations.convert.to_layout(x,
-                                                    allowrecord=True,
-                                                    allowother=True)
+                                                    allow_record=True,
+                                                    allow_other=True)
                 for x in arguments]
 
     def getfunction(inputs, depth):
@@ -88,8 +88,8 @@ def re_evaluate(local_dict=None):
     arguments = getArguments(names, local_dict)
 
     arrays = [awkward1.operations.convert.to_layout(x,
-                                                    allowrecord=True,
-                                                    allowother=True)
+                                                    allow_record=True,
+                                                    allow_other=True)
                 for x in arguments]
 
     def getfunction(inputs, depth):

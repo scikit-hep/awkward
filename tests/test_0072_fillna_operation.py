@@ -53,8 +53,8 @@ def test_fillna_listarray_array():
     assert awkward1.to_list(listarray.fillna(value)) == [[0.0, 1.1, 2.2], [], [4.4, 5.5], [5.5, 6.6, 7.7], [8.8]]
 
 def test_fillna_unionarray():
-    content1 = awkward1.Array([[], [1.1], [2.2, 2.2]]).layout
-    content2 = awkward1.Array([[2, 2], [1], []]).layout
+    content1 = awkward1.from_iter([[], [1.1], [2.2, 2.2]], highlevel=False)
+    content2 = awkward1.from_iter([[2, 2], [1], []], highlevel=False)
     tags = awkward1.layout.Index8(numpy.array([0, 1, 0, 1, 0, 1], dtype=numpy.int8))
     index = awkward1.layout.Index64(numpy.array([0, 0, 1, 1, 2, 2], dtype=numpy.int64))
     array = awkward1.layout.UnionArray8_64(tags, index, [content1, content2])

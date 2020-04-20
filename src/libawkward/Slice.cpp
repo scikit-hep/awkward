@@ -10,9 +10,7 @@
 #include "awkward/Slice.h"
 
 namespace awkward {
-  SliceItem::~SliceItem() { }
-
-  /////////////////////////////////////////////////////// SliceAt
+  ////////// SliceAt
 
   SliceAt::SliceAt(int64_t at)
       : at_(at) { }
@@ -37,7 +35,7 @@ namespace awkward {
     return false;
   }
 
-  /////////////////////////////////////////////////////// SliceRange
+  ////////// SliceRange
 
   SliceRange::SliceRange(int64_t start, int64_t stop, int64_t step)
       : start_(start)
@@ -99,7 +97,7 @@ namespace awkward {
     return true;
   }
 
-  /////////////////////////////////////////////////////// SliceEllipsis
+  ////////// SliceEllipsis
 
   SliceEllipsis::SliceEllipsis() { }
 
@@ -118,7 +116,7 @@ namespace awkward {
     return true;
   }
 
-  /////////////////////////////////////////////////////// SliceNewAxis
+  ////////// SliceNewAxis
 
   SliceNewAxis::SliceNewAxis() { }
 
@@ -137,7 +135,7 @@ namespace awkward {
     return false;
   }
 
-  /////////////////////////////////////////////////////// SliceArrayOf<T>
+  ////////// SliceArrayOf<T>
 
   template <typename T>
   SliceArrayOf<T>::SliceArrayOf(const IndexOf<T>& index,
@@ -312,7 +310,7 @@ namespace awkward {
 
   template class SliceArrayOf<int64_t>;
 
-  /////////////////////////////////////////////////////// SliceField
+  ////////// SliceField
 
   SliceField::SliceField(const std::string& key)
       : key_(key) { }
@@ -337,7 +335,7 @@ namespace awkward {
     return false;
   }
 
-  /////////////////////////////////////////////////////// SliceFields
+  ////////// SliceFields
 
   SliceFields::SliceFields(const std::vector<std::string>& keys)
       : keys_(keys) { }
@@ -371,7 +369,7 @@ namespace awkward {
     return false;
   }
 
-  /////////////////////////////////////////////////////// SliceMissingOf<T>
+  ////////// SliceMissingOf<T>
 
   template <typename T>
   SliceMissingOf<T>::SliceMissingOf(const IndexOf<T>& index,
@@ -460,7 +458,7 @@ namespace awkward {
 
   template class SliceMissingOf<int64_t>;
 
-  /////////////////////////////////////////////////////// SliceJaggedOf<T>
+  ////////// SliceJaggedOf<T>
 
   template <typename T>
   SliceJaggedOf<T>::SliceJaggedOf(const IndexOf<T>& offsets,
@@ -539,7 +537,7 @@ namespace awkward {
 
   template class SliceJaggedOf<int64_t>;
 
-  /////////////////////////////////////////////////////// Slice
+  ////////// Slice
 
   int64_t Slice::none() {
     return kSliceNone;

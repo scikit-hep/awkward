@@ -585,62 +585,63 @@ namespace awkward {
   }
 
   void
-  NumpyArray::tojson_part(ToJson& builder) const {
+  NumpyArray::tojson_part(ToJson& builder,
+                          bool include_beginendlist) const {
     check_for_iteration();
     if (parameter_equals("__array__", "\"byte\"")) {
-      tojson_string(builder);
+      tojson_string(builder, include_beginendlist);
     }
     else if (parameter_equals("__array__", "\"char\"")) {
-      tojson_string(builder);
+      tojson_string(builder, include_beginendlist);
     }
     else if (format_.compare("d") == 0) {
-      tojson_real<double>(builder);
+      tojson_real<double>(builder, include_beginendlist);
     }
     else if (format_.compare("f") == 0) {
-      tojson_real<float>(builder);
+      tojson_real<float>(builder, include_beginendlist);
     }
 #if defined _MSC_VER || defined __i386__
     else if (format_.compare("q") == 0) {
 #else
     else if (format_.compare("l") == 0) {
 #endif
-      tojson_integer<int64_t>(builder);
+      tojson_integer<int64_t>(builder, include_beginendlist);
     }
 #if defined _MSC_VER || defined __i386__
     else if (format_.compare("Q") == 0) {
 #else
     else if (format_.compare("L") == 0) {
 #endif
-      tojson_integer<uint64_t>(builder);
+      tojson_integer<uint64_t>(builder, include_beginendlist);
     }
 #if defined _MSC_VER || defined __i386__
       else if (format_.compare("l") == 0) {
 #else
       else if (format_.compare("i") == 0) {
 #endif
-      tojson_integer<int32_t>(builder);
+      tojson_integer<int32_t>(builder, include_beginendlist);
     }
 #if defined _MSC_VER || defined __i386__
     else if (format_.compare("L") == 0) {
 #else
     else if (format_.compare("I") == 0) {
 #endif
-      tojson_integer<uint32_t>(builder);
+      tojson_integer<uint32_t>(builder, include_beginendlist);
     }
     else if (format_.compare("h") == 0) {
-      tojson_integer<int16_t>(builder);
+      tojson_integer<int16_t>(builder, include_beginendlist);
     }
     else if (format_.compare("H") == 0) {
-      tojson_integer<uint16_t>(builder);
+      tojson_integer<uint16_t>(builder, include_beginendlist);
     }
     else if (format_.compare("b") == 0) {
-      tojson_integer<int8_t>(builder);
+      tojson_integer<int8_t>(builder, include_beginendlist);
     }
     else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
-      tojson_integer<uint8_t>(builder);
+      tojson_integer<uint8_t>(builder, include_beginendlist);
     }
     else if (format_.compare("?") == 0) {
-      tojson_boolean(builder);
+      tojson_boolean(builder, include_beginendlist);
     }
     else {
       throw std::invalid_argument(
@@ -3583,18 +3584,24 @@ namespace awkward {
   }
 
   void
-  NumpyArray::tojson_boolean(ToJson& builder) const {
+  NumpyArray::tojson_boolean(ToJson& builder,
+                             bool include_beginendlist) const {
     if (ndim() == 0) {
       bool* array = reinterpret_cast<bool*>(byteptr());
       builder.boolean(array[0]);
     }
     else if (ndim() == 1) {
       bool* array = reinterpret_cast<bool*>(byteptr());
-      builder.beginlist();
-      for (int64_t i = 0;  i < length();  i++) {
-        builder.boolean(array[i]);
+      int64_t stride = (int64_t)(strides_[0]);
+      if (include_beginendlist) {
+        builder.beginlist();
       }
-      builder.endlist();
+      for (int64_t i = 0;  i < length();  i++) {
+        builder.boolean(array[i*stride]);
+      }
+      if (include_beginendlist) {
+        builder.endlist();
+      }
     }
     else {
       const std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
@@ -3610,7 +3617,7 @@ namespace awkward {
                          byteoffset,
                          itemsize_,
                          format_);
-        numpy.tojson_boolean(builder);
+        numpy.tojson_boolean(builder, true);
       }
       builder.endlist();
     }
@@ -3618,18 +3625,24 @@ namespace awkward {
 
   template <typename T>
   void
-  NumpyArray::tojson_integer(ToJson& builder) const {
+  NumpyArray::tojson_integer(ToJson& builder,
+                             bool include_beginendlist) const {
     if (ndim() == 0) {
       T* array = reinterpret_cast<T*>(byteptr());
       builder.integer(array[0]);
     }
     else if (ndim() == 1) {
       T* array = reinterpret_cast<T*>(byteptr());
-      builder.beginlist();
-      for (int64_t i = 0;  i < length();  i++) {
-        builder.integer(array[i]);
+      int64_t stride = (int64_t)(strides_[0] / sizeof(T));
+      if (include_beginendlist) {
+        builder.beginlist();
       }
-      builder.endlist();
+      for (int64_t i = 0;  i < length();  i++) {
+        builder.integer(array[i*stride]);
+      }
+      if (include_beginendlist) {
+        builder.endlist();
+      }
     }
     else {
       const std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
@@ -3645,7 +3658,7 @@ namespace awkward {
                          byteoffset,
                          itemsize_,
                          format_);
-        numpy.tojson_integer<T>(builder);
+        numpy.tojson_integer<T>(builder, true);
       }
       builder.endlist();
     }
@@ -3653,18 +3666,24 @@ namespace awkward {
 
   template <typename T>
   void
-  NumpyArray::tojson_real(ToJson& builder) const {
+  NumpyArray::tojson_real(ToJson& builder,
+                          bool include_beginendlist) const {
     if (ndim() == 0) {
       T* array = reinterpret_cast<T*>(byteptr());
       builder.real(array[0]);
     }
     else if (ndim() == 1) {
       T* array = reinterpret_cast<T*>(byteptr());
-      builder.beginlist();
-      for (int64_t i = 0;  i < length();  i++) {
-        builder.real(array[i]);
+      int64_t stride = (int64_t)(strides_[0] / sizeof(T));
+      if (include_beginendlist) {
+        builder.beginlist();
       }
-      builder.endlist();
+      for (int64_t i = 0;  i < length();  i++) {
+        builder.real(array[i*stride]);
+      }
+      if (include_beginendlist) {
+        builder.endlist();
+      }
     }
     else {
       const std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
@@ -3680,14 +3699,15 @@ namespace awkward {
                          byteoffset,
                          itemsize_,
                          format_);
-        numpy.tojson_real<T>(builder);
+        numpy.tojson_real<T>(builder, true);
       }
       builder.endlist();
     }
   }
 
   void
-  NumpyArray::tojson_string(ToJson& builder) const {
+  NumpyArray::tojson_string(ToJson& builder,
+                            bool include_beginendlist) const {
     if (ndim() == 0) {
       char* array = reinterpret_cast<char*>(byteptr());
       builder.string(array, 1);
@@ -3710,7 +3730,7 @@ namespace awkward {
                          byteoffset,
                          itemsize_,
                          format_);
-        numpy.tojson_string(builder);
+        numpy.tojson_string(builder, true);
       }
       builder.endlist();
     }

@@ -269,7 +269,7 @@ namespace awkward {
   }
 
   void
-  RecordArray::tojson_part(ToJson& builder) const {
+  RecordArray::tojson_part(ToJson& builder, bool include_beginendlist) const {
     int64_t rows = length();
     size_t cols = contents_.size();
     util::RecordLookupPtr keys = recordlookup_;
@@ -280,16 +280,21 @@ namespace awkward {
       }
     }
     check_for_iteration();
-    builder.beginlist();
+    if (include_beginendlist) {
+      builder.beginlist();
+    }
     for (int64_t i = 0;  i < rows;  i++) {
       builder.beginrecord();
       for (size_t j = 0;  j < cols;  j++) {
         builder.field(keys.get()->at(j).c_str());
-        contents_[j].get()->getitem_at_nowrap(i).get()->tojson_part(builder);
+        contents_[j].get()->getitem_at_nowrap(i).get()->tojson_part(builder,
+                                                                    true);
       }
       builder.endrecord();
     }
-    builder.endlist();
+    if (include_beginendlist) {
+      builder.endlist();
+    }
   }
 
   void

@@ -303,7 +303,7 @@ namespace awkward {
                     const std::string& post) const override;
 
     void
-      tojson_part(ToJson& builder) const override;
+      tojson_part(ToJson& builder, bool include_beginendlist) const override;
 
     void
       nbytes_part(std::map<size_t, int64_t>& largest) const override;
@@ -702,21 +702,21 @@ namespace awkward {
 
   /// @brief Internal function to fill JSON with boolean values.
   void
-    tojson_boolean(ToJson& builder) const;
+    tojson_boolean(ToJson& builder, bool include_beginendlist) const;
 
   /// @brief Internal function to fill JSON with integer values.
   template <typename T>
   void
-    tojson_integer(ToJson& builder) const;
+    tojson_integer(ToJson& builder, bool include_beginendlist) const;
 
   /// @brief Internal function to fill JSON with floating-point values.
   template <typename T>
   void
-    tojson_real(ToJson& builder) const;
+    tojson_real(ToJson& builder, bool include_beginendlist) const;
 
   /// @brief Internal function to fill JSON with string values.
   void
-    tojson_string(ToJson& builder) const;
+    tojson_string(ToJson& builder, bool include_beginendlist) const;
 
   private:
 

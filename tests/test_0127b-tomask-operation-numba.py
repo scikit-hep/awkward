@@ -12,7 +12,7 @@ import awkward1
 numba = pytest.importorskip("numba")
 
 def test_ByteMaskedArray():
-    content = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]).layout
+    content = awkward1.from_iter([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False)
     mask = awkward1.layout.Index8(numpy.array([0, 0, 1, 1, 0], dtype=numpy.int8))
     array = awkward1.Array(awkward1.layout.ByteMaskedArray(mask, content, valid_when=False))
     assert awkward1.to_list(array) == [[0.0, 1.1, 2.2], [], None, None, [6.6, 7.7, 8.8, 9.9]]

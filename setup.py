@@ -18,8 +18,10 @@ from setuptools import setup, Extension
 install_requires = open("requirements.txt").read().strip().split()
 
 extras = {"test": open("requirements-test.txt").read().strip().split(),
-          "docs": open("requirements-docs.txt").read().strip().split(),
-          "dev":  open("requirements-dev.txt").read().strip().split()}
+          "dev":  ['numba>=0.49.0;python_version>="3.6"',
+                   'pandas>=0.24.0;python_version>="3.6"',
+                   'numexpr;python_version>="3.6"',
+                   'autograd;python_version>="3.6"']}
 extras["all"] = sum(extras.values(), [])
 
 tests_require = extras["test"]
@@ -143,6 +145,7 @@ setup(name = "awkward1",
           ("include/awkward/python",      glob.glob("include/awkward/python/*.h")),
           ("include/awkward/array",       glob.glob("include/awkward/array/*.h")),
           ("include/awkward/builder",     glob.glob("include/awkward/builder/*.h")),
+          ("include/awkward/partition",   glob.glob("include/awkward/partition/*.h")),
           ("include/awkward/io",          glob.glob("include/awkward/io/*.h")),
           ("include/awkward/type",        glob.glob("include/awkward/type/*.h"))],
       version = open("VERSION_INFO").read().strip(),

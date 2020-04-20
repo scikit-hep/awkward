@@ -49,7 +49,9 @@ def validity_error(array, exception=False):
     elif isinstance(array, awkward1.highlevel.ArrayBuilder):
         return validity_error(array.snapshot().layout, exception=exception)
 
-    elif isinstance(array, (awkward1.layout.Content, awkward1.layout.Record)):
+    elif isinstance(array, (awkward1.layout.Content,
+                            awkward1.layout.Record,
+                            awkward1.partition.PartitionedArray)):
         out = array.validityerror()
         if out is not None and exception:
             raise ValueError(out)
@@ -155,7 +157,8 @@ def type(array):
     elif isinstance(array, awkward1.layout.ArrayBuilder):
         return array.type(awkward1._util.typestrs(None))
 
-    elif isinstance(array, awkward1.layout.Content):
+    elif isinstance(array, (awkward1.layout.Content,
+                            awkward1.partition.PartitionedArray)):
         return array.type(awkward1._util.typestrs(None))
 
     else:
@@ -192,7 +195,8 @@ def parameters(array):
         return array.layout.parameters
 
     elif isinstance(array, (awkward1.layout.Content,
-                            awkward1.layout.Record)):
+                            awkward1.layout.Record,
+                            awkward1.partition.PartitionedArray)):
         return array.parameters
 
     elif isinstance(array, awkward1.highlevel.ArrayBuilder):
@@ -218,8 +222,8 @@ def keys(array):
     list.
     """
     layout = awkward1.operations.convert.to_layout(array,
-                                                   allowrecord=True,
-                                                   allowother=False)
+                                                   allow_record=True,
+                                                   allow_other=False)
     return layout.keys()
 
 __all__ = [x for x in list(globals())

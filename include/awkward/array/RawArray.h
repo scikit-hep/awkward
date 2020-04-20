@@ -337,50 +337,61 @@ namespace awkward {
     }
 
     void
-      tojson_part(ToJson& builder) const override {
+      tojson_part(ToJson& builder, bool include_beginendlist) const override {
       if (std::is_same<T, double>::value) {
         tojson_real(builder,
-                    reinterpret_cast<double*>(byteptr()), length());
+                    reinterpret_cast<double*>(byteptr()),
+                    length());
       }
       else if (std::is_same<T, float>::value) {
         tojson_real(builder,
-                    reinterpret_cast<float*>(byteptr()), length());
+                    reinterpret_cast<float*>(byteptr()),
+                    length());
       }
       else if (std::is_same<T, int64_t>::value) {
         tojson_integer(builder,
-                       reinterpret_cast<int64_t*>(byteptr()), length());
+                       reinterpret_cast<int64_t*>(byteptr()),
+                       length());
       }
       else if (std::is_same<T, uint64_t>::value) {
         tojson_integer(builder,
-                       reinterpret_cast<uint64_t*>(byteptr()), length());
+                       reinterpret_cast<uint64_t*>(byteptr()),
+                       length());
       }
       else if (std::is_same<T, int32_t>::value) {
         tojson_integer(builder,
-                       reinterpret_cast<int32_t*>(byteptr()), length());
+                       reinterpret_cast<int32_t*>(byteptr()),
+                       length());
       }
       else if (std::is_same<T, uint32_t>::value) {
         tojson_integer(builder,
-                       reinterpret_cast<uint32_t*>(byteptr()), length());
+                       reinterpret_cast<uint32_t*>(byteptr()),
+                       length());
       }
       else if (std::is_same<T, int16_t>::value) {
         tojson_integer(builder,
-                       reinterpret_cast<int16_t*>(byteptr()), length());
+                       reinterpret_cast<int16_t*>(byteptr()),
+                       length());
       }
       else if (std::is_same<T, uint16_t>::value) {
         tojson_integer(builder,
-                       reinterpret_cast<uint16_t*>(byteptr()), length());
+                       reinterpret_cast<uint16_t*>(byteptr()),
+                       length());
       }
       else if (std::is_same<T, int8_t>::value) {
         tojson_integer(builder,
-                       reinterpret_cast<int8_t*>(byteptr()), length());
+                       reinterpret_cast<int8_t*>(byteptr()),
+                       length());
       }
       else if (std::is_same<T, uint8_t>::value) {
         tojson_integer(builder,
-                       reinterpret_cast<uint8_t*>(byteptr()), length());
+                       reinterpret_cast<uint8_t*>(byteptr()),
+                       length());
       }
       else if (std::is_same<T, bool>::value) {
         tojson_boolean(builder,
-                       reinterpret_cast<bool*>(byteptr()), length());
+                       reinterpret_cast<bool*>(byteptr()),
+                       length());
       }
       else {
         throw std::invalid_argument(std::string("cannot convert RawArrayOf<")

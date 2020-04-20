@@ -60,8 +60,8 @@ def elementwise_grad(fun, argnum=0, *nary_op_args, **nary_op_kwargs):
 
     def broadcast(*args, **kwargs):
         nextargs = [awkward1.operations.convert.to_layout(x,
-                                                          allowrecord=True,
-                                                          allowother=True)
+                                                          allow_record=True,
+                                                          allow_other=True)
                     for x in args]
 
         def getfunction(inputs, depth):

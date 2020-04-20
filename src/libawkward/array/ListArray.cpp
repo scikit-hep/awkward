@@ -75,7 +75,7 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<ListOffsetArray64>
+  const ContentPtr
   ListArrayOf<T>::broadcast_tooffsets64(const Index64& offsets) const {
     if (offsets.length() == 0  ||  offsets.getitem_at_nowrap(0) != 0) {
       throw std::invalid_argument(
@@ -116,7 +116,7 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<RegularArray>
+  const ContentPtr
   ListArrayOf<T>::toRegularArray() const {
     Index64 offsets = compact_offsets64(true);
     ContentPtr listoffsetarray64 = broadcast_tooffsets64(offsets);
@@ -126,7 +126,7 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<ListOffsetArray64>
+  const ContentPtr
   ListArrayOf<T>::toListOffsetArray64(bool start_at_zero) const {
     Index64 offsets = compact_offsets64(start_at_zero);
     return broadcast_tooffsets64(offsets);
@@ -299,14 +299,19 @@ namespace awkward {
 
   template <typename T>
   void
-  ListArrayOf<T>::tojson_part(ToJson& builder) const {
+  ListArrayOf<T>::tojson_part(ToJson& builder,
+                              bool include_beginendlist) const {
     int64_t len = length();
     check_for_iteration();
-    builder.beginlist();
-    for (int64_t i = 0;  i < len;  i++) {
-      getitem_at_nowrap(i).get()->tojson_part(builder);
+    if (include_beginendlist) {
+      builder.beginlist();
     }
-    builder.endlist();
+    for (int64_t i = 0;  i < len;  i++) {
+      getitem_at_nowrap(i).get()->tojson_part(builder, true);
+    }
+    if (include_beginendlist) {
+      builder.endlist();
+    }
   }
 
   template <typename T>
@@ -1122,7 +1127,7 @@ namespace awkward {
     else if (axis == depth + 1) {
       Index64 offsets = compact_offsets64(true);
       int64_t innerlength =
-        offsets.getitem_at_nowrap(offsets.offset() + offsets.length() - 1);
+        offsets.getitem_at_nowrap(offsets.length() - 1);
       Index64 localindex(innerlength);
       struct Error err = util::awkward_listarray_localindex_64(
         localindex.ptr().get(),

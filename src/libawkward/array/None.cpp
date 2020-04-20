@@ -49,7 +49,8 @@ namespace awkward {
   }
 
   void
-  None::tojson_part(ToJson& builder) const {
+  None::tojson_part(ToJson& builder,
+                    bool include_beginendlist) const {
     builder.null();
   }
 

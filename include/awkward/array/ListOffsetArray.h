@@ -11,8 +11,6 @@
 #include "awkward/Content.h"
 
 namespace awkward {
-  class RegularArray;
-
   /// @class ListOffsetArrayOf
   ///
   /// @brief Represents an array of nested lists that can have different
@@ -95,12 +93,12 @@ namespace awkward {
     /// matches.
     ///
     /// As indicated by the name, this is a basic element of broadcasting.
-    const std::shared_ptr<ListOffsetArrayOf<int64_t>>
+    const ContentPtr
       broadcast_tooffsets64(const Index64& offsets) const;
 
     /// @brief Converts this array to a RegularArray if all nested lists have
     /// the same size (error otherwise).
-    const std::shared_ptr<RegularArray>
+    const ContentPtr
       toRegularArray() const;
 
     /// @brief Returns a {@link ListOffsetArrayOf ListOffsetArray} with
@@ -110,7 +108,7 @@ namespace awkward {
     /// @param start_at_zero If `true`, the first offset will be `0`, meaning
     /// there are no "unreachable" elements in the `content` that corresponds
     /// to these offsets.
-    const std::shared_ptr<ListOffsetArrayOf<int64_t>>
+    const ContentPtr
       toListOffsetArray64(bool start_at_zero) const;
 
     /// @brief User-friendly name of this class: `"ListOffsetArray32"`,
@@ -133,7 +131,7 @@ namespace awkward {
                     const std::string& post) const override;
 
     void
-      tojson_part(ToJson& builder) const override;
+      tojson_part(ToJson& builder, bool include_beginendlist) const override;
 
     void
       nbytes_part(std::map<size_t, int64_t>& largest) const override;

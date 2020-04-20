@@ -58,7 +58,7 @@ namespace awkward {
     return out;
   }
 
-  const std::shared_ptr<ListOffsetArray64>
+  const ContentPtr
   RegularArray::broadcast_tooffsets64(const Index64& offsets) const {
     if (offsets.length() == 0  ||  offsets.getitem_at_nowrap(0) != 0) {
       throw std::invalid_argument(
@@ -108,12 +108,12 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<RegularArray>
+  const ContentPtr
   RegularArray::toRegularArray() const {
-    return std::dynamic_pointer_cast<RegularArray>(shallow_copy());
+    return shallow_copy();
   }
 
-  const std::shared_ptr<ListOffsetArray64>
+  const ContentPtr
   RegularArray::toListOffsetArray64(bool start_at_zero) const {
     Index64 offsets = compact_offsets64(start_at_zero);
     return broadcast_tooffsets64(offsets);
@@ -249,14 +249,18 @@ namespace awkward {
   }
 
   void
-  RegularArray::tojson_part(ToJson& builder) const {
+  RegularArray::tojson_part(ToJson& builder, bool include_beginendlist) const {
     int64_t len = length();
     check_for_iteration();
-    builder.beginlist();
-    for (int64_t i = 0;  i < len;  i++) {
-      getitem_at_nowrap(i).get()->tojson_part(builder);
+    if (include_beginendlist) {
+      builder.beginlist();
     }
-    builder.endlist();
+    for (int64_t i = 0;  i < len;  i++) {
+      getitem_at_nowrap(i).get()->tojson_part(builder, true);
+    }
+    if (include_beginendlist) {
+      builder.endlist();
+    }
   }
 
   void

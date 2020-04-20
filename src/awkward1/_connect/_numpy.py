@@ -15,7 +15,7 @@ import awkward1.operations.convert
 import awkward1._util
 
 def convert_to_array(layout, args, kwargs):
-    out = awkward1.operations.convert.to_numpy(layout)
+    out = awkward1.operations.convert.to_numpy(layout, allow_missing=False)
     if args == () and kwargs == {}:
         return out
     else:
@@ -44,8 +44,8 @@ def array_ufunc(ufunc, method, inputs, kwargs):
 
     behavior = awkward1._util.behaviorof(*inputs)
     inputs = [awkward1.operations.convert.to_layout(x,
-                                                    allowrecord=True,
-                                                    allowother=True)
+                                                    allow_record=True,
+                                                    allow_other=True)
                 for x in inputs]
 
     def adjust(custom, inputs, kwargs):
@@ -57,6 +57,7 @@ def array_ufunc(ufunc, method, inputs, kwargs):
         out = custom(*args, **kwargs)
         if not isinstance(out, tuple):
             out = (out,)
+
         return tuple(x.layout
                          if isinstance(x, (awkward1.highlevel.Array,
                                            awkward1.highlevel.Record))
@@ -82,7 +83,8 @@ def array_ufunc(ufunc, method, inputs, kwargs):
             return lambda: adjust(custom, inputs, kwargs)
 
         if all(isinstance(x, awkward1.layout.NumpyArray) or
-               not isinstance(x, awkward1.layout.Content)
+               not isinstance(x, (awkward1.layout.Content,
+                                  awkward1.partition.PartitionedArray))
                  for x in inputs):
             return lambda: (awkward1.layout.NumpyArray(
                               getattr(ufunc, method)(*inputs, **kwargs)),)

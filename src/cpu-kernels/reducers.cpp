@@ -2376,9 +2376,10 @@ ERROR awkward_listoffsetarray_reduce_local_nextparents_64(
   const int64_t* offsets,
   int64_t offsetsoffset,
   int64_t length) {
+  int64_t initialoffset = offsets[offsetsoffset];
   for (int64_t i = 0;  i < length;  i++) {
-    for (int64_t j = offsets[offsetsoffset + i];
-         j < offsets[offsetsoffset + i + 1];
+    for (int64_t j = offsets[offsetsoffset + i] - initialoffset;
+         j < offsets[offsetsoffset + i + 1] - initialoffset;
          j++) {
       nextparents[j] = i;
     }

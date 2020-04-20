@@ -193,7 +193,8 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
     """
 
     def __init__(self, data, behavior=None, with_name=None, check_valid=False):
-        if isinstance(data, awkward1.layout.Content):
+        if isinstance(data, (awkward1.layout.Content,
+                             awkward1.partition.PartitionedArray)):
             layout = data
         elif isinstance(data, Array):
             layout = data.layout
@@ -210,8 +211,9 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         else:
             layout = awkward1.operations.convert.from_iter(data,
                                                            highlevel=False,
-                                                           allowrecord=False)
-        if not isinstance(layout, awkward1.layout.Content):
+                                                           allow_record=False)
+        if not isinstance(layout, (awkward1.layout.Content,
+                                   awkward1.partition.PartitionedArray)):
             raise TypeError("could not convert data into an awkward1.Array")
 
         if with_name is not None:
@@ -273,7 +275,8 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
 
     @layout.setter
     def layout(self, layout):
-        if isinstance(layout, awkward1.layout.Content):
+        if isinstance(layout, (awkward1.layout.Content,
+                               awkward1.partition.PartitionedArray)):
             self._layout = layout
             self._numbaview = None
         else:
@@ -1619,7 +1622,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         Lists all methods, properties, and field names (see #__getattr__)
         that can be accessed as attributes.
         """
-        return sorted(set(dir(super(Array, self))
+        return sorted(set(dir(super(Record, self))
                           + [x for x in self._layout.keys()
                                if _dir_pattern.match(x) and
                                not keyword.iskeyword(x)]))
