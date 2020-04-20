@@ -126,7 +126,7 @@ if args.buildpython:
 
     # Run pytest on all or a subset of tests.
     if args.pytest is not None and not (os.path.exists(args.pytest) and not os.path.isdir(args.pytest) and not args.pytest.endswith(".py")):
-        check_call(["python3", "-m", "pytest", "-vv", "-rs", args.pytest], env=env)
+        check_call(["python", "-m", "pytest", "-vv", "-rs", args.pytest], env=env)
 
     # If you'll be using it interactively, you'll need awkward1 in the library path (for some operations).
     if reminder:
