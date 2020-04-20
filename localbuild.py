@@ -2,11 +2,15 @@
 
 # BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+import sys
+if sys.version_info <= (3, 0):
+    sys.stdout.write("Sorry, Python 3.x is supported, not Python 2.x\n")
+    sys.exit(1)
+
 import argparse
 import subprocess
 import shutil
 import os
-import sys
 import json
 import glob
 import multiprocessing
