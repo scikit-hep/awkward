@@ -21,8 +21,10 @@ namespace awkward {
   /// passed to an array's `__getitem__` in Python.
   class EXPORT_SYMBOL SliceItem {
   public:
-    /// @brief Empty destructor; required for some C++ reason.
-    virtual ~SliceItem() { }
+    /// @brief Virtual destructor acts as a first non-inline virtual function
+    /// that determines a specific translation unit in which vtable shall be
+    /// emitted.
+    virtual ~SliceItem();
 
     /// @brief Copies this node without copying any associated arrays.
     virtual const SliceItemPtr
@@ -300,6 +302,10 @@ namespace awkward {
     bool frombool_;
   };
 
+#if !defined AWKWARD_SLICE_NO_EXTERN_TEMPLATE && !defined _MSC_VER
+  extern template class SliceArrayOf<int64_t>;
+#endif
+
   using SliceArray64 = SliceArrayOf<int64_t>;
 
   /// @class SliceField
@@ -450,6 +456,10 @@ namespace awkward {
     const SliceItemPtr content_;
   };
 
+#if !defined AWKWARD_SLICE_NO_EXTERN_TEMPLATE && !defined _MSC_VER
+  extern template class SliceMissingOf<int64_t>;
+#endif
+
   using SliceMissing64 = SliceMissingOf<int64_t>;
 
   /// @class SliceJaggedOf
@@ -516,6 +526,10 @@ namespace awkward {
     /// @brief See #content.
     const SliceItemPtr content_;
   };
+
+#if !defined AWKWARD_SLICE_NO_EXTERN_TEMPLATE && !defined _MSC_VER
+  extern template class SliceJaggedOf<int64_t>;
+#endif
 
   using SliceJagged64 = SliceJaggedOf<int64_t>;
 

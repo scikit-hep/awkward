@@ -32,6 +32,11 @@ namespace awkward {
     /// @brief Integer type of an Index, used by ListForm, IndexedForm, etc.
     enum Form {i8, u8, i32, u32, i64, kNumIndexForm};
 
+    /// @brief Virtual destructor acts as a first non-inline virtual function
+    /// that determines a specific translation unit in which vtable shall be
+    /// emitted.
+    virtual ~Index();
+
     /// @brief Copies this Index node without copying its buffer.
     ///
     /// See also #deep_copy.
@@ -184,6 +189,14 @@ namespace awkward {
     /// @brief See #length.
     const int64_t length_;
   };
+
+#if !defined AWKWARD_INDEX_NO_EXTERN_TEMPLATE && !defined _MSC_VER
+  extern template class IndexOf<int8_t>;
+  extern template class IndexOf<uint8_t>;
+  extern template class IndexOf<int32_t>;
+  extern template class IndexOf<uint32_t>;
+  extern template class IndexOf<int64_t>;
+#endif
 
   using Index8   = IndexOf<int8_t>;
   using IndexU8  = IndexOf<uint8_t>;

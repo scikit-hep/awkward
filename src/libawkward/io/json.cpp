@@ -17,6 +17,7 @@ namespace rj = rapidjson;
 
 namespace awkward {
   ////////// writing to JSON
+  ToJson::~ToJson() = default;
 
   class ToJsonString::Impl {
   public:

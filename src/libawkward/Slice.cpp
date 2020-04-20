@@ -7,9 +7,14 @@
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/util.h"
 
+#define AWKWARD_SLICE_NO_EXTERN_TEMPLATE
 #include "awkward/Slice.h"
 
 namespace awkward {
+  ////////// SliceItem
+
+  SliceItem::~SliceItem() = default;
+
   ////////// SliceAt
 
   SliceAt::SliceAt(int64_t at)

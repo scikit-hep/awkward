@@ -13,6 +13,8 @@ namespace awkward {
     }
   }
 
+  PartitionedArray::~PartitionedArray() = default;
+
   const ContentPtrVec
   PartitionedArray::partitions() const {
     return partitions_;
