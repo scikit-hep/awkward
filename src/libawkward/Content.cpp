@@ -793,12 +793,4 @@ namespace awkward {
     }
   }
 
-  const int64_t
-  Content::axis_wrap_if_negative(int64_t axis) const {
-    if (axis < 0) {
-      throw std::runtime_error("FIXME: negative axis not implemented yet");
-    }
-    return axis;
-  }
-
 }
