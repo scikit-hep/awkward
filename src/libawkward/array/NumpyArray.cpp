@@ -141,7 +141,7 @@ namespace awkward {
         std::string("Numpy format \"") + format_
         + std::string("\" cannot be expressed as a PrimitiveType"));
     }
-    for (int64_t i = inner_shape_.size() - 1;  i >= 0;  i--) {
+    for (int64_t i = ((int64_t)inner_shape_.size()) - 1;  i >= 0;  i--) {
       out = std::make_shared<RegularType>(
                 util::Parameters(),
                 util::gettypestr(parameters_, typestrs),
@@ -223,6 +223,10 @@ namespace awkward {
       if (!dtype.empty()) {
         builder.field("dtype");
         builder.string(dtype.c_str(), dtype.length());
+      }
+      else if (verbose) {
+        builder.field("dtype");
+        builder.null();
       }
       builder.endrecord();
     }

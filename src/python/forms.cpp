@@ -50,7 +50,9 @@ form_methods(py::class_<T, std::shared_ptr<T>, ak::Form>& x) {
                -> std::shared_ptr<ak::Type> {
             return self.type(typestrs);
           })
-          .def("tojson", &T::tojson)
+          .def("tojson", &T::tojson,
+                         py::arg("pretty") = false,
+                         py::arg("verbose") = true)
   ;
 }
 
@@ -88,10 +90,35 @@ make_BitMaskedForm(const py::handle& m, const std::string& name) {
   );
 }
 
-// py::class_<ak::ByteMaskedForm, std::shared_ptr<ak::ByteMaskedForm>, ak::Form>
-// make_ByteMaskedForm(const py::handle& m, const std::string& name) {
-
-// }
+py::class_<ak::ByteMaskedForm, std::shared_ptr<ak::ByteMaskedForm>, ak::Form>
+make_ByteMaskedForm(const py::handle& m, const std::string& name) {
+  return form_methods(py::class_<ak::ByteMaskedForm,
+                      std::shared_ptr<ak::ByteMaskedForm>,
+                      ak::Form>(m, name.c_str())
+      .def(py::init([](const std::string& mask,
+                       const std::shared_ptr<ak::Form>& content,
+                       bool valid_when,
+                       bool has_identities,
+                       const py::object& parameters) -> ak::ByteMaskedForm {
+        return ak::ByteMaskedForm(has_identities,
+                                 dict2parameters(parameters),
+                                 ak::Index::str2form(mask),
+                                 content,
+                                 valid_when);
+      }),
+           py::arg("mask"),
+           py::arg("content"),
+           py::arg("valid_when"),
+           py::arg("has_identities") = false,
+           py::arg("parameters") = py::none())
+      .def_property_readonly("mask", [](const ak::ByteMaskedForm& self)
+                                     -> std::string {
+        return ak::Index::form2str(self.mask());
+      })
+      .def_property_readonly("content", &ak::ByteMaskedForm::content)
+      .def_property_readonly("valid_when", &ak::ByteMaskedForm::valid_when)
+  );
+}
 
 // py::class_<ak::EmptyForm, std::shared_ptr<ak::EmptyForm>, ak::Form>
 // make_EmptyForm(const py::handle& m, const std::string& name) {

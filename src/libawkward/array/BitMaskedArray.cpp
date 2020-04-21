@@ -66,6 +66,8 @@ namespace awkward {
   void
   BitMaskedForm::tojson_part(ToJson& builder, bool verbose) const {
     builder.beginrecord();
+    identities_tojson(builder, verbose);
+    parameters_tojson(builder, verbose);
     builder.field("mask");
     std::string mask = Index::form2str(mask_);
     builder.string(mask.c_str(), mask.length());

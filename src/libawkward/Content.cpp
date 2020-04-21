@@ -71,7 +71,7 @@ namespace awkward {
   Form::identities_tojson(ToJson& builder, bool verbose) const {
     if (verbose  ||  has_identities_) {
       builder.field("has_identities");
-      builder.boolean(true);
+      builder.boolean(has_identities_);
     }
   }
 
