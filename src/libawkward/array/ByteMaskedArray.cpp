@@ -61,7 +61,7 @@ namespace awkward {
   }
 
   void
-  ByteMaskedForm::tojson_part(ToJson& builder) const {
+  ByteMaskedForm::tojson_part(ToJson& builder, bool verbose) const {
     throw std::runtime_error("ByteMaskedForm::tojson_part");
   }
 
@@ -72,6 +72,11 @@ namespace awkward {
                                             mask_,
                                             content_,
                                             valid_when_);
+  }
+
+  bool
+  ByteMaskedForm::equal(const FormPtr& other) const {
+    throw std::runtime_error("FIXME: ByteMaskedForm::equal");
   }
 
   ////////// ByteMaskedArray

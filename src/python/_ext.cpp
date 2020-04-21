@@ -8,6 +8,7 @@
 #include "awkward/python/identities.h"
 #include "awkward/python/content.h"
 #include "awkward/python/types.h"
+#include "awkward/python/forms.h"
 #include "awkward/python/io.h"
 #include "awkward/python/partition.h"
 
@@ -85,6 +86,22 @@ PYBIND11_MODULE(_ext, m) {
   make_OptionType(m, "OptionType");
   make_UnionType(m, "UnionType");
   make_RecordType(m, "RecordType");
+
+  ////////// forms.h
+
+  make_Form(m, "Form");
+  make_BitMaskedForm(m, "BitMaskedForm");
+  // make_ByteMaskedForm(m, "ByteMaskedForm");
+  // make_EmptyForm(m, "EmptyForm");
+  // make_IndexedForm(m, "IndexedForm");
+  // make_IndexedOptionForm(m, "IndexedOptionForm");
+  // make_ListForm(m, "ListForm");
+  // make_ListOffsetForm(m, "ListOffsetForm");
+  // make_NumpyForm(m, "NumpyForm");
+  // make_RecordForm(m, "RecordForm");
+  // make_RegularForm(m, "RegularForm");
+  // make_UnionForm(m, "UnionForm");
+  // make_UnmaskedForm(m, "UnmaskedForm");
 
   ////////// io.h
 

@@ -61,7 +61,7 @@ namespace awkward {
   }
 
   void
-  ListForm::tojson_part(ToJson& builder) const {
+  ListForm::tojson_part(ToJson& builder, bool verbose) const {
     throw std::runtime_error("ListForm::tojson_part");
   }
 
@@ -72,6 +72,11 @@ namespace awkward {
                                       starts_,
                                       stops_,
                                       content_);
+  }
+
+  bool
+  ListForm::equal(const FormPtr& other) const {
+    throw std::runtime_error("FIXME: ListForm::equal");
   }
 
   ////////// ListArray

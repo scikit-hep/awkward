@@ -43,7 +43,7 @@ namespace awkward {
   }
 
   void
-  UnmaskedForm::tojson_part(ToJson& builder) const {
+  UnmaskedForm::tojson_part(ToJson& builder, bool verbose) const {
     throw std::runtime_error("UnmaskedForm::tojson_part");
   }
 
@@ -52,6 +52,11 @@ namespace awkward {
     return std::make_shared<UnmaskedForm>(has_identities_,
                                           parameters_,
                                           content_);
+  }
+
+  bool
+  UnmaskedForm::equal(const FormPtr& other) const {
+    throw std::runtime_error("FIXME: UnmaskedForm::equal");
   }
 
   ////////// UnmaskedArray

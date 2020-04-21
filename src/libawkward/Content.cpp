@@ -20,17 +20,22 @@
 namespace awkward {
   ////////// Form
 
+  FormPtr
+  Form::fromjson(const std::string& data) {
+    throw std::runtime_error("FIXME: Form::fromjson");
+  }
+
   Form::Form(bool has_identities, const util::Parameters& parameters)
       : has_identities_(has_identities)
       , parameters_(parameters) { }
 
   const std::string
   Form::tostring() const {
-    return tojson(true);
+    return tojson(true, false);
   }
 
   const std::string
-  Form::tojson(bool pretty) const {
+  Form::tojson(bool pretty, bool verbose) const {
     throw std::runtime_error("FIXME: Form::tojson");
   }
 
@@ -51,6 +56,27 @@ namespace awkward {
       return "null";
     }
     return item->second;
+  }
+
+  void
+  Form::identities_tojson(ToJson& builder, bool verbose) const {
+    if (verbose  ||  has_identities_) {
+      builder.field("has_identities");
+      builder.boolean(true);
+    }
+  }
+
+  void
+  Form::parameters_tojson(ToJson& builder, bool verbose) const {
+    if (verbose  ||  !parameters_.empty()) {
+      builder.field("parameters");
+      builder.beginrecord();
+      for (auto pair : parameters_) {
+        builder.field(pair.first.c_str());
+        builder.json(pair.second.c_str());
+      }
+      builder.endrecord();
+    }
   }
 
   ////////// Content

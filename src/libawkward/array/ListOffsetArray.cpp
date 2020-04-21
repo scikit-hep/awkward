@@ -55,7 +55,7 @@ namespace awkward {
   }
 
   void
-  ListOffsetForm::tojson_part(ToJson& builder) const {
+  ListOffsetForm::tojson_part(ToJson& builder, bool verbose) const {
     throw std::runtime_error("ListOffsetForm::tojson_part");
   }
 
@@ -65,6 +65,11 @@ namespace awkward {
                                             parameters_,
                                             offsets_,
                                             content_);
+  }
+
+  bool
+  ListOffsetForm::equal(const FormPtr& other) const {
+    throw std::runtime_error("FIXME: ListOffsetForm::equal");
   }
 
   ////////// ListOffsetArray

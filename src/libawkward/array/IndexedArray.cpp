@@ -54,7 +54,7 @@ namespace awkward {
   }
 
   void
-  IndexedForm::tojson_part(ToJson& builder) const {
+  IndexedForm::tojson_part(ToJson& builder, bool verbose) const {
     throw std::runtime_error("IndexedForm::tojson_part");
   }
 
@@ -64,6 +64,11 @@ namespace awkward {
                                          parameters_,
                                          index_,
                                          content_);
+  }
+
+  bool
+  IndexedForm::equal(const FormPtr& other) const {
+    throw std::runtime_error("FIXME: IndexedForm::equal");
   }
 
   ////////// IndexedOptionForm
@@ -95,7 +100,7 @@ namespace awkward {
   }
 
   void
-  IndexedOptionForm::tojson_part(ToJson& builder) const {
+  IndexedOptionForm::tojson_part(ToJson& builder, bool verbose) const {
     throw std::runtime_error("IndexedOptionForm::tojson_part");
   }
 
@@ -105,6 +110,11 @@ namespace awkward {
                                                parameters_,
                                                index_,
                                                content_);
+  }
+
+  bool
+  IndexedOptionForm::equal(const FormPtr& other) const {
+    throw std::runtime_error("FIXME: IndexedOptionForm::equal");
   }
 
   ////////// IndexedArray

@@ -54,7 +54,7 @@ namespace awkward {
   }
 
   void
-  RegularForm::tojson_part(ToJson& builder) const {
+  RegularForm::tojson_part(ToJson& builder, bool verbose) const {
     throw std::runtime_error("RegularForm::tojson_part");
   }
 
@@ -64,6 +64,11 @@ namespace awkward {
                                          parameters_,
                                          content_,
                                          size_);
+  }
+
+  bool
+  RegularForm::equal(const FormPtr& other) const {
+    throw std::runtime_error("FIXME: RegularForm::equal");
   }
 
   ////////// RegularArray

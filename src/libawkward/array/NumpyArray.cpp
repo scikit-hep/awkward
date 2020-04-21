@@ -152,8 +152,23 @@ namespace awkward {
   }
 
   void
-  NumpyForm::tojson_part(ToJson& builder) const {
-    throw std::runtime_error("NumpyForm::tojson_part");
+  NumpyForm::tojson_part(ToJson& builder, bool verbose) const {
+    builder.beginrecord();
+    identities_tojson(builder, verbose);
+    parameters_tojson(builder, verbose);
+    if (verbose  ||  !inner_shape_.empty()) {
+      builder.field("inner_shape");
+      builder.beginlist();
+      for (auto x : inner_shape_) {
+        builder.integer(x);
+      }
+      builder.endlist();
+    }
+    builder.field("itemsize");
+    builder.integer(itemsize_);
+    builder.field("format");
+    builder.string(format_.c_str(), format_.length());
+    builder.endrecord();
   }
 
   const FormPtr
@@ -163,6 +178,11 @@ namespace awkward {
                                        inner_shape_,
                                        itemsize_,
                                        format_);
+  }
+
+  bool
+  NumpyForm::equal(const FormPtr& other) const {
+    throw std::runtime_error("FIXME: NumpyForm::equal");
   }
 
   ////////// NumpyArray

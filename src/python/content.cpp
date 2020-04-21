@@ -1047,6 +1047,9 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
                -> std::shared_ptr<ak::Type> {
             return self.type(typestrs);
           })
+          .def("form", [](const T& self) -> std::shared_ptr<ak::Form> {
+            return self.form();
+          })
           .def("__len__", &len<T>)
           .def("__getitem__", &getitem<T>)
           .def("__iter__", &iter<T>)

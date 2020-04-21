@@ -64,7 +64,7 @@ namespace awkward {
   }
 
   void
-  BitMaskedForm::tojson_part(ToJson& builder) const {
+  BitMaskedForm::tojson_part(ToJson& builder, bool verbose) const {
     throw std::runtime_error("BitMaskedForm::tojson_part");
   }
 
@@ -76,6 +76,11 @@ namespace awkward {
                                            content_,
                                            valid_when_,
                                            lsb_order_);
+  }
+
+  bool
+  BitMaskedForm::equal(const FormPtr& other) const {
+    throw std::runtime_error("FIXME: BitMaskedForm::equal");
   }
 
   ////////// BitMaskedArray

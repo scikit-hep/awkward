@@ -54,7 +54,7 @@ namespace awkward {
   }
 
   void
-  RecordForm::tojson_part(ToJson& builder) const {
+  RecordForm::tojson_part(ToJson& builder, bool verbose) const {
     throw std::runtime_error("RecordForm::tojson_part");
   }
 
@@ -64,6 +64,11 @@ namespace awkward {
                                         parameters_,
                                         recordlookup_,
                                         contents_);
+  }
+
+  bool
+  RecordForm::equal(const FormPtr& other) const {
+    throw std::runtime_error("FIXME: RecordForm::equal");
   }
 
   ////////// RecordArray

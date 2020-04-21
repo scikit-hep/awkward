@@ -31,6 +31,8 @@ namespace awkward {
   /// type. There is a one-to-many relationship from Type to Form.
   class EXPORT_SYMBOL Form {
   public:
+    static FormPtr fromjson(const std::string& data);
+
     /// @brief Called by subclass constructors; assigns #has_identities
     /// and #parameters upon construction.
     Form(bool has_identities, const util::Parameters& parameters);
@@ -48,15 +50,20 @@ namespace awkward {
     /// @brief Internal function to produce a JSON representation one node at
     /// a time.
     virtual void
-      tojson_part(ToJson& builder) const = 0;
+      tojson_part(ToJson& builder, bool verbose) const = 0;
 
     /// @brief Copies this node without copying any nodes hierarchically
     /// nested within it.
     virtual const FormPtr
       shallow_copy() const = 0;
 
+    /// @brief Returns `true` if this Form is equal to the other Form; `false`
+    /// otherwise.
+    virtual bool
+      equal(const FormPtr& other) const = 0;
+
     /// @brief Returns a string representation of this Form (#tojson with
-    /// `pretty = true`).
+    /// `pretty = true` and `verbose = false`).
     const std::string
       tostring() const;
 
@@ -65,7 +72,7 @@ namespace awkward {
     /// @param pretty If `true`, add spacing to make the JSON human-readable.
     /// If `false`, return a compact representation.
     const std::string
-      tojson(bool pretty) const;
+      tojson(bool pretty, bool verbose) const;
 
     /// @brief Returns `true` if the corresponding array has associated
     /// {@link IdentitiesOf Identities}.
@@ -90,6 +97,18 @@ namespace awkward {
     /// double-quoted: e.g. `"\"actual_value\""`.
     const std::string
       parameter(const std::string& key) const;
+
+    /// @brief Internal function for adding identities in #tojson.
+    ///
+    /// Must be called between `builder.beginrecord()` and `builder.endrecord`.
+    void
+      identities_tojson(ToJson& builder, bool verbose) const;
+
+    /// @brief Internal function for adding parameters in #tojson.
+    ///
+    /// Must be called between `builder.beginrecord()` and `builder.endrecord`.
+    void
+      parameters_tojson(ToJson& builder, bool verbose) const;
 
     protected:
     /// @brief See #has_identities;

@@ -59,7 +59,7 @@ namespace awkward {
   }
 
   void
-  UnionForm::tojson_part(ToJson& builder) const {
+  UnionForm::tojson_part(ToJson& builder, bool verbose) const {
     throw std::runtime_error("UnionForm::tojson_part");
   }
 
@@ -70,6 +70,11 @@ namespace awkward {
                                        tags_,
                                        index_,
                                        contents_);
+  }
+
+  bool
+  UnionForm::equal(const FormPtr& other) const {
+    throw std::runtime_error("FIXME: UnionForm::equal");
   }
 
   ////////// UnionArray

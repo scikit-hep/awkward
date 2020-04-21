@@ -49,15 +49,20 @@ namespace awkward {
     }
 
     void
-      tojson_part(ToJson& builder) const override {
-      throw std::runtime_error("NumpyForm::tojson_part");
+      tojson_part(ToJson& builder, bool verbose) const override {
+      throw std::runtime_error("RawForm::tojson_part");
     }
 
     const FormPtr
-      shallow_copy() const {
+      shallow_copy() const override {
       return std::make_shared<RawForm>(has_identities_,
                                        parameters_,
                                        T_);
+    }
+
+    bool
+      equal(const FormPtr& other) const {
+      throw std::runtime_error("FIXME: RawForm::equal");
     }
 
   private:

@@ -226,17 +226,17 @@ namespace awkward {
       if (value.empty()) {
         return false;
       }
-      if (!((value[0] >= 'a'  &&  value[0] <= 'z')  || 
-            (value[0] >= 'A'  &&  value[0] <= 'Z')  || 
+      if (!((value[0] >= 'a'  &&  value[0] <= 'z')  ||
+            (value[0] >= 'A'  &&  value[0] <= 'Z')  ||
             (value[0] == '_'))) {
-        return false; 
+        return false;
       }
       for (size_t i = 1;  i < value.length();  i++) {
-        if (!((value[i] >= 'a'  &&  value[i] <= 'z')  || 
-              (value[i] >= 'A'  &&  value[i] <= 'Z')  || 
-              (value[i] >= '0'  &&  value[i] <= '9')  || 
+        if (!((value[i] >= 'a'  &&  value[i] <= 'z')  ||
+              (value[i] >= 'A'  &&  value[i] <= 'Z')  ||
+              (value[i] >= '0'  &&  value[i] <= '9')  ||
               (value[i] == '_'))) {
-          return false; 
+          return false;
         }
       }
       return true;

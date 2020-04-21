@@ -35,10 +35,13 @@ namespace awkward {
       type(const util::TypeStrs& typestrs) const override;
 
     void
-      tojson_part(ToJson& builder) const override;
+      tojson_part(ToJson& builder, bool verbose) const override;
 
     const FormPtr
-      shallow_copy() const;
+      shallow_copy() const override;
+
+    bool
+      equal(const FormPtr& other) const override;
 
   private:
     Index::Form index_;
@@ -64,10 +67,13 @@ namespace awkward {
       type(const util::TypeStrs& typestrs) const override;
 
     void
-      tojson_part(ToJson& builder) const override;
+      tojson_part(ToJson& builder, bool verbose) const override;
 
     const FormPtr
       shallow_copy() const;
+
+    bool
+      equal(const FormPtr& other) const override;
 
   private:
     Index::Form index_;

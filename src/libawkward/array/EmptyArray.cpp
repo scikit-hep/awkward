@@ -28,7 +28,7 @@ namespace awkward {
   }
 
   void
-  EmptyForm::tojson_part(ToJson& builder) const {
+  EmptyForm::tojson_part(ToJson& builder, bool verbose) const {
     throw std::runtime_error("EmptyForm::tojson_part");
   }
 
@@ -36,6 +36,11 @@ namespace awkward {
   EmptyForm::shallow_copy() const {
     return std::make_shared<EmptyForm>(has_identities_,
                                        parameters_);
+  }
+
+  bool
+  EmptyForm::equal(const FormPtr& other) const {
+    throw std::runtime_error("FIXME: EmptyForm::equal");
   }
 
   ////////// EmptyArray
