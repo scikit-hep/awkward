@@ -30,6 +30,33 @@ namespace awkward {
     const std::vector<FormPtr>
       contents() const;
 
+    bool
+      istuple() const;
+
+    int64_t
+      numfields() const;
+
+    int64_t
+      fieldindex(const std::string& key) const;
+
+    const std::string
+      key(int64_t fieldindex) const;
+
+    bool
+      haskey(const std::string& key) const;
+
+    const std::vector<std::string>
+      keys() const;
+
+    const FormPtr
+      content(int64_t fieldindex) const;
+
+    const FormPtr
+      content(const std::string& key) const;
+
+    const std::vector<std::pair<std::string, FormPtr>>
+      items() const;
+
     const TypePtr
       type(const util::TypeStrs& typestrs) const override;
 

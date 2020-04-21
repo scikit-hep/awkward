@@ -35,6 +35,12 @@ namespace awkward {
     const std::vector<FormPtr>
       contents() const;
 
+    int64_t
+      numcontents() const;
+
+    const FormPtr
+      content(int64_t index) const;
+
     const TypePtr
       type(const util::TypeStrs& typestrs) const override;
 

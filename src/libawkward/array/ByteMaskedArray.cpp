@@ -62,7 +62,18 @@ namespace awkward {
 
   void
   ByteMaskedForm::tojson_part(ToJson& builder, bool verbose) const {
-    throw std::runtime_error("ByteMaskedForm::tojson_part");
+    builder.beginrecord();
+    builder.field("class");
+    builder.string("ByteMaskedArray");
+    builder.field("mask");
+    builder.string(Index::form2str(mask_));
+    builder.field("content");
+    content_.get()->tojson_part(builder, verbose);
+    builder.field("valid_when");
+    builder.boolean(valid_when_);
+    identities_tojson(builder, verbose);
+    parameters_tojson(builder, verbose);
+    builder.endrecord();
   }
 
   const FormPtr

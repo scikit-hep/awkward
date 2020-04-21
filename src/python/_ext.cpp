@@ -91,17 +91,17 @@ PYBIND11_MODULE(_ext, m) {
 
   make_Form(m, "Form");
   make_BitMaskedForm(m, "BitMaskedForm");
-  // make_ByteMaskedForm(m, "ByteMaskedForm");
-  // make_EmptyForm(m, "EmptyForm");
-  // make_IndexedForm(m, "IndexedForm");
-  // make_IndexedOptionForm(m, "IndexedOptionForm");
-  // make_ListForm(m, "ListForm");
-  // make_ListOffsetForm(m, "ListOffsetForm");
+  make_ByteMaskedForm(m, "ByteMaskedForm");
+  make_EmptyForm(m, "EmptyForm");
+  make_IndexedForm(m, "IndexedForm");
+  make_IndexedOptionForm(m, "IndexedOptionForm");
+  make_ListForm(m, "ListForm");
+  make_ListOffsetForm(m, "ListOffsetForm");
   make_NumpyForm(m, "NumpyForm");
-  // make_RecordForm(m, "RecordForm");
-  // make_RegularForm(m, "RegularForm");
-  // make_UnionForm(m, "UnionForm");
-  // make_UnmaskedForm(m, "UnmaskedForm");
+  make_RecordForm(m, "RecordForm");
+  make_RegularForm(m, "RegularForm");
+  make_UnionForm(m, "UnionForm");
+  make_UnmaskedForm(m, "UnmaskedForm");
 
   ////////// io.h
 

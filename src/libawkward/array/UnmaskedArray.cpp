@@ -44,7 +44,14 @@ namespace awkward {
 
   void
   UnmaskedForm::tojson_part(ToJson& builder, bool verbose) const {
-    throw std::runtime_error("UnmaskedForm::tojson_part");
+    builder.beginrecord();
+    builder.field("class");
+    builder.string("UnmaskedArray");
+    builder.field("content");
+    content_.get()->tojson_part(builder, verbose);
+    identities_tojson(builder, verbose);
+    parameters_tojson(builder, verbose);
+    builder.endrecord();
   }
 
   const FormPtr

@@ -34,11 +34,23 @@ namespace awkward {
 
     const std::string format() const;
 
+    const std::string
+      primitive() const;
+
     const TypePtr
       type(const util::TypeStrs& typestrs) const override;
 
+    const std::string
+      tostring() const override;
+
+    const std::string
+      tojson(bool pretty, bool verbose) const override;
+
     void
       tojson_part(ToJson& builder, bool verbose) const override;
+
+    void
+      tojson_part(ToJson& builder, bool verbose, bool toplevel) const;
 
     const FormPtr
       shallow_copy() const override;

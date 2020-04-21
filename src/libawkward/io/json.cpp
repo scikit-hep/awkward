@@ -20,6 +20,16 @@ namespace awkward {
   ////////// writing to JSON
   ToJson::~ToJson() = default;
 
+  void
+  ToJson::string(const std::string& x) {
+    string(x.c_str(), x.length());
+  }
+
+  void
+  ToJson::field(const std::string& x) {
+    field(x.c_str());
+  }
+
   template <typename DOCUMENT, typename WRITER>
   void copyjson(const DOCUMENT& value, WRITER& writer) {
     if (value.IsNull()) {

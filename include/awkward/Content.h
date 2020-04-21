@@ -64,14 +64,14 @@ namespace awkward {
 
     /// @brief Returns a string representation of this Form (#tojson with
     /// `pretty = true` and `verbose = false`).
-    const std::string
+    virtual const std::string
       tostring() const;
 
     /// @brief Returns a JSON representation of this array.
     ///
     /// @param pretty If `true`, add spacing to make the JSON human-readable.
     /// If `false`, return a compact representation.
-    const std::string
+    virtual const std::string
       tojson(bool pretty, bool verbose) const;
 
     /// @brief Returns `true` if the corresponding array has associated

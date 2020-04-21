@@ -55,7 +55,16 @@ namespace awkward {
 
   void
   RegularForm::tojson_part(ToJson& builder, bool verbose) const {
-    throw std::runtime_error("RegularForm::tojson_part");
+    builder.beginrecord();
+    builder.field("class");
+    builder.string("RegularArray");
+    builder.field("content");
+    content_.get()->tojson_part(builder, verbose);
+    builder.field("size");
+    builder.integer(size_);
+    identities_tojson(builder, verbose);
+    parameters_tojson(builder, verbose);
+    builder.endrecord();
   }
 
   const FormPtr

@@ -46,6 +46,16 @@ namespace awkward {
     return contents_;
   }
 
+  int64_t
+  UnionForm::numcontents() const {
+    return (int64_t)contents_.size();
+  }
+
+  const FormPtr
+  UnionForm::content(int64_t index) const {
+    return contents_[(size_t)index];
+  }
+
   const TypePtr
   UnionForm::type(const util::TypeStrs& typestrs) const {
     std::vector<TypePtr> types;
@@ -60,7 +70,33 @@ namespace awkward {
 
   void
   UnionForm::tojson_part(ToJson& builder, bool verbose) const {
-    throw std::runtime_error("UnionForm::tojson_part");
+    builder.beginrecord();
+    builder.field("class");
+    if (index_ == Index::Form::i32) {
+      builder.string("UnionArray8_32");
+    }
+    else if (index_ == Index::Form::u32) {
+      builder.string("UnionArray8_U32");
+    }
+    else if (index_ == Index::Form::i64) {
+      builder.string("UnionArray8_64");
+    }
+    else {
+      builder.string("UnrecognizedUnionArray");
+    }
+    builder.field("tags");
+    builder.string(Index::form2str(tags_));
+    builder.field("index");
+    builder.string(Index::form2str(index_));
+    builder.field("contents");
+    builder.beginlist();
+    for (auto x : contents_) {
+      x.get()->tojson_part(builder, verbose);
+    }
+    builder.endlist();
+    identities_tojson(builder, verbose);
+    parameters_tojson(builder, verbose);
+    builder.endrecord();
   }
 
   const FormPtr

@@ -56,7 +56,27 @@ namespace awkward {
 
   void
   ListOffsetForm::tojson_part(ToJson& builder, bool verbose) const {
-    throw std::runtime_error("ListOffsetForm::tojson_part");
+    builder.beginrecord();
+    builder.field("class");
+    if (offsets_ == Index::Form::i32) {
+      builder.string("ListOffsetArray32");
+    }
+    else if (offsets_ == Index::Form::u32) {
+      builder.string("ListOffsetArrayU32");
+    }
+    else if (offsets_ == Index::Form::i64) {
+      builder.string("ListOffsetArray64");
+    }
+    else {
+      builder.string("UnrecognizedListOffsetArray");
+    }
+    builder.field("offsets");
+    builder.string(Index::form2str(offsets_));
+    builder.field("content");
+    content_.get()->tojson_part(builder, verbose);
+    identities_tojson(builder, verbose);
+    parameters_tojson(builder, verbose);
+    builder.endrecord();
   }
 
   const FormPtr

@@ -40,6 +40,74 @@ namespace awkward {
     return contents_;
   }
 
+  bool
+  RecordForm::istuple() const {
+    return recordlookup_.get() == nullptr;
+  }
+
+  int64_t
+  RecordForm::numfields() const {
+    return (int64_t)contents_.size();
+  }
+
+  int64_t
+  RecordForm::fieldindex(const std::string& key) const {
+    return util::fieldindex(recordlookup_, key, numfields());
+  }
+
+  const std::string
+  RecordForm::key(int64_t fieldindex) const {
+    return util::key(recordlookup_, fieldindex, numfields());
+  }
+
+  bool
+  RecordForm::haskey(const std::string& key) const {
+    return util::haskey(recordlookup_, key, numfields());
+  }
+
+  const std::vector<std::string>
+  RecordForm::keys() const {
+    return util::keys(recordlookup_, numfields());
+  }
+
+  const FormPtr
+  RecordForm::content(int64_t fieldindex) const {
+    if (fieldindex >= numfields()) {
+      throw std::invalid_argument(
+        std::string("fieldindex ") + std::to_string(fieldindex)
+        + std::string(" for record with only ") + std::to_string(numfields())
+        + std::string(" fields"));
+    }
+    return contents_[(size_t)fieldindex];
+  }
+
+  const FormPtr
+  RecordForm::content(const std::string& key) const {
+    return contents_[(size_t)fieldindex(key)];
+  }
+
+  const std::vector<std::pair<std::string, FormPtr>>
+  RecordForm::items() const {
+    std::vector<std::pair<std::string, FormPtr>> out;
+    if (recordlookup_.get() != nullptr) {
+      size_t cols = contents_.size();
+      for (size_t j = 0;  j < cols;  j++) {
+        out.push_back(
+          std::pair<std::string, FormPtr>(recordlookup_.get()->at(j),
+                                          contents_[j]));
+      }
+    }
+    else {
+      size_t cols = contents_.size();
+      for (size_t j = 0;  j < cols;  j++) {
+        out.push_back(
+          std::pair<std::string, FormPtr>(std::to_string(j),
+                                          contents_[j]));
+      }
+    }
+    return out;
+  }
+
   const TypePtr
   RecordForm::type(const util::TypeStrs& typestrs) const {
     std::vector<TypePtr> types;
@@ -55,7 +123,28 @@ namespace awkward {
 
   void
   RecordForm::tojson_part(ToJson& builder, bool verbose) const {
-    throw std::runtime_error("RecordForm::tojson_part");
+    builder.beginrecord();
+    builder.field("class");
+    builder.string("RecordArray");
+    builder.field("contents");
+    if (recordlookup_.get() == nullptr) {
+      builder.beginlist();
+      for (auto x : contents_) {
+        x.get()->tojson_part(builder, verbose);
+      }
+      builder.endlist();
+    }
+    else {
+      builder.beginrecord();
+      for (size_t i = 0;  i < recordlookup_.get()->size();  i++) {
+        builder.field(recordlookup_.get()->at(i));
+        contents_[i].get()->tojson_part(builder, verbose);
+      }
+      builder.endrecord();
+    }
+    identities_tojson(builder, verbose);
+    parameters_tojson(builder, verbose);
+    builder.endrecord();
   }
 
   const FormPtr

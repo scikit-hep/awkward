@@ -29,7 +29,12 @@ namespace awkward {
 
   void
   EmptyForm::tojson_part(ToJson& builder, bool verbose) const {
-    throw std::runtime_error("EmptyForm::tojson_part");
+    builder.beginrecord();
+    builder.field("class");
+    builder.string("EmptyArray");
+    identities_tojson(builder, verbose);
+    parameters_tojson(builder, verbose);
+    builder.endrecord();
   }
 
   const FormPtr

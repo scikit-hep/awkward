@@ -51,6 +51,62 @@ namespace awkward {
     return format_;
   }
 
+  const std::string
+  NumpyForm::primitive() const {
+    if (format_.compare("d") == 0) {
+      return "float64";
+    }
+    else if (format_.compare("f") == 0) {
+      return "float32";
+    }
+#if defined _MSC_VER || defined __i386__
+    else if (format_.compare("q") == 0) {
+#else
+    else if (format_.compare("l") == 0) {
+#endif
+      return "int64";
+    }
+#if defined _MSC_VER || defined __i386__
+    else if (format_.compare("Q") == 0) {
+#else
+    else if (format_.compare("L") == 0) {
+#endif
+      return "uint64";
+    }
+#if defined _MSC_VER || defined __i386__
+    else if (format_.compare("l") == 0) {
+#else
+    else if (format_.compare("i") == 0) {
+#endif
+      return "int32";
+    }
+#if defined _MSC_VER || defined __i386__
+    else if (format_.compare("L") == 0) {
+#else
+    else if (format_.compare("I") == 0) {
+#endif
+      return "uint32";
+    }
+    else if (format_.compare("h") == 0) {
+      return "int16";
+    }
+    else if (format_.compare("H") == 0) {
+      return "uint16";
+    }
+    else if (format_.compare("b") == 0) {
+      return "int8";
+    }
+    else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
+      return "uint8";
+    }
+    else if (format_.compare("?") == 0) {
+      return "bool";
+    }
+    else {
+      return "unknown";
+    }
+  }
+
   const TypePtr
   NumpyForm::type(const util::TypeStrs& typestrs) const {
     TypePtr out;
@@ -151,63 +207,39 @@ namespace awkward {
     return out;
   }
 
+  const std::string
+  NumpyForm::tostring() const {
+    ToJsonPrettyString builder(-1);
+    tojson_part(builder, false, true);
+    return builder.tostring();
+  }
+
+  const std::string
+  NumpyForm::tojson(bool pretty, bool verbose) const {
+    if (pretty) {
+      ToJsonPrettyString builder(-1);
+      tojson_part(builder, verbose, true);
+      return builder.tostring();
+    }
+    else {
+      ToJsonString builder(-1);
+      tojson_part(builder, verbose, true);
+      return builder.tostring();
+    }
+  }
+
   void
   NumpyForm::tojson_part(ToJson& builder, bool verbose) const {
-    std::string dtype;
-    if (format_.compare("d") == 0) {
-      dtype = "float64";
-    }
-    else if (format_.compare("f") == 0) {
-      dtype = "float32";
-    }
-#if defined _MSC_VER || defined __i386__
-    else if (format_.compare("q") == 0) {
-#else
-    else if (format_.compare("l") == 0) {
-#endif
-      dtype = "int64";
-    }
-#if defined _MSC_VER || defined __i386__
-    else if (format_.compare("Q") == 0) {
-#else
-    else if (format_.compare("L") == 0) {
-#endif
-      dtype = "uint64";
-    }
-#if defined _MSC_VER || defined __i386__
-    else if (format_.compare("l") == 0) {
-#else
-    else if (format_.compare("i") == 0) {
-#endif
-      dtype = "int32";
-    }
-#if defined _MSC_VER || defined __i386__
-    else if (format_.compare("L") == 0) {
-#else
-    else if (format_.compare("I") == 0) {
-#endif
-      dtype = "uint32";
-    }
-    else if (format_.compare("h") == 0) {
-      dtype = "int16";
-    }
-    else if (format_.compare("H") == 0) {
-      dtype = "uint16";
-    }
-    else if (format_.compare("b") == 0) {
-      dtype = "int8";
-    }
-    else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
-      dtype = "uint8";
-    }
-    else if (format_.compare("?") == 0) {
-      dtype = "bool";
-    }
+    return tojson_part(builder, verbose, false);
+  }
 
-    if (verbose  ||  dtype.empty()) {
+  void
+  NumpyForm::tojson_part(ToJson& builder, bool verbose, bool toplevel) const {
+    std::string p = primitive();
+    if (verbose  ||  toplevel  ||  p.empty()  ||  !inner_shape_.empty()) {
       builder.beginrecord();
-      identities_tojson(builder, verbose);
-      parameters_tojson(builder, verbose);
+      builder.field("class");
+      builder.string("NumpyArray");
       if (verbose  ||  !inner_shape_.empty()) {
         builder.field("inner_shape");
         builder.beginlist();
@@ -219,19 +251,21 @@ namespace awkward {
       builder.field("itemsize");
       builder.integer(itemsize_);
       builder.field("format");
-      builder.string(format_.c_str(), format_.length());
-      if (!dtype.empty()) {
-        builder.field("dtype");
-        builder.string(dtype.c_str(), dtype.length());
+      builder.string(format_);
+      if (!p.empty()) {
+        builder.field("primitive");
+        builder.string(p);
       }
       else if (verbose) {
-        builder.field("dtype");
+        builder.field("primitive");
         builder.null();
       }
+      identities_tojson(builder, verbose);
+      parameters_tojson(builder, verbose);
       builder.endrecord();
     }
     else {
-      builder.string(dtype.c_str(), dtype.length());
+      builder.string(p.c_str(), p.length());
     }
   }
 

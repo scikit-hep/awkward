@@ -36,6 +36,9 @@ make_EmptyForm(const py::handle& m, const std::string& name);
 py::class_<ak::IndexedForm, std::shared_ptr<ak::IndexedForm>, ak::Form>
 make_IndexedForm(const py::handle& m, const std::string& name);
 
+py::class_<ak::IndexedOptionForm, std::shared_ptr<ak::IndexedOptionForm>, ak::Form>
+make_IndexedOptionForm(const py::handle& m, const std::string& name);
+
 py::class_<ak::ListForm, std::shared_ptr<ak::ListForm>, ak::Form>
 make_ListForm(const py::handle& m, const std::string& name);
 

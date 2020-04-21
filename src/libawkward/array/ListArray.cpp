@@ -62,7 +62,29 @@ namespace awkward {
 
   void
   ListForm::tojson_part(ToJson& builder, bool verbose) const {
-    throw std::runtime_error("ListForm::tojson_part");
+    builder.beginrecord();
+    builder.field("class");
+    if (starts_ == Index::Form::i32) {
+      builder.string("ListArray32");
+    }
+    else if (starts_ == Index::Form::u32) {
+      builder.string("ListArrayU32");
+    }
+    else if (starts_ == Index::Form::i64) {
+      builder.string("ListArray64");
+    }
+    else {
+      builder.string("UnrecognizedListArray");
+    }
+    builder.field("starts");
+    builder.string(Index::form2str(starts_));
+    builder.field("stops");
+    builder.string(Index::form2str(stops_));
+    builder.field("content");
+    content_.get()->tojson_part(builder, verbose);
+    identities_tojson(builder, verbose);
+    parameters_tojson(builder, verbose);
+    builder.endrecord();
   }
 
   const FormPtr

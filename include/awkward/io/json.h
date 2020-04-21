@@ -77,6 +77,12 @@ namespace awkward {
     /// @brief Write raw JSON as a string.
     virtual void
       json(const char* data) = 0;
+    /// @brief Append a string value `x`.
+    void
+      string(const std::string& x);
+    /// @brief Insert a key for a key-value pair.
+    void
+      field(const std::string& x);
   };
 
   /// @class ToJsonString
