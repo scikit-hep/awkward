@@ -36,7 +36,7 @@ namespace awkward {
       regular_index(const IndexOf<T>& tags);
 
     /// @brief Creates a UnionArrayOf from a full set of parameters.
-    /// 
+    ///
     /// @param identities Optional Identities for each element of the array
     /// (may be `nullptr`).
     /// @param parameters String-to-JSON map that augments the meaning of this
@@ -326,6 +326,12 @@ namespace awkward {
     const IndexOf<I> index_;
     const ContentPtrVec contents_;
   };
+
+#if !defined AWKWARD_UNIONARRAY_NO_EXTERN_TEMPLATE && !defined _MSC_VER
+  extern template class UnionArrayOf<int8_t, int32_t>;
+  extern template class UnionArrayOf<int8_t, uint32_t>;
+  extern template class UnionArrayOf<int8_t, int64_t>;
+#endif
 
   using UnionArray8_32  = UnionArrayOf<int8_t, int32_t>;
   using UnionArray8_U32 = UnionArrayOf<int8_t, uint32_t>;

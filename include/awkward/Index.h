@@ -28,6 +28,13 @@ namespace awkward {
   ///    - {@link IndexOf IndexU32}, which is `IndexOf<uint32_t>`
   ///    - {@link IndexOf Index64}, which is `IndexOf<int64_t>`
   class EXPORT_SYMBOL Index {
+  public:
+    /// @brief Virtual destructor acts as a first non-inline virtual function
+    /// that determines a specific translation unit in which vtable shall be
+    /// emitted.
+    virtual ~Index();
+
+  private:
     /// @brief Copies this Index node without copying its buffer.
     ///
     /// See also #deep_copy.
@@ -180,6 +187,14 @@ namespace awkward {
     /// @brief See #length.
     const int64_t length_;
   };
+
+#if !defined AWKWARD_INDEX_NO_EXTERN_TEMPLATE && !defined _MSC_VER
+  extern template class IndexOf<int8_t>;
+  extern template class IndexOf<uint8_t>;
+  extern template class IndexOf<int32_t>;
+  extern template class IndexOf<uint32_t>;
+  extern template class IndexOf<int64_t>;
+#endif
 
   using Index8   = IndexOf<int8_t>;
   using IndexU8  = IndexOf<uint8_t>;

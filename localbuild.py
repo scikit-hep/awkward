@@ -24,13 +24,8 @@ args = arguments.parse_args()
 args.buildpython = not args.no_buildpython
 args.dependencies = not args.no_dependencies
 
-try:
-    git_config = open(".git/config").read()
-except:
-    git_config = ""
-
-if "github.com/scikit-hep/awkward-1.0" not in git_config:
-    arguments.error("localbuild must be executed in the head of the awkward-1.0 tree")
+git_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], stdout=subprocess.PIPE)
+os.chdir(git_root.stdout.decode().strip())
 
 if args.clean:
     for x in ("localbuild", "awkward1", ".pytest_cache", "tests/__pycache__"):
@@ -69,7 +64,7 @@ if (os.stat("CMakeLists.txt").st_mtime >= localbuild_time or
     if os.path.exists("localbuild"):
         shutil.rmtree("localbuild")
 
-    newdir_args = ["-S", ".", "-B", "localbuild"]
+    newdir_args = ["-S", ".", "-Blocalbuild"]
 
     if args.release:
         newdir_args.append("-DCMAKE_BUILD_TYPE=Release")
@@ -86,7 +81,7 @@ if (os.stat("CMakeLists.txt").st_mtime >= localbuild_time or
     json.dump(thisstate, open("localbuild/laststate.json", "w"))
 
 # Build C++ normally; this might be a no-op if make/ninja determines that the build is up-to-date.
-check_call(["cmake", "--build", "localbuild", "-j", args.j])
+check_call(["cmake", "--build", "localbuild", "--", "-j" + args.j])
 
 if args.ctest:
     check_call(["cmake", "--build", "localbuild", "--target", "test", "--", "CTEST_OUTPUT_ON_FAILURE=1", "--no-print-directory"])

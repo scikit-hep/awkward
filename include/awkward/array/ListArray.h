@@ -71,7 +71,7 @@ namespace awkward {
       stops() const;
 
     /// @brief Data referenced by the #starts and #stops to build nested lists.
-    /// 
+    ///
     /// The `content` does not necessarily represent a flattened version of
     /// this array because a single element may belong to multiple lists or
     /// no list at all.
@@ -340,6 +340,12 @@ namespace awkward {
     /// @brief See #content.
     const ContentPtr content_;
   };
+
+#if !defined AWKWARD_LISTARRAY_NO_EXTERN_TEMPLATE && !defined _MSC_VER
+  extern template class ListArrayOf<int32_t>;
+  extern template class ListArrayOf<uint32_t>;
+  extern template class ListArrayOf<int64_t>;
+#endif
 
   using ListArray32  = ListArrayOf<int32_t>;
   using ListArrayU32 = ListArrayOf<uint32_t>;

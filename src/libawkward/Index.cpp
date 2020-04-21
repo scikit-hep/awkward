@@ -5,11 +5,14 @@
 #include <sstream>
 #include <type_traits>
 
+#define AWKWARD_INDEX_NO_EXTERN_TEMPLATE
 #include "awkward/Slice.h"
 
 #include "awkward/Index.h"
 
 namespace awkward {
+  Index::~Index() = default;
+
   template <typename T>
   IndexOf<T>::IndexOf(int64_t length)
       : ptr_(std::shared_ptr<T>(length == 0 ? nullptr : new T[(size_t)length],

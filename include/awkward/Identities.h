@@ -91,6 +91,11 @@ namespace awkward {
                int64_t width,
                int64_t length);
 
+    /// @brief Virtual destructor acts as a first non-inline virtual function
+    /// that determines a specific translation unit in which vtable shall be
+    /// emitted.
+    virtual ~Identities();
+
     /// @brief A globally unique reference to this set of identities.
     const Ref
       ref() const;
@@ -361,6 +366,11 @@ namespace awkward {
     /// @brief See #ptr.
     const std::shared_ptr<T> ptr_;
   };
+
+#if !defined AWKWARD_IDENTITIES_NO_EXTERN_TEMPLATE && !defined _MSC_VER
+  extern template class IdentitiesOf<int32_t>;
+  extern template class IdentitiesOf<int64_t>;
+#endif
 
   using Identities32 = IdentitiesOf<int32_t>;
   using Identities64 = IdentitiesOf<int64_t>;

@@ -22,6 +22,7 @@
 #include "awkward/array/BitMaskedArray.h"
 #include "awkward/array/UnmaskedArray.h"
 
+#define AWKWARD_LISTOFFSETARRAY_NO_EXTERN_TEMPLATE
 #include "awkward/array/ListOffsetArray.h"
 
 namespace awkward {
@@ -1352,7 +1353,8 @@ namespace awkward {
         outstops.ptr().get(),
         distincts.ptr().get(),
         maxcount * outlength,
-        gaps.ptr().get());
+        gaps.ptr().get(),
+        outlength);
       util::handle_error(err6, classname(), identities_.get());
 
       ContentPtr out = std::make_shared<ListArray64>(Identities::none(),

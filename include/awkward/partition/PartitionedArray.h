@@ -18,8 +18,10 @@ namespace awkward {
   public:
     PartitionedArray(const ContentPtrVec& partitions);
 
-    /// @brief Empty destructor; required for some C++ reason.
-    virtual ~PartitionedArray() { }
+    /// @brief Virtual destructor acts as a first non-inline virtual function
+    /// that determines a specific translation unit in which vtable shall be
+    /// emitted.
+    virtual ~PartitionedArray();
 
     /// @brief The partitions as a `std::vector<std::shared_ptr<Content>>`.
     const ContentPtrVec

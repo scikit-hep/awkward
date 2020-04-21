@@ -22,6 +22,7 @@
 #include "awkward/array/RegularArray.h"
 #include "awkward/array/ListOffsetArray.h"
 
+#define AWKWARD_INDEXEDARRAY_NO_EXTERN_TEMPLATE
 #include "awkward/array/IndexedArray.h"
 
 namespace awkward {

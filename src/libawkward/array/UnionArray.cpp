@@ -12,9 +12,10 @@
 #include "awkward/Slice.h"
 #include "awkward/array/EmptyArray.h"
 #include "awkward/array/IndexedArray.h"
-
 #include "awkward/array/NumpyArray.h"
 #include "awkward/array/RegularArray.h"
+
+#define AWKWARD_UNIONARRAY_NO_EXTERN_TEMPLATE
 #include "awkward/array/UnionArray.h"
 
 namespace awkward {

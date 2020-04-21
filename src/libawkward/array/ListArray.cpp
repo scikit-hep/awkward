@@ -21,6 +21,7 @@
 #include "awkward/array/BitMaskedArray.h"
 #include "awkward/array/UnmaskedArray.h"
 
+#define AWKWARD_LISTARRAY_NO_EXTERN_TEMPLATE
 #include "awkward/array/ListArray.h"
 
 namespace awkward {
