@@ -2352,7 +2352,7 @@ namespace awkward {
                                  ascending,
                                  stable);
       }
-      else if (format_.compare("B") == 0  or  format_.compare("c") == 0) {
+      else if ((format_.compare("B") == 0)  or  (format_.compare("c") == 0)) {
         ptr = array_sort<uint8_t>(reinterpret_cast<uint8_t*>(ptr_.get()),
                                   offset,
                                   starts,
@@ -2523,7 +2523,7 @@ namespace awkward {
                                  ascending,
                                  stable);
       }
-      else if (format_.compare("B") == 0  or  format_.compare("c") == 0) {
+      else if ((format_.compare("B") == 0)  or  (format_.compare("c") == 0)) {
         ptr = index_sort<uint8_t>(reinterpret_cast<uint8_t*>(ptr_.get()),
                                   length(),
                                   offset,
