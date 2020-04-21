@@ -1793,7 +1793,8 @@ namespace awkward {
 
       Index64 outstarts(outlength);
       Index64 outstops(outlength);
-      struct Error err6 = awkward_listoffsetarray_reduce_nonlocal_outstartsstops_64(
+      struct Error err6 =
+        awkward_listoffsetarray_reduce_nonlocal_outstartsstops_64(
         outstarts.ptr().get(),
         outstops.ptr().get(),
         distincts.ptr().get(),

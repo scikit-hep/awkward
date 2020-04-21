@@ -748,19 +748,19 @@ namespace awkward {
       int64_t next_stop = ranges[index + 1];
 
       while(next_start < length) {
-        if(ascending  and  not stable) {
+        if(ascending  &&  !stable) {
           std::sort(result.begin() + next_start, result.begin() + next_stop,
             [&data](size_t i1, size_t i2) {return data[i1] < data[i2];});
         }
-        else if(not ascending  and  not stable) {
+        else if(!ascending  &&  !stable) {
           std::sort(result.begin() + next_start, result.begin() + next_stop,
             [&data](size_t i1, size_t i2) {return data[i1] > data[i2];});
         }
-        else if(ascending  and  stable) {
+        else if(ascending  &&  stable) {
           std::stable_sort(result.begin() + next_start, result.begin() + next_stop,
             [&data](size_t i1, size_t i2) {return data[i1] < data[i2];});
         }
-        else if(not ascending  and  stable) {
+        else if(!ascending  &&  stable) {
           std::stable_sort(result.begin() + next_start, result.begin() + next_stop,
             [&data](size_t i1, size_t i2) {return data[i1] > data[i2];});
         }
@@ -807,19 +807,19 @@ namespace awkward {
                            last_stop;
 
       while(next_start < last_stop) {
-        if(ascending  and  not stable) {
+        if(ascending  &&  !stable) {
           std::sort(result.begin() + next_start, result.begin() + next_stop,
             [&data](size_t i1, size_t i2) {return data[i1] < data[i2];});
         }
-        else if(not ascending  and  not stable) {
+        else if(!ascending  &&  !stable) {
           std::sort(result.begin() + next_start, result.begin() + next_stop,
             [&data](size_t i1, size_t i2) {return data[i1] > data[i2];});
         }
-        else if(ascending  and  stable) {
+        else if(ascending  &&  stable) {
           std::stable_sort(result.begin() + next_start, result.begin() + next_stop,
             [&data](size_t i1, size_t i2) {return data[i1] < data[i2];});
         }
-        else if(not ascending  and  stable) {
+        else if(!ascending  &&  stable) {
           std::stable_sort(result.begin() + next_start, result.begin() + next_stop,
             [&data](size_t i1, size_t i2) {return data[i1] > data[i2];});
         }

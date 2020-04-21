@@ -2394,19 +2394,15 @@ ERROR awkward_listoffsetarray_reduce_local_outoffsets_64(
   int64_t lenparents,
   int64_t outlength) {
   outoffsets[outlength] = lenparents;
-  for(int64_t i = 0; i < outlength + 1; i++) {
-    outoffsets[i] = lenparents;
-  }
   int64_t k = 0;
   int64_t last = -1;
-    for (int64_t i = 0;  i < lenparents;  i++) {
-      while (last < parents[parentsoffset + i]) {
-        outoffsets[k] = i;
-        k++;
-        last++;
+  for (int64_t i = 0;  i < lenparents;  i++) {
+    while (last < parents[parentsoffset + i]) {
+      outoffsets[k] = i;
+      k++;
+      last++;
     }
   }
-
   return success();
 }
 
