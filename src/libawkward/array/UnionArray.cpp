@@ -1588,8 +1588,8 @@ namespace awkward {
                                 bool ascending,
                                 bool stable) const {
     ContentPtr simplified = simplify_uniontype(true);
-    if (dynamic_cast<UnionArray8_32*>(simplified.get())  or
-        dynamic_cast<UnionArray8_U32*>(simplified.get())  or
+    if (dynamic_cast<UnionArray8_32*>(simplified.get())  ||
+        dynamic_cast<UnionArray8_U32*>(simplified.get())  ||
         dynamic_cast<UnionArray8_64*>(simplified.get())) {
       throw std::invalid_argument(std::string("cannot sort ") + classname());
     }
@@ -1610,8 +1610,8 @@ namespace awkward {
                                    bool ascending,
                                    bool stable) const {
     ContentPtr simplified = simplify_uniontype(true);
-    if (dynamic_cast<UnionArray8_32*>(simplified.get())  or
-        dynamic_cast<UnionArray8_U32*>(simplified.get())  or
+    if (dynamic_cast<UnionArray8_32*>(simplified.get())  ||
+        dynamic_cast<UnionArray8_U32*>(simplified.get())  ||
         dynamic_cast<UnionArray8_64*>(simplified.get())) {
       throw std::invalid_argument(std::string("cannot sort ") + classname());
     }
