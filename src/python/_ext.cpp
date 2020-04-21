@@ -97,7 +97,7 @@ PYBIND11_MODULE(_ext, m) {
   // make_IndexedOptionForm(m, "IndexedOptionForm");
   // make_ListForm(m, "ListForm");
   // make_ListOffsetForm(m, "ListOffsetForm");
-  // make_NumpyForm(m, "NumpyForm");
+  make_NumpyForm(m, "NumpyForm");
   // make_RecordForm(m, "RecordForm");
   // make_RegularForm(m, "RegularForm");
   // make_UnionForm(m, "UnionForm");

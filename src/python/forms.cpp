@@ -37,47 +37,6 @@ parameter(const T& self, const std::string& key) {
   return py::module::import("json").attr("loads")(pyvalue);
 }
 
-ak::Index::Form
-str2index(const std::string& form) {
-  if (strncmp(form.c_str(), "i8", form.length()) == 0) {
-    return ak::Index::Form::i8;
-  }
-  else if (strncmp(form.c_str(), "u8", form.length()) == 0) {
-    return ak::Index::Form::u8;
-  }
-  else if (strncmp(form.c_str(), "i32", form.length()) == 0) {
-    return ak::Index::Form::i8;
-  }
-  else if (strncmp(form.c_str(), "u32", form.length()) == 0) {
-    return ak::Index::Form::u8;
-  }
-  else if (strncmp(form.c_str(), "i64", form.length()) == 0) {
-    return ak::Index::Form::i64;
-  }
-  else {
-    throw std::invalid_argument(
-              std::string("unrecognized Index::Form: ") + form);
-  }
-}
-
-const std::string
-index2str(ak::Index::Form form) {
-  switch (form) {
-    case ak::Index::Form::i8:
-      return "i8";
-    case ak::Index::Form::u8:
-      return "u8";
-    case ak::Index::Form::i32:
-      return "i32";
-    case ak::Index::Form::u32:
-      return "u32";
-    case ak::Index::Form::i64:
-      return "i64";
-    default:
-      throw std::runtime_error("unrecognized Index::Form");
-  }
-}
-
 template <typename T>
 py::class_<T, ak::Form>
 form_methods(py::class_<T, std::shared_ptr<T>, ak::Form>& x) {
@@ -108,7 +67,7 @@ make_BitMaskedForm(const py::handle& m, const std::string& name) {
                        const py::object& parameters) -> ak::BitMaskedForm {
         return ak::BitMaskedForm(has_identities,
                                  dict2parameters(parameters),
-                                 str2index(mask),
+                                 ak::Index::str2form(mask),
                                  content,
                                  valid_when,
                                  lsb_order);
@@ -121,7 +80,7 @@ make_BitMaskedForm(const py::handle& m, const std::string& name) {
            py::arg("parameters") = py::none())
       .def_property_readonly("mask", [](const ak::BitMaskedForm& self)
                                      -> std::string {
-        return index2str(self.mask());
+        return ak::Index::form2str(self.mask());
       })
       .def_property_readonly("content", &ak::BitMaskedForm::content)
       .def_property_readonly("valid_when", &ak::BitMaskedForm::valid_when)
@@ -161,10 +120,32 @@ make_BitMaskedForm(const py::handle& m, const std::string& name) {
 
 // }
 
-// py::class_<ak::NumpyForm, std::shared_ptr<ak::NumpyForm>, ak::Form>
-// make_NumpyForm(const py::handle& m, const std::string& name) {
-
-// }
+py::class_<ak::NumpyForm, std::shared_ptr<ak::NumpyForm>, ak::Form>
+make_NumpyForm(const py::handle& m, const std::string& name) {
+  return form_methods(py::class_<ak::NumpyForm,
+                      std::shared_ptr<ak::NumpyForm>,
+                      ak::Form>(m, name.c_str())
+      .def(py::init([](const std::vector<int64_t>& inner_shape,
+                       int64_t itemsize,
+                       const std::string& format,
+                       bool has_identities,
+                       const py::object& parameters) -> ak::NumpyForm {
+        return ak::NumpyForm(has_identities,
+                             dict2parameters(parameters),
+                             inner_shape,
+                             itemsize,
+                             format);
+      }),
+           py::arg("inner_shape"),
+           py::arg("itemsize"),
+           py::arg("format"),
+           py::arg("has_identities") = false,
+           py::arg("parameters") = py::none())
+      .def_property_readonly("inner_shape", &ak::NumpyForm::inner_shape)
+      .def_property_readonly("itemsize", &ak::NumpyForm::itemsize)
+      .def_property_readonly("format", &ak::NumpyForm::format)
+  );
+}
 
 // py::class_<ak::RecordForm, std::shared_ptr<ak::RecordForm>, ak::Form>
 // make_RecordForm(const py::handle& m, const std::string& name) {

@@ -22,7 +22,7 @@ import awkward1.operations.structure
 _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
 class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
-            awkward1._connect._pandas.PandasMixin, Sequence):
+            awkward1._connect._pandas.PandasMixin):
     """
     Args:
         data (#ak.layout.Content, #ak.Array, np.ndarray, str, or iterable):
@@ -1793,7 +1793,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
               awkward1._connect._numba.arrayview.RecordView.fromrecord(self)
         return numba.typeof(self._numbaview)
 
-class ArrayBuilder(Sequence):
+class ArrayBuilder(object):
     """
     Args:
         behavior (None or dict): Custom #ak.behavior for arrays built by

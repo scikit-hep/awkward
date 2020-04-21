@@ -153,22 +153,82 @@ namespace awkward {
 
   void
   NumpyForm::tojson_part(ToJson& builder, bool verbose) const {
-    builder.beginrecord();
-    identities_tojson(builder, verbose);
-    parameters_tojson(builder, verbose);
-    if (verbose  ||  !inner_shape_.empty()) {
-      builder.field("inner_shape");
-      builder.beginlist();
-      for (auto x : inner_shape_) {
-        builder.integer(x);
-      }
-      builder.endlist();
+    std::string dtype;
+    if (format_.compare("d") == 0) {
+      dtype = "float64";
     }
-    builder.field("itemsize");
-    builder.integer(itemsize_);
-    builder.field("format");
-    builder.string(format_.c_str(), format_.length());
-    builder.endrecord();
+    else if (format_.compare("f") == 0) {
+      dtype = "float32";
+    }
+#if defined _MSC_VER || defined __i386__
+    else if (format_.compare("q") == 0) {
+#else
+    else if (format_.compare("l") == 0) {
+#endif
+      dtype = "int64";
+    }
+#if defined _MSC_VER || defined __i386__
+    else if (format_.compare("Q") == 0) {
+#else
+    else if (format_.compare("L") == 0) {
+#endif
+      dtype = "uint64";
+    }
+#if defined _MSC_VER || defined __i386__
+    else if (format_.compare("l") == 0) {
+#else
+    else if (format_.compare("i") == 0) {
+#endif
+      dtype = "int32";
+    }
+#if defined _MSC_VER || defined __i386__
+    else if (format_.compare("L") == 0) {
+#else
+    else if (format_.compare("I") == 0) {
+#endif
+      dtype = "uint32";
+    }
+    else if (format_.compare("h") == 0) {
+      dtype = "int16";
+    }
+    else if (format_.compare("H") == 0) {
+      dtype = "uint16";
+    }
+    else if (format_.compare("b") == 0) {
+      dtype = "int8";
+    }
+    else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
+      dtype = "uint8";
+    }
+    else if (format_.compare("?") == 0) {
+      dtype = "bool";
+    }
+
+    if (verbose  ||  dtype.empty()) {
+      builder.beginrecord();
+      identities_tojson(builder, verbose);
+      parameters_tojson(builder, verbose);
+      if (verbose  ||  !inner_shape_.empty()) {
+        builder.field("inner_shape");
+        builder.beginlist();
+        for (auto x : inner_shape_) {
+          builder.integer(x);
+        }
+        builder.endlist();
+      }
+      builder.field("itemsize");
+      builder.integer(itemsize_);
+      builder.field("format");
+      builder.string(format_.c_str(), format_.length());
+      if (!dtype.empty()) {
+        builder.field("dtype");
+        builder.string(dtype.c_str(), dtype.length());
+      }
+      builder.endrecord();
+    }
+    else {
+      builder.string(dtype.c_str(), dtype.length());
+    }
   }
 
   const FormPtr

@@ -32,6 +32,14 @@ namespace awkward {
     /// @brief Integer type of an Index, used by ListForm, IndexedForm, etc.
     enum class Form {i8, u8, i32, u32, i64, kNumIndexForm};
 
+    /// @brief Converts a string into a Form enumeration.
+    static Form
+      str2form(const std::string& str);
+
+    /// @brief Converts a Form enumeration into a string.
+    static const std::string
+      form2str(Form form);
+
     /// @brief Virtual destructor acts as a first non-inline virtual function
     /// that determines a specific translation unit in which vtable shall be
     /// emitted.

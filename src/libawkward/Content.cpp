@@ -36,7 +36,16 @@ namespace awkward {
 
   const std::string
   Form::tojson(bool pretty, bool verbose) const {
-    throw std::runtime_error("FIXME: Form::tojson");
+    if (pretty) {
+      ToJsonPrettyString builder(-1);
+      tojson_part(builder, verbose);
+      return builder.tostring();
+    }
+    else {
+      ToJsonString builder(-1);
+      tojson_part(builder, verbose);
+      return builder.tostring();
+    }
   }
 
   bool

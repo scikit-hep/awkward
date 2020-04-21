@@ -11,6 +11,47 @@
 #include "awkward/Index.h"
 
 namespace awkward {
+  Index::Form
+  Index::str2form(const std::string& str) {
+    if (strncmp(str.c_str(), "i8", str.length()) == 0) {
+      return Index::Form::i8;
+    }
+    else if (strncmp(str.c_str(), "u8", str.length()) == 0) {
+      return Index::Form::u8;
+    }
+    else if (strncmp(str.c_str(), "i32", str.length()) == 0) {
+      return Index::Form::i8;
+    }
+    else if (strncmp(str.c_str(), "u32", str.length()) == 0) {
+      return Index::Form::u8;
+    }
+    else if (strncmp(str.c_str(), "i64", str.length()) == 0) {
+      return Index::Form::i64;
+    }
+    else {
+      throw std::invalid_argument(
+                std::string("unrecognized Index::Form: ") + str);
+    }
+  }
+
+  const std::string
+  Index::form2str(Index::Form form) {
+    switch (form) {
+    case Index::Form::i8:
+      return "i8";
+    case Index::Form::u8:
+      return "u8";
+    case Index::Form::i32:
+      return "i32";
+    case Index::Form::u32:
+      return "u32";
+    case Index::Form::i64:
+      return "i64";
+    default:
+      throw std::runtime_error("unrecognized Index::Form");
+    }
+  }
+
   Index::~Index() = default;
 
   template <typename T>

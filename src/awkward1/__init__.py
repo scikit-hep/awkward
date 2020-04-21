@@ -15,6 +15,7 @@ if (distutils.version.LooseVersion(numpy.__version__) <
 # shims for C++ (now everything is compiled into one 'awkward1._ext' module)
 import awkward1.layout
 import awkward1.types
+import awkward1.forms
 import awkward1.partition
 
 # third-party connectors
