@@ -46,7 +46,11 @@ namespace awkward {
 
   const TypePtr
   RegularForm::type(const util::TypeStrs& typestrs) const {
-    throw std::runtime_error("RegularForm::type");
+    return std::make_shared<RegularType>(
+               parameters_,
+               util::gettypestr(parameters_, typestrs),
+               content_.get()->type(typestrs),
+               size_);
   }
 
   void
@@ -261,11 +265,7 @@ namespace awkward {
 
   const TypePtr
   RegularArray::type(const util::TypeStrs& typestrs) const {
-    return std::make_shared<RegularType>(
-      parameters_,
-      util::gettypestr(parameters_, typestrs),
-      content_.get()->type(typestrs),
-      size_);
+    return form().get()->type(typestrs);
   }
 
   const FormPtr

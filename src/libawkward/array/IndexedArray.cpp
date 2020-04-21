@@ -48,7 +48,9 @@ namespace awkward {
 
   const TypePtr
   IndexedForm::type(const util::TypeStrs& typestrs) const {
-    throw std::runtime_error("IndexedForm::type");
+    TypePtr out = content_.get()->type(typestrs);
+    out.get()->setparameters(parameters_);
+    return out;
   }
 
   void
@@ -86,7 +88,10 @@ namespace awkward {
 
   const TypePtr
   IndexedOptionForm::type(const util::TypeStrs& typestrs) const {
-    throw std::runtime_error("IndexedOptionForm::type");
+    return std::make_shared<OptionType>(
+               parameters_,
+               util::gettypestr(parameters_, typestrs),
+               content_.get()->type(typestrs));
   }
 
   void
@@ -686,17 +691,7 @@ namespace awkward {
   template <typename T, bool ISOPTION>
   const TypePtr
   IndexedArrayOf<T, ISOPTION>::type(const util::TypeStrs& typestrs) const {
-    if (ISOPTION) {
-      return std::make_shared<OptionType>(
-        parameters_,
-        util::gettypestr(parameters_, typestrs),
-        content_.get()->type(typestrs));
-    }
-    else {
-      TypePtr out = content_.get()->type(typestrs);
-      out.get()->setparameters(parameters_);
-      return out;
-    }
+    return form().get()->type(typestrs);
   }
 
   template <typename T, bool ISOPTION>

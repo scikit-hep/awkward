@@ -57,7 +57,10 @@ namespace awkward {
 
   const TypePtr
   BitMaskedForm::type(const util::TypeStrs& typestrs) const {
-    throw std::runtime_error("BitMaskedForm::type");
+    return std::make_shared<OptionType>(
+               parameters_,
+               util::gettypestr(parameters_, typestrs),
+               content_.get()->type(typestrs));
   }
 
   void
@@ -296,10 +299,7 @@ namespace awkward {
 
   const TypePtr
   BitMaskedArray::type(const util::TypeStrs& typestrs) const {
-    return std::make_shared<OptionType>(
-      parameters_,
-      util::gettypestr(parameters_, typestrs),
-      content_.get()->type(typestrs));
+    return form().get()->type(typestrs);
   }
 
   const FormPtr

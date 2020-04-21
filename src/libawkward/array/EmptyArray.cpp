@@ -22,7 +22,9 @@ namespace awkward {
 
   const TypePtr
   EmptyForm::type(const util::TypeStrs& typestrs) const {
-    throw std::runtime_error("EmptyForm::type");
+    return std::make_shared<UnknownType>(
+               parameters_,
+               util::gettypestr(parameters_, typestrs));
   }
 
   void
@@ -81,9 +83,7 @@ namespace awkward {
 
   const TypePtr
   EmptyArray::type(const util::TypeStrs& typestrs) const {
-    return std::make_shared<UnknownType>(parameters_,
-                                         util::gettypestr(parameters_,
-                                                          typestrs));
+    return form().get()->type(typestrs);
   }
 
   const FormPtr

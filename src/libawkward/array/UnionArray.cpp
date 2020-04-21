@@ -48,7 +48,14 @@ namespace awkward {
 
   const TypePtr
   UnionForm::type(const util::TypeStrs& typestrs) const {
-    throw std::runtime_error("UnionForm::type");
+    std::vector<TypePtr> types;
+    for (auto item : contents_) {
+      types.push_back(item.get()->type(typestrs));
+    }
+    return std::make_shared<UnionType>(
+               parameters_,
+               util::gettypestr(parameters_, typestrs),
+               types);
   }
 
   void
@@ -593,13 +600,7 @@ namespace awkward {
   template <typename T, typename I>
   const TypePtr
   UnionArrayOf<T, I>::type(const util::TypeStrs& typestrs) const {
-    std::vector<TypePtr> types;
-    for (auto item : contents_) {
-      types.push_back(item.get()->type(typestrs));
-    }
-    return std::make_shared<UnionType>(parameters_,
-                                       util::gettypestr(parameters_, typestrs),
-                                       types);
+    return form().get()->type(typestrs);
   }
 
   template <typename T, typename I>

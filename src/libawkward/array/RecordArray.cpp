@@ -42,7 +42,15 @@ namespace awkward {
 
   const TypePtr
   RecordForm::type(const util::TypeStrs& typestrs) const {
-    throw std::runtime_error("RecordForm::type");
+    std::vector<TypePtr> types;
+    for (auto item : contents_) {
+      types.push_back(item.get()->type(typestrs));
+    }
+    return std::make_shared<RecordType>(
+               parameters_,
+               util::gettypestr(parameters_, typestrs),
+               types,
+               recordlookup_);
   }
 
   void
@@ -264,14 +272,7 @@ namespace awkward {
 
   const TypePtr
   RecordArray::type(const util::TypeStrs& typestrs) const {
-    std::vector<TypePtr> types;
-    for (auto item : contents_) {
-      types.push_back(item.get()->type(typestrs));
-    }
-    return std::make_shared<RecordType>(
-      parameters_,
-      util::gettypestr(parameters_, typestrs),
-      types, recordlookup_);
+    return form().get()->type(typestrs);
   }
 
   const FormPtr

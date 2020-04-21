@@ -48,7 +48,10 @@ namespace awkward {
 
   const TypePtr
   ListOffsetForm::type(const util::TypeStrs& typestrs) const {
-    throw std::runtime_error("ListOffsetForm::type");
+    return std::make_shared<ListType>(
+               parameters_,
+               util::gettypestr(parameters_, typestrs),
+               content_.get()->type(typestrs));
   }
 
   void
@@ -338,9 +341,7 @@ namespace awkward {
   template <typename T>
   const TypePtr
   ListOffsetArrayOf<T>::type(const util::TypeStrs& typestrs) const {
-    return std::make_shared<ListType>(parameters_,
-                                      util::gettypestr(parameters_, typestrs),
-                                      content_.get()->type(typestrs));
+    return form().get()->type(typestrs);
   }
 
   template <typename T>

@@ -83,9 +83,7 @@ namespace awkward {
 
   const TypePtr
   Record::type(const util::TypeStrs& typestrs) const {
-    TypePtr out = array_.get()->type(typestrs);
-    out.get()->setparameters(parameters_);
-    return out;
+    return form().get()->type(typestrs);
   }
 
   const FormPtr

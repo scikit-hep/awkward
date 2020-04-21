@@ -36,7 +36,10 @@ namespace awkward {
 
   const TypePtr
   UnmaskedForm::type(const util::TypeStrs& typestrs) const {
-    throw std::runtime_error("UnmaskedForm::type");
+    return std::make_shared<OptionType>(
+      parameters_,
+      util::gettypestr(parameters_, typestrs),
+      content_.get()->type(typestrs));
   }
 
   void
@@ -213,10 +216,7 @@ namespace awkward {
   const TypePtr
   UnmaskedArray::type(const std::map<std::string,
                       std::string>& typestrs) const {
-    return std::make_shared<OptionType>(
-      parameters_,
-      util::gettypestr(parameters_, typestrs),
-      content_.get()->type(typestrs));
+    return form().get()->type(typestrs);
   }
 
   const FormPtr
