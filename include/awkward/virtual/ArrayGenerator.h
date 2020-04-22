@@ -21,12 +21,21 @@ namespace awkward {
     /// The #form can be `nullptr`, in which case the generated array can have
     /// any Form and any Type, but doing so would cause VirtualArray to
     /// materialize in more circumstances, undermining its usefulness.
-    ArrayGenerator(const FormPtr& form);
+    ///
+    /// Similarly, the #length can be specified to avoid materializing a
+    /// VirtualArray when its length must be known. Any negative value,
+    /// such as -1, is interpreted as "unknown."
+    ArrayGenerator(const FormPtr& form, int64_t length);
 
     /// @brief The Form the generated array is expected to take; may be
     /// `nullptr`.
     const FormPtr
       form() const;
+
+    /// @brief The length the generated array is expected to have; may
+    /// be negative to indicate that the length is unknown.
+    int64_t
+      length() const;
 
     /// @brief Creates an array but does not check it against the #form.
     virtual const ContentPtr
@@ -38,6 +47,7 @@ namespace awkward {
 
   protected:
     const FormPtr form_;
+    int64_t length_;
   };
 
   using ArrayGeneratorPtr = std::shared_ptr<ArrayGenerator>;

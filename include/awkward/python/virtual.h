@@ -14,6 +14,7 @@ namespace ak = awkward;
 class PyArrayGenerator: public ak::ArrayGenerator {
 public:
   PyArrayGenerator(const ak::FormPtr& form,
+                   int64_t length,
                    const py::object& callable,
                    const py::tuple& args,
                    const py::dict& kwargs);

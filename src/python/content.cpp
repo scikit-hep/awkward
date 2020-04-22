@@ -5,6 +5,8 @@
 #include "awkward/python/identities.h"
 #include "awkward/python/util.h"
 
+#include "awkward/python/virtual.h"
+
 #include "awkward/python/content.h"
 
 ////////// boxing
@@ -2009,3 +2011,52 @@ template py::class_<ak::UnionArray8_64,
                     std::shared_ptr<ak::UnionArray8_64>,
                     ak::Content>
 make_UnionArrayOf(const py::handle& m, const std::string& name);
+
+////////// VirtualArray
+
+py::class_<ak::VirtualArray, std::shared_ptr<ak::VirtualArray>, ak::Content>
+make_VirtualArray(const py::handle& m, const std::string& name) {
+  return content_methods(py::class_<ak::VirtualArray,
+                         std::shared_ptr<ak::VirtualArray>,
+                         ak::Content>(m, name.c_str())
+      .def(py::init([](const std::shared_ptr<PyArrayGenerator>& generator,
+                       const py::object& cache,
+                       const py::object& identities,
+                       const py::object& parameters) -> ak::VirtualArray {
+        std::shared_ptr<PyArrayCache> cppcache(nullptr);
+        if (!cache.is(py::none())) {
+          try {
+            cppcache = cache.cast<std::shared_ptr<PyArrayCache>>();
+          }
+          catch (py::cast_error err) {
+            throw std::invalid_argument(
+                "VirtualArray 'cache' must be an ArrayCache or None");
+          }
+        }
+        return ak::VirtualArray(
+          unbox_identities_none(identities),
+          dict2parameters(parameters),
+          generator,
+          cppcache);
+      }), py::arg("generator"),
+          py::arg("cache") = py::none(),
+          py::arg("identities") = py::none(),
+          py::arg("parameters") = py::none())
+      .def_property_readonly("generator", &ak::VirtualArray::generator)
+      .def_property_readonly("cache", &ak::VirtualArray::cache)
+      .def_property_readonly("peek_array", [](const ak::VirtualArray& self)
+                                           -> py::object {
+        std::shared_ptr<ak::Content> out = self.peek_array();
+        if (out.get() == nullptr) {
+          return py::none();
+        }
+        else {
+          return box(out);
+        }
+      })
+      .def_property_readonly("array", [](const ak::VirtualArray& self)
+                                      -> py::object {
+        return box(self.array());
+      })
+  );
+}

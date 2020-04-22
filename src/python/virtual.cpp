@@ -7,10 +7,11 @@
 #include "awkward/python/virtual.h"
 
 PyArrayGenerator::PyArrayGenerator(const ak::FormPtr& form,
+                                   int64_t length,
                                    const py::object& callable,
                                    const py::tuple& args,
                                    const py::dict& kwargs)
-    : ArrayGenerator(form)
+    : ArrayGenerator(form, length)
     , callable_(callable)
     , args_(args)
     , kwargs_(kwargs) { }
@@ -27,7 +28,8 @@ make_PyArrayGenerator(const py::handle& m, const std::string& name) {
       .def(py::init([](const py::object& callable,
                        const py::tuple& args,
                        const py::dict& kwargs,
-                       const py::object& form) -> PyArrayGenerator {
+                       const py::object& form,
+                       const py::object& length) -> PyArrayGenerator {
         ak::FormPtr cppform(nullptr);
         if (!form.is(py::none())) {
           try {
@@ -38,18 +40,38 @@ make_PyArrayGenerator(const py::handle& m, const std::string& name) {
                 "PyArrayGenerator 'form' must be an ak.forms.Form or None");
           }
         }
-        return PyArrayGenerator(cppform, callable, args, kwargs);
+        int64_t cpplength = -1;
+        if (!length.is(py::none())) {
+          try {
+            cpplength = form.cast<int64_t>();
+          }
+          catch (py::cast_error err) {
+            throw std::invalid_argument(
+                "PyArrayGenerator 'length' must be an int or None");
+          }
+        }
+        return PyArrayGenerator(cppform, cpplength, callable, args, kwargs);
       }), py::arg("callable")
         , py::arg("args") = py::tuple(0)
         , py::arg("kwargs") = py::dict()
-        , py::arg("form") = py::none())
+        , py::arg("form") = py::none()
+        , py::arg("length") = py::none())
       .def("form", [](const PyArrayGenerator& self) -> py::object {
         ak::FormPtr form = self.form();
         if (form.get() == nullptr) {
           return py::none();
         }
         else {
-          py::cast(form.get());
+          return py::cast(form.get());
+        }
+      })
+      .def("length", [](const PyArrayGenerator& self) -> py::object {
+        int64_t length = self.length();
+        if (length < 0) {
+          return py::none();
+        }
+        else {
+          return py::cast(length);
         }
       })
       .def("__call__", [](const PyArrayGenerator& self) -> py::object {

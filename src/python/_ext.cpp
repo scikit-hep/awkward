@@ -72,6 +72,8 @@ PYBIND11_MODULE(_ext, m) {
   make_UnionArrayOf<int8_t, uint32_t>(m, "UnionArray8_U32");
   make_UnionArrayOf<int8_t, int64_t>(m,  "UnionArray8_64");
 
+  make_VirtualArray(m, "VirtualArray");
+
   m.def("_slice_tostring", [](py::object obj) -> std::string {
     return toslice(obj).tostring();
   });
@@ -106,8 +108,8 @@ PYBIND11_MODULE(_ext, m) {
 
   ////////// virtual.h
 
-  make_PyArrayGenerator(m, "PyArrayGenerator");
-  make_PyArrayCache(m, "PyArrayCache");
+  make_PyArrayGenerator(m, "ArrayGenerator");
+  make_PyArrayCache(m, "ArrayCache");
 
   ////////// io.h
 

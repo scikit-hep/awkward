@@ -3,12 +3,18 @@
 #include "awkward/virtual/ArrayGenerator.h"
 
 namespace awkward {
-  ArrayGenerator::ArrayGenerator(const FormPtr& form)
-      : form_(form) { }
+  ArrayGenerator::ArrayGenerator(const FormPtr& form, int64_t length)
+      : form_(form)
+      , length_(length) { }
 
   const FormPtr
   ArrayGenerator::form() const {
     return form_;
+  }
+
+  int64_t
+  ArrayGenerator::length() const {
+    return length_;
   }
 
   const ContentPtr
