@@ -8,6 +8,8 @@
 
 #include "awkward/python/virtual.h"
 
+////////// PyArrayGenerator
+
 PyArrayGenerator::PyArrayGenerator(const ak::FormPtr& form,
                                    int64_t length,
                                    const py::object& callable,
@@ -35,7 +37,10 @@ PyArrayGenerator::kwargs() const {
 
 const ak::ContentPtr
 PyArrayGenerator::generate() const {
-  return unbox_content(callable_(*args_, **kwargs_));
+  py::object out = callable_(*args_, **kwargs_);
+  py::object layout = py::module::import("awkward1").attr("to_layout")(
+                                        out, py::cast(false), py::cast(false));
+  return unbox_content(layout);
 }
 
 const std::string
@@ -72,7 +77,7 @@ make_PyArrayGenerator(const py::handle& m, const std::string& name) {
           }
           catch (py::cast_error err) {
             throw std::invalid_argument(
-                "PyArrayGenerator 'form' must be an ak.forms.Form or None");
+                "ArrayGenerator 'form' must be an ak.forms.Form or None");
           }
         }
         int64_t cpplength = -1;
@@ -82,7 +87,7 @@ make_PyArrayGenerator(const py::handle& m, const std::string& name) {
           }
           catch (py::cast_error err) {
             throw std::invalid_argument(
-                "PyArrayGenerator 'length' must be an int or None");
+                "ArrayGenerator 'length' must be an int or None");
           }
         }
         return PyArrayGenerator(cppform, cpplength, callable, args, kwargs);
@@ -91,7 +96,8 @@ make_PyArrayGenerator(const py::handle& m, const std::string& name) {
         , py::arg("kwargs") = py::dict()
         , py::arg("form") = py::none()
         , py::arg("length") = py::none())
-      .def("form", [](const PyArrayGenerator& self) -> py::object {
+      .def_property_readonly("form", [](const PyArrayGenerator& self)
+                                     -> py::object {
         ak::FormPtr form = self.form();
         if (form.get() == nullptr) {
           return py::none();
@@ -100,7 +106,8 @@ make_PyArrayGenerator(const py::handle& m, const std::string& name) {
           return py::cast(form.get());
         }
       })
-      .def("length", [](const PyArrayGenerator& self) -> py::object {
+      .def_property_readonly("length", [](const PyArrayGenerator& self)
+                                       -> py::object {
         int64_t length = self.length();
         if (length < 0) {
           return py::none();
@@ -117,6 +124,97 @@ make_PyArrayGenerator(const py::handle& m, const std::string& name) {
       })
   );
 }
+
+////////// SliceGenerator
+
+py::class_<ak::SliceGenerator, std::shared_ptr<ak::SliceGenerator>>
+make_SliceGenerator(const py::handle& m, const std::string& name) {
+  return (py::class_<ak::SliceGenerator,
+                     std::shared_ptr<ak::SliceGenerator>>(m, name.c_str())
+      .def(py::init([](const py::object& generator,
+                       const py::object& slice,
+                       const py::object& form,
+                       const py::object& length) -> ak::SliceGenerator {
+        ak::FormPtr cppform(nullptr);
+        if (!form.is(py::none())) {
+          try {
+            cppform = form.cast<ak::Form*>()->shallow_copy();
+          }
+          catch (py::cast_error err) {
+            throw std::invalid_argument(
+                "SliceGenerator 'form' must be an ak.forms.Form or None");
+          }
+        }
+        int64_t cpplength = -1;
+        if (!length.is(py::none())) {
+          try {
+            cpplength = length.cast<int64_t>();
+          }
+          catch (py::cast_error err) {
+            throw std::invalid_argument(
+                "SliceGenerator 'length' must be an int or None");
+          }
+        }
+        std::shared_ptr<ak::ArrayGenerator> cppgenerator(nullptr);
+        try {
+          cppgenerator = generator.cast<std::shared_ptr<PyArrayGenerator>>();
+        }
+        catch (py::cast_error err) {
+          try {
+            cppgenerator = generator.cast<std::shared_ptr<ak::SliceGenerator>>();
+          }
+          catch (py::cast_error err) {
+            throw std::invalid_argument(
+              "generator must be an ArrayGenerator or another SliceGenerator");
+          }
+        }
+        ak::Slice cppslice = toslice(slice);
+        return ak::SliceGenerator(cppform, cpplength, cppgenerator, cppslice);
+      }), py::arg("generator")
+        , py::arg("slice")
+        , py::arg("form") = py::none()
+        , py::arg("length") = py::none())
+      .def_property_readonly("form",
+                             [](const ak::SliceGenerator& self) -> py::object {
+        ak::FormPtr form = self.form();
+        if (form.get() == nullptr) {
+          return py::none();
+        }
+        else {
+          return py::cast(form.get());
+        }
+      })
+      .def_property_readonly("length",
+                             [](const ak::SliceGenerator& self) -> py::object {
+        int64_t length = self.length();
+        if (length < 0) {
+          return py::none();
+        }
+        else {
+          return py::cast(length);
+        }
+      })
+      .def_property_readonly("generator",
+                             [](const ak::SliceGenerator& self) -> py::object {
+        std::shared_ptr<ak::ArrayGenerator> out = self.generator();
+        if (std::shared_ptr<ak::SliceGenerator> ptr =
+            std::dynamic_pointer_cast<ak::SliceGenerator>(out)) {
+          return py::cast(ptr);
+        }
+        else {
+          return py::cast(out);
+        }
+      })
+      .def("__call__", [](const ak::SliceGenerator& self) -> py::object {
+        return box(self.generate_and_check());
+      })
+      .def("__repr__", [](const ak::SliceGenerator& self) -> std::string {
+        return self.tostring_part("", "", "");
+      })
+  );
+}
+
+////////// PyArrayCache
 
 PyArrayCache::PyArrayCache(const py::object& mutablemapping)
     : mutablemapping_(mutablemapping) { }

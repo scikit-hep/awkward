@@ -109,6 +109,7 @@ PYBIND11_MODULE(_ext, m) {
   ////////// virtual.h
 
   make_PyArrayGenerator(m, "ArrayGenerator");
+  make_SliceGenerator(m, "SliceGenerator");
   make_PyArrayCache(m, "ArrayCache");
 
   ////////// io.h

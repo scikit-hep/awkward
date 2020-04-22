@@ -625,6 +625,13 @@ namespace awkward {
     return out.str();
   }
 
+  const Slice
+  Slice::prepended(const SliceItemPtr& item) const {
+    std::vector<SliceItemPtr> items(items_);
+    items.insert(items.begin(), item);
+    return Slice(items, true);
+  }
+
   void
   Slice::append(const SliceItemPtr& item) {
     if (sealed_) {

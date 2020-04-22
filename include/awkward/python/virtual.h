@@ -11,6 +11,8 @@
 namespace py = pybind11;
 namespace ak = awkward;
 
+////////// PyArrayGenerator
+
 class PyArrayGenerator: public ak::ArrayGenerator {
 public:
   PyArrayGenerator(const ak::FormPtr& form,
@@ -44,6 +46,13 @@ private:
 
 py::class_<PyArrayGenerator, std::shared_ptr<PyArrayGenerator>>
 make_PyArrayGenerator(const py::handle& m, const std::string& name);
+
+////////// SliceGenerator
+
+py::class_<ak::SliceGenerator, std::shared_ptr<ak::SliceGenerator>>
+make_SliceGenerator(const py::handle& m, const std::string& name);
+
+////////// PyArrayCache
 
 class PyArrayCache: public ak::ArrayCache {
 public:

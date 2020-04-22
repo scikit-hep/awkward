@@ -3,9 +3,12 @@
 #ifndef AWKWARD_ARRAYGENERATOR_H_
 #define AWKWARD_ARRAYGENERATOR_H_
 
+#include "awkward/Slice.h"
 #include "awkward/Content.h"
 
 namespace awkward {
+  ////////// ArrayGenerator
+
   /// @class ArrayGenerator
   ///
   /// @brief Abstract superclass to generat arrays for VirtualArray, definining
@@ -57,6 +60,38 @@ namespace awkward {
 
   using ArrayGeneratorPtr = std::shared_ptr<ArrayGenerator>;
 
+  ////////// SliceGenerator
+
+  /// @class SliceGenerator
+  ///
+  /// @brief Generator for lazy slicing. Used to avoid materializing a
+  /// VirtualArray before its content is needed (in case its content is
+  /// never needed).
+  class EXPORT_SYMBOL SliceGenerator: public ArrayGenerator {
+  public:
+    SliceGenerator(const FormPtr& form,
+                   int64_t length,
+                   const ArrayGeneratorPtr& generator,
+                   const Slice& slice);
+
+    const ArrayGeneratorPtr
+      generator() const;
+
+    const Slice
+      slice() const;
+
+    const ContentPtr
+      generate() const override;
+
+    const std::string
+      tostring_part(const std::string& indent,
+                    const std::string& pre,
+                    const std::string& post) const override;
+
+  protected:
+    const ArrayGeneratorPtr& generator_;
+    const Slice slice_;
+  };
 }
 
 #endif // AWKWARD_ARRAYGENERATOR_H_

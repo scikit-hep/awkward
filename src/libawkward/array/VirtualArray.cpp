@@ -146,7 +146,10 @@ namespace awkward {
 
   const ContentPtr
   VirtualArray::shallow_copy() const {
-    throw std::runtime_error("FIXME: VirtualArray::shallow_copy");
+    return std::make_shared<VirtualArray>(identities_,
+                                          parameters_,
+                                          generator_,
+                                          cache_);
   }
 
   const ContentPtr
@@ -340,7 +343,15 @@ namespace awkward {
   VirtualArray::getitem_next(const SliceRange& range,
                            const Slice& tail,
                            const Index64& advanced) const {
-    throw std::runtime_error("FIXME: VirtualArray::getitem_next(range)");
+    FormPtr form(nullptr);   // FIXME
+    int64_t length = -1;     // FIXME
+    ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
+              form, length, generator_, tail.prepended(range.shallow_copy()));
+    ArrayCachePtr cache(nullptr);
+    return std::make_shared<VirtualArray>(Identities::none(),
+                                          util::Parameters(),
+                                          generator,
+                                          cache);
   }
 
   const ContentPtr

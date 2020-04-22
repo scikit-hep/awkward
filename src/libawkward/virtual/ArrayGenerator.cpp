@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+#include "sstream"
+
 #include "awkward/virtual/ArrayGenerator.h"
 
 namespace awkward {
@@ -34,5 +36,41 @@ namespace awkward {
           + out.get()->form().get()->tostring());
     }
     return out;
+  }
+
+  SliceGenerator::SliceGenerator(const FormPtr& form,
+                                 int64_t length,
+                                 const ArrayGeneratorPtr& generator,
+                                 const Slice& slice)
+      : ArrayGenerator(form, length)
+      , generator_(generator)
+      , slice_(slice) { }
+
+  const ArrayGeneratorPtr
+  SliceGenerator::generator() const {
+    return generator_;
+  }
+
+  const Slice
+  SliceGenerator::slice() const {
+    return slice_;
+  }
+
+  const ContentPtr
+  SliceGenerator::generate() const {
+    return generator_.get()->generate().get()->getitem(slice_);
+  }
+
+  const std::string
+  SliceGenerator::tostring_part(const std::string& indent,
+                                const std::string& pre,
+                                const std::string& post) const {
+    std::stringstream out;
+    out << indent << pre << "<SliceGenerator>\n";
+    out << indent << "    <slice>" << slice_.tostring() << "</slice>\n";
+    out << generator_.get()->tostring_part(
+             indent + std::string("    "), "<generator>", "</generator>\n");
+    out << indent << "</SliceGenerator>" << post;
+    return out.str();
   }
 }
