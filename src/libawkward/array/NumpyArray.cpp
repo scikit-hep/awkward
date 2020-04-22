@@ -2068,6 +2068,13 @@ namespace awkward {
   }
 
   const ContentPtr
+  NumpyArray::is_none(int64_t axis, int64_t depth) const {
+    throw std::runtime_error(
+      "wubba lubba dub dub");
+    return nullptr;
+  }
+
+  const ContentPtr
   NumpyArray::rpad(int64_t target, int64_t axis, int64_t depth) const {
     if (ndim() == 0) {
       throw std::runtime_error("cannot rpad a scalar");

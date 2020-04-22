@@ -1020,6 +1020,14 @@ namespace awkward {
                                             stops_,
                                             content_.get()->fillna(value));
   }
+  
+  template <typename T>
+  const ContentPtr
+  ListArrayOf<T>::is_none(int64_t axis, int64_t depth) const {
+    throw std::runtime_error(
+      "wubba lubba dub dub");
+    return nullptr;
+  }
 
   template <typename T>
   const ContentPtr

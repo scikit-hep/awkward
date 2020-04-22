@@ -687,6 +687,13 @@ namespace awkward {
   }
 
   const ContentPtr
+  RegularArray::is_none(int64_t axis, int64_t depth) const {
+    throw std::runtime_error(
+      "wubba lubba dub dub");
+    return nullptr;
+  }
+
+  const ContentPtr
   RegularArray::rpad(int64_t target, int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {

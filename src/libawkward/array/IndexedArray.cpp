@@ -1468,6 +1468,14 @@ namespace awkward {
 
   template <typename T, bool ISOPTION>
   const ContentPtr
+  IndexedArrayOf<T, ISOPTION>::is_none(int64_t axis, int64_t depth) const {
+    throw std::runtime_error(
+      "wubba lubba dub dub");
+    return nullptr;
+  }
+
+  template <typename T, bool ISOPTION>
+  const ContentPtr
   IndexedArrayOf<T, ISOPTION>::rpad(int64_t target,
                                     int64_t axis,
                                     int64_t depth) const {

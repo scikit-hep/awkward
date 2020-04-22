@@ -416,6 +416,9 @@ namespace awkward {
     virtual const ContentPtr
       fillna(const ContentPtr& value) const = 0;
 
+    virtual const ContentPtr
+      is_none(int64_t axis, int64_t depth) const = 0;
+
     /// @brief If `axis = 0`, returns a view of this array padded on the
     /// right with `None` values to have a minimum length; otherwise, returns
     /// an array with nested lists all padded to the minimum length.
@@ -752,6 +755,9 @@ namespace awkward {
     /// defined universally in the Content class.
     const ContentPtr
       localindex_axis0() const;
+
+    const ContentPtr
+      isnone_axis0() const;
 
     /// @brief Internal function to handle the `axis = 0` case of
     /// #combinations.

@@ -188,6 +188,9 @@ namespace awkward {
     const ContentPtr
       fillna(const ContentPtr& value) const override;
 
+    const ContentPtr
+      is_none(int64_t axis, int64_t depth) const override;
+
     /// @exception std::runtime_error is always thrown
     const ContentPtr
       rpad(int64_t target, int64_t axis, int64_t depth) const override;

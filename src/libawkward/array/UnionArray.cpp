@@ -1458,6 +1458,14 @@ namespace awkward {
 
   template <typename T, typename I>
   const ContentPtr
+  UnionArrayOf<T, I>::is_none(int64_t axis, int64_t depth) const {
+    throw std::runtime_error(
+      "wubba lubba dub dub");
+    return nullptr;
+  }
+
+  template <typename T, typename I>
+  const ContentPtr
   UnionArrayOf<T, I>::rpad(int64_t target, int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {

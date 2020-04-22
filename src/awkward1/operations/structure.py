@@ -1146,8 +1146,8 @@ def fill_none(array, value, highlevel=True):
     else:
         return out
 
-def is_none(array, highlevel=True):
-    """
+def is_none(array, axis = 1, highlevel=True):
+    """ TODO
     Args:
         array: Data to check for missing values (None).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
@@ -1156,41 +1156,49 @@ def is_none(array, highlevel=True):
     Returns an array whose value is True where an element of `array` is None;
     False otherwise.
     """
-    def apply(layout):
-        if isinstance(layout, awkward1._util.unknowntypes):
-            return apply(awkward1.layout.NumpyArray(numpy.array([])))
-
-        elif isinstance(layout, awkward1._util.indexedtypes):
-            return apply(layout.project())
-
-        elif isinstance(layout, awkward1._util.uniontypes):
-            contents = [apply(layout.project(i))
-                          for i in range(layout.numcontents)]
-            out = numpy.empty(len(layout), dtype=numpy.bool_)
-            tags = numpy.asarray(layout.tags)
-            for tag, content in enumerate(contents):
-                out[tags == tag] = content
-            return out
-
-        elif isinstance(layout, awkward1._util.optiontypes):
-            return numpy.asarray(layout.bytemask()).view(numpy.bool_)
-
-        else:
-            return numpy.zeros(len(layout), dtype=numpy.bool_)
-
     layout = awkward1.operations.convert.to_layout(array, allow_record=False)
-
-    if isinstance(layout, awkward1.partition.PartitionedArray):
-        out = awkward1.partition.apply(
-            lambda x: awkward1.layout.NumpyArray(apply(x)), layout)
-    else:
-        out = awkward1.layout.NumpyArray(apply(layout))
+    out = layout.is_none(axis=axis)
 
     if highlevel:
-        return awkward1._util.wrap(out,
-                                   behavior=awkward1._util.behaviorof(array))
-    else:
-        return out
+        return  awkward1._util.wrap(
+                 out, behavior=awkward1._util.behaviorof(array)) 
+    return out
+    
+    # def apply(layout):
+    #     if isinstance(layout, awkward1._util.unknowntypes):
+    #         return apply(awkward1.layout.NumpyArray(numpy.array([])))
+
+    #     elif isinstance(layout, awkward1._util.indexedtypes):
+    #         return apply(layout.project())
+
+    #     elif isinstance(layout, awkward1._util.uniontypes):
+    #         contents = [apply(layout.project(i))
+    #                       for i in range(layout.numcontents)]
+    #         out = numpy.empty(len(layout), dtype=numpy.bool_)
+    #         tags = numpy.asarray(layout.tags)
+    #         for tag, content in enumerate(contents):
+    #             out[tags == tag] = content
+    #         return out
+
+    #     elif isinstance(layout, awkward1._util.optiontypes):
+    #         return numpy.asarray(layout.bytemask()).view(numpy.bool_)
+
+    #     else:
+    #         return numpy.zeros(len(layout), dtype=numpy.bool_)
+
+    # layout = awkward1.operations.convert.to_layout(array, allow_record=False)
+
+    # if isinstance(layout, awkward1.partition.PartitionedArray):
+    #     out = awkward1.partition.apply(
+    #         lambda x: awkward1.layout.NumpyArray(apply(x)), layout)
+    # else:
+    #     out = awkward1.layout.NumpyArray(apply(layout))
+
+    # if highlevel:
+    #     return awkward1._util.wrap(out,
+    #                                behavior=awkward1._util.behaviorof(array))
+    # else:
+    #     return out
 
 def singletons(array, highlevel=True):
     """

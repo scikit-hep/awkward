@@ -1173,7 +1173,14 @@ namespace awkward {
     return std::make_shared<ListOffsetArrayOf<T>>(
       identities_, parameters_, offsets_, content().get()->fillna(value));
   }
-
+  
+  template <typename T>
+  const ContentPtr
+  ListOffsetArrayOf<T>::is_none(int64_t axis, int64_t depth) const {
+    throw std::runtime_error(
+      "wubba lubba dub dub");
+    return nullptr;
+  }
   template <typename T>
   const ContentPtr
   ListOffsetArrayOf<T>::rpad(int64_t target,

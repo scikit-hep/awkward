@@ -315,6 +315,13 @@ namespace awkward {
   }
 
   const ContentPtr
+  Record::is_none(int64_t axis, int64_t depth) const {
+    throw std::runtime_error(
+      "wubba lubba dub dub");
+    return nullptr;
+  }
+
+  const ContentPtr
   Record::rpad(int64_t length, int64_t axis, int64_t depth) const {
     throw std::invalid_argument(
       "Record cannot be padded because it is not an array");

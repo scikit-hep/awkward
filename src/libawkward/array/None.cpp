@@ -212,6 +212,13 @@ namespace awkward {
   }
 
   const ContentPtr
+  None::is_none(int64_t axis, int64_t depth) const {
+    throw std::runtime_error(
+      "wubba lubba dub dub");
+    return nullptr;
+  }
+
+  const ContentPtr
   None::rpad(int64_t length, int64_t axis, int64_t depth) const {
     throw std::runtime_error("undefined operation: None::rpad");
   }

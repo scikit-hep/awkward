@@ -779,6 +779,12 @@ namespace awkward {
       fillna(const ContentPtr& value) const override {
       return shallow_copy();
     }
+    
+    const ContentPtr
+      is_none(int64_t axis, int64_t depth) const override{
+          //Return array of false 
+          return nullptr;
+      }
 
     const ContentPtr
       rpad(int64_t target, int64_t axis, int64_t depth) const override {

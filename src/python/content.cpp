@@ -1106,6 +1106,10 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
                [](const T&self, const py::object&  value) -> py::object {
             return box(self.fillna(unbox_content(value)));
           })
+          .def("is_none",
+                [](const T&self, int64_t axis) -> py::object {
+            return box(self.is_none(axis, 0));
+          }, py::arg("axis") = 1)
           .def("num", [](const T& self, int64_t axis) -> py::object {
             return box(self.num(axis, 0));
           }, py::arg("axis") = 1)
