@@ -29,6 +29,9 @@ namespace ak = awkward;
 py::object
 box(const std::shared_ptr<ak::Content>& content);
 
+std::shared_ptr<ak::Content>
+unbox_content(const py::handle& obj);
+
 template <typename T>
 std::string
 repr(const T& self) {

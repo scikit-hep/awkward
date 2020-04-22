@@ -9,6 +9,7 @@
 #include "awkward/python/content.h"
 #include "awkward/python/types.h"
 #include "awkward/python/forms.h"
+#include "awkward/python/virtual.h"
 #include "awkward/python/io.h"
 #include "awkward/python/partition.h"
 
@@ -102,6 +103,10 @@ PYBIND11_MODULE(_ext, m) {
   make_RegularForm(m, "RegularForm");
   make_UnionForm(m, "UnionForm");
   make_UnmaskedForm(m, "UnmaskedForm");
+
+  ////////// virtual.h
+
+  make_PyArrayCache(m, "PyArrayCache");
 
   ////////// io.h
 
