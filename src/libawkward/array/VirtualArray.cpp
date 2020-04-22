@@ -127,13 +127,11 @@ namespace awkward {
   void
   VirtualArray::tojson_part(ToJson& builder,
                           bool include_beginendlist) const {
-    throw std::runtime_error("FIXME: VirtualArray::tojson_part");
+    return array().get()->tojson_part(builder, include_beginendlist);
   }
 
   void
-  VirtualArray::nbytes_part(std::map<size_t, int64_t>& largest) const {
-    // Nothing to do: VirtualArrays contribute 0 to the nbytes.
-  }
+  VirtualArray::nbytes_part(std::map<size_t, int64_t>& largest) const { }
 
   int64_t
   VirtualArray::length() const {
@@ -149,20 +147,19 @@ namespace awkward {
     return std::make_shared<VirtualArray>(identities_,
                                           parameters_,
                                           generator_,
-                                          cache_);
+                                          cache_,
+                                          cache_key_);
   }
 
   const ContentPtr
   VirtualArray::deep_copy(bool copyarrays,
                           bool copyindexes,
                           bool copyidentities) const {
-    throw std::runtime_error("FIXME: VirtualArray::deep_copy");
+    return array().get()->deep_copy(copyarrays, copyindexes, copyidentities);
   }
 
   void
-  VirtualArray::check_for_iteration() const {
-    throw std::runtime_error("FIXME: VirtualArray::check_for_iteration");
-  }
+  VirtualArray::check_for_iteration() const { }
 
   const ContentPtr
   VirtualArray::getitem_nothing() const {
@@ -185,8 +182,6 @@ namespace awkward {
 
   const ContentPtr
   VirtualArray::getitem_at_nowrap(int64_t at) const {
-    std::cout << "getitem_at_nowrap " << at << std::endl;
-
     return array().get()->getitem_at_nowrap(at);
   }
 
@@ -208,8 +203,6 @@ namespace awkward {
 
   const ContentPtr
   VirtualArray::getitem_range_nowrap(int64_t start, int64_t stop) const {
-    std::cout << "getitem_range_nowrap " << start << " " << stop << std::endl;
-
     Slice slice;
     slice.append(SliceRange(start, stop, 1));
     slice.become_sealed();
@@ -224,18 +217,42 @@ namespace awkward {
 
   const ContentPtr
   VirtualArray::getitem_field(const std::string& key) const {
-    throw std::runtime_error("FIXME: VirtualArray::getitem_field");
+    Slice slice;
+    slice.append(SliceField(key));
+    slice.become_sealed();
+    FormPtr form = generator_.get()->form();
+    if (form.get() != nullptr) {
+      form = form.get()->getitem_field(key);
+    }
+    ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
+                 form, length(), generator_, slice);
+    ArrayCachePtr cache(nullptr);
+    return std::make_shared<VirtualArray>(Identities::none(),
+                                          parameters_,
+                                          generator,
+                                          cache);
   }
 
   const ContentPtr
   VirtualArray::getitem_fields(const std::vector<std::string>& keys) const {
-    throw std::runtime_error("FIXME: VirtualArray::getitem_fields");
+    Slice slice;
+    slice.append(SliceFields(keys));
+    slice.become_sealed();
+    FormPtr form = generator_.get()->form();
+    if (form.get() != nullptr) {
+      form = form.get()->getitem_fields(keys);
+    }
+    ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
+                 form, length(), generator_, slice);
+    ArrayCachePtr cache(nullptr);
+    return std::make_shared<VirtualArray>(Identities::none(),
+                                          parameters_,
+                                          generator,
+                                          cache);
   }
 
   const ContentPtr
   VirtualArray::carry(const Index64& carry) const {
-    std::cout << "carry " << carry.tostring() << std::endl;
-
     Slice slice;
     std::vector<int64_t> shape({ carry.length() });
     std::vector<int64_t> strides({ 1 });

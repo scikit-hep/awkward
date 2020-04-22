@@ -86,6 +86,24 @@ namespace awkward {
                                          content_);
   }
 
+  const FormPtr
+  IndexedForm::getitem_field(const std::string& key) const {
+    return std::make_shared<IndexedForm>(
+               has_identities_,
+               util::Parameters(),
+               index_,
+               content_.get()->getitem_field(key));
+  }
+
+  const FormPtr
+  IndexedForm::getitem_fields(const std::vector<std::string>& keys) const {
+    return std::make_shared<IndexedForm>(
+               has_identities_,
+               util::Parameters(),
+               index_,
+               content_.get()->getitem_fields(keys));
+  }
+
   bool
   IndexedForm::equal(const FormPtr& other,
                      bool check_identities,
@@ -165,6 +183,24 @@ namespace awkward {
                                                parameters_,
                                                index_,
                                                content_);
+  }
+
+  const FormPtr
+  IndexedOptionForm::getitem_field(const std::string& key) const {
+    return std::make_shared<IndexedOptionForm>(
+               has_identities_,
+               util::Parameters(),
+               index_,
+               content_.get()->getitem_field(key));
+  }
+
+  const FormPtr
+  IndexedOptionForm::getitem_fields(const std::vector<std::string>& keys) const {
+    return std::make_shared<IndexedOptionForm>(
+               has_identities_,
+               util::Parameters(),
+               index_,
+               content_.get()->getitem_fields(keys));
   }
 
   bool

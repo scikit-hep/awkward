@@ -91,6 +91,28 @@ namespace awkward {
                                            lsb_order_);
   }
 
+  const FormPtr
+  BitMaskedForm::getitem_field(const std::string& key) const {
+    return std::make_shared<BitMaskedForm>(
+               has_identities_,
+               util::Parameters(),
+               mask_,
+               content_.get()->getitem_field(key),
+               valid_when_,
+               lsb_order_);
+  }
+
+  const FormPtr
+  BitMaskedForm::getitem_fields(const std::vector<std::string>& keys) const {
+    return std::make_shared<BitMaskedForm>(
+               has_identities_,
+               util::Parameters(),
+               mask_,
+               content_.get()->getitem_fields(keys),
+               valid_when_,
+               lsb_order_);
+  }
+
   bool
   BitMaskedForm::equal(const FormPtr& other,
                        bool check_identities,

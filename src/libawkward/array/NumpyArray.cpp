@@ -278,6 +278,16 @@ namespace awkward {
                                        format_);
   }
 
+  const FormPtr
+  NumpyForm::getitem_field(const std::string& key) const {
+    throw std::invalid_argument("cannot slice NumpyForm by field name");
+  }
+
+  const FormPtr
+  NumpyForm::getitem_fields(const std::vector<std::string>& keys) const {
+    throw std::invalid_argument("cannot slice NumpyForm by field names");
+  }
+
   bool
   NumpyForm::equal(const FormPtr& other,
                    bool check_identities,
@@ -1026,7 +1036,7 @@ namespace awkward {
   NumpyArray::getitem_fields(const std::vector<std::string>& keys) const {
     throw std::invalid_argument(
       std::string("cannot slice ") + classname()
-      + std::string(" by field name"));
+      + std::string(" by field names"));
   }
 
   bool getitem_too_general(const SliceItemPtr& head, const Slice& tail) {

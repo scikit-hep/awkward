@@ -108,6 +108,34 @@ namespace awkward {
                                        contents_);
   }
 
+  const FormPtr
+  UnionForm::getitem_field(const std::string& key) const {
+    std::vector<FormPtr> contents;
+    for (auto content : contents_) {
+      contents.push_back(content.get()->getitem_field(key));
+    }
+    return std::make_shared<UnionForm>(
+               has_identities_,
+               util::Parameters(),
+               tags_,
+               index_,
+               contents);
+  }
+
+  const FormPtr
+  UnionForm::getitem_fields(const std::vector<std::string>& keys) const {
+    std::vector<FormPtr> contents;
+    for (auto content : contents_) {
+      contents.push_back(content.get()->getitem_fields(keys));
+    }
+    return std::make_shared<UnionForm>(
+               has_identities_,
+               util::Parameters(),
+               tags_,
+               index_,
+               contents);
+  }
+
   bool
   UnionForm::equal(const FormPtr& other,
                    bool check_identities,

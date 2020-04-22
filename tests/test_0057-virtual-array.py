@@ -187,9 +187,21 @@ def test_slice():
         lambda: awkward1.Array([[1.1, 2.2, 3.3, 4.4, 5.5], [6.6, 7.7, 8.8], [100, 200, 300, 400]]))
     virtualarray = awkward1.layout.VirtualArray(generator)
 
-    assert virtualarray.peek_array is None
+    assert isinstance(virtualarray, awkward1.layout.VirtualArray)
 
     sliced = virtualarray[:-1]
-    assert sliced.peek_array is None
+    assert isinstance(sliced, awkward1.layout.VirtualArray)
+
+    assert isinstance(sliced[1], awkward1.layout.NumpyArray)
+
+def test_field():
+    generator = awkward1.virtual.ArrayGenerator(
+        lambda: awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}]))
+    virtualarray = awkward1.layout.VirtualArray(generator)
+
+    assert isinstance(virtualarray, awkward1.layout.VirtualArray)
+
+    sliced = virtualarray["y"]
+    assert isinstance(sliced, awkward1.layout.VirtualArray)
 
     assert isinstance(sliced[1], awkward1.layout.NumpyArray)

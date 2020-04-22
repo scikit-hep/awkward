@@ -75,6 +75,24 @@ namespace awkward {
                                          size_);
   }
 
+  const FormPtr
+  RegularForm::getitem_field(const std::string& key) const {
+    return std::make_shared<RegularForm>(
+               has_identities_,
+               util::Parameters(),
+               content_.get()->getitem_field(key),
+               size_);
+  }
+
+  const FormPtr
+  RegularForm::getitem_fields(const std::vector<std::string>& keys) const {
+    return std::make_shared<RegularForm>(
+               has_identities_,
+               util::Parameters(),
+               content_.get()->getitem_fields(keys),
+               size_);
+  }
+
   bool
   RegularForm::equal(const FormPtr& other,
                      bool check_identities,

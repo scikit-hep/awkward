@@ -64,6 +64,16 @@ namespace awkward {
             bool check_identities,
             bool check_parameters) const = 0;
 
+    /// @brief Returns the Form corresponding to the Content that would be
+    /// obtained by {@link Content#getitem_field Content::getitem_field}.
+    virtual const FormPtr
+      getitem_field(const std::string& key) const = 0;
+
+    /// @brief Returns the Form corresponding to the Content that would be
+    /// obtained by {@link Content#getitem_fields Content::getitem_fields}.
+    virtual const FormPtr
+      getitem_fields(const std::vector<std::string>& keys) const = 0;
+
     /// @brief Returns a string representation of this Form (#tojson with
     /// `pretty = true` and `verbose = false`).
     virtual const std::string

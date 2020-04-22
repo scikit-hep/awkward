@@ -43,6 +43,16 @@ namespace awkward {
                                        parameters_);
   }
 
+  const FormPtr
+  EmptyForm::getitem_field(const std::string& key) const {
+    throw std::invalid_argument("cannot slice EmptyForm by field name");
+  }
+
+  const FormPtr
+  EmptyForm::getitem_fields(const std::vector<std::string>& keys) const {
+    throw std::invalid_argument("cannot slice EmptyForm by field names");
+  }
+
   bool
   EmptyForm::equal(const FormPtr& other,
                    bool check_identities,
@@ -226,7 +236,7 @@ namespace awkward {
   EmptyArray::getitem_fields(const std::vector<std::string>& keys) const {
     throw std::invalid_argument(
       std::string("cannot slice ") + classname()
-      + std::string(" by field name"));
+      + std::string(" by field names"));
   }
 
   const ContentPtr

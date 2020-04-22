@@ -60,6 +60,16 @@ namespace awkward {
                                        T_);
     }
 
+    const FormPtr
+      getitem_field(const std::string& key) const override {
+      throw std::invalid_argument("cannot slice RawForm by field name");
+    }
+
+    const FormPtr
+      getitem_fields(const std::vector<std::string>& keys) const override {
+      throw std::invalid_argument("cannot slice RawForm by field names");
+    }
+
     bool
       equal(const FormPtr& other,
             bool check_identities,
@@ -567,7 +577,7 @@ namespace awkward {
     const ContentPtr
       getitem_fields(const std::vector<std::string>& keys) const override {
       throw std::invalid_argument(std::string("cannot slice ") + classname()
-        + std::string(" by field name"));
+        + std::string(" by field names"));
     }
 
     const ContentPtr
