@@ -61,7 +61,9 @@ namespace awkward {
     }
 
     bool
-      equal(const FormPtr& other) const {
+      equal(const FormPtr& other,
+            bool check_identities,
+            bool check_parameters) const {
       throw std::runtime_error("FIXME: RawForm::equal");
     }
 

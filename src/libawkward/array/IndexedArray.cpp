@@ -87,8 +87,26 @@ namespace awkward {
   }
 
   bool
-  IndexedForm::equal(const FormPtr& other) const {
-    throw std::runtime_error("FIXME: IndexedForm::equal");
+  IndexedForm::equal(const FormPtr& other,
+                     bool check_identities,
+                     bool check_parameters) const {
+    if (check_identities  &&
+        has_identities_ != other.get()->has_identities()) {
+      return false;
+    }
+    if (check_parameters  &&
+        !util::parameters_equal(parameters_, other.get()->parameters())) {
+      return false;
+    }
+    if (IndexedForm* t = dynamic_cast<IndexedForm*>(other.get())) {
+      return (index_ == t->index()  &&
+              content_.get()->equal(t->content(),
+                                    check_identities,
+                                    check_parameters));
+    }
+    else {
+      return false;
+    }
   }
 
   ////////// IndexedOptionForm
@@ -150,8 +168,26 @@ namespace awkward {
   }
 
   bool
-  IndexedOptionForm::equal(const FormPtr& other) const {
-    throw std::runtime_error("FIXME: IndexedOptionForm::equal");
+  IndexedOptionForm::equal(const FormPtr& other,
+                           bool check_identities,
+                           bool check_parameters) const {
+    if (check_identities  &&
+        has_identities_ != other.get()->has_identities()) {
+      return false;
+    }
+    if (check_parameters  &&
+        !util::parameters_equal(parameters_, other.get()->parameters())) {
+      return false;
+    }
+    if (IndexedOptionForm* t = dynamic_cast<IndexedOptionForm*>(other.get())) {
+      return (index_ == t->index()  &&
+              content_.get()->equal(t->content(),
+                                    check_identities,
+                                    check_parameters));
+    }
+    else {
+      return false;
+    }
   }
 
   ////////// IndexedArray

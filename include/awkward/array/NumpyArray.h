@@ -56,7 +56,9 @@ namespace awkward {
       shallow_copy() const override;
 
     bool
-      equal(const FormPtr& other) const override;
+      equal(const FormPtr& other,
+            bool check_identities,
+            bool check_parameters) const override;
 
   private:
     const std::vector<int64_t> inner_shape_;

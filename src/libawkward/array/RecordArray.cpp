@@ -28,7 +28,13 @@ namespace awkward {
                          const std::vector<FormPtr>& contents)
       : Form(has_identities, parameters)
       , recordlookup_(recordlookup)
-      , contents_(contents) { }
+      , contents_(contents) {
+    if (recordlookup.get() != nullptr  &&
+        recordlookup.get()->size() != contents.size()) {
+      throw std::invalid_argument(
+        "recordlookup (if provided) and contents must have the same length");
+    }
+  }
 
   const util::RecordLookupPtr
   RecordForm::recordlookup() const {
@@ -156,8 +162,68 @@ namespace awkward {
   }
 
   bool
-  RecordForm::equal(const FormPtr& other) const {
-    throw std::runtime_error("FIXME: RecordForm::equal");
+  RecordForm::equal(const FormPtr& other,
+                    bool check_identities,
+                    bool check_parameters) const {
+    if (check_identities  &&
+        has_identities_ != other.get()->has_identities()) {
+      return false;
+    }
+    if (check_parameters  &&
+        !util::parameters_equal(parameters_, other.get()->parameters())) {
+      return false;
+    }
+    if (RecordForm* t = dynamic_cast<RecordForm*>(other.get())) {
+      if (recordlookup_.get() == nullptr  &&
+          t->recordlookup().get() != nullptr) {
+        return false;
+      }
+      else if (recordlookup_.get() != nullptr  &&
+               t->recordlookup().get() == nullptr) {
+        return false;
+      }
+      else if (recordlookup_.get() != nullptr  &&
+               t->recordlookup().get() != nullptr) {
+        util::RecordLookupPtr one = recordlookup_;
+        util::RecordLookupPtr two = t->recordlookup();
+        if (one.get()->size() != two.get()->size()) {
+          return false;
+        }
+        for (int64_t i = 0;  i < one.get()->size();  i++) {
+          int64_t j = 0;
+          for (;  j < one.get()->size();  j++) {
+            if (one.get()->at(i) == two.get()->at(j)) {
+              break;
+            }
+          }
+          if (j == one.get()->size()) {
+            return false;
+          }
+          if (!content(i).get()->equal(t->content(j),
+                                       check_identities,
+                                       check_parameters)) {
+            return false;
+          }
+        }
+        return true;
+      }
+      else {
+        if (numfields() != t->numfields()) {
+          return false;
+        }
+        for (int64_t i = 0;  i < numfields();  i++) {
+          if (!content(i).get()->equal(t->content(i),
+                                       check_identities,
+                                       check_parameters)) {
+            return false;
+          }
+        }
+        return true;
+      }
+    }
+    else {
+      return false;
+    }
   }
 
   ////////// RecordArray

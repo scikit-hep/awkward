@@ -279,8 +279,25 @@ namespace awkward {
   }
 
   bool
-  NumpyForm::equal(const FormPtr& other) const {
-    throw std::runtime_error("FIXME: NumpyForm::equal");
+  NumpyForm::equal(const FormPtr& other,
+                   bool check_identities,
+                   bool check_parameters) const {
+    if (check_identities  &&
+        has_identities_ != other.get()->has_identities()) {
+      return false;
+    }
+    if (check_parameters  &&
+        !util::parameters_equal(parameters_, other.get()->parameters())) {
+      return false;
+    }
+    if (NumpyForm* t = dynamic_cast<NumpyForm*>(other.get())) {
+      return (inner_shape_ == t->inner_shape()  &&
+              itemsize_ == t->itemsize()  &&
+              format_ == t->format());
+    }
+    else {
+      return false;
+    }
   }
 
   ////////// NumpyArray

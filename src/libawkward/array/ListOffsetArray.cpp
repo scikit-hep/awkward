@@ -88,8 +88,26 @@ namespace awkward {
   }
 
   bool
-  ListOffsetForm::equal(const FormPtr& other) const {
-    throw std::runtime_error("FIXME: ListOffsetForm::equal");
+  ListOffsetForm::equal(const FormPtr& other,
+                        bool check_identities,
+                        bool check_parameters) const {
+    if (check_identities  &&
+        has_identities_ != other.get()->has_identities()) {
+      return false;
+    }
+    if (check_parameters  &&
+        !util::parameters_equal(parameters_, other.get()->parameters())) {
+      return false;
+    }
+    if (ListOffsetForm* t = dynamic_cast<ListOffsetForm*>(other.get())) {
+      return (offsets_ == t->offsets()  &&
+              content_.get()->equal(t->content(),
+                                    check_identities,
+                                    check_parameters));
+    }
+    else {
+      return false;
+    }
   }
 
   ////////// ListOffsetArray

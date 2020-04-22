@@ -86,8 +86,27 @@ namespace awkward {
   }
 
   bool
-  ByteMaskedForm::equal(const FormPtr& other) const {
-    throw std::runtime_error("FIXME: ByteMaskedForm::equal");
+  ByteMaskedForm::equal(const FormPtr& other,
+                        bool check_identities,
+                        bool check_parameters) const {
+    if (check_identities  &&
+        has_identities_ != other.get()->has_identities()) {
+      return false;
+    }
+    if (check_parameters  &&
+        !util::parameters_equal(parameters_, other.get()->parameters())) {
+      return false;
+    }
+    if (ByteMaskedForm* t = dynamic_cast<ByteMaskedForm*>(other.get())) {
+      return (mask_ == t->mask()  &&
+              content_.get()->equal(t->content(),
+                                    check_identities,
+                                    check_parameters)  &&
+              valid_when_ == t->valid_when());
+    }
+    else {
+      return false;
+    }
   }
 
   ////////// ByteMaskedArray

@@ -44,8 +44,23 @@ namespace awkward {
   }
 
   bool
-  EmptyForm::equal(const FormPtr& other) const {
-    throw std::runtime_error("FIXME: EmptyForm::equal");
+  EmptyForm::equal(const FormPtr& other,
+                   bool check_identities,
+                   bool check_parameters) const {
+    if (check_identities  &&
+        has_identities_ != other.get()->has_identities()) {
+      return false;
+    }
+    if (check_parameters  &&
+        !util::parameters_equal(parameters_, other.get()->parameters())) {
+      return false;
+    }
+    if (EmptyForm* t = dynamic_cast<EmptyForm*>(other.get())) {
+      return true;
+    }
+    else {
+      return false;
+    }
   }
 
   ////////// EmptyArray

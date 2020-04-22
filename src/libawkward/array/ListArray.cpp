@@ -97,8 +97,27 @@ namespace awkward {
   }
 
   bool
-  ListForm::equal(const FormPtr& other) const {
-    throw std::runtime_error("FIXME: ListForm::equal");
+  ListForm::equal(const FormPtr& other,
+                  bool check_identities,
+                  bool check_parameters) const {
+    if (check_identities  &&
+        has_identities_ != other.get()->has_identities()) {
+      return false;
+    }
+    if (check_parameters  &&
+        !util::parameters_equal(parameters_, other.get()->parameters())) {
+      return false;
+    }
+    if (ListForm* t = dynamic_cast<ListForm*>(other.get())) {
+      return (starts_ == t->starts()  &&
+              stops_ == t->stops()  &&
+              content_.get()->equal(t->content(),
+                                    check_identities,
+                                    check_parameters));
+    }
+    else {
+      return false;
+    }
   }
 
   ////////// ListArray

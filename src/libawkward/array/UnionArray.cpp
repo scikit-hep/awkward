@@ -109,8 +109,36 @@ namespace awkward {
   }
 
   bool
-  UnionForm::equal(const FormPtr& other) const {
-    throw std::runtime_error("FIXME: UnionForm::equal");
+  UnionForm::equal(const FormPtr& other,
+                   bool check_identities,
+                   bool check_parameters) const {
+    if (check_identities  &&
+        has_identities_ != other.get()->has_identities()) {
+      return false;
+    }
+    if (check_parameters  &&
+        !util::parameters_equal(parameters_, other.get()->parameters())) {
+      return false;
+    }
+    if (UnionForm* t = dynamic_cast<UnionForm*>(other.get())) {
+      if (tags_ != t->tags()  ||  index_ != t->index()) {
+        return false;
+      }
+      if (numcontents() != t->numcontents()) {
+        return false;
+      }
+      for (int64_t i = 0;  i < numcontents();  i++) {
+        if (!content(i).get()->equal(t->content(i),
+                                     check_identities,
+                                     check_parameters)) {
+          return false;
+        }
+      }
+      return true;
+    }
+    else {
+      return false;
+    }
   }
 
   ////////// UnionArray

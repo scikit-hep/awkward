@@ -76,8 +76,26 @@ namespace awkward {
   }
 
   bool
-  RegularForm::equal(const FormPtr& other) const {
-    throw std::runtime_error("FIXME: RegularForm::equal");
+  RegularForm::equal(const FormPtr& other,
+                     bool check_identities,
+                     bool check_parameters) const {
+    if (check_identities  &&
+        has_identities_ != other.get()->has_identities()) {
+      return false;
+    }
+    if (check_parameters  &&
+        !util::parameters_equal(parameters_, other.get()->parameters())) {
+      return false;
+    }
+    if (RegularForm* t = dynamic_cast<RegularForm*>(other.get())) {
+      return (content_.get()->equal(t->content(),
+                                    check_identities,
+                                    check_parameters)  &&
+              size_ == t->size());
+    }
+    else {
+      return false;
+    }
   }
 
   ////////// RegularArray

@@ -60,7 +60,9 @@ namespace awkward {
     /// @brief Returns `true` if this Form is equal to the other Form; `false`
     /// otherwise.
     virtual bool
-      equal(const FormPtr& other) const = 0;
+      equal(const FormPtr& other,
+            bool check_identities,
+            bool check_parameters) const = 0;
 
     /// @brief Returns a string representation of this Form (#tojson with
     /// `pretty = true` and `verbose = false`).
