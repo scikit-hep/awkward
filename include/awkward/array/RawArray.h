@@ -23,6 +23,7 @@
 #include "awkward/array/EmptyArray.h"
 #include "awkward/array/IndexedArray.h"
 #include "awkward/array/NumpyArray.h"
+#include "awkward/array/RegularArray.h"
 #include "awkward/array/ByteMaskedArray.h"
 #include "awkward/array/BitMaskedArray.h"
 #include "awkward/array/UnmaskedArray.h"
@@ -72,7 +73,7 @@ namespace awkward {
   class EXPORT_SYMBOL RawArrayOf: public Content {
   public:
     /// @brief Creates a RawArray from a full set of parameters.
-    /// 
+    ///
     /// @param identities Optional Identities for each element of the array
     /// (may be `nullptr`).
     /// @param parameters String-to-JSON map that augments the meaning of this
@@ -833,7 +834,54 @@ namespace awkward {
                 int64_t outlength,
                 bool ascending,
                 bool stable) const override {
-      throw std::runtime_error("FIXME: RawArray:sort_next");
+      std::shared_ptr<T> ptr(
+                    new T[(size_t)length_], util::array_deleter<T>());
+      std::vector<size_t> result(length_);
+
+      std::iota(result.begin(), result.end(), 0);
+      if(ascending  &&  !stable) {
+        std::sort(result.begin(), result.end(),
+          [&](size_t i1, size_t i2) {return getitem_at_nowrap(i1) < getitem_at_nowrap(i2);});
+      }
+      else if(!ascending  &&  !stable) {
+        std::sort(result.begin(), result.end(),
+          [&](size_t i1, size_t i2) {return getitem_at_nowrap(i1) > getitem_at_nowrap(i2);});
+      }
+      else if(ascending  &&  stable) {
+        std::stable_sort(result.begin(), result.end(),
+          [&](size_t i1, size_t i2) {return getitem_at_nowrap(i1) < getitem_at_nowrap(i2);});
+      }
+      else if(!ascending  &&  stable) {
+        std::stable_sort(result.begin(), result.end(),
+          [&](size_t i1, size_t i2) {return getitem_at_nowrap(i1) > getitem_at_nowrap(i2);});
+      }
+      struct Error err = util::awkward_numpyarray_sort<T>(
+        ptr.get(),
+        ptr_.get(),
+        &result[0],
+        result.size(),
+        itemsize_,
+        starts.ptr().get(),
+        starts.offset(),
+        parents.ptr().get(),
+        parents.offset(),
+        length_,
+        outlength);
+      util::handle_error(err, classname(), nullptr);
+
+      ContentPtr out = std::make_shared<RawArrayOf<T>>(Identities::none(),
+                                             util::Parameters(),
+                                             ptr,
+                                             offset_,
+                                             length_,
+                                             itemsize_);
+
+      out = std::make_shared<RegularArray>(Identities::none(),
+                                           util::Parameters(),
+                                           out,
+                                           length_);
+
+      return out;
     }
 
     const ContentPtr
@@ -843,7 +891,54 @@ namespace awkward {
                    int64_t outlength,
                    bool ascending,
                    bool stable) const override {
-      throw std::runtime_error("FIXME: RawArray:argsort_next");
+      std::shared_ptr<int64_t> ptr(
+        new int64_t[(size_t)length_], util::array_deleter<int64_t>());
+      std::vector<size_t> result(length_);
+
+      std::iota(result.begin(), result.end(), 0);
+      if(ascending  &&  !stable) {
+        std::sort(result.begin(), result.end(),
+          [&](size_t i1, size_t i2) {return getitem_at_nowrap(i1) < getitem_at_nowrap(i2);});
+      }
+      else if(!ascending  &&  !stable) {
+        std::sort(result.begin(), result.end(),
+          [&](size_t i1, size_t i2) {return getitem_at_nowrap(i1) > getitem_at_nowrap(i2);});
+      }
+      else if(ascending  &&  stable) {
+        std::stable_sort(result.begin(), result.end(),
+          [&](size_t i1, size_t i2) {return getitem_at_nowrap(i1) < getitem_at_nowrap(i2);});
+      }
+      else if(!ascending  &&  stable) {
+        std::stable_sort(result.begin(), result.end(),
+          [&](size_t i1, size_t i2) {return getitem_at_nowrap(i1) > getitem_at_nowrap(i2);});
+      }
+      struct Error err = util::awkward_numpyarray_argsort_64<T>(
+        ptr.get(),
+        ptr_.get(),
+        &result[0],
+        result.size(),
+        itemsize_,
+        starts.ptr().get(),
+        starts.offset(),
+        parents.ptr().get(),
+        parents.offset(),
+        length_,
+        outlength);
+      util::handle_error(err, classname(), nullptr);
+      ssize_t itemsize = 8;
+      ContentPtr out = std::make_shared<RawArrayOf<int64_t>>(Identities::none(),
+                                                       util::Parameters(),
+                                                       ptr,
+                                                       offset_,
+                                                       length_,
+                                                       itemsize);
+
+      out = std::make_shared<RegularArray>(Identities::none(),
+                                           util::Parameters(),
+                                           out,
+                                           length_);
+
+      return out;
     }
 
     const ContentPtr
