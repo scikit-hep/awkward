@@ -859,22 +859,15 @@ namespace awkward {
         ptr.get(),
         ptr_.get(),
         &result[0],
-        result.size(),
-        itemsize_,
-        starts.ptr().get(),
-        starts.offset(),
-        parents.ptr().get(),
-        parents.offset(),
-        length_,
-        outlength);
+        length_);
       util::handle_error(err, classname(), nullptr);
 
       ContentPtr out = std::make_shared<RawArrayOf<T>>(Identities::none(),
-                                             util::Parameters(),
-                                             ptr,
-                                             offset_,
-                                             length_,
-                                             itemsize_);
+                                                       util::Parameters(),
+                                                       ptr,
+                                                       offset_,
+                                                       length_,
+                                                       itemsize_);
 
       out = std::make_shared<RegularArray>(Identities::none(),
                                            util::Parameters(),
@@ -912,18 +905,13 @@ namespace awkward {
         std::stable_sort(result.begin(), result.end(),
           [&](size_t i1, size_t i2) {return getitem_at_nowrap(i1) > getitem_at_nowrap(i2);});
       }
-      struct Error err = util::awkward_numpyarray_argsort_64<T>(
+      struct Error err = awkward_argsort_64(
         ptr.get(),
-        ptr_.get(),
         &result[0],
-        result.size(),
-        itemsize_,
         starts.ptr().get(),
-        starts.offset(),
         parents.ptr().get(),
         parents.offset(),
-        length_,
-        outlength);
+        length_);
       util::handle_error(err, classname(), nullptr);
       ssize_t itemsize = 8;
       ContentPtr out = std::make_shared<RawArrayOf<int64_t>>(Identities::none(),

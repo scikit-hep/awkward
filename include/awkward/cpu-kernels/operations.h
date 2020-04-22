@@ -1327,292 +1327,80 @@ extern "C" {
       bool lsb_order);
 
   EXPORT_SYMBOL struct Error
-    awkward_argsort_bool_64(
+    awkward_argsort_64(
       int64_t* toptr,
-      const bool* fromptr,
       const size_t* fromindex,
-      size_t indexlength,
-      int64_t fromptroffset,
       const int64_t* starts,
-      int64_t startsoffset,
       const int64_t* parents,
       int64_t parentsoffset,
-      int64_t lenparents,
-      int64_t outlength);
-  EXPORT_SYMBOL struct Error
-    awkward_argsort_int8_64(
-      int64_t* toptr,
-      const int8_t* fromptr,
-      const size_t* fromindex,
-      size_t indexlength,
-      int64_t fromptroffset,
-      const int64_t* starts,
-      int64_t startsoffset,
-      const int64_t* parents,
-      int64_t parentsoffset,
-      int64_t lenparents,
-      int64_t outlength);
-  EXPORT_SYMBOL struct Error
-    awkward_argsort_uint8_64(
-      int64_t* toptr,
-      const uint8_t* fromptr,
-      const size_t* fromindex,
-      size_t indexlength,
-      int64_t fromptroffset,
-      const int64_t* starts,
-      int64_t startsoffset,
-      const int64_t* parents,
-      int64_t parentsoffset,
-      int64_t lenparents,
-      int64_t outlength);
-  EXPORT_SYMBOL struct Error
-    awkward_argsort_int16_64(
-      int64_t* toptr,
-      const int16_t* fromptr,
-      const size_t* fromindex,
-      size_t indexlength,
-      int64_t fromptroffset,
-      const int64_t* starts,
-      int64_t startsoffset,
-      const int64_t* parents,
-      int64_t parentsoffset,
-      int64_t lenparents,
-      int64_t outlength);
-  EXPORT_SYMBOL struct Error
-    awkward_argsort_uint16_64(
-      int64_t* toptr,
-      const uint16_t* fromptr,
-      const size_t* fromindex,
-      size_t indexlength,
-      int64_t fromptroffset,
-      const int64_t* starts,
-      int64_t startsoffset,
-      const int64_t* parents,
-      int64_t parentsoffset,
-      int64_t lenparents,
-      int64_t outlength);
-  EXPORT_SYMBOL struct Error
-    awkward_argsort_int32_64(
-      int64_t* toptr,
-      const int32_t* fromptr,
-      const size_t* fromindex,
-      size_t indexlength,
-      int64_t fromptroffset,
-      const int64_t* starts,
-      int64_t startsoffset,
-      const int64_t* parents,
-      int64_t parentsoffset,
-      int64_t lenparents,
-      int64_t outlength);
-  EXPORT_SYMBOL struct Error
-    awkward_argsort_uint32_64(
-      int64_t* toptr,
-      const uint32_t* fromptr,
-      const size_t* fromindex,
-      size_t indexlength,
-      int64_t fromptroffset,
-      const int64_t* starts,
-      int64_t startsoffset,
-      const int64_t* parents,
-      int64_t parentsoffset,
-      int64_t lenparents,
-      int64_t outlength);
-  EXPORT_SYMBOL struct Error
-    awkward_argsort_int64_64(
-      int64_t* toptr,
-      const int64_t* fromptr,
-      const size_t* fromindex,
-      size_t indexlength,
-      int64_t fromptroffset,
-      const int64_t* starts,
-      int64_t startsoffset,
-      const int64_t* parents,
-      int64_t parentsoffset,
-      int64_t lenparents,
-      int64_t outlength);
-  EXPORT_SYMBOL struct Error
-    awkward_argsort_uint64_64(
-      int64_t* toptr,
-      const uint64_t* fromptr,
-      const size_t* fromindex,
-      size_t indexlength,
-      int64_t fromptroffset,
-      const int64_t* starts,
-      int64_t startsoffset,
-      const int64_t* parents,
-      int64_t parentsoffset,
-      int64_t lenparents,
-      int64_t outlength);
-  EXPORT_SYMBOL struct Error
-    awkward_argsort_float32_64(
-      int64_t* toptr,
-      const float* fromptr,
-      const size_t* fromindex,
-      size_t indexlength,
-      int64_t fromptroffset,
-      const int64_t* starts,
-      int64_t startsoffset,
-      const int64_t* parents,
-      int64_t parentsoffset,
-      int64_t lenparents,
-      int64_t outlength);
-  EXPORT_SYMBOL struct Error
-    awkward_argsort_float64_64(
-      int64_t* toptr,
-      const double* fromptr,
-      const size_t* fromindex,
-      size_t indexlength,
-      int64_t fromptroffset,
-      const int64_t* starts,
-      int64_t startsoffset,
-      const int64_t* parents,
-      int64_t parentsoffset,
-      int64_t lenparents,
-      int64_t outlength);
+      int64_t length);
 
   EXPORT_SYMBOL struct Error
     awkward_sort_bool(
       bool* toptr,
       const bool* fromptr,
       const size_t* fromindex,
-      size_t indexlength,
-      int64_t fromptroffset,
-      const int64_t* starts,
-      int64_t startsoffset,
-      const int64_t* parents,
-      int64_t parentsoffset,
-      int64_t lenparents,
-      int64_t outlength);
+      int64_t length);
   EXPORT_SYMBOL struct Error
     awkward_sort_int8(
       int8_t* toptr,
       const int8_t* fromptr,
       const size_t* fromindex,
-      size_t indexlength,
-      int64_t fromptroffset,
-      const int64_t* starts,
-      int64_t startsoffset,
-      const int64_t* parents,
-      int64_t parentsoffset,
-      int64_t lenparents,
-      int64_t outlength);
+      int64_t length);
   EXPORT_SYMBOL struct Error
     awkward_sort_uint8(
       uint8_t* toptr,
       const uint8_t* fromptr,
       const size_t* fromindex,
-      size_t indexlength,
-      int64_t fromptroffset,
-      const int64_t* starts,
-      int64_t startsoffset,
-      const int64_t* parents,
-      int64_t parentsoffset,
-      int64_t lenparents,
-      int64_t outlength);
+      int64_t length);
   EXPORT_SYMBOL struct Error
     awkward_sort_int16(
       int16_t* toptr,
       const int16_t* fromptr,
       const size_t* fromindex,
-      size_t indexlength,
-      int64_t fromptroffset,
-      const int64_t* starts,
-      int64_t startsoffset,
-      const int64_t* parents,
-      int64_t parentsoffset,
-      int64_t lenparents,
-      int64_t outlength);
+      int64_t length);
   EXPORT_SYMBOL struct Error
     awkward_sort_uint16(
       uint16_t* toptr,
       const uint16_t* fromptr,
       const size_t* fromindex,
-      size_t indexlength,
-      int64_t fromptroffset,
-      const int64_t* starts,
-      int64_t startsoffset,
-      const int64_t* parents,
-      int64_t parentsoffset,
-      int64_t lenparents,
-      int64_t outlength);
+      int64_t length);
   EXPORT_SYMBOL struct Error
     awkward_sort_int32(
       int32_t* toptr,
       const int32_t* fromptr,
       const size_t* fromindex,
-      size_t indexlength,
-      int64_t fromptroffset,
-      const int64_t* starts,
-      int64_t startsoffset,
-      const int64_t* parents,
-      int64_t parentsoffset,
-      int64_t lenparents,
-      int64_t outlength);
+      int64_t length);
   EXPORT_SYMBOL struct Error
     awkward_sort_uint32(
       uint32_t* toptr,
       const uint32_t* fromptr,
       const size_t* fromindex,
-      size_t indexlength,
-      int64_t fromptroffset,
-      const int64_t* starts,
-      int64_t startsoffset,
-      const int64_t* parents,
-      int64_t parentsoffset,
-      int64_t lenparents,
-      int64_t outlength);
+      int64_t length);
   EXPORT_SYMBOL struct Error
     awkward_sort_int64(
       int64_t* toptr,
       const int64_t* fromptr,
       const size_t* fromindex,
-      size_t indexlength,
-      int64_t fromptroffset,
-      const int64_t* starts,
-      int64_t startsoffset,
-      const int64_t* parents,
-      int64_t parentsoffset,
-      int64_t lenparents,
-      int64_t outlength);
+      int64_t length);
   EXPORT_SYMBOL struct Error
     awkward_sort_uint64(
       uint64_t* toptr,
       const uint64_t* fromptr,
       const size_t* fromindex,
-      size_t indexlength,
-      int64_t fromptroffset,
-      const int64_t* starts,
-      int64_t startsoffset,
-      const int64_t* parents,
-      int64_t parentsoffset,
-      int64_t lenparents,
-      int64_t outlength);
+      int64_t length);
   EXPORT_SYMBOL struct Error
     awkward_sort_float32(
       float* toptr,
       const float* fromptr,
       const size_t* fromindex,
-      size_t indexlength,
-      int64_t fromptroffset,
-      const int64_t* starts,
-      int64_t startsoffset,
-      const int64_t* parents,
-      int64_t parentsoffset,
-      int64_t lenparents,
-      int64_t outlength);
+      int64_t length);
   EXPORT_SYMBOL struct Error
     awkward_sort_float64(
       double* toptr,
       const double* fromptr,
       const size_t* fromindex,
-      size_t indexlength,
-      int64_t fromptroffset,
-      const int64_t* starts,
-      int64_t startsoffset,
-      const int64_t* parents,
-      int64_t parentsoffset,
-      int64_t lenparents,
-      int64_t outlength);
+      int64_t length);
 
   EXPORT_SYMBOL struct Error
     awkward_listoffsetarray_local_outoffsets_64(

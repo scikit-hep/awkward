@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "awkward/cpu-kernels/util.h"
+#include "awkward/cpu-kernels/operations.h"
 #include "awkward/Slice.h"
 #include "awkward/Content.h"
 
@@ -769,18 +770,13 @@ namespace awkward {
         next_stop = (ranges.size() > index + 1) ?  ranges[index + 1] : length;
       }
 
-      struct Error err = util::awkward_numpyarray_argsort_64<T>(
+      struct Error err = awkward_argsort_64(
         ptr.get(),
-        data,
         &result[0],
-        result.size(),
-        offset,
         starts.ptr().get(),
-        starts.offset(),
         parents.ptr().get(),
         parents.offset(),
-        length,
-        outlength);
+        length);
       util::handle_error(err, classname(), nullptr);
 
       return ptr;
@@ -834,14 +830,7 @@ namespace awkward {
         ptr.get(),
         data,
         &result[0],
-        result.size(),
-        offset,
-        starts.ptr().get(),
-        starts.offset(),
-        parents.ptr().get(),
-        parents.offset(),
-        parents.length(),
-        outlength);
+        parents.length());
       util::handle_error(err, classname(), nullptr);
 
       return ptr;
