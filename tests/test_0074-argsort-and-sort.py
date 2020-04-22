@@ -9,12 +9,12 @@ import numpy
 
 import awkward1
 
-def test_sort_emptyarray():
+def test_EmptyArray():
     array = awkward1.layout.EmptyArray()
     #FIXME assert awkward1.to_list(array.sort(0, True, False)) == []
     #FIXME assert awkward1.to_list(array.argsort(0, True, False)) == []
 
-def test_sort_numpyarray():
+def test_NumpyArray():
     array = awkward1.layout.NumpyArray(numpy.array([3.3, 2.2, 1.1, 5.5, 4.4]))
     assert awkward1.to_list(array.argsort(0, True, False)) == [2, 1, 0, 4, 3]
     assert awkward1.to_list(array.argsort(0, False, False)) == [3, 4, 0, 1, 2]
@@ -30,7 +30,7 @@ def test_sort_numpyarray():
         array.sort(2, True, False)
     assert str(err.value) == "axis=2 exceeds the depth of the nested list structure (which is 2)"
 
-def test_sort_indexoffsetarray():
+def test_IndexedOffsetArray():
     array = awkward1.Array([[ 2.2,  1.1,  3.3],
                             [],
                             [ 4.4,  5.5 ],
@@ -97,7 +97,7 @@ def test_3d():
         # [[[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         #  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]]
 
-def test_sort_recordarray():
+def test_RecordArray():
     array = awkward1.Array([{"x": 0.0, "y": []},
                             {"x": 1.1, "y": [1]},
                             {"x": 2.2, "y": [2, 2]},
@@ -125,3 +125,12 @@ def test_sort_recordarray():
     assert awkward1.to_list(array_y) == [[], [1], [2, 2], [3, 3, 3], [4, 4, 4, 4], [5, 5, 5], [6, 6], [7], []]
     assert awkward1.to_list(array.y.layout.argsort(0, True, False)) == [[0, 1, 2, 3, 4, 5, 6], [0, 1, 2, 3, 4], [0, 1, 2], [0]]
     assert awkward1.to_list(array.y.layout.argsort(1, True, True)) == [[], [0], [0, 1], [0, 1, 2], [0, 1, 2, 3], [0, 1, 2], [0, 1], [0], []]
+
+def test_ByteMaskedArray():
+    content = awkward1.from_iter([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False)
+    mask = awkward1.layout.Index8(numpy.array([0, 0, 1, 1, 0], dtype=numpy.int8))
+    array = awkward1.layout.ByteMaskedArray(mask, content, valid_when=False)
+    assert awkward1.to_list(array.argsort(0, True, False)) == [[0, 1], [0, 1], [0, 1], [0]]
+    assert awkward1.to_list(array.sort(0, True, False)) == [[[0.0, 6.6], [1.1, 7.7], [2.2, 8.8], [9.9]]]
+    assert awkward1.to_list(array.argsort(1, True, False)) == [[0, 1, 2], [], None, None, [0, 1, 2, 3]]
+    assert awkward1.to_list(array.sort(1, False, False)) ==  [[2.2, 1.1, 0.0], [], None, None, [9.9, 8.8, 7.7, 6.6]]
