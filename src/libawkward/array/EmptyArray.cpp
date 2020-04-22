@@ -296,7 +296,7 @@ namespace awkward {
   const ContentPtr
   EmptyArray::is_none(int64_t axis, int64_t depth) const {
     throw std::runtime_error(
-      "wubba lubba dub dub");
+      "TODO: Not implemented yet");
     return nullptr;
   }
 
