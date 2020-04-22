@@ -662,7 +662,12 @@ namespace awkward {
                             int64_t outlength,
                             bool ascending,
                             bool stable) const {
-    throw std::runtime_error("FIXME: BitMaskedArray::sort_next is not implemened");
+    return toByteMaskedArray().get()->sort_next(negaxis,
+                                                starts,
+                                                parents,
+                                                outlength,
+                                                ascending,
+                                                stable);
   }
 
   const ContentPtr
@@ -672,7 +677,12 @@ namespace awkward {
                                int64_t outlength,
                                bool ascending,
                                bool stable) const {
-    throw std::runtime_error("FIXME: BitMaskedArray::argsort_next is not implemened");
+    return toByteMaskedArray().get()->argsort_next(negaxis,
+                                                   starts,
+                                                   parents,
+                                                   outlength,
+                                                   ascending,
+                                                   stable);
   }
 
   const ContentPtr
