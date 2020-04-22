@@ -184,15 +184,12 @@ def test_basic():
 
 def test_slice():
     generator = awkward1.virtual.ArrayGenerator(
-        lambda: awkward1.Array([[1.1, 2.2, 3.3, 4.4], [5.5, 6.6, 7.7]]))
+        lambda: awkward1.Array([[1.1, 2.2, 3.3, 4.4, 5.5], [6.6, 7.7, 8.8], [100, 200, 300, 400]]))
     virtualarray = awkward1.layout.VirtualArray(generator)
 
-    virtualarray.array
+    assert virtualarray.peek_array is None
 
-    # print(virtualarray)
+    sliced = virtualarray[:-1]
+    assert sliced.peek_array is None
 
-    # print(virtualarray[slice(1, -1),])
-
-
-
-    # raise Exception
+    assert isinstance(sliced[1], awkward1.layout.NumpyArray)

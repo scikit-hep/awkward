@@ -614,10 +614,10 @@ namespace awkward {
     void
       append(const SliceNewAxis& item);
 
-    /// @brief Inserts a SliceArrayOf in-place at the end of the #items.
-    template <typename T>
+    /// @brief Inserts a {@link SliceArrayOf SliceArray64} in-place at the end
+    /// of the #items.
     void
-      append(const SliceArrayOf<T>& item);
+      append(const SliceArray64& item);
 
     /// @brief Inserts a SliceField in-place at the end of the #items.
     void
@@ -627,15 +627,15 @@ namespace awkward {
     void
       append(const SliceFields& item);
 
-    /// @brief Inserts a SliceMissingOf in-place at the end of the #items.
-    template <typename T>
+    /// @brief Inserts a {@link SliceMissingOf SliceMissing64} in-place at the
+    /// end of the #items.
     void
-      append(const SliceMissingOf<T>& item);
+      append(const SliceMissing64& item);
 
-    /// @brief Inserts a SliceJaggedOf in-place at the end of the #items.
-    template <typename T>
+    /// @brief Inserts a {@link SliceJaggedOf SliceJagged64} in-place at the
+    /// end of the #items.
     void
-      append(const SliceJaggedOf<T>& item);
+      append(const SliceJagged64& item);
 
     /// @brief Seal this Slice so that it is no longer open to #append.
     void

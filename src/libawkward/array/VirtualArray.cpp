@@ -7,27 +7,26 @@
 #include "awkward/array/VirtualArray.h"
 
 namespace awkward {
-  const util::Parameters
-  ensure_cache_key(const util::Parameters& parameters) {
-    if (util::parameter_equals(parameters, "__cache_key__", "null")) {
-      util::Parameters out(parameters);
-      out["__cache_key__"] = util::quote(ArrayCache::newkey(), true);
-      return out;
-    }
-    else {
-      return parameters;
-    }
-  }
-
   ////////// VirtualArray
 
   VirtualArray::VirtualArray(const IdentitiesPtr& identities,
                              const util::Parameters& parameters,
                              const ArrayGeneratorPtr& generator,
-                             const ArrayCachePtr& cache)
-      : Content(identities, ensure_cache_key(parameters))
+                             const ArrayCachePtr& cache,
+                             const std::string& cache_key)
+      : Content(identities, parameters)
       , generator_(generator)
-      , cache_(cache) { }
+      , cache_(cache)
+      , cache_key_(cache_key) { }
+
+  VirtualArray::VirtualArray(const IdentitiesPtr& identities,
+                             const util::Parameters& parameters,
+                             const ArrayGeneratorPtr& generator,
+                             const ArrayCachePtr& cache)
+      : Content(identities, parameters)
+      , generator_(generator)
+      , cache_(cache)
+      , cache_key_(ArrayCache::newkey()) { }
 
   const ArrayGeneratorPtr
   VirtualArray::generator() const {
@@ -64,7 +63,7 @@ namespace awkward {
 
   const std::string
   VirtualArray::cache_key() const {
-    return parameter_asstring("__cache_key__");
+    return cache_key_;
   }
 
   const std::string
@@ -101,7 +100,8 @@ namespace awkward {
                             const std::string& pre,
                             const std::string& post) const {
     std::stringstream out;
-    out << indent << pre << "<" << classname() << ">\n";
+    out << indent << pre << "<" << classname()
+        << " cache_key=\"" << cache_key_ << "\">\n";
     if (identities_.get() != nullptr) {
       out << identities_.get()->tostring_part(
                indent + std::string("    "), "", "\n");
@@ -166,27 +166,60 @@ namespace awkward {
 
   const ContentPtr
   VirtualArray::getitem_nothing() const {
-    throw std::runtime_error("FIXME: VirtualArray::getitem_nothing");
+    return array().get()->getitem_nothing();
   }
 
   const ContentPtr
   VirtualArray::getitem_at(int64_t at) const {
-    throw std::runtime_error("FIXME: VirtualArray::getitem_at");
+    int64_t regular_at = at;
+    if (regular_at < 0) {
+      regular_at += length();
+    }
+    if (!(0 <= regular_at  &&  regular_at < length())) {
+      util::handle_error(failure("index out of range", kSliceNone, at),
+                         classname(),
+                         identities_.get());
+    }
+    return getitem_at_nowrap(regular_at);
   }
 
   const ContentPtr
   VirtualArray::getitem_at_nowrap(int64_t at) const {
-    throw std::runtime_error("FIXME: VirtualArray::getitem_at_nowrap");
+    std::cout << "getitem_at_nowrap " << at << std::endl;
+
+    return array().get()->getitem_at_nowrap(at);
   }
 
   const ContentPtr
   VirtualArray::getitem_range(int64_t start, int64_t stop) const {
-    throw std::runtime_error("FIXME: VirtualArray::getitem_range");
+    int64_t regular_start = start;
+    int64_t regular_stop = stop;
+    awkward_regularize_rangeslice(&regular_start, &regular_stop,
+      true, start != Slice::none(), stop != Slice::none(),
+      length());
+    if (identities_.get() != nullptr  &&
+        regular_stop > identities_.get()->length()) {
+      util::handle_error(failure("index out of range", kSliceNone, stop),
+                         identities_.get()->classname(),
+                         nullptr);
+    }
+    return getitem_range_nowrap(regular_start, regular_stop);
   }
 
   const ContentPtr
   VirtualArray::getitem_range_nowrap(int64_t start, int64_t stop) const {
-    throw std::runtime_error("FIXME: VirtualArray::getitem_range_nowrap");
+    std::cout << "getitem_range_nowrap " << start << " " << stop << std::endl;
+
+    Slice slice;
+    slice.append(SliceRange(start, stop, 1));
+    slice.become_sealed();
+    ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
+                 generator_.get()->form(), stop - start, generator_, slice);
+    ArrayCachePtr cache(nullptr);
+    return std::make_shared<VirtualArray>(Identities::none(),
+                                          parameters_,
+                                          generator,
+                                          cache);
   }
 
   const ContentPtr
@@ -201,7 +234,20 @@ namespace awkward {
 
   const ContentPtr
   VirtualArray::carry(const Index64& carry) const {
-    throw std::runtime_error("FIXME: VirtualArray::carry");
+    std::cout << "carry " << carry.tostring() << std::endl;
+
+    Slice slice;
+    std::vector<int64_t> shape({ carry.length() });
+    std::vector<int64_t> strides({ 1 });
+    slice.append(SliceArray64(carry, shape, strides, false));
+    slice.become_sealed();
+    ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
+                 generator_.get()->form(), carry.length(), generator_, slice);
+    ArrayCachePtr cache(nullptr);
+    return std::make_shared<VirtualArray>(Identities::none(),
+                                          parameters_,
+                                          generator,
+                                          cache);
   }
 
   const std::string
@@ -343,15 +389,7 @@ namespace awkward {
   VirtualArray::getitem_next(const SliceRange& range,
                            const Slice& tail,
                            const Index64& advanced) const {
-    FormPtr form(nullptr);   // FIXME
-    int64_t length = -1;     // FIXME
-    ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
-              form, length, generator_, tail.prepended(range.shallow_copy()));
-    ArrayCachePtr cache(nullptr);
-    return std::make_shared<VirtualArray>(Identities::none(),
-                                          util::Parameters(),
-                                          generator,
-                                          cache);
+    throw std::runtime_error("FIXME: VirtualArray::getitem_next(range)");
   }
 
   const ContentPtr

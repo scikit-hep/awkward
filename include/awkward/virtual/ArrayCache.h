@@ -20,7 +20,8 @@ namespace awkward {
     /// process.
     ///
     /// If process-independent keys are needed, they can be bound to
-    /// VirtualArrays with the "__cache_key__" parameter.
+    /// VirtualArrays by explicitly setting the
+    /// {@link VirtualArray#cache_key VirtualArray::cache_key}.
     static const std::string
       newkey();
 

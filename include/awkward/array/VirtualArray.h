@@ -31,6 +31,16 @@ namespace awkward {
     /// checks it against an expected Form.
     /// @param cache Temporary storage for materialized arrays to avoid calling
     /// the #generator more than necessary. May be `nullptr`.
+    /// @param cache_key The key this VirtualArray will use when filling a
+    /// #cache.
+    VirtualArray(const IdentitiesPtr& identities,
+                 const util::Parameters& parameters,
+                 const ArrayGeneratorPtr& generator,
+                 const ArrayCachePtr& cache,
+                 const std::string& cache_key);
+
+    /// @brief Creates a VirtualArray with an automatically assigned #cache_key
+    /// (unique per process).
     VirtualArray(const IdentitiesPtr& identities,
                  const util::Parameters& parameters,
                  const ArrayGeneratorPtr& generator,
@@ -59,8 +69,7 @@ namespace awkward {
     const ContentPtr
       array() const;
 
-    /// @brief The cache key assigned to this VirtualArray; it may be set via
-    /// parameters or self-assigned (unique per process).
+    /// @brief The key this VirtualArray will use when filling a #cache.
     const std::string
       cache_key() const;
 
@@ -269,6 +278,8 @@ namespace awkward {
     const ArrayGeneratorPtr generator_;
     /// @brief See #cache.
     const ArrayCachePtr cache_;
+    /// @brief See #cache_key.
+    const std::string cache_key_;
   };
 
 }

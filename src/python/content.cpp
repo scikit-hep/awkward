@@ -120,6 +120,10 @@ box(const std::shared_ptr<ak::Content>& content) {
            dynamic_cast<ak::UnionArray8_64*>(content.get())) {
     return py::cast(*raw);
   }
+  else if (ak::VirtualArray* raw =
+           dynamic_cast<ak::VirtualArray*>(content.get())) {
+    return py::cast(*raw);
+  }
   else {
     throw std::runtime_error("missing boxer for Content subtype");
   }
@@ -233,6 +237,10 @@ unbox_content(const py::handle& obj) {
   catch (py::cast_error err) { }
   try {
     return obj.cast<ak::UnionArray8_64*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  try {
+    return obj.cast<ak::VirtualArray*>()->shallow_copy();
   }
   catch (py::cast_error err) { }
   throw std::invalid_argument("content argument must be a Content subtype");
@@ -406,6 +414,10 @@ toslice_part(ak::Slice& slice, py::object obj) {
       }
       else if (py::isinstance<ak::Content>(obj)) {
         content = unbox_content(obj);
+        if (ak::VirtualArray* raw
+              = dynamic_cast<ak::VirtualArray*>(content.get())) {
+          content = raw->array();
+        }
       }
       else if (py::isinstance<ak::ArrayBuilder>(obj)) {
         content = unbox_content(obj.attr("snapshot")());
@@ -2021,6 +2033,7 @@ make_VirtualArray(const py::handle& m, const std::string& name) {
                          ak::Content>(m, name.c_str())
       .def(py::init([](const std::shared_ptr<PyArrayGenerator>& generator,
                        const py::object& cache,
+                       const py::object& cache_key,
                        const py::object& identities,
                        const py::object& parameters) -> ak::VirtualArray {
         std::shared_ptr<PyArrayCache> cppcache(nullptr);
@@ -2033,13 +2046,32 @@ make_VirtualArray(const py::handle& m, const std::string& name) {
                 "VirtualArray 'cache' must be an ArrayCache or None");
           }
         }
-        return ak::VirtualArray(
-          unbox_identities_none(identities),
-          dict2parameters(parameters),
-          generator,
-          cppcache);
+        if (!cache_key.is(py::none())) {
+          std::string cppcache_key;
+          try {
+            cppcache_key = cache_key.cast<std::string>();
+          }
+          catch (py::cast_error err) {
+            throw std::invalid_argument(
+                "VirtualArray 'cache_key' must be a string or None");
+          }
+          return ak::VirtualArray(
+            unbox_identities_none(identities),
+            dict2parameters(parameters),
+            generator,
+            cppcache,
+            cppcache_key);
+        }
+        else {
+          return ak::VirtualArray(
+            unbox_identities_none(identities),
+            dict2parameters(parameters),
+            generator,
+            cppcache);
+        }
       }), py::arg("generator"),
           py::arg("cache") = py::none(),
+          py::arg("cache_key") = py::none(),
           py::arg("identities") = py::none(),
           py::arg("parameters") = py::none())
       .def_property_readonly("generator", &ak::VirtualArray::generator)
