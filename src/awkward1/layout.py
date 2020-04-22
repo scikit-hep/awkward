@@ -47,4 +47,6 @@ from awkward1._ext import UnionArray8_32
 from awkward1._ext import UnionArray8_U32
 from awkward1._ext import UnionArray8_64
 
+from awkward1._ext import VirtualArray
+
 from awkward1._ext import _slice_tostring

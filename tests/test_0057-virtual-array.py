@@ -165,3 +165,19 @@ def test_forms():
     assert form.has_identities == False
     assert form.parameters == {"hey": ["you"]}
     assert form.parameter("hey") == ["you"]
+
+def fcn():
+    return awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5]))
+
+def test_basic():
+    generator = awkward1.virtual.ArrayGenerator(fcn, form=awkward1.forms.NumpyForm([], 8, "d"), length=5)
+
+    d = {}
+    cache = awkward1.virtual.ArrayCache(d)
+
+    virtualarray = awkward1.layout.VirtualArray(generator, cache)
+    assert virtualarray.peek_array is None
+    assert virtualarray.array is not None
+    assert awkward1.to_list(virtualarray.peek_array) == [1.1, 2.2, 3.3, 4.4, 5.5]
+    assert awkward1.to_list(virtualarray.array) == [1.1, 2.2, 3.3, 4.4, 5.5]
+    assert awkward1.to_list(d[virtualarray.cache_key]) == [1.1, 2.2, 3.3, 4.4, 5.5]

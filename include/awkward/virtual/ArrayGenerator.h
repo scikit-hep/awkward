@@ -45,6 +45,11 @@ namespace awkward {
     const ContentPtr
       generate_and_check() const;
 
+    virtual const std::string
+      tostring_part(const std::string& indent,
+                    const std::string& pre,
+                    const std::string& post) const = 0;
+
   protected:
     const FormPtr form_;
     int64_t length_;

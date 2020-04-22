@@ -31,6 +31,11 @@ namespace awkward {
     /// @brief Writes or overwrites an array at `key`.
     virtual void
       set(const std::string& key, const ContentPtr& value) = 0;
+
+    virtual const std::string
+      tostring_part(const std::string& indent,
+                    const std::string& pre,
+                    const std::string& post) const = 0;
   };
 
   using ArrayCachePtr = std::shared_ptr<ArrayCache>;

@@ -7,13 +7,25 @@
 #include "awkward/array/VirtualArray.h"
 
 namespace awkward {
+  const util::Parameters
+  ensure_cache_key(const util::Parameters& parameters) {
+    if (util::parameter_equals(parameters, "__cache_key__", "null")) {
+      util::Parameters out(parameters);
+      out["__cache_key__"] = util::quote(ArrayCache::newkey(), true);
+      return out;
+    }
+    else {
+      return parameters;
+    }
+  }
+
   ////////// VirtualArray
 
   VirtualArray::VirtualArray(const IdentitiesPtr& identities,
                              const util::Parameters& parameters,
                              const ArrayGeneratorPtr& generator,
                              const ArrayCachePtr& cache)
-      : Content(identities, parameters)
+      : Content(identities, ensure_cache_key(parameters))
       , generator_(generator)
       , cache_(cache) { }
 
@@ -29,12 +41,30 @@ namespace awkward {
 
   const ContentPtr
   VirtualArray::peek_array() const {
-    throw std::runtime_error("FIXME: VirtualArray::peek_array");
+    if (cache_.get() != nullptr) {
+      return cache_.get()->get(cache_key());
+    }
+    return ContentPtr(nullptr);
   }
 
   const ContentPtr
   VirtualArray::array() const {
-    throw std::runtime_error("FIXME: VirtualArray::array");
+    ContentPtr out(nullptr);
+    if (cache_.get() != nullptr) {
+      out = cache_.get()->get(cache_key());
+    }
+    if (out.get() == nullptr) {
+      out = generator_.get()->generate_and_check();
+    }
+    if (cache_.get() != nullptr) {
+      cache_.get()->set(cache_key(), out);
+    }
+    return out;
+  }
+
+  const std::string
+  VirtualArray::cache_key() const {
+    return parameter_asstring("__cache_key__");
   }
 
   const std::string
@@ -59,7 +89,11 @@ namespace awkward {
 
   const FormPtr
   VirtualArray::form() const {
-    throw std::runtime_error("FIXME: VirtualArray::form");
+    FormPtr out = generator_.get()->form();
+    if (out.get() == nullptr) {
+      out = array().get()->form();
+    }
+    return out;
   }
 
   const std::string
@@ -75,21 +109,25 @@ namespace awkward {
     if (!parameters_.empty()) {
       out << parameters_tostring(indent + std::string("    "), "", "\n");
     }
-    throw std::runtime_error("FIXME: VirtualArray::tostring_part");
-    // out << starts_.tostring_part(
-    //          indent + std::string("    "), "<starts>", "</starts>\n");
-    // out << stops_.tostring_part(
-    //          indent + std::string("    "), "<stops>", "</stops>\n");
-    // out << content_.get()->tostring_part(
-    //          indent + std::string("    "), "<content>", "</content>\n");
-    // out << indent << "</" << classname() << ">" << post;
-    // return out.str();
+    out << generator_.get()->tostring_part(indent + std::string("    "),
+                                           "", "\n");
+    if (cache_.get() != nullptr) {
+      out << cache_.get()->tostring_part(indent + std::string("    "),
+                                         "", "\n");
+    }
+    ContentPtr peek = peek_array();
+    if (peek.get() != nullptr) {
+      out << peek.get()->tostring_part(
+               indent + std::string("    "), "<array>", "</array>\n");
+    }
+    out << indent << "</" << classname() << ">" << post;
+    return out.str();
   }
 
   void
   VirtualArray::tojson_part(ToJson& builder,
                           bool include_beginendlist) const {
-
+    throw std::runtime_error("FIXME: VirtualArray::tojson_part");
   }
 
   void
@@ -99,7 +137,11 @@ namespace awkward {
 
   int64_t
   VirtualArray::length() const {
-    throw std::runtime_error("FIXME: VirtualArray::length");
+    int64_t out = generator_.get()->length();
+    if (out < 0) {
+      out = array().get()->length();
+    }
+    return out;
   }
 
   const ContentPtr

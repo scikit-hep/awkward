@@ -59,6 +59,11 @@ namespace awkward {
     const ContentPtr
       array() const;
 
+    /// @brief The cache key assigned to this VirtualArray; it may be set via
+    /// parameters or self-assigned (unique per process).
+    const std::string
+      cache_key() const;
+
     /// @brief User-friendly name of this class: `"VirtualArray"`.
     const std::string
       classname() const override;

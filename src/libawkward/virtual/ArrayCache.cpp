@@ -9,7 +9,7 @@ namespace awkward {
 
   const std::string
   ArrayCache::newkey() {
-    std::string out = std::to_string(numkeys);
+    std::string out = std::string("ak") + std::to_string(numkeys);
     numkeys++;
     return out;
   }

@@ -2058,5 +2058,6 @@ make_VirtualArray(const py::handle& m, const std::string& name) {
                                       -> py::object {
         return box(self.array());
       })
+      .def_property_readonly("cache_key", &ak::VirtualArray::cache_key)
   );
 }

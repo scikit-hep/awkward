@@ -19,8 +19,22 @@ public:
                    const py::tuple& args,
                    const py::dict& kwargs);
 
+  const py::object
+    callable() const;
+
+  const py::tuple
+    args() const;
+
+  const py::kwargs
+    kwargs() const;
+
   const ak::ContentPtr
     generate() const override;
+
+  const std::string
+  tostring_part(const std::string& indent,
+                const std::string& pre,
+                const std::string& post) const override;
 
 private:
   const py::object callable_;
@@ -35,11 +49,19 @@ class PyArrayCache: public ak::ArrayCache {
 public:
   PyArrayCache(const py::object& mutablemapping);
 
+  const py::object
+    mutablemapping() const;
+
   ak::ContentPtr
     get(const std::string& key) const override;
 
   void
     set(const std::string& key, const ak::ContentPtr& value) override;
+
+  const std::string
+  tostring_part(const std::string& indent,
+                const std::string& pre,
+                const std::string& post) const override;
 
 private:
   const py::object mutablemapping_;
