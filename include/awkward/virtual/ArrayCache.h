@@ -24,7 +24,7 @@ namespace awkward {
     static const std::string
       newkey();
 
-    /// @brief Attempts to get an array; may be nullptr if not available.
+    /// @brief Attempts to get an array; may be `nullptr` if not available.
     virtual ContentPtr
       get(const std::string& key) const = 0;
 

@@ -106,6 +106,7 @@ PYBIND11_MODULE(_ext, m) {
 
   ////////// virtual.h
 
+  make_PyArrayGenerator(m, "PyArrayGenerator");
   make_PyArrayCache(m, "PyArrayCache");
 
   ////////// io.h
