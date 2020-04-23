@@ -184,7 +184,8 @@ def test_basic():
 
 def test_slice():
     generator = awkward1.virtual.ArrayGenerator(
-        lambda: awkward1.Array([[1.1, 2.2, 3.3, 4.4, 5.5], [6.6, 7.7, 8.8], [100, 200, 300, 400]]))
+        lambda: awkward1.Array([[1.1, 2.2, 3.3, 4.4, 5.5], [6.6, 7.7, 8.8], [100, 200, 300, 400]]),
+        length = 3)
     virtualarray = awkward1.layout.VirtualArray(generator)
 
     assert isinstance(virtualarray, awkward1.layout.VirtualArray)

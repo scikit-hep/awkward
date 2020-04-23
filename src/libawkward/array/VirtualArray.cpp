@@ -4,6 +4,8 @@
 #include <sstream>
 #include <stdexcept>
 
+#include "awkward/array/RegularArray.h"
+
 #include "awkward/array/VirtualArray.h"
 
 namespace awkward {
@@ -187,18 +189,17 @@ namespace awkward {
 
   const ContentPtr
   VirtualArray::getitem_range(int64_t start, int64_t stop) const {
-    int64_t regular_start = start;
-    int64_t regular_stop = stop;
-    awkward_regularize_rangeslice(&regular_start, &regular_stop,
-      true, start != Slice::none(), stop != Slice::none(),
-      length());
-    if (identities_.get() != nullptr  &&
-        regular_stop > identities_.get()->length()) {
-      util::handle_error(failure("index out of range", kSliceNone, stop),
-                         identities_.get()->classname(),
-                         nullptr);
+    if (generator_.get()->length() < 0) {
+      return array().get()->getitem_range(start, stop);
     }
-    return getitem_range_nowrap(regular_start, regular_stop);
+    else {
+      int64_t regular_start = start;
+      int64_t regular_stop = stop;
+      awkward_regularize_rangeslice(&regular_start, &regular_stop,
+        true, start != Slice::none(), stop != Slice::none(),
+        generator_.get()->length());
+      return getitem_range_nowrap(regular_start, regular_stop);
+    }
   }
 
   const ContentPtr
@@ -225,10 +226,10 @@ namespace awkward {
       form = form.get()->getitem_field(key);
     }
     ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
-                 form, length(), generator_, slice);
+                 form, generator_.get()->length(), generator_, slice);
     ArrayCachePtr cache(nullptr);
     return std::make_shared<VirtualArray>(Identities::none(),
-                                          parameters_,
+                                          util::Parameters(),
                                           generator,
                                           cache);
   }
@@ -243,10 +244,10 @@ namespace awkward {
       form = form.get()->getitem_fields(keys);
     }
     ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
-                 form, length(), generator_, slice);
+                 form, generator_.get()->length(), generator_, slice);
     ArrayCachePtr cache(nullptr);
     return std::make_shared<VirtualArray>(Identities::none(),
-                                          parameters_,
+                                          util::Parameters(),
                                           generator,
                                           cache);
   }
@@ -299,24 +300,24 @@ namespace awkward {
 
   const SliceItemPtr
   VirtualArray::asslice() const {
-    throw std::runtime_error("FIXME: VirtualArray::asslice");
+    return array().get()->asslice();
   }
 
   const ContentPtr
   VirtualArray::fillna(const ContentPtr& value) const {
-    throw std::runtime_error("FIXME: VirtualArray::fillna");
+    return array().get()->fillna(value);
   }
 
   const ContentPtr
   VirtualArray::rpad(int64_t target, int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: VirtualArray::rpad");
+    return array().get()->rpad(target, axis, depth);
   }
 
   const ContentPtr
   VirtualArray::rpad_and_clip(int64_t target,
-                            int64_t axis,
-                            int64_t depth) const {
-    throw std::runtime_error("FIXME: VirtualArray::rpad_and_clip");
+                              int64_t axis,
+                              int64_t depth) const {
+    return array().get()->rpad_and_clip(target, axis, depth);
   }
 
   const ContentPtr
@@ -327,22 +328,140 @@ namespace awkward {
                           int64_t outlength,
                           bool mask,
                           bool keepdims) const {
-    throw std::runtime_error("FIXME: VirtualArray::reduce_next");
+    return array().get()->reduce_next(reducer,
+                                      negaxis,
+                                      starts,
+                                      parents,
+                                      outlength,
+                                      mask,
+                                      keepdims);
   }
 
   const ContentPtr
   VirtualArray::localindex(int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: VirtualArray::localindex");
+    return array().get()->localindex(axis, depth);
   }
 
   const ContentPtr
   VirtualArray::combinations(int64_t n,
-                           bool replacement,
-                           const util::RecordLookupPtr& recordlookup,
-                           const util::Parameters& parameters,
-                           int64_t axis,
-                           int64_t depth) const {
-    throw std::runtime_error("FIXME: VirtualArray::combinations");
+                             bool replacement,
+                             const util::RecordLookupPtr& recordlookup,
+                             const util::Parameters& parameters,
+                             int64_t axis,
+                             int64_t depth) const {
+    return array().get()->combinations(n,
+                                       replacement,
+                                       recordlookup,
+                                       parameters,
+                                       axis,
+                                       depth);
+  }
+
+  const ContentPtr
+  VirtualArray::getitem(const Slice& where) const {
+    if (where.length() == 1) {
+      SliceItemPtr head = where.head();
+
+      if (SliceRange* range =
+          dynamic_cast<SliceRange*>(head.get())) {
+        if (range->step() == 0) {
+            throw std::invalid_argument("slice step cannot be zero");
+        }
+        else if (generator_.get()->length() >= 0) {
+          int64_t regular_start = range->start();
+          int64_t regular_stop = range->stop();
+          awkward_regularize_rangeslice(&regular_start,
+                                        &regular_stop,
+                                        range->step() > 0,
+                                        range->start() != Slice::none(),
+                                        range->stop() != Slice::none(),
+                                        generator_.get()->length());
+          int64_t length;
+          if ((range->step() > 0  &&  regular_stop - regular_start > 0)  ||
+              (range->step() < 0  &&  regular_stop - regular_start < 0)) {
+            int64_t numer = abs(regular_start - regular_stop);
+            int64_t denom = abs(range->step());
+            int64_t d = numer / denom;
+            int64_t m = numer % denom;
+            length = d + (m != 0 ? 1 : 0);
+          }
+          else {
+            length = 0;
+          }
+          ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
+                     generator_.get()->form(), length, generator_, where);
+          ArrayCachePtr cache(nullptr);
+          return std::make_shared<VirtualArray>(Identities::none(),
+                                                util::Parameters(),
+                                                generator,
+                                                cache);
+        }
+        else {
+          return array().get()->getitem(where);
+        }
+      }
+
+      else if (SliceEllipsis* ellipsis =
+               dynamic_cast<SliceEllipsis*>(head.get())) {
+        FormPtr form = generator_.get()->form();
+        int64_t length = generator_.get()->length();
+        ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
+                     form, length, generator_, where);
+        ArrayCachePtr cache(nullptr);
+        return std::make_shared<VirtualArray>(Identities::none(),
+                                              util::Parameters(),
+                                              generator,
+                                              cache);
+      }
+
+      else if (SliceNewAxis* newaxis =
+               dynamic_cast<SliceNewAxis*>(head.get())) {
+        FormPtr form = generator_.get()->form();
+        if (form.get() != nullptr) {
+          form = std::make_shared<RegularForm>(false,
+                                               util::Parameters(),
+                                               form,
+                                               1);
+        }
+        ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
+                     form, 1, generator_, where);
+        ArrayCachePtr cache(nullptr);
+        return std::make_shared<VirtualArray>(Identities::none(),
+                                              util::Parameters(),
+                                              generator,
+                                              cache);
+      }
+
+      else if (SliceArray64* slicearray =
+               dynamic_cast<SliceArray64*>(head.get())) {
+        int64_t length = slicearray->length();
+        ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
+                     generator_.get()->form(), length, generator_, where);
+        ArrayCachePtr cache(nullptr);
+        return std::make_shared<VirtualArray>(Identities::none(),
+                                              util::Parameters(),
+                                              generator,
+                                              cache);
+      }
+
+      else if (SliceField* field =
+               dynamic_cast<SliceField*>(head.get())) {
+        return getitem_field(field->key());
+      }
+
+      else if (SliceFields* fields =
+               dynamic_cast<SliceFields*>(head.get())) {
+        return getitem_fields(fields->keys());
+      }
+
+      else {
+        return array().get()->getitem(where);
+      }
+    }
+
+    else {
+      return array().get()->getitem(where);
+    }
   }
 
   const ContentPtr

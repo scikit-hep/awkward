@@ -196,6 +196,9 @@ namespace awkward {
                    int64_t depth) const override;
 
     const ContentPtr
+      getitem(const Slice& where) const override;
+
+    const ContentPtr
       getitem_next(const SliceAt& at,
                    const Slice& tail,
                    const Index64& advanced) const override;
