@@ -138,6 +138,16 @@ namespace awkward {
   }
 
   const FormPtr
+  RecordForm::getitem_range() const {
+    throw std::runtime_error("FIXME: RecordForm::getitem_range");
+  }
+
+  const FormPtr
+  RecordForm::getitem_array() const {
+    throw std::runtime_error("FIXME: RecordForm::getitem_array");
+  }
+
+  const FormPtr
   RecordForm::getitem_field(const std::string& key) const {
     return content(key);
   }

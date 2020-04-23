@@ -89,6 +89,16 @@ namespace awkward {
   }
 
   const FormPtr
+  ListOffsetForm::getitem_range() const {
+    throw std::runtime_error("FIXME: ListOffsetForm::getitem_range");
+  }
+
+  const FormPtr
+  ListOffsetForm::getitem_array() const {
+    throw std::runtime_error("FIXME: ListOffsetForm::getitem_array");
+  }
+
+  const FormPtr
   ListOffsetForm::getitem_field(const std::string& key) const {
     return std::make_shared<ListOffsetForm>(
                has_identities_,

@@ -280,6 +280,16 @@ namespace awkward {
   }
 
   const FormPtr
+  NumpyForm::getitem_range() const {
+    throw std::runtime_error("FIXME: NumpyForm::getitem_range");
+  }
+
+  const FormPtr
+  NumpyForm::getitem_array() const {
+    throw std::runtime_error("FIXME: NumpyForm::getitem_array");
+  }
+
+  const FormPtr
   NumpyForm::getitem_field(const std::string& key) const {
     throw std::invalid_argument("cannot slice NumpyForm by field name");
   }

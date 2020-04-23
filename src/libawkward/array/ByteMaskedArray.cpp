@@ -87,6 +87,16 @@ namespace awkward {
   }
 
   const FormPtr
+  ByteMaskedForm::getitem_range() const {
+    throw std::runtime_error("FIXME: ByteMaskedForm::getitem_range");
+  }
+
+  const FormPtr
+  ByteMaskedForm::getitem_array() const {
+    throw std::runtime_error("FIXME: ByteMaskedForm::getitem_array");
+  }
+
+  const FormPtr
   ByteMaskedForm::getitem_field(const std::string& key) const {
     return std::make_shared<ByteMaskedForm>(
                has_identities_,

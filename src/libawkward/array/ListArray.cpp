@@ -98,6 +98,16 @@ namespace awkward {
   }
 
   const FormPtr
+  ListForm::getitem_range() const {
+    throw std::runtime_error("FIXME: ListForm::getitem_range");
+  }
+
+  const FormPtr
+  ListForm::getitem_array() const {
+    throw std::runtime_error("FIXME: ListForm::getitem_array");
+  }
+
+  const FormPtr
   ListForm::getitem_field(const std::string& key) const {
     return std::make_shared<ListForm>(
                has_identities_,

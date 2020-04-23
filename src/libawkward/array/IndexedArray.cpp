@@ -88,6 +88,16 @@ namespace awkward {
   }
 
   const FormPtr
+  IndexedForm::getitem_range() const {
+    throw std::runtime_error("FIXME: IndexedForm::getitem_range");
+  }
+
+  const FormPtr
+  IndexedForm::getitem_array() const {
+    throw std::runtime_error("FIXME: IndexedForm::getitem_array");
+  }
+
+  const FormPtr
   IndexedForm::getitem_field(const std::string& key) const {
     return std::make_shared<IndexedForm>(
                has_identities_,
@@ -240,6 +250,16 @@ namespace awkward {
                                                parameters_,
                                                index_,
                                                content_);
+  }
+
+  const FormPtr
+  IndexedOptionForm::getitem_range() const {
+    throw std::runtime_error("FIXME: IndexedOptionForm::getitem_range");
+  }
+
+  const FormPtr
+  IndexedOptionForm::getitem_array() const {
+    throw std::runtime_error("FIXME: IndexedOptionForm::getitem_array");
   }
 
   const FormPtr

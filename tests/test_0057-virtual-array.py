@@ -185,7 +185,7 @@ def test_basic():
 def test_slice():
     generator = awkward1.virtual.ArrayGenerator(
         lambda: awkward1.Array([[1.1, 2.2, 3.3, 4.4, 5.5], [6.6, 7.7, 8.8], [100, 200, 300, 400]]),
-        length = 3)
+        length=3)
     virtualarray = awkward1.layout.VirtualArray(generator)
 
     assert isinstance(virtualarray, awkward1.layout.VirtualArray)
@@ -206,3 +206,24 @@ def test_field():
     assert isinstance(sliced, awkward1.layout.VirtualArray)
 
     assert isinstance(sliced[1], awkward1.layout.NumpyArray)
+
+# def test_single_level():
+#     template = awkward1.Array([[{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}], [], [{"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}]])
+#     generator = awkward1.virtual.ArrayGenerator(lambda: template, form=template.layout.form, length=3)
+#     d = {}
+#     cache = awkward1.virtual.ArrayCache(d)
+#     virtualarray = awkward1.layout.VirtualArray(generator, cache)
+
+#     a = virtualarray[2]
+#     assert isinstance(a, awkward1.layout.RecordArray)
+#     assert awkward1.to_list(a) == [{"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}]
+#     assert len(d) == 1
+#     d.clear()
+
+#     a = virtualarray[1:]
+#     assert isinstance(a, awkward1.layout.VirtualArray)
+#     assert len(d) == 0
+#     b = a[1]
+#     assert isinstance(b, awkward1.layout.RecordArray)
+#     assert len(d) == 1
+#     d.clear()

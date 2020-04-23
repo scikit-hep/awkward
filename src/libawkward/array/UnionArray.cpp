@@ -110,6 +110,16 @@ namespace awkward {
   }
 
   const FormPtr
+  UnionForm::getitem_range() const {
+    throw std::runtime_error("FIXME: UnionForm::getitem_range");
+  }
+
+  const FormPtr
+  UnionForm::getitem_array() const {
+    throw std::runtime_error("FIXME: UnionForm::getitem_array");
+  }
+
+  const FormPtr
   UnionForm::getitem_field(const std::string& key) const {
     std::vector<FormPtr> contents;
     for (auto content : contents_) {

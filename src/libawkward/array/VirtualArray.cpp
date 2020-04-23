@@ -388,8 +388,12 @@ namespace awkward {
           else {
             length = 0;
           }
+          FormPtr form = generator_.get()->form();
+          if (form.get() != nullptr) {
+            form = form.get()->getitem_range();
+          }
           ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
-                     generator_.get()->form(), length, generator_, where);
+                     form, length, generator_, where);
           ArrayCachePtr cache(nullptr);
           return std::make_shared<VirtualArray>(Identities::none(),
                                                 util::Parameters(),
@@ -404,9 +408,8 @@ namespace awkward {
       else if (SliceEllipsis* ellipsis =
                dynamic_cast<SliceEllipsis*>(head.get())) {
         FormPtr form = generator_.get()->form();
-        int64_t length = generator_.get()->length();
         ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
-                     form, length, generator_, where);
+                     form, generator_.get()->length(), generator_, where);
         ArrayCachePtr cache(nullptr);
         return std::make_shared<VirtualArray>(Identities::none(),
                                               util::Parameters(),
@@ -434,9 +437,12 @@ namespace awkward {
 
       else if (SliceArray64* slicearray =
                dynamic_cast<SliceArray64*>(head.get())) {
-        int64_t length = slicearray->length();
+        FormPtr form = generator_.get()->form();
+        if (form.get() != nullptr) {
+          form = form.get()->getitem_array();
+        }
         ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
-                     generator_.get()->form(), length, generator_, where);
+                     form, slicearray->length(), generator_, where);
         ArrayCachePtr cache(nullptr);
         return std::make_shared<VirtualArray>(Identities::none(),
                                               util::Parameters(),

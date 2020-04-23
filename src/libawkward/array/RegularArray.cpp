@@ -77,6 +77,16 @@ namespace awkward {
   }
 
   const FormPtr
+  RegularForm::getitem_range() const {
+    throw std::runtime_error("FIXME: RegularForm::getitem_range");
+  }
+
+  const FormPtr
+  RegularForm::getitem_array() const {
+    throw std::runtime_error("FIXME: RegularForm::getitem_array");
+  }
+
+  const FormPtr
   RegularForm::getitem_field(const std::string& key) const {
     return std::make_shared<RegularForm>(
                has_identities_,
