@@ -55,7 +55,7 @@ namespace awkward {
 
   const std::string
   EmptyForm::purelist_parameter(const std::string& key) const {
-    parameter(key);
+    return parameter(key);
   }
 
   bool
@@ -296,60 +296,6 @@ namespace awkward {
   const ContentPtr
   EmptyArray::carry(const Index64& carry) const {
     return shallow_copy();
-  }
-
-  const std::string
-  EmptyArray::purelist_parameter(const std::string& key) const {
-    return parameter(key);
-  }
-
-  bool
-  EmptyArray::purelist_isregular() const {
-    return true;
-  }
-
-  int64_t
-  EmptyArray::purelist_depth() const {
-    return 1;
-  }
-
-  const std::pair<int64_t, int64_t>
-  EmptyArray::minmax_depth() const {
-    return std::pair<int64_t, int64_t>(1, 1);
-  }
-
-  const std::pair<bool, int64_t>
-  EmptyArray::branch_depth() const {
-    return std::pair<bool, int64_t>(false, 1);
-  }
-
-  int64_t
-  EmptyArray::numfields() const {
-    return -1;
-  }
-
-  int64_t
-  EmptyArray::fieldindex(const std::string& key) const {
-    throw std::invalid_argument(
-      std::string("key ") + util::quote(key, true)
-      + std::string(" does not exist (data might not be records)"));
-  }
-
-  const std::string
-  EmptyArray::key(int64_t fieldindex) const {
-    throw std::invalid_argument(
-      std::string("fieldindex \"") + std::to_string(fieldindex)
-      + std::string("\" does not exist (data might not be records)"));
-  }
-
-  bool
-  EmptyArray::haskey(const std::string& key) const {
-    return false;
-  }
-
-  const std::vector<std::string>
-  EmptyArray::keys() const {
-    return std::vector<std::string>();
   }
 
   const std::string

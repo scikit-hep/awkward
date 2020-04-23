@@ -126,56 +126,6 @@ namespace awkward {
   }
 
   const std::string
-  None::purelist_parameter(const std::string& key) const {
-    throw std::runtime_error("undefined operation: None::purelist_parameter");
-  }
-
-  bool
-  None::purelist_isregular() const {
-    throw std::runtime_error("undefined operation: None::purelist_isregular");
-  }
-
-  int64_t
-  None::purelist_depth() const {
-    throw std::runtime_error("undefined operation: None::purelist_depth");
-  }
-
-  const std::pair<int64_t, int64_t>
-  None::minmax_depth() const {
-    throw std::runtime_error("undefined operation: None::minmax_depth");
-  }
-
-  const std::pair<bool, int64_t>
-  None::branch_depth() const {
-    throw std::runtime_error("undefined operation: None::branch_depth");
-  }
-
-  int64_t
-  None::numfields() const {
-    throw std::runtime_error("undefined operation: None::numfields");
-  }
-
-  int64_t
-  None::fieldindex(const std::string& key) const {
-    throw std::runtime_error("undefined operation: None::fieldindex");
-  }
-
-  const std::string
-  None::key(int64_t fieldindex) const {
-    throw std::runtime_error("undefined operation: None::key");
-  }
-
-  bool
-  None::haskey(const std::string& key) const {
-    throw std::runtime_error("undefined operation: None::haskey");
-  }
-
-  const std::vector<std::string>
-  None::keys() const {
-    throw std::runtime_error("undefined operation: None::keys");
-  }
-
-  const std::string
   None::validityerror(const std::string& path) const {
     throw std::runtime_error("undefined operation: None::validityerror");
   }

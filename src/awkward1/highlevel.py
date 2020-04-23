@@ -220,7 +220,6 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
             layout = awkward1.operations.structure.with_name(layout,
                                                              with_name,
                                                              highlevel=False)
-
         if self.__class__ is Array:
             self.__class__ = awkward1._util.arrayclass(layout, behavior)
 

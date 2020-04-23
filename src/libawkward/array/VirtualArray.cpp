@@ -268,56 +268,6 @@ namespace awkward {
   }
 
   const std::string
-  VirtualArray::purelist_parameter(const std::string& key) const {
-    throw std::runtime_error("FIXME: VirtualArray::purelist_parameter");
-  }
-
-  bool
-  VirtualArray::purelist_isregular() const {
-    throw std::runtime_error("FIXME: VirtualArray::purelist_isregular");
-  }
-
-  int64_t
-  VirtualArray::purelist_depth() const {
-    throw std::runtime_error("FIXME: VirtualArray::purelist_depth");
-  }
-
-  const std::pair<int64_t, int64_t>
-  VirtualArray::minmax_depth() const {
-    throw std::runtime_error("FIXME: VirtualArray::minmax_depth");
-  }
-
-  const std::pair<bool, int64_t>
-  VirtualArray::branch_depth() const {
-    throw std::runtime_error("FIXME: VirtualArray::branch_depth");
-  }
-
-  int64_t
-  VirtualArray::numfields() const {
-    throw std::runtime_error("FIXME: VirtualArray::numfields");
-  }
-
-  int64_t
-  VirtualArray::fieldindex(const std::string& key) const {
-    throw std::runtime_error("FIXME: VirtualArray::fieldindex");
-  }
-
-  const std::string
-  VirtualArray::key(int64_t fieldindex) const {
-    throw std::runtime_error("FIXME: VirtualArray::key");
-  }
-
-  bool
-  VirtualArray::haskey(const std::string& key) const {
-    throw std::runtime_error("FIXME: VirtualArray::haskey");
-  }
-
-  const std::vector<std::string>
-  VirtualArray::keys() const {
-    throw std::runtime_error("FIXME: VirtualArray::keys");
-  }
-
-  const std::string
   VirtualArray::validityerror(const std::string& path) const {
     throw std::runtime_error("FIXME: VirtualArray::validityerror");
   }

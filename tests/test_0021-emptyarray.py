@@ -42,6 +42,7 @@ def test_unknown():
     assert not awkward1.type(a) == awkward1.types.PrimitiveType("float64")
 
 def test_getitem():
+    a = awkward1.from_json("[]")
     a = awkward1.from_json("[[], [[], []], [[], [], []]]")
     assert awkward1.to_list(a[2]) == [[], [], []]
 

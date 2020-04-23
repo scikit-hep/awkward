@@ -211,16 +211,6 @@ namespace awkward {
     throw std::runtime_error("undefined operation: Record::carry");
   }
 
-  const std::string
-  Record::purelist_parameter(const std::string& key) const {
-    return parameter(key);
-  }
-
-  bool
-  Record::purelist_isregular() const {
-    return true;
-  }
-
   int64_t
   Record::purelist_depth() const {
     return 0;
@@ -236,31 +226,6 @@ namespace awkward {
   Record::branch_depth() const {
     std::pair<bool, int64_t> out = array_.get()->branch_depth();
     return std::pair<bool, int64_t>(out.first, out.second - 1);
-  }
-
-  int64_t
-  Record::numfields() const {
-    return array_.get()->numfields();
-  }
-
-  int64_t
-  Record::fieldindex(const std::string& key) const {
-    return array_.get()->fieldindex(key);
-  }
-
-  const std::string
-  Record::key(int64_t fieldindex) const {
-    return array_.get()->key(fieldindex);
-  }
-
-  bool
-  Record::haskey(const std::string& key) const {
-    return array_.get()->haskey(key);
-  }
-
-  const std::vector<std::string>
-  Record::keys() const {
-    return array_.get()->keys();
   }
 
   const std::string

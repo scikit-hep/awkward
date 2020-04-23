@@ -472,13 +472,13 @@ namespace awkward {
     /// @brief The parameter associated with `key` at the first level
     /// that has a non-null value, descending only as deep as the first
     /// RecordArray.
-    virtual const std::string
-      purelist_parameter(const std::string& key) const = 0;
+    const std::string
+      purelist_parameter(const std::string& key) const;
 
     /// @brief Returns `true` if all nested lists down to the first RecordArray
     /// are RegularArray nodes; `false` otherwise.
-    virtual bool
-      purelist_isregular() const = 0;
+    bool
+      purelist_isregular() const;
 
     /// @brief The list-depth of this array, not counting any contained
     /// within a RecordArray.
@@ -489,14 +489,14 @@ namespace awkward {
     /// If this array contains a {@link UnionArrayOf UnionArray} with
     /// different depths, the return value is `-1`.
     virtual int64_t
-      purelist_depth() const = 0;
+      purelist_depth() const;
 
     /// @brief Returns (a) the minimum list-depth and (b) the maximum
     /// list-depth of the array, which can differ if this array "branches"
     /// (differs when followed through different fields of a RecordArray or
     /// {@link UnionArrayOf UnionArray}).
     virtual const std::pair<int64_t, int64_t>
-      minmax_depth() const = 0;
+      minmax_depth() const;
 
     /// @brief Returns (a) whether the list-depth of this array "branches,"
     /// or differs when followed through different fields of a RecordArray or
@@ -505,34 +505,34 @@ namespace awkward {
     /// If the array does not contain any records or heterogeneous data, the
     /// `first` element is always `true` and the `second` is simply the depth.
     virtual const std::pair<bool, int64_t>
-      branch_depth() const = 0;
+      branch_depth() const;
 
     /// @brief The number of fields in the first nested tuple or
     /// records or `-1` if this array does not contain a RecordArray.
-    virtual int64_t
-      numfields() const = 0;
+    int64_t
+      numfields() const;
 
     /// @brief The position of a tuple or record key name if this array
     /// contains a RecordArray.
-    virtual int64_t
-      fieldindex(const std::string& key) const = 0;
+    int64_t
+      fieldindex(const std::string& key) const;
 
     /// @brief The record name associated with a given field index or
     /// the tuple index as a string (e.g. `"0"`, `"1"`, `"2"`) if a tuple.
     ///
     /// Raises an error if the array does not contain a RecordArray.
-    virtual const std::string
-      key(int64_t fieldindex) const = 0;
+    const std::string
+      key(int64_t fieldindex) const;
 
     /// @brief Returns `true` if the array contains a RecordArray with the
     /// specified `key`; `false` otherwise.
-    virtual bool
-      haskey(const std::string& key) const = 0;
+    bool
+      haskey(const std::string& key) const;
 
     /// @brief A list of RecordArray keys or an empty list if this
     /// array does not contain a RecordArray.
-    virtual const std::vector<std::string>
-      keys() const = 0;
+    const std::vector<std::string>
+      keys() const;
 
     /// @brief Returns an error message if this array is invalid; otherwise,
     /// returns an empty string.

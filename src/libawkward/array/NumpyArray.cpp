@@ -1248,61 +1248,6 @@ namespace awkward {
   }
 
   const std::string
-  NumpyArray::purelist_parameter(const std::string& key) const {
-    return parameter(key);
-  }
-
-  bool
-  NumpyArray::purelist_isregular() const {
-    return true;
-  }
-
-  int64_t
-  NumpyArray::purelist_depth() const {
-    return (int64_t)shape_.size();
-  }
-
-  const std::pair<int64_t, int64_t>
-  NumpyArray::minmax_depth() const {
-    return std::pair<int64_t, int64_t>((int64_t)shape_.size(),
-                                       (int64_t)shape_.size());
-  }
-
-  const std::pair<bool, int64_t>
-  NumpyArray::branch_depth() const {
-    return std::pair<bool, int64_t>(false, (int64_t)shape_.size());
-  }
-
-  int64_t
-  NumpyArray::numfields() const {
-    return -1;
-  }
-
-  int64_t
-  NumpyArray::fieldindex(const std::string& key) const {
-    throw std::invalid_argument(
-      std::string("key ") + util::quote(key, true)
-      + std::string(" does not exist (data are not records)"));
-  }
-
-  const std::string
-  NumpyArray::key(int64_t fieldindex) const {
-    throw std::invalid_argument(
-      std::string("fieldindex \"") + std::to_string(fieldindex)
-      + std::string("\" does not exist (data are not records)"));
-  }
-
-  bool
-  NumpyArray::haskey(const std::string& key) const {
-    return false;
-  }
-
-  const std::vector<std::string>
-  NumpyArray::keys() const {
-    return std::vector<std::string>();
-  }
-
-  const std::string
   NumpyArray::validityerror(const std::string& path) const {
     if (shape_.empty()) {
       return (std::string("at ") + path + std::string(" (") + classname()

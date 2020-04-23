@@ -640,62 +640,6 @@ namespace awkward {
   }
 
   const std::string
-  BitMaskedArray::purelist_parameter(const std::string& key) const {
-    std::string out = parameter(key);
-    if (out == std::string("null")) {
-      return content_.get()->purelist_parameter(key);
-    }
-    else {
-      return out;
-    }
-  }
-
-  bool
-  BitMaskedArray::purelist_isregular() const {
-    return content_.get()->purelist_isregular();
-  }
-
-  int64_t
-  BitMaskedArray::purelist_depth() const {
-    return content_.get()->purelist_depth();
-  }
-
-  const std::pair<int64_t, int64_t>
-  BitMaskedArray::minmax_depth() const {
-    return content_.get()->minmax_depth();
-  }
-
-  const std::pair<bool, int64_t>
-  BitMaskedArray::branch_depth() const {
-    return content_.get()->branch_depth();
-  }
-
-  int64_t
-  BitMaskedArray::numfields() const {
-    return content_.get()->numfields();
-  }
-
-  int64_t
-  BitMaskedArray::fieldindex(const std::string& key) const {
-    return content_.get()->fieldindex(key);
-  }
-
-  const std::string
-  BitMaskedArray::key(int64_t fieldindex) const {
-    return content_.get()->key(fieldindex);
-  }
-
-  bool
-  BitMaskedArray::haskey(const std::string& key) const {
-    return content_.get()->haskey(key);
-  }
-
-  const std::vector<std::string>
-  BitMaskedArray::keys() const {
-    return content_.get()->keys();
-  }
-
-  const std::string
   BitMaskedArray::validityerror(const std::string& path) const {
     return content_.get()->validityerror(path + std::string(".content"));
   }

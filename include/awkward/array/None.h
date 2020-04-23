@@ -108,46 +108,6 @@ namespace awkward {
     const ContentPtr
       carry(const Index64& carry) const override;
 
-    /// @exception std::runtime_error is always thrown
-    const std::string
-      purelist_parameter(const std::string& key) const override;
-
-    /// @exception std::runtime_error is always thrown
-    bool
-      purelist_isregular() const override;
-
-    /// @exception std::runtime_error is always thrown
-    int64_t
-      purelist_depth() const override;
-
-    /// @exception std::runtime_error is always thrown
-    const std::pair<int64_t, int64_t>
-      minmax_depth() const override;
-
-    /// @exception std::runtime_error is always thrown
-    const std::pair<bool, int64_t>
-      branch_depth() const override;
-
-    /// @exception std::runtime_error is always thrown
-    int64_t
-      numfields() const override;
-
-    /// @exception std::runtime_error is always thrown
-    int64_t
-      fieldindex(const std::string& key) const override;
-
-    /// @exception std::runtime_error is always thrown
-    const std::string
-      key(int64_t fieldindex) const override;
-
-    /// @exception std::runtime_error is always thrown
-    bool
-      haskey(const std::string& key) const override;
-
-    /// @exception std::runtime_error is always thrown
-    const std::vector<std::string>
-      keys() const override;
-
     // operations
 
     /// @exception std::runtime_error is always thrown
