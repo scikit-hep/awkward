@@ -295,9 +295,11 @@ namespace awkward {
 
   const ContentPtr
   EmptyArray::is_none(int64_t axis, int64_t depth) const {
-    throw std::runtime_error(
-      "TODO: Not implemented yet");
-    return nullptr;
+    if(axis = depth){
+      Index8 out(0);
+      return std::make_shared<NumpyArray>(out, "?");
+    }
+    throw std::runtime_error("axis exceeds the depth of this array");
   }
 
   const ContentPtr

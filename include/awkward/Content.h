@@ -416,6 +416,16 @@ namespace awkward {
     virtual const ContentPtr
       fillna(const ContentPtr& value) const = 0;
 
+    /// @brief Returns an array whose value is True where an element of array is None;
+    /// False otherwise.
+    ///
+    /// @param axis The axis at which to apply padding.
+    /// Negative `axis` counts backward from the deepest levels (`-1` is
+    /// the last valid `axis`)
+    /// @param depth The current depth while stepping into the array: this
+    /// value is set to `0` on the array node where the user starts the
+    /// process and is increased at each level of list-depth (instead of
+    /// decreasing the user-specified `axis`).
     virtual const ContentPtr
       is_none(int64_t axis, int64_t depth) const = 0;
 
@@ -755,9 +765,6 @@ namespace awkward {
     /// defined universally in the Content class.
     const ContentPtr
       localindex_axis0() const;
-
-    const ContentPtr
-      isnone_axis0() const;
 
     /// @brief Internal function to handle the `axis = 0` case of
     /// #combinations.

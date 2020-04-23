@@ -257,11 +257,6 @@ namespace awkward {
   }
 
   const ContentPtr
-  Content::isnone_axis0() const{
-      return nullptr;
-  }
-
-  const ContentPtr
   Content::localindex_axis0() const {
     Index64 localindex(length());
     struct Error err = awkward_localindex_64(

@@ -203,19 +203,18 @@ namespace awkward {
 
   const SliceItemPtr
   None::asslice() const {
-    throw std::runtime_error("undefined opteration: None::asslice");
+    throw std::runtime_error("undefined operation: None::asslice");
   }
 
   const ContentPtr
   None::fillna(const ContentPtr& value) const {
-    throw std::runtime_error("undefined opteration: None::fillna");
+    throw std::runtime_error("undefined operation: None::fillna");
   }
 
   const ContentPtr
   None::is_none(int64_t axis, int64_t depth) const {
-    throw std::runtime_error(
-      "TODO: Not implemented yet");
-    return nullptr;
+    // TODO: Maybe None should actually return for the function `is_none` (?).
+    throw std::runtime_error("undefined operation: None::is_none");
   }
 
   const ContentPtr

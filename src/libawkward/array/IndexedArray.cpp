@@ -1469,9 +1469,24 @@ namespace awkward {
   template <typename T, bool ISOPTION>
   const ContentPtr
   IndexedArrayOf<T, ISOPTION>::is_none(int64_t axis, int64_t depth) const {
-    throw std::runtime_error(
-      "TODO: Not implemented yet");
-    return nullptr;
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if(axis == depth){
+      Index8 index(bytemask());
+      return std::make_shared<NumpyArray>(index, "?");
+    }
+    else if(ISOPTION){
+      int64_t numnull;
+      struct Error err1 = util::awkward_indexedarray_numnull<T>(
+        &numnull,
+        index_.ptr().get(),
+        index_.offset(),
+        index_.length());
+      util::handle_error(err1, classname(), identities_.get());
+      if(numnull != 0) std::runtime_error("axis exceeds the depth of certain nodes");
+    }
+    return project().get()->is_none(axis,
+                                    depth);
+    //Simplify Optiontype ? Mostly not.
   }
 
   template <typename T, bool ISOPTION>

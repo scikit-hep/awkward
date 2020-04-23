@@ -2069,9 +2069,15 @@ namespace awkward {
 
   const ContentPtr
   NumpyArray::is_none(int64_t axis, int64_t depth) const {
-    throw std::runtime_error(
-      "TODO: Not implemented yet");
-    return nullptr;
+    if(axis == depth){
+      Index8 index(length());
+      struct Error err = awkward_zero_mask8(
+        index.ptr().get(),
+        length());
+      util::handle_error(err, classname(), identities_.get());
+      return std::make_shared<NumpyArray>(index, "?");
+    }
+    throw std::runtime_error("axis exceeds the depth of this array");
   }
 
   const ContentPtr
