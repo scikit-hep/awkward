@@ -16,6 +16,7 @@
 #include "awkward/array/BitMaskedArray.h"
 #include "awkward/array/UnmaskedArray.h"
 #include "awkward/array/NumpyArray.h"
+#include "awkward/array/VirtualArray.h"
 
 #include "awkward/array/RecordArray.h"
 
@@ -844,6 +845,10 @@ namespace awkward {
 
   bool
   RecordArray::mergeable(const ContentPtr& other, bool mergebool) const {
+    if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
+      return mergeable(raw->array(), mergebool);
+    }
+
     if (!parameters_equal(other.get()->parameters())) {
       return false;
     }
@@ -923,6 +928,10 @@ namespace awkward {
 
   const ContentPtr
   RecordArray::merge(const ContentPtr& other) const {
+    if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
+      return merge(raw->array());
+    }
+
     if (!parameters_equal(other.get()->parameters())) {
       return merge_as_union(other);
     }

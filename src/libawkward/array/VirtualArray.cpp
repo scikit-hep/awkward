@@ -269,32 +269,32 @@ namespace awkward {
 
   const std::string
   VirtualArray::validityerror(const std::string& path) const {
-    throw std::runtime_error("FIXME: VirtualArray::validityerror");
+    return array().get()->validityerror(path + ".array");
   }
 
   const ContentPtr
   VirtualArray::shallow_simplify() const {
-    throw std::runtime_error("FIXME: VirtualArray::shallow_simplify");
+    return array().get()->shallow_simplify();
   }
 
   const ContentPtr
   VirtualArray::num(int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: VirtualArray::num");
+    return array().get()->num(axis, depth);
   }
 
   const std::pair<Index64, ContentPtr>
   VirtualArray::offsets_and_flattened(int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: VirtualArray::offsets_and_flattened");
+    return array().get()->offsets_and_flattened(axis, depth);
   }
 
   bool
   VirtualArray::mergeable(const ContentPtr& other, bool mergebool) const {
-    throw std::runtime_error("FIXME: VirtualArray::mergeable");
+    return array().get()->mergeable(other, mergebool);
   }
 
   const ContentPtr
   VirtualArray::merge(const ContentPtr& other) const {
-    throw std::runtime_error("FIXME: VirtualArray::merge");
+    return array().get()->merge(other);
   }
 
   const SliceItemPtr

@@ -20,6 +20,7 @@
 #include "awkward/array/ByteMaskedArray.h"
 #include "awkward/array/BitMaskedArray.h"
 #include "awkward/array/UnmaskedArray.h"
+#include "awkward/array/VirtualArray.h"
 
 #define AWKWARD_LISTARRAY_NO_EXTERN_TEMPLATE
 #include "awkward/array/ListArray.h"
@@ -781,6 +782,10 @@ namespace awkward {
   template <typename T>
   bool
   ListArrayOf<T>::mergeable(const ContentPtr& other, bool mergebool) const {
+    if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
+      return mergeable(raw->array(), mergebool);
+    }
+
     if (!parameters_equal(other.get()->parameters())) {
       return false;
     }
@@ -860,6 +865,10 @@ namespace awkward {
   template <typename T>
   const ContentPtr
   ListArrayOf<T>::merge(const ContentPtr& other) const {
+    if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
+      return merge(raw->array());
+    }
+
     if (!parameters_equal(other.get()->parameters())) {
       return merge_as_union(other);
     }

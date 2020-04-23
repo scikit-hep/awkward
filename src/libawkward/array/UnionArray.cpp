@@ -14,6 +14,7 @@
 #include "awkward/array/IndexedArray.h"
 #include "awkward/array/NumpyArray.h"
 #include "awkward/array/RegularArray.h"
+#include "awkward/array/VirtualArray.h"
 
 #define AWKWARD_UNIONARRAY_NO_EXTERN_TEMPLATE
 #include "awkward/array/UnionArray.h"
@@ -1297,6 +1298,10 @@ namespace awkward {
   bool
   UnionArrayOf<T, I>::mergeable(const ContentPtr& other,
                                 bool mergebool) const {
+    if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
+      return mergeable(raw->array(), mergebool);
+    }
+
     if (!parameters_equal(other.get()->parameters())) {
       return false;
     }
@@ -1306,6 +1311,10 @@ namespace awkward {
   template <typename T, typename I>
   const ContentPtr
   UnionArrayOf<T, I>::reverse_merge(const ContentPtr& other) const {
+    if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
+      return reverse_merge(raw->array());
+    }
+
     int64_t theirlength = other.get()->length();
     int64_t mylength = length();
     Index8 tags(theirlength + mylength);
@@ -1386,6 +1395,10 @@ namespace awkward {
   template <typename T, typename I>
   const ContentPtr
   UnionArrayOf<T, I>::merge(const ContentPtr& other) const {
+    if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
+      return merge(raw->array());
+    }
+
     if (!parameters_equal(other.get()->parameters())) {
       return merge_as_union(other);
     }

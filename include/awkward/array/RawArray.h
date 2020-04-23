@@ -26,6 +26,7 @@
 #include "awkward/array/ByteMaskedArray.h"
 #include "awkward/array/BitMaskedArray.h"
 #include "awkward/array/UnmaskedArray.h"
+#include "awkward/array/VirtualArray.h"
 
 namespace awkward {
   /// @class RawForm
@@ -724,6 +725,10 @@ namespace awkward {
 
     bool
       mergeable(const ContentPtr& other, bool mergebool) const override {
+      if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
+        return mergeable(raw->array(), mergebool);
+      }
+
       if (dynamic_cast<EmptyArray*>(other.get())) {
         return true;
       }

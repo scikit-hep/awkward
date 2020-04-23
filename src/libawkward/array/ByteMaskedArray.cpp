@@ -21,6 +21,7 @@
 #include "awkward/array/UnionArray.h"
 #include "awkward/array/RegularArray.h"
 #include "awkward/array/ListOffsetArray.h"
+#include "awkward/array/VirtualArray.h"
 
 #include "awkward/array/ByteMaskedArray.h"
 
@@ -748,6 +749,10 @@ namespace awkward {
 
   bool
   ByteMaskedArray::mergeable(const ContentPtr& other, bool mergebool) const {
+    if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
+      return mergeable(raw->array(), mergebool);
+    }
+
     if (!parameters_equal(other.get()->parameters())) {
       return false;
     }
