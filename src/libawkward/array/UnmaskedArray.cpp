@@ -62,32 +62,6 @@ namespace awkward {
                                           content_);
   }
 
-  const FormPtr
-  UnmaskedForm::getitem_range() const {
-    throw std::runtime_error("FIXME: UnmaskedForm::getitem_range");
-  }
-
-  const FormPtr
-  UnmaskedForm::getitem_array() const {
-    throw std::runtime_error("FIXME: UnmaskedForm::getitem_array");
-  }
-
-  const FormPtr
-  UnmaskedForm::getitem_field(const std::string& key) const {
-    return std::make_shared<UnmaskedForm>(
-               has_identities_,
-               util::Parameters(),
-               content_.get()->getitem_field(key));
-  }
-
-  const FormPtr
-  UnmaskedForm::getitem_fields(const std::vector<std::string>& keys) const {
-    return std::make_shared<UnmaskedForm>(
-               has_identities_,
-               util::Parameters(),
-               content_.get()->getitem_fields(keys));
-  }
-
   const std::string
   UnmaskedForm::purelist_parameter(const std::string& key) const {
     std::string out = parameter(key);

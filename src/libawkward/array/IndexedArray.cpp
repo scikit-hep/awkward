@@ -87,34 +87,6 @@ namespace awkward {
                                          content_);
   }
 
-  const FormPtr
-  IndexedForm::getitem_range() const {
-    throw std::runtime_error("FIXME: IndexedForm::getitem_range");
-  }
-
-  const FormPtr
-  IndexedForm::getitem_array() const {
-    throw std::runtime_error("FIXME: IndexedForm::getitem_array");
-  }
-
-  const FormPtr
-  IndexedForm::getitem_field(const std::string& key) const {
-    return std::make_shared<IndexedForm>(
-               has_identities_,
-               util::Parameters(),
-               index_,
-               content_.get()->getitem_field(key));
-  }
-
-  const FormPtr
-  IndexedForm::getitem_fields(const std::vector<std::string>& keys) const {
-    return std::make_shared<IndexedForm>(
-               has_identities_,
-               util::Parameters(),
-               index_,
-               content_.get()->getitem_fields(keys));
-  }
-
   const std::string
   IndexedForm::purelist_parameter(const std::string& key) const {
     std::string out = parameter(key);
@@ -250,34 +222,6 @@ namespace awkward {
                                                parameters_,
                                                index_,
                                                content_);
-  }
-
-  const FormPtr
-  IndexedOptionForm::getitem_range() const {
-    throw std::runtime_error("FIXME: IndexedOptionForm::getitem_range");
-  }
-
-  const FormPtr
-  IndexedOptionForm::getitem_array() const {
-    throw std::runtime_error("FIXME: IndexedOptionForm::getitem_array");
-  }
-
-  const FormPtr
-  IndexedOptionForm::getitem_field(const std::string& key) const {
-    return std::make_shared<IndexedOptionForm>(
-               has_identities_,
-               util::Parameters(),
-               index_,
-               content_.get()->getitem_field(key));
-  }
-
-  const FormPtr
-  IndexedOptionForm::getitem_fields(const std::vector<std::string>& keys) const {
-    return std::make_shared<IndexedOptionForm>(
-               has_identities_,
-               util::Parameters(),
-               index_,
-               content_.get()->getitem_fields(keys));
   }
 
   const std::string

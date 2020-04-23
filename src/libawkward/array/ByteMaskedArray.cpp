@@ -86,36 +86,6 @@ namespace awkward {
                                             valid_when_);
   }
 
-  const FormPtr
-  ByteMaskedForm::getitem_range() const {
-    throw std::runtime_error("FIXME: ByteMaskedForm::getitem_range");
-  }
-
-  const FormPtr
-  ByteMaskedForm::getitem_array() const {
-    throw std::runtime_error("FIXME: ByteMaskedForm::getitem_array");
-  }
-
-  const FormPtr
-  ByteMaskedForm::getitem_field(const std::string& key) const {
-    return std::make_shared<ByteMaskedForm>(
-               has_identities_,
-               util::Parameters(),
-               mask_,
-               content_.get()->getitem_field(key),
-               valid_when_);
-  }
-
-  const FormPtr
-  ByteMaskedForm::getitem_fields(const std::vector<std::string>& keys) const {
-    return std::make_shared<ByteMaskedForm>(
-               has_identities_,
-               util::Parameters(),
-               mask_,
-               content_.get()->getitem_fields(keys),
-               valid_when_);
-  }
-
   const std::string
   ByteMaskedForm::purelist_parameter(const std::string& key) const {
     std::string out = parameter(key);

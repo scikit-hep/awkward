@@ -137,41 +137,6 @@ namespace awkward {
                                         contents_);
   }
 
-  const FormPtr
-  RecordForm::getitem_range() const {
-    throw std::runtime_error("FIXME: RecordForm::getitem_range");
-  }
-
-  const FormPtr
-  RecordForm::getitem_array() const {
-    throw std::runtime_error("FIXME: RecordForm::getitem_array");
-  }
-
-  const FormPtr
-  RecordForm::getitem_field(const std::string& key) const {
-    return content(key);
-  }
-
-  const FormPtr
-  RecordForm::getitem_fields(const std::vector<std::string>& keys) const {
-    std::vector<FormPtr> contents;
-    util::RecordLookupPtr recordlookup(nullptr);
-    if (recordlookup_.get() != nullptr) {
-      recordlookup = std::make_shared<util::RecordLookup>();
-    }
-    for (auto key : keys) {
-      contents.push_back(content(key));
-      if (recordlookup.get() != nullptr) {
-        recordlookup.get()->push_back(key);
-      }
-    }
-    return std::make_shared<RecordForm>(
-               has_identities_,
-               util::Parameters(),
-               recordlookup,
-               contents);
-  }
-
   const std::string
   RecordForm::purelist_parameter(const std::string& key) const {
     return parameter(key);

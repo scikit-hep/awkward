@@ -64,28 +64,6 @@ namespace awkward {
             bool check_identities,
             bool check_parameters) const = 0;
 
-    /// @brief Returns the Form corresponding to the Content that would be
-    /// obtained by {@link Content#getitem_next Content::getitem_next} with
-    /// a SliceRange.
-    virtual const FormPtr
-      getitem_range() const = 0;
-
-    /// @brief Returns the Form corresponding to the Content that would be
-    /// obtained by {@link Content#getitem_next Content::getitem_next} with
-    /// a SliceArray.
-    virtual const FormPtr
-      getitem_array() const = 0;
-
-    /// @brief Returns the Form corresponding to the Content that would be
-    /// obtained by {@link Content#getitem_field Content::getitem_field}.
-    virtual const FormPtr
-      getitem_field(const std::string& key) const = 0;
-
-    /// @brief Returns the Form corresponding to the Content that would be
-    /// obtained by {@link Content#getitem_fields Content::getitem_fields}.
-    virtual const FormPtr
-      getitem_fields(const std::vector<std::string>& keys) const = 0;
-
     /// @brief The parameter associated with `key` at the first level
     /// that has a non-null value, descending only as deep as the first
     /// RecordForm.

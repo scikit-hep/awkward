@@ -92,38 +92,6 @@ namespace awkward {
                                            lsb_order_);
   }
 
-  const FormPtr
-  BitMaskedForm::getitem_range() const {
-    throw std::runtime_error("FIXME: BitMaskedForm::getitem_range");
-  }
-
-  const FormPtr
-  BitMaskedForm::getitem_array() const {
-    throw std::runtime_error("FIXME: BitMaskedForm::getitem_array");
-  }
-
-  const FormPtr
-  BitMaskedForm::getitem_field(const std::string& key) const {
-    return std::make_shared<BitMaskedForm>(
-               has_identities_,
-               util::Parameters(),
-               mask_,
-               content_.get()->getitem_field(key),
-               valid_when_,
-               lsb_order_);
-  }
-
-  const FormPtr
-  BitMaskedForm::getitem_fields(const std::vector<std::string>& keys) const {
-    return std::make_shared<BitMaskedForm>(
-               has_identities_,
-               util::Parameters(),
-               mask_,
-               content_.get()->getitem_fields(keys),
-               valid_when_,
-               lsb_order_);
-  }
-
   const std::string
   BitMaskedForm::purelist_parameter(const std::string& key) const {
     std::string out = parameter(key);

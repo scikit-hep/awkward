@@ -109,44 +109,6 @@ namespace awkward {
                                        contents_);
   }
 
-  const FormPtr
-  UnionForm::getitem_range() const {
-    throw std::runtime_error("FIXME: UnionForm::getitem_range");
-  }
-
-  const FormPtr
-  UnionForm::getitem_array() const {
-    throw std::runtime_error("FIXME: UnionForm::getitem_array");
-  }
-
-  const FormPtr
-  UnionForm::getitem_field(const std::string& key) const {
-    std::vector<FormPtr> contents;
-    for (auto content : contents_) {
-      contents.push_back(content.get()->getitem_field(key));
-    }
-    return std::make_shared<UnionForm>(
-               has_identities_,
-               util::Parameters(),
-               tags_,
-               index_,
-               contents);
-  }
-
-  const FormPtr
-  UnionForm::getitem_fields(const std::vector<std::string>& keys) const {
-    std::vector<FormPtr> contents;
-    for (auto content : contents_) {
-      contents.push_back(content.get()->getitem_fields(keys));
-    }
-    return std::make_shared<UnionForm>(
-               has_identities_,
-               util::Parameters(),
-               tags_,
-               index_,
-               contents);
-  }
-
   const std::string
   UnionForm::purelist_parameter(const std::string& key) const {
     std::string out = parameter(key);

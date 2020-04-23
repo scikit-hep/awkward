@@ -76,34 +76,6 @@ namespace awkward {
                                          size_);
   }
 
-  const FormPtr
-  RegularForm::getitem_range() const {
-    throw std::runtime_error("FIXME: RegularForm::getitem_range");
-  }
-
-  const FormPtr
-  RegularForm::getitem_array() const {
-    throw std::runtime_error("FIXME: RegularForm::getitem_array");
-  }
-
-  const FormPtr
-  RegularForm::getitem_field(const std::string& key) const {
-    return std::make_shared<RegularForm>(
-               has_identities_,
-               util::Parameters(),
-               content_.get()->getitem_field(key),
-               size_);
-  }
-
-  const FormPtr
-  RegularForm::getitem_fields(const std::vector<std::string>& keys) const {
-    return std::make_shared<RegularForm>(
-               has_identities_,
-               util::Parameters(),
-               content_.get()->getitem_fields(keys),
-               size_);
-  }
-
   const std::string
   RegularForm::purelist_parameter(const std::string& key) const {
     std::string out = parameter(key);

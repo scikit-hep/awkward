@@ -43,26 +43,6 @@ namespace awkward {
                                        parameters_);
   }
 
-  const FormPtr
-  EmptyForm::getitem_range() const {
-    throw std::runtime_error("FIXME: EmptyForm::getitem_range");
-  }
-
-  const FormPtr
-  EmptyForm::getitem_array() const {
-    throw std::runtime_error("FIXME: EmptyForm::getitem_array");
-  }
-
-  const FormPtr
-  EmptyForm::getitem_field(const std::string& key) const {
-    throw std::invalid_argument("cannot slice EmptyForm by field name");
-  }
-
-  const FormPtr
-  EmptyForm::getitem_fields(const std::vector<std::string>& keys) const {
-    throw std::invalid_argument("cannot slice EmptyForm by field names");
-  }
-
   const std::string
   EmptyForm::purelist_parameter(const std::string& key) const {
     return parameter(key);

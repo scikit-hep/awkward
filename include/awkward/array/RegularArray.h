@@ -38,18 +38,6 @@ namespace awkward {
     const FormPtr
       shallow_copy() const override;
 
-    const FormPtr
-      getitem_range() const override;
-
-    const FormPtr
-      getitem_array() const override;
-
-    const FormPtr
-      getitem_field(const std::string& key) const override;
-
-    const FormPtr
-      getitem_fields(const std::vector<std::string>& keys) const override;
-
     const std::string
       purelist_parameter(const std::string& key) const override;
 

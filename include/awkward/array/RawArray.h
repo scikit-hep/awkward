@@ -61,26 +61,6 @@ namespace awkward {
                                        T_);
     }
 
-    const FormPtr
-      getitem_range() const override {
-      return shallow_copy();
-    }
-
-    const FormPtr
-      getitem_array() const override {
-      return shallow_copy();
-    }
-
-    const FormPtr
-      getitem_field(const std::string& key) const override {
-      throw std::invalid_argument("cannot slice RawForm by field name");
-    }
-
-    const FormPtr
-      getitem_fields(const std::vector<std::string>& keys) const override {
-      throw std::invalid_argument("cannot slice RawForm by field names");
-    }
-
     const std::string
       purelist_parameter(const std::string& key) const override {
       parameter(key);

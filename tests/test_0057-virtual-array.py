@@ -207,23 +207,66 @@ def test_field():
 
     assert isinstance(sliced[1], awkward1.layout.NumpyArray)
 
-# def test_single_level():
-#     template = awkward1.Array([[{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}], [], [{"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}]])
-#     generator = awkward1.virtual.ArrayGenerator(lambda: template, form=template.layout.form, length=3)
-#     d = {}
-#     cache = awkward1.virtual.ArrayCache(d)
-#     virtualarray = awkward1.layout.VirtualArray(generator, cache)
+def test_single_level():
+    template = awkward1.Array([[{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}], [], [{"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}]])
+    generator = awkward1.virtual.ArrayGenerator(lambda: template, form=template.layout.form, length=3)
+    d = {}
+    cache = awkward1.virtual.ArrayCache(d)
+    virtualarray = awkward1.layout.VirtualArray(generator, cache)
 
-#     a = virtualarray[2]
-#     assert isinstance(a, awkward1.layout.RecordArray)
-#     assert awkward1.to_list(a) == [{"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}]
-#     assert len(d) == 1
-#     d.clear()
+    a = virtualarray[2]
+    assert isinstance(a, awkward1.layout.RecordArray)
+    assert len(d) == 1
+    assert awkward1.to_list(a) == [{"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}]
+    d.clear()
 
-#     a = virtualarray[1:]
-#     assert isinstance(a, awkward1.layout.VirtualArray)
-#     assert len(d) == 0
-#     b = a[1]
-#     assert isinstance(b, awkward1.layout.RecordArray)
-#     assert len(d) == 1
-#     d.clear()
+    a = virtualarray[1:]
+    assert isinstance(a, awkward1.layout.VirtualArray)
+    assert len(d) == 0
+    b = a[1]
+    assert isinstance(b, awkward1.layout.RecordArray)
+    assert len(d) == 0
+    assert awkward1.to_list(b) == [{"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}]
+    d.clear()
+
+    a = virtualarray[[0, 2, 1, 0]]
+    assert isinstance(a, awkward1.layout.VirtualArray)
+    assert len(d) == 0
+    b = a[1]
+    assert isinstance(b, awkward1.layout.RecordArray)
+    assert len(d) == 0
+    assert awkward1.to_list(b) == [{"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}]
+    d.clear()
+
+    a = virtualarray[[False, True, True]]
+    assert isinstance(a, awkward1.layout.VirtualArray)
+    assert len(d) == 0
+    b = a[1]
+    assert isinstance(b, awkward1.layout.RecordArray)
+    assert len(d) == 0
+    assert awkward1.to_list(b) == [{"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}]
+    d.clear()
+
+    a = virtualarray["x"]
+    assert isinstance(a, awkward1.layout.VirtualArray)
+    assert len(d) == 0
+    b = a[2]
+    assert isinstance(b, awkward1.layout.NumpyArray)
+    assert len(d) == 0
+    assert awkward1.to_list(b) == [3.3, 4.4]
+    d.clear()
+
+    a = virtualarray["y"]
+    assert isinstance(a, awkward1.layout.VirtualArray)
+    assert len(d) == 0
+    b = a[2]
+    assert isinstance(b, (awkward1.layout.ListArray64, awkward1.layout.ListOffsetArray64))
+    assert len(d) == 0
+    assert awkward1.to_list(b) == [[3, 3, 3], [4, 4, 4, 4]]
+    d.clear()
+
+    a = virtualarray[::2, 1]
+    assert isinstance(a, awkward1.layout.RecordArray)
+    assert len(d) == 1
+    assert awkward1.to_list(a) == [{"x": 1.1, "y": [1]}, {"x": 4.4, "y": [4, 4, 4, 4]}]
+    d.clear()
