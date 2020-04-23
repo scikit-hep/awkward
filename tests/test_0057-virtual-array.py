@@ -270,3 +270,19 @@ def test_single_level():
     assert len(d) == 1
     assert awkward1.to_list(a) == [{"x": 1.1, "y": [1]}, {"x": 4.4, "y": [4, 4, 4, 4]}]
     d.clear()
+
+def test_iter():
+    generator = awkward1.virtual.ArrayGenerator(fcn, form=awkward1.forms.NumpyForm([], 8, "d"), length=5)
+    d = {}
+    cache = awkward1.virtual.ArrayCache(d)
+    virtualarray = awkward1.layout.VirtualArray(generator, cache)
+
+    assert len(d) == 0
+    it = iter(virtualarray)
+    assert len(d) == 1
+    d.clear()
+    assert len(d) == 0
+    assert next(it) == 1.1
+    assert len(d) == 0
+    assert list(it) == [2.2, 3.3, 4.4, 5.5]
+    assert len(d) == 0
