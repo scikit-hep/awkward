@@ -53,6 +53,60 @@ namespace awkward {
     throw std::invalid_argument("cannot slice EmptyForm by field names");
   }
 
+  const std::string
+  EmptyForm::purelist_parameter(const std::string& key) const {
+    parameter(key);
+  }
+
+  bool
+  EmptyForm::purelist_isregular() const {
+    return true;
+  }
+
+  int64_t
+  EmptyForm::purelist_depth() const {
+    return 1;
+  }
+
+  const std::pair<int64_t, int64_t>
+  EmptyForm::minmax_depth() const {
+    return std::pair<int64_t, int64_t>(1, 1);
+  }
+
+  const std::pair<bool, int64_t>
+  EmptyForm::branch_depth() const {
+    return std::pair<bool, int64_t>(false, 1);
+  }
+
+  int64_t
+  EmptyForm::numfields() const {
+    return -1;
+  }
+
+  int64_t
+  EmptyForm::fieldindex(const std::string& key) const {
+    throw std::invalid_argument(
+      std::string("key ") + util::quote(key, true)
+      + std::string(" does not exist (data might not be records)"));
+  }
+
+  const std::string
+  EmptyForm::key(int64_t fieldindex) const {
+    throw std::invalid_argument(
+      std::string("fieldindex \"") + std::to_string(fieldindex)
+      + std::string("\" does not exist (data might not be records)"));
+  }
+
+  bool
+  EmptyForm::haskey(const std::string& key) const {
+    return false;
+  }
+
+  const std::vector<std::string>
+  EmptyForm::keys() const {
+    return std::vector<std::string>();
+  }
+
   bool
   EmptyForm::equal(const FormPtr& other,
                    bool check_identities,
@@ -270,7 +324,9 @@ namespace awkward {
   }
 
   int64_t
-  EmptyArray::numfields() const { return -1; }
+  EmptyArray::numfields() const {
+    return -1;
+  }
 
   int64_t
   EmptyArray::fieldindex(const std::string& key) const {

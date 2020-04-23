@@ -288,6 +288,61 @@ namespace awkward {
     throw std::invalid_argument("cannot slice NumpyForm by field names");
   }
 
+  const std::string
+  NumpyForm::purelist_parameter(const std::string& key) const {
+    return parameter(key);
+  }
+
+  bool
+  NumpyForm::purelist_isregular() const {
+    return true;
+  }
+
+  int64_t
+  NumpyForm::purelist_depth() const {
+    return (int64_t)inner_shape_.size() + 1;
+  }
+
+  const std::pair<int64_t, int64_t>
+  NumpyForm::minmax_depth() const {
+    return std::pair<int64_t, int64_t>((int64_t)inner_shape_.size() + 1,
+                                       (int64_t)inner_shape_.size() + 1);
+  }
+
+  const std::pair<bool, int64_t>
+  NumpyForm::branch_depth() const {
+    return std::pair<bool, int64_t>(false, (int64_t)inner_shape_.size() + 1);
+  }
+
+  int64_t
+  NumpyForm::numfields() const {
+    return -1;
+  }
+
+  int64_t
+  NumpyForm::fieldindex(const std::string& key) const {
+    throw std::invalid_argument(
+      std::string("key ") + util::quote(key, true)
+      + std::string(" does not exist (data are not records)"));
+  }
+
+  const std::string
+  NumpyForm::key(int64_t fieldindex) const {
+    throw std::invalid_argument(
+      std::string("fieldindex \"") + std::to_string(fieldindex)
+      + std::string("\" does not exist (data are not records)"));
+  }
+
+  bool
+  NumpyForm::haskey(const std::string& key) const {
+    return false;
+  }
+
+  const std::vector<std::string>
+  NumpyForm::keys() const {
+    return std::vector<std::string>();
+  }
+
   bool
   NumpyForm::equal(const FormPtr& other,
                    bool check_identities,
@@ -1219,7 +1274,9 @@ namespace awkward {
   }
 
   int64_t
-  NumpyArray::numfields() const { return -1; }
+  NumpyArray::numfields() const {
+    return -1;
+  }
 
   int64_t
   NumpyArray::fieldindex(const std::string& key) const {

@@ -116,6 +116,66 @@ namespace awkward {
                content_.get()->getitem_fields(keys));
   }
 
+  const std::string
+  ListForm::purelist_parameter(const std::string& key) const {
+    std::string out = parameter(key);
+    if (out == std::string("null")) {
+      return content_.get()->purelist_parameter(key);
+    }
+    else {
+      return out;
+    }
+  }
+
+  bool
+  ListForm::purelist_isregular() const {
+    return false;
+  }
+
+  int64_t
+  ListForm::purelist_depth() const {
+    return content_.get()->purelist_depth() + 1;
+  }
+
+  const std::pair<int64_t, int64_t>
+  ListForm::minmax_depth() const {
+    std::pair<int64_t, int64_t> content_depth = content_.get()->minmax_depth();
+    return std::pair<int64_t, int64_t>(content_depth.first + 1,
+                                       content_depth.second + 1);
+  }
+
+  const std::pair<bool, int64_t>
+  ListForm::branch_depth() const {
+    std::pair<bool, int64_t> content_depth = content_.get()->branch_depth();
+    return std::pair<bool, int64_t>(content_depth.first,
+                                    content_depth.second + 1);
+  }
+
+  int64_t
+  ListForm::numfields() const {
+    return content_.get()->numfields();
+  }
+
+  int64_t
+  ListForm::fieldindex(const std::string& key) const {
+    return content_.get()->fieldindex(key);
+  }
+
+  const std::string
+  ListForm::key(int64_t fieldindex) const {
+    return content_.get()->key(fieldindex);
+  }
+
+  bool
+  ListForm::haskey(const std::string& key) const {
+    return content_.get()->haskey(key);
+  }
+
+  const std::vector<std::string>
+  ListForm::keys() const {
+    return content_.get()->keys();
+  }
+
   bool
   ListForm::equal(const FormPtr& other,
                   bool check_identities,

@@ -93,6 +93,66 @@ namespace awkward {
                size_);
   }
 
+  const std::string
+  RegularForm::purelist_parameter(const std::string& key) const {
+    std::string out = parameter(key);
+    if (out == std::string("null")) {
+      return content_.get()->purelist_parameter(key);
+    }
+    else {
+      return out;
+    }
+  }
+
+  bool
+  RegularForm::purelist_isregular() const {
+    return content_.get()->purelist_isregular();
+  }
+
+  int64_t
+  RegularForm::purelist_depth() const {
+    return content_.get()->purelist_depth() + 1;
+  }
+
+  const std::pair<int64_t, int64_t>
+  RegularForm::minmax_depth() const {
+    std::pair<int64_t, int64_t> content_depth = content_.get()->minmax_depth();
+    return std::pair<int64_t, int64_t>(content_depth.first + 1,
+                                       content_depth.second + 1);
+  }
+
+  const std::pair<bool, int64_t>
+  RegularForm::branch_depth() const {
+    std::pair<bool, int64_t> content_depth = content_.get()->branch_depth();
+    return std::pair<bool, int64_t>(content_depth.first,
+                                    content_depth.second + 1);
+  }
+
+  int64_t
+  RegularForm::numfields() const {
+    return content_.get()->numfields();
+  }
+
+  int64_t
+  RegularForm::fieldindex(const std::string& key) const {
+    return content_.get()->fieldindex(key);
+  }
+
+  const std::string
+  RegularForm::key(int64_t fieldindex) const {
+    return content_.get()->key(fieldindex);
+  }
+
+  bool
+  RegularForm::haskey(const std::string& key) const {
+    return content_.get()->haskey(key);
+  }
+
+  const std::vector<std::string>
+  RegularForm::keys() const {
+    return content_.get()->keys();
+  }
+
   bool
   RegularForm::equal(const FormPtr& other,
                      bool check_identities,

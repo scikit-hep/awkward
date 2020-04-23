@@ -113,6 +113,62 @@ namespace awkward {
                lsb_order_);
   }
 
+  const std::string
+  BitMaskedForm::purelist_parameter(const std::string& key) const {
+    std::string out = parameter(key);
+    if (out == std::string("null")) {
+      return content_.get()->purelist_parameter(key);
+    }
+    else {
+      return out;
+    }
+  }
+
+  bool
+  BitMaskedForm::purelist_isregular() const {
+    return content_.get()->purelist_isregular();
+  }
+
+  int64_t
+  BitMaskedForm::purelist_depth() const {
+    return content_.get()->purelist_depth();
+  }
+
+  const std::pair<int64_t, int64_t>
+  BitMaskedForm::minmax_depth() const {
+    return content_.get()->minmax_depth();
+  }
+
+  const std::pair<bool, int64_t>
+  BitMaskedForm::branch_depth() const {
+    return content_.get()->branch_depth();
+  }
+
+  int64_t
+  BitMaskedForm::numfields() const {
+    return content_.get()->numfields();
+  }
+
+  int64_t
+  BitMaskedForm::fieldindex(const std::string& key) const {
+    return content_.get()->fieldindex(key);
+  }
+
+  const std::string
+  BitMaskedForm::key(int64_t fieldindex) const {
+    return content_.get()->key(fieldindex);
+  }
+
+  bool
+  BitMaskedForm::haskey(const std::string& key) const {
+    return content_.get()->haskey(key);
+  }
+
+  const std::vector<std::string>
+  BitMaskedForm::keys() const {
+    return content_.get()->keys();
+  }
+
   bool
   BitMaskedForm::equal(const FormPtr& other,
                        bool check_identities,

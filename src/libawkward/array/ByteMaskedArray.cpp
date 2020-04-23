@@ -105,6 +105,62 @@ namespace awkward {
                valid_when_);
   }
 
+  const std::string
+  ByteMaskedForm::purelist_parameter(const std::string& key) const {
+    std::string out = parameter(key);
+    if (out == std::string("null")) {
+      return content_.get()->purelist_parameter(key);
+    }
+    else {
+      return out;
+    }
+  }
+
+  bool
+  ByteMaskedForm::purelist_isregular() const {
+    return content_.get()->purelist_isregular();
+  }
+
+  int64_t
+  ByteMaskedForm::purelist_depth() const {
+    return content_.get()->purelist_depth();
+  }
+
+  const std::pair<int64_t, int64_t>
+  ByteMaskedForm::minmax_depth() const {
+    return content_.get()->minmax_depth();
+  }
+
+  const std::pair<bool, int64_t>
+  ByteMaskedForm::branch_depth() const {
+    return content_.get()->branch_depth();
+  }
+
+  int64_t
+  ByteMaskedForm::numfields() const {
+    return content_.get()->numfields();
+  }
+
+  int64_t
+  ByteMaskedForm::fieldindex(const std::string& key) const {
+    return content_.get()->fieldindex(key);
+  }
+
+  const std::string
+  ByteMaskedForm::key(int64_t fieldindex) const {
+    return content_.get()->key(fieldindex);
+  }
+
+  bool
+  ByteMaskedForm::haskey(const std::string& key) const {
+    return content_.get()->haskey(key);
+  }
+
+  const std::vector<std::string>
+  ByteMaskedForm::keys() const {
+    return content_.get()->keys();
+  }
+
   bool
   ByteMaskedForm::equal(const FormPtr& other,
                         bool check_identities,

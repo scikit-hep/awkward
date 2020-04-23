@@ -67,6 +67,12 @@ namespace awkward {
     return item->second;
   }
 
+  bool
+  Form::parameter_equals(const std::string& key,
+                         const std::string& value) const {
+    return util::parameter_equals(parameters_, key, value);
+  }
+
   void
   Form::identities_tojson(ToJson& builder, bool verbose) const {
     if (verbose  ||  has_identities_) {

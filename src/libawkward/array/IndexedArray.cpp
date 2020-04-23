@@ -104,6 +104,62 @@ namespace awkward {
                content_.get()->getitem_fields(keys));
   }
 
+  const std::string
+  IndexedForm::purelist_parameter(const std::string& key) const {
+    std::string out = parameter(key);
+    if (out == std::string("null")) {
+      return content_.get()->purelist_parameter(key);
+    }
+    else {
+      return out;
+    }
+  }
+
+  bool
+  IndexedForm::purelist_isregular() const {
+    return content_.get()->purelist_isregular();
+  }
+
+  int64_t
+  IndexedForm::purelist_depth() const {
+    return content_.get()->purelist_depth();
+  }
+
+  const std::pair<int64_t, int64_t>
+  IndexedForm::minmax_depth() const {
+    return content_.get()->minmax_depth();
+  }
+
+  const std::pair<bool, int64_t>
+  IndexedForm::branch_depth() const {
+    return content_.get()->branch_depth();
+  }
+
+  int64_t
+  IndexedForm::numfields() const {
+    return content_.get()->numfields();
+  }
+
+  int64_t
+  IndexedForm::fieldindex(const std::string& key) const {
+    return content_.get()->fieldindex(key);
+  }
+
+  const std::string
+  IndexedForm::key(int64_t fieldindex) const {
+    return content_.get()->key(fieldindex);
+  }
+
+  bool
+  IndexedForm::haskey(const std::string& key) const {
+    return content_.get()->haskey(key);
+  }
+
+  const std::vector<std::string>
+  IndexedForm::keys() const {
+    return content_.get()->keys();
+  }
+
   bool
   IndexedForm::equal(const FormPtr& other,
                      bool check_identities,
@@ -201,6 +257,62 @@ namespace awkward {
                util::Parameters(),
                index_,
                content_.get()->getitem_fields(keys));
+  }
+
+  const std::string
+  IndexedOptionForm::purelist_parameter(const std::string& key) const {
+    std::string out = parameter(key);
+    if (out == std::string("null")) {
+      return content_.get()->purelist_parameter(key);
+    }
+    else {
+      return out;
+    }
+  }
+
+  bool
+  IndexedOptionForm::purelist_isregular() const {
+    return content_.get()->purelist_isregular();
+  }
+
+  int64_t
+  IndexedOptionForm::purelist_depth() const {
+    return content_.get()->purelist_depth();
+  }
+
+  const std::pair<int64_t, int64_t>
+  IndexedOptionForm::minmax_depth() const {
+    return content_.get()->minmax_depth();
+  }
+
+  const std::pair<bool, int64_t>
+  IndexedOptionForm::branch_depth() const {
+    return content_.get()->branch_depth();
+  }
+
+  int64_t
+  IndexedOptionForm::numfields() const {
+    return content_.get()->numfields();
+  }
+
+  int64_t
+  IndexedOptionForm::fieldindex(const std::string& key) const {
+    return content_.get()->fieldindex(key);
+  }
+
+  const std::string
+  IndexedOptionForm::key(int64_t fieldindex) const {
+    return content_.get()->key(fieldindex);
+  }
+
+  bool
+  IndexedOptionForm::haskey(const std::string& key) const {
+    return content_.get()->haskey(key);
+  }
+
+  const std::vector<std::string>
+  IndexedOptionForm::keys() const {
+    return content_.get()->keys();
   }
 
   bool

@@ -70,6 +70,59 @@ namespace awkward {
       throw std::invalid_argument("cannot slice RawForm by field names");
     }
 
+    const std::string
+      purelist_parameter(const std::string& key) const override {
+      parameter(key);
+    }
+
+    bool
+      purelist_isregular() const override {
+      return true;
+    }
+
+    int64_t
+      purelist_depth() const override {
+      return 1;
+    }
+
+    const std::pair<int64_t, int64_t>
+      minmax_depth() const override {
+      return std::pair<int64_t, int64_t>(1, 1);
+    }
+
+    const std::pair<bool, int64_t>
+      branch_depth() const override {
+      return std::pair<bool, int64_t>(false, 1);
+    }
+
+    int64_t
+      numfields() const override {
+      return -1;
+    }
+
+    int64_t
+      fieldindex(const std::string& key) const override {
+      throw std::invalid_argument(std::string("key ") + util::quote(key, true)
+        + std::string(" does not exist (data are not records)"));
+    }
+
+    const std::string
+      key(int64_t fieldindex) const override {
+      throw std::invalid_argument(std::string("fieldindex \"")
+        + std::to_string(fieldindex)
+        + std::string("\" does not exist (data are not records)"));
+    }
+
+    bool
+      haskey(const std::string& key) const override {
+      return false;
+    }
+
+    const std::vector<std::string>
+      keys() const override {
+      return std::vector<std::string>();
+    }
+
     bool
       equal(const FormPtr& other,
             bool check_identities,

@@ -51,31 +51,6 @@ namespace awkward {
     return recordlookup_.get() == nullptr;
   }
 
-  int64_t
-  RecordForm::numfields() const {
-    return (int64_t)contents_.size();
-  }
-
-  int64_t
-  RecordForm::fieldindex(const std::string& key) const {
-    return util::fieldindex(recordlookup_, key, numfields());
-  }
-
-  const std::string
-  RecordForm::key(int64_t fieldindex) const {
-    return util::key(recordlookup_, fieldindex, numfields());
-  }
-
-  bool
-  RecordForm::haskey(const std::string& key) const {
-    return util::haskey(recordlookup_, key, numfields());
-  }
-
-  const std::vector<std::string>
-  RecordForm::keys() const {
-    return util::keys(recordlookup_, numfields());
-  }
-
   const FormPtr
   RecordForm::content(int64_t fieldindex) const {
     if (fieldindex >= numfields()) {
@@ -184,6 +159,89 @@ namespace awkward {
                util::Parameters(),
                recordlookup,
                contents);
+  }
+
+  const std::string
+  RecordForm::purelist_parameter(const std::string& key) const {
+    return parameter(key);
+  }
+
+  bool
+  RecordForm::purelist_isregular() const {
+    return true;
+  }
+
+  int64_t
+  RecordForm::purelist_depth() const {
+    return 1;
+  }
+
+  const std::pair<int64_t, int64_t>
+  RecordForm::minmax_depth() const {
+    if (contents_.empty()) {
+      return std::pair<int64_t, int64_t>(0, 0);
+    }
+    int64_t min = kMaxInt64;
+    int64_t max = 0;
+    for (auto content : contents_) {
+      std::pair<int64_t, int64_t> minmax = content.get()->minmax_depth();
+      if (minmax.first < min) {
+        min = minmax.first;
+      }
+      if (minmax.second > max) {
+        max = minmax.second;
+      }
+    }
+    return std::pair<int64_t, int64_t>(min, max);
+  }
+
+  const std::pair<bool, int64_t>
+  RecordForm::branch_depth() const {
+    if (contents_.empty()) {
+      return std::pair<bool, int64_t>(false, 1);
+    }
+    else {
+      bool anybranch = false;
+      int64_t mindepth = -1;
+      for (auto content : contents_) {
+        std::pair<bool, int64_t> content_depth = content.get()->branch_depth();
+        if (mindepth == -1) {
+          mindepth = content_depth.second;
+        }
+        if (content_depth.first  ||  mindepth != content_depth.second) {
+          anybranch = true;
+        }
+        if (mindepth > content_depth.second) {
+          mindepth = content_depth.second;
+        }
+      }
+      return std::pair<bool, int64_t>(anybranch, mindepth);
+    }
+  }
+
+  int64_t
+  RecordForm::numfields() const {
+    return (int64_t)contents_.size();
+  }
+
+  int64_t
+  RecordForm::fieldindex(const std::string& key) const {
+    return util::fieldindex(recordlookup_, key, numfields());
+  }
+
+  const std::string
+  RecordForm::key(int64_t fieldindex) const {
+    return util::key(recordlookup_, fieldindex, numfields());
+  }
+
+  bool
+  RecordForm::haskey(const std::string& key) const {
+    return util::haskey(recordlookup_, key, numfields());
+  }
+
+  const std::vector<std::string>
+  RecordForm::keys() const {
+    return util::keys(recordlookup_, numfields());
   }
 
   bool
