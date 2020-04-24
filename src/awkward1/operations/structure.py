@@ -1147,7 +1147,7 @@ def fill_none(array, value, highlevel=True):
         return out
 
 def is_none(array, axis = 1, highlevel=True):
-    """ TODO
+    """
     Args:
         array: Data to check for missing values (None).
         axis (int): The dimension at which this operation is applied. The

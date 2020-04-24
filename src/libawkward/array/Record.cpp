@@ -319,7 +319,7 @@ namespace awkward {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if(toaxis == depth){
        throw std::invalid_argument(
-        "cannot call 'num' with an 'axis' of 0 on a Record");
+        "cannot call 'is_none' with an 'axis' of 0 on a Record");
     }
     else{
       ContentPtr singleton = array_.get()->getitem_range_nowrap(at_, at_ + 1);

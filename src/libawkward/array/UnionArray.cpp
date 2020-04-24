@@ -1471,7 +1471,7 @@ namespace awkward {
     else{
       ContentPtrVec contents;
       for (auto content : contents_) {
-        contents.push_back(content.get()->is_none(axis, depth));
+        contents.push_back(content.get()->is_none(axis, depth + 1));
       }
       UnionArrayOf<T, I> out(Identities::none(),
                              util::Parameters(),

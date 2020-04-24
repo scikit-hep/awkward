@@ -2079,7 +2079,7 @@ namespace awkward {
       return std::make_shared<NumpyArray>(index, "?");
     }
     else{
-      throw std::invalid_argument("'axis' out of range for 'num'");
+      throw std::invalid_argument("'axis' out of range for 'is_none'");
     }
   }
 
