@@ -213,7 +213,6 @@ namespace awkward {
 
   const ContentPtr
   None::is_none(int64_t axis, int64_t depth) const {
-    // TODO: Maybe None should actually return for the function `is_none` (?).
     throw std::runtime_error("undefined operation: None::is_none");
   }
 

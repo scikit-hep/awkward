@@ -1025,7 +1025,7 @@ namespace awkward {
   const ContentPtr
   ListArrayOf<T>::is_none(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
-    if(axis == depth){
+    if(toaxis == depth){
       Index8 index(length());
       struct Error err = awkward_zero_mask8(
         index.ptr().get(),
@@ -1033,16 +1033,14 @@ namespace awkward {
       util::handle_error(err, classname(), identities_.get());
       return std::make_shared<NumpyArray>(index, "?");
     }
-    
-    ContentPtr compact = toListOffsetArray64(true);
-    ListOffsetArray64* rawcompact =
-    dynamic_cast<ListOffsetArray64*>(compact.get());
-    ContentPtr next = rawcompact->content().get()->is_none(axis,
-                                                           depth + 1);
-    return std::make_shared<ListOffsetArray64>(identities_,
-                                               util::Parameters(),
-                                               rawcompact->offsets(),
-                                               next);
+    else{
+      return std::make_shared<ListArrayOf<T>>(
+        Identities::none(),
+        parameters_,
+        starts_,
+        stops_,
+        content_.get()->is_none(axis, depth + 1));
+    }
   }
 
   template <typename T>

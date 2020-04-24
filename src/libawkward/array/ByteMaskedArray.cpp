@@ -709,9 +709,27 @@ namespace awkward {
 
   const ContentPtr
   ByteMaskedArray::is_none(int64_t axis, int64_t depth) const {
-    throw std::runtime_error(
-      "TODO: Not implemented yet");
-    return nullptr;
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if(toaxis == depth){
+      Index8 mask = bytemask();
+      return std::make_shared<NumpyArray>(mask, "?");
+    }
+    else{
+      int64_t numnull;
+      std::pair<Index64, Index64> pair = nextcarry_outindex(numnull);
+      Index64 nextcarry = pair.first;
+      Index64 outindex = pair.second;
+
+      ContentPtr next = content_.get()->carry(nextcarry);
+
+      ContentPtr out = next.get()->is_none(axis, depth);
+      IndexedOptionArray64 out2(Identities::none(),
+                                util::Parameters(),
+                                outindex,
+                                out);
+      return out2.simplify_optiontype();
+    }
+
   }
 
   const ContentPtr

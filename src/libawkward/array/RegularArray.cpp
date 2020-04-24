@@ -688,9 +688,22 @@ namespace awkward {
 
   const ContentPtr
   RegularArray::is_none(int64_t axis, int64_t depth) const {
-    throw std::runtime_error(
-      "TODO: Not implemented yet");
-    return nullptr;
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if(axis == depth){
+      Index8 index(length());
+      struct Error err = awkward_zero_mask8(
+        index.ptr().get(),
+        length());
+      util::handle_error(err, classname(), identities_.get());
+      return std::make_shared<NumpyArray>(index, "?");
+    }
+    else{
+      return std::make_shared<RegularArray>(
+      Identities::none(),
+      parameters_,
+      content_.get()->is_none(axis, depth + 1),
+      size_);
+    }
   }
 
   const ContentPtr

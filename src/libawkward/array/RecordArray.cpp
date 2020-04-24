@@ -841,9 +841,26 @@ namespace awkward {
 
   const ContentPtr
   RecordArray::is_none(int64_t axis, int64_t depth) const {
-    throw std::runtime_error(
-      "TODO: Not implemented yet");
-    return nullptr;
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if(toaxis == depth) {
+      Index8 index(length());
+      struct Error err = awkward_zero_mask8(
+        index.ptr().get(),
+        length());
+      util::handle_error(err, classname(), identities_.get());
+      return std::make_shared<NumpyArray>(index, "?");
+    }
+    else{
+      ContentPtrVec contents;
+      for (auto content : contents_) {
+        contents.push_back(content.get()->is_none(axis, depth));
+      }
+      return std::make_shared<RecordArray>(Identities::none(),
+                                           util::Parameters(),
+                                           contents,
+                                           recordlookup_,
+                                           length_);
+    }
   }
 
   const ContentPtr

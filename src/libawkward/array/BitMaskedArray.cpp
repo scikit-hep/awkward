@@ -608,9 +608,7 @@ namespace awkward {
 
   const ContentPtr
   BitMaskedArray::is_none(int64_t axis, int64_t depth) const {
-    throw std::runtime_error(
-      "TODO: Not implemented yet");
-    return nullptr;
+    return toByteMaskedArray().get()->is_none(axis, depth);
   }
 
   const ContentPtr

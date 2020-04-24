@@ -1470,23 +1470,25 @@ namespace awkward {
   const ContentPtr
   IndexedArrayOf<T, ISOPTION>::is_none(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
-    if(axis == depth){
-      Index8 index(bytemask());
+    if(toaxis == depth){
+      Index8 index = bytemask();
       return std::make_shared<NumpyArray>(index, "?");
     }
     else if(ISOPTION){
-      int64_t numnull;
-      struct Error err1 = util::awkward_indexedarray_numnull<T>(
-        &numnull,
-        index_.ptr().get(),
-        index_.offset(),
-        index_.length());
-      util::handle_error(err1, classname(), identities_.get());
-      if(numnull != 0) std::runtime_error("axis exceeds the depth of certain nodes");
+        int64_t numnull;
+        std::pair<Index64, IndexOf<T>> pair = nextcarry_outindex(numnull);
+        Index64 nextcarry = pair.first;
+        IndexOf<T> outindex = pair.second;
+
+        ContentPtr next = content_.get()->carry(nextcarry);
+        ContentPtr out = next.get()->is_none(axis, depth);
+        IndexedArrayOf<T, ISOPTION> out2(identities_,
+                                         util::Parameters(),
+                                         outindex,
+                                         out);
+        return out2.simplify_optiontype();
     }
-    return project().get()->is_none(axis,
-                                    depth);
-    //Simplify Optiontype ? Mostly not.
+    return project().get()->is_none(axis, depth);
   }
 
   template <typename T, bool ISOPTION>

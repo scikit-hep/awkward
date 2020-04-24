@@ -316,9 +316,15 @@ namespace awkward {
 
   const ContentPtr
   Record::is_none(int64_t axis, int64_t depth) const {
-    throw std::runtime_error(
-      "TODO: Not implemented yet");
-    return nullptr;
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if(toaxis == depth){
+       throw std::invalid_argument(
+        "cannot call 'num' with an 'axis' of 0 on a Record");
+    }
+    else{
+      ContentPtr singleton = array_.get()->getitem_range_nowrap(at_, at_ + 1);
+      return singleton.get()->is_none(axis, depth).get()->getitem_at_nowrap(0);
+    }
   }
 
   const ContentPtr

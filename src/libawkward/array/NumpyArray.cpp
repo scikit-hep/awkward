@@ -2069,7 +2069,8 @@ namespace awkward {
 
   const ContentPtr
   NumpyArray::is_none(int64_t axis, int64_t depth) const {
-    if(axis == depth){
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if(toaxis == depth){
       Index8 index(length());
       struct Error err = awkward_zero_mask8(
         index.ptr().get(),
@@ -2077,7 +2078,9 @@ namespace awkward {
       util::handle_error(err, classname(), identities_.get());
       return std::make_shared<NumpyArray>(index, "?");
     }
-    throw std::runtime_error("axis exceeds the depth of this array");
+    else{
+      throw std::invalid_argument("'axis' out of range for 'num'");
+    }
   }
 
   const ContentPtr
