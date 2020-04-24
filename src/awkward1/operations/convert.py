@@ -1228,17 +1228,30 @@ def to_arrow(layout):
         elif isinstance(layout, (awkward1.layout.ListArray32, 
                                 awkward1.layout.ListArrayU32, 
                                 awkward1.layout.ListArray64)):
-            
-            return recurse(layout.broadcast_tooffsets64(layout.compact_offsets64()))
+            if mask is not None:
+                return recurse(layout.broadcast_tooffsets64(layout.compact_offsets64()), mask)
+            else:
+                return recurse(layout.broadcast_tooffsets64(layout.compact_offsets64()))
 
         elif isinstance(layout, (awkward1.layout.RecordArray)):
             values = [recurse(x) for x in layout.contents]
             # Arrow rejects the values list if every child array is not of same length
             min_list_len = min(map(len, values))
-            for i in range(len(values)):
-                values[i] = values[i].slice(0, min_list_len)
 
-            return pyarrow.StructArray.from_arrays(values, layout.keys())
+            if mask is not None:
+                for i in range(len(values)):
+                    values[i] = values[i].slice(0, len(mask)) 
+                indices = []
+                for i in range(len(mask)):
+                    if mask[i] == 1:
+                        indices.append(None)
+                    else:
+                        indices.append(i)   
+                return pyarrow.StructArray.from_arrays(values, layout.keys()).take(pyarrow.array(indices))
+            else:
+                for i in range(len(values)):
+                    values[i] = values[i].slice(0, min_list_len)
+                return pyarrow.StructArray.from_arrays(values, layout.keys())
         
         elif isinstance(layout, (awkward1.layout.UnionArray8_32, 
                                 awkward1.layout.UnionArray8_64, 
@@ -1259,7 +1272,13 @@ def to_arrow(layout):
                                 awkward1.layout.IndexedArray64, 
                                 awkward1.layout.IndexedArrayU32)):
             if mask is not None:
-                return pyarrow.DictionaryArray.from_arrays(recurse(layout.index), recurse(layout.content), mask=numpy.array(mask, dtype=numpy.bool))
+                indices = []
+                for i in range(len(mask)):
+                    if mask[i] == 1:
+                        indices.append(None)
+                    else:
+                        indices.append(i)
+                return pyarrow.DictionaryArray.from_arrays(recurse(layout.index), recurse(layout.content)).take(pyarrow.array(indices))
             else:
                 return pyarrow.DictionaryArray.from_arrays(recurse(layout.index), recurse(layout.content))
 
