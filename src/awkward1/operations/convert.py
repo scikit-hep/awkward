@@ -17,6 +17,7 @@ import awkward1.layout
 import awkward1._ext
 import awkward1._util
 
+
 def from_numpy(array, regulararray=False, highlevel=True, behavior=None):
     """
     Args:
@@ -47,8 +48,8 @@ def from_numpy(array, regulararray=False, highlevel=True, behavior=None):
     def recurse(array, mask):
         if regulararray and len(array.shape) > 1:
             return awkward1.layout.RegularArray(
-                     recurse(array.reshape((-1,) + array.shape[2:]), mask),
-                     array.shape[1])
+                recurse(array.reshape((-1,) + array.shape[2:]), mask),
+                array.shape[1])
 
         if len(array.shape) == 0:
             data = awkward1.layout.NumpyArray(array.reshape(1))
@@ -63,7 +64,7 @@ def from_numpy(array, regulararray=False, highlevel=True, behavior=None):
         else:
             # NumPy's MaskedArray is a ByteMaskedArray with valid_when=False
             return awkward1.layout.ByteMaskedArray(
-                     awkward1.layout.Index8(mask), data, valid_when=False)
+                awkward1.layout.Index8(mask), data, valid_when=False)
 
     if isinstance(array, numpy.ma.MaskedArray):
         mask = numpy.ma.getmask(array)
@@ -79,6 +80,7 @@ def from_numpy(array, regulararray=False, highlevel=True, behavior=None):
         return awkward1._util.wrap(layout, behavior)
     else:
         return layout
+
 
 def to_numpy(array, allow_missing=True):
     """
@@ -122,7 +124,7 @@ def to_numpy(array, allow_missing=True):
 
     elif isinstance(array, awkward1.highlevel.Record):
         out = array.layout
-        return to_numpy(out.array[out.at : out.at + 1],
+        return to_numpy(out.array[out.at: out.at + 1],
                         allow_missing=allow_missing)[0]
 
     elif isinstance(array, awkward1.highlevel.ArrayBuilder):
@@ -134,18 +136,18 @@ def to_numpy(array, allow_missing=True):
     elif (awkward1.operations.describe.parameters(array).get("__array__") ==
           "bytestring"):
         return numpy.array([awkward1.behaviors.string.ByteBehavior(
-                              array[i]).__bytes__()
-                            for i in range(len(array))])
+            array[i]).__bytes__()
+            for i in range(len(array))])
 
     elif (awkward1.operations.describe.parameters(array).get("__array__") ==
           "string"):
         return numpy.array([awkward1.behaviors.string.CharBehavior(
-                              array[i]).__str__()
-                            for i in range(len(array))])
+            array[i]).__str__()
+            for i in range(len(array))])
 
     elif isinstance(array, awkward1.partition.PartitionedArray):
         tocat = [to_numpy(x, allow_missing=allow_missing)
-                   for x in array.partitions]
+                 for x in array.partitions]
         if any(isinstance(x, numpy.ma.MaskedArray) for x in tocat):
             return numpy.ma.concatenate(tocat)
         else:
@@ -159,7 +161,7 @@ def to_numpy(array, allow_missing=True):
 
     elif isinstance(array, awkward1._util.uniontypes):
         contents = [to_numpy(array.project(i), allow_missing=allow_missing)
-                      for i in range(array.numcontents)]
+                    for i in range(array.numcontents)]
 
         if any(isinstance(x, numpy.ma.MaskedArray) for x in contents):
             try:
@@ -196,7 +198,7 @@ def to_numpy(array, allow_missing=True):
         if mask0.any():
             if allow_missing:
                 mask = numpy.broadcast_to(
-                    mask0.reshape((shape[0],) + (1,)*(len(shape) - 1)), shape)
+                    mask0.reshape((shape[0],) + (1,) * (len(shape) - 1)), shape)
                 data[~mask0] = content
                 return numpy.ma.MaskedArray(data, mask)
             else:
@@ -213,7 +215,7 @@ def to_numpy(array, allow_missing=True):
         out = to_numpy(array.content, allow_missing=allow_missing)
         head, tail = out.shape[0], out.shape[1:]
         shape = (head // array.size, array.size) + tail
-        return out[:shape[0]*array.size].reshape(shape)
+        return out[:shape[0] * array.size].reshape(shape)
 
     elif isinstance(array, awkward1._util.listtypes):
         return to_numpy(array.toRegularArray(), allow_missing=allow_missing)
@@ -222,13 +224,13 @@ def to_numpy(array, allow_missing=True):
         if array.numfields == 0:
             return numpy.empty(len(array), dtype=[])
         contents = [to_numpy(array.field(i), allow_missing=allow_missing)
-                      for i in range(array.numfields)]
+                    for i in range(array.numfields)]
         if any(len(x.shape) != 1 for x in contents):
             raise ValueError(
-                    "cannot convert {0} into numpy.ndarray".format(array))
+                "cannot convert {0} into numpy.ndarray".format(array))
         out = numpy.empty(len(contents[0]),
                           dtype=[(str(n), x.dtype)
-                                   for n, x in zip(array.keys(), contents)])
+                                 for n, x in zip(array.keys(), contents)])
         for n, x in zip(array.keys(), contents):
             out[n] = x
         return out
@@ -246,6 +248,7 @@ def to_numpy(array, allow_missing=True):
     else:
         raise ValueError(
             "cannot convert {0} into numpy.ndarray".format(array))
+
 
 def from_iter(iterable,
               highlevel=True,
@@ -312,6 +315,7 @@ def from_iter(iterable,
         return awkward1._util.wrap(layout, behavior)
     else:
         return layout
+
 
 def to_list(array):
     """
@@ -394,6 +398,7 @@ def to_list(array):
     else:
         raise TypeError("unrecognized array type: {0}".format(type(array)))
 
+
 def from_json(source,
               highlevel=True,
               behavior=None,
@@ -433,6 +438,7 @@ def from_json(source,
         return awkward1._util.wrap(layout, behavior)
     else:
         return layout
+
 
 def to_json(array,
             destination=None,
@@ -514,6 +520,7 @@ def to_json(array,
                           pretty=pretty,
                           maxdecimals=maxdecimals,
                           buffersize=buffersize)
+
 
 def from_awkward0(array,
                   keeplayout=False,
@@ -624,19 +631,19 @@ def from_awkward0(array,
                 if startsmax >= from_awkward0.int64max:
                     offsets = awkward1.layout.Index64(array.offsets)
                     return awkward1.layout.ListOffsetArray64(
-                             offsets, recurse(array.content, level + 1))
+                        offsets, recurse(array.content, level + 1))
                 elif startsmax >= from_awkward0.uint32max:
                     offsets = awkward1.layout.IndexU32(array.offsets)
                     return awkward1.layout.ListOffsetArrayU32(
-                             offsets, recurse(array.content, level + 1))
+                        offsets, recurse(array.content, level + 1))
                 else:
                     offsets = awkward1.layout.Index32(array.offsets)
                     return awkward1.layout.ListOffsetArray32(
-                             offsets, recurse(array.content, level + 1))
+                        offsets, recurse(array.content, level + 1))
 
             else:
                 if (startsmax >= from_awkward0.int64max or
-                    stopsmax >= from_awkward0.int64max):
+                        stopsmax >= from_awkward0.int64max):
                     starts = awkward1.layout.Index64(array.starts.reshape(-1))
                     stops = awkward1.layout.Index64(array.stops.reshape(-1))
                     out = awkward1.layout.ListArray64(starts,
@@ -666,7 +673,7 @@ def from_awkward0(array,
             # contents
             if array.istuple:
                 return awkward1.layout.RecordArray(
-                         [recurse(x, level + 1) for x in array.contents.values()])
+                    [recurse(x, level + 1) for x in array.contents.values()])
             else:
                 keys = []
                 values = []
@@ -682,17 +689,17 @@ def from_awkward0(array,
                 tags = awkward1.layout.Index8(array.tags.reshape(-1))
                 index = awkward1.layout.Index64(array.index.reshape(-1))
                 out = awkward1.layout.UnionArray8_64(tags, index,
-                        [recurse(x, level + 1) for x in array.contents])
+                                                     [recurse(x, level + 1) for x in array.contents])
             elif indexmax >= from_awkward0.uint32max:
                 tags = awkward1.layout.Index8(array.tags.reshape(-1))
                 index = awkward1.layout.IndexU32(array.index.reshape(-1))
                 out = awkward1.layout.UnionArray8_U32(tags, index,
-                        [recurse(x, level + 1) for x in array.contents])
+                                                      [recurse(x, level + 1) for x in array.contents])
             else:
                 tags = awkward1.layout.Index8(array.tags.reshape(-1))
                 index = awkward1.layout.Index32(array.index.reshape(-1))
                 out = awkward1.layout.UnionArray8_32(tags, index,
-                        [recurse(x, level + 1) for x in array.contents])
+                                                     [recurse(x, level + 1) for x in array.contents])
 
             for size in array.tags.shape[:0:-1]:
                 out = awkward1.layout.RegularArray(out, size)
@@ -701,11 +708,11 @@ def from_awkward0(array,
         elif isinstance(array, awkward0.MaskedArray):
             # mask, content, maskedwhen
             mask = awkward1.layout.Index8(
-                     array.mask.view(numpy.int8).reshape(-1))
+                array.mask.view(numpy.int8).reshape(-1))
             out = awkward1.layout.ByteMaskedArray(
-                    mask,
-                    recurse(array.content, level + 1),
-                    valid_when=(not array.maskedwhen))
+                mask,
+                recurse(array.content, level + 1),
+                valid_when=(not array.maskedwhen))
             for size in array.mask.shape[:0:-1]:
                 out = awkward1.layout.RegularArray(out, size)
             return out
@@ -714,11 +721,11 @@ def from_awkward0(array,
             # mask, content, maskedwhen, lsborder
             mask = awkward.layout.IndexU8(array.mask.view(numpy.uint8))
             return awkward1.layout.BitMaskedArray(
-                     mask,
-                     recurse(array.content, level + 1),
-                     valid_when=(not array.maskedwhen),
-                     length=len(array.content),
-                     lsb_order=array.lsborder)
+                mask,
+                recurse(array.content, level + 1),
+                valid_when=(not array.maskedwhen),
+                length=len(array.content),
+                lsb_order=array.lsborder)
 
         elif isinstance(array, awkward0.IndexedMaskedArray):
             # mask, content, maskedwhen
@@ -726,15 +733,15 @@ def from_awkward0(array,
             if indexmax >= from_awkward0.int64max:
                 index = awkward1.layout.Index64(array.index.reshape(-1))
                 out = awkward1.layout.IndexedOptionArray64(
-                        index, recurse(array.content, level + 1))
+                    index, recurse(array.content, level + 1))
             elif indexmax >= from_awkward0.uint32max:
                 index = awkward1.layout.IndexU32(array.index.reshape(-1))
                 out = awkward1.layout.IndexedOptionArrayU32(
-                        index, recurse(array.content, level + 1))
+                    index, recurse(array.content, level + 1))
             else:
                 index = awkward1.layout.Index32(array.index.reshape(-1))
                 out = awkward1.layout.IndexedOptionArray32(
-                        index, recurse(array.content, level + 1))
+                    index, recurse(array.content, level + 1))
 
             for size in array.tags.shape[:0:-1]:
                 out = awkward1.layout.RegularArray(out, size)
@@ -782,8 +789,8 @@ def from_awkward0(array,
                 out.setparameter("__array__", "string")
             else:
                 raise ValueError(
-                        "unsupported encoding: {0}".format(
-                                                        repr(array.encoding)))
+                    "unsupported encoding: {0}".format(
+                        repr(array.encoding)))
             return out
 
         elif isinstance(array, awkward0.ObjectArray):
@@ -809,24 +816,24 @@ def from_awkward0(array,
                                  "awkward0.ChunkedArray; try keeplayout=False")
             elif level == 0:
                 return awkward1.partition.IrregularlyPartitionedArray(
-                         [recurse(x, level + 1) for x in array.chunks])
+                    [recurse(x, level + 1) for x in array.chunks])
             else:
                 return awkward1.operations.structure.concatenate(
-                         [recurse(x, level + 1) for x in array.chunks])
+                    [recurse(x, level + 1) for x in array.chunks])
 
         elif isinstance(array, awkward0.AppendableArray):
             # chunkshape, dtype, chunks
             raise ValueError(
-                    "the awkward1 equivalent of awkward0.AppendableArray is "
-                    "awkward1.ArrayBuilder, but it is not a Content type, not "
-                    "mixable with immutable array elements")
+                "the awkward1 equivalent of awkward0.AppendableArray is "
+                "awkward1.ArrayBuilder, but it is not a Content type, not "
+                "mixable with immutable array elements")
 
         elif isinstance(array, awkward0.VirtualArray):
             # generator, args, kwargs, cache, persistentkey, type, nbytes, persistvirtual
             if keeplayout:
                 raise ValueError(
-                        "awkward1.VirtualArray hasn't been written yet; "
-                        "try keeplayout=False")
+                    "awkward1.VirtualArray hasn't been written yet; "
+                    "try keeplayout=False")
             return recurse(array.array, level + 1)
 
         else:
@@ -838,10 +845,12 @@ def from_awkward0(array,
     else:
         return out
 
+
 from_awkward0.int8max = numpy.iinfo(numpy.int8).max
 from_awkward0.int32max = numpy.iinfo(numpy.int32).max
 from_awkward0.uint32max = numpy.iinfo(numpy.uint32).max
 from_awkward0.int64max = numpy.iinfo(numpy.int64).max
+
 
 def to_awkward0(array, keeplayout=False):
     """
@@ -863,7 +872,7 @@ def to_awkward0(array, keeplayout=False):
     def recurse(layout):
         if isinstance(layout, awkward1.partition.PartitionedArray):
             return awkward0.ChunkedArray(
-                       [recurse(x) for x in layout.partitions])
+                [recurse(x) for x in layout.partitions])
 
         elif isinstance(layout, awkward1.layout.NumpyArray):
             return numpy.asarray(layout)
@@ -875,52 +884,52 @@ def to_awkward0(array, keeplayout=False):
             # content, size
             if keeplayout:
                 raise ValueError(
-                        "awkward0 has no equivalent of RegularArray; "
-                        "try keeplayout=False")
+                    "awkward0 has no equivalent of RegularArray; "
+                    "try keeplayout=False")
             offsets = numpy.arange(0,
-                                   (len(layout) + 1)*layout.size,
+                                   (len(layout) + 1) * layout.size,
                                    layout.size)
             return awkward0.JaggedArray.fromoffsets(
-                     offsets, recurse(layout.content))
+                offsets, recurse(layout.content))
 
         elif isinstance(layout, awkward1.layout.ListArray32):
             # starts, stops, content
             return awkward0.JaggedArray(
-                     numpy.asarray(layout.starts),
-                     numpy.asarray(layout.stops),
-                     recurse(layout.content))
+                numpy.asarray(layout.starts),
+                numpy.asarray(layout.stops),
+                recurse(layout.content))
 
         elif isinstance(layout, awkward1.layout.ListArrayU32):
             # starts, stops, content
             return awkward0.JaggedArray(
-                     numpy.asarray(layout.starts),
-                     numpy.asarray(layout.stops),
-                     recurse(layout.content))
+                numpy.asarray(layout.starts),
+                numpy.asarray(layout.stops),
+                recurse(layout.content))
 
         elif isinstance(layout, awkward1.layout.ListArray64):
             # starts, stops, content
             return awkward0.JaggedArray(
-                     numpy.asarray(layout.starts),
-                     numpy.asarray(layout.stops),
-                     recurse(layout.content))
+                numpy.asarray(layout.starts),
+                numpy.asarray(layout.stops),
+                recurse(layout.content))
 
         elif isinstance(layout, awkward1.layout.ListOffsetArray32):
             # offsets, content
             return awkward0.JaggedArray.fromoffsets(
-                     numpy.asarray(layout.offsets),
-                     recurse(layout.content))
+                numpy.asarray(layout.offsets),
+                recurse(layout.content))
 
         elif isinstance(layout, awkward1.layout.ListOffsetArrayU32):
             # offsets, content
             return awkward0.JaggedArray.fromoffsets(
-                     numpy.asarray(layout.offsets),
-                     recurse(layout.content))
+                numpy.asarray(layout.offsets),
+                recurse(layout.content))
 
         elif isinstance(layout, awkward1.layout.ListOffsetArray64):
             # offsets, content
             return awkward0.JaggedArray.fromoffsets(
-                     numpy.asarray(layout.offsets),
-                     recurse(layout.content))
+                numpy.asarray(layout.offsets),
+                recurse(layout.content))
 
         elif isinstance(layout, awkward1.layout.Record):
             # istuple, numfields, field(i)
@@ -1021,13 +1030,14 @@ def to_awkward0(array, keeplayout=False):
 
         else:
             raise AssertionError(
-                    "missing converter for {0}".format(type(layout).__name__))
+                "missing converter for {0}".format(type(layout).__name__))
 
     layout = to_layout(array,
                        allow_record=True,
                        allow_other=False,
                        numpytype=(numpy.generic,))
     return recurse(layout)
+
 
 def to_layout(array,
               allow_record=True,
@@ -1077,11 +1087,11 @@ def to_layout(array,
         data = numpy.ma.getdata(array)
         if mask is False:
             out = awkward1.layout.UnmaskedArray(
-                    awkward1.layout.NumpyArray(data.reshape(-1)))
+                awkward1.layout.NumpyArray(data.reshape(-1)))
         else:
             out = awkward1.layout.ByteMaskedArray(
-                    awkwrad1.layout.Index8(mask.reshape(-1)),
-                    awkward1.layout.NumpyArray(data.reshape(-1)))
+                awkwrad1.layout.Index8(mask.reshape(-1)),
+                awkward1.layout.NumpyArray(data.reshape(-1)))
         for size in array.shape[:0:-1]:
             out = awkward1.layout.RegularArray(out, size)
         return out
@@ -1108,6 +1118,7 @@ def to_layout(array,
     else:
         return array
 
+
 def regularize_numpyarray(array, allow_empty=True, highlevel=True):
     """
     Args:
@@ -1126,7 +1137,7 @@ def regularize_numpyarray(array, allow_empty=True, highlevel=True):
     """
     def getfunction(layout, depth):
         if (isinstance(layout, awkward1.layout.NumpyArray) and
-            layout.ndim != 1):
+                layout.ndim != 1):
             return lambda: layout.toRegularArray()
         elif (isinstance(layout, awkward1.layout.EmptyArray) and
               not allow_empty):
@@ -1139,10 +1150,20 @@ def regularize_numpyarray(array, allow_empty=True, highlevel=True):
     else:
         return out
 
+
 def to_arrow(layout):
     import pyarrow
 
-    def recurse(layout, mask = None):
+    def mask_to_indices(mask):
+        indices = []
+        for i in range(len(mask)):
+            if mask[i] == 1:
+                indices.append(None)
+            else:
+                indices.append(i)
+        return pyarrow.array(indices)
+
+    def recurse(layout, mask=None):
 
         if isinstance(layout, awkward1.layout.NumpyArray):
             numpy_arr = numpy.asarray(layout)
@@ -1150,84 +1171,88 @@ def to_arrow(layout):
                 return pyarrow.array(numpy_arr, mask=mask)
             else:
                 return pyarrow.Tensor.from_numpy(numpy_arr)
-        
+
         elif isinstance(layout, awkward1.layout.EmptyArray):
             return pyarrow.array(numpy.array([], dtype=numpy.float64))
 
-        elif isinstance(layout, (awkward1.layout.IndexU8, 
-                                awkward1.layout.IndexU32, 
-                                awkward1.layout.Index8, 
-                                awkward1.layout.Index32, 
-                                awkward1.layout.Index64)):
+        elif isinstance(layout, (awkward1.layout.IndexU8,
+                                 awkward1.layout.IndexU32,
+                                 awkward1.layout.Index8,
+                                 awkward1.layout.Index32,
+                                 awkward1.layout.Index64)):
             return pyarrow.array(numpy.asarray(layout))
-        
+
         elif isinstance(layout, awkward1.layout.ListOffsetArray32):
 
             if (awkward1.operations.describe.parameters(layout).get("__array__") == "bytestring"):
-                arr = [awkward1.behaviors.string.ByteBehavior(
-                    layout[i]).__bytes__() for i in range(len(layout))]
+                offsets = numpy.asarray(layout.offsets, dtype=numpy.int32)
+                arrow_arr = pyarrow.BinaryArray.from_buffers(
+                    len(offsets) - 1, pyarrow.py_buffer(offsets), pyarrow.py_buffer(layout.content))
+
                 if mask is not None:
-                    return pyarrow.array(arr, mask=numpy.array(mask, dtype=numpy.bool))
+                    indices = mask_to_indices(mask)
+                    return arrow_arr.take(indices)
                 else:
-                    return pyarrow.array(arr)
+                    return arrow_arr
 
             if (awkward1.operations.describe.parameters(layout).get("__array__") == "string"):
-                arr = [awkward1.behaviors.string.CharBehavior(
-                    layout[i]).__str__() for i in range(len(layout))]
-                if mask is not None:
-                    return pyarrow.array(arr, mask=numpy.array(mask, dtype=numpy.bool))
-                else:
-                    return pyarrow.array(arr)
-            
-            if mask is not None:
-                indices = []
-                for i in range(len(mask)):
-                    if mask[i] == 1:
-                        indices.append(None)
-                    else:
-                        indices.append(i)
-                return pyarrow.ListArray.from_arrays(recurse(layout.offsets), 
-                                                            recurse(layout.content)).take( pyarrow.array(indices))
-            
-            return pyarrow.ListArray.from_arrays(recurse(layout.offsets), recurse(layout.content))
+                offsets = numpy.asarray(layout.offsets, dtype=numpy.int32)
+                arrow_arr = pyarrow.StringArray.from_buffers(
+                    len(offsets) - 1, pyarrow.py_buffer(offsets), pyarrow.py_buffer(layout.content))
 
-        elif isinstance(layout, (awkward1.layout.ListOffsetArray64, 
-                                awkward1.layout.ListOffsetArrayU32)):
+                if mask is not None:
+                    indices = mask_to_indices(mask)
+                    return arrow_arr.take(indices)
+                else:
+                    return arrow_arr
+
+            arrow_arr = pyarrow.ListArray.from_arrays(recurse(layout.offsets),
+                                                      recurse(layout.content))
+            if mask is not None:
+                indices = mask_to_indices(mask)
+                return arrow_arr.take(indices)
+            else:
+                return arrow_arr
+
+        elif isinstance(layout, (awkward1.layout.ListOffsetArray64,
+                                 awkward1.layout.ListOffsetArrayU32)):
 
             if (awkward1.operations.describe.parameters(layout).get("__array__") == "bytestring"):
-                arr = [awkward1.behaviors.string.ByteBehavior(
-                    layout[i]).__bytes__() for i in range(len(layout))]
+                offsets = numpy.asarray(layout.offsets, dtype=numpy.int64)
+                arrow_arr = pyarrow.LargeBinaryArray.from_buffers(
+                    len(offsets) - 1, pyarrow.py_buffer(offsets), pyarrow.py_buffer(layout.content))
+
                 if mask is not None:
-                    return pyarrow.array(arr, mask=numpy.array(mask, dtype=numpy.bool))
+                    indices = mask_to_indices(mask)
+                    return arrow_arr.take(indices)
                 else:
-                    return pyarrow.array(arr) 
+                    return arrow_arr
 
             if (awkward1.operations.describe.parameters(layout).get("__array__") == "string"):
-                arr = [awkward1.behaviors.string.CharBehavior(
-                    layout[i]).__str__() for i in range(len(layout))]
+                offsets = numpy.asarray(layout.offsets, dtype=numpy.int64)
+                arrow_arr = pyarrow.LargeStringArray.from_buffers(
+                    len(offsets) - 1, pyarrow.py_buffer(offsets), pyarrow.py_buffer(layout.content))
+
                 if mask is not None:
-                    return pyarrow.array(arr, mask=numpy.array(mask, dtype=numpy.bool))
+                    indices = mask_to_indices(mask)
+                    return arrow_arr.take(indices)
                 else:
-                    return pyarrow.array(arr) 
-            
+                    return arrow_arr
+
+            arrow_arr = pyarrow.LargeListArray.from_arrays(recurse(layout.offsets),
+                                                           recurse(layout.content))
             if mask is not None:
-                indices = []
-                for i in range(len(mask)):
-                    if mask[i] == 1:
-                        indices.append(None)
-                    else:
-                        indices.append(i)
-                return pyarrow.LargeListArray.from_arrays(recurse(layout.offsets), 
-                                                            recurse(layout.content)).take( pyarrow.array(indices))
-            
-            return pyarrow.LargeListArray.from_arrays(recurse(layout.offsets), recurse(layout.content))
-        
+                indices = mask_to_indices(mask)
+                return arrow_arr.take(indices)
+            else:
+                return arrow_arr
+
         elif isinstance(layout, (awkward1.layout.RegularArray)):
             return recurse(layout.broadcast_tooffsets64(layout.compact_offsets64()))
 
-        elif isinstance(layout, (awkward1.layout.ListArray32, 
-                                awkward1.layout.ListArrayU32, 
-                                awkward1.layout.ListArray64)):
+        elif isinstance(layout, (awkward1.layout.ListArray32,
+                                 awkward1.layout.ListArrayU32,
+                                 awkward1.layout.ListArray64)):
             if mask is not None:
                 return recurse(layout.broadcast_tooffsets64(layout.compact_offsets64()), mask)
             else:
@@ -1240,23 +1265,23 @@ def to_arrow(layout):
 
             if mask is not None:
                 for i in range(len(values)):
-                    values[i] = values[i].slice(0, len(mask)) 
+                    values[i] = values[i].slice(0, len(mask))
                 indices = []
                 for i in range(len(mask)):
                     if mask[i] == 1:
                         indices.append(None)
                     else:
-                        indices.append(i)   
+                        indices.append(i)
                 return pyarrow.StructArray.from_arrays(values, layout.keys()).take(pyarrow.array(indices))
             else:
                 for i in range(len(values)):
                     values[i] = values[i].slice(0, min_list_len)
                 return pyarrow.StructArray.from_arrays(values, layout.keys())
-        
-        elif isinstance(layout, (awkward1.layout.UnionArray8_32, 
-                                awkward1.layout.UnionArray8_64, 
-                                awkward1.layout.UnionArray8_U32)):
-        
+
+        elif isinstance(layout, (awkward1.layout.UnionArray8_32,
+                                 awkward1.layout.UnionArray8_64,
+                                 awkward1.layout.UnionArray8_U32)):
+
             values = [recurse(x) for x in layout.contents]
             if mask is not None:
                 indices = []
@@ -1267,10 +1292,10 @@ def to_arrow(layout):
                         indices.append(i)
                 return pyarrow.UnionArray.from_dense(recurse(layout.tags), recurse(layout.index), values).take(pyarrow.array(indices))
             return pyarrow.UnionArray.from_dense(recurse(layout.tags), recurse(layout.index), values)
-        
-        elif isinstance(layout, (awkward1.layout.IndexedArray32, 
-                                awkward1.layout.IndexedArray64, 
-                                awkward1.layout.IndexedArrayU32)):
+
+        elif isinstance(layout, (awkward1.layout.IndexedArray32,
+                                 awkward1.layout.IndexedArray64,
+                                 awkward1.layout.IndexedArrayU32)):
             if mask is not None:
                 indices = []
                 for i in range(len(mask)):
@@ -1282,8 +1307,8 @@ def to_arrow(layout):
             else:
                 return pyarrow.DictionaryArray.from_arrays(recurse(layout.index), recurse(layout.content))
 
-        elif isinstance(layout, (awkward1.layout.IndexedOptionArray32, 
-                                awkward1.layout.IndexedOptionArray64)):
+        elif isinstance(layout, (awkward1.layout.IndexedOptionArray32,
+                                 awkward1.layout.IndexedOptionArray64)):
             # Convert this to a Union Array
             dummy_numeric_val = awkward1.Array([]).layout
             tags = numpy.zeros(len(layout.index), dtype=numpy.int8)
@@ -1294,9 +1319,10 @@ def to_arrow(layout):
                     tags[i] = 0
                 else:
                     tags[i] = 1
-            array = awkward1.layout.UnionArray8_32(awkward1.layout.Index8(tags), awkward1.layout.Index32(index), [dummy_numeric_val, layout.content])
+            array = awkward1.layout.UnionArray8_32(awkward1.layout.Index8(
+                tags), awkward1.layout.Index32(index), [dummy_numeric_val, layout.content])
             return(recurse(array))
-        
+
         elif isinstance(layout, (awkward1.layout.BitMaskedArray)):
             mask = numpy.asarray(layout.bytemask(), dtype=numpy.bool) == (
                 not layout.valid_when)
@@ -1305,14 +1331,14 @@ def to_arrow(layout):
             return recurse(layout.content, mask).slice(0, len(mask))
 
         elif isinstance(layout, (awkward1.layout.ByteMaskedArray)):
-            mask = numpy.asarray(layout.mask, dtype=numpy.bool) == (not layout.valid_when)
+            mask = numpy.asarray(layout.mask, dtype=numpy.bool) == (
+                not layout.valid_when)
             # mask = numpy.append(mask, [True for x in range(len(layout.content) - len(mask))])
             return recurse(layout.content, mask).slice(0, len(mask))
 
-    return recurse(layout)    
-
+    return recurse(layout)
 
 
 __all__ = [x for x in list(globals())
-             if not x.startswith("_") and
-             x not in ("numbers", "json", "Iterable", "numpy", "awkward1")]
+           if not x.startswith("_") and
+           x not in ("numbers", "json", "Iterable", "numpy", "awkward1")]
