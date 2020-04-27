@@ -44,11 +44,13 @@ class Lookup(object):
 def tolookup(layout, positions, sharedptrs, arrays):
     import awkward1.layout
 
-    if isinstance(layout, awkward1.layout.NumpyArray):
+    if isinstance(layout, (awkward1.layout.NumpyArray,
+                           awkward1.forms.NumpyForm)):
         return awkward1._connect._numba.layout.NumpyArrayType.tolookup(
                  layout, positions, sharedptrs, arrays)
 
-    elif isinstance(layout, awkward1.layout.RegularArray):
+    elif isinstance(layout, (awkward1.layout.RegularArray,
+                             awkward1.forms.RegularForm)):
         return awkward1._connect._numba.layout.RegularArrayType.tolookup(
                  layout, positions, sharedptrs, arrays)
 
@@ -57,34 +59,42 @@ def tolookup(layout, positions, sharedptrs, arrays):
                              awkward1.layout.ListArray64,
                              awkward1.layout.ListOffsetArray32,
                              awkward1.layout.ListOffsetArrayU32,
-                             awkward1.layout.ListOffsetArray64)):
+                             awkward1.layout.ListOffsetArray64,
+                             awkward1.forms.ListForm,
+                             awkward1.forms.ListOffsetForm)):
         return awkward1._connect._numba.layout.ListArrayType.tolookup(
                  layout, positions, sharedptrs, arrays)
 
     elif isinstance(layout, (awkward1.layout.IndexedArray32,
                              awkward1.layout.IndexedArrayU32,
-                             awkward1.layout.IndexedArray64)):
+                             awkward1.layout.IndexedArray64,
+                             awkward1.forms.IndexedForm)):
         return awkward1._connect._numba.layout.IndexedArrayType.tolookup(
                  layout, positions, sharedptrs, arrays)
 
     elif isinstance(layout, (awkward1.layout.IndexedOptionArray32,
-                             awkward1.layout.IndexedOptionArray64)):
+                             awkward1.layout.IndexedOptionArray64,
+                             awkward1.forms.IndexedOptionForm)):
         return awkward1._connect._numba.layout.IndexedOptionArrayType.tolookup(
                  layout, positions, sharedptrs, arrays)
 
-    elif isinstance(layout, awkward1.layout.ByteMaskedArray):
+    elif isinstance(layout, (awkward1.layout.ByteMaskedArray,
+                             awkward1.forms.ByteMaskedForm)):
         return awkward1._connect._numba.layout.ByteMaskedArrayType.tolookup(
                  layout, positions, sharedptrs, arrays)
 
-    elif isinstance(layout, awkward1.layout.BitMaskedArray):
+    elif isinstance(layout, (awkward1.layout.BitMaskedArray,
+                             awkward1.forms.BitMaskedForm)):
         return awkward1._connect._numba.layout.BitMaskedArrayType.tolookup(
                  layout, positions, sharedptrs, arrays)
 
-    elif isinstance(layout, awkward1.layout.UnmaskedArray):
+    elif isinstance(layout, (awkward1.layout.UnmaskedArray,
+                             awkward1.forms.UnmaskedForm)):
         return awkward1._connect._numba.layout.UnmaskedArrayType.tolookup(
                  layout, positions, sharedptrs, arrays)
 
-    elif isinstance(layout, awkward1.layout.RecordArray):
+    elif isinstance(layout, (awkward1.layout.RecordArray,
+                             awkward1.forms.RecordForm)):
         return awkward1._connect._numba.layout.RecordArrayType.tolookup(
                  layout, positions, sharedptrs, arrays)
 
@@ -94,7 +104,8 @@ def tolookup(layout, positions, sharedptrs, arrays):
 
     elif isinstance(layout, (awkward1.layout.UnionArray8_32,
                              awkward1.layout.UnionArray8_U32,
-                             awkward1.layout.UnionArray8_64)):
+                             awkward1.layout.UnionArray8_64,
+                             awkward1.forms.UnionForm)):
         return awkward1._connect._numba.layout.UnionArrayType.tolookup(
                  layout, positions, sharedptrs, arrays)
 

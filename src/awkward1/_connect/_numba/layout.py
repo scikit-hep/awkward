@@ -107,6 +107,16 @@ class ContentType(numba.types.Type):
             positions.append(arrays[-1])
             sharedptrs.append(None)
 
+    @classmethod
+    def form_tolookup_identities(cls, form, positions, sharedptrs, arrays):
+        if not form.has_identities:
+            positions.append(-1)
+            sharedptrs.append(None)
+        else:
+            arrays.append(None)
+            positions.append(arrays[-1])
+            sharedptrs.append(None)
+
     def IndexOf(self, arraytype):
         if arraytype.dtype.bitwidth == 8 and arraytype.dtype.signed:
             return awkward1.layout.Index8
@@ -310,6 +320,19 @@ class NumpyArrayType(ContentType):
         arrays.append(array)
         return pos
 
+    @classmethod
+    def form_tolookup(cls, form, positions, sharedptrs, arrays):
+        if len(form.inner_shape) != 0:
+            raise NotImplementedError(
+                "NumpyForm is multidimensional; TODO: convert to RegularForm,"
+                " just as NumpyArrays are converted to RegularArrays")
+        pos = len(positions)
+        cls.form_tolookup_identities(form, positions, sharedptrs, arrays)
+        positions.append(len(arrays))
+        sharedptrs.append(None)
+        arrays.append(0)
+        return pos
+
     def __init__(self, arraytype, identitiestype, parameters):
         super(NumpyArrayType, self).__init__(
             name="awkward1.NumpyArrayType({0}, {1}, {2})".format(
@@ -466,6 +489,26 @@ class ListArrayType(ContentType):
         sharedptrs.append(None)
         positions[pos + cls.CONTENT] = \
           awkward1._connect._numba.arrayview.tolookup(layout.content,
+                                                      positions,
+                                                      sharedptrs,
+                                                      arrays)
+        return pos
+
+    @classmethod
+    def form_tolookup(cls, form, positions, sharedptrs, arrays):
+        pos = len(positions)
+        cls.form_tolookup_identities(form, positions, sharedptrs, arrays)
+        sharedptrs[-1] = None
+        positions.append(len(arrays))
+        sharedptrs.append(None)
+        arrays.append(0)
+        positions.append(len(arrays))
+        sharedptrs.append(None)
+        arrays.append(0)
+        positions.append(None)
+        sharedptrs.append(None)
+        positions[pos + cls.CONTENT] = \
+          awkward1._connect._numba.arrayview.tolookup(form.content,
                                                       positions,
                                                       sharedptrs,
                                                       arrays)
