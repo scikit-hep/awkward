@@ -153,7 +153,7 @@ class ContentType(numba.types.Type):
 
     def form_fill_identities(self, pos, layout, lookup):
         if layout.identities is not None:
-            lookup.arrayptr[self.IDENTITIES] = \
+            lookup.arrayptr[pos + self.IDENTITIES] = \
                 numpy.asarray(layout.identities).ctypes.data
 
     def IndexOf(self, arraytype):
@@ -417,10 +417,13 @@ class NumpyArrayType(ContentType):
         self.parameters = parameters
 
     def form_fill(self, pos, layout, lookup):
-        lookup.sharedptrs_new.append(layout._persistent_shared_ptr)
-        lookup.sharedptrs[pos] = lookup.sharedptrs_new[-1].ptr()
+        lookup.sharedptrs_hold[pos] = layout._persistent_shared_ptr
+        lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
         self.form_fill_identities(pos, layout, lookup)
-        lookup.arrayptrs[pos + self.ARRAY] = numpy.asarray(layout).ctypes.data
+
+        lookup.original_positions[pos + self.ARRAY] = numpy.asarray(layout)
+        lookup.arrayptrs[pos + self.ARRAY] = \
+                      lookup.original_positions[pos + self.ARRAY].ctypes.data
 
     def tolayout(self, lookup, pos, fields):
         assert fields == ()
@@ -618,7 +621,8 @@ class ListArrayType(ContentType):
         self.parameters = parameters
 
     def form_fill(self, pos, layout, lookup):
-        lookup.sharedptrs[pos] = layout._persistent_shared_ptr.ptr()
+        lookup.sharedptrs_hold[pos] = layout._persistent_shared_ptr
+        lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
         self.form_fill_identities(pos, layout, lookup)
 
         if isinstance(layout, (awkward1.layout.ListArray32,
@@ -633,8 +637,11 @@ class ListArrayType(ContentType):
             starts = offsets[:-1]
             stops = offsets[1:]
 
+        lookup.original_positions[pos + self.STARTS] = starts
+        lookup.original_positions[pos + self.STOPS] = stops
         lookup.arrayptrs[pos + self.STARTS] = starts.ctypes.data
         lookup.arrayptrs[pos + self.STOPS] = stops.ctypes.data
+
         self.contenttype.form_fill(lookup.arrayptrs[pos + self.CONTENT],
                                    layout.content,
                                    lookup)
@@ -1975,19 +1982,31 @@ class VirtualArrayType(ContentType):
             numbatype_obj = pyapi.unserialize(pyapi.serialize_object(numbatype))
             fill_obj = pyapi.object_getattr_string(numbatype_obj, "form_fill")
             arraypos_obj = pyapi.long_from_ssize_t(arraypos)
-            arrays_new_obj = pyapi.object_getattr_string(viewproxy.pylookup,
-                                                         "arrays_new")
             array_obj = pyapi.object_getattr_string(virtualarray_obj, "array")
 
+            with builder.if_then(builder.icmp_signed(
+                                   "!=",
+                                   pyapi.err_occurred(),
+                                   context.get_constant(numba.types.voidptr,
+                                                        0)),
+                                 likely=False):
+                context.call_conv.return_exc(builder)
+
             # add the materialized array to our Lookup
-            pyapi.list_append(arrays_new_obj, array_obj)
             pyapi.call_function_objargs(fill_obj, (arraypos_obj,
                                                    array_obj,
                                                    lookup_obj,))
 
+            with builder.if_then(builder.icmp_signed(
+                                   "!=",
+                                   pyapi.err_occurred(),
+                                   context.get_constant(numba.types.voidptr,
+                                                        0)),
+                                 likely=False):
+                context.call_conv.return_exc(builder)
+
             # decref the new references
             pyapi.decref(array_obj)
-            pyapi.decref(arrays_new_obj)
             pyapi.decref(arraypos_obj)
             pyapi.decref(fill_obj)
             pyapi.decref(numbatype_obj)

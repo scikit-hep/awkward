@@ -31,11 +31,10 @@ class Lookup(object):
                 assert isinstance(x, int)
                 return x
 
+        self.original_positions = positions
         self.positions = [find(x) for x in positions]
         self.sharedptrs_hold = sharedptrs
-        self.arrays = tuple(arrays)
-        self.arrays_new = []
-        self.sharedptrs_new = []
+        self.arrays = arrays
 
         def arrayptr(x):
             if isinstance(x, int):
