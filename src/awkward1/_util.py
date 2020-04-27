@@ -21,6 +21,8 @@ py27 = (sys.version_info[0] < 3)
 py35 = (sys.version_info[0] == 3 and sys.version_info[1] <= 5)
 win  = (os.name == "nt")
 
+virtualtypes = (awkward1.layout.VirtualArray,)
+
 unknowntypes = (awkward1.layout.EmptyArray,)
 
 indexedtypes = (awkward1.layout.IndexedArray32,
@@ -348,6 +350,9 @@ def completely_flatten(array):
                 out.append(outi)
         return tuple(out)
 
+    elif isinstance(array, virtualtypes):
+        return completely_flatten(array.array)
+
     elif isinstance(array, unknowntypes):
         return (numpy.array([], dtype=numpy.bool_),)
 
@@ -418,6 +423,11 @@ def broadcast_and_apply(inputs, getfunction, behavior):
         # the rest of this is one switch statement
         if function is not None:
             return function()
+
+        elif any(isinstance(x, virtualtypes) for x in inputs):
+            return apply([x if not isinstance(x, virtualtypes) else x.array
+                            for x in inputs],
+                         depth)
 
         elif any(isinstance(x, unknowntypes) for x in inputs):
             return apply([x if not isinstance(x, unknowntypes)
@@ -985,6 +995,13 @@ def recursively_apply(layout,
                for x in layout.contents],
             layout.identities,
             layout.parameters if keep_parameters else None)
+
+    elif isinstance(layout, awkward1.layout.VirtualArray):
+        return recursively_apply(layout.array,
+                                 getfunction,
+                                 args,
+                                 depth,
+                                 keep_parameters)
 
     else:
         raise AssertionError(

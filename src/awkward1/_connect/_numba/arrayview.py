@@ -156,6 +156,10 @@ def tolookup(layout, positions, sharedptrs, arrays):
         return awkward1._connect._numba.layout.UnionArrayType.form_tolookup(
                  layout, positions, sharedptrs, arrays)
 
+    elif isinstance(layout, awkward1.layout.VirtualArray):
+        return awkward1._connect._numba.layout.VirtualArrayType.tolookup(
+                 layout, positions, sharedptrs, arrays)
+
     else:
         raise AssertionError(
                 "unrecognized Content or Form type: {0}".format(type(layout)))

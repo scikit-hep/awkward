@@ -13,7 +13,7 @@ import awkward1
 numba = pytest.importorskip("numba")
 awkward1_connect_numba_arrayview = pytest.importorskip("awkward1._connect._numba.arrayview")
 
-def test_form_layouts():
+def test_listarray():
     layout = awkward1.from_iter([[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]], highlevel=False)
 
     numbatype = awkward1._connect._numba.arrayview.tonumbatype(layout.form)
@@ -25,3 +25,23 @@ def test_form_layouts():
 
     assert numpy.array_equal(lookup1.arrayptrs, lookup2.arrayptrs)
     assert numpy.array_equal(lookup1.sharedptrs == -1, lookup2.sharedptrs == -1)
+
+    generator = awkward1.virtual.ArrayGenerator(lambda: layout, form=layout.form)
+    virtualarray = awkward1.layout.VirtualArray(generator)
+
+    lookup3 = awkward1_connect_numba_arrayview.Lookup(virtualarray)
+    assert len(lookup1.arrayptrs) + 3 == len(lookup3.arrayptrs)
+
+    print(awkward1_connect_numba_arrayview.Lookup(virtualarray)._view_as_array())
+
+    @numba.njit
+    def f1(x):
+        return x[2][1]
+
+    array = awkward1.Array(virtualarray)
+    # print(f1(array))
+
+
+
+
+    # raise Exception

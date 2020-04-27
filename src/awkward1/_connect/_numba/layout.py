@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 
 import json
+import ctypes
 
 import numpy
 import numba
@@ -96,6 +97,15 @@ def typeof_UnionArray(obj, c):
                           numba.typeof(numpy.asarray(obj.index)),
                           tuple(numba.typeof(x) for x in obj.contents),
                           numba.typeof(obj.identities), obj.parameters)
+
+@numba.extending.typeof_impl.register(awkward1.layout.VirtualArray)
+def typeof_VirtualArray(obj, c):
+    if obj.form is None:
+        raise ValueError(
+            "VirtualArrays without a known 'form' can't be used in Numba")
+    if obj.form.has_identities:
+        raise NotImplementedError("TODO: identities in VirtualArray")
+    return VirtualArrayType(obj.form, numba.none, obj.parameters)
 
 class ContentType(numba.types.Type):
     @classmethod
@@ -1811,3 +1821,68 @@ class UnionArrayType(ContentType):
                             key):
         raise NotImplementedError(
             type(self).__name__ + ".lower_getitem_field not implemented")
+
+class VirtualArrayType(ContentType):
+    IDENTITIES = 0
+    PYOBJECT = 1
+    ARRAY = 2
+
+    @classmethod
+    def tolookup(cls, layout, positions, sharedptrs, arrays):
+        pos = len(positions)
+        cls.tolookup_identities(layout, positions, sharedptrs, arrays)
+        sharedptrs[-1] = layout._persistent_shared_ptr
+        if layout.form is None:
+            raise ValueError(
+                "VirtualArrays without a known 'form' can't be used in Numba")
+        pyptr = ctypes.py_object(layout)
+        voidptr = numpy.frombuffer(pyptr, dtype=numpy.intp).item()
+        positions.append(voidptr)
+        sharedptrs.append(None)
+        positions.append(None)
+        sharedptrs.append(None)
+        positions[pos + cls.ARRAY] = \
+          awkward1._connect._numba.arrayview.tolookup(layout.form,
+                                                      positions,
+                                                      sharedptrs,
+                                                      arrays)
+        return pos
+
+    def __init__(self, form, identitiestype, parameters):
+        if form is None:
+            raise ValueError(
+                "VirtualArrays without a known 'form' can't be used in Numba")
+        super(VirtualArrayType, self).__init__(
+            name="awkward1.VirtualArrayType({0}, {1}, {2})".format(
+              form.tojson(),
+              identitiestype.name,
+              json.dumps(parameters)))
+        # it's not necessary to attach the Form to this VirtualArrayType
+        # (and it will require Forms to be pickleable if/when you do)
+        self.identitiestype = identitiestype
+        self.parameters = parameters
+
+    def tolayout(self, lookup, pos, fields):
+        voidptr = ctypes.c_void_p(lookup.arrayptrs[pos + self.PYOBJECT])
+        pyptr = ctypes.cast(voidptr, ctypes.py_object)
+        virtualarray = pyptr.value
+        return virtualarray
+
+    def hasfield(self, key):
+        raise Exception("FIXME")
+
+    def getitem_at(self, viewtype):
+        raise Exception("FIXME")
+
+    def lower_getitem_at(self,
+                         context,
+                         builder,
+                         rettype,
+                         viewtype,
+                         viewval,
+                         viewproxy,
+                         attype,
+                         atval,
+                         wrapneg,
+                         checkbounds):
+        raise Exception("FIXME")

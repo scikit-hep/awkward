@@ -895,7 +895,10 @@ def flatten(array, axis=1, highlevel=True):
 
     elif awkward1.layout.Content.axis_wrap_if_negative(axis) == 0:
         def apply(layout):
-            if isinstance(layout, awkward1._util.unknowntypes):
+            if isinstance(layout, awkward1._util.virtualtypes):
+                return apply(layout.array)
+
+            elif isinstance(layout, awkward1._util.unknowntypes):
                 return apply(awkward1.layout.NumpyArray(numpy.array([])))
 
             elif isinstance(layout, awkward1._util.indexedtypes):
@@ -1157,7 +1160,10 @@ def is_none(array, highlevel=True):
     False otherwise.
     """
     def apply(layout):
-        if isinstance(layout, awkward1._util.unknowntypes):
+        if isinstance(layout, awkward1._util.virtualtypes):
+            return apply(layout.array)
+
+        elif isinstance(layout, awkward1._util.unknowntypes):
             return apply(awkward1.layout.NumpyArray(numpy.array([])))
 
         elif isinstance(layout, awkward1._util.indexedtypes):
@@ -2109,7 +2115,9 @@ def size(array, axis=None):
         raise NotImplementedError("ak.size with axis < 0")
 
     def recurse(layout, axis, sizes):
-        if isinstance(layout, awkward1._util.unknowntypes):
+        if isinstance(layout, awkward1._util.virtualtypes):
+            recurse(layout.array, axis, sizes)
+        elif isinstance(layout, awkward1._util.unknowntypes):
             pass
         elif isinstance(layout, awkward1._util.indexedtypes):
             recurse(layout.content, axis, sizes)
