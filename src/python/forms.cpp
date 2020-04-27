@@ -86,6 +86,23 @@ make_BitMaskedForm(const py::handle& m, const std::string& name) {
       .def_property_readonly("content", &ak::BitMaskedForm::content)
       .def_property_readonly("valid_when", &ak::BitMaskedForm::valid_when)
       .def_property_readonly("lsb_order", &ak::BitMaskedForm::lsb_order)
+      .def(py::pickle([](const ak::BitMaskedForm& self) {
+        return py::make_tuple(
+                   py::cast(self.has_identities()),
+                   parameters2dict(self.parameters()),
+                   py::cast(ak::Index::form2str(self.mask())),
+                   py::cast(self.content()),
+                   py::cast(self.valid_when()),
+                   py::cast(self.lsb_order()));
+      }, [](const py::tuple& state) {
+        return ak::BitMaskedForm(
+                   state[0].cast<bool>(),
+                   dict2parameters(state[1]),
+                   ak::Index::str2form(state[2].cast<std::string>()),
+                   state[3].cast<std::shared_ptr<ak::Form>>(),
+                   state[4].cast<bool>(),
+                   state[5].cast<bool>());
+      }))
   );
 }
 
@@ -115,6 +132,21 @@ make_ByteMaskedForm(const py::handle& m, const std::string& name) {
       })
       .def_property_readonly("content", &ak::ByteMaskedForm::content)
       .def_property_readonly("valid_when", &ak::ByteMaskedForm::valid_when)
+      .def(py::pickle([](const ak::ByteMaskedForm& self) {
+        return py::make_tuple(
+                   py::cast(self.has_identities()),
+                   parameters2dict(self.parameters()),
+                   py::cast(ak::Index::form2str(self.mask())),
+                   py::cast(self.content()),
+                   py::cast(self.valid_when()));
+      }, [](const py::tuple& state) {
+        return ak::ByteMaskedForm(
+                   state[0].cast<bool>(),
+                   dict2parameters(state[1]),
+                   ak::Index::str2form(state[2].cast<std::string>()),
+                   state[3].cast<std::shared_ptr<ak::Form>>(),
+                   state[4].cast<bool>());
+      }))
   );
 }
 
@@ -129,6 +161,15 @@ make_EmptyForm(const py::handle& m, const std::string& name) {
                              dict2parameters(parameters));
       }), py::arg("has_identities") = false,
           py::arg("parameters") = py::none())
+      .def(py::pickle([](const ak::EmptyForm& self) {
+        return py::make_tuple(
+                   py::cast(self.has_identities()),
+                   parameters2dict(self.parameters()));
+      }, [](const py::tuple& state) {
+        return ak::EmptyForm(
+                   state[0].cast<bool>(),
+                   dict2parameters(state[1]));
+      }))
   );
 }
 
@@ -154,6 +195,19 @@ make_IndexedForm(const py::handle& m, const std::string& name) {
         return ak::Index::form2str(self.index());
       })
       .def_property_readonly("content", &ak::IndexedForm::content)
+      .def(py::pickle([](const ak::IndexedForm& self) {
+        return py::make_tuple(
+                   py::cast(self.has_identities()),
+                   parameters2dict(self.parameters()),
+                   py::cast(ak::Index::form2str(self.index())),
+                   py::cast(self.content()));
+      }, [](const py::tuple& state) {
+        return ak::IndexedForm(
+                   state[0].cast<bool>(),
+                   dict2parameters(state[1]),
+                   ak::Index::str2form(state[2].cast<std::string>()),
+                   state[3].cast<std::shared_ptr<ak::Form>>());
+      }))
   );
 }
 
@@ -181,6 +235,19 @@ make_IndexedOptionForm(const py::handle& m, const std::string& name) {
         return ak::Index::form2str(self.index());
       })
       .def_property_readonly("content", &ak::IndexedOptionForm::content)
+      .def(py::pickle([](const ak::IndexedOptionForm& self) {
+        return py::make_tuple(
+                   py::cast(self.has_identities()),
+                   parameters2dict(self.parameters()),
+                   py::cast(ak::Index::form2str(self.index())),
+                   py::cast(self.content()));
+      }, [](const py::tuple& state) {
+        return ak::IndexedOptionForm(
+                   state[0].cast<bool>(),
+                   dict2parameters(state[1]),
+                   ak::Index::str2form(state[2].cast<std::string>()),
+                   state[3].cast<std::shared_ptr<ak::Form>>());
+      }))
   );
 }
 
@@ -213,6 +280,21 @@ make_ListForm(const py::handle& m, const std::string& name) {
         return ak::Index::form2str(self.stops());
       })
       .def_property_readonly("content", &ak::ListForm::content)
+      .def(py::pickle([](const ak::ListForm& self) {
+        return py::make_tuple(
+                   py::cast(self.has_identities()),
+                   parameters2dict(self.parameters()),
+                   py::cast(ak::Index::form2str(self.starts())),
+                   py::cast(ak::Index::form2str(self.stops())),
+                   py::cast(self.content()));
+      }, [](const py::tuple& state) {
+        return ak::ListForm(
+                   state[0].cast<bool>(),
+                   dict2parameters(state[1]),
+                   ak::Index::str2form(state[2].cast<std::string>()),
+                   ak::Index::str2form(state[3].cast<std::string>()),
+                   state[4].cast<std::shared_ptr<ak::Form>>());
+      }))
   );
 }
 
@@ -238,6 +320,19 @@ make_ListOffsetForm(const py::handle& m, const std::string& name) {
         return ak::Index::form2str(self.offsets());
       })
       .def_property_readonly("content", &ak::ListOffsetForm::content)
+      .def(py::pickle([](const ak::ListOffsetForm& self) {
+        return py::make_tuple(
+                   py::cast(self.has_identities()),
+                   parameters2dict(self.parameters()),
+                   py::cast(ak::Index::form2str(self.offsets())),
+                   py::cast(self.content()));
+      }, [](const py::tuple& state) {
+        return ak::ListOffsetForm(
+                   state[0].cast<bool>(),
+                   dict2parameters(state[1]),
+                   ak::Index::str2form(state[2].cast<std::string>()),
+                   state[3].cast<std::shared_ptr<ak::Form>>());
+      }))
   );
 }
 
@@ -265,6 +360,21 @@ make_NumpyForm(const py::handle& m, const std::string& name) {
       .def_property_readonly("itemsize", &ak::NumpyForm::itemsize)
       .def_property_readonly("format", &ak::NumpyForm::format)
       .def_property_readonly("primitive", &ak::NumpyForm::primitive)
+      .def(py::pickle([](const ak::NumpyForm& self) {
+        return py::make_tuple(
+                   py::cast(self.has_identities()),
+                   parameters2dict(self.parameters()),
+                   py::cast(self.inner_shape()),
+                   py::cast(self.itemsize()),
+                   py::cast(self.format()));
+      }, [](const py::tuple& state) {
+        return ak::NumpyForm(
+                   state[0].cast<bool>(),
+                   dict2parameters(state[1]),
+                   state[2].cast<std::vector<int64_t>>(),
+                   state[3].cast<int64_t>(),
+                   state[4].cast<std::string>());
+      }))
   );
 }
 
@@ -326,6 +436,47 @@ make_RecordForm(const py::handle& m, const std::string& name) {
       })
       .def("items", &ak::RecordForm::items)
       .def("values", &ak::RecordForm::contents)
+      .def(py::pickle([](const ak::RecordForm& self) {
+        py::object recordlookup = py::none();
+        if (!self.istuple()) {
+          py::tuple recordlookup_tuple(self.numfields());
+          for (int64_t i = 0;  i < self.numfields();  i++) {
+            recordlookup_tuple[(size_t)i] =
+              py::cast(self.recordlookup().get()->at((size_t)i));
+          }
+          recordlookup = recordlookup_tuple;
+        }
+        py::tuple contents(self.numfields());
+        for (int64_t i = 0;  i < self.numfields();  i++) {
+          contents[(size_t)i] = py::cast(self.content(i));
+        }
+        return py::make_tuple(
+                   py::cast(self.has_identities()),
+                   parameters2dict(self.parameters()),
+                   recordlookup,
+                   contents);
+      }, [](const py::tuple& state) {
+        std::shared_ptr<ak::util::RecordLookup> recordlookup(nullptr);
+        py::object state2 = state[2];
+        if (!state2.is(py::none())) {
+          py::tuple st2 = state2;
+          recordlookup = std::make_shared<ak::util::RecordLookup>();
+          for (int64_t i = 0;  i < (int64_t)py::len(st2);  i++) {
+            recordlookup.get()->push_back(st2[(size_t)i].cast<std::string>());
+          }
+        }
+        std::vector<std::shared_ptr<ak::Form>> contents;
+        py::object state3 = state[3];
+        py::tuple st3 = state3;
+        for (int64_t i = 0;  i < (int64_t)py::len(st3);  i++) {
+          contents.push_back(st3[(size_t)i].cast<std::shared_ptr<ak::Form>>());
+        }
+        return ak::RecordForm(
+                   state[0].cast<bool>(),
+                   dict2parameters(state[1]),
+                   recordlookup,
+                   contents);
+      }))
   );
 }
 
@@ -348,6 +499,19 @@ make_RegularForm(const py::handle& m, const std::string& name) {
           py::arg("parameters") = py::none())
       .def_property_readonly("content", &ak::RegularForm::content)
       .def_property_readonly("size", &ak::RegularForm::size)
+      .def(py::pickle([](const ak::RegularForm& self) {
+        return py::make_tuple(
+                   py::cast(self.has_identities()),
+                   parameters2dict(self.parameters()),
+                   py::cast(self.content()),
+                   py::cast(self.size()));
+      }, [](const py::tuple& state) {
+        return ak::RegularForm(
+                   state[0].cast<bool>(),
+                   dict2parameters(state[1]),
+                   state[2].cast<std::shared_ptr<ak::Form>>(),
+                   state[3].cast<int64_t>());
+      }))
   );
 }
 
@@ -382,6 +546,31 @@ make_UnionForm(const py::handle& m, const std::string& name) {
       .def_property_readonly("contents", &ak::UnionForm::contents)
       .def_property_readonly("numcontents", &ak::UnionForm::numcontents)
       .def("content", &ak::UnionForm::content)
+      .def(py::pickle([](const ak::UnionForm& self) {
+        py::tuple contents(self.numcontents());
+        for (int64_t i = 0;  i < self.numcontents();  i++) {
+          contents[(size_t)i] = py::cast(self.content(i));
+        }
+        return py::make_tuple(
+                   py::cast(self.has_identities()),
+                   parameters2dict(self.parameters()),
+                   py::cast(ak::Index::form2str(self.tags())),
+                   py::cast(ak::Index::form2str(self.index())),
+                   contents);
+      }, [](const py::tuple& state) {
+        std::vector<std::shared_ptr<ak::Form>> contents;
+        py::object state4 = state[4];
+        py::tuple st4 = state4;
+        for (int64_t i = 0;  i < (int64_t)py::len(st4);  i++) {
+          contents.push_back(st4[(size_t)i].cast<std::shared_ptr<ak::Form>>());
+        }
+        return ak::UnionForm(
+                   state[0].cast<bool>(),
+                   dict2parameters(state[1]),
+                   ak::Index::str2form(state[2].cast<std::string>()),
+                   ak::Index::str2form(state[3].cast<std::string>()),
+                   contents);
+      }))
   );
 }
 
@@ -400,5 +589,16 @@ make_UnmaskedForm(const py::handle& m, const std::string& name) {
           py::arg("has_identities") = false,
           py::arg("parameters") = py::none())
       .def_property_readonly("content", &ak::UnmaskedForm::content)
+      .def(py::pickle([](const ak::UnmaskedForm& self) {
+        return py::make_tuple(
+                   py::cast(self.has_identities()),
+                   parameters2dict(self.parameters()),
+                   py::cast(self.content()));
+      }, [](const py::tuple& state) {
+        return ak::UnmaskedForm(
+                   state[0].cast<bool>(),
+                   dict2parameters(state[1]),
+                   state[2].cast<std::shared_ptr<ak::Form>>());
+      }))
   );
 }

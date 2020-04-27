@@ -1857,8 +1857,7 @@ class VirtualArrayType(ContentType):
               form.tojson(),
               identitiestype.name,
               json.dumps(parameters)))
-        # it's not necessary to attach the Form to this VirtualArrayType
-        # (and it will require Forms to be pickleable if/when you do)
+        self.form = form
         self.identitiestype = identitiestype
         self.parameters = parameters
 
@@ -1869,10 +1868,48 @@ class VirtualArrayType(ContentType):
         return virtualarray
 
     def hasfield(self, key):
-        raise Exception("FIXME")
+        return self.form.haskey(key)
 
     def getitem_at(self, viewtype):
-        raise Exception("FIXME")
+        def getitem_at(form):
+            if isinstance(form, awkward1.forms.NumpyForm):
+                return HERE
+
+            elif isinstance(form, awkward1.forms.RegularForm):
+                return HERE
+
+            elif isinstance(form, awkward1.forms.ListForm):
+                return HERE
+
+            elif isinstance(form, awkward1.forms.ListOffsetForm):
+                return HERE
+
+            elif isinstance(form, awkward1.forms.IndexedForm):
+                return HERE
+
+            elif isinstance(form, awkward1.forms.IndexedOptionForm):
+                return HERE
+
+            elif isinstance(form, awkward1.forms.ByteMaskedForm):
+                return HERE
+
+            elif isinstance(form, awkward1.forms.BitMaskedForm):
+                return HERE
+
+            elif isinstance(form, awkward1.forms.UnmaskedForm):
+                return HERE
+
+            elif isinstance(form, awkward1.forms.RecordForm):
+                return HERE
+
+            elif isinstance(form, awkward1.forms.UnionForm):
+                return HERE
+
+            else:
+                raise AssertionError(
+                    "unrecognized Form type: {0}".format(type(form)))
+
+        return getitem_at(self.form)
 
     def lower_getitem_at(self,
                          context,
