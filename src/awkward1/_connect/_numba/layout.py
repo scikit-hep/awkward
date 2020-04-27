@@ -1873,43 +1873,67 @@ class VirtualArrayType(ContentType):
     def getitem_at(self, viewtype):
         def getitem_at(form):
             if isinstance(form, awkward1.forms.NumpyForm):
-                return HERE
+                assert len(form.inner_shape) == 0
+                if form.primitive == "float64":
+                    return numba.float64
+                elif form.primitive == "float32":
+                    return numba.float32
+                elif form.primitive == "int64":
+                    return numba.int64
+                elif form.primitive == "uint64":
+                    return numba.uint64
+                elif form.primitive == "int32":
+                    return numba.int32
+                elif form.primitive == "uint32":
+                    return numba.uint32
+                elif form.primitive == "int16":
+                    return numba.int16
+                elif form.primitive == "uint16":
+                    return numba.uint16
+                elif form.primitive == "int8":
+                    return numba.int8
+                elif form.primitive == "uint8":
+                    return numba.uint8
+                elif form.primitive == "bool":
+                    return numba.bool
+                else:
+                    raise ValueError("unrecognized NumpyForm.primitive type: {0}"
+                                     .format(form.primitive))
 
-            elif isinstance(form, awkward1.forms.RegularForm):
-                return HERE
-
-            elif isinstance(form, awkward1.forms.ListForm):
-                return HERE
-
-            elif isinstance(form, awkward1.forms.ListOffsetForm):
-                return HERE
+            elif isinstance(form, (awkward1.forms.RegularForm,
+                                   awkward1.forms.ListForm,
+                                   awkward1.forms.ListOffsetForm)):
+                return form.content
 
             elif isinstance(form, awkward1.forms.IndexedForm):
                 return HERE
 
-            elif isinstance(form, awkward1.forms.IndexedOptionForm):
-                return HERE
-
-            elif isinstance(form, awkward1.forms.ByteMaskedForm):
-                return HERE
-
-            elif isinstance(form, awkward1.forms.BitMaskedForm):
-                return HERE
-
-            elif isinstance(form, awkward1.forms.UnmaskedForm):
+            elif isinstance(form, (awkward1.forms.IndexedOptionForm,
+                                   awkward1.forms.ByteMaskedForm,
+                                   awkward1.forms.BitMaskedForm,
+                                   awkward1.forms.UnmaskedForm)):
                 return HERE
 
             elif isinstance(form, awkward1.forms.RecordForm):
                 return HERE
 
             elif isinstance(form, awkward1.forms.UnionForm):
-                return HERE
+                raise TypeError("union types cannot be accessed in Numba")
 
             else:
                 raise AssertionError(
                     "unrecognized Form type: {0}".format(type(form)))
 
-        return getitem_at(self.form)
+        out = getitem_at(self.form)
+        if isinstance(out, awkward1.forms.Form):
+            HERE!
+
+            awkward1._connect._numba.arrayview.wrap(self.contenttype,
+                                                       viewtype,
+                                                       None)
+
+        else:
+            return out
 
     def lower_getitem_at(self,
                          context,

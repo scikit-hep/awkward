@@ -39,9 +39,9 @@ def test_listarray():
         return x[2][1]
 
     array = awkward1.Array(virtualarray)
-    # print(f1(array))
+    print(f1(array))
 
 
 
 
-    # raise Exception
+    raise Exception
