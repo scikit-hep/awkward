@@ -13,7 +13,8 @@ import awkward1._connect._numba.arrayview
 
 @numba.extending.typeof_impl.register(awkward1.layout.NumpyArray)
 def typeof_NumpyArray(obj, c):
-    return NumpyArrayType(numba.typeof(numpy.asarray(obj)),
+    t = numba.typeof(numpy.asarray(obj))
+    return NumpyArrayType(numba.types.Array(t.dtype, t.ndim, "A"),
                           numba.typeof(obj.identities),
                           obj.parameters)
 
@@ -114,8 +115,36 @@ class ContentType(numba.types.Type):
             sharedptrs.append(None)
         else:
             arrays.append(None)
-            positions.append(arrays[-1])
+            positions.append(0)
             sharedptrs.append(None)
+
+    @classmethod
+    def from_form_identities(cls, form):
+        if not form.has_identities:
+            return numba.none
+        else:
+            raise NotImplementedError("TODO: identities in VirtualArray")
+
+    @classmethod
+    def from_form_index(cls, index_string):
+        if index_string == "i8":
+            return numba.types.Array(numba.int8, 1, "C")
+        elif index_string == "u8":
+            return numba.types.Array(numba.uint8, 1, "C")
+        elif index_string == "i32":
+            return numba.types.Array(numba.int32, 1, "C")
+        elif index_string == "u32":
+            return numba.types.Array(numba.uint32, 1, "C")
+        elif index_string == "i64":
+            return numba.types.Array(numba.int64, 1, "C")
+        else:
+            raise AssertionError(
+                "unrecognized Form index type: {0}".format(index_string))
+
+    def form_fill_identities(self, pos, layout, lookup):
+        if layout.identities is not None:
+            lookup.arrayptr[self.IDENTITIES] = \
+                numpy.asarray(layout.identities).ctypes.data
 
     def IndexOf(self, arraytype):
         if arraytype.dtype.bitwidth == 8 and arraytype.dtype.signed:
@@ -328,10 +357,46 @@ class NumpyArrayType(ContentType):
                 " just as NumpyArrays are converted to RegularArrays")
         pos = len(positions)
         cls.form_tolookup_identities(form, positions, sharedptrs, arrays)
-        positions.append(len(arrays))
+        sharedptrs[-1] = 0
+        positions.append(0)
         sharedptrs.append(None)
         arrays.append(0)
         return pos
+
+    @classmethod
+    def from_form(cls, form):
+        if len(form.inner_shape) != 0:
+            raise NotImplementedError(
+                "NumpyForm is multidimensional; TODO: convert to RegularForm,"
+                " just as NumpyArrays are converted to RegularArrays")
+        if form.primitive == "float64":
+            arraytype = numba.types.Array(numba.float64, 1, "A")
+        elif form.primitive == "float32":
+            arraytype = numba.types.Array(numba.float32, 1, "A")
+        elif form.primitive == "int64":
+            arraytype = numba.types.Array(numba.int64, 1, "A")
+        elif form.primitive == "uint64":
+            arraytype = numba.types.Array(numba.uint64, 1, "A")
+        elif form.primitive == "int32":
+            arraytype = numba.types.Array(numba.int32, 1, "A")
+        elif form.primitive == "uint32":
+            arraytype = numba.types.Array(numba.uint32, 1, "A")
+        elif form.primitive == "int16":
+            arraytype = numba.types.Array(numba.int16, 1, "A")
+        elif form.primitive == "uint16":
+            arraytype = numba.types.Array(numba.uint16, 1, "A")
+        elif form.primitive == "int8":
+            arraytype = numba.types.Array(numba.int8, 1, "A")
+        elif form.primitive == "uint8":
+            arraytype = numba.types.Array(numba.uint8, 1, "A")
+        elif form.primitive == "bool":
+            arraytype = numba.types.Array(numba.bool, 1, "A")
+        else:
+            raise ValueError("unrecognized NumpyForm.primitive type: {0}"
+                             .format(form.primitive))
+        return NumpyArrayType(arraytype,
+                              cls.from_form_identities(form),
+                              form.parameters)
 
     def __init__(self, arraytype, identitiestype, parameters):
         super(NumpyArrayType, self).__init__(
@@ -340,6 +405,11 @@ class NumpyArrayType(ContentType):
         self.arraytype = arraytype
         self.identitiestype = identitiestype
         self.parameters = parameters
+
+    def form_fill(self, pos, layout, lookup):
+        lookup.sharedptrs[pos] = layout._persistent_shared_ptr.ptr()
+        self.form_fill_identities(pos, layout, lookup)
+        lookup.arrayptrs[pos + self.ARRAY] = numpy.asarray(layout).ctypes.data
 
     def tolayout(self, lookup, pos, fields):
         assert fields == ()
@@ -498,11 +568,11 @@ class ListArrayType(ContentType):
     def form_tolookup(cls, form, positions, sharedptrs, arrays):
         pos = len(positions)
         cls.form_tolookup_identities(form, positions, sharedptrs, arrays)
-        sharedptrs[-1] = None
-        positions.append(len(arrays))
+        sharedptrs[-1] = 0
+        positions.append(0)
         sharedptrs.append(None)
         arrays.append(0)
-        positions.append(len(arrays))
+        positions.append(0)
         sharedptrs.append(None)
         arrays.append(0)
         positions.append(None)
@@ -513,6 +583,16 @@ class ListArrayType(ContentType):
                                                       sharedptrs,
                                                       arrays)
         return pos
+
+    @classmethod
+    def from_form(cls, form):
+        return ListArrayType(
+            cls.from_form_index(form.starts
+                                  if isinstance(form, awkward1.forms.ListForm)
+                                  else form.offsets),
+            awkward1._connect._numba.arrayview.tonumbatype(form.content),
+            cls.from_form_identities(form),
+            form.parameters)
 
     def __init__(self, indextype, contenttype, identitiestype, parameters):
         super(ListArrayType, self).__init__(
@@ -525,6 +605,28 @@ class ListArrayType(ContentType):
         self.contenttype = contenttype
         self.identitiestype = identitiestype
         self.parameters = parameters
+
+    def form_fill(self, pos, layout, lookup):
+        lookup.sharedptrs[pos] = layout._persistent_shared_ptr.ptr()
+        self.form_fill_identities(pos, layout, lookup)
+
+        if isinstance(layout, (awkward1.layout.ListArray32,
+                               awkward1.layout.ListArrayU32,
+                               awkward1.layout.ListArray64)):
+            starts = numpy.asarray(layout.starts)
+            stops = numpy.asarray(layout.stops)
+        elif isinstance(layout, (awkward1.layout.ListOffsetArray32,
+                                 awkward1.layout.ListOffsetArrayU32,
+                                 awkward1.layout.ListOffsetArray64)):
+            offsets = numpy.asarray(layout.offsets)
+            starts = offsets[:-1]
+            stops = offsets[1:]
+
+        lookup.arrayptrs[pos + self.STARTS] = starts.ctypes.data
+        lookup.arrayptrs[pos + self.STOPS] = stops.ctypes.data
+        self.contenttype.form_fill(lookup.arrayptrs[pos + self.CONTENT],
+                                   layout.content,
+                                   lookup)
 
     def ListArrayOf(self):
         if self.indextype.dtype.bitwidth == 32 and self.indextype.dtype.signed:
