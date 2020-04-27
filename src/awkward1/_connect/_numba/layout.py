@@ -428,7 +428,7 @@ class NumpyArrayType(ContentType):
     def tolayout(self, lookup, pos, fields):
         assert fields == ()
         return awkward1.layout.NumpyArray(
-                 lookup.arrays[lookup.positions[pos + self.ARRAY]],
+                 lookup.original_positions[pos + self.ARRAY],
                  parameters=self.parameters)
 
     def hasfield(self, key):
@@ -660,9 +660,9 @@ class ListArrayType(ContentType):
 
     def tolayout(self, lookup, pos, fields):
         starts = self.IndexOf(self.indextype)(
-                   lookup.arrays[lookup.positions[pos + self.STARTS]])
+                   lookup.original_positions[pos + self.STARTS])
         stops = self.IndexOf(self.indextype)(
-                   lookup.arrays[lookup.positions[pos + self.STOPS]])
+                   lookup.original_positions[pos + self.STOPS])
         content = self.contenttype.tolayout(
                    lookup,
                    lookup.positions[pos + self.CONTENT],
@@ -788,7 +788,7 @@ class IndexedArrayType(ContentType):
 
     def tolayout(self, lookup, pos, fields):
         index = self.IndexOf(self.indextype)(
-                  lookup.arrays[lookup.positions[pos + self.INDEX]])
+                  lookup.original_positions[pos + self.INDEX])
         content = self.contenttype.tolayout(
                     lookup, lookup.positions[pos + self.CONTENT], fields)
         return self.IndexedArrayOf()(index,
@@ -909,7 +909,7 @@ class IndexedOptionArrayType(ContentType):
 
     def tolayout(self, lookup, pos, fields):
         index = self.IndexOf(self.indextype)(
-            lookup.arrays[lookup.positions[pos + self.INDEX]])
+            lookup.original_positions[pos + self.INDEX])
         content = self.contenttype.tolayout(
             lookup, lookup.positions[pos + self.CONTENT], fields)
         return self.IndexedOptionArrayOf()(index,
@@ -1046,7 +1046,7 @@ class ByteMaskedArrayType(ContentType):
 
     def tolayout(self, lookup, pos, fields):
         mask = self.IndexOf(self.masktype)(
-            lookup.arrays[lookup.positions[pos + self.MASK]])
+            lookup.original_positions[pos + self.MASK])
         content = self.contenttype.tolayout(
             lookup, lookup.positions[pos + self.CONTENT], fields)
         return awkward1.layout.ByteMaskedArray(mask,
@@ -1181,7 +1181,7 @@ class BitMaskedArrayType(ContentType):
 
     def tolayout(self, lookup, pos, fields):
         mask = self.IndexOf(self.masktype)(
-            lookup.arrays[lookup.positions[pos + self.MASK]])
+            lookup.original_positions[pos + self.MASK])
         content = self.contenttype.tolayout(
             lookup, lookup.positions[pos + self.CONTENT], fields)
         return awkward1.layout.BitMaskedArray(mask,
@@ -1763,9 +1763,9 @@ class UnionArrayType(ContentType):
 
     def tolayout(self, lookup, pos, fields):
         tags = self.IndexOf(self.tagstype)(
-                 lookup.arrays[lookup.positions[pos + self.TAGS]])
+                 lookup.original_positions[pos + self.TAGS])
         index = self.IndexOf(self.indextype)(
-                  lookup.arrays[lookup.positions[pos + self.INDEX]])
+                  lookup.original_positions[pos + self.INDEX])
         contents = []
         for i, contenttype in enumerate(self.contenttypes):
             layout = contenttype.tolayout(
