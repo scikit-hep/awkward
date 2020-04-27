@@ -34,6 +34,8 @@ class Lookup(object):
         self.positions = [find(x) for x in positions]
         self.sharedptrs_hold = sharedptrs
         self.arrays = tuple(arrays)
+        self.arrays_new = []
+        self.sharedptrs_new = []
 
         def arrayptr(x):
             if isinstance(x, int):

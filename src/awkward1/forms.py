@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import
 
+from awkward1._ext import Form
 from awkward1._ext import BitMaskedForm
 from awkward1._ext import ByteMaskedForm
 from awkward1._ext import EmptyForm

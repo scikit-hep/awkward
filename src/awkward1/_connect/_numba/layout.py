@@ -417,7 +417,8 @@ class NumpyArrayType(ContentType):
         self.parameters = parameters
 
     def form_fill(self, pos, layout, lookup):
-        lookup.sharedptrs[pos] = layout._persistent_shared_ptr.ptr()
+        lookup.sharedptrs_new.append(layout._persistent_shared_ptr)
+        lookup.sharedptrs[pos] = lookup.sharedptrs_new[-1].ptr()
         self.form_fill_identities(pos, layout, lookup)
         lookup.arrayptrs[pos + self.ARRAY] = numpy.asarray(layout).ctypes.data
 
@@ -1926,12 +1927,10 @@ class VirtualArrayType(ContentType):
 
         out = getitem_at(self.form)
         if isinstance(out, awkward1.forms.Form):
-            HERE!
-
-            awkward1._connect._numba.arrayview.wrap(self.contenttype,
-                                                       viewtype,
-                                                       None)
-
+            numbatype = awkward1._connect._numba.arrayview.tonumbatype(out)
+            return awkward1._connect._numba.arrayview.wrap(numbatype,
+                                                           viewtype,
+                                                           None)
         else:
             return out
 
@@ -1946,4 +1945,77 @@ class VirtualArrayType(ContentType):
                          atval,
                          wrapneg,
                          checkbounds):
-        raise Exception("FIXME")
+        pyobjptr = getat(context,
+                         builder,
+                         viewproxy.arrayptrs,
+                         posat(context, builder, viewproxy.pos, self.PYOBJECT))
+        arraypos = getat(context,
+                         builder,
+                         viewproxy.arrayptrs,
+                         posat(context, builder, viewproxy.pos, self.ARRAY))
+        sharedptr = getat(context, builder, viewproxy.sharedptrs, arraypos)
+
+        numbatype = awkward1._connect._numba.arrayview.tonumbatype(self.form)
+        with builder.if_then(builder.icmp_signed(
+                                 "==",
+                                 sharedptr,
+                                 context.get_constant(numba.intp, 0)),
+                             likely=False):
+            # only rarely enter Python
+            pyapi = context.get_python_api(builder)
+            gil = pyapi.gil_ensure()
+
+            # borrowed references
+            virtualarray_obj = builder.inttoptr(
+                                 pyobjptr,
+                                 context.get_value_type(numba.types.pyobject))
+            lookup_obj = viewproxy.pylookup
+
+            # new references
+            numbatype_obj = pyapi.unserialize(pyapi.serialize_object(numbatype))
+            fill_obj = pyapi.object_getattr_string(numbatype_obj, "form_fill")
+            arraypos_obj = pyapi.long_from_ssize_t(arraypos)
+            arrays_new_obj = pyapi.object_getattr_string(viewproxy.pylookup,
+                                                         "arrays_new")
+            array_obj = pyapi.object_getattr_string(virtualarray_obj, "array")
+
+            # add the materialized array to our Lookup
+            pyapi.list_append(arrays_new_obj, array_obj)
+            pyapi.call_function_objargs(fill_obj, (arraypos_obj,
+                                                   array_obj,
+                                                   lookup_obj,))
+
+            # decref the new references
+            pyapi.decref(array_obj)
+            pyapi.decref(arrays_new_obj)
+            pyapi.decref(arraypos_obj)
+            pyapi.decref(fill_obj)
+            pyapi.decref(numbatype_obj)
+
+            pyapi.gil_release(gil)
+
+        # normally, we just pass on the request to the materialized array
+        whichpos = posat(context, builder, viewproxy.pos, self.ARRAY)
+        nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
+
+        nextviewtype = awkward1._connect._numba.arrayview.wrap(
+                         numbatype, viewtype, None)
+        proxynext = context.make_helper(builder, nextviewtype)
+        proxynext.pos        = nextpos
+        proxynext.start      = viewproxy.start
+        proxynext.stop       = viewproxy.stop
+        proxynext.arrayptrs  = viewproxy.arrayptrs
+        proxynext.sharedptrs = viewproxy.sharedptrs
+        proxynext.pylookup   = viewproxy.pylookup
+
+        return numbatype.lower_getitem_at_check(
+                    context,
+                    builder,
+                    rettype,
+                    nextviewtype,
+                    proxynext._getvalue(),
+                    proxynext,
+                    numba.intp,
+                    atval,
+                    wrapneg,
+                    checkbounds)
