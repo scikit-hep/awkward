@@ -17,6 +17,7 @@
 #include "awkward/array/RegularArray.h"
 #include "awkward/array/UnionArray.h"
 #include "awkward/array/UnmaskedArray.h"
+#include "awkward/array/VirtualArray.h"
 
 namespace py = pybind11;
 namespace ak = awkward;
@@ -59,5 +60,8 @@ make_UnionForm(const py::handle& m, const std::string& name);
 
 py::class_<ak::UnmaskedForm, std::shared_ptr<ak::UnmaskedForm>, ak::Form>
 make_UnmaskedForm(const py::handle& m, const std::string& name);
+
+py::class_<ak::VirtualForm, std::shared_ptr<ak::VirtualForm>, ak::Form>
+make_VirtualForm(const py::handle& m, const std::string& name);
 
 #endif // AWKWARDPY_FORMS_H_

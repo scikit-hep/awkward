@@ -603,3 +603,47 @@ make_UnmaskedForm(const py::handle& m, const std::string& name) {
       }))
   );
 }
+
+py::class_<ak::VirtualForm, std::shared_ptr<ak::VirtualForm>, ak::Form>
+make_VirtualForm(const py::handle& m, const std::string& name) {
+  return form_methods(py::class_<ak::VirtualForm,
+                      std::shared_ptr<ak::VirtualForm>,
+                      ak::Form>(m, name.c_str())
+      .def(py::init([](const std::shared_ptr<ak::Form>& form,
+                       bool has_length,
+                       bool has_identities,
+                       const py::object& parameters) -> ak::VirtualForm {
+        return ak::VirtualForm(has_identities,
+                               dict2parameters(parameters),
+                               form,
+                               has_length);
+      }), py::arg("form"),
+          py::arg("has_length"),
+          py::arg("has_identities") = false,
+          py::arg("parameters") = py::none())
+      .def_property_readonly("form", &ak::VirtualForm::form)
+      .def_property_readonly("has_length", &ak::VirtualForm::has_length)
+      .def(py::pickle([](const ak::VirtualForm& self) {
+        py::object form = py::none();
+        if (self.has_form()) {
+          form = py::cast(self.form());
+        }
+        return py::make_tuple(
+                   py::cast(self.has_identities()),
+                   parameters2dict(self.parameters()),
+                   form,
+                   py::cast(self.has_length()));
+      }, [](const py::tuple& state) {
+        py::object pyform = state[2];
+        std::shared_ptr<ak::Form> form(nullptr);
+        if (!pyform.is(py::none())) {
+          form = pyform.cast<std::shared_ptr<ak::Form>>();
+        }
+        return ak::VirtualForm(
+                   state[0].cast<bool>(),
+                   dict2parameters(state[1]),
+                   form,
+                   state[3].cast<bool>());
+      }))
+  );
+}

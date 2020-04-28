@@ -20,6 +20,7 @@
 #include "awkward/array/ByteMaskedArray.h"
 #include "awkward/array/BitMaskedArray.h"
 #include "awkward/array/UnmaskedArray.h"
+#include "awkward/array/VirtualArray.h"
 #include "awkward/type/ArrayType.h"
 
 #include "awkward/Content.h"
@@ -452,6 +453,24 @@ namespace awkward {
       if (cls == std::string("EmptyArray")) {
         return std::make_shared<EmptyForm>(h, p);
       }
+
+      if (cls == std::string("VirtualArray")) {
+        if (!json.HasMember("form")) {
+          throw std::invalid_argument(
+                  cls + std::string(" is missing its 'form'"));
+        }
+        FormPtr form(nullptr);
+        if (!json["form"].IsNull()) {
+          form = fromjson_part(json["form"]);
+        }
+        if (!json.HasMember("has_length")  ||  !json["has_length"].IsBool()) {
+          throw std::invalid_argument(
+                  cls + std::string(" is missing its 'has_length'"));
+        }
+        bool has_length = json["has_length"].GetBool();
+        return std::make_shared<VirtualForm>(h, p, form, has_length);
+      }
+
     }
 
     rj::StringBuffer stringbuffer;

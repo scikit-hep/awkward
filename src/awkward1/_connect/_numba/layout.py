@@ -417,6 +417,8 @@ class NumpyArrayType(ContentType):
         self.parameters = parameters
 
     def form_fill(self, pos, layout, lookup):
+        print(type(self), "form_fill")
+
         lookup.sharedptrs_hold[pos] = layout._persistent_shared_ptr
         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
         self.form_fill_identities(pos, layout, lookup)
@@ -513,6 +515,8 @@ class RegularArrayType(ContentType):
         self.parameters = parameters
 
     def form_fill(self, pos, layout, lookup):
+        print(type(self), "form_fill")
+
         lookup.sharedptrs_hold[pos] = layout._persistent_shared_ptr
         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
         self.form_fill_identities(pos, layout, lookup)
@@ -652,6 +656,8 @@ class ListArrayType(ContentType):
         self.parameters = parameters
 
     def form_fill(self, pos, layout, lookup):
+        print(type(self), "form_fill")
+
         lookup.sharedptrs_hold[pos] = layout._persistent_shared_ptr
         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
         self.form_fill_identities(pos, layout, lookup)
@@ -672,6 +678,8 @@ class ListArrayType(ContentType):
         lookup.original_positions[pos + self.STOPS] = stops
         lookup.arrayptrs[pos + self.STARTS] = starts.ctypes.data
         lookup.arrayptrs[pos + self.STOPS] = stops.ctypes.data
+
+        print("HERE", type(layout.content))
 
         self.contenttype.form_fill(lookup.arrayptrs[pos + self.CONTENT],
                                    layout.content,
@@ -830,6 +838,8 @@ class IndexedArrayType(ContentType):
         self.parameters = parameters
 
     def form_fill(self, pos, layout, lookup):
+        print(type(self), "form_fill")
+
         lookup.sharedptrs_hold[pos] = layout._persistent_shared_ptr
         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
         self.form_fill_identities(pos, layout, lookup)
@@ -991,6 +1001,8 @@ class IndexedOptionArrayType(ContentType):
         self.parameters = parameters
 
     def form_fill(self, pos, layout, lookup):
+        print(type(self), "form_fill")
+
         lookup.sharedptrs_hold[pos] = layout._persistent_shared_ptr
         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
         self.form_fill_identities(pos, layout, lookup)
@@ -1178,6 +1190,8 @@ class ByteMaskedArrayType(ContentType):
         self.parameters = parameters
 
     def form_fill(self, pos, layout, lookup):
+        print(type(self), "form_fill")
+
         lookup.sharedptrs_hold[pos] = layout._persistent_shared_ptr
         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
         self.form_fill_identities(pos, layout, lookup)
@@ -1353,6 +1367,8 @@ class BitMaskedArrayType(ContentType):
         self.parameters = parameters
 
     def form_fill(self, pos, layout, lookup):
+        print(type(self), "form_fill")
+
         lookup.sharedptrs_hold[pos] = layout._persistent_shared_ptr
         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
         self.form_fill_identities(pos, layout, lookup)
@@ -1525,6 +1541,8 @@ class UnmaskedArrayType(ContentType):
         self.parameters = parameters
 
     def form_fill(self, pos, layout, lookup):
+        print(type(self), "form_fill")
+
         lookup.sharedptrs_hold[pos] = layout._persistent_shared_ptr
         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
         self.form_fill_identities(pos, layout, lookup)
@@ -1674,6 +1692,8 @@ class RecordArrayType(ContentType):
         self.parameters = parameters
 
     def form_fill(self, pos, layout, lookup):
+        print(type(self), "form_fill")
+
         lookup.sharedptrs_hold[pos] = layout._persistent_shared_ptr
         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
         self.form_fill_identities(pos, layout, lookup)
@@ -2049,6 +2069,8 @@ class UnionArrayType(ContentType):
         self.parameters = parameters
 
     def form_fill(self, pos, layout, lookup):
+        print(type(self), "form_fill")
+
         lookup.sharedptrs_hold[pos] = layout._persistent_shared_ptr
         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
         self.form_fill_identities(pos, layout, lookup)

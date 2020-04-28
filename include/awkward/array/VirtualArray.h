@@ -14,6 +14,75 @@
 #include "awkward/virtual/ArrayCache.h"
 
 namespace awkward {
+  /// @class VirtualForm
+  ///
+  /// @brief Form describing VirtualArray.
+  class EXPORT_SYMBOL VirtualForm: public Form {
+  public:
+    /// @brief Creates a VirtualForm. See VirtualArray for documentation.
+    VirtualForm(bool has_identities,
+                const util::Parameters& parameters,
+                const FormPtr& form,
+                bool has_length);
+
+    bool
+      has_form() const;
+
+    const FormPtr
+      form() const;
+
+    bool
+      has_length() const;
+
+    const TypePtr
+      type(const util::TypeStrs& typestrs) const override;
+
+    void
+      tojson_part(ToJson& builder, bool verbose) const override;
+
+    const FormPtr
+      shallow_copy() const override;
+
+    const std::string
+      purelist_parameter(const std::string& key) const override;
+
+    bool
+      purelist_isregular() const override;
+
+    int64_t
+      purelist_depth() const override;
+
+    const std::pair<int64_t, int64_t>
+      minmax_depth() const override;
+
+    const std::pair<bool, int64_t>
+      branch_depth() const override;
+
+    int64_t
+      numfields() const override;
+
+    int64_t
+      fieldindex(const std::string& key) const override;
+
+    const std::string
+      key(int64_t fieldindex) const override;
+
+    bool
+      haskey(const std::string& key) const override;
+
+    const std::vector<std::string>
+      keys() const override;
+
+    bool
+      equal(const FormPtr& other,
+            bool check_identities,
+            bool check_parameters) const override;
+
+  private:
+    const FormPtr form_;
+    bool has_length_;
+  };
+
   /// @class VirtualArray
   ///
   /// @brief Represents an array that can be generated on demand.

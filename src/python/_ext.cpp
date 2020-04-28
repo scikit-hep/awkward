@@ -105,6 +105,7 @@ PYBIND11_MODULE(_ext, m) {
   make_RegularForm(m, "RegularForm");
   make_UnionForm(m, "UnionForm");
   make_UnmaskedForm(m, "UnmaskedForm");
+  make_VirtualForm(m, "VirtualForm");
 
   ////////// virtual.h
 

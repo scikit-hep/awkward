@@ -214,6 +214,32 @@ def test_forms():
     assert form.parameters == {"hey": ["you"]}
     assert form.parameter("hey") == ["you"]
 
+    form = awkward1.forms.VirtualForm(awkward1.forms.NumpyForm([], 8, "d"), True)
+    assert form == form
+    assert pickle.loads(pickle.dumps(form, -1)) == form
+    assert awkward1.forms.Form.fromjson(form.tojson(False, False)) == form
+    assert awkward1.forms.Form.fromjson(form.tojson(False, True)) == form
+    assert form.form.inner_shape == []
+    assert form.form.itemsize == 8
+    assert form.form.primitive == "float64"
+    assert form.form.has_identities == False
+    assert form.form.parameters == {}
+    assert form.has_length is True
+    assert form.parameters == {}
+    assert json.loads(form.tojson(False, True)) == {"class": "VirtualArray", "form": {"class": "NumpyArray", "inner_shape": [], "itemsize": 8, "format": "d", "primitive": "float64", "has_identities": False, "parameters": {}}, "has_length": True, "has_identities": False, "parameters": {}}
+    assert json.loads(str(form)) == {"class": "VirtualArray", "form": "float64", "has_length": True}
+
+    form = awkward1.forms.VirtualForm(None, False)
+    assert form == form
+    assert pickle.loads(pickle.dumps(form, -1)) == form
+    assert awkward1.forms.Form.fromjson(form.tojson(False, False)) == form
+    assert awkward1.forms.Form.fromjson(form.tojson(False, True)) == form
+    assert form.form is None
+    assert form.has_length is False
+    assert form.parameters == {}
+    assert json.loads(form.tojson(False, True)) == {"class": "VirtualArray", "form": None, "has_length": False, "has_identities": False, "parameters": {}}
+    assert json.loads(str(form)) == {"class": "VirtualArray", "form": None, "has_length": False}
+
 def fcn():
     return awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5]))
 

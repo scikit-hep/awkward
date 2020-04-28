@@ -55,8 +55,12 @@ class Lookup(object):
         self.sharedptrs = numpy.array([sharedptr(x) for x in sharedptrs],
                                       dtype=numpy.intp)
 
+        print(self._view_as_array())
+
     def _view_as_array(self):
-        return numpy.vstack([self.arrayptrs, self.sharedptrs]).T
+        return numpy.vstack([numpy.arange(len(self.arrayptrs)),
+                             self.arrayptrs,
+                             self.sharedptrs]).T
 
 def tolookup(layout, positions, sharedptrs, arrays):
     import awkward1.layout

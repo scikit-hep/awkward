@@ -9,6 +9,218 @@
 #include "awkward/array/VirtualArray.h"
 
 namespace awkward {
+  ////////// VirtualForm
+
+  VirtualForm::VirtualForm(bool has_identities,
+                           const util::Parameters& parameters,
+                           const FormPtr& form,
+                           bool has_length)
+      : Form(has_identities, parameters)
+      , form_(form)
+      , has_length_(has_length) { }
+
+  bool
+  VirtualForm::has_form() const {
+    return form_.get() != nullptr;
+  }
+
+  const FormPtr
+  VirtualForm::form() const {
+    return form_;
+  }
+
+  bool
+  VirtualForm::has_length() const {
+    return has_length_;
+  }
+
+  const TypePtr
+  VirtualForm::type(const util::TypeStrs& typestrs) const {
+    if (form_.get() == nullptr) {
+      throw std::invalid_argument(
+          "VirtualForm cannot determine its type without an expected Form");
+    }
+    else {
+      return form_.get()->type(typestrs);
+    }
+  }
+
+  void
+  VirtualForm::tojson_part(ToJson& builder, bool verbose) const {
+    builder.beginrecord();
+    builder.field("class");
+    builder.string("VirtualArray");
+    builder.field("form");
+    if (form_.get() == nullptr) {
+      builder.null();
+    }
+    else {
+      form_.get()->tojson_part(builder, verbose);
+    }
+    builder.field("has_length");
+    builder.boolean(has_length_);
+    identities_tojson(builder, verbose);
+    parameters_tojson(builder, verbose);
+    builder.endrecord();
+  }
+
+  const FormPtr
+  VirtualForm::shallow_copy() const {
+    return std::make_shared<VirtualForm>(has_identities_,
+                                         parameters_,
+                                         form_,
+                                         has_length_);
+  }
+
+  const std::string
+  VirtualForm::purelist_parameter(const std::string& key) const {
+    std::string out = parameter(key);
+    if (out == std::string("null")) {
+      if (form_.get() == nullptr) {
+        throw std::invalid_argument("VirtualForm cannot determine nested "
+                                    "parameters without an expected Form");
+      }
+      else {
+        return form_.get()->purelist_parameter(key);
+      }
+    }
+    else {
+      return out;
+    }
+  }
+
+  bool
+  VirtualForm::purelist_isregular() const {
+    if (form_.get() == nullptr) {
+      throw std::invalid_argument(
+          "VirtualForm cannot determine its type without an expected Form");
+    }
+    else {
+      return form_.get()->purelist_isregular();
+    }
+  }
+
+  int64_t
+  VirtualForm::purelist_depth() const {
+    if (form_.get() == nullptr) {
+      throw std::invalid_argument(
+          "VirtualForm cannot determine its type without an expected Form");
+    }
+    else {
+      return form_.get()->purelist_depth();
+    }
+  }
+
+  const std::pair<int64_t, int64_t>
+  VirtualForm::minmax_depth() const {
+    if (form_.get() == nullptr) {
+      throw std::invalid_argument(
+          "VirtualForm cannot determine its type without an expected Form");
+    }
+    else {
+      return form_.get()->minmax_depth();
+    }
+  }
+
+  const std::pair<bool, int64_t>
+  VirtualForm::branch_depth() const {
+    if (form_.get() == nullptr) {
+      throw std::invalid_argument(
+          "VirtualForm cannot determine its type without an expected Form");
+    }
+    else {
+      return form_.get()->branch_depth();
+    }
+  }
+
+  int64_t
+  VirtualForm::numfields() const {
+    if (form_.get() == nullptr) {
+      throw std::invalid_argument(
+          "VirtualForm cannot determine its type without an expected Form");
+    }
+    else {
+      return form_.get()->numfields();
+    }
+  }
+
+  int64_t
+  VirtualForm::fieldindex(const std::string& key) const {
+    if (form_.get() == nullptr) {
+      throw std::invalid_argument(
+          "VirtualForm cannot determine its type without an expected Form");
+    }
+    else {
+      return form_.get()->fieldindex(key);
+    }
+  }
+
+  const std::string
+  VirtualForm::key(int64_t fieldindex) const {
+    if (form_.get() == nullptr) {
+      throw std::invalid_argument(
+          "VirtualForm cannot determine its type without an expected Form");
+    }
+    else {
+      return form_.get()->key(fieldindex);
+    }
+  }
+
+  bool
+  VirtualForm::haskey(const std::string& key) const {
+    if (form_.get() == nullptr) {
+      throw std::invalid_argument(
+          "VirtualForm cannot determine its type without an expected Form");
+    }
+    else {
+      return form_.get()->haskey(key);
+    }
+  }
+
+  const std::vector<std::string>
+  VirtualForm::keys() const {
+    if (form_.get() == nullptr) {
+      throw std::invalid_argument(
+          "VirtualForm cannot determine its type without an expected Form");
+    }
+    else {
+      return form_.get()->keys();
+    }
+  }
+
+  bool
+  VirtualForm::equal(const FormPtr& other,
+                      bool check_identities,
+                      bool check_parameters) const {
+    if (check_identities  &&
+        has_identities_ != other.get()->has_identities()) {
+      return false;
+    }
+    if (check_parameters  &&
+        !util::parameters_equal(parameters_, other.get()->parameters())) {
+      return false;
+    }
+    if (VirtualForm* t = dynamic_cast<VirtualForm*>(other.get())) {
+      if (form_.get() == nullptr  &&  t->form().get() != nullptr) {
+        return false;
+      }
+      else if (form_.get() != nullptr  &&  t->form().get() == nullptr) {
+        return false;
+      }
+      else if (form_.get() != nullptr  &&  t->form().get() != nullptr) {
+        if (!form_.get()->equal(t->form(),
+                                check_identities,
+                                check_parameters)) {
+          return false;
+        }
+      }
+      return has_length_ == t->has_length();
+    }
+    else {
+      return false;
+    }
+  }
+
   ////////// VirtualArray
 
   VirtualArray::VirtualArray(const IdentitiesPtr& identities,
@@ -90,11 +302,15 @@ namespace awkward {
 
   const FormPtr
   VirtualArray::form() const {
-    FormPtr out = generator_.get()->form();
-    if (out.get() == nullptr) {
-      out = array().get()->form();
+    FormPtr generator_form = generator_.get()->form();
+    if (generator_form.get() == nullptr) {
+      generator_form = array().get()->form();
     }
-    return out;
+    int64_t generator_length = generator_.get()->length();
+    return std::make_shared<VirtualForm>(identities_.get() != nullptr,
+                                         parameters_,
+                                         generator_form,
+                                         generator_length >= 0);
   }
 
   const std::string
