@@ -58,7 +58,16 @@ namespace awkward {
 
   const ContentPtr
   SliceGenerator::generate() const {
-    return generator_.get()->generate().get()->getitem(slice_);
+    ContentPtr inner = generator_.get()->generate();
+    if (slice_.length() == 1) {
+      SliceItemPtr head = slice_.head();
+      if (SliceRange* raw = dynamic_cast<SliceRange*>(head.get())) {
+        if (raw->step() == 1) {
+          return inner.get()->getitem_range(raw->start(), raw->stop());
+        }
+      }
+    }
+    return inner.get()->getitem(slice_);
   }
 
   const std::string

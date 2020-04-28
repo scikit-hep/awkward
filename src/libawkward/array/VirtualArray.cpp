@@ -439,9 +439,8 @@ namespace awkward {
     Slice slice;
     slice.append(SliceRange(start, stop, 1));
     slice.become_sealed();
-    FormPtr form(nullptr);
     ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
-                 form, stop - start, generator_, slice);
+                 generator_.get()->form(), stop - start, generator_, slice);
     ArrayCachePtr cache(nullptr);
     return std::make_shared<VirtualArray>(Identities::none(),
                                           parameters_,

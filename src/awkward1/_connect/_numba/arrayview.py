@@ -55,8 +55,6 @@ class Lookup(object):
         self.sharedptrs = numpy.array([sharedptr(x) for x in sharedptrs],
                                       dtype=numpy.intp)
 
-        print(self._view_as_array())
-
     def _view_as_array(self):
         return numpy.vstack([numpy.arange(len(self.arrayptrs)),
                              self.arrayptrs,
@@ -165,6 +163,10 @@ def tolookup(layout, positions, sharedptrs, arrays):
         return awkward1._connect._numba.layout.VirtualArrayType.tolookup(
                  layout, positions, sharedptrs, arrays)
 
+    elif isinstance(layout, awkward1.forms.VirtualForm):
+        return awkward1._connect._numba.layout.VirtualArrayType.form_tolookup(
+                 layout, positions, sharedptrs, arrays)
+
     else:
         raise AssertionError(
                 "unrecognized Content or Form type: {0}".format(type(layout)))
@@ -202,6 +204,9 @@ def tonumbatype(form):
 
     elif isinstance(form, awkward1.forms.UnionForm):
         return awkward1._connect._numba.layout.UnionArrayType.from_form(form)
+
+    elif isinstance(form, awkward1.forms.VirtualForm):
+        return awkward1._connect._numba.layout.VirtualArrayType.from_form(form)
 
     else:
         raise AssertionError("unrecognized Form type: {0}".format(type(form)))
@@ -296,7 +301,8 @@ class ArrayView(object):
 
     def toarray(self):
         layout = self.type.tolayout(self.lookup, self.pos, self.fields)
-        return awkward1._util.wrap(layout[self.start:self.stop], self.behavior)
+        sliced = layout.getitem_range_nowrap(self.start, self.stop)
+        return awkward1._util.wrap(sliced, self.behavior)
 
 @numba.extending.typeof_impl.register(ArrayView)
 def typeof_ArrayView(obj, c):

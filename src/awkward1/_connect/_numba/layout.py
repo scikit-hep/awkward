@@ -100,12 +100,12 @@ def typeof_UnionArray(obj, c):
 
 @numba.extending.typeof_impl.register(awkward1.layout.VirtualArray)
 def typeof_VirtualArray(obj, c):
-    if obj.form is None:
+    if obj.form.form is None:
         raise ValueError(
             "VirtualArrays without a known 'form' can't be used in Numba")
     if obj.form.has_identities:
         raise NotImplementedError("TODO: identities in VirtualArray")
-    return VirtualArrayType(obj.form, numba.none, obj.parameters)
+    return VirtualArrayType(obj.form.form, numba.none, obj.parameters)
 
 class ContentType(numba.types.Type):
     @classmethod
@@ -417,8 +417,6 @@ class NumpyArrayType(ContentType):
         self.parameters = parameters
 
     def form_fill(self, pos, layout, lookup):
-        print(type(self), "form_fill")
-
         lookup.sharedptrs_hold[pos] = layout._persistent_shared_ptr
         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
         self.form_fill_identities(pos, layout, lookup)
@@ -515,8 +513,6 @@ class RegularArrayType(ContentType):
         self.parameters = parameters
 
     def form_fill(self, pos, layout, lookup):
-        print(type(self), "form_fill")
-
         lookup.sharedptrs_hold[pos] = layout._persistent_shared_ptr
         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
         self.form_fill_identities(pos, layout, lookup)
@@ -656,8 +652,6 @@ class ListArrayType(ContentType):
         self.parameters = parameters
 
     def form_fill(self, pos, layout, lookup):
-        print(type(self), "form_fill")
-
         lookup.sharedptrs_hold[pos] = layout._persistent_shared_ptr
         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
         self.form_fill_identities(pos, layout, lookup)
@@ -678,8 +672,6 @@ class ListArrayType(ContentType):
         lookup.original_positions[pos + self.STOPS] = stops
         lookup.arrayptrs[pos + self.STARTS] = starts.ctypes.data
         lookup.arrayptrs[pos + self.STOPS] = stops.ctypes.data
-
-        print("HERE", type(layout.content))
 
         self.contenttype.form_fill(lookup.arrayptrs[pos + self.CONTENT],
                                    layout.content,
@@ -838,8 +830,6 @@ class IndexedArrayType(ContentType):
         self.parameters = parameters
 
     def form_fill(self, pos, layout, lookup):
-        print(type(self), "form_fill")
-
         lookup.sharedptrs_hold[pos] = layout._persistent_shared_ptr
         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
         self.form_fill_identities(pos, layout, lookup)
@@ -1001,8 +991,6 @@ class IndexedOptionArrayType(ContentType):
         self.parameters = parameters
 
     def form_fill(self, pos, layout, lookup):
-        print(type(self), "form_fill")
-
         lookup.sharedptrs_hold[pos] = layout._persistent_shared_ptr
         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
         self.form_fill_identities(pos, layout, lookup)
@@ -1190,8 +1178,6 @@ class ByteMaskedArrayType(ContentType):
         self.parameters = parameters
 
     def form_fill(self, pos, layout, lookup):
-        print(type(self), "form_fill")
-
         lookup.sharedptrs_hold[pos] = layout._persistent_shared_ptr
         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
         self.form_fill_identities(pos, layout, lookup)
@@ -1367,8 +1353,6 @@ class BitMaskedArrayType(ContentType):
         self.parameters = parameters
 
     def form_fill(self, pos, layout, lookup):
-        print(type(self), "form_fill")
-
         lookup.sharedptrs_hold[pos] = layout._persistent_shared_ptr
         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
         self.form_fill_identities(pos, layout, lookup)
@@ -1541,8 +1525,6 @@ class UnmaskedArrayType(ContentType):
         self.parameters = parameters
 
     def form_fill(self, pos, layout, lookup):
-        print(type(self), "form_fill")
-
         lookup.sharedptrs_hold[pos] = layout._persistent_shared_ptr
         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
         self.form_fill_identities(pos, layout, lookup)
@@ -1692,8 +1674,6 @@ class RecordArrayType(ContentType):
         self.parameters = parameters
 
     def form_fill(self, pos, layout, lookup):
-        print(type(self), "form_fill")
-
         lookup.sharedptrs_hold[pos] = layout._persistent_shared_ptr
         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
         self.form_fill_identities(pos, layout, lookup)
@@ -2069,8 +2049,6 @@ class UnionArrayType(ContentType):
         self.parameters = parameters
 
     def form_fill(self, pos, layout, lookup):
-        print(type(self), "form_fill")
-
         lookup.sharedptrs_hold[pos] = layout._persistent_shared_ptr
         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
         self.form_fill_identities(pos, layout, lookup)
@@ -2198,24 +2176,65 @@ class VirtualArrayType(ContentType):
         positions.append(None)
         sharedptrs.append(None)
         positions[pos + cls.ARRAY] = \
-          awkward1._connect._numba.arrayview.tolookup(layout.form,
+          awkward1._connect._numba.arrayview.tolookup(layout.form.form,
                                                       positions,
                                                       sharedptrs,
                                                       arrays)
         return pos
 
-    def __init__(self, form, identitiestype, parameters):
-        if form is None:
+    @classmethod
+    def form_tolookup(cls, form, positions, sharedptrs, arrays):
+        pos = len(positions)
+        cls.form_tolookup_identities(form, positions, sharedptrs, arrays)
+        sharedptrs[-1] = 0
+        if form.form is None:
+            raise ValueError(
+                "VirtualArrays without a known 'form' can't be used in Numba")
+        positions.append(0)
+        sharedptrs.append(None)
+        positions.append(None)
+        sharedptrs.append(None)
+        positions[pos + cls.ARRAY] = \
+          awkward1._connect._numba.arrayview.tolookup(form.form,
+                                                      positions,
+                                                      sharedptrs,
+                                                      arrays)
+        return pos
+
+    @classmethod
+    def from_form(cls, form):
+        if form.form is None:
+            raise ValueError(
+                "VirtualArrays without a known 'form' can't be used in Numba "
+                "(including nested)")
+        return VirtualArrayType(form.form,
+                                cls.from_form_identities(form),
+                                form.parameters)
+
+    def __init__(self, generator_form, identitiestype, parameters):
+        if generator_form is None:
             raise ValueError(
                 "VirtualArrays without a known 'form' can't be used in Numba")
         super(VirtualArrayType, self).__init__(
             name="awkward1.VirtualArrayType({0}, {1}, {2})".format(
-              form.tojson(),
+              generator_form.tojson(),
               identitiestype.name,
               json.dumps(parameters)))
-        self.form = form
+        self.generator_form = generator_form
         self.identitiestype = identitiestype
         self.parameters = parameters
+
+    def form_fill(self, pos, layout, lookup):
+        lookup.sharedptrs_hold[pos] = layout._persistent_shared_ptr
+        lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
+        self.form_fill_identities(pos, layout, lookup)
+
+        pyptr = ctypes.py_object(layout)
+        ctypes.pythonapi.Py_IncRef(pyptr)
+        voidptr = numpy.frombuffer(pyptr, dtype=numpy.intp).item()
+
+        lookup.original_positions[pos + self.PYOBJECT] = voidptr
+        lookup.arrayptrs[pos + self.PYOBJECT] = voidptr
 
     def tolayout(self, lookup, pos, fields):
         voidptr = ctypes.c_void_p(int(lookup.arrayptrs[pos + self.PYOBJECT]))
@@ -2225,7 +2244,7 @@ class VirtualArrayType(ContentType):
         return virtualarray
 
     def hasfield(self, key):
-        return self.form.haskey(key)
+        return self.generator_form.haskey(key)
 
     def getitem_at(self, viewtype):
         def getitem_at(form):
@@ -2291,7 +2310,7 @@ class VirtualArrayType(ContentType):
             else:
                 return out
 
-        return wrap(getitem_at(self.form))
+        return wrap(getitem_at(self.generator_form))
 
     def lower_getitem_at(self,
                          context,
@@ -2314,7 +2333,9 @@ class VirtualArrayType(ContentType):
                          posat(context, builder, viewproxy.pos, self.ARRAY))
         sharedptr = getat(context, builder, viewproxy.sharedptrs, arraypos)
 
-        numbatype = awkward1._connect._numba.arrayview.tonumbatype(self.form)
+        numbatype = awkward1._connect._numba.arrayview.tonumbatype(
+                        self.generator_form)
+
         with builder.if_then(builder.icmp_signed(
                                  "==",
                                  sharedptr,
