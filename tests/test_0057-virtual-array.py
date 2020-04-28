@@ -20,6 +20,8 @@ def test_forms():
     form = awkward1.forms.NumpyForm([], 8, "d")
     assert form == form
     assert pickle.loads(pickle.dumps(form, -1)) == form
+    assert awkward1.forms.Form.fromjson(form.tojson(False, False)) == form
+    assert awkward1.forms.Form.fromjson(form.tojson(False, True)) == form
     assert form.inner_shape == []
     assert form.itemsize == 8
     assert form.primitive == "float64"
@@ -31,6 +33,8 @@ def test_forms():
     form = awkward1.forms.NumpyForm([1, 2, 3], 8, "d", has_identities=True, parameters={"hey": ["you", {"there": 3}]})
     assert form == form
     assert pickle.loads(pickle.dumps(form, -1)) == form
+    assert awkward1.forms.Form.fromjson(form.tojson(False, False)) == form
+    assert awkward1.forms.Form.fromjson(form.tojson(False, True)) == form
     assert form.inner_shape == [1, 2, 3]
     assert form.itemsize == 8
     assert form.primitive == "float64"
@@ -43,6 +47,8 @@ def test_forms():
     form = awkward1.forms.BitMaskedForm("i8", awkward1.forms.NumpyForm([], 8, "d"), True, False, parameters={"hey": ["you"]})
     assert form == form
     assert pickle.loads(pickle.dumps(form, -1)) == form
+    assert awkward1.forms.Form.fromjson(form.tojson(False, False)) == form
+    assert awkward1.forms.Form.fromjson(form.tojson(False, True)) == form
     assert json.loads(form.tojson(False, True)) == {"class": "BitMaskedArray", "mask": "i8", "content": {"class": "NumpyArray", "inner_shape": [], "itemsize": 8, "format": "d", "primitive": "float64", "has_identities": False, "parameters": {}}, "valid_when": True, "lsb_order": False, "has_identities": False, "parameters": {"hey": ["you"]}}
     assert json.loads(str(form)) == {"class": "BitMaskedArray", "mask": "i8", "content": "float64", "valid_when": True, "lsb_order": False, "parameters": {"hey": ["you"]}}
     assert form.mask == "i8"
@@ -56,6 +62,8 @@ def test_forms():
     form = awkward1.forms.ByteMaskedForm("i8", awkward1.forms.NumpyForm([], 8, "d"), True, parameters={"hey": ["you"]})
     assert form == form
     assert pickle.loads(pickle.dumps(form, -1)) == form
+    assert awkward1.forms.Form.fromjson(form.tojson(False, False)) == form
+    assert awkward1.forms.Form.fromjson(form.tojson(False, True)) == form
     assert json.loads(form.tojson(False, True)) == {"class": "ByteMaskedArray", "mask": "i8", "content": {"class": "NumpyArray", "inner_shape": [], "itemsize": 8, "format": "d", "primitive": "float64", "has_identities": False, "parameters": {}}, "valid_when": True, "has_identities": False, "parameters": {"hey": ["you"]}}
     assert json.loads(str(form)) == {"class": "ByteMaskedArray", "mask": "i8", "content": "float64", "valid_when": True, "parameters": {"hey": ["you"]}}
     assert form.mask == "i8"
@@ -68,6 +76,8 @@ def test_forms():
     form = awkward1.forms.EmptyForm(parameters={"hey": ["you"]})
     assert form == form
     assert pickle.loads(pickle.dumps(form, -1)) == form
+    assert awkward1.forms.Form.fromjson(form.tojson(False, False)) == form
+    assert awkward1.forms.Form.fromjson(form.tojson(False, True)) == form
     assert json.loads(form.tojson(False, True)) == {"class": "EmptyArray", "has_identities": False, "parameters": {"hey": ["you"]}}
     assert json.loads(str(form)) == {"class": "EmptyArray", "parameters": {"hey": ["you"]}}
     assert form.has_identities == False
@@ -77,6 +87,8 @@ def test_forms():
     form = awkward1.forms.IndexedForm("i64", awkward1.forms.NumpyForm([], 8, "d"), parameters={"hey": ["you"]})
     assert form == form
     assert pickle.loads(pickle.dumps(form, -1)) == form
+    assert awkward1.forms.Form.fromjson(form.tojson(False, False)) == form
+    assert awkward1.forms.Form.fromjson(form.tojson(False, True)) == form
     assert json.loads(form.tojson(False, True)) == {"class": "IndexedArray64", "index": "i64", "content": {"class": "NumpyArray", "inner_shape": [], "itemsize": 8, "format": "d", "primitive": "float64", "has_identities": False, "parameters": {}}, "has_identities": False, "parameters": {"hey": ["you"]}}
     assert json.loads(str(form)) == {"class": "IndexedArray64", "index": "i64", "content": "float64", "parameters": {"hey": ["you"]}}
     assert form.index == "i64"
@@ -88,6 +100,8 @@ def test_forms():
     form = awkward1.forms.IndexedOptionForm("i64", awkward1.forms.NumpyForm([], 8, "d"), parameters={"hey": ["you"]})
     assert form == form
     assert pickle.loads(pickle.dumps(form, -1)) == form
+    assert awkward1.forms.Form.fromjson(form.tojson(False, False)) == form
+    assert awkward1.forms.Form.fromjson(form.tojson(False, True)) == form
     assert json.loads(form.tojson(False, True)) == {"class": "IndexedOptionArray64", "index": "i64", "content": {"class": "NumpyArray", "inner_shape": [], "itemsize": 8, "format": "d", "primitive": "float64", "has_identities": False, "parameters": {}}, "has_identities": False, "parameters": {"hey": ["you"]}}
     assert json.loads(str(form)) == {"class": "IndexedOptionArray64", "index": "i64", "content": "float64", "parameters": {"hey": ["you"]}}
     assert form.index == "i64"
@@ -99,6 +113,8 @@ def test_forms():
     form = awkward1.forms.ListForm("i64", "i64", awkward1.forms.NumpyForm([], 8, "d"), parameters={"hey": ["you"]})
     assert form == form
     assert pickle.loads(pickle.dumps(form, -1)) == form
+    assert awkward1.forms.Form.fromjson(form.tojson(False, False)) == form
+    assert awkward1.forms.Form.fromjson(form.tojson(False, True)) == form
     assert json.loads(form.tojson(False, True)) == {"class": "ListArray64", "starts": "i64", "stops": "i64", "content": {"class": "NumpyArray", "inner_shape": [], "itemsize": 8, "format": "d", "primitive": "float64", "has_identities": False, "parameters": {}}, "has_identities": False, "parameters": {"hey": ["you"]}}
     assert json.loads(str(form)) == {"class": "ListArray64", "starts": "i64", "stops": "i64", "content": "float64", "parameters": {"hey": ["you"]}}
     assert form.starts == "i64"
@@ -111,6 +127,8 @@ def test_forms():
     form = awkward1.forms.ListOffsetForm("i64", awkward1.forms.NumpyForm([], 8, "d"), parameters={"hey": ["you"]})
     assert form == form
     assert pickle.loads(pickle.dumps(form, -1)) == form
+    assert awkward1.forms.Form.fromjson(form.tojson(False, False)) == form
+    assert awkward1.forms.Form.fromjson(form.tojson(False, True)) == form
     assert json.loads(form.tojson(False, True)) == {"class": "ListOffsetArray64", "offsets": "i64", "content": {"class": "NumpyArray", "inner_shape": [], "itemsize": 8, "format": "d", "primitive": "float64", "has_identities": False, "parameters": {}}, "has_identities": False, "parameters": {"hey": ["you"]}}
     assert json.loads(str(form)) == {"class": "ListOffsetArray64", "offsets": "i64", "content": "float64", "parameters": {"hey": ["you"]}}
     assert form.offsets == "i64"
@@ -122,6 +140,8 @@ def test_forms():
     form = awkward1.forms.RecordForm({"one": awkward1.forms.NumpyForm([], 8, "d"), "two": awkward1.forms.NumpyForm([], 1, "?")}, parameters={"hey": ["you"]})
     assert form == form
     assert pickle.loads(pickle.dumps(form, -1)) == form
+    assert awkward1.forms.Form.fromjson(form.tojson(False, False)) == form
+    assert awkward1.forms.Form.fromjson(form.tojson(False, True)) == form
     assert json.loads(form.tojson(False, True)) == {"class": "RecordArray", "contents": {"one": {"class": "NumpyArray", "inner_shape": [], "itemsize": 8, "format": "d", "primitive": "float64", "has_identities": False, "parameters": {}}, "two": {"class": "NumpyArray", "inner_shape": [], "itemsize": 1, "format": "?", "primitive": "bool", "has_identities": False, "parameters": {}}}, "has_identities": False, "parameters": {"hey": ["you"]}}
     assert json.loads(str(form)) == {"class": "RecordArray", "contents": {"one": "float64", "two": "bool"}, "parameters": {"hey": ["you"]}}
     if not awkward1._util.py27 and not awkward1._util.py35:
@@ -139,6 +159,8 @@ def test_forms():
     form = awkward1.forms.RecordForm([awkward1.forms.NumpyForm([], 8, "d"), awkward1.forms.NumpyForm([], 1, "?")], parameters={"hey": ["you"]})
     assert form == form
     assert pickle.loads(pickle.dumps(form, -1)) == form
+    assert awkward1.forms.Form.fromjson(form.tojson(False, False)) == form
+    assert awkward1.forms.Form.fromjson(form.tojson(False, True)) == form
     assert json.loads(form.tojson(False, True)) == {"class": "RecordArray", "contents": [{"class": "NumpyArray", "inner_shape": [], "itemsize": 8, "format": "d", "primitive": "float64", "has_identities": False, "parameters": {}}, {"class": "NumpyArray", "inner_shape": [], "itemsize": 1, "format": "?", "primitive": "bool", "has_identities": False, "parameters": {}}], "has_identities": False, "parameters": {"hey": ["you"]}}
     assert json.loads(str(form)) == {"class": "RecordArray", "contents": ["float64", "bool"], "parameters": {"hey": ["you"]}}
     assert [json.loads(str(x)) for x in form.values()] == [{"class": "NumpyArray", "itemsize": 8, "format": "d", "primitive": "float64"}, {"class": "NumpyArray", "itemsize": 1, "format": "?", "primitive": "bool"}]
@@ -154,6 +176,8 @@ def test_forms():
     form = awkward1.forms.RegularForm(awkward1.forms.NumpyForm([], 8, "d"), 10, parameters={"hey": ["you"]})
     assert form == form
     assert pickle.loads(pickle.dumps(form, -1)) == form
+    assert awkward1.forms.Form.fromjson(form.tojson(False, False)) == form
+    assert awkward1.forms.Form.fromjson(form.tojson(False, True)) == form
     assert json.loads(form.tojson(False, True)) == {"class": "RegularArray", "content": {"class": "NumpyArray", "inner_shape": [], "itemsize": 8, "format": "d", "primitive": "float64", "has_identities": False, "parameters": {}}, "size": 10, "has_identities": False, "parameters": {"hey": ["you"]}}
     assert json.loads(str(form)) == {"class": "RegularArray", "content": "float64", "size": 10, "parameters": {"hey": ["you"]}}
     assert json.loads(str(form.content)) == {"class": "NumpyArray", "itemsize": 8, "format": "d", "primitive": "float64"}
@@ -165,6 +189,8 @@ def test_forms():
     form = awkward1.forms.UnionForm("i8", "i64", [awkward1.forms.NumpyForm([], 8, "d"), awkward1.forms.NumpyForm([], 1, "?")], parameters={"hey": ["you"]})
     assert form == form
     assert pickle.loads(pickle.dumps(form, -1)) == form
+    assert awkward1.forms.Form.fromjson(form.tojson(False, False)) == form
+    assert awkward1.forms.Form.fromjson(form.tojson(False, True)) == form
     assert json.loads(form.tojson(False, True)) == {"class": "UnionArray8_64", "tags": "i8", "index": "i64", "contents": [{"class": "NumpyArray", "inner_shape": [], "itemsize": 8, "format": "d", "primitive": "float64", "has_identities": False, "parameters": {}}, {"class": "NumpyArray", "inner_shape": [], "itemsize": 1, "format": "?", "primitive": "bool", "has_identities": False, "parameters": {}}], "has_identities": False, "parameters": {"hey": ["you"]}}
     assert json.loads(str(form)) == {"class": "UnionArray8_64", "tags": "i8", "index": "i64", "contents": ["float64", "bool"], "parameters": {"hey": ["you"]}}
     assert form.tags == "i8"
@@ -179,6 +205,8 @@ def test_forms():
     form = awkward1.forms.UnmaskedForm(awkward1.forms.NumpyForm([], 8, "d"), parameters={"hey": ["you"]})
     assert form == form
     assert pickle.loads(pickle.dumps(form, -1)) == form
+    assert awkward1.forms.Form.fromjson(form.tojson(False, False)) == form
+    assert awkward1.forms.Form.fromjson(form.tojson(False, True)) == form
     assert json.loads(form.tojson(False, True)) == {"class": "UnmaskedArray", "content": {"class": "NumpyArray", "inner_shape": [], "itemsize": 8, "format": "d", "primitive": "float64", "has_identities": False, "parameters": {}}, "has_identities": False, "parameters": {"hey": ["you"]}}
     assert json.loads(str(form)) == {"class": "UnmaskedArray", "content": "float64", "parameters": {"hey": ["you"]}}
     assert json.loads(str(form.content)) == {"class": "NumpyArray", "itemsize": 8, "format": "d", "primitive": "float64"}

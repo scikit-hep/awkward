@@ -18,6 +18,7 @@ make_Form(const py::handle& m, const std::string& name) {
                         const std::shared_ptr<ak::Form>& other) -> bool {
         return !self.get()->equal(other, true, true);
       })
+      .def_static("fromjson", &ak::Form::fromjson)
   );
 }
 
