@@ -1715,6 +1715,7 @@ class RecordArrayType(ContentType):
                            lookup.positions[pos + self.CONTENTS + i],
                            fields)
                 contents.append(layout)
+
             if len(contents) == 0:
                 return awkward1.layout.RecordArray(
                          contents,
@@ -2167,6 +2168,7 @@ class VirtualArrayType(ContentType):
             raise ValueError(
                 "VirtualArrays without a known 'form' can't be used in Numba")
         pyptr = ctypes.py_object(layout)
+        ctypes.pythonapi.Py_IncRef(pyptr)
         voidptr = numpy.frombuffer(pyptr, dtype=numpy.intp).item()
 
         positions.append(voidptr)
@@ -2196,6 +2198,7 @@ class VirtualArrayType(ContentType):
     def tolayout(self, lookup, pos, fields):
         voidptr = ctypes.c_void_p(int(lookup.arrayptrs[pos + self.PYOBJECT]))
         pyptr = ctypes.cast(voidptr, ctypes.py_object)
+        ctypes.pythonapi.Py_IncRef(pyptr)
         virtualarray = pyptr.value
         return virtualarray
 

@@ -705,3 +705,70 @@ def test_unionarray():
     assert counter[0] == 0
 
     assert awkward1.to_list(f3(array)) == [0.0, [], 1.1, [1], 2.2, [2, 2], 3.3, [3, 3, 3], 4.4, [4, 4, 4, 4]]
+
+def test_deep_virtualarrays():
+    one = awkward1.from_iter([0.0, 1.1, 2.2, 3.3, 4.4], highlevel=False)
+    two = awkward1.from_iter([[], [1], [2, 2], [3, 3, 3], [4, 4, 4, 4]], highlevel=False)
+
+    counter = [0, 0]
+    def materialize1():
+        counter[0] += 1
+        return one
+
+    generator1 = awkward1.virtual.ArrayGenerator(materialize1, form=one.form, length=len(one))
+    vone = awkward1.layout.VirtualArray(generator1)
+
+    def materialize2():
+        counter[1] += 1
+        return two
+
+    generator2 = awkward1.virtual.ArrayGenerator(materialize2, form=two.form, length=len(two))
+    vtwo = awkward1.layout.VirtualArray(generator2)
+
+    recordarray = awkward1.layout.RecordArray([vone, vtwo], ["x", "y"])
+    array = awkward1.Array(recordarray)
+    array.numba_type
+    assert counter == [0, 0]
+
+    @numba.njit
+    def f3(x):
+        return x
+
+    tmp1 = f3(array).layout
+    assert isinstance(tmp1, awkward1.layout.RecordArray)
+    assert isinstance(tmp1.field(0), awkward1.layout.VirtualArray)
+    assert isinstance(tmp1.field(1), awkward1.layout.VirtualArray)
+    assert counter == [0, 0]
+
+    @numba.njit
+    def f1a(x):
+        return x["x"]
+
+    tmp2a = f1a(array).layout
+    assert isinstance(tmp2a, awkward1.layout.VirtualArray)
+    assert counter == [0, 0]
+
+    @numba.njit
+    def f1b(x):
+        return x["x"][2]
+
+    tmp2b = f1b(array)
+    assert tmp2b == 2.2
+    assert counter == [1, 0]
+
+    @numba.njit
+    def f2a(x):
+        return x["y"]
+
+    tmp3a = f2a(array).layout
+    assert isinstance(tmp3a, awkward1.layout.VirtualArray)
+    assert counter == [1, 0]
+
+    @numba.njit
+    def f2b(x):
+        return x["y"][2]
+
+    tmp3b = f2b(array).layout
+    assert isinstance(tmp3b, awkward1.layout.NumpyArray)
+    assert awkward1.to_list(tmp3b) == [2, 2]
+    assert counter == [1, 1]
