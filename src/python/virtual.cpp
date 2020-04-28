@@ -1,6 +1,6 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
-#include "sstream"
+#include <sstream>
 
 #include <pybind11/pybind11.h>
 
@@ -57,7 +57,29 @@ PyArrayGenerator::tostring_part(const std::string& indent,
     out << " kwargs=\"" << kwargs_.attr("__repr__")().cast<std::string>()
         << "\"";
   }
-  out << "/>" << post;
+  if (form_.get() == nullptr  &&  length_ < 0) {
+    out << "/>";
+  }
+  else {
+    out << ">\n";
+    if (length_ >= 0) {
+      out << indent << "    <length>" << length_ << "</length>\n";
+    }
+    if (form_.get() != nullptr) {
+      std::string formstr = form_.get()->tojson(true, false);
+      std::string replace = std::string("\n")
+                                + indent + std::string("        ");
+      size_t pos = 0;
+      while ((pos = formstr.find("\n", pos)) != std::string::npos) {
+        formstr.replace(pos, 1, replace);
+        pos += replace.length();
+      }
+      out << indent << "    <form>\n" << indent << "        " << formstr
+          << "\n" << indent << "    </form>\n";
+    }
+    out << indent << "</ArrayGenerator>";
+  }
+  out << post;
   return out.str();
 }
 

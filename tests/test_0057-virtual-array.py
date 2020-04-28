@@ -334,3 +334,35 @@ def test_iter():
     assert len(d) == 0
     assert list(it) == [2.2, 3.3, 4.4, 5.5]
     assert len(d) == 0
+
+def test_nested_virtualness():
+    counter = [0, 0]
+
+    content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
+
+    def materialize1():
+        counter[1] += 1
+        return content
+
+    generator1 = awkward1.virtual.ArrayGenerator(materialize1, form=content.form, length=len(content))
+    virtual1 = awkward1.layout.VirtualArray(generator1)
+
+    offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 10], dtype=numpy.int64))
+    listarray = awkward1.layout.ListOffsetArray64(offsets, virtual1)
+
+    def materialize2():
+        counter[0] += 1
+        return listarray
+
+    generator2 = awkward1.virtual.ArrayGenerator(materialize2, form=listarray.form, length=len(listarray))
+    virtual2 = awkward1.layout.VirtualArray(generator2)
+
+    assert counter == [0, 0]
+
+    tmp1 = virtual2[2]
+    assert isinstance(tmp1, awkward1.layout.VirtualArray)
+    assert counter == [1, 0]
+
+    tmp2 = tmp1[1]
+    assert tmp2 == 4.4
+    assert counter == [1, 1]
