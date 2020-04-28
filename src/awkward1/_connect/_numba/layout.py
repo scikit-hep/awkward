@@ -1624,7 +1624,7 @@ class RecordArrayType(ContentType):
         positions.extend([None] * form.numfields)
         sharedptrs.extend([None] * form.numfields)
         if form.istuple:
-            for i, content in enumerate(form.contents):
+            for i, (n, content) in enumerate(form.contents.items()):
                 positions[pos + cls.CONTENTS + i] = \
                   awkward1._connect._numba.arrayview.tolookup(content,
                                                               positions,
@@ -1644,7 +1644,7 @@ class RecordArrayType(ContentType):
         contents = []
         if form.istuple:
             recordlookup = None
-            for x in form.contents:
+            for n, x in form.contents.items():
                 contents.append(
                     awkward1._connect._numba.arrayview.tonumbatype(x))
         else:
@@ -2238,16 +2238,17 @@ class VirtualArrayType(ContentType):
                 return form.content
 
             elif isinstance(form, awkward1.forms.IndexedForm):
-                return HERE
+                return getitem_at(form.content)
 
             elif isinstance(form, (awkward1.forms.IndexedOptionForm,
                                    awkward1.forms.ByteMaskedForm,
                                    awkward1.forms.BitMaskedForm,
                                    awkward1.forms.UnmaskedForm)):
-                return HERE
+                return numba.types.optional(wrap(getitem_at(form.content)))
 
             elif isinstance(form, awkward1.forms.RecordForm):
-                return HERE
+                arrayview = wrap(form)
+                return arrayview.type.getitem_at(arrayview)
 
             elif isinstance(form, awkward1.forms.UnionForm):
                 raise TypeError("union types cannot be accessed in Numba")
@@ -2256,14 +2257,16 @@ class VirtualArrayType(ContentType):
                 raise AssertionError(
                     "unrecognized Form type: {0}".format(type(form)))
 
-        out = getitem_at(self.form)
-        if isinstance(out, awkward1.forms.Form):
-            numbatype = awkward1._connect._numba.arrayview.tonumbatype(out)
-            return awkward1._connect._numba.arrayview.wrap(numbatype,
-                                                           viewtype,
-                                                           None)
-        else:
-            return out
+        def wrap(out):
+            if isinstance(out, awkward1.forms.Form):
+                numbatype = awkward1._connect._numba.arrayview.tonumbatype(out)
+                return awkward1._connect._numba.arrayview.wrap(numbatype,
+                                                               viewtype,
+                                                               None)
+            else:
+                return out
+
+        return wrap(getitem_at(self.form))
 
     def lower_getitem_at(self,
                          context,
