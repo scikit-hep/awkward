@@ -478,6 +478,28 @@ class RegularArrayType(ContentType):
                                                       arrays)
         return pos
 
+    @classmethod
+    def form_tolookup(cls, form, positions, sharedptrs, arrays):
+        pos = len(positions)
+        cls.form_tolookup_identities(form, positions, sharedptrs, arrays)
+        sharedptrs[-1] = 0
+        positions.append(None)
+        sharedptrs.append(None)
+        positions[pos + cls.CONTENT] = \
+          awkward1._connect._numba.arrayview.tolookup(form.content,
+                                                      positions,
+                                                      sharedptrs,
+                                                      arrays)
+        return pos
+
+    @classmethod
+    def from_form(cls, form):
+        return RegularArrayType(
+            awkward1._connect._numba.arrayview.tonumbatype(form.content),
+            form.size,
+            cls.from_form_identities(form),
+            form.parameters)
+
     def __init__(self, contenttype, size, identitiestype, parameters):
         super(RegularArrayType, self).__init__(
             name="awkward1.RegularArrayType({0}, {1}, {2}, {3})".format(
@@ -489,6 +511,15 @@ class RegularArrayType(ContentType):
         self.size = size
         self.identitiestype = identitiestype
         self.parameters = parameters
+
+    def form_fill(self, pos, layout, lookup):
+        lookup.sharedptrs_hold[pos] = layout._persistent_shared_ptr
+        lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
+        self.form_fill_identities(pos, layout, lookup)
+
+        self.contenttype.form_fill(lookup.arrayptrs[pos + self.CONTENT],
+                                   layout.content,
+                                   lookup)
 
     def tolayout(self, lookup, pos, fields):
         content = self.contenttype.tolayout(
@@ -761,6 +792,31 @@ class IndexedArrayType(ContentType):
                                                       arrays)
         return pos
 
+    @classmethod
+    def form_tolookup(cls, form, positions, sharedptrs, arrays):
+        pos = len(positions)
+        cls.form_tolookup_identities(form, positions, sharedptrs, arrays)
+        sharedptrs[-1] = 0
+        arrays.append(0)
+        positions.append(0)
+        sharedptrs.append(None)
+        positions.append(None)
+        sharedptrs.append(None)
+        positions[pos + cls.CONTENT] = \
+          awkward1._connect._numba.arrayview.tolookup(form.content,
+                                                      positions,
+                                                      sharedptrs,
+                                                      arrays)
+        return pos
+
+    @classmethod
+    def from_form(cls, form):
+        return IndexedArrayType(
+            cls.from_form_index(form.index),
+            awkward1._connect._numba.arrayview.tonumbatype(form.content),
+            cls.from_form_identities(form),
+            form.parameters)
+
     def __init__(self, indextype, contenttype, identitiestype, parameters):
         super(IndexedArrayType, self).__init__(
             name="awkward1.IndexedArrayType({0}, {1}, {2}, {3})".format(
@@ -772,6 +828,19 @@ class IndexedArrayType(ContentType):
         self.contenttype = contenttype
         self.identitiestype = identitiestype
         self.parameters = parameters
+
+    def form_fill(self, pos, layout, lookup):
+        lookup.sharedptrs_hold[pos] = layout._persistent_shared_ptr
+        lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
+        self.form_fill_identities(pos, layout, lookup)
+
+        index = numpy.asarray(layout.index)
+        lookup.original_positions[pos + self.INDEX] = index
+        lookup.arrayptrs[pos + self.INDEX] = index.ctypes.data
+
+        self.contenttype.form_fill(lookup.arrayptrs[pos + self.CONTENT],
+                                   layout.content,
+                                   lookup)
 
     def IndexedArrayOf(self):
         if self.indextype.dtype.bitwidth == 32 and self.indextype.dtype.signed:
@@ -884,6 +953,31 @@ class IndexedOptionArrayType(ContentType):
                                                       arrays)
         return pos
 
+    @classmethod
+    def form_tolookup(cls, form, positions, sharedptrs, arrays):
+        pos = len(positions)
+        cls.form_tolookup_identities(form, positions, sharedptrs, arrays)
+        sharedptrs[-1] = 0
+        arrays.append(0)
+        positions.append(0)
+        sharedptrs.append(None)
+        positions.append(None)
+        sharedptrs.append(None)
+        positions[pos + cls.CONTENT] = \
+          awkward1._connect._numba.arrayview.tolookup(form.content,
+                                                      positions,
+                                                      sharedptrs,
+                                                      arrays)
+        return pos
+
+    @classmethod
+    def from_form(cls, form):
+        return IndexedOptionArrayType(
+            cls.from_form_index(form.index),
+            awkward1._connect._numba.arrayview.tonumbatype(form.content),
+            cls.from_form_identities(form),
+            form.parameters)
+
     def __init__(self, indextype, contenttype, identitiestype, parameters):
         super(IndexedOptionArrayType, self).__init__(
             name="awkward1.IndexedOptionArrayType({0}, {1}, {2}, {3})".format(
@@ -895,6 +989,19 @@ class IndexedOptionArrayType(ContentType):
         self.contenttype = contenttype
         self.identitiestype = identitiestype
         self.parameters = parameters
+
+    def form_fill(self, pos, layout, lookup):
+        lookup.sharedptrs_hold[pos] = layout._persistent_shared_ptr
+        lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
+        self.form_fill_identities(pos, layout, lookup)
+
+        index = numpy.asarray(layout.index)
+        lookup.original_positions[pos + self.INDEX] = index
+        lookup.arrayptrs[pos + self.INDEX] = index.ctypes.data
+
+        self.contenttype.form_fill(lookup.arrayptrs[pos + self.CONTENT],
+                                   layout.content,
+                                   lookup)
 
     def IndexedOptionArrayOf(self):
         if self.indextype.dtype.bitwidth == 32 and self.indextype.dtype.signed:
@@ -1025,6 +1132,32 @@ class ByteMaskedArrayType(ContentType):
                                                       arrays)
         return pos
 
+    @classmethod
+    def form_tolookup(cls, form, positions, sharedptrs, arrays):
+        pos = len(positions)
+        cls.form_tolookup_identities(form, positions, sharedptrs, arrays)
+        sharedptrs[-1] = 0
+        arrays.append(0)
+        positions.append(0)
+        sharedptrs.append(None)
+        positions.append(None)
+        sharedptrs.append(None)
+        positions[pos + cls.CONTENT] = \
+          awkward1._connect._numba.arrayview.tolookup(form.content,
+                                                      positions,
+                                                      sharedptrs,
+                                                      arrays)
+        return pos
+
+    @classmethod
+    def from_form(cls, form):
+        return ByteMaskedArrayType(
+            cls.from_form_index(form.mask),
+            awkward1._connect._numba.arrayview.tonumbatype(form.content),
+            form.valid_when,
+            cls.from_form_identities(form),
+            form.parameters)
+
     def __init__(self,
                  masktype,
                  contenttype,
@@ -1043,6 +1176,19 @@ class ByteMaskedArrayType(ContentType):
         self.valid_when = valid_when
         self.identitiestype = identitiestype
         self.parameters = parameters
+
+    def form_fill(self, pos, layout, lookup):
+        lookup.sharedptrs_hold[pos] = layout._persistent_shared_ptr
+        lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
+        self.form_fill_identities(pos, layout, lookup)
+
+        mask = numpy.asarray(layout.mask)
+        lookup.original_positions[pos + self.MASK] = mask
+        lookup.arrayptrs[pos + self.MASK] = mask.ctypes.data
+
+        self.contenttype.form_fill(lookup.arrayptrs[pos + self.CONTENT],
+                                   layout.content,
+                                   lookup)
 
     def tolayout(self, lookup, pos, fields):
         mask = self.IndexOf(self.masktype)(
@@ -1157,6 +1303,33 @@ class BitMaskedArrayType(ContentType):
                                                       arrays)
         return pos
 
+    @classmethod
+    def form_tolookup(cls, form, positions, sharedptrs, arrays):
+        pos = len(positions)
+        cls.form_tolookup_identities(form, positions, sharedptrs, arrays)
+        sharedptrs[-1] = 0
+        arrays.append(0)
+        positions.append(0)
+        sharedptrs.append(None)
+        positions.append(None)
+        sharedptrs.append(None)
+        positions[pos + cls.CONTENT] = \
+          awkward1._connect._numba.arrayview.tolookup(form.content,
+                                                      positions,
+                                                      sharedptrs,
+                                                      arrays)
+        return pos
+
+    @classmethod
+    def from_form(cls, form):
+        return BitMaskedArrayType(
+            cls.from_form_index(form.mask),
+            awkward1._connect._numba.arrayview.tonumbatype(form.content),
+            form.valid_when,
+            form.lsb_order,
+            cls.from_form_identities(form),
+            form.parameters)
+
     def __init__(self,
                  masktype,
                  contenttype,
@@ -1178,6 +1351,19 @@ class BitMaskedArrayType(ContentType):
         self.lsb_order = lsb_order
         self.identitiestype = identitiestype
         self.parameters = parameters
+
+    def form_fill(self, pos, layout, lookup):
+        lookup.sharedptrs_hold[pos] = layout._persistent_shared_ptr
+        lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
+        self.form_fill_identities(pos, layout, lookup)
+
+        mask = numpy.asarray(layout.mask)
+        lookup.original_positions[pos + self.MASK] = mask
+        lookup.arrayptrs[pos + self.MASK] = mask.ctypes.data
+
+        self.contenttype.form_fill(lookup.arrayptrs[pos + self.CONTENT],
+                                   layout.content,
+                                   lookup)
 
     def tolayout(self, lookup, pos, fields):
         mask = self.IndexOf(self.masktype)(
@@ -1307,6 +1493,27 @@ class UnmaskedArrayType(ContentType):
                                                       arrays)
         return pos
 
+    @classmethod
+    def form_tolookup(cls, form, positions, sharedptrs, arrays):
+        pos = len(positions)
+        cls.form_tolookup_identities(form, positions, sharedptrs, arrays)
+        sharedptrs[-1] = 0
+        positions.append(None)
+        sharedptrs.append(None)
+        positions[pos + cls.CONTENT] = \
+          awkward1._connect._numba.arrayview.tolookup(form.content,
+                                                      positions,
+                                                      sharedptrs,
+                                                      arrays)
+        return pos
+
+    @classmethod
+    def from_form(cls, form):
+        return UnmaskedArrayType(
+            awkward1._connect._numba.arrayview.tonumbatype(form.content),
+            cls.from_form_identities(form),
+            form.parameters)
+
     def __init__(self, contenttype, identitiestype, parameters):
         super(UnmaskedArrayType, self).__init__(
             name="awkward1.UnmaskedArrayType({0}, {1}, {2})".format(
@@ -1316,6 +1523,15 @@ class UnmaskedArrayType(ContentType):
         self.contenttype = contenttype
         self.identitiestype = identitiestype
         self.parameters = parameters
+
+    def form_fill(self, pos, layout, lookup):
+        lookup.sharedptrs_hold[pos] = layout._persistent_shared_ptr
+        lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
+        self.form_fill_identities(pos, layout, lookup)
+
+        self.contenttype.form_fill(lookup.arrayptrs[pos + self.CONTENT],
+                                   layout.content,
+                                   lookup)
 
     def tolayout(self, lookup, pos, fields):
         content = self.contenttype.tolayout(
@@ -1400,6 +1616,50 @@ class RecordArrayType(ContentType):
                                                           arrays)
         return pos
 
+    @classmethod
+    def form_tolookup(cls, form, positions, sharedptrs, arrays):
+        pos = len(positions)
+        cls.form_tolookup_identities(form, positions, sharedptrs, arrays)
+        sharedptrs[-1] = 0
+        positions.extend([None] * form.numfields)
+        sharedptrs.extend([None] * form.numfields)
+        if form.istuple:
+            for i, content in enumerate(form.contents):
+                positions[pos + cls.CONTENTS + i] = \
+                  awkward1._connect._numba.arrayview.tolookup(content,
+                                                              positions,
+                                                              sharedptrs,
+                                                              arrays)
+        else:
+            for i, (n, content) in enumerate(form.contents.items()):
+                positions[pos + cls.CONTENTS + i] = \
+                  awkward1._connect._numba.arrayview.tolookup(content,
+                                                              positions,
+                                                              sharedptrs,
+                                                              arrays)
+        return pos
+
+    @classmethod
+    def from_form(cls, form):
+        contents = []
+        if form.istuple:
+            recordlookup = None
+            for x in form.contents:
+                contents.append(
+                    awkward1._connect._numba.arrayview.tonumbatype(x))
+        else:
+            recordlookup = []
+            for n, x in form.contents.items():
+                contents.append(
+                    awkward1._connect._numba.arrayview.tonumbatype(x))
+                recordlookup.append(n)
+
+        return RecordArrayType(
+            contents,
+            recordlookup,
+            cls.from_form_identities(form),
+            form.parameters)
+
     def __init__(self, contenttypes, recordlookup, identitiestype, parameters):
         super(RecordArrayType, self).__init__(
             name="awkward1.RecordArrayType(({0}{1}), ({2}), {3}, {4})".format(
@@ -1412,6 +1672,16 @@ class RecordArrayType(ContentType):
         self.recordlookup = recordlookup
         self.identitiestype = identitiestype
         self.parameters = parameters
+
+    def form_fill(self, pos, layout, lookup):
+        lookup.sharedptrs_hold[pos] = layout._persistent_shared_ptr
+        lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
+        self.form_fill_identities(pos, layout, lookup)
+
+        for i, contenttype in enumerate(self.contenttypes):
+            contenttype.form_fill(lookup.arrayptrs[pos + self.CONTENTS + i],
+                                  layout.field(i),
+                                  lookup)
 
     def fieldindex(self, key):
         out = -1
@@ -1723,6 +1993,41 @@ class UnionArrayType(ContentType):
                                                           arrays)
         return pos
 
+    @classmethod
+    def form_tolookup(cls, form, positions, sharedptrs, arrays):
+        pos = len(positions)
+        cls.form_tolookup_identities(form, positions, sharedptrs, arrays)
+        sharedptrs[-1] = 0
+        arrays.append(0)
+        positions.append(0)
+        sharedptrs.append(None)
+        arrays.append(0)
+        positions.append(0)
+        sharedptrs.append(None)
+        positions.extend([None] * form.numcontents)
+        sharedptrs.extend([None] * form.numcontents)
+        for i, content in enumerate(form.contents):
+            positions[pos + cls.CONTENTS + i] = \
+              awkward1._connect._numba.arrayview.tolookup(content,
+                                                          positions,
+                                                          sharedptrs,
+                                                          arrays)
+        return pos
+
+    @classmethod
+    def from_form(cls, form):
+        contents = []
+        for x in form.contents:
+            contents.append(
+                awkward1._connect._numba.arrayview.tonumbatype(x))
+
+        return UnionArrayType(
+            cls.from_form_index(form.tags),
+            cls.from_form_index(form.index),
+            contents,
+            cls.from_form_identities(form),
+            form.parameters)
+
     def __init__(self,
                  tagstype,
                  indextype,
@@ -1741,6 +2046,24 @@ class UnionArrayType(ContentType):
         self.contenttypes = contenttypes
         self.identitiestype = identitiestype
         self.parameters = parameters
+
+    def form_fill(self, pos, layout, lookup):
+        lookup.sharedptrs_hold[pos] = layout._persistent_shared_ptr
+        lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
+        self.form_fill_identities(pos, layout, lookup)
+
+        tags = numpy.asarray(layout.tags)
+        lookup.original_positions[pos + self.TAGS] = tags
+        lookup.arrayptrs[pos + self.TAGS] = tags.ctypes.data
+
+        index = numpy.asarray(layout.index)
+        lookup.original_positions[pos + self.INDEX] = index
+        lookup.arrayptrs[pos + self.INDEX] = index.ctypes.data
+
+        for i, contenttype in enumerate(self.contenttypes):
+            contenttype.form_fill(lookup.arrayptrs[pos + self.CONTENTS + i],
+                                  layout.content(i),
+                                  lookup)
 
     def UnionArrayOf(self):
         if self.tagstype.dtype.bitwidth == 8 and self.tagstype.dtype.signed:
