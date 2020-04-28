@@ -2,10 +2,16 @@
 
 #include <sstream>
 
+#include "rapidjson/document.h"
+#include "rapidjson/stringbuffer.h"
+#include "rapidjson/writer.h"
+#include "rapidjson/prettywriter.h"
+
 #include "awkward/cpu-kernels/operations.h"
 #include "awkward/cpu-kernels/reducers.h"
 #include "awkward/array/RegularArray.h"
 #include "awkward/array/ListArray.h"
+#include "awkward/array/ListOffsetArray.h"
 #include "awkward/array/EmptyArray.h"
 #include "awkward/array/UnionArray.h"
 #include "awkward/array/IndexedArray.h"
@@ -13,16 +19,454 @@
 #include "awkward/array/NumpyArray.h"
 #include "awkward/array/ByteMaskedArray.h"
 #include "awkward/array/BitMaskedArray.h"
+#include "awkward/array/UnmaskedArray.h"
 #include "awkward/type/ArrayType.h"
 
 #include "awkward/Content.h"
 
+namespace rj = rapidjson;
+
 namespace awkward {
   ////////// Form
 
+  template <typename JSON>
+  FormPtr
+  fromjson_part(const JSON& json) {
+    if (json.IsString()) {
+      util::Parameters p;
+      std::vector<int64_t> s;
+
+      if (std::string("float64") == json.GetString()) {
+        return std::make_shared<NumpyForm>(false, p, s, 8, "d");
+      }
+      if (std::string("float32") == json.GetString()) {
+        return std::make_shared<NumpyForm>(false, p, s, 4, "f");
+      }
+      if (std::string("int64") == json.GetString()) {
+#if defined _MSC_VER || defined __i386__
+        return std::make_shared<NumpyForm>(false, p, s, 8, "q");
+#else
+        return std::make_shared<NumpyForm>(false, p, s, 8, "l");
+#endif
+      }
+      if (std::string("uint64") == json.GetString()) {
+#if defined _MSC_VER || defined __i386__
+        return std::make_shared<NumpyForm>(false, p, s, 8, "Q");
+#else
+        return std::make_shared<NumpyForm>(false, p, s, 8, "L");
+#endif
+      }
+      if (std::string("int32") == json.GetString()) {
+#if defined _MSC_VER || defined __i386__
+        return std::make_shared<NumpyForm>(false, p, s, 4, "l");
+#else
+        return std::make_shared<NumpyForm>(false, p, s, 4, "i");
+#endif
+      }
+      if (std::string("uint32") == json.GetString()) {
+#if defined _MSC_VER || defined __i386__
+        return std::make_shared<NumpyForm>(false, p, s, 4, "L");
+#else
+        return std::make_shared<NumpyForm>(false, p, s, 4, "I");
+#endif
+      }
+      if (std::string("int16") == json.GetString()) {
+        return std::make_shared<NumpyForm>(false, p, s, 2, "h");
+      }
+      if (std::string("uint16") == json.GetString()) {
+        return std::make_shared<NumpyForm>(false, p, s, 2, "H");
+      }
+      if (std::string("int8") == json.GetString()) {
+        return std::make_shared<NumpyForm>(false, p, s, 1, "b");
+      }
+      if (std::string("uint8") == json.GetString()) {
+        return std::make_shared<NumpyForm>(false, p, s, 1, "B");
+      }
+      if (std::string("bool") == json.GetString()) {
+        return std::make_shared<NumpyForm>(false, p, s, 1, "?");
+      }
+    }
+
+    if (json.IsObject()  &&
+        json.HasMember("class")  &&
+        json["class"].IsString()) {
+      util::Parameters p;
+      if (json.HasMember("parameters")) {
+        if (json["parameters"].IsObject()) {
+          for (auto& pair : json["parameters"].GetObject()) {
+            rj::StringBuffer stringbuffer;
+            rj::Writer<rj::StringBuffer> writer(stringbuffer);
+            pair.value.Accept(writer);
+            p[pair.name.GetString()] = stringbuffer.GetString();
+          }
+        }
+        else {
+          throw std::invalid_argument("'parameters' must be a JSON object");
+        }
+      }
+      bool h = false;
+      if (json.HasMember("has_identities")) {
+        if (json["has_identities"].IsBool()) {
+          h = json["has_identities"].GetBool();
+        }
+        else {
+          throw std::invalid_argument("'has_identities' must be boolean");
+        }
+      }
+
+      bool isgen;
+      bool is64;
+      bool isU32;
+      bool is32;
+      std::string cls = json["class"].GetString();
+
+      if (cls == std::string("NumpyArray")) {
+        std::string format;
+        int64_t itemsize;
+        if (json.HasMember("primitive")  &&  json["primitive"].IsString()) {
+          FormPtr tmp = fromjson_part(json["primitive"]);
+          NumpyForm* raw = dynamic_cast<NumpyForm*>(tmp.get());
+          format = raw->format();
+          itemsize = raw->itemsize();
+        }
+        else if (json.HasMember("format")  &&  json["format"].IsString()  &&
+                 json.HasMember("itemsize")  &&  json["itemsize"].IsInt()) {
+          format = json["format"].GetString();
+          itemsize = json["itemsize"].GetInt64();
+        }
+        else {
+          throw std::invalid_argument("NumpyForm must have a 'primitive' "
+                                      "field or 'format' and 'itemsize'");
+        }
+        std::vector<int64_t> s;
+        if (json.HasMember("inner_shape")  &&  json["inner_shape"].IsArray()) {
+          for (auto& x : json["inner_shape"].GetArray()) {
+            if (x.IsInt()) {
+              s.push_back(x.GetInt64());
+            }
+            else {
+              throw std::invalid_argument("NumpyForm 'inner_shape' must only "
+                                          "contain integers");
+            }
+          }
+        }
+        return std::make_shared<NumpyForm>(h, p, s, itemsize, format);
+      }
+
+      if (cls == std::string("RecordArray")) {
+        util::RecordLookupPtr recordlookup(nullptr);
+        std::vector<FormPtr> contents;
+        if (json.HasMember("contents")  &&  json["contents"].IsArray()) {
+          for (auto& x : json["contents"].GetArray()) {
+            contents.push_back(fromjson_part(x));
+          }
+        }
+        else if (json.HasMember("contents")  &&  json["contents"].IsObject()) {
+          recordlookup = std::make_shared<util::RecordLookup>();
+          for (auto& pair : json["contents"].GetObject()) {
+            recordlookup.get()->push_back(pair.name.GetString());
+            contents.push_back(fromjson_part(pair.value));
+          }
+        }
+        else {
+          throw std::invalid_argument("RecordArray 'contents' must be a JSON "
+                                      "list or a JSON object");
+        }
+        return std::make_shared<RecordForm>(h, p, recordlookup, contents);
+      }
+
+      if ((isgen = (cls == std::string("ListOffsetArray")))  ||
+          (is64  = (cls == std::string("ListOffsetArray64")))  ||
+          (isU32 = (cls == std::string("ListOffsetArrayU32")))  ||
+          (is32  = (cls == std::string("ListOffsetArray32")))) {
+        Index::Form offsets = (is64  ? Index::Form::i64 :
+                               isU32 ? Index::Form::u32 :
+                               is32  ? Index::Form::i32 :
+                                       Index::Form::kNumIndexForm);
+        if (json.HasMember("offsets")  &&  json["offsets"].IsString()) {
+          Index::Form tmp = Index::str2form(json["offsets"].GetString());
+          if (offsets != Index::Form::kNumIndexForm  &&  offsets != tmp) {
+            throw std::invalid_argument(
+                  cls + std::string(" has conflicting 'offsets' type: ")
+                      + json["offsets"].GetString());
+          }
+          offsets = tmp;
+        }
+        if (offsets == Index::Form::kNumIndexForm) {
+          throw std::invalid_argument(
+                  cls + std::string(" is missing an 'offsets' specification"));
+        }
+        if (!json.HasMember("content")) {
+          throw std::invalid_argument(
+                  cls + std::string(" is missing its 'content'"));
+        }
+        FormPtr content = fromjson_part(json["content"]);
+        return std::make_shared<ListOffsetForm>(h, p, offsets, content);
+      }
+
+      if ((isgen = (cls == std::string("ListArray")))  ||
+          (is64  = (cls == std::string("ListArray64")))  ||
+          (isU32 = (cls == std::string("ListArrayU32")))  ||
+          (is32  = (cls == std::string("ListArray32")))) {
+        Index::Form starts = (is64  ? Index::Form::i64 :
+                              isU32 ? Index::Form::u32 :
+                              is32  ? Index::Form::i32 :
+                                      Index::Form::kNumIndexForm);
+        Index::Form stops  = (is64  ? Index::Form::i64 :
+                              isU32 ? Index::Form::u32 :
+                              is32  ? Index::Form::i32 :
+                                      Index::Form::kNumIndexForm);
+        if (json.HasMember("starts")  &&  json["starts"].IsString()) {
+          Index::Form tmp = Index::str2form(json["starts"].GetString());
+          if (starts != Index::Form::kNumIndexForm  &&  starts != tmp) {
+            throw std::invalid_argument(
+                  cls + std::string(" has conflicting 'starts' type: ")
+                      + json["starts"].GetString());
+          }
+          starts = tmp;
+        }
+        if (json.HasMember("stops")  &&  json["stops"].IsString()) {
+          Index::Form tmp = Index::str2form(json["stops"].GetString());
+          if (stops != Index::Form::kNumIndexForm  &&  stops != tmp) {
+            throw std::invalid_argument(
+                  cls + std::string(" has conflicting 'stops' type: ")
+                      + json["stops"].GetString());
+          }
+          stops = tmp;
+        }
+        if (starts == Index::Form::kNumIndexForm) {
+          throw std::invalid_argument(
+                  cls + std::string(" is missing a 'starts' specification"));
+        }
+        if (stops == Index::Form::kNumIndexForm) {
+          throw std::invalid_argument(
+                  cls + std::string(" is missing a 'stops' specification"));
+        }
+        if (!json.HasMember("content")) {
+          throw std::invalid_argument(
+                  cls + std::string(" is missing its 'content'"));
+        }
+        FormPtr content = fromjson_part(json["content"]);
+        return std::make_shared<ListForm>(h, p, starts, stops, content);
+      }
+
+      if (cls == std::string("RegularArray")) {
+        if (!json.HasMember("content")) {
+          throw std::invalid_argument(
+                  cls + std::string(" is missing its 'content'"));
+        }
+        FormPtr content = fromjson_part(json["content"]);
+        if (!json.HasMember("size")  ||  !json["size"].IsInt()) {
+          throw std::invalid_argument(
+                  cls + std::string(" is missing its 'size'"));
+        }
+        int64_t size = json["size"].GetInt64();
+        return std::make_shared<RegularForm>(h, p, content, size);
+      }
+
+      if ((isgen = (cls == std::string("IndexedOptionArray")))  ||
+          (is64  = (cls == std::string("IndexedOptionArray64")))  ||
+          (is32  = (cls == std::string("IndexedOptionArray32")))) {
+        Index::Form index = (is64  ? Index::Form::i64 :
+                             is32  ? Index::Form::i32 :
+                                     Index::Form::kNumIndexForm);
+        if (json.HasMember("index")  &&  json["index"].IsString()) {
+          Index::Form tmp = Index::str2form(json["index"].GetString());
+          if (index != Index::Form::kNumIndexForm  &&  index != tmp) {
+            throw std::invalid_argument(
+                  cls + std::string(" has conflicting 'index' type: ")
+                      + json["index"].GetString());
+          }
+          index = tmp;
+        }
+        if (index == Index::Form::kNumIndexForm) {
+          throw std::invalid_argument(
+                  cls + std::string(" is missing an 'index' specification"));
+        }
+        if (!json.HasMember("content")) {
+          throw std::invalid_argument(
+                  cls + std::string(" is missing its 'content'"));
+        }
+        FormPtr content = fromjson_part(json["content"]);
+        return std::make_shared<IndexedOptionForm>(h, p, index, content);
+      }
+
+      if ((isgen = (cls == std::string("IndexedArray")))  ||
+          (is64  = (cls == std::string("IndexedArray64")))  ||
+          (isU32 = (cls == std::string("IndexedArrayU32")))  ||
+          (is32  = (cls == std::string("IndexedArray32")))) {
+        Index::Form index = (is64  ? Index::Form::i64 :
+                             isU32 ? Index::Form::u32 :
+                             is32  ? Index::Form::i32 :
+                                     Index::Form::kNumIndexForm);
+        if (json.HasMember("index")  &&  json["index"].IsString()) {
+          Index::Form tmp = Index::str2form(json["index"].GetString());
+          if (index != Index::Form::kNumIndexForm  &&  index != tmp) {
+            throw std::invalid_argument(
+                  cls + std::string(" has conflicting 'index' type: ")
+                      + json["index"].GetString());
+          }
+          index = tmp;
+        }
+        if (index == Index::Form::kNumIndexForm) {
+          throw std::invalid_argument(
+                  cls + std::string(" is missing an 'index' specification"));
+        }
+        if (!json.HasMember("content")) {
+          throw std::invalid_argument(
+                  cls + std::string(" is missing its 'content'"));
+        }
+        FormPtr content = fromjson_part(json["content"]);
+        return std::make_shared<IndexedForm>(h, p, index, content);
+      }
+
+      if (cls == std::string("ByteMaskedArray")) {
+        Index::Form mask = (is64  ? Index::Form::i64 :
+                            isU32 ? Index::Form::u32 :
+                            is32  ? Index::Form::i32 :
+                                    Index::Form::kNumIndexForm);
+        if (json.HasMember("mask")  &&  json["mask"].IsString()) {
+          Index::Form tmp = Index::str2form(json["mask"].GetString());
+          if (mask != Index::Form::kNumIndexForm  &&  mask != tmp) {
+            throw std::invalid_argument(
+                  cls + std::string(" has conflicting 'mask' type: ")
+                      + json["mask"].GetString());
+          }
+          mask = tmp;
+        }
+        if (mask == Index::Form::kNumIndexForm) {
+          throw std::invalid_argument(
+                  cls + std::string(" is missing a 'mask' specification"));
+        }
+        if (!json.HasMember("content")) {
+          throw std::invalid_argument(
+                  cls + std::string(" is missing its 'content'"));
+        }
+        FormPtr content = fromjson_part(json["content"]);
+        if (!json.HasMember("valid_when")  ||  !json["valid_when"].IsBool()) {
+          throw std::invalid_argument(
+                  cls + std::string(" is missing its 'valid_when'"));
+        }
+        bool valid_when = json["valid_when"].GetBool();
+        return std::make_shared<ByteMaskedForm>(h, p, mask, content,
+                                                valid_when);
+      }
+
+      if (cls == std::string("BitMaskedArray")) {
+        Index::Form mask = (is64  ? Index::Form::i64 :
+                            isU32 ? Index::Form::u32 :
+                            is32  ? Index::Form::i32 :
+                                    Index::Form::kNumIndexForm);
+        if (json.HasMember("mask")  &&  json["mask"].IsString()) {
+          Index::Form tmp = Index::str2form(json["mask"].GetString());
+          if (mask != Index::Form::kNumIndexForm  &&  mask != tmp) {
+            throw std::invalid_argument(
+                  cls + std::string(" has conflicting 'mask' type: ")
+                      + json["mask"].GetString());
+          }
+          mask = tmp;
+        }
+        if (mask == Index::Form::kNumIndexForm) {
+          throw std::invalid_argument(
+                  cls + std::string(" is missing a 'mask' specification"));
+        }
+        if (!json.HasMember("content")) {
+          throw std::invalid_argument(
+                  cls + std::string(" is missing its 'content'"));
+        }
+        FormPtr content = fromjson_part(json["content"]);
+        if (!json.HasMember("valid_when")  ||  !json["valid_when"].IsBool()) {
+          throw std::invalid_argument(
+                  cls + std::string(" is missing its 'valid_when'"));
+        }
+        bool valid_when = json["valid_when"].GetBool();
+        if (!json.HasMember("lsb_order")  ||  !json["lsb_order"].IsBool()) {
+          throw std::invalid_argument(
+                  cls + std::string(" is missing its 'lsb_order'"));
+        }
+        bool lsb_order = json["lsb_order"].GetBool();
+        return std::make_shared<BitMaskedForm>(h, p, mask, content,
+                                               valid_when, lsb_order);
+      }
+
+      if (cls == std::string("UnmaskedArray")) {
+        if (!json.HasMember("content")) {
+          throw std::invalid_argument(
+                  cls + std::string(" is missing its 'content'"));
+        }
+        FormPtr content = fromjson_part(json["content"]);
+        return std::make_shared<UnmaskedForm>(h, p, content);
+      }
+
+      if ((isgen = (cls == std::string("UnionArray")))  ||
+          (is64  = (cls == std::string("UnionArray8_64")))  ||
+          (isU32 = (cls == std::string("UnionArray8_U32")))  ||
+          (is32  = (cls == std::string("UnionArray8_32")))) {
+        Index::Form tags = (is64  ? Index::Form::i8 :
+                            isU32 ? Index::Form::i8 :
+                            is32  ? Index::Form::i8 :
+                                    Index::Form::kNumIndexForm);
+        if (json.HasMember("tags")  &&  json["tags"].IsString()) {
+          Index::Form tmp = Index::str2form(json["tags"].GetString());
+          if (tags != Index::Form::kNumIndexForm  &&  tags != tmp) {
+            throw std::invalid_argument(
+                  cls + std::string(" has conflicting 'tags' type: ")
+                      + json["tags"].GetString());
+          }
+          tags = tmp;
+        }
+        Index::Form index = (is64  ? Index::Form::i64 :
+                             isU32 ? Index::Form::u32 :
+                             is32  ? Index::Form::i32 :
+                                     Index::Form::kNumIndexForm);
+        if (json.HasMember("index")  &&  json["index"].IsString()) {
+          Index::Form tmp = Index::str2form(json["index"].GetString());
+          if (index != Index::Form::kNumIndexForm  &&  index != tmp) {
+            throw std::invalid_argument(
+                  cls + std::string(" has conflicting 'index' type: ")
+                      + json["index"].GetString());
+          }
+          index = tmp;
+        }
+        if (tags == Index::Form::kNumIndexForm) {
+          throw std::invalid_argument(
+                  cls + std::string(" is missing a 'tags' specification"));
+        }
+        if (index == Index::Form::kNumIndexForm) {
+          throw std::invalid_argument(
+                  cls + std::string(" is missing an 'index' specification"));
+        }
+        std::vector<FormPtr> contents;
+        if (json.HasMember("contents")  &&  json["contents"].IsArray()) {
+          for (auto& x : json["contents"].GetArray()) {
+            contents.push_back(fromjson_part(x));
+          }
+        }
+        else {
+          throw std::invalid_argument(
+                  cls + std::string(" 'contents' must be a JSON list"));
+        }
+        return std::make_shared<UnionForm>(h, p, tags, index, contents);
+      }
+
+      if (cls == std::string("EmptyArray")) {
+        return std::make_shared<EmptyForm>(h, p);
+      }
+    }
+
+    rj::StringBuffer stringbuffer;
+    rj::PrettyWriter<rj::StringBuffer> writer(stringbuffer);
+    json.Accept(writer);
+    throw std::invalid_argument(
+              std::string("JSON cannot be recognized as a Form:\n\n")
+              + stringbuffer.GetString());
+  }
+
   FormPtr
   Form::fromjson(const std::string& data) {
-    throw std::runtime_error("FIXME: Form::fromjson");
+    rj::Document doc;
+    doc.Parse<rj::kParseNanAndInfFlag>(data.c_str());
+    return fromjson_part(doc);
   }
 
   Form::Form(bool has_identities, const util::Parameters& parameters)
