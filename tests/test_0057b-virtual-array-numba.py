@@ -9,6 +9,7 @@ import pytest
 import numpy
 
 import awkward1
+import awkward1._io
 
 numba = pytest.importorskip("numba")
 awkward1_connect_numba_arrayview = pytest.importorskip("awkward1._connect._numba.arrayview")
@@ -31,7 +32,7 @@ def test_numpyarray():
         counter[0] += 1
         return layout
 
-    generator = awkward1.virtual.ArrayGenerator(materialize, form=layout.form, length=len(layout))
+    generator = awkward1._io.ArrayGenerator(materialize, form=layout.form, length=len(layout))
     virtualarray = awkward1.layout.VirtualArray(generator)
 
     lookup3 = awkward1_connect_numba_arrayview.Lookup(virtualarray)
@@ -72,7 +73,7 @@ def test_listarray():
             counter[0] += 1
             return layout
 
-        generator = awkward1.virtual.ArrayGenerator(materialize, form=layout.form, length=len(layout))
+        generator = awkward1._io.ArrayGenerator(materialize, form=layout.form, length=len(layout))
         virtualarray = awkward1.layout.VirtualArray(generator)
 
         lookup3 = awkward1_connect_numba_arrayview.Lookup(virtualarray)
@@ -129,7 +130,7 @@ def test_regulararray():
         counter[0] += 1
         return layout
 
-    generator = awkward1.virtual.ArrayGenerator(materialize, form=layout.form, length=len(layout))
+    generator = awkward1._io.ArrayGenerator(materialize, form=layout.form, length=len(layout))
     virtualarray = awkward1.layout.VirtualArray(generator)
 
     lookup3 = awkward1_connect_numba_arrayview.Lookup(virtualarray)
@@ -187,7 +188,7 @@ def test_indexedarray():
         counter[0] += 1
         return layout
 
-    generator = awkward1.virtual.ArrayGenerator(materialize, form=layout.form, length=len(layout))
+    generator = awkward1._io.ArrayGenerator(materialize, form=layout.form, length=len(layout))
     virtualarray = awkward1.layout.VirtualArray(generator)
 
     lookup3 = awkward1_connect_numba_arrayview.Lookup(virtualarray)
@@ -244,7 +245,7 @@ def test_indexedoptionarray():
         counter[0] += 1
         return layout
 
-    generator = awkward1.virtual.ArrayGenerator(materialize, form=layout.form, length=len(layout))
+    generator = awkward1._io.ArrayGenerator(materialize, form=layout.form, length=len(layout))
     virtualarray = awkward1.layout.VirtualArray(generator)
 
     lookup3 = awkward1_connect_numba_arrayview.Lookup(virtualarray)
@@ -308,7 +309,7 @@ def test_bytemaskedarray():
         counter[0] += 1
         return layout
 
-    generator = awkward1.virtual.ArrayGenerator(materialize, form=layout.form, length=len(layout))
+    generator = awkward1._io.ArrayGenerator(materialize, form=layout.form, length=len(layout))
     virtualarray = awkward1.layout.VirtualArray(generator)
 
     lookup3 = awkward1_connect_numba_arrayview.Lookup(virtualarray)
@@ -372,7 +373,7 @@ def test_bitmaskedarray():
         counter[0] += 1
         return layout
 
-    generator = awkward1.virtual.ArrayGenerator(materialize, form=layout.form, length=len(layout))
+    generator = awkward1._io.ArrayGenerator(materialize, form=layout.form, length=len(layout))
     virtualarray = awkward1.layout.VirtualArray(generator)
 
     lookup3 = awkward1_connect_numba_arrayview.Lookup(virtualarray)
@@ -436,7 +437,7 @@ def test_unmaskedarray():
         counter[0] += 1
         return layout
 
-    generator = awkward1.virtual.ArrayGenerator(materialize, form=layout.form, length=len(layout))
+    generator = awkward1._io.ArrayGenerator(materialize, form=layout.form, length=len(layout))
     virtualarray = awkward1.layout.VirtualArray(generator)
 
     lookup3 = awkward1_connect_numba_arrayview.Lookup(virtualarray)
@@ -493,7 +494,7 @@ def test_recordarray():
         counter[0] += 1
         return layout
 
-    generator = awkward1.virtual.ArrayGenerator(materialize, form=layout.form, length=len(layout))
+    generator = awkward1._io.ArrayGenerator(materialize, form=layout.form, length=len(layout))
     virtualarray = awkward1.layout.VirtualArray(generator)
 
     lookup3 = awkward1_connect_numba_arrayview.Lookup(virtualarray)
@@ -610,7 +611,7 @@ def test_tuplearray():
         counter[0] += 1
         return layout
 
-    generator = awkward1.virtual.ArrayGenerator(materialize, form=layout.form, length=len(layout))
+    generator = awkward1._io.ArrayGenerator(materialize, form=layout.form, length=len(layout))
     virtualarray = awkward1.layout.VirtualArray(generator)
 
     lookup3 = awkward1_connect_numba_arrayview.Lookup(virtualarray)
@@ -687,7 +688,7 @@ def test_unionarray():
         counter[0] += 1
         return layout
 
-    generator = awkward1.virtual.ArrayGenerator(materialize, form=layout.form, length=len(layout))
+    generator = awkward1._io.ArrayGenerator(materialize, form=layout.form, length=len(layout))
     virtualarray = awkward1.layout.VirtualArray(generator)
 
     lookup3 = awkward1_connect_numba_arrayview.Lookup(virtualarray)
@@ -715,14 +716,14 @@ def test_deep_virtualarrays():
         counter[0] += 1
         return one
 
-    generator1 = awkward1.virtual.ArrayGenerator(materialize1, form=one.form, length=len(one))
+    generator1 = awkward1._io.ArrayGenerator(materialize1, form=one.form, length=len(one))
     vone = awkward1.layout.VirtualArray(generator1)
 
     def materialize2():
         counter[1] += 1
         return two
 
-    generator2 = awkward1.virtual.ArrayGenerator(materialize2, form=two.form, length=len(two))
+    generator2 = awkward1._io.ArrayGenerator(materialize2, form=two.form, length=len(two))
     vtwo = awkward1.layout.VirtualArray(generator2)
 
     recordarray = awkward1.layout.RecordArray([vone, vtwo], ["x", "y"])
@@ -782,7 +783,7 @@ def test_nested_virtualness():
         counter[1] += 1
         return content
 
-    generator1 = awkward1.virtual.ArrayGenerator(materialize1, form=content.form, length=len(content))
+    generator1 = awkward1._io.ArrayGenerator(materialize1, form=content.form, length=len(content))
     virtual1 = awkward1.layout.VirtualArray(generator1)
 
     offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 10], dtype=numpy.int64))
@@ -792,7 +793,7 @@ def test_nested_virtualness():
         counter[0] += 1
         return listarray
 
-    generator2 = awkward1.virtual.ArrayGenerator(materialize2, form=listarray.form, length=len(listarray))
+    generator2 = awkward1._io.ArrayGenerator(materialize2, form=listarray.form, length=len(listarray))
     virtual2 = awkward1.layout.VirtualArray(generator2)
     array = awkward1.Array(virtual2)
 

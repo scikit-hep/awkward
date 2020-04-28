@@ -16,7 +16,6 @@ if (distutils.version.LooseVersion(numpy.__version__) <
 import awkward1.layout
 import awkward1.types
 import awkward1.forms
-import awkward1.virtual
 import awkward1.partition
 
 # third-party connectors

@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 
 import numbers
+import json
 try:
     from collections.abc import Iterable
 except ImportError:
@@ -209,8 +210,8 @@ def zip(arrays,
             `array` to all levels. If an int, limit the number of dimensions
             that get broadcasted. The minimum value is `1`, for no
             broadcasting.
-        parameters (dict): Parameters for the new #ak.layout.RecordArray node
-            that is created by this operation.
+        parameters (None or dict): Parameters for the new
+            #ak.layout.RecordArray node that is created by this operation.
         with_name (None or str): Assigns a `"__record__"` name to the new
             #ak.layout.RecordArray node that is created by this operation
             (overriding `parameters`, if necessary).
@@ -1292,8 +1293,8 @@ def cartesian(arrays,
             each of the `arrays`; if an iterable of str or int, group common
             items for a chosen set of keys from the `array` dict or slots
             of the `array` iterable.
-        parameters (dict): Parameters for the new #ak.layout.RecordArray node
-            that is created by this operation.
+        parameters (None or dict): Parameters for the new
+            #ak.layout.RecordArray node that is created by this operation.
         with_name (None or str): Assigns a `"__record__"` name to the new
             #ak.layout.RecordArray node that is created by this operation
             (overriding `parameters`, if necessary).
@@ -1697,8 +1698,8 @@ def argcartesian(arrays,
             each of the `arrays`; if an iterable of str or int, group common
             items for a chosen set of keys from the `array` dict or slots
             of the `array` iterable.
-        parameters (dict): Parameters for the new #ak.layout.RecordArray node
-            that is created by this operation.
+        parameters (None or dict): Parameters for the new
+            #ak.layout.RecordArray node that is created by this operation.
         with_name (None or str): Assigns a `"__record__"` name to the new
             #ak.layout.RecordArray node that is created by this operation
             (overriding `parameters`, if necessary).
@@ -1793,8 +1794,8 @@ def combinations(array,
         keys (None or list of str): If None, the pairs/triples/etc. are
             tuples with unnamed fields; otherwise, these `keys` name the
             fields. The number of `keys` must be equal to `n`.
-        parameters (dict): Parameters for the new #ak.layout.RecordArray node
-            that is created by this operation.
+        parameters (None or dict): Parameters for the new
+            #ak.layout.RecordArray node that is created by this operation.
         with_name (None or str): Assigns a `"__record__"` name to the new
             #ak.layout.RecordArray node that is created by this operation
             (overriding `parameters`, if necessary).
@@ -1957,8 +1958,8 @@ def argcombinations(array,
         keys (None or list of str): If None, the pairs/triples/etc. are
             tuples with unnamed fields; otherwise, these `keys` name the
             fields. The number of `keys` must be equal to `n`.
-        parameters (dict): Parameters for the new #ak.layout.RecordArray node
-            that is created by this operation.
+        parameters (None or dict): Parameters for the new
+            #ak.layout.RecordArray node that is created by this operation.
         with_name (None or str): Assigns a `"__record__"` name to the new
             #ak.layout.RecordArray node that is created by this operation
             (overriding `parameters`, if necessary).
@@ -2089,6 +2090,82 @@ def repartition(array, lengths, highlevel=True):
     if highlevel:
         return awkward1._util.wrap(
             out, behavior=awkward1._util.behaviorof(array))
+    else:
+        return out
+
+def virtual(generate,
+            form=None,
+            length=None,
+            cache=None,
+            cache_key=None,
+            parameters=None,
+            highlevel=True,
+            behavior=None):
+    """
+    Args:
+        generate (callable): Zero-argument function that makes an array.
+        form (None, Form, or JSON): If None, the layout of the generated array
+            is unknown until it is generated, which might require it to be
+            generated earlier than intended; if a Form, use this Form to
+            predict the layout and verify that the generated array complies;
+            if a JSON string, convert the JSON into a Form and use it.
+        length (None or int): If None or negative, the length of the generated
+            array is unknown until it is generated, which might require it to
+            be generated earlier than intended; if a non-negative int, use this
+            to predict the length and verify that the generated array complies.
+        cache (None or MutableMapping): If None, arrays are generated every
+            time they are needed; otherwise, generated arrays are stored in the
+            mapping with `__setitem__`, retrieved with `__getitem__`, and only
+            re-generated if `__getitem__` raises a `KeyError`. This mapping may
+            evict elements according to any caching algorithm (LRU, LFR, RR,
+            TTL, etc.).
+        cache_key (None or str): If None, a unique string is generated for this
+            virtual array for use with the `cache` (unique per Python process);
+            otherwise, the explicitly provided key is used (which ought to
+            ensure global uniquness for the scope in which these arrays are
+            used).
+        parameters (None or dict): Parameters for the new
+            #ak.layout.VirtualArray node that is created by this operation.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+        behavior (bool): Custom #ak.behavior for the output array, if
+            high-level.
+
+    Creates a virtual array, an array that is created on demand.
+
+    For example:
+
+        >>> len(array)
+        3
+        >>> awkward1.type(array)
+        3 * var * float64
+        >>> array[2]
+        generating
+        <Array [4.4, 5.5] type='2 * float64'>
+    """
+
+    if form in ("float64", "float32", "int64", "uint64", "int32", "uint32",
+                "int16", "uint16", "int8", "uint8", "bool"):
+        form = awkward1.forms.Form.fromjson('"' + form + '"')
+
+    elif (isinstance(form, (str, bytes)) or
+          (awkward1._util.py27 and isinstance(form, unicode))):
+        form = awkward1.forms.Form.fromjson(form)
+
+    elif form is not None and not isinstance(form, awkward1.forms.Form):
+        form = awkward1.forms.Form.fromjson(json.dumps(form))
+
+    gen = awkward1._io.ArrayGenerator(generate, form=form, length=length)
+    if cache is not None:
+        cache = awkward1._io.ArrayCache(cache)
+
+    out = awkward1.layout.VirtualArray(gen,
+                                       cache,
+                                       cache_key=cache_key,
+                                       parameters=parameters)
+
+    if highlevel:
+        return awkward1._util.wrap(out, behavior=behavior)
     else:
         return out
 
