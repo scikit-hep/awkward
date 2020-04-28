@@ -193,6 +193,11 @@ namespace awkward {
       return array().get()->getitem_range(start, stop);
     }
     else {
+      ContentPtr peek = peek_array();
+      if (peek.get() != nullptr) {
+        return peek.get()->getitem_range(start, stop);
+      }
+
       int64_t regular_start = start;
       int64_t regular_stop = stop;
       awkward_regularize_rangeslice(&regular_start, &regular_stop,
@@ -204,6 +209,17 @@ namespace awkward {
 
   const ContentPtr
   VirtualArray::getitem_range_nowrap(int64_t start, int64_t stop) const {
+    ContentPtr peek = peek_array();
+    if (peek.get() != nullptr) {
+      return peek.get()->getitem_range_nowrap(start, stop);
+    }
+
+    if (generator_.get()->length() >= 0  &&
+        start == 0  &&
+        stop == generator_.get()->length()) {
+      return shallow_copy();
+    }
+
     Slice slice;
     slice.append(SliceRange(start, stop, 1));
     slice.become_sealed();
@@ -219,6 +235,11 @@ namespace awkward {
 
   const ContentPtr
   VirtualArray::getitem_field(const std::string& key) const {
+    ContentPtr peek = peek_array();
+    if (peek.get() != nullptr) {
+      return peek.get()->getitem_field(key);
+    }
+
     Slice slice;
     slice.append(SliceField(key));
     slice.become_sealed();
@@ -234,6 +255,11 @@ namespace awkward {
 
   const ContentPtr
   VirtualArray::getitem_fields(const std::vector<std::string>& keys) const {
+    ContentPtr peek = peek_array();
+    if (peek.get() != nullptr) {
+      return peek.get()->getitem_fields(keys);
+    }
+
     Slice slice;
     slice.append(SliceFields(keys));
     slice.become_sealed();
@@ -249,6 +275,11 @@ namespace awkward {
 
   const ContentPtr
   VirtualArray::carry(const Index64& carry) const {
+    ContentPtr peek = peek_array();
+    if (peek.get() != nullptr) {
+      return peek.get()->carry(carry);
+    }
+
     Slice slice;
     std::vector<int64_t> shape({ carry.length() });
     std::vector<int64_t> strides({ 1 });
@@ -355,6 +386,11 @@ namespace awkward {
 
   const ContentPtr
   VirtualArray::getitem(const Slice& where) const {
+    ContentPtr peek = peek_array();
+    if (peek.get() != nullptr) {
+      return peek.get()->getitem(where);
+    }
+
     if (where.length() == 1) {
       SliceItemPtr head = where.head();
 
@@ -458,42 +494,48 @@ namespace awkward {
   VirtualArray::getitem_next(const SliceAt& at,
                            const Slice& tail,
                            const Index64& advanced) const {
-    throw std::runtime_error("FIXME: VirtualArray::getitem_next(at)");
+    throw std::runtime_error(
+            "undefined operation: VirtualArray::getitem_next(at)");
   }
 
   const ContentPtr
   VirtualArray::getitem_next(const SliceRange& range,
                            const Slice& tail,
                            const Index64& advanced) const {
-    throw std::runtime_error("FIXME: VirtualArray::getitem_next(range)");
+    throw std::runtime_error(
+            "undefined operation: VirtualArray::getitem_next(range)");
   }
 
   const ContentPtr
   VirtualArray::getitem_next(const SliceArray64& array,
                            const Slice& tail,
                            const Index64& advanced) const {
-    throw std::runtime_error("FIXME: VirtualArray::getitem_next(array)");
+    throw std::runtime_error(
+            "undefined operation: VirtualArray::getitem_next(array)");
   }
 
   const ContentPtr
   VirtualArray::getitem_next(const SliceField& field,
                            const Slice& tail,
                            const Index64& advanced) const {
-    throw std::runtime_error("FIXME: VirtualArray::getitem_next(field)");
+    throw std::runtime_error(
+            "undefined operation: VirtualArray::getitem_next(field)");
   }
 
   const ContentPtr
   VirtualArray::getitem_next(const SliceFields& fields,
                            const Slice& tail,
                            const Index64& advanced) const {
-    throw std::runtime_error("FIXME: VirtualArray::getitem_next(fields)");
+    throw std::runtime_error(
+            "undefined operation: VirtualArray::getitem_next(fields)");
   }
 
   const ContentPtr
   VirtualArray::getitem_next(const SliceJagged64& jagged,
                            const Slice& tail,
                            const Index64& advanced) const {
-    throw std::runtime_error("FIXME: VirtualArray::getitem_next(jagged)");
+    throw std::runtime_error(
+            "undefined operation: VirtualArray::getitem_next(jagged)");
   }
 
   const ContentPtr
@@ -501,7 +543,8 @@ namespace awkward {
                                   const Index64& slicestops,
                                   const SliceArray64& slicecontent,
                                   const Slice& tail) const {
-    throw std::runtime_error("FIXME: VirtualArray::getitem_next_jagged(array)");
+    throw std::runtime_error(
+            "undefined operation: VirtualArray::getitem_next_jagged(array)");
   }
 
   const ContentPtr
@@ -509,7 +552,8 @@ namespace awkward {
                                   const Index64& slicestops,
                                   const SliceMissing64& slicecontent,
                                   const Slice& tail) const {
-    throw std::runtime_error("FIXME: VirtualArray::getitem_next_jagged(missing)");
+    throw std::runtime_error(
+            "undefined operation: VirtualArray::getitem_next_jagged(missing)");
   }
 
   const ContentPtr
@@ -517,7 +561,8 @@ namespace awkward {
                                   const Index64& slicestops,
                                   const SliceJagged64& slicecontent,
                                   const Slice& tail) const {
-    throw std::runtime_error("FIXME: VirtualArray::getitem_next_jagged(jagged)");
+    throw std::runtime_error(
+            "undefined operation: VirtualArray::getitem_next_jagged(jagged)");
   }
 
 }

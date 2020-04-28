@@ -1845,6 +1845,7 @@ class VirtualArrayType(ContentType):
                 "VirtualArrays without a known 'form' can't be used in Numba")
         pyptr = ctypes.py_object(layout)
         voidptr = numpy.frombuffer(pyptr, dtype=numpy.intp).item()
+
         positions.append(voidptr)
         sharedptrs.append(None)
         positions.append(None)
@@ -1870,7 +1871,7 @@ class VirtualArrayType(ContentType):
         self.parameters = parameters
 
     def tolayout(self, lookup, pos, fields):
-        voidptr = ctypes.c_void_p(lookup.arrayptrs[pos + self.PYOBJECT])
+        voidptr = ctypes.c_void_p(int(lookup.arrayptrs[pos + self.PYOBJECT]))
         pyptr = ctypes.cast(voidptr, ctypes.py_object)
         virtualarray = pyptr.value
         return virtualarray
