@@ -710,11 +710,11 @@ namespace awkward {
 
   const TypePtr
   NumpyArray::type(const util::TypeStrs& typestrs) const {
-    return form().get()->type(typestrs);
+    return form(true).get()->type(typestrs);
   }
 
   const FormPtr
-  NumpyArray::form() const {
+  NumpyArray::form(bool materialize) const {
     std::vector<int64_t> inner_shape;
     for (size_t i = 1;  i < shape_.size();  i++) {
       inner_shape.push_back((int64_t)shape_[i]);
@@ -724,6 +724,16 @@ namespace awkward {
                                        inner_shape,
                                        (int64_t)itemsize_,
                                        format_);
+  }
+
+  bool
+  NumpyArray::has_virtual_form() const {
+    return false;
+  }
+
+  bool
+  NumpyArray::has_virtual_length() const {
+    return false;
   }
 
   const std::string
@@ -1236,6 +1246,35 @@ namespace awkward {
                                         0,
                                         itemsize_,
                                         format_);
+  }
+
+  int64_t
+  NumpyArray::numfields() const {
+    return -1;
+  }
+
+  int64_t
+  NumpyArray::fieldindex(const std::string& key) const {
+    throw std::invalid_argument(
+      std::string("key ") + util::quote(key, true)
+      + std::string(" does not exist (data are not records)"));
+  }
+
+  const std::string
+  NumpyArray::key(int64_t fieldindex) const {
+    throw std::invalid_argument(
+      std::string("fieldindex \"") + std::to_string(fieldindex)
+      + std::string("\" does not exist (data are not records)"));
+  }
+
+  bool
+  NumpyArray::haskey(const std::string& key) const {
+    return false;
+  }
+
+  const std::vector<std::string>
+  NumpyArray::keys() const {
+    return std::vector<std::string>();
   }
 
   const std::string

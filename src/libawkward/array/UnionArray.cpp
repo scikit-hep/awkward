@@ -808,21 +808,43 @@ namespace awkward {
   template <typename T, typename I>
   const TypePtr
   UnionArrayOf<T, I>::type(const util::TypeStrs& typestrs) const {
-    return form().get()->type(typestrs);
+    return form(true).get()->type(typestrs);
   }
 
   template <typename T, typename I>
   const FormPtr
-  UnionArrayOf<T, I>::form() const {
+  UnionArrayOf<T, I>::form(bool materialize) const {
     std::vector<FormPtr> contents;
     for (auto x : contents_) {
-      contents.push_back(x.get()->form());
+      contents.push_back(x.get()->form(materialize));
     }
     return std::make_shared<UnionForm>(identities_.get() != nullptr,
                                        parameters_,
                                        tags_.form(),
                                        index_.form(),
                                        contents);
+  }
+
+  template <typename T, typename I>
+  bool
+  UnionArrayOf<T, I>::has_virtual_form() const {
+    for (auto x : contents_) {
+      if (x.get()->has_virtual_form()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  template <typename T, typename I>
+  bool
+  UnionArrayOf<T, I>::has_virtual_length() const {
+    for (auto x : contents_) {
+      if (x.get()->has_virtual_length()) {
+        return true;
+      }
+    }
+    return false;
   }
 
   template <typename T, typename I>
@@ -1132,6 +1154,65 @@ namespace awkward {
                                                 nexttags,
                                                 nextindex,
                                                 contents_);
+  }
+
+  template <typename T, typename I>
+  int64_t
+  UnionArrayOf<T, I>::numfields() const {
+    return (int64_t)keys().size();
+  }
+
+  template <typename T, typename I>
+  int64_t
+  UnionArrayOf<T, I>::fieldindex(const std::string& key) const {
+    throw std::invalid_argument(
+      "UnionForm breaks the one-to-one relationship "
+      "between fieldindexes and keys");
+  }
+
+  template <typename T, typename I>
+  const std::string
+  UnionArrayOf<T, I>::key(int64_t fieldindex) const {
+    throw std::invalid_argument(
+      "UnionForm breaks the one-to-one relationship "
+      "between fieldindexes and keys");
+  }
+
+  template <typename T, typename I>
+  bool
+  UnionArrayOf<T, I>::haskey(const std::string& key) const {
+    for (auto x : keys()) {
+      if (x == key) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  template <typename T, typename I>
+  const std::vector<std::string>
+  UnionArrayOf<T, I>::keys() const {
+    std::vector<std::string> out;
+    if (contents_.empty()) {
+      return out;
+    }
+    out = contents_[0].get()->keys();
+    for (size_t i = 1;  i < contents_.size();  i++) {
+      std::vector<std::string> tmp = contents_[i].get()->keys();
+      for (int64_t j = (int64_t)out.size() - 1;  j >= 0;  j--) {
+        bool found = false;
+        for (size_t k = 0;  k < tmp.size();  k++) {
+          if (tmp[k] == out[(size_t)j]) {
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          out.erase(out.begin() + (size_t)j);
+        }
+      }
+    }
+    return out;
   }
 
   template <typename T, typename I>

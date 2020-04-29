@@ -275,8 +275,20 @@ namespace awkward {
     /// {@link IdentitiesOf Identities},
     /// {@link NumpyArray#ptr NumpyArray::ptr}, and
     /// {@link RawArrayOf#ptr RawArray::ptr}).
+    ///
+    /// @param materialize If true, materialize any
+    /// {@link VirtualArray VirtualArrays} encountered along the way.
     virtual const FormPtr
-      form() const = 0;
+      form(bool materialize) const = 0;
+
+    /// @brief If true, the array contains a VirtualArray with an unknown Form.
+    virtual bool
+      has_virtual_form() const = 0;
+
+    /// @brief If true, the array contains a VirtualArray with an unknown
+    /// length.
+    virtual bool
+      has_virtual_length() const = 0;
 
     /// @brief Internal function to build an output string for #tostring.
     ///
@@ -462,7 +474,7 @@ namespace awkward {
     /// @brief The parameter associated with `key` at the first level
     /// that has a non-null value, descending only as deep as the first
     /// RecordArray.
-    const std::string
+    virtual const std::string
       purelist_parameter(const std::string& key) const;
 
     /// @brief Returns `true` if all nested lists down to the first RecordArray
@@ -499,30 +511,30 @@ namespace awkward {
 
     /// @brief The number of fields in the first nested tuple or
     /// records or `-1` if this array does not contain a RecordArray.
-    int64_t
-      numfields() const;
+    virtual int64_t
+      numfields() const = 0;
 
     /// @brief The position of a tuple or record key name if this array
     /// contains a RecordArray.
-    int64_t
-      fieldindex(const std::string& key) const;
+    virtual int64_t
+      fieldindex(const std::string& key) const = 0;
 
     /// @brief The record name associated with a given field index or
     /// the tuple index as a string (e.g. `"0"`, `"1"`, `"2"`) if a tuple.
     ///
     /// Raises an error if the array does not contain a RecordArray.
-    const std::string
-      key(int64_t fieldindex) const;
+    virtual const std::string
+      key(int64_t fieldindex) const = 0;
 
     /// @brief Returns `true` if the array contains a RecordArray with the
     /// specified `key`; `false` otherwise.
-    bool
-      haskey(const std::string& key) const;
+    virtual bool
+      haskey(const std::string& key) const = 0;
 
     /// @brief A list of RecordArray keys or an empty list if this
     /// array does not contain a RecordArray.
-    const std::vector<std::string>
-      keys() const;
+    virtual const std::vector<std::string>
+      keys() const = 0;
 
     /// @brief Returns an error message if this array is invalid; otherwise,
     /// returns an empty string.

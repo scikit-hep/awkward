@@ -74,19 +74,7 @@ namespace awkward {
 
   const std::string
   VirtualForm::purelist_parameter(const std::string& key) const {
-    std::string out = parameter(key);
-    if (out == std::string("null")) {
-      if (form_.get() == nullptr) {
-        throw std::invalid_argument("VirtualForm cannot determine nested "
-                                    "parameters without an expected Form");
-      }
-      else {
-        return form_.get()->purelist_parameter(key);
-      }
-    }
-    else {
-      return out;
-    }
+    return parameter(key);
   }
 
   bool
@@ -297,20 +285,30 @@ namespace awkward {
 
   const TypePtr
   VirtualArray::type(const util::TypeStrs& typestrs) const {
-    return form().get()->type(typestrs);
+    return form(true).get()->type(typestrs);
   }
 
   const FormPtr
-  VirtualArray::form() const {
+  VirtualArray::form(bool materialize) const {
     FormPtr generator_form = generator_.get()->form();
-    if (generator_form.get() == nullptr) {
-      generator_form = array().get()->form();
+    if (materialize  &&  generator_form.get() == nullptr) {
+      generator_form = array().get()->form(materialize);
     }
     int64_t generator_length = generator_.get()->length();
     return std::make_shared<VirtualForm>(identities_.get() != nullptr,
                                          parameters_,
                                          generator_form,
                                          generator_length >= 0);
+  }
+
+  bool
+  VirtualArray::has_virtual_form() const {
+    return generator_.get()->form().get() == nullptr;
+  }
+
+  bool
+  VirtualArray::has_virtual_length() const {
+    return generator_.get()->length() < 0;
   }
 
   const std::string
@@ -508,6 +506,36 @@ namespace awkward {
                                           parameters_,
                                           generator,
                                           cache);
+  }
+
+  const std::string
+  VirtualArray::purelist_parameter(const std::string& key) const {
+    return parameter(key);
+  }
+
+  int64_t
+  VirtualArray::numfields() const {
+    return form(true).get()->numfields();
+  }
+
+  int64_t
+  VirtualArray::fieldindex(const std::string& key) const {
+    return form(true).get()->fieldindex(key);
+  }
+
+  const std::string
+  VirtualArray::key(int64_t fieldindex) const {
+    return form(true).get()->key(fieldindex);
+  }
+
+  bool
+  VirtualArray::haskey(const std::string& key) const {
+    return form(true).get()->haskey(key);
+  }
+
+  const std::vector<std::string>
+  VirtualArray::keys() const {
+    return form(true).get()->keys();
   }
 
   const std::string

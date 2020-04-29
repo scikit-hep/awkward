@@ -36,12 +36,22 @@ namespace awkward {
 
   const TypePtr
   None::type(const util::TypeStrs& typestrs) const {
-    throw std::runtime_error("undefined operation: None::type()");
+    throw std::runtime_error("undefined operation: None::type");
   }
 
   const FormPtr
-  None::form() const {
-    throw std::runtime_error("undefined operation: None::form()");
+  None::form(bool materialize) const {
+    throw std::runtime_error("undefined operation: None::form");
+  }
+
+  bool
+  None::has_virtual_form() const {
+    throw std::runtime_error("undefined operation: None::has_virtual_form");
+  }
+
+  bool
+  None::has_virtual_length() const {
+    throw std::runtime_error("undefined operation: None::has_virtual_length");
   }
 
   const std::string
@@ -123,6 +133,31 @@ namespace awkward {
   const ContentPtr
   None::carry(const Index64& carry) const {
     throw std::runtime_error("undefined operation: None::carry");
+  }
+
+  int64_t
+  None::numfields() const {
+    throw std::runtime_error("undefined operatino: None::numfields");
+  }
+
+  int64_t
+  None::fieldindex(const std::string& key) const {
+    throw std::runtime_error("undefined operatino: None::fieldindex");
+  }
+
+  const std::string
+  None::key(int64_t fieldindex) const {
+    throw std::runtime_error("undefined operatino: None::key");
+  }
+
+  bool
+  None::haskey(const std::string& key) const {
+    throw std::runtime_error("undefined operatino: None::haskey");
+  }
+
+  const std::vector<std::string>
+  None::keys() const {
+    throw std::runtime_error("undefined operatino: None::keys");
   }
 
   const std::string

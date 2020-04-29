@@ -162,13 +162,23 @@ namespace awkward {
 
   const TypePtr
   EmptyArray::type(const util::TypeStrs& typestrs) const {
-    return form().get()->type(typestrs);
+    return form(true).get()->type(typestrs);
   }
 
   const FormPtr
-  EmptyArray::form() const {
+  EmptyArray::form(bool materialize) const {
     return std::make_shared<EmptyForm>(identities_.get() != nullptr,
                                        parameters_);
+  }
+
+  bool
+  EmptyArray::has_virtual_form() const {
+    return false;
+  }
+
+  bool
+  EmptyArray::has_virtual_length() const {
+    return false;
   }
 
   const std::string
@@ -286,6 +296,35 @@ namespace awkward {
   const ContentPtr
   EmptyArray::carry(const Index64& carry) const {
     return shallow_copy();
+  }
+
+  int64_t
+  EmptyArray::numfields() const {
+    return -1;
+  }
+
+  int64_t
+  EmptyArray::fieldindex(const std::string& key) const {
+    throw std::invalid_argument(
+      std::string("key ") + util::quote(key, true)
+      + std::string(" does not exist (data might not be records)"));
+  }
+
+  const std::string
+  EmptyArray::key(int64_t fieldindex) const {
+    throw std::invalid_argument(
+      std::string("fieldindex \"") + std::to_string(fieldindex)
+      + std::string("\" does not exist (data might not be records)"));
+  }
+
+  bool
+  EmptyArray::haskey(const std::string& key) const {
+    return false;
+  }
+
+  const std::vector<std::string>
+  EmptyArray::keys() const {
+    return std::vector<std::string>();
   }
 
   const std::string

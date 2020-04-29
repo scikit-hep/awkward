@@ -445,16 +445,28 @@ namespace awkward {
   template <typename T>
   const TypePtr
   ListOffsetArrayOf<T>::type(const util::TypeStrs& typestrs) const {
-    return form().get()->type(typestrs);
+    return form(true).get()->type(typestrs);
   }
 
   template <typename T>
   const FormPtr
-  ListOffsetArrayOf<T>::form() const {
+  ListOffsetArrayOf<T>::form(bool materialize) const {
     return std::make_shared<ListOffsetForm>(identities_.get() != nullptr,
                                             parameters_,
                                             offsets_.form(),
-                                            content_.get()->form());
+                                            content_.get()->form(materialize));
+  }
+
+  template <typename T>
+  bool
+  ListOffsetArrayOf<T>::has_virtual_form() const {
+    return content_.get()->has_virtual_form();
+  }
+
+  template <typename T>
+  bool
+  ListOffsetArrayOf<T>::has_virtual_length() const {
+    return content_.get()->has_virtual_length();
   }
 
   template <typename T>
@@ -703,6 +715,36 @@ namespace awkward {
                                             nextstarts,
                                             nextstops,
                                             content_);
+  }
+
+  template <typename T>
+  int64_t
+  ListOffsetArrayOf<T>::numfields() const {
+    return content_.get()->numfields();
+  }
+
+  template <typename T>
+  int64_t
+  ListOffsetArrayOf<T>::fieldindex(const std::string& key) const {
+    return content_.get()->fieldindex(key);
+  }
+
+  template <typename T>
+  const std::string
+  ListOffsetArrayOf<T>::key(int64_t fieldindex) const {
+    return content_.get()->key(fieldindex);
+  }
+
+  template <typename T>
+  bool
+  ListOffsetArrayOf<T>::haskey(const std::string& key) const {
+    return content_.get()->haskey(key);
+  }
+
+  template <typename T>
+  const std::vector<std::string>
+  ListOffsetArrayOf<T>::keys() const {
+    return content_.get()->keys();
   }
 
   template <typename T>

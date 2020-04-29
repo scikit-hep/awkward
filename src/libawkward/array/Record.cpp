@@ -83,12 +83,22 @@ namespace awkward {
 
   const TypePtr
   Record::type(const util::TypeStrs& typestrs) const {
-    return form().get()->type(typestrs);
+    return form(true).get()->type(typestrs);
   }
 
   const FormPtr
-  Record::form() const {
-    return array_.get()->form();
+  Record::form(bool materialize) const {
+    return array_.get()->form(materialize);
+  }
+
+  bool
+  Record::has_virtual_form() const {
+    return array_.get()->has_virtual_form();
+  }
+
+  bool
+  Record::has_virtual_length() const {
+    return array_.get()->has_virtual_length();
   }
 
   const std::string
@@ -226,6 +236,31 @@ namespace awkward {
   Record::branch_depth() const {
     std::pair<bool, int64_t> out = array_.get()->branch_depth();
     return std::pair<bool, int64_t>(out.first, out.second - 1);
+  }
+
+  int64_t
+  Record::numfields() const {
+    return array_.get()->numfields();
+  }
+
+  int64_t
+  Record::fieldindex(const std::string& key) const {
+    return array_.get()->fieldindex(key);
+  }
+
+  const std::string
+  Record::key(int64_t fieldindex) const {
+    return array_.get()->key(fieldindex);
+  }
+
+  bool
+  Record::haskey(const std::string& key) const {
+    return array_.get()->haskey(key);
+  }
+
+  const std::vector<std::string>
+  Record::keys() const {
+    return array_.get()->keys();
   }
 
   const std::string

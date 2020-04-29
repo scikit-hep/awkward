@@ -178,7 +178,13 @@ namespace awkward {
       setidentities(const IdentitiesPtr& identities) override;
 
     const FormPtr
-      form() const override;
+      form(bool materialize) const override;
+
+    bool
+      has_virtual_form() const override;
+
+    bool
+      has_virtual_length() const override;
 
     const std::string
       tostring_part(const std::string& indent,
@@ -239,6 +245,21 @@ namespace awkward {
 
     const ContentPtr
       carry(const Index64& carry) const override;
+
+    int64_t
+      numfields() const override;
+
+    int64_t
+      fieldindex(const std::string& key) const override;
+
+    const std::string
+      key(int64_t fieldindex) const override;
+
+    bool
+      haskey(const std::string& key) const override;
+
+    const std::vector<std::string>
+      keys() const override;
 
     // operations
     const std::string

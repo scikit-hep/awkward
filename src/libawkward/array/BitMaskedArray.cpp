@@ -394,17 +394,27 @@ namespace awkward {
 
   const TypePtr
   BitMaskedArray::type(const util::TypeStrs& typestrs) const {
-    return form().get()->type(typestrs);
+    return form(true).get()->type(typestrs);
   }
 
   const FormPtr
-  BitMaskedArray::form() const {
+  BitMaskedArray::form(bool materialize) const {
     return std::make_shared<BitMaskedForm>(identities_.get() != nullptr,
                                            parameters_,
                                            mask_.form(),
-                                           content_.get()->form(),
+                                           content_.get()->form(materialize),
                                            valid_when_,
                                            lsb_order_);
+  }
+
+  bool
+  BitMaskedArray::has_virtual_form() const {
+    return content_.get()->has_virtual_form();
+  }
+
+  bool
+  BitMaskedArray::has_virtual_length() const {
+    return content_.get()->has_virtual_length();
   }
 
   const std::string
@@ -616,6 +626,31 @@ namespace awkward {
   const ContentPtr
   BitMaskedArray::carry(const Index64& carry) const {
     return toByteMaskedArray().get()->carry(carry);
+  }
+
+  int64_t
+  BitMaskedArray::numfields() const {
+    return content_.get()->numfields();
+  }
+
+  int64_t
+  BitMaskedArray::fieldindex(const std::string& key) const {
+    return content_.get()->fieldindex(key);
+  }
+
+  const std::string
+  BitMaskedArray::key(int64_t fieldindex) const {
+    return content_.get()->key(fieldindex);
+  }
+
+  bool
+  BitMaskedArray::haskey(const std::string& key) const {
+    return content_.get()->haskey(key);
+  }
+
+  const std::vector<std::string>
+  BitMaskedArray::keys() const {
+    return content_.get()->keys();
   }
 
   const std::string

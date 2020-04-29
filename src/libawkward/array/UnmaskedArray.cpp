@@ -302,14 +302,24 @@ namespace awkward {
   const TypePtr
   UnmaskedArray::type(const std::map<std::string,
                       std::string>& typestrs) const {
-    return form().get()->type(typestrs);
+    return form(true).get()->type(typestrs);
   }
 
   const FormPtr
-  UnmaskedArray::form() const {
+  UnmaskedArray::form(bool materialize) const {
     return std::make_shared<UnmaskedForm>(identities_.get() != nullptr,
                                           parameters_,
-                                          content_.get()->form());
+                                          content_.get()->form(materialize));
+  }
+
+  bool
+  UnmaskedArray::has_virtual_form() const {
+    return content_.get()->has_virtual_form();
+  }
+
+  bool
+  UnmaskedArray::has_virtual_length() const {
+    return content_.get()->has_virtual_length();
   }
 
   const std::string
@@ -496,6 +506,31 @@ namespace awkward {
     return std::make_shared<UnmaskedArray>(identities,
                                            parameters_,
                                            content_.get()->carry(carry));
+  }
+
+  int64_t
+  UnmaskedArray::numfields() const {
+    return content_.get()->numfields();
+  }
+
+  int64_t
+  UnmaskedArray::fieldindex(const std::string& key) const {
+    return content_.get()->fieldindex(key);
+  }
+
+  const std::string
+  UnmaskedArray::key(int64_t fieldindex) const {
+    return content_.get()->key(fieldindex);
+  }
+
+  bool
+  UnmaskedArray::haskey(const std::string& key) const {
+    return content_.get()->haskey(key);
+  }
+
+  const std::vector<std::string>
+  UnmaskedArray::keys() const {
+    return content_.get()->keys();
   }
 
   const std::string

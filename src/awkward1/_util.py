@@ -398,7 +398,10 @@ def broadcast_and_apply(inputs, getfunction, behavior):
 
     def apply(inputs, depth):
         # handle implicit right-broadcasting (i.e. NumPy-like)
-        if any(isinstance(x, listtypes) for x in inputs):
+        if (any(isinstance(x, listtypes) for x in inputs) and
+            not any(isinstance(x, (awkward1.layout.Content,
+                                   awkward1.layout.Record)) and
+                    x.has_virtual_form for x in inputs)):
             maxdepth = max(x.purelist_depth
                            for x in inputs
                            if isinstance(x, awkward1.layout.Content))
@@ -1016,7 +1019,7 @@ def minimally_touching_string(limit_length, layout, behavior):
     if len(layout) == 0:
         return "[]"
 
-    def forward(x, space, brackets=True, wrap=True):
+    def forward(x, space, brackets=True, wrap=True, stop=None):
         done = False
         if wrap and isinstance(x, (awkward1.layout.Content,
                                    awkward1.partition.PartitionedArray)):
@@ -1039,7 +1042,7 @@ def minimally_touching_string(limit_length, layout, behavior):
                 if brackets:
                     yield space + "["
                 sp = ""
-                for i in range(len(x)):
+                for i in range(len(x) if stop is None else stop):
                     for token in forward(x[i], sp):
                         yield token
                     sp = ", "
@@ -1070,7 +1073,7 @@ def minimally_touching_string(limit_length, layout, behavior):
             else:
                 yield space + repr(x)
 
-    def backward(x, space, brackets=True, wrap=True):
+    def backward(x, space, brackets=True, wrap=True, stop=-1):
         done = False
         if wrap and isinstance(x, (awkward1.layout.Content,
                                    awkward1.partition.PartitionedArray)):
@@ -1093,7 +1096,7 @@ def minimally_touching_string(limit_length, layout, behavior):
                 if brackets:
                     yield "]" + space
                 sp = ""
-                for i in range(len(x) - 1, -1, -1):
+                for i in range(len(x) - 1, stop, -1):
                     for token in backward(x[i], sp):
                         yield token
                     sp = ", "
@@ -1141,9 +1144,9 @@ def minimally_touching_string(limit_length, layout, behavior):
     left, right = ["["], ["]"]
     leftlen, rightlen = 1, 1
     leftgen = \
-      forever(forward(layout[:halfway], "", brackets=False, wrap=False))
+      forever(forward(layout, "", brackets=False, wrap=False, stop=halfway))
     rightgen = \
-      forever(backward(layout[halfway:], "", brackets=False, wrap=False))
+      forever(backward(layout, "", brackets=False, wrap=False, stop=halfway - 1))
     while True:
         l = next(leftgen)
         if l is not None:

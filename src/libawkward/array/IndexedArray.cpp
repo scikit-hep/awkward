@@ -887,24 +887,37 @@ namespace awkward {
   template <typename T, bool ISOPTION>
   const TypePtr
   IndexedArrayOf<T, ISOPTION>::type(const util::TypeStrs& typestrs) const {
-    return form().get()->type(typestrs);
+    return form(true).get()->type(typestrs);
   }
 
   template <typename T, bool ISOPTION>
   const FormPtr
-  IndexedArrayOf<T, ISOPTION>::form() const {
+  IndexedArrayOf<T, ISOPTION>::form(bool materialize) const {
     if (ISOPTION) {
-      return std::make_shared<IndexedOptionForm>(identities_.get() != nullptr,
-                                                 parameters_,
-                                                 index_.form(),
-                                                 content_.get()->form());
+      return std::make_shared<IndexedOptionForm>(
+                                           identities_.get() != nullptr,
+                                           parameters_,
+                                           index_.form(),
+                                           content_.get()->form(materialize));
     }
     else {
       return std::make_shared<IndexedForm>(identities_.get() != nullptr,
                                            parameters_,
                                            index_.form(),
-                                           content_.get()->form());
+                                           content_.get()->form(materialize));
     }
+  }
+
+  template <typename T, bool ISOPTION>
+  bool
+  IndexedArrayOf<T, ISOPTION>::has_virtual_form() const {
+    return content_.get()->has_virtual_form();
+  }
+
+  template <typename T, bool ISOPTION>
+  bool
+  IndexedArrayOf<T, ISOPTION>::has_virtual_length() const {
+    return content_.get()->has_virtual_length();
   }
 
   template <typename T, bool ISOPTION>
@@ -1189,6 +1202,36 @@ namespace awkward {
                                                          parameters_,
                                                          nextindex,
                                                          content_);
+  }
+
+  template <typename T, bool ISOPTION>
+  int64_t
+  IndexedArrayOf<T, ISOPTION>::numfields() const {
+    return content_.get()->numfields();
+  }
+
+  template <typename T, bool ISOPTION>
+  int64_t
+  IndexedArrayOf<T, ISOPTION>::fieldindex(const std::string& key) const {
+    return content_.get()->fieldindex(key);
+  }
+
+  template <typename T, bool ISOPTION>
+  const std::string
+  IndexedArrayOf<T, ISOPTION>::key(int64_t fieldindex) const {
+    return content_.get()->key(fieldindex);
+  }
+
+  template <typename T, bool ISOPTION>
+  bool
+  IndexedArrayOf<T, ISOPTION>::haskey(const std::string& key) const {
+    return content_.get()->haskey(key);
+  }
+
+  template <typename T, bool ISOPTION>
+  const std::vector<std::string>
+  IndexedArrayOf<T, ISOPTION>::keys() const {
+    return content_.get()->keys();
   }
 
   template <typename T, bool ISOPTION>

@@ -454,7 +454,7 @@ def test_zip():
     y = awkward1.Array([1.1, 2.2, 3.3, 4.4, 5.5])
 
     one = awkward1.zip({"x": x, "y": y})
-    two = awkward1.zip({"x": x, "y": y}, depthlimit=1)
+    two = awkward1.zip({"x": x, "y": y}, depth_limit=1)
     xx, yy = awkward1.unzip(two)
     assert isinstance(one.layout, awkward1.layout.Content)
     assert isinstance(two.layout, awkward1.layout.Content)
@@ -471,7 +471,7 @@ def test_zip():
     assert awkward1.to_list(x) == [[1, 2, 3], [], [4, 5], [6], [7, 8, 9, 10]]
 
     one = awkward1.zip({"x": x, "y": y})
-    two = awkward1.zip({"x": x, "y": y}, depthlimit=1)
+    two = awkward1.zip({"x": x, "y": y}, depth_limit=1)
     xx, yy = awkward1.unzip(two)
     assert isinstance(one.layout, awkward1.partition.PartitionedArray)
     assert isinstance(two.layout, awkward1.partition.PartitionedArray)
@@ -488,7 +488,7 @@ def test_zip():
     assert awkward1.to_list(y) == [1.1, 2.2, 3.3, 4.4, 5.5]
 
     one = awkward1.zip({"x": x, "y": y})
-    two = awkward1.zip({"x": x, "y": y}, depthlimit=1)
+    two = awkward1.zip({"x": x, "y": y}, depth_limit=1)
     xx, yy = awkward1.unzip(two)
     assert isinstance(one.layout, awkward1.partition.PartitionedArray)
     assert isinstance(two.layout, awkward1.partition.PartitionedArray)
@@ -505,7 +505,7 @@ def test_zip():
     assert awkward1.to_list(x) == [[1, 2, 3], [], [4, 5], [6], [7, 8, 9, 10]]
 
     one = awkward1.zip({"x": x, "y": y})
-    two = awkward1.zip({"x": x, "y": y}, depthlimit=1)
+    two = awkward1.zip({"x": x, "y": y}, depth_limit=1)
     xx, yy = awkward1.unzip(two)
     assert isinstance(one.layout, awkward1.partition.PartitionedArray)
     assert isinstance(two.layout, awkward1.partition.PartitionedArray)
@@ -522,7 +522,7 @@ def test_zip():
     assert awkward1.to_list(y) == [1.1, 2.2, 3.3, 4.4, 5.5]
 
     one = awkward1.zip({"x": x, "y": y})
-    two = awkward1.zip({"x": x, "y": y}, depthlimit=1)
+    two = awkward1.zip({"x": x, "y": y}, depth_limit=1)
     xx, yy = awkward1.unzip(two)
     assert isinstance(one.layout, awkward1.layout.Content)
     assert isinstance(two.layout, awkward1.layout.Content)

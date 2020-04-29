@@ -358,15 +358,25 @@ namespace awkward {
 
   const TypePtr
   RegularArray::type(const util::TypeStrs& typestrs) const {
-    return form().get()->type(typestrs);
+    return form(true).get()->type(typestrs);
   }
 
   const FormPtr
-  RegularArray::form() const {
+  RegularArray::form(bool materialize) const {
     return std::make_shared<RegularForm>(identities_.get() != nullptr,
                                          parameters_,
-                                         content_.get()->form(),
+                                         content_.get()->form(materialize),
                                          size_);
+  }
+
+  bool
+  RegularArray::has_virtual_form() const {
+    return content_.get()->has_virtual_form();
+  }
+
+  bool
+  RegularArray::has_virtual_length() const {
+    return content_.get()->has_virtual_length();
   }
 
   const std::string
@@ -544,6 +554,31 @@ namespace awkward {
                                           parameters_,
                                           content_.get()->carry(nextcarry),
                                           size_);
+  }
+
+  int64_t
+  RegularArray::numfields() const {
+    return content_.get()->numfields();
+  }
+
+  int64_t
+  RegularArray::fieldindex(const std::string& key) const {
+    return content_.get()->fieldindex(key);
+  }
+
+  const std::string
+  RegularArray::key(int64_t fieldindex) const {
+    return content_.get()->key(fieldindex);
+  }
+
+  bool
+  RegularArray::haskey(const std::string& key) const {
+    return content_.get()->haskey(key);
+  }
+
+  const std::vector<std::string>
+  RegularArray::keys() const {
+    return content_.get()->keys();
   }
 
   const std::string

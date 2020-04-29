@@ -491,19 +491,39 @@ namespace awkward {
 
   const TypePtr
   RecordArray::type(const util::TypeStrs& typestrs) const {
-    return form().get()->type(typestrs);
+    return form(true).get()->type(typestrs);
   }
 
   const FormPtr
-  RecordArray::form() const {
+  RecordArray::form(bool materialize) const {
     std::vector<FormPtr> contents;
     for (auto x : contents_) {
-      contents.push_back(x.get()->form());
+      contents.push_back(x.get()->form(materialize));
     }
     return std::make_shared<RecordForm>(identities_.get() != nullptr,
                                         parameters_,
                                         recordlookup_,
                                         contents);
+  }
+
+  bool
+  RecordArray::has_virtual_form() const {
+    for (auto x : contents_) {
+      if (x.get()->has_virtual_form()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool
+  RecordArray::has_virtual_length() const {
+    for (auto x : contents_) {
+      if (x.get()->has_virtual_length()) {
+        return true;
+      }
+    }
+    return false;
   }
 
   const std::string
@@ -728,6 +748,31 @@ namespace awkward {
                                          contents,
                                          recordlookup_,
                                          carry.length());
+  }
+
+  int64_t
+  RecordArray::numfields() const {
+    return (int64_t)contents_.size();
+  }
+
+  int64_t
+  RecordArray::fieldindex(const std::string& key) const {
+    return util::fieldindex(recordlookup_, key, numfields());
+  }
+
+  const std::string
+  RecordArray::key(int64_t fieldindex) const {
+    return util::key(recordlookup_, fieldindex, numfields());
+  }
+
+  bool
+  RecordArray::haskey(const std::string& key) const {
+    return util::haskey(recordlookup_, key, numfields());
+  }
+
+  const std::vector<std::string>
+  RecordArray::keys() const {
+    return util::keys(recordlookup_, numfields());
   }
 
   const std::string

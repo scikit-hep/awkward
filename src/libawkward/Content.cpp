@@ -628,52 +628,27 @@ namespace awkward {
 
   const std::string
   Content::purelist_parameter(const std::string& key) const {
-    return form().get()->purelist_parameter(key);
+    return form(false).get()->purelist_parameter(key);
   }
 
   bool
   Content::purelist_isregular() const {
-    return form().get()->purelist_isregular();
+    return form(true).get()->purelist_isregular();
   }
 
   int64_t
   Content::purelist_depth() const {
-    return form().get()->purelist_depth();
+    return form(true).get()->purelist_depth();
   }
 
   const std::pair<int64_t, int64_t>
   Content::minmax_depth() const {
-    return form().get()->minmax_depth();
+    return form(true).get()->minmax_depth();
   }
 
   const std::pair<bool, int64_t>
   Content::branch_depth() const {
-    return form().get()->branch_depth();
-  }
-
-  int64_t
-  Content::numfields() const {
-    return form().get()->numfields();
-  }
-
-  int64_t
-  Content::fieldindex(const std::string& key) const {
-    return form().get()->fieldindex(key);
-  }
-
-  const std::string
-  Content::key(int64_t fieldindex) const {
-    return form().get()->key(fieldindex);
-  }
-
-  bool
-  Content::haskey(const std::string& key) const {
-    return form().get()->haskey(key);
-  }
-
-  const std::vector<std::string>
-  Content::keys() const {
-    return form().get()->keys();
+    return form(true).get()->branch_depth();
   }
 
   const ContentPtr

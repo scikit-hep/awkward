@@ -6,8 +6,10 @@ import numbers
 import json
 try:
     from collections.abc import Iterable
+    from collections.abc import MutableMapping
 except ImportError:
     from collections import Iterable
+    from collections import MutableMapping
 
 import numpy
 
@@ -197,7 +199,7 @@ def num(array, axis=1, highlevel=True):
         return out
 
 def zip(arrays,
-        depthlimit=None,
+        depth_limit=None,
         parameters=None,
         with_name=None,
         highlevel=True):
@@ -206,7 +208,7 @@ def zip(arrays,
         arrays (dict or iterable of arrays): Arrays to combine into a
             record-containing structure (if a dict) or a tuple-containing
             structure (if any other kind of iterable).
-        depthlimit (None or int): If None, attempt to fully broadcast the
+        depth_limit (None or int): If None, attempt to fully broadcast the
             `array` to all levels. If an int, limit the number of dimensions
             that get broadcasted. The minimum value is `1`, for no
             broadcasting.
@@ -222,7 +224,7 @@ def zip(arrays,
     of records or the slots of a collection of tuples. If the `arrays` have
     nested structure, they are broadcasted with one another to form the
     records or tuples as deeply as possible, though this can be limited by
-    `depthlimit`.
+    `depth_limit`.
 
     This operation may be thought of as the opposite of projection in
     #ak.Array.__getitem__, which extracts fields one at a time, or
@@ -275,20 +277,20 @@ def zip(arrays,
         >>> ak.zip([one, two])
         ValueError: in ListArray64, cannot broadcast nested list
 
-    For this, one can set the `depthlimit` to prevent the operation from
+    For this, one can set the `depth_limit` to prevent the operation from
     attempting to broadcast what can't be broadcasted.
 
-        >>> ak.to_list(ak.zip([one, two], depthlimit=1))
+        >>> ak.to_list(ak.zip([one, two], depth_limit=1))
         [([[1, 2, 3], [], [4, 5], [6]], [[1.1, 2.2], [3.3], [4.4], [5.5]]),
          ([], []),
          ([[7, 8]], [[6.6]])]
 
-    As an extreme, `depthlimit=1` is a handy way to make a record structure
+    As an extreme, `depth_limit=1` is a handy way to make a record structure
     at the outermost level, regardless of whether the fields have matching
     structure or not.
     """
-    if depthlimit is not None and depthlimit <= 0:
-        raise ValueError("depthlimit must be None or at least 1")
+    if depth_limit is not None and depth_limit <= 0:
+        raise ValueError("depth_limit must be None or at least 1")
 
     if isinstance(arrays, dict):
         recordlookup = []
@@ -299,6 +301,7 @@ def zip(arrays,
                 awkward1.operations.convert.to_layout(x,
                                                       allow_record=False,
                                                       allow_other=False))
+
     else:
         recordlookup = None
         layouts = []
@@ -316,9 +319,9 @@ def zip(arrays,
         parameters["__record__"] = with_name
 
     def getfunction(inputs, depth):
-        if ((depthlimit is None and
+        if ((depth_limit is None and
              all(x.purelist_depth == 1 for x in inputs)) or
-            (depthlimit == depth)):
+            (depth_limit == depth)):
             return lambda: (
                 awkward1.layout.RecordArray(inputs,
                                             recordlookup,
@@ -2168,6 +2171,149 @@ def virtual(generate,
         return awkward1._util.wrap(out, behavior=behavior)
     else:
         return out
+
+def with_cache(array, cache, chain=None, highlevel=True):
+    """
+    Args:
+        array: Data to search for nested virtual arrays.
+        cache (None or MutableMapping): If None, arrays are generated every
+            time they are needed; otherwise, generated arrays are stored in the
+            mapping with `__setitem__`, retrieved with `__getitem__`, and only
+            re-generated if `__getitem__` raises a `KeyError`. This mapping may
+            evict elements according to any caching algorithm (LRU, LFR, RR,
+            TTL, etc.).
+        chain (None, "first", "last", or bool): If None, the provided `cache`
+            simply replaces any existing virtual array caches. If "first", the
+            provided `cache` becomes first in a chain of caches; virtual arrays
+            will attempt to `__getitem__`/`__setitem__` the provided `cache`
+            first, falling back to preexisting caches if necessary. If "last",
+            the provided `cache` becomes last in a chain of caches: the
+            preexisting caches get priority. If a bool, True is equivalent to
+            "first" and False is equivalent to None.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+
+    Remove caches from all virtual arrays nested within `array` if `cache` is
+    None; adds a cache otherwise.
+
+    For example:
+
+        >>> cache1 = {}
+        >>> one = ak.virtual(lambda: [[1.1, 2.2, 3.3], [], [4.4, 5.5]], cache=cache1, length=3)
+        >>> two = ak.virtual(lambda: [100, 200, 300], cache=cache1, length=3)
+        >>> array1 = ak.zip({"x": one, "y": two}, depth_limit=1)
+        >>> len(cache1)
+        0
+
+    creates an array of records with virtual fields that would fill `cache1`.
+
+    We can then switch to `cache2` by replacement:
+
+        >>> cache2 = {}
+        >>> array2 = ak.with_cache(array1, cache2)
+        >>> ak.to_list(array2)
+        [{"x": [1.1, 2.2, 3.3], "y": 100}, {"x": [], "y": 200}, {"x": [4.4, 5.5], "y": 300}]
+        >>>
+        >>> len(cache1), len(cache2)
+        (0, 2)
+
+    Viewing the new `array2` filled `cache2` and not `cache1`.
+
+    After evicting the caches, we can then chain `cache1` and `cache2`:
+
+        >>> cache1.clear()
+        >>> cache2.clear()
+        >>>
+        >>> array3 = ak.with_cache(array2, cache1, chain="first")
+        >>> ak.to_list(array3)
+        [{"x": [1.1, 2.2, 3.3], "y": 100}, {"x": [], "y": 200}, {"x": [4.4, 5.5], "y": 300}]
+        >>>
+        >>> len(cache1), len(cache2)
+        (2, 0)
+
+    Now `cache1` is filled first, but it would spill over 
+
+    See #ak.virtual.
+    """
+
+    if chain is True:
+        chain = "first"
+    elif chain is False:
+        chain = None
+    elif chain is not None and chain not in ("first", "last"):
+        raise ValueError("chain must be None, 'first', 'last', or bool")
+
+    if not isinstance(cache, awkward1._io.ArrayCache):
+        cache = awkward1._io.ArrayCache(cache)
+
+    def getfunction(layout, depth):
+        if isinstance(layout, awkward1.layout.VirtualArray):
+            if chain is None:
+                newcache = cache
+            elif cache is None:
+                newcache = layout.cache
+            elif layout.cache is None:
+                newcache = cache
+            elif chain == "first":
+                newcache = awkward1._io.ArrayCache(_CacheChain(cache,
+                                                               layout.cache))
+            elif chain == "last":
+                newcache = awkward1._io.ArrayCache(_CacheChain(layout.cache,
+                                                               cache))
+            return lambda: awkward1.layout.VirtualArray(
+                               layout.generator,
+                               newcache,
+                               layout.cache_key,
+                               layout.identities,
+                               layout.parameters)
+        else:
+            return None
+
+    out = awkward1._util.recursively_apply(
+            awkward1.operations.convert.to_layout(array), getfunction)
+    if highlevel:
+        return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
+    else:
+        return out
+
+class _CacheChain(MutableMapping):
+    def __init__(self, first, last):
+        self.first = first
+        self.last = last
+
+    def __getitem__(self, where):
+        try:
+            print("try to get from first", where, self.first)
+            tmp = self.first[where]
+            print("yes, first")
+            return tmp
+        except KeyError:
+            print("try to get from last", where, self.last)
+            tmp = self.last[where]
+            print("yes, last")
+            return tmp
+
+    def __setitem__(self, where, what):
+        print("set in first", where)
+        self.first[where] = what
+
+    def __delitem__(self, where):
+        try:
+            del self.first[where]
+        except KeyError:
+            del self.last[where]
+
+    def __iter__(self):
+        seen = set()
+        for x in self.first:
+            seen.add(x)
+            yield x
+        for x in self.last:
+            if x not in seen:
+                yield x
+
+    def __len__(self):
+        return len(set(self.first).union(set(self.last)))
 
 @awkward1._connect._numpy.implements(numpy.size)
 def size(array, axis=None):

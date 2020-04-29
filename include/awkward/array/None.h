@@ -47,7 +47,13 @@ namespace awkward {
 
     /// @exception std::runtime_error is always thrown
     const FormPtr
-      form() const override;
+      form(bool materialize) const override;
+
+    bool
+      has_virtual_form() const override;
+
+    bool
+      has_virtual_length() const override;
 
     const std::string
       tostring_part(const std::string& indent,
@@ -107,6 +113,26 @@ namespace awkward {
     /// @exception std::runtime_error is always thrown
     const ContentPtr
       carry(const Index64& carry) const override;
+
+    /// @exception std::runtime_error is always thrown
+    int64_t
+      numfields() const override;
+
+    /// @exception std::runtime_error is always thrown
+    int64_t
+      fieldindex(const std::string& key) const override;
+
+    /// @exception std::runtime_error is always thrown
+    const std::string
+      key(int64_t fieldindex) const override;
+
+    /// @exception std::runtime_error is always thrown
+    bool
+      haskey(const std::string& key) const override;
+
+    /// @exception std::runtime_error is always thrown
+    const std::vector<std::string>
+      keys() const override;
 
     // operations
 
