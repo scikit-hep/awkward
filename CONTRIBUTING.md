@@ -66,8 +66,8 @@ As stated above, new releases are published frequently, getting bug fixes and ne
 
 HERE
 
-<center>
-  <img src="docs-images/diagrams/awkward-1-0-layers.png" width="500">
-</center>
+<p align="center">
+  <img src="docs-images/diagrams/awkward-1-0-layers.png" width="650">
+</p>
 
 THERE
