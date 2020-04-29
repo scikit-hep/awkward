@@ -2,12 +2,22 @@
 
 import subprocess
 import re
+import http.client
 
 tagslist_text = subprocess.run(["git", "show-ref", "--tags"], stdout=subprocess.PIPE).stdout
 tagslist = dict(re.findall(rb"([0-9a-f]{40}) refs/tags/([0-9\.]+)", tagslist_text))
 
 subjects_text = subprocess.run(["git", "log", "--format='format:%H %s'"], stdout=subprocess.PIPE).stdout
 subjects = re.findall(rb"([0-9a-f]{40}) (.*)", subjects_text)
+
+pypi_connection = http.client.HTTPSConnection("pypi.org")
+
+def pypi_exists(tag):
+    print("Looking for release {0} on PyPI...".format(tag))
+    pypi_connection.request("HEAD", "/project/awkward1/{0}/".format(tag))
+    response = pypi_connection.getresponse()
+    response.read()
+    return response.status == 200
 
 with open("_auto/changelog.rst", "w") as outfile:
     outfile.write("Release history\n")
@@ -24,8 +34,14 @@ with open("_auto/changelog.rst", "w") as outfile:
                 outfile.write("*(no pull requests)*\n")
             numprs = 0
 
-            outfile.write("\nRelease `{0} <{1}>`__\n".format(tag, tagurl))
-            outfile.write("="*(len(tag) + len(tagurl) + 15) + "\n\n")
+            if pypi_exists(tag):
+                pypi_url = " (`pip <https://pypi.org/project/awkward1/{0}/>`__)".format(tag)
+            else:
+                pypi_url = ""
+
+            header_text = "\nRelease `{0} <{1}>`__{2}\n".format(tag, tagurl, pypi_url)
+            outfile.write(header_text)
+            outfile.write("="*len(header_text) + "\n\n")
 
         m = re.match(rb"(.*) \(#([1-9][0-9]*)\)", subject)
         if m is not None:

@@ -65,19 +65,21 @@ Be sure to clone this repository recursively to get the header-only C++ dependen
 git clone --recursive https://github.com/scikit-hep/awkward-1.0.git
 ```
 
-You can install it on your system with pip, which uses exactly the same procedure as deployment:
+You can install it on your system with pip, which uses exactly the same procedure as deployment. This is recommended if you **do not** expect to change the code.
 
 ```bash
 pip install .[test,dev]
 ```
 
-Or you can build it locally for incremental development. The following reuses a local directory so that you only recompile what you've changed:
+Or you can build it locally for incremental development. The following reuses a local directory so that you only recompile what you've changed. This is recommended if you **do** expect to change the code.
 
 ```bash
 python localbuild.py --pytest tests
 ```
 
 [Continuous integration](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=3&_a=summary) and [continuous deployment](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=4&_a=summary) are hosted by Azure Pipelines.
+
+[Release history](https://awkward-array.readthedocs.io/en/latest/_auto/changelog.html) (changelog) is hosted by ReadTheDocs.
 
 ## Using Awkward Array as a dependency
 
