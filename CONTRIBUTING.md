@@ -64,10 +64,17 @@ As stated above, new releases are published frequently, getting bug fixes and ne
 
 ## Project organization
 
-HERE
+The Awkward Array codebase consists of three main layers: the high-level user interface (in Python), data ownership and navigation (independently in C++ and lowered Numba), and array manipulation (in C++ and CUDA, behind a pure C interface).
 
 <p align="center">
   <img src="docs-images/diagrams/awkward-1-0-layers.png" width="600">
 </p>
 
-THERE
+Contributing to each part of the codebase has a different flavor:
+
+   * The high-level code is focused on user experience, with careful attention to names, backward compatibility, duck typing, and interfaces with external libraries. Parts of it are more docstring than code.
+   * The C++ code is focused on correct memory management and navigating data structures. It is *not* the place for performance optimizations, at least not unless motivated by specific metrics.
+   * The Numba code requires familiarity with [Numba's extension mechanism](https://numba.pydata.org/numba-doc/dev/extending/index.html) and Numba internals. (We use only the low-level API.)
+   * The CPU kernels and GPU kernels are two implementations of the same functions, optimized for CPUs and GPUs, respectively. The interface (and most of the implementations) of these functions involve only numbers and arrays. This *is* the place for performance optimizations.
+
+Contributions might only touch one layer of the code or it might involve more than one.
