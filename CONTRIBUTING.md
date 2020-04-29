@@ -18,9 +18,9 @@ Feel free to [open pull requests in GitHub](https://github.com/scikit-hep/awkwar
 
 Please [make the pull request a draft](https://github.blog/2019-02-14-introducing-draft-pull-requests/) to indicate that it is in an incomplete state and shouldn't be merged until you click "ready for review."
 
-At present, I (Jim Pivarski, [jpivarski](https://github.com/jpivarski)) merge or close all pull requests for Awkward Array, though a team of maintainers should expand in the future, as the project matures. When I'm working closely with a developer, such as a summer student, I'll sometimes give that developer permission to merge their own pull requests.
+At present, I (Jim Pivarski, [jpivarski](https://github.com/jpivarski)) merge or close all pull requests for Awkward Array, though a team of maintainers should be enlisted in the future, as the project matures. When I'm working closely with a developer, such as a summer student, I'll sometimes give that developer permission to merge their own pull requests.
 
-If you're waiting for me to review, comment upon, or merge a pull request, please do remind me by mentioning me ("`@pivarski`") in a comment. It's possible that I've forgotten and I apologize in advance. (I tend to give the person I'm currently working with my full attention, unfortunately at the expense of others.)
+If you're waiting for me to review, comment upon, or merge a pull request, please do remind me by mentioning me (`@jpivarski`) in a comment. It's possible that I've forgotten and I apologize in advance. (I tend to give the person I'm currently working with my full attention, unfortunately at the expense of others.)
 
 ### Becoming a regular committer
 
