@@ -74,7 +74,24 @@ Contributing to each part of the codebase has a different flavor:
 
    * The high-level code is focused on user experience, with careful attention to names, backward compatibility, duck typing, and interfaces with external libraries. Parts of it are more docstring than code.
    * The C++ code is focused on correct memory management and navigating data structures. It is *not* the place for performance optimizations, at least not unless motivated by specific metrics.
-   * The Numba code requires familiarity with [Numba's extension mechanism](https://numba.pydata.org/numba-doc/dev/extending/index.html) and Numba internals. (We use only the low-level API.)
-   * The CPU kernels and GPU kernels are two implementations of the same functions, optimized for CPUs and GPUs, respectively. The interface (and most of the implementations) of these functions involve only numbers and arrays. This *is* the place for performance optimizations.
+   * The Numba code requires familiarity with [Numba's extension mechanism](https://numba.pydata.org/numba-doc/dev/extending/index.html) (low-level only) and Numba internals.
+   * The CPU kernels and GPU kernels are two implementations of the same functions, optimized for CPUs and GPUs, respectively. The pure C interface to these functions, and most of their implementations, involve only numbers and arrays. This *is* the place for performance optimizations.
 
 Contributions might only touch one layer of the code or it might involve more than one.
+
+### Performance considerations
+
+The conventional model is that Python is for a good user interface and C++ is for performance. In the case of Awkward Array, even the C++ layer is not intended for high performance; this is pushed down to the CPU and GPU kernels. See the "[how-it-works tutorials for developers](https://scikit-hep.org/awkward-1.0/index.html)" for more on columnar data, but in typical applications, the number of C++ objects is small (hundreds to thousands of instances) while the size of array buffers sent to CPU and GPU kernels is large (billions of elements).
+
+Thus, we freely take advantage of some "old" C++ practices that sacrifice performance for flexibility:
+
+   * dynamic dispatch (virtual methods) instead of template specialization
+   * copy constructors and naive argument passing instead of move semantics.
+
+The CPU and GPU kernels, on the other hand, should be optimized for hardware cache throughput and vectorization. Performance improvements in CPU and GPU kernels are eagerly sought, while performance improvements in the C++ codebase have to be justified by significant gains.
+
+Sometimes, changes in the C++ or even Python code can change the number or size of CPU and GPU kernels that need to be run, in which case they are easily justified performance corrections.
+
+### General statements on coding style
+
+Above all, the purpose of any programming language is to be read by humans; if we were only concerned with operating the machine, we would flip individual bits.
