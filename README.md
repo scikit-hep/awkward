@@ -77,9 +77,8 @@ Or you can build it locally for incremental development. The following reuses a 
 python localbuild.py --pytest tests
 ```
 
-[Continuous integration](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=3&_a=summary) and [continuous deployment](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=4&_a=summary) are hosted by Azure Pipelines.
-
-[Release history](https://awkward-array.readthedocs.io/en/latest/_auto/changelog.html) (changelog) is hosted by ReadTheDocs.
+   * [Continuous integration](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=3&_a=summary) and [continuous deployment](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=4&_a=summary) are hosted by Azure Pipelines.
+   * [Release history](https://awkward-array.readthedocs.io/en/latest/_auto/changelog.html) (changelog) is hosted by ReadTheDocs.
 
 ## Using Awkward Array as a dependency
 
@@ -91,7 +90,7 @@ See the [dependent-project](https://github.com/scikit-hep/awkward-1.0/tree/maste
 
 # Papers and talks about Awkward Array
 
-   * The [original motivations document](https://docs.google.com/document/d/1lj8ARTKV1_hqGTh0W_f01S6SsmpzZAXz9qqqWnEB3j4/edit?usp=sharing) from July 2019, now a little out-of-date.
+   * [Original motivations document](https://docs.google.com/document/d/1lj8ARTKV1_hqGTh0W_f01S6SsmpzZAXz9qqqWnEB3j4/edit?usp=sharing) from July 2019, now out-of-date.
    * [StrangeLoop talk](https://youtu.be/2NxWpU7NArk) on September 14, 2019.
    * [PyHEP talk](https://indico.cern.ch/event/833895/contributions/3577882) on October 17, 2019.
    * [CHEP talk](https://indico.cern.ch/event/773049/contributions/3473258) on November 7, 2019.
