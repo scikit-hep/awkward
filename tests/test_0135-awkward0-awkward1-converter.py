@@ -100,8 +100,8 @@ def test_fromawkward0():
 
     array = awkward0.fromiter(["hello", "you", "guys"])
     assert isinstance(awkward1.from_awkward0(array, highlevel=False), (awkward1.layout.ListArray32, awkward1.layout.ListArrayU32, awkward1.layout.ListArray64, awkward1.layout.ListOffsetArray32, awkward1.layout.ListOffsetArrayU32, awkward1.layout.ListOffsetArray64))
-    assert awkward1.from_awkward0(array, highlevel=False).parameters["__array__"] in ("string", "bytes")
-    assert awkward1.from_awkward0(array, highlevel=False).content.parameters["__array__"] in ("utf8", "char")
+    assert awkward1.from_awkward0(array, highlevel=False).parameters["__array__"] in ("string", "bytestring")
+    assert awkward1.from_awkward0(array, highlevel=False).content.parameters["__array__"] in ("char", "byte")
     assert awkward1.to_list(awkward1.from_awkward0(array)) == ["hello", "you", "guys"]
 
     class Point(object):

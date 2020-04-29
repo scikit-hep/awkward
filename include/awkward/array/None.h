@@ -45,6 +45,16 @@ namespace awkward {
     const TypePtr
       type(const util::TypeStrs& typestrs) const override;
 
+    /// @exception std::runtime_error is always thrown
+    const FormPtr
+      form(bool materialize) const override;
+
+    bool
+      has_virtual_form() const override;
+
+    bool
+      has_virtual_length() const override;
+
     const std::string
       tostring_part(const std::string& indent,
                     const std::string& pre,
@@ -103,26 +113,6 @@ namespace awkward {
     /// @exception std::runtime_error is always thrown
     const ContentPtr
       carry(const Index64& carry) const override;
-
-    /// @exception std::runtime_error is always thrown
-    const std::string
-      purelist_parameter(const std::string& key) const override;
-
-    /// @exception std::runtime_error is always thrown
-    bool
-      purelist_isregular() const override;
-
-    /// @exception std::runtime_error is always thrown
-    int64_t
-      purelist_depth() const override;
-
-    /// @exception std::runtime_error is always thrown
-    const std::pair<int64_t, int64_t>
-      minmax_depth() const override;
-
-    /// @exception std::runtime_error is always thrown
-    const std::pair<bool, int64_t>
-      branch_depth() const override;
 
     /// @exception std::runtime_error is always thrown
     int64_t

@@ -1,5 +1,6 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+#include "rapidjson/document.h"
 #include "rapidjson/reader.h"
 #include "rapidjson/writer.h"
 #include "rapidjson/prettywriter.h"
@@ -19,6 +20,53 @@ namespace awkward {
   ////////// writing to JSON
   ToJson::~ToJson() = default;
 
+  void
+  ToJson::string(const std::string& x) {
+    string(x.c_str(), x.length());
+  }
+
+  void
+  ToJson::field(const std::string& x) {
+    field(x.c_str());
+  }
+
+  template <typename DOCUMENT, typename WRITER>
+  void copyjson(const DOCUMENT& value, WRITER& writer) {
+    if (value.IsNull()) {
+      writer.Null();
+    }
+    else if (value.IsBool()) {
+      writer.Bool(value.GetBool());
+    }
+    else if (value.IsInt()) {
+      writer.Int64(value.GetInt());
+    }
+    else if (value.IsDouble()) {
+      writer.Int64(value.GetDouble());
+    }
+    else if (value.IsString()) {
+      writer.String(value.GetString());
+    }
+    else if (value.IsArray()) {
+      writer.StartArray();
+      for (size_t i = 0;  i < value.Size();  i++) {
+        copyjson(value[i], writer);
+      }
+      writer.EndArray();
+    }
+    else if (value.IsObject()) {
+      writer.StartObject();
+      for (auto it = value.MemberBegin();  it != value.MemberEnd();  ++it) {
+        writer.Key(it->name.GetString());
+        copyjson(it->value, writer);
+      }
+      writer.EndObject();
+    }
+    else {
+      throw std::runtime_error("unrecognized JSON element type");
+    }
+  }
+
   class ToJsonString::Impl {
   public:
     Impl(int64_t maxdecimals): buffer_(), writer_(buffer_) {
@@ -37,6 +85,11 @@ namespace awkward {
     void beginrecord() { writer_.StartObject(); }
     void field(const char* x) { writer_.Key(x); }
     void endrecord() { writer_.EndObject(); }
+    void json(const char* data) {
+      rj::Document doc;
+      doc.Parse<rj::kParseNanAndInfFlag>(data);
+      copyjson(doc, writer_);
+    }
     const std::string tostring() {
       return std::string(buffer_.GetString());
     }
@@ -102,6 +155,11 @@ namespace awkward {
     impl_->endrecord();
   }
 
+  void
+  ToJsonString::json(const char* x) {
+    impl_->json(x);
+  }
+
   const std::string
   ToJsonString::tostring() {
     return impl_->tostring();
@@ -126,6 +184,11 @@ namespace awkward {
     void beginrecord() { writer_.StartObject(); }
     void field(const char* x) { writer_.Key(x); }
     void endrecord() { writer_.EndObject(); }
+    void json(const char* data) {
+      rj::Document doc;
+      doc.Parse<rj::kParseNanAndInfFlag>(data);
+      copyjson(doc, writer_);
+    }
     const std::string tostring() {
       return std::string(buffer_.GetString());
     }
@@ -191,6 +254,11 @@ namespace awkward {
     impl_->endrecord();
   }
 
+  void
+  ToJsonPrettyString::json(const char* x) {
+    impl_->json(x);
+  }
+
   const std::string
   ToJsonPrettyString::tostring() {
     return impl_->tostring();
@@ -219,6 +287,11 @@ namespace awkward {
     void beginrecord() { writer_.StartObject(); }
     void field(const char* x) { writer_.Key(x); }
     void endrecord() { writer_.EndObject(); }
+    void json(const char* data) {
+      rj::Document doc;
+      doc.Parse<rj::kParseNanAndInfFlag>(data);
+      copyjson(doc, writer_);
+    }
   private:
     std::shared_ptr<char> buffer_;
     rj::FileWriteStream stream_;
@@ -284,6 +357,11 @@ namespace awkward {
     impl_->endrecord();
   }
 
+  void
+  ToJsonFile::json(const char* x) {
+    impl_->json(x);
+  }
+
   class ToJsonPrettyFile::Impl {
   public:
     Impl(FILE* destination, int64_t maxdecimals, int64_t buffersize)
@@ -307,6 +385,11 @@ namespace awkward {
     void beginrecord() { writer_.StartObject(); }
     void field(const char* x) { writer_.Key(x); }
     void endrecord() { writer_.EndObject(); }
+    void json(const char* data) {
+      rj::Document doc;
+      doc.Parse<rj::kParseNanAndInfFlag>(data);
+      copyjson(doc, writer_);
+    }
   private:
     std::shared_ptr<char> buffer_;
     rj::FileWriteStream stream_;
@@ -372,6 +455,11 @@ namespace awkward {
   void
   ToJsonPrettyFile::endrecord() {
     impl_->endrecord();
+  }
+
+  void
+  ToJsonPrettyFile::json(const char* x) {
+    impl_->json(x);
   }
 
   ////////// reading from JSON

@@ -20,11 +20,169 @@
 #include "awkward/array/ByteMaskedArray.h"
 #include "awkward/array/BitMaskedArray.h"
 #include "awkward/array/UnmaskedArray.h"
+#include "awkward/array/VirtualArray.h"
 
 #define AWKWARD_LISTARRAY_NO_EXTERN_TEMPLATE
 #include "awkward/array/ListArray.h"
 
 namespace awkward {
+  ////////// ListForm
+
+  ListForm::ListForm(bool has_identities,
+                     const util::Parameters& parameters,
+                     Index::Form starts,
+                     Index::Form stops,
+                     const FormPtr& content)
+      : Form(has_identities, parameters)
+      , starts_(starts)
+      , stops_(stops)
+      , content_(content) { }
+
+  Index::Form
+  ListForm::starts() const {
+    return starts_;
+  }
+
+  Index::Form
+  ListForm::stops() const {
+    return stops_;
+  }
+
+  const FormPtr
+  ListForm::content() const {
+    return content_;
+  }
+
+  const TypePtr
+  ListForm::type(const util::TypeStrs& typestrs) const {
+    return std::make_shared<ListType>(
+               parameters_,
+               util::gettypestr(parameters_, typestrs),
+               content_.get()->type(typestrs));
+  }
+
+  void
+  ListForm::tojson_part(ToJson& builder, bool verbose) const {
+    builder.beginrecord();
+    builder.field("class");
+    if (starts_ == Index::Form::i32) {
+      builder.string("ListArray32");
+    }
+    else if (starts_ == Index::Form::u32) {
+      builder.string("ListArrayU32");
+    }
+    else if (starts_ == Index::Form::i64) {
+      builder.string("ListArray64");
+    }
+    else {
+      builder.string("UnrecognizedListArray");
+    }
+    builder.field("starts");
+    builder.string(Index::form2str(starts_));
+    builder.field("stops");
+    builder.string(Index::form2str(stops_));
+    builder.field("content");
+    content_.get()->tojson_part(builder, verbose);
+    identities_tojson(builder, verbose);
+    parameters_tojson(builder, verbose);
+    builder.endrecord();
+  }
+
+  const FormPtr
+  ListForm::shallow_copy() const {
+    return std::make_shared<ListForm>(has_identities_,
+                                      parameters_,
+                                      starts_,
+                                      stops_,
+                                      content_);
+  }
+
+  const std::string
+  ListForm::purelist_parameter(const std::string& key) const {
+    std::string out = parameter(key);
+    if (out == std::string("null")) {
+      return content_.get()->purelist_parameter(key);
+    }
+    else {
+      return out;
+    }
+  }
+
+  bool
+  ListForm::purelist_isregular() const {
+    return false;
+  }
+
+  int64_t
+  ListForm::purelist_depth() const {
+    return content_.get()->purelist_depth() + 1;
+  }
+
+  const std::pair<int64_t, int64_t>
+  ListForm::minmax_depth() const {
+    std::pair<int64_t, int64_t> content_depth = content_.get()->minmax_depth();
+    return std::pair<int64_t, int64_t>(content_depth.first + 1,
+                                       content_depth.second + 1);
+  }
+
+  const std::pair<bool, int64_t>
+  ListForm::branch_depth() const {
+    std::pair<bool, int64_t> content_depth = content_.get()->branch_depth();
+    return std::pair<bool, int64_t>(content_depth.first,
+                                    content_depth.second + 1);
+  }
+
+  int64_t
+  ListForm::numfields() const {
+    return content_.get()->numfields();
+  }
+
+  int64_t
+  ListForm::fieldindex(const std::string& key) const {
+    return content_.get()->fieldindex(key);
+  }
+
+  const std::string
+  ListForm::key(int64_t fieldindex) const {
+    return content_.get()->key(fieldindex);
+  }
+
+  bool
+  ListForm::haskey(const std::string& key) const {
+    return content_.get()->haskey(key);
+  }
+
+  const std::vector<std::string>
+  ListForm::keys() const {
+    return content_.get()->keys();
+  }
+
+  bool
+  ListForm::equal(const FormPtr& other,
+                  bool check_identities,
+                  bool check_parameters) const {
+    if (check_identities  &&
+        has_identities_ != other.get()->has_identities()) {
+      return false;
+    }
+    if (check_parameters  &&
+        !util::parameters_equal(parameters_, other.get()->parameters())) {
+      return false;
+    }
+    if (ListForm* t = dynamic_cast<ListForm*>(other.get())) {
+      return (starts_ == t->starts()  &&
+              stops_ == t->stops()  &&
+              content_.get()->equal(t->content(),
+                                    check_identities,
+                                    check_parameters));
+    }
+    else {
+      return false;
+    }
+  }
+
+  ////////// ListArray
+
   template <typename T>
   ListArrayOf<T>::ListArrayOf(const IdentitiesPtr& identities,
                               const util::Parameters& parameters,
@@ -269,9 +427,29 @@ namespace awkward {
   template <typename T>
   const TypePtr
   ListArrayOf<T>::type(const util::TypeStrs& typestrs) const {
-    return std::make_shared<ListType>(parameters_,
-                                      util::gettypestr(parameters_, typestrs),
-                                      content_.get()->type(typestrs));
+    return form(true).get()->type(typestrs);
+  }
+
+  template <typename T>
+  const FormPtr
+  ListArrayOf<T>::form(bool materialize) const {
+    return std::make_shared<ListForm>(identities_.get() != nullptr,
+                                      parameters_,
+                                      starts_.form(),
+                                      stops_.form(),
+                                      content_.get()->form(materialize));
+  }
+
+  template <typename T>
+  bool
+  ListArrayOf<T>::has_virtual_form() const {
+    return content_.get()->has_virtual_form();
+  }
+
+  template <typename T>
+  bool
+  ListArrayOf<T>::has_virtual_length() const {
+    return content_.get()->has_virtual_length();
   }
 
   template <typename T>
@@ -536,46 +714,6 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::string
-  ListArrayOf<T>::purelist_parameter(const std::string& key) const {
-    std::string out = parameter(key);
-    if (out == std::string("null")) {
-      return content_.get()->purelist_parameter(key);
-    }
-    else {
-      return out;
-    }
-  }
-
-  template <typename T>
-  bool
-  ListArrayOf<T>::purelist_isregular() const {
-    return false;
-  }
-
-  template <typename T>
-  int64_t
-  ListArrayOf<T>::purelist_depth() const {
-    return content_.get()->purelist_depth() + 1;
-  }
-
-  template <typename T>
-  const std::pair<int64_t, int64_t>
-  ListArrayOf<T>::minmax_depth() const {
-    std::pair<int64_t, int64_t> content_depth = content_.get()->minmax_depth();
-    return std::pair<int64_t, int64_t>(content_depth.first + 1,
-                                       content_depth.second + 1);
-  }
-
-  template <typename T>
-  const std::pair<bool, int64_t>
-  ListArrayOf<T>::branch_depth() const {
-    std::pair<bool, int64_t> content_depth = content_.get()->branch_depth();
-    return std::pair<bool, int64_t>(content_depth.first,
-                                    content_depth.second + 1);
-  }
-
-  template <typename T>
   int64_t
   ListArrayOf<T>::numfields() const {
     return content_.get()->numfields();
@@ -666,6 +804,10 @@ namespace awkward {
   template <typename T>
   bool
   ListArrayOf<T>::mergeable(const ContentPtr& other, bool mergebool) const {
+    if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
+      return mergeable(raw->array(), mergebool);
+    }
+
     if (!parameters_equal(other.get()->parameters())) {
       return false;
     }
@@ -745,6 +887,10 @@ namespace awkward {
   template <typename T>
   const ContentPtr
   ListArrayOf<T>::merge(const ContentPtr& other) const {
+    if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
+      return merge(raw->array());
+    }
+
     if (!parameters_equal(other.get()->parameters())) {
       return merge_as_union(other);
     }

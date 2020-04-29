@@ -1,46 +1,38 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
-#ifndef AWKWARD_RECORDARRAY_H_
-#define AWKWARD_RECORDARRAY_H_
+#ifndef AWKWARD_VIRTUALARRAY_H_
+#define AWKWARD_VIRTUALARRAY_H_
 
-#include <memory>
 #include <string>
-#include <unordered_map>
+#include <memory>
+#include <vector>
 
 #include "awkward/cpu-kernels/util.h"
-#include "awkward/Identities.h"
+#include "awkward/Slice.h"
 #include "awkward/Content.h"
+#include "awkward/virtual/ArrayGenerator.h"
+#include "awkward/virtual/ArrayCache.h"
 
 namespace awkward {
-  /// @class RecordForm
+  /// @class VirtualForm
   ///
-  /// @brief Form describing RecordArray (not a Record).
-  class EXPORT_SYMBOL RecordForm: public Form {
+  /// @brief Form describing VirtualArray.
+  class EXPORT_SYMBOL VirtualForm: public Form {
   public:
-    /// @brief Creates a RecordForm. See RecordArray (not Record) for
-    /// documentation.
-    RecordForm(bool has_identities,
-               const util::Parameters& parameters,
-               const util::RecordLookupPtr& recordlookup,
-               const std::vector<FormPtr>& contents);
-
-    const util::RecordLookupPtr
-      recordlookup() const;
-
-    const std::vector<FormPtr>
-      contents() const;
+    /// @brief Creates a VirtualForm. See VirtualArray for documentation.
+    VirtualForm(bool has_identities,
+                const util::Parameters& parameters,
+                const FormPtr& form,
+                bool has_length);
 
     bool
-      istuple() const;
+      has_form() const;
 
     const FormPtr
-      content(int64_t fieldindex) const;
+      form() const;
 
-    const FormPtr
-      content(const std::string& key) const;
-
-    const std::vector<std::pair<std::string, FormPtr>>
-      items() const;
+    bool
+      has_length() const;
 
     const TypePtr
       type(const util::TypeStrs& typestrs) const override;
@@ -87,87 +79,70 @@ namespace awkward {
             bool check_parameters) const override;
 
   private:
-    const util::RecordLookupPtr recordlookup_;
-    const std::vector<FormPtr> contents_;
+    const FormPtr form_;
+    bool has_length_;
   };
 
-  /// @class RecordArray
+  /// @class VirtualArray
   ///
-  /// @brief Represents an array of tuples or records, in which a tuple
-  /// has a fixed number of differently typed fields and a record has
-  /// a named set of differently typed fields.
+  /// @brief Represents an array that can be generated on demand.
   ///
-  /// See #RecordArray for the meaning of each parameter.
-  ///
-  /// Tuples and records are distinguished by the absence or presence of a
-  /// #recordlookup (`std::vector<std::string>`) that associates key names
-  /// with each field.
-  ///
-  /// Fields are always ordered, whether tuples or records.
-  class EXPORT_SYMBOL RecordArray:
-    public Content,
-    public std::enable_shared_from_this<RecordArray> {
+  /// See #VirtualArray for the meaning of each parameter.
+  class EXPORT_SYMBOL VirtualArray: public Content {
   public:
-    /// @brief Creates a RecordArray from a full set of parameters.
+    /// @brief Creates a VirtualArray from a full set of parameters.
     ///
     /// @param identities Optional Identities for each element of the array
     /// (may be `nullptr`).
     /// @param parameters String-to-JSON map that augments the meaning of this
     /// array.
-    /// @param contents `std::vector` of Content instances representing the
-    /// (ordered) fields.
-    /// @param recordlookup A `std::shared_ptr<std::vector<std::string>>`
-    /// optional list of key names.
-    /// If absent (`nullptr`), the data are tuples; otherwise, they are
-    /// records. The number of names must match the number of #contents.
-    /// @param length The length of the array, breaking ambiguities between
-    /// #contents of different lengths and essential if there are zero fields.
-    RecordArray(const IdentitiesPtr& identities,
-                const util::Parameters& parameters,
-                const ContentPtrVec& contents,
-                const util::RecordLookupPtr& recordlookup,
-                int64_t length);
+    /// @param generator Function that materializes the array and possibly
+    /// checks it against an expected Form.
+    /// @param cache Temporary storage for materialized arrays to avoid calling
+    /// the #generator more than necessary. May be `nullptr`.
+    /// @param cache_key The key this VirtualArray will use when filling a
+    /// #cache.
+    VirtualArray(const IdentitiesPtr& identities,
+                 const util::Parameters& parameters,
+                 const ArrayGeneratorPtr& generator,
+                 const ArrayCachePtr& cache,
+                 const std::string& cache_key);
 
-    /// @brief Creates a RecordArray in which #length is the minimum
-    /// length of the #contents or zero if there are no #contents.
-    RecordArray(const IdentitiesPtr& identities,
-                const util::Parameters& parameters,
-                const ContentPtrVec& contents,
-                const util::RecordLookupPtr& recordlookup);
+    /// @brief Creates a VirtualArray with an automatically assigned #cache_key
+    /// (unique per process).
+    VirtualArray(const IdentitiesPtr& identities,
+                 const util::Parameters& parameters,
+                 const ArrayGeneratorPtr& generator,
+                 const ArrayCachePtr& cache);
 
-    /// @brief `std::vector` of Content instances representing the
-    /// (ordered) fields.
-    const ContentPtrVec
-      contents() const;
+    /// @brief Function that materializes the array and possibly
+    /// checks it against an expected Form.
+    const ArrayGeneratorPtr
+      generator() const;
 
-    /// @brief A `std::shared_ptr<std::vector<std::string>>`
-    /// optional list of key names.
-    /// If absent (`nullptr`), the data are tuples; otherwise, they are
-    /// records. The number of names must match the number of #contents.
-    const util::RecordLookupPtr
-      recordlookup() const;
+    /// @brief Temporary storage for materialized arrays to avoid calling
+    /// the #generator more than necessary. May be `nullptr`.
+    const ArrayCachePtr
+      cache() const;
 
-    /// @brief Returns `true` if #recordlookup is `nullptr`; `false` otherwise.
-    bool
-      istuple() const;
-
-    /// @brief Returns a RecordArray with an additional or a replaced field
-    /// at index `where` with value `what`.
+    /// @brief Returns the array if it exists in the #cache; `nullptr`
+    /// otherwise.
     ///
-    /// This "setitem" method does not change the original array; and the
-    /// output references most of the original data (without copying).
+    /// This method *does not* cause the array to be materialized if it is not.
     const ContentPtr
-      setitem_field(int64_t where, const ContentPtr& what) const;
+      peek_array() const;
 
-    /// @brief Returns a RecordArray with an additional or a replaced field
-    /// at key name `where` with value `what`.
+    /// @brief Ensures that the array is generated and returns it.
     ///
-    /// This "setitem" method does not change the original array; and the
-    /// output references most of the original data (without copying).
+    /// This method *does not* return `nullptr`.
     const ContentPtr
-      setitem_field(const std::string& where, const ContentPtr& what) const;
+      array() const;
 
-    /// @brief User-friendly name of this class: `"RecordArray"`.
+    /// @brief The key this VirtualArray will use when filling a #cache.
+    const std::string
+      cache_key() const;
+
+    /// @brief User-friendly name of this class: `"VirtualArray"`.
     const std::string
       classname() const override;
 
@@ -176,6 +151,9 @@ namespace awkward {
 
     void
       setidentities(const IdentitiesPtr& identities) override;
+
+    const TypePtr
+      type(const util::TypeStrs& typestrs) const override;
 
     const FormPtr
       form(bool materialize) const override;
@@ -191,18 +169,16 @@ namespace awkward {
                     const std::string& pre,
                     const std::string& post) const override;
 
-    const TypePtr
-      type(const util::TypeStrs& typestrs) const override;
-
     void
       tojson_part(ToJson& builder, bool include_beginendlist) const override;
 
+    /// @copydoc Content::nbytes_part
+    ///
+    /// The bytes of materialized arrays are not counted, so the
+    /// {@link Content#nbytes nbytes} of a VirtualArray is always zero.
     void
       nbytes_part(std::map<size_t, int64_t>& largest) const override;
 
-    /// @copydoc Content::length()
-    ///
-    /// Note that this is an input parameter.
     int64_t
       length() const override;
 
@@ -239,12 +215,10 @@ namespace awkward {
       getitem_fields(const std::vector<std::string>& keys) const override;
 
     const ContentPtr
-      getitem_next(const SliceItemPtr& head,
-                   const Slice& tail,
-                   const Index64& advanced) const override;
-
-    const ContentPtr
       carry(const Index64& carry) const override;
+
+    const std::string
+      purelist_parameter(const std::string& key) const override;
 
     int64_t
       numfields() const override;
@@ -265,9 +239,6 @@ namespace awkward {
     const std::string
       validityerror(const std::string& path) const override;
 
-    /// @copydoc Content::shallow_simplify()
-    ///
-    /// For RecordArray, this method returns #shallow_copy (pass-through).
     const ContentPtr
       shallow_simplify() const override;
 
@@ -317,36 +288,8 @@ namespace awkward {
                    int64_t axis,
                    int64_t depth) const override;
 
-    /// @brief Returns the field at a given index (without trimming it to
-    /// have the same #length as this RecordArray).
-    ///
-    /// Equivalent to `contents[fieldindex]`.
     const ContentPtr
-      field(int64_t fieldindex) const;
-
-    /// @brief Returns the field with a given key name (without trimming it to
-    /// have the same #length as this RecordArray).
-    ///
-    /// Equivalent to `contents[fieldindex(key)]`.
-    const ContentPtr
-      field(const std::string& key) const;
-
-    /// @brief Returns all the fields (without trimming them to have the same
-    /// #length as this RecordArray).
-    ///
-    /// Equivalent to `contents`.
-    const ContentPtrVec
-      fields() const;
-
-    /// @brief Returns key, field pairs for all fields (without trimming them
-    /// to have the same #length as this RecordArray).
-    const std::vector<std::pair<std::string, ContentPtr>>
-      fielditems() const;
-
-    /// @brief Returns this RecordArray without #recordlookup, converting any
-    /// records into tuples.
-    const std::shared_ptr<RecordArray>
-      astuple() const;
+      getitem(const Slice& where) const override;
 
     const ContentPtr
       getitem_next(const SliceAt& at,
@@ -396,22 +339,15 @@ namespace awkward {
                           const SliceJagged64& slicecontent,
                           const Slice& tail) const override;
 
-  protected:
-    template <typename S>
-    const ContentPtr
-      getitem_next_jagged_generic(const Index64& slicestarts,
-                                  const Index64& slicestops,
-                                  const S& slicecontent,
-                                  const Slice& tail) const;
-
   private:
-    /// @brief See #contents.
-    const ContentPtrVec contents_;
-    /// @brief See #recordlookup.
-    const util::RecordLookupPtr recordlookup_;
-    /// @brief See #length.
-    int64_t length_;
+    /// @brief See #generator.
+    const ArrayGeneratorPtr generator_;
+    /// @brief See #cache.
+    const ArrayCachePtr cache_;
+    /// @brief See #cache_key.
+    const std::string cache_key_;
   };
+
 }
 
-#endif // AWKWARD_RECORDARRAY_H_
+#endif // AWKWARD_VIRTUALARRAY_H_

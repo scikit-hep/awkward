@@ -2,11 +2,22 @@
 
 #include <sstream>
 
+#include "awkward/array/VirtualArray.h"
+
 #include "awkward/Iterator.h"
 
 namespace awkward {
+  const ContentPtr nonvirtual(const ContentPtr& content) {
+    if (VirtualArray* raw = dynamic_cast<VirtualArray*>(content.get())) {
+      return raw->array();
+    }
+    else {
+      return content;
+    }
+  }
+
   Iterator::Iterator(const ContentPtr& content)
-    : content_(content)
+    : content_(nonvirtual(content))
     , at_(0) {
     content.get()->check_for_iteration();
   }

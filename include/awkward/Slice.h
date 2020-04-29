@@ -590,48 +590,52 @@ namespace awkward {
     const std::string
       tostring() const;
 
-    /// @brief Insert a SliceItem at the end of the #items.
+    /// @brief Returns a new Slice with `item` prepended.
+    const Slice
+      prepended(const SliceItemPtr& item) const;
+
+    /// @brief Inserts a SliceItem in-place at the end of the #items.
     void
       append(const SliceItemPtr& item);
 
-    /// @brief Insert a SliceAt at the end of the #items.
+    /// @brief Inserts a SliceAt in-place at the end of the #items.
     void
       append(const SliceAt& item);
 
-    /// @brief Insert a SliceRange at the end of the #items.
+    /// @brief Inserts a SliceRange in-place at the end of the #items.
     void
       append(const SliceRange& item);
 
-    /// @brief Insert a SliceEllipsis at the end of the #items.
+    /// @brief Inserts a SliceEllipsis in-place at the end of the #items.
     void
       append(const SliceEllipsis& item);
 
-    /// @brief Insert a SliceNewAxis at the end of the #items.
+    /// @brief Inserts a SliceNewAxis in-place at the end of the #items.
     void
       append(const SliceNewAxis& item);
 
-    /// @brief Insert a SliceArrayOf at the end of the #items.
-    template <typename T>
+    /// @brief Inserts a {@link SliceArrayOf SliceArray64} in-place at the end
+    /// of the #items.
     void
-      append(const SliceArrayOf<T>& item);
+      append(const SliceArray64& item);
 
-    /// @brief Insert a SliceField at the end of the #items.
+    /// @brief Inserts a SliceField in-place at the end of the #items.
     void
       append(const SliceField& item);
 
-    /// @brief Insert a SliceFields at the end of the #items.
+    /// @brief Inserts a SliceFields in-place at the end of the #items.
     void
       append(const SliceFields& item);
 
-    /// @brief Insert a SliceMissingOf at the end of the #items.
-    template <typename T>
+    /// @brief Inserts a {@link SliceMissingOf SliceMissing64} in-place at the
+    /// end of the #items.
     void
-      append(const SliceMissingOf<T>& item);
+      append(const SliceMissing64& item);
 
-    /// @brief Insert a SliceJaggedOf at the end of the #items.
-    template <typename T>
+    /// @brief Inserts a {@link SliceJaggedOf SliceJagged64} in-place at the
+    /// end of the #items.
     void
-      append(const SliceJaggedOf<T>& item);
+      append(const SliceJagged64& item);
 
     /// @brief Seal this Slice so that it is no longer open to #append.
     void

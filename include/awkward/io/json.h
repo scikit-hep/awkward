@@ -74,6 +74,15 @@ namespace awkward {
     /// @brief End the current record.
     virtual void
       endrecord() = 0;
+    /// @brief Write raw JSON as a string.
+    virtual void
+      json(const char* data) = 0;
+    /// @brief Append a string value `x`.
+    void
+      string(const std::string& x);
+    /// @brief Insert a key for a key-value pair.
+    void
+      field(const std::string& x);
   };
 
   /// @class ToJsonString
@@ -108,6 +117,8 @@ namespace awkward {
       field(const char* x) override;
     void
       endrecord() override;
+    void
+      json(const char* data) override;
     /// @brief Return the accumulated data as a string.
     const std::string
       tostring();
@@ -148,6 +159,8 @@ namespace awkward {
       field(const char* x) override;
     void
       endrecord() override;
+    void
+      json(const char* data) override;
     /// @brief Return the accumulated data as a string.
     const std::string
       tostring();
@@ -190,6 +203,8 @@ namespace awkward {
       field(const char* x) override;
     void
       endrecord() override;
+    void
+      json(const char* data) override;
   private:
     class Impl;
     Impl* impl_;
@@ -231,6 +246,8 @@ namespace awkward {
       field(const char* x) override;
     void
       endrecord() override;
+    void
+      json(const char* data) override;
   private:
     class Impl;
     Impl* impl_;
