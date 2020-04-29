@@ -14,7 +14,9 @@ The first thing you should do if you want to fix something is to [submit an issu
 
 ### Contributing a pull request
 
-Feel free to [open pull requests in GitHub](https://github.com/scikit-hep/awkward-1.0/pulls) from your forked repo when you start working on the problem. I recommend opening the pull request early so that we can see your progress and communicate about it. Please [make the pull request a draft](https://github.blog/2019-02-14-introducing-draft-pull-requests/) to indicate that it is in an incomplete state and shouldn't be merged until you click "ready for review."
+Feel free to [open pull requests in GitHub](https://github.com/scikit-hep/awkward-1.0/pulls) from your forked repo when you start working on the problem. I recommend opening the pull request early so that we can see your progress and communicate about it. (Note that you can `git commit --allow-empty` to make an empty commit and start a pull request before you even have new code.)
+
+Please [make the pull request a draft](https://github.blog/2019-02-14-introducing-draft-pull-requests/) to indicate that it is in an incomplete state and shouldn't be merged until you click "ready for review."
 
 At present, I (Jim Pivarski, [jpivarski](https://github.com/jpivarski)) merge or close all pull requests for Awkward Array, though a team of maintainers should expand in the future, as the project matures. When I'm working closely with a developer, such as a summer student, I'll sometimes give that developer permission to merge their own pull requests.
 
