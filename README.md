@@ -58,7 +58,7 @@ pip install awkward1
 Most users will get a precompiled binary (wheel) for your operating system and Python version. If not, the above attempts to compile from source.
 
    * Report any bugs on [GitHub Issues](https://github.com/scikit-hep/awkward-1.0/issues).
-   * Ask any "how do I?" questions on [StackOverflow tagged as [awkward-array]](https://stackoverflow.com/questions/tagged/awkward-array).
+   * Ask any "how do I…?" questions on [StackOverflow tagged as [awkward-array]](https://stackoverflow.com/questions/tagged/awkward-array).
    * Realtime chat on [Gitter Scikit-HEP/community](https://gitter.im/Scikit-HEP/community).
 
 ## Installation for developers
