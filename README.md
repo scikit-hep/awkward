@@ -57,6 +57,9 @@ pip install awkward1
 
 Most users will get a precompiled binary (wheel) for your operating system and Python version. If not, the above attempts to compile from source.
 
+   * Report any bugs on [GitHub Issues](https://github.com/scikit-hep/awkward-1.0/issues).
+   * Ask any "how do I?" questions on [StackOverflow tagged as [awkward-array]](https://stackoverflow.com/questions/tagged/awkward-array).
+
 ## Installation for developers
 
 Be sure to clone this repository recursively to get the header-only C++ dependencies.
@@ -79,6 +82,7 @@ python localbuild.py --pytest tests
 
    * [Continuous integration](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=3&_a=summary) and [continuous deployment](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=4&_a=summary) are hosted by Azure Pipelines.
    * [Release history](https://awkward-array.readthedocs.io/en/latest/_auto/changelog.html) (changelog) is hosted by ReadTheDocs.
+   * [CONTRIBUTING.md](CONTRIBUTING.md) provides more information on how to contribute.
 
 ## Using Awkward Array as a dependency
 
