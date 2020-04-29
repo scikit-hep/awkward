@@ -2207,31 +2207,29 @@ def with_cache(array, cache, chain=None, highlevel=True):
 
     creates an array of records with virtual fields that would fill `cache1`.
 
-    We can then switch to `cache2` by replacement:
+    We can then switch every instance of `cache1` in `array` with `cache2`:
 
         >>> cache2 = {}
         >>> array2 = ak.with_cache(array1, cache2)
-        >>> ak.to_list(array2)
-        [{"x": [1.1, 2.2, 3.3], "y": 100}, {"x": [], "y": 200}, {"x": [4.4, 5.5], "y": 300}]
+        >>> array2["x"]
+        <Array [[1.1, 2.2, 3.3], [], [4.4, 5.5]] type='3 * var * float64'>
         >>>
         >>> len(cache1), len(cache2)
-        (0, 2)
+        (0, 1)
 
-    Viewing the new `array2` filled `cache2` and not `cache1`.
+    Viewing the `array2["x"]` filled `cache2` and not `cache1`.
 
-    After evicting the caches, we can then chain `cache1` and `cache2`:
+    We can also chain `cache1` and `cache2`:
 
-        >>> cache1.clear()
-        >>> cache2.clear()
-        >>>
         >>> array3 = ak.with_cache(array2, cache1, chain="first")
-        >>> ak.to_list(array3)
-        [{"x": [1.1, 2.2, 3.3], "y": 100}, {"x": [], "y": 200}, {"x": [4.4, 5.5], "y": 300}]
+        >>> array3
+        <Array [{x: [1.1, 2.2, 3.3], ... 5.5], y: 300}] type='3 * {"x": var * float64, "...'>
         >>>
         >>> len(cache1), len(cache2)
-        (2, 0)
+        (1, 1)
 
-    Now `cache1` is filled first, but it would spill over 
+    The request for `array3["x"]` deferred to the already-filled `cache2`,
+    while the request for `array3["y"]` put a new array into `cache1`.
 
     See #ak.virtual.
     """
@@ -2278,24 +2276,22 @@ def with_cache(array, cache, chain=None, highlevel=True):
 
 class _CacheChain(MutableMapping):
     def __init__(self, first, last):
+        if isinstance(first, awkward1._io.ArrayCache):
+            first = first.mutablemapping
+        if isinstance(last, awkward1._io.ArrayCache):
+            last = last.mutablemapping
         self.first = first
         self.last = last
 
     def __getitem__(self, where):
         try:
-            print("try to get from first", where, self.first)
-            tmp = self.first[where]
-            print("yes, first")
-            return tmp
+            return self.first[where]
         except KeyError:
-            print("try to get from last", where, self.last)
-            tmp = self.last[where]
-            print("yes, last")
-            return tmp
+            return self.last[where]
 
     def __setitem__(self, where, what):
-        print("set in first", where)
-        self.first[where] = what
+        if where not in self.last:
+            self.first[where] = what
 
     def __delitem__(self, where):
         try:

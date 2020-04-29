@@ -291,6 +291,7 @@ make_PyArrayCache(const py::handle& m, const std::string& name) {
                      std::shared_ptr<PyArrayCache>>(m, name.c_str())
       .def(py::init<const py::object&>(),
            py::arg("mutablemapping"))
+      .def_property_readonly("mutablemapping", &PyArrayCache::mutablemapping)
       .def("__repr__", [](const PyArrayCache& self) -> std::string {
         return self.tostring_part("", "", "");
       })

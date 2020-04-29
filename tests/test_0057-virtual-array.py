@@ -421,41 +421,23 @@ def test_highlevel():
 def test_cache_chain():
     cache1 = {}
 
-    def gen1():
-        print("gen1")
-        return [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
-
-    def gen2():
-        print("gen2")
-        return [100, 200, 300]
-
-    one = awkward1.virtual(gen1, cache=cache1, length=3)
-    two = awkward1.virtual(gen2, cache=cache1, length=3)
+    one = awkward1.virtual(lambda: [[1.1, 2.2, 3.3], [], [4.4, 5.5]], cache=cache1, length=3)
+    two = awkward1.virtual(lambda: [100, 200, 300], cache=cache1, length=3)
     array1 = awkward1.zip({"x": one, "y": two}, depth_limit=1)
 
     assert len(cache1) == 0
 
-    print("nothing yet")
-
     cache2 = {}
     array2 = awkward1.with_cache(array1, cache2)
 
-    print("get x from array2")
-
     assert awkward1.to_list(array2["x"]) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
 
-    # assert len(cache1) == 0
-    # assert len(cache2) == 1
+    assert len(cache1) == 0
+    assert len(cache2) == 1
 
     array3 = awkward1.with_cache(array2, cache1, chain="first")
 
-    print("get x from array3")
-    print(array3["x"])
-    print("get y from array3")
-    print(array3["y"])
+    assert awkward1.to_list(array3) == [{"x": [1.1, 2.2, 3.3], "y": 100}, {"x": [], "y": 200}, {"x": [4.4, 5.5], "y": 300}]
 
-    # assert awkward1.to_list(array3) == [{"x": [1.1, 2.2, 3.3], "y": 100}, {"x": [], "y": 200}, {"x": [4.4, 5.5], "y": 300}]
-
-    # assert len(cache1) == 1
-    # assert len(cache2) == 1
-    # raise Exception
+    assert len(cache1) == 1
+    assert len(cache2) == 1
