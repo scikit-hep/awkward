@@ -1,5 +1,6 @@
 # BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+import json
 import subprocess
 import re
 import http.client
@@ -9,6 +10,16 @@ tagslist = dict(re.findall(rb"([0-9a-f]{40}) refs/tags/([0-9\.]+)", tagslist_tex
 
 subjects_text = subprocess.run(["git", "log", "--format='format:%H %s'"], stdout=subprocess.PIPE).stdout
 subjects = re.findall(rb"([0-9a-f]{40}) (.*)", subjects_text)
+
+github_connection = http.client.HTTPSConnection("api.github.com")
+github_connection.request("GET", "/repos/scikit-hep/awkward-1.0/releases", headers={"User-Agent": "awkward1-changelog"})
+github_releases_text = github_connection.getresponse().read()
+try:
+    github_releases = json.loads(github_releases_text)
+except:
+    print(github_releases_text)
+    raise
+releases = {x["tag_name"]: x["body"] for x in github_releases}
 
 pypi_connection = http.client.HTTPSConnection("pypi.org")
 
@@ -42,6 +53,12 @@ with open("_auto/changelog.rst", "w") as outfile:
             header_text = "\nRelease `{0} <{1}>`__{2}\n".format(tag, tagurl, pypi_url)
             outfile.write(header_text)
             outfile.write("="*len(header_text) + "\n\n")
+
+            if tag in releases:
+                text = releases[tag].strip()
+                text = re.sub(r"([a-zA-Z0-9\-_]+/[a-zA-Z0-9\-_]+)#([1-9][0-9]*)", r"`\1#\2 <https://github.com/\1/issues/\2>`__", text)
+                text = re.sub(r"([^a-zA-Z0-9\-_])#([1-9][0-9]*)", r"\1`#\2 <https://github.com/scikit-hep/awkward-1.0/issues/\2>`__", text)
+                outfile.write(text + "\n\n")
 
         m = re.match(rb"(.*) \(#([1-9][0-9]*)\)", subject)
         if m is not None:
