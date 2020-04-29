@@ -56,3 +56,16 @@ Committing directly to `master` is not allowed except for
 
 and only by me.
 
+### Releases
+
+Similarly, only I publish releases (or a team of maintainers, in the future). Publishing releases starts the deployment procedure, updating the package that users will get when they pip-install.
+
+As stated above, new releases are published frequently, getting bug fixes and new features to users almost continuously. We prefer this over "big bang" releases with many changes.
+
+## Project organization
+
+HERE
+
+![](docs-images/diagrams/awkward-1-0-layers.png)
+
+THERE
