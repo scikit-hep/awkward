@@ -46,6 +46,7 @@ with open("_auto/changelog.rst", "w") as outfile:
     outfile.write("Release history\n")
     outfile.write("---------------\n")
 
+    first = True
     numprs = None
 
     for taghash, subject in subjects:
@@ -87,24 +88,34 @@ with open("_auto/changelog.rst", "w") as outfile:
                 text = re.sub(r"([^a-zA-Z0-9\-_])#([1-9][0-9]*)", r"\1`#\2 <https://github.com/scikit-hep/awkward-1.0/issues/\2>`__", text)
                 outfile.write(text + "\n\n")
 
+            first = False
+
         m = re.match(rb"(.*) \(#([1-9][0-9]*)\)", subject)
         if m is not None:
             if numprs is None:
                 numprs = 0
             numprs += 1
 
-            text = m.group(1).decode()
+            if first:
+                header_text = "\nUnreleased (`master branch <https://github.com/scikit-hep/awkward-1.0>`__ on GitHub)\n"
+                outfile.write(header_text)
+                outfile.write("="*len(header_text) + "\n\n")
+
+            text = m.group(1).decode().strip()
             prnum = m.group(2).decode()
             prurl = "https://github.com/scikit-hep/awkward-1.0/pull/{0}".format(prnum)
 
-            known = []
+            known = [prnum]
             for issue in re.findall(r"([a-zA-Z0-9\-_]+/[a-zA-Z0-9\-_]+)#([1-9][0-9]*)", text):
                 known.append(issue)
             for issue in re.findall(r"([^a-zA-Z0-9\-_])#([1-9][0-9]*)", text):
                 known.append(issue[1])
 
+            text = re.sub(r"`", "``", text)
             text = re.sub(r"([a-zA-Z0-9\-_]+/[a-zA-Z0-9\-_]+)#([1-9][0-9]*)", r"`\1#\2 <https://github.com/\1/issues/\2>`__", text)
             text = re.sub(r"([^a-zA-Z0-9\-_])#([1-9][0-9]*)", r"\1`#\2 <https://github.com/scikit-hep/awkward-1.0/issues/\2>`__", text)
+            if re.match(r".*[a-zA-Z0-9_]$", text):
+                text = text + "."
 
             body_text = subprocess.run(["git", "log", "-1", taghash.decode(), "--format='format:%b'"], stdout=subprocess.PIPE).stdout.decode()
             addresses = []
@@ -117,6 +128,8 @@ with open("_auto/changelog.rst", "w") as outfile:
             if len(addresses) == 0:
                 addresses_text = ""
             else:
-                addresses_text = " (Addresses {0})".format(", ".join(addresses))
+                addresses_text = " (**also:** {0})".format(", ".join(addresses))
 
             outfile.write("* PR `#{0} <{1}>`__: {2}{3}\n".format(prnum, prurl, text, addresses_text))
+
+            first = False
