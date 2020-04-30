@@ -12,6 +12,15 @@ import awkward1
 pyarrow = pytest.importorskip("pyarrow")
 
 def test_toarrow():
+    content = awkward1.Array(["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]).layout
+    bitmask = awkward1.layout.IndexU8(numpy.array([40, 34], dtype=numpy.uint8))
+    array = awkward1.layout.BitMaskedArray(bitmask, content, False, 9, False)
+    assert awkward1.to_arrow(array).to_pylist() == awkward1.to_list(array)
+
+    bytemask = awkward1.layout.Index8(numpy.array([False, True, False], dtype=numpy.bool))
+    array = awkward1.layout.ByteMaskedArray(bytemask, content, True)
+    assert awkward1.to_arrow(array).to_pylist() == awkward1.to_list(array)
+
     array = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5]))
     assert isinstance(awkward1.to_arrow(array), (pyarrow.lib.Tensor, pyarrow.lib.Array))
     assert awkward1.to_arrow(array).to_pylist() == [0.0, 1.1, 2.2, 3.3, 4.4, 5.5]
@@ -118,3 +127,4 @@ def test_toarrow():
     #                          6.9, -0.7, 3.9, 1.6, 8.7, -0.7, 3.2, 4.3, 4.0, 5.8, 4.2, 7.0,
     #                          5.6, 3.8])))
     # assert awkward1.to_arrow(ioa).to_pylist() == awkward1.to_list(ioa)
+
