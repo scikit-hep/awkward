@@ -1160,17 +1160,15 @@ def to_arrow(layout):
         if isinstance(layout, awkward1.layout.NumpyArray):
             numpy_arr = numpy.asarray(layout)
             if (numpy_arr.ndim == 1):
-                # This is a bit messy right now. I inferred the type here from creating a arrow array. Avoid this, in future commits.
-                arr = pyarrow.array(numpy_arr)
                 if mask is not None:
-                    return pyarrow.Array.from_buffers(arr.type, len(numpy_arr), [pyarrow.py_buffer(mask), pyarrow.py_buffer(numpy_arr)])
+                    return pyarrow.Array.from_buffers(pyarrow.from_numpy_dtype(numpy.dtype), len(numpy_arr), [pyarrow.py_buffer(mask), pyarrow.py_buffer(numpy_arr)])
                 else:
-                    return arr
+                    return pyarrow.Array.from_buffers(pyarrow.from_numpy_dtype(numpy.dtype), len(numpy_arr), [None, pyarrow.py_buffer(numpy_arr)])
             else:
                 return pyarrow.Tensor.from_numpy(numpy_arr)
 
         elif isinstance(layout, awkward1.layout.EmptyArray):
-            return pyarrow.array(numpy.array([], dtype=numpy.float64))
+            return pyarrow.Array.from_buffers(pyarrow.from_numpy_dtype(numpy.float64), 0, [None, None])
 
         elif isinstance(layout, (awkward1.layout.IndexU8,
                                  awkward1.layout.IndexU32,
@@ -1179,11 +1177,10 @@ def to_arrow(layout):
                                  awkward1.layout.Index64)):
 
             numpy_arr = numpy.asarray(layout)
-            arr = pyarrow.array(numpy_arr)
             if mask is not None:
-                return pyarrow.Array.from_buffers(arr.type, len(numpy_arr), [pyarrow.py_buffer(mask), pyarrow.py_buffer(numpy_arr)])
+                return pyarrow.Array.from_buffers(pyarrow.from_numpy_dtype(numpy.dtype), len(numpy_arr), [pyarrow.py_buffer(mask), pyarrow.py_buffer(numpy_arr)])
             else:
-                return arr
+                return pyarrow.Array.from_buffers(pyarrow.from_numpy_dtype(numpy.dtype), len(numpy_arr), [None, pyarrow.py_buffer(numpy_arr)])
 
         elif isinstance(layout, awkward1.layout.ListOffsetArray32):
 
