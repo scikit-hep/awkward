@@ -98,14 +98,14 @@ def test_toarrow():
     assert isinstance(awkward1.to_arrow(unionarray), (pyarrow.UnionArray))
     assert awkward1.to_arrow(unionarray).to_pylist() == [1, 2, [1.1, 2.2, 3.3], [], 3, [4.4, 5.5], 5, 4]
 
-    # content = awkward1.layout.NumpyArray(
-    #     numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
-    # index = awkward1.layout.Index64(
-    #     numpy.array([0, 2, 4, 6, 8, 9, 7, 5], dtype=numpy.int64))
-    # indexedarray = awkward1.layout.IndexedArray64(index, content)
+    content = awkward1.layout.NumpyArray(
+        numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
+    index = awkward1.layout.Index32(
+        numpy.array([0, 2, 4, 6, 8, 9, 7, 5], dtype=numpy.int64))
+    indexedarray = awkward1.layout.IndexedArray32(index, content)
 
-    # assert isinstance(awkward1.to_arrow(indexedarray), (pyarrow.DictionaryArray))
-    # assert awkward1.to_arrow(indexedarray).to_pylist() == [0.0, 2.2, 4.4, 6.6, 8.8, 9.9, 7.7, 5.5]
+    assert isinstance(awkward1.to_arrow(indexedarray), (pyarrow.DictionaryArray))
+    assert awkward1.to_arrow(indexedarray).to_pylist() == [0.0, 2.2, 4.4, 6.6, 8.8, 9.9, 7.7, 5.5]
 
     # bytemaskedarray = awkward1.layout.ByteMaskedArray(awkward1.layout.Index8(numpy.array([True, True, False, False, False], dtype=numpy.int8)), listoffsetarray, True)
 
@@ -123,8 +123,8 @@ def test_toarrow():
     # bytemaskedarray = awkward1.layout.ByteMaskedArray(awkward1.layout.Index8(numpy.array([True, False, False], dtype=numpy.int8)), unionarray, True)
     # assert awkward1.to_arrow(bytemaskedarray).to_pylist() == awkward1.to_list(bytemaskedarray)
 
-    # ioa = awkward1.layout.IndexedOptionArray32(awkward1.layout.Index32([-30, 19, 6, 7, -3, 21, 13, 22, 17, 9, -12, 16]), awkward1.layout.NumpyArray(numpy.array([5.2, 1.7, 6.7, -0.4, 4.0, 7.8, 3.8, 6.8, 4.2, 0.3, 4.6, 6.2,
-    #                          6.9, -0.7, 3.9, 1.6, 8.7, -0.7, 3.2, 4.3, 4.0, 5.8, 4.2, 7.0,
-    #                          5.6, 3.8])))
-    # assert awkward1.to_arrow(ioa).to_pylist() == awkward1.to_list(ioa)
+    ioa = awkward1.layout.IndexedOptionArray32(awkward1.layout.Index32([-30, 19, 6, 7, -3, 21, 13, 22, 17, 9, -12, 16]), awkward1.layout.NumpyArray(numpy.array([5.2, 1.7, 6.7, -0.4, 4.0, 7.8, 3.8, 6.8, 4.2, 0.3, 4.6, 6.2,
+                             6.9, -0.7, 3.9, 1.6, 8.7, -0.7, 3.2, 4.3, 4.0, 5.8, 4.2, 7.0,
+                             5.6, 3.8])))
+    assert awkward1.to_arrow(ioa).to_pylist() == awkward1.to_list(ioa)
 
