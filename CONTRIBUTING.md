@@ -102,6 +102,8 @@ The CPU and GPU kernels, on the other hand, should be optimized for hardware cac
 
 Sometimes, changes in the C++ or even Python code can change the number or size of CPU and GPU kernels that need to be run, in which case they are easily justified performance corrections.
 
+To ensure this separation between "slow control" and "fast math," Python and C++ code are not allowed to perform any loops over data in array buffers. Only CPU and GPU kernels are allowed to do that. In fact, C++ is not even allowed to access values pointed to by these arrays, as the pointer might be in main memory or it might be a device pointer on a GPU. (Dereferencing such a pointer as though it were in main memory would cause a segmentation fault.)
+
 ### General statements on coding style
 
 Above all, the purpose of any programming language is to be read by humans; if we were only concerned with operating the machine, we would be flipping individual bits. It should be organized in stanzas that highlight similarities and differences by grouping them on the screen.
@@ -149,6 +151,8 @@ We target Python 2.7 and recent versions of Python 3, currently starting with 3.
 We only supprt Python 2.7 as much as is practical. For example, we ignore compiler warnings when compiling against Python 2.7 and any unit tests that depend on the difference are skipped for Python 2.7.
 
 Python 2.7 and 3.5 have unstable dict order, which excludes them both from some tests.
+
+Allowing Python 2.7 after it has been fully and finally discontinued may sound anachronistic, but some of our users depend on legacy codebases forcing them in Python 2, and Python 2 limits our adoption of new language features, keeping the code "simple, rather than smart."
 
 ### Third party dependencies
 
