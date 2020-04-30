@@ -374,7 +374,7 @@ def completely_flatten(array):
     elif isinstance(array, recordtypes):
         out = []
         for i in range(array.numfields):
-            out.append(completely_flatten(array.field(i)))
+            out.extend(completely_flatten(array.field(i)))
         return tuple(out)
 
     elif isinstance(array, awkward1.layout.NumpyArray):

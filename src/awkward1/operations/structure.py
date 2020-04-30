@@ -108,7 +108,8 @@ def mask(array, mask, valid_when=True, highlevel=True):
             return lambda: (
                 awkward1.layout.ByteMaskedArray(bytemask,
                                                 layoutarray,
-                                                valid_when=valid_when),)
+                                                valid_when=valid_when)
+                               .simplify(),)
         else:
             return None
 
