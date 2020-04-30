@@ -1010,6 +1010,13 @@ def recursively_apply(layout,
         raise AssertionError(
                 "unrecognized Content type: {0}".format(type(layout)))
 
+def highlevel_type(layout, behavior, isarray):
+    if isarray:
+        return awkward1.types.ArrayType(layout.type(typestrs(behavior)),
+                                        len(layout))
+    else:
+        return layout.type(typestrs(behavior))
+
 def minimally_touching_string(limit_length, layout, behavior):
     import awkward1.layout
 

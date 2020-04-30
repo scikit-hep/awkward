@@ -2079,8 +2079,32 @@ make_VirtualArray(const py::handle& m, const std::string& name) {
           py::arg("cache_key") = py::none(),
           py::arg("identities") = py::none(),
           py::arg("parameters") = py::none())
-      .def_property_readonly("generator", &ak::VirtualArray::generator)
-      .def_property_readonly("cache", &ak::VirtualArray::cache)
+      .def_property_readonly("generator", [](const ak::VirtualArray& self)
+                                          -> py::object {
+        if (std::shared_ptr<PyArrayGenerator> ptr =
+               std::dynamic_pointer_cast<PyArrayGenerator>(self.generator())) {
+          return py::cast(ptr);
+        }
+        else {
+          throw std::invalid_argument(
+                  "VirtualArray's generator is not a Python function");
+        }
+      })
+      .def_property_readonly("cache", [](const ak::VirtualArray& self)
+                                      -> py::object {
+        std::shared_ptr<ak::ArrayCache> cache = self.cache();
+        if (cache.get() == nullptr) {
+          return py::none();
+        }
+        if (std::shared_ptr<PyArrayCache> ptr =
+               std::dynamic_pointer_cast<PyArrayCache>(cache)) {
+          return py::cast(ptr);
+        }
+        else {
+          throw std::invalid_argument(
+                  "VirtualArray's cache is not a Python MutableMapping");
+        }
+      })
       .def_property_readonly("peek_array", [](const ak::VirtualArray& self)
                                            -> py::object {
         std::shared_ptr<ak::Content> out = self.peek_array();

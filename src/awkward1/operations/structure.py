@@ -2027,6 +2027,48 @@ def partitions(array):
     else:
         return None
 
+def partitioned(generate,
+                numpartitions,
+                highlevel=True,
+                behavior=None):
+    """
+    Args:
+        generate (int -> array): A function that generates an array partition
+            given a partition number.
+        numpartitions (int): Number of partitions to generate.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content or #ak.partition.PartitionedArray
+            subclass.
+        behavior (bool): Custom #ak.behavior for the output array, if
+            high-level.
+
+    Returns a partitioned array, produced by calling a function for each
+    partition.
+
+    Partitioning is an internal aspect of an array: it should behave
+    identically to a non-partitioned array, but possibly with different
+    performance characteristics.
+
+    Arrays can only be partitioned in the first dimension; it is intended
+    for performing calculations in memory-sized chunks.
+    """
+    total_length = 0
+    partitions = []
+    stops = []
+    for partitionid in range(numpartitions):
+        layout = awkward1.operations.convert.to_layout(generate(partitionid),
+                                                       allow_record=False,
+                                                       allow_other=False)
+        total_length += len(layout)
+        partitions.append(layout)
+        stops.append(total_length)
+
+    out = awkward1.partition.IrregularlyPartitionedArray(partitions, stops)
+    if highlevel:
+        return awkward1._util.wrap(out, behavior=behavior)
+    else:
+        return out
+
 def repartition(array, lengths, highlevel=True):
     """
     Args:
@@ -2098,6 +2140,8 @@ def repartition(array, lengths, highlevel=True):
         return out
 
 def virtual(generate,
+            args=(),
+            kwargs={},
             form=None,
             length=None,
             cache=None,
@@ -2107,7 +2151,10 @@ def virtual(generate,
             behavior=None):
     """
     Args:
-        generate (callable): Zero-argument function that makes an array.
+        generate (callable): Function that makes an array from `args` and
+            `kwargs`.
+        args (tuple): Positional arguments to pass to `generate`.
+        kwargs (dict): Keyword arguments to pass to `generate`.
         form (None, Form, or JSON): If None, the layout of the generated array
             is unknown until it is generated, which might require it to be
             generated earlier than intended; if a Form, use this Form to
@@ -2147,6 +2194,7 @@ def virtual(generate,
         generating
         <Array [4.4, 5.5] type='2 * float64'>
     """
+    import awkward1._io
 
     if form in ("float64", "float32", "int64", "uint64", "int32", "uint32",
                 "int16", "uint16", "int8", "uint8", "bool"):
@@ -2159,7 +2207,11 @@ def virtual(generate,
     elif form is not None and not isinstance(form, awkward1.forms.Form):
         form = awkward1.forms.Form.fromjson(json.dumps(form))
 
-    gen = awkward1._io.ArrayGenerator(generate, form=form, length=length)
+    gen = awkward1._io.ArrayGenerator(generate,
+                                      args,
+                                      kwargs,
+                                      form=form,
+                                      length=length)
     if cache is not None:
         cache = awkward1._io.ArrayCache(cache)
 
@@ -2224,7 +2276,7 @@ def with_cache(array, cache, chain=None, highlevel=True):
 
         >>> array3 = ak.with_cache(array2, cache1, chain="first")
         >>> array3
-        <Array [{x: [1.1, 2.2, 3.3], ... 5.5], y: 300}] type='3 * {"x": var * float64, "...'>
+        <Array [{x: [1.1, 2.2, 3.3], ... 5.5], y: 300}] type='3 * {"x": var * float64, ...'>
         >>>
         >>> len(cache1), len(cache2)
         (1, 1)
@@ -2234,6 +2286,7 @@ def with_cache(array, cache, chain=None, highlevel=True):
 
     See #ak.virtual.
     """
+    import awkward1._io
 
     if chain is True:
         chain = "first"
@@ -2277,6 +2330,8 @@ def with_cache(array, cache, chain=None, highlevel=True):
 
 class _CacheChain(MutableMapping):
     def __init__(self, first, last):
+        import awkward1._io
+
         if isinstance(first, awkward1._io.ArrayCache):
             first = first.mutablemapping
         if isinstance(last, awkward1._io.ArrayCache):
