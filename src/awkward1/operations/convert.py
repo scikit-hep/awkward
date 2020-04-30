@@ -1352,6 +1352,9 @@ def to_arrow(layout):
                 bytemask.reshape(-1, 8)[:, ::-1].reshape(-1))
 
             return recurse(layout.content, bitmask).slice(length=len(mask))
+        
+        elif isinstance(layout, (awkward1.layout.UnmaskedArray)):
+            return recurse(layout.content)
 
     return recurse(layout)
 
