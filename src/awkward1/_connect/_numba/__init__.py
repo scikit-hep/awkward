@@ -15,6 +15,7 @@ def register_and_check(name):
     if (distutils.version.LooseVersion(numba.__version__) <
         distutils.version.LooseVersion("0.49")):
         raise ImportError(name + " can only be used with Numba 0.49 or later")
+    register()
 
 def register():
     import awkward1._connect._numba.arrayview
