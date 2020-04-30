@@ -1284,7 +1284,7 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         """
         import numba
         import awkward1._connect._numba
-        awkward1._connect._numba.register()
+        awkward1._connect._numba.register_and_check("ak.Array")
         if self._numbaview is None:
             self._numbaview = \
               awkward1._connect._numba.arrayview.ArrayView.fromarray(self)
@@ -1786,7 +1786,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         """
         import numba
         import awkward1._connect._numba
-        awkward1._connect._numba.register()
+        awkward1._connect._numba.register_and_check("ak.Record")
         if self._numbaview is None:
             self._numbaview = \
               awkward1._connect._numba.arrayview.RecordView.fromrecord(self)
@@ -2091,7 +2091,7 @@ class ArrayBuilder(object):
         """
         import numba
         import awkward1._connect._numba.builder
-        awkward1._connect._numba.register()
+        awkward1._connect._numba.register_and_check("ak.ArrayBuilder")
         return awkward1._connect._numba.builder.ArrayBuilderType(
                  self._behavior)
 
