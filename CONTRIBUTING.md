@@ -104,6 +104,18 @@ Sometimes, changes in the C++ or even Python code can change the number or size 
 
 To ensure this separation between "slow control" and "fast math," Python and C++ code are not allowed to perform any loops over data in array buffers. Only CPU and GPU kernels are allowed to do that. In fact, C++ is not even allowed to access values pointed to by these arrays, as the pointer might be in main memory or it might be a device pointer on a GPU. (Dereferencing such a pointer as though it were in main memory would cause a segmentation fault.)
 
+### Priorities
+
+As we change the code, we should keep in mind the following priorities, in this order (from most important to "nice to have"):
+
+   1. Operations must give correct results. Awkward Array is basically a math library, and for our chosen interpretation of the data structures as mathematical objects and operations as functions, there is a right answer. Silently returning the wrong answer is worse than crashing.
+   2. When used in Python, it must not raise segmentation faults. Python users expect to freely use software without ever encountering a segmentation fault (or other signal/behavior that aborts the Python shell). "Crashes" are indications that something is seriously wrong. Exceptions, however, are normal and expected. We use `ValueError` (`std::invalid_argument` in C++) to indicate that the user has provided wrong input and `RuntimeError` (`std::runtime_error` in C++) to indicate an internal error. The latter is a bug, but the user is informed of the bug in a useful way.
+   3. The separation between "slow control" and "fast math" must be maintained. No Python or C++ loops over array buffer data: all of that must be contained within CPU and GPU kernels or NumPy and CuPy calls in Python. The only exceptions are for converting from and to non-columnar data structures (e.g. `ak.from_iter` and `ak.to_list`). This rule is motivated by performance (see the section above), but it is an objective, categorical rule that enables CPU/GPU interchangeability, not a slippery slope of fine-tuning.
+   4. Python-friendly interface. This library is intended for data analysts who want to focus on data without being interrupted by technical complications. The front-end should be as simple as possible, but no simpler: inherent mathematical features should be foremost, even if they are complex, but computing-related complexity should not. This criterion can usually be satisfied independently of the others.
+   5. NumPy compatibility. Every function that generalizes a NumPy function is unified with it (using [NEP 13](https://numpy.org/neps/nep-0013-ufunc-overrides.html) and [NEP 18](https://numpy.org/neps/nep-0018-array-function-protocol.html)) and behaves identically for the same input data.
+   6. Readability and maintainability. Awkward Array is a long-term project that can't afford to accrue technical debt.
+   7. Performance tuning. Ultimately, the reason data analysts use Awkward Array, rather than writing for loops, is speed. It's usually an orders-of-magnitude difference thanks to the separation between "slow control" and "fast math," but there may be cases where explicit tuning is warranted.
+
 ### General statements on coding style
 
 Above all, the purpose of any programming language is to be read by humans; if we were only concerned with operating the machine, we would be flipping individual bits. It should be organized in stanzas that highlight similarities and differences by grouping them on the screen.
@@ -163,6 +175,20 @@ The Python codebase only strictly depends on NumPy 1.13.1, the first version wit
 Other third party libraries are used if they exist (can be imported), and we only accept certain versions of these libraries. Both the test-import and any version-testing must be within runtime code, not startup code, so that they're only invoked when users explicitly call for the feature that requires them.
 
 Versions can be explicitly tested with `distutils.version.LooseVersion`, though it's better to test for features (existence of classes, methods, and attributes) than to test for explicit version numbers.
+
+### Array object details
+
+Arrays are (or soon will be: [#176](https://github.com/scikit-hep/awkward-1.0/issues/176) and [#177](https://github.com/scikit-hep/awkward-1.0/issues/177)) immutable objects. Only the high-level `ak.Array` changes its state in-place in response to user choices (such as `__setitem__`, which replaces its `layout` using the pure function `ak.with_field`). This is not a performance liability but usually a benefit because it means that we can freely share data among array objects without worrying about long-distance modifications.
+
+Users can break this model by wrapping NumPy arrays as Awkward Arrays and changing the original NumPy arrays in-place, but they are encouraged not to.
+
+An Awkward Array has distributed state: index arrays refer to positions in content arrays that might not exist. The validity of these relationships are checked as late as possible, i.e. an index position is checked to ensure that it is not outside of its content just before fetching that content.
+
+This is motivated by performance: if bounds checking is performed when an element is needed, then the index has to be in CPU cache/a register anyway, whereas a separate validity-checking pass would flush caches. Also, some operations on valid arrays can be guaranteed to produce valid arrays as results, and there is no reason to re-check. (Mathematical guarantees on validity have not been explored.)
+
+Most objects are defined by a small set of named fields (such as `starts`, `stops`, and `content` for a ListArray). In both C++ and Python, constructors take the full set of fields, the fields are stored as private members, and there are public accessors to those attributes, all with the same names. This ensures that the fields are immutable and resembles Scala's "case class" pattern for functional programming.
+
+Within the narrow scope of a function, there is no attempt to maintain immutability.
 
 ------------
 

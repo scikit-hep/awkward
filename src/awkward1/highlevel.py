@@ -354,24 +354,34 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         similar to existing type-constructors, so it's a plausible addition
         to the language.)
         """
-        return awkward1.types.ArrayType(
-                 self._layout.type(awkward1._util.typestrs(self._behavior)),
-                 len(self._layout))
+        return awkward1._util.highlevel_type(self._layout, self._behavior, True)
 
     class Mask(object):
         def __init__(self, array, valid_when):
             self._array = array
             self._valid_when = valid_when
 
+        def __str__(self, limit_value=85):
+            return self._array.__str__(limit_value=limit_value)
+
         def __repr__(self, limit_value=40, limit_total=85):
+            import awkward1.operations.structure
+            layout = awkward1.operations.structure.with_cache(self._layout,
+                                                              {},
+                                                              chain="last",
+                                                              highlevel=False)
             value = awkward1._util.minimally_touching_string(limit_value,
-                                                             self._layout,
+                                                             layout,
                                                              self._behavior)
 
-            name = getattr(self, "__name__", type(self._array).__name__)
+            try:
+                name = super(Array, self._array).__getattribute__("__name__")
+            except AttributeError:
+                name = type(self._array).__name__
             limit_type = limit_total - (len(value) + len(name)
                                         + len("<.mask  type=>"))
-            typestr = repr(str(self.type))
+            typestr = repr(str(awkward1._util.highlevel_type(
+                                   layout, self._array._behavior, True)))
             if len(typestr) > limit_type:
                 typestr = typestr[:(limit_type - 4)] + "..." + typestr[-1]
 
@@ -1114,8 +1124,13 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         See #ak.to_list and #ak.to_json to convert whole Arrays into Python
         data or JSON strings without loss (except for #type).
         """
+        import awkward1.operations.structure
+        layout = awkward1.operations.structure.with_cache(self._layout,
+                                                          {},
+                                                          chain="last",
+                                                          highlevel=False)
         return awkward1._util.minimally_touching_string(limit_value,
-                                                        self._layout,
+                                                        layout,
                                                         self._behavior)
 
     def __repr__(self, limit_value=40, limit_total=85):
@@ -1133,13 +1148,22 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         The #type is truncated as well, but showing only the left side
         of its string (the outermost data structures).
         """
+        import awkward1.operations.structure
+        layout = awkward1.operations.structure.with_cache(self._layout,
+                                                          {},
+                                                          chain="last",
+                                                          highlevel=False)
         value = awkward1._util.minimally_touching_string(limit_value,
-                                                         self._layout,
+                                                         layout,
                                                          self._behavior)
 
-        name = getattr(self, "__name__", type(self).__name__)
+        try:
+            name = super(Array, self).__getattribute__("__name__")
+        except AttributeError:
+            name = type(self).__name__
         limit_type = limit_total - (len(value) + len(name) + len("<  type=>"))
-        typestr = repr(str(self.type))
+        typestr = repr(str(awkward1._util.highlevel_type(
+                               layout, self._behavior, True)))
         if len(typestr) > limit_type:
             typestr = typestr[:(limit_type - 4)] + "..." + typestr[-1]
 
@@ -1727,8 +1751,13 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
 
         See #ak.Array.__str__ for a more complete description.
         """
+        import awkward1.operations.structure
+        layout = awkward1.operations.structure.with_cache(self._layout,
+                                                          {},
+                                                          chain="last",
+                                                          highlevel=False)
         return awkward1._util.minimally_touching_string(limit_value + 2,
-                                                        self._layout,
+                                                        layout,
                                                         self._behavior)[1:-1]
 
     def __repr__(self, limit_value=40, limit_total=85):
@@ -1743,13 +1772,22 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
 
         See #ak.Array.__repr__ for a more complete description.
         """
+        import awkward1.operations.structure
+        layout = awkward1.operations.structure.with_cache(self._layout,
+                                                          {},
+                                                          chain="last",
+                                                          highlevel=False)
         value = awkward1._util.minimally_touching_string(limit_value + 2,
-                                                         self._layout,
+                                                         layout,
                                                          self._behavior)[1:-1]
 
-        name = getattr(self, "__name__", type(self).__name__)
+        try:
+            name = super(Record, self).__getattribute__("__name__")
+        except AttributeError:
+            name = type(self).__name__
         limit_type = limit_total - (len(value) + len(name) + len("<  type=>"))
-        typestr = repr(str(self.type))
+        typestr = repr(str(awkward1._util.highlevel_type(
+                               layout, self._behavior, False)))
         if len(typestr) > limit_type:
             typestr = typestr[:(limit_type - 4)] + "..." + typestr[-1]
 

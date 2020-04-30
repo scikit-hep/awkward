@@ -374,7 +374,7 @@ def completely_flatten(array):
     elif isinstance(array, recordtypes):
         out = []
         for i in range(array.numfields):
-            out.append(completely_flatten(array.field(i)))
+            out.extend(completely_flatten(array.field(i)))
         return tuple(out)
 
     elif isinstance(array, awkward1.layout.NumpyArray):
@@ -1009,6 +1009,13 @@ def recursively_apply(layout,
     else:
         raise AssertionError(
                 "unrecognized Content type: {0}".format(type(layout)))
+
+def highlevel_type(layout, behavior, isarray):
+    if isarray:
+        return awkward1.types.ArrayType(layout.type(typestrs(behavior)),
+                                        len(layout))
+    else:
+        return layout.type(typestrs(behavior))
 
 def minimally_touching_string(limit_length, layout, behavior):
     import awkward1.layout
