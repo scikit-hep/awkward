@@ -166,7 +166,7 @@ Versions can be explicitly tested with `distutils.version.LooseVersion`, though 
 
 ------------
 
-Thanks again for wanting to contribute to Awkward Array. We all look forward to what you have to add.
+Thanks again for contributing to Awkward Array. We all look forward to what you have to add.
 
 Cheers, and I wish you good craftsmanship!
 
