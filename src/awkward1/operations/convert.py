@@ -1296,10 +1296,13 @@ def to_arrow(layout):
                                  awkward1.layout.IndexedArray64)):
 
             if mask is not None:
-                mask = numpy.asarray(numpy.unpackbits(
-                    mask), dtype=numpy.bool) == False
+                # index = numpy.asarray(layout.index)
+                # content_buffer = recurse(layout.content[layout.index])
+                # dic_type = pyarrow.dictionary(pyarrow.from_numpy_dtype(index.dtype), content_buffer.type)
+                # arrow_arr = pyarrow.DictionaryArray.from_buffers(dic_type, len(index), [pyarrow.py_buffer(mask), pyarrow.py_buffer(content_buffer.to_numpy())])
                 arrow_arr = pyarrow.DictionaryArray.from_arrays(
-                    recurse(layout.index), recurse(layout.content), mask=mask)
+                    recurse(layout.index), recurse(layout.content))
+                ValueError("Mask in pyarrow not implemented yet")
             else:
                 arrow_arr = pyarrow.DictionaryArray.from_arrays(
                     recurse(layout.index), recurse(layout.content))
