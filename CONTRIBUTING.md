@@ -175,6 +175,20 @@ Other third party libraries are used if they exist (can be imported), and we onl
 
 Versions can be explicitly tested with `distutils.version.LooseVersion`, though it's better to test for features (existence of classes, methods, and attributes) than to test for explicit version numbers.
 
+### Array object details
+
+Arrays are (or soon will be: [#176](https://github.com/scikit-hep/awkward-1.0/issues/176) and [#177](https://github.com/scikit-hep/awkward-1.0/issues/177)) immutable objects. Only the high-level `ak.Array` changes its state in-place in response to user choices (such as `__setitem__`, which replaces its `layout` using the pure function `ak.with_field`). This is not a performance liability but usually a benefit because it means that we can freely share data among array objects without worrying about long-distance modifications.
+
+Users can break this model by wrapping NumPy arrays as Awkward Arrays and changing the original NumPy arrays in-place, but they are encouraged not to.
+
+An Awkward Array has distributed state: index arrays refer to positions in content arrays that might not exist. The validity of these relationships are checked as late as possible, i.e. an index position is checked to ensure that it is not outside of its content just before fetching that content.
+
+This is motivated by performance: if bounds checking is performed when an element is needed, then the index has to be in CPU cache/a register anyway, whereas a separate validity-checking pass would flush caches. Also, some operations on valid arrays can be guaranteed to produce valid arrays as results, and there is no reason to re-check. (Mathematical guarantees on validity have not been explored.)
+
+Most objects are defined by a small set of named fields (such as `starts`, `stops`, and `content` for a ListArray). In both C++ and Python, constructors take the full set of fields, the fields are stored as private members, and there are public accessors to those attributes, all with the same names. This ensures that the fields are immutable and resembles Scala's "case class" pattern for functional programming.
+
+Within the narrow scope of a function, there is no attempt to maintain immutability.
+
 ------------
 
 Thanks again for contributing to Awkward Array. We all look forward to what you have to add.
