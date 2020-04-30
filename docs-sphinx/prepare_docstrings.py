@@ -1,3 +1,5 @@
+# BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+
 import re
 import os
 import ast
@@ -12,7 +14,7 @@ config = sphinx.ext.napoleon.Config(napoleon_use_param=True,
 if not os.path.exists("_auto"):
     os.mkdir("_auto")
 
-toctree = []
+toctree = ["_auto/changelog.rst"]
 
 def tostr(node):
     if isinstance(node, ast.NameConstant):
@@ -35,7 +37,7 @@ def tostr(node):
 
     elif isinstance(node, ast.Subscript):
         return "{0}[{1}]".format(tostr(node.value), tostr(node.slice))
-    
+
     elif isinstance(node, ast.Slice):
         start = "" if node.lower is None else tostr(node.lower)
         stop  = "" if node.upper is None else tostr(node.upper)
@@ -188,7 +190,7 @@ def doclass(link, shortname, name, astcls):
             outfile.write(attrtext + "\n" + "="*len(attrtext) + "\n\n")
             outfile.write(".. py:attribute:: " + attrtext + "\n\n")
             docstring = ast.get_docstring(node)
-            
+
         elif any(isinstance(x, ast.Attribute) and x.attr == "setter"
                  for x in node.decorator_list):
             docstring = None
@@ -199,7 +201,7 @@ def doclass(link, shortname, name, astcls):
             outfile.write(methodname + "\n" + "="*len(methodname) + "\n\n")
             outfile.write(".. py:method:: " + methodtext + "\n\n")
             docstring = ast.get_docstring(node)
-        
+
         if docstring is not None:
             outfile.write(dodoc(docstring, qualname, names) + "\n\n")
 

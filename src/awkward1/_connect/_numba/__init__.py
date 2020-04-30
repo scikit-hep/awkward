@@ -2,9 +2,19 @@
 
 from __future__ import absolute_import
 
+import distutils.version
+
+import numpy
+
 import awkward1.highlevel
 import awkward1.layout
-import numpy
+
+def register_and_check(name):
+    # Numba 0.49 rearranged its internal classes; only pre or post-0.49 can
+    # be supported.
+    if (distutils.version.LooseVersion(numba.__version__) <
+        distutils.version.LooseVersion("0.49")):
+        raise ImportError(name + " can only be used with Numba 0.49 or later")
 
 def register():
     import awkward1._connect._numba.arrayview

@@ -57,3 +57,5 @@ import subprocess
 subprocess.check_call(["doxygen", os.path.join("docs-doxygen", "Doxyfile")], cwd="..")
 
 exec(open("prepare_docstrings.py").read(), dict(globals()))
+
+exec(open("make_changelog.py").read(), dict(globals()))
