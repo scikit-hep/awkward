@@ -104,6 +104,17 @@ Sometimes, changes in the C++ or even Python code can change the number or size 
 
 To ensure this separation between "slow control" and "fast math," Python and C++ code are not allowed to perform any loops over data in array buffers. Only CPU and GPU kernels are allowed to do that. In fact, C++ is not even allowed to access values pointed to by these arrays, as the pointer might be in main memory or it might be a device pointer on a GPU. (Dereferencing such a pointer as though it were in main memory would cause a segmentation fault.)
 
+### Priorities
+
+As we change the code, we should keep in mind the following priorities, in this order (from most important to "nice to have"):
+
+   1. Operations must give correct results. Awkward Array is basically a math library, and for our chosen interpretation of the data structures as mathematical objects and operations as functions, there is a right answer. Silently returning the wrong answer is worse than crashing.
+   2. When used in Python, it must not raise segmentation faults. Python users expect to freely use software without ever encountering a segmentation fault (or other signal/behavior that aborts the Python shell). "Crashes" are indications that something is seriously wrong. Exceptions, however, are normal and expected. We use `ValueError` (`std::invalid_argument` in C++) to indicate that the user has provided wrong input and `RuntimeError` (`std::runtime_error` in C++) to indicate an internal error. The latter is a bug, but the user is informed of the bug in a useful way.
+   3. The separation between "slow control" and "fast math" must be maintained. No Python or C++ loops over array buffer data: all of that must be contained within CPU and GPU kernels or NumPy and CuPy calls in Python. The only exceptions are for converting from and to non-columnar data structures (e.g. `ak.from_iter` and `ak.to_list`). This rule is motivated by performance (see the section above), but it is an objective, categorical rule that enables CPU/GPU interchangeability, not a slippery slope of fine-tuning.
+   4. Python-friendly interface. This library is intended for data analysts who want to focus on data without being interrupted by technical complications. The front-end should be as simple as possible, but no simpler: inherent mathematical features should be foremost, even if they are complex, but computing-related complexity should not. This criterion can usually be satisfied independently of the others.
+   5. Readability and maintainability. Awkward Array is a long-term project that can't afford to accrue technical debt.
+   6. Performance tuning. Ultimately, the reason data analysts use Awkward Array, rather than writing for loops, is speed. It's usually an orders-of-magnitude difference thanks to the separation between "slow control" and "fast math," but there may be cases where explicit tuning is warranted.
+
 ### General statements on coding style
 
 Above all, the purpose of any programming language is to be read by humans; if we were only concerned with operating the machine, we would be flipping individual bits. It should be organized in stanzas that highlight similarities and differences by grouping them on the screen.
