@@ -152,7 +152,7 @@ We only supprt Python 2.7 as much as is practical. For example, we ignore compil
 
 Python 2.7 and 3.5 have unstable dict order, which excludes them both from some tests.
 
-Allowing Python 2.7 after it has been fully and finally discontinued may sound anachronistic, but some of our users depend on legacy codebases forcing them in Python 2, and Python 2 limits our adoption of new language features, keeping the code "simple, rather than smart."
+Allowing Python 2.7 after it has been [fully and finally discontinued](https://mail.python.org/archives/list/python-dev@python.org/message/OFCIETIXLX34X7FVK5B5WPZH22HXV342/) may sound anachronistic, but some of our users depend on legacy codebases forcing them in Python 2, and Python 2 limits our adoption of new language features, keeping the code "simple, rather than smart."
 
 ### Third party dependencies
 
@@ -163,3 +163,11 @@ The Python codebase only strictly depends on NumPy 1.13.1, the first version wit
 Other third party libraries are used if they exist (can be imported), and we only accept certain versions of these libraries. Both the test-import and any version-testing must be within runtime code, not startup code, so that they're only invoked when users explicitly call for the feature that requires them.
 
 Versions can be explicitly tested with `distutils.version.LooseVersion`, though it's better to test for features (existence of classes, methods, and attributes) than to test for explicit version numbers.
+
+------------
+
+Thanks again for wanting to contribute to Awkward Array. We all look forward to what you have to add.
+
+Cheers, and I wish you good craftsmanship.
+
+Jim Pivarski
