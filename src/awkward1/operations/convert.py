@@ -1186,14 +1186,14 @@ def to_arrow(layout):
 
             if (awkward1.operations.describe.parameters(layout).get("__array__") == "bytestring"):
                 offsets = numpy.asarray(layout.offsets, dtype=numpy.int32)
-                arrow_arr = pyarrow.BinaryArray.from_buffers(
-                    len(offsets) - 1, pyarrow.py_buffer(offsets), pyarrow.py_buffer(layout.content))
-
-                if mask is not None:
-                    indices = mask_to_indices(mask)
-                    return arrow_arr.take(indices)
+                if mask is None:
+                    arrow_arr = pyarrow.BinaryArray.from_buffers(
+                        len(offsets) - 1, pyarrow.py_buffer(offsets), pyarrow.py_buffer(layout.content))
                 else:
-                    return arrow_arr
+                    arrow_arr = pyarrow.BinaryArray.from_buffers(
+                        len(offsets) - 1, pyarrow.py_buffer(offsets), pyarrow.py_buffer(layout.content), pyarrow.py_buffer(mask))
+
+                return arrow_arr
 
             if (awkward1.operations.describe.parameters(layout).get("__array__") == "string"):
                 offsets = numpy.asarray(layout.offsets, dtype=numpy.int32)
@@ -1205,46 +1205,51 @@ def to_arrow(layout):
                         len(offsets) - 1, pyarrow.py_buffer(offsets), pyarrow.py_buffer(layout.content), pyarrow.py_buffer(mask))
 
                 return arrow_arr
-            arrow_arr = pyarrow.ListArray.from_arrays(recurse(layout.offsets),
-                                                      recurse(layout.content))
-            if mask is not None:
-                indices = mask_to_indices(mask)
-                return arrow_arr.take(indices)
+
+            content_buffer = recurse(layout.content)
+            if mask is None:
+                arrow_arr = pyarrow.Array.from_buffers(pyarrow.list_(content_buffer.type), len(
+                    layout.offsets) - 1, [None, pyarrow.py_buffer(layout.offsets)], children=[content_buffer])
             else:
-                return arrow_arr
+                arrow_arr = pyarrow.Array.from_buffers(pyarrow.list_(content_buffer.type), len(
+                    layout.offsets) - 1, [pyarrow.py_buffer(mask), pyarrow.py_buffer(layout.offsets)], children=[content_buffer])
+
+            return arrow_arr
 
         elif isinstance(layout, (awkward1.layout.ListOffsetArray64,
                                  awkward1.layout.ListOffsetArrayU32)):
 
             if (awkward1.operations.describe.parameters(layout).get("__array__") == "bytestring"):
                 offsets = numpy.asarray(layout.offsets, dtype=numpy.int64)
-                arrow_arr = pyarrow.LargeBinaryArray.from_buffers(
-                    len(offsets) - 1, pyarrow.py_buffer(offsets), pyarrow.py_buffer(layout.content))
-
-                if mask is not None:
-                    indices = mask_to_indices(mask)
-                    return arrow_arr.take(indices)
+                if mask is None:
+                    arrow_arr = pyarrow.LargeBinaryArray.from_buffers(
+                        len(offsets) - 1, pyarrow.py_buffer(offsets), pyarrow.py_buffer(layout.content))
                 else:
-                    return arrow_arr
+                    arrow_arr = pyarrow.LargeBinaryArray.from_buffers(
+                        len(offsets) - 1, pyarrow.py_buffer(offsets), pyarrow.py_buffer(layout.content), pyarrow.py_buffer(mask))
+
+                return arrow_arr
 
             if (awkward1.operations.describe.parameters(layout).get("__array__") == "string"):
-                offsets = numpy.asarray(layout.offsets, dtype=numpy.int64)
+                offsets = numpy.asarray(layout.offsets, dtype=numpy.int32)
                 if mask is None:
                     arrow_arr = pyarrow.LargeStringArray.from_buffers(
                         len(offsets) - 1, pyarrow.py_buffer(offsets), pyarrow.py_buffer(layout.content))
                 else:
                     arrow_arr = pyarrow.LargeStringArray.from_buffers(
                         len(offsets) - 1, pyarrow.py_buffer(offsets), pyarrow.py_buffer(layout.content), pyarrow.py_buffer(mask))
-                
+
                 return arrow_arr
 
-            arrow_arr = pyarrow.LargeListArray.from_arrays(recurse(layout.offsets),
-                                                           recurse(layout.content))
-            if mask is not None:
-                indices = mask_to_indices(mask)
-                return arrow_arr.take(indices)
+            content_buffer = recurse(layout.content)
+            if mask is None:
+                arrow_arr = pyarrow.Array.from_buffers(pyarrow.large_list(content_buffer.type), len(
+                    layout.offsets) - 1, [None, pyarrow.py_buffer(layout.offsets)], children=[content_buffer])
             else:
-                return arrow_arr
+                arrow_arr = pyarrow.Array.from_buffers(pyarrow.large_list(content_buffer.type), len(
+                    layout.offsets) - 1, [pyarrow.py_buffer(mask), pyarrow.py_buffer(layout.offsets)], children=[content_buffer])
+
+            return arrow_arr
 
         elif isinstance(layout, (awkward1.layout.RegularArray)):
             if mask is not None:
@@ -1262,35 +1267,28 @@ def to_arrow(layout):
 
         elif isinstance(layout, (awkward1.layout.RecordArray)):
             values = [recurse(x) for x in layout.contents]
-            # Arrow rejects the values list if every child array is not of same length
+
             min_list_len = min(map(len, values))
 
+            types = pyarrow.struct(
+                [pyarrow.field(layout.keys()[i], values[i].type) for i in range(len(values))])
+
             if mask is not None:
-                for i in range(len(values)):
-                    values[i] = values[i].slice(0, len(mask))
-                indices = mask_to_indices(mask)
-                arrow_arr = pyarrow.StructArray.from_arrays(
-                    values, layout.keys())
-                return arrow_arr.take(indices)
+                return pyarrow.StructArray.from_buffers(types, min_list_len, [pyarrow.py_buffer(mask)], children=values)
             else:
-                for i in range(len(values)):
-                    values[i] = values[i].slice(0, min_list_len)
-                return pyarrow.StructArray.from_arrays(values, layout.keys())
+                return pyarrow.StructArray.from_buffers(types, min_list_len, [None], children=values)
 
         elif isinstance(layout, (awkward1.layout.UnionArray8_32,
                                  awkward1.layout.UnionArray8_64,
                                  awkward1.layout.UnionArray8_U32)):
 
-            values = [recurse(x) for x in layout.contents]
+            values = [to_arrow(x) for x in layout.contents]
+            types = pyarrow.struct([pyarrow.field(str(i), values[i].type) for i in range(len(values))])
+
             if mask is not None:
-                indices = []
-                for i in range(len(mask)):
-                    if mask[i] == 1:
-                        indices.append(None)
-                    else:
-                        indices.append(i)
-                return pyarrow.UnionArray.from_dense(recurse(layout.tags), recurse(layout.index), values).take(pyarrow.array(indices))
-            return pyarrow.UnionArray.from_dense(recurse(layout.tags), recurse(layout.index), values)
+                return pyarrow.UnionArray.from_buffers(types, len(layout.tags), [pyarrow.py_buffer(layout), pyarrow.py_buffer(numpy.asarray(layout.tags)), pyarrow.py_buffer(numpy.asarray(layout.index))], children=values)
+            else:
+                return pyarrow.UnionArray.from_buffers(types, len(layout.tags), [None, pyarrow.py_buffer(numpy.asarray(layout.tags)), pyarrow.py_buffer(numpy.asarray(layout.index))], children=values)
 
         elif isinstance(layout, (awkward1.layout.IndexedArray32,
                                  awkward1.layout.IndexedArray64,
@@ -1329,18 +1327,21 @@ def to_arrow(layout):
             return recurse(layout.content, bitmask)
 
         elif isinstance(layout, (awkward1.layout.ByteMaskedArray)):
-            mask = numpy.asarray(layout.mask, dtype=numpy.bool) == layout.valid_when
-        
-            bytemask = numpy.zeros(8 * math.ceil(len(layout.content) / 8), dtype=numpy.bool)
-            bytemask[:len(mask)] = mask
-            bitmask = numpy.packbits(bytemask.reshape(-1, 8)[:, ::-1].reshape(-1))
+            mask = numpy.asarray(
+                layout.mask, dtype=numpy.bool) == layout.valid_when
 
-            return recurse(layout.content, bitmask).slice(length = len(mask))
+            bytemask = numpy.zeros(
+                8 * math.ceil(len(layout.content) / 8), dtype=numpy.bool)
+            bytemask[:len(mask)] = mask
+            bitmask = numpy.packbits(
+                bytemask.reshape(-1, 8)[:, ::-1].reshape(-1))
+
+            return recurse(layout.content, bitmask).slice(length=len(mask))
 
     return recurse(layout)
+
 
 # HAve a lookup table that assoicates  values with pyarrow data type
 __all__ = [x for x in list(globals())
            if not x.startswith("_") and
            x not in ("numbers", "json", "Iterable", "numpy", "awkward1")]
-
