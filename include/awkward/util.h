@@ -1034,13 +1034,16 @@ namespace awkward {
         int64_t offset,
         int64_t at,
         T value);
-        
+
     template <typename T>
     ERROR
       awkward_numpyarray_sort(
         T* toptr,
         const T* fromptr,
         const size_t* fromindex,
+        const int64_t* starts,
+        const int64_t* parents,
+        int64_t parentsoffset,
         int64_t length);
   }
 }

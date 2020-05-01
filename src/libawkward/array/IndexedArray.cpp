@@ -1634,6 +1634,89 @@ namespace awkward {
 
   template <typename T, bool ISOPTION>
   const ContentPtr
+  IndexedArrayOf<T, ISOPTION>::recurse_next(int64_t negaxis,
+                                            const Index64& starts,
+                                            const Index64& parents,
+                                            int64_t outlength,
+                                            bool mask,
+                                            bool keepdims) const {
+    int64_t numnull;
+    struct Error err1 = util::awkward_indexedarray_numnull<T>(
+      &numnull,
+      index_.ptr().get(),
+      index_.offset(),
+      index_.length());
+    util::handle_error(err1, classname(), identities_.get());
+
+    Index64 nextparents(index_.length() - numnull);
+    Index64 nextcarry(index_.length() - numnull);
+    Index64 outindex(index_.length());
+    struct Error err2 = util::awkward_indexedarray_reduce_next_64<T>(
+      nextcarry.ptr().get(),
+      nextparents.ptr().get(),
+      outindex.ptr().get(),
+      index_.ptr().get(),
+      index_.offset(),
+      parents.ptr().get(),
+      parents.offset(),
+      index_.length());
+    util::handle_error(err2, classname(), identities_.get());
+
+    ContentPtr next = content_.get()->carry(nextcarry);
+    ContentPtr out = next.get()->recurse_next(negaxis,
+                                              starts,
+                                              nextparents,
+                                              outlength,
+                                              mask,
+                                              keepdims);
+
+    std::pair<bool, int64_t> branchdepth = branch_depth();
+    if (!branchdepth.first  &&  negaxis == branchdepth.second) {
+      return out;
+    }
+    else {
+      if (RegularArray* raw =
+          dynamic_cast<RegularArray*>(out.get())) {
+        out = raw->toListOffsetArray64(true);
+      }
+      if (ListOffsetArray64* raw =
+          dynamic_cast<ListOffsetArray64*>(out.get())) {
+        Index64 outoffsets(starts.length() + 1);
+        if (starts.length() > 0  &&  starts.getitem_at_nowrap(0) != 0) {
+          throw std::runtime_error(
+            "reduce_next with unbranching depth > negaxis expects a "
+            "ListOffsetArray64 whose offsets start at zero");
+        }
+        struct Error err3 = awkward_indexedarray_reduce_next_fix_offsets_64(
+          outoffsets.ptr().get(),
+          starts.ptr().get(),
+          starts.offset(),
+          starts.length(),
+          outindex.length());
+        util::handle_error(err3, classname(), identities_.get());
+
+        return std::make_shared<ListOffsetArray64>(
+          raw->identities(),
+          raw->parameters(),
+          outoffsets,
+          std::make_shared<IndexedOptionArray64>(Identities::none(),
+                                                 util::Parameters(),
+                                                 outindex,
+                                                 raw->content()));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("reduce_next with unbranching depth > negaxis is only "
+                      "expected to return RegularArray or ListOffsetArray64; "
+                      "instead, it returned ") + out.get()->classname());
+      }
+    }
+
+    return out;
+  }
+
+  template <typename T, bool ISOPTION>
+  const ContentPtr
   IndexedArrayOf<T, ISOPTION>::localindex(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (axis == depth) {
@@ -1713,7 +1796,8 @@ namespace awkward {
                                          const Index64& parents,
                                          int64_t outlength,
                                          bool ascending,
-                                         bool stable) const {
+                                         bool stable,
+                                         bool keepdims) const {
     int64_t numnull;
     struct Error err1 = util::awkward_indexedarray_numnull<T>(
       &numnull,
@@ -1742,7 +1826,8 @@ namespace awkward {
                                            nextparents,
                                            outlength,
                                            ascending,
-                                           stable);
+                                           stable,
+                                           keepdims);
 
     std::pair<bool, int64_t> branchdepth = branch_depth();
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
@@ -1871,7 +1956,6 @@ namespace awkward {
 
     return out;
   }
-
 
   template <typename T, bool ISOPTION>
   const ContentPtr

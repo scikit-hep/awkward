@@ -431,12 +431,21 @@ namespace awkward {
                   bool keepdims) const override;
 
     const ContentPtr
+      recurse_next(int64_t negaxis,
+                   const Index64& starts,
+                   const Index64& parents,
+                   int64_t outlength,
+                   bool mask,
+                   bool keepdims) const override;
+
+    const ContentPtr
       sort_next(int64_t negaxis,
                 const Index64& starts,
                 const Index64& parents,
                 int64_t outlength,
                 bool ascending,
-                bool stable) const override;
+                bool stable,
+                bool keepdims) const override;
 
     const ContentPtr
       argsort_next(int64_t negaxis,
@@ -794,15 +803,18 @@ namespace awkward {
         new T[(size_t)parents.length()], util::array_deleter<T>());
       std::vector<size_t> result(parents.length());
       std::iota(result.begin(), result.end(), 0);
-
-      int64_t last_stop = parents.length();
       int64_t index(0);
-      int64_t next_start = starts.getitem_at_nowrap(index);
-      int64_t next_stop = (starts.length() > index + 1) ?
-                           starts.getitem_at_nowrap(index + 1) :
-                           last_stop;
+      std::vector<int64_t> ranges(starts.length() + 1);
+      for (int64_t i = 0; i < starts.length(); i++) {
+        ranges[i] = starts.getitem_at_nowrap(i);
+      }
+      ranges[starts.length()] = (int64_t)outlength;
+      std::sort(begin(ranges), end(ranges));
 
-      while(next_start < last_stop) {
+      int64_t next_start = ranges[index];
+      int64_t next_stop = ranges[index + 1];
+
+      while(next_start < outlength) {
         if(ascending  &&  !stable) {
           std::sort(result.begin() + next_start, result.begin() + next_stop,
             [&data](size_t i1, size_t i2) {return data[i1] < data[i2];});
@@ -821,15 +833,16 @@ namespace awkward {
         }
         index++;
         next_start = next_stop;
-        next_stop = (starts.length() > index + 1) ?
-                     starts.getitem_at_nowrap(index + 1) :
-                     last_stop;
+        next_stop = (ranges.size() > index + 1) ?  ranges[index + 1] : outlength;
       }
 
       struct Error err = util::awkward_numpyarray_sort<T>(
         ptr.get(),
         data,
         &result[0],
+        starts.ptr().get(),
+        parents.ptr().get(),
+        parents.offset(),
         parents.length());
       util::handle_error(err, classname(), nullptr);
 

@@ -924,6 +924,31 @@ namespace awkward {
   }
 
   const ContentPtr
+  RecordArray::recurse_next(int64_t negaxis,
+                            const Index64& starts,
+                            const Index64& parents,
+                            int64_t outlength,
+                            bool mask,
+                            bool keepdims) const {
+    ContentPtrVec contents;
+    for (auto content : contents_) {
+      ContentPtr trimmed = content.get()->getitem_range_nowrap(0, length());
+      ContentPtr next = trimmed.get()->recurse_next(negaxis,
+                                                    starts,
+                                                    parents,
+                                                    outlength,
+                                                    mask,
+                                                    keepdims);
+      contents.push_back(next);
+    }
+    return std::make_shared<RecordArray>(Identities::none(),
+                                         util::Parameters(),
+                                         contents,
+                                         recordlookup_,
+                                         outlength);
+  }
+
+  const ContentPtr
   RecordArray::localindex(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (axis == depth) {
@@ -1031,7 +1056,8 @@ namespace awkward {
                          const Index64& parents,
                          int64_t outlength,
                          bool ascending,
-                         bool stable) const {
+                         bool stable,
+                         bool keepdims) const {
     std::vector<ContentPtr> contents;
     for (auto content : contents_) {
       ContentPtr trimmed = content.get()->getitem_range_nowrap(0, length());
@@ -1040,7 +1066,8 @@ namespace awkward {
                                                  parents,
                                                  outlength,
                                                  ascending,
-                                                 stable);
+                                                 stable,
+                                                 keepdims);
       contents.push_back(next);
     }
     return std::make_shared<RecordArray>(Identities::none(),

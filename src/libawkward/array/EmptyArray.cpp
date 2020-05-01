@@ -337,6 +337,22 @@ namespace awkward {
   }
 
   const ContentPtr
+  EmptyArray::recurse_next(int64_t negaxis,
+                           const Index64& starts,
+                           const Index64& parents,
+                           int64_t outlength,
+                           bool mask,
+                           bool keepdims) const {
+    ContentPtr asnumpy = toNumpyArray("d", 8);
+    return asnumpy.get()->recurse_next(negaxis,
+                                       starts,
+                                       parents,
+                                       outlength,
+                                       mask,
+                                       keepdims);
+  }
+
+  const ContentPtr
   EmptyArray::localindex(int64_t axis, int64_t depth) const {
     return std::make_shared<NumpyArray>(Index64(0));
   }
@@ -360,9 +376,16 @@ namespace awkward {
                         const Index64& parents,
                         int64_t outlength,
                         bool ascending,
-                        bool stable) const {
+                        bool stable,
+                        bool keepdims) const {
     ContentPtr asnumpy = toNumpyArray("d", 8);
-    return asnumpy.get()->sort_next(negaxis, starts, parents, outlength, ascending, stable);
+    return asnumpy.get()->sort_next(negaxis,
+                                    starts,
+                                    parents,
+                                    outlength,
+                                    ascending,
+                                    stable,
+                                    keepdims);
   }
 
   const ContentPtr

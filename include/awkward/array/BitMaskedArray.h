@@ -274,12 +274,21 @@ namespace awkward {
                   bool keepdims) const override;
 
     const ContentPtr
+      recurse_next(int64_t negaxis,
+                   const Index64& starts,
+                   const Index64& parents,
+                   int64_t outlength,
+                   bool mask,
+                   bool keepdims) const override;
+
+    const ContentPtr
       sort_next(int64_t negaxis,
                 const Index64& starts,
                 const Index64& parents,
                 int64_t outlength,
                 bool ascending,
-                bool stable) const override;
+                bool stable,
+                bool keepdims) const override;
 
     const ContentPtr
       argsort_next(int64_t negaxis,
@@ -288,7 +297,7 @@ namespace awkward {
                    int64_t outlength,
                    bool ascending,
                    bool stable) const override;
-                   
+
     const ContentPtr
       localindex(int64_t axis, int64_t depth) const override;
 

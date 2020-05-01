@@ -828,12 +828,23 @@ namespace awkward {
     }
 
     const ContentPtr
+      recurse_next(int64_t negaxis,
+                   const Index64& starts,
+                   const Index64& parents,
+                   int64_t outlength,
+                   bool mask,
+                   bool keepdims) const override {
+      throw std::runtime_error("FIXME: RawArray:recurse_next");
+    }
+
+    const ContentPtr
       sort_next(int64_t negaxis,
                 const Index64& starts,
                 const Index64& parents,
                 int64_t outlength,
                 bool ascending,
-                bool stable) const override {
+                bool stable,
+                bool keepdims) const override {
       std::shared_ptr<T> ptr(
                     new T[(size_t)length_], util::array_deleter<T>());
       std::vector<size_t> result(length_);
@@ -859,6 +870,9 @@ namespace awkward {
         ptr.get(),
         ptr_.get(),
         &result[0],
+        starts.ptr().get(),
+        parents.ptr().get(),
+        parents.offset(),
         length_);
       util::handle_error(err, classname(), nullptr);
 

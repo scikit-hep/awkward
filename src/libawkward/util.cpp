@@ -4104,11 +4104,17 @@ namespace awkward {
       bool* toptr,
       const bool* fromptr,
       const size_t* fromindex,
+      const int64_t* starts,
+      const int64_t* parents,
+      int64_t parentsoffset,
       int64_t length) {
       return awkward_sort_bool(
         toptr,
         fromptr,
         fromindex,
+        starts,
+        parents,
+        parentsoffset,
         length);
     }
     template <>
@@ -4116,11 +4122,17 @@ namespace awkward {
       uint8_t* toptr,
       const uint8_t* fromptr,
       const size_t* fromindex,
+      const int64_t* starts,
+      const int64_t* parents,
+      int64_t parentsoffset,
       int64_t length) {
       return awkward_sort_uint8(
         toptr,
         fromptr,
         fromindex,
+        starts,
+        parents,
+        parentsoffset,
         length);
     }
     template <>
@@ -4128,11 +4140,17 @@ namespace awkward {
       int8_t* toptr,
       const int8_t* fromptr,
       const size_t* fromindex,
+      const int64_t* starts,
+      const int64_t* parents,
+      int64_t parentsoffset,
       int64_t length) {
       return awkward_sort_int8(
         toptr,
         fromptr,
         fromindex,
+        starts,
+        parents,
+        parentsoffset,
         length);
     }
     template <>
@@ -4140,11 +4158,17 @@ namespace awkward {
       uint16_t* toptr,
       const uint16_t* fromptr,
       const size_t* fromindex,
+      const int64_t* starts,
+      const int64_t* parents,
+      int64_t parentsoffset,
       int64_t length) {
       return awkward_sort_uint16(
         toptr,
         fromptr,
         fromindex,
+        starts,
+        parents,
+        parentsoffset,
         length);
     }
     template <>
@@ -4152,11 +4176,17 @@ namespace awkward {
       int16_t* toptr,
       const int16_t* fromptr,
       const size_t* fromindex,
+      const int64_t* starts,
+      const int64_t* parents,
+      int64_t parentsoffset,
       int64_t length) {
       return awkward_sort_int16(
         toptr,
         fromptr,
         fromindex,
+        starts,
+        parents,
+        parentsoffset,
         length);
     }
     template <>
@@ -4164,11 +4194,17 @@ namespace awkward {
       uint32_t* toptr,
       const uint32_t* fromptr,
       const size_t* fromindex,
+      const int64_t* starts,
+      const int64_t* parents,
+      int64_t parentsoffset,
       int64_t length) {
       return awkward_sort_uint32(
         toptr,
         fromptr,
         fromindex,
+        starts,
+        parents,
+        parentsoffset,
         length);
     }
     template <>
@@ -4176,11 +4212,17 @@ namespace awkward {
       int32_t* toptr,
       const int32_t* fromptr,
       const size_t* fromindex,
+      const int64_t* starts,
+      const int64_t* parents,
+      int64_t parentsoffset,
       int64_t length) {
       return awkward_sort_int32(
         toptr,
         fromptr,
         fromindex,
+        starts,
+        parents,
+        parentsoffset,
         length);
     }
     template <>
@@ -4188,11 +4230,17 @@ namespace awkward {
       uint64_t* toptr,
       const uint64_t* fromptr,
       const size_t* fromindex,
+      const int64_t* starts,
+      const int64_t* parents,
+      int64_t parentsoffset,
       int64_t length) {
       return awkward_sort_uint64(
         toptr,
         fromptr,
         fromindex,
+        starts,
+        parents,
+        parentsoffset,
         length);
     }
     template <>
@@ -4200,11 +4248,17 @@ namespace awkward {
       int64_t* toptr,
       const int64_t* fromptr,
       const size_t* fromindex,
+      const int64_t* starts,
+      const int64_t* parents,
+      int64_t parentsoffset,
       int64_t length) {
       return awkward_sort_int64(
         toptr,
         fromptr,
         fromindex,
+        starts,
+        parents,
+        parentsoffset,
         length);
     }
     template <>
@@ -4212,11 +4266,17 @@ namespace awkward {
       float* toptr,
       const float* fromptr,
       const size_t* fromindex,
+      const int64_t* starts,
+      const int64_t* parents,
+      int64_t parentsoffset,
       int64_t length) {
       return awkward_sort_float32(
         toptr,
         fromptr,
         fromindex,
+        starts,
+        parents,
+        parentsoffset,
         length);
     }
     template <>
@@ -4224,11 +4284,17 @@ namespace awkward {
       double* toptr,
       const double* fromptr,
       const size_t* fromindex,
+      const int64_t* starts,
+      const int64_t* parents,
+      int64_t parentsoffset,
       int64_t length) {
       return awkward_sort_float64(
         toptr,
         fromptr,
         fromindex,
+        starts,
+        parents,
+        parentsoffset,
         length);
     }
 

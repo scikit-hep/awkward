@@ -480,6 +480,14 @@ namespace awkward {
                   bool mask,
                   bool keepdims) const = 0;
 
+    virtual const ContentPtr
+      recurse_next(int64_t negaxis,
+                   const Index64& starts,
+                   const Index64& parents,
+                   int64_t outlength,
+                   bool mask,
+                   bool keepdims) const = 0;
+
     /// @brief This array with one axis removed by applying a Reducer
     ///
     /// The user's entry point for this operation is #sort.
@@ -505,7 +513,8 @@ namespace awkward {
                 const Index64& parents,
                 int64_t outlength,
                 bool ascending,
-                bool stable) const = 0;
+                bool stable,
+                bool keepdims) const = 0;
 
     virtual const ContentPtr
       argsort_next(int64_t negaxis,
@@ -677,6 +686,11 @@ namespace awkward {
              int64_t axis,
              bool mask,
              bool keepdims) const;
+
+    const ContentPtr
+      recurse(int64_t axis,
+              bool mask,
+              bool keepdims) const;
 
     /// @brief This array with one axis sorted by applying a sorting algorithm
     ///

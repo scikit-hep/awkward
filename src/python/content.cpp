@@ -1253,6 +1253,13 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
              py::arg("keys") = py::none(),
              py::arg("parameters") = py::none(),
              py::arg("axis") = 1)
+          .def("recurse",
+              [](const T&self,
+                 int64_t axis,
+                 bool mask,
+                 bool keepdims) -> py::object {
+               return box(self.recurse(axis, mask, keepdims));
+          })
           .def("sort",
                [](const T&self,
                   int64_t axis,

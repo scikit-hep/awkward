@@ -605,6 +605,21 @@ namespace awkward {
   }
 
   const ContentPtr
+  UnmaskedArray::recurse_next(int64_t negaxis,
+                              const Index64& starts,
+                              const Index64& parents,
+                              int64_t outlength,
+                              bool mask,
+                              bool keepdims) const {
+    return content_.get()->recurse_next(negaxis,
+                                        starts,
+                                        parents,
+                                        outlength,
+                                        mask,
+                                        keepdims);
+  }
+
+  const ContentPtr
   UnmaskedArray::localindex(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (axis == depth) {
@@ -651,13 +666,15 @@ namespace awkward {
                            const Index64& parents,
                            int64_t outlength,
                            bool ascending,
-                           bool stable) const {
+                           bool stable,
+                           bool keepdims) const {
     return content_.get()->sort_next(negaxis,
                                      starts,
                                      parents,
                                      outlength,
                                      ascending,
-                                     stable);
+                                     stable,
+                                     keepdims);
   }
 
   const ContentPtr
@@ -667,12 +684,12 @@ namespace awkward {
                               int64_t outlength,
                               bool ascending,
                               bool stable) const {
-    return content_.get()->sort_next(negaxis,
-                                     starts,
-                                     parents,
-                                     outlength,
-                                     ascending,
-                                     stable);
+    return content_.get()->argsort_next(negaxis,
+                                        starts,
+                                        parents,
+                                        outlength,
+                                        ascending,
+                                        stable);
   }
 
   const ContentPtr

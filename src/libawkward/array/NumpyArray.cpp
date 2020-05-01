@@ -2266,6 +2266,65 @@ namespace awkward {
       return out;
     }
   }
+  const ContentPtr
+  NumpyArray::recurse_next(int64_t negaxis,
+                           const Index64& starts,
+                           const Index64& parents,
+                           int64_t outlength,
+                           bool mask,
+                           bool keepdims) const {
+    if (shape_.empty()) {
+      throw std::runtime_error("attempting to reduce a scalar");
+    }
+    else if (shape_.size() != 1  ||  !iscontiguous()) {
+      return toRegularArray().get()->recurse_next(negaxis,
+                                                  starts,
+                                                  parents,
+                                                  outlength,
+                                                  mask,
+                                                  keepdims);
+    }
+    else {
+
+      ContentPtr out = std::make_shared<NumpyArray>(Identities::none(),
+                                                    util::Parameters(),
+                                                    ptr_,
+                                                    shape_,
+                                                    strides_,
+                                                    0,
+                                                    itemsize_,
+                                                    format_);
+
+      if (mask) {
+        Index8 mask(out.get()->length());
+        struct Error err = awkward_numpyarray_reduce_mask_bytemaskedarray(
+          mask.ptr().get(),
+          parents.ptr().get(),
+          parents.offset(),
+          parents.length(),
+          out.get()->length());
+        util::handle_error(err, classname(), nullptr);
+        Index8 maskOne(out.get()->length());
+        for(int64_t i = 0; i < out.get()->length(); i++)
+          maskOne.setitem_at_nowrap(i, 0);
+
+        out = std::make_shared<ByteMaskedArray>(Identities::none(),
+                                                util::Parameters(),
+                                                maskOne,
+                                                out,
+                                                false);
+      }
+
+      if (keepdims) {
+        out = std::make_shared<RegularArray>(Identities::none(),
+                                             util::Parameters(),
+                                             out,
+                                             parents.length()/starts.length());
+      }
+
+      return out;
+    }
+  }
 
   const ContentPtr
   NumpyArray::localindex(int64_t axis, int64_t depth) const {
@@ -2317,7 +2376,8 @@ namespace awkward {
                         const Index64& parents,
                         int64_t outlength,
                         bool ascending,
-                        bool stable) const {
+                        bool stable,
+                        bool keepdims) const {
     if (shape_.empty()) {
       throw std::runtime_error("attempting to sort a scalar");
     }
@@ -2327,7 +2387,8 @@ namespace awkward {
                                                parents,
                                                outlength,
                                                ascending,
-                                               stable);
+                                               stable,
+                                               keepdims);
     }
     else {
       std::shared_ptr<Content> out;
@@ -2460,22 +2521,17 @@ namespace awkward {
                                          ptr,
                                          shape_,
                                          strides_,
-                                         byteoffset_,
+                                         0,
                                          itemsize_,
                                          format_);
-      Index64 outoffsets(outlength + 1);
-      struct Error err = awkward_listoffsetarray_local_outoffsets_64(
-        outoffsets.ptr().get(),
-        parents.ptr().get(),
-        parents.offset(),
-        parents.length(),
-        outlength);
-      util::handle_error(err, classname(), identities_.get());
 
-      out = std::make_shared<ListOffsetArray64>(Identities::none(),
-                                                util::Parameters(),
-                                                outoffsets,
-                                                out);
+      if (keepdims) {
+        out = std::make_shared<RegularArray>(Identities::none(),
+          util::Parameters(),
+          out,
+          parents.length()/starts.length());
+      }
+
       return out;
     }
   }
