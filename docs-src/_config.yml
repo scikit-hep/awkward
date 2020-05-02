@@ -2,3 +2,12 @@ title: ""
 author: Jim Pivarski
 copyright: "2020 Jim Pivarski"
 logo: img/logo-300px.png
+
+html:
+  favicon: img/favicon.ico
+
+launch_buttons:
+  binderhub_url: ""
+
+repository:
+  url: https://github.com/scikit-hep/awkward-1.0
