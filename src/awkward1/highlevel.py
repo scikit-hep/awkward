@@ -1399,7 +1399,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         else:
             raise TypeError("behavior must be None or a dict")
 
-    def to_list(self):
+    def tolist(self):
         """
         Converts this Record into Python objects.
 
@@ -1422,11 +1422,11 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         """
         return awkward1.operations.convert.to_list(self)
 
-    def to_json(self,
-                destination=None,
-                pretty=False,
-                maxdecimals=None,
-                buffersize=65536):
+    def tojson(self,
+               destination=None,
+               pretty=False,
+               maxdecimals=None,
+               buffersize=65536):
         """
         Args:
             destination (None or str): If None, this method returns a JSON str;
