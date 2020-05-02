@@ -20,7 +20,10 @@ Sometimes, data start off as JSON for generality, but eventually need to be flat
 
 Awkward Array was developed for datasets that are, well, awkward to deal with any other way.
 
-Consider, for example, this GeoJSON of Chicago bike paths:
+JSON to array
+-------------
+
+Consider, for example, this [GeoJSON of Chicago bike paths](https://github.com/Chicago/osd-bike-routes/blob/master/data/Bikeroutes.geojson):
 
 ```{code-cell}
 import urllib.request
@@ -45,7 +48,12 @@ we can slice it as we might a NumPy array.
 bikeroutes["features", "properties", "STREET"]
 ```
 
-In the above, we see that there are 1061 streets and the first is named `'W FULLERTON AVE`. The longitude and latitude coordinates can be obtained with a slice on coordinates.
+In the above, we see that there are 1061 streets and the first is named `'W FULLERTON AVE`.
+
+Array-like computation
+----------------------
+
+The longitude and latitude coordinates can be obtained with a slice on coordinates.
 
 ```{code-cell}
 longitude = bikeroutes["features", "geometry", "coordinates", ..., 0]
@@ -78,4 +86,17 @@ for i in range(10):
     print(bikeroutes.features.properties.STREET[i], "\t\t", street_length[i, 0])
 ```
 
+With the same commands that would have sliced up a strictly rectangular array, we performed useful calculations on irregular data.
 
+Performance
+-----------
+
+Moreover, these kinds of calculations run at number-crunching speeds, rather than what you'd expect for native Python or JSON-processing.
+
+Hidden within each Awkward Array is a collection of NumPy arrays,
+
+```{code-cell}
+np.asarray(bikeroutes.features.geometry.coordinates.layout.content.content.content)
+```
+
+and all of the distance calculations in the previous example are compiled routines operating on these columnar arrays.
