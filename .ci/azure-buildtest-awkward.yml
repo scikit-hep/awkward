@@ -10,7 +10,9 @@ trigger:
       - .ci/azure-deploy-awkward.yml
       - .ci/linux-build.sh
       - .readthedocs.yml
-      - docs-demo-notebooks/*
+      - docs-src/*
+      - docs-img/*
+      - docs-jupyter/*
       - docs-doxygen/*
       - docs-sphinx/*
       - docs/*

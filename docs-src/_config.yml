@@ -1,8 +1,0 @@
-# Book settings
-title: Awkward Array tutorials
-author: Jim Pivarski
-logo: ../doc-img/logo/logo-300px.png
-
-latex:
-  latex_documents:
-    targetname: book.tex
