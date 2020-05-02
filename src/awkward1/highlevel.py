@@ -307,55 +307,7 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
             self._behavior = behavior
         else:
             raise TypeError("behavior must be None or a dict")
-
-    @property
-    def type(self):
-        """
-        The high-level type of this Array as #ak.types.Type objects.
-
-        The high-level type ignores #layout differences like
-        #ak.layout.ListArray64 versus #ak.layout.ListOffsetArray64, but
-        not differences like "regular-sized lists" (i.e.
-        #ak.layout.RegularArray) versus "variable-sized lists" (i.e.
-        #ak.layout.ListArray64 and similar).
-
-        Types are rendered as [Datashape](https://datashape.readthedocs.io/)
-        strings, which makes the same distinctions.
-
-        For example,
-
-            ak.Array([[{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}],
-                      [],
-                      [{"x": 3.3, "y": [3, 3, 3]}]])
-
-        has type
-
-            3 * var * {"x": float64, "y": var * int64}
-
-        but
-
-            ak.Array(np.arange(2*3*5).reshape(2, 3, 5))
-
-        has type
-
-            2 * 3 * 5 * int64
-
-        Some cases, like heterogeneous data, require [extensions beyond the
-        Datashape specification](https://github.com/blaze/datashape/issues/237).
-        For example,
-
-            ak.Array([1, "two", [3, 3, 3]])
-
-        has type
-
-            3 * union[int64, string, var * int64]
-
-        but "union" is not a Datashape type-constructor. (Its syntax is
-        similar to existing type-constructors, so it's a plausible addition
-        to the language.)
-        """
-        return awkward1._util.highlevel_type(self._layout, self._behavior, True)
-
+       
     class Mask(object):
         def __init__(self, array, valid_when):
             self._array = array
@@ -786,7 +738,7 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         NumPy arrays can be sliced by all of the above slice types except
         arrays with missing values and arrays with nested lists, both of
         which are inexpressible in NumPy. Missing values, represented by
-        None in Python, are called option types (#ak.type.OptionType) in
+        None in Python, are called option types (#ak.types.OptionType) in
         Awkward Array and can be used as a slice.
 
         For example, an `array` like
@@ -1447,15 +1399,6 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         else:
             raise TypeError("behavior must be None or a dict")
 
-    @property
-    def type(self):
-        """
-        The high-level type of this Record as #ak.types.Type objects.
-
-        See #ak.Array.type for a more complete description.
-        """
-        return self._layout.type(awkward1._util.typestrs(self._behavior))
-
     def to_list(self):
         """
         Converts this Record into Python objects.
@@ -2002,18 +1945,6 @@ class ArrayBuilder(object):
             self._behavior = behavior
         else:
             raise TypeError("behavior must be None or a dict")
-
-    @property
-    def type(self):
-        """
-        The current high-level type of this ArrayBuilder as #ak.types.Type
-        objects.
-
-        Note that the type can change as data are accumulated.
-
-        See #ak.Array.type for a more complete description.
-        """
-        return self.snapshot().type
 
     def __len__(self):
         """
