@@ -9,6 +9,8 @@ namespace awkward {
       : form_(form)
       , length_(length) { }
 
+  ArrayGenerator::~ArrayGenerator() = default;
+
   const FormPtr
   ArrayGenerator::form() const {
     return form_;

@@ -30,6 +30,11 @@ namespace awkward {
     /// such as -1, is interpreted as "unknown."
     ArrayGenerator(const FormPtr& form, int64_t length);
 
+    /// @brief Virtual destructor acts as a first non-inline virtual function
+    /// that determines a specific translation unit in which vtable shall be
+    /// emitted.
+    virtual ~ArrayGenerator();
+
     /// @brief The Form the generated array is expected to take; may be
     /// `nullptr`.
     const FormPtr
