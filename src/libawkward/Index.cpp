@@ -20,10 +20,10 @@ namespace awkward {
       return Index::Form::u8;
     }
     else if (strncmp(str.c_str(), "i32", str.length()) == 0) {
-      return Index::Form::i8;
+      return Index::Form::i32;
     }
     else if (strncmp(str.c_str(), "u32", str.length()) == 0) {
-      return Index::Form::u8;
+      return Index::Form::u32;
     }
     else if (strncmp(str.c_str(), "i64", str.length()) == 0) {
       return Index::Form::i64;
