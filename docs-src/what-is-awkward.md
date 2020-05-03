@@ -46,8 +46,8 @@ bikeroutes = ak.Record(bikeroutes_pyobj)
 bikeroutes
 ```
 
-Data type
----------
+Data types
+----------
 
 Generic JSON is untyped, but GeoJSON is regular enough that its data type can be inferred. The [ak.type](https://awkward-array.readthedocs.io/en/latest/_auto/ak.type.html) function displays an array's type in [Datashape syntax](https://datashape.readthedocs.io/).
 
@@ -218,12 +218,76 @@ This would have been incredibly awkward to write in terms of only NumPy operatio
 Performance
 -----------
 
-Moreover, these kinds of calculations run at number-crunching speeds, rather than what you'd expect for native Python or JSON-processing.
+Having well-defined data types and operating on whole arrays in each Python statement allows the bulk of the processing to be performed in precompiled routines. This is the principle behind NumPy as well.
 
-Hidden within each Awkward Array is a collection of NumPy arrays,
+Another factor is that the data are not laid out in memory the way JSON or Python objects are—contiguous by record or scattered about in objects that point to each other—they are laid out as arrays, contiguous by field.
+
+For instance, if we dig down to the coordinate data, we see that it is a NumPy array of numerical values without being interrupted by any character strings from field names or street names.
 
 ```{code-cell}
-np.asarray(bikeroutes.features.geometry.coordinates.layout.content.content.content)
+bikeroutes.features.geometry.coordinates.layout.content.content.content
 ```
 
-and all of the distance calculations in the previous example are compiled routines operating on these columnar arrays.
+This is known as [columnar data](https://towardsdatascience.com/the-beauty-of-column-oriented-data-2945c0c9f560), which has advantages in storage and processing.
+
+Most functions in the Awkward Array library work by unpacking the whole-array structure to find the relevant columns, apply a mathematical function (usually NumPy's own) to the columns, then pack it up in a new structure.
+
+The view of data as nested records is a high-level convenience. Internally, it's all just one-dimensional arrays.
+
+![](img/how-it-works-muons.svg)
+
+To put this in concrete numbers, it means Awkward operations are many times faster than their pure Python equivalents, besides being more concise to express.
+
+**Pure Python:**
+
+```{code-cell}
+%%timeit
+
+total_length = []
+for route in bikeroutes_pyobj["features"]:
+    route_length = []
+    for polyline in route["geometry"]["coordinates"]:
+        segment_length = []
+        last = None
+        for lng, lat in polyline:
+            km_east = lng * 82.7
+            km_north = lat * 111.1
+            if last is not None:
+                dx2 = (km_east - last[0])**2
+                dy2 = (km_north - last[1])**2
+                segment_length.append(np.sqrt(dx2 + dy2))
+            last = (km_east, km_north)
+
+        route_length.append(sum(segment_length))
+    total_length.append(sum(route_length))
+```
+
+**Awkward Array:**
+
+```{code-cell}
+%%timeit
+
+km_east = bikeroutes.features.geometry.coordinates[..., 0] * 82.7
+km_north = bikeroutes.features.geometry.coordinates[..., 1] * 111.1
+
+segment_length = np.sqrt((km_east[:, :, 1:] - km_east[:, :, :-1])**2 +
+                         (km_north[:, :, 1:] - km_north[:, :, :-1])**2)
+
+route_length = np.sum(segment_length, axis=-1)
+total_length = np.sum(route_length, axis=-1)
+```
+
+Compatibility
+-------------
+
+Awkward Array is not the only library to target numerical data analysis in Python, but we think it is unique in its emphasis on manipulating columnar data structures.
+
+  * For all functions defined in both [NumPy](https://numpy.org/) and Awkward Array, the latter is a strict generalization for non-rectangular data.
+  * [Apache Arrow](https://arrow.apache.org/) is an emerging standard for general columnar data structures like Awkward's, and most Awkward Arrays can be converted to and from Arrow Arrays without copying the underlying buffers (i.e. conversion is fast and doesn't scale with the size of the dataset). Arrow natively reads and writes in the [Parquet file format](https://parquet.apache.org/), widely used by columnar databases.
+  * [Uproot](https://github.com/scikit-hep/uproot#readme) reads and writes the [ROOT file format](https://root.cern/) as Awkward Arrays. ROOT is ubiquitous in particle physics; more than an exabyte of data is in ROOT format.
+  * Awkward Arrays can also be [Pandas](https://pandas.pydata.org/) DataFrame columns without any copying or conversion.
+  * They can also be passed in and out of functions compiled by [Numba](http://numba.pydata.org/), the leading just-in-time compiler for numerical Python.
+  * FIXME: [Dask](https://dask.org/)
+  * FIXME: [Zarr](https://zarr.readthedocs.io/en/stable/)
+
+Awkward Array is one of the tools for Pythonic data analysis, solving the specific problem of operating on complex data structures at large scales.
