@@ -2128,9 +2128,9 @@ namespace awkward {
     return std::pair<Index64, IndexOf<T>>(nextcarry, outindex);
   }
 
-  template class IndexedArrayOf<int32_t, false>;
-  template class IndexedArrayOf<uint32_t, false>;
-  template class IndexedArrayOf<int64_t, false>;
-  template class IndexedArrayOf<int32_t, true>;
-  template class IndexedArrayOf<int64_t, true>;
+  template class EXPORT_SYMBOL IndexedArrayOf<int32_t, false>;
+  template class EXPORT_SYMBOL IndexedArrayOf<uint32_t, false>;
+  template class EXPORT_SYMBOL IndexedArrayOf<int64_t, false>;
+  template class EXPORT_SYMBOL IndexedArrayOf<int32_t, true>;
+  template class EXPORT_SYMBOL IndexedArrayOf<int64_t, true>;
 }

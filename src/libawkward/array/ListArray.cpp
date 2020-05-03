@@ -1794,7 +1794,7 @@ namespace awkward {
                                                outcontent);
   }
 
-  template class ListArrayOf<int32_t>;
-  template class ListArrayOf<uint32_t>;
-  template class ListArrayOf<int64_t>;
+  template class EXPORT_SYMBOL ListArrayOf<int32_t>;
+  template class EXPORT_SYMBOL ListArrayOf<uint32_t>;
+  template class EXPORT_SYMBOL ListArrayOf<int64_t>;
 }

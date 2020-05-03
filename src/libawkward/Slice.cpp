@@ -313,7 +313,7 @@ namespace awkward {
     return index;
   }
 
-  template class SliceArrayOf<int64_t>;
+  template class EXPORT_SYMBOL SliceArrayOf<int64_t>;
 
   ////////// SliceField
 
@@ -461,7 +461,7 @@ namespace awkward {
     return true;
   }
 
-  template class SliceMissingOf<int64_t>;
+  template class EXPORT_SYMBOL SliceMissingOf<int64_t>;
 
   ////////// SliceJaggedOf<T>
 
@@ -540,7 +540,7 @@ namespace awkward {
     return true;
   }
 
-  template class SliceJaggedOf<int64_t>;
+  template class EXPORT_SYMBOL SliceJaggedOf<int64_t>;
 
   ////////// Slice
 
