@@ -30,7 +30,13 @@ Let's illustrate this with a non-physics dataset: maps of bike routes in my home
 JSON to array
 -------------
 
-The city of Chicago publishes quite a lot of data; here is a [GeoJSON of bike paths](https://github.com/Chicago/osd-bike-routes/blob/master/data/Bikeroutes.geojson).
+The city of Chicago publishes quite a lot of data; here is a [GeoJSON of bike paths](https://github.com/Chicago/osd-bike-routes/blob/master/data/Bikeroutes.geojson):
+
+<div style="margin-right: 15px">
+  <iframe class="render-viewer " src="https://render.githubusercontent.com/view/geojson?commit=5f556dcd4ed54f5f5c926c01c34ebc6261ec7d34&amp;enc_url=68747470733a2f2f7261772e67697468756275736572636f6e74656e742e636f6d2f4368696361676f2f6f73642d62696b652d726f757465732f356635353664636434656435346635663563393236633031633334656263363236316563376433342f646174612f42696b65726f757465732e67656f6a736f6e&amp;nwo=Chicago%2Fosd-bike-routes&amp;path=data%2FBikeroutes.geojson&amp;repository_id=8065965&amp;repository_type=Repository#292b99b1-4187-4d13-8b0d-ce8fa6eb4ab1" sandbox="allow-scripts allow-same-origin allow-top-navigation" title="File display" width="100%" height="400px"></iframe>
+</div>
+
+which we load into Python by downloading it from GitHub and converting it from JSON.
 
 ```{code-cell}
 import urllib.request
@@ -41,7 +47,9 @@ bikeroutes_json = urllib.request.urlopen(url).read()
 bikeroutes_pyobj = json.loads(bikeroutes_json)
 ```
 
-It's a complicated dataset with street names and variable-length polylines. Let's load it as an Awkward Array: [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html) for an array of records, [ak.Record](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Record.html) for a single record (that may contain arrays).
+It's a complex dataset with nested structures containing street names and variable-length polylines, and it's about 2 MB.
+
+To load it as an Awkward Array, we can use the [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html) constructor for an array of records or the [ak.Record](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Record.html) constructor for a single record like this one.
 
 ```{code-cell}
 import awkward1 as ak
@@ -241,7 +249,7 @@ The view of data as nested records is a high-level convenience. Internally, it's
 
 To put this in concrete numbers, it means Awkward operations are many times faster than their pure Python equivalents, besides being more concise to express.
 
-**Pure Python:**
+**Python for loops:**
 
 ```{code-cell}
 %%timeit
@@ -265,7 +273,7 @@ for route in bikeroutes_pyobj["features"]:
     total_length.append(sum(route_length))
 ```
 
-**Awkward Array:**
+**Awkward Arrays:**
 
 ```{code-cell}
 %%timeit
@@ -282,7 +290,7 @@ total_length = np.sum(route_length, axis=-1)
 
 ![](img/bikeroutes-scaling.svg)
 
-It wasn't included in the above test, but parallel processing also has less overhead with Awkward Arrays than Python objects because compiled routines don't lock the Python interpreter.
+Parallel processing wasn't included in the above test, but Awkward computations are better for multithreading because compiled routines don't lock the Python interpreter the way that Python statements do (see [Python GIL](https://www.dabeaz.com/python/UnderstandingGIL.pdf)).
 
 Additionally, numerical data take about 8× less memory because they're packed into arrays without per-object overhead.
 
@@ -301,6 +309,6 @@ Awkward Array is not the only library to target numerical data analysis in Pytho
   * [Dask](https://dask.org/) can perform delayed, distributed, and cache-efficient calculations on Awkward Arrays.
   * [Zarr](https://zarr.readthedocs.io/en/stable/) can store and deliver Awkward Arrays as a v3 extension.
 
-**FIXME:** not all of the above are implemented yet, but I didn't want to forget to write them. See [GitHub Issues](https://github.com/scikit-hep/awkward-1.0/issues) for progress.
+**FIXME:** not all of these are implemented yet, but I didn't want to forget to write them. See [GitHub Issues](https://github.com/scikit-hep/awkward-1.0/issues) for progress.
 
 Awkward Array "plays well" with the scientific Python ecosystem, enhancing it with one new capability: the ability to analyze JSON-like data with NumPy-like idioms.
