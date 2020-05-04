@@ -71,11 +71,11 @@ namespace awkward {
   public:
     SliceGenerator(const FormPtr& form,
                    int64_t length,
-                   const ArrayGeneratorPtr& generator,
+                   const ContentPtr& content,
                    const Slice& slice);
 
-    const ArrayGeneratorPtr
-      generator() const;
+    const ContentPtr
+      content() const;
 
     const Slice
       slice() const;
@@ -89,7 +89,7 @@ namespace awkward {
                     const std::string& post) const override;
 
   protected:
-    const ArrayGeneratorPtr& generator_;
+    const ContentPtr content_;
     const Slice slice_;
   };
 }

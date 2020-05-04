@@ -2036,11 +2036,25 @@ make_VirtualArray(const py::handle& m, const std::string& name) {
   return content_methods(py::class_<ak::VirtualArray,
                          std::shared_ptr<ak::VirtualArray>,
                          ak::Content>(m, name.c_str())
-      .def(py::init([](const std::shared_ptr<PyArrayGenerator>& generator,
+      .def(py::init([](const py::object& generator,
                        const py::object& cache,
                        const py::object& cache_key,
                        const py::object& identities,
                        const py::object& parameters) -> ak::VirtualArray {
+        std::shared_ptr<ak::ArrayGenerator> gen;
+        try {
+          gen = generator.cast<std::shared_ptr<PyArrayGenerator>>();
+        }
+        catch (py::cast_error err) {
+          try {
+            gen = generator.cast<std::shared_ptr<ak::SliceGenerator>>();
+          }
+          catch (py::cast_error err) {
+            throw std::invalid_argument(
+                "VirtualArray 'generator' must be a PyArrayGenerator or a "
+                "SliceGenerator");
+          }
+        }
         std::shared_ptr<PyArrayCache> cppcache(nullptr);
         if (!cache.is(py::none())) {
           try {
@@ -2063,7 +2077,7 @@ make_VirtualArray(const py::handle& m, const std::string& name) {
           return ak::VirtualArray(
             unbox_identities_none(identities),
             dict2parameters(parameters),
-            generator,
+            gen,
             cppcache,
             cppcache_key);
         }
@@ -2071,7 +2085,7 @@ make_VirtualArray(const py::handle& m, const std::string& name) {
           return ak::VirtualArray(
             unbox_identities_none(identities),
             dict2parameters(parameters),
-            generator,
+            gen,
             cppcache);
         }
       }), py::arg("generator"),
@@ -2081,8 +2095,13 @@ make_VirtualArray(const py::handle& m, const std::string& name) {
           py::arg("parameters") = py::none())
       .def_property_readonly("generator", [](const ak::VirtualArray& self)
                                           -> py::object {
+        std::shared_ptr<ak::ArrayGenerator> gen = self.generator();
         if (std::shared_ptr<PyArrayGenerator> ptr =
-               std::dynamic_pointer_cast<PyArrayGenerator>(self.generator())) {
+               std::dynamic_pointer_cast<PyArrayGenerator>(gen)) {
+          return py::cast(ptr);
+        }
+        else if (std::shared_ptr<ak::SliceGenerator> ptr =
+               std::dynamic_pointer_cast<ak::SliceGenerator>(gen)) {
           return py::cast(ptr);
         }
         else {
