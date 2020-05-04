@@ -151,6 +151,9 @@ def dodoc(docstring, qualname, names):
     return out
 
 def doclass(link, shortname, name, astcls):
+    if name.startswith("_"):
+        return
+
     qualname = shortname + "." + name
 
     init, rest, names = None, [], []
@@ -213,6 +216,9 @@ def doclass(link, shortname, name, astcls):
             outfile.write(out)
 
 def dofunction(link, shortname, name, astfcn):
+    if name.startswith("_"):
+        return
+
     qualname = shortname + "." + name
 
     outfile = io.StringIO()
