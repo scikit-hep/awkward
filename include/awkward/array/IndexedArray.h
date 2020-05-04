@@ -102,7 +102,7 @@ namespace awkward {
       tojson_part(ToJson& builder, bool verbose) const override;
 
     const FormPtr
-      shallow_copy() const;
+      shallow_copy() const override;
 
     const std::string
       purelist_parameter(const std::string& key) const override;
