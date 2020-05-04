@@ -14,6 +14,7 @@ from awkward1._ext import Identities64
 from awkward1._ext import Iterator
 from awkward1._ext import ArrayBuilder
 from awkward1._ext import _PersistentSharedPtr
+
 from awkward1._ext import Content
 
 from awkward1._ext import EmptyArray
@@ -48,5 +49,8 @@ from awkward1._ext import UnionArray8_U32
 from awkward1._ext import UnionArray8_64
 
 from awkward1._ext import VirtualArray
+from awkward1._ext import ArrayGenerator
+from awkward1._ext import SliceGenerator
+from awkward1._ext import ArrayCache
 
 from awkward1._ext import _slice_tostring
