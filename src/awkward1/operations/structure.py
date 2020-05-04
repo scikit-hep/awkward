@@ -2194,8 +2194,6 @@ def virtual(generate,
         generating
         <Array [4.4, 5.5] type='2 * float64'>
     """
-    import awkward1._io
-
     if form in ("float64", "float32", "int64", "uint64", "int32", "uint32",
                 "int16", "uint16", "int8", "uint8", "bool"):
         form = awkward1.forms.Form.fromjson('"' + form + '"')
@@ -2207,13 +2205,13 @@ def virtual(generate,
     elif form is not None and not isinstance(form, awkward1.forms.Form):
         form = awkward1.forms.Form.fromjson(json.dumps(form))
 
-    gen = awkward1._io.ArrayGenerator(generate,
-                                      args,
-                                      kwargs,
-                                      form=form,
-                                      length=length)
+    gen = awkward1.layout.ArrayGenerator(generate,
+                                         args,
+                                         kwargs,
+                                         form=form,
+                                         length=length)
     if cache is not None:
-        cache = awkward1._io.ArrayCache(cache)
+        cache = awkward1.layout.ArrayCache(cache)
 
     out = awkward1.layout.VirtualArray(gen,
                                        cache,
@@ -2286,8 +2284,6 @@ def with_cache(array, cache, chain=None, highlevel=True):
 
     See #ak.virtual.
     """
-    import awkward1._io
-
     if chain is True:
         chain = "first"
     elif chain is False:
@@ -2295,8 +2291,8 @@ def with_cache(array, cache, chain=None, highlevel=True):
     elif chain is not None and chain not in ("first", "last"):
         raise ValueError("chain must be None, 'first', 'last', or bool")
 
-    if not isinstance(cache, awkward1._io.ArrayCache):
-        cache = awkward1._io.ArrayCache(cache)
+    if not isinstance(cache, awkward1.layout.ArrayCache):
+        cache = awkward1.layout.ArrayCache(cache)
 
     def getfunction(layout, depth):
         if isinstance(layout, awkward1.layout.VirtualArray):
@@ -2307,11 +2303,11 @@ def with_cache(array, cache, chain=None, highlevel=True):
             elif layout.cache is None:
                 newcache = cache
             elif chain == "first":
-                newcache = awkward1._io.ArrayCache(_CacheChain(cache,
-                                                               layout.cache))
+                newcache = awkward1.layout.ArrayCache(_CacheChain(cache,
+                                                                 layout.cache))
             elif chain == "last":
-                newcache = awkward1._io.ArrayCache(_CacheChain(layout.cache,
-                                                               cache))
+                newcache = awkward1.layout.ArrayCache(_CacheChain(layout.cache,
+                                                                  cache))
             return lambda: awkward1.layout.VirtualArray(
                                layout.generator,
                                newcache,
@@ -2330,11 +2326,9 @@ def with_cache(array, cache, chain=None, highlevel=True):
 
 class _CacheChain(MutableMapping):
     def __init__(self, first, last):
-        import awkward1._io
-
-        if isinstance(first, awkward1._io.ArrayCache):
+        if isinstance(first, awkward1.layout.ArrayCache):
             first = first.mutablemapping
-        if isinstance(last, awkward1._io.ArrayCache):
+        if isinstance(last, awkward1.layout.ArrayCache):
             last = last.mutablemapping
         self.first = first
         self.last = last
