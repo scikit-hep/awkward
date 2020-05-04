@@ -117,8 +117,11 @@ Navigation
    * :doc:`ak.layout.BitMaskedArray`: represents its content with missing values with a 1-bit boolean mask.
    * :doc:`ak.layout.UnmaskedArray`: specifies that its content can contain missing values in principle, but no mask is supplied because all elements are non-missing.
    * :doc:`ak.layout.UnionArray`: interleaves a set of arrays as a tagged union, can represent heterogeneous data.
+   * :doc:`ak.layout.VirtualArray`: generates an array on demand from an :doc:`ak.layout.ArrayGenerator` or a :doc:`ak.layout.SliceGenerator` and optionally caches the generated array in an :doc:`ak.layout.ArrayCache`.
 
 Most layout nodes contain another content node (:doc:`ak.layout.RecordArray` and :doc:`ak.layout.UnionArray` can contain more than one), thus forming a tree. Only :doc:`ak.layout.EmptyArray` and :doc:`ak.layout.NumpyArray` cannot contain a content, and hence these are leaves of the tree.
+
+Note that :doc:`_auto/ak.partition.PartitionedArray` and its concrete class,  :doc:`_auto/ak.partition.IrregularlyPartitionedArray`, are not :doc:`ak.layout.Content` because they cannot be nested within a tree. Partitioning is only allowed at the root of the tree.
 
 **Iterator for layout nodes:** :doc:`ak.layout.Iterator` (used internally).
 
@@ -130,10 +133,41 @@ Most layout nodes contain another content node (:doc:`ak.layout.RecordArray` and
 
 **High-level data types:**
 
+This is the type of data in a high-level :doc:`_auto/ak.Array` or :doc:`_auto/ak.Record` as reported by :doc:`_auto/ak.type`. It represents as much information as a data analyst needs to know (e.g. the distinction between variable and fixed-length lists, but not the distinction between :doc:`ak.layout.ListArray` and :doc:`ak.layout.ListOffsetArray`).
 
+   * :doc:`ak.types.Type`: the abstract superclass.
+   * :doc:`ak.types.ArrayType`: type of a non-composable, high-level :doc:`_auto/ak.Array`, which includes the length of the array.
+   * :doc:`ak.types.UnknownType`: a type that is not known because it is represented by an :doc:`ak.layout.EmptyArray`.
+   * :doc:`ak.types.PrimitiveType`: a numeric or boolean type.
+   * :doc:`ak.types.RegularType`: lists of a fixed length; this ``size`` is part of the type description.
+   * :doc:`ak.types.ListType`: lists of unspecified or variable length.
+   * :doc:`ak.types.RecordType`: records with named fields or tuples with a fixed number of unnamed slots. The fields/slots and their types are part of the type description.
+   * :doc:`ak.types.OptionType`: data that may be missing.
+   * :doc:`ak.types.UnionType`: heterogeneous data selected from a short list of possibilities.
 
+All concrete :doc:`ak.types.Type` subclasses are composable except :doc:`ak.types.ArrayType`.
 
+**Low-level array forms:**
 
+This is the type of a :doc:`ak.layout.Content` array expressed with low-level granularity (e.g. including the distinction between :doc:`ak.layout.ListArray` and :doc:`ak.layout.ListOffsetArray`). There is a one-to-one relationship between :doc:`ak.layout.Content` subclasses and :doc:`ak.forms.Form` subclasses, and each :doc:`ak.forms.Form` maps to only one :doc:`ak.types.Type`.
 
+   * :doc:`ak.forms.Form`: the abstract subclass.
+   * :doc:`ak.forms.EmptyForm` for :doc:`ak.layout.EmptyArray`
+   * :doc:`ak.forms.NumpyForm` for :doc:`ak.layout.NumpyArray`
+   * :doc:`ak.forms.RegularForm` for :doc:`ak.layout.RegularArray`
+   * :doc:`ak.forms.ListForm` for :doc:`ak.layout.ListArray`
+   * :doc:`ak.forms.ListOffsetForm` for :doc:`ak.layout.ListOffsetArray`
+   * :doc:`ak.forms.RecordForm` for :doc:`ak.layout.RecordArray`
+   * :doc:`ak.forms.IndexedForm` for :doc:`ak.layout.IndexedArray`
+   * :doc:`ak.forms.IndexedOptionForm` for :doc:`ak.layout.IndexedOptionArray`
+   * :doc:`ak.forms.ByteMaskedForm` for :doc:`ak.layout.ByteMaskedArray`
+   * :doc:`ak.forms.BitMaskedForm` for :doc:`ak.layout.BitMaskedArray`
+   * :doc:`ak.forms.UnmaskedForm` for :doc:`ak.layout.UnmaskedArray`
+   * :doc:`ak.forms.UnionForm` for :doc:`ak.layout.UnionArray`
+   * :doc:`ak.forms.VirtualForm` for :doc:`ak.layout.VirtualArray`
+
+**Implementation internals:**
+
+The rest of the classes and functions described here are not part of the public interface. Either the objects or the submodules begin with an underscore, indicating that they can freely change from one version to the next.
 
 .. include:: _auto/toctree.txt
