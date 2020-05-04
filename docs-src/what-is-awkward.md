@@ -14,13 +14,16 @@ kernelspec:
 What is an Awkward Array?
 =========================
 
-Arrays are fundamental to computing, and [NumPy](https://numpy.org/) makes it easy to interact with arrays in Python. However, NumPy's arrays are rectangular tables or tensors that cannot express variable-length structures.
+Efficiency and generality
+-------------------------
+
+Arrays are the most efficient data structures in computing, and [NumPy](https://numpy.org/) makes it easy to interact with arrays in Python. However, NumPy's arrays are rectangular tables or tensors that cannot express variable-length structures.
 
 General tree-like data are often expressed using [JSON](https://www.json.org/), but at the expense of memory use and processing speed.
 
-Awkward Arrays are general tree-like data structures, like JSON, but contiguous in memory and operated upon with compiled, vectorized code like NumPy. They're building blocks for data analysis, recognizing that some datasets are more awkward than others.
+Awkward Arrays are general tree-like data structures, like JSON, but contiguous in memory and operated upon with compiled, vectorized code like NumPy. They're building blocks for data analysis, recognizing that some datasets are, well, more awkward than others.
 
-This library was originally developed for high-energy particle physics. Particle physics datasets have rich data structures that usually can't be flattened to rectangular arrays, but physicists need to process them quickly because the datasets are enormous. Awkward Arrays combine generic data structures with high-performance number-crunching.
+This library was originally developed for high-energy particle physics. Particle physics datasets have rich data structures that usually can't be flattened into rectangular arrays, but physicists need to process them efficiently because the datasets are enormous. Awkward Arrays combine generic data structures with high-performance number-crunching.
 
 Let's illustrate this with a non-physics dataset: maps of bike routes in my hometown of Chicago.
 
@@ -234,7 +237,7 @@ Most functions in the Awkward Array library work by unpacking the whole-array st
 
 The view of data as nested records is a high-level convenience. Internally, it's all just one-dimensional arrays.
 
-![](img/how-it-works-muons.svg)
+![](img/how-it-works.svg)
 
 To put this in concrete numbers, it means Awkward operations are many times faster than their pure Python equivalents, besides being more concise to express.
 
@@ -277,17 +280,27 @@ route_length = np.sum(segment_length, axis=-1)
 total_length = np.sum(route_length, axis=-1)
 ```
 
+![](img/bikeroutes-scaling.svg)
+
+It wasn't included in the above test, but parallel processing also has less overhead with Awkward Arrays than Python objects because compiled routines don't lock the Python interpreter.
+
+Additionally, numerical data take about 8× less memory because they're packed into arrays without per-object overhead.
+
+These are the normal advantages of using array libraries for mathematical calculations over Python objects, but Awkward Array widens the scope of problems that can be solved with arrays.
+
 Compatibility
 -------------
 
 Awkward Array is not the only library to target numerical data analysis in Python, but we think it is unique in its emphasis on manipulating columnar data structures.
 
-  * For all functions defined in both [NumPy](https://numpy.org/) and Awkward Array, the latter is a strict generalization for non-rectangular data.
-  * [Apache Arrow](https://arrow.apache.org/) is an emerging standard for general columnar data structures like Awkward's, and most Awkward Arrays can be converted to and from Arrow Arrays without copying the underlying buffers (i.e. conversion is fast and doesn't scale with the size of the dataset). Arrow natively reads and writes in the [Parquet file format](https://parquet.apache.org/), widely used by columnar databases.
+  * All functions that are defined in both [NumPy](https://numpy.org/) and Awkward Array are strictly generalized in the latter. Rectangular arrays behave the same way in both libraries.
+  * [Apache Arrow](https://arrow.apache.org/) is an emerging standard for general columnar data structures like Awkward's, but Arrow is more concerned with sharing arrays between applications than structure manipulation. Most Awkward Arrays can be converted to and from Arrow Arrays without copying the underlying buffers (i.e. conversion is fast and doesn't scale with the size of the dataset). Conversion to Arrow also enables saving as [Parquet files](https://parquet.apache.org/), widely used by columnar databases.
   * [Uproot](https://github.com/scikit-hep/uproot#readme) reads and writes the [ROOT file format](https://root.cern/) as Awkward Arrays. ROOT is ubiquitous in particle physics; more than an exabyte of data is in ROOT format.
   * Awkward Arrays can also be [Pandas](https://pandas.pydata.org/) DataFrame columns without any copying or conversion.
-  * They can also be passed in and out of functions compiled by [Numba](http://numba.pydata.org/), the leading just-in-time compiler for numerical Python.
-  * FIXME: [Dask](https://dask.org/)
-  * FIXME: [Zarr](https://zarr.readthedocs.io/en/stable/)
+  * Awkward Arrays can also be passed in and out of functions compiled by [Numba](http://numba.pydata.org/), the leading just-in-time compiler for numerical Python. This allows for fast for-loop style calculations on the same data structures.
+  * [Dask](https://dask.org/) can perform delayed, distributed, and cache-efficient calculations on Awkward Arrays.
+  * [Zarr](https://zarr.readthedocs.io/en/stable/) can store and deliver Awkward Arrays as a v3 extension.
 
-Awkward Array is one of the tools for Pythonic data analysis, solving the specific problem of operating on complex data structures at large scales.
+**FIXME:** not all of the above are implemented yet, but I didn't want to forget to write them. See [GitHub Issues](https://github.com/scikit-hep/awkward-1.0/issues) for progress.
+
+Awkward Array "plays well" with the scientific Python ecosystem, enhancing it with one new capability: the ability to analyze JSON-like data with NumPy-like idioms.
