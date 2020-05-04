@@ -89,7 +89,7 @@ namespace awkward {
                     const std::string& post) const override;
 
   protected:
-    const ArrayGeneratorPtr& generator_;
+    const ArrayGeneratorPtr generator_;
     const Slice slice_;
   };
 }
