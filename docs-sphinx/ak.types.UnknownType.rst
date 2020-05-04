@@ -9,17 +9,17 @@ no instances are encountered to resolve the type.
 In addition to the properties and methods described in :doc:`ak.types.Type`,
 an UnknownType has the following.
 
-ak.layout.UnknownType.__init__
-==============================
+ak.types.UnknownType.__init__
+=============================
 
-.. py:method:: ak.layout.UnknownType.__init__(type, size, parameters=None, typestr=None)
+.. py:method:: ak.types.UnknownType.__init__(type, size, parameters=None, typestr=None)
 
-ak.layout.UnknownType.type
-==========================
+ak.types.UnknownType.type
+=========================
 
-.. py:attribute:: ak.layout.UnknownType.type
+.. py:attribute:: ak.types.UnknownType.type
 
-ak.layout.UnknownType.size
-==========================
+ak.types.UnknownType.size
+=========================
 
-.. py:attribute:: ak.layout.UnknownType.size
+.. py:attribute:: ak.types.UnknownType.size

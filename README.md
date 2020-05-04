@@ -1,4 +1,4 @@
-<img src="docs-images/logo/logo-300px.png">
+<img src="docs-img/logo/logo-300px.png">
 
 Awkward Array is a library for **nested, variable-sized data**, including arbitrary-length lists, records, mixed types, and missing data, using **NumPy-like idioms**.
 
@@ -8,7 +8,7 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
   <tr>
     <td width="33%" valign="top">
       <a href="https://scikit-hep.org/awkward-1.0/index.html">
-        <img src="docs-images/panel-data-analysts.png" width="268">
+        <img src="docs-img/panel-data-analysts.png" width="268">
       </a>
       <p align="center"><b>
         <a href="https://scikit-hep.org/awkward-1.0/index.html">
@@ -18,7 +18,7 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
     </td>
     <td width="33%" valign="top">
       <a href="https://scikit-hep.org/awkward-1.0/index.html">
-        <img src="docs-images/panel-developers.png" width="268">
+        <img src="docs-img/panel-developers.png" width="268">
       </a>
       <p align="center"><b>
         <a href="https://scikit-hep.org/awkward-1.0/index.html">
@@ -28,7 +28,7 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
     </td>
     <td width="33%" valign="top">
       <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
-        <img src="docs-images/panel-doxygen.png" width="268">
+        <img src="docs-img/panel-doxygen.png" width="268">
       </a>
       <p align="center"><b>
         <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
@@ -36,7 +36,7 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
         </a>
       </b></p>
       <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
-        <img src="docs-images/panel-sphinx.png" width="268">
+        <img src="docs-img/panel-sphinx.png" width="268">
       </a>
       <p align="center"><b>
         <a href="https://awkward-array.readthedocs.io/en/latest/index.html">

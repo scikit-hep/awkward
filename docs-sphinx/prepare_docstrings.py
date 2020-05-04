@@ -151,6 +151,9 @@ def dodoc(docstring, qualname, names):
     return out
 
 def doclass(link, shortname, name, astcls):
+    if name.startswith("_"):
+        return
+
     qualname = shortname + "." + name
 
     init, rest, names = None, [], []
@@ -213,6 +216,9 @@ def doclass(link, shortname, name, astcls):
             outfile.write(out)
 
 def dofunction(link, shortname, name, astfcn):
+    if name.startswith("_"):
+        return
+
     qualname = shortname + "." + name
 
     outfile = io.StringIO()
@@ -284,6 +290,10 @@ for filename in sorted(glob.glob("../src/awkward1/**/*.py", recursive=True),
                         "ak.layout.BitMaskedArray.rst",
                         "ak.layout.UnmaskedArray.rst",
                         "ak.layout.UnionArray.rst",
+                        "ak.layout.VirtualArray.rst",
+                        "ak.layout.ArrayGenerator.rst",
+                        "ak.layout.SliceGenerator.rst",
+                        "ak.layout.ArrayCache.rst",
                         "ak.layout.Iterator.rst",
                         "ak.layout.ArrayBuilder.rst",
                         "ak.layout.Index.rst",
@@ -297,6 +307,20 @@ for filename in sorted(glob.glob("../src/awkward1/**/*.py", recursive=True),
                         "ak.types.RecordType.rst",
                         "ak.types.OptionType.rst",
                         "ak.types.UnionType.rst",
+                        "ak.forms.Form.rst",
+                        "ak.forms.EmptyForm.rst",
+                        "ak.forms.NumpyForm.rst",
+                        "ak.forms.RegularForm.rst",
+                        "ak.forms.ListForm.rst",
+                        "ak.forms.ListOffsetForm.rst",
+                        "ak.forms.RecordForm.rst",
+                        "ak.forms.IndexedForm.rst",
+                        "ak.forms.IndexedOptionForm.rst",
+                        "ak.forms.ByteMaskedForm.rst",
+                        "ak.forms.BitMaskedForm.rst",
+                        "ak.forms.UnmaskedForm.rst",
+                        "ak.forms.UnionForm.rst",
+                        "ak.forms.VirtualForm.rst",
                         "ak._io.fromjson.rst",
                         "ak._io.fromroot_nestedvector.rst",
                         ])

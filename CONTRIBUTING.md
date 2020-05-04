@@ -67,7 +67,7 @@ As stated above, new releases are published frequently, getting bug fixes and ne
 The Awkward Array codebase consists of three main layers: the high-level user interface (in Python), data ownership and navigation (independently in C++ and lowered Numba), and array manipulation (in C++ and CUDA, behind a pure C interface).
 
 <p align="center">
-  <img src="docs-images/diagrams/awkward-1-0-layers.png" width="600">
+  <img src="docs-img/diagrams/awkward-1-0-layers.png" width="600">
 </p>
 
 Contributing to each part of the codebase has a different flavor:
