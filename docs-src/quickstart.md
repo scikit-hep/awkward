@@ -23,6 +23,28 @@ Quickstart
 <table>
   <tr>
     <td width="50%" valign="top" align="center">
+      <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
+        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/panel-sphinx.png" width="80%">
+      </a>
+      <p align="center" style="margin-top: 10px"><b>
+        <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
+        Python<br>API reference
+        </a>
+      </b></p>
+    </td>
+    <td width="50%" valign="top" align="center">
+      <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
+        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/panel-doxygen.png" width="80%">
+      </a>
+      <p align="center" style="margin-top: 10px"><b>
+        <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
+        C++<br>API reference
+        </a>
+      </b></p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top" align="center">
       <a href="how-do-i.html">
         <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/panel-data-analysts.png" width="80%">
       </a>
@@ -39,28 +61,6 @@ Quickstart
       <p align="center" style="margin-top: 10px"><b>
         <a href="how-it-works.html">
         How-it-works tutorials<br>for developers
-        </a>
-      </b></p>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" valign="top" align="center">
-      <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
-        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/panel-doxygen.png" width="80%">
-      </a>
-      <p align="center" style="margin-top: 10px"><b>
-        <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
-        C++<br>API reference
-        </a>
-      </b></p>
-    </td>
-    <td width="50%" valign="top" align="center">
-      <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
-        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/panel-sphinx.png" width="80%">
-      </a>
-      <p align="center" style="margin-top: 10px"><b>
-        <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
-        Python<br>API reference
         </a>
       </b></p>
     </td>
@@ -93,7 +93,7 @@ For developers
 See Awkward Array's [GitHub page](https://github.com/scikit-hep/awkward-1.0) for more on
 
    * [insatllation for developers](https://github.com/scikit-hep/awkward-1.0#installation-for-developers)
-   * [using Awkward as a dependency](https://github.com/scikit-hep/awkward-1.0#using-awkward-array-as-a-dependency)
+   * [using Awkward as a dependency](https://github.com/scikit-hep/awkward-1.0/tree/master/dependent-project)
    * [continuous integration](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=3&_a=summary) and [continuous deployment](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=4&_a=summary)
    * [release history](https://awkward-array.readthedocs.io/en/latest/_auto/changelog.html) (changelog)
    * [CONTRIBUTING.md](https://github.com/scikit-hep/awkward-1.0/blob/master/CONTRIBUTING.md)
