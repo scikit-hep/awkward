@@ -1,2 +1,10 @@
 - file: quickstart
 - file: what-is-awkward
+
+- header: How-to tutorials
+- file: how-do-i
+  title: Introduction
+
+- header: How-it-works tutorials
+- file: how-it-works
+  title: Introduction

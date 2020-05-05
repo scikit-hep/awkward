@@ -7,21 +7,21 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
 <table>
   <tr>
     <td width="33%" valign="top">
-      <a href="https://scikit-hep.org/awkward-1.0/index.html">
+      <a href="https://awkward-array.org/how-do-i.html">
         <img src="docs-img/panel-data-analysts.png" width="268">
       </a>
       <p align="center"><b>
-        <a href="https://scikit-hep.org/awkward-1.0/index.html">
+        <a href="https://awkward-array.org/how-do-i.html">
         How-to documentation<br>for data analysts
         </a>
       </b></p>
     </td>
     <td width="33%" valign="top">
-      <a href="https://scikit-hep.org/awkward-1.0/index.html">
+      <a href="https://awkward-array.org/how-it-works.html">
         <img src="docs-img/panel-developers.png" width="268">
       </a>
       <p align="center"><b>
-        <a href="https://scikit-hep.org/awkward-1.0/index.html">
+        <a href="https://awkward-array.org/how-it-works.html">
         How-it-works tutorials<br>for developers
         </a>
       </b></p>
@@ -57,9 +57,9 @@ pip install awkward1
 
 Most users will get a precompiled binary (wheel) for your operating system and Python version. If not, the above attempts to compile from source.
 
-   * Report any bugs on [GitHub Issues](https://github.com/scikit-hep/awkward-1.0/issues).
-   * Ask any "how do I…?" questions on [StackOverflow tagged as [awkward-array]](https://stackoverflow.com/questions/tagged/awkward-array).
-   * Realtime chat on [Gitter Scikit-HEP/community](https://gitter.im/Scikit-HEP/community).
+   * Report bugs, request features, and ask for additional documentation on [GitHub Issues](https://github.com/scikit-hep/awkward-1.0/issues). If you have a general "How do I…?" question, we'll answer it as a new [example in the tutorial](https://awkward-array.org/how-do-i.html).
+   * If you have a problem that's too specific to be new documentation or it isn't exclusively related to Awkward Array, it might be more appropriate to ask on [StackOverflow with the [awkward-array] tag](https://stackoverflow.com/questions/tagged/awkward-array). Be sure to include tags for any other libraries that you use, such as Pandas or PyTorch.
+   * The [Gitter Scikit-HEP/community](https://gitter.im/Scikit-HEP/community) is a way to get in touch with all Scikit-HEP developers and users.
 
 ## Installation for developers
 
@@ -84,6 +84,7 @@ python localbuild.py --pytest tests
    * [Continuous integration](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=3&_a=summary) and [continuous deployment](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=4&_a=summary) are hosted by Azure Pipelines.
    * [Release history](https://awkward-array.readthedocs.io/en/latest/_auto/changelog.html) (changelog) is hosted by ReadTheDocs.
    * [CONTRIBUTING.md](CONTRIBUTING.md) provides more information on how to contribute.
+   * [LICENSE](https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE) is BSD-3.
 
 ## Using Awkward Array as a dependency
 
