@@ -804,17 +804,27 @@ namespace awkward {
       std::vector<size_t> result(parents.length());
       std::iota(result.begin(), result.end(), 0);
       int64_t index(0);
-      std::vector<int64_t> ranges(starts.length() + 1);
-      for (int64_t i = 0; i < starts.length(); i++) {
-        ranges[i] = starts.getitem_at_nowrap(i);
+
+      std::vector<int64_t> unique_parents;
+      std::vector<int64_t> ranges(parents.length() + 1);
+      for (int64_t i = 0; i < parents.length(); i++) {
+        ranges[i] = parents.getitem_at_nowrap(i);
       }
-      ranges[starts.length()] = (int64_t)outlength;
-      std::sort(begin(ranges), end(ranges));
+      ranges[parents.length()] = (int64_t)outlength;
 
-      int64_t next_start = ranges[index];
-      int64_t next_stop = ranges[index + 1];
+      for (auto const& it : ranges) {
+        auto res = std::find(std::begin(ranges), std::end(ranges), it);
+        if (res != std::end(ranges)) {
+          if (unique_parents.empty() || unique_parents.back() != std::distance(std::begin(ranges), res)) {
+            unique_parents.emplace_back(std::distance(std::begin(ranges), res));
+          }
+        }
+      }
 
-      while(next_start < outlength) {
+      for(int64_t i = 0; i < unique_parents.size() - 1; i++) {
+        int64_t next_start = unique_parents[i];
+        int64_t next_stop = unique_parents[i + 1];
+
         if(ascending  &&  !stable) {
           std::sort(result.begin() + next_start, result.begin() + next_stop,
             [&data](size_t i1, size_t i2) {return data[i1] < data[i2];});
@@ -831,9 +841,6 @@ namespace awkward {
           std::stable_sort(result.begin() + next_start, result.begin() + next_stop,
             [&data](size_t i1, size_t i2) {return data[i1] > data[i2];});
         }
-        index++;
-        next_start = next_stop;
-        next_stop = (ranges.size() > index + 1) ?  ranges[index + 1] : outlength;
       }
 
       struct Error err = util::awkward_numpyarray_sort<T>(

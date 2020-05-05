@@ -1821,6 +1821,7 @@ namespace awkward {
     util::handle_error(err2, classname(), identities_.get());
 
     ContentPtr next = content_.get()->carry(nextcarry);
+
     ContentPtr out = next.get()->sort_next(negaxis,
                                            starts,
                                            nextparents,
@@ -1828,6 +1829,26 @@ namespace awkward {
                                            ascending,
                                            stable,
                                            keepdims);
+
+    Index64 nextoutindex(index_.length());
+    int64_t j = 0;
+    for (int64_t i = 0; i < parents.length(); i++) {
+      int64_t parent = parents.getitem_at_nowrap(i);
+      int64_t start = starts.getitem_at_nowrap(parent);
+      int64_t nextparent = nextparents.getitem_at_nowrap(j);
+      if (parent == nextparent) {
+        nextoutindex.setitem_at_nowrap(i, j);
+        ++j;
+      }
+      else {
+        nextoutindex.setitem_at_nowrap(i, -1);
+      }
+    }
+
+    out = std::make_shared<IndexedOptionArray64>(Identities::none(),
+                                                 util::Parameters(),
+                                                 nextoutindex,
+                                                 out);
 
     std::pair<bool, int64_t> branchdepth = branch_depth();
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {

@@ -44,6 +44,16 @@ def test_IndexedOffsetArray():
                             [ 5.5 ],
                             [-4.4, -5.5, -6.6]]
 
+    array1 = awkward1.Array([[ 2.2,  1.1,  3.3],
+                             [ None, None, None ],
+                             [ 4.4,  5.5, None ],
+                             [ 5.5, None, None ],
+                             [-4.4, -5.5, -6.6]]).layout
+
+    assert awkward1.to_list(array1.recurse(0, True, True)) == []
+    assert awkward1.to_list(array1.recurse(1, True, True)) == []
+
+
 def test_3d():
     array = awkward1.layout.NumpyArray(numpy.array([
 # axis 2:    0       1       2       3       4         # axis 1:
