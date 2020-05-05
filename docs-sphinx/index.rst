@@ -13,10 +13,10 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
 Documentation
 *************
 
-   * `How-to documentation for data analysts <https://scikit-hep.org/awkward-1.0/index.html>`__
-   * `How-it-works tutorials for developers <https://scikit-hep.org/awkward-1.0/index.html>`__
-   * `C++ API reference <https://awkward-array.readthedocs.io/en/latest/_static/index.html>`__
-   * Python API reference: **this site**.
+   * `How-to documentation for data analysts <https://awkward-array.org/how-do-i.html>`__
+   * `How-it-works tutorials for developers <https://awkward-array.org/how-it-works.html>`__
+   * `C++ API reference <_static/index.html>`__
+   * Python API reference: **this site**
 
 Navigation
 **********
@@ -103,7 +103,7 @@ Navigation
 
 **Layout nodes:** the high-level :doc:`_auto/ak.Array` and :doc:`_auto/ak.Record` types hide the tree-structure that build the array, but they can be accessed with `ak.Array.layout <_auto/ak.Array.html#ak-array-layout>`_. This layout structure is the core of the library, but usually doesn't have to be accessed by data analysts.
 
-   * :doc:`ak.layout.Content`: the abstract superclass.
+   * :doc:`ak.layout.Content`: the abstract base class.
    * :doc:`ak.layout.EmptyArray`: an array of unknown type with no elements (usually produced by :doc:`_auto/ak.ArrayBuilder`, which can't determine type at a given level without samples).
    * :doc:`ak.layout.NumpyArray`: any NumPy array (e.g. multidimensional shape, arbitrary dtype), though usually only one-dimensional arrays of numbers.
    * :doc:`ak.layout.RegularArray`: splits its nested content into equal-length lists.
@@ -135,7 +135,7 @@ Note that :doc:`_auto/ak.partition.PartitionedArray` and its concrete class,  :d
 
 This is the type of data in a high-level :doc:`_auto/ak.Array` or :doc:`_auto/ak.Record` as reported by :doc:`_auto/ak.type`. It represents as much information as a data analyst needs to know (e.g. the distinction between variable and fixed-length lists, but not the distinction between :doc:`ak.layout.ListArray` and :doc:`ak.layout.ListOffsetArray`).
 
-   * :doc:`ak.types.Type`: the abstract superclass.
+   * :doc:`ak.types.Type`: the abstract base class.
    * :doc:`ak.types.ArrayType`: type of a non-composable, high-level :doc:`_auto/ak.Array`, which includes the length of the array.
    * :doc:`ak.types.UnknownType`: a type that is not known because it is represented by an :doc:`ak.layout.EmptyArray`.
    * :doc:`ak.types.PrimitiveType`: a numeric or boolean type.
@@ -151,23 +151,35 @@ All concrete :doc:`ak.types.Type` subclasses are composable except :doc:`ak.type
 
 This is the type of a :doc:`ak.layout.Content` array expressed with low-level granularity (e.g. including the distinction between :doc:`ak.layout.ListArray` and :doc:`ak.layout.ListOffsetArray`). There is a one-to-one relationship between :doc:`ak.layout.Content` subclasses and :doc:`ak.forms.Form` subclasses, and each :doc:`ak.forms.Form` maps to only one :doc:`ak.types.Type`.
 
-   * :doc:`ak.forms.Form`: the abstract subclass.
-   * :doc:`ak.forms.EmptyForm` for :doc:`ak.layout.EmptyArray`
-   * :doc:`ak.forms.NumpyForm` for :doc:`ak.layout.NumpyArray`
-   * :doc:`ak.forms.RegularForm` for :doc:`ak.layout.RegularArray`
-   * :doc:`ak.forms.ListForm` for :doc:`ak.layout.ListArray`
-   * :doc:`ak.forms.ListOffsetForm` for :doc:`ak.layout.ListOffsetArray`
-   * :doc:`ak.forms.RecordForm` for :doc:`ak.layout.RecordArray`
-   * :doc:`ak.forms.IndexedForm` for :doc:`ak.layout.IndexedArray`
-   * :doc:`ak.forms.IndexedOptionForm` for :doc:`ak.layout.IndexedOptionArray`
-   * :doc:`ak.forms.ByteMaskedForm` for :doc:`ak.layout.ByteMaskedArray`
-   * :doc:`ak.forms.BitMaskedForm` for :doc:`ak.layout.BitMaskedArray`
-   * :doc:`ak.forms.UnmaskedForm` for :doc:`ak.layout.UnmaskedArray`
-   * :doc:`ak.forms.UnionForm` for :doc:`ak.layout.UnionArray`
-   * :doc:`ak.forms.VirtualForm` for :doc:`ak.layout.VirtualArray`
+   * :doc:`ak.forms.Form`: the abstract base class.
+   * :doc:`ak.forms.EmptyForm` for :doc:`ak.layout.EmptyArray`.
+   * :doc:`ak.forms.NumpyForm` for :doc:`ak.layout.NumpyArray`.
+   * :doc:`ak.forms.RegularForm` for :doc:`ak.layout.RegularArray`.
+   * :doc:`ak.forms.ListForm` for :doc:`ak.layout.ListArray`.
+   * :doc:`ak.forms.ListOffsetForm` for :doc:`ak.layout.ListOffsetArray`.
+   * :doc:`ak.forms.RecordForm` for :doc:`ak.layout.RecordArray`.
+   * :doc:`ak.forms.IndexedForm` for :doc:`ak.layout.IndexedArray`.
+   * :doc:`ak.forms.IndexedOptionForm` for :doc:`ak.layout.IndexedOptionArray`.
+   * :doc:`ak.forms.ByteMaskedForm` for :doc:`ak.layout.ByteMaskedArray`.
+   * :doc:`ak.forms.BitMaskedForm` for :doc:`ak.layout.BitMaskedArray`.
+   * :doc:`ak.forms.UnmaskedForm` for :doc:`ak.layout.UnmaskedArray`.
+   * :doc:`ak.forms.UnionForm` for :doc:`ak.layout.UnionArray`.
+   * :doc:`ak.forms.VirtualForm` for :doc:`ak.layout.VirtualArray`.
 
-**Implementation internals:**
+Internal implementation
+"""""""""""""""""""""""
 
 The rest of the classes and functions described here are not part of the public interface. Either the objects or the submodules begin with an underscore, indicating that they can freely change from one version to the next.
+
+More documentation
+""""""""""""""""""
+
+The Awkward Array project is divided into 3 layers with 5 main components.
+
+.. raw:: html
+
+    <img src="_static/awkward-1-0-layers.svg" style="max-width: 500px; margin-left: auto; margin-right: auto;">
+
+The C++ classes, cpu-kernels, and gpu-kernels are described in the `C++ API reference <_static/index.html>`__.
 
 .. include:: _auto/toctree.txt
