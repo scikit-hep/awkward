@@ -815,7 +815,8 @@ def from_awkward0(array,
                          [recurse(x, level + 1) for x in array.chunks])
             else:
                 return awkward1.operations.structure.concatenate(
-                         [recurse(x, level + 1) for x in array.chunks])
+                         [recurse(x, level + 1) for x in array.chunks],
+                         highlevel=False)
 
         elif isinstance(array, awkward0.AppendableArray):
             # chunkshape, dtype, chunks
