@@ -13,10 +13,10 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
 Documentation
 *************
 
-   * `How-to documentation for data analysts <https://scikit-hep.org/awkward-1.0/index.html>`__
-   * `How-it-works tutorials for developers <https://scikit-hep.org/awkward-1.0/index.html>`__
-   * `C++ API reference <https://awkward-array.readthedocs.io/en/latest/_static/index.html>`__
-   * Python API reference: **this site**.
+   * `How-to documentation for data analysts <https://awkward-array.org/how-do-i.html>`__
+   * `How-it-works tutorials for developers <https://awkward-array.org/how-it-works.html>`__
+   * `C++ API reference <_static/index.html>`__
+   * Python API reference: **this site**
 
 Navigation
 **********
@@ -166,8 +166,20 @@ This is the type of a :doc:`ak.layout.Content` array expressed with low-level gr
    * :doc:`ak.forms.UnionForm` for :doc:`ak.layout.UnionArray`
    * :doc:`ak.forms.VirtualForm` for :doc:`ak.layout.VirtualArray`
 
-**Implementation internals:**
+Internal implementation
+"""""""""""""""""""""""
 
 The rest of the classes and functions described here are not part of the public interface. Either the objects or the submodules begin with an underscore, indicating that they can freely change from one version to the next.
+
+More documentation
+""""""""""""""""""
+
+The Awkward Array project is divided into 3 layers with 5 main components.
+
+.. raw:: html
+
+    <img src="_static/awkward-1-0-layers.svg" style="max-width: 500px; margin-left: auto; margin-right: auto;">
+
+The C++ classes, cpu-kernels, and gpu-kernels are described in the `C++ API reference <_static/index.html>`__.
 
 .. include:: _auto/toctree.txt
