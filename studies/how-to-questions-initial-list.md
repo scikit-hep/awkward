@@ -9,7 +9,7 @@ Converting arrays
    - Zarr
 
 Creating arrays
-   - ArrayBuilder (general)
+   - ArrayBuilder (easy & general)
    - Layout (faster)
    - Lazy arrays and Dask
 
@@ -30,11 +30,11 @@ Numerical math
 
 Filtering data
    - By number of items
-   - Cuts vs masks
-   - Jagged slicing
-   - Masked slicing
+   - Cuts vs. masks
+   - Slicing lists within arrays
+   - Slices with missing values
 
-Restructuring
+Restructuring data
    - Zip/unzip and project
    - Adding fields to records
    - Renaming records
@@ -51,4 +51,4 @@ Specialized behavior
    - Subclassing Array/Record
    - Overriding NumPy functions
    - In Numba
-   - Lorentz vectors
+   - For physics: Lorentz vectors
