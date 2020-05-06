@@ -20,7 +20,7 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
 Quickstart
 ==========
 
-<table>
+<table style="margin-top: 30px">
   <tr>
     <td width="50%" valign="top" align="center">
       <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
@@ -43,7 +43,7 @@ Quickstart
       </b></p>
     </td>
   </tr>
-  <tr>
+  <tr style="margin-top: 20px">
     <td width="50%" valign="top" align="center">
       <a href="how-do-i.html">
         <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/panel-data-analysts.png" width="80%">
