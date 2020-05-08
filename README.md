@@ -130,6 +130,9 @@ Thanks especially to the gracious help of awkward-array contributors ([emoji key
     <td align="center"><a href="https://github.com/reikdas"><img src="https://avatars0.githubusercontent.com/u/11775615?v=4" width="100px;" alt=""/><br /><sub><b>Pratyush Das</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward-1.0/commits?author=reikdas" title="Code">💻</a> <a href="#ideas-reikdas" title="Ideas, Planning, & Feedback">🤔</a> <a href="#talk-reikdas" title="Talks">📢</a></td>
     <td align="center"><a href="https://github.com/trickarcher"><img src="https://avatars3.githubusercontent.com/u/39878675?v=4" width="100px;" alt=""/><br /><sub><b>Anish Biswas</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward-1.0/commits?author=trickarcher" title="Code">💻</a> <a href="#ideas-trickarcher" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/scikit-hep/awkward-1.0/commits?author=trickarcher" title="Tests">⚠️</a></td>
   </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/Ellipse0934"><img src="https://avatars3.githubusercontent.com/u/7466364?v=4" width="100px;" alt=""/><br /><sub><b>Ellipse0934</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward-1.0/commits?author=Ellipse0934" title="Code">💻</a> <a href="#ideas-Ellipse0934" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/scikit-hep/awkward-1.0/commits?author=Ellipse0934" title="Tests">⚠️</a></td>
+  </tr>
 </table>
 
 <!-- markdownlint-enable -->
