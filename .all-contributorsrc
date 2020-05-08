@@ -159,6 +159,19 @@
         "test",
         "talk"
       ]
+    },
+    {
+      "login": "mhedges",
+      "name": "Michael Hedges",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/18672512?v=4",
+      "profile": "https://github.com/mhedges",
+      "contributions": [
+        "code",
+        "ideas",
+        "question",
+        "test",
+        "talk"
+      ]
     }
   ],
   "contributorsPerLine": 7,
