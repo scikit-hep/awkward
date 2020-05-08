@@ -87,6 +87,17 @@
         "ideas",
         "talk"
       ]
+    },
+    {
+      "login": "trickarcher",
+      "name": "Anish Biswas",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/39878675?v=4",
+      "profile": "https://github.com/trickarcher",
+      "contributions": [
+        "code",
+        "ideas",
+        "test"
+      ]
     }
   ],
   "contributorsPerLine": 7,
