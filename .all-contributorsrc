@@ -173,6 +173,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "martindurant",
+      "name": "Martin Durant",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/6042212?v=4",
+      "profile": "http://martindurant.github.io/",
+      "contributions": [
+        "ideas"
+      ]
     }
   ],
   "contributorsPerLine": 7,
