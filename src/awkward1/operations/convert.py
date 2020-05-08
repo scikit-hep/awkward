@@ -1296,12 +1296,12 @@ def to_arrow(layout):
                                  awkward1.layout.IndexedArray64)):
 
             if mask is not None:
-                # index = numpy.asarray(layout.index)
-                # content_buffer = recurse(layout.content[layout.index])
-                # dic_type = pyarrow.dictionary(pyarrow.from_numpy_dtype(index.dtype), content_buffer.type)
-                # arrow_arr = pyarrow.DictionaryArray.from_buffers(dic_type, len(index), [pyarrow.py_buffer(mask), pyarrow.py_buffer(content_buffer.to_numpy())])
-                arrow_arr = pyarrow.DictionaryArray.from_arrays(
-                    recurse(layout.index), recurse(layout.content))
+                index = numpy.asarray(layout.index)
+                content_buffer = recurse(layout.content[layout.index])
+                print(content_buffer.buffers())
+                dic_type = pyarrow.dictionary(pyarrow.from_numpy_dtype(index.dtype), content_buffer.type)
+                arrow_arr = pyarrow.DictionaryArray.from_buffers(dic_type, len(index), [None, content_buffer.buffers()])
+                
                 ValueError("Mask in pyarrow not implemented yet")
             else:
                 arrow_arr = pyarrow.DictionaryArray.from_arrays(
@@ -1357,6 +1357,38 @@ def to_arrow(layout):
             return recurse(layout.content)
 
     return recurse(layout)
+
+def from_arrow(array):
+    import pyarrow
+
+    def recurse(array, mask=None):
+        
+        if isinstance(array, pyarrow.Tensor):
+            out = awkward1.layout.NumpyArray(array.to_numpy())
+            return out
+
+        elif isinstance(array, pyarrow.ListArray):
+            offsets = awkward1.layout.Index32(array.offsets.to_numpy())
+            contents = recurse(array.values)
+            return awkward1.layout.ListOffsetArray32(offsets, contents)
+
+        elif isinstance(array, pyarrow.LargeListArray):
+            offsets = awkward1.layout.Index64(array.offsets.to_numpy())
+            contents = recurse(array.values)
+            return awkward1.layout.ListOffsetArray64(offsets, contents)
+        
+        elif isinstance(array, pyarrow.StructArray):
+            child_array = [recurse(array.field(x)) for x in range(array.type.num_children)]
+            keys = [array.type[x].name for x in range(array.type.num_children)]
+            return awkward1.layout.RecordArray(child_array, keys)
+
+        elif isinstance(array, pyarrow.lib.Array):
+            buffers = array.buffers()
+            out = popbuffers(array, array.type, buffers, len(array))
+            print(out)
+            return out
+    
+    return recurse(array)
 
 
 # HAve a lookup table that assoicates  values with pyarrow data type
