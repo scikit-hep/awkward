@@ -121,6 +121,18 @@
         "infra",
         "test"
       ]
+    },
+    {
+      "login": "glass-ships",
+      "name": "glass-ships",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/26975530?v=4",
+      "profile": "https://github.com/glass-ships",
+      "contributions": [
+        "code",
+        "ideas",
+        "test",
+        "talk"
+      ]
     }
   ],
   "contributorsPerLine": 7,
