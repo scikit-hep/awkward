@@ -172,6 +172,17 @@
         "test",
         "talk"
       ]
+    },
+    {
+      "login": "guitargeek",
+      "name": "Jonas Rembser",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/6578603?v=4",
+      "profile": "https://github.com/guitargeek",
+      "contributions": [
+        "code",
+        "ideas",
+        "test"
+      ]
     }
   ],
   "contributorsPerLine": 7,
