@@ -76,6 +76,17 @@
         "test",
         "talk"
       ]
+    },
+    {
+      "login": "reikdas",
+      "name": "Pratyush Das",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/11775615?v=4",
+      "profile": "https://github.com/reikdas",
+      "contributions": [
+        "code",
+        "ideas",
+        "talk"
+      ]
     }
   ],
   "contributorsPerLine": 7,
