@@ -26,6 +26,21 @@
         "tutorial",
         "talk"
       ]
+    },
+    {
+      "login": "nsmith-",
+      "name": "Nicholas Smith",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/6587412?v=4",
+      "profile": "https://github.com/nsmith-",
+      "contributions": [
+        "bug",
+        "code",
+        "example",
+        "ideas",
+        "question",
+        "test",
+        "talk"
+      ]
     }
   ],
   "contributorsPerLine": 7,
