@@ -2,7 +2,6 @@
 
 [![Scikit-HEP](https://scikit-hep.org/assets/images/Scikit--HEP-Project-blue.svg)](https://scikit-hep.org/)
 [![Build Status](https://dev.azure.com/jpivarski/Scikit-HEP/_apis/build/status/buildtest-awkward?branchName=master)](https://dev.azure.com/jpivarski/Scikit-HEP/_build/latest?definitionId=3&branchName=master)
-[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
 [![DOI](https://zenodo.org/badge/137079949.svg)](https://zenodo.org/badge/latestdoi/137079949)
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
@@ -116,7 +115,7 @@ C++ projects can link against the shared libraries `libawkward-cpu-kernels.so` a
 
 Support for this work was provided by NSF cooperative agreement OAC-1836650 (IRIS-HEP), grant OAC-1450377 (DIANA/HEP) and PHY-1520942 (US-CMS LHC Ops).
 
-Thanks especially to the gracious help of awkward-array contributors:
+Thanks especially to the gracious help of awkward-array contributors ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
@@ -124,6 +123,7 @@ Thanks especially to the gracious help of awkward-array contributors:
 <table>
   <tr>
     <td align="center"><a href="https://github.com/jpivarski"><img src="https://avatars0.githubusercontent.com/u/1852447?v=4" width="100px;" alt=""/><br /><sub><b>Jim Pivarski</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward-1.0/issues?q=author%3Ajpivarski" title="Bug reports">🐛</a> <a href="https://github.com/scikit-hep/awkward-1.0/commits?author=jpivarski" title="Code">💻</a> <a href="#content-jpivarski" title="Content">🖋</a> <a href="https://github.com/scikit-hep/awkward-1.0/commits?author=jpivarski" title="Documentation">📖</a> <a href="#design-jpivarski" title="Design">🎨</a> <a href="#example-jpivarski" title="Examples">💡</a> <a href="#ideas-jpivarski" title="Ideas, Planning, & Feedback">🤔</a> <a href="#infra-jpivarski" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a> <a href="#maintenance-jpivarski" title="Maintenance">🚧</a> <a href="#question-jpivarski" title="Answering Questions">💬</a> <a href="https://github.com/scikit-hep/awkward-1.0/pulls?q=is%3Apr+reviewed-by%3Ajpivarski" title="Reviewed Pull Requests">👀</a> <a href="https://github.com/scikit-hep/awkward-1.0/commits?author=jpivarski" title="Tests">⚠️</a> <a href="#tutorial-jpivarski" title="Tutorials">✅</a> <a href="#talk-jpivarski" title="Talks">📢</a></td>
+    <td align="center"><a href="https://github.com/ianna"><img src="https://avatars0.githubusercontent.com/u/1390682?v=4" width="100px;" alt=""/><br /><sub><b>Ianna Osborne</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward-1.0/commits?author=ianna" title="Code">💻</a> <a href="#ideas-ianna" title="Ideas, Planning, & Feedback">🤔</a> <a href="#maintenance-ianna" title="Maintenance">🚧</a> <a href="https://github.com/scikit-hep/awkward-1.0/commits?author=ianna" title="Tests">⚠️</a></td>
     <td align="center"><a href="https://github.com/nsmith-"><img src="https://avatars2.githubusercontent.com/u/6587412?v=4" width="100px;" alt=""/><br /><sub><b>Nicholas Smith</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward-1.0/issues?q=author%3Ansmith-" title="Bug reports">🐛</a> <a href="https://github.com/scikit-hep/awkward-1.0/commits?author=nsmith-" title="Code">💻</a> <a href="#example-nsmith-" title="Examples">💡</a> <a href="#ideas-nsmith-" title="Ideas, Planning, & Feedback">🤔</a> <a href="#question-nsmith-" title="Answering Questions">💬</a> <a href="https://github.com/scikit-hep/awkward-1.0/commits?author=nsmith-" title="Tests">⚠️</a> <a href="#talk-nsmith-" title="Talks">📢</a></td>
   </tr>
 </table>
