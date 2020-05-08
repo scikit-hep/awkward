@@ -4,6 +4,7 @@
 [![Build Status](https://dev.azure.com/jpivarski/Scikit-HEP/_apis/build/status/buildtest-awkward?branchName=master)](https://dev.azure.com/jpivarski/Scikit-HEP/_build/latest?definitionId=3&branchName=master)
 [![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
 [![DOI](https://zenodo.org/badge/137079949.svg)](https://zenodo.org/badge/latestdoi/137079949)
+[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
 Awkward Array is a library for **nested, variable-sized data**, including arbitrary-length lists, records, mixed types, and missing data, using **NumPy-like idioms**.
 
@@ -89,7 +90,7 @@ python localbuild.py --pytest tests
    * [Continuous integration](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=3&_a=summary) and [continuous deployment](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=4&_a=summary) are hosted by Azure Pipelines.
    * [Release history](https://awkward-array.readthedocs.io/en/latest/_auto/changelog.html) (changelog) is hosted by ReadTheDocs.
    * [CONTRIBUTING.md](CONTRIBUTING.md) provides more information on how to contribute.
-   * [LICENSE](https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE) is BSD-3.
+   * The [LICENSE](https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE) is BSD-3.
 
 ## Using Awkward Array as a dependency
 
@@ -129,5 +130,3 @@ Thanks especially to the gracious help of awkward-array contributors:
 <!-- markdownlint-enable -->
 <!-- prettier-ignore-end -->
 <!-- ALL-CONTRIBUTORS-LIST:END -->
-
-(See [emoji key](https://allcontributors.org/docs/en/emoji-key) for contribution types.)

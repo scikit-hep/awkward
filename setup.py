@@ -183,20 +183,20 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
       </b></p>
     </td>
     <td width="33%" valign="top">
-      <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
-        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/panel-doxygen.png" width="268">
-      </a>
-      <p align="center"><b>
-        <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
-        C++<br>API reference
-        </a>
-      </b></p>
       <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
         <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/panel-sphinx.png" width="268">
       </a>
       <p align="center"><b>
         <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
         Python<br>API reference
+        </a>
+      </b></p>
+      <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
+        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/panel-doxygen.png" width="268">
+      </a>
+      <p align="center"><b>
+        <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
+        C++<br>API reference
         </a>
       </b></p>
     </td>
