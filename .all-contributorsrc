@@ -27,6 +27,44 @@
       ]
     },
     {
+      "login": "reikdas",
+      "name": "Pratyush Das",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/11775615?v=4",
+      "profile": "https://github.com/reikdas",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "trickarcher",
+      "name": "Anish Biswas",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/39878675?v=4",
+      "profile": "https://github.com/trickarcher",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "glass-ships",
+      "name": "glass-ships",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/26975530?v=4",
+      "profile": "https://github.com/glass-ships",
+      "contributions": [
+        "code",
+        "test"
+      ]
+    },
+    {
+      "login": "henryiii",
+      "name": "Henry Schreiner",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/4616906?v=4",
+      "profile": "http://iscinumpy.gitlab.io",
+      "contributions": [
+        "code",
+        "infra"
+      ]
+    },
+    {
       "login": "nsmith-",
       "name": "Nicholas Smith",
       "avatar_url": "https://avatars2.githubusercontent.com/u/6587412?v=4",
@@ -47,34 +85,6 @@
       ]
     },
     {
-      "login": "henryiii",
-      "name": "Henry Schreiner",
-      "avatar_url": "https://avatars1.githubusercontent.com/u/4616906?v=4",
-      "profile": "http://iscinumpy.gitlab.io",
-      "contributions": [
-        "code",
-        "infra"
-      ]
-    },
-    {
-      "login": "reikdas",
-      "name": "Pratyush Das",
-      "avatar_url": "https://avatars0.githubusercontent.com/u/11775615?v=4",
-      "profile": "https://github.com/reikdas",
-      "contributions": [
-        "code"
-      ]
-    },
-    {
-      "login": "trickarcher",
-      "name": "Anish Biswas",
-      "avatar_url": "https://avatars3.githubusercontent.com/u/39878675?v=4",
-      "profile": "https://github.com/trickarcher",
-      "contributions": [
-        "code"
-      ]
-    },
-    {
       "login": "Ellipse0934",
       "name": "Ellipse0934",
       "avatar_url": "https://avatars3.githubusercontent.com/u/7466364?v=4",
@@ -90,16 +100,6 @@
       "profile": "https://gitlab.com/veprbl",
       "contributions": [
         "infra"
-      ]
-    },
-    {
-      "login": "glass-ships",
-      "name": "glass-ships",
-      "avatar_url": "https://avatars2.githubusercontent.com/u/26975530?v=4",
-      "profile": "https://github.com/glass-ships",
-      "contributions": [
-        "code",
-        "test"
       ]
     },
     {
