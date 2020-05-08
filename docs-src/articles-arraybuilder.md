@@ -11,8 +11,8 @@ kernelspec:
   name: python3
 ---
 
-How to perform computations with NumPy
-======================================
+ArrayBuilder: the record-oriented → columnar algorithm
+======================================================
 
 **This is a stub:** I intend to write this article, but haven't yet.
 

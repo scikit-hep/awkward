@@ -1,11 +1,16 @@
 - file: quickstart
+  title: "Quickstart"
+
 - file: what-is-awkward
+  title: "What is an Awkward Array?"
 
 - header: "How-to tutorials"
+
 - file: how-to
   title: "Introduction"
 
 - file: how-to-convert
+  title: "Converting arrays"
   expand_sections: true
   sections:
     - file: how-to-convert-numpy
@@ -26,6 +31,7 @@
       title: "Zarr"
 
 - file: how-to-create
+  title: "Creating arrays"
   expand_sections: true
   sections:
     - file: how-to-create-arraybuilder
@@ -36,6 +42,7 @@
       title: "Lazy arrays and Dask"
 
 - file: how-to-examine
+  title: "Examining arrays"
   expand_sections: true
   sections:
     - file: how-to-examine-type
@@ -50,6 +57,7 @@
       title: "Checking validity"
 
 - file: how-to-math
+  title: "Numerical math"
   expand_sections: true
   sections:
     - file: how-to-math-numpy
@@ -66,6 +74,7 @@
       title: "On GPUs"
 
 - file: how-to-filter
+  title: "Filtering data"
   expand_sections: true
   sections:
     - file: how-to-filter-num
@@ -78,6 +87,7 @@
       title: "Slices with missing values"
 
 - file: how-to-restructure
+  title: "Restructuring data"
   expand_sections: true
   sections:
     - file: how-to-restructure-zip-project
@@ -96,6 +106,7 @@
       title: "Sorting"
 
 - file: how-to-combinatorics
+  title: "Combinatorics"
   expand_sections: true
   sections:
     - file: how-to-combinatorics-cartesian-combinations
@@ -104,6 +115,7 @@
       title: "Best match between collections"
 
 - file: how-to-specialize
+  title: "Specialized behavior"
   expand_sections: true
   sections:
     - file: how-to-specialize-subclass
@@ -116,5 +128,24 @@
       title: "For physics: Lorentz vectors"
 
 - header: "How-it-works tutorials"
+
 - file: how-it-works
   title: "Introduction"
+
+- file: articles-data-types
+  title: "Abstract data types"
+
+- file: articles-layouts
+  title: "Columnar layouts"
+
+- file: articles-arrays-are-functions
+  title: "Arrays as functional programming"
+
+- file: articles-vectorization
+  title: "Slow control and fast math"
+
+- file: articles-arraybuilder
+  title: "Record-oriented → columnar"
+
+- file: articles-identities
+  title: "Array element identities"

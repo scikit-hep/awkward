@@ -11,8 +11,8 @@ kernelspec:
   name: python3
 ---
 
-How to perform computations with NumPy
-======================================
+Array element identities
+========================
 
 **This is a stub:** I intend to write this article, but haven't yet.
 
