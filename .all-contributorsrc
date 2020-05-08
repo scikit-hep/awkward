@@ -109,6 +109,18 @@
         "ideas",
         "test"
       ]
+    },
+    {
+      "login": "veprbl",
+      "name": "Dmitry Kalinkin",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/245573?v=4",
+      "profile": "https://gitlab.com/veprbl",
+      "contributions": [
+        "bug",
+        "code",
+        "infra",
+        "test"
+      ]
     }
   ],
   "contributorsPerLine": 7,
