@@ -20,10 +20,147 @@
 #include "awkward/array/ByteMaskedArray.h"
 #include "awkward/array/BitMaskedArray.h"
 #include "awkward/array/UnmaskedArray.h"
+#include "awkward/array/VirtualArray.h"
 
 #include "awkward/array/RegularArray.h"
 
 namespace awkward {
+  ////////// RegularForm
+
+  RegularForm::RegularForm(bool has_identities,
+                           const util::Parameters& parameters,
+                           const FormPtr& content,
+                           int64_t size)
+      : Form(has_identities, parameters)
+      , content_(content)
+      , size_(size) { }
+
+  const FormPtr
+  RegularForm::content() const {
+    return content_;
+  }
+
+  int64_t
+  RegularForm::size() const {
+    return size_;
+  }
+
+  const TypePtr
+  RegularForm::type(const util::TypeStrs& typestrs) const {
+    return std::make_shared<RegularType>(
+               parameters_,
+               util::gettypestr(parameters_, typestrs),
+               content_.get()->type(typestrs),
+               size_);
+  }
+
+  void
+  RegularForm::tojson_part(ToJson& builder, bool verbose) const {
+    builder.beginrecord();
+    builder.field("class");
+    builder.string("RegularArray");
+    builder.field("content");
+    content_.get()->tojson_part(builder, verbose);
+    builder.field("size");
+    builder.integer(size_);
+    identities_tojson(builder, verbose);
+    parameters_tojson(builder, verbose);
+    builder.endrecord();
+  }
+
+  const FormPtr
+  RegularForm::shallow_copy() const {
+    return std::make_shared<RegularForm>(has_identities_,
+                                         parameters_,
+                                         content_,
+                                         size_);
+  }
+
+  const std::string
+  RegularForm::purelist_parameter(const std::string& key) const {
+    std::string out = parameter(key);
+    if (out == std::string("null")) {
+      return content_.get()->purelist_parameter(key);
+    }
+    else {
+      return out;
+    }
+  }
+
+  bool
+  RegularForm::purelist_isregular() const {
+    return content_.get()->purelist_isregular();
+  }
+
+  int64_t
+  RegularForm::purelist_depth() const {
+    return content_.get()->purelist_depth() + 1;
+  }
+
+  const std::pair<int64_t, int64_t>
+  RegularForm::minmax_depth() const {
+    std::pair<int64_t, int64_t> content_depth = content_.get()->minmax_depth();
+    return std::pair<int64_t, int64_t>(content_depth.first + 1,
+                                       content_depth.second + 1);
+  }
+
+  const std::pair<bool, int64_t>
+  RegularForm::branch_depth() const {
+    std::pair<bool, int64_t> content_depth = content_.get()->branch_depth();
+    return std::pair<bool, int64_t>(content_depth.first,
+                                    content_depth.second + 1);
+  }
+
+  int64_t
+  RegularForm::numfields() const {
+    return content_.get()->numfields();
+  }
+
+  int64_t
+  RegularForm::fieldindex(const std::string& key) const {
+    return content_.get()->fieldindex(key);
+  }
+
+  const std::string
+  RegularForm::key(int64_t fieldindex) const {
+    return content_.get()->key(fieldindex);
+  }
+
+  bool
+  RegularForm::haskey(const std::string& key) const {
+    return content_.get()->haskey(key);
+  }
+
+  const std::vector<std::string>
+  RegularForm::keys() const {
+    return content_.get()->keys();
+  }
+
+  bool
+  RegularForm::equal(const FormPtr& other,
+                     bool check_identities,
+                     bool check_parameters) const {
+    if (check_identities  &&
+        has_identities_ != other.get()->has_identities()) {
+      return false;
+    }
+    if (check_parameters  &&
+        !util::parameters_equal(parameters_, other.get()->parameters())) {
+      return false;
+    }
+    if (RegularForm* t = dynamic_cast<RegularForm*>(other.get())) {
+      return (content_.get()->equal(t->content(),
+                                    check_identities,
+                                    check_parameters)  &&
+              size_ == t->size());
+    }
+    else {
+      return false;
+    }
+  }
+
+  ////////// RegularArray
+
   RegularArray::RegularArray(const IdentitiesPtr& identities,
                              const util::Parameters& parameters,
                              const ContentPtr& content,
@@ -221,11 +358,25 @@ namespace awkward {
 
   const TypePtr
   RegularArray::type(const util::TypeStrs& typestrs) const {
-    return std::make_shared<RegularType>(
-      parameters_,
-      util::gettypestr(parameters_, typestrs),
-      content_.get()->type(typestrs),
-      size_);
+    return form(true).get()->type(typestrs);
+  }
+
+  const FormPtr
+  RegularArray::form(bool materialize) const {
+    return std::make_shared<RegularForm>(identities_.get() != nullptr,
+                                         parameters_,
+                                         content_.get()->form(materialize),
+                                         size_);
+  }
+
+  bool
+  RegularArray::has_virtual_form() const {
+    return content_.get()->has_virtual_form();
+  }
+
+  bool
+  RegularArray::has_virtual_length() const {
+    return content_.get()->has_virtual_length();
   }
 
   const std::string
@@ -405,41 +556,6 @@ namespace awkward {
                                           size_);
   }
 
-  const std::string
-  RegularArray::purelist_parameter(const std::string& key) const {
-    std::string out = parameter(key);
-    if (out == std::string("null")) {
-      return content_.get()->purelist_parameter(key);
-    }
-    else {
-      return out;
-    }
-  }
-
-  bool
-  RegularArray::purelist_isregular() const {
-    return content_.get()->purelist_isregular();
-  }
-
-  int64_t
-  RegularArray::purelist_depth() const {
-    return content_.get()->purelist_depth() + 1;
-  }
-
-  const std::pair<int64_t, int64_t>
-  RegularArray::minmax_depth() const {
-    std::pair<int64_t, int64_t> content_depth = content_.get()->minmax_depth();
-    return std::pair<int64_t, int64_t>(content_depth.first + 1,
-                                       content_depth.second + 1);
-  }
-
-  const std::pair<bool, int64_t>
-  RegularArray::branch_depth() const {
-    std::pair<bool, int64_t> content_depth = content_.get()->branch_depth();
-    return std::pair<bool, int64_t>(content_depth.first,
-                                    content_depth.second + 1);
-  }
-
   int64_t
   RegularArray::numfields() const {
     return content_.get()->numfields();
@@ -508,6 +624,10 @@ namespace awkward {
 
   bool
   RegularArray::mergeable(const ContentPtr& other, bool mergebool) const {
+    if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
+      return mergeable(raw->array(), mergebool);
+    }
+
     if (!parameters_equal(other.get()->parameters())) {
       return false;
     }
@@ -586,6 +706,10 @@ namespace awkward {
 
   const ContentPtr
   RegularArray::merge(const ContentPtr& other) const {
+    if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
+      return merge(raw->array());
+    }
+
     if (!parameters_equal(other.get()->parameters())) {
       return merge_as_union(other);
     }

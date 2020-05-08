@@ -83,9 +83,22 @@ namespace awkward {
 
   const TypePtr
   Record::type(const util::TypeStrs& typestrs) const {
-    TypePtr out = array_.get()->type(typestrs);
-    out.get()->setparameters(parameters_);
-    return out;
+    return form(true).get()->type(typestrs);
+  }
+
+  const FormPtr
+  Record::form(bool materialize) const {
+    return array_.get()->form(materialize);
+  }
+
+  bool
+  Record::has_virtual_form() const {
+    return array_.get()->has_virtual_form();
+  }
+
+  bool
+  Record::has_virtual_length() const {
+    return array_.get()->has_virtual_length();
   }
 
   const std::string
@@ -206,16 +219,6 @@ namespace awkward {
   const ContentPtr
   Record::carry(const Index64& carry) const {
     throw std::runtime_error("undefined operation: Record::carry");
-  }
-
-  const std::string
-  Record::purelist_parameter(const std::string& key) const {
-    return parameter(key);
-  }
-
-  bool
-  Record::purelist_isregular() const {
-    return true;
   }
 
   int64_t

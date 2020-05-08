@@ -14,6 +14,111 @@
 #include "awkward/array/EmptyArray.h"
 
 namespace awkward {
+  ////////// EmptyForm
+
+  EmptyForm::EmptyForm(bool has_identities,
+                       const util::Parameters& parameters)
+      : Form(has_identities, parameters) { }
+
+  const TypePtr
+  EmptyForm::type(const util::TypeStrs& typestrs) const {
+    return std::make_shared<UnknownType>(
+               parameters_,
+               util::gettypestr(parameters_, typestrs));
+  }
+
+  void
+  EmptyForm::tojson_part(ToJson& builder, bool verbose) const {
+    builder.beginrecord();
+    builder.field("class");
+    builder.string("EmptyArray");
+    identities_tojson(builder, verbose);
+    parameters_tojson(builder, verbose);
+    builder.endrecord();
+  }
+
+  const FormPtr
+  EmptyForm::shallow_copy() const {
+    return std::make_shared<EmptyForm>(has_identities_,
+                                       parameters_);
+  }
+
+  const std::string
+  EmptyForm::purelist_parameter(const std::string& key) const {
+    return parameter(key);
+  }
+
+  bool
+  EmptyForm::purelist_isregular() const {
+    return true;
+  }
+
+  int64_t
+  EmptyForm::purelist_depth() const {
+    return 1;
+  }
+
+  const std::pair<int64_t, int64_t>
+  EmptyForm::minmax_depth() const {
+    return std::pair<int64_t, int64_t>(1, 1);
+  }
+
+  const std::pair<bool, int64_t>
+  EmptyForm::branch_depth() const {
+    return std::pair<bool, int64_t>(false, 1);
+  }
+
+  int64_t
+  EmptyForm::numfields() const {
+    return -1;
+  }
+
+  int64_t
+  EmptyForm::fieldindex(const std::string& key) const {
+    throw std::invalid_argument(
+      std::string("key ") + util::quote(key, true)
+      + std::string(" does not exist (data might not be records)"));
+  }
+
+  const std::string
+  EmptyForm::key(int64_t fieldindex) const {
+    throw std::invalid_argument(
+      std::string("fieldindex \"") + std::to_string(fieldindex)
+      + std::string("\" does not exist (data might not be records)"));
+  }
+
+  bool
+  EmptyForm::haskey(const std::string& key) const {
+    return false;
+  }
+
+  const std::vector<std::string>
+  EmptyForm::keys() const {
+    return std::vector<std::string>();
+  }
+
+  bool
+  EmptyForm::equal(const FormPtr& other,
+                   bool check_identities,
+                   bool check_parameters) const {
+    if (check_identities  &&
+        has_identities_ != other.get()->has_identities()) {
+      return false;
+    }
+    if (check_parameters  &&
+        !util::parameters_equal(parameters_, other.get()->parameters())) {
+      return false;
+    }
+    if (EmptyForm* t = dynamic_cast<EmptyForm*>(other.get())) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
+  ////////// EmptyArray
+
   EmptyArray::EmptyArray(const IdentitiesPtr& identities,
                          const util::Parameters& parameters)
       : Content(identities, parameters) { }
@@ -57,9 +162,23 @@ namespace awkward {
 
   const TypePtr
   EmptyArray::type(const util::TypeStrs& typestrs) const {
-    return std::make_shared<UnknownType>(parameters_,
-                                         util::gettypestr(parameters_,
-                                                          typestrs));
+    return form(true).get()->type(typestrs);
+  }
+
+  const FormPtr
+  EmptyArray::form(bool materialize) const {
+    return std::make_shared<EmptyForm>(identities_.get() != nullptr,
+                                       parameters_);
+  }
+
+  bool
+  EmptyArray::has_virtual_form() const {
+    return false;
+  }
+
+  bool
+  EmptyArray::has_virtual_length() const {
+    return false;
   }
 
   const std::string
@@ -171,7 +290,7 @@ namespace awkward {
   EmptyArray::getitem_fields(const std::vector<std::string>& keys) const {
     throw std::invalid_argument(
       std::string("cannot slice ") + classname()
-      + std::string(" by field name"));
+      + std::string(" by field names"));
   }
 
   const ContentPtr
@@ -179,33 +298,10 @@ namespace awkward {
     return shallow_copy();
   }
 
-  const std::string
-  EmptyArray::purelist_parameter(const std::string& key) const {
-    return parameter(key);
-  }
-
-  bool
-  EmptyArray::purelist_isregular() const {
-    return true;
-  }
-
   int64_t
-  EmptyArray::purelist_depth() const {
-    return 1;
+  EmptyArray::numfields() const {
+    return -1;
   }
-
-  const std::pair<int64_t, int64_t>
-  EmptyArray::minmax_depth() const {
-    return std::pair<int64_t, int64_t>(1, 1);
-  }
-
-  const std::pair<bool, int64_t>
-  EmptyArray::branch_depth() const {
-    return std::pair<bool, int64_t>(false, 1);
-  }
-
-  int64_t
-  EmptyArray::numfields() const { return -1; }
 
   int64_t
   EmptyArray::fieldindex(const std::string& key) const {

@@ -154,7 +154,7 @@ setup(name = "awkward1",
       maintainer = "Jim Pivarski",
       maintainer_email = "pivarski@princeton.edu",
       description = "Development of awkward 1.0, to replace scikit-hep/awkward-array in 2020.",
-      long_description = """<a href="https://github.com/scikit-hep/awkward-1.0#readme"><img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-images/logo/logo-300px.png"></a>
+      long_description = """<a href="https://github.com/scikit-hep/awkward-1.0#readme"><img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/logo/logo-300px.png"></a>
 
 Awkward Array is a library for **nested, variable-sized data**, including arbitrary-length lists, records, mixed types, and missing data, using **NumPy-like idioms**.
 
@@ -163,28 +163,28 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
 <table>
   <tr>
     <td width="33%" valign="top">
-      <a href="https://scikit-hep.org/awkward-1.0/index.html">
-        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-images/panel-data-analysts.png" width="268">
+      <a href="https://awkward-array.org/how-to.html">
+        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/panel-data-analysts.png" width="268">
       </a>
       <p align="center"><b>
-        <a href="https://scikit-hep.org/awkward-1.0/index.html">
+        <a href="https://awkward-array.org/how-to.html">
         How-to documentation<br>for data analysts
         </a>
       </b></p>
     </td>
     <td width="33%" valign="top">
-      <a href="https://scikit-hep.org/awkward-1.0/index.html">
-        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-images/panel-developers.png" width="268">
+      <a href="https://awkward-array.org/how-it-works.html">
+        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/panel-developers.png" width="268">
       </a>
       <p align="center"><b>
-        <a href="https://scikit-hep.org/awkward-1.0/index.html">
+        <a href="https://awkward-array.org/how-it-works.html">
         How-it-works tutorials<br>for developers
         </a>
       </b></p>
     </td>
     <td width="33%" valign="top">
       <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
-        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-images/panel-doxygen.png" width="268">
+        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/panel-doxygen.png" width="268">
       </a>
       <p align="center"><b>
         <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
@@ -192,7 +192,7 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
         </a>
       </b></p>
       <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
-        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-images/panel-sphinx.png" width="268">
+        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/panel-sphinx.png" width="268">
       </a>
       <p align="center"><b>
         <a href="https://awkward-array.readthedocs.io/en/latest/index.html">

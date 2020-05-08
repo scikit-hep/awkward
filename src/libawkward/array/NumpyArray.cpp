@@ -21,11 +21,345 @@
 #include "awkward/array/ByteMaskedArray.h"
 #include "awkward/array/BitMaskedArray.h"
 #include "awkward/array/UnmaskedArray.h"
+#include "awkward/array/VirtualArray.h"
 #include "awkward/util.h"
 
 #include "awkward/array/NumpyArray.h"
 
 namespace awkward {
+  ////////// NumpyForm
+
+  NumpyForm::NumpyForm(bool has_identities,
+                       const util::Parameters& parameters,
+                       const std::vector<int64_t>& inner_shape,
+                       int64_t itemsize,
+                       const std::string& format)
+      : Form(has_identities, parameters)
+      , inner_shape_(inner_shape)
+      , itemsize_(itemsize)
+      , format_(format) { }
+
+  const std::vector<int64_t>
+  NumpyForm::inner_shape() const {
+    return inner_shape_;
+  }
+
+  int64_t
+  NumpyForm::itemsize() const {
+    return itemsize_;
+  }
+
+  const std::string
+  NumpyForm::format() const {
+    return format_;
+  }
+
+  const std::string
+  NumpyForm::primitive() const {
+    if (format_.compare("d") == 0) {
+      return "float64";
+    }
+    else if (format_.compare("f") == 0) {
+      return "float32";
+    }
+#if defined _MSC_VER || defined __i386__
+    else if (format_.compare("q") == 0) {
+#else
+    else if (format_.compare("l") == 0) {
+#endif
+      return "int64";
+    }
+#if defined _MSC_VER || defined __i386__
+    else if (format_.compare("Q") == 0) {
+#else
+    else if (format_.compare("L") == 0) {
+#endif
+      return "uint64";
+    }
+#if defined _MSC_VER || defined __i386__
+    else if (format_.compare("l") == 0) {
+#else
+    else if (format_.compare("i") == 0) {
+#endif
+      return "int32";
+    }
+#if defined _MSC_VER || defined __i386__
+    else if (format_.compare("L") == 0) {
+#else
+    else if (format_.compare("I") == 0) {
+#endif
+      return "uint32";
+    }
+    else if (format_.compare("h") == 0) {
+      return "int16";
+    }
+    else if (format_.compare("H") == 0) {
+      return "uint16";
+    }
+    else if (format_.compare("b") == 0) {
+      return "int8";
+    }
+    else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
+      return "uint8";
+    }
+    else if (format_.compare("?") == 0) {
+      return "bool";
+    }
+    else {
+      return "unknown";
+    }
+  }
+
+  const TypePtr
+  NumpyForm::type(const util::TypeStrs& typestrs) const {
+    TypePtr out;
+    if (format_.compare("d") == 0) {
+      out = std::make_shared<PrimitiveType>(
+                parameters_,
+                util::gettypestr(parameters_, typestrs),
+                PrimitiveType::float64);
+    }
+    else if (format_.compare("f") == 0) {
+      out = std::make_shared<PrimitiveType>(
+                parameters_,
+                util::gettypestr(parameters_, typestrs),
+                PrimitiveType::float32);
+    }
+#if defined _MSC_VER || defined __i386__
+    else if (format_.compare("q") == 0) {
+#else
+    else if (format_.compare("l") == 0) {
+#endif
+      out = std::make_shared<PrimitiveType>(
+                parameters_,
+                util::gettypestr(parameters_, typestrs),
+                PrimitiveType::int64);
+    }
+#if defined _MSC_VER || defined __i386__
+    else if (format_.compare("Q") == 0) {
+#else
+    else if (format_.compare("L") == 0) {
+#endif
+      out = std::make_shared<PrimitiveType>(
+                parameters_,
+                util::gettypestr(parameters_, typestrs),
+                PrimitiveType::uint64);
+    }
+#if defined _MSC_VER || defined __i386__
+    else if (format_.compare("l") == 0) {
+#else
+    else if (format_.compare("i") == 0) {
+#endif
+      out = std::make_shared<PrimitiveType>(
+                parameters_,
+                util::gettypestr(parameters_, typestrs),
+                PrimitiveType::int32);
+    }
+#if defined _MSC_VER || defined __i386__
+    else if (format_.compare("L") == 0) {
+#else
+    else if (format_.compare("I") == 0) {
+#endif
+      out = std::make_shared<PrimitiveType>(
+                parameters_,
+                util::gettypestr(parameters_, typestrs),
+                PrimitiveType::uint32);
+    }
+    else if (format_.compare("h") == 0) {
+      out = std::make_shared<PrimitiveType>(
+                parameters_,
+                util::gettypestr(parameters_, typestrs),
+                PrimitiveType::int16);
+    }
+    else if (format_.compare("H") == 0) {
+      out = std::make_shared<PrimitiveType>(
+                parameters_,
+                util::gettypestr(parameters_, typestrs),
+                PrimitiveType::uint16);
+    }
+    else if (format_.compare("b") == 0) {
+      out = std::make_shared<PrimitiveType>(
+                parameters_,
+                util::gettypestr(parameters_, typestrs),
+                PrimitiveType::int8);
+    }
+    else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
+      out = std::make_shared<PrimitiveType>(
+                parameters_,
+                util::gettypestr(parameters_, typestrs),
+                PrimitiveType::uint8);
+    }
+    else if (format_.compare("?") == 0) {
+      out = std::make_shared<PrimitiveType>(
+                parameters_,
+                util::gettypestr(parameters_, typestrs),
+                PrimitiveType::boolean);
+    }
+    else {
+      throw std::invalid_argument(
+        std::string("Numpy format \"") + format_
+        + std::string("\" cannot be expressed as a PrimitiveType"));
+    }
+    for (int64_t i = ((int64_t)inner_shape_.size()) - 1;  i >= 0;  i--) {
+      out = std::make_shared<RegularType>(
+                util::Parameters(),
+                util::gettypestr(parameters_, typestrs),
+                out,
+                inner_shape_[(size_t)i]);
+    }
+    return out;
+  }
+
+  const std::string
+  NumpyForm::tostring() const {
+    ToJsonPrettyString builder(-1);
+    tojson_part(builder, false, true);
+    return builder.tostring();
+  }
+
+  const std::string
+  NumpyForm::tojson(bool pretty, bool verbose) const {
+    if (pretty) {
+      ToJsonPrettyString builder(-1);
+      tojson_part(builder, verbose, true);
+      return builder.tostring();
+    }
+    else {
+      ToJsonString builder(-1);
+      tojson_part(builder, verbose, true);
+      return builder.tostring();
+    }
+  }
+
+  void
+  NumpyForm::tojson_part(ToJson& builder, bool verbose) const {
+    return tojson_part(builder, verbose, false);
+  }
+
+  void
+  NumpyForm::tojson_part(ToJson& builder, bool verbose, bool toplevel) const {
+    std::string p = primitive();
+    if (verbose  ||  toplevel  ||  p.empty()  ||  !inner_shape_.empty()) {
+      builder.beginrecord();
+      builder.field("class");
+      builder.string("NumpyArray");
+      if (verbose  ||  !inner_shape_.empty()) {
+        builder.field("inner_shape");
+        builder.beginlist();
+        for (auto x : inner_shape_) {
+          builder.integer(x);
+        }
+        builder.endlist();
+      }
+      builder.field("itemsize");
+      builder.integer(itemsize_);
+      builder.field("format");
+      builder.string(format_);
+      if (!p.empty()) {
+        builder.field("primitive");
+        builder.string(p);
+      }
+      else if (verbose) {
+        builder.field("primitive");
+        builder.null();
+      }
+      identities_tojson(builder, verbose);
+      parameters_tojson(builder, verbose);
+      builder.endrecord();
+    }
+    else {
+      builder.string(p.c_str(), p.length());
+    }
+  }
+
+  const FormPtr
+  NumpyForm::shallow_copy() const {
+    return std::make_shared<NumpyForm>(has_identities_,
+                                       parameters_,
+                                       inner_shape_,
+                                       itemsize_,
+                                       format_);
+  }
+
+  const std::string
+  NumpyForm::purelist_parameter(const std::string& key) const {
+    return parameter(key);
+  }
+
+  bool
+  NumpyForm::purelist_isregular() const {
+    return true;
+  }
+
+  int64_t
+  NumpyForm::purelist_depth() const {
+    return (int64_t)inner_shape_.size() + 1;
+  }
+
+  const std::pair<int64_t, int64_t>
+  NumpyForm::minmax_depth() const {
+    return std::pair<int64_t, int64_t>((int64_t)inner_shape_.size() + 1,
+                                       (int64_t)inner_shape_.size() + 1);
+  }
+
+  const std::pair<bool, int64_t>
+  NumpyForm::branch_depth() const {
+    return std::pair<bool, int64_t>(false, (int64_t)inner_shape_.size() + 1);
+  }
+
+  int64_t
+  NumpyForm::numfields() const {
+    return -1;
+  }
+
+  int64_t
+  NumpyForm::fieldindex(const std::string& key) const {
+    throw std::invalid_argument(
+      std::string("key ") + util::quote(key, true)
+      + std::string(" does not exist (data are not records)"));
+  }
+
+  const std::string
+  NumpyForm::key(int64_t fieldindex) const {
+    throw std::invalid_argument(
+      std::string("fieldindex \"") + std::to_string(fieldindex)
+      + std::string("\" does not exist (data are not records)"));
+  }
+
+  bool
+  NumpyForm::haskey(const std::string& key) const {
+    return false;
+  }
+
+  const std::vector<std::string>
+  NumpyForm::keys() const {
+    return std::vector<std::string>();
+  }
+
+  bool
+  NumpyForm::equal(const FormPtr& other,
+                   bool check_identities,
+                   bool check_parameters) const {
+    if (check_identities  &&
+        has_identities_ != other.get()->has_identities()) {
+      return false;
+    }
+    if (check_parameters  &&
+        !util::parameters_equal(parameters_, other.get()->parameters())) {
+      return false;
+    }
+    if (NumpyForm* t = dynamic_cast<NumpyForm*>(other.get())) {
+      return (inner_shape_ == t->inner_shape()  &&
+              itemsize_ == t->itemsize()  &&
+              format_ == t->format());
+    }
+    else {
+      return false;
+    }
+  }
+
+  ////////// NumpyArray
+
   const std::unordered_map<std::type_index, std::string>
   NumpyArray::format_map = {
     { typeid(int8_t), "b"},
@@ -378,102 +712,30 @@ namespace awkward {
 
   const TypePtr
   NumpyArray::type(const util::TypeStrs& typestrs) const {
-    TypePtr out;
-    if (format_.compare("d") == 0) {
-      out = std::make_shared<PrimitiveType>(
-        parameters_,
-        util::gettypestr(parameters_, typestrs),
-        PrimitiveType::float64);
+    return form(true).get()->type(typestrs);
+  }
+
+  const FormPtr
+  NumpyArray::form(bool materialize) const {
+    std::vector<int64_t> inner_shape;
+    for (size_t i = 1;  i < shape_.size();  i++) {
+      inner_shape.push_back((int64_t)shape_[i]);
     }
-    else if (format_.compare("f") == 0) {
-      out = std::make_shared<PrimitiveType>(
-        parameters_,
-        util::gettypestr(parameters_, typestrs),
-        PrimitiveType::float32);
-    }
-#if defined _MSC_VER || defined __i386__
-    else if (format_.compare("q") == 0) {
-#else
-    else if (format_.compare("l") == 0) {
-#endif
-      out = std::make_shared<PrimitiveType>(
-        parameters_,
-        util::gettypestr(parameters_, typestrs),
-        PrimitiveType::int64);
-    }
-#if defined _MSC_VER || defined __i386__
-    else if (format_.compare("Q") == 0) {
-#else
-    else if (format_.compare("L") == 0) {
-#endif
-      out = std::make_shared<PrimitiveType>(
-        parameters_,
-        util::gettypestr(parameters_, typestrs),
-        PrimitiveType::uint64);
-    }
-#if defined _MSC_VER || defined __i386__
-    else if (format_.compare("l") == 0) {
-#else
-    else if (format_.compare("i") == 0) {
-#endif
-      out = std::make_shared<PrimitiveType>(
-        parameters_,
-        util::gettypestr(parameters_, typestrs),
-        PrimitiveType::int32);
-    }
-#if defined _MSC_VER || defined __i386__
-    else if (format_.compare("L") == 0) {
-#else
-    else if (format_.compare("I") == 0) {
-#endif
-      out = std::make_shared<PrimitiveType>(
-        parameters_,
-        util::gettypestr(parameters_, typestrs),
-        PrimitiveType::uint32);
-    }
-    else if (format_.compare("h") == 0) {
-      out = std::make_shared<PrimitiveType>(
-        parameters_,
-        util::gettypestr(parameters_, typestrs),
-        PrimitiveType::int16);
-    }
-    else if (format_.compare("H") == 0) {
-      out = std::make_shared<PrimitiveType>(
-        parameters_,
-        util::gettypestr(parameters_, typestrs),
-        PrimitiveType::uint16);
-    }
-    else if (format_.compare("b") == 0) {
-      out = std::make_shared<PrimitiveType>(
-        parameters_,
-        util::gettypestr(parameters_, typestrs),
-        PrimitiveType::int8);
-    }
-    else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
-      out = std::make_shared<PrimitiveType>(
-        parameters_,
-        util::gettypestr(parameters_, typestrs),
-        PrimitiveType::uint8);
-    }
-    else if (format_.compare("?") == 0) {
-      out = std::make_shared<PrimitiveType>(
-        parameters_,
-        util::gettypestr(parameters_, typestrs),
-        PrimitiveType::boolean);
-    }
-    else {
-      throw std::invalid_argument(
-        std::string("Numpy format \"") + format_
-        + std::string("\" cannot be expressed as a PrimitiveType"));
-    }
-    for (std::size_t i = shape_.size() - 1;  i > 0;  i--) {
-      out = std::make_shared<RegularType>(
-        util::Parameters(),
-        util::gettypestr(parameters_, typestrs),
-        out,
-        (int64_t)shape_[i]);
-    }
-    return out;
+    return std::make_shared<NumpyForm>(identities_.get() != nullptr,
+                                       parameters_,
+                                       inner_shape,
+                                       (int64_t)itemsize_,
+                                       format_);
+  }
+
+  bool
+  NumpyArray::has_virtual_form() const {
+    return false;
+  }
+
+  bool
+  NumpyArray::has_virtual_length() const {
+    return false;
   }
 
   const std::string
@@ -832,7 +1094,7 @@ namespace awkward {
   NumpyArray::getitem_fields(const std::vector<std::string>& keys) const {
     throw std::invalid_argument(
       std::string("cannot slice ") + classname()
-      + std::string(" by field name"));
+      + std::string(" by field names"));
   }
 
   bool getitem_too_general(const SliceItemPtr& head, const Slice& tail) {
@@ -988,34 +1250,10 @@ namespace awkward {
                                         format_);
   }
 
-  const std::string
-  NumpyArray::purelist_parameter(const std::string& key) const {
-    return parameter(key);
-  }
-
-  bool
-  NumpyArray::purelist_isregular() const {
-    return true;
-  }
-
   int64_t
-  NumpyArray::purelist_depth() const {
-    return (int64_t)shape_.size();
+  NumpyArray::numfields() const {
+    return -1;
   }
-
-  const std::pair<int64_t, int64_t>
-  NumpyArray::minmax_depth() const {
-    return std::pair<int64_t, int64_t>((int64_t)shape_.size(),
-                                       (int64_t)shape_.size());
-  }
-
-  const std::pair<bool, int64_t>
-  NumpyArray::branch_depth() const {
-    return std::pair<bool, int64_t>(false, (int64_t)shape_.size());
-  }
-
-  int64_t
-  NumpyArray::numfields() const { return -1; }
 
   int64_t
   NumpyArray::fieldindex(const std::string& key) const {
@@ -1189,6 +1427,10 @@ namespace awkward {
 
   bool
   NumpyArray::mergeable(const ContentPtr& other, bool mergebool) const {
+    if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
+      return mergeable(raw->array(), mergebool);
+    }
+
     if (!parameters_equal(other.get()->parameters())) {
       return false;
     }
@@ -1296,6 +1538,10 @@ namespace awkward {
 
   const ContentPtr
   NumpyArray::merge(const ContentPtr& other) const {
+    if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
+      return merge(raw->array());
+    }
+
     if (!parameters_equal(other.get()->parameters())) {
       return merge_as_union(other);
     }

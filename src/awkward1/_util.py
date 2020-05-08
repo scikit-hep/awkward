@@ -21,6 +21,8 @@ py27 = (sys.version_info[0] < 3)
 py35 = (sys.version_info[0] == 3 and sys.version_info[1] <= 5)
 win  = (os.name == "nt")
 
+virtualtypes = (awkward1.layout.VirtualArray,)
+
 unknowntypes = (awkward1.layout.EmptyArray,)
 
 indexedtypes = (awkward1.layout.IndexedArray32,
@@ -348,6 +350,9 @@ def completely_flatten(array):
                 out.append(outi)
         return tuple(out)
 
+    elif isinstance(array, virtualtypes):
+        return completely_flatten(array.array)
+
     elif isinstance(array, unknowntypes):
         return (numpy.array([], dtype=numpy.bool_),)
 
@@ -369,7 +374,7 @@ def completely_flatten(array):
     elif isinstance(array, recordtypes):
         out = []
         for i in range(array.numfields):
-            out.append(completely_flatten(array.field(i)))
+            out.extend(completely_flatten(array.field(i)))
         return tuple(out)
 
     elif isinstance(array, awkward1.layout.NumpyArray):
@@ -393,7 +398,10 @@ def broadcast_and_apply(inputs, getfunction, behavior):
 
     def apply(inputs, depth):
         # handle implicit right-broadcasting (i.e. NumPy-like)
-        if any(isinstance(x, listtypes) for x in inputs):
+        if (any(isinstance(x, listtypes) for x in inputs) and
+            not any(isinstance(x, (awkward1.layout.Content,
+                                   awkward1.layout.Record)) and
+                    x.has_virtual_form for x in inputs)):
             maxdepth = max(x.purelist_depth
                            for x in inputs
                            if isinstance(x, awkward1.layout.Content))
@@ -418,6 +426,11 @@ def broadcast_and_apply(inputs, getfunction, behavior):
         # the rest of this is one switch statement
         if function is not None:
             return function()
+
+        elif any(isinstance(x, virtualtypes) for x in inputs):
+            return apply([x if not isinstance(x, virtualtypes) else x.array
+                            for x in inputs],
+                         depth)
 
         elif any(isinstance(x, unknowntypes) for x in inputs):
             return apply([x if not isinstance(x, unknowntypes)
@@ -986,9 +999,23 @@ def recursively_apply(layout,
             layout.identities,
             layout.parameters if keep_parameters else None)
 
+    elif isinstance(layout, awkward1.layout.VirtualArray):
+        return recursively_apply(layout.array,
+                                 getfunction,
+                                 args,
+                                 depth,
+                                 keep_parameters)
+
     else:
         raise AssertionError(
                 "unrecognized Content type: {0}".format(type(layout)))
+
+def highlevel_type(layout, behavior, isarray):
+    if isarray:
+        return awkward1.types.ArrayType(layout.type(typestrs(behavior)),
+                                        len(layout))
+    else:
+        return layout.type(typestrs(behavior))
 
 def minimally_touching_string(limit_length, layout, behavior):
     import awkward1.layout
@@ -999,7 +1026,7 @@ def minimally_touching_string(limit_length, layout, behavior):
     if len(layout) == 0:
         return "[]"
 
-    def forward(x, space, brackets=True, wrap=True):
+    def forward(x, space, brackets=True, wrap=True, stop=None):
         done = False
         if wrap and isinstance(x, (awkward1.layout.Content,
                                    awkward1.partition.PartitionedArray)):
@@ -1022,7 +1049,7 @@ def minimally_touching_string(limit_length, layout, behavior):
                 if brackets:
                     yield space + "["
                 sp = ""
-                for i in range(len(x)):
+                for i in range(len(x) if stop is None else stop):
                     for token in forward(x[i], sp):
                         yield token
                     sp = ", "
@@ -1053,7 +1080,7 @@ def minimally_touching_string(limit_length, layout, behavior):
             else:
                 yield space + repr(x)
 
-    def backward(x, space, brackets=True, wrap=True):
+    def backward(x, space, brackets=True, wrap=True, stop=-1):
         done = False
         if wrap and isinstance(x, (awkward1.layout.Content,
                                    awkward1.partition.PartitionedArray)):
@@ -1076,7 +1103,7 @@ def minimally_touching_string(limit_length, layout, behavior):
                 if brackets:
                     yield "]" + space
                 sp = ""
-                for i in range(len(x) - 1, -1, -1):
+                for i in range(len(x) - 1, stop, -1):
                     for token in backward(x[i], sp):
                         yield token
                     sp = ", "
@@ -1124,9 +1151,9 @@ def minimally_touching_string(limit_length, layout, behavior):
     left, right = ["["], ["]"]
     leftlen, rightlen = 1, 1
     leftgen = \
-      forever(forward(layout[:halfway], "", brackets=False, wrap=False))
+      forever(forward(layout, "", brackets=False, wrap=False, stop=halfway))
     rightgen = \
-      forever(backward(layout[halfway:], "", brackets=False, wrap=False))
+      forever(backward(layout, "", brackets=False, wrap=False, stop=halfway - 1))
     while True:
         l = next(leftgen)
         if l is not None:

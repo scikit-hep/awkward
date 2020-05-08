@@ -5,6 +5,8 @@
 #include "awkward/python/identities.h"
 #include "awkward/python/util.h"
 
+#include "awkward/python/virtual.h"
+
 #include "awkward/python/content.h"
 
 ////////// boxing
@@ -116,6 +118,10 @@ box(const std::shared_ptr<ak::Content>& content) {
   }
   else if (ak::UnionArray8_64* raw =
            dynamic_cast<ak::UnionArray8_64*>(content.get())) {
+    return py::cast(*raw);
+  }
+  else if (ak::VirtualArray* raw =
+           dynamic_cast<ak::VirtualArray*>(content.get())) {
     return py::cast(*raw);
   }
   else {
@@ -231,6 +237,10 @@ unbox_content(const py::handle& obj) {
   catch (py::cast_error err) { }
   try {
     return obj.cast<ak::UnionArray8_64*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  try {
+    return obj.cast<ak::VirtualArray*>()->shallow_copy();
   }
   catch (py::cast_error err) { }
   throw std::invalid_argument("content argument must be a Content subtype");
@@ -404,6 +414,10 @@ toslice_part(ak::Slice& slice, py::object obj) {
       }
       else if (py::isinstance<ak::Content>(obj)) {
         content = unbox_content(obj);
+        if (ak::VirtualArray* raw
+              = dynamic_cast<ak::VirtualArray*>(content.get())) {
+          content = raw->array();
+        }
       }
       else if (py::isinstance<ak::ArrayBuilder>(obj)) {
         content = unbox_content(obj.attr("snapshot")());
@@ -1047,6 +1061,12 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
                -> std::shared_ptr<ak::Type> {
             return self.type(typestrs);
           })
+          .def_property_readonly("form", [](const T& self)
+                                         -> std::shared_ptr<ak::Form> {
+            return self.form(false);
+          })
+          .def_property_readonly("has_virtual_form", &T::has_virtual_form)
+          .def_property_readonly("has_virtual_length", &T::has_virtual_length)
           .def("__len__", &len<T>)
           .def("__getitem__", &getitem<T>)
           .def("__iter__", &iter<T>)
@@ -1083,6 +1103,8 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
             return pair;
           })
           .def("getitem_nothing", &T::getitem_nothing)
+          .def("getitem_at_nowrap", &T::getitem_at_nowrap)
+          .def("getitem_range_nowrap", &T::getitem_range_nowrap)
           .def_property_readonly(
             "_persistent_shared_ptr",
             [](std::shared_ptr<ak::Content>& self) -> PersistentSharedPtr {
@@ -2027,3 +2049,116 @@ template py::class_<ak::UnionArray8_64,
                     std::shared_ptr<ak::UnionArray8_64>,
                     ak::Content>
 make_UnionArrayOf(const py::handle& m, const std::string& name);
+
+////////// VirtualArray
+
+py::class_<ak::VirtualArray, std::shared_ptr<ak::VirtualArray>, ak::Content>
+make_VirtualArray(const py::handle& m, const std::string& name) {
+  return content_methods(py::class_<ak::VirtualArray,
+                         std::shared_ptr<ak::VirtualArray>,
+                         ak::Content>(m, name.c_str())
+      .def(py::init([](const py::object& generator,
+                       const py::object& cache,
+                       const py::object& cache_key,
+                       const py::object& identities,
+                       const py::object& parameters) -> ak::VirtualArray {
+        std::shared_ptr<ak::ArrayGenerator> gen;
+        try {
+          gen = generator.cast<std::shared_ptr<PyArrayGenerator>>();
+        }
+        catch (py::cast_error err) {
+          try {
+            gen = generator.cast<std::shared_ptr<ak::SliceGenerator>>();
+          }
+          catch (py::cast_error err) {
+            throw std::invalid_argument(
+                "VirtualArray 'generator' must be a PyArrayGenerator or a "
+                "SliceGenerator");
+          }
+        }
+        std::shared_ptr<PyArrayCache> cppcache(nullptr);
+        if (!cache.is(py::none())) {
+          try {
+            cppcache = cache.cast<std::shared_ptr<PyArrayCache>>();
+          }
+          catch (py::cast_error err) {
+            throw std::invalid_argument(
+                "VirtualArray 'cache' must be an ArrayCache or None");
+          }
+        }
+        if (!cache_key.is(py::none())) {
+          std::string cppcache_key;
+          try {
+            cppcache_key = cache_key.cast<std::string>();
+          }
+          catch (py::cast_error err) {
+            throw std::invalid_argument(
+                "VirtualArray 'cache_key' must be a string or None");
+          }
+          return ak::VirtualArray(
+            unbox_identities_none(identities),
+            dict2parameters(parameters),
+            gen,
+            cppcache,
+            cppcache_key);
+        }
+        else {
+          return ak::VirtualArray(
+            unbox_identities_none(identities),
+            dict2parameters(parameters),
+            gen,
+            cppcache);
+        }
+      }), py::arg("generator"),
+          py::arg("cache") = py::none(),
+          py::arg("cache_key") = py::none(),
+          py::arg("identities") = py::none(),
+          py::arg("parameters") = py::none())
+      .def_property_readonly("generator", [](const ak::VirtualArray& self)
+                                          -> py::object {
+        std::shared_ptr<ak::ArrayGenerator> gen = self.generator();
+        if (std::shared_ptr<PyArrayGenerator> ptr =
+               std::dynamic_pointer_cast<PyArrayGenerator>(gen)) {
+          return py::cast(ptr);
+        }
+        else if (std::shared_ptr<ak::SliceGenerator> ptr =
+               std::dynamic_pointer_cast<ak::SliceGenerator>(gen)) {
+          return py::cast(ptr);
+        }
+        else {
+          throw std::invalid_argument(
+                  "VirtualArray's generator is not a Python function");
+        }
+      })
+      .def_property_readonly("cache", [](const ak::VirtualArray& self)
+                                      -> py::object {
+        std::shared_ptr<ak::ArrayCache> cache = self.cache();
+        if (cache.get() == nullptr) {
+          return py::none();
+        }
+        if (std::shared_ptr<PyArrayCache> ptr =
+               std::dynamic_pointer_cast<PyArrayCache>(cache)) {
+          return py::cast(ptr);
+        }
+        else {
+          throw std::invalid_argument(
+                  "VirtualArray's cache is not a Python MutableMapping");
+        }
+      })
+      .def_property_readonly("peek_array", [](const ak::VirtualArray& self)
+                                           -> py::object {
+        std::shared_ptr<ak::Content> out = self.peek_array();
+        if (out.get() == nullptr) {
+          return py::none();
+        }
+        else {
+          return box(out);
+        }
+      })
+      .def_property_readonly("array", [](const ak::VirtualArray& self)
+                                      -> py::object {
+        return box(self.array());
+      })
+      .def_property_readonly("cache_key", &ak::VirtualArray::cache_key)
+  );
+}

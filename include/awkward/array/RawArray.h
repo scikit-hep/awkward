@@ -27,8 +27,105 @@
 #include "awkward/array/ByteMaskedArray.h"
 #include "awkward/array/BitMaskedArray.h"
 #include "awkward/array/UnmaskedArray.h"
+#include "awkward/array/VirtualArray.h"
 
 namespace awkward {
+  /// @class RawForm
+  ///
+  /// @brief Form describing RawArray.
+  class EXPORT_SYMBOL RawForm: public Form {
+  public:
+    /// @brief Creates a RawForm. See RawArray for documentation.
+    RawForm(bool has_identities,
+            const util::Parameters& parameters,
+            const std::string& T)
+        : Form(has_identities, parameters)
+        , T_(T) { }
+
+    const std::string
+      T() const;
+
+    const TypePtr
+      type(const util::TypeStrs& typestrs) const override {
+      throw std::runtime_error("RawForm::type");
+    }
+
+    void
+      tojson_part(ToJson& builder, bool verbose) const override {
+      throw std::runtime_error("RawForm::tojson_part");
+    }
+
+    const FormPtr
+      shallow_copy() const override {
+      return std::make_shared<RawForm>(has_identities_,
+                                       parameters_,
+                                       T_);
+    }
+
+    const std::string
+      purelist_parameter(const std::string& key) const override {
+      parameter(key);
+    }
+
+    bool
+      purelist_isregular() const override {
+      return true;
+    }
+
+    int64_t
+      purelist_depth() const override {
+      return 1;
+    }
+
+    const std::pair<int64_t, int64_t>
+      minmax_depth() const override {
+      return std::pair<int64_t, int64_t>(1, 1);
+    }
+
+    const std::pair<bool, int64_t>
+      branch_depth() const override {
+      return std::pair<bool, int64_t>(false, 1);
+    }
+
+    int64_t
+      numfields() const override {
+      return -1;
+    }
+
+    int64_t
+      fieldindex(const std::string& key) const override {
+      throw std::invalid_argument(std::string("key ") + util::quote(key, true)
+        + std::string(" does not exist (data are not records)"));
+    }
+
+    const std::string
+      key(int64_t fieldindex) const override {
+      throw std::invalid_argument(std::string("fieldindex \"")
+        + std::to_string(fieldindex)
+        + std::string("\" does not exist (data are not records)"));
+    }
+
+    bool
+      haskey(const std::string& key) const override {
+      return false;
+    }
+
+    const std::vector<std::string>
+      keys() const override {
+      return std::vector<std::string>();
+    }
+
+    bool
+      equal(const FormPtr& other,
+            bool check_identities,
+            bool check_parameters) const {
+      throw std::runtime_error("FIXME: RawForm::equal");
+    }
+
+  private:
+    const std::string T_;
+  };
+
   /// @brief Internal function to fill JSON with boolean values.
   void
     tojson_boolean(ToJson& builder, bool* array, int64_t length) {
@@ -284,6 +381,23 @@ namespace awkward {
       }
     }
 
+    const FormPtr
+      form(bool materialize) const override {
+      return std::make_shared<RawForm>(identities_.get() != nullptr,
+                                       parameters_,
+                                       typeid(T).name());
+    }
+
+    bool
+      has_virtual_form() const override {
+      return false;
+    }
+
+    bool
+      has_virtual_length() const override {
+      return false;
+    }
+
     const std::string
       tostring_part(const std::string& indent,
                     const std::string& pre,
@@ -518,7 +632,7 @@ namespace awkward {
     const ContentPtr
       getitem_fields(const std::vector<std::string>& keys) const override {
       throw std::invalid_argument(std::string("cannot slice ") + classname()
-        + std::string(" by field name"));
+        + std::string(" by field names"));
     }
 
     const ContentPtr
@@ -539,7 +653,8 @@ namespace awkward {
       return Content::getitem_next(head, tail, advanced);
     }
 
-    const ContentPtr carry(const Index64& carry) const override {
+    const ContentPtr
+      carry(const Index64& carry) const override {
       std::shared_ptr<T> ptr(new T[(size_t)carry.length()],
                              util::array_deleter<T>());
       struct Error err = awkward_numpyarray_getitem_next_null_64(
@@ -564,30 +679,7 @@ namespace awkward {
                                              itemsize_);
     }
 
-    const std::string
-      purelist_parameter(const std::string& key) const override {
-      return parameter(key);
-    }
-
-    bool
-      purelist_isregular() const override {
-      return true;
-    }
-
-    int64_t
-      purelist_depth() const override {
-      return 1;
-    }
-
-    const std::pair<int64_t, int64_t>
-      minmax_depth() const override {
-      return std::pair<int64_t, int64_t>(1, 1);
-    }
-
-    const std::pair<bool, int64_t>
-      branch_depth() const override {
-      return std::pair<bool, int64_t>(false, 1);
-    }
+    // operations
 
     int64_t
       numfields() const override {
@@ -616,8 +708,6 @@ namespace awkward {
       keys() const override {
       return std::vector<std::string>();
     }
-
-    // operations
 
     const std::string
       validityerror(const std::string& path) const override {
@@ -664,6 +754,10 @@ namespace awkward {
 
     bool
       mergeable(const ContentPtr& other, bool mergebool) const override {
+      if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
+        return mergeable(raw->array(), mergebool);
+      }
+
       if (dynamic_cast<EmptyArray*>(other.get())) {
         return true;
       }

@@ -6,27 +6,27 @@ The type of a :doc:`ak.layout.UnionArray`.
 In addition to the properties and methods described in :doc:`ak.types.Type`,
 a UnionType has the following.
 
-ak.layout.UnionType.__init__
-============================
+ak.types.UnionType.__init__
+===========================
 
-.. py:method:: ak.layout.UnionType.__init__(types, keys=None, parameters=None, typestr=None)
+.. py:method:: ak.types.UnionType.__init__(types, keys=None, parameters=None, typestr=None)
 
-ak.layout.UnionType.types
-=========================
-
-.. py:attribute:: ak.layout.UnionType.types
-
-ak.layout.UnionType.__getitem__
-===============================
-
-.. py:method:: ak.layout.UnionType.__getitem__(where)
-
-ak.layout.UnionType.type
+ak.types.UnionType.types
 ========================
 
-.. py:method:: ak.layout.UnionType.type(index)
+.. py:attribute:: ak.types.UnionType.types
 
-ak.layout.UnionType.numtypes
-============================
+ak.types.UnionType.__getitem__
+==============================
 
-.. py:attribute:: ak.layout.UnionType.numtypes
+.. py:method:: ak.types.UnionType.__getitem__(where)
+
+ak.types.UnionType.type
+=======================
+
+.. py:method:: ak.types.UnionType.type(index)
+
+ak.types.UnionType.numtypes
+===========================
+
+.. py:attribute:: ak.types.UnionType.numtypes

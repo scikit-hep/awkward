@@ -1,3 +1,0 @@
-awkward1
-nbinteract
-jupyter-book

@@ -17,10 +17,131 @@
 #include "awkward/array/IndexedArray.h"
 #include "awkward/array/ByteMaskedArray.h"
 #include "awkward/array/BitMaskedArray.h"
+#include "awkward/array/VirtualArray.h"
 
 #include "awkward/array/UnmaskedArray.h"
 
 namespace awkward {
+  ////////// UnmaskedForm
+
+  UnmaskedForm::UnmaskedForm(bool has_identities,
+                             const util::Parameters& parameters,
+                             const FormPtr& content)
+      : Form(has_identities, parameters)
+      , content_(content) { }
+
+  const FormPtr
+  UnmaskedForm::content() const {
+    return content_;
+  }
+
+  const TypePtr
+  UnmaskedForm::type(const util::TypeStrs& typestrs) const {
+    return std::make_shared<OptionType>(
+      parameters_,
+      util::gettypestr(parameters_, typestrs),
+      content_.get()->type(typestrs));
+  }
+
+  void
+  UnmaskedForm::tojson_part(ToJson& builder, bool verbose) const {
+    builder.beginrecord();
+    builder.field("class");
+    builder.string("UnmaskedArray");
+    builder.field("content");
+    content_.get()->tojson_part(builder, verbose);
+    identities_tojson(builder, verbose);
+    parameters_tojson(builder, verbose);
+    builder.endrecord();
+  }
+
+  const FormPtr
+  UnmaskedForm::shallow_copy() const {
+    return std::make_shared<UnmaskedForm>(has_identities_,
+                                          parameters_,
+                                          content_);
+  }
+
+  const std::string
+  UnmaskedForm::purelist_parameter(const std::string& key) const {
+    std::string out = parameter(key);
+    if (out == std::string("null")) {
+      return content_.get()->purelist_parameter(key);
+    }
+    else {
+      return out;
+    }
+  }
+
+  bool
+  UnmaskedForm::purelist_isregular() const {
+    return content_.get()->purelist_isregular();
+  }
+
+  int64_t
+  UnmaskedForm::purelist_depth() const {
+    return content_.get()->purelist_depth();
+  }
+
+  const std::pair<int64_t, int64_t>
+  UnmaskedForm::minmax_depth() const {
+    return content_.get()->minmax_depth();
+  }
+
+  const std::pair<bool, int64_t>
+  UnmaskedForm::branch_depth() const {
+    return content_.get()->branch_depth();
+  }
+
+  int64_t
+  UnmaskedForm::numfields() const {
+    return content_.get()->numfields();
+  }
+
+  int64_t
+  UnmaskedForm::fieldindex(const std::string& key) const {
+    return content_.get()->fieldindex(key);
+  }
+
+  const std::string
+  UnmaskedForm::key(int64_t fieldindex) const {
+    return content_.get()->key(fieldindex);
+  }
+
+  bool
+  UnmaskedForm::haskey(const std::string& key) const {
+    return content_.get()->haskey(key);
+  }
+
+  const std::vector<std::string>
+  UnmaskedForm::keys() const {
+    return content_.get()->keys();
+  }
+
+  bool
+  UnmaskedForm::equal(const FormPtr& other,
+                      bool check_identities,
+                      bool check_parameters) const {
+    if (check_identities  &&
+        has_identities_ != other.get()->has_identities()) {
+      return false;
+    }
+    if (check_parameters  &&
+        !util::parameters_equal(parameters_, other.get()->parameters())) {
+      return false;
+    }
+    if (UnmaskedForm* t = dynamic_cast<UnmaskedForm*>(other.get())) {
+      return (content_.get()->equal(t->content(),
+                                    check_identities,
+                                    check_parameters));
+    }
+    else {
+      return false;
+    }
+  }
+
+  ////////// UnmaskedArray
+
   UnmaskedArray::UnmaskedArray(const IdentitiesPtr& identities,
                                const util::Parameters& parameters,
                                const ContentPtr& content)
@@ -181,10 +302,24 @@ namespace awkward {
   const TypePtr
   UnmaskedArray::type(const std::map<std::string,
                       std::string>& typestrs) const {
-    return std::make_shared<OptionType>(
-      parameters_,
-      util::gettypestr(parameters_, typestrs),
-      content_.get()->type(typestrs));
+    return form(true).get()->type(typestrs);
+  }
+
+  const FormPtr
+  UnmaskedArray::form(bool materialize) const {
+    return std::make_shared<UnmaskedForm>(identities_.get() != nullptr,
+                                          parameters_,
+                                          content_.get()->form(materialize));
+  }
+
+  bool
+  UnmaskedArray::has_virtual_form() const {
+    return content_.get()->has_virtual_form();
+  }
+
+  bool
+  UnmaskedArray::has_virtual_length() const {
+    return content_.get()->has_virtual_length();
   }
 
   const std::string
@@ -373,37 +508,6 @@ namespace awkward {
                                            content_.get()->carry(carry));
   }
 
-  const std::string
-  UnmaskedArray::purelist_parameter(const std::string& key) const {
-    std::string out = parameter(key);
-    if (out == std::string("null")) {
-      return content_.get()->purelist_parameter(key);
-    }
-    else {
-      return out;
-    }
-  }
-
-  bool
-  UnmaskedArray::purelist_isregular() const {
-    return content_.get()->purelist_isregular();
-  }
-
-  int64_t
-  UnmaskedArray::purelist_depth() const {
-    return content_.get()->purelist_depth();
-  }
-
-  const std::pair<int64_t, int64_t>
-  UnmaskedArray::minmax_depth() const {
-    return content_.get()->minmax_depth();
-  }
-
-  const std::pair<bool, int64_t>
-  UnmaskedArray::branch_depth() const {
-    return content_.get()->branch_depth();
-  }
-
   int64_t
   UnmaskedArray::numfields() const {
     return content_.get()->numfields();
@@ -480,6 +584,10 @@ namespace awkward {
 
   bool
   UnmaskedArray::mergeable(const ContentPtr& other, bool mergebool) const {
+    if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
+      return mergeable(raw->array(), mergebool);
+    }
+
     if (!parameters_equal(other.get()->parameters())) {
       return false;
     }

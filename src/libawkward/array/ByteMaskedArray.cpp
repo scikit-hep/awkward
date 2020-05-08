@@ -21,10 +21,153 @@
 #include "awkward/array/UnionArray.h"
 #include "awkward/array/RegularArray.h"
 #include "awkward/array/ListOffsetArray.h"
+#include "awkward/array/VirtualArray.h"
 
 #include "awkward/array/ByteMaskedArray.h"
 
 namespace awkward {
+  ////////// ByteMaskedForm
+
+  ByteMaskedForm::ByteMaskedForm(bool has_identities,
+                                 const util::Parameters& parameters,
+                                 Index::Form mask,
+                                 const FormPtr& content,
+                                 bool valid_when)
+      : Form(has_identities, parameters)
+      , mask_(mask)
+      , content_(content)
+      , valid_when_(valid_when) { }
+
+  Index::Form
+  ByteMaskedForm::mask() const {
+    return mask_;
+  }
+
+  const FormPtr
+  ByteMaskedForm::content() const {
+    return content_;
+  }
+
+  bool
+  ByteMaskedForm::valid_when() const {
+    return valid_when_;
+  }
+
+  const TypePtr
+  ByteMaskedForm::type(const util::TypeStrs& typestrs) const {
+    return std::make_shared<OptionType>(
+               parameters_,
+               util::gettypestr(parameters_, typestrs),
+               content_.get()->type(typestrs));
+  }
+
+  void
+  ByteMaskedForm::tojson_part(ToJson& builder, bool verbose) const {
+    builder.beginrecord();
+    builder.field("class");
+    builder.string("ByteMaskedArray");
+    builder.field("mask");
+    builder.string(Index::form2str(mask_));
+    builder.field("content");
+    content_.get()->tojson_part(builder, verbose);
+    builder.field("valid_when");
+    builder.boolean(valid_when_);
+    identities_tojson(builder, verbose);
+    parameters_tojson(builder, verbose);
+    builder.endrecord();
+  }
+
+  const FormPtr
+  ByteMaskedForm::shallow_copy() const {
+    return std::make_shared<ByteMaskedForm>(has_identities_,
+                                            parameters_,
+                                            mask_,
+                                            content_,
+                                            valid_when_);
+  }
+
+  const std::string
+  ByteMaskedForm::purelist_parameter(const std::string& key) const {
+    std::string out = parameter(key);
+    if (out == std::string("null")) {
+      return content_.get()->purelist_parameter(key);
+    }
+    else {
+      return out;
+    }
+  }
+
+  bool
+  ByteMaskedForm::purelist_isregular() const {
+    return content_.get()->purelist_isregular();
+  }
+
+  int64_t
+  ByteMaskedForm::purelist_depth() const {
+    return content_.get()->purelist_depth();
+  }
+
+  const std::pair<int64_t, int64_t>
+  ByteMaskedForm::minmax_depth() const {
+    return content_.get()->minmax_depth();
+  }
+
+  const std::pair<bool, int64_t>
+  ByteMaskedForm::branch_depth() const {
+    return content_.get()->branch_depth();
+  }
+
+  int64_t
+  ByteMaskedForm::numfields() const {
+    return content_.get()->numfields();
+  }
+
+  int64_t
+  ByteMaskedForm::fieldindex(const std::string& key) const {
+    return content_.get()->fieldindex(key);
+  }
+
+  const std::string
+  ByteMaskedForm::key(int64_t fieldindex) const {
+    return content_.get()->key(fieldindex);
+  }
+
+  bool
+  ByteMaskedForm::haskey(const std::string& key) const {
+    return content_.get()->haskey(key);
+  }
+
+  const std::vector<std::string>
+  ByteMaskedForm::keys() const {
+    return content_.get()->keys();
+  }
+
+  bool
+  ByteMaskedForm::equal(const FormPtr& other,
+                        bool check_identities,
+                        bool check_parameters) const {
+    if (check_identities  &&
+        has_identities_ != other.get()->has_identities()) {
+      return false;
+    }
+    if (check_parameters  &&
+        !util::parameters_equal(parameters_, other.get()->parameters())) {
+      return false;
+    }
+    if (ByteMaskedForm* t = dynamic_cast<ByteMaskedForm*>(other.get())) {
+      return (mask_ == t->mask()  &&
+              content_.get()->equal(t->content(),
+                                    check_identities,
+                                    check_parameters)  &&
+              valid_when_ == t->valid_when());
+    }
+    else {
+      return false;
+    }
+  }
+
+  ////////// ByteMaskedArray
+
   ByteMaskedArray::ByteMaskedArray(const IdentitiesPtr& identities,
                                    const util::Parameters& parameters,
                                    const Index8& mask,
@@ -252,10 +395,26 @@ namespace awkward {
 
   const TypePtr
   ByteMaskedArray::type(const util::TypeStrs& typestrs) const {
-    return std::make_shared<OptionType>(
-             parameters_,
-             util::gettypestr(parameters_, typestrs),
-             content_.get()->type(typestrs));
+    return form(true).get()->type(typestrs);
+  }
+
+  const FormPtr
+  ByteMaskedArray::form(bool materialize) const {
+    return std::make_shared<ByteMaskedForm>(identities_.get() != nullptr,
+                                            parameters_,
+                                            mask_.form(),
+                                            content_.get()->form(materialize),
+                                            valid_when_);
+  }
+
+  bool
+  ByteMaskedArray::has_virtual_form() const {
+    return content_.get()->has_virtual_form();
+  }
+
+  bool
+  ByteMaskedArray::has_virtual_length() const {
+    return content_.get()->has_virtual_length();
   }
 
   const std::string
@@ -499,37 +658,6 @@ namespace awkward {
                                              valid_when_);
   }
 
-  const std::string
-  ByteMaskedArray::purelist_parameter(const std::string& key) const {
-    std::string out = parameter(key);
-    if (out == std::string("null")) {
-      return content_.get()->purelist_parameter(key);
-    }
-    else {
-      return out;
-    }
-  }
-
-  bool
-  ByteMaskedArray::purelist_isregular() const {
-    return content_.get()->purelist_isregular();
-  }
-
-  int64_t
-  ByteMaskedArray::purelist_depth() const {
-    return content_.get()->purelist_depth();
-  }
-
-  const std::pair<int64_t, int64_t>
-  ByteMaskedArray::minmax_depth() const {
-    return content_.get()->minmax_depth();
-  }
-
-  const std::pair<bool, int64_t>
-  ByteMaskedArray::branch_depth() const {
-    return content_.get()->branch_depth();
-  }
-
   int64_t
   ByteMaskedArray::numfields() const {
     return content_.get()->numfields();
@@ -636,6 +764,10 @@ namespace awkward {
 
   bool
   ByteMaskedArray::mergeable(const ContentPtr& other, bool mergebool) const {
+    if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
+      return mergeable(raw->array(), mergebool);
+    }
+
     if (!parameters_equal(other.get()->parameters())) {
       return false;
     }

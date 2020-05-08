@@ -151,6 +151,9 @@ def to_numpy(array, allow_missing=True):
         else:
             return numpy.concatenate(tocat)
 
+    elif isinstance(array, awkward1._util.virtualtypes):
+        return to_numpy(array.array, allow_missing=True)
+
     elif isinstance(array, awkward1._util.unknowntypes):
         return numpy.array([])
 
@@ -812,7 +815,8 @@ def from_awkward0(array,
                          [recurse(x, level + 1) for x in array.chunks])
             else:
                 return awkward1.operations.structure.concatenate(
-                         [recurse(x, level + 1) for x in array.chunks])
+                         [recurse(x, level + 1) for x in array.chunks],
+                         highlevel=False)
 
         elif isinstance(array, awkward0.AppendableArray):
             # chunkshape, dtype, chunks
@@ -824,10 +828,9 @@ def from_awkward0(array,
         elif isinstance(array, awkward0.VirtualArray):
             # generator, args, kwargs, cache, persistentkey, type, nbytes, persistvirtual
             if keeplayout:
-                raise ValueError(
-                        "awkward1.VirtualArray hasn't been written yet; "
-                        "try keeplayout=False")
-            return recurse(array.array, level + 1)
+                raise NotImplementedError("FIXME")
+            else:
+                return recurse(array.array, level + 1)
 
         else:
             raise TypeError("not an awkward0 array: {0}".format(repr(array)))
@@ -1019,6 +1022,9 @@ def to_awkward0(array, keeplayout=False):
             # content
             return recurse(layout.content)   # no equivalent in awkward0
 
+        elif isinstance(layout, awkward1.layout.VirtualArray):
+            raise NotImplementedError("FIXME")
+
         else:
             raise AssertionError(
                     "missing converter for {0}".format(type(layout).__name__))
@@ -1131,6 +1137,10 @@ def regularize_numpyarray(array, allow_empty=True, highlevel=True):
         elif (isinstance(layout, awkward1.layout.EmptyArray) and
               not allow_empty):
             return lambda: layout.toNumpyArray()
+        elif isinstance(layout, awkward1.layout.VirtualArray):
+            # FIXME: we must transform the Form (replacing inner_shape with
+            # RegularForms) and wrap the ArrayGenerator with regularize_numpy
+            return lambda: layout
         else:
             return None
     out = awkward1._util.recursively_apply(to_layout(array), getfunction)

@@ -21,11 +21,290 @@
 #include "awkward/array/UnmaskedArray.h"
 #include "awkward/array/RegularArray.h"
 #include "awkward/array/ListOffsetArray.h"
+#include "awkward/array/VirtualArray.h"
 
 #define AWKWARD_INDEXEDARRAY_NO_EXTERN_TEMPLATE
 #include "awkward/array/IndexedArray.h"
 
 namespace awkward {
+  ////////// IndexedForm
+
+  IndexedForm::IndexedForm(bool has_identities,
+                           const util::Parameters& parameters,
+                           Index::Form index,
+                           const FormPtr& content)
+      : Form(has_identities, parameters)
+      , index_(index)
+      , content_(content) { }
+
+  Index::Form
+  IndexedForm::index() const {
+    return index_;
+  }
+
+  const FormPtr
+  IndexedForm::content() const {
+    return content_;
+  }
+
+  const TypePtr
+  IndexedForm::type(const util::TypeStrs& typestrs) const {
+    TypePtr out = content_.get()->type(typestrs);
+    out.get()->setparameters(parameters_);
+    return out;
+  }
+
+  void
+  IndexedForm::tojson_part(ToJson& builder, bool verbose) const {
+    builder.beginrecord();
+    builder.field("class");
+    if (index_ == Index::Form::i32) {
+      builder.string("IndexedArray32");
+    }
+    else if (index_ == Index::Form::u32) {
+      builder.string("IndexedArrayU32");
+    }
+    else if (index_ == Index::Form::i64) {
+      builder.string("IndexedArray64");
+    }
+    else {
+      builder.string("UnrecognizedIndexedArray");
+    }
+    builder.field("index");
+    builder.string(Index::form2str(index_));
+    builder.field("content");
+    content_.get()->tojson_part(builder, verbose);
+    identities_tojson(builder, verbose);
+    parameters_tojson(builder, verbose);
+    builder.endrecord();
+  }
+
+  const FormPtr
+  IndexedForm::shallow_copy() const {
+    return std::make_shared<IndexedForm>(has_identities_,
+                                         parameters_,
+                                         index_,
+                                         content_);
+  }
+
+  const std::string
+  IndexedForm::purelist_parameter(const std::string& key) const {
+    std::string out = parameter(key);
+    if (out == std::string("null")) {
+      return content_.get()->purelist_parameter(key);
+    }
+    else {
+      return out;
+    }
+  }
+
+  bool
+  IndexedForm::purelist_isregular() const {
+    return content_.get()->purelist_isregular();
+  }
+
+  int64_t
+  IndexedForm::purelist_depth() const {
+    return content_.get()->purelist_depth();
+  }
+
+  const std::pair<int64_t, int64_t>
+  IndexedForm::minmax_depth() const {
+    return content_.get()->minmax_depth();
+  }
+
+  const std::pair<bool, int64_t>
+  IndexedForm::branch_depth() const {
+    return content_.get()->branch_depth();
+  }
+
+  int64_t
+  IndexedForm::numfields() const {
+    return content_.get()->numfields();
+  }
+
+  int64_t
+  IndexedForm::fieldindex(const std::string& key) const {
+    return content_.get()->fieldindex(key);
+  }
+
+  const std::string
+  IndexedForm::key(int64_t fieldindex) const {
+    return content_.get()->key(fieldindex);
+  }
+
+  bool
+  IndexedForm::haskey(const std::string& key) const {
+    return content_.get()->haskey(key);
+  }
+
+  const std::vector<std::string>
+  IndexedForm::keys() const {
+    return content_.get()->keys();
+  }
+
+  bool
+  IndexedForm::equal(const FormPtr& other,
+                     bool check_identities,
+                     bool check_parameters) const {
+    if (check_identities  &&
+        has_identities_ != other.get()->has_identities()) {
+      return false;
+    }
+    if (check_parameters  &&
+        !util::parameters_equal(parameters_, other.get()->parameters())) {
+      return false;
+    }
+    if (IndexedForm* t = dynamic_cast<IndexedForm*>(other.get())) {
+      return (index_ == t->index()  &&
+              content_.get()->equal(t->content(),
+                                    check_identities,
+                                    check_parameters));
+    }
+    else {
+      return false;
+    }
+  }
+
+  ////////// IndexedOptionForm
+
+  IndexedOptionForm::IndexedOptionForm(bool has_identities,
+                                       const util::Parameters& parameters,
+                                       Index::Form index,
+                                       const FormPtr& content)
+      : Form(has_identities, parameters)
+      , index_(index)
+      , content_(content) { }
+
+  Index::Form
+  IndexedOptionForm::index() const {
+    return index_;
+  }
+
+  const FormPtr
+  IndexedOptionForm::content() const {
+    return content_;
+  }
+
+  const TypePtr
+  IndexedOptionForm::type(const util::TypeStrs& typestrs) const {
+    return std::make_shared<OptionType>(
+               parameters_,
+               util::gettypestr(parameters_, typestrs),
+               content_.get()->type(typestrs));
+  }
+
+  void
+  IndexedOptionForm::tojson_part(ToJson& builder, bool verbose) const {
+    builder.beginrecord();
+    builder.field("class");
+    if (index_ == Index::Form::i32) {
+      builder.string("IndexedOptionArray32");
+    }
+    else if (index_ == Index::Form::i64) {
+      builder.string("IndexedOptionArray64");
+    }
+    else {
+      builder.string("UnrecognizedIndexedOptionArray");
+    }
+    builder.field("index");
+    builder.string(Index::form2str(index_));
+    builder.field("content");
+    content_.get()->tojson_part(builder, verbose);
+    identities_tojson(builder, verbose);
+    parameters_tojson(builder, verbose);
+    builder.endrecord();
+  }
+
+  const FormPtr
+  IndexedOptionForm::shallow_copy() const {
+    return std::make_shared<IndexedOptionForm>(has_identities_,
+                                               parameters_,
+                                               index_,
+                                               content_);
+  }
+
+  const std::string
+  IndexedOptionForm::purelist_parameter(const std::string& key) const {
+    std::string out = parameter(key);
+    if (out == std::string("null")) {
+      return content_.get()->purelist_parameter(key);
+    }
+    else {
+      return out;
+    }
+  }
+
+  bool
+  IndexedOptionForm::purelist_isregular() const {
+    return content_.get()->purelist_isregular();
+  }
+
+  int64_t
+  IndexedOptionForm::purelist_depth() const {
+    return content_.get()->purelist_depth();
+  }
+
+  const std::pair<int64_t, int64_t>
+  IndexedOptionForm::minmax_depth() const {
+    return content_.get()->minmax_depth();
+  }
+
+  const std::pair<bool, int64_t>
+  IndexedOptionForm::branch_depth() const {
+    return content_.get()->branch_depth();
+  }
+
+  int64_t
+  IndexedOptionForm::numfields() const {
+    return content_.get()->numfields();
+  }
+
+  int64_t
+  IndexedOptionForm::fieldindex(const std::string& key) const {
+    return content_.get()->fieldindex(key);
+  }
+
+  const std::string
+  IndexedOptionForm::key(int64_t fieldindex) const {
+    return content_.get()->key(fieldindex);
+  }
+
+  bool
+  IndexedOptionForm::haskey(const std::string& key) const {
+    return content_.get()->haskey(key);
+  }
+
+  const std::vector<std::string>
+  IndexedOptionForm::keys() const {
+    return content_.get()->keys();
+  }
+
+  bool
+  IndexedOptionForm::equal(const FormPtr& other,
+                           bool check_identities,
+                           bool check_parameters) const {
+    if (check_identities  &&
+        has_identities_ != other.get()->has_identities()) {
+      return false;
+    }
+    if (check_parameters  &&
+        !util::parameters_equal(parameters_, other.get()->parameters())) {
+      return false;
+    }
+    if (IndexedOptionForm* t = dynamic_cast<IndexedOptionForm*>(other.get())) {
+      return (index_ == t->index()  &&
+              content_.get()->equal(t->content(),
+                                    check_identities,
+                                    check_parameters));
+    }
+    else {
+      return false;
+    }
+  }
+
+  ////////// IndexedArray
+
   template <typename T, bool ISOPTION>
   IndexedArrayOf<T, ISOPTION>::IndexedArrayOf(
     const IdentitiesPtr& identities,
@@ -608,17 +887,37 @@ namespace awkward {
   template <typename T, bool ISOPTION>
   const TypePtr
   IndexedArrayOf<T, ISOPTION>::type(const util::TypeStrs& typestrs) const {
+    return form(true).get()->type(typestrs);
+  }
+
+  template <typename T, bool ISOPTION>
+  const FormPtr
+  IndexedArrayOf<T, ISOPTION>::form(bool materialize) const {
     if (ISOPTION) {
-      return std::make_shared<OptionType>(
-        parameters_,
-        util::gettypestr(parameters_, typestrs),
-        content_.get()->type(typestrs));
+      return std::make_shared<IndexedOptionForm>(
+                                           identities_.get() != nullptr,
+                                           parameters_,
+                                           index_.form(),
+                                           content_.get()->form(materialize));
     }
     else {
-      TypePtr out = content_.get()->type(typestrs);
-      out.get()->setparameters(parameters_);
-      return out;
+      return std::make_shared<IndexedForm>(identities_.get() != nullptr,
+                                           parameters_,
+                                           index_.form(),
+                                           content_.get()->form(materialize));
     }
+  }
+
+  template <typename T, bool ISOPTION>
+  bool
+  IndexedArrayOf<T, ISOPTION>::has_virtual_form() const {
+    return content_.get()->has_virtual_form();
+  }
+
+  template <typename T, bool ISOPTION>
+  bool
+  IndexedArrayOf<T, ISOPTION>::has_virtual_length() const {
+    return content_.get()->has_virtual_length();
   }
 
   template <typename T, bool ISOPTION>
@@ -906,43 +1205,6 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const std::string
-  IndexedArrayOf<T, ISOPTION>::purelist_parameter(
-    const std::string& key) const {
-    std::string out = parameter(key);
-    if (out == std::string("null")) {
-      return content_.get()->purelist_parameter(key);
-    }
-    else {
-      return out;
-    }
-  }
-
-  template <typename T, bool ISOPTION>
-  bool
-  IndexedArrayOf<T, ISOPTION>::purelist_isregular() const {
-    return content_.get()->purelist_isregular();
-  }
-
-  template <typename T, bool ISOPTION>
-  int64_t
-  IndexedArrayOf<T, ISOPTION>::purelist_depth() const {
-    return content_.get()->purelist_depth();
-  }
-
-  template <typename T, bool ISOPTION>
-  const std::pair<int64_t, int64_t>
-  IndexedArrayOf<T, ISOPTION>::minmax_depth() const {
-    return content_.get()->minmax_depth();
-  }
-
-  template <typename T, bool ISOPTION>
-  const std::pair<bool, int64_t>
-  IndexedArrayOf<T, ISOPTION>::branch_depth() const {
-    return content_.get()->branch_depth();
-  }
-
-  template <typename T, bool ISOPTION>
   int64_t
   IndexedArrayOf<T, ISOPTION>::numfields() const {
     return content_.get()->numfields();
@@ -1077,6 +1339,10 @@ namespace awkward {
   bool
   IndexedArrayOf<T, ISOPTION>::mergeable(const ContentPtr& other,
                                          bool mergebool) const {
+    if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
+      return mergeable(raw->array(), mergebool);
+    }
+
     if (!parameters_equal(other.get()->parameters())) {
       return false;
     }
@@ -1128,6 +1394,10 @@ namespace awkward {
   template <typename T, bool ISOPTION>
   const ContentPtr
   IndexedArrayOf<T, ISOPTION>::reverse_merge(const ContentPtr& other) const {
+    if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
+      return reverse_merge(raw->array());
+    }
+
     int64_t theirlength = other.get()->length();
     int64_t mylength = length();
     Index64 index(theirlength + mylength);
@@ -1185,6 +1455,10 @@ namespace awkward {
   template <typename T, bool ISOPTION>
   const ContentPtr
   IndexedArrayOf<T, ISOPTION>::merge(const ContentPtr& other) const {
+    if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
+      return merge(raw->array());
+    }
+
     if (!parameters_equal(other.get()->parameters())) {
       return merge_as_union(other);
     }

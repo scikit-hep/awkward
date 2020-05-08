@@ -18,6 +18,9 @@ starts = awkward1.layout.Index64(numpy.array([0, 1]))
 stops = awkward1.layout.Index64(numpy.array([2, 3]))
 listarray = awkward1.layout.ListArray64(starts, stops, regulararray)
 
+def test_simple_type():
+    assert str(awkward1.type(content)) == "float64"
+
 def test_type():
     assert str(awkward1.type(regulararray)) == "2 * var * float64"
 

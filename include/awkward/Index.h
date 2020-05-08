@@ -29,17 +29,28 @@ namespace awkward {
   ///    - {@link IndexOf Index64}, which is `IndexOf<int64_t>`
   class EXPORT_SYMBOL Index {
   public:
+    /// @brief Integer type of an Index, used by ListForm, IndexedForm, etc.
+    enum class Form {i8, u8, i32, u32, i64, kNumIndexForm};
+
+    /// @brief Converts a string into a Form enumeration.
+    static Form
+      str2form(const std::string& str);
+
+    /// @brief Converts a Form enumeration into a string.
+    static const std::string
+      form2str(Form form);
+
     /// @brief Virtual destructor acts as a first non-inline virtual function
     /// that determines a specific translation unit in which vtable shall be
     /// emitted.
     virtual ~Index();
 
-  private:
     /// @brief Copies this Index node without copying its buffer.
     ///
     /// See also #deep_copy.
     virtual const std::shared_ptr<Index>
       shallow_copy() const = 0;
+
     /// @brief Converts this Index to an {@link IndexOf Index64}.
     virtual IndexOf<int64_t>
       to64() const = 0;
@@ -62,7 +73,7 @@ namespace awkward {
   class EXPORT_SYMBOL IndexOf: public Index {
   public:
     /// @brief Creates an IndexOf from a full set of parameters.
-    /// 
+    ///
     /// @param ptr Reference-counted pointer to the integer array buffer.
     /// @param offset Location of item zero in the buffer, relative to
     /// `ptr`, measured in the number of elements. We keep this information in
@@ -111,6 +122,10 @@ namespace awkward {
       tostring_part(const std::string& indent,
                     const std::string& pre,
                     const std::string& post) const;
+
+    /// @brief Returns the enum describing this Index's integer specialization.
+    Form
+      form() const;
 
     /// @brief Returns the element at a given position in the array, handling
     /// negative indexing and bounds-checking like Python.

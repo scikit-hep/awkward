@@ -62,7 +62,8 @@ namespace awkward {
     /// @brief Identities field location type (integer-string pairs).
     using FieldLoc = std::vector<std::pair<int64_t, std::string>>;
 
-    /// @brief Returns a new globally unique Identities reference.
+    /// @brief Returns a new Identities reference that is globally unique
+    /// in the current process.
     ///
     /// This is thread-safe: the global counter is an atomic integer.
     static Ref

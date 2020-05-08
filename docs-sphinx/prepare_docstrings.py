@@ -1,3 +1,5 @@
+# BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+
 import re
 import os
 import ast
@@ -12,7 +14,7 @@ config = sphinx.ext.napoleon.Config(napoleon_use_param=True,
 if not os.path.exists("_auto"):
     os.mkdir("_auto")
 
-toctree = []
+toctree = ["_auto/changelog.rst"]
 
 def tostr(node):
     if isinstance(node, ast.NameConstant):
@@ -35,7 +37,7 @@ def tostr(node):
 
     elif isinstance(node, ast.Subscript):
         return "{0}[{1}]".format(tostr(node.value), tostr(node.slice))
-    
+
     elif isinstance(node, ast.Slice):
         start = "" if node.lower is None else tostr(node.lower)
         stop  = "" if node.upper is None else tostr(node.upper)
@@ -149,6 +151,9 @@ def dodoc(docstring, qualname, names):
     return out
 
 def doclass(link, shortname, name, astcls):
+    if name.startswith("_"):
+        return
+
     qualname = shortname + "." + name
 
     init, rest, names = None, [], []
@@ -188,7 +193,7 @@ def doclass(link, shortname, name, astcls):
             outfile.write(attrtext + "\n" + "="*len(attrtext) + "\n\n")
             outfile.write(".. py:attribute:: " + attrtext + "\n\n")
             docstring = ast.get_docstring(node)
-            
+
         elif any(isinstance(x, ast.Attribute) and x.attr == "setter"
                  for x in node.decorator_list):
             docstring = None
@@ -199,7 +204,7 @@ def doclass(link, shortname, name, astcls):
             outfile.write(methodname + "\n" + "="*len(methodname) + "\n\n")
             outfile.write(".. py:method:: " + methodtext + "\n\n")
             docstring = ast.get_docstring(node)
-        
+
         if docstring is not None:
             outfile.write(dodoc(docstring, qualname, names) + "\n\n")
 
@@ -211,6 +216,9 @@ def doclass(link, shortname, name, astcls):
             outfile.write(out)
 
 def dofunction(link, shortname, name, astfcn):
+    if name.startswith("_"):
+        return
+
     qualname = shortname + "." + name
 
     outfile = io.StringIO()
@@ -282,6 +290,10 @@ for filename in sorted(glob.glob("../src/awkward1/**/*.py", recursive=True),
                         "ak.layout.BitMaskedArray.rst",
                         "ak.layout.UnmaskedArray.rst",
                         "ak.layout.UnionArray.rst",
+                        "ak.layout.VirtualArray.rst",
+                        "ak.layout.ArrayGenerator.rst",
+                        "ak.layout.SliceGenerator.rst",
+                        "ak.layout.ArrayCache.rst",
                         "ak.layout.Iterator.rst",
                         "ak.layout.ArrayBuilder.rst",
                         "ak.layout.Index.rst",
@@ -295,6 +307,20 @@ for filename in sorted(glob.glob("../src/awkward1/**/*.py", recursive=True),
                         "ak.types.RecordType.rst",
                         "ak.types.OptionType.rst",
                         "ak.types.UnionType.rst",
+                        "ak.forms.Form.rst",
+                        "ak.forms.EmptyForm.rst",
+                        "ak.forms.NumpyForm.rst",
+                        "ak.forms.RegularForm.rst",
+                        "ak.forms.ListForm.rst",
+                        "ak.forms.ListOffsetForm.rst",
+                        "ak.forms.RecordForm.rst",
+                        "ak.forms.IndexedForm.rst",
+                        "ak.forms.IndexedOptionForm.rst",
+                        "ak.forms.ByteMaskedForm.rst",
+                        "ak.forms.BitMaskedForm.rst",
+                        "ak.forms.UnmaskedForm.rst",
+                        "ak.forms.UnionForm.rst",
+                        "ak.forms.VirtualForm.rst",
                         "ak._io.fromjson.rst",
                         "ak._io.fromroot_nestedvector.rst",
                         ])

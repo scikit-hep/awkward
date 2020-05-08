@@ -36,7 +36,22 @@ namespace awkward {
 
   const TypePtr
   None::type(const util::TypeStrs& typestrs) const {
-    throw std::runtime_error("undefined operation: None::type()");
+    throw std::runtime_error("undefined operation: None::type");
+  }
+
+  const FormPtr
+  None::form(bool materialize) const {
+    throw std::runtime_error("undefined operation: None::form");
+  }
+
+  bool
+  None::has_virtual_form() const {
+    throw std::runtime_error("undefined operation: None::has_virtual_form");
+  }
+
+  bool
+  None::has_virtual_length() const {
+    throw std::runtime_error("undefined operation: None::has_virtual_length");
   }
 
   const std::string
@@ -120,54 +135,29 @@ namespace awkward {
     throw std::runtime_error("undefined operation: None::carry");
   }
 
-  const std::string
-  None::purelist_parameter(const std::string& key) const {
-    throw std::runtime_error("undefined operation: None::purelist_parameter");
-  }
-
-  bool
-  None::purelist_isregular() const {
-    throw std::runtime_error("undefined operation: None::purelist_isregular");
-  }
-
-  int64_t
-  None::purelist_depth() const {
-    throw std::runtime_error("undefined operation: None::purelist_depth");
-  }
-
-  const std::pair<int64_t, int64_t>
-  None::minmax_depth() const {
-    throw std::runtime_error("undefined operation: None::minmax_depth");
-  }
-
-  const std::pair<bool, int64_t>
-  None::branch_depth() const {
-    throw std::runtime_error("undefined operation: None::branch_depth");
-  }
-
   int64_t
   None::numfields() const {
-    throw std::runtime_error("undefined operation: None::numfields");
+    throw std::runtime_error("undefined operatino: None::numfields");
   }
 
   int64_t
   None::fieldindex(const std::string& key) const {
-    throw std::runtime_error("undefined operation: None::fieldindex");
+    throw std::runtime_error("undefined operatino: None::fieldindex");
   }
 
   const std::string
   None::key(int64_t fieldindex) const {
-    throw std::runtime_error("undefined operation: None::key");
+    throw std::runtime_error("undefined operatino: None::key");
   }
 
   bool
   None::haskey(const std::string& key) const {
-    throw std::runtime_error("undefined operation: None::haskey");
+    throw std::runtime_error("undefined operatino: None::haskey");
   }
 
   const std::vector<std::string>
   None::keys() const {
-    throw std::runtime_error("undefined operation: None::keys");
+    throw std::runtime_error("undefined operatino: None::keys");
   }
 
   const std::string

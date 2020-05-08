@@ -22,7 +22,7 @@ import awkward1.operations.structure
 _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
 class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
-            awkward1._connect._pandas.PandasMixin, Sequence):
+            awkward1._connect._pandas.PandasMixin):
     """
     Args:
         data (#ak.layout.Content, #ak.Array, np.ndarray, str, or iterable):
@@ -220,7 +220,6 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
             layout = awkward1.operations.structure.with_name(layout,
                                                              with_name,
                                                              highlevel=False)
-
         if self.__class__ is Array:
             self.__class__ = awkward1._util.arrayclass(layout, behavior)
 
@@ -308,71 +307,33 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
             self._behavior = behavior
         else:
             raise TypeError("behavior must be None or a dict")
-
-    @property
-    def type(self):
-        """
-        The high-level type of this Array as #ak.types.Type objects.
-
-        The high-level type ignores #layout differences like
-        #ak.layout.ListArray64 versus #ak.layout.ListOffsetArray64, but
-        not differences like "regular-sized lists" (i.e.
-        #ak.layout.RegularArray) versus "variable-sized lists" (i.e.
-        #ak.layout.ListArray64 and similar).
-
-        Types are rendered as [Datashape](https://datashape.readthedocs.io/)
-        strings, which makes the same distinctions.
-
-        For example,
-
-            ak.Array([[{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}],
-                      [],
-                      [{"x": 3.3, "y": [3, 3, 3]}]])
-
-        has type
-
-            3 * var * {"x": float64, "y": var * int64}
-
-        but
-
-            ak.Array(np.arange(2*3*5).reshape(2, 3, 5))
-
-        has type
-
-            2 * 3 * 5 * int64
-
-        Some cases, like heterogeneous data, require [extensions beyond the
-        Datashape specification](https://github.com/blaze/datashape/issues/237).
-        For example,
-
-            ak.Array([1, "two", [3, 3, 3]])
-
-        has type
-
-            3 * union[int64, string, var * int64]
-
-        but "union" is not a Datashape type-constructor. (Its syntax is
-        similar to existing type-constructors, so it's a plausible addition
-        to the language.)
-        """
-        return awkward1.types.ArrayType(
-                 self._layout.type(awkward1._util.typestrs(self._behavior)),
-                 len(self._layout))
-
+       
     class Mask(object):
         def __init__(self, array, valid_when):
             self._array = array
             self._valid_when = valid_when
 
+        def __str__(self, limit_value=85):
+            return self._array.__str__(limit_value=limit_value)
+
         def __repr__(self, limit_value=40, limit_total=85):
+            import awkward1.operations.structure
+            layout = awkward1.operations.structure.with_cache(self._layout,
+                                                              {},
+                                                              chain="last",
+                                                              highlevel=False)
             value = awkward1._util.minimally_touching_string(limit_value,
-                                                             self._layout,
+                                                             layout,
                                                              self._behavior)
 
-            name = getattr(self, "__name__", type(self._array).__name__)
+            try:
+                name = super(Array, self._array).__getattribute__("__name__")
+            except AttributeError:
+                name = type(self._array).__name__
             limit_type = limit_total - (len(value) + len(name)
                                         + len("<.mask  type=>"))
-            typestr = repr(str(self.type))
+            typestr = repr(str(awkward1._util.highlevel_type(
+                                   layout, self._array._behavior, True)))
             if len(typestr) > limit_type:
                 typestr = typestr[:(limit_type - 4)] + "..." + typestr[-1]
 
@@ -777,7 +738,7 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         NumPy arrays can be sliced by all of the above slice types except
         arrays with missing values and arrays with nested lists, both of
         which are inexpressible in NumPy. Missing values, represented by
-        None in Python, are called option types (#ak.type.OptionType) in
+        None in Python, are called option types (#ak.types.OptionType) in
         Awkward Array and can be used as a slice.
 
         For example, an `array` like
@@ -1115,8 +1076,13 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         See #ak.to_list and #ak.to_json to convert whole Arrays into Python
         data or JSON strings without loss (except for #type).
         """
+        import awkward1.operations.structure
+        layout = awkward1.operations.structure.with_cache(self._layout,
+                                                          {},
+                                                          chain="last",
+                                                          highlevel=False)
         return awkward1._util.minimally_touching_string(limit_value,
-                                                        self._layout,
+                                                        layout,
                                                         self._behavior)
 
     def __repr__(self, limit_value=40, limit_total=85):
@@ -1134,13 +1100,22 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         The #type is truncated as well, but showing only the left side
         of its string (the outermost data structures).
         """
+        import awkward1.operations.structure
+        layout = awkward1.operations.structure.with_cache(self._layout,
+                                                          {},
+                                                          chain="last",
+                                                          highlevel=False)
         value = awkward1._util.minimally_touching_string(limit_value,
-                                                         self._layout,
+                                                         layout,
                                                          self._behavior)
 
-        name = getattr(self, "__name__", type(self).__name__)
+        try:
+            name = super(Array, self).__getattribute__("__name__")
+        except AttributeError:
+            name = type(self).__name__
         limit_type = limit_total - (len(value) + len(name) + len("<  type=>"))
-        typestr = repr(str(self.type))
+        typestr = repr(str(awkward1._util.highlevel_type(
+                               layout, self._behavior, True)))
         if len(typestr) > limit_type:
             typestr = typestr[:(limit_type - 4)] + "..." + typestr[-1]
 
@@ -1285,7 +1260,7 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         """
         import numba
         import awkward1._connect._numba
-        awkward1._connect._numba.register()
+        awkward1._connect._numba.register_and_check("ak.Array")
         if self._numbaview is None:
             self._numbaview = \
               awkward1._connect._numba.arrayview.ArrayView.fromarray(self)
@@ -1424,16 +1399,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         else:
             raise TypeError("behavior must be None or a dict")
 
-    @property
-    def type(self):
-        """
-        The high-level type of this Record as #ak.types.Type objects.
-
-        See #ak.Array.type for a more complete description.
-        """
-        return self._layout.type(awkward1._util.typestrs(self._behavior))
-
-    def to_list(self):
+    def tolist(self):
         """
         Converts this Record into Python objects.
 
@@ -1456,11 +1422,11 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         """
         return awkward1.operations.convert.to_list(self)
 
-    def to_json(self,
-                destination=None,
-                pretty=False,
-                maxdecimals=None,
-                buffersize=65536):
+    def tojson(self,
+               destination=None,
+               pretty=False,
+               maxdecimals=None,
+               buffersize=65536):
         """
         Args:
             destination (None or str): If None, this method returns a JSON str;
@@ -1728,8 +1694,13 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
 
         See #ak.Array.__str__ for a more complete description.
         """
+        import awkward1.operations.structure
+        layout = awkward1.operations.structure.with_cache(self._layout,
+                                                          {},
+                                                          chain="last",
+                                                          highlevel=False)
         return awkward1._util.minimally_touching_string(limit_value + 2,
-                                                        self._layout,
+                                                        layout,
                                                         self._behavior)[1:-1]
 
     def __repr__(self, limit_value=40, limit_total=85):
@@ -1744,13 +1715,22 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
 
         See #ak.Array.__repr__ for a more complete description.
         """
+        import awkward1.operations.structure
+        layout = awkward1.operations.structure.with_cache(self._layout,
+                                                          {},
+                                                          chain="last",
+                                                          highlevel=False)
         value = awkward1._util.minimally_touching_string(limit_value + 2,
-                                                         self._layout,
+                                                         layout,
                                                          self._behavior)[1:-1]
 
-        name = getattr(self, "__name__", type(self).__name__)
+        try:
+            name = super(Record, self).__getattribute__("__name__")
+        except AttributeError:
+            name = type(self).__name__
         limit_type = limit_total - (len(value) + len(name) + len("<  type=>"))
-        typestr = repr(str(self.type))
+        typestr = repr(str(awkward1._util.highlevel_type(
+                               layout, self._behavior, False)))
         if len(typestr) > limit_type:
             typestr = typestr[:(limit_type - 4)] + "..." + typestr[-1]
 
@@ -1787,13 +1767,13 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         """
         import numba
         import awkward1._connect._numba
-        awkward1._connect._numba.register()
+        awkward1._connect._numba.register_and_check("ak.Record")
         if self._numbaview is None:
             self._numbaview = \
               awkward1._connect._numba.arrayview.RecordView.fromrecord(self)
         return numba.typeof(self._numbaview)
 
-class ArrayBuilder(Sequence):
+class ArrayBuilder(object):
     """
     Args:
         behavior (None or dict): Custom #ak.behavior for arrays built by
@@ -1966,18 +1946,6 @@ class ArrayBuilder(Sequence):
         else:
             raise TypeError("behavior must be None or a dict")
 
-    @property
-    def type(self):
-        """
-        The current high-level type of this ArrayBuilder as #ak.types.Type
-        objects.
-
-        Note that the type can change as data are accumulated.
-
-        See #ak.Array.type for a more complete description.
-        """
-        return self.snapshot().type
-
     def __len__(self):
         """
         The current length of the accumulated array.
@@ -2092,7 +2060,7 @@ class ArrayBuilder(Sequence):
         """
         import numba
         import awkward1._connect._numba.builder
-        awkward1._connect._numba.register()
+        awkward1._connect._numba.register_and_check("ak.ArrayBuilder")
         return awkward1._connect._numba.builder.ArrayBuilderType(
                  self._behavior)
 

@@ -7,12 +7,12 @@ recognized.
 In addition to the properties and methods described in :doc:`ak.types.Type`,
 a PrimitiveType has the following.
 
-ak.layout.PrimitiveType.__init__
-================================
+ak.types.PrimitiveType.__init__
+===============================
 
-.. py:method:: ak.layout.PrimitiveType.__init__(dtype, parameters=None, typestr=None)
+.. py:method:: ak.types.PrimitiveType.__init__(dtype, parameters=None, typestr=None)
 
-ak.layout.PrimitiveType.dtype
-=============================
+ak.types.PrimitiveType.dtype
+============================
 
-.. py:attribute:: ak.layout.PrimitiveType.dtype
+.. py:attribute:: ak.types.PrimitiveType.dtype

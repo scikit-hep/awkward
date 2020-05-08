@@ -102,7 +102,8 @@ make_Type(const py::handle& m, const std::string& name) {
 }
 
 template <typename T>
-py::dict getparameters(const T& self) {
+py::dict
+getparameters(const T& self) {
   return parameters2dict(self.parameters());
 }
 

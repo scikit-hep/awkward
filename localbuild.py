@@ -24,8 +24,9 @@ args = arguments.parse_args()
 args.buildpython = not args.no_buildpython
 args.dependencies = not args.no_dependencies
 
-git_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], stdout=subprocess.PIPE)
-os.chdir(git_root.stdout.decode().strip())
+if sys.version_info[0] >= 3:
+    git_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], stdout=subprocess.PIPE)
+    os.chdir(git_root.stdout.decode().strip())
 
 if args.clean:
     for x in ("localbuild", "awkward1", ".pytest_cache", "tests/__pycache__"):
@@ -86,13 +87,21 @@ check_call(["cmake", "--build", "localbuild", "--", "-j" + args.j])
 if args.ctest:
     check_call(["cmake", "--build", "localbuild", "--target", "test", "--", "CTEST_OUTPUT_ON_FAILURE=1", "--no-print-directory"])
 
+def walk(directory):
+    for x in os.listdir(directory):
+        f = os.path.join(directory, x)
+        yield f
+        if os.path.isdir(f):
+            for y in walk(f):
+                yield y
+
 # Build Python (copy sources to executable tree).
 if args.buildpython:
     if os.path.exists("awkward1"):
         shutil.rmtree("awkward1")
 
     # Link (don't copy) the Python files into a built directory.
-    for x in glob.glob("src/awkward1/**", recursive=True):
+    for x in walk(os.path.join("src", "awkward1")):
         olddir, oldfile = os.path.split(x)
         newdir  = olddir[3 + len(os.sep):]
         newfile = x[3 + len(os.sep):]
