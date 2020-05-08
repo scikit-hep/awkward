@@ -115,7 +115,7 @@ C++ projects can link against the shared libraries `libawkward-cpu-kernels.so` a
 
 Support for this work was provided by NSF cooperative agreement OAC-1836650 (IRIS-HEP), grant OAC-1450377 (DIANA/HEP) and PHY-1520942 (US-CMS LHC Ops).
 
-Thanks especially to the gracious help of awkward-array contributors.
+Thanks especially to the gracious help of awkward-array contributors (including the [original repository](https://github.com/scikit-hep/awkward-array)).
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
@@ -123,7 +123,7 @@ Thanks especially to the gracious help of awkward-array contributors.
 <table>
   <tr>
     <td align="center"><a href="https://github.com/jpivarski"><img src="https://avatars0.githubusercontent.com/u/1852447?v=4" width="100px;" alt=""/><br /><sub><b>Jim Pivarski</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward-1.0/commits?author=jpivarski" title="Code">💻</a> <a href="https://github.com/scikit-hep/awkward-1.0/commits?author=jpivarski" title="Documentation">📖</a> <a href="#infra-jpivarski" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a> <a href="#maintenance-jpivarski" title="Maintenance">🚧</a></td>
-    <td align="center"><a href="https://github.com/ianna"><img src="https://avatars0.githubusercontent.com/u/1390682?v=4" width="100px;" alt=""/><br /><sub><b>Ianna Osborne</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward-1.0/commits?author=ianna" title="Code">💻</a> <a href="#maintenance-ianna" title="Maintenance">🚧</a></td>
+    <td align="center"><a href="https://github.com/ianna"><img src="https://avatars0.githubusercontent.com/u/1390682?v=4" width="100px;" alt=""/><br /><sub><b>Ianna Osborne</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward-1.0/commits?author=ianna" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/nsmith-"><img src="https://avatars2.githubusercontent.com/u/6587412?v=4" width="100px;" alt=""/><br /><sub><b>Nicholas Smith</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward-1.0/commits?author=nsmith-" title="Code">💻</a> <a href="https://github.com/scikit-hep/awkward-1.0/commits?author=nsmith-" title="Tests">⚠️</a></td>
     <td align="center"><a href="https://github.com/lgray"><img src="https://avatars0.githubusercontent.com/u/1068089?v=4" width="100px;" alt=""/><br /><sub><b>Lindsey Gray</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward-1.0/commits?author=lgray" title="Code">💻</a> <a href="https://github.com/scikit-hep/awkward-1.0/commits?author=lgray" title="Tests">⚠️</a></td>
     <td align="center"><a href="http://iscinumpy.gitlab.io"><img src="https://avatars1.githubusercontent.com/u/4616906?v=4" width="100px;" alt=""/><br /><sub><b>Henry Schreiner</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward-1.0/commits?author=henryiii" title="Code">💻</a> <a href="#infra-henryiii" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
