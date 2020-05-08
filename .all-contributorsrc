@@ -11,17 +11,10 @@
       "avatar_url": "https://avatars0.githubusercontent.com/u/1852447?v=4",
       "profile": "https://github.com/jpivarski",
       "contributions": [
-        "bug",
         "code",
         "doc",
-        "design",
-        "ideas",
         "infra",
-        "maintenance",
-        "question",
-        "review",
-        "test",
-        "talk"
+        "maintenance"
       ]
     },
     {
@@ -31,9 +24,7 @@
       "profile": "https://github.com/ianna",
       "contributions": [
         "code",
-        "ideas",
-        "maintenance",
-        "test"
+        "maintenance"
       ]
     },
     {
@@ -42,12 +33,8 @@
       "avatar_url": "https://avatars2.githubusercontent.com/u/6587412?v=4",
       "profile": "https://github.com/nsmith-",
       "contributions": [
-        "bug",
         "code",
-        "ideas",
-        "question",
-        "test",
-        "talk"
+        "test"
       ]
     },
     {
@@ -56,12 +43,8 @@
       "avatar_url": "https://avatars0.githubusercontent.com/u/1068089?v=4",
       "profile": "https://github.com/lgray",
       "contributions": [
-        "bug",
         "code",
-        "ideas",
-        "question",
-        "test",
-        "talk"
+        "test"
       ]
     },
     {
@@ -70,12 +53,8 @@
       "avatar_url": "https://avatars1.githubusercontent.com/u/4616906?v=4",
       "profile": "http://iscinumpy.gitlab.io",
       "contributions": [
-        "bug",
         "code",
-        "ideas",
-        "infra",
-        "test",
-        "talk"
+        "infra"
       ]
     },
     {
@@ -84,9 +63,7 @@
       "avatar_url": "https://avatars0.githubusercontent.com/u/11775615?v=4",
       "profile": "https://github.com/reikdas",
       "contributions": [
-        "code",
-        "ideas",
-        "talk"
+        "code"
       ]
     },
     {
@@ -95,9 +72,7 @@
       "avatar_url": "https://avatars3.githubusercontent.com/u/39878675?v=4",
       "profile": "https://github.com/trickarcher",
       "contributions": [
-        "code",
-        "ideas",
-        "test"
+        "code"
       ]
     },
     {
@@ -106,8 +81,6 @@
       "avatar_url": "https://avatars3.githubusercontent.com/u/7466364?v=4",
       "profile": "https://github.com/Ellipse0934",
       "contributions": [
-        "code",
-        "ideas",
         "test"
       ]
     },
@@ -117,10 +90,7 @@
       "avatar_url": "https://avatars1.githubusercontent.com/u/245573?v=4",
       "profile": "https://gitlab.com/veprbl",
       "contributions": [
-        "bug",
-        "code",
-        "infra",
-        "test"
+        "infra"
       ]
     },
     {
@@ -130,9 +100,7 @@
       "profile": "https://github.com/glass-ships",
       "contributions": [
         "code",
-        "ideas",
-        "test",
-        "talk"
+        "test"
       ]
     },
     {
@@ -141,10 +109,7 @@
       "avatar_url": "https://avatars3.githubusercontent.com/u/48469669?v=4",
       "profile": "https://www.linkedin.com/in/charles-c-escott/",
       "contributions": [
-        "code",
-        "ideas",
-        "test",
-        "talk"
+        "code"
       ]
     },
     {
@@ -153,11 +118,7 @@
       "avatar_url": "https://avatars3.githubusercontent.com/u/32773304?v=4",
       "profile": "https://github.com/masonproffitt",
       "contributions": [
-        "bug",
-        "code",
-        "ideas",
-        "test",
-        "talk"
+        "code"
       ]
     },
     {
@@ -166,11 +127,7 @@
       "avatar_url": "https://avatars3.githubusercontent.com/u/18672512?v=4",
       "profile": "https://github.com/mhedges",
       "contributions": [
-        "code",
-        "ideas",
-        "question",
-        "test",
-        "talk"
+        "code"
       ]
     },
     {
@@ -179,9 +136,7 @@
       "avatar_url": "https://avatars2.githubusercontent.com/u/6578603?v=4",
       "profile": "https://github.com/guitargeek",
       "contributions": [
-        "code",
-        "ideas",
-        "test"
+        "code"
       ]
     }
   ],
