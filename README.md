@@ -1,5 +1,11 @@
 <img src="docs-img/logo/logo-300px.png">
 
+[![Scikit-HEP](https://scikit-hep.org/assets/images/Scikit--HEP-Project-blue.svg)](https://scikit-hep.org/)
+[![Build Status](https://dev.azure.com/jpivarski/Scikit-HEP/_apis/build/status/buildtest-awkward?branchName=master)](https://dev.azure.com/jpivarski/Scikit-HEP/_build/latest?definitionId=3&branchName=master)
+[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+[![DOI](https://zenodo.org/badge/137079949.svg)](https://zenodo.org/badge/latestdoi/137079949)
+[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
+
 Awkward Array is a library for **nested, variable-sized data**, including arbitrary-length lists, records, mixed types, and missing data, using **NumPy-like idioms**.
 
 Arrays are **dynamically typed**, but operations on them are **compiled and fast**. Their behavior coincides with NumPy when array dimensions are regular and generalizes when they're not.
@@ -84,7 +90,7 @@ python localbuild.py --pytest tests
    * [Continuous integration](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=3&_a=summary) and [continuous deployment](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=4&_a=summary) are hosted by Azure Pipelines.
    * [Release history](https://awkward-array.readthedocs.io/en/latest/_auto/changelog.html) (changelog) is hosted by ReadTheDocs.
    * [CONTRIBUTING.md](CONTRIBUTING.md) provides more information on how to contribute.
-   * [LICENSE](https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE) is BSD-3.
+   * The [LICENSE](https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE) is BSD-3.
 
 ## Using Awkward Array as a dependency
 
@@ -105,3 +111,22 @@ C++ projects can link against the shared libraries `libawkward-cpu-kernels.so` a
    * [Demo for Numba developers](https://github.com/scikit-hep/awkward-1.0/blob/master/docs-demo-notebooks/2020-01-22-numba-demo-EVALUATED.ipynb) on January 22, 2020.
    * [Summary poster](https://github.com/jpivarski/2020-02-27-irishep-poster/blob/master/pivarski-irishep-poster.pdf) on February 27, 2020.
    * [Demo for Electron Ion Collider users](https://github.com/jpivarski/2020-04-08-eic-jlab#readme) ([video](https://www.youtube.com/watch?v=FoxNS6nlbD0)) on April 8, 2020.
+
+# Acknowledgements
+
+Support for this work was provided by NSF cooperative agreement OAC-1836650 (IRIS-HEP), grant OAC-1450377 (DIANA/HEP) and PHY-1520942 (US-CMS LHC Ops).
+
+Thanks especially to the gracious help of awkward-array contributors:
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tr>
+    <td align="center"><a href="https://github.com/jpivarski"><img src="https://avatars0.githubusercontent.com/u/1852447?v=4" width="100px;" alt=""/><br /><sub><b>Jim Pivarski</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward-1.0/issues?q=author%3Ajpivarski" title="Bug reports">🐛</a> <a href="https://github.com/scikit-hep/awkward-1.0/commits?author=jpivarski" title="Code">💻</a> <a href="#content-jpivarski" title="Content">🖋</a> <a href="https://github.com/scikit-hep/awkward-1.0/commits?author=jpivarski" title="Documentation">📖</a> <a href="#design-jpivarski" title="Design">🎨</a> <a href="#example-jpivarski" title="Examples">💡</a> <a href="#ideas-jpivarski" title="Ideas, Planning, & Feedback">🤔</a> <a href="#infra-jpivarski" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a> <a href="#maintenance-jpivarski" title="Maintenance">🚧</a> <a href="#question-jpivarski" title="Answering Questions">💬</a> <a href="https://github.com/scikit-hep/awkward-1.0/pulls?q=is%3Apr+reviewed-by%3Ajpivarski" title="Reviewed Pull Requests">👀</a> <a href="https://github.com/scikit-hep/awkward-1.0/commits?author=jpivarski" title="Tests">⚠️</a> <a href="#tutorial-jpivarski" title="Tutorials">✅</a> <a href="#talk-jpivarski" title="Talks">📢</a></td>
+  </tr>
+</table>
+
+<!-- markdownlint-enable -->
+<!-- prettier-ignore-end -->
+<!-- ALL-CONTRIBUTORS-LIST:END -->
