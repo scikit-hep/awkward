@@ -144,6 +144,7 @@ Thanks especially to the gracious help of awkward-array contributors (including 
     <td align="center"><a href="https://github.com/benkrikler"><img src="https://avatars0.githubusercontent.com/u/4083697?v=4" width="100px;" alt=""/><br /><sub><b>benkrikler</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward-1.0/commits?author=benkrikler" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/bfis"><img src="https://avatars0.githubusercontent.com/u/15651150?v=4" width="100px;" alt=""/><br /><sub><b>bfis</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward-1.0/commits?author=bfis" title="Code">💻</a></td>
     <td align="center"><a href="https://ddavis.io/"><img src="https://avatars2.githubusercontent.com/u/3202090?v=4" width="100px;" alt=""/><br /><sub><b>Doug Davis</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward-1.0/commits?author=douglasdavis" title="Code">💻</a></td>
+    <td align="center"><a href="http://twitter: @JoosepPata"><img src="https://avatars0.githubusercontent.com/u/69717?v=4" width="100px;" alt=""/><br /><sub><b>Joosep Pata</b></sub></a><br /><a href="#ideas-jpata" title="Ideas, Planning, & Feedback">🤔</a></td>
   </tr>
 </table>
 
