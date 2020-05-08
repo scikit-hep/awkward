@@ -50,8 +50,23 @@ def test_IndexedOffsetArray():
                              [ 5.5, None, None ],
                              [-4.4, -5.5, -6.6]]).layout
 
-    assert awkward1.to_list(array1.recurse(0, True, True)) == []
-    assert awkward1.to_list(array1.recurse(1, True, True)) == []
+    assert awkward1.to_list(array1.recurse(0, True, True)) == [
+                             [2.2, 1.1, 3.3],
+                             [4.4, 5.5, -6.6],
+                             [5.5, -5.5, None],
+                             [-4.4, None, None],
+                             [None, None, None]]
+                             # [ 2.2,  1.1,  3.3],
+                             # [ None, None, None ],
+                             # [ 4.4,  5.5, None ],
+                             # [ 5.5, None, None ],
+                             # [-4.4, -5.5, -6.6]]
+    assert awkward1.to_list(array1.recurse(1, True, True)) == [
+                             [ 2.2,  1.1,  3.3],
+                             [ None, None, None ],
+                             [ 4.4,  5.5, None ],
+                             [ 5.5, None, None ],
+                             [-4.4, -5.5, -6.6]]
 
 
 def test_3d():
