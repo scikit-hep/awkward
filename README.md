@@ -139,6 +139,9 @@ Thanks especially to the gracious help of awkward-array contributors (including 
     <td align="center"><a href="https://github.com/mhedges"><img src="https://avatars3.githubusercontent.com/u/18672512?v=4" width="100px;" alt=""/><br /><sub><b>Michael Hedges</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward-1.0/commits?author=mhedges" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/guitargeek"><img src="https://avatars2.githubusercontent.com/u/6578603?v=4" width="100px;" alt=""/><br /><sub><b>Jonas Rembser</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward-1.0/commits?author=guitargeek" title="Code">💻</a></td>
   </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/Jayd-1234"><img src="https://avatars0.githubusercontent.com/u/34567389?v=4" width="100px;" alt=""/><br /><sub><b>Jaydeep Nandi</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward-1.0/commits?author=Jayd-1234" title="Code">💻</a></td>
+  </tr>
 </table>
 
 <!-- markdownlint-enable -->
