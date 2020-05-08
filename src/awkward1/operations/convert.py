@@ -1388,13 +1388,22 @@ def from_arrow(array):
                 return awkward1.layout.BitMaskedArray(mask, awk_arr, True, len(offsets) - 1, True) 
         
         elif isinstance(array, pyarrow.StructArray):
+            mask = awkward1.layout.IndexU8(numpy.frombuffer(array.buffers()[0].to_pybytes(), dtype=numpy.uint8))
             child_array = [recurse(array.field(x)) for x in range(array.type.num_children)]
             keys = [array.type[x].name for x in range(array.type.num_children)]
-            return awkward1.layout.RecordArray(child_array, keys)
+            awk_arr = awkward1.layout.RecordArray(child_array, keys)
+            if mask is None:
+                return awk_arr
+            else:
+                return awkward1.layout.BitMaskedArray(mask, awk_arr, True, len(awk_arr), True) 
 
         elif isinstance(array, pyarrow.lib.Array):
-            out = awkward1.layout.NumpyArray(array.to_numpy())
-            return out
+            mask = awkward1.layout.IndexU8(numpy.frombuffer(array.buffers()[0].to_pybytes(), dtype=numpy.uint8))
+            awk_arr = awkward1.layout.NumpyArray(array.to_numpy())
+            if mask is None:
+                return awk_arr
+            else:
+                return awkward1.layout.BitMaskedArray(mask, awk_arr, True, len(awk_arr), True)
     
     return recurse(array)
 
