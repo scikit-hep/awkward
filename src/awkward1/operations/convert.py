@@ -1368,14 +1368,24 @@ def from_arrow(array):
             return out
 
         elif isinstance(array, pyarrow.ListArray):
+            mask = awkward1.layout.IndexU8(numpy.frombuffer(array.buffers()[0].to_pybytes(), dtype=numpy.uint8))
             offsets = awkward1.layout.Index32(array.offsets.to_numpy())
             contents = recurse(array.values)
-            return awkward1.layout.ListOffsetArray32(offsets, contents)
+            awk_arr = awkward1.layout.ListOffsetArray32(offsets, contents)
+            if mask is None:
+                return awk_arr
+            else:
+                return awkward1.layout.BitMaskedArray(mask, awk_arr, True, len(offsets) - 1, True)
 
         elif isinstance(array, pyarrow.LargeListArray):
+            mask = awkward1.layout.IndexU8(numpy.frombuffer(array.buffers()[0].to_pybytes(), dtype=numpy.uint8))
             offsets = awkward1.layout.Index64(array.offsets.to_numpy())
             contents = recurse(array.values)
-            return awkward1.layout.ListOffsetArray64(offsets, contents)
+            awk_arr = awkward1.layout.ListOffsetArray64(offsets, contents)
+            if mask is None:
+                return awk_arr
+            else:
+                return awkward1.layout.BitMaskedArray(mask, awk_arr, True, len(offsets) - 1, True) 
         
         elif isinstance(array, pyarrow.StructArray):
             child_array = [recurse(array.field(x)) for x in range(array.type.num_children)]
@@ -1383,9 +1393,7 @@ def from_arrow(array):
             return awkward1.layout.RecordArray(child_array, keys)
 
         elif isinstance(array, pyarrow.lib.Array):
-            buffers = array.buffers()
-            out = popbuffers(array, array.type, buffers, len(array))
-            print(out)
+            out = awkward1.layout.NumpyArray(array.to_numpy())
             return out
     
     return recurse(array)
@@ -1395,3 +1403,4 @@ def from_arrow(array):
 __all__ = [x for x in list(globals())
            if not x.startswith("_") and
            x not in ("numbers", "json", "Iterable", "numpy", "awkward1")]
+
