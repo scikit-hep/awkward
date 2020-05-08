@@ -64,7 +64,7 @@ namespace awkward {
 
     const std::string
       purelist_parameter(const std::string& key) const override {
-      parameter(key);
+      return parameter(key);
     }
 
     bool
@@ -118,7 +118,7 @@ namespace awkward {
     bool
       equal(const FormPtr& other,
             bool check_identities,
-            bool check_parameters) const {
+            bool check_parameters) const override {
       throw std::runtime_error("FIXME: RawForm::equal");
     }
 
