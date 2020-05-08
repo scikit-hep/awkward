@@ -132,6 +132,7 @@ Thanks especially to the gracious help of awkward-array contributors ([emoji key
   </tr>
   <tr>
     <td align="center"><a href="https://github.com/Ellipse0934"><img src="https://avatars3.githubusercontent.com/u/7466364?v=4" width="100px;" alt=""/><br /><sub><b>Ellipse0934</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward-1.0/commits?author=Ellipse0934" title="Code">💻</a> <a href="#ideas-Ellipse0934" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/scikit-hep/awkward-1.0/commits?author=Ellipse0934" title="Tests">⚠️</a></td>
+    <td align="center"><a href="https://gitlab.com/veprbl"><img src="https://avatars1.githubusercontent.com/u/245573?v=4" width="100px;" alt=""/><br /><sub><b>Dmitry Kalinkin</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward-1.0/issues?q=author%3Aveprbl" title="Bug reports">🐛</a> <a href="https://github.com/scikit-hep/awkward-1.0/commits?author=veprbl" title="Code">💻</a> <a href="#infra-veprbl" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a> <a href="https://github.com/scikit-hep/awkward-1.0/commits?author=veprbl" title="Tests">⚠️</a></td>
   </tr>
 </table>
 
