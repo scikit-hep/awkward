@@ -11,8 +11,8 @@ kernelspec:
   name: python3
 ---
 
-How-it-works tutorials
-======================
+How to find the best match between two collections using Cartesian (cross) product
+==================================================================================
 
 **This is a stub:** I intend to write this article, but haven't yet.
 

@@ -11,8 +11,8 @@ kernelspec:
   name: python3
 ---
 
-How-it-works tutorials
-======================
+How to list an array's fields/columns/keys
+==========================================
 
 **This is a stub:** I intend to write this article, but haven't yet.
 

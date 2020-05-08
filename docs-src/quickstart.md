@@ -20,14 +20,36 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
 Quickstart
 ==========
 
-<table>
+<table style="margin-top: 30px">
   <tr>
     <td width="50%" valign="top" align="center">
-      <a href="how-do-i.html">
+      <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
+        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/panel-sphinx.png" width="80%">
+      </a>
+      <p align="center" style="margin-top: 10px"><b>
+        <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
+        Python<br>API reference
+        </a>
+      </b></p>
+    </td>
+    <td width="50%" valign="top" align="center">
+      <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
+        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/panel-doxygen.png" width="80%">
+      </a>
+      <p align="center" style="margin-top: 10px"><b>
+        <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
+        C++<br>API reference
+        </a>
+      </b></p>
+    </td>
+  </tr>
+  <tr style="margin-top: 20px">
+    <td width="50%" valign="top" align="center">
+      <a href="how-to.html">
         <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/panel-data-analysts.png" width="80%">
       </a>
       <p align="center" style="margin-top: 10px"><b>
-        <a href="how-do-i.html">
+        <a href="how-to.html">
         How-to documentation<br>for data analysts
         </a>
       </b></p>
@@ -39,28 +61,6 @@ Quickstart
       <p align="center" style="margin-top: 10px"><b>
         <a href="how-it-works.html">
         How-it-works tutorials<br>for developers
-        </a>
-      </b></p>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" valign="top" align="center">
-      <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
-        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/panel-doxygen.png" width="80%">
-      </a>
-      <p align="center" style="margin-top: 10px"><b>
-        <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
-        C++<br>API reference
-        </a>
-      </b></p>
-    </td>
-    <td width="50%" valign="top" align="center">
-      <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
-        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/panel-sphinx.png" width="80%">
-      </a>
-      <p align="center" style="margin-top: 10px"><b>
-        <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
-        Python<br>API reference
         </a>
       </b></p>
     </td>
@@ -81,7 +81,7 @@ Most users will get a precompiled binary (wheel) for your operating system and P
 Getting help
 ------------
 
-Report bugs, request features, and ask for additional documentation on [GitHub Issues](https://github.com/scikit-hep/awkward-1.0/issues). If you have a general "How do I…?" question, we'll answer it as a new [example in the tutorial](how-do-i).
+Report bugs, request features, and ask for additional documentation on [GitHub Issues](https://github.com/scikit-hep/awkward-1.0/issues). If you have a general "How do I…?" question, we'll answer it as a new [example in the tutorial](how-to).
 
 If you have a problem that's too specific to be new documentation or it isn't exclusively related to Awkward Array, it might be more appropriate to ask on [StackOverflow with the [awkward-array] tag](https://stackoverflow.com/questions/tagged/awkward-array). Be sure to include tags for any other libraries that you use, such as Pandas or PyTorch.
 
@@ -93,7 +93,7 @@ For developers
 See Awkward Array's [GitHub page](https://github.com/scikit-hep/awkward-1.0) for more on
 
    * [insatllation for developers](https://github.com/scikit-hep/awkward-1.0#installation-for-developers)
-   * [using Awkward as a dependency](https://github.com/scikit-hep/awkward-1.0#using-awkward-array-as-a-dependency)
+   * [using Awkward as a dependency](https://github.com/scikit-hep/awkward-1.0/tree/master/dependent-project)
    * [continuous integration](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=3&_a=summary) and [continuous deployment](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=4&_a=summary)
    * [release history](https://awkward-array.readthedocs.io/en/latest/_auto/changelog.html) (changelog)
    * [CONTRIBUTING.md](https://github.com/scikit-hep/awkward-1.0/blob/master/CONTRIBUTING.md)

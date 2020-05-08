@@ -6,7 +6,7 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
 
 ## Documentation
 
-   * [How-to documentation for data analysts](https://awkward-array.org/how-do-i.html)
+   * [How-to documentation for data analysts](https://awkward-array.org/how-to.html)
    * [How-it-works tutorials for developers](https://awkward-array.org/how-it-works.html)
    * C++ API reference: **this site**
    * [Python API reference](../index.html)

@@ -11,8 +11,8 @@ kernelspec:
   name: python3
 ---
 
-How-it-works tutorials
-======================
+How to specialize behavior by subclassing Array/Record
+======================================================
 
 **This is a stub:** I intend to write this article, but haven't yet.
 

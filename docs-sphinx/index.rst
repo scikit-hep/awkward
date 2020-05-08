@@ -13,7 +13,7 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
 Documentation
 *************
 
-   * `How-to documentation for data analysts <https://awkward-array.org/how-do-i.html>`__
+   * `How-to documentation for data analysts <https://awkward-array.org/how-to.html>`__
    * `How-it-works tutorials for developers <https://awkward-array.org/how-it-works.html>`__
    * `C++ API reference <_static/index.html>`__
    * Python API reference: **this site**

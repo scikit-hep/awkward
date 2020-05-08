@@ -11,8 +11,8 @@ kernelspec:
   name: python3
 ---
 
-How-it-works tutorials
-======================
+How to find all combinations of elements: Cartesian (cross) product and "n choose k"
+====================================================================================
 
 **This is a stub:** I intend to write this article, but haven't yet.
 

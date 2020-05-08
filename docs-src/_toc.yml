@@ -1,10 +1,151 @@
 - file: quickstart
+  title: "Quickstart"
+
 - file: what-is-awkward
+  title: "What is an Awkward Array?"
 
-- header: How-to tutorials
-- file: how-do-i
-  title: Introduction
+- header: "How-to tutorials"
 
-- header: How-it-works tutorials
+- file: how-to
+  title: "Introduction"
+
+- file: how-to-convert
+  title: "Converting arrays"
+  expand_sections: true
+  sections:
+    - file: how-to-convert-numpy
+      title: "NumPy"
+    - file: how-to-convert-python
+      title: "Python objects"
+    - file: how-to-convert-json
+      title: "JSON"
+    - file: how-to-convert-uproot
+      title: "ROOT via Uproot"
+    - file: how-to-convert-arrow
+      title: "Parquet via Arrow"
+    - file: how-to-convert-pandas
+      title: "Pandas: Awkward columns"
+    - file: how-to-convert-pandas-multiindex
+      title: "Pandas: as MultiIndex"
+    - file: how-to-convert-zarr
+      title: "Zarr"
+
+- file: how-to-create
+  title: "Creating arrays"
+  expand_sections: true
+  sections:
+    - file: how-to-create-arraybuilder
+      title: "ArrayBuilder (easy & general)"
+    - file: how-to-create-layout
+      title: "Layout (faster)"
+    - file: how-to-create-lazy-dask
+      title: "Lazy arrays and Dask"
+
+- file: how-to-examine
+  title: "Examining arrays"
+  expand_sections: true
+  sections:
+    - file: how-to-examine-type
+      title: "Data type"
+    - file: how-to-examine-single-item
+      title: "Single item detail"
+    - file: how-to-examine-list-fields
+      title: "Listing fields/keys/columns"
+    - file: how-to-examine-simple-slicing
+      title: "Simple slicing"
+    - file: how-to-examine-checking-validity
+      title: "Checking validity"
+
+- file: how-to-math
+  title: "Numerical math"
+  expand_sections: true
+  sections:
+    - file: how-to-math-numpy
+      title: "NumPy functions"
+    - file: how-to-math-broadcasting
+      title: "Awkward broadcasting"
+    - file: how-to-math-reducing
+      title: "Reducing (sum/min/any/all)"
+    - file: how-to-math-statistics
+      title: "Statistics (mean/var/std)"
+    - file: how-to-math-argminmax
+      title: "Using argmin/argmax"
+    - file: how-to-math-gpu
+      title: "On GPUs"
+
+- file: how-to-filter
+  title: "Filtering data"
+  expand_sections: true
+  sections:
+    - file: how-to-filter-num
+      title: "By number of items"
+    - file: how-to-filter-cut-mask
+      title: "Cuts vs. masks"
+    - file: how-to-filter-jagged
+      title: "Slicing lists within arrays"
+    - file: how-to-filter-masked
+      title: "Slices with missing values"
+
+- file: how-to-restructure
+  title: "Restructuring data"
+  expand_sections: true
+  sections:
+    - file: how-to-restructure-zip-project
+      title: "Zip/unzip and project"
+    - file: how-to-restructure-add-fields
+      title: "Adding fields to records"
+    - file: how-to-restructure-rename-records
+      title: "Renaming records"
+    - file: how-to-restructure-flatten
+      title: "Flattening for plots"
+    - file: how-to-restructure-pad
+      title: "Padding/clipping for machine learning"
+    - file: how-to-restructure-concatenate
+      title: "Concatenating and interleaving"
+    - file: how-to-restructure-sort
+      title: "Sorting"
+
+- file: how-to-combinatorics
+  title: "Combinatorics"
+  expand_sections: true
+  sections:
+    - file: how-to-combinatorics-cartesian-combinations
+      title: 'Cartesian/cross product and "n choose k"'
+    - file: how-to-combinatorics-best-match
+      title: "Best match between collections"
+
+- file: how-to-specialize
+  title: "Specialized behavior"
+  expand_sections: true
+  sections:
+    - file: how-to-specialize-subclass
+      title: "Subclassing Array/Record"
+    - file: how-to-specialize-override-numpy
+      title: "Overriding NumPy functions"
+    - file: how-to-specialize-in-numba
+      title: "In Numba"
+    - file: how-to-specialize-lorentz
+      title: "For physics: Lorentz vectors"
+
+- header: "How-it-works tutorials"
+
 - file: how-it-works
-  title: Introduction
+  title: "Introduction"
+
+- file: articles-data-types
+  title: "Abstract data types"
+
+- file: articles-layouts
+  title: "Columnar layouts"
+
+- file: articles-arrays-are-functions
+  title: "Arrays as functional programming"
+
+- file: articles-vectorization
+  title: "Slow control and fast math"
+
+- file: articles-arraybuilder
+  title: "Record-oriented → columnar"
+
+- file: articles-identities
+  title: "Array element identities"

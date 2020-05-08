@@ -11,8 +11,8 @@ kernelspec:
   name: python3
 ---
 
-How-it-works tutorials
-======================
+How to pad and clip arrays, particularly for machine learning
+=============================================================
 
 **This is a stub:** I intend to write this article, but haven't yet.
 

@@ -11,8 +11,8 @@ kernelspec:
   name: python3
 ---
 
-How-it-works tutorials
-======================
+ArrayBuilder: the record-oriented → columnar algorithm
+======================================================
 
 **This is a stub:** I intend to write this article, but haven't yet.
 
