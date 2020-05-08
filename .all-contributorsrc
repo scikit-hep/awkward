@@ -133,6 +133,18 @@
         "test",
         "talk"
       ]
+    },
+    {
+      "login": "EscottC",
+      "name": "Charles Escott",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/48469669?v=4",
+      "profile": "https://www.linkedin.com/in/charles-c-escott/",
+      "contributions": [
+        "code",
+        "ideas",
+        "test",
+        "talk"
+      ]
     }
   ],
   "contributorsPerLine": 7,
