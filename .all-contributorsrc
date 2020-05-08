@@ -13,17 +13,14 @@
       "contributions": [
         "bug",
         "code",
-        "content",
         "doc",
         "design",
-        "example",
         "ideas",
         "infra",
         "maintenance",
         "question",
         "review",
         "test",
-        "tutorial",
         "talk"
       ]
     },
@@ -47,7 +44,6 @@
       "contributions": [
         "bug",
         "code",
-        "example",
         "ideas",
         "question",
         "test",
@@ -78,8 +74,7 @@
         "ideas",
         "infra",
         "test",
-        "talk",
-        "example"
+        "talk"
       ]
     }
   ],
