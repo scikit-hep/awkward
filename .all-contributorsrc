@@ -145,6 +145,19 @@
         "test",
         "talk"
       ]
+    },
+    {
+      "login": "masonproffitt",
+      "name": "Mason Proffitt",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/32773304?v=4",
+      "profile": "https://github.com/masonproffitt",
+      "contributions": [
+        "bug",
+        "code",
+        "ideas",
+        "test",
+        "talk"
+      ]
     }
   ],
   "contributorsPerLine": 7,
