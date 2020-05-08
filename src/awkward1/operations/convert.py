@@ -1368,43 +1368,59 @@ def from_arrow(array):
             return out
 
         elif isinstance(array, pyarrow.ListArray):
-            mask = awkward1.layout.IndexU8(numpy.frombuffer(array.buffers()[0].to_pybytes(), dtype=numpy.uint8))
+            mask = array.buffers()[0]
             offsets = awkward1.layout.Index32(array.offsets.to_numpy())
             contents = recurse(array.values)
             awk_arr = awkward1.layout.ListOffsetArray32(offsets, contents)
             if mask is None:
                 return awk_arr
             else:
-                return awkward1.layout.BitMaskedArray(mask, awk_arr, True, len(offsets) - 1, True)
+                awk_mask = awkward1.layout.IndexU8(numpy.frombuffer(mask.to_pybytes(), dtype=numpy.uint8))
+                return awkward1.layout.BitMaskedArray(awk_mask, awk_arr, True, len(offsets) - 1, True)
 
         elif isinstance(array, pyarrow.LargeListArray):
-            mask = awkward1.layout.IndexU8(numpy.frombuffer(array.buffers()[0].to_pybytes(), dtype=numpy.uint8))
+            mask = array.buffers()[0]   
             offsets = awkward1.layout.Index64(array.offsets.to_numpy())
             contents = recurse(array.values)
             awk_arr = awkward1.layout.ListOffsetArray64(offsets, contents)
             if mask is None:
                 return awk_arr
             else:
-                return awkward1.layout.BitMaskedArray(mask, awk_arr, True, len(offsets) - 1, True) 
+                awk_mask = awkward1.layout.IndexU8(numpy.frombuffer(mask.to_pybytes(), dtype=numpy.uint8))
+                return awkward1.layout.BitMaskedArray(awk_mask, awk_arr, True, len(offsets) - 1, True) 
         
         elif isinstance(array, pyarrow.StructArray):
-            mask = awkward1.layout.IndexU8(numpy.frombuffer(array.buffers()[0].to_pybytes(), dtype=numpy.uint8))
+            mask = array.buffers()[0]
             child_array = [recurse(array.field(x)) for x in range(array.type.num_children)]
             keys = [array.type[x].name for x in range(array.type.num_children)]
             awk_arr = awkward1.layout.RecordArray(child_array, keys)
             if mask is None:
                 return awk_arr
             else:
-                return awkward1.layout.BitMaskedArray(mask, awk_arr, True, len(awk_arr), True) 
+                awk_mask = awkward1.layout.IndexU8(numpy.frombuffer(mask.to_pybytes(), dtype=numpy.uint8))
+                return awkward1.layout.BitMaskedArray(awk_mask, awk_arr, True, len(awk_arr), True) 
+
+        elif isinstance(array, pyarrow.DictionaryArray):
+            mask = array.buffers()[0]
+            content = recurse(array.dictionary)
+            indices = awkward1.layout.Index32(recurse(array.indices))
+            awk_arr = awkward1.layout.IndexedArray32(indices, content)
+            if mask is None:
+                return awk_arr
+            else:
+                awk_mask = awkward1.layout.IndexU8(numpy.frombuffer(mask.to_pybytes(), dtype=numpy.uint8))
+                return awkward1.layout.BitMaskedArray(awk_mask, awk_arr, True, len(awk_arr), True) 
+
 
         elif isinstance(array, pyarrow.lib.Array):
-            mask = awkward1.layout.IndexU8(numpy.frombuffer(array.buffers()[0].to_pybytes(), dtype=numpy.uint8))
+            mask = array.buffers()[0]            
             awk_arr = awkward1.layout.NumpyArray(array.to_numpy())
             if mask is None:
                 return awk_arr
             else:
-                return awkward1.layout.BitMaskedArray(mask, awk_arr, True, len(awk_arr), True)
-    
+                awk_mask = awkward1.layout.IndexU8(numpy.frombuffer(mask.to_pybytes(), dtype=numpy.uint8))
+                return awkward1.layout.BitMaskedArray(awk_mask, awk_arr, True, len(awk_arr), True)
+
     return recurse(array)
 
 
