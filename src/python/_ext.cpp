@@ -8,6 +8,8 @@
 #include "awkward/python/identities.h"
 #include "awkward/python/content.h"
 #include "awkward/python/types.h"
+#include "awkward/python/forms.h"
+#include "awkward/python/virtual.h"
 #include "awkward/python/io.h"
 #include "awkward/python/partition.h"
 
@@ -70,6 +72,8 @@ PYBIND11_MODULE(_ext, m) {
   make_UnionArrayOf<int8_t, uint32_t>(m, "UnionArray8_U32");
   make_UnionArrayOf<int8_t, int64_t>(m,  "UnionArray8_64");
 
+  make_VirtualArray(m, "VirtualArray");
+
   m.def("_slice_tostring", [](py::object obj) -> std::string {
     return toslice(obj).tostring();
   });
@@ -85,6 +89,29 @@ PYBIND11_MODULE(_ext, m) {
   make_OptionType(m, "OptionType");
   make_UnionType(m, "UnionType");
   make_RecordType(m, "RecordType");
+
+  ////////// forms.h
+
+  make_Form(m, "Form");
+  make_BitMaskedForm(m, "BitMaskedForm");
+  make_ByteMaskedForm(m, "ByteMaskedForm");
+  make_EmptyForm(m, "EmptyForm");
+  make_IndexedForm(m, "IndexedForm");
+  make_IndexedOptionForm(m, "IndexedOptionForm");
+  make_ListForm(m, "ListForm");
+  make_ListOffsetForm(m, "ListOffsetForm");
+  make_NumpyForm(m, "NumpyForm");
+  make_RecordForm(m, "RecordForm");
+  make_RegularForm(m, "RegularForm");
+  make_UnionForm(m, "UnionForm");
+  make_UnmaskedForm(m, "UnmaskedForm");
+  make_VirtualForm(m, "VirtualForm");
+
+  ////////// virtual.h
+
+  make_PyArrayGenerator(m, "ArrayGenerator");
+  make_SliceGenerator(m, "SliceGenerator");
+  make_PyArrayCache(m, "ArrayCache");
 
   ////////// io.h
 

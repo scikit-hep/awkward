@@ -2350,7 +2350,8 @@ ERROR awkward_listoffsetarray_reduce_nonlocal_outstartsstops_64(
   int64_t* outstops,
   const int64_t* distincts,
   int64_t lendistincts,
-  const int64_t* gaps) {
+  const int64_t* gaps,
+  int64_t outlength) {
   int64_t j = 0;
   int64_t k = 0;
   int64_t maxdistinct = -1;
@@ -2367,6 +2368,10 @@ ERROR awkward_listoffsetarray_reduce_nonlocal_outstartsstops_64(
     if (distincts[i] != -1) {
       outstops[k - 1] = i + 1;
     }
+  }
+  for (;  k < outlength;  k++) {
+    outstarts[k] = lendistincts + 1;
+    outstops[k] = lendistincts + 1;
   }
   return success();
 }

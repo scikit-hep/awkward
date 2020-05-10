@@ -9,6 +9,11 @@ dependent-project/Makefile
 dependent-project/cmake_install.cmake
 dependent-project/cmake_pybind11
 
+# to use all-contributors-cli without adding it to the project
+node_modules
+package.json
+yarn.lock
+
 ############################################################# JupyterBook and Doxygen
 
 docs/.sass-cache

@@ -8,12 +8,12 @@ The type of an :doc:`ak.layout.IndexedOptionArray`,
 In addition to the properties and methods described in :doc:`ak.types.Type`,
 an OptionType has the following.
 
-ak.layout.OptionType.__init__
-=============================
+ak.types.OptionType.__init__
+============================
 
-.. py:method:: ak.layout.OptionType.__init__(type, parameters=None, typestr=None)
+.. py:method:: ak.types.OptionType.__init__(type, parameters=None, typestr=None)
 
-ak.layout.OptionType.type
-=========================
+ak.types.OptionType.type
+========================
 
-.. py:attribute:: ak.layout.OptionType.type
+.. py:attribute:: ak.types.OptionType.type

@@ -10,6 +10,7 @@
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/Slice.h"
 
+#define AWKWARD_IDENTITIES_NO_EXTERN_TEMPLATE
 #include "awkward/Identities.h"
 
 namespace awkward {
@@ -35,6 +36,8 @@ namespace awkward {
       , offset_(offset)
       , width_(width)
       , length_(length) { }
+
+  Identities::~Identities() = default;
 
   const Identities::Ref
   Identities::ref() const {

@@ -136,10 +136,20 @@ def type(array):
         return awkward1.types.PrimitiveType(
                  type.dtype2primitive[array.dtype.type])
 
-    elif isinstance(array, (awkward1.highlevel.Array,
-                            awkward1.highlevel.Record,
-                            awkward1.highlevel.ArrayBuilder)):
-        return array.type
+    elif isinstance(array, awkward1.highlevel.Array):
+        return awkward1._util.highlevel_type(array.layout,
+                                             array.behavior,
+                                             True)
+
+    elif isinstance(array, awkward1.highlevel.Record):
+        return awkward1._util.highlevel_type(array.layout,
+                                             array.behavior,
+                                             False)
+
+    elif isinstance(array, awkward1.highlevel.ArrayBuilder):
+        return awkward1._util.highlevel_type(array.snapshot().layout,
+                                             array.behavior,
+                                             True)
 
     elif isinstance(array, awkward1.layout.Record):
         return array.type(awkward1._util.typestrs(None))

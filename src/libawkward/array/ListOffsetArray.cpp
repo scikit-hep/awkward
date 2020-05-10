@@ -21,10 +21,158 @@
 #include "awkward/array/ByteMaskedArray.h"
 #include "awkward/array/BitMaskedArray.h"
 #include "awkward/array/UnmaskedArray.h"
+#include "awkward/array/VirtualArray.h"
 
+#define AWKWARD_LISTOFFSETARRAY_NO_EXTERN_TEMPLATE
 #include "awkward/array/ListOffsetArray.h"
 
 namespace awkward {
+  ////////// ListOffsetForm
+
+  ListOffsetForm::ListOffsetForm(bool has_identities,
+                                 const util::Parameters& parameters,
+                                 Index::Form offsets,
+                                 const FormPtr& content)
+      : Form(has_identities, parameters)
+      , offsets_(offsets)
+      , content_(content) { }
+
+  Index::Form
+  ListOffsetForm::offsets() const {
+    return offsets_;
+  }
+
+  const FormPtr
+  ListOffsetForm::content() const {
+    return content_;
+  }
+
+  const TypePtr
+  ListOffsetForm::type(const util::TypeStrs& typestrs) const {
+    return std::make_shared<ListType>(
+               parameters_,
+               util::gettypestr(parameters_, typestrs),
+               content_.get()->type(typestrs));
+  }
+
+  void
+  ListOffsetForm::tojson_part(ToJson& builder, bool verbose) const {
+    builder.beginrecord();
+    builder.field("class");
+    if (offsets_ == Index::Form::i32) {
+      builder.string("ListOffsetArray32");
+    }
+    else if (offsets_ == Index::Form::u32) {
+      builder.string("ListOffsetArrayU32");
+    }
+    else if (offsets_ == Index::Form::i64) {
+      builder.string("ListOffsetArray64");
+    }
+    else {
+      builder.string("UnrecognizedListOffsetArray");
+    }
+    builder.field("offsets");
+    builder.string(Index::form2str(offsets_));
+    builder.field("content");
+    content_.get()->tojson_part(builder, verbose);
+    identities_tojson(builder, verbose);
+    parameters_tojson(builder, verbose);
+    builder.endrecord();
+  }
+
+  const FormPtr
+  ListOffsetForm::shallow_copy() const {
+    return std::make_shared<ListOffsetForm>(has_identities_,
+                                            parameters_,
+                                            offsets_,
+                                            content_);
+  }
+
+  const std::string
+  ListOffsetForm::purelist_parameter(const std::string& key) const {
+    std::string out = parameter(key);
+    if (out == std::string("null")) {
+      return content_.get()->purelist_parameter(key);
+    }
+    else {
+      return out;
+    }
+  }
+
+  bool
+  ListOffsetForm::purelist_isregular() const {
+    return false;
+  }
+
+  int64_t
+  ListOffsetForm::purelist_depth() const {
+    return content_.get()->purelist_depth() + 1;
+  }
+
+  const std::pair<int64_t, int64_t>
+  ListOffsetForm::minmax_depth() const {
+    std::pair<int64_t, int64_t> content_depth = content_.get()->minmax_depth();
+    return std::pair<int64_t, int64_t>(content_depth.first + 1,
+                                       content_depth.second + 1);
+  }
+
+  const std::pair<bool, int64_t>
+  ListOffsetForm::branch_depth() const {
+    std::pair<bool, int64_t> content_depth = content_.get()->branch_depth();
+    return std::pair<bool, int64_t>(content_depth.first,
+                                    content_depth.second + 1);
+  }
+
+  int64_t
+  ListOffsetForm::numfields() const {
+    return content_.get()->numfields();
+  }
+
+  int64_t
+  ListOffsetForm::fieldindex(const std::string& key) const {
+    return content_.get()->fieldindex(key);
+  }
+
+  const std::string
+  ListOffsetForm::key(int64_t fieldindex) const {
+    return content_.get()->key(fieldindex);
+  }
+
+  bool
+  ListOffsetForm::haskey(const std::string& key) const {
+    return content_.get()->haskey(key);
+  }
+
+  const std::vector<std::string>
+  ListOffsetForm::keys() const {
+    return content_.get()->keys();
+  }
+
+  bool
+  ListOffsetForm::equal(const FormPtr& other,
+                        bool check_identities,
+                        bool check_parameters) const {
+    if (check_identities  &&
+        has_identities_ != other.get()->has_identities()) {
+      return false;
+    }
+    if (check_parameters  &&
+        !util::parameters_equal(parameters_, other.get()->parameters())) {
+      return false;
+    }
+    if (ListOffsetForm* t = dynamic_cast<ListOffsetForm*>(other.get())) {
+      return (offsets_ == t->offsets()  &&
+              content_.get()->equal(t->content(),
+                                    check_identities,
+                                    check_parameters));
+    }
+    else {
+      return false;
+    }
+  }
+
+  ////////// ListOffsetArray
+
   template <typename T>
   ListOffsetArrayOf<T>::ListOffsetArrayOf(const IdentitiesPtr& identities,
                                           const util::Parameters& parameters,
@@ -297,9 +445,28 @@ namespace awkward {
   template <typename T>
   const TypePtr
   ListOffsetArrayOf<T>::type(const util::TypeStrs& typestrs) const {
-    return std::make_shared<ListType>(parameters_,
-                                      util::gettypestr(parameters_, typestrs),
-                                      content_.get()->type(typestrs));
+    return form(true).get()->type(typestrs);
+  }
+
+  template <typename T>
+  const FormPtr
+  ListOffsetArrayOf<T>::form(bool materialize) const {
+    return std::make_shared<ListOffsetForm>(identities_.get() != nullptr,
+                                            parameters_,
+                                            offsets_.form(),
+                                            content_.get()->form(materialize));
+  }
+
+  template <typename T>
+  bool
+  ListOffsetArrayOf<T>::has_virtual_form() const {
+    return content_.get()->has_virtual_form();
+  }
+
+  template <typename T>
+  bool
+  ListOffsetArrayOf<T>::has_virtual_length() const {
+    return content_.get()->has_virtual_length();
   }
 
   template <typename T>
@@ -551,46 +718,6 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::string
-  ListOffsetArrayOf<T>::purelist_parameter(const std::string& key) const {
-    std::string out = parameter(key);
-    if (out == std::string("null")) {
-      return content_.get()->purelist_parameter(key);
-    }
-    else {
-      return out;
-    }
-  }
-
-  template <typename T>
-  bool
-  ListOffsetArrayOf<T>::purelist_isregular() const {
-    return false;
-  }
-
-  template <typename T>
-  int64_t
-  ListOffsetArrayOf<T>::purelist_depth() const {
-    return content_.get()->purelist_depth() + 1;
-  }
-
-  template <typename T>
-  const std::pair<int64_t, int64_t>
-  ListOffsetArrayOf<T>::minmax_depth() const {
-    std::pair<int64_t, int64_t> content_depth = content_.get()->minmax_depth();
-    return std::pair<int64_t, int64_t>(content_depth.first + 1,
-                                       content_depth.second + 1);
-  }
-
-  template <typename T>
-  const std::pair<bool, int64_t>
-  ListOffsetArrayOf<T>::branch_depth() const {
-    std::pair<bool, int64_t> content_depth = content_.get()->branch_depth();
-    return std::pair<bool, int64_t>(content_depth.first,
-                                    content_depth.second + 1);
-  }
-
-  template <typename T>
   int64_t
   ListOffsetArrayOf<T>::numfields() const {
     return content_.get()->numfields();
@@ -732,6 +859,10 @@ namespace awkward {
   bool
   ListOffsetArrayOf<T>::mergeable(const ContentPtr& other,
                                   bool mergebool) const {
+    if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
+      return mergeable(raw->array(), mergebool);
+    }
+
     if (!parameters_equal(other.get()->parameters())) {
       return false;
     }
@@ -811,6 +942,10 @@ namespace awkward {
   template <typename T>
   const ContentPtr
   ListOffsetArrayOf<T>::merge(const ContentPtr& other) const {
+    if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
+      return merge(raw->array());
+    }
+
     if (!parameters_equal(other.get()->parameters())) {
       return merge_as_union(other);
     }
@@ -1352,7 +1487,8 @@ namespace awkward {
         outstops.ptr().get(),
         distincts.ptr().get(),
         maxcount * outlength,
-        gaps.ptr().get());
+        gaps.ptr().get(),
+        outlength);
       util::handle_error(err6, classname(), identities_.get());
 
       ContentPtr out = std::make_shared<ListArray64>(Identities::none(),

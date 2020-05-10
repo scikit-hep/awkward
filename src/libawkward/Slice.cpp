@@ -7,9 +7,14 @@
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/util.h"
 
+#define AWKWARD_SLICE_NO_EXTERN_TEMPLATE
 #include "awkward/Slice.h"
 
 namespace awkward {
+  ////////// SliceItem
+
+  SliceItem::~SliceItem() = default;
+
   ////////// SliceAt
 
   SliceAt::SliceAt(int64_t at)
@@ -620,6 +625,13 @@ namespace awkward {
     return out.str();
   }
 
+  const Slice
+  Slice::prepended(const SliceItemPtr& item) const {
+    std::vector<SliceItemPtr> items(items_);
+    items.insert(items.begin(), item);
+    return Slice(items, true);
+  }
+
   void
   Slice::append(const SliceItemPtr& item) {
     if (sealed_) {
@@ -648,9 +660,8 @@ namespace awkward {
     items_.push_back(item.shallow_copy());
   }
 
-  template <typename T>
   void
-  Slice::append(const SliceArrayOf<T>& item) {
+  Slice::append(const SliceArray64& item) {
     items_.push_back(item.shallow_copy());
   }
 
@@ -664,15 +675,13 @@ namespace awkward {
     items_.push_back(item.shallow_copy());
   }
 
-  template <typename T>
   void
-  Slice::append(const SliceMissingOf<T>& item) {
+  Slice::append(const SliceMissing64& item) {
     items_.push_back(item.shallow_copy());
   }
 
-  template <typename T>
   void
-  Slice::append(const SliceJaggedOf<T>& item) {
+  Slice::append(const SliceJagged64& item) {
     items_.push_back(item.shallow_copy());
   }
 

@@ -94,7 +94,7 @@ def test_builder_string():
         assert repr(a) == "<Array ['one', 'two', 'three'] type='3 * bytes'>"
     else:
         assert repr(a) == "<Array [b'one', b'two', b'three'] type='3 * bytes'>"
-    assert repr(a.type) == "3 * bytes"
+    assert repr(awkward1.type(a)) == "3 * bytes"
 
     builder = awkward1.ArrayBuilder()
 
@@ -113,7 +113,7 @@ def test_builder_string():
         assert repr(a) == "<Array [u'one', u'two', u'three'] type='3 * string'>"
     else:
         assert repr(a) == "<Array ['one', 'two', 'three'] type='3 * string'>"
-    assert repr(a.type) == "3 * string"
+    assert repr(awkward1.type(a)) == "3 * string"
 
     builder = awkward1.ArrayBuilder()
 
@@ -138,7 +138,7 @@ def test_builder_string():
         assert str(a) == "[['one', 'two', 'three'], [], ['four', 'five']]"
     assert awkward1.to_list(a) == [['one', 'two', 'three'], [], ['four', 'five']]
     assert awkward1.to_json(a) == '[["one","two","three"],[],["four","five"]]'
-    assert repr(a.type) == "3 * var * string"
+    assert repr(awkward1.type(a)) == "3 * var * string"
 
 def test_fromiter_fromjson():
     assert awkward1.to_list(awkward1.from_iter(["one", "two", "three"])) == ["one", "two", "three"]

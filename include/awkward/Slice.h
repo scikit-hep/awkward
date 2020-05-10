@@ -21,8 +21,10 @@ namespace awkward {
   /// passed to an array's `__getitem__` in Python.
   class EXPORT_SYMBOL SliceItem {
   public:
-    /// @brief Empty destructor; required for some C++ reason.
-    virtual ~SliceItem() { }
+    /// @brief Virtual destructor acts as a first non-inline virtual function
+    /// that determines a specific translation unit in which vtable shall be
+    /// emitted.
+    virtual ~SliceItem();
 
     /// @brief Copies this node without copying any associated arrays.
     virtual const SliceItemPtr
@@ -300,6 +302,10 @@ namespace awkward {
     bool frombool_;
   };
 
+#if !defined AWKWARD_SLICE_NO_EXTERN_TEMPLATE && !defined _MSC_VER
+  extern template class SliceArrayOf<int64_t>;
+#endif
+
   using SliceArray64 = SliceArrayOf<int64_t>;
 
   /// @class SliceField
@@ -450,6 +456,10 @@ namespace awkward {
     const SliceItemPtr content_;
   };
 
+#if !defined AWKWARD_SLICE_NO_EXTERN_TEMPLATE && !defined _MSC_VER
+  extern template class SliceMissingOf<int64_t>;
+#endif
+
   using SliceMissing64 = SliceMissingOf<int64_t>;
 
   /// @class SliceJaggedOf
@@ -517,6 +527,10 @@ namespace awkward {
     const SliceItemPtr content_;
   };
 
+#if !defined AWKWARD_SLICE_NO_EXTERN_TEMPLATE && !defined _MSC_VER
+  extern template class SliceJaggedOf<int64_t>;
+#endif
+
   using SliceJagged64 = SliceJaggedOf<int64_t>;
 
   /// @class Slice
@@ -576,48 +590,52 @@ namespace awkward {
     const std::string
       tostring() const;
 
-    /// @brief Insert a SliceItem at the end of the #items.
+    /// @brief Returns a new Slice with `item` prepended.
+    const Slice
+      prepended(const SliceItemPtr& item) const;
+
+    /// @brief Inserts a SliceItem in-place at the end of the #items.
     void
       append(const SliceItemPtr& item);
 
-    /// @brief Insert a SliceAt at the end of the #items.
+    /// @brief Inserts a SliceAt in-place at the end of the #items.
     void
       append(const SliceAt& item);
 
-    /// @brief Insert a SliceRange at the end of the #items.
+    /// @brief Inserts a SliceRange in-place at the end of the #items.
     void
       append(const SliceRange& item);
 
-    /// @brief Insert a SliceEllipsis at the end of the #items.
+    /// @brief Inserts a SliceEllipsis in-place at the end of the #items.
     void
       append(const SliceEllipsis& item);
 
-    /// @brief Insert a SliceNewAxis at the end of the #items.
+    /// @brief Inserts a SliceNewAxis in-place at the end of the #items.
     void
       append(const SliceNewAxis& item);
 
-    /// @brief Insert a SliceArrayOf at the end of the #items.
-    template <typename T>
+    /// @brief Inserts a {@link SliceArrayOf SliceArray64} in-place at the end
+    /// of the #items.
     void
-      append(const SliceArrayOf<T>& item);
+      append(const SliceArray64& item);
 
-    /// @brief Insert a SliceField at the end of the #items.
+    /// @brief Inserts a SliceField in-place at the end of the #items.
     void
       append(const SliceField& item);
 
-    /// @brief Insert a SliceFields at the end of the #items.
+    /// @brief Inserts a SliceFields in-place at the end of the #items.
     void
       append(const SliceFields& item);
 
-    /// @brief Insert a SliceMissingOf at the end of the #items.
-    template <typename T>
+    /// @brief Inserts a {@link SliceMissingOf SliceMissing64} in-place at the
+    /// end of the #items.
     void
-      append(const SliceMissingOf<T>& item);
+      append(const SliceMissing64& item);
 
-    /// @brief Insert a SliceJaggedOf at the end of the #items.
-    template <typename T>
+    /// @brief Inserts a {@link SliceJaggedOf SliceJagged64} in-place at the
+    /// end of the #items.
     void
-      append(const SliceJaggedOf<T>& item);
+      append(const SliceJagged64& item);
 
     /// @brief Seal this Slice so that it is no longer open to #append.
     void

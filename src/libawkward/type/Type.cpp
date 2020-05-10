@@ -16,6 +16,8 @@ namespace awkward {
       : parameters_(parameters)
       , typestr_(typestr) { }
 
+  Type::~Type() = default;
+
   const util::Parameters
   Type::parameters() const {
     return parameters_;

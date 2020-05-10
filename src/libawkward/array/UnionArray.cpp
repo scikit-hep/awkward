@@ -12,12 +12,276 @@
 #include "awkward/Slice.h"
 #include "awkward/array/EmptyArray.h"
 #include "awkward/array/IndexedArray.h"
-
 #include "awkward/array/NumpyArray.h"
 #include "awkward/array/RegularArray.h"
+#include "awkward/array/VirtualArray.h"
+
+#define AWKWARD_UNIONARRAY_NO_EXTERN_TEMPLATE
 #include "awkward/array/UnionArray.h"
 
 namespace awkward {
+  ////////// UnionForm
+
+  UnionForm::UnionForm(bool has_identities,
+                       const util::Parameters& parameters,
+                       Index::Form tags,
+                       Index::Form index,
+                       const std::vector<FormPtr>& contents)
+      : Form(has_identities, parameters)
+      , tags_(tags)
+      , index_(index)
+      , contents_(contents) { }
+
+  Index::Form
+  UnionForm::tags() const {
+    return tags_;
+  }
+
+  Index::Form
+  UnionForm::index() const {
+    return index_;
+  }
+
+  const std::vector<FormPtr>
+  UnionForm::contents() const {
+    return contents_;
+  }
+
+  int64_t
+  UnionForm::numcontents() const {
+    return (int64_t)contents_.size();
+  }
+
+  const FormPtr
+  UnionForm::content(int64_t index) const {
+    return contents_[(size_t)index];
+  }
+
+  const TypePtr
+  UnionForm::type(const util::TypeStrs& typestrs) const {
+    std::vector<TypePtr> types;
+    for (auto item : contents_) {
+      types.push_back(item.get()->type(typestrs));
+    }
+    return std::make_shared<UnionType>(
+               parameters_,
+               util::gettypestr(parameters_, typestrs),
+               types);
+  }
+
+  void
+  UnionForm::tojson_part(ToJson& builder, bool verbose) const {
+    builder.beginrecord();
+    builder.field("class");
+    if (index_ == Index::Form::i32) {
+      builder.string("UnionArray8_32");
+    }
+    else if (index_ == Index::Form::u32) {
+      builder.string("UnionArray8_U32");
+    }
+    else if (index_ == Index::Form::i64) {
+      builder.string("UnionArray8_64");
+    }
+    else {
+      builder.string("UnrecognizedUnionArray");
+    }
+    builder.field("tags");
+    builder.string(Index::form2str(tags_));
+    builder.field("index");
+    builder.string(Index::form2str(index_));
+    builder.field("contents");
+    builder.beginlist();
+    for (auto x : contents_) {
+      x.get()->tojson_part(builder, verbose);
+    }
+    builder.endlist();
+    identities_tojson(builder, verbose);
+    parameters_tojson(builder, verbose);
+    builder.endrecord();
+  }
+
+  const FormPtr
+  UnionForm::shallow_copy() const {
+    return std::make_shared<UnionForm>(has_identities_,
+                                       parameters_,
+                                       tags_,
+                                       index_,
+                                       contents_);
+  }
+
+  const std::string
+  UnionForm::purelist_parameter(const std::string& key) const {
+    std::string out = parameter(key);
+    if (out == std::string("null")) {
+      if (contents_.empty()) {
+        return "null";
+      }
+      out = contents_[0].get()->purelist_parameter(key);
+      for (size_t i = 1;  i < contents_.size();  i++) {
+        if (!contents_[i].get()->parameter_equals(key, out)) {
+          return "null";
+        }
+      }
+      return out;
+    }
+    else {
+      return out;
+    }
+  }
+
+  bool
+  UnionForm::purelist_isregular() const {
+    for (auto content : contents_) {
+      if (!content.get()->purelist_isregular()) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  int64_t
+  UnionForm::purelist_depth() const {
+    bool first = true;
+    int64_t out = -1;
+    for (auto content : contents_) {
+      if (first) {
+        first = false;
+        out = content.get()->purelist_depth();
+      }
+      else if (out != content.get()->purelist_depth()) {
+        return -1;
+      }
+    }
+    return out;
+  }
+
+  const std::pair<int64_t, int64_t>
+  UnionForm::minmax_depth() const {
+    if (contents_.empty()) {
+      return std::pair<int64_t, int64_t>(0, 0);
+    }
+    int64_t min = kMaxInt64;
+    int64_t max = 0;
+    for (auto content : contents_) {
+      std::pair<int64_t, int64_t> minmax = content.get()->minmax_depth();
+      if (minmax.first < min) {
+        min = minmax.first;
+      }
+      if (minmax.second > max) {
+        max = minmax.second;
+      }
+    }
+    return std::pair<int64_t, int64_t>(min, max);
+  }
+
+  const std::pair<bool, int64_t>
+  UnionForm::branch_depth() const {
+    bool anybranch = false;
+    int64_t mindepth = -1;
+    for (auto content : contents_) {
+      std::pair<bool, int64_t> content_depth = content.get()->branch_depth();
+      if (mindepth == -1) {
+        mindepth = content_depth.second;
+      }
+      if (content_depth.first  ||  mindepth != content_depth.second) {
+        anybranch = true;
+      }
+      if (mindepth > content_depth.second) {
+        mindepth = content_depth.second;
+      }
+    }
+    return std::pair<bool, int64_t>(anybranch, mindepth);
+  }
+
+  int64_t
+  UnionForm::numfields() const {
+    return (int64_t)keys().size();
+  }
+
+  int64_t
+  UnionForm::fieldindex(const std::string& key) const {
+    throw std::invalid_argument(
+      "UnionForm breaks the one-to-one relationship "
+      "between fieldindexes and keys");
+  }
+
+  const std::string
+  UnionForm::key(int64_t fieldindex) const {
+    throw std::invalid_argument(
+      "UnionForm breaks the one-to-one relationship "
+      "between fieldindexes and keys");
+  }
+
+  bool
+  UnionForm::haskey(const std::string& key) const {
+    for (auto x : keys()) {
+      if (x == key) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  const std::vector<std::string>
+  UnionForm::keys() const {
+    std::vector<std::string> out;
+    if (contents_.empty()) {
+      return out;
+    }
+    out = contents_[0].get()->keys();
+    for (size_t i = 1;  i < contents_.size();  i++) {
+      std::vector<std::string> tmp = contents_[i].get()->keys();
+      for (int64_t j = (int64_t)out.size() - 1;  j >= 0;  j--) {
+        bool found = false;
+        for (size_t k = 0;  k < tmp.size();  k++) {
+          if (tmp[k] == out[(size_t)j]) {
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          out.erase(out.begin() + (size_t)j);
+        }
+      }
+    }
+    return out;
+  }
+
+  bool
+  UnionForm::equal(const FormPtr& other,
+                   bool check_identities,
+                   bool check_parameters) const {
+    if (check_identities  &&
+        has_identities_ != other.get()->has_identities()) {
+      return false;
+    }
+    if (check_parameters  &&
+        !util::parameters_equal(parameters_, other.get()->parameters())) {
+      return false;
+    }
+    if (UnionForm* t = dynamic_cast<UnionForm*>(other.get())) {
+      if (tags_ != t->tags()  ||  index_ != t->index()) {
+        return false;
+      }
+      if (numcontents() != t->numcontents()) {
+        return false;
+      }
+      for (int64_t i = 0;  i < numcontents();  i++) {
+        if (!content(i).get()->equal(t->content(i),
+                                     check_identities,
+                                     check_parameters)) {
+          return false;
+        }
+      }
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
+  ////////// UnionArray
+
   template <>
   const IndexOf<int32_t>
   UnionArrayOf<int8_t, int32_t>::sparse_index(int64_t len) {
@@ -544,13 +808,43 @@ namespace awkward {
   template <typename T, typename I>
   const TypePtr
   UnionArrayOf<T, I>::type(const util::TypeStrs& typestrs) const {
-    std::vector<TypePtr> types;
-    for (auto item : contents_) {
-      types.push_back(item.get()->type(typestrs));
+    return form(true).get()->type(typestrs);
+  }
+
+  template <typename T, typename I>
+  const FormPtr
+  UnionArrayOf<T, I>::form(bool materialize) const {
+    std::vector<FormPtr> contents;
+    for (auto x : contents_) {
+      contents.push_back(x.get()->form(materialize));
     }
-    return std::make_shared<UnionType>(parameters_,
-                                       util::gettypestr(parameters_, typestrs),
-                                       types);
+    return std::make_shared<UnionForm>(identities_.get() != nullptr,
+                                       parameters_,
+                                       tags_.form(),
+                                       index_.form(),
+                                       contents);
+  }
+
+  template <typename T, typename I>
+  bool
+  UnionArrayOf<T, I>::has_virtual_form() const {
+    for (auto x : contents_) {
+      if (x.get()->has_virtual_form()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  template <typename T, typename I>
+  bool
+  UnionArrayOf<T, I>::has_virtual_length() const {
+    for (auto x : contents_) {
+      if (x.get()->has_virtual_length()) {
+        return true;
+      }
+    }
+    return false;
   }
 
   template <typename T, typename I>
@@ -863,95 +1157,6 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  const std::string
-  UnionArrayOf<T, I>::purelist_parameter(const std::string& key) const {
-    std::string out = parameter(key);
-    if (out == std::string("null")) {
-      if (contents_.empty()) {
-        return "null";
-      }
-      out = contents_[0].get()->purelist_parameter(key);
-      for (size_t i = 1;  i < contents_.size();  i++) {
-        if (!contents_[i].get()->parameter_equals(key, out)) {
-          return "null";
-        }
-      }
-      return out;
-    }
-    else {
-      return out;
-    }
-  }
-
-  template <typename T, typename I>
-  bool
-  UnionArrayOf<T, I>::purelist_isregular() const {
-    for (auto content : contents_) {
-      if (!content.get()->purelist_isregular()) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  template <typename T, typename I>
-  int64_t
-  UnionArrayOf<T, I>::purelist_depth() const {
-    bool first = true;
-    int64_t out = -1;
-    for (auto content : contents_) {
-      if (first) {
-        first = false;
-        out = content.get()->purelist_depth();
-      }
-      else if (out != content.get()->purelist_depth()) {
-        return -1;
-      }
-    }
-    return out;
-  }
-
-  template <typename T, typename I>
-  const std::pair<int64_t, int64_t>
-  UnionArrayOf<T, I>::minmax_depth() const {
-    if (contents_.empty()) {
-      return std::pair<int64_t, int64_t>(0, 0);
-    }
-    int64_t min = kMaxInt64;
-    int64_t max = 0;
-    for (auto content : contents_) {
-      std::pair<int64_t, int64_t> minmax = content.get()->minmax_depth();
-      if (minmax.first < min) {
-        min = minmax.first;
-      }
-      if (minmax.second > max) {
-        max = minmax.second;
-      }
-    }
-    return std::pair<int64_t, int64_t>(min, max);
-  }
-
-  template <typename T, typename I>
-  const std::pair<bool, int64_t>
-  UnionArrayOf<T, I>::branch_depth() const {
-    bool anybranch = false;
-    int64_t mindepth = -1;
-    for (auto content : contents_) {
-      std::pair<bool, int64_t> content_depth = content.get()->branch_depth();
-      if (mindepth == -1) {
-        mindepth = content_depth.second;
-      }
-      if (content_depth.first  ||  mindepth != content_depth.second) {
-        anybranch = true;
-      }
-      if (mindepth > content_depth.second) {
-        mindepth = content_depth.second;
-      }
-    }
-    return std::pair<bool, int64_t>(anybranch, mindepth);
-  }
-
-  template <typename T, typename I>
   int64_t
   UnionArrayOf<T, I>::numfields() const {
     return (int64_t)keys().size();
@@ -961,7 +1166,7 @@ namespace awkward {
   int64_t
   UnionArrayOf<T, I>::fieldindex(const std::string& key) const {
     throw std::invalid_argument(
-      "UnionArray breaks the one-to-one relationship "
+      "UnionForm breaks the one-to-one relationship "
       "between fieldindexes and keys");
   }
 
@@ -969,7 +1174,7 @@ namespace awkward {
   const std::string
   UnionArrayOf<T, I>::key(int64_t fieldindex) const {
     throw std::invalid_argument(
-      "UnionArray breaks the one-to-one relationship "
+      "UnionForm breaks the one-to-one relationship "
       "between fieldindexes and keys");
   }
 
@@ -1146,6 +1351,10 @@ namespace awkward {
   bool
   UnionArrayOf<T, I>::mergeable(const ContentPtr& other,
                                 bool mergebool) const {
+    if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
+      return mergeable(raw->array(), mergebool);
+    }
+
     if (!parameters_equal(other.get()->parameters())) {
       return false;
     }
@@ -1155,6 +1364,10 @@ namespace awkward {
   template <typename T, typename I>
   const ContentPtr
   UnionArrayOf<T, I>::reverse_merge(const ContentPtr& other) const {
+    if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
+      return reverse_merge(raw->array());
+    }
+
     int64_t theirlength = other.get()->length();
     int64_t mylength = length();
     Index8 tags(theirlength + mylength);
@@ -1235,6 +1448,10 @@ namespace awkward {
   template <typename T, typename I>
   const ContentPtr
   UnionArrayOf<T, I>::merge(const ContentPtr& other) const {
+    if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
+      return merge(raw->array());
+    }
+
     if (!parameters_equal(other.get()->parameters())) {
       return merge_as_union(other);
     }

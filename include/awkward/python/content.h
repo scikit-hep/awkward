@@ -22,12 +22,16 @@
 #include "awkward/array/RecordArray.h"
 #include "awkward/array/RegularArray.h"
 #include "awkward/array/UnionArray.h"
+#include "awkward/array/VirtualArray.h"
 
 namespace py = pybind11;
 namespace ak = awkward;
 
 py::object
 box(const std::shared_ptr<ak::Content>& content);
+
+std::shared_ptr<ak::Content>
+unbox_content(const py::handle& obj);
 
 template <typename T>
 std::string
@@ -171,5 +175,9 @@ py::class_<ak::UnionArrayOf<T, I>,
            std::shared_ptr<ak::UnionArrayOf<T, I>>,
            ak::Content>
   make_UnionArrayOf(const py::handle& m, const std::string& name);
+
+/// @brief Makes a VirtualArray in Python that mirrors the one in C++.
+py::class_<ak::VirtualArray, std::shared_ptr<ak::VirtualArray>, ak::Content>
+  make_VirtualArray(const py::handle& m, const std::string& name);
 
 #endif // AWKWARDPY_CONTENT_H_
