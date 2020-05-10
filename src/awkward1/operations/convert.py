@@ -1361,15 +1361,91 @@ def to_arrow(layout):
 def from_arrow(array):
     import pyarrow
 
-    def recurse(array, mask=None):
+    def recurse(array):
         
         if isinstance(array, pyarrow.Tensor):
             out = awkward1.layout.NumpyArray(array.to_numpy())
             return out
 
+        elif isinstance(array, pyarrow.StringArray):
+            mask = array.buffers()[0]        
+            
+            offsets = numpy.frombuffer(array.buffers()[1], dtype=numpy.int32)
+            contents = numpy.frombuffer(array.buffers()[2], dtype=numpy.uint8)
+          
+            offsets = awkward1.layout.Index32(offsets)
+            contents =  awkward1.layout.NumpyArray(contents)
+          
+            contents.setparameter("__array__", "char")
+            awk_arr = awkward1.layout.ListOffsetArray32(offsets, contents)
+            awk_arr.setparameter("__array__", "string") 
+            
+            if mask is None:
+                return awk_arr
+            else:
+                awk_mask = awkward1.layout.IndexU8(numpy.frombuffer(mask.to_pybytes(), dtype=numpy.uint8))
+                return awkward1.layout.BitMaskedArray(awk_mask, awk_arr, True, len(offsets) - 1, True)
+        
+        elif isinstance(array, pyarrow.LargeStringArray):
+            mask = array.buffers()[0]        
+            
+            offsets = numpy.frombuffer(array.buffers()[1], dtype=numpy.int64)
+            contents = numpy.frombuffer(array.buffers()[2], dtype=numpy.uint8)
+          
+            offsets = awkward1.layout.Index64(offsets)
+            contents =  awkward1.layout.NumpyArray(contents)
+          
+            contents.setparameter("__array__", "char")
+            awk_arr = awkward1.layout.ListOffsetArray64(offsets, contents)
+            awk_arr.setparameter("__array__", "string") 
+            
+            if mask is None:
+                return awk_arr
+            else:
+                awk_mask = awkward1.layout.IndexU8(numpy.frombuffer(mask.to_pybytes(), dtype=numpy.uint8))
+                return awkward1.layout.BitMaskedArray(awk_mask, awk_arr, True, len(offsets) - 1, True)
+        
+        elif isinstance(array, pyarrow.BinaryArray):
+            mask = array.buffers()[0]        
+            
+            offsets = numpy.frombuffer(array.buffers()[1], dtype=numpy.int32)
+            contents = numpy.frombuffer(array.buffers()[2], dtype=numpy.uint8)
+          
+            offsets = awkward1.layout.Index32(offsets)
+            contents =  awkward1.layout.NumpyArray(contents)
+          
+            contents.setparameter("__array__", "byte")
+            awk_arr = awkward1.layout.ListOffsetArray32(offsets, contents)
+            awk_arr.setparameter("__array__", "bytestring") 
+            
+            if mask is None:
+                return awk_arr
+            else:
+                awk_mask = awkward1.layout.IndexU8(numpy.frombuffer(mask.to_pybytes(), dtype=numpy.uint8))
+                return awkward1.layout.BitMaskedArray(awk_mask, awk_arr, True, len(offsets) - 1, True)
+        
+        elif isinstance(array, pyarrow.LargeBinaryArray):
+            mask = array.buffers()[0]        
+            
+            offsets = numpy.frombuffer(array.buffers()[1], dtype=numpy.int32)
+            contents = numpy.frombuffer(array.buffers()[2], dtype=numpy.uint8)
+          
+            offsets = awkward1.layout.Index64(offsets)
+            contents =  awkward1.layout.NumpyArray(contents)
+          
+            contents.setparameter("__array__", "byte")
+            awk_arr = awkward1.layout.ListOffsetArray64(offsets, contents)
+            awk_arr.setparameter("__array__", "bytestring") 
+            
+            if mask is None:
+                return awk_arr
+            else:
+                awk_mask = awkward1.layout.IndexU8(numpy.frombuffer(mask.to_pybytes(), dtype=numpy.uint8))
+                return awkward1.layout.BitMaskedArray(awk_mask, awk_arr, True, len(offsets) - 1, True)
+
         elif isinstance(array, pyarrow.ListArray):
             mask = array.buffers()[0]
-            offsets = awkward1.layout.Index32(array.offsets.to_numpy())
+            offsets = awkward1.layout.Index32(numpy.frombuffer(array.buffers()[1], dtype=numpy.int32))
             contents = recurse(array.values)
             awk_arr = awkward1.layout.ListOffsetArray32(offsets, contents)
             if mask is None:
@@ -1380,7 +1456,7 @@ def from_arrow(array):
 
         elif isinstance(array, pyarrow.LargeListArray):
             mask = array.buffers()[0]   
-            offsets = awkward1.layout.Index64(array.offsets.to_numpy())
+            offsets = awkward1.layout.Index64(numpy.frombuffer(array.buffers()[1], dtype=numpy.int64))
             contents = recurse(array.values)
             awk_arr = awkward1.layout.ListOffsetArray64(offsets, contents)
             if mask is None:
@@ -1412,7 +1488,7 @@ def from_arrow(array):
                 return awkward1.layout.BitMaskedArray(awk_mask, awk_arr, True, len(awk_arr), True) 
 
         elif isinstance(array, pyarrow.ChunkedArray):
-            return [recurse(array.chunk(x)) for x in range(array.num_chunks)]
+            awk_arr = awkward1.operations.structure.concatenate([recurse(array.chunk(x)) for x in range(array.num_chunks)])
         
         elif isinstance(array, pyarrow.RecordBatch):
             mask = array.buffers()[0]
@@ -1439,7 +1515,7 @@ def from_arrow(array):
 
         elif isinstance(array, pyarrow.lib.Array):
             mask = array.buffers()[0]            
-            awk_arr = awkward1.layout.NumpyArray(array.to_numpy())
+            awk_arr = awkward1.layout.NumpyArray(array.to_numpy(zero_copy_only=False))
             if mask is None:
                 return awk_arr
             else:
