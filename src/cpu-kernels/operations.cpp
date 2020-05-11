@@ -3659,9 +3659,6 @@ template <typename OUT>
 ERROR awkward_argsort(
   OUT* toptr,
   const size_t* fromindex,
-  const int64_t* starts,
-  const int64_t* parents,
-  int64_t parentsoffset,
   int64_t length) {
   for (int64_t i = 0;  i < length;  i++) {
     toptr[i] = fromindex[i];
@@ -3671,16 +3668,10 @@ ERROR awkward_argsort(
 ERROR awkward_argsort_64(
   int64_t* toptr,
   const size_t* fromindex,
-  const int64_t* starts,
-  const int64_t* parents,
-  int64_t parentsoffset,
   int64_t length) {
   return awkward_argsort<int64_t>(
     toptr,
     fromindex,
-    starts,
-    parents,
-    parentsoffset,
     length);
 }
 

@@ -866,9 +866,6 @@ namespace awkward {
       struct Error err = awkward_argsort_64(
         ptr.get(),
         &result[0],
-        starts.ptr().get(),
-        parents.ptr().get(),
-        parents.offset(),
         length);
       util::handle_error(err, classname(), nullptr);
 

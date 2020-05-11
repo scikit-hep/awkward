@@ -1330,9 +1330,6 @@ extern "C" {
     awkward_argsort_64(
       int64_t* toptr,
       const size_t* fromindex,
-      const int64_t* starts,
-      const int64_t* parents,
-      int64_t parentsoffset,
       int64_t length);
 
   EXPORT_SYMBOL struct Error
