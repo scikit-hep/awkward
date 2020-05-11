@@ -211,7 +211,7 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
         "numba_extensions": ["init = awkward1._connect._numba:register"]
       },
       test_suite = "tests",
-      python_requires = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*",
+      python_requires = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*",
       install_requires = install_requires,
       tests_require = extras["test"],
       extras_require = extras,
