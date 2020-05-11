@@ -991,7 +991,8 @@ namespace awkward {
                    const Index64& parents,
                    int64_t outlength,
                    bool ascending,
-                   bool stable) const override {
+                   bool stable,
+                   bool keepdims) const override {
       std::shared_ptr<int64_t> ptr(
         new int64_t[(size_t)length_], util::array_deleter<int64_t>());
       std::vector<size_t> result(length_);

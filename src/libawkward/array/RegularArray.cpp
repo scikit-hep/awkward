@@ -1042,13 +1042,15 @@ namespace awkward {
                              const Index64& parents,
                              int64_t outlength,
                              bool ascending,
-                             bool stable) const {
+                             bool stable,
+                             bool keepdims) const {
     return toListOffsetArray64(true).get()->argsort_next(negaxis,
                                                          starts,
                                                          parents,
                                                          outlength,
                                                          ascending,
-                                                         stable);
+                                                         stable,
+                                                         keepdims);
   }
 
   const ContentPtr

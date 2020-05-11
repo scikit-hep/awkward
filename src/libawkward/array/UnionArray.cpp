@@ -1851,7 +1851,8 @@ namespace awkward {
                                    const Index64& parents,
                                    int64_t outlength,
                                    bool ascending,
-                                   bool stable) const {
+                                   bool stable,
+                                   bool keepdims) const {
     ContentPtr simplified = simplify_uniontype(true);
     if (dynamic_cast<UnionArray8_32*>(simplified.get())  ||
         dynamic_cast<UnionArray8_U32*>(simplified.get())  ||
@@ -1863,7 +1864,8 @@ namespace awkward {
                                           parents,
                                           outlength,
                                           ascending,
-                                          stable);
+                                          stable,
+                                          keepdims);
   }
 
   template <typename T, typename I>

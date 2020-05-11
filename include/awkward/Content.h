@@ -717,7 +717,8 @@ namespace awkward {
                    const Index64& parents,
                    int64_t outlength,
                    bool ascending,
-                   bool stable) const = 0;
+                   bool stable,
+                   bool keepdims) const = 0;
 
     /// @brief A (possibly nested) array of integers indicating the
     /// positions of elements within each nested list.

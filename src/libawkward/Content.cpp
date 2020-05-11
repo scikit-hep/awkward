@@ -807,7 +807,8 @@ namespace awkward {
                                    parents,
                                    1,
                                    ascending,
-                                   stable);
+                                   stable,
+                                   true);
 
     return next.get()->getitem_at_nowrap(0);
   }

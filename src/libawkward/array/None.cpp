@@ -264,7 +264,8 @@ namespace awkward {
                      const Index64& parents,
                      int64_t outlength,
                      bool ascending,
-                     bool stable) const {
+                     bool stable,
+                     bool keepdims) const {
     throw std::runtime_error("undefined operation: None::argsort_next");
   }
 

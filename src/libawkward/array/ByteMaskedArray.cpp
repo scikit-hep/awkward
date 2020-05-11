@@ -1223,7 +1223,8 @@ namespace awkward {
                                 const Index64& parents,
                                 int64_t outlength,
                                 bool ascending,
-                                bool stable) const {
+                                bool stable,
+                                bool keepdims) const {
     int64_t numnull;
     struct Error err1 = awkward_bytemaskedarray_numnull(
       &numnull,
@@ -1254,7 +1255,8 @@ namespace awkward {
                                               nextparents,
                                               outlength,
                                               ascending,
-                                              stable);
+                                              stable,
+                                              keepdims);
 
     std::pair<bool, int64_t> branchdepth = branch_depth();
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {

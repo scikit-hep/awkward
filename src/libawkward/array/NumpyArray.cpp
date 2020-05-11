@@ -2788,7 +2788,8 @@ namespace awkward {
                            const Index64& parents,
                            int64_t outlength,
                            bool ascending,
-                           bool stable) const {
+                           bool stable,
+                           bool keepdims) const {
     if (shape_.empty()) {
       throw std::runtime_error("attempting to argsort a scalar");
     }
@@ -2798,7 +2799,8 @@ namespace awkward {
                                                   parents,
                                                   outlength,
                                                   ascending,
-                                                  stable);
+                                                  stable,
+                                                  keepdims);
     }
     else {
       std::shared_ptr<Content> out;
@@ -2889,7 +2891,7 @@ namespace awkward {
       else if (format_.compare("l") == 0) {
 #endif
         ptr = index_sort<int64_t>(reinterpret_cast<int64_t*>(ptr_.get()),
-                                  shape_[0],
+                                  length(),
                                   offset,
                                   starts,
                                   parents,
@@ -2950,25 +2952,19 @@ namespace awkward {
       out = std::make_shared<NumpyArray>(Identities::none(),
                                          util::Parameters(),
                                          ptr,
-                                         shape,
+                                         shape_,
                                          strides,
                                          0,
                                          itemsize,
                                          format);
 
-      Index64 outoffsets(outlength + 1);
-      struct Error err = awkward_listoffsetarray_local_outoffsets_64(
-        outoffsets.ptr().get(),
-        parents.ptr().get(),
-        parents.offset(),
-        parents.length(),
-        outlength);
-      util::handle_error(err, classname(), identities_.get());
+      if (keepdims) {
+        out = std::make_shared<RegularArray>(Identities::none(),
+                                             util::Parameters(),
+                                             out,
+                                             parents.length()/starts.length());
+      }
 
-      out = std::make_shared<ListOffsetArray64>(Identities::none(),
-                                                util::Parameters(),
-                                                outoffsets,
-                                                out);
       return out;
     }
   }

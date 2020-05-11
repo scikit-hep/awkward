@@ -300,7 +300,8 @@ namespace awkward {
                    const Index64& parents,
                    int64_t outlength,
                    bool ascending,
-                   bool stable) const override;
+                   bool stable,
+                   bool keepdims) const override;
 
 
     const ContentPtr

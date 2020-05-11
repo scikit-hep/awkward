@@ -490,9 +490,16 @@ namespace awkward {
                            const Index64& parents,
                            int64_t outlength,
                            bool ascending,
-                           bool stable) const {
+                           bool stable,
+                           bool keepdims) const {
     ContentPtr asnumpy = toNumpyArray("d", 8);
-    return asnumpy.get()->argsort_next(negaxis, starts, parents, outlength, ascending, stable);
+    return asnumpy.get()->argsort_next(negaxis,
+                                       starts,
+                                       parents,
+                                       outlength,
+                                       ascending,
+                                       stable,
+                                       keepdims);
   }
 
   const ContentPtr
