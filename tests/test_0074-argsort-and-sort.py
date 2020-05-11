@@ -56,6 +56,20 @@ def test_IndexedOffsetArray():
                             [  5.5, None, None ],
                             [ -4.4, -5.5, -6.6 ]]).layout
 
+# np.sort(array, 1)
+# array([[   1.1,    2.2,    3.3],
+#        [1000. , 1000. , 1000. ],
+#        [   4.4,    5.5, 1000. ],
+#        [   5.5, 1000. , 1000. ],
+#        [  -6.6,   -5.5,   -4.4]])
+
+    assert awkward1.to_list(array.sort(1, True, False)) == [
+        [  1.1,  2.2,   3.3],
+        [ None, None, None ],
+        [  4.4,  5.5, None ],
+        [  5.5, None, None ],
+        [ -6.6, -5.5, -4.4 ]]
+
     assert awkward1.to_list(array.sort(1, False, False)) == [
         [  3.3,  2.2,  1.1 ],
         [ None, None, None ],
@@ -63,11 +77,46 @@ def test_IndexedOffsetArray():
         [  5.5, None, None ],
         [ -4.4, -5.5, -6.6 ]]
 
+# np.argsort(array, 1)
+# array([[1, 0, 2],
+#        [0, 1, 2],
+#        [0, 2, 1],
+#        [0, 1, 2],
+#        [2, 1, 0]])
+
+    assert awkward1.to_list(array.argsort(1, True, False)) == [
+        [    1,    0,    2 ],
+        [ None, None, None ],
+        [    0,    1, None ],
+        [    0, None, None ],
+        [    2,    1,    0 ]]
+
+# np.sort(array, 0)
+# array([[  -4.4,   -5.5,   -6.6],
+#        [   2.2,    1.1,    3.3],
+#        [   4.4, 1000. ,    5.5],
+#        [   5.5, 1000. , 1000. ],
+#        [1000. , 1000. , 1000. ]])
+
     assert awkward1.to_list(array.sort(0, True, False)) == [
         [ -4.4, -5.5, -6.6 ],
         [  2.2,  1.1,  3.3 ],
         [  4.4, None,  5.5 ],
         [  5.5, None, None ],
+        [ None, None, None ]]
+
+# np.argsort(array, 0)
+# array([[4, 4, 4],
+#        [0, 0, 0],
+#        [2, 1, 2],
+#        [3, 2, 1],
+#        [1, 3, 3]])
+
+    assert awkward1.to_list(array.argsort(0, True, False)) == [
+        [    3,    1,    2 ],
+        [    0,    0,    0 ],
+        [    1, None,    1 ],
+        [    2, None, None ],
         [ None, None, None ]]
 
     array3 = awkward1.Array([[ 2.2,  1.1,  3.3],
@@ -166,7 +215,7 @@ def test_3d():
         [[0, 1, 2, 3, 4],
          [0, 1, 2, 3, 4],
          [0, 1, 2, 3, 4]],
-         
+
         [[4, 3, 2, 1, 0],
          [4, 3, 2, 1, 0],
          [4, 3, 2, 1, 0]]]

@@ -3664,10 +3664,7 @@ ERROR awkward_argsort(
   int64_t parentsoffset,
   int64_t length) {
   for (int64_t i = 0;  i < length;  i++) {
-    int64_t parent = parents[parentsoffset + i];
-    int64_t start = starts[parent];
-
-    toptr[i] = fromindex[i] - start;
+    toptr[i] = fromindex[i];
   }
   return success();
 }

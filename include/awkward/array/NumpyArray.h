@@ -822,7 +822,6 @@ namespace awkward {
         new int64_t[(size_t)length], util::array_deleter<int64_t>());
       std::vector<size_t> result(length);
       std::iota(result.begin(), result.end(), 0);
-      int64_t index(0);
 
       std::vector<int64_t> unique_parents;
       std::vector<int64_t> ranges(parents.length() + 1);
@@ -840,26 +839,28 @@ namespace awkward {
         }
       }
 
-      for(int64_t i = 0; i < unique_parents.size() - 1; i++) {
+      for (int64_t i = 0; i < unique_parents.size() - 1; i++) {
         int64_t next_start = unique_parents[i];
         int64_t next_stop = unique_parents[i + 1];
 
-        if(ascending  &&  !stable) {
+        if (ascending  &&  !stable) {
           std::sort(result.begin() + next_start, result.begin() + next_stop,
             [&data](size_t i1, size_t i2) {return data[i1] < data[i2];});
         }
-        else if(!ascending  &&  !stable) {
+        else if (!ascending  &&  !stable) {
           std::sort(result.begin() + next_start, result.begin() + next_stop,
             [&data](size_t i1, size_t i2) {return data[i1] > data[i2];});
         }
-        else if(ascending  &&  stable) {
+        else if (ascending  &&  stable) {
           std::stable_sort(result.begin() + next_start, result.begin() + next_stop,
             [&data](size_t i1, size_t i2) {return data[i1] < data[i2];});
         }
-        else if(!ascending  &&  stable) {
+        else if (!ascending  &&  stable) {
           std::stable_sort(result.begin() + next_start, result.begin() + next_stop,
             [&data](size_t i1, size_t i2) {return data[i1] > data[i2];});
         }
+        std::transform(result.begin() + next_start, result.begin() + next_stop, result.begin() + next_start,
+                   [&next_start](size_t i) -> size_t { return i - next_start; });
       }
 
       struct Error err = awkward_argsort_64(
@@ -886,7 +887,6 @@ namespace awkward {
         new T[(size_t)parents.length()], util::array_deleter<T>());
       std::vector<size_t> result(parents.length());
       std::iota(result.begin(), result.end(), 0);
-      int64_t index(0);
 
       std::vector<int64_t> unique_parents;
       std::vector<int64_t> ranges(parents.length() + 1);
@@ -904,23 +904,23 @@ namespace awkward {
         }
       }
 
-      for(int64_t i = 0; i < unique_parents.size() - 1; i++) {
+      for (int64_t i = 0; i < unique_parents.size() - 1; i++) {
         int64_t next_start = unique_parents[i];
         int64_t next_stop = unique_parents[i + 1];
 
-        if(ascending  &&  !stable) {
+        if (ascending  &&  !stable) {
           std::sort(result.begin() + next_start, result.begin() + next_stop,
             [&data](size_t i1, size_t i2) {return data[i1] < data[i2];});
         }
-        else if(!ascending  &&  !stable) {
+        else if (!ascending  &&  !stable) {
           std::sort(result.begin() + next_start, result.begin() + next_stop,
             [&data](size_t i1, size_t i2) {return data[i1] > data[i2];});
         }
-        else if(ascending  &&  stable) {
+        else if (ascending  &&  stable) {
           std::stable_sort(result.begin() + next_start, result.begin() + next_stop,
             [&data](size_t i1, size_t i2) {return data[i1] < data[i2];});
         }
-        else if(!ascending  &&  stable) {
+        else if (!ascending  &&  stable) {
           std::stable_sort(result.begin() + next_start, result.begin() + next_stop,
             [&data](size_t i1, size_t i2) {return data[i1] > data[i2];});
         }
