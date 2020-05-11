@@ -75,12 +75,6 @@ def test_IndexedOffsetArray():
         [  5.5 ],
         [ -4.4, -5.5, -6.6 ]]
 
-# array([list([2.2, 1.1, 3.3]), list([]), list([4.4, 5.5]), list([5.5]),
-#        list([-4.4, -5.5, -6.6])], dtype=object)
-# np.sort(array, axis=0)
-# array([list([]), list([-4.4, -5.5, -6.6]), list([2.2, 1.1, 3.3]),
-#        list([4.4, 5.5]), list([5.5])], dtype=object)
-
     assert awkward1.to_list(array3.sort(0, True, False)) == [
         [ -4.4, -5.5, -6.6 ],
         [],
@@ -88,12 +82,51 @@ def test_IndexedOffsetArray():
         [  4.4 ],
         [  5.5, 5.5, 3.3 ]]
 
-    # FIXME:
+#FIXME: Based on Numpy list sorting:
+#
+# array([list([2.2, 1.1, 3.3]), list([]), list([4.4, 5.5]), list([5.5]),
+#        list([-4.4, -5.5, -6.6])], dtype=object)
+# np.sort(array, axis=0)
+# array([list([]), list([-4.4, -5.5, -6.6]), list([2.2, 1.1, 3.3]),
+#        list([4.4, 5.5]), list([5.5])], dtype=object)
+#
+# the result should be:
+    #
     # [[ -4.4, -5.5, -6.6 ],
     #  [  2.2,  1.1,  3.3 ],
     #  [  4.4,  5.5 ],
     #  [  5.5 ],
     #  []]
+
+# This can be done following the steps: pad, sort,
+# and flatten to strip off the None's
+#
+    array4 = array3.rpad(3, 1)
+    assert awkward1.to_list(array4) == [
+        [2.2, 1.1, 3.3],
+        [None, None, None],
+        [4.4, 5.5, None],
+        [5.5, None, None],
+        [-4.4, -5.5, -6.6]]
+
+    array5 = array4.sort(0, True, False)
+    assert awkward1.to_list(array5.sort(0, True, False)) == [
+        [-4.4, -5.5, -6.6],
+        [2.2, 1.1, 3.3],
+        [4.4, 5.5, None],
+        [5.5, None, None],
+        [None, None, None]]
+
+# flatten does not strip off the None's
+# and is not allowed to do this:
+#
+    # array6 = array5.flatten(0)
+    # assert awkward1.to_list(array6) == [
+    #     [ -4.4, -5.5, -6.6 ],
+    #     [  2.2,  1.1,  3.3 ],
+    #     [  4.4,  5.5 ],
+    #     [  5.5 ],
+    #     []]
 
 # #     assert awkward1.to_list(array.argsort(1, True, False)) == [[1, 0, 2], [], [0, 1], [0], [2, 1, 0]]
 # #     assert awkward1.to_list(array.argsort(0, True, False)) == [[3, 0, 1, 2], [2, 0, 1], [1, 0]]
