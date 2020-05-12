@@ -735,19 +735,14 @@ namespace awkward {
 
   const ContentPtr
   RecordArray::carry(const Index64& carry) const {
-    ContentPtrVec contents;
-    for (auto content : contents_) {
-      contents.push_back(content.get()->carry(carry));
-    }
     IdentitiesPtr identities(nullptr);
     if (identities_.get() != nullptr) {
       identities = identities_.get()->getitem_carry_64(carry);
     }
-    return std::make_shared<RecordArray>(identities,
-                                         parameters_,
-                                         contents,
-                                         recordlookup_,
-                                         carry.length());
+    return std::make_shared<IndexedArray64>(identities,
+                                            util::Parameters(),
+                                            carry,
+                                            shallow_copy());
   }
 
   int64_t
