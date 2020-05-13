@@ -1489,7 +1489,7 @@ def from_arrow(obj):
             assert getattr(tpe, "num_buffers", 2) == 2
             mask = buffers.pop(0)
             offsets = awkward1.layout.Index32(
-                numpy.frombuffer(buffers.pop(0), dtype=numpy.int64)[:length + 1])
+                numpy.frombuffer(buffers.pop(0), dtype=numpy.int32)[:length + 1])
             content = popbuffers(None if array is None else array.flatten(),
                                  tpe.value_type,
                                  buffers,
@@ -1709,10 +1709,9 @@ def from_arrow(obj):
         elif tpe == pyarrow.bool_():
             assert getattr(tpe, "num_buffers", 2) == 2
             mask = buffers.pop(0)
-            out = numpy.unpackbits(numpy.frombuffer(
-                buffers.pop(0), dtype=numpy.uint8))
-            out = out.reshape(-1, 8)[:, ::-1].reshape(-1)[:length]
-            out = awkward1.layout.NumpyArray(out)    # lsborder=True
+            data = buffers.pop(0)
+            out = numpy.frombuffer(data, dtype=numpy.uint8)
+            out = awkward1.layout.NumpyArray(out)
             if mask is not None:
                 mask = numpy.frombuffer(mask, dtype=numpy.uint8)
                 return awkward1.layout.BitMaskedArray(mask,

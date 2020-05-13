@@ -160,6 +160,9 @@ def test_toarrow():
     assert awkward1.to_arrow(ioa).to_pylist() == awkward1.to_list(ioa)
 
 def test_fromarrow():
+    boolarray = awkward1.layout.NumpyArray(numpy.array([True, True, True, False, False, True, False, True, False, True]))
+    assert awkward1.to_list(awkward1.from_arrow(awkward1.to_arrow(boolarray))) == awkward1.to_list(boolarray)
+
     content = awkward1.layout.NumpyArray(
         numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10]))
     assert awkward1.to_list(awkward1.from_arrow(awkward1.to_arrow(content))) == awkward1.to_list(content)
@@ -189,3 +192,30 @@ def test_fromarrow():
         numpy.array([0, 1, 0, 1, 2, 2, 4, 3], dtype=numpy.int32))
     array = awkward1.layout.UnionArray8_32(tags, index, [content0, content])
     assert awkward1.to_list(awkward1.from_arrow(awkward1.to_arrow(array))) == awkward1.to_list(array)
+
+def test_chunkedarray():
+    a = pyarrow.chunked_array([pyarrow.array([1.1, 2.2, 3.3]), pyarrow.array([], pyarrow.float64()), pyarrow.array([4.4, 5.5]), pyarrow.array([6.6]), pyarrow.array([], pyarrow.float64()), pyarrow.array([], pyarrow.float64()), pyarrow.array([7.7, 8.8, 9.9])])
+    assert a.to_pylist() == [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]
+    assert awkward1.to_list(awkward1.from_arrow(a)) == [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]
+
+def test_recordbatch():
+    a = pyarrow.RecordBatch.from_arrays(
+            [pyarrow.array([1.1, 2.2, 3.3, 4.4, 5.5]),
+             pyarrow.array([[1, 2, 3], [], [], [4, 5], [6]])],
+            ["a", "b"])
+    assert awkward1.to_list(awkward1.from_arrow(a)) == [{"a": 1.1, "b": [1, 2, 3]}, {"a": 2.2, "b": []}, {"a": 3.3, "b": []}, {"a": 4.4, "b": [4, 5]}, {"a": 5.5, "b": [6]}]
+
+    a = pyarrow.RecordBatch.from_arrays(
+            [pyarrow.array([1.1, 2.2, 3.3, None, 5.5]),
+             pyarrow.array([[1, None, 3], [], [], [4, 5], [6]])],
+            ["a", "b"])
+    assert awkward1.to_list(awkward1.from_arrow(a)) == [{"a": 1.1, "b": [1, None, 3]}, {"a": 2.2, "b": []}, {"a": 3.3, "b": []}, {"a": None, "b": [4, 5]}, {"a": 5.5, "b": [6]}]
+
+    a = pyarrow.RecordBatch.from_arrays(
+            [pyarrow.array([1.1, 2.2, 3.3, None, 5.5]),
+             pyarrow.array([[1, 2, 3], [], [4, 5], [None], [6]]),
+             pyarrow.array([{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}, {"x": 4, "y": None}, {"x": 5, "y": 5.5}]),
+             pyarrow.array([{"x": 1, "y": 1.1}, None, None, {"x": 4, "y": None}, {"x": 5, "y": 5.5}]),
+             pyarrow.array([[{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}], [], [{"x": 4, "y": None}, {"x": 5, "y": 5.5}], [None], [{"x": 6, "y": 6.6}]])],
+            ["a", "b", "c", "d", "e"])
+    assert awkward1.to_list(awkward1.from_arrow(a)) == [{"a": 1.1, "b": [1, 2, 3], "c": {"x": 1, "y": 1.1}, "d": {"x": 1, "y": 1.1}, "e": [{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}]}, {"a": 2.2, "b": [], "c": {"x": 2, "y": 2.2}, "d": None, "e": []}, {"a": 3.3, "b": [4, 5], "c": {"x": 3, "y": 3.3}, "d": None, "e": [{"x": 4, "y": None}, {"x": 5, "y": 5.5}]}, {"a": None, "b": [None], "c": {"x": 4, "y": None}, "d":{"x": 4, "y": None}, "e": [None]}, {"a": 5.5, "b": [6], "c": {"x": 5, "y": 5.5}, "d": {"x": 5, "y": 5.5}, "e": [{"x": 6, "y": 6.6}]}]

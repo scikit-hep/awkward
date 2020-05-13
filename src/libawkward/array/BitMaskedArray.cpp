@@ -271,7 +271,7 @@ namespace awkward {
       mask_.ptr().get(),
       mask_.offset(),
       mask_.length(),
-      valid_when_,
+      false,
       lsb_order_);
     util::handle_error(err, classname(), identities_.get());
     return std::make_shared<ByteMaskedArray>(
