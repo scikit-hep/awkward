@@ -18,7 +18,6 @@ import awkward1.layout
 import awkward1._ext
 import awkward1._util
 
-
 def from_numpy(array, regulararray=False, highlevel=True, behavior=None):
     """
     Args:
@@ -1161,8 +1160,10 @@ def regularize_numpyarray(array, allow_empty=True, highlevel=True):
     else:
         return out
 
-def to_arrow(layout):
+def to_arrow(array):
     import pyarrow
+
+    layout = to_layout(array)
 
     def recurse(layout, mask=None):
         if isinstance(layout, awkward1.layout.NumpyArray):
@@ -1189,6 +1190,9 @@ def to_arrow(layout):
                                  awkward1.layout.Index8,
                                  awkward1.layout.Index32,
                                  awkward1.layout.Index64)):
+            # usually, we wouldn't consider Indexes as "arrays" for conversion,
+            # but this is used to good effect in the DictionaryArray (below)
+
             numpy_arr = numpy.asarray(layout)
             if mask is not None:
                 return pyarrow.Array.from_buffers(
@@ -1338,7 +1342,7 @@ def to_arrow(layout):
         elif isinstance(layout, (awkward1.layout.UnionArray8_32,
                                  awkward1.layout.UnionArray8_64,
                                  awkward1.layout.UnionArray8_U32)):
-            values = [to_arrow(x) for x in layout.contents]
+            values = [recurse(x) for x in layout.contents]
             types = pyarrow.union(
                 pyarrow.struct([pyarrow.field(str(i), values[i].type)
                                   for i in range(len(values))]),
@@ -1430,7 +1434,7 @@ def to_arrow(layout):
 
     return recurse(layout)
 
-def from_arrow(obj):
+def from_arrow(obj, highlevel=True, behavior=None):
     import pyarrow
 
     def popbuffers(array, tpe, buffers, length):
@@ -1440,9 +1444,9 @@ def from_arrow(obj):
                                buffers,
                                length)
             if hasattr(tpe, "dictionary"):
-                content = from_arrow(tpe.dictionary)
+                content = recurse(tpe.dictionary)
             elif array is not None:
-                content = from_arrow(array.dictionary)
+                content = recurse(array.dictionary)
             else:
                 raise NotImplementedError(
                     "no way to access Arrow dictionary inside of UnionArray")
@@ -1461,7 +1465,7 @@ def from_arrow(obj):
                     awkward1.layout.Index32(index), content)
 
         elif isinstance(tpe, pyarrow.lib.StructType):
-            assert getattr(tpe, "num_buffers", 1) == 1
+            assert tpe.num_buffers == 1
             mask = buffers.pop(0)
             child_arrays = []
             keys = []
@@ -1486,7 +1490,7 @@ def from_arrow(obj):
                 return out
 
         elif isinstance(tpe, pyarrow.lib.ListType):
-            assert getattr(tpe, "num_buffers", 2) == 2
+            assert tpe.num_buffers == 2
             mask = buffers.pop(0)
             offsets = awkward1.layout.Index32(
                 numpy.frombuffer(buffers.pop(0), dtype=numpy.int32)[:length + 1])
@@ -1508,7 +1512,7 @@ def from_arrow(obj):
                 return out
 
         elif isinstance(tpe, pyarrow.lib.LargeListType):
-            assert getattr(tpe, "num_buffers", 2) == 2
+            assert tpe.num_buffers == 2
             mask = buffers.pop(0)
             offsets = awkward1.layout.Index64(
                 numpy.frombuffer(buffers.pop(0), dtype=numpy.int64)[:length + 1])
@@ -1530,7 +1534,7 @@ def from_arrow(obj):
                 return out
 
         elif isinstance(tpe, pyarrow.lib.UnionType) and tpe.mode == "sparse":
-            assert getattr(tpe, "num_buffers", 3) == 3
+            assert tpe.num_buffers == 3
             mask = buffers.pop(0)
             tags = numpy.frombuffer(buffers.pop(0), dtype=numpy.int8)[:length]
             assert buffers.pop(0) is None
@@ -1567,7 +1571,7 @@ def from_arrow(obj):
                 return out
 
         elif isinstance(tpe, pyarrow.lib.UnionType) and tpe.mode == "dense":
-            assert getattr(tpe, "num_buffers", 3) == 3
+            assert tpe.num_buffers == 3
             mask = buffers.pop(0)
             tags = numpy.frombuffer(buffers.pop(0), dtype=numpy.int8)[:length]
             index = numpy.frombuffer(
@@ -1603,7 +1607,7 @@ def from_arrow(obj):
                 return out
 
         elif tpe == pyarrow.string():
-            assert getattr(tpe, "num_buffers", 3) == 3
+            assert tpe.num_buffers == 3
             mask = buffers.pop(0)
 
             offsets = numpy.frombuffer(buffers.pop(0), dtype=numpy.int32)
@@ -1629,7 +1633,7 @@ def from_arrow(obj):
                                                       True)
 
         elif tpe == pyarrow.large_string():
-            assert getattr(tpe, "num_buffers", 3) == 3
+            assert tpe.num_buffers == 3
             mask = buffers.pop(0)
 
             offsets = numpy.frombuffer(buffers.pop(0), dtype=numpy.int64)
@@ -1655,7 +1659,7 @@ def from_arrow(obj):
                                                       True)
 
         elif tpe == pyarrow.binary():
-            assert getattr(tpe, "num_buffers", 3) == 3
+            assert tpe.num_buffers == 3
             mask = buffers.pop(0)
 
             offsets = numpy.frombuffer(buffers.pop(0), dtype=numpy.int32)
@@ -1681,7 +1685,7 @@ def from_arrow(obj):
                                                       True)
 
         elif tpe == pyarrow.large_binary():
-            assert getattr(tpe, "num_buffers", 3) == 3
+            assert tpe.num_buffers == 3
             mask = buffers.pop(0)
 
             offsets = numpy.frombuffer(buffers.pop(0), dtype=numpy.int64)
@@ -1707,7 +1711,7 @@ def from_arrow(obj):
                                                       True)
 
         elif tpe == pyarrow.bool_():
-            assert getattr(tpe, "num_buffers", 2) == 2
+            assert tpe.num_buffers == 2
             mask = buffers.pop(0)
             data = buffers.pop(0)
             out = numpy.frombuffer(data, dtype=numpy.uint8)
@@ -1723,7 +1727,7 @@ def from_arrow(obj):
                 return out
 
         elif isinstance(tpe, pyarrow.lib.DataType):
-            assert getattr(tpe, "num_buffers", 2) == 2
+            assert tpe.num_buffers == 2
             mask = buffers.pop(0)
             out = awkward1.layout.NumpyArray(numpy.frombuffer(
                 buffers.pop(0), dtype=tpe.to_pandas_dtype())[:length])
@@ -1741,42 +1745,48 @@ def from_arrow(obj):
         else:
             raise NotImplementedError(repr(tpe))
 
-    if isinstance(obj, pyarrow.lib.Array):
-        buffers = obj.buffers()
-        out = popbuffers(obj, obj.type, buffers, len(obj))
-        assert len(buffers) == 0
-        return out
+    def recurse(obj):
+        if isinstance(obj, pyarrow.lib.Array):
+            buffers = obj.buffers()
+            out = popbuffers(obj, obj.type, buffers, len(obj))
+            assert len(buffers) == 0
+            return out
 
-    elif isinstance(obj, pyarrow.lib.ChunkedArray):
-        chunks = [x for x in obj.chunks if len(x) > 0]
-        if len(chunks) == 1:
-            return from_arrow(chunks[0])
+        elif isinstance(obj, pyarrow.lib.ChunkedArray):
+            chunks = [x for x in obj.chunks if len(x) > 0]
+            if len(chunks) == 1:
+                return recurse(chunks[0])
+            else:
+                return awkward1.operations.structure.concatenate(
+                         [recurse(x) for x in chunks], highlevel=False)
+
+        elif isinstance(obj, pyarrow.lib.RecordBatch):
+            child_array = [recurse(obj.column(x))
+                             for x in range(obj.num_columns)]
+            keys = obj.schema.names
+            awk_arr = awkward1.layout.RecordArray(child_array, keys)
+            return awk_arr
+
+        elif isinstance(obj, pyarrow.lib.Table):
+            chunks = []
+            chunksizes = []
+            for batch in obj.to_batches():
+                chunk = recurse(batch)
+                if len(chunk) > 0:
+                    chunks.append(chunk)
+            if len(chunks) == 1:
+                return chunks[0]
+            else:
+                return awkward1.operations.structure.concatenate(
+                         chunks, highlevel=False)
+
         else:
-            return awkward1.operations.structure.concatenate(
-                     [from_arrow(x) for x in chunks], highlevel=False)
+            raise NotImplementedError(type(obj))
 
-    elif isinstance(obj, pyarrow.lib.RecordBatch):
-        child_array = [from_arrow(obj.column(x))
-                         for x in range(obj.num_columns)]
-        keys = obj.schema.names
-        awk_arr = awkward1.layout.RecordArray(child_array, keys)
-        return awk_arr
-
-    elif isinstance(obj, pyarrow.lib.Table):
-        chunks = []
-        chunksizes = []
-        for batch in obj.to_batches():
-            chunk = from_arrow(batch)
-            if len(chunk) > 0:
-                chunks.append(chunk)
-        if len(chunks) == 1:
-            return chunks[0]
-        else:
-            return awkward1.operations.structure.concatenate(
-                     chunks, highlevel=False)
-
+    if highlevel:
+        return awkward1._util.wrap(recurse(obj), behavior)
     else:
-        raise NotImplementedError(type(obj))
+        return recurse(obj)
 
 __all__ = [x for x in list(globals())
            if not x.startswith("_") and
