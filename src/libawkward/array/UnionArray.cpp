@@ -1439,7 +1439,7 @@ namespace awkward {
     }
 
     return std::make_shared<UnionArray8_64>(Identities::none(),
-                                            util::Parameters(),
+                                            parameters_,
                                             tags,
                                             index,
                                             contents);
@@ -1616,7 +1616,7 @@ namespace awkward {
     }
 
     return std::make_shared<UnionArray8_64>(Identities::none(),
-                                            util::Parameters(),
+                                            parameters_,
                                             tags,
                                             index,
                                             contents);

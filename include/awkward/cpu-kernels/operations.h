@@ -609,6 +609,13 @@ extern "C" {
       const bool* fromptr,
       int64_t fromoffset,
       int64_t length);
+  EXPORT_SYMBOL struct Error
+    awkward_numpyarray_fill_tobyte_frombyte(
+      int8_t* toptr,
+      int64_t tooffset,
+      const int8_t* fromptr,
+      int64_t fromoffset,
+      int64_t length);
 
   EXPORT_SYMBOL struct Error
     awkward_listarray_fill_to64_from32(

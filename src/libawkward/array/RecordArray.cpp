@@ -1012,7 +1012,7 @@ namespace awkward {
       if (istuple() == rawother->istuple()  &&
           numfields() == 0  &&  rawother->numfields() == 0) {
         return std::make_shared<RecordArray>(Identities::none(),
-                                             util::Parameters(),
+                                             parameters_,
                                              contents_,
                                              util::RecordLookupPtr(nullptr),
                                              mylength + theirlength);
@@ -1028,7 +1028,7 @@ namespace awkward {
             contents.push_back(mine.get()->merge(theirs));
           }
           return std::make_shared<RecordArray>(Identities::none(),
-                                               util::Parameters(),
+                                               parameters_,
                                                contents,
                                                recordlookup_);
         }
@@ -1048,7 +1048,7 @@ namespace awkward {
             contents.push_back(mine.get()->merge(theirs));
           }
           return std::make_shared<RecordArray>(Identities::none(),
-                                               util::Parameters(),
+                                               parameters_,
                                                contents,
                                                recordlookup_);
         }

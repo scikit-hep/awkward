@@ -588,6 +588,11 @@ namespace awkward {
                    const Index64& advanced) const override;
 
   protected:
+    /// @brief Internal function to merge two byte arrays without promoting
+    /// the types to int64.
+    const ContentPtr
+      merge_bytes(const std::shared_ptr<NumpyArray>& other) const;
+
     /// @brief Internal function that propagates the derivation of a contiguous
     /// version of this array from one axis to the next.
     ///

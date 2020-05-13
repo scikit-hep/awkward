@@ -1204,7 +1204,7 @@ namespace awkward {
     }
 
     return std::make_shared<ListArray64>(Identities::none(),
-                                         util::Parameters(),
+                                         parameters_,
                                          starts,
                                          stops,
                                          content);

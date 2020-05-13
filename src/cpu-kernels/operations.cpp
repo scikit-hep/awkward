@@ -1478,6 +1478,19 @@ ERROR awkward_numpyarray_fill_tobool_frombool(
     fromoffset,
     length);
 }
+ERROR awkward_numpyarray_fill_tobyte_frombyte(
+  int8_t* toptr,
+  int64_t tooffset,
+  const int8_t* fromptr,
+  int64_t fromoffset,
+  int64_t length) {
+  return awkward_numpyarray_fill<int8_t, int8_t>(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length);
+}
 
 template <typename FROM, typename TO>
 ERROR awkward_listarray_fill(

@@ -1447,7 +1447,7 @@ namespace awkward {
 
     return std::make_shared<IndexedArrayOf<int64_t, ISOPTION>>(
       Identities::none(),
-      util::Parameters(),
+      parameters_,
       index,
       content);
   }
@@ -1623,13 +1623,13 @@ namespace awkward {
 
     if (ISOPTION  ||  other_isoption) {
       return std::make_shared<IndexedOptionArray64>(Identities::none(),
-                                                    util::Parameters(),
+                                                    parameters_,
                                                     index,
                                                     content);
     }
     else {
       return std::make_shared<IndexedArray64>(Identities::none(),
-                                              util::Parameters(),
+                                              parameters_,
                                               index,
                                               content);
     }

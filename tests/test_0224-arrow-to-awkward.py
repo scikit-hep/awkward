@@ -209,3 +209,220 @@ def test_recordbatch():
              pyarrow.array([[{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}], [], [{"x": 4, "y": None}, {"x": 5, "y": 5.5}], [None], [{"x": 6, "y": 6.6}]])],
             ["a", "b", "c", "d", "e"])
     assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == [{"a": 1.1, "b": [1, 2, 3], "c": {"x": 1, "y": 1.1}, "d": {"x": 1, "y": 1.1}, "e": [{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}]}, {"a": 2.2, "b": [], "c": {"x": 2, "y": 2.2}, "d": None, "e": []}, {"a": 3.3, "b": [4, 5], "c": {"x": 3, "y": 3.3}, "d": None, "e": [{"x": 4, "y": None}, {"x": 5, "y": 5.5}]}, {"a": None, "b": [None], "c": {"x": 4, "y": None}, "d":{"x": 4, "y": None}, "e": [None]}, {"a": 5.5, "b": [6], "c": {"x": 5, "y": 5.5}, "d": {"x": 5, "y": 5.5}, "e": [{"x": 6, "y": 6.6}]}]
+
+def test_arrow_toarrow_string():
+    a = awkward1.from_iter(["one", "two", "three"], highlevel=False)
+    assert awkward1.to_list(awkward1.from_arrow(awkward1.to_arrow(a), highlevel=False)) == awkward1.to_list(a)
+    a = awkward1.from_iter([["one", "two", "three"], [], ["four", "five"]], highlevel=False)
+    assert awkward1.to_list(awkward1.from_arrow(awkward1.to_arrow(a), highlevel=False)) == awkward1.to_list(a)
+    if hasattr(pyarrow.BinaryArray, 'from_buffers'):
+        a = awkward1.from_iter([b"one", b"two", b"three"], highlevel=False)
+        assert awkward1.to_list(awkward1.from_arrow(awkward1.to_arrow(a), highlevel=False)) == [b"one", b"two", b"three"]
+        a = awkward1.from_iter([[b"one", b"two", b"three"], [], [b"four", b"five"]], highlevel=False)
+        assert awkward1.to_list(awkward1.from_arrow(awkward1.to_arrow(a), highlevel=False)) == [[b"one", b"two", b"three"], [], [b"four", b"five"]]
+    else:
+        a = awkward1.from_iter([b"one", b"two", b"three"], highlevel=False)
+        assert awkward1.to_list(awkward1.from_arrow(awkward1.to_arrow(a), highlevel=False)) == ["one", "two", "three"]
+        a = awkward1.from_iter([[b"one", b"two", b"three"], [], [b"four", b"five"]], highlevel=False)
+        assert awkward1.to_list(awkward1.from_arrow(awkward1.to_arrow(a), highlevel=False)) == [["one", "two", "three"], [], ["four", "five"]]
+
+def test_arrow_array():
+    a = pyarrow.array([1.1, 2.2, 3.3, 4.4, 5.5])
+    assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == [1.1, 2.2, 3.3, 4.4, 5.5]
+
+def test_arrow_boolean():
+    a = pyarrow.array([True, True, False, False, True])
+    assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == [True, True, False, False, True]
+
+def test_arrow_array_null():
+    a = pyarrow.array([1.1, 2.2, 3.3, None, 4.4, 5.5])
+    assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == [1.1, 2.2, 3.3, None, 4.4, 5.5]
+
+def test_arrow_nested_array():
+    a = pyarrow.array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
+    assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+
+def test_arrow_nested_nested_array():
+    a = pyarrow.array([[[1.1, 2.2], [3.3], []], [], [[4.4, 5.5]]])
+    assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == [[[1.1, 2.2], [3.3], []], [], [[4.4, 5.5]]]
+
+def test_arrow_nested_array_null():
+    a = pyarrow.array([[1.1, 2.2, None], [], [4.4, 5.5]])
+    assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == [[1.1, 2.2, None], [], [4.4, 5.5]]
+
+def test_arrow_null_nested_array_null():
+    a = pyarrow.array([[1.1, 2.2, None], [], None, [4.4, 5.5]])
+    assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == [[1.1, 2.2, None], [], None, [4.4, 5.5]]
+
+def test_arrow_chunked_array():
+    a = pyarrow.chunked_array([pyarrow.array([1.1, 2.2, 3.3, 4.4, 5.5]), pyarrow.array([], pyarrow.float64()), pyarrow.array([6.6, 7.7, 8.8])])
+    assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8]
+
+def test_arrow_struct():
+    a = pyarrow.array([{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}])
+    assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == [{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}]
+
+def test_arrow_struct_null():
+    a = pyarrow.array([{"x": 1, "y": 1.1}, {"x": 2, "y": None}, {"x": 3, "y": 3.3}])
+    assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == [{"x": 1, "y": 1.1}, {"x": 2, "y": None}, {"x": 3, "y": 3.3}]
+
+def test_arrow_null_struct():
+    a = pyarrow.array([{"x": 1, "y": 1.1}, None, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}])
+    assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == [{"x": 1, "y": 1.1}, None, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}]
+
+def test_arrow_null_struct_null():
+    a = pyarrow.array([{"x": 1, "y": 1.1}, None, {"x": 2, "y": None}, {"x": 3, "y": 3.3}])
+    assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == [{"x": 1, "y": 1.1}, None, {"x": 2, "y": None}, {"x": 3, "y": 3.3}]
+
+def test_arrow_chunked_struct():
+    t = pyarrow.struct({"x": pyarrow.int64(), "y": pyarrow.float64()})
+    a = pyarrow.chunked_array([pyarrow.array([{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}], t), pyarrow.array([], t), pyarrow.array([{"x": 4, "y": 4.4}, {"x": 5, "y": 5.5}], t)])
+    assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == [{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}, {"x": 4, "y": 4.4}, {"x": 5, "y": 5.5}]
+
+def test_arrow_nested_struct():
+    a = pyarrow.array([[{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}], [], [{"x": 4, "y": 4.4}, {"x": 5, "y": 5.5}]])
+    assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == [[{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}], [], [{"x": 4, "y": 4.4}, {"x": 5, "y": 5.5}]]
+
+def test_arrow_nested_struct_null():
+    a = pyarrow.array([[{"x": 1, "y": 1.1}, {"x": 2, "y": None}, {"x": 3, "y": 3.3}], [], [{"x": 4, "y": 4.4}, {"x": 5, "y": 5.5}]])
+    assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == [[{"x": 1, "y": 1.1}, {"x": 2, "y": None}, {"x": 3, "y": 3.3}], [], [{"x": 4, "y": 4.4}, {"x": 5, "y": 5.5}]]
+
+def test_arrow_null_nested_struct():
+    a = pyarrow.array([[{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}], None, [], [{"x": 4, "y": 4.4}, {"x": 5, "y": 5.5}]])
+    assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == [[{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}], None, [], [{"x": 4, "y": 4.4}, {"x": 5, "y": 5.5}]]
+
+def test_arrow_null_nested_struct_null():
+    a = pyarrow.array([[{"x": 1, "y": 1.1}, {"x": 2, "y": None}, {"x": 3, "y": 3.3}], None, [], [{"x": 4, "y": 4.4}, {"x": 5, "y": 5.5}]])
+    assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == [[{"x": 1, "y": 1.1}, {"x": 2, "y": None}, {"x": 3, "y": 3.3}], None, [], [{"x": 4, "y": 4.4}, {"x": 5, "y": 5.5}]]
+
+def test_arrow_struct_nested():
+    a = pyarrow.array([{"x": [], "y": 1.1}, {"x": [2], "y": 2.2}, {"x": [3, 3], "y": 3.3}])
+    assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == [{"x": [], "y": 1.1}, {"x": [2], "y": 2.2}, {"x": [3, 3], "y": 3.3}]
+
+def test_arrow_struct_nested_null():
+    a = pyarrow.array([{"x": [], "y": 1.1}, {"x": [2], "y": 2.2}, {"x": [None, 3], "y": 3.3}])
+    assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == [{"x": [], "y": 1.1}, {"x": [2], "y": 2.2}, {"x": [None, 3], "y": 3.3}]
+
+def test_arrow_nested_struct_nested():
+    a = pyarrow.array([[{"x": [], "y": 1.1}, {"x": [2], "y": 2.2}, {"x": [3, 3], "y": 3.3}], [], [{"x": [4, 4, 4], "y": 4.4}, {"x": [5, 5, 5, 5], "y": 5.5}]])
+    assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == [[{"x": [], "y": 1.1}, {"x": [2], "y": 2.2}, {"x": [3, 3], "y": 3.3}], [], [{"x": [4, 4, 4], "y": 4.4}, {"x": [5, 5, 5, 5], "y": 5.5}]]
+
+def test_arrow_null_nested_struct_nested_null():
+    a = pyarrow.array([[{"x": [], "y": 1.1}, {"x": [2], "y": 2.2}, {"x": [None, 3], "y": 3.3}], None, [], [{"x": [4, 4, 4], "y": 4.4}, {"x": [5, 5, 5, 5], "y": 5.5}]])
+    assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == [[{"x": [], "y": 1.1}, {"x": [2], "y": 2.2}, {"x": [None, 3], "y": 3.3}], None, [], [{"x": [4, 4, 4], "y": 4.4}, {"x": [5, 5, 5, 5], "y": 5.5}]]
+
+def test_arrow_strings():
+    if not awkward1._util.py27:
+        a = pyarrow.array(["one", "two", "three", u"fo\u2014ur", "five"])
+        assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == ["one", "two", "three", u"fo\u2014ur", "five"]
+
+def test_arrow_strings_null():
+    if not awkward1._util.py27:
+        a = pyarrow.array(["one", "two", None, u"fo\u2014ur", "five"])
+        assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == ["one", "two", None, u"fo\u2014ur", "five"]
+
+def test_arrow_binary():
+    a = pyarrow.array([b"one", b"two", b"three", b"four", b"five"])
+    assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == [b"one", b"two", b"three", b"four", b"five"]
+
+def test_arrow_binary_null():
+    a = pyarrow.array([b"one", b"two", None, b"four", b"five"])
+    assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == [b"one", b"two", None, b"four", b"five"]
+
+# def test_arrow_chunked_strings():
+#     a = pyarrow.chunked_array([pyarrow.array(["one", "two", "three", "four", "five"]), pyarrow.array(["six", "seven", "eight"])])
+#     assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == ["one", "two", "three", "four", "five", "six", "seven", "eight"]
+
+# def test_arrow_nested_strings():
+#     a = pyarrow.array([["one", "two", "three"], [], ["four", "five"]])
+#     assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == [["one", "two", "three"], [], ["four", "five"]]
+
+# def test_arrow_nested_strings_null():
+#     a = pyarrow.array([["one", "two", None], [], ["four", "five"]])
+#     assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == [["one", "two", None], [], ["four", "five"]]
+
+# def test_arrow_null_nested_strings_null():
+#     a = pyarrow.array([["one", "two", None], [], None, ["four", "five"]])
+#     assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == [["one", "two", None], [], None, ["four", "five"]]
+
+# def test_arrow_union_sparse():
+#     a = pyarrow.UnionArray.from_sparse(pyarrow.array([0, 1, 0, 0, 1], type=pyarrow.int8()), [pyarrow.array([0.0, 1.1, 2.2, 3.3, 4.4]), pyarrow.array([True, True, False, True, False])])
+#     assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == [0.0, True, 2.2, 3.3, False]
+
+# def test_arrow_union_sparse_null():
+#     a = pyarrow.UnionArray.from_sparse(pyarrow.array([0, 1, 0, 0, 1], type=pyarrow.int8()), [pyarrow.array([0.0, 1.1, None, 3.3, 4.4]), pyarrow.array([True, True, False, True, False])])
+#     assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == [0.0, True, None, 3.3, False]
+
+# def test_arrow_union_sparse_null_null():
+#     a = pyarrow.UnionArray.from_sparse(pyarrow.array([0, 1, 0, 0, 1], type=pyarrow.int8()), [pyarrow.array([0.0, 1.1, None, 3.3, 4.4]), pyarrow.array([True, None, False, True, False])])
+#     assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == [0.0, None, None, 3.3, False]
+
+# def test_arrow_union_dense():
+#     a = pyarrow.UnionArray.from_dense(pyarrow.array([0, 1, 0, 0, 0, 1, 1], type=pyarrow.int8()), pyarrow.array([0, 0, 1, 2, 3, 1, 2], type=pyarrow.int32()), [pyarrow.array([0.0, 1.1, 2.2, 3.3]), pyarrow.array([True, True, False])])
+#     assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == [0.0, True, 1.1, 2.2, 3.3, True, False]
+
+# def test_arrow_union_dense_null():
+#     a = pyarrow.UnionArray.from_dense(pyarrow.array([0, 1, 0, 0, 0, 1, 1], type=pyarrow.int8()), pyarrow.array([0, 0, 1, 2, 3, 1, 2], type=pyarrow.int32()), [pyarrow.array([0.0, 1.1, None, 3.3]), pyarrow.array([True, True, False])])
+#     assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == [0.0, True, 1.1, None, 3.3, True, False]
+
+# def test_arrow_union_dense_null_null():
+#     a = pyarrow.UnionArray.from_dense(pyarrow.array([0, 1, 0, 0, 0, 1, 1], type=pyarrow.int8()), pyarrow.array([0, 0, 1, 2, 3, 1, 2], type=pyarrow.int32()), [pyarrow.array([0.0, 1.1, None, 3.3]), pyarrow.array([True, None, False])])
+#     assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == [0.0, True, 1.1, None, 3.3, None, False]
+
+# def test_arrow_dictarray():
+#     a = pyarrow.DictionaryArray.from_arrays(pyarrow.array([0, 0, 2, 2, 1, 0, 2, 1, 1]), pyarrow.array(["one", "two", "three"]))
+#     assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == ["one", "one", "three", "three", "two", "one", "three", "two", "two"]
+
+# def test_arrow_dictarray_null():
+#     a = pyarrow.DictionaryArray.from_arrays(pyarrow.array([0, 0, 2, None, 1, None, 2, 1, 1]), pyarrow.array(["one", "two", "three"]))
+#     assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == ["one", "one", "three", None, "two", None, "three", "two", "two"]
+
+# def test_arrow_null_dictarray():
+#     a = pyarrow.DictionaryArray.from_arrays(pyarrow.array([0, 0, 2, 2, 1, 0, 2, 1, 1]), pyarrow.array(["one", None, "three"]))
+#     assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == ["one", "one", "three", "three", None, "one", "three", None, None]
+
+# def test_arrow_batch():
+#     a = pyarrow.RecordBatch.from_arrays(
+#         [pyarrow.array([1.1, 2.2, 3.3, None, 5.5]),
+#          pyarrow.array([[1, 2, 3], [], [4, 5], [None], [6]]),
+#          pyarrow.array([{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}, {"x": 4, "y": None}, {"x": 5, "y": 5.5}]),
+#          pyarrow.array([{"x": 1, "y": 1.1}, None, None, {"x": 4, "y": None}, {"x": 5, "y": 5.5}]),
+#          pyarrow.array([[{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}], [], [{"x": 4, "y": None}, {"x": 5, "y": 5.5}], [None], [{"x": 6, "y": 6.6}]])],
+#         ["a", "b", "c", "d", "e"])
+#     assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == [{"a": 1.1, "b": [1, 2, 3], "c": {"x": 1, "y": 1.1}, "d": {"x": 1, "y": 1.1}, "e": [{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}]}, {"a": 2.2, "b": [], "c": {"x": 2, "y": 2.2}, "d": None, "e": []}, {"a": 3.3, "b": [4, 5], "c": {"x": 3, "y": 3.3}, "d": None, "e": [{"x": 4, "y": None}, {"x": 5, "y": 5.5}]}, {"a": None, "b": [None], "c": {"x": 4, "y": None}, "d":{"x": 4, "y": None}, "e": [None]}, {"a": 5.5, "b": [6], "c": {"x": 5, "y": 5.5}, "d": {"x": 5, "y": 5.5}, "e": [{"x": 6, "y": 6.6}]}]
+
+# def test_arrow_table():
+#     a = pyarrow.Table.from_batches([
+#         pyarrow.RecordBatch.from_arrays(
+#         [pyarrow.array([1.1, 2.2, 3.3, None, 5.5]),
+#          pyarrow.array([[1, 2, 3], [], [4, 5], [None], [6]]),
+#          pyarrow.array([{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}, {"x": 4, "y": None}, {"x": 5, "y": 5.5}]),
+#          pyarrow.array([{"x": 1, "y": 1.1}, None, None, {"x": 4, "y": None}, {"x": 5, "y": 5.5}]),
+#          pyarrow.array([[{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}], [], [{"x": 4, "y": None}, {"x": 5, "y": 5.5}], [None], [{"x": 6, "y": 6.6}]])],
+#         ["a", "b", "c", "d", "e"]),
+#         pyarrow.RecordBatch.from_arrays(
+#         [pyarrow.array([1.1, 2.2, 3.3, None, 5.5]),
+#          pyarrow.array([[1, 2, 3], [], [4, 5], [None], [6]]),
+#          pyarrow.array([{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}, {"x": 4, "y": None}, {"x": 5, "y": 5.5}]),
+#          pyarrow.array([{"x": 1, "y": 1.1}, None, None, {"x": 4, "y": None}, {"x": 5, "y": 5.5}]),
+#          pyarrow.array([[{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}], [], [{"x": 4, "y": None}, {"x": 5, "y": 5.5}], [None], [{"x": 6, "y": 6.6}]])],
+#         ["a", "b", "c", "d", "e"])])
+#     assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == [{"a": 1.1, "b": [1, 2, 3], "c": {"x": 1, "y": 1.1}, "d": {"x": 1, "y": 1.1}, "e": [{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}]}, {"a": 2.2, "b": [], "c": {"x": 2, "y": 2.2}, "d": None, "e": []}, {"a": 3.3, "b": [4, 5], "c": {"x": 3, "y": 3.3}, "d": None, "e": [{"x": 4, "y": None}, {"x": 5, "y": 5.5}]}, {"a": None, "b": [None], "c": {"x": 4, "y": None}, "d": {"x": 4, "y": None}, "e": [None]}, {"a": 5.5, "b": [6], "c": {"x": 5, "y": 5.5}, "d": {"x": 5, "y": 5.5}, "e": [{"x": 6, "y": 6.6}]}, {"a": 1.1, "b": [1, 2, 3], "c": {"x": 1, "y": 1.1}, "d": {"x": 1, "y": 1.1}, "e": [{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}]}, {"a": 2.2, "b": [], "c": {"x": 2, "y": 2.2}, "d": None, "e": []}, {"a": 3.3, "b": [4, 5], "c": {"x": 3, "y": 3.3}, "d": None, "e": [{"x": 4, "y": None}, {"x": 5, "y": 5.5}]}, {"a": None, "b": [None], "c": {"x": 4, "y": None}, "d": {"x": 4, "y": None}, "e": [None]}, {"a": 5.5, "b": [6], "c": {"x": 5, "y": 5.5}, "d": {"x": 5, "y": 5.5}, "e": [{"x": 6, "y": 6.6}]}]
+
+# def test_arrow_nonnullable_table():
+#     x = pyarrow.array([1, 2, 3])
+#     y = pyarrow.array([1.1, 2.2, 3.3])
+#     table = pyarrow.Table.from_arrays([x], ["x"])
+#     if hasattr(pyarrow, "column"):
+#         table2 = table.add_column(1, pyarrow.column(pyarrow.field("y", y.type, False), numpy.array([1.1, 2.2, 3.3])))
+#     else:
+#         table2 = table.add_column(1, "y", y)
+#     assert awkward1.to_list(awkward1.from_arrow(table2, highlevel=False)) == [{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}]
+
+# def test_arrow_fromarrow_zerocopy():
+#     a = awkward1.from_iter([[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6, 7.7, 8.8], [], [9.9]], highlevel=False)
+#     b = awkward1.to_arrow(a)
+#     c = awkward1.from_arrow(b, highlevel=False)
+#     assert c.offsets.ctypes.data == b.buffers()[1].address
+#     assert c.content.ctypes.data == b.buffers()[3].address
+#     assert c.offsetsaliased(c.starts, c.stops)

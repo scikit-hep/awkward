@@ -1168,16 +1168,31 @@ def to_arrow(array):
     def recurse(layout, mask=None):
         if isinstance(layout, awkward1.layout.NumpyArray):
             numpy_arr = numpy.asarray(layout)
+            length = len(numpy_arr)
+            arrow_type = pyarrow.from_numpy_dtype(numpy_arr.dtype)
+
+            if issubclass(numpy_arr.dtype.type, (numpy.bool_, numpy.bool)):
+                if len(numpy_arr) % 8 == 0:
+                    ready_to_pack = numpy_arr
+                else:
+                    ready_to_pack = numpy.empty(
+                                      int(numpy.ceil(len(numpy_arr) / 8.0)) * 8,
+                                      dtype=numpy_arr.dtype)
+                    ready_to_pack[:len(numpy_arr)] = numpy_arr
+                    ready_to_pack[len(numpy_arr):] = 0
+                numpy_arr = numpy.packbits(
+                              ready_to_pack.reshape(-1, 8)[:, ::-1].reshape(-1))
+
             if (numpy_arr.ndim == 1):
                 if mask is not None:
                     return pyarrow.Array.from_buffers(
-                        pyarrow.from_numpy_dtype(numpy_arr.dtype),
-                        len(numpy_arr),
+                        arrow_type,
+                        length,
                         [pyarrow.py_buffer(mask), pyarrow.py_buffer(numpy_arr)])
                 else:
                     return pyarrow.Array.from_buffers(
-                        pyarrow.from_numpy_dtype(numpy_arr.dtype),
-                        len(numpy_arr),
+                        arrow_type,
+                        length,
                         [None, pyarrow.py_buffer(numpy_arr)])
             else:
                 return pyarrow.Tensor.from_numpy(numpy_arr)
@@ -1257,16 +1272,21 @@ def to_arrow(array):
 
             if layout.parameter("__array__") == "bytestring":
                 if mask is None:
-                    arrow_arr = pyarrow.LargeBinaryArray.from_buffers(
+                    arrow_arr = pyarrow.Array.from_buffers(
+                        pyarrow.large_binary(),
                         len(offsets) - 1,
-                        pyarrow.py_buffer(offsets),
-                        pyarrow.py_buffer(layout.content))
+                        [None,
+                         pyarrow.py_buffer(offsets),
+                         pyarrow.py_buffer(layout.content)],
+                        children=[])
                 else:
-                    arrow_arr = pyarrow.LargeBinaryArray.from_buffers(
+                    arrow_arr = pyarrow.Array.from_buffers(
+                        pyarrow.large_binary(),
                         len(offsets) - 1,
-                        pyarrow.py_buffer(offsets),
-                        pyarrow.py_buffer(layout.content),
-                        pyarrow.py_buffer(mask))
+                        [pyarrow.py_buffer(mask),
+                         pyarrow.py_buffer(offsets),
+                         pyarrow.py_buffer(layout.content)],
+                        children=[])
                 return arrow_arr
 
             if layout.parameter("__array__") == "string":
@@ -1715,7 +1735,8 @@ def from_arrow(obj, highlevel=True, behavior=None):
             mask = buffers.pop(0)
             data = buffers.pop(0)
             out = numpy.frombuffer(data, dtype=numpy.uint8)
-            out = awkward1.layout.NumpyArray(out)
+            out = numpy.unpackbits(out).reshape(-1, 8)[:, ::-1].reshape(-1)
+            out = awkward1.layout.NumpyArray(out[:length])
             if mask is not None:
                 mask = numpy.frombuffer(mask, dtype=numpy.uint8)
                 return awkward1.layout.BitMaskedArray(mask,

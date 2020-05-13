@@ -771,7 +771,7 @@ namespace awkward {
             0, rawother->size()*rawother->length());
         ContentPtr content = mine.get()->merge(theirs);
         return std::make_shared<RegularArray>(Identities::none(),
-                                              util::Parameters(),
+                                              parameters_,
                                               content,
                                               size_);
       }
