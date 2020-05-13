@@ -394,6 +394,8 @@ namespace awkward {
         + std::string(", must be equal to len(strides), which is ")
         + std::to_string(strides.size()));
     }
+    if(GPU_FLAG)
+        ops = std::make_shared<GPUKernels>();
   }
 
   NumpyArray::NumpyArray(const Index8 index)
@@ -646,7 +648,7 @@ namespace awkward {
                                        length());
       Identities32* rawidentities =
         reinterpret_cast<Identities32*>(newidentities.get());
-      struct Error err = awkward_new_identities32(rawidentities->ptr().get(),
+      struct Error err = ops->awkward_new_identities32(rawidentities->ptr().get(),
                                                   length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
@@ -659,7 +661,7 @@ namespace awkward {
                                        length());
       Identities64* rawidentities =
         reinterpret_cast<Identities64*>(newidentities.get());
-      struct Error err = awkward_new_identities64(rawidentities->ptr().get(),
+      struct Error err = ops->awkward_new_identities64(rawidentities->ptr().get(),
                                                   length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
@@ -1206,7 +1208,7 @@ namespace awkward {
                            const Slice& tail,
                            const Index64& advanced) const {
     Index64 carry(shape_[0]);
-    struct Error err = awkward_carry_arange_64(carry.ptr().get(), shape_[0]);
+    struct Error err = ops->awkward_carry_arange_64(carry.ptr().get(), shape_[0]);
     util::handle_error(err, classname(), identities_.get());
     return getitem_next(head,
                         tail,
@@ -1222,7 +1224,7 @@ namespace awkward {
     std::shared_ptr<void> ptr(
       new uint8_t[(size_t)(carry.length()*strides_[0])],
       util::array_deleter<uint8_t>());
-    struct Error err = awkward_numpyarray_getitem_next_null_64(
+    struct Error err = ops->awkward_numpyarray_getitem_next_null_64(
       reinterpret_cast<uint8_t*>(ptr.get()),
       reinterpret_cast<uint8_t*>(ptr_.get()),
       carry.length(),
@@ -1335,7 +1337,7 @@ namespace awkward {
     }
 
     Index64 tonum(reps);
-    struct Error err = awkward_regulararray_num_64(
+    struct Error err = ops->awkward_regulararray_num_64(
       tonum.ptr().get(),
       size,
       reps);
@@ -1695,7 +1697,7 @@ namespace awkward {
       struct Error err;
       if (format.compare("d") == 0) {
         if (format_.compare("d") == 0) {
-          err = awkward_numpyarray_fill_todouble_fromdouble(
+          err = ops->awkward_numpyarray_fill_todouble_fromdouble(
                   reinterpret_cast<double*>(ptr.get()),
                   0,
                   reinterpret_cast<double*>(contiguous_self.ptr().get()),
@@ -1703,7 +1705,7 @@ namespace awkward {
                   self_flatlength);
         }
         else if (format_.compare("f") == 0) {
-          err = awkward_numpyarray_fill_todouble_fromfloat(
+          err = ops->awkward_numpyarray_fill_todouble_fromfloat(
                   reinterpret_cast<double*>(ptr.get()),
                   0,
                   reinterpret_cast<float*>(contiguous_self.ptr().get()),
@@ -2207,7 +2209,7 @@ namespace awkward {
 #else
       if (format_.compare("L") == 0) {
 #endif
-        err = awkward_numpyarray_fill_to64_fromU64(
+        err = ops->awkward_numpyarray_fill_to64_fromU64(
                 index.ptr().get(),
                 0,
                 reinterpret_cast<uint64_t*>(contiguous_self.ptr().get()),
@@ -2281,7 +2283,7 @@ namespace awkward {
     }
     else if (format_.compare("?") == 0) {
       int64_t numtrue;
-      struct Error err1 = awkward_numpyarray_getitem_boolean_numtrue(
+      struct Error err1 = ops->awkward_numpyarray_getitem_boolean_numtrue(
         &numtrue,
         reinterpret_cast<int8_t*>(ptr_.get()),
         (int64_t)byteoffset_,

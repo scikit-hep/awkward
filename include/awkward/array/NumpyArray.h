@@ -12,6 +12,9 @@
 #include "awkward/cpu-kernels/util.h"
 #include "awkward/Slice.h"
 #include "awkward/Content.h"
+#include "awkward/cpu-kernels/cpu_kernels.h"
+#include "awkward/gpu-kernels/gpu_kernels.h"
+#include "awkward/kernels/kernel.h"
 
 namespace awkward {
   /// @class NumpyForm
@@ -182,7 +185,14 @@ namespace awkward {
     /// The format may be specified explicitly.
     NumpyArray(const Index64 index, const std::string& format);
 
-    /// @brief Reference-counted pointer to the array buffer.
+    /// @brief A GPU Flag decides the location of the instance of this class
+    bool GPU_FLAG = true; // This will be resolved once the content markers are in place
+
+    /// @brief An instance of the KernelCore class
+    std::shared_ptr<KernelCore> ops = std::make_shared<CPUKernels>();
+
+
+      /// @brief Reference-counted pointer to the array buffer.
     const std::shared_ptr<void>
       ptr() const;
 

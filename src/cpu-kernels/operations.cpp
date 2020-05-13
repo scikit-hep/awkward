@@ -3,7 +3,9 @@
 #include <cstring>
 
 #include "awkward/cpu-kernels/operations.h"
+class CPUKernels {
 
+};
 template <typename T, typename C>
 ERROR awkward_listarray_num(
   T* tonum,
