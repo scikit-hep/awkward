@@ -1225,16 +1225,21 @@ def to_arrow(array):
 
             if layout.parameter("__array__") == "bytestring":
                 if mask is None:
-                    arrow_arr = pyarrow.BinaryArray.from_buffers(
+                    arrow_arr = pyarrow.Array.from_buffers(
+                        pyarrow.binary(),
                         len(offsets) - 1,
-                        pyarrow.py_buffer(offsets),
-                        pyarrow.py_buffer(layout.content))
+                        [None,
+                         pyarrow.py_buffer(offsets),
+                         pyarrow.py_buffer(layout.content)],
+                        children=[])
                 else:
-                    arrow_arr = pyarrow.BinaryArray.from_buffers(
+                    arrow_arr = pyarrow.Array.from_buffers(
+                        pyarrow.binary(),
                         len(offsets) - 1,
-                        pyarrow.py_buffer(offsets),
-                        pyarrow.py_buffer(layout.content),
-                        pyarrow.py_buffer(mask))
+                        [pyarrow.py_buffer(offsets),
+                         pyarrow.py_buffer(layout.content),
+                         pyarrow.py_buffer(mask)],
+                        children=[])
                 return arrow_arr
 
             if layout.parameter("__array__") == "string":
@@ -1645,7 +1650,7 @@ def from_arrow(obj, highlevel=True, behavior=None):
                 return awk_arr
             else:
                 awk_mask = awkward1.layout.IndexU8(
-                    numpy.frombuffer(mask.to_pybytes(), dtype=numpy.uint8))
+                             numpy.frombuffer(mask, dtype=numpy.uint8))
                 return awkward1.layout.BitMaskedArray(awk_mask,
                                                       awk_arr,
                                                       True,
@@ -1671,7 +1676,7 @@ def from_arrow(obj, highlevel=True, behavior=None):
                 return awk_arr
             else:
                 awk_mask = awkward1.layout.IndexU8(
-                    numpy.frombuffer(mask.to_pybytes(), dtype=numpy.uint8))
+                             numpy.frombuffer(mask, dtype=numpy.uint8))
                 return awkward1.layout.BitMaskedArray(awk_mask,
                                                       awk_arr,
                                                       True,
@@ -1697,7 +1702,7 @@ def from_arrow(obj, highlevel=True, behavior=None):
                 return awk_arr
             else:
                 awk_mask = awkward1.layout.IndexU8(
-                    numpy.frombuffer(mask.to_pybytes(), dtype=numpy.uint8))
+                             numpy.frombuffer(mask, dtype=numpy.uint8))
                 return awkward1.layout.BitMaskedArray(awk_mask,
                                                       awk_arr,
                                                       True,
@@ -1723,7 +1728,7 @@ def from_arrow(obj, highlevel=True, behavior=None):
                 return awk_arr
             else:
                 awk_mask = awkward1.layout.IndexU8(
-                    numpy.frombuffer(mask.to_pybytes(), dtype=numpy.uint8))
+                             numpy.frombuffer(mask, dtype=numpy.uint8))
                 return awkward1.layout.BitMaskedArray(awk_mask,
                                                       awk_arr,
                                                       True,
@@ -1738,8 +1743,10 @@ def from_arrow(obj, highlevel=True, behavior=None):
             out = numpy.unpackbits(out).reshape(-1, 8)[:, ::-1].reshape(-1)
             out = awkward1.layout.NumpyArray(out[:length])
             if mask is not None:
+                awk_mask = awkward1.layout.IndexU8(
+                             numpy.frombuffer(mask, dtype=numpy.uint8))
                 mask = numpy.frombuffer(mask, dtype=numpy.uint8)
-                return awkward1.layout.BitMaskedArray(mask,
+                return awkward1.layout.BitMaskedArray(awk_mask,
                                                       out,
                                                       True,
                                                       length,
