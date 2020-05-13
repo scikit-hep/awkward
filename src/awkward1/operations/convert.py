@@ -1343,7 +1343,7 @@ def to_arrow(layout):
                 pyarrow.struct([pyarrow.field(str(i), values[i].type)
                                   for i in range(len(values))]),
                 "dense",
-                [x for x in range(len(values))])
+                list(range(len(values))))
 
             if mask is not None:
                 return pyarrow.Array.from_buffers(
@@ -1372,27 +1372,34 @@ def to_arrow(layout):
             else:
                 return recurse(layout.content[layout.index], mask)
 
-        elif isinstance(layout, awkward1.layout.IndexedOptionArray32):
-            # Convert this to a Indexed Array
-            index = numpy.asarray(layout.index)
-            for i in range(len(index)):
-                if index[i] < 0:
-                    index[i] = 0
-            index = awkward1.layout.Index32(index)
-            array = awkward1.layout.IndexedArray32(index, layout.content)
+        elif isinstance(layout, (awkward1.layout.IndexedOptionArray32,
+                                 awkward1.layout.IndexedOptionArray64)):
+            index = numpy.array(layout.index, copy=True)
+            nulls = (index < 0)
+            index[nulls] = 0
 
-            return recurse(array, mask)
+            if len(nulls) % 8 == 0:
+                this_bytemask = (~nulls).view(numpy.uint8)
+            else:
+                length = int(numpy.ceil(len(nulls) / 8.0)) * 8
+                this_bytemask = numpy.empty(length, dtype=numpy.uint8)
+                this_bytemask[:len(nulls)] = ~nulls
+                this_bytemask[len(nulls):] = 0
 
-        elif isinstance(layout, awkward1.layout.IndexedOptionArray64):
-            # Convert this to a Indexed Array
-            index = numpy.asarray(layout.index)
-            for i in range(len(index)):
-                if index[i] < 0:
-                    index[i] = 0
-            index = awkward1.layout.Index64(index)
-            array = awkward1.layout.IndexedArray64(index, layout.content)
+            this_bitmask = numpy.packbits(
+                this_bytemask.reshape(-1, 8)[:, ::-1].reshape(-1))
 
-            return recurse(array, mask)
+            if isinstance(layout, awkward1.layout.IndexedOptionArray32):
+                next = awkward1.layout.IndexedArray32(
+                    awkward1.layout.Index32(index), layout.content)
+            else:
+                next = awkward1.layout.IndexedArray64(
+                    awkward1.layout.Index64(index), layout.content)
+
+            if mask is None:
+                return recurse(next, this_bitmask)
+            else:
+                return recurse(next, mask & this_bitmask)
 
         elif isinstance(layout, awkward1.layout.BitMaskedArray):
             bitmask = numpy.asarray(layout.mask, dtype=numpy.uint8)
@@ -1423,7 +1430,7 @@ def to_arrow(layout):
 
     return recurse(layout)
 
-def fromarrow(obj):
+def from_arrow(obj):
     import pyarrow
 
     def popbuffers(array, tpe, buffers, length):
@@ -1433,9 +1440,9 @@ def fromarrow(obj):
                                buffers,
                                length)
             if hasattr(tpe, "dictionary"):
-                content = fromarrow(tpe.dictionary)
+                content = from_arrow(tpe.dictionary)
             elif array is not None:
-                content = fromarrow(array.dictionary)
+                content = from_arrow(array.dictionary)
             else:
                 raise NotImplementedError(
                     "no way to access Arrow dictionary inside of UnionArray")
@@ -1744,14 +1751,14 @@ def fromarrow(obj):
     elif isinstance(obj, pyarrow.lib.ChunkedArray):
         chunks = [x for x in obj.chunks if len(x) > 0]
         if len(chunks) == 1:
-            return fromarrow(chunks[0])
+            return from_arrow(chunks[0])
         else:
             return awkward1.operations.structure.concatenate(
-                     [fromarrow(x) for x in chunks])
+                     [from_arrow(x) for x in chunks], highlevel=False)
 
     elif isinstance(obj, pyarrow.lib.RecordBatch):
-        child_array = [fromarrow(obj.column(x))
-                       for x in range(obj.num_columns)]
+        child_array = [from_arrow(obj.column(x))
+                         for x in range(obj.num_columns)]
         keys = obj.schema.names
         awk_arr = awkward1.layout.RecordArray(child_array, keys)
         return awk_arr
@@ -1760,13 +1767,14 @@ def fromarrow(obj):
         chunks = []
         chunksizes = []
         for batch in obj.to_batches():
-            chunk = fromarrow(batch)
+            chunk = from_arrow(batch)
             if len(chunk) > 0:
                 chunks.append(chunk)
         if len(chunks) == 1:
             return chunks[0]
         else:
-            return awkward1.operations.structure.concatenate(chunks)
+            return awkward1.operations.structure.concatenate(
+                     chunks, highlevel=False)
 
     else:
         raise NotImplementedError(type(obj))

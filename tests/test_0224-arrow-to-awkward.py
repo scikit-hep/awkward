@@ -11,7 +11,6 @@ import awkward1
 
 pyarrow = pytest.importorskip("pyarrow")
 
-
 def test_toarrow():
     content = awkward1.Array(
         ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]).layout
@@ -160,28 +159,26 @@ def test_toarrow():
                                                                                                                                                                  5.6, 3.8])))
     assert awkward1.to_arrow(ioa).to_pylist() == awkward1.to_list(ioa)
 
-
 def test_fromarrow():
     content = awkward1.layout.NumpyArray(
         numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10]))
-    assert awkward1.to_list(awkward1.fromarrow(awkward1.to_arrow(content))) == awkward1.to_list(content)
-    
+    assert awkward1.to_list(awkward1.from_arrow(awkward1.to_arrow(content))) == awkward1.to_list(content)
+
     offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 10, 10]))
-    # assert awkward1.to_list(awkward1.fromarrow(awkward1.to_arrow(offsets))) == awkward1.to_list(offsets)
-    
+
     listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content)
-    assert awkward1.to_list(awkward1.fromarrow(awkward1.to_arrow(listoffsetarray))) == awkward1.to_list(listoffsetarray)
-    
+    assert awkward1.to_list(awkward1.from_arrow(awkward1.to_arrow(listoffsetarray))) == awkward1.to_list(listoffsetarray)
+
     regulararray = awkward1.layout.RegularArray(listoffsetarray, 2)
-    assert awkward1.to_list(awkward1.fromarrow(awkward1.to_arrow(regulararray))) == awkward1.to_list(regulararray)
-    
+    assert awkward1.to_list(awkward1.from_arrow(awkward1.to_arrow(regulararray))) == awkward1.to_list(regulararray)
+
     content1 = awkward1.layout.NumpyArray(numpy.array([1, 2, 3, 4, 5]))
     content2 = awkward1.layout.NumpyArray(
         numpy.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
     offsets = awkward1.layout.Index32(numpy.array([0, 3, 3, 5, 6, 9]))
     recordarray = awkward1.layout.RecordArray(
         [content1, listoffsetarray, content2, content1], keys=["one", "chonks", "2", "wonky"])
-    assert awkward1.to_list(awkward1.fromarrow(awkward1.to_arrow(recordarray))) == awkward1.to_list(recordarray)
+    assert awkward1.to_list(awkward1.from_arrow(awkward1.to_arrow(recordarray))) == awkward1.to_list(recordarray)
 
     content0 = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
     content = awkward1.Array(
@@ -191,32 +188,4 @@ def test_fromarrow():
     index = awkward1.layout.Index32(
         numpy.array([0, 1, 0, 1, 2, 2, 4, 3], dtype=numpy.int32))
     array = awkward1.layout.UnionArray8_32(tags, index, [content0, content])
-    assert awkward1.to_list(awkward1.fromarrow(awkward1.to_arrow(array))) == awkward1.to_list(array)    
-
-    # content = awkward1.layout.NumpyArray(
-    #     numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
-    # index = awkward1.layout.Index64(
-    #     numpy.array([0, 2, 4, 6, 8, 9, 7, 5], dtype=numpy.int64))
-    # indexedarray = awkward1.layout.IndexedArray64(index, content)
-    # assert awkward1.to_list(awkward1.fromarrow(awkward1.to_arrow(indexedarray))) == awkward1.to_list(indexedarray)
-
-    # import pyarrow as pa
-    # binary = pa.array([b'a', b' ', b'b', b'c', b' ', b' ', b'd'],
-    #                   type='binary')
-    # int64 = pa.array([0, 1, 0, 0, 2, 3, 0], type='int64')
-    # types = pa.array([0, 1, 0, 0, 1, 1, 0], type='int8')
-    # arr = pa.UnionArray.from_sparse(types, [binary, int64])
-
-    # arr = pa.chunked_array([["a", "b"], ["c", None, "e"]])
-    # print(arr.to_pylist())
-    # print(awkward1.to_list(awkward1.fromarrow(arr)))
-    # import pandas as pd
-
-    # df = pd.DataFrame({'int': [1, 2], 'str': ['a', 'b']})
-    # arr = pa.Table.from_pandas(df)
-    # print(arr.to_pydict())
-    # print(awkward1.to_list(awkward1.fromarrow(arr)))
-
-    # bool_arr = pa.array([True, False, True])
-    # print(bool_arr)
-    # print(awkward1.to_list(awkward1.fromarrow(bool_arr)))
+    assert awkward1.to_list(awkward1.from_arrow(awkward1.to_arrow(array))) == awkward1.to_list(array)
