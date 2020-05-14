@@ -1,4 +1,4 @@
-# BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 from __future__ import absolute_import
 
@@ -1161,6 +1161,19 @@ def regularize_numpyarray(array, allow_empty=True, highlevel=True):
         return out
 
 def to_arrow(array):
+    """
+    Args:
+        array: Data to convert to an Apache Arrow array.
+
+    Converts an Awkward Array into an Apache Arrow array.
+
+    This produces arrays of type `pyarrow.Array`. You might need to further
+    manipulations (using the pyarrow library) to build a `pyarrow.ChunkedArray`,
+    a `pyarrow.RecordBatch`, or a `pyarrow.Table`.
+
+    See also #ak.from_arrow.
+    """
+
     import pyarrow
 
     layout = to_layout(array)
@@ -1447,7 +1460,22 @@ def to_arrow(array):
 
     return recurse(layout)
 
-def from_arrow(obj, highlevel=True, behavior=None):
+def from_arrow(array, highlevel=True, behavior=None):
+    """
+    Args:
+        array (`pyarrow.Array`, `pyarrow.ChunkedArray`, `pyarrow.RecordBatch`,
+            or `pyarrow.Table`): Apache Arrow array to convert into an
+            Awkward Array.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+        behavior (bool): Custom #ak.behavior for the output array, if
+            high-level.
+
+    Converts an Apache Arrow array into an Awkward Array.
+
+    See also #ak.to_arrow.
+    """
+
     import pyarrow
 
     def popbuffers(array, tpe, buffers, length):
@@ -1797,9 +1825,9 @@ def from_arrow(obj, highlevel=True, behavior=None):
             raise TypeError("unrecognized Arrow type: {0}".format(repr(tpe)))
 
     if highlevel:
-        return awkward1._util.wrap(recurse(obj), behavior)
+        return awkward1._util.wrap(recurse(array), behavior)
     else:
-        return recurse(obj)
+        return recurse(array)
 
 __all__ = [x for x in list(globals())
            if not x.startswith("_") and
