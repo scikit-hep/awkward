@@ -12,19 +12,26 @@ import awkward1.layout
 import awkward1._util
 import awkward1._connect._numba.arrayview
 
+
 @numba.extending.typeof_impl.register(awkward1.layout.NumpyArray)
 def typeof_NumpyArray(obj, c):
     t = numba.typeof(numpy.asarray(obj))
-    return NumpyArrayType(numba.types.Array(t.dtype, t.ndim, "A"),
-                          numba.typeof(obj.identities),
-                          obj.parameters)
+    return NumpyArrayType(
+        numba.types.Array(t.dtype, t.ndim, "A"),
+        numba.typeof(obj.identities),
+        obj.parameters,
+    )
+
 
 @numba.extending.typeof_impl.register(awkward1.layout.RegularArray)
 def typeof_RegularArray(obj, c):
-    return RegularArrayType(numba.typeof(obj.content),
-                            obj.size,
-                            numba.typeof(obj.identities),
-                            obj.parameters)
+    return RegularArrayType(
+        numba.typeof(obj.content),
+        obj.size,
+        numba.typeof(obj.identities),
+        obj.parameters,
+    )
+
 
 @numba.extending.typeof_impl.register(awkward1.layout.ListArray32)
 @numba.extending.typeof_impl.register(awkward1.layout.ListArrayU32)
@@ -33,79 +40,98 @@ def typeof_RegularArray(obj, c):
 @numba.extending.typeof_impl.register(awkward1.layout.ListOffsetArrayU32)
 @numba.extending.typeof_impl.register(awkward1.layout.ListOffsetArray64)
 def typeof_ListArray(obj, c):
-    return ListArrayType(numba.typeof(numpy.asarray(obj.starts)),
-                         numba.typeof(obj.content),
-                         numba.typeof(obj.identities),
-                         obj.parameters)
+    return ListArrayType(
+        numba.typeof(numpy.asarray(obj.starts)),
+        numba.typeof(obj.content),
+        numba.typeof(obj.identities),
+        obj.parameters,
+    )
+
 
 @numba.extending.typeof_impl.register(awkward1.layout.IndexedArray32)
 @numba.extending.typeof_impl.register(awkward1.layout.IndexedArrayU32)
 @numba.extending.typeof_impl.register(awkward1.layout.IndexedArray64)
 def typeof_IndexedArray(obj, c):
-    return IndexedArrayType(numba.typeof(numpy.asarray(obj.index)),
-                            numba.typeof(obj.content),
-                            numba.typeof(obj.identities),
-                            obj.parameters)
+    return IndexedArrayType(
+        numba.typeof(numpy.asarray(obj.index)),
+        numba.typeof(obj.content),
+        numba.typeof(obj.identities),
+        obj.parameters,
+    )
+
 
 @numba.extending.typeof_impl.register(awkward1.layout.IndexedOptionArray32)
 @numba.extending.typeof_impl.register(awkward1.layout.IndexedOptionArray64)
 def typeof_IndexedOptionArray(obj, c):
-    return IndexedOptionArrayType(numba.typeof(numpy.asarray(obj.index)),
-                                  numba.typeof(obj.content),
-                                  numba.typeof(obj.identities),
-                                  obj.parameters)
+    return IndexedOptionArrayType(
+        numba.typeof(numpy.asarray(obj.index)),
+        numba.typeof(obj.content),
+        numba.typeof(obj.identities),
+        obj.parameters,
+    )
+
 
 @numba.extending.typeof_impl.register(awkward1.layout.ByteMaskedArray)
 def typeof_ByteMaskedArray(obj, c):
-    return ByteMaskedArrayType(numba.typeof(numpy.asarray(obj.mask)),
-                               numba.typeof(obj.content),
-                               obj.valid_when,
-                               numba.typeof(obj.identities),
-                               obj.parameters)
+    return ByteMaskedArrayType(
+        numba.typeof(numpy.asarray(obj.mask)),
+        numba.typeof(obj.content),
+        obj.valid_when,
+        numba.typeof(obj.identities),
+        obj.parameters,
+    )
+
 
 @numba.extending.typeof_impl.register(awkward1.layout.BitMaskedArray)
 def typeof_BitMaskedArray(obj, c):
-    return BitMaskedArrayType(numba.typeof(numpy.asarray(obj.mask)),
-                              numba.typeof(obj.content),
-                              obj.valid_when,
-                              obj.lsb_order,
-                              numba.typeof(obj.identities),
-                              obj.parameters)
+    return BitMaskedArrayType(
+        numba.typeof(numpy.asarray(obj.mask)),
+        numba.typeof(obj.content),
+        obj.valid_when,
+        obj.lsb_order,
+        numba.typeof(obj.identities),
+        obj.parameters,
+    )
+
 
 @numba.extending.typeof_impl.register(awkward1.layout.UnmaskedArray)
 def typeof_UnmaskedArray(obj, c):
-    return UnmaskedArrayType(numba.typeof(obj.content),
-                             numba.typeof(obj.identities),
-                             obj.parameters)
+    return UnmaskedArrayType(
+        numba.typeof(obj.content), numba.typeof(obj.identities), obj.parameters
+    )
+
 
 @numba.extending.typeof_impl.register(awkward1.layout.RecordArray)
 def typeof_RecordArray(obj, c):
-    return RecordArrayType(tuple(numba.typeof(x) for x in obj.contents),
-                           obj.recordlookup,
-                           numba.typeof(obj.identities),
-                           obj.parameters)
+    return RecordArrayType(
+        tuple(numba.typeof(x) for x in obj.contents),
+        obj.recordlookup,
+        numba.typeof(obj.identities),
+        obj.parameters,
+    )
 
-@numba.extending.typeof_impl.register(awkward1.layout.Record)
-def typeof_Record(obj, c):
-    return RecordType(numba.typeof(obj.array))
 
 @numba.extending.typeof_impl.register(awkward1.layout.UnionArray8_32)
 @numba.extending.typeof_impl.register(awkward1.layout.UnionArray8_U32)
 @numba.extending.typeof_impl.register(awkward1.layout.UnionArray8_64)
 def typeof_UnionArray(obj, c):
-    return UnionArrayType(numba.typeof(numpy.asarray(obj.tags)),
-                          numba.typeof(numpy.asarray(obj.index)),
-                          tuple(numba.typeof(x) for x in obj.contents),
-                          numba.typeof(obj.identities), obj.parameters)
+    return UnionArrayType(
+        numba.typeof(numpy.asarray(obj.tags)),
+        numba.typeof(numpy.asarray(obj.index)),
+        tuple(numba.typeof(x) for x in obj.contents),
+        numba.typeof(obj.identities),
+        obj.parameters,
+    )
+
 
 @numba.extending.typeof_impl.register(awkward1.layout.VirtualArray)
 def typeof_VirtualArray(obj, c):
     if obj.form.form is None:
-        raise ValueError(
-            "VirtualArrays without a known 'form' can't be used in Numba")
+        raise ValueError("VirtualArrays without a known 'form' can't be used in Numba")
     if obj.form.has_identities:
         raise NotImplementedError("TODO: identities in VirtualArray")
     return VirtualArrayType(obj.form.form, numba.none, obj.parameters)
+
 
 class ContentType(numba.types.Type):
     @classmethod
@@ -149,12 +175,14 @@ class ContentType(numba.types.Type):
             return numba.types.Array(numba.int64, 1, "C")
         else:
             raise AssertionError(
-                "unrecognized Form index type: {0}".format(index_string))
+                "unrecognized Form index type: {0}".format(index_string)
+            )
 
     def form_fill_identities(self, pos, layout, lookup):
         if layout.identities is not None:
-            lookup.arrayptr[pos + self.IDENTITIES] = \
-                numpy.asarray(layout.identities).ctypes.data
+            lookup.arrayptr[pos + self.IDENTITIES] = numpy.asarray(
+                layout.identities
+            ).ctypes.data
 
     def IndexOf(self, arraytype):
         if arraytype.dtype.bitwidth == 8 and arraytype.dtype.signed:
@@ -168,12 +196,10 @@ class ContentType(numba.types.Type):
         elif arraytype.dtype.bitwidth == 64 and arraytype.dtype.signed:
             return awkward1.layout.Index64
         else:
-            raise AssertionError(
-                    "no Index* type for array: {0}".format(arraytype))
+            raise AssertionError("no Index* type for array: {0}".format(arraytype))
 
     def getitem_at_check(self, viewtype):
-        typer = awkward1._util.numba_array_typer(viewtype.type,
-                                                 viewtype.behavior)
+        typer = awkward1._util.numba_array_typer(viewtype.type, viewtype.behavior)
         if typer is None:
             return self.getitem_at(viewtype)
         else:
@@ -185,107 +211,113 @@ class ContentType(numba.types.Type):
     def getitem_field(self, viewtype, key):
         if self.hasfield(key):
             return awkward1._connect._numba.arrayview.wrap(
-                     self, viewtype, viewtype.fields + (key,))
+                self, viewtype, viewtype.fields + (key,)
+            )
         else:
             raise TypeError(
-                    "array does not have a field with key {0}".format(
-                                                                  repr(key)))
+                "array does not have a field with key {0}".format(repr(key))
+            )
 
-    def lower_getitem_at_check(self,
-                               context,
-                               builder,
-                               rettype,
-                               viewtype,
-                               viewval,
-                               viewproxy,
-                               attype,
-                               atval,
-                               wrapneg,
-                               checkbounds):
-        lower = awkward1._util.numba_array_lower(viewtype.type,
-                                                 viewtype.behavior)
+    def lower_getitem_at_check(
+        self,
+        context,
+        builder,
+        rettype,
+        viewtype,
+        viewval,
+        viewproxy,
+        attype,
+        atval,
+        wrapneg,
+        checkbounds,
+    ):
+        lower = awkward1._util.numba_array_lower(viewtype.type, viewtype.behavior)
         if lower is not None:
-            atval = regularize_atval(context,
-                                     builder,
-                                     viewproxy,
-                                     attype,
-                                     atval,
-                                     wrapneg,
-                                     checkbounds)
-            return lower(context,
-                         builder,
-                         rettype,
-                         viewtype,
-                         viewval,
-                         viewproxy,
-                         attype,
-                         atval)
+            atval = regularize_atval(
+                context, builder, viewproxy, attype, atval, wrapneg, checkbounds
+            )
+            return lower(
+                context, builder, rettype, viewtype, viewval, viewproxy, attype, atval
+            )
         else:
-            return self.lower_getitem_at(context,
-                                         builder,
-                                         rettype,
-                                         viewtype,
-                                         viewval,
-                                         viewproxy,
-                                         attype,
-                                         atval,
-                                         wrapneg,
-                                         checkbounds)
+            return self.lower_getitem_at(
+                context,
+                builder,
+                rettype,
+                viewtype,
+                viewval,
+                viewproxy,
+                attype,
+                atval,
+                wrapneg,
+                checkbounds,
+            )
 
-    def lower_getitem_range(self,
-                            context,
-                            builder,
-                            rettype,
-                            viewtype,
-                            viewval,
-                            viewproxy,
-                            start,
-                            stop,
-                            wrapneg):
+    def lower_getitem_range(
+        self,
+        context,
+        builder,
+        rettype,
+        viewtype,
+        viewval,
+        viewproxy,
+        start,
+        stop,
+        wrapneg,
+    ):
         length = builder.sub(viewproxy.stop, viewproxy.start)
 
         regular_start = numba.core.cgutils.alloca_once_value(builder, start)
         regular_stop = numba.core.cgutils.alloca_once_value(builder, stop)
 
         if wrapneg:
-            with builder.if_then(builder.icmp_signed(
-                   "<", start, context.get_constant(numba.intp, 0))):
+            with builder.if_then(
+                builder.icmp_signed("<", start, context.get_constant(numba.intp, 0))
+            ):
                 builder.store(builder.add(start, length), regular_start)
-            with builder.if_then(builder.icmp_signed(
-                   "<", stop, context.get_constant(numba.intp, 0))):
+            with builder.if_then(
+                builder.icmp_signed("<", stop, context.get_constant(numba.intp, 0))
+            ):
                 builder.store(builder.add(stop, length), regular_stop)
 
-        with builder.if_then(builder.icmp_signed(
-               "<", builder.load(regular_start),
-                    context.get_constant(numba.intp, 0))):
+        with builder.if_then(
+            builder.icmp_signed(
+                "<", builder.load(regular_start), context.get_constant(numba.intp, 0)
+            )
+        ):
             builder.store(context.get_constant(numba.intp, 0), regular_start)
-        with builder.if_then(builder.icmp_signed(
-               ">", builder.load(regular_start), length)):
+        with builder.if_then(
+            builder.icmp_signed(">", builder.load(regular_start), length)
+        ):
             builder.store(length, regular_start)
 
-        with builder.if_then(builder.icmp_signed(
-               "<", builder.load(regular_stop), builder.load(regular_start))):
+        with builder.if_then(
+            builder.icmp_signed(
+                "<", builder.load(regular_stop), builder.load(regular_start)
+            )
+        ):
             builder.store(builder.load(regular_start), regular_stop)
-        with builder.if_then(builder.icmp_signed(
-               ">", builder.load(regular_stop), length)):
+        with builder.if_then(
+            builder.icmp_signed(">", builder.load(regular_stop), length)
+        ):
             builder.store(length, regular_stop)
 
         proxyout = context.make_helper(builder, rettype)
-        proxyout.pos        = viewproxy.pos
-        proxyout.start      = builder.add(viewproxy.start,
-                                          builder.load(regular_start))
-        proxyout.stop       = builder.add(viewproxy.start,
-                                          builder.load(regular_stop))
-        proxyout.arrayptrs  = viewproxy.arrayptrs
+        proxyout.pos = viewproxy.pos
+        proxyout.start = builder.add(viewproxy.start, builder.load(regular_start))
+        proxyout.stop = builder.add(viewproxy.start, builder.load(regular_stop))
+        proxyout.arrayptrs = viewproxy.arrayptrs
         proxyout.sharedptrs = viewproxy.sharedptrs
-        proxyout.pylookup   = viewproxy.pylookup
+        proxyout.pylookup = viewproxy.pylookup
         return proxyout._getvalue()
 
     def lower_getitem_field(self, context, builder, viewtype, viewval, key):
         return viewval
 
+
 def posat(context, builder, pos, offset):
     return builder.add(pos, context.get_constant(numba.intp, offset))
+
 
 def getat(context, builder, baseptr, offset, rettype=None):
     ptrtype = None
@@ -294,25 +326,16 @@ def getat(context, builder, baseptr, offset, rettype=None):
         bitwidth = rettype.bitwidth
     else:
         bitwidth = numba.intp.bitwidth
-    byteoffset = builder.mul(offset,
-                             context.get_constant(numba.intp, bitwidth // 8))
-    return builder.load(numba.core.cgutils.pointer_add(builder,
-                                                       baseptr,
-                                                       byteoffset,
-                                                       ptrtype))
+    byteoffset = builder.mul(offset, context.get_constant(numba.intp, bitwidth // 8))
+    return builder.load(
+        numba.core.cgutils.pointer_add(builder, baseptr, byteoffset, ptrtype)
+    )
 
-def regularize_atval(context,
-                     builder,
-                     viewproxy,
-                     attype,
-                     atval,
-                     wrapneg,
-                     checkbounds):
-    atval = awkward1._connect._numba.castint(context,
-                                             builder,
-                                             attype,
-                                             numba.intp,
-                                             atval)
+
+def regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkbounds):
+    atval = awkward1._connect._numba.castint(
+        context, builder, attype, numba.intp, atval
+    )
 
     if not attype.signed:
         wrapneg = False
@@ -321,27 +344,30 @@ def regularize_atval(context,
         length = builder.sub(viewproxy.stop, viewproxy.start)
 
         if wrapneg:
-            regular_atval = numba.core.cgutils.alloca_once_value(builder,
-                                                                 atval)
-            with builder.if_then(builder.icmp_signed(
-                   "<", atval, context.get_constant(numba.intp, 0))):
+            regular_atval = numba.core.cgutils.alloca_once_value(builder, atval)
+            with builder.if_then(
+                builder.icmp_signed("<", atval, context.get_constant(numba.intp, 0))
+            ):
                 builder.store(builder.add(atval, length), regular_atval)
             atval = builder.load(regular_atval)
 
         if checkbounds:
             with builder.if_then(
-                   builder.or_(
-                     builder.icmp_signed(
-                       "<", atval, context.get_constant(numba.intp, 0)),
-                     builder.icmp_signed(">=", atval, length))):
+                builder.or_(
+                    builder.icmp_signed(
+                        "<", atval, context.get_constant(numba.intp, 0)
+                    ),
+                    builder.icmp_signed(">=", atval, length),
+                )
+            ):
                 context.call_conv.return_user_exc(
-                    builder, ValueError, ("slice index out of bounds",))
+                    builder, ValueError, ("slice index out of bounds",)
+                )
 
-    return awkward1._connect._numba.castint(context,
-                                            builder,
-                                            atval.type,
-                                            numba.intp,
-                                            atval)
+    return awkward1._connect._numba.castint(
+        context, builder, atval.type, numba.intp, atval
+    )
+
 
 class NumpyArrayType(ContentType):
     IDENTITIES = 0
@@ -364,7 +390,8 @@ class NumpyArrayType(ContentType):
         if len(form.inner_shape) != 0:
             raise NotImplementedError(
                 "NumpyForm is multidimensional; TODO: convert to RegularForm,"
-                " just as NumpyArrays are converted to RegularArrays")
+                " just as NumpyArrays are converted to RegularArrays"
+            )
         pos = len(positions)
         cls.form_tolookup_identities(form, positions, sharedptrs, arrays)
         sharedptrs[-1] = 0
@@ -378,7 +405,8 @@ class NumpyArrayType(ContentType):
         if len(form.inner_shape) != 0:
             raise NotImplementedError(
                 "NumpyForm is multidimensional; TODO: convert to RegularForm,"
-                " just as NumpyArrays are converted to RegularArrays")
+                " just as NumpyArrays are converted to RegularArrays"
+            )
         if form.primitive == "float64":
             arraytype = numba.types.Array(numba.float64, 1, "A")
         elif form.primitive == "float32":
@@ -402,16 +430,19 @@ class NumpyArrayType(ContentType):
         elif form.primitive == "bool":
             arraytype = numba.types.Array(numba.bool, 1, "A")
         else:
-            raise ValueError("unrecognized NumpyForm.primitive type: {0}"
-                             .format(form.primitive))
-        return NumpyArrayType(arraytype,
-                              cls.from_form_identities(form),
-                              form.parameters)
+            raise ValueError(
+                "unrecognized NumpyForm.primitive type: {0}".format(form.primitive)
+            )
+        return NumpyArrayType(
+            arraytype, cls.from_form_identities(form), form.parameters
+        )
 
     def __init__(self, arraytype, identitiestype, parameters):
         super(NumpyArrayType, self).__init__(
             name="awkward1.NumpyArrayType({0}, {1}, {2})".format(
-              arraytype.name, identitiestype.name, json.dumps(parameters)))
+                arraytype.name, identitiestype.name, json.dumps(parameters)
+            )
+        )
         self.arraytype = arraytype
         self.identitiestype = identitiestype
         self.parameters = parameters
@@ -422,14 +453,15 @@ class NumpyArrayType(ContentType):
         self.form_fill_identities(pos, layout, lookup)
 
         lookup.original_positions[pos + self.ARRAY] = numpy.asarray(layout)
-        lookup.arrayptrs[pos + self.ARRAY] = \
-                      lookup.original_positions[pos + self.ARRAY].ctypes.data
+        lookup.arrayptrs[pos + self.ARRAY] = lookup.original_positions[
+            pos + self.ARRAY
+        ].ctypes.data
 
     def tolayout(self, lookup, pos, fields):
         assert fields == ()
         return awkward1.layout.NumpyArray(
-                 lookup.original_positions[pos + self.ARRAY],
-                 parameters=self.parameters)
+            lookup.original_positions[pos + self.ARRAY], parameters=self.parameters
+        )
 
     def hasfield(self, key):
         return False
@@ -437,28 +469,27 @@ class NumpyArrayType(ContentType):
     def getitem_at(self, viewtype):
         return self.arraytype.dtype
 
-    def lower_getitem_at(self,
-                         context,
-                         builder,
-                         rettype,
-                         viewtype,
-                         viewval,
-                         viewproxy,
-                         attype,
-                         atval,
-                         wrapneg,
-                         checkbounds):
+    def lower_getitem_at(
+        self,
+        context,
+        builder,
+        rettype,
+        viewtype,
+        viewval,
+        viewproxy,
+        attype,
+        atval,
+        wrapneg,
+        checkbounds,
+    ):
         whichpos = posat(context, builder, viewproxy.pos, self.ARRAY)
         arrayptr = getat(context, builder, viewproxy.arrayptrs, whichpos)
-        atval = regularize_atval(context,
-                                 builder,
-                                 viewproxy,
-                                 attype,
-                                 atval,
-                                 wrapneg,
-                                 checkbounds)
+        atval = regularize_atval(
+            context, builder, viewproxy, attype, atval, wrapneg, checkbounds
+        )
         arraypos = builder.add(viewproxy.start, atval)
         return getat(context, builder, arrayptr, arraypos, rettype)
+
 
 class RegularArrayType(ContentType):
     IDENTITIES = 0
@@ -471,11 +502,9 @@ class RegularArrayType(ContentType):
         sharedptrs[-1] = layout._persistent_shared_ptr
         positions.append(None)
         sharedptrs.append(None)
-        positions[pos + cls.CONTENT] = \
-          awkward1._connect._numba.arrayview.tolookup(layout.content,
-                                                      positions,
-                                                      sharedptrs,
-                                                      arrays)
+        positions[pos + cls.CONTENT] = awkward1._connect._numba.arrayview.tolookup(
+            layout.content, positions, sharedptrs, arrays
+        )
         return pos
 
     @classmethod
@@ -485,11 +514,9 @@ class RegularArrayType(ContentType):
         sharedptrs[-1] = 0
         positions.append(None)
         sharedptrs.append(None)
-        positions[pos + cls.CONTENT] = \
-          awkward1._connect._numba.arrayview.tolookup(form.content,
-                                                      positions,
-                                                      sharedptrs,
-                                                      arrays)
+        positions[pos + cls.CONTENT] = awkward1._connect._numba.arrayview.tolookup(
+            form.content, positions, sharedptrs, arrays
+        )
         return pos
 
     @classmethod
@@ -498,15 +525,15 @@ class RegularArrayType(ContentType):
             awkward1._connect._numba.arrayview.tonumbatype(form.content),
             form.size,
             cls.from_form_identities(form),
-            form.parameters)
+            form.parameters,
+        )
 
     def __init__(self, contenttype, size, identitiestype, parameters):
         super(RegularArrayType, self).__init__(
             name="awkward1.RegularArrayType({0}, {1}, {2}, {3})".format(
-            contenttype.name,
-            size,
-            identitiestype.name,
-            json.dumps(parameters)))
+                contenttype.name, size, identitiestype.name, json.dumps(parameters)
+            )
+        )
         self.contenttype = contenttype
         self.size = size
         self.identitiestype = identitiestype
@@ -517,59 +544,57 @@ class RegularArrayType(ContentType):
         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
         self.form_fill_identities(pos, layout, lookup)
 
-        self.contenttype.form_fill(lookup.arrayptrs[pos + self.CONTENT],
-                                   layout.content,
-                                   lookup)
+        self.contenttype.form_fill(
+            lookup.arrayptrs[pos + self.CONTENT], layout.content, lookup
+        )
 
     def tolayout(self, lookup, pos, fields):
         content = self.contenttype.tolayout(
-                    lookup, lookup.positions[pos + self.CONTENT], fields)
-        return awkward1.layout.RegularArray(content,
-                                            self.size,
-                                            parameters=self.parameters)
+            lookup, lookup.positions[pos + self.CONTENT], fields
+        )
+        return awkward1.layout.RegularArray(
+            content, self.size, parameters=self.parameters
+        )
 
     def hasfield(self, key):
         return self.contenttype.hasfield(key)
 
     def getitem_at(self, viewtype):
-        return awkward1._connect._numba.arrayview.wrap(self.contenttype,
-                                                       viewtype,
-                                                       None)
+        return awkward1._connect._numba.arrayview.wrap(self.contenttype, viewtype, None)
 
-    def lower_getitem_at(self,
-                         context,
-                         builder,
-                         rettype,
-                         viewtype,
-                         viewval,
-                         viewproxy,
-                         attype,
-                         atval,
-                         wrapneg,
-                         checkbounds):
+    def lower_getitem_at(
+        self,
+        context,
+        builder,
+        rettype,
+        viewtype,
+        viewval,
+        viewproxy,
+        attype,
+        atval,
+        wrapneg,
+        checkbounds,
+    ):
         whichpos = posat(context, builder, viewproxy.pos, self.CONTENT)
         nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
 
-        atval = regularize_atval(context,
-                                 builder,
-                                 viewproxy,
-                                 attype,
-                                 atval,
-                                 wrapneg,
-                                 checkbounds)
+        atval = regularize_atval(
+            context, builder, viewproxy, attype, atval, wrapneg, checkbounds
+        )
 
         size = context.get_constant(numba.intp, self.size)
         start = builder.mul(builder.add(viewproxy.start, atval), size)
-        stop  = builder.add(start, size)
+        stop = builder.add(start, size)
 
         proxyout = context.make_helper(builder, rettype)
-        proxyout.pos        = nextpos
-        proxyout.start      = start
-        proxyout.stop       = stop
-        proxyout.arrayptrs  = viewproxy.arrayptrs
+        proxyout.pos = nextpos
+        proxyout.start = start
+        proxyout.stop = stop
+        proxyout.arrayptrs = viewproxy.arrayptrs
         proxyout.sharedptrs = viewproxy.sharedptrs
-        proxyout.pylookup   = viewproxy.pylookup
+        proxyout.pylookup = viewproxy.pylookup
         return proxyout._getvalue()
+
 
 class ListArrayType(ContentType):
     IDENTITIES = 0
@@ -579,14 +604,24 @@ class ListArrayType(ContentType):
 
     @classmethod
     def tolookup(cls, layout, positions, sharedptrs, arrays):
-        if isinstance(layout, (awkward1.layout.ListArray32,
-                               awkward1.layout.ListArrayU32,
-                               awkward1.layout.ListArray64)):
+        if isinstance(
+            layout,
+            (
+                awkward1.layout.ListArray32,
+                awkward1.layout.ListArrayU32,
+                awkward1.layout.ListArray64,
+            ),
+        ):
             starts = numpy.asarray(layout.starts)
             stops = numpy.asarray(layout.stops)
-        elif isinstance(layout, (awkward1.layout.ListOffsetArray32,
-                                 awkward1.layout.ListOffsetArrayU32,
-                                 awkward1.layout.ListOffsetArray64)):
+        elif isinstance(
+            layout,
+            (
+                awkward1.layout.ListOffsetArray32,
+                awkward1.layout.ListOffsetArrayU32,
+                awkward1.layout.ListOffsetArray64,
+            ),
+        ):
             offsets = numpy.asarray(layout.offsets)
             starts = offsets[:-1]
             stops = offsets[1:]
@@ -602,11 +637,9 @@ class ListArrayType(ContentType):
         arrays.append(stops)
         positions.append(None)
         sharedptrs.append(None)
-        positions[pos + cls.CONTENT] = \
-          awkward1._connect._numba.arrayview.tolookup(layout.content,
-                                                      positions,
-                                                      sharedptrs,
-                                                      arrays)
+        positions[pos + cls.CONTENT] = awkward1._connect._numba.arrayview.tolookup(
+            layout.content, positions, sharedptrs, arrays
+        )
         return pos
 
     @classmethod
@@ -622,30 +655,33 @@ class ListArrayType(ContentType):
         arrays.append(0)
         positions.append(None)
         sharedptrs.append(None)
-        positions[pos + cls.CONTENT] = \
-          awkward1._connect._numba.arrayview.tolookup(form.content,
-                                                      positions,
-                                                      sharedptrs,
-                                                      arrays)
+        positions[pos + cls.CONTENT] = awkward1._connect._numba.arrayview.tolookup(
+            form.content, positions, sharedptrs, arrays
+        )
         return pos
 
     @classmethod
     def from_form(cls, form):
         return ListArrayType(
-            cls.from_form_index(form.starts
-                                  if isinstance(form, awkward1.forms.ListForm)
-                                  else form.offsets),
+            cls.from_form_index(
+                form.starts
+                if isinstance(form, awkward1.forms.ListForm)
+                else form.offsets
+            ),
             awkward1._connect._numba.arrayview.tonumbatype(form.content),
             cls.from_form_identities(form),
-            form.parameters)
+            form.parameters,
+        )
 
     def __init__(self, indextype, contenttype, identitiestype, parameters):
         super(ListArrayType, self).__init__(
             name="awkward1.ListArrayType({0}, {1}, {2}, {3})".format(
-              indextype.name,
-              contenttype.name,
-              identitiestype.name,
-              json.dumps(parameters)))
+                indextype.name,
+                contenttype.name,
+                identitiestype.name,
+                json.dumps(parameters),
+            )
+        )
         self.indextype = indextype
         self.contenttype = contenttype
         self.identitiestype = identitiestype
@@ -656,14 +692,24 @@ class ListArrayType(ContentType):
         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
         self.form_fill_identities(pos, layout, lookup)
 
-        if isinstance(layout, (awkward1.layout.ListArray32,
-                               awkward1.layout.ListArrayU32,
-                               awkward1.layout.ListArray64)):
+        if isinstance(
+            layout,
+            (
+                awkward1.layout.ListArray32,
+                awkward1.layout.ListArrayU32,
+                awkward1.layout.ListArray64,
+            ),
+        ):
             starts = numpy.asarray(layout.starts)
             stops = numpy.asarray(layout.stops)
-        elif isinstance(layout, (awkward1.layout.ListOffsetArray32,
-                                 awkward1.layout.ListOffsetArrayU32,
-                                 awkward1.layout.ListOffsetArray64)):
+        elif isinstance(
+            layout,
+            (
+                awkward1.layout.ListOffsetArray32,
+                awkward1.layout.ListOffsetArrayU32,
+                awkward1.layout.ListOffsetArray64,
+            ),
+        ):
             offsets = numpy.asarray(layout.offsets)
             starts = offsets[:-1]
             stops = offsets[1:]
@@ -673,102 +719,83 @@ class ListArrayType(ContentType):
         lookup.arrayptrs[pos + self.STARTS] = starts.ctypes.data
         lookup.arrayptrs[pos + self.STOPS] = stops.ctypes.data
 
-        self.contenttype.form_fill(lookup.arrayptrs[pos + self.CONTENT],
-                                   layout.content,
-                                   lookup)
+        self.contenttype.form_fill(
+            lookup.arrayptrs[pos + self.CONTENT], layout.content, lookup
+        )
 
     def ListArrayOf(self):
         if self.indextype.dtype.bitwidth == 32 and self.indextype.dtype.signed:
             return awkward1.layout.ListArray32
         elif self.indextype.dtype.bitwidth == 32:
             return awkward1.layout.ListArrayU32
-        elif (self.indextype.dtype.bitwidth == 64 and
-              self.indextype.dtype.signed):
+        elif self.indextype.dtype.bitwidth == 64 and self.indextype.dtype.signed:
             return awkward1.layout.ListArray64
         else:
             raise AssertionError(
-                    "no ListArray* type for array: {0}".format(indextype))
+                "no ListArray* type for array: {0}".format(self.indextype)
+            )
 
     def tolayout(self, lookup, pos, fields):
         starts = self.IndexOf(self.indextype)(
-                   lookup.original_positions[pos + self.STARTS])
+            lookup.original_positions[pos + self.STARTS]
+        )
         stops = self.IndexOf(self.indextype)(
-                   lookup.original_positions[pos + self.STOPS])
+            lookup.original_positions[pos + self.STOPS]
+        )
         content = self.contenttype.tolayout(
-                   lookup,
-                   lookup.positions[pos + self.CONTENT],
-                   fields)
-        return self.ListArrayOf()(starts,
-                                  stops,
-                                  content,
-                                  parameters=self.parameters)
+            lookup, lookup.positions[pos + self.CONTENT], fields
+        )
+        return self.ListArrayOf()(starts, stops, content, parameters=self.parameters)
 
     def hasfield(self, key):
         return self.contenttype.hasfield(key)
 
     def getitem_at(self, viewtype):
-        return awkward1._connect._numba.arrayview.wrap(self.contenttype,
-                                                       viewtype,
-                                                       None)
+        return awkward1._connect._numba.arrayview.wrap(self.contenttype, viewtype, None)
 
-    def lower_getitem_at(self,
-                         context,
-                         builder,
-                         rettype,
-                         viewtype,
-                         viewval,
-                         viewproxy,
-                         attype,
-                         atval,
-                         wrapneg,
-                         checkbounds):
+    def lower_getitem_at(
+        self,
+        context,
+        builder,
+        rettype,
+        viewtype,
+        viewval,
+        viewproxy,
+        attype,
+        atval,
+        wrapneg,
+        checkbounds,
+    ):
         whichpos = posat(context, builder, viewproxy.pos, self.CONTENT)
         nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
 
-        atval = regularize_atval(context,
-                                 builder,
-                                 viewproxy,
-                                 attype,
-                                 atval,
-                                 wrapneg,
-                                 checkbounds)
+        atval = regularize_atval(
+            context, builder, viewproxy, attype, atval, wrapneg, checkbounds
+        )
 
         startspos = posat(context, builder, viewproxy.pos, self.STARTS)
         startsptr = getat(context, builder, viewproxy.arrayptrs, startspos)
         startsarraypos = builder.add(viewproxy.start, atval)
-        start = getat(context,
-                      builder,
-                      startsptr,
-                      startsarraypos,
-                      self.indextype.dtype)
+        start = getat(context, builder, startsptr, startsarraypos, self.indextype.dtype)
 
         stopspos = posat(context, builder, viewproxy.pos, self.STOPS)
         stopsptr = getat(context, builder, viewproxy.arrayptrs, stopspos)
         stopsarraypos = builder.add(viewproxy.start, atval)
-        stop = getat(context,
-                     builder,
-                     stopsptr,
-                     stopsarraypos,
-                     self.indextype.dtype)
+        stop = getat(context, builder, stopsptr, stopsarraypos, self.indextype.dtype)
 
         proxyout = context.make_helper(builder, rettype)
-        proxyout.pos        = nextpos
-        proxyout.start      = awkward1._connect._numba.castint(
-                                context,
-                                builder,
-                                self.indextype.dtype,
-                                numba.intp,
-                                start)
-        proxyout.stop       = awkward1._connect._numba.castint(
-                                context,
-                                builder,
-                                self.indextype.dtype,
-                                numba.intp,
-                                stop)
-        proxyout.arrayptrs  = viewproxy.arrayptrs
+        proxyout.pos = nextpos
+        proxyout.start = awkward1._connect._numba.castint(
+            context, builder, self.indextype.dtype, numba.intp, start
+        )
+        proxyout.stop = awkward1._connect._numba.castint(
+            context, builder, self.indextype.dtype, numba.intp, stop
+        )
+        proxyout.arrayptrs = viewproxy.arrayptrs
         proxyout.sharedptrs = viewproxy.sharedptrs
-        proxyout.pylookup   = viewproxy.pylookup
+        proxyout.pylookup = viewproxy.pylookup
         return proxyout._getvalue()
+
 
 class IndexedArrayType(ContentType):
     IDENTITIES = 0
@@ -785,11 +812,9 @@ class IndexedArrayType(ContentType):
         sharedptrs.append(None)
         positions.append(None)
         sharedptrs.append(None)
-        positions[pos + cls.CONTENT] = \
-          awkward1._connect._numba.arrayview.tolookup(layout.content,
-                                                      positions,
-                                                      sharedptrs,
-                                                      arrays)
+        positions[pos + cls.CONTENT] = awkward1._connect._numba.arrayview.tolookup(
+            layout.content, positions, sharedptrs, arrays
+        )
         return pos
 
     @classmethod
@@ -802,11 +827,9 @@ class IndexedArrayType(ContentType):
         sharedptrs.append(None)
         positions.append(None)
         sharedptrs.append(None)
-        positions[pos + cls.CONTENT] = \
-          awkward1._connect._numba.arrayview.tolookup(form.content,
-                                                      positions,
-                                                      sharedptrs,
-                                                      arrays)
+        positions[pos + cls.CONTENT] = awkward1._connect._numba.arrayview.tolookup(
+            form.content, positions, sharedptrs, arrays
+        )
         return pos
 
     @classmethod
@@ -815,15 +838,18 @@ class IndexedArrayType(ContentType):
             cls.from_form_index(form.index),
             awkward1._connect._numba.arrayview.tonumbatype(form.content),
             cls.from_form_identities(form),
-            form.parameters)
+            form.parameters,
+        )
 
     def __init__(self, indextype, contenttype, identitiestype, parameters):
         super(IndexedArrayType, self).__init__(
             name="awkward1.IndexedArrayType({0}, {1}, {2}, {3})".format(
-              indextype.name,
-              contenttype.name,
-              identitiestype.name,
-              json.dumps(parameters)))
+                indextype.name,
+                contenttype.name,
+                identitiestype.name,
+                json.dumps(parameters),
+            )
+        )
         self.indextype = indextype
         self.contenttype = contenttype
         self.identitiestype = identitiestype
@@ -838,31 +864,30 @@ class IndexedArrayType(ContentType):
         lookup.original_positions[pos + self.INDEX] = index
         lookup.arrayptrs[pos + self.INDEX] = index.ctypes.data
 
-        self.contenttype.form_fill(lookup.arrayptrs[pos + self.CONTENT],
-                                   layout.content,
-                                   lookup)
+        self.contenttype.form_fill(
+            lookup.arrayptrs[pos + self.CONTENT], layout.content, lookup
+        )
 
     def IndexedArrayOf(self):
         if self.indextype.dtype.bitwidth == 32 and self.indextype.dtype.signed:
             return awkward1.layout.IndexedArray32
         elif self.indextype.dtype.bitwidth == 32:
             return awkward1.layout.IndexedArrayU32
-        elif (self.indextype.dtype.bitwidth == 64 and
-              self.indextype.dtype.signed):
+        elif self.indextype.dtype.bitwidth == 64 and self.indextype.dtype.signed:
             return awkward1.layout.IndexedArray64
         else:
             raise AssertionError(
-                    "no IndexedArray* type for array: {0}".format(
-                      self.indextype))
+                "no IndexedArray* type for array: {0}".format(self.indextype)
+            )
 
     def tolayout(self, lookup, pos, fields):
         index = self.IndexOf(self.indextype)(
-                  lookup.original_positions[pos + self.INDEX])
+            lookup.original_positions[pos + self.INDEX]
+        )
         content = self.contenttype.tolayout(
-                    lookup, lookup.positions[pos + self.CONTENT], fields)
-        return self.IndexedArrayOf()(index,
-                                     content,
-                                     parameters=self.parameters)
+            lookup, lookup.positions[pos + self.CONTENT], fields
+        )
+        return self.IndexedArrayOf()(index, content, parameters=self.parameters)
 
     def hasfield(self, key):
         return self.contenttype.hasfield(key)
@@ -870,66 +895,60 @@ class IndexedArrayType(ContentType):
     def getitem_at(self, viewtype):
         return self.contenttype.getitem_at_check(viewtype)
 
-    def lower_getitem_at(self,
-                         context,
-                         builder,
-                         rettype,
-                         viewtype,
-                         viewval,
-                         viewproxy,
-                         attype,
-                         atval,
-                         wrapneg,
-                         checkbounds):
+    def lower_getitem_at(
+        self,
+        context,
+        builder,
+        rettype,
+        viewtype,
+        viewval,
+        viewproxy,
+        attype,
+        atval,
+        wrapneg,
+        checkbounds,
+    ):
         whichpos = posat(context, builder, viewproxy.pos, self.CONTENT)
         nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
 
-        atval = regularize_atval(context,
-                                 builder,
-                                 viewproxy,
-                                 attype,
-                                 atval,
-                                 wrapneg,
-                                 checkbounds)
+        atval = regularize_atval(
+            context, builder, viewproxy, attype, atval, wrapneg, checkbounds
+        )
 
         indexpos = posat(context, builder, viewproxy.pos, self.INDEX)
         indexptr = getat(context, builder, viewproxy.arrayptrs, indexpos)
         indexarraypos = builder.add(viewproxy.start, atval)
-        nextat = getat(context,
-                       builder,
-                       indexptr,
-                       indexarraypos,
-                       self.indextype.dtype)
+        nextat = getat(context, builder, indexptr, indexarraypos, self.indextype.dtype)
 
         nextviewtype = awkward1._connect._numba.arrayview.wrap(
-                         self.contenttype, viewtype, None)
+            self.contenttype, viewtype, None
+        )
         proxynext = context.make_helper(builder, nextviewtype)
-        proxynext.pos        = nextpos
-        proxynext.start      = viewproxy.start
-        proxynext.stop       = builder.add(
-                                 awkward1._connect._numba.castint(
-                                   context,
-                                   builder,
-                                   self.indextype.dtype,
-                                   numba.intp,
-                                   nextat),
-                                 builder.add(viewproxy.start,
-                                             context.get_constant(
-                                               numba.intp, 1)))
-        proxynext.arrayptrs  = viewproxy.arrayptrs
+        proxynext.pos = nextpos
+        proxynext.start = viewproxy.start
+        proxynext.stop = builder.add(
+            awkward1._connect._numba.castint(
+                context, builder, self.indextype.dtype, numba.intp, nextat
+            ),
+            builder.add(viewproxy.start, context.get_constant(numba.intp, 1)),
+        )
+        proxynext.arrayptrs = viewproxy.arrayptrs
         proxynext.sharedptrs = viewproxy.sharedptrs
-        proxynext.pylookup   = viewproxy.pylookup
+        proxynext.pylookup = viewproxy.pylookup
 
-        return self.contenttype.lower_getitem_at_check(context,
-                                                       builder,
-                                                       rettype,
-                                                       nextviewtype,
-                                                       proxynext._getvalue(),
-                                                       proxynext,
-                                                       numba.intp,
-                                                       nextat,
-                                                       False,
-                                                       False)
+        return self.contenttype.lower_getitem_at_check(
+            context,
+            builder,
+            rettype,
+            nextviewtype,
+            proxynext._getvalue(),
+            proxynext,
+            numba.intp,
+            nextat,
+            False,
+            False,
+        )
+
 
 class IndexedOptionArrayType(ContentType):
     IDENTITIES = 0
@@ -946,11 +965,9 @@ class IndexedOptionArrayType(ContentType):
         sharedptrs.append(None)
         positions.append(None)
         sharedptrs.append(None)
-        positions[pos + cls.CONTENT] = \
-          awkward1._connect._numba.arrayview.tolookup(layout.content,
-                                                      positions,
-                                                      sharedptrs,
-                                                      arrays)
+        positions[pos + cls.CONTENT] = awkward1._connect._numba.arrayview.tolookup(
+            layout.content, positions, sharedptrs, arrays
+        )
         return pos
 
     @classmethod
@@ -963,11 +980,9 @@ class IndexedOptionArrayType(ContentType):
         sharedptrs.append(None)
         positions.append(None)
         sharedptrs.append(None)
-        positions[pos + cls.CONTENT] = \
-          awkward1._connect._numba.arrayview.tolookup(form.content,
-                                                      positions,
-                                                      sharedptrs,
-                                                      arrays)
+        positions[pos + cls.CONTENT] = awkward1._connect._numba.arrayview.tolookup(
+            form.content, positions, sharedptrs, arrays
+        )
         return pos
 
     @classmethod
@@ -976,15 +991,18 @@ class IndexedOptionArrayType(ContentType):
             cls.from_form_index(form.index),
             awkward1._connect._numba.arrayview.tonumbatype(form.content),
             cls.from_form_identities(form),
-            form.parameters)
+            form.parameters,
+        )
 
     def __init__(self, indextype, contenttype, identitiestype, parameters):
         super(IndexedOptionArrayType, self).__init__(
             name="awkward1.IndexedOptionArrayType({0}, {1}, {2}, {3})".format(
-              indextype.name,
-              contenttype.name,
-              identitiestype.name,
-              json.dumps(parameters)))
+                indextype.name,
+                contenttype.name,
+                identitiestype.name,
+                json.dumps(parameters),
+            )
+        )
         self.indextype = indextype
         self.contenttype = contenttype
         self.identitiestype = identitiestype
@@ -999,116 +1017,106 @@ class IndexedOptionArrayType(ContentType):
         lookup.original_positions[pos + self.INDEX] = index
         lookup.arrayptrs[pos + self.INDEX] = index.ctypes.data
 
-        self.contenttype.form_fill(lookup.arrayptrs[pos + self.CONTENT],
-                                   layout.content,
-                                   lookup)
+        self.contenttype.form_fill(
+            lookup.arrayptrs[pos + self.CONTENT], layout.content, lookup
+        )
 
     def IndexedOptionArrayOf(self):
         if self.indextype.dtype.bitwidth == 32 and self.indextype.dtype.signed:
             return awkward1.layout.IndexedOptionArray32
-        elif (self.indextype.dtype.bitwidth == 64 and
-              self.indextype.dtype.signed):
+        elif self.indextype.dtype.bitwidth == 64 and self.indextype.dtype.signed:
             return awkward1.layout.IndexedOptionArray64
         else:
             raise AssertionError(
-                    "no IndexedOptionArray* type for array: {0}".format(
-                      self.indextype))
+                "no IndexedOptionArray* type for array: {0}".format(self.indextype)
+            )
 
     def tolayout(self, lookup, pos, fields):
         index = self.IndexOf(self.indextype)(
-            lookup.original_positions[pos + self.INDEX])
+            lookup.original_positions[pos + self.INDEX]
+        )
         content = self.contenttype.tolayout(
-            lookup, lookup.positions[pos + self.CONTENT], fields)
-        return self.IndexedOptionArrayOf()(index,
-                                           content,
-                                           parameters=self.parameters)
+            lookup, lookup.positions[pos + self.CONTENT], fields
+        )
+        return self.IndexedOptionArrayOf()(index, content, parameters=self.parameters)
 
     def hasfield(self, key):
         return self.contenttype.hasfield(key)
 
     def getitem_at(self, viewtype):
-        return numba.types.optional(
-                 self.contenttype.getitem_at_check(viewtype))
+        return numba.types.optional(self.contenttype.getitem_at_check(viewtype))
 
-    def lower_getitem_at(self,
-                         context,
-                         builder,
-                         rettype,
-                         viewtype,
-                         viewval,
-                         viewproxy,
-                         attype,
-                         atval,
-                         wrapneg,
-                         checkbounds):
+    def lower_getitem_at(
+        self,
+        context,
+        builder,
+        rettype,
+        viewtype,
+        viewval,
+        viewproxy,
+        attype,
+        atval,
+        wrapneg,
+        checkbounds,
+    ):
         whichpos = posat(context, builder, viewproxy.pos, self.CONTENT)
         nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
 
-        atval = regularize_atval(context,
-                                 builder,
-                                 viewproxy,
-                                 attype,
-                                 atval,
-                                 wrapneg,
-                                 checkbounds)
+        atval = regularize_atval(
+            context, builder, viewproxy, attype, atval, wrapneg, checkbounds
+        )
 
         indexpos = posat(context, builder, viewproxy.pos, self.INDEX)
         indexptr = getat(context, builder, viewproxy.arrayptrs, indexpos)
         indexarraypos = builder.add(viewproxy.start, atval)
-        nextat = getat(context,
-                       builder,
-                       indexptr,
-                       indexarraypos,
-                       self.indextype.dtype)
+        nextat = getat(context, builder, indexptr, indexarraypos, self.indextype.dtype)
 
         output = context.make_helper(builder, rettype)
 
-        with builder.if_else(builder.icmp_signed(
-               "<",
-               nextat,
-               context.get_constant(self.indextype.dtype, 0))) as (isnone,
-                                                                   isvalid):
+        with builder.if_else(
+            builder.icmp_signed(
+                "<", nextat, context.get_constant(self.indextype.dtype, 0)
+            )
+        ) as (isnone, isvalid):
             with isnone:
                 output.valid = numba.core.cgutils.false_bit
-                output.data = numba.core.cgutils.get_null_value(
-                                output.data.type)
+                output.data = numba.core.cgutils.get_null_value(output.data.type)
 
             with isvalid:
                 nextviewtype = awkward1._connect._numba.arrayview.wrap(
-                                 self.contenttype, viewtype, None)
+                    self.contenttype, viewtype, None
+                )
                 proxynext = context.make_helper(builder, nextviewtype)
-                proxynext.pos        = nextpos
-                proxynext.start      = viewproxy.start
-                proxynext.stop       = builder.add(
-                                         awkward1._connect._numba.castint(
-                                           context,
-                                           builder,
-                                           self.indextype.dtype,
-                                           numba.intp,
-                                           nextat),
-                                         builder.add(viewproxy.start,
-                                                     context.get_constant(
-                                                       numba.intp, 1)))
-                proxynext.arrayptrs  = viewproxy.arrayptrs
+                proxynext.pos = nextpos
+                proxynext.start = viewproxy.start
+                proxynext.stop = builder.add(
+                    awkward1._connect._numba.castint(
+                        context, builder, self.indextype.dtype, numba.intp, nextat
+                    ),
+                    builder.add(viewproxy.start, context.get_constant(numba.intp, 1)),
+                )
+                proxynext.arrayptrs = viewproxy.arrayptrs
                 proxynext.sharedptrs = viewproxy.sharedptrs
-                proxynext.pylookup   = viewproxy.pylookup
+                proxynext.pylookup = viewproxy.pylookup
 
                 outdata = self.contenttype.lower_getitem_at_check(
-                            context,
-                            builder,
-                            rettype.type,
-                            nextviewtype,
-                            proxynext._getvalue(),
-                            proxynext,
-                            numba.intp,
-                            nextat,
-                            False,
-                            False)
+                    context,
+                    builder,
+                    rettype.type,
+                    nextviewtype,
+                    proxynext._getvalue(),
+                    proxynext,
+                    numba.intp,
+                    nextat,
+                    False,
+                    False,
+                )
 
                 output.valid = numba.core.cgutils.true_bit
                 output.data = outdata
 
         return output._getvalue()
+
 
 class ByteMaskedArrayType(ContentType):
     IDENTITIES = 0
@@ -1125,11 +1133,9 @@ class ByteMaskedArrayType(ContentType):
         sharedptrs.append(None)
         positions.append(None)
         sharedptrs.append(None)
-        positions[pos + cls.CONTENT] = \
-          awkward1._connect._numba.arrayview.tolookup(layout.content,
-                                                      positions,
-                                                      sharedptrs,
-                                                      arrays)
+        positions[pos + cls.CONTENT] = awkward1._connect._numba.arrayview.tolookup(
+            layout.content, positions, sharedptrs, arrays
+        )
         return pos
 
     @classmethod
@@ -1142,11 +1148,9 @@ class ByteMaskedArrayType(ContentType):
         sharedptrs.append(None)
         positions.append(None)
         sharedptrs.append(None)
-        positions[pos + cls.CONTENT] = \
-          awkward1._connect._numba.arrayview.tolookup(form.content,
-                                                      positions,
-                                                      sharedptrs,
-                                                      arrays)
+        positions[pos + cls.CONTENT] = awkward1._connect._numba.arrayview.tolookup(
+            form.content, positions, sharedptrs, arrays
+        )
         return pos
 
     @classmethod
@@ -1156,21 +1160,20 @@ class ByteMaskedArrayType(ContentType):
             awkward1._connect._numba.arrayview.tonumbatype(form.content),
             form.valid_when,
             cls.from_form_identities(form),
-            form.parameters)
+            form.parameters,
+        )
 
-    def __init__(self,
-                 masktype,
-                 contenttype,
-                 valid_when,
-                 identitiestype,
-                 parameters):
+    def __init__(self, masktype, contenttype, valid_when, identitiestype, parameters):
         super(ByteMaskedArrayType, self).__init__(
             name="awkward1.ByteMaskedArrayType({0}, {1}, {2}, {3}, "
-            "{4})".format(masktype.name,
-                          contenttype.name,
-                          valid_when,
-                          identitiestype.name,
-                          json.dumps(parameters)))
+            "{4})".format(
+                masktype.name,
+                contenttype.name,
+                valid_when,
+                identitiestype.name,
+                json.dumps(parameters),
+            )
+        )
         self.masktype = masktype
         self.contenttype = contenttype
         self.valid_when = valid_when
@@ -1186,100 +1189,93 @@ class ByteMaskedArrayType(ContentType):
         lookup.original_positions[pos + self.MASK] = mask
         lookup.arrayptrs[pos + self.MASK] = mask.ctypes.data
 
-        self.contenttype.form_fill(lookup.arrayptrs[pos + self.CONTENT],
-                                   layout.content,
-                                   lookup)
+        self.contenttype.form_fill(
+            lookup.arrayptrs[pos + self.CONTENT], layout.content, lookup
+        )
 
     def tolayout(self, lookup, pos, fields):
-        mask = self.IndexOf(self.masktype)(
-            lookup.original_positions[pos + self.MASK])
+        mask = self.IndexOf(self.masktype)(lookup.original_positions[pos + self.MASK])
         content = self.contenttype.tolayout(
-            lookup, lookup.positions[pos + self.CONTENT], fields)
-        return awkward1.layout.ByteMaskedArray(mask,
-                                               content,
-                                               self.valid_when,
-                                               parameters=self.parameters)
+            lookup, lookup.positions[pos + self.CONTENT], fields
+        )
+        return awkward1.layout.ByteMaskedArray(
+            mask, content, self.valid_when, parameters=self.parameters
+        )
 
     def hasfield(self, key):
         return self.contenttype.hasfield(key)
 
     def getitem_at(self, viewtype):
-        return numba.types.optional(
-                 self.contenttype.getitem_at_check(viewtype))
+        return numba.types.optional(self.contenttype.getitem_at_check(viewtype))
 
-    def lower_getitem_at(self,
-                         context,
-                         builder,
-                         rettype,
-                         viewtype,
-                         viewval,
-                         viewproxy,
-                         attype,
-                         atval,
-                         wrapneg,
-                         checkbounds):
+    def lower_getitem_at(
+        self,
+        context,
+        builder,
+        rettype,
+        viewtype,
+        viewval,
+        viewproxy,
+        attype,
+        atval,
+        wrapneg,
+        checkbounds,
+    ):
         whichpos = posat(context, builder, viewproxy.pos, self.CONTENT)
         nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
 
-        atval = regularize_atval(context,
-                                 builder,
-                                 viewproxy,
-                                 attype,
-                                 atval,
-                                 wrapneg,
-                                 checkbounds)
+        atval = regularize_atval(
+            context, builder, viewproxy, attype, atval, wrapneg, checkbounds
+        )
 
         maskpos = posat(context, builder, viewproxy.pos, self.MASK)
         maskptr = getat(context, builder, viewproxy.arrayptrs, maskpos)
         maskarraypos = builder.add(viewproxy.start, atval)
-        byte = getat(context,
-                     builder,
-                     maskptr,
-                     maskarraypos,
-                     self.masktype.dtype)
+        byte = getat(context, builder, maskptr, maskarraypos, self.masktype.dtype)
 
         output = context.make_helper(builder, rettype)
 
         with builder.if_else(
-               builder.icmp_signed("==",
-                 builder.icmp_signed("!=",
-                                     byte,
-                                     context.get_constant(numba.int8, 0)),
-                                   context.get_constant(numba.int8,
-                                                        int(self.valid_when)
-                          ))) as (isvalid, isnone):
+            builder.icmp_signed(
+                "==",
+                builder.icmp_signed("!=", byte, context.get_constant(numba.int8, 0)),
+                context.get_constant(numba.int8, int(self.valid_when)),
+            )
+        ) as (isvalid, isnone):
             with isvalid:
                 nextviewtype = awkward1._connect._numba.arrayview.wrap(
-                                 self.contenttype, viewtype, None)
+                    self.contenttype, viewtype, None
+                )
                 proxynext = context.make_helper(builder, nextviewtype)
-                proxynext.pos        = nextpos
-                proxynext.start      = viewproxy.start
-                proxynext.stop       = viewproxy.stop
-                proxynext.arrayptrs  = viewproxy.arrayptrs
+                proxynext.pos = nextpos
+                proxynext.start = viewproxy.start
+                proxynext.stop = viewproxy.stop
+                proxynext.arrayptrs = viewproxy.arrayptrs
                 proxynext.sharedptrs = viewproxy.sharedptrs
-                proxynext.pylookup   = viewproxy.pylookup
+                proxynext.pylookup = viewproxy.pylookup
 
                 outdata = self.contenttype.lower_getitem_at_check(
-                            context,
-                            builder,
-                            rettype.type,
-                            nextviewtype,
-                            proxynext._getvalue(),
-                            proxynext,
-                            numba.intp,
-                            atval,
-                            False,
-                            False)
+                    context,
+                    builder,
+                    rettype.type,
+                    nextviewtype,
+                    proxynext._getvalue(),
+                    proxynext,
+                    numba.intp,
+                    atval,
+                    False,
+                    False,
+                )
 
                 output.valid = numba.core.cgutils.true_bit
                 output.data = outdata
 
             with isnone:
                 output.valid = numba.core.cgutils.false_bit
-                output.data = numba.core.cgutils.get_null_value(
-                                output.data.type)
+                output.data = numba.core.cgutils.get_null_value(output.data.type)
 
         return output._getvalue()
+
 
 class BitMaskedArrayType(ContentType):
     IDENTITIES = 0
@@ -1296,11 +1292,9 @@ class BitMaskedArrayType(ContentType):
         sharedptrs.append(None)
         positions.append(None)
         sharedptrs.append(None)
-        positions[pos + cls.CONTENT] = \
-          awkward1._connect._numba.arrayview.tolookup(layout.content,
-                                                      positions,
-                                                      sharedptrs,
-                                                      arrays)
+        positions[pos + cls.CONTENT] = awkward1._connect._numba.arrayview.tolookup(
+            layout.content, positions, sharedptrs, arrays
+        )
         return pos
 
     @classmethod
@@ -1313,11 +1307,9 @@ class BitMaskedArrayType(ContentType):
         sharedptrs.append(None)
         positions.append(None)
         sharedptrs.append(None)
-        positions[pos + cls.CONTENT] = \
-          awkward1._connect._numba.arrayview.tolookup(form.content,
-                                                      positions,
-                                                      sharedptrs,
-                                                      arrays)
+        positions[pos + cls.CONTENT] = awkward1._connect._numba.arrayview.tolookup(
+            form.content, positions, sharedptrs, arrays
+        )
         return pos
 
     @classmethod
@@ -1328,23 +1320,23 @@ class BitMaskedArrayType(ContentType):
             form.valid_when,
             form.lsb_order,
             cls.from_form_identities(form),
-            form.parameters)
+            form.parameters,
+        )
 
-    def __init__(self,
-                 masktype,
-                 contenttype,
-                 valid_when,
-                 lsb_order,
-                 identitiestype,
-                 parameters):
+    def __init__(
+        self, masktype, contenttype, valid_when, lsb_order, identitiestype, parameters
+    ):
         super(BitMaskedArrayType, self).__init__(
             name="awkward1.BitMaskedArrayType({0}, {1}, {2}, {3}, {4}, "
-            "{5})".format(masktype.name,
-                          contenttype.name,
-                          valid_when,
-                          lsb_order,
-                          identitiestype.name,
-                          json.dumps(parameters)))
+            "{5})".format(
+                masktype.name,
+                contenttype.name,
+                valid_when,
+                lsb_order,
+                identitiestype.name,
+                json.dumps(parameters),
+            )
+        )
         self.masktype = masktype
         self.contenttype = contenttype
         self.valid_when = valid_when
@@ -1361,119 +1353,116 @@ class BitMaskedArrayType(ContentType):
         lookup.original_positions[pos + self.MASK] = mask
         lookup.arrayptrs[pos + self.MASK] = mask.ctypes.data
 
-        self.contenttype.form_fill(lookup.arrayptrs[pos + self.CONTENT],
-                                   layout.content,
-                                   lookup)
+        self.contenttype.form_fill(
+            lookup.arrayptrs[pos + self.CONTENT], layout.content, lookup
+        )
 
     def tolayout(self, lookup, pos, fields):
-        mask = self.IndexOf(self.masktype)(
-            lookup.original_positions[pos + self.MASK])
+        mask = self.IndexOf(self.masktype)(lookup.original_positions[pos + self.MASK])
         content = self.contenttype.tolayout(
-            lookup, lookup.positions[pos + self.CONTENT], fields)
-        return awkward1.layout.BitMaskedArray(mask,
-                                              content,
-                                              self.valid_when,
-                                              len(content),
-                                              self.lsb_order,
-                                              parameters=self.parameters)
+            lookup, lookup.positions[pos + self.CONTENT], fields
+        )
+        return awkward1.layout.BitMaskedArray(
+            mask,
+            content,
+            self.valid_when,
+            len(content),
+            self.lsb_order,
+            parameters=self.parameters,
+        )
 
     def hasfield(self, key):
         return self.contenttype.hasfield(key)
 
     def getitem_at(self, viewtype):
-        return numba.types.optional(
-                 self.contenttype.getitem_at_check(viewtype))
+        return numba.types.optional(self.contenttype.getitem_at_check(viewtype))
 
-    def lower_getitem_at(self,
-                         context,
-                         builder,
-                         rettype,
-                         viewtype,
-                         viewval,
-                         viewproxy,
-                         attype,
-                         atval,
-                         wrapneg,
-                         checkbounds):
+    def lower_getitem_at(
+        self,
+        context,
+        builder,
+        rettype,
+        viewtype,
+        viewval,
+        viewproxy,
+        attype,
+        atval,
+        wrapneg,
+        checkbounds,
+    ):
         whichpos = posat(context, builder, viewproxy.pos, self.CONTENT)
         nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
 
-        atval = regularize_atval(context,
-                                 builder,
-                                 viewproxy,
-                                 attype,
-                                 atval,
-                                 wrapneg,
-                                 checkbounds)
+        atval = regularize_atval(
+            context, builder, viewproxy, attype, atval, wrapneg, checkbounds
+        )
         bitatval = builder.sdiv(atval, context.get_constant(numba.intp, 8))
         shiftval = awkward1._connect._numba.castint(
-                     context,
-                     builder,
-                     numba.intp,
-                     numba.uint8,
-                     builder.srem(atval, context.get_constant(numba.intp, 8)))
+            context,
+            builder,
+            numba.intp,
+            numba.uint8,
+            builder.srem(atval, context.get_constant(numba.intp, 8)),
+        )
 
         maskpos = posat(context, builder, viewproxy.pos, self.MASK)
         maskptr = getat(context, builder, viewproxy.arrayptrs, maskpos)
         maskarraypos = builder.add(viewproxy.start, bitatval)
-        byte = getat(context,
-                     builder,
-                     maskptr,
-                     maskarraypos,
-                     self.masktype.dtype)
+        byte = getat(context, builder, maskptr, maskarraypos, self.masktype.dtype)
         if self.lsb_order:
             # ((byte >> ((uint8_t)shift)) & ((uint8_t)1))
             asbool = builder.and_(
-                       builder.lshr(byte, shiftval),
-                       context.get_constant(numba.uint8, 1))
+                builder.lshr(byte, shiftval), context.get_constant(numba.uint8, 1)
+            )
         else:
             # ((byte << ((uint8_t)shift)) & ((uint8_t)128))
             asbool = builder.and_(
-                       builder.shl(byte, shiftval),
-                       context.get_constant(numba.uint8, 128))
+                builder.shl(byte, shiftval), context.get_constant(numba.uint8, 128)
+            )
 
         output = context.make_helper(builder, rettype)
 
         with builder.if_else(
-               builder.icmp_signed("==",
-                 builder.icmp_signed("!=",
-                                     asbool,
-                                     context.get_constant(numba.uint8, 0)),
-                                   context.get_constant(numba.uint8,
-                                                        int(self.valid_when)
-                          ))) as (isvalid, isnone):
+            builder.icmp_signed(
+                "==",
+                builder.icmp_signed("!=", asbool, context.get_constant(numba.uint8, 0)),
+                context.get_constant(numba.uint8, int(self.valid_when)),
+            )
+        ) as (isvalid, isnone):
             with isvalid:
                 nextviewtype = awkward1._connect._numba.arrayview.wrap(
-                                 self.contenttype, viewtype, None)
+                    self.contenttype, viewtype, None
+                )
                 proxynext = context.make_helper(builder, nextviewtype)
-                proxynext.pos        = nextpos
-                proxynext.start      = viewproxy.start
-                proxynext.stop       = viewproxy.stop
-                proxynext.arrayptrs  = viewproxy.arrayptrs
+                proxynext.pos = nextpos
+                proxynext.start = viewproxy.start
+                proxynext.stop = viewproxy.stop
+                proxynext.arrayptrs = viewproxy.arrayptrs
                 proxynext.sharedptrs = viewproxy.sharedptrs
-                proxynext.pylookup   = viewproxy.pylookup
+                proxynext.pylookup = viewproxy.pylookup
 
                 outdata = self.contenttype.lower_getitem_at_check(
-                            context,
-                            builder,
-                            rettype.type,
-                            nextviewtype,
-                            proxynext._getvalue(),
-                            proxynext,
-                            numba.intp,
-                            atval,
-                            False,
-                            False)
+                    context,
+                    builder,
+                    rettype.type,
+                    nextviewtype,
+                    proxynext._getvalue(),
+                    proxynext,
+                    numba.intp,
+                    atval,
+                    False,
+                    False,
+                )
 
                 output.valid = numba.core.cgutils.true_bit
                 output.data = outdata
 
             with isnone:
                 output.valid = numba.core.cgutils.false_bit
-                output.data = numba.core.cgutils.get_null_value(
-                                output.data.type)
+                output.data = numba.core.cgutils.get_null_value(output.data.type)
 
         return output._getvalue()
+
 
 class UnmaskedArrayType(ContentType):
     IDENTITIES = 0
@@ -1486,11 +1475,9 @@ class UnmaskedArrayType(ContentType):
         sharedptrs[-1] = layout._persistent_shared_ptr
         positions.append(None)
         sharedptrs.append(None)
-        positions[pos + cls.CONTENT] = \
-          awkward1._connect._numba.arrayview.tolookup(layout.content,
-                                                      positions,
-                                                      sharedptrs,
-                                                      arrays)
+        positions[pos + cls.CONTENT] = awkward1._connect._numba.arrayview.tolookup(
+            layout.content, positions, sharedptrs, arrays
+        )
         return pos
 
     @classmethod
@@ -1500,11 +1487,9 @@ class UnmaskedArrayType(ContentType):
         sharedptrs[-1] = 0
         positions.append(None)
         sharedptrs.append(None)
-        positions[pos + cls.CONTENT] = \
-          awkward1._connect._numba.arrayview.tolookup(form.content,
-                                                      positions,
-                                                      sharedptrs,
-                                                      arrays)
+        positions[pos + cls.CONTENT] = awkward1._connect._numba.arrayview.tolookup(
+            form.content, positions, sharedptrs, arrays
+        )
         return pos
 
     @classmethod
@@ -1512,14 +1497,15 @@ class UnmaskedArrayType(ContentType):
         return UnmaskedArrayType(
             awkward1._connect._numba.arrayview.tonumbatype(form.content),
             cls.from_form_identities(form),
-            form.parameters)
+            form.parameters,
+        )
 
     def __init__(self, contenttype, identitiestype, parameters):
         super(UnmaskedArrayType, self).__init__(
             name="awkward1.UnmaskedArrayType({0}, {1}, {2})".format(
-              contenttype.name,
-              identitiestype.name,
-              json.dumps(parameters)))
+                contenttype.name, identitiestype.name, json.dumps(parameters)
+            )
+        )
         self.contenttype = contenttype
         self.identitiestype = identitiestype
         self.parameters = parameters
@@ -1529,73 +1515,73 @@ class UnmaskedArrayType(ContentType):
         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
         self.form_fill_identities(pos, layout, lookup)
 
-        self.contenttype.form_fill(lookup.arrayptrs[pos + self.CONTENT],
-                                   layout.content,
-                                   lookup)
+        self.contenttype.form_fill(
+            lookup.arrayptrs[pos + self.CONTENT], layout.content, lookup
+        )
 
     def tolayout(self, lookup, pos, fields):
         content = self.contenttype.tolayout(
-            lookup, lookup.positions[pos + self.CONTENT], fields)
-        return awkward1.layout.UnmaskedArray(content,
-                                             parameters=self.parameters)
+            lookup, lookup.positions[pos + self.CONTENT], fields
+        )
+        return awkward1.layout.UnmaskedArray(content, parameters=self.parameters)
 
     def hasfield(self, key):
         return self.contenttype.hasfield(key)
 
     def getitem_at(self, viewtype):
-        return numba.types.optional(
-                 self.contenttype.getitem_at_check(viewtype))
+        return numba.types.optional(self.contenttype.getitem_at_check(viewtype))
 
-    def lower_getitem_at(self,
-                         context,
-                         builder,
-                         rettype,
-                         viewtype,
-                         viewval,
-                         viewproxy,
-                         attype,
-                         atval,
-                         wrapneg,
-                         checkbounds):
+    def lower_getitem_at(
+        self,
+        context,
+        builder,
+        rettype,
+        viewtype,
+        viewval,
+        viewproxy,
+        attype,
+        atval,
+        wrapneg,
+        checkbounds,
+    ):
         whichpos = posat(context, builder, viewproxy.pos, self.CONTENT)
         nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
 
-        atval = regularize_atval(context,
-                                 builder,
-                                 viewproxy,
-                                 attype,
-                                 atval,
-                                 wrapneg,
-                                 checkbounds)
+        atval = regularize_atval(
+            context, builder, viewproxy, attype, atval, wrapneg, checkbounds
+        )
 
         output = context.make_helper(builder, rettype)
 
         nextviewtype = awkward1._connect._numba.arrayview.wrap(
-                         self.contenttype, viewtype, None)
+            self.contenttype, viewtype, None
+        )
         proxynext = context.make_helper(builder, nextviewtype)
-        proxynext.pos        = nextpos
-        proxynext.start      = viewproxy.start
-        proxynext.stop       = viewproxy.stop
-        proxynext.arrayptrs  = viewproxy.arrayptrs
+        proxynext.pos = nextpos
+        proxynext.start = viewproxy.start
+        proxynext.stop = viewproxy.stop
+        proxynext.arrayptrs = viewproxy.arrayptrs
         proxynext.sharedptrs = viewproxy.sharedptrs
-        proxynext.pylookup   = viewproxy.pylookup
+        proxynext.pylookup = viewproxy.pylookup
 
         outdata = self.contenttype.lower_getitem_at_check(
-                    context,
-                    builder,
-                    rettype.type,
-                    nextviewtype,
-                    proxynext._getvalue(),
-                    proxynext,
-                    numba.intp,
-                    atval,
-                    False,
-                    False)
+            context,
+            builder,
+            rettype.type,
+            nextviewtype,
+            proxynext._getvalue(),
+            proxynext,
+            numba.intp,
+            atval,
+            False,
+            False,
+        )
 
         output.valid = numba.core.cgutils.true_bit
         output.data = outdata
 
         return output._getvalue()
+
 
 class RecordArrayType(ContentType):
     IDENTITIES = 0
@@ -1609,11 +1595,11 @@ class RecordArrayType(ContentType):
         positions.extend([None] * layout.numfields)
         sharedptrs.extend([None] * layout.numfields)
         for i, content in enumerate(layout.contents):
-            positions[pos + cls.CONTENTS + i] = \
-              awkward1._connect._numba.arrayview.tolookup(content,
-                                                          positions,
-                                                          sharedptrs,
-                                                          arrays)
+            positions[
+                pos + cls.CONTENTS + i
+            ] = awkward1._connect._numba.arrayview.tolookup(
+                content, positions, sharedptrs, arrays
+            )
         return pos
 
     @classmethod
@@ -1625,18 +1611,18 @@ class RecordArrayType(ContentType):
         sharedptrs.extend([None] * form.numfields)
         if form.istuple:
             for i, (n, content) in enumerate(form.contents.items()):
-                positions[pos + cls.CONTENTS + i] = \
-                  awkward1._connect._numba.arrayview.tolookup(content,
-                                                              positions,
-                                                              sharedptrs,
-                                                              arrays)
+                positions[
+                    pos + cls.CONTENTS + i
+                ] = awkward1._connect._numba.arrayview.tolookup(
+                    content, positions, sharedptrs, arrays
+                )
         else:
             for i, (n, content) in enumerate(form.contents.items()):
-                positions[pos + cls.CONTENTS + i] = \
-                  awkward1._connect._numba.arrayview.tolookup(content,
-                                                              positions,
-                                                              sharedptrs,
-                                                              arrays)
+                positions[
+                    pos + cls.CONTENTS + i
+                ] = awkward1._connect._numba.arrayview.tolookup(
+                    content, positions, sharedptrs, arrays
+                )
         return pos
 
     @classmethod
@@ -1645,29 +1631,27 @@ class RecordArrayType(ContentType):
         if form.istuple:
             recordlookup = None
             for n, x in form.contents.items():
-                contents.append(
-                    awkward1._connect._numba.arrayview.tonumbatype(x))
+                contents.append(awkward1._connect._numba.arrayview.tonumbatype(x))
         else:
             recordlookup = []
             for n, x in form.contents.items():
-                contents.append(
-                    awkward1._connect._numba.arrayview.tonumbatype(x))
+                contents.append(awkward1._connect._numba.arrayview.tonumbatype(x))
                 recordlookup.append(n)
 
         return RecordArrayType(
-            contents,
-            recordlookup,
-            cls.from_form_identities(form),
-            form.parameters)
+            contents, recordlookup, cls.from_form_identities(form), form.parameters
+        )
 
     def __init__(self, contenttypes, recordlookup, identitiestype, parameters):
         super(RecordArrayType, self).__init__(
             name="awkward1.RecordArrayType(({0}{1}), ({2}), {3}, {4})".format(
-              ", ".join(x.name for x in contenttypes),
-              "," if len(contenttypes) == 1 else "",
-              "None" if recordlookup is None else repr(tuple(recordlookup)),
-              identitiestype.name,
-              json.dumps(parameters)))
+                ", ".join(x.name for x in contenttypes),
+                "," if len(contenttypes) == 1 else "",
+                "None" if recordlookup is None else repr(tuple(recordlookup)),
+                identitiestype.name,
+                json.dumps(parameters),
+            )
+        )
         self.contenttypes = contenttypes
         self.recordlookup = recordlookup
         self.identitiestype = identitiestype
@@ -1679,9 +1663,9 @@ class RecordArrayType(ContentType):
         self.form_fill_identities(pos, layout, lookup)
 
         for i, contenttype in enumerate(self.contenttypes):
-            contenttype.form_fill(lookup.arrayptrs[pos + self.CONTENTS + i],
-                                  layout.field(i),
-                                  lookup)
+            contenttype.form_fill(
+                lookup.arrayptrs[pos + self.CONTENTS + i], layout.field(i), lookup
+            )
 
     def fieldindex(self, key):
         out = -1
@@ -1704,28 +1688,27 @@ class RecordArrayType(ContentType):
             index = self.fieldindex(fields[0])
             assert index is not None
             return self.contenttypes[index].tolayout(
-                     lookup,
-                     lookup.positions[pos + self.CONTENTS + index],
-                     fields[1:])
+                lookup, lookup.positions[pos + self.CONTENTS + index], fields[1:]
+            )
         else:
             contents = []
             for i, contenttype in enumerate(self.contenttypes):
                 layout = contenttype.tolayout(
-                           lookup,
-                           lookup.positions[pos + self.CONTENTS + i],
-                           fields)
+                    lookup, lookup.positions[pos + self.CONTENTS + i], fields
+                )
                 contents.append(layout)
 
             if len(contents) == 0:
                 return awkward1.layout.RecordArray(
-                         contents,
-                         self.recordlookup,
-                         numpy.iinfo(numpy.int64).max,
-                         parameters=self.parameters)
+                    contents,
+                    self.recordlookup,
+                    numpy.iinfo(numpy.int64).max,
+                    parameters=self.parameters,
+                )
             else:
-                return awkward1.layout.RecordArray(contents,
-                                                   self.recordlookup,
-                                                   parameters=self.parameters)
+                return awkward1.layout.RecordArray(
+                    contents, self.recordlookup, parameters=self.parameters
+                )
 
     def hasfield(self, key):
         return self.fieldindex(key) is not None
@@ -1734,7 +1717,8 @@ class RecordArrayType(ContentType):
         out = self.getitem_at(viewtype)
         if isinstance(out, awkward1._connect._numba.arrayview.RecordViewType):
             typer = awkward1._util.numba_record_typer(
-                      out.arrayviewtype.type, out.arrayviewtype.behavior)
+                out.arrayviewtype.type, out.arrayviewtype.behavior
+            )
             if typer is not None:
                 return typer(out)
         return out
@@ -1748,17 +1732,21 @@ class RecordArrayType(ContentType):
             if index is None:
                 if self.recordlookup is None:
                     raise ValueError(
-                            "no field {0} in tuples with {1} fields".format(
-                              repr(key), len(self.contenttypes)))
+                        "no field {0} in tuples with {1} fields".format(
+                            repr(key), len(self.contenttypes)
+                        )
+                    )
                 else:
                     raise ValueError(
-                            "no field {0} in records with "
-                            "fields: [{1}]".format(
-                              repr(key),
-                              ", ".join(repr(x) for x in self.recordlookup)))
+                        "no field {0} in records with "
+                        "fields: [{1}]".format(
+                            repr(key), ", ".join(repr(x) for x in self.recordlookup)
+                        )
+                    )
             contenttype = self.contenttypes[index]
             subviewtype = awkward1._connect._numba.arrayview.wrap(
-                            contenttype, viewtype, viewtype.fields[1:])
+                contenttype, viewtype, viewtype.fields[1:]
+            )
             return contenttype.getitem_at_check(subviewtype)
 
     def getitem_field(self, viewtype, key):
@@ -1766,17 +1754,20 @@ class RecordArrayType(ContentType):
         if index is None:
             if self.recordlookup is None:
                 raise ValueError(
-                        "no field {0} in tuples with {1} fields".format(
-                        repr(key), len(self.contenttypes)))
+                    "no field {0} in tuples with {1} fields".format(
+                        repr(key), len(self.contenttypes)
+                    )
+                )
             else:
                 raise ValueError(
-                        "no field {0} in records with fields: [{1}]".format(
-                          repr(key),
-                          ", ".join(repr(x) for x in self.recordlookup)))
+                    "no field {0} in records with fields: [{1}]".format(
+                        repr(key), ", ".join(repr(x) for x in self.recordlookup)
+                    )
+                )
         contenttype = self.contenttypes[index]
-        subviewtype = awkward1._connect._numba.arrayview.wrap(contenttype,
-                                                              viewtype,
-                                                              None)
+        subviewtype = awkward1._connect._numba.arrayview.wrap(
+            contenttype, viewtype, None
+        )
         return contenttype.getitem_range(subviewtype)
 
     def getitem_field_record(self, recordviewtype, key):
@@ -1784,111 +1775,113 @@ class RecordArrayType(ContentType):
         if index is None:
             if self.recordlookup is None:
                 raise ValueError(
-                        "no field {0} in tuple with {1} fields".format(
-                        repr(key), len(self.contenttypes)))
+                    "no field {0} in tuple with {1} fields".format(
+                        repr(key), len(self.contenttypes)
+                    )
+                )
             else:
                 raise ValueError(
-                        "no field {0} in record with fields: [{1}]".format(
-                        repr(key),
-                        ", ".join(repr(x) for x in self.recordlookup)))
+                    "no field {0} in record with fields: [{1}]".format(
+                        repr(key), ", ".join(repr(x) for x in self.recordlookup)
+                    )
+                )
         contenttype = self.contenttypes[index]
-        subviewtype = awkward1._connect._numba.arrayview.wrap(contenttype,
-                                                              recordviewtype,
-                                                              None)
+        subviewtype = awkward1._connect._numba.arrayview.wrap(
+            contenttype, recordviewtype, None
+        )
         return contenttype.getitem_at_check(subviewtype)
 
-    def lower_getitem_at_check(self,
-                               context,
-                               builder,
-                               rettype,
-                               viewtype,
-                               viewval,
-                               viewproxy,
-                               attype,
-                               atval,
-                               wrapneg,
-                               checkbounds):
-        out = self.lower_getitem_at(context,
-                                    builder,
-                                    rettype,
-                                    viewtype,
-                                    viewval,
-                                    viewproxy,
-                                    attype,
-                                    atval,
-                                    wrapneg,
-                                    checkbounds)
+    def lower_getitem_at_check(
+        self,
+        context,
+        builder,
+        rettype,
+        viewtype,
+        viewval,
+        viewproxy,
+        attype,
+        atval,
+        wrapneg,
+        checkbounds,
+    ):
+        out = self.lower_getitem_at(
+            context,
+            builder,
+            rettype,
+            viewtype,
+            viewval,
+            viewproxy,
+            attype,
+            atval,
+            wrapneg,
+            checkbounds,
+        )
         baretype = self.getitem_at(viewtype)
-        if isinstance(baretype,
-                      awkward1._connect._numba.arrayview.RecordViewType):
+        if isinstance(baretype, awkward1._connect._numba.arrayview.RecordViewType):
             lower = awkward1._util.numba_record_lower(
-                      baretype.arrayviewtype.type,
-                      baretype.arrayviewtype.behavior)
+                baretype.arrayviewtype.type, baretype.arrayviewtype.behavior
+            )
             if lower is not None:
                 return lower(context, builder, rettype(baretype), (out,))
         return out
 
-    def lower_getitem_at(self,
-                         context,
-                         builder,
-                         rettype,
-                         viewtype,
-                         viewval,
-                         viewproxy,
-                         attype,
-                         atval,
-                         wrapneg,
-                         checkbounds):
-        atval = regularize_atval(context,
-                                 builder,
-                                 viewproxy,
-                                 attype,
-                                 atval,
-                                 wrapneg,
-                                 checkbounds)
+    def lower_getitem_at(
+        self,
+        context,
+        builder,
+        rettype,
+        viewtype,
+        viewval,
+        viewproxy,
+        attype,
+        atval,
+        wrapneg,
+        checkbounds,
+    ):
+        atval = regularize_atval(
+            context, builder, viewproxy, attype, atval, wrapneg, checkbounds
+        )
 
         if len(viewtype.fields) == 0:
             proxyout = context.make_helper(
-                         builder,
-                         awkward1._connect._numba.arrayview.RecordViewType(
-                           viewtype))
+                builder, awkward1._connect._numba.arrayview.RecordViewType(viewtype)
+            )
             proxyout.arrayview = viewval
-            proxyout.at        = atval
+            proxyout.at = atval
             return proxyout._getvalue()
 
         else:
             index = self.fieldindex(viewtype.fields[0])
             contenttype = self.contenttypes[index]
 
-            whichpos = posat(context,
-                             builder,
-                             viewproxy.pos,
-                             self.CONTENTS + index)
+            whichpos = posat(context, builder, viewproxy.pos, self.CONTENTS + index)
             nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
 
             nextviewtype = awkward1._connect._numba.arrayview.wrap(
-                             contenttype, viewtype, viewtype.fields[1:])
+                contenttype, viewtype, viewtype.fields[1:]
+            )
             proxynext = context.make_helper(builder, nextviewtype)
-            proxynext.pos        = nextpos
-            proxynext.start      = viewproxy.start
-            proxynext.stop       = builder.add(atval,
-                                     builder.add(
-                                       viewproxy.start,
-                                       context.get_constant(numba.intp, 1)))
-            proxynext.arrayptrs  = viewproxy.arrayptrs
+            proxynext.pos = nextpos
+            proxynext.start = viewproxy.start
+            proxynext.stop = builder.add(
+                atval, builder.add(viewproxy.start, context.get_constant(numba.intp, 1))
+            )
+            proxynext.arrayptrs = viewproxy.arrayptrs
             proxynext.sharedptrs = viewproxy.sharedptrs
-            proxynext.pylookup   = viewproxy.pylookup
+            proxynext.pylookup = viewproxy.pylookup
 
-            return contenttype.lower_getitem_at_check(context,
-                                                      builder,
-                                                      rettype,
-                                                      nextviewtype,
-                                                      proxynext._getvalue(),
-                                                      proxynext,
-                                                      numba.intp,
-                                                      atval,
-                                                      False,
-                                                      False)
+            return contenttype.lower_getitem_at_check(
+                context,
+                builder,
+                rettype,
+                nextviewtype,
+                proxynext._getvalue(),
+                proxynext,
+                numba.intp,
+                atval,
+                False,
+                False,
+            )
 
     def lower_getitem_field(self, context, builder, viewtype, viewval, key):
         viewproxy = context.make_helper(builder, viewtype, viewval)
@@ -1896,76 +1889,65 @@ class RecordArrayType(ContentType):
         index = self.fieldindex(key)
         contenttype = self.contenttypes[index]
 
-        whichpos = posat(context,
-                         builder,
-                         viewproxy.pos,
-                         self.CONTENTS + index)
+        whichpos = posat(context, builder, viewproxy.pos, self.CONTENTS + index)
         nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
 
-        proxynext = context.make_helper(builder,
-                                        contenttype.getitem_range(viewtype))
-        proxynext.pos        = nextpos
-        proxynext.start      = viewproxy.start
-        proxynext.stop       = viewproxy.stop
-        proxynext.arrayptrs  = viewproxy.arrayptrs
+        proxynext = context.make_helper(builder, contenttype.getitem_range(viewtype))
+        proxynext.pos = nextpos
+        proxynext.start = viewproxy.start
+        proxynext.stop = viewproxy.stop
+        proxynext.arrayptrs = viewproxy.arrayptrs
         proxynext.sharedptrs = viewproxy.sharedptrs
-        proxynext.pylookup   = viewproxy.pylookup
+        proxynext.pylookup = viewproxy.pylookup
 
         return proxynext._getvalue()
 
-    def lower_getitem_field_record(self,
-                                   context,
-                                   builder,
-                                   recordviewtype,
-                                   recordviewval,
-                                   key):
+    def lower_getitem_field_record(
+        self, context, builder, recordviewtype, recordviewval, key
+    ):
         arrayviewtype = recordviewtype.arrayviewtype
-        recordviewproxy = context.make_helper(builder,
-                                              recordviewtype,
-                                              recordviewval)
+        recordviewproxy = context.make_helper(builder, recordviewtype, recordviewval)
         arrayviewval = recordviewproxy.arrayview
-        arrayviewproxy = context.make_helper(builder,
-                                             arrayviewtype,
-                                             arrayviewval)
+        arrayviewproxy = context.make_helper(builder, arrayviewtype, arrayviewval)
 
         index = self.fieldindex(key)
         contenttype = self.contenttypes[index]
 
-        whichpos = posat(context,
-                         builder,
-                         arrayviewproxy.pos,
-                         self.CONTENTS + index)
+        whichpos = posat(context, builder, arrayviewproxy.pos, self.CONTENTS + index)
         nextpos = getat(context, builder, arrayviewproxy.arrayptrs, whichpos)
 
         proxynext = context.make_helper(
-                      builder, contenttype.getitem_range(arrayviewtype))
-        proxynext.pos        = nextpos
-        proxynext.start      = arrayviewproxy.start
-        proxynext.stop       = builder.add(
-                                 recordviewproxy.at,
-                                 builder.add(
-                                   arrayviewproxy.start,
-                                   context.get_constant(numba.intp, 1)))
-        proxynext.arrayptrs  = arrayviewproxy.arrayptrs
+            builder, contenttype.getitem_range(arrayviewtype)
+        )
+        proxynext.pos = nextpos
+        proxynext.start = arrayviewproxy.start
+        proxynext.stop = builder.add(
+            recordviewproxy.at,
+            builder.add(arrayviewproxy.start, context.get_constant(numba.intp, 1)),
+        )
+        proxynext.arrayptrs = arrayviewproxy.arrayptrs
         proxynext.sharedptrs = arrayviewproxy.sharedptrs
-        proxynext.pylookup   = arrayviewproxy.pylookup
+        proxynext.pylookup = arrayviewproxy.pylookup
 
-        nextviewtype = awkward1._connect._numba.arrayview.wrap(contenttype,
-                                                               arrayviewtype,
-                                                               None)
+        nextviewtype = awkward1._connect._numba.arrayview.wrap(
+            contenttype, arrayviewtype, None
+        )
 
         rettype = self.getitem_field_record(recordviewtype, key)
 
-        return contenttype.lower_getitem_at_check(context,
-                                                  builder,
-                                                  rettype,
-                                                  nextviewtype,
-                                                  proxynext._getvalue(),
-                                                  proxynext,
-                                                  numba.intp,
-                                                  recordviewproxy.at,
-                                                  False,
-                                                  False)
+        return contenttype.lower_getitem_at_check(
+            context,
+            builder,
+            rettype,
+            nextviewtype,
+            proxynext._getvalue(),
+            proxynext,
+            numba.intp,
+            recordviewproxy.at,
+            False,
+            False,
+        )
+
 
 class UnionArrayType(ContentType):
     IDENTITIES = 0
@@ -1987,11 +1969,11 @@ class UnionArrayType(ContentType):
         positions.extend([None] * layout.numcontents)
         sharedptrs.extend([None] * layout.numcontents)
         for i, content in enumerate(layout.contents):
-            positions[pos + cls.CONTENTS + i] = \
-              awkward1._connect._numba.arrayview.tolookup(content,
-                                                          positions,
-                                                          sharedptrs,
-                                                          arrays)
+            positions[
+                pos + cls.CONTENTS + i
+            ] = awkward1._connect._numba.arrayview.tolookup(
+                content, positions, sharedptrs, arrays
+            )
         return pos
 
     @classmethod
@@ -2008,40 +1990,39 @@ class UnionArrayType(ContentType):
         positions.extend([None] * form.numcontents)
         sharedptrs.extend([None] * form.numcontents)
         for i, content in enumerate(form.contents):
-            positions[pos + cls.CONTENTS + i] = \
-              awkward1._connect._numba.arrayview.tolookup(content,
-                                                          positions,
-                                                          sharedptrs,
-                                                          arrays)
+            positions[
+                pos + cls.CONTENTS + i
+            ] = awkward1._connect._numba.arrayview.tolookup(
+                content, positions, sharedptrs, arrays
+            )
         return pos
 
     @classmethod
     def from_form(cls, form):
         contents = []
         for x in form.contents:
-            contents.append(
-                awkward1._connect._numba.arrayview.tonumbatype(x))
+            contents.append(awkward1._connect._numba.arrayview.tonumbatype(x))
 
         return UnionArrayType(
             cls.from_form_index(form.tags),
             cls.from_form_index(form.index),
             contents,
             cls.from_form_identities(form),
-            form.parameters)
+            form.parameters,
+        )
 
-    def __init__(self,
-                 tagstype,
-                 indextype,
-                 contenttypes,
-                 identitiestype,
-                 parameters):
+    def __init__(self, tagstype, indextype, contenttypes, identitiestype, parameters):
         super(UnionArrayType, self).__init__(
             name="awkward1.UnionArrayType({0}, {1}, ({2}{3}), {4}, "
-            "{5})".format(tagstype.name,
-                          indextype.name,
-                          ", ".join(x.name for x in contenttypes),
-                          "," if len(contenttypes) == 1 else "",
-                          identitiestype.name, json.dumps(parameters)))
+            "{5})".format(
+                tagstype.name,
+                indextype.name,
+                ", ".join(x.name for x in contenttypes),
+                "," if len(contenttypes) == 1 else "",
+                identitiestype.name,
+                json.dumps(parameters),
+            )
+        )
         self.tagstype = tagstype
         self.indextype = indextype
         self.contenttypes = contenttypes
@@ -2062,45 +2043,39 @@ class UnionArrayType(ContentType):
         lookup.arrayptrs[pos + self.INDEX] = index.ctypes.data
 
         for i, contenttype in enumerate(self.contenttypes):
-            contenttype.form_fill(lookup.arrayptrs[pos + self.CONTENTS + i],
-                                  layout.content(i),
-                                  lookup)
+            contenttype.form_fill(
+                lookup.arrayptrs[pos + self.CONTENTS + i], layout.content(i), lookup
+            )
 
     def UnionArrayOf(self):
         if self.tagstype.dtype.bitwidth == 8 and self.tagstype.dtype.signed:
-            if (self.indextype.dtype.bitwidth == 32 and
-                self.indextype.dtype.signed):
+            if self.indextype.dtype.bitwidth == 32 and self.indextype.dtype.signed:
                 return awkward1.layout.UnionArray8_32
             elif self.indextype.dtype.bitwidth == 32:
                 return awkward1.layout.UnionArray8_U32
-            elif (self.indextype.dtype.bitwidth == 64 and
-                  self.indextype.dtype.signed):
+            elif self.indextype.dtype.bitwidth == 64 and self.indextype.dtype.signed:
                 return awkward1.layout.UnionArray8_64
             else:
                 raise AssertionError(
-                        "no UnionArray* type for index array: {0}".format(
-                          self.indextype))
+                    "no UnionArray* type for index array: {0}".format(self.indextype)
+                )
         else:
             raise AssertionError(
-                    "no UnionArray* type for tags array: {0}".format(
-                      self.tagstype))
+                "no UnionArray* type for tags array: {0}".format(self.tagstype)
+            )
 
     def tolayout(self, lookup, pos, fields):
-        tags = self.IndexOf(self.tagstype)(
-                 lookup.original_positions[pos + self.TAGS])
+        tags = self.IndexOf(self.tagstype)(lookup.original_positions[pos + self.TAGS])
         index = self.IndexOf(self.indextype)(
-                  lookup.original_positions[pos + self.INDEX])
+            lookup.original_positions[pos + self.INDEX]
+        )
         contents = []
         for i, contenttype in enumerate(self.contenttypes):
             layout = contenttype.tolayout(
-                       lookup,
-                       lookup.positions[pos + self.CONTENTS + i],
-                       fields)
+                lookup, lookup.positions[pos + self.CONTENTS + i], fields
+            )
             contents.append(layout)
-        return self.UnionArrayOf()(tags,
-                                   index,
-                                   contents,
-                                   parameters=self.parameters)
+        return self.UnionArrayOf()(tags, index, contents, parameters=self.parameters)
 
     def hasfield(self, key):
         return any(x.hasfield(key) for x in self.contenttypes)
@@ -2117,42 +2092,44 @@ class UnionArrayType(ContentType):
         if not all(isinstance(x, RecordArrayType) for x in self.contenttypes):
             raise TypeError("union types cannot be accessed in Numba")
 
-    def lower_getitem_at(self,
-                         context,
-                         builder,
-                         rettype,
-                         viewtype,
-                         viewval,
-                         viewproxy,
-                         attype,
-                         atval,
-                         wrapneg,
-                         checkbounds):
+    def lower_getitem_at(
+        self,
+        context,
+        builder,
+        rettype,
+        viewtype,
+        viewval,
+        viewproxy,
+        attype,
+        atval,
+        wrapneg,
+        checkbounds,
+    ):
         raise NotImplementedError(
-            type(self).__name__ + ".lower_getitem_at not implemented")
+            type(self).__name__ + ".lower_getitem_at not implemented"
+        )
 
-    def lower_getitem_range(self,
-                            context,
-                            builder,
-                            rettype,
-                            viewtype,
-                            viewval,
-                            viewproxy,
-                            start,
-                            stop,
-                            wrapneg):
+    def lower_getitem_range(
+        self,
+        context,
+        builder,
+        rettype,
+        viewtype,
+        viewval,
+        viewproxy,
+        start,
+        stop,
+        wrapneg,
+    ):
         raise NotImplementedError(
-            type(self).__name__ + ".lower_getitem_range not implemented")
+            type(self).__name__ + ".lower_getitem_range not implemented"
+        )
 
-    def lower_getitem_field(self,
-                            context,
-                            builder,
-                            viewtype,
-                            viewval,
-                            viewproxy,
-                            key):
+    def lower_getitem_field(self, context, builder, viewtype, viewval, viewproxy, key):
         raise NotImplementedError(
-            type(self).__name__ + ".lower_getitem_field not implemented")
+            type(self).__name__ + ".lower_getitem_field not implemented"
+        )
+
 
 class VirtualArrayType(ContentType):
     IDENTITIES = 0
@@ -2166,7 +2143,8 @@ class VirtualArrayType(ContentType):
         sharedptrs[-1] = layout._persistent_shared_ptr
         if layout.form is None:
             raise ValueError(
-                "VirtualArrays without a known 'form' can't be used in Numba")
+                "VirtualArrays without a known 'form' can't be used in Numba"
+            )
         pyptr = ctypes.py_object(layout)
         ctypes.pythonapi.Py_IncRef(pyptr)
         voidptr = numpy.frombuffer(pyptr, dtype=numpy.intp).item()
@@ -2175,11 +2153,9 @@ class VirtualArrayType(ContentType):
         sharedptrs.append(None)
         positions.append(None)
         sharedptrs.append(None)
-        positions[pos + cls.ARRAY] = \
-          awkward1._connect._numba.arrayview.tolookup(layout.form.form,
-                                                      positions,
-                                                      sharedptrs,
-                                                      arrays)
+        positions[pos + cls.ARRAY] = awkward1._connect._numba.arrayview.tolookup(
+            layout.form.form, positions, sharedptrs, arrays
+        )
         return pos
 
     @classmethod
@@ -2189,16 +2165,15 @@ class VirtualArrayType(ContentType):
         sharedptrs[-1] = 0
         if form.form is None:
             raise ValueError(
-                "VirtualArrays without a known 'form' can't be used in Numba")
+                "VirtualArrays without a known 'form' can't be used in Numba"
+            )
         positions.append(0)
         sharedptrs.append(None)
         positions.append(None)
         sharedptrs.append(None)
-        positions[pos + cls.ARRAY] = \
-          awkward1._connect._numba.arrayview.tolookup(form.form,
-                                                      positions,
-                                                      sharedptrs,
-                                                      arrays)
+        positions[pos + cls.ARRAY] = awkward1._connect._numba.arrayview.tolookup(
+            form.form, positions, sharedptrs, arrays
+        )
         return pos
 
     @classmethod
@@ -2206,20 +2181,22 @@ class VirtualArrayType(ContentType):
         if form.form is None:
             raise ValueError(
                 "VirtualArrays without a known 'form' can't be used in Numba "
-                "(including nested)")
-        return VirtualArrayType(form.form,
-                                cls.from_form_identities(form),
-                                form.parameters)
+                "(including nested)"
+            )
+        return VirtualArrayType(
+            form.form, cls.from_form_identities(form), form.parameters
+        )
 
     def __init__(self, generator_form, identitiestype, parameters):
         if generator_form is None:
             raise ValueError(
-                "VirtualArrays without a known 'form' can't be used in Numba")
+                "VirtualArrays without a known 'form' can't be used in Numba"
+            )
         super(VirtualArrayType, self).__init__(
             name="awkward1.VirtualArrayType({0}, {1}, {2})".format(
-              generator_form.tojson(),
-              identitiestype.name,
-              json.dumps(parameters)))
+                generator_form.tojson(), identitiestype.name, json.dumps(parameters)
+            )
+        )
         self.generator_form = generator_form
         self.identitiestype = identitiestype
         self.parameters = parameters
@@ -2273,21 +2250,34 @@ class VirtualArrayType(ContentType):
                 elif form.primitive == "bool":
                     return numba.bool
                 else:
-                    raise ValueError("unrecognized NumpyForm.primitive type: {0}"
-                                     .format(form.primitive))
+                    raise ValueError(
+                        "unrecognized NumpyForm.primitive type: {0}".format(
+                            form.primitive
+                        )
+                    )
 
-            elif isinstance(form, (awkward1.forms.RegularForm,
-                                   awkward1.forms.ListForm,
-                                   awkward1.forms.ListOffsetForm)):
+            elif isinstance(
+                form,
+                (
+                    awkward1.forms.RegularForm,
+                    awkward1.forms.ListForm,
+                    awkward1.forms.ListOffsetForm,
+                ),
+            ):
                 return form.content
 
             elif isinstance(form, awkward1.forms.IndexedForm):
                 return getitem_at(form.content)
 
-            elif isinstance(form, (awkward1.forms.IndexedOptionForm,
-                                   awkward1.forms.ByteMaskedForm,
-                                   awkward1.forms.BitMaskedForm,
-                                   awkward1.forms.UnmaskedForm)):
+            elif isinstance(
+                form,
+                (
+                    awkward1.forms.IndexedOptionForm,
+                    awkward1.forms.ByteMaskedForm,
+                    awkward1.forms.BitMaskedForm,
+                    awkward1.forms.UnmaskedForm,
+                ),
+            ):
                 return numba.types.optional(wrap(getitem_at(form.content)))
 
             elif isinstance(form, awkward1.forms.RecordForm):
@@ -2298,57 +2288,60 @@ class VirtualArrayType(ContentType):
                 raise TypeError("union types cannot be accessed in Numba")
 
             else:
-                raise AssertionError(
-                    "unrecognized Form type: {0}".format(type(form)))
+                raise AssertionError("unrecognized Form type: {0}".format(type(form)))
 
         def wrap(out):
             if isinstance(out, awkward1.forms.Form):
                 numbatype = awkward1._connect._numba.arrayview.tonumbatype(out)
-                return awkward1._connect._numba.arrayview.wrap(numbatype,
-                                                               viewtype,
-                                                               None)
+                return awkward1._connect._numba.arrayview.wrap(
+                    numbatype, viewtype, None
+                )
             else:
                 return out
 
         return wrap(getitem_at(self.generator_form))
 
-    def lower_getitem_at(self,
-                         context,
-                         builder,
-                         rettype,
-                         viewtype,
-                         viewval,
-                         viewproxy,
-                         attype,
-                         atval,
-                         wrapneg,
-                         checkbounds):
-        pyobjptr = getat(context,
-                         builder,
-                         viewproxy.arrayptrs,
-                         posat(context, builder, viewproxy.pos, self.PYOBJECT))
-        arraypos = getat(context,
-                         builder,
-                         viewproxy.arrayptrs,
-                         posat(context, builder, viewproxy.pos, self.ARRAY))
+    def lower_getitem_at(
+        self,
+        context,
+        builder,
+        rettype,
+        viewtype,
+        viewval,
+        viewproxy,
+        attype,
+        atval,
+        wrapneg,
+        checkbounds,
+    ):
+        pyobjptr = getat(
+            context,
+            builder,
+            viewproxy.arrayptrs,
+            posat(context, builder, viewproxy.pos, self.PYOBJECT),
+        )
+        arraypos = getat(
+            context,
+            builder,
+            viewproxy.arrayptrs,
+            posat(context, builder, viewproxy.pos, self.ARRAY),
+        )
         sharedptr = getat(context, builder, viewproxy.sharedptrs, arraypos)
 
-        numbatype = awkward1._connect._numba.arrayview.tonumbatype(
-                        self.generator_form)
+        numbatype = awkward1._connect._numba.arrayview.tonumbatype(self.generator_form)
 
-        with builder.if_then(builder.icmp_signed(
-                                 "==",
-                                 sharedptr,
-                                 context.get_constant(numba.intp, 0)),
-                             likely=False):
+        with builder.if_then(
+            builder.icmp_signed("==", sharedptr, context.get_constant(numba.intp, 0)),
+            likely=False,
+        ):
             # only rarely enter Python
             pyapi = context.get_python_api(builder)
             gil = pyapi.gil_ensure()
 
             # borrowed references
             virtualarray_obj = builder.inttoptr(
-                                 pyobjptr,
-                                 context.get_value_type(numba.types.pyobject))
+                pyobjptr, context.get_value_type(numba.types.pyobject)
+            )
             lookup_obj = viewproxy.pylookup
 
             # new references
@@ -2357,25 +2350,29 @@ class VirtualArrayType(ContentType):
             arraypos_obj = pyapi.long_from_ssize_t(arraypos)
             array_obj = pyapi.object_getattr_string(virtualarray_obj, "array")
 
-            with builder.if_then(builder.icmp_signed(
-                                   "!=",
-                                   pyapi.err_occurred(),
-                                   context.get_constant(numba.types.voidptr,
-                                                        0)),
-                                 likely=False):
+            with builder.if_then(
+                builder.icmp_signed(
+                    "!=",
+                    pyapi.err_occurred(),
+                    context.get_constant(numba.types.voidptr, 0),
+                ),
+                likely=False,
+            ):
                 context.call_conv.return_exc(builder)
 
             # add the materialized array to our Lookup
-            pyapi.call_function_objargs(fill_obj, (arraypos_obj,
-                                                   array_obj,
-                                                   lookup_obj,))
+            pyapi.call_function_objargs(
+                fill_obj, (arraypos_obj, array_obj, lookup_obj,)
+            )
 
-            with builder.if_then(builder.icmp_signed(
-                                   "!=",
-                                   pyapi.err_occurred(),
-                                   context.get_constant(numba.types.voidptr,
-                                                        0)),
-                                 likely=False):
+            with builder.if_then(
+                builder.icmp_signed(
+                    "!=",
+                    pyapi.err_occurred(),
+                    context.get_constant(numba.types.voidptr, 0),
+                ),
+                likely=False,
+            ):
                 context.call_conv.return_exc(builder)
 
             # decref the new references
@@ -2391,23 +2388,25 @@ class VirtualArrayType(ContentType):
         nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
 
         nextviewtype = awkward1._connect._numba.arrayview.wrap(
-                         numbatype, viewtype, None)
+            numbatype, viewtype, None
+        )
         proxynext = context.make_helper(builder, nextviewtype)
-        proxynext.pos        = nextpos
-        proxynext.start      = viewproxy.start
-        proxynext.stop       = viewproxy.stop
-        proxynext.arrayptrs  = viewproxy.arrayptrs
+        proxynext.pos = nextpos
+        proxynext.start = viewproxy.start
+        proxynext.stop = viewproxy.stop
+        proxynext.arrayptrs = viewproxy.arrayptrs
         proxynext.sharedptrs = viewproxy.sharedptrs
-        proxynext.pylookup   = viewproxy.pylookup
+        proxynext.pylookup = viewproxy.pylookup
 
         return numbatype.lower_getitem_at_check(
-                    context,
-                    builder,
-                    rettype,
-                    nextviewtype,
-                    proxynext._getvalue(),
-                    proxynext,
-                    numba.intp,
-                    atval,
-                    wrapneg,
-                    checkbounds)
+            context,
+            builder,
+            rettype,
+            nextviewtype,
+            proxynext._getvalue(),
+            proxynext,
+            numba.intp,
+            atval,
+            wrapneg,
+            checkbounds,
+        )

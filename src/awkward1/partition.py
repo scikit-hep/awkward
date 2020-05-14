@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 
 import numbers
+
 try:
     from collections.abc import Iterable
 except ImportError:
@@ -13,11 +14,13 @@ import numpy
 import awkward1._ext
 import awkward1._util
 
+
 def single(obj):
     if isinstance(obj, awkward1.layout.Content):
         return IrregularlyPartitionedArray([obj])
     else:
         return obj
+
 
 def first(obj):
     if isinstance(obj, PartitionedArray):
@@ -25,11 +28,13 @@ def first(obj):
     else:
         return obj
 
+
 def every(obj):
     if isinstance(obj, PartitionedArray):
         return obj.partitions
     else:
         return [obj]
+
 
 def partition_as(sample, arrays):
     stops = sample.stops
@@ -38,9 +43,10 @@ def partition_as(sample, arrays):
         for n, x in arrays.items():
             if isinstance(x, PartitionedArray):
                 out[n] = x.repartition(stops)
-            elif (isinstance(x, awkward1.layout.Content) and
-                  (x.parameter("__array__") == "string" or
-                   x.parameter("__array__") == "bytestring")):
+            elif isinstance(x, awkward1.layout.Content) and (
+                x.parameter("__array__") == "string"
+                or x.parameter("__array__") == "bytestring"
+            ):
                 out[n] = x
             elif isinstance(x, awkward1.layout.Content):
                 out[n] = IrregularlyPartitionedArray.toPartitioned(x, stops)
@@ -52,15 +58,17 @@ def partition_as(sample, arrays):
         for x in arrays:
             if isinstance(x, PartitionedArray):
                 out.append(x.repartition(stops))
-            elif (isinstance(x, awkward1.layout.Content) and
-                  (x.parameter("__array__") == "string" or
-                   x.parameter("__array__") == "bytestring")):
+            elif isinstance(x, awkward1.layout.Content) and (
+                x.parameter("__array__") == "string"
+                or x.parameter("__array__") == "bytestring"
+            ):
                 out.append(x)
             elif isinstance(x, awkward1.layout.Content):
                 out.append(IrregularlyPartitionedArray.toPartitioned(x, stops))
             else:
                 out.append(x)
         return out
+
 
 def iterate(numpartitions, arrays):
     if isinstance(arrays, dict):
@@ -82,8 +90,10 @@ def iterate(numpartitions, arrays):
                     out.append(x)
             yield out
 
+
 def apply(function, array):
     return IrregularlyPartitionedArray([function(x) for x in array.partitions])
+
 
 class PartitionedArray(object):
     @classmethod
@@ -161,8 +171,7 @@ class PartitionedArray(object):
     def deep_copy(self, *args, **kwargs):
         out = type(self).__new__(type(self))
         out.__dict__.update(self.__dict__)
-        out._partitions = [x.deep_copy(*args, **kwargs)
-                               for x in out.partitions]
+        out._partitions = [x.deep_copy(*args, **kwargs) for x in out.partitions]
         return out
 
     @property
@@ -208,8 +217,7 @@ class PartitionedArray(object):
         if first(self).axis_wrap_if_negative(axis) == 0:
             return sum(x.num(axis) for x in self.partitions)
         else:
-            return self.replace_partitions(
-                [x.num(axis) for x in self.partitions])
+            return self.replace_partitions([x.num(axis) for x in self.partitions])
 
     def flatten(self, *args, **kwargs):
         return apply(lambda x: x.flatten(*args, **kwargs), self)
@@ -219,14 +227,16 @@ class PartitionedArray(object):
             return self.toContent().rpad(length, axis)
         else:
             return self.replace_partitions(
-                [x.rpad(length, axis) for x in self.partitions])
+                [x.rpad(length, axis) for x in self.partitions]
+            )
 
     def rpad_and_clip(self, length, axis):
         if first(self).axis_wrap_if_negative(axis) == 0:
             return self.toContent().rpad_and_clip(length, axis)
         else:
             return self.replace_partitions(
-                [x.rpad_and_clip(length, axis) for x in self.partitions])
+                [x.rpad_and_clip(length, axis) for x in self.partitions]
+            )
 
     def reduce(self, name, axis, mask, keepdims):
         branch, depth = first(self).branch_depth
@@ -236,9 +246,9 @@ class PartitionedArray(object):
         if not branch and negaxis == depth:
             return getattr(self.toContent(), name)(axis, mask, keepdims)
         else:
-            return self.replace_partitions([
-                            getattr(x, name)(axis, mask, keepdims)
-                                for x in self.partitions])
+            return self.replace_partitions(
+                [getattr(x, name)(axis, mask, keepdims) for x in self.partitions]
+            )
 
     def count(self, axis, mask, keepdims):
         return self.reduce("count", axis, mask, keepdims)
@@ -275,29 +285,29 @@ class PartitionedArray(object):
             start = 0
             output = []
             for x in self.partitions:
-                output.append(awkward1.layout.NumpyArray(
-                    numpy.arange(start, start + len(x), dtype=numpy.int64)))
+                output.append(
+                    awkward1.layout.NumpyArray(
+                        numpy.arange(start, start + len(x), dtype=numpy.int64)
+                    )
+                )
                 start += len(x)
             return self.replace_partitions(output)
 
         else:
-            return self.replace_partitions([x.localindex(axis)
-                                              for x in self.partitions])
+            return self.replace_partitions(
+                [x.localindex(axis) for x in self.partitions]
+            )
 
     def combinations(self, n, replacement, keys, parameters, axis):
         if first(self).axis_wrap_if_negative(axis) == 0:
-            return self.toContent().combinations(n,
-                                                 replacement,
-                                                 keys,
-                                                 parameters,
-                                                 axis)
+            return self.toContent().combinations(n, replacement, keys, parameters, axis)
         else:
-            return self.replace_partitions([x.combinations(n,
-                                                           replacement,
-                                                           keys,
-                                                           parameters,
-                                                           axis)
-                                              for x in self.partitions])
+            return self.replace_partitions(
+                [
+                    x.combinations(n, replacement, keys, parameters, axis)
+                    for x in self.partitions
+                ]
+            )
 
     def __len__(self):
         return len(self._ext)
@@ -331,38 +341,46 @@ class PartitionedArray(object):
             else:
                 out = out.merge(x)
             if isinstance(out, awkward1._util.uniontypes):
-                out = out.simplify(mergebool=mergebool)
+                out = out.simplify(mergebool=False)
         return out
 
     def repartition(self, *args, **kwargs):
-        return PartitionedArray.from_ext(
-                   self._ext.repartition(*args, **kwargs))
+        return PartitionedArray.from_ext(self._ext.repartition(*args, **kwargs))
 
     def __getitem__(self, where):
         import awkward1.operations.convert
         import awkward1.operations.describe
         from awkward1.types import PrimitiveType, OptionType, UnionType
 
-        if (not isinstance(where, bool) and
-            isinstance(where, (numbers.Integral, numpy.integer))):
+        if not isinstance(where, bool) and isinstance(
+            where, (numbers.Integral, numpy.integer)
+        ):
             return PartitionedArray.from_ext(self._ext.getitem_at(where))
 
         elif isinstance(where, slice):
-            return PartitionedArray.from_ext(self._ext.getitem_range(
-                       where.start, where.stop, where.step))
+            return PartitionedArray.from_ext(
+                self._ext.getitem_range(where.start, where.stop, where.step)
+            )
 
-        elif (isinstance(where, str) or
-              (awkward1._util.py27 and isinstance(where, unicode))):
+        elif isinstance(where, str) or (
+            awkward1._util.py27 and isinstance(where, awkward1._util.unicode)
+        ):
             return self.replace_partitions([x[where] for x in self.partitions])
 
         elif isinstance(where, tuple) and len(where) == 0:
             return self
 
-        elif (isinstance(where, Iterable) and
-              len(where) > 0 and
-              all((isinstance(x, str) or
-                   (awkward1._util.py27 and isinstance(x, unicode)))
-                  for x in where)):
+        elif (
+            isinstance(where, Iterable)
+            and len(where) > 0
+            and all(
+                (
+                    isinstance(x, str)
+                    or (awkward1._util.py27 and isinstance(x, awkward1._util.unicode))
+                )
+                for x in where
+            )
+        ):
             return self.replace_partitions([x[where] for x in self.partitions])
 
         else:
@@ -370,56 +388,90 @@ class PartitionedArray(object):
                 where = (where,)
             head, tail = where[0], where[1:]
 
-            if (not isinstance(head, bool) and
-                isinstance(head, (numbers.Integral, numpy.integer))):
-                original_head = head
+            if not isinstance(head, bool) and isinstance(
+                head, (numbers.Integral, numpy.integer)
+            ):
                 if head < 0:
                     head += len(self)
                 if not 0 <= head < len(self):
                     raise ValueError(
-                        "{0} index out of range".format(type(self).__name__))
+                        "{0} index out of range".format(type(self).__name__)
+                    )
                 partitionid, index = self._ext.partitionid_index_at(head)
                 return self.partition(partitionid)[(index,) + tail]
 
             elif isinstance(head, slice):
-                partitions = self._ext.getitem_range(head.start,
-                                                     head.stop,
-                                                     head.step).partitions
-                return IrregularlyPartitionedArray([x[(slice(None),) + tail]
-                                                      for x in partitions])
+                partitions = self._ext.getitem_range(
+                    head.start, head.stop, head.step
+                ).partitions
+                return IrregularlyPartitionedArray(
+                    [x[(slice(None),) + tail] for x in partitions]
+                )
 
-            elif ((head is Ellipsis) or
-                  (isinstance(where, str) or
-                   (awkward1._util.py27 and isinstance(where, unicode))) or
-                  (isinstance(head, Iterable) and
-                   all((isinstance(x, str) or
-                        (awkward1._util.py27 and isinstance(x, unicode)))
-                       for x in head))):
-                return IrregularlyPartitionedArray([x[(head,) + tail]
-                                                     for x in self.partitions])
+            elif (
+                (head is Ellipsis)
+                or (
+                    isinstance(where, str)
+                    or (
+                        awkward1._util.py27
+                        and isinstance(where, awkward1._util.unicode)
+                    )
+                )
+                or (
+                    isinstance(head, Iterable)
+                    and all(
+                        (
+                            isinstance(x, str)
+                            or (
+                                awkward1._util.py27
+                                and isinstance(x, awkward1._util.unicode)
+                            )
+                        )
+                        for x in head
+                    )
+                )
+            ):
+                return IrregularlyPartitionedArray(
+                    [x[(head,) + tail] for x in self.partitions]
+                )
 
             elif head is numpy.newaxis:
                 return self.toContent()[(head,) + tail]
 
             else:
-                layout = awkward1.operations.convert.to_layout(head,
-                            allow_record=False, allow_other=False,
-                            numpytype=(numpy.integer, numpy.bool_, numpy.bool))
+                layout = awkward1.operations.convert.to_layout(
+                    head,
+                    allow_record=False,
+                    allow_other=False,
+                    numpytype=(numpy.integer, numpy.bool_, numpy.bool),
+                )
 
                 t = awkward1.operations.describe.type(layout)
-                int_types = [PrimitiveType("int8"),  PrimitiveType("uint8"),
-                             PrimitiveType("int16"), PrimitiveType("uint16"),
-                             PrimitiveType("int32"), PrimitiveType("uint32"),
-                             PrimitiveType("int64"), PrimitiveType("uint64")]
+                int_types = [
+                    PrimitiveType("int8"),
+                    PrimitiveType("uint8"),
+                    PrimitiveType("int16"),
+                    PrimitiveType("uint16"),
+                    PrimitiveType("int32"),
+                    PrimitiveType("uint32"),
+                    PrimitiveType("int64"),
+                    PrimitiveType("uint64"),
+                ]
                 opt_types = [OptionType(p) for p in int_types]
 
-                if (isinstance(t, OptionType) or
-                    t in int_types + opt_types or
-                    (isinstance(t, UnionType) and
-                     all(ti in int_types for ti in t.types)) or
-                    (isinstance(t, OptionType) and
-                     isinstance(t.type, UnionType) and
-                     all(ti in int_types for ti in t.type.types))):
+                if (
+                    isinstance(t, OptionType)
+                    or t in int_types + opt_types
+                    or (
+                        isinstance(t, UnionType)
+                        and all(ti in int_types for ti in t.types)
+                    )
+                    or (
+                        isinstance(t, OptionType)
+                        and isinstance(t.type, UnionType)
+                        and all(ti in int_types for ti in t.type.types)
+                    )
+                ):
 
                     if isinstance(layout, PartitionedArray):
                         layout = layout.toContent()
@@ -431,13 +483,15 @@ class PartitionedArray(object):
                         layout = layout.repartition(stops)
                     else:
                         layout = IrregularlyPartitionedArray.toPartitioned(
-                                     layout, stops)
+                            layout, stops
+                        )
                     inparts = self.partitions
                     headparts = layout.partitions
                     outparts = []
                     for i in range(len(inparts)):
                         outparts.append(inparts[i][(headparts[i],) + tail])
                     return IrregularlyPartitionedArray(outparts, stops)
+
 
 class IrregularlyPartitionedArray(PartitionedArray):
     @classmethod
@@ -453,8 +507,7 @@ class IrregularlyPartitionedArray(PartitionedArray):
         if stops is None:
             self._ext = awkward1._ext.IrregularlyPartitionedArray(partitions)
         else:
-            self._ext = awkward1._ext.IrregularlyPartitionedArray(partitions,
-                                                                  stops)
+            self._ext = awkward1._ext.IrregularlyPartitionedArray(partitions, stops)
 
     @property
     def stops(self):
@@ -465,8 +518,10 @@ class IrregularlyPartitionedArray(PartitionedArray):
         for x, stop in zip(self.partitions, self.stops):
             total_length += len(x)
             if total_length != stop:
-                return ("IrregularlyPartitionedArray stops do not match "
-                        "partition lengths")
+                return (
+                    "IrregularlyPartitionedArray stops do not match "
+                    "partition lengths"
+                )
             out = x.validityerror()
             if out is not None:
                 return out
