@@ -3,11 +3,9 @@
 #ifndef AWKWARD_NUMPYARRAY_H_
 #define AWKWARD_NUMPYARRAY_H_
 
-#include <algorithm>
 #include <string>
 #include <unordered_map>
 #include <memory>
-#include <numeric>
 #include <typeindex>
 #include <vector>
 

@@ -3,14 +3,16 @@
 #ifndef AWKWARD_RAWARRAY_H_
 #define AWKWARD_RAWARRAY_H_
 
+#include <algorithm>
 #include <cstring>
-#include <vector>
-#include <string>
 #include <iomanip>
-#include <sstream>
 #include <memory>
+#include <numeric>
+#include <sstream>
 #include <stdexcept>
+#include <string>
 #include <typeinfo>
+#include <vector>
 
 #include "awkward/cpu-kernels/util.h"
 #include "awkward/cpu-kernels/identities.h"
