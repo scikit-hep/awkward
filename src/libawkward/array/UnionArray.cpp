@@ -1745,30 +1745,6 @@ namespace awkward {
 
   template <typename T, typename I>
   const ContentPtr
-  UnionArrayOf<T, I>::recurse_next(int64_t negaxis,
-                                   const Index64& starts,
-                                   const Index64& parents,
-                                   int64_t outlength,
-                                   bool mask,
-                                   bool keepdims) const {
-    ContentPtr simplified = simplify_uniontype(true);
-    if (dynamic_cast<UnionArray8_32*>(simplified.get())  ||
-        dynamic_cast<UnionArray8_U32*>(simplified.get())  ||
-        dynamic_cast<UnionArray8_64*>(simplified.get())) {
-      throw std::invalid_argument(
-        std::string("cannot recurse (call '")
-        + std::string("' on) an irreducible ") + classname());
-    }
-    return simplified.get()->recurse_next(negaxis,
-                                          starts,
-                                          parents,
-                                          outlength,
-                                          mask,
-                                          keepdims);
-  }
-
-  template <typename T, typename I>
-  const ContentPtr
   UnionArrayOf<T, I>::localindex(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (axis == depth) {

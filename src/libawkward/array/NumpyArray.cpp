@@ -2512,65 +2512,6 @@ namespace awkward {
       return out;
     }
   }
-  const ContentPtr
-  NumpyArray::recurse_next(int64_t negaxis,
-                           const Index64& starts,
-                           const Index64& parents,
-                           int64_t outlength,
-                           bool mask,
-                           bool keepdims) const {
-    if (shape_.empty()) {
-      throw std::runtime_error("attempting to reduce a scalar");
-    }
-    else if (shape_.size() != 1  ||  !iscontiguous()) {
-      return toRegularArray().get()->recurse_next(negaxis,
-                                                  starts,
-                                                  parents,
-                                                  outlength,
-                                                  mask,
-                                                  keepdims);
-    }
-    else {
-
-      ContentPtr out = std::make_shared<NumpyArray>(Identities::none(),
-                                                    util::Parameters(),
-                                                    ptr_,
-                                                    shape_,
-                                                    strides_,
-                                                    0,
-                                                    itemsize_,
-                                                    format_);
-
-      if (mask) {
-        Index8 mask(out.get()->length());
-        struct Error err = awkward_numpyarray_reduce_mask_bytemaskedarray(
-          mask.ptr().get(),
-          parents.ptr().get(),
-          parents.offset(),
-          parents.length(),
-          out.get()->length());
-        util::handle_error(err, classname(), nullptr);
-        Index8 maskOne(out.get()->length());
-        for(int64_t i = 0; i < out.get()->length(); i++)
-          maskOne.setitem_at_nowrap(i, 0);
-
-        out = std::make_shared<ByteMaskedArray>(Identities::none(),
-                                                util::Parameters(),
-                                                maskOne,
-                                                out,
-                                                false);
-      }
-
-      if (keepdims) {
-        out = std::make_shared<RegularArray>(Identities::none(),
-                                             util::Parameters(),
-                                             out,
-                                             parents.length()/starts.length());
-      }
-
-      return out;
-    }
-  }
 
   const ContentPtr
   NumpyArray::localindex(int64_t axis, int64_t depth) const {
@@ -2638,51 +2579,55 @@ namespace awkward {
     }
     else {
       std::shared_ptr<Content> out;
-      int64_t length = parents.length();
       int64_t offset = byteoffset_ / itemsize_;
       std::shared_ptr<void> ptr;
       if (format_.compare("?") == 0) {
         ptr = array_sort<bool>(reinterpret_cast<bool*>(ptr_.get()),
+                               length(),
                                offset,
                                starts,
                                parents,
-                               length,
+                               outlength,
                                ascending,
                                stable);
       }
       else if (format_.compare("b") == 0) {
         ptr = array_sort<int8_t>(reinterpret_cast<int8_t*>(ptr_.get()),
+                                 length(),
                                  offset,
                                  starts,
                                  parents,
-                                 length,
+                                 outlength,
                                  ascending,
                                  stable);
       }
       else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
         ptr = array_sort<uint8_t>(reinterpret_cast<uint8_t*>(ptr_.get()),
+                                  length(),
                                   offset,
                                   starts,
                                   parents,
-                                  length,
+                                  outlength,
                                   ascending,
                                   stable);
       }
       else if (format_.compare("h") == 0) {
         ptr = array_sort<int16_t>(reinterpret_cast<int16_t*>(ptr_.get()),
+                                  length(),
                                   offset,
                                   starts,
                                   parents,
-                                  length,
+                                  outlength,
                                   ascending,
                                   stable);
       }
       else if (format_.compare("H") == 0) {
         ptr = array_sort<uint16_t>(reinterpret_cast<uint16_t*>(ptr_.get()),
+                                   length(),
                                    offset,
                                    starts,
                                    parents,
-                                   length,
+                                   outlength,
                                    ascending,
                                    stable);
       }
@@ -2692,10 +2637,11 @@ namespace awkward {
       else if (format_.compare("i") == 0) {
 #endif
         ptr = array_sort<int32_t>(reinterpret_cast<int32_t*>(ptr_.get()),
+                                  length(),
                                   offset,
                                   starts,
                                   parents,
-                                  length,
+                                  outlength,
                                   ascending,
                                   stable);
       }
@@ -2705,10 +2651,11 @@ namespace awkward {
       else if (format_.compare("I") == 0) {
 #endif
         ptr = array_sort<uint32_t>(reinterpret_cast<uint32_t*>(ptr_.get()),
+                                   length(),
                                    offset,
                                    starts,
                                    parents,
-                                   length,
+                                   outlength,
                                    ascending,
                                    stable);
       }
@@ -2718,10 +2665,11 @@ namespace awkward {
       else if (format_.compare("l") == 0) {
 #endif
         ptr = array_sort<int64_t>(reinterpret_cast<int64_t*>(ptr_.get()),
+                                  length(),
                                   offset,
                                   starts,
                                   parents,
-                                  length,
+                                  outlength,
                                   ascending,
                                   stable);
       }
@@ -2731,28 +2679,31 @@ namespace awkward {
       else if (format_.compare("L") == 0) {
 #endif
         ptr = array_sort<uint64_t>(reinterpret_cast<uint64_t*>(ptr_.get()),
+                                   length(),
                                    offset,
                                    starts,
                                    parents,
-                                   length,
+                                   outlength,
                                    ascending,
                                    stable);
       }
       else if (format_.compare("f") == 0) {
         ptr = array_sort<float>(reinterpret_cast<float*>(ptr_.get()),
+                                length(),
                                 offset,
                                 starts,
                                 parents,
-                                length,
+                                outlength,
                                 ascending,
                                 stable);
       }
       else if (format_.compare("d") == 0) {
         ptr = array_sort<double>(reinterpret_cast<double*>(ptr_.get()),
+                                 length(),
                                  offset,
                                  starts,
                                  parents,
-                                 length,
+                                 outlength,
                                  ascending,
                                  stable);
       }
@@ -2804,7 +2755,6 @@ namespace awkward {
     }
     else {
       std::shared_ptr<Content> out;
-      int64_t parents_length = parents.length();
       int64_t offset = byteoffset_ / itemsize_;
       std::shared_ptr<void> ptr;
       if (format_.compare("?") == 0) {
@@ -2964,7 +2914,6 @@ namespace awkward {
                                              out,
                                              parents.length()/starts.length());
       }
-
       return out;
     }
   }
@@ -4033,4 +3982,143 @@ namespace awkward {
       builder.endlist();
     }
   }
+
+  template<typename T>
+  const std::shared_ptr<void>
+  NumpyArray::index_sort(const T* data,
+                         int64_t length,
+                         int64_t offset,
+                         const Index64& starts,
+                         const Index64& parents,
+                         int64_t outlength,
+                         bool ascending,
+                         bool stable) const {
+    std::shared_ptr<int64_t> ptr(
+      new int64_t[(size_t)length], util::array_deleter<int64_t>());
+
+    if (length == 0) {
+      return ptr;
+    }
+
+    std::vector<size_t> result(length);
+    std::iota(result.begin(), result.end(), 0);
+
+    std::vector<int64_t> offsets = sorting_ranges(parents,
+                                                  outlength);
+
+    for (int64_t i = 0; i < offsets.size() - 1; i++) {
+      auto start = std::next(result.begin(), offsets[i]);
+      auto stop = std::next(result.begin(), offsets[i + 1]);
+
+      if (ascending  &&  !stable) {
+        std::sort(start, stop,
+          [&data](size_t i1, size_t i2) {return data[i1] < data[i2];});
+      }
+      else if (!ascending  &&  !stable) {
+        std::sort(start, stop,
+          [&data](size_t i1, size_t i2) {return data[i1] > data[i2];});
+      }
+      else if (ascending  &&  stable) {
+        std::stable_sort(start, stop,
+          [&data](size_t i1, size_t i2) {return data[i1] < data[i2];});
+      }
+      else if (!ascending  &&  stable) {
+        std::stable_sort(start, stop,
+          [&data](size_t i1, size_t i2) {return data[i1] > data[i2];});
+      }
+      std::transform(start, stop, start,
+                 [&](size_t j) -> size_t { return j - (size_t)offsets[i]; });
+    }
+
+    struct Error err2 = awkward_argsort_64(
+      ptr.get(),
+      &result[0],
+      length);
+    util::handle_error(err2, classname(), nullptr);
+
+    return ptr;
+  }
+
+  template<typename T>
+  const std::shared_ptr<void>
+  NumpyArray::array_sort(const T* data,
+                         int64_t length,
+                         int64_t offset,
+                         const Index64& starts,
+                         const Index64& parents,
+                         int64_t outlength,
+                         bool ascending,
+                         bool stable) const {
+    std::shared_ptr<T> ptr(
+      new T[(size_t)length], util::array_deleter<T>());
+
+    if (length == 0) {
+      return ptr;
+    }
+
+    std::vector<size_t> result(length);
+    std::iota(result.begin(), result.end(), 0);
+
+    std::vector<int64_t> offsets = sorting_ranges(parents,
+                                                  outlength);
+
+    for (int64_t i = 0; i < offsets.size() - 1; i++) {
+      auto start = std::next(result.begin(), offsets[i]);
+      auto stop = std::next(result.begin(), offsets[i + 1]);
+
+      if (ascending  &&  !stable) {
+        std::sort(start, stop,
+          [&data](size_t i1, size_t i2) {return data[i1] < data[i2];});
+      }
+      else if (!ascending  &&  !stable) {
+        std::sort(start, stop,
+          [&data](size_t i1, size_t i2) {return data[i1] > data[i2];});
+      }
+      else if (ascending  &&  stable) {
+        std::stable_sort(start, stop,
+          [&data](size_t i1, size_t i2) {return data[i1] < data[i2];});
+      }
+      else if (!ascending  &&  stable) {
+        std::stable_sort(start, stop,
+          [&data](size_t i1, size_t i2) {return data[i1] > data[i2];});
+      }
+    }
+
+    struct Error err2 = util::awkward_numpyarray_sort<T>(
+      ptr.get(),
+      data,
+      &result[0],
+      starts.ptr().get(),
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length());
+    util::handle_error(err2, classname(), nullptr);
+
+    return ptr;
+  }
+
+  std::vector<int64_t>
+  NumpyArray::sorting_ranges(const Index64& parents,
+                             int64_t outlength) const {
+    std::vector<int64_t> result;
+    std::vector<int64_t> ranges(parents.length() + 1);
+    struct Error err = awkward_argsort_prepare_ranges(
+      &ranges[0],
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, classname(), nullptr);
+
+    for (auto const& it : ranges) {
+      auto res = std::find(std::begin(ranges), std::end(ranges), it);
+      if (res != std::end(ranges)) {
+        if (result.empty() || result.back() != std::distance(std::begin(ranges), res)) {
+          result.emplace_back(std::distance(std::begin(ranges), res));
+        }
+      }
+    }
+    return result;
+  }
+
 }

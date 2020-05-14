@@ -188,14 +188,6 @@ namespace awkward {
                   bool mask,
                   bool keepdims) const override;
 
-    const ContentPtr
-      recurse_next(int64_t negaxis,
-                   const Index64& starts,
-                   const Index64& parents,
-                   int64_t outlength,
-                   bool mask,
-                   bool keepdims) const override;
-
     /// @exception std::runtime_error is always thrown
     const ContentPtr
       sort_next(int64_t negaxis,

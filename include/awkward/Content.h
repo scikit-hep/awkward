@@ -675,14 +675,6 @@ namespace awkward {
                   bool mask,
                   bool keepdims) const = 0;
 
-    virtual const ContentPtr
-      recurse_next(int64_t negaxis,
-                   const Index64& starts,
-                   const Index64& parents,
-                   int64_t outlength,
-                   bool mask,
-                   bool keepdims) const = 0;
-
     /// @brief This array with one axis removed by applying a Reducer
     ///
     /// The user's entry point for this operation is #sort.

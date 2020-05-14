@@ -223,16 +223,6 @@ namespace awkward {
   }
 
   const ContentPtr
-  None::recurse_next(int64_t negaxis,
-                     const Index64& starts,
-                     const Index64& parents,
-                     int64_t outlength,
-                     bool mask,
-                     bool keepdims) const {
-    throw std::runtime_error("undefined operation: None::recurse_next");
-  }
-
-  const ContentPtr
   None::localindex(int64_t axis, int64_t depth) const {
     throw std::runtime_error("undefined operation: None:localindex");
   }

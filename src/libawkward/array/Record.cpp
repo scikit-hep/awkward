@@ -348,22 +348,6 @@ namespace awkward {
   }
 
   const ContentPtr
-  Record::recurse_next(int64_t negaxis,
-                       const Index64& starts,
-                       const Index64& parents,
-                       int64_t outlength,
-                       bool mask,
-                       bool keepdims) const {
-    ContentPtr trimmed = array_.get()->getitem_range_nowrap(at_, at_ + 1);
-    return trimmed.get()->recurse_next(negaxis,
-                                       starts,
-                                       parents,
-                                       outlength,
-                                       mask,
-                                       keepdims);
-  }
-
-  const ContentPtr
   Record::localindex(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {

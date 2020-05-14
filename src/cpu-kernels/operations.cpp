@@ -3655,6 +3655,21 @@ ERROR awkward_bitmaskedarray_to_indexedoptionarray_64(
     lsb_order);
 }
 
+EXPORT_SYMBOL struct Error
+  awkward_argsort_prepare_ranges(
+    int64_t* toranges,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t length,
+    int64_t outlength) {
+  for (int64_t i = 0; i < length; i++) {
+    toranges[i] = parents[i];
+  }
+  toranges[length] = outlength;
+
+  return success();
+}
+
 template <typename OUT>
 ERROR awkward_argsort(
   OUT* toptr,

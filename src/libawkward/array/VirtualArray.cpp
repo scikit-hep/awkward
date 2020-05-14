@@ -608,21 +608,6 @@ namespace awkward {
   }
 
   const ContentPtr
-  VirtualArray::recurse_next(int64_t negaxis,
-                             const Index64& starts,
-                             const Index64& parents,
-                             int64_t outlength,
-                             bool mask,
-                             bool keepdims) const {
-    return array().get()->recurse_next(negaxis,
-                                       starts,
-                                       parents,
-                                       outlength,
-                                       mask,
-                                       keepdims);
-  }
-
-  const ContentPtr
   VirtualArray::sort_next(int64_t negaxis,
                           const Index64& starts,
                           const Index64& parents,

@@ -13,6 +13,7 @@ def test_EmptyArray():
     array = awkward1.layout.EmptyArray()
     assert awkward1.to_list(array.sort(0, True, False)) == []
     assert awkward1.to_list(array.argsort(0, True, False)) == []
+#    raise ValueError
 
 def test_NumpyArray():
     array = awkward1.layout.NumpyArray(numpy.array([3.3, 2.2, 1.1, 5.5, 4.4]))

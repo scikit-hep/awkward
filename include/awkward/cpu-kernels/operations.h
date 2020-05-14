@@ -1327,6 +1327,14 @@ extern "C" {
       bool lsb_order);
 
   EXPORT_SYMBOL struct Error
+    awkward_argsort_prepare_ranges(
+      int64_t* toptr,
+      const int64_t* parents,
+      int64_t parentsoffset,
+      int64_t length,
+      int64_t outlength);
+
+  EXPORT_SYMBOL struct Error
     awkward_argsort_64(
       int64_t* toptr,
       const size_t* fromindex,

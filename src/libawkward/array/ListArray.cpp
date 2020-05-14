@@ -1266,22 +1266,6 @@ namespace awkward {
 
   template <typename T>
   const ContentPtr
-  ListArrayOf<T>::recurse_next(int64_t negaxis,
-                               const Index64& starts,
-                               const Index64& parents,
-                               int64_t outlength,
-                               bool mask,
-                               bool keepdims) const {
-    return toListOffsetArray64(true).get()->recurse_next(negaxis,
-                                                         starts,
-                                                         parents,
-                                                         outlength,
-                                                         mask,
-                                                         keepdims);
-  }
-
-  template <typename T>
-  const ContentPtr
   ListArrayOf<T>::localindex(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (axis == depth) {

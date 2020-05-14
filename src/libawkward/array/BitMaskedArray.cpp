@@ -780,21 +780,6 @@ namespace awkward {
   }
 
   const ContentPtr
-  BitMaskedArray::recurse_next(int64_t negaxis,
-                               const Index64& starts,
-                               const Index64& parents,
-                               int64_t outlength,
-                               bool mask,
-                               bool keepdims) const {
-    return toByteMaskedArray().get()->recurse_next(negaxis,
-                                                   starts,
-                                                   parents,
-                                                   outlength,
-                                                   mask,
-                                                   keepdims);
-  }
-
-  const ContentPtr
   BitMaskedArray::localindex(int64_t axis, int64_t depth) const {
     return toByteMaskedArray().get()->localindex(axis, depth);
   }
