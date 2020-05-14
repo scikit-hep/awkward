@@ -442,6 +442,15 @@ def test_arrow_coverage100():
 
     a = awkward1.layout.ByteMaskedArray(awkward1.layout.Index8(numpy.array([False, True, False, False, True, True])), awkward1.layout.ListOffsetArray32(awkward1.layout.Index32(numpy.array([0, 5, 10, 15, 20, 25, 30], "i4")), awkward1.layout.NumpyArray(numpy.frombuffer(b"hellotherehellotherehellothere", "u1"), parameters={"__array__": "chars"}), parameters={"__array__": "string"}), valid_when=False)
     assert [x for x in awkward1.to_arrow(a)] == ["hello", None, "hello", "there", None, None]
+    assert awkward1.to_list(awkward1.from_arrow(awkward1.to_arrow(a))) == ["hello", None, "hello", "there", None, None]
+
+    a = awkward1.layout.ByteMaskedArray(awkward1.layout.Index8(numpy.array([False, True, False, False, True, True])), awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(numpy.array([0, 5, 10, 15, 20, 25, 30], "i8")), awkward1.layout.NumpyArray(numpy.frombuffer(b"hellotherehellotherehellothere", "u1"), parameters={"__array__": "chars"}), parameters={"__array__": "string"}), valid_when=False)
+    assert [x for x in awkward1.to_arrow(a)] == ["hello", None, "hello", "there", None, None]
+    assert awkward1.to_list(awkward1.from_arrow(awkward1.to_arrow(a))) == ["hello", None, "hello", "there", None, None]
+
+    a = awkward1.layout.ByteMaskedArray(awkward1.layout.Index8(numpy.array([False, True, False, False, True, True])), awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(numpy.array([0, 5, 10, 15, 20, 25, 30], "i8")), awkward1.layout.NumpyArray(numpy.frombuffer(b"hellotherehellotherehellothere", "u1"), parameters={"__array__": "bytes"}), parameters={"__array__": "bytestring"}), valid_when=False)
+    assert [x for x in awkward1.to_arrow(a)] == [b"hello", None, b"hello", b"there", None, None]
+    assert awkward1.to_list(awkward1.from_arrow(awkward1.to_arrow(a))) == [b"hello", None, b"hello", b"there", None, None]
 
     a = awkward1.layout.ByteMaskedArray(awkward1.layout.Index8(numpy.array([False, True])), awkward1.layout.ListOffsetArray32(awkward1.layout.Index32(numpy.array([0, 5, 10], "i4")), awkward1.layout.NumpyArray(numpy.frombuffer(b"hellothere", "u1"), parameters={"__array__": "chars"}), parameters={"__array__": "string"}), valid_when=False)
     assert [x for x in awkward1.to_arrow(a)] == ["hello", None]
@@ -475,3 +484,56 @@ def test_arrow_coverage100():
 
     a = awkward1.layout.UnmaskedArray(awkward1.layout.ListOffsetArray32(awkward1.layout.Index32(numpy.array([0, 5, 10], "i4")), awkward1.layout.NumpyArray(numpy.frombuffer(b"hellothere", "u1"))))
     assert [x for x in awkward1.to_arrow(a)] == [[104, 101, 108, 108, 111], [116, 104, 101, 114, 101]]
+
+    a = pyarrow.array(["one", "two", "three", "two", "two", "one", "three", "one"]).dictionary_encode()
+    b = awkward1.from_arrow(a, highlevel=False)
+    assert isinstance(b, awkward1._util.indexedtypes)
+    assert awkward1.to_list(b) == ["one", "two", "three", "two", "two", "one", "three", "one"]
+
+    a = awkward1.Array([[1.1, 2.2, 3.3], [], None, [4.4, 5.5]])
+    assert awkward1.to_list(awkward1.from_arrow(awkward1.to_arrow(a))) == [[1.1, 2.2, 3.3], [], None, [4.4, 5.5]]
+
+    a = awkward1.layout.ByteMaskedArray(awkward1.layout.Index8(numpy.array([False, False, False, True, True, False, False])), awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 999, 314, 4.4, 5.5])), valid_when=False)
+    assert awkward1.to_arrow(a).to_pylist() == [1.1, 2.2, 3.3, None, None, 4.4, 5.5]
+
+    a = awkward1.layout.ByteMaskedArray(awkward1.layout.Index8(numpy.array([False, False, False, True, True, False, False])), awkward1.from_iter([b"hello", b"", b"there", b"yuk", b"", b"o", b"hellothere"], highlevel=False), valid_when=False)
+    assert awkward1.to_arrow(a).to_pylist() == [b"hello", b"", b"there", None, None, b"o", b"hellothere"]
+
+    a = awkward1.layout.ByteMaskedArray(awkward1.layout.Index8([True, True, False, True]), awkward1.from_iter([[1.1, 2.2, 3.3], [], [999], [4.4, 5.5]], highlevel=False), valid_when=True)
+    assert awkward1.to_list(awkward1.from_arrow(awkward1.to_arrow(a))) == [[1.1, 2.2, 3.3], [], None, [4.4, 5.5]]
+
+    a = awkward1.from_iter([[1, 2, 3], [], [4, 5], 999, 123], highlevel=False)
+    assert awkward1.to_arrow(a).to_pylist() == [[1, 2, 3], [], [4, 5], 999, 123]
+    assert awkward1.to_list(awkward1.from_arrow(awkward1.to_arrow(a))) == [[1, 2, 3], [], [4, 5], 999, 123]
+
+    b = awkward1.layout.ByteMaskedArray(awkward1.layout.Index8(numpy.array([True, True, False, False, True])), a, valid_when=True)
+    assert awkward1.to_arrow(b).to_pylist() == [[1, 2, 3], [], None, None, 123]
+    assert awkward1.to_list(awkward1.from_arrow(awkward1.to_arrow(b))) == [[1, 2, 3], [], None, None, 123]
+
+    content1 = awkward1.from_iter([1.1, 2.2, 3.3, 4.4, 5.5], highlevel=False)
+    content2 = awkward1.layout.NumpyArray(numpy.array([], dtype=numpy.int32))
+    a = awkward1.layout.UnionArray8_32(awkward1.layout.Index8(numpy.array([0, 0, 0, 0, 0], "i1")), awkward1.layout.Index32(numpy.array([0, 1, 2, 3, 4], "i4")), [content1, content2])
+    assert awkward1.to_list(a) == [1.1, 2.2, 3.3, 4.4, 5.5]
+    assert awkward1.to_arrow(a).to_pylist() == [1.1, 2.2, 3.3, 4.4, 5.5]
+    assert awkward1.to_list(awkward1.from_arrow(awkward1.to_arrow(a))) == [1.1, 2.2, 3.3, 4.4, 5.5]
+
+    a = pyarrow.UnionArray.from_sparse(pyarrow.array([0, 0, 0, 0, 0], type=pyarrow.int8()), [pyarrow.array([0.0, 1.1, None, 3.3, 4.4]), pyarrow.array([True, None, False, True, False])])
+    assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == [0.0, 1.1, None, 3.3, 4.4]
+
+    uniontype = pyarrow.union([pyarrow.field("0", pyarrow.list_(pyarrow.float64())),
+                               pyarrow.field("1", pyarrow.float64())],
+                              "sparse",
+                              [0, 1])
+    a = pyarrow.Array.from_buffers(
+            uniontype,
+            5,
+            [pyarrow.py_buffer(numpy.array([3], "u1")),
+             pyarrow.py_buffer(numpy.array([0, 1, 0, 1, 1], "i1")),
+             None],
+            children=[pyarrow.array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]),
+                      pyarrow.array([0.0, 1.1, 2.2, 3.3, 4.4])])
+    assert a.to_pylist() == [[0.0, 1.1, 2.2], 1.1, None, None, None]
+    assert awkward1.to_list(awkward1.from_arrow(a)) == [[0.0, 1.1, 2.2], 1.1, None, None, None]
+
+    a = pyarrow.chunked_array([pyarrow.array([1.1, 2.2, 3.3, 4.4, 5.5])])
+    assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == [1.1, 2.2, 3.3, 4.4, 5.5]

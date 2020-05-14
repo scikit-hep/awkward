@@ -1183,7 +1183,7 @@ def to_arrow(array):
                 numpy_arr = numpy.packbits(
                               ready_to_pack.reshape(-1, 8)[:, ::-1].reshape(-1))
 
-            if (numpy_arr.ndim == 1):
+            if numpy_arr.ndim == 1:
                 if mask is not None:
                     return pyarrow.Array.from_buffers(
                         arrow_type,
@@ -1199,21 +1199,6 @@ def to_arrow(array):
 
         elif isinstance(layout, awkward1.layout.EmptyArray):
             return pyarrow.Array.from_buffers(pyarrow.float64(), 0, [None, None])
-
-        elif isinstance(layout, (awkward1.layout.IndexU8,
-                                 awkward1.layout.IndexU32,
-                                 awkward1.layout.Index8,
-                                 awkward1.layout.Index32,
-                                 awkward1.layout.Index64)):
-            # usually, we wouldn't consider Indexes as "arrays" for conversion,
-            # but this is used to good effect in the DictionaryArray (below)
-
-            numpy_arr = numpy.asarray(layout)
-            assert mask is None
-            return pyarrow.Array.from_buffers(
-                pyarrow.from_numpy_dtype(numpy_arr.dtype),
-                len(numpy_arr),
-                [None, pyarrow.py_buffer(numpy_arr)])
 
         elif isinstance(layout, awkward1.layout.ListOffsetArray32):
             offsets = numpy.asarray(layout.offsets, dtype=numpy.int32)
@@ -1251,7 +1236,7 @@ def to_arrow(array):
                         pyarrow.py_buffer(mask))
                 return arrow_arr
 
-            content_buffer = recurse(layout.content)
+            content_buffer = recurse(layout.content[:offsets[-1]])
             if mask is None:
                 arrow_arr = pyarrow.Array.from_buffers(
                     pyarrow.list_(content_buffer.type),
@@ -1305,7 +1290,7 @@ def to_arrow(array):
                         pyarrow.py_buffer(mask))
                 return arrow_arr
 
-            content_buffer = recurse(layout.content)
+            content_buffer = recurse(layout.content[:offsets[-1]])
             if mask is None:
                 arrow_arr = pyarrow.Array.from_buffers(
                     pyarrow.large_list(content_buffer.type),
@@ -1321,13 +1306,8 @@ def to_arrow(array):
             return arrow_arr
 
         elif isinstance(layout, awkward1.layout.RegularArray):
-            if mask is not None:
-                return recurse(
-                    layout.broadcast_tooffsets64(layout.compact_offsets64()),
-                    mask)
-            else:
-                return recurse(
-                    layout.broadcast_tooffsets64(layout.compact_offsets64()))
+            return recurse(layout.broadcast_tooffsets64(
+                               layout.compact_offsets64()), mask)
 
         elif isinstance(layout, (awkward1.layout.ListArray32,
                                  awkward1.layout.ListArrayU32,
@@ -1341,7 +1321,7 @@ def to_arrow(array):
                     layout.broadcast_tooffsets64(layout.compact_offsets64()))
 
         elif isinstance(layout, awkward1.layout.RecordArray):
-            values = [recurse(x) for x in layout.contents]
+            values = [recurse(x[:len(layout)]) for x in layout.contents]
 
             min_list_len = min(map(len, values))
 
@@ -1365,11 +1345,10 @@ def to_arrow(array):
                                  awkward1.layout.UnionArray8_64,
                                  awkward1.layout.UnionArray8_U32)):
             values = [recurse(x) for x in layout.contents]
-            types = pyarrow.union(
-                pyarrow.struct([pyarrow.field(str(i), values[i].type)
-                                  for i in range(len(values))]),
-                "dense",
-                list(range(len(values))))
+            types = pyarrow.union([pyarrow.field(str(i), values[i].type)
+                                     for i in range(len(values))],
+                                  "dense",
+                                  list(range(len(values))))
 
             if mask is not None:
                 return pyarrow.Array.from_buffers(
@@ -1377,7 +1356,8 @@ def to_arrow(array):
                     len(layout.tags),
                     [pyarrow.py_buffer(mask),
                      pyarrow.py_buffer(numpy.asarray(layout.tags)),
-                     pyarrow.py_buffer(numpy.asarray(layout.index))],
+                     pyarrow.py_buffer(numpy.asarray(layout.index)
+                                            .astype(numpy.int32))],
                     children=values)
             else:
                 return pyarrow.Array.from_buffers(
@@ -1385,18 +1365,26 @@ def to_arrow(array):
                     len(layout.tags),
                     [None,
                      pyarrow.py_buffer(numpy.asarray(layout.tags)),
-                     pyarrow.py_buffer(numpy.asarray(layout.index))],
+                     pyarrow.py_buffer(numpy.asarray(layout.index)
+                                            .astype(numpy.int32))],
                     children=values)
 
         elif isinstance(layout, (awkward1.layout.IndexedArray32,
                                  awkward1.layout.IndexedArrayU32,
                                  awkward1.layout.IndexedArray64)):
+            index = numpy.asarray(layout.index)
+            dictionary = recurse(layout.content)
             if mask is None:
-                return pyarrow.DictionaryArray.from_arrays(
-                    recurse(layout.index),
-                    recurse(layout.content))
+                return pyarrow.DictionaryArray.from_arrays(index,
+                                                           dictionary)
             else:
-                return recurse(layout.content[layout.index], mask)
+                bytemask = (numpy.unpackbits(~mask)
+                                 .reshape(-1, 8)[:, ::-1]
+                                 .reshape(-1)
+                                 .view(numpy.bool_))[:len(index)]
+                return pyarrow.DictionaryArray.from_arrays(index,
+                                                           dictionary,
+                                                           bytemask)
 
         elif isinstance(layout, (awkward1.layout.IndexedOptionArray32,
                                  awkward1.layout.IndexedOptionArray64)):
@@ -1437,7 +1425,7 @@ def to_arrow(array):
             if layout.valid_when is False:
                 bitmask = ~bitmask
 
-            return recurse(layout.content, bitmask).slice(
+            return recurse(layout.content[:len(layout)], bitmask).slice(
                 length=min(len(bitmask) * 8, len(layout.content)))
 
         elif isinstance(layout, awkward1.layout.ByteMaskedArray):
@@ -1449,10 +1437,13 @@ def to_arrow(array):
             bitmask = numpy.packbits(
                 bytemask.reshape(-1, 8)[:, ::-1].reshape(-1))
 
-            return recurse(layout.content, bitmask).slice(length=len(mask))
+            return recurse(layout.content[:len(layout)], bitmask).slice(length=len(mask))
 
         elif isinstance(layout, (awkward1.layout.UnmaskedArray)):
             return recurse(layout.content)
+
+        else:
+            raise TypeError("unrecognized array type: {0}".format(repr(layout)))
 
     return recurse(layout)
 
@@ -1465,13 +1456,10 @@ def from_arrow(obj, highlevel=True, behavior=None):
                                tpe.index_type,
                                buffers,
                                length)
-            if hasattr(tpe, "dictionary"):
-                content = recurse(tpe.dictionary)
-            elif array is not None:
+            if array is not None:
                 content = recurse(array.dictionary)
             else:
-                raise NotImplementedError(
-                    "no way to access Arrow dictionary inside of UnionArray")
+                raise NotImplementedError("Arrow dictionary inside of UnionArray")
 
             if isinstance(index, awkward1.layout.BitMaskedArray):
                 return awkward1.layout.BitMaskedArray(
@@ -1768,7 +1756,7 @@ def from_arrow(obj, highlevel=True, behavior=None):
                 return out
 
         else:
-            raise NotImplementedError(repr(tpe))
+            raise TypeError("unrecognized Arrow array type: {0}".format(repr(tpe)))
 
     def recurse(obj):
         if isinstance(obj, pyarrow.lib.Array):
@@ -1806,7 +1794,7 @@ def from_arrow(obj, highlevel=True, behavior=None):
                          chunks, highlevel=False)
 
         else:
-            raise NotImplementedError(type(obj))
+            raise TypeError("unrecognized Arrow type: {0}".format(repr(tpe)))
 
     if highlevel:
         return awkward1._util.wrap(recurse(obj), behavior)
