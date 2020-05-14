@@ -1209,16 +1209,11 @@ def to_arrow(array):
             # but this is used to good effect in the DictionaryArray (below)
 
             numpy_arr = numpy.asarray(layout)
-            if mask is not None:
-                return pyarrow.Array.from_buffers(
-                    pyarrow.from_numpy_dtype(numpy_arr.dtype),
-                    len(numpy_arr),
-                    [pyarrow.py_buffer(mask), pyarrow.py_buffer(numpy_arr)])
-            else:
-                return pyarrow.Array.from_buffers(
-                    pyarrow.from_numpy_dtype(numpy_arr.dtype),
-                    len(numpy_arr),
-                    [None, pyarrow.py_buffer(numpy_arr)])
+            assert mask is None
+            return pyarrow.Array.from_buffers(
+                pyarrow.from_numpy_dtype(numpy_arr.dtype),
+                len(numpy_arr),
+                [None, pyarrow.py_buffer(numpy_arr)])
 
         elif isinstance(layout, awkward1.layout.ListOffsetArray32):
             offsets = numpy.asarray(layout.offsets, dtype=numpy.int32)
@@ -1236,9 +1231,9 @@ def to_arrow(array):
                     arrow_arr = pyarrow.Array.from_buffers(
                         pyarrow.binary(),
                         len(offsets) - 1,
-                        [pyarrow.py_buffer(offsets),
-                         pyarrow.py_buffer(layout.content),
-                         pyarrow.py_buffer(mask)],
+                        [pyarrow.py_buffer(mask),
+                         pyarrow.py_buffer(offsets),
+                         pyarrow.py_buffer(layout.content)],
                         children=[])
                 return arrow_arr
 
@@ -1261,13 +1256,15 @@ def to_arrow(array):
                 arrow_arr = pyarrow.Array.from_buffers(
                     pyarrow.list_(content_buffer.type),
                     len(offsets) - 1,
-                    [None, pyarrow.py_buffer(offsets)],
+                    [None,
+                     pyarrow.py_buffer(offsets)],
                     children=[content_buffer])
             else:
                 arrow_arr = pyarrow.Array.from_buffers(
                     pyarrow.list_(content_buffer.type),
                     len(offsets) - 1,
-                    [pyarrow.py_buffer(mask), pyarrow.py_buffer(offsets)],
+                    [pyarrow.py_buffer(mask),
+                     pyarrow.py_buffer(offsets)],
                     children=[content_buffer])
             return arrow_arr
 

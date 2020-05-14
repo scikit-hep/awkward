@@ -428,3 +428,50 @@ def test_arrow_coverage100():
     a = awkward1.layout.ListOffsetArray32(awkward1.layout.Index32(numpy.array([0, 5, 10], "i4")), awkward1.layout.NumpyArray(numpy.frombuffer(b"hellothere", "u1"), parameters={"__array__": "bytes"}), parameters={"__array__": "bytestring"})
     assert [x for x in awkward1.to_arrow(a)] == [b"hello", b"there"]
 
+    a = awkward1.layout.ByteMaskedArray(awkward1.layout.Index8(numpy.array([False, True, False, False, True, True])), awkward1.layout.ListOffsetArray32(awkward1.layout.Index32(numpy.array([0, 5, 10, 15, 20, 25, 30], "i4")), awkward1.layout.NumpyArray(numpy.frombuffer(b"hellotherehellotherehellothere", "u1"), parameters={"__array__": "bytes"}), parameters={"__array__": "bytestring"}), valid_when=False)
+    assert [x for x in awkward1.to_arrow(a)] == [b"hello", None, b"hello", b"there", None, None]
+
+    a = awkward1.layout.ByteMaskedArray(awkward1.layout.Index8(numpy.array([False, True])), awkward1.layout.ListOffsetArray32(awkward1.layout.Index32(numpy.array([0, 5, 10], "i4")), awkward1.layout.NumpyArray(numpy.frombuffer(b"hellothere", "u1"), parameters={"__array__": "bytes"}), parameters={"__array__": "bytestring"}), valid_when=False)
+    assert [x for x in awkward1.to_arrow(a)] == [b"hello", None]
+
+    a = awkward1.layout.IndexedOptionArray32(awkward1.layout.Index32(numpy.array([-1, 1, -1, 0, 0, -1], "i4")), awkward1.layout.ListOffsetArray32(awkward1.layout.Index32(numpy.array([0, 5, 10], "i4")), awkward1.layout.NumpyArray(numpy.frombuffer(b"hellothere", "u1"), parameters={"__array__": "bytes"}), parameters={"__array__": "bytestring"}))
+    assert [x for x in awkward1.to_arrow(a)] == [None, b"there", None, b"hello", b"hello", None]
+
+    a = awkward1.layout.ListOffsetArray32(awkward1.layout.Index32(numpy.array([0, 5, 10], "i4")), awkward1.layout.NumpyArray(numpy.frombuffer(b"hellothere", "u1"), parameters={"__array__": "chars"}), parameters={"__array__": "string"})
+    assert [x for x in awkward1.to_arrow(a)] == ["hello", "there"]
+
+    a = awkward1.layout.ByteMaskedArray(awkward1.layout.Index8(numpy.array([False, True, False, False, True, True])), awkward1.layout.ListOffsetArray32(awkward1.layout.Index32(numpy.array([0, 5, 10, 15, 20, 25, 30], "i4")), awkward1.layout.NumpyArray(numpy.frombuffer(b"hellotherehellotherehellothere", "u1"), parameters={"__array__": "chars"}), parameters={"__array__": "string"}), valid_when=False)
+    assert [x for x in awkward1.to_arrow(a)] == ["hello", None, "hello", "there", None, None]
+
+    a = awkward1.layout.ByteMaskedArray(awkward1.layout.Index8(numpy.array([False, True])), awkward1.layout.ListOffsetArray32(awkward1.layout.Index32(numpy.array([0, 5, 10], "i4")), awkward1.layout.NumpyArray(numpy.frombuffer(b"hellothere", "u1"), parameters={"__array__": "chars"}), parameters={"__array__": "string"}), valid_when=False)
+    assert [x for x in awkward1.to_arrow(a)] == ["hello", None]
+
+    a = awkward1.layout.IndexedOptionArray32(awkward1.layout.Index32(numpy.array([-1, 1, -1, 0, 0, -1], "i4")), awkward1.layout.ListOffsetArray32(awkward1.layout.Index32(numpy.array([0, 5, 10], "i4")), awkward1.layout.NumpyArray(numpy.frombuffer(b"hellothere", "u1"), parameters={"__array__": "chars"}), parameters={"__array__": "string"}))
+    assert [x for x in awkward1.to_arrow(a)] == [None, "there", None, "hello", "hello", None]
+
+    a = awkward1.layout.ListOffsetArray32(awkward1.layout.Index32(numpy.array([0, 5, 10], "i4")), awkward1.layout.NumpyArray(numpy.frombuffer(b"hellothere", "u1")))
+    assert [x for x in awkward1.to_arrow(a)] == [[104, 101, 108, 108, 111], [116, 104, 101, 114, 101]]
+
+    a = awkward1.layout.ByteMaskedArray(awkward1.layout.Index8(numpy.array([False, True, False, False, True, True])), awkward1.layout.ListOffsetArray32(awkward1.layout.Index32(numpy.array([0, 5, 10, 15, 20, 25, 30], "i4")), awkward1.layout.NumpyArray(numpy.frombuffer(b"hellotherehellotherehellothere", "u1"))), valid_when=False)
+    assert [x for x in awkward1.to_arrow(a)] == [[104, 101, 108, 108, 111], None, [104, 101, 108, 108, 111], [116, 104, 101, 114, 101], None, None]
+
+    a = awkward1.layout.ByteMaskedArray(awkward1.layout.Index8(numpy.array([False, True])), awkward1.layout.ListOffsetArray32(awkward1.layout.Index32(numpy.array([0, 5, 10], "i4")), awkward1.layout.NumpyArray(numpy.frombuffer(b"hellothere", "u1"))), valid_when=False)
+    assert [x for x in awkward1.to_arrow(a)] == [[104, 101, 108, 108, 111], None]
+
+    a = awkward1.layout.IndexedOptionArray32(awkward1.layout.Index32(numpy.array([-1, 1, -1, 0, 0, -1], "i4")), awkward1.layout.ListOffsetArray32(awkward1.layout.Index32(numpy.array([0, 5, 10], "i4")), awkward1.layout.NumpyArray(numpy.frombuffer(b"hellothere", "u1"))))
+    assert [x for x in awkward1.to_arrow(a)] == [None, [116, 104, 101, 114, 101], None, [104, 101, 108, 108, 111], [104, 101, 108, 108, 111], None]
+
+    a = awkward1.layout.IndexedOptionArray32(awkward1.layout.Index32(numpy.array([-1, 1, -1, 0, 0, -1], "i4")), awkward1.layout.RegularArray(awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])), 3))
+    assert awkward1.to_arrow(a).to_pylist() == [None, [4.4, 5.5, 6.6], None, [1.1, 2.2, 3.3], [1.1, 2.2, 3.3], None]
+
+    a = awkward1.layout.IndexedOptionArray32(awkward1.layout.Index32(numpy.array([-1, 1, -1, 0, 0, -1, 1, -1], "i4")), awkward1.layout.RegularArray(awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])), 3))
+    assert awkward1.to_arrow(a).to_pylist() == [None, [4.4, 5.5, 6.6], None, [1.1, 2.2, 3.3], [1.1, 2.2, 3.3], None, [4.4, 5.5, 6.6], None]
+
+    a = awkward1.layout.IndexedOptionArray64(awkward1.layout.Index64(numpy.array([-1, 1, -1, 0, 0, -1, 1, -1], "i8")), awkward1.layout.RegularArray(awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])), 3))
+    assert awkward1.to_arrow(a).to_pylist() == [None, [4.4, 5.5, 6.6], None, [1.1, 2.2, 3.3], [1.1, 2.2, 3.3], None, [4.4, 5.5, 6.6], None]
+
+    a = awkward1.layout.ByteMaskedArray(awkward1.layout.Index8(numpy.array([True, True, True, True, False, False])), awkward1.layout.IndexedOptionArray32(awkward1.layout.Index32(numpy.array([-1, 1, -1, 0, 0, -1], "i4")), awkward1.layout.RegularArray(awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])), 3)), valid_when=True)
+    assert awkward1.to_arrow(a).to_pylist() == [None, [4.4, 5.5, 6.6], None, [1.1, 2.2, 3.3], None, None]
+
+    a = awkward1.layout.UnmaskedArray(awkward1.layout.ListOffsetArray32(awkward1.layout.Index32(numpy.array([0, 5, 10], "i4")), awkward1.layout.NumpyArray(numpy.frombuffer(b"hellothere", "u1"))))
+    assert [x for x in awkward1.to_arrow(a)] == [[104, 101, 108, 108, 111], [116, 104, 101, 114, 101]]

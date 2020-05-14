@@ -2202,7 +2202,7 @@ namespace awkward {
             contiguous_other.length());
     util::handle_error(err, classname(), nullptr);
 
-    std::vector<ssize_t> shape({ length() + other.get()->length() });
+    std::vector<ssize_t> shape({ (ssize_t)(length() + other.get()->length()) });
     std::vector<ssize_t> strides({ 1 });
     return std::make_shared<NumpyArray>(Identities::none(),
                                         parameters_,
