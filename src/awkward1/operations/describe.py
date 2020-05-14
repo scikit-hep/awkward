@@ -8,6 +8,7 @@ import numpy
 
 import awkward1.layout
 
+
 def is_valid(array, exception=False):
     """
     Args:
@@ -26,6 +27,7 @@ def is_valid(array, exception=False):
     out = validity_error(array, exception=exception)
     return out is None
 
+
 def validity_error(array, exception=False):
     """
     Args:
@@ -42,16 +44,20 @@ def validity_error(array, exception=False):
 
     See also #ak.is_valid.
     """
-    if isinstance(array, (awkward1.highlevel.Array,
-                          awkward1.highlevel.Record)):
+    if isinstance(array, (awkward1.highlevel.Array, awkward1.highlevel.Record)):
         return validity_error(array.layout, exception=exception)
 
     elif isinstance(array, awkward1.highlevel.ArrayBuilder):
         return validity_error(array.snapshot().layout, exception=exception)
 
-    elif isinstance(array, (awkward1.layout.Content,
-                            awkward1.layout.Record,
-                            awkward1.partition.PartitionedArray)):
+    elif isinstance(
+        array,
+        (
+            awkward1.layout.Content,
+            awkward1.layout.Record,
+            awkward1.partition.PartitionedArray,
+        ),
+    ):
         out = array.validityerror()
         if out is not None and exception:
             raise ValueError(out)
@@ -63,6 +69,7 @@ def validity_error(array, exception=False):
 
     else:
         raise TypeError("not an awkward array: {0}".format(repr(array)))
+
 
 def type(array):
     """
@@ -122,34 +129,33 @@ def type(array):
     elif isinstance(array, numbers.Real):
         return awkward1.types.PrimitiveType("float64")
 
-    elif isinstance(array,
-                    (numpy.int8,
-                     numpy.int16,
-                     numpy.int32,
-                     numpy.int64,
-                     numpy.uint8,
-                     numpy.uint16,
-                     numpy.uint32,
-                     numpy.uint64,
-                     numpy.float32,
-                     numpy.float64)):
-        return awkward1.types.PrimitiveType(
-                 type.dtype2primitive[array.dtype.type])
+    elif isinstance(
+        array,
+        (
+            numpy.int8,
+            numpy.int16,
+            numpy.int32,
+            numpy.int64,
+            numpy.uint8,
+            numpy.uint16,
+            numpy.uint32,
+            numpy.uint64,
+            numpy.float32,
+            numpy.float64,
+        ),
+    ):
+        return awkward1.types.PrimitiveType(type.dtype2primitive[array.dtype.type])
 
     elif isinstance(array, awkward1.highlevel.Array):
-        return awkward1._util.highlevel_type(array.layout,
-                                             array.behavior,
-                                             True)
+        return awkward1._util.highlevel_type(array.layout, array.behavior, True)
 
     elif isinstance(array, awkward1.highlevel.Record):
-        return awkward1._util.highlevel_type(array.layout,
-                                             array.behavior,
-                                             False)
+        return awkward1._util.highlevel_type(array.layout, array.behavior, False)
 
     elif isinstance(array, awkward1.highlevel.ArrayBuilder):
-        return awkward1._util.highlevel_type(array.snapshot().layout,
-                                             array.behavior,
-                                             True)
+        return awkward1._util.highlevel_type(
+            array.snapshot().layout, array.behavior, True
+        )
 
     elif isinstance(array, awkward1.layout.Record):
         return array.type(awkward1._util.typestrs(None))
@@ -158,8 +164,7 @@ def type(array):
         if len(array.shape) == 0:
             return type(array.reshape((1,))[0])
         else:
-            out = awkward1.types.PrimitiveType(
-                    type.dtype2primitive[array.dtype.type])
+            out = awkward1.types.PrimitiveType(type.dtype2primitive[array.dtype.type])
             for x in array.shape[-1:0:-1]:
                 out = awkward1.types.RegularType(out, x)
             return awkward1.types.ArrayType(out, array.shape[0])
@@ -167,25 +172,28 @@ def type(array):
     elif isinstance(array, awkward1.layout.ArrayBuilder):
         return array.type(awkward1._util.typestrs(None))
 
-    elif isinstance(array, (awkward1.layout.Content,
-                            awkward1.partition.PartitionedArray)):
+    elif isinstance(
+        array, (awkward1.layout.Content, awkward1.partition.PartitionedArray)
+    ):
         return array.type(awkward1._util.typestrs(None))
 
     else:
         raise TypeError("unrecognized array type: {0}".format(repr(array)))
 
+
 type.dtype2primitive = {
-    numpy.int8:    "int8",
-    numpy.int16:   "int16",
-    numpy.int32:   "int32",
-    numpy.int64:   "int64",
-    numpy.uint8:   "uint8",
-    numpy.uint16:  "uint16",
-    numpy.uint32:  "uint32",
-    numpy.uint64:  "uint64",
+    numpy.int8: "int8",
+    numpy.int16: "int16",
+    numpy.int32: "int32",
+    numpy.int64: "int64",
+    numpy.uint8: "uint8",
+    numpy.uint16: "uint16",
+    numpy.uint32: "uint32",
+    numpy.uint64: "uint64",
     numpy.float32: "float32",
     numpy.float64: "float64",
 }
+
 
 def parameters(array):
     """
@@ -200,13 +208,17 @@ def parameters(array):
     See #ak.Array and #ak.behavior for a more complete description of
     behaviors.
     """
-    if isinstance(array, (awkward1.highlevel.Array,
-                          awkward1.highlevel.Record)):
+    if isinstance(array, (awkward1.highlevel.Array, awkward1.highlevel.Record)):
         return array.layout.parameters
 
-    elif isinstance(array, (awkward1.layout.Content,
-                            awkward1.layout.Record,
-                            awkward1.partition.PartitionedArray)):
+    elif isinstance(
+        array,
+        (
+            awkward1.layout.Content,
+            awkward1.layout.Record,
+            awkward1.partition.PartitionedArray,
+        ),
+    ):
         return array.parameters
 
     elif isinstance(array, awkward1.highlevel.ArrayBuilder):
@@ -217,6 +229,7 @@ def parameters(array):
 
     else:
         return {}
+
 
 def keys(array):
     """
@@ -231,11 +244,14 @@ def keys(array):
     If the array contains neither tuples nor records, this returns an empty
     list.
     """
-    layout = awkward1.operations.convert.to_layout(array,
-                                                   allow_record=True,
-                                                   allow_other=False)
+    layout = awkward1.operations.convert.to_layout(
+        array, allow_record=True, allow_other=False
+    )
     return layout.keys()
 
-__all__ = [x for x in list(globals())
-             if not x.startswith("_") and
-             x not in ("numbers", "numpy", "awkward1")]
+
+__all__ = [
+    x
+    for x in list(globals())
+    if not x.startswith("_") and x not in ("numbers", "numpy", "awkward1")
+]

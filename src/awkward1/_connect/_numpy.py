@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 
 import sys
+
 try:
     from collections.abc import Iterable
 except ImportError:
@@ -14,6 +15,7 @@ import awkward1.layout
 import awkward1.operations.convert
 import awkward1._util
 
+
 def convert_to_array(layout, args, kwargs):
     out = awkward1.operations.convert.to_numpy(layout, allow_missing=False)
     if args == () and kwargs == {}:
@@ -21,7 +23,9 @@ def convert_to_array(layout, args, kwargs):
     else:
         return numpy.array(out, *args, **kwargs)
 
+
 implemented = {}
+
 
 def array_function(func, types, args, kwargs):
     function = implemented.get(func)
@@ -30,11 +34,14 @@ def array_function(func, types, args, kwargs):
     else:
         return function(*args, **kwargs)
 
+
 def implements(numpy_function):
     def decorator(function):
         implemented[numpy_function] = function
         return function
+
     return decorator
+
 
 def array_ufunc(ufunc, method, inputs, kwargs):
     import awkward1.highlevel
@@ -43,57 +50,67 @@ def array_ufunc(ufunc, method, inputs, kwargs):
         return NotImplemented
 
     behavior = awkward1._util.behaviorof(*inputs)
-    inputs = [awkward1.operations.convert.to_layout(x,
-                                                    allow_record=True,
-                                                    allow_other=True)
-                for x in inputs]
+    inputs = [
+        awkward1.operations.convert.to_layout(x, allow_record=True, allow_other=True)
+        for x in inputs
+    ]
 
     def adjust(custom, inputs, kwargs):
-        args = [awkward1._util.wrap(x, behavior)
-                    if isinstance(x, (awkward1.layout.Content,
-                                      awkward1.layout.Record))
-                    else x
-                    for x in inputs]
+        args = [
+            awkward1._util.wrap(x, behavior)
+            if isinstance(x, (awkward1.layout.Content, awkward1.layout.Record))
+            else x
+            for x in inputs
+        ]
         out = custom(*args, **kwargs)
         if not isinstance(out, tuple):
             out = (out,)
 
-        return tuple(x.layout
-                         if isinstance(x, (awkward1.highlevel.Array,
-                                           awkward1.highlevel.Record))
-                         else x
-                         for x in out)
+        return tuple(
+            x.layout
+            if isinstance(x, (awkward1.highlevel.Array, awkward1.highlevel.Record))
+            else x
+            for x in out
+        )
 
     def getfunction(inputs, depth):
         signature = (ufunc,) + tuple(
-                                 x.parameters.get("__record__")
-                                 if isinstance(x, awkward1.layout.Content)
-                                 else type(x)
-                                   for x in inputs)
+            x.parameters.get("__record__")
+            if isinstance(x, awkward1.layout.Content)
+            else type(x)
+            for x in inputs
+        )
         custom = awkward1._util.overload(behavior, signature)
         if custom is not None:
             return lambda: adjust(custom, inputs, kwargs)
 
-        signature = (ufunc,) + tuple(x.parameters.get("__array__")
-                                     if isinstance(x, awkward1.layout.Content)
-                                     else type(x)
-                                       for x in inputs)
+        signature = (ufunc,) + tuple(
+            x.parameters.get("__array__")
+            if isinstance(x, awkward1.layout.Content)
+            else type(x)
+            for x in inputs
+        )
         custom = awkward1._util.overload(behavior, signature)
         if custom is not None:
             return lambda: adjust(custom, inputs, kwargs)
 
-        if all(isinstance(x, awkward1.layout.NumpyArray) or
-               not isinstance(x, (awkward1.layout.Content,
-                                  awkward1.partition.PartitionedArray))
-                 for x in inputs):
-            return lambda: (awkward1.layout.NumpyArray(
-                              getattr(ufunc, method)(*inputs, **kwargs)),)
+        if all(
+            isinstance(x, awkward1.layout.NumpyArray)
+            or not isinstance(
+                x, (awkward1.layout.Content, awkward1.partition.PartitionedArray)
+            )
+            for x in inputs
+        ):
+            return lambda: (
+                awkward1.layout.NumpyArray(getattr(ufunc, method)(*inputs, **kwargs)),
+            )
 
         return None
 
     out = awkward1._util.broadcast_and_apply(inputs, getfunction, behavior)
     assert isinstance(out, tuple) and len(out) == 1
     return awkward1._util.wrap(out[0], behavior)
+
 
 try:
     NDArrayOperatorsMixin = numpy.lib.mixins.NDArrayOperatorsMixin
@@ -112,6 +129,7 @@ except AttributeError:
             if _disables_array_ufunc(other):
                 return NotImplemented
             return ufunc(self, other)
+
         func.__name__ = "__{}__".format(name)
         return func
 
@@ -120,23 +138,28 @@ except AttributeError:
             if _disables_array_ufunc(other):
                 return NotImplemented
             return ufunc(other, self)
+
         func.__name__ = "__r{}__".format(name)
         return func
 
     def _inplace_binary_method(ufunc, name):
         def func(self, other):
             return ufunc(self, other, out=(self,))
+
         func.__name__ = "__i{}__".format(name)
         return func
 
     def _numeric_methods(ufunc, name):
-        return (_binary_method(ufunc, name),
-                _reflected_binary_method(ufunc, name),
-                _inplace_binary_method(ufunc, name))
+        return (
+            _binary_method(ufunc, name),
+            _reflected_binary_method(ufunc, name),
+            _inplace_binary_method(ufunc, name),
+        )
 
     def _unary_method(ufunc, name):
         def func(self):
             return ufunc(self)
+
         func.__name__ = "__{}__".format(name)
         return func
 
@@ -154,18 +177,20 @@ except AttributeError:
         if sys.version_info.major < 3:
             __div__, __rdiv__, __idiv__ = _numeric_methods(um.divide, "div")
         __truediv__, __rtruediv__, __itruediv__ = _numeric_methods(
-            um.true_divide, "truediv")
+            um.true_divide, "truediv"
+        )
         __floordiv__, __rfloordiv__, __ifloordiv__ = _numeric_methods(
-            um.floor_divide, "floordiv")
+            um.floor_divide, "floordiv"
+        )
         __mod__, __rmod__, __imod__ = _numeric_methods(um.remainder, "mod")
         if hasattr(um, "divmod"):
             __divmod__ = _binary_method(um.divmod, "divmod")
             __rdivmod__ = _reflected_binary_method(um.divmod, "divmod")
         __pow__, __rpow__, __ipow__ = _numeric_methods(um.power, "pow")
-        __lshift__, __rlshift__, __ilshift__ = _numeric_methods(
-            um.left_shift, "lshift")
+        __lshift__, __rlshift__, __ilshift__ = _numeric_methods(um.left_shift, "lshift")
         __rshift__, __rrshift__, __irshift__ = _numeric_methods(
-            um.right_shift, "rshift")
+            um.right_shift, "rshift"
+        )
         __and__, __rand__, __iand__ = _numeric_methods(um.bitwise_and, "and")
         __xor__, __rxor__, __ixor__ = _numeric_methods(um.bitwise_xor, "xor")
         __or__, __ror__, __ior__ = _numeric_methods(um.bitwise_or, "or")

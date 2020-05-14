@@ -9,13 +9,16 @@ import numpy
 import awkward1.highlevel
 import awkward1.layout
 
+
 def register_and_check(name):
     # Numba 0.49 rearranged its internal classes; only pre or post-0.49 can
     # be supported.
-    if (distutils.version.LooseVersion(numba.__version__) <
-        distutils.version.LooseVersion("0.49")):
+    if distutils.version.LooseVersion(
+        numba.__version__
+    ) < distutils.version.LooseVersion("0.49"):
         raise ImportError(name + " can only be used with Numba 0.49 or later")
     register()
+
 
 def register():
     import awkward1._connect._numba.arrayview
@@ -23,30 +26,31 @@ def register():
     import awkward1._connect._numba.builder
 
     n = awkward1.numba
-    n.ArrayViewType       = awkward1._connect._numba.arrayview.ArrayViewType
-    n.ArrayViewModel      = awkward1._connect._numba.arrayview.ArrayViewModel
-    n.RecordViewType      = awkward1._connect._numba.arrayview.RecordViewType
-    n.RecordViewModel     = awkward1._connect._numba.arrayview.RecordViewModel
-    n.ContentType         = awkward1._connect._numba.layout.ContentType
-    n.NumpyArrayType      = awkward1._connect._numba.layout.NumpyArrayType
-    n.RegularArrayType    = awkward1._connect._numba.layout.RegularArrayType
-    n.ListArrayType       = awkward1._connect._numba.layout.ListArrayType
-    n.IndexedArrayType    = awkward1._connect._numba.layout.IndexedArrayType
-    n.IndexedOptionArrayType = \
-                         awkward1._connect._numba.layout.IndexedOptionArrayType
+    n.ArrayViewType = awkward1._connect._numba.arrayview.ArrayViewType
+    n.ArrayViewModel = awkward1._connect._numba.arrayview.ArrayViewModel
+    n.RecordViewType = awkward1._connect._numba.arrayview.RecordViewType
+    n.RecordViewModel = awkward1._connect._numba.arrayview.RecordViewModel
+    n.ContentType = awkward1._connect._numba.layout.ContentType
+    n.NumpyArrayType = awkward1._connect._numba.layout.NumpyArrayType
+    n.RegularArrayType = awkward1._connect._numba.layout.RegularArrayType
+    n.ListArrayType = awkward1._connect._numba.layout.ListArrayType
+    n.IndexedArrayType = awkward1._connect._numba.layout.IndexedArrayType
+    n.IndexedOptionArrayType = awkward1._connect._numba.layout.IndexedOptionArrayType
     n.ByteMaskedArrayType = awkward1._connect._numba.layout.ByteMaskedArrayType
-    n.BitMaskedArrayType  = awkward1._connect._numba.layout.BitMaskedArrayType
-    n.UnmaskedArrayType   = awkward1._connect._numba.layout.UnmaskedArrayType
-    n.RecordArrayType     = awkward1._connect._numba.layout.RecordArrayType
-    n.UnionArrayType      = awkward1._connect._numba.layout.UnionArrayType
-    n.ArrayBuilderType    = awkward1._connect._numba.builder.ArrayBuilderType
-    n.ArrayBuilderModel   = awkward1._connect._numba.builder.ArrayBuilderModel
+    n.BitMaskedArrayType = awkward1._connect._numba.layout.BitMaskedArrayType
+    n.UnmaskedArrayType = awkward1._connect._numba.layout.UnmaskedArrayType
+    n.RecordArrayType = awkward1._connect._numba.layout.RecordArrayType
+    n.UnionArrayType = awkward1._connect._numba.layout.UnionArrayType
+    n.ArrayBuilderType = awkward1._connect._numba.builder.ArrayBuilderType
+    n.ArrayBuilderModel = awkward1._connect._numba.builder.ArrayBuilderModel
+
 
 try:
     import numba
 except ImportError:
     pass
 else:
+
     @numba.extending.typeof_impl.register(awkward1.highlevel.Array)
     def typeof_Array(obj, c):
         return obj.numba_type
@@ -59,8 +63,10 @@ else:
     def typeof_ArrayBuilder(obj, c):
         return obj.numba_type
 
+
 def repr_behavior(behavior):
     return repr(behavior)
+
 
 def castint(context, builder, fromtype, totype, val):
     import llvmlite.ir.types
@@ -75,8 +81,7 @@ def castint(context, builder, fromtype, totype, val):
         elif fromtype.width == 64:
             fromtype = numba.int64
     if not isinstance(fromtype, numba.types.Integer):
-        raise AssertionError(
-                "unrecognized integer type: {0}".format(repr(fromtype)))
+        raise AssertionError("unrecognized integer type: {0}".format(repr(fromtype)))
 
     if fromtype.bitwidth < totype.bitwidth:
         if fromtype.signed:
