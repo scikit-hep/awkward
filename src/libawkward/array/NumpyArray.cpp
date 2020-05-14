@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #include <iomanip>
 #include <numeric>
@@ -1596,6 +1596,19 @@ namespace awkward {
       throw std::invalid_argument("cannot merge Numpy scalars");
     }
 
+    if ((parameter_equals("__array__", "\"byte\"")  ||
+         parameter_equals("__array__", "\"char\""))  &&
+        (other.get()->parameter_equals("__array__", "\"byte\"")  ||
+         other.get()->parameter_equals("__array__", "\"char\""))) {
+      if (std::shared_ptr<NumpyArray> othernumpy =
+            std::dynamic_pointer_cast<NumpyArray>(other)) {
+        if (ndim() == 1  &&  othernumpy.get()->ndim() == 1  &&
+            itemsize() == 1  &&  othernumpy.get()->itemsize() == 1) {
+          return merge_bytes(othernumpy);
+        }
+      }
+    }
+
     NumpyArray contiguous_self = contiguous();
     if (NumpyArray* rawother = dynamic_cast<NumpyArray*>(other.get())) {
       if (ndim() != rawother->ndim()) {
@@ -2146,7 +2159,7 @@ namespace awkward {
       }
 
       return std::make_shared<NumpyArray>(Identities::none(),
-                                          util::Parameters(),
+                                          parameters_,
                                           ptr,
                                           shape,
                                           strides,
@@ -2160,6 +2173,45 @@ namespace awkward {
         std::string("cannot merge ") + classname() + std::string(" with ")
         + other.get()->classname());
     }
+  }
+
+  const ContentPtr
+  NumpyArray::merge_bytes(const std::shared_ptr<NumpyArray>& other) const {
+    NumpyArray contiguous_self = contiguous();
+    NumpyArray contiguous_other = other.get()->contiguous();
+
+    std::shared_ptr<void> ptr(
+      new uint8_t[(size_t)(length() + other.get()->length())],
+      util::array_deleter<uint8_t>());
+
+    struct Error err;
+
+    err = awkward_numpyarray_fill_tobyte_frombyte(
+            reinterpret_cast<int8_t*>(ptr.get()),
+            0,
+            reinterpret_cast<int8_t*>(contiguous_self.ptr().get()),
+            (int64_t)contiguous_self.byteoffset(),
+            contiguous_self.length());
+    util::handle_error(err, classname(), nullptr);
+
+    err = awkward_numpyarray_fill_tobyte_frombyte(
+            reinterpret_cast<int8_t*>(ptr.get()),
+            length(),
+            reinterpret_cast<int8_t*>(contiguous_other.ptr().get()),
+            (int64_t)contiguous_other.byteoffset(),
+            contiguous_other.length());
+    util::handle_error(err, classname(), nullptr);
+
+    std::vector<ssize_t> shape({ (ssize_t)(length() + other.get()->length()) });
+    std::vector<ssize_t> strides({ 1 });
+    return std::make_shared<NumpyArray>(Identities::none(),
+                                        parameters_,
+                                        ptr,
+                                        shape,
+                                        strides,
+                                        0,
+                                        1,
+                                        format_);
   }
 
   const SliceItemPtr

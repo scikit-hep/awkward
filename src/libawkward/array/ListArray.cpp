@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #include <sstream>
 #include <type_traits>
@@ -1145,7 +1145,7 @@ namespace awkward {
     }
 
     return std::make_shared<ListArray64>(Identities::none(),
-                                         util::Parameters(),
+                                         parameters_,
                                          starts,
                                          stops,
                                          content);
