@@ -341,7 +341,7 @@ class PartitionedArray(object):
             else:
                 out = out.merge(x)
             if isinstance(out, awkward1._util.uniontypes):
-                out = out.simplify(mergebool=mergebool)
+                out = out.simplify(mergebool=False)
         return out
 
     def repartition(self, *args, **kwargs):
@@ -363,7 +363,7 @@ class PartitionedArray(object):
             )
 
         elif isinstance(where, str) or (
-            awkward1._util.py27 and isinstance(where, unicode)
+            awkward1._util.py27 and isinstance(where, awkward1._util.unicode)
         ):
             return self.replace_partitions([x[where] for x in self.partitions])
 
@@ -374,7 +374,10 @@ class PartitionedArray(object):
             isinstance(where, Iterable)
             and len(where) > 0
             and all(
-                (isinstance(x, str) or (awkward1._util.py27 and isinstance(x, unicode)))
+                (
+                    isinstance(x, str)
+                    or (awkward1._util.py27 and isinstance(x, awkward1._util.unicode))
+                )
                 for x in where
             )
         ):
@@ -388,7 +391,6 @@ class PartitionedArray(object):
             if not isinstance(head, bool) and isinstance(
                 head, (numbers.Integral, numpy.integer)
             ):
-                original_head = head
                 if head < 0:
                     head += len(self)
                 if not 0 <= head < len(self):
@@ -410,14 +412,20 @@ class PartitionedArray(object):
                 (head is Ellipsis)
                 or (
                     isinstance(where, str)
-                    or (awkward1._util.py27 and isinstance(where, unicode))
+                    or (
+                        awkward1._util.py27
+                        and isinstance(where, awkward1._util.unicode)
+                    )
                 )
                 or (
                     isinstance(head, Iterable)
                     and all(
                         (
                             isinstance(x, str)
-                            or (awkward1._util.py27 and isinstance(x, unicode))
+                            or (
+                                awkward1._util.py27
+                                and isinstance(x, awkward1._util.unicode)
+                            )
                         )
                         for x in head
                     )

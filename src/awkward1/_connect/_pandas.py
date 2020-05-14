@@ -332,10 +332,9 @@ def dfs(array, levelname=lambda i: "sub" * i + "entry", anonymous="values"):
                         col_names,
                     )
                 ]
-            except:
+            except Exception:
                 return [(layout, row_arrays, col_names)]
 
-    behavior = awkward1._util.behaviorof(array)
     layout = awkward1.operations.convert.to_layout(
         array, allow_record=True, allow_other=False
     )

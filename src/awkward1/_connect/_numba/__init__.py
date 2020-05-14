@@ -4,8 +4,6 @@ from __future__ import absolute_import
 
 import distutils.version
 
-import numpy
-
 import awkward1.highlevel
 import awkward1.layout
 

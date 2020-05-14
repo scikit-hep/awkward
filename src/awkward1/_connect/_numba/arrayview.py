@@ -569,7 +569,7 @@ def lower_getitem_range(context, builder, sig, args):
     operator.getitem, ArrayViewType, numba.types.StringLiteral
 )
 def lower_getitem_field(context, builder, sig, args):
-    rettype, (viewtype, wheretype) = sig.return_type, sig.args
+    _, (viewtype, wheretype) = sig.return_type, sig.args
     viewval, whereval = args
     return viewtype.type.lower_getitem_field(
         context, builder, viewtype, viewval, wheretype.literal_value
@@ -803,7 +803,7 @@ class type_getitem_record(numba.core.typing.templates.AbstractTemplate):
     operator.getitem, RecordViewType, numba.types.StringLiteral
 )
 def lower_getitem_field_record(context, builder, sig, args):
-    rettype, (recordviewtype, wheretype) = sig.return_type, sig.args
+    _, (recordviewtype, wheretype) = sig.return_type, sig.args
     recordviewval, whereval = args
     return recordviewtype.arrayviewtype.type.lower_getitem_field_record(
         context, builder, recordviewtype, recordviewval, wheretype.literal_value
@@ -1308,7 +1308,7 @@ def lower_getitem_at_partitioned(context, builder, sig, args):
     operator.getitem, PartitionedViewType, numba.types.slice2_type
 )
 def lower_getitem_range_partitioned(context, builder, sig, args):
-    rettype, (partviewtype, wheretype) = sig.return_type, sig.args
+    _, (partviewtype, wheretype) = sig.return_type, sig.args
     partviewval, whereval = args
 
     whereproxy = context.make_helper(builder, wheretype, whereval)
@@ -1370,7 +1370,7 @@ def lower_getitem_range_partitioned(context, builder, sig, args):
     operator.getitem, PartitionedViewType, numba.types.StringLiteral
 )
 def lower_getitem_field_partitioned(context, builder, sig, args):
-    rettype, (partviewtype, wheretype) = sig.return_type, sig.args
+    _, (partviewtype, _) = sig.return_type, sig.args
     partviewval, whereval = args
 
     if context.enable_nrt:

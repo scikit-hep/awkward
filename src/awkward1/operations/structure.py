@@ -1158,7 +1158,7 @@ def fill_none(array, value, highlevel=True):
     else:
         if isinstance(value, Iterable) and not (
             isinstance(value, (str, bytes))
-            or (awkward1._util.py27 and isinstance(value, unicode))
+            or (awkward1._util.py27 and isinstance(value, awkward1._util.unicode))
         ):
             valuelayout = awkward1.operations.convert.to_layout(
                 value, allow_record=True, allow_other=False
@@ -2272,7 +2272,7 @@ def virtual(
         form = awkward1.forms.Form.fromjson('"' + form + '"')
 
     elif isinstance(form, (str, bytes)) or (
-        awkward1._util.py27 and isinstance(form, unicode)
+        awkward1._util.py27 and isinstance(form, awkward1._util.unicode)
     ):
         form = awkward1.forms.Form.fromjson(form)
 

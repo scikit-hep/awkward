@@ -2,7 +2,6 @@
 
 from __future__ import absolute_import
 
-import os
 import ctypes
 import ctypes.util
 import platform

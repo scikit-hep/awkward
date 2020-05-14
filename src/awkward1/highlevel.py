@@ -6,10 +6,8 @@ import re
 import keyword
 
 try:
-    from collections.abc import Sequence
     from collections.abc import Iterable
-except:
-    from collections import Sequence
+except ImportError:
     from collections import Iterable
 
 import numpy
@@ -1166,7 +1164,7 @@ class Array(
                 return awkward1._connect._numpy.convert_to_array(
                     self._layout, args, kwargs
                 )
-            except:
+            except Exception:
                 out = numpy.empty(len(self._layout), dtype="O")
                 for i, x in enumerate(self._layout):
                     out[i] = awkward1._util.wrap(x, self._behavior)
@@ -1262,7 +1260,7 @@ class Array(
         See [Numba documentation](https://numba.pydata.org/numba-doc/dev/reference/types.html)
         on types and signatures.
         """
-        import numba
+        import numba  # noqa: F401
         import awkward1._connect._numba
 
         awkward1._connect._numba.register_and_check("ak.Array")
@@ -1779,7 +1777,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         See [Numba documentation](https://numba.pydata.org/numba-doc/dev/reference/types.html)
         on types and signatures.
         """
-        import numba
+        import numba  # noqa: F401
         import awkward1._connect._numba
 
         awkward1._connect._numba.register_and_check("ak.Record")
@@ -2067,7 +2065,7 @@ class ArrayBuilder(object):
         See [Numba documentation](https://numba.pydata.org/numba-doc/dev/reference/types.html)
         on types and signatures.
         """
-        import numba
+        import numba  # noqa: F401
         import awkward1._connect._numba.builder
 
         awkward1._connect._numba.register_and_check("ak.ArrayBuilder")

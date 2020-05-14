@@ -493,7 +493,7 @@ def lower_beginrecord(context, builder, sig, args):
 @numba.extending.lower_builtin(
     "begin_record", ArrayBuilderType, numba.types.StringLiteral
 )
-def lower_beginrecord(context, builder, sig, args):
+def lower_beginrecord_field(context, builder, sig, args):
     arraybuildertype, nametype = sig.args
     arraybuilderval, nameval = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)

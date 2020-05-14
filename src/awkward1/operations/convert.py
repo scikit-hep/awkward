@@ -2,7 +2,6 @@
 
 from __future__ import absolute_import
 
-import sys
 import numbers
 import json
 import collections
@@ -117,7 +116,7 @@ def to_numpy(array, allow_missing=True):
     if isinstance(array, (bool, str, bytes, numbers.Number)):
         return numpy.array([array])[0]
 
-    elif sys.version_info[0] < 3 and isinstance(array, unicode):
+    elif awkward1._util.py27 and isinstance(array, awkward1._util.unicode):
         return numpy.array([array])[0]
 
     elif isinstance(array, numpy.ndarray):
@@ -179,14 +178,14 @@ def to_numpy(array, allow_missing=True):
         if any(isinstance(x, numpy.ma.MaskedArray) for x in contents):
             try:
                 out = numpy.ma.concatenate(contents)
-            except:
+            except Exception:
                 raise ValueError(
                     "cannot convert {0} into numpy.ma.MaskedArray".format(array)
                 )
         else:
             try:
                 out = numpy.concatenate(contents)
-            except:
+            except Exception:
                 raise ValueError("cannot convert {0} into numpy.ndarray".format(array))
 
         tags = numpy.asarray(array.tags)
@@ -359,7 +358,7 @@ def to_list(array):
     if array is None or isinstance(array, (bool, str, bytes, numbers.Number)):
         return array
 
-    elif sys.version_info[0] < 3 and isinstance(array, unicode):
+    elif awkward1._util.py27 and isinstance(array, awkward1._util.unicode):
         return array
 
     elif isinstance(array, numpy.ndarray):
@@ -491,7 +490,7 @@ def to_json(array, destination=None, pretty=False, maxdecimals=None, buffersize=
     elif isinstance(array, bytes):
         return json.dumps(array.decode("utf-8", "surrogateescape"))
 
-    elif sys.version_info[0] < 3 and isinstance(array, unicode):
+    elif awkward1._util.py27 and isinstance(array, awkward1._util.unicode):
         return json.dumps(array)
 
     elif isinstance(array, numpy.ndarray):
@@ -737,7 +736,7 @@ def from_awkward0(
 
         elif isinstance(array, awkward0.BitMaskedArray):
             # mask, content, maskedwhen, lsborder
-            mask = awkward.layout.IndexU8(array.mask.view(numpy.uint8))
+            mask = awkward1.layout.IndexU8(array.mask.view(numpy.uint8))
             return awkward1.layout.BitMaskedArray(
                 mask,
                 recurse(array.content, level + 1),
@@ -1142,7 +1141,7 @@ def to_layout(
             )
         else:
             out = awkward1.layout.ByteMaskedArray(
-                awkwrad1.layout.Index8(mask.reshape(-1)),
+                awkward1.layout.Index8(mask.reshape(-1)),
                 awkward1.layout.NumpyArray(data.reshape(-1)),
             )
         for size in array.shape[:0:-1]:
@@ -1158,7 +1157,7 @@ def to_layout(
         return out
 
     elif isinstance(array, (str, bytes)) or (
-        awkward1._util.py27 and isinstance(array, unicode)
+        awkward1._util.py27 and isinstance(array, awkward1._util.unicode)
     ):
         return from_iter([array], highlevel=False)
 
@@ -1901,7 +1900,6 @@ def from_arrow(array, highlevel=True, behavior=None):
 
         elif isinstance(obj, pyarrow.lib.Table):
             chunks = []
-            chunksizes = []
             for batch in obj.to_batches():
                 chunk = recurse(batch)
                 if len(chunk) > 0:
@@ -1914,7 +1912,7 @@ def from_arrow(array, highlevel=True, behavior=None):
                 )
 
         else:
-            raise TypeError("unrecognized Arrow type: {0}".format(repr(tpe)))
+            raise TypeError("unrecognized Arrow type: {0}".format(type(obj)))
 
     if highlevel:
         return awkward1._util.wrap(recurse(array), behavior)

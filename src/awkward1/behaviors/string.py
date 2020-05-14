@@ -2,8 +2,6 @@
 
 from __future__ import absolute_import
 
-import codecs
-
 import numpy
 
 import awkward1.highlevel

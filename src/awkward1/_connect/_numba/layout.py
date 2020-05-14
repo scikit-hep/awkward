@@ -736,7 +736,9 @@ class ListArrayType(ContentType):
         elif self.indextype.dtype.bitwidth == 64 and self.indextype.dtype.signed:
             return awkward1.layout.ListArray64
         else:
-            raise AssertionError("no ListArray* type for array: {0}".format(indextype))
+            raise AssertionError(
+                "no ListArray* type for array: {0}".format(self.indextype)
+            )
 
     def tolayout(self, lookup, pos, fields):
         starts = self.IndexOf(self.indextype)(

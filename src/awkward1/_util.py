@@ -3,7 +3,6 @@
 from __future__ import absolute_import
 
 import inspect
-import numbers
 import re
 import sys
 import os
@@ -21,6 +20,12 @@ import awkward1.partition
 py27 = sys.version_info[0] < 3
 py35 = sys.version_info[0] == 3 and sys.version_info[1] <= 5
 win = os.name == "nt"
+
+# to silence flake8 F821 errors
+if py27:
+    unicode = eval("unicode")
+else:
+    unicode = None
 
 virtualtypes = (awkward1.layout.VirtualArray,)
 
@@ -1249,27 +1254,34 @@ def minimally_touching_string(limit_length, layout, behavior):
         backward(layout, "", brackets=False, wrap=False, stop=halfway - 1)
     )
     while True:
-        l = next(leftgen)
-        if l is not None:
+        lft = next(leftgen)
+        rgt = next(rightgen)
+
+        if lft is not None:
             if (
-                leftlen + rightlen + len(l) + (2 if l is None and r is None else 6)
+                leftlen
+                + rightlen
+                + len(lft)
+                + (2 if lft is None and rgt is None else 6)
                 > limit_length
             ):
                 break
-            left.append(l)
-            leftlen += len(l)
+            left.append(lft)
+            leftlen += len(lft)
 
-        r = next(rightgen)
-        if r is not None:
+        if rgt is not None:
             if (
-                leftlen + rightlen + len(r) + (2 if l is None and r is None else 6)
+                leftlen
+                + rightlen
+                + len(rgt)
+                + (2 if lft is None and rgt is None else 6)
                 > limit_length
             ):
                 break
-            right.append(r)
-            rightlen += len(r)
+            right.append(rgt)
+            rightlen += len(rgt)
 
-        if l is None and r is None:
+        if lft is None and rgt is None:
             break
 
     while len(left) > 1 and (
@@ -1280,7 +1292,7 @@ def minimally_touching_string(limit_length, layout, behavior):
         or left[-1] == ", "
     ):
         left.pop()
-        l = ""
+        lft = ""
     while len(right) > 1 and (
         right[-1] == "]"
         or right[-1] == "], "
@@ -1289,8 +1301,8 @@ def minimally_touching_string(limit_length, layout, behavior):
         or right[-1] == ", "
     ):
         right.pop()
-        r = ""
-    if l is None and r is None:
+        rgt = ""
+    if lft is None and rgt is None:
         if left == ["["]:
             return "[" + "".join(reversed(right)).lstrip(" ")
         else:

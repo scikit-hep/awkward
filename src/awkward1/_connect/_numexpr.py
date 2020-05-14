@@ -21,7 +21,7 @@ def getArguments(names, local_dict=None, global_dict=None):
         if global_dict is None:
             global_dict = frame_globals
 
-        clear_local_dict = clear_local_dict and not frame_globals is local_dict
+        clear_local_dict = clear_local_dict and frame_globals is not local_dict
 
         arguments = []
         for name in names:
@@ -90,7 +90,7 @@ def re_evaluate(local_dict=None):
     import numexpr
 
     try:
-        compiled_ex = numexpr.necompiler._numexpr_last["ex"]
+        compiled_ex = numexpr.necompiler._numexpr_last["ex"]  # noqa: F841
     except KeyError:
         raise RuntimeError("not a previous evaluate() execution found")
     names = numexpr.necompiler._numexpr_last["argnames"]
