@@ -32,7 +32,7 @@ add_definitions(-DVERSION_INFO="${VERSION_INFO}")
 project(awkward LANGUAGES CXX VERSION ${VERSION_INFO})
 
 # Three tiers: cpu-kernels (extern "C" interface), libawkward (C++), and Python modules.
-file(GLOB CPU_KERNEL_SOURCES CONFIGURE_DEPENDS "src/cpu-kernels/*.cpp" src/cpu-kernels/cpu_kernels.cpp src/gpu-kernels/gpu_kernels.cpp)
+file(GLOB CPU_KERNEL_SOURCES CONFIGURE_DEPENDS "src/cpu-kernels/*.cpp" src/gpu-kernels/identities.cpp src/kernels/kernel.cpp)
 file(GLOB KERNEL_SOURCES CONFIGURE_DEPENDS "src/kernels/*.cpp")
 file(GLOB_RECURSE LIBAWKWARD_SOURCES CONFIGURE_DEPENDS "src/libawkward/*.cpp")
 
@@ -81,7 +81,7 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
 endif()
 add_library(awkward-static STATIC $<TARGET_OBJECTS:awkward-objects>)
 set_property(TARGET awkward-static PROPERTY POSITION_INDEPENDENT_CODE ON)
-add_library(awkward        SHARED $<TARGET_OBJECTS:awkward-objects> include/awkward/cpu-kernels/cpu_kernels.h include/awkward/kernels/kernel.h include/awkward/gpu-kernels/gpu_kernels.h src/gpu-kernels/gpu_kernels.cpp)
+add_library(awkward        SHARED $<TARGET_OBJECTS:awkward-objects> include/awkward/kernels/kernel.h src/kernels/kernel.cpp src/gpu-kernels/identities.cpp include/awkward/gpu-kernels/identities.h)
 target_link_libraries(awkward-static PRIVATE awkward-cpu-kernels-static)
 target_link_libraries(awkward        PRIVATE awkward-cpu-kernels-static)
 set_target_properties(awkward-objects PROPERTIES CXX_VISIBILITY_PRESET hidden)
