@@ -29,19 +29,29 @@ checked_version = False
 
 
 def get_pandas():
-    import pandas
-
     global checked_version
-    if not checked_version:
-        if distutils.version.LooseVersion(
+    try:
+        import pandas
+    except ImportError:
+        raise ImportError(
+            """install the 'pandas' package with:
+
+    pip install pandas --upgrade
+
+or
+
+    conda install pandas"""
+        )
+    else:
+        if not checked_version and distutils.version.LooseVersion(
             pandas.__version__
-        ) < distutils.version.LooseVersion("0.24.0"):
+        ) < distutils.version.LooseVersion("0.24"):
             raise ImportError(
-                "cannot use Awkward Array with Pandas version {0} (at "
-                "least 0.24.0 is required)".format(pandas.__version__)
+                "awkward1 can only work with pandas 0.24 or later "
+                "(you have version {0})".format(pandas.__version__)
             )
         checked_version = True
-    return pandas
+        return pandas
 
 
 AwkwardDtype = None

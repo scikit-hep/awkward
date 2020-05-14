@@ -8,14 +8,33 @@ import awkward1.highlevel
 import awkward1.layout
 
 
-def register_and_check(name):
-    # Numba 0.49 rearranged its internal classes; only pre or post-0.49 can
-    # be supported.
-    if distutils.version.LooseVersion(
-        numba.__version__
-    ) < distutils.version.LooseVersion("0.49"):
-        raise ImportError(name + " can only be used with Numba 0.49 or later")
-    register()
+checked_version = False
+
+
+def register_and_check():
+    global checked_version
+    try:
+        import numba
+    except ImportError:
+        raise ImportError(
+            """install the 'numba' package with:
+
+    pip install numba --upgrade
+
+or
+
+    conda install numba"""
+        )
+    else:
+        if not checked_version and distutils.version.LooseVersion(
+            numba.__version__
+        ) < distutils.version.LooseVersion("0.49"):
+            raise ImportError(
+                "awkward1 can only work with numba 0.49 or later "
+                "(you have version {0})".format(numba.__version__)
+            )
+        checked_version = True
+        register()
 
 
 def register():

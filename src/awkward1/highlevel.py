@@ -164,6 +164,13 @@ class Array(
     inside the Numba-compiled function; to make outputs, consider
     #ak.ArrayBuilder.
 
+    Arrow
+    *****
+
+    Arrays are convertible to and from [Apache Arrow](https://arrow.apache.org/),
+    a standard for representing nested data structures in columnar arrays.
+    See #ak.to_arrow and #ak.from_arrow.
+
     NumExpr
     *******
 
@@ -1260,14 +1267,15 @@ class Array(
         See [Numba documentation](https://numba.pydata.org/numba-doc/dev/reference/types.html)
         on types and signatures.
         """
-        import numba  # noqa: F401
         import awkward1._connect._numba
 
-        awkward1._connect._numba.register_and_check("ak.Array")
+        awkward1._connect._numba.register_and_check()
         if self._numbaview is None:
             self._numbaview = awkward1._connect._numba.arrayview.ArrayView.fromarray(
                 self
             )
+        import numba
+
         return numba.typeof(self._numbaview)
 
 
@@ -1777,14 +1785,15 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         See [Numba documentation](https://numba.pydata.org/numba-doc/dev/reference/types.html)
         on types and signatures.
         """
-        import numba  # noqa: F401
         import awkward1._connect._numba
 
-        awkward1._connect._numba.register_and_check("ak.Record")
+        awkward1._connect._numba.register_and_check()
         if self._numbaview is None:
             self._numbaview = awkward1._connect._numba.arrayview.RecordView.fromrecord(
                 self
             )
+        import numba
+
         return numba.typeof(self._numbaview)
 
 
@@ -2065,10 +2074,11 @@ class ArrayBuilder(object):
         See [Numba documentation](https://numba.pydata.org/numba-doc/dev/reference/types.html)
         on types and signatures.
         """
-        import numba  # noqa: F401
+        import awkward1._connect._numba
+
+        awkward1._connect._numba.register_and_check()
         import awkward1._connect._numba.builder
 
-        awkward1._connect._numba.register_and_check("ak.ArrayBuilder")
         return awkward1._connect._numba.builder.ArrayBuilderType(self._behavior)
 
     def snapshot(self):

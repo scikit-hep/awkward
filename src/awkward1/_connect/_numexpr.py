@@ -2,11 +2,43 @@
 
 from __future__ import absolute_import
 
+import warnings
 import sys
+import distutils.version
 
 import awkward1.layout
 import awkward1.operations.convert
 import awkward1._util
+
+
+checked_version = False
+
+
+def import_numexpr():
+    global checked_version
+    try:
+        import numexpr
+    except ImportError:
+        raise ImportError(
+            """install the 'numexpr' package with:
+
+    pip install numexpr --upgrade
+
+or
+
+    conda install numexpr"""
+        )
+    else:
+        if not checked_version and distutils.version.LooseVersion(
+            numexpr.__version__
+        ) < distutils.version.LooseVersion("2.7.1"):
+            warnings.warn(
+                "awkward1 is only known to work with numexpr 2.7.1 or later"
+                "(you have version {0})".format(numexpr.__version__),
+                RuntimeWarning,
+            )
+        checked_version = True
+        return numexpr
 
 
 def getArguments(names, local_dict=None, global_dict=None):
@@ -40,7 +72,7 @@ def getArguments(names, local_dict=None, global_dict=None):
 def evaluate(
     expression, local_dict=None, global_dict=None, order="K", casting="safe", **kwargs
 ):
-    import numexpr
+    numexpr = import_numexpr()
 
     context = numexpr.necompiler.getContext(kwargs, frame_depth=1)
     expr_key = (expression, tuple(sorted(context.items())))
@@ -87,7 +119,7 @@ evaluate.evaluate = evaluate
 
 
 def re_evaluate(local_dict=None):
-    import numexpr
+    numexpr = import_numexpr()
 
     try:
         compiled_ex = numexpr.necompiler._numexpr_last["ex"]  # noqa: F841
