@@ -111,11 +111,6 @@ def typeof_RecordArray(obj, c):
     )
 
 
-@numba.extending.typeof_impl.register(awkward1.layout.Record)
-def typeof_Record(obj, c):
-    return RecordType(numba.typeof(obj.array))
-
-
 @numba.extending.typeof_impl.register(awkward1.layout.UnionArray8_32)
 @numba.extending.typeof_impl.register(awkward1.layout.UnionArray8_U32)
 @numba.extending.typeof_impl.register(awkward1.layout.UnionArray8_64)
