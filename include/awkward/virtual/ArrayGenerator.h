@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #ifndef AWKWARD_ARRAYGENERATOR_H_
 #define AWKWARD_ARRAYGENERATOR_H_
@@ -76,11 +76,11 @@ namespace awkward {
   public:
     SliceGenerator(const FormPtr& form,
                    int64_t length,
-                   const ArrayGeneratorPtr& generator,
+                   const ContentPtr& content,
                    const Slice& slice);
 
-    const ArrayGeneratorPtr
-      generator() const;
+    const ContentPtr
+      content() const;
 
     const Slice
       slice() const;
@@ -94,7 +94,7 @@ namespace awkward {
                     const std::string& post) const override;
 
   protected:
-    const ArrayGeneratorPtr& generator_;
+    const ContentPtr content_;
     const Slice slice_;
   };
 }

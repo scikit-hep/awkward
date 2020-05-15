@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #include <sstream>
 
@@ -153,7 +153,7 @@ py::class_<ak::SliceGenerator, std::shared_ptr<ak::SliceGenerator>>
 make_SliceGenerator(const py::handle& m, const std::string& name) {
   return (py::class_<ak::SliceGenerator,
                      std::shared_ptr<ak::SliceGenerator>>(m, name.c_str())
-      .def(py::init([](const py::object& generator,
+      .def(py::init([](const py::object& content,
                        const py::object& slice,
                        const py::object& form,
                        const py::object& length) -> ak::SliceGenerator {
@@ -177,22 +177,12 @@ make_SliceGenerator(const py::handle& m, const std::string& name) {
                 "SliceGenerator 'length' must be an int or None");
           }
         }
-        std::shared_ptr<ak::ArrayGenerator> cppgenerator(nullptr);
-        try {
-          cppgenerator = generator.cast<std::shared_ptr<PyArrayGenerator>>();
-        }
-        catch (py::cast_error err) {
-          try {
-            cppgenerator = generator.cast<std::shared_ptr<ak::SliceGenerator>>();
-          }
-          catch (py::cast_error err) {
-            throw std::invalid_argument(
-              "generator must be an ArrayGenerator or another SliceGenerator");
-          }
-        }
         ak::Slice cppslice = toslice(slice);
-        return ak::SliceGenerator(cppform, cpplength, cppgenerator, cppslice);
-      }), py::arg("generator")
+        return ak::SliceGenerator(cppform,
+                                  cpplength,
+                                  unbox_content(content),
+                                  cppslice);
+      }), py::arg("content")
         , py::arg("slice")
         , py::arg("form") = py::none()
         , py::arg("length") = py::none())
@@ -216,17 +206,7 @@ make_SliceGenerator(const py::handle& m, const std::string& name) {
           return py::cast(length);
         }
       })
-      .def_property_readonly("generator",
-                             [](const ak::SliceGenerator& self) -> py::object {
-        std::shared_ptr<ak::ArrayGenerator> out = self.generator();
-        if (std::shared_ptr<ak::SliceGenerator> ptr =
-            std::dynamic_pointer_cast<ak::SliceGenerator>(out)) {
-          return py::cast(ptr);
-        }
-        else {
-          return py::cast(out);
-        }
-      })
+      .def_property_readonly("content", &ak::SliceGenerator::content)
       .def("__call__", [](const ak::SliceGenerator& self) -> py::object {
         return box(self.generate_and_check());
       })

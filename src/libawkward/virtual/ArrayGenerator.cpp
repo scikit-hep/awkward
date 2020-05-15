@@ -1,6 +1,8 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #include "sstream"
+
+#include "awkward/array/VirtualArray.h"
 
 #include "awkward/virtual/ArrayGenerator.h"
 
@@ -42,15 +44,15 @@ namespace awkward {
 
   SliceGenerator::SliceGenerator(const FormPtr& form,
                                  int64_t length,
-                                 const ArrayGeneratorPtr& generator,
+                                 const ContentPtr& content,
                                  const Slice& slice)
       : ArrayGenerator(form, length)
-      , generator_(generator)
+      , content_(content)
       , slice_(slice) { }
 
-  const ArrayGeneratorPtr
-  SliceGenerator::generator() const {
-    return generator_;
+  const ContentPtr
+  SliceGenerator::content() const {
+    return content_;
   }
 
   const Slice
@@ -60,16 +62,25 @@ namespace awkward {
 
   const ContentPtr
   SliceGenerator::generate() const {
-    ContentPtr inner = generator_.get()->generate();
     if (slice_.length() == 1) {
       SliceItemPtr head = slice_.head();
       if (SliceRange* raw = dynamic_cast<SliceRange*>(head.get())) {
         if (raw->step() == 1) {
-          return inner.get()->getitem_range(raw->start(), raw->stop());
+          if (VirtualArray* a = dynamic_cast<VirtualArray*>(content_.get())) {
+            return a->array().get()->getitem_range(raw->start(), raw->stop());
+          }
+          else {
+            return content_.get()->getitem_range(raw->start(), raw->stop());
+          }
         }
       }
     }
-    return inner.get()->getitem(slice_);
+    if (VirtualArray* a = dynamic_cast<VirtualArray*>(content_.get())) {
+      return a->array().get()->getitem(slice_);
+    }
+    else {
+      return content_.get()->getitem(slice_);
+    }
   }
 
   const std::string
@@ -79,8 +90,8 @@ namespace awkward {
     std::stringstream out;
     out << indent << pre << "<SliceGenerator>\n";
     out << indent << "    <slice>" << slice_.tostring() << "</slice>\n";
-    out << generator_.get()->tostring_part(
-             indent + std::string("    "), "<generator>", "</generator>\n");
+    out << content_.get()->tostring_part(
+             indent + std::string("    "), "<content>", "</content>\n");
     out << indent << "</SliceGenerator>" << post;
     return out.str();
   }

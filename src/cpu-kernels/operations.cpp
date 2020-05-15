@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #include <cstring>
 
@@ -1472,6 +1472,19 @@ ERROR awkward_numpyarray_fill_tobool_frombool(
   int64_t fromoffset,
   int64_t length) {
   return awkward_numpyarray_fill_frombool<bool>(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length);
+}
+ERROR awkward_numpyarray_fill_tobyte_frombyte(
+  int8_t* toptr,
+  int64_t tooffset,
+  const int8_t* fromptr,
+  int64_t fromoffset,
+  int64_t length) {
+  return awkward_numpyarray_fill<int8_t, int8_t>(
     toptr,
     tooffset,
     fromptr,

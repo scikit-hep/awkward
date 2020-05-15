@@ -67,7 +67,7 @@ As stated above, new releases are published frequently, getting bug fixes and ne
 The Awkward Array codebase consists of three main layers: the high-level user interface (in Python), data ownership and navigation (independently in C++ and lowered Numba), and array manipulation (in C++ and CUDA, behind a pure C interface).
 
 <p align="center">
-  <img src="docs-images/diagrams/awkward-1-0-layers.png" width="600">
+  <img src="docs-img/diagrams/awkward-1-0-layers.png" width="600">
 </p>
 
 Contributing to each part of the codebase has a different flavor:
@@ -91,7 +91,7 @@ and a Python library shipped as binary wheels or (in rare cases) a source tarbal
 
 ### Performance considerations
 
-The conventional model is that Python is for a good user interface and C++ is for performance. In the case of Awkward Array, even the C++ layer is not intended for high performance; this is pushed down to the CPU and GPU kernels. See the "[how-it-works tutorials for developers](https://scikit-hep.org/awkward-1.0/index.html)" for more on columnar data, but in typical applications, the number of C++ objects is small (hundreds to thousands of instances) while the size of array buffers sent to CPU and GPU kernels is large (billions of elements).
+The conventional model is that Python is for a good user interface and C++ is for performance. In the case of Awkward Array, even the C++ layer is not intended for high performance; this is pushed down to the CPU and GPU kernels. See the "[how-it-works tutorials for developers](https://scikit-hep.org/awkward-1.0/how-it-works.html)" for more on columnar data, but in typical applications, the number of C++ objects is small (hundreds to thousands of instances) while the size of array buffers sent to CPU and GPU kernels is large (billions of elements).
 
 Thus, we freely take advantage of some "old" C++ practices that sacrifice performance for flexibility:
 

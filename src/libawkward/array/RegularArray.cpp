@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #include <iomanip>
 #include <sstream>
@@ -771,7 +771,7 @@ namespace awkward {
             0, rawother->size()*rawother->length());
         ContentPtr content = mine.get()->merge(theirs);
         return std::make_shared<RegularArray>(Identities::none(),
-                                              util::Parameters(),
+                                              parameters_,
                                               content,
                                               size_);
       }

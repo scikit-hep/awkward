@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #include <cstring>
 #include <iomanip>
@@ -20,10 +20,10 @@ namespace awkward {
       return Index::Form::u8;
     }
     else if (strncmp(str.c_str(), "i32", str.length()) == 0) {
-      return Index::Form::i8;
+      return Index::Form::i32;
     }
     else if (strncmp(str.c_str(), "u32", str.length()) == 0) {
-      return Index::Form::u8;
+      return Index::Form::u32;
     }
     else if (strncmp(str.c_str(), "i64", str.length()) == 0) {
       return Index::Form::i64;

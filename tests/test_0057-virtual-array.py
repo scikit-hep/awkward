@@ -1,4 +1,4 @@
-# BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 from __future__ import absolute_import
 
@@ -15,7 +15,6 @@ import pytest
 import numpy
 
 import awkward1
-import awkward1._io
 
 def test_forms():
     form = awkward1.forms.NumpyForm([], 8, "d")
@@ -245,10 +244,10 @@ def fcn():
     return awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5]))
 
 def test_basic():
-    generator = awkward1._io.ArrayGenerator(fcn, form=awkward1.forms.NumpyForm([], 8, "d"), length=5)
+    generator = awkward1.layout.ArrayGenerator(fcn, form=awkward1.forms.NumpyForm([], 8, "d"), length=5)
 
     d = {}
-    cache = awkward1._io.ArrayCache(d)
+    cache = awkward1.layout.ArrayCache(d)
 
     virtualarray = awkward1.layout.VirtualArray(generator, cache)
     assert virtualarray.peek_array is None
@@ -258,7 +257,7 @@ def test_basic():
     assert awkward1.to_list(d[virtualarray.cache_key]) == [1.1, 2.2, 3.3, 4.4, 5.5]
 
 def test_slice():
-    generator = awkward1._io.ArrayGenerator(
+    generator = awkward1.layout.ArrayGenerator(
         lambda: awkward1.Array([[1.1, 2.2, 3.3, 4.4, 5.5], [6.6, 7.7, 8.8], [100, 200, 300, 400]]),
         length=3)
     virtualarray = awkward1.layout.VirtualArray(generator)
@@ -271,7 +270,7 @@ def test_slice():
     assert isinstance(sliced[1], awkward1.layout.NumpyArray)
 
 def test_field():
-    generator = awkward1._io.ArrayGenerator(
+    generator = awkward1.layout.ArrayGenerator(
         lambda: awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}]))
     virtualarray = awkward1.layout.VirtualArray(generator)
 
@@ -284,9 +283,9 @@ def test_field():
 
 def test_single_level():
     template = awkward1.Array([[{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}], [], [{"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}]])
-    generator = awkward1._io.ArrayGenerator(lambda: template, form=template.layout.form, length=3)
+    generator = awkward1.layout.ArrayGenerator(lambda: template, form=template.layout.form, length=3)
     d = {}
-    cache = awkward1._io.ArrayCache(d)
+    cache = awkward1.layout.ArrayCache(d)
     virtualarray = awkward1.layout.VirtualArray(generator, cache)
 
     a = virtualarray[2]
@@ -300,7 +299,7 @@ def test_single_level():
     assert len(d) == 0
     b = a[1]
     assert isinstance(b, awkward1.layout.RecordArray)
-    assert len(d) == 0
+    assert len(d) == 1
     assert awkward1.to_list(b) == [{"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}]
     d.clear()
 
@@ -309,7 +308,7 @@ def test_single_level():
     assert len(d) == 0
     b = a[1]
     assert isinstance(b, awkward1.layout.RecordArray)
-    assert len(d) == 0
+    assert len(d) == 1
     assert awkward1.to_list(b) == [{"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}]
     d.clear()
 
@@ -318,7 +317,7 @@ def test_single_level():
     assert len(d) == 0
     b = a[1]
     assert isinstance(b, awkward1.layout.RecordArray)
-    assert len(d) == 0
+    assert len(d) == 1
     assert awkward1.to_list(b) == [{"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}]
     d.clear()
 
@@ -327,7 +326,7 @@ def test_single_level():
     assert len(d) == 0
     b = a[2]
     assert isinstance(b, awkward1.layout.NumpyArray)
-    assert len(d) == 0
+    assert len(d) == 1
     assert awkward1.to_list(b) == [3.3, 4.4]
     d.clear()
 
@@ -336,7 +335,7 @@ def test_single_level():
     assert len(d) == 0
     b = a[2]
     assert isinstance(b, (awkward1.layout.ListArray64, awkward1.layout.ListOffsetArray64))
-    assert len(d) == 0
+    assert len(d) == 1
     assert awkward1.to_list(b) == [[3, 3, 3], [4, 4, 4, 4]]
     d.clear()
 
@@ -347,9 +346,9 @@ def test_single_level():
     d.clear()
 
 def test_iter():
-    generator = awkward1._io.ArrayGenerator(fcn, form=awkward1.forms.NumpyForm([], 8, "d"), length=5)
+    generator = awkward1.layout.ArrayGenerator(fcn, form=awkward1.forms.NumpyForm([], 8, "d"), length=5)
     d = {}
-    cache = awkward1._io.ArrayCache(d)
+    cache = awkward1.layout.ArrayCache(d)
     virtualarray = awkward1.layout.VirtualArray(generator, cache)
 
     assert len(d) == 0
@@ -371,7 +370,7 @@ def test_nested_virtualness():
         counter[1] += 1
         return content
 
-    generator1 = awkward1._io.ArrayGenerator(materialize1, form=content.form, length=len(content))
+    generator1 = awkward1.layout.ArrayGenerator(materialize1, form=content.form, length=len(content))
     virtual1 = awkward1.layout.VirtualArray(generator1)
 
     offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 10], dtype=numpy.int64))
@@ -381,7 +380,7 @@ def test_nested_virtualness():
         counter[0] += 1
         return listarray
 
-    generator2 = awkward1._io.ArrayGenerator(materialize2, form=listarray.form, length=len(listarray))
+    generator2 = awkward1.layout.ArrayGenerator(materialize2, form=listarray.form, length=len(listarray))
     virtual2 = awkward1.layout.VirtualArray(generator2)
 
     assert counter == [0, 0]

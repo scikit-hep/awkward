@@ -1,4 +1,4 @@
-# BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 from __future__ import absolute_import
 
@@ -50,10 +50,10 @@ def test_string2():
     assert not isinstance(a, awkward1.behaviors.string.StringBehavior)
     assert awkward1.to_list(a) == [[104, 101, 121], [], [116, 104, 101, 114, 101]]
 
-    assert repr(a.type) == "3 * var * uint8"
-    assert repr(a[0].type) == "3 * uint8"
-    assert repr(a[1].type) == "0 * uint8"
-    assert repr(a[2].type) == "5 * uint8"
+    assert repr(awkward1.type(a)) == "3 * var * uint8"
+    assert repr(awkward1.type(a[0])) == "3 * uint8"
+    assert repr(awkward1.type(a[1])) == "0 * uint8"
+    assert repr(awkward1.type(a[2])) == "5 * uint8"
 
     assert repr(a) == "<Array [[104, 101, 121], ... 101, 114, 101]] type='3 * var * uint8'>"
     assert str(a) == "[[104, 101, 121], [], [116, 104, 101, 114, 101]]"

@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #ifndef AWKWARD_INDEXEDARRAY_H_
 #define AWKWARD_INDEXEDARRAY_H_
@@ -102,7 +102,7 @@ namespace awkward {
       tojson_part(ToJson& builder, bool verbose) const override;
 
     const FormPtr
-      shallow_copy() const;
+      shallow_copy() const override;
 
     const std::string
       purelist_parameter(const std::string& key) const override;

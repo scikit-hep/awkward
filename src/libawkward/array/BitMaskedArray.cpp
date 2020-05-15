@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #include <sstream>
 #include <type_traits>
@@ -271,7 +271,7 @@ namespace awkward {
       mask_.ptr().get(),
       mask_.offset(),
       mask_.length(),
-      valid_when_,
+      false,
       lsb_order_);
     util::handle_error(err, classname(), identities_.get());
     return std::make_shared<ByteMaskedArray>(

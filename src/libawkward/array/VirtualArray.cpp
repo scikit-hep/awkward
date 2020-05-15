@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #include <iomanip>
 #include <sstream>
@@ -438,7 +438,7 @@ namespace awkward {
     slice.append(SliceRange(start, stop, 1));
     slice.become_sealed();
     ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
-                 generator_.get()->form(), stop - start, generator_, slice);
+                 generator_.get()->form(), stop - start, shallow_copy(), slice);
     ArrayCachePtr cache(nullptr);
     return std::make_shared<VirtualArray>(Identities::none(),
                                           parameters_,
@@ -458,7 +458,7 @@ namespace awkward {
     slice.become_sealed();
     FormPtr form(nullptr);
     ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
-                 form, generator_.get()->length(), generator_, slice);
+                 form, generator_.get()->length(), shallow_copy(), slice);
     ArrayCachePtr cache(nullptr);
     return std::make_shared<VirtualArray>(Identities::none(),
                                           util::Parameters(),
@@ -478,7 +478,7 @@ namespace awkward {
     slice.become_sealed();
     FormPtr form(nullptr);
     ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
-                 form, generator_.get()->length(), generator_, slice);
+                 form, generator_.get()->length(), shallow_copy(), slice);
     ArrayCachePtr cache(nullptr);
     return std::make_shared<VirtualArray>(Identities::none(),
                                           util::Parameters(),
@@ -500,7 +500,7 @@ namespace awkward {
     slice.become_sealed();
     FormPtr form(nullptr);
     ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
-                 form, carry.length(), generator_, slice);
+                 form, carry.length(), shallow_copy(), slice);
     ArrayCachePtr cache(nullptr);
     return std::make_shared<VirtualArray>(Identities::none(),
                                           parameters_,
@@ -665,7 +665,7 @@ namespace awkward {
           }
           FormPtr form(nullptr);
           ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
-                     form, length, generator_, where);
+                     form, length, shallow_copy(), where);
           ArrayCachePtr cache(nullptr);
           return std::make_shared<VirtualArray>(Identities::none(),
                                                 util::Parameters(),
@@ -681,7 +681,7 @@ namespace awkward {
                dynamic_cast<SliceEllipsis*>(head.get())) {
         FormPtr form(nullptr);
         ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
-                     form, generator_.get()->length(), generator_, where);
+                     form, generator_.get()->length(), shallow_copy(), where);
         ArrayCachePtr cache(nullptr);
         return std::make_shared<VirtualArray>(Identities::none(),
                                               util::Parameters(),
@@ -693,7 +693,7 @@ namespace awkward {
                dynamic_cast<SliceNewAxis*>(head.get())) {
         FormPtr form(nullptr);
         ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
-                     form, 1, generator_, where);
+                     form, 1, shallow_copy(), where);
         ArrayCachePtr cache(nullptr);
         return std::make_shared<VirtualArray>(Identities::none(),
                                               util::Parameters(),
@@ -705,7 +705,7 @@ namespace awkward {
                dynamic_cast<SliceArray64*>(head.get())) {
         FormPtr form(nullptr);
         ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
-                     form, slicearray->length(), generator_, where);
+                     form, slicearray->length(), shallow_copy(), where);
         ArrayCachePtr cache(nullptr);
         return std::make_shared<VirtualArray>(Identities::none(),
                                               util::Parameters(),
