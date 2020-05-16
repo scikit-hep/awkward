@@ -32,7 +32,10 @@ class FuncBody(object):
         elif item.__class__.__name__ == "Assignment":
             self.code += " "*indent + "{0} = {1}\n".format(self.traverse(item.lvalue, 0, called=True), self.traverse(item.rvalue, 0, called=True))
         elif item.__class__.__name__ == "FuncCall":
-            return " "*indent + "{0}({1})".format(item.name.name, self.traverse(item.args, 0, called=True))
+            if item.args is not None:
+                return " "*indent + "{0}({1})".format(item.name.name, self.traverse(item.args, 0, called=True))
+            else:
+                return " " * indent + "{0}()".format(item.name.name)
         elif item.__class__.__name__ == "ExprList":
             exprlist = " "*indent
             for i in range(len(item.exprs)):
