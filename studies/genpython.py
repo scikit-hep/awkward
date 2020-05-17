@@ -53,16 +53,16 @@ def preprocess(filename):
                 continue
             if func is True and re.search("<.*>", line) is not None:
                 line = line.replace(re.search("<.*>", line).group(), "")
-            if func is True and re.search("u?int.._t\*?", line) is not None:
+            if func is True and re.search("u?int\d{1,2}_t\*?", line) is not None:
                 if "=" not in line and "(" not in line:
-                    varname = line[re.search("u?int.._t\*?", line).span()[1] + 1:]
+                    varname = line[re.search("u?int\d{1,2}_t\*?", line).span()[1] + 1:]
                     varname = re.sub("[\W_]+", "", varname)
-                    tokens[funcname][varname] = re.search("u?int.._t\*?", line).group()
-                line = line.replace(re.search("u?int.._t", line).group(), "int", 1)
+                    tokens[funcname][varname] = re.search("u?int\d{1,2}_t\*?", line).group()
+                line = line.replace(re.search("u?int\d{1,2}_t\*?", line).group(), "int", 1)
             if func is True and templ is True:
                 for x in templateids:
                     if x in line:
-                        if line[line.find(x)-1] == " " or line[line.find(x)-1] == "*":
+                        if line[line.find(x)-1] == " " or line[line.find(x)-1] == "*" or line[line.find(x)-1]:
                             if "=" not in line:
                                 varnamestart = line.find(x) + len(x) + 1
                                 varnameend = line[varnamestart:].find(",") + varnamestart
@@ -151,9 +151,13 @@ class FuncBody(object):
             self.code += " "*(indent+4) + "{0}\n".format(self.traverse(item.next, 0, called=True))
         elif item.__class__.__name__ == "UnaryOp":
             if item.op[1:] == "++":
-                unaryop = " "*indent + "{0} = {0} + 1".format(item.expr.name)
+                unaryop = " "*indent + "{0} = {0} + 1\n".format(item.expr.name)
             elif item.op[1:] == "--":
-                unaryop = " " * indent + "{0} = {0} - 1".format(item.expr.name)
+                unaryop = " " * indent + "{0} = {0} - 1\n".format(item.expr.name)
+            elif item.op == "*":
+                unaryop = " "*indent + "{0}".format(self.traverse(item.expr, 0, called=True))
+            elif item.op == "-":
+                unaryop = " "*indent + "-{0}".format(self.traverse(item.expr, 0, called=True))
             else:
                 raise NotImplementedError("Please inform the developers about the error")
             if called:
@@ -173,7 +177,7 @@ class FuncBody(object):
             else:
                 self.code += decllist
         elif item.__class__.__name__ == "ArrayRef":
-            arrayref = " "*indent + "{0}[{1}]".format(item.name.name, self.traverse(item.subscript, 0, called=True))
+            arrayref = " "*indent + "{0}[{1}]".format(self.traverse(item.name, 0, called=True), self.traverse(item.subscript, 0, called=True))
             if called:
                 return arrayref
             else:
@@ -196,6 +200,11 @@ class FuncBody(object):
                 return ID
             else:
                 self.code += ID
+        elif item.__class__.__name__ == "Compound":
+            compound = ""
+            for i in range(len(item.block_items)):
+                compound += self.traverse(item.block_items[i], indent + 4, called=True) + "\n"
+            return compound
         elif item.__class__.__name__ == "EmptyStatement":
             pass
         else:
