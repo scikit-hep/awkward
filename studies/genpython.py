@@ -64,7 +64,6 @@ class FuncBody(object):
         self.ast = ast
         self.code = ""
         self.traverse(self.ast.block_items, 4)
-        print(self.code)
 
     def traverse(self, item, indent, called=False):
         if item.__class__.__name__ == "list":
@@ -186,7 +185,6 @@ class FuncDecl(object):
         self.args = []
         self.returntype = self.ast.type.type.type.names[0]
         self.traverse()
-        print("def {0}({1}):".format(self.name, self.arrange_args()))
 
     def traverse(self):
         if self.ast.type.args is not None:
@@ -210,8 +208,26 @@ arg_parser.add_argument("filename")
 args = arg_parser.parse_args()
 filename = args.filename
 
-pfile, tokens = preprocess(filename)
-ast = pycparser.c_parser.CParser().parse(pfile)
-for i in range(len(ast.ext)):
-    FuncDecl(ast.ext[i].decl)
-    FuncBody(ast.ext[i].body)
+if __name__ == "__main__":
+    pfile, tokens = preprocess(filename)
+    ast = pycparser.c_parser.CParser().parse(pfile)
+    for i in range(len(ast.ext)):
+        decl = FuncDecl(ast.ext[i].decl)
+        body = FuncBody(ast.ext[i].body)
+        print("{0} : {1}".format(decl.name, tokens[decl.name]["type"]))
+        print("----------------------------------------------------")
+        for x in decl.args:
+            brackets = "[]" if x["list"] else ""
+            if x["name"] in tokens[decl.name]:
+                typename = tokens[decl.name][x["name"]]
+            else:
+                typename = x["type"]
+            if typename.endswith("*"):
+                typename = typename[:-1]
+            if typename == "C" or typename == "T":
+                typename = "Any"
+            print("{0} : {1}{2}".format(x["name"], typename, brackets))
+        print()
+        print("def {0}({1}):".format(decl.name, decl.arrange_args()))
+        print(body.code)
+        print()
