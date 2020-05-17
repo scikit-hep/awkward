@@ -1,5 +1,62 @@
 import argparse
 import pycparser
+import re
+
+def preprocess(filename):
+    code = ""
+    func = False
+    tokens = {}
+    templateids = ["T*", "C*", "T", "C"]
+    with open(filename, "r") as f:
+        for line in f:
+            if line.endswith("\n"):
+                line = line[:-1].rstrip() + "\n"
+            else:
+                line = line.rstrip()
+            if line.startswith("#"):
+                continue
+            if line.startswith("template"):
+                continue
+            if func is True and line.count("{") > 0:
+                for _ in range(line.count("{")):
+                    parans.append("{")
+            if func is False and re.search("\s.*\(", line):
+                funcname = re.search("\s.*\(", line).group()[1:-1]
+                tokens[funcname] = {"type": line.lstrip().split(" ")[0]}
+                line = line.replace(line.split(" ")[0], "int")
+                func = True
+                parans = []
+                code += line
+                if line.count("{") > 0:
+                    for _ in range(line.count("{")):
+                        parans.append("{")
+                continue
+            if func is True and re.search("<.*>", line) is not None:
+                line = line.replace(re.search("<.*>", line).group(), "")
+            if func is True and re.search("int.._t\*?", line) is not None:
+                if "=" not in line and "(" not in line:
+                    varname = line[re.search("int.._t\*?", line).span()[1] + 1:]
+                    varname = re.sub("[\W_]+", "", varname)
+                    tokens[funcname][varname] = re.search("int.._t\*?", line).group()
+                line = line.replace(re.search("int.._t", line).group(), "int", 1)
+            for x in templateids:
+                if x in line and func is True:
+                    if "=" not in line:
+                        varnamestart = line.find(x) + len(x) + 1
+                        varnameend = line[varnamestart:].find(",") + varnamestart
+                        varname = line[varnamestart:varnameend]
+                        tokens[funcname][varname] = x
+                    if x.endswith("*"):
+                        x = x[:-1]
+                    line = line.replace(x, "int")
+            code += line
+            if func is True and line.count("}") > 0:
+                for _ in range(line.count("}")):
+                    parans.pop()
+                if len(parans) == 0:
+                    func = False
+
+    return code,tokens
 
 class FuncBody(object):
 
@@ -153,7 +210,8 @@ arg_parser.add_argument("filename")
 args = arg_parser.parse_args()
 filename = args.filename
 
-ast = pycparser.parse_file(filename)
+pfile, tokens = preprocess(filename)
+ast = pycparser.c_parser.CParser().parse(pfile)
 for i in range(len(ast.ext)):
     FuncDecl(ast.ext[i].decl)
     FuncBody(ast.ext[i].body)
