@@ -5,8 +5,9 @@ import re
 def preprocess(filename):
     code = ""
     func = False
+    templ = False
     tokens = {}
-    templateids = ["T*", "C*", "T", "C"]
+    templateids = []
     with open(filename, "r") as f:
         for line in f:
             if line.endswith("\n"):
@@ -15,7 +16,26 @@ def preprocess(filename):
                 line = line.rstrip()
             if line.startswith("#"):
                 continue
-            if line.startswith("template"):
+            if line.startswith("//"):
+                continue
+            if line.startswith("template") and func is False:
+                templ = True
+            if "typename" in line:
+                iterate = True
+                tempids = []
+                while iterate:
+                    if re.search("typename [^,]*,", line) is not None:
+                        tempids.append(line[re.search("typename [^,]*,", line).span()[0]+9:re.search("typename [^,]*,", line).span()[1]-1])
+                        line = line[re.search("typename [^,]*,", line).span()[1]:]
+                    if re.search("typename [^,]*,", line) is None:
+                        iterate = False
+                if re.search("typename [^,]*>", line) is not None:
+                    tempids.append(line[re.search("typename [^,]*>", line).span()[0]+9:re.search("typename [^,]*>", line).span()[1]-1])
+                    line = line[re.search("typename [^,]*>", line).span()[1]:]
+                for x in tempids:
+                    templateids.append(x + "*")
+                for x in tempids:
+                    templateids.append(x)
                 continue
             if func is True and line.count("{") > 0:
                 for _ in range(line.count("{")):
@@ -33,28 +53,32 @@ def preprocess(filename):
                 continue
             if func is True and re.search("<.*>", line) is not None:
                 line = line.replace(re.search("<.*>", line).group(), "")
-            if func is True and re.search("int.._t\*?", line) is not None:
+            if func is True and re.search("u?int.._t\*?", line) is not None:
                 if "=" not in line and "(" not in line:
-                    varname = line[re.search("int.._t\*?", line).span()[1] + 1:]
+                    varname = line[re.search("u?int.._t\*?", line).span()[1] + 1:]
                     varname = re.sub("[\W_]+", "", varname)
-                    tokens[funcname][varname] = re.search("int.._t\*?", line).group()
-                line = line.replace(re.search("int.._t", line).group(), "int", 1)
-            for x in templateids:
-                if x in line and func is True:
-                    if "=" not in line:
-                        varnamestart = line.find(x) + len(x) + 1
-                        varnameend = line[varnamestart:].find(",") + varnamestart
-                        varname = line[varnamestart:varnameend]
-                        tokens[funcname][varname] = x
-                    if x.endswith("*"):
-                        x = x[:-1]
-                    line = line.replace(x, "int")
+                    tokens[funcname][varname] = re.search("u?int.._t\*?", line).group()
+                line = line.replace(re.search("u?int.._t", line).group(), "int", 1)
+            if func is True and templ is True:
+                for x in templateids:
+                    if x in line:
+                        if line[line.find(x)-1] == " " or line[line.find(x)-1] == "*":
+                            if "=" not in line:
+                                varnamestart = line.find(x) + len(x) + 1
+                                varnameend = line[varnamestart:].find(",") + varnamestart
+                                varname = line[varnamestart:varnameend]
+                                tokens[funcname][varname] = x
+                            if x.endswith("*"):
+                                x = x[:-1]
+                            line = line.replace(x, "int")
             code += line
             if func is True and line.count("}") > 0:
                 for _ in range(line.count("}")):
                     parans.pop()
                 if len(parans) == 0:
                     func = False
+                    templ = False
+                    templateids = []
 
     return code,tokens
 
@@ -190,9 +214,18 @@ class FuncDecl(object):
         if self.ast.type.args is not None:
             params = self.ast.type.args.params
             for param in params:
+                typename, listcount = self.iterclass(param.type, 0)
                 self.args.append({"name": param.name,
-                                  "type": param.type.type.names[0] if param.type.__class__.__name__ == "TypeDecl" else param.type.type.type.names[0],
-                                  "list": param.type.__class__.__name__ == "PtrDecl"})
+                                  "type": typename,
+                                  "list": listcount})
+
+    def iterclass(self, obj, count):
+        if obj.__class__.__name__ == "IdentifierType":
+            return obj.names[0], count
+        elif obj.__class__.__name__ == "TypeDecl":
+            return self.iterclass(obj.type, count)
+        elif obj.__class__.__name__ == "PtrDecl":
+            return self.iterclass(obj.type, count+1)
 
     def arrange_args(self):
         arranged = ""
@@ -217,7 +250,7 @@ if __name__ == "__main__":
         print("{0} : {1}".format(decl.name, tokens[decl.name]["type"]))
         print("----------------------------------------------------")
         for x in decl.args:
-            brackets = "[]" if x["list"] else ""
+            brackets = "[]"*x["list"]
             if x["name"] in tokens[decl.name]:
                 typename = tokens[decl.name][x["name"]]
             else:
