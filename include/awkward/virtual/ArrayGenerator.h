@@ -53,10 +53,25 @@ namespace awkward {
     const ContentPtr
       generate_and_check() const;
 
+    /// @brief Returns a string representation of this ArrayGenerator.
     virtual const std::string
       tostring_part(const std::string& indent,
                     const std::string& pre,
                     const std::string& post) const = 0;
+
+    /// @brief Copies this ArrayGenerator, referencing any contents.
+    virtual const std::shared_ptr<ArrayGenerator>
+      shallow_copy() const = 0;
+
+    /// @brief Return a copy of this ArrayGenerator with a different form
+    /// (or a now-known form, whereas it might have been unknown before).
+    virtual const std::shared_ptr<ArrayGenerator>
+      with_form(const FormPtr& form) const = 0;
+
+    /// @brief Return a copy of this ArrayGenerator with a different length
+    /// (or a now-known length, whereas it might have been unknown before).
+    virtual const std::shared_ptr<ArrayGenerator>
+      with_length(int64_t length) const = 0;
 
   protected:
     const FormPtr form_;
@@ -92,6 +107,15 @@ namespace awkward {
       tostring_part(const std::string& indent,
                     const std::string& pre,
                     const std::string& post) const override;
+
+    const std::shared_ptr<ArrayGenerator>
+      shallow_copy() const override;
+
+    const std::shared_ptr<ArrayGenerator>
+      with_form(const FormPtr& form) const override;
+
+    const std::shared_ptr<ArrayGenerator>
+      with_length(int64_t length) const override;
 
   protected:
     const ContentPtr content_;

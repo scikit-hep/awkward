@@ -95,4 +95,28 @@ namespace awkward {
     out << indent << "</SliceGenerator>" << post;
     return out.str();
   }
+
+  const std::shared_ptr<ArrayGenerator>
+  SliceGenerator::shallow_copy() const {
+    return std::make_shared<SliceGenerator>(form_,
+                                            length_,
+                                            content_,
+                                            slice_);
+  }
+
+  const std::shared_ptr<ArrayGenerator>
+  SliceGenerator::with_form(const FormPtr& form) const {
+    return std::make_shared<SliceGenerator>(form,
+                                            length_,
+                                            content_,
+                                            slice_);
+  }
+
+  const std::shared_ptr<ArrayGenerator>
+  SliceGenerator::with_length(int64_t length) const {
+    return std::make_shared<SliceGenerator>(form_,
+                                            length,
+                                            content_,
+                                            slice_);
+  }
 }
