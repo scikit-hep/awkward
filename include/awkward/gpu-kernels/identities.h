@@ -1,7 +1,3 @@
-//
-// Created by root on 5/14/20.
-//
-
 #ifndef AWKWARDGPU_IDENTITIES_H
 #define AWKWARDGPU_IDENTITIES_H
 
