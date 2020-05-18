@@ -26,13 +26,13 @@ or
     conda install numba"""
         )
     else:
-        if not checked_version and distutils.version.LooseVersion(
-            numba.__version__
-        ) < distutils.version.LooseVersion("0.49"):
-            raise ImportError(
-                "awkward1 can only work with numba 0.49 or later "
-                "(you have version {0})".format(numba.__version__)
-            )
+        # if not checked_version and distutils.version.LooseVersion(
+        #     numba.__version__
+        # ) < distutils.version.LooseVersion("0.49"):
+        #     raise ImportError(
+        #         "awkward1 can only work with numba 0.49 or later "
+        #         "(you have version {0})".format(numba.__version__)
+        #     )
         checked_version = True
         register()
 
@@ -60,13 +60,6 @@ def register():
     n.UnionArrayType = awkward1._connect._numba.layout.UnionArrayType
     n.ArrayBuilderType = awkward1._connect._numba.builder.ArrayBuilderType
     n.ArrayBuilderModel = awkward1._connect._numba.builder.ArrayBuilderModel
-
-
-try:
-    import numba
-except ImportError:
-    pass
-else:
 
     @numba.extending.typeof_impl.register(awkward1.highlevel.Array)
     def typeof_Array(obj, c):
