@@ -12,7 +12,7 @@
 #include "awkward/cpu-kernels/util.h"
 #include "awkward/Slice.h"
 #include "awkward/Content.h"
-#include "awkward/kernels/kernel.h"
+#include "awkward/kernel.h"
 
 namespace awkward {
   /// @class NumpyForm
@@ -184,7 +184,7 @@ namespace awkward {
     NumpyArray(const Index64 index, const std::string& format);
 
     /// @brief A GPU Flag decides the location of the instance of this class
-    uint8_t memory_loc = -1; // This will be resolved once the content markers are in place
+   int64_t memory_loc = -1; // This will be resolved once the content markers are in place
 
 
       /// @brief Reference-counted pointer to the array buffer.

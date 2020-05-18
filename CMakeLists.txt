@@ -32,8 +32,8 @@ add_definitions(-DVERSION_INFO="${VERSION_INFO}")
 project(awkward LANGUAGES CXX VERSION ${VERSION_INFO})
 
 # Three tiers: cpu-kernels (extern "C" interface), libawkward (C++), and Python modules.
-file(GLOB CPU_KERNEL_SOURCES CONFIGURE_DEPENDS "src/cpu-kernels/*.cpp" src/gpu-kernels/identities.cpp src/kernels/kernel.cpp)
-file(GLOB KERNEL_SOURCES CONFIGURE_DEPENDS "src/kernels/*.cpp")
+file(GLOB CPU_KERNEL_SOURCES CONFIGURE_DEPENDS "src/cpu-kernels/*.cpp")
+file(GLOB GPU_KERNEL_SOURCES CONFIGURE_DEPENDS "src/gpu-kernels/*.cpp")
 file(GLOB_RECURSE LIBAWKWARD_SOURCES CONFIGURE_DEPENDS "src/libawkward/*.cpp")
 
 include_directories(include)
@@ -66,10 +66,25 @@ set_target_properties(awkward-cpu-kernels-static PROPERTIES CXX_VISIBILITY_PRESE
 set_target_properties(awkward-cpu-kernels-static PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
 set_target_properties(awkward-cpu-kernels PROPERTIES CXX_VISIBILITY_PRESET hidden)
 set_target_properties(awkward-cpu-kernels PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
+
+add_library(awkward-gpu-kernels-objects OBJECT ${GPU_KERNEL_SOURCES})
+set_target_properties(awkward-gpu-kernels-objects PROPERTIES POSITION_INDEPENDENT_CODE 1)
+add_library(awkward-gpu-kernels-static STATIC $<TARGET_OBJECTS:awkward-gpu-kernels-objects>)
+set_property(TARGET awkward-gpu-kernels-static PROPERTY POSITION_INDEPENDENT_CODE ON)
+add_library(awkward-gpu-kernels        SHARED $<TARGET_OBJECTS:awkward-gpu-kernels-objects>)
+set_target_properties(awkward-gpu-kernels-objects PROPERTIES CXX_VISIBILITY_PRESET hidden)
+set_target_properties(awkward-gpu-kernels-objects PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
+set_target_properties(awkward-gpu-kernels-static PROPERTIES CXX_VISIBILITY_PRESET hidden)
+set_target_properties(awkward-gpu-kernels-static PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
+set_target_properties(awkward-gpu-kernels PROPERTIES CXX_VISIBILITY_PRESET hidden)
+set_target_properties(awkward-gpu-kernels PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
+
 if (APPLE)
   set_target_properties(awkward-cpu-kernels PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE INSTALL_RPATH "@loader_path")
+  set_target_properties(awkward-gpu-kernels PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE INSTALL_RPATH "@loader_path")
 else()
   set_target_properties(awkward-cpu-kernels PROPERTIES BUILD_RPATH_USE_ORIGIN TRUE)
+  set_target_properties(awkward-gpu-kernels PROPERTIES BUILD_RPATH_USE_ORIGIN TRUE)
 endif()
 
 # Second tier: libawkward (object files, static library, and dynamic library).
@@ -81,9 +96,9 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
 endif()
 add_library(awkward-static STATIC $<TARGET_OBJECTS:awkward-objects>)
 set_property(TARGET awkward-static PROPERTY POSITION_INDEPENDENT_CODE ON)
-add_library(awkward        SHARED $<TARGET_OBJECTS:awkward-objects> include/awkward/kernels/kernel.h src/kernels/kernel.cpp src/gpu-kernels/identities.cpp include/awkward/gpu-kernels/identities.h)
-target_link_libraries(awkward-static PRIVATE awkward-cpu-kernels-static)
-target_link_libraries(awkward        PRIVATE awkward-cpu-kernels-static)
+add_library(awkward        SHARED $<TARGET_OBJECTS:awkward-objects>)
+target_link_libraries(awkward-static PRIVATE awkward-cpu-kernels-static awkward-gpu-kernels-static)
+target_link_libraries(awkward        PRIVATE awkward-cpu-kernels-static awkward-gpu-kernels-static)
 set_target_properties(awkward-objects PROPERTIES CXX_VISIBILITY_PRESET hidden)
 set_target_properties(awkward-objects PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
 set_target_properties(awkward-static PROPERTIES CXX_VISIBILITY_PRESET hidden)
@@ -116,13 +131,13 @@ if (PYBUILD)
     set_target_properties(_ext PROPERTIES BUILD_RPATH_USE_ORIGIN TRUE)
   endif()
 
-  install(TARGETS awkward-static awkward awkward-cpu-kernels awkward-cpu-kernels-static
+  install(TARGETS awkward-static awkward awkward-cpu-kernels awkward-cpu-kernels-static awkward-gpu-kernels awkward-gpu-kernels-static
           _ext
           LIBRARY DESTINATION awkward1 ARCHIVE DESTINATION awkward1)
 
 # Third tier: install without Python modules.
 else()
-  install(TARGETS awkward-static awkward awkward-cpu-kernels awkward-cpu-kernels-static
+  install(TARGETS awkward-static awkward awkward-cpu-kernels awkward-cpu-kernels-static awkward-gpu-kernels awkward-gpu-kernels-static
           LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
 
 endif()
