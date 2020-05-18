@@ -26,18 +26,19 @@ or
     conda install numba"""
         )
     else:
-        # if not checked_version and distutils.version.LooseVersion(
-        #     numba.__version__
-        # ) < distutils.version.LooseVersion("0.49"):
-        #     raise ImportError(
-        #         "awkward1 can only work with numba 0.49 or later "
-        #         "(you have version {0})".format(numba.__version__)
-        #     )
+        if not checked_version and distutils.version.LooseVersion(
+            numba.__version__
+        ) < distutils.version.LooseVersion("0.50"):
+            raise ImportError(
+                "awkward1 can only work with numba 0.50 or later "
+                "(you have version {0})".format(numba.__version__)
+            )
         checked_version = True
         register()
 
 
 def register():
+    import numba
     import awkward1._connect._numba.arrayview
     import awkward1._connect._numba.layout
     import awkward1._connect._numba.builder
@@ -79,6 +80,7 @@ def repr_behavior(behavior):
 
 
 def castint(context, builder, fromtype, totype, val):
+    import numba
     import llvmlite.ir.types
 
     if isinstance(fromtype, llvmlite.ir.types.IntType):
