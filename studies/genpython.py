@@ -144,11 +144,16 @@ class FuncBody(object):
             else:
                 self.code += ifstmt
         elif item.__class__.__name__ == "For":
-            self.code += "{0}".format(self.traverse(item.init, indent, called=True))
-            self.code += " "*indent + "while {0}:\n".format(self.traverse(item.cond, 0, called=True))
+            forstmt = "{0}".format(self.traverse(item.init, indent, called=True))
+            forstmt += " "*indent + "while {0}:\n".format(self.traverse(item.cond, 0, called=True))
             for i in range(len(item.stmt.block_items)):
-                self.traverse(item.stmt.block_items[i], indent+4)
-            self.code += " "*(indent+4) + "{0}\n".format(self.traverse(item.next, 0, called=True))
+                forstmt += self.traverse(item.stmt.block_items[i], indent+4, called=True) + "\n"
+                print(forstmt)
+            forstmt += " "*(indent+4) + "{0}\n".format(self.traverse(item.next, 0, called=True))
+            if called:
+                return forstmt
+            else:
+                self.code += forstmt
         elif item.__class__.__name__ == "UnaryOp":
             if item.op[1:] == "++":
                 unaryop = " "*indent + "{0} = {0} + 1\n".format(item.expr.name)
@@ -252,6 +257,7 @@ filename = args.filename
 
 if __name__ == "__main__":
     pfile, tokens = preprocess(filename)
+    print(pfile)
     ast = pycparser.c_parser.CParser().parse(pfile)
     for i in range(len(ast.ext)):
         decl = FuncDecl(ast.ext[i].decl)
