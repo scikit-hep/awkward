@@ -10,6 +10,7 @@
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/cpu-kernels/operations.h"
 #include "awkward/cpu-kernels/reducers.h"
+#include "awkward/cpu-kernels/sorting.h"
 #include "awkward/type/PrimitiveType.h"
 #include "awkward/type/RegularType.h"
 #include "awkward/type/ArrayType.h"
@@ -3994,13 +3995,13 @@ namespace awkward {
                          bool ascending,
                          bool stable) const {
     std::shared_ptr<int64_t> ptr(
-      new int64_t[(size_t)length], util::array_deleter<int64_t>());
+      new int64_t[length], util::array_deleter<int64_t>());
 
     if (length == 0) {
       return ptr;
     }
 
-    std::vector<size_t> result(length);
+    std::vector<int64_t> result(length);
     std::iota(result.begin(), result.end(), 0);
 
     std::vector<int64_t> offsets = sorting_ranges(parents,
@@ -4012,27 +4013,28 @@ namespace awkward {
 
       if (ascending  &&  !stable) {
         std::sort(start, stop,
-          [&data](size_t i1, size_t i2) {return data[i1] < data[i2];});
+          [&data](int64_t i1, int64_t i2) {return data[i1] < data[i2];});
       }
       else if (!ascending  &&  !stable) {
         std::sort(start, stop,
-          [&data](size_t i1, size_t i2) {return data[i1] > data[i2];});
+          [&data](int64_t i1, int64_t i2) {return data[i1] > data[i2];});
       }
       else if (ascending  &&  stable) {
         std::stable_sort(start, stop,
-          [&data](size_t i1, size_t i2) {return data[i1] < data[i2];});
+          [&data](int64_t i1, int64_t i2) {return data[i1] < data[i2];});
       }
       else if (!ascending  &&  stable) {
         std::stable_sort(start, stop,
-          [&data](size_t i1, size_t i2) {return data[i1] > data[i2];});
+          [&data](int64_t i1, int64_t i2) {return data[i1] > data[i2];});
       }
       std::transform(start, stop, start,
-                 [&](size_t j) -> size_t { return j - (size_t)offsets[i]; });
+                 [&](int64_t j) -> int64_t { return j - offsets[i]; });
     }
 
     struct Error err2 = awkward_argsort_64(
       ptr.get(),
       &result[0],
+      0, // offset
       length);
     util::handle_error(err2, classname(), nullptr);
 
@@ -4050,13 +4052,13 @@ namespace awkward {
                          bool ascending,
                          bool stable) const {
     std::shared_ptr<T> ptr(
-      new T[(size_t)length], util::array_deleter<T>());
+      new T[length], util::array_deleter<T>());
 
     if (length == 0) {
       return ptr;
     }
 
-    std::vector<size_t> result(length);
+    std::vector<int64_t> result(length);
     std::iota(result.begin(), result.end(), 0);
 
     std::vector<int64_t> offsets = sorting_ranges(parents,
@@ -4068,19 +4070,19 @@ namespace awkward {
 
       if (ascending  &&  !stable) {
         std::sort(start, stop,
-          [&data](size_t i1, size_t i2) {return data[i1] < data[i2];});
+          [&data](int64_t i1, int64_t i2) {return data[i1] < data[i2];});
       }
       else if (!ascending  &&  !stable) {
         std::sort(start, stop,
-          [&data](size_t i1, size_t i2) {return data[i1] > data[i2];});
+          [&data](int64_t i1, int64_t i2) {return data[i1] > data[i2];});
       }
       else if (ascending  &&  stable) {
         std::stable_sort(start, stop,
-          [&data](size_t i1, size_t i2) {return data[i1] < data[i2];});
+          [&data](int64_t i1, int64_t i2) {return data[i1] < data[i2];});
       }
       else if (!ascending  &&  stable) {
         std::stable_sort(start, stop,
-          [&data](size_t i1, size_t i2) {return data[i1] > data[i2];});
+          [&data](int64_t i1, int64_t i2) {return data[i1] > data[i2];});
       }
     }
 
@@ -4088,6 +4090,7 @@ namespace awkward {
       ptr.get(),
       data,
       &result[0],
+      0, // offset
       starts.ptr().get(),
       parents.ptr().get(),
       parents.offset(),

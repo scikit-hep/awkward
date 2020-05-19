@@ -477,8 +477,6 @@ namespace awkward {
                            bool stable,
                            bool keepdims) const {
     ContentPtr asnumpy = toNumpyArray("d", 8);
-    std::cout << "argsort an EmptyArray:\n" <<
-      asnumpy.get()->tostring() << "\n";
      ContentPtr out = asnumpy.get()->argsort_next(negaxis,
                                        starts,
                                        parents,
@@ -486,7 +484,6 @@ namespace awkward {
                                        ascending,
                                        stable,
                                        keepdims);
-    std::cout << out.get()->tostring() << "\n";
     return out;
   }
 

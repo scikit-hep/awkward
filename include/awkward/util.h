@@ -1040,7 +1040,8 @@ namespace awkward {
       awkward_numpyarray_sort(
         T* toptr,
         const T* fromptr,
-        const size_t* fromindex,
+        const int64_t* fromindex,
+        int64_t indexoffset,
         const int64_t* starts,
         const int64_t* parents,
         int64_t parentsoffset,

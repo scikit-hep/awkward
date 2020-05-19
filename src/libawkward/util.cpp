@@ -9,6 +9,7 @@
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/cpu-kernels/operations.h"
 #include "awkward/cpu-kernels/reducers.h"
+#include "awkward/cpu-kernels/sorting.h"
 
 #include "awkward/util.h"
 #include "awkward/Identities.h"
@@ -4103,7 +4104,8 @@ namespace awkward {
     Error awkward_numpyarray_sort<bool>(
       bool* toptr,
       const bool* fromptr,
-      const size_t* fromindex,
+      const int64_t* fromindex,
+      int64_t indexoffset,
       const int64_t* starts,
       const int64_t* parents,
       int64_t parentsoffset,
@@ -4112,6 +4114,7 @@ namespace awkward {
         toptr,
         fromptr,
         fromindex,
+        indexoffset,
         starts,
         parents,
         parentsoffset,
@@ -4121,7 +4124,8 @@ namespace awkward {
     Error awkward_numpyarray_sort<uint8_t>(
       uint8_t* toptr,
       const uint8_t* fromptr,
-      const size_t* fromindex,
+      const int64_t* fromindex,
+      int64_t indexoffset,
       const int64_t* starts,
       const int64_t* parents,
       int64_t parentsoffset,
@@ -4130,6 +4134,7 @@ namespace awkward {
         toptr,
         fromptr,
         fromindex,
+        indexoffset,
         starts,
         parents,
         parentsoffset,
@@ -4139,7 +4144,8 @@ namespace awkward {
     Error awkward_numpyarray_sort<int8_t>(
       int8_t* toptr,
       const int8_t* fromptr,
-      const size_t* fromindex,
+      const int64_t* fromindex,
+      int64_t indexoffset,
       const int64_t* starts,
       const int64_t* parents,
       int64_t parentsoffset,
@@ -4148,6 +4154,7 @@ namespace awkward {
         toptr,
         fromptr,
         fromindex,
+        indexoffset,
         starts,
         parents,
         parentsoffset,
@@ -4157,7 +4164,8 @@ namespace awkward {
     Error awkward_numpyarray_sort<uint16_t>(
       uint16_t* toptr,
       const uint16_t* fromptr,
-      const size_t* fromindex,
+      const int64_t* fromindex,
+      int64_t indexoffset,
       const int64_t* starts,
       const int64_t* parents,
       int64_t parentsoffset,
@@ -4166,6 +4174,7 @@ namespace awkward {
         toptr,
         fromptr,
         fromindex,
+        indexoffset,
         starts,
         parents,
         parentsoffset,
@@ -4175,7 +4184,8 @@ namespace awkward {
     Error awkward_numpyarray_sort<int16_t>(
       int16_t* toptr,
       const int16_t* fromptr,
-      const size_t* fromindex,
+      const int64_t* fromindex,
+      int64_t indexoffset,
       const int64_t* starts,
       const int64_t* parents,
       int64_t parentsoffset,
@@ -4184,6 +4194,7 @@ namespace awkward {
         toptr,
         fromptr,
         fromindex,
+        indexoffset,
         starts,
         parents,
         parentsoffset,
@@ -4193,7 +4204,8 @@ namespace awkward {
     Error awkward_numpyarray_sort<uint32_t>(
       uint32_t* toptr,
       const uint32_t* fromptr,
-      const size_t* fromindex,
+      const int64_t* fromindex,
+      int64_t indexoffset,
       const int64_t* starts,
       const int64_t* parents,
       int64_t parentsoffset,
@@ -4202,6 +4214,7 @@ namespace awkward {
         toptr,
         fromptr,
         fromindex,
+        indexoffset,
         starts,
         parents,
         parentsoffset,
@@ -4211,7 +4224,8 @@ namespace awkward {
     Error awkward_numpyarray_sort<int32_t>(
       int32_t* toptr,
       const int32_t* fromptr,
-      const size_t* fromindex,
+      const int64_t* fromindex,
+      int64_t indexoffset,
       const int64_t* starts,
       const int64_t* parents,
       int64_t parentsoffset,
@@ -4220,6 +4234,7 @@ namespace awkward {
         toptr,
         fromptr,
         fromindex,
+        indexoffset,
         starts,
         parents,
         parentsoffset,
@@ -4229,7 +4244,8 @@ namespace awkward {
     Error awkward_numpyarray_sort<uint64_t>(
       uint64_t* toptr,
       const uint64_t* fromptr,
-      const size_t* fromindex,
+      const int64_t* fromindex,
+      int64_t indexoffset,
       const int64_t* starts,
       const int64_t* parents,
       int64_t parentsoffset,
@@ -4238,6 +4254,7 @@ namespace awkward {
         toptr,
         fromptr,
         fromindex,
+        indexoffset,
         starts,
         parents,
         parentsoffset,
@@ -4247,7 +4264,8 @@ namespace awkward {
     Error awkward_numpyarray_sort<int64_t>(
       int64_t* toptr,
       const int64_t* fromptr,
-      const size_t* fromindex,
+      const int64_t* fromindex,
+      int64_t indexoffset,
       const int64_t* starts,
       const int64_t* parents,
       int64_t parentsoffset,
@@ -4256,6 +4274,7 @@ namespace awkward {
         toptr,
         fromptr,
         fromindex,
+        indexoffset,
         starts,
         parents,
         parentsoffset,
@@ -4265,7 +4284,8 @@ namespace awkward {
     Error awkward_numpyarray_sort<float>(
       float* toptr,
       const float* fromptr,
-      const size_t* fromindex,
+      const int64_t* fromindex,
+      int64_t indexoffset,
       const int64_t* starts,
       const int64_t* parents,
       int64_t parentsoffset,
@@ -4274,6 +4294,7 @@ namespace awkward {
         toptr,
         fromptr,
         fromindex,
+        indexoffset,
         starts,
         parents,
         parentsoffset,
@@ -4283,7 +4304,8 @@ namespace awkward {
     Error awkward_numpyarray_sort<double>(
       double* toptr,
       const double* fromptr,
-      const size_t* fromindex,
+      const int64_t* fromindex,
+      int64_t indexoffset,
       const int64_t* starts,
       const int64_t* parents,
       int64_t parentsoffset,
@@ -4292,6 +4314,7 @@ namespace awkward {
         toptr,
         fromptr,
         fromindex,
+        indexoffset,
         starts,
         parents,
         parentsoffset,

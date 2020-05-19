@@ -18,6 +18,7 @@
 #include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/cpu-kernels/operations.h"
+#include "awkward/cpu-kernels/sorting.h"
 #include "awkward/type/PrimitiveType.h"
 #include "awkward/util.h"
 #include "awkward/Slice.h"
@@ -932,30 +933,31 @@ namespace awkward {
                 bool stable,
                 bool keepdims) const override {
       std::shared_ptr<T> ptr(
-                    new T[(size_t)length_], util::array_deleter<T>());
-      std::vector<size_t> result(length_);
+                    new T[length_], util::array_deleter<T>());
+      std::vector<int64_t> result(length_);
 
       std::iota(result.begin(), result.end(), 0);
       if(ascending  &&  !stable) {
         std::sort(result.begin(), result.end(),
-          [&](size_t i1, size_t i2) {return getitem_at_nowrap(i1) < getitem_at_nowrap(i2);});
+          [&](int64_t i1, int64_t i2) {return getitem_at_nowrap(i1) < getitem_at_nowrap(i2);});
       }
       else if(!ascending  &&  !stable) {
         std::sort(result.begin(), result.end(),
-          [&](size_t i1, size_t i2) {return getitem_at_nowrap(i1) > getitem_at_nowrap(i2);});
+          [&](int64_t i1, int64_t i2) {return getitem_at_nowrap(i1) > getitem_at_nowrap(i2);});
       }
       else if(ascending  &&  stable) {
         std::stable_sort(result.begin(), result.end(),
-          [&](size_t i1, size_t i2) {return getitem_at_nowrap(i1) < getitem_at_nowrap(i2);});
+          [&](int64_t i1, int64_t i2) {return getitem_at_nowrap(i1) < getitem_at_nowrap(i2);});
       }
       else if(!ascending  &&  stable) {
         std::stable_sort(result.begin(), result.end(),
-          [&](size_t i1, size_t i2) {return getitem_at_nowrap(i1) > getitem_at_nowrap(i2);});
+          [&](int64_t i1, int64_t i2) {return getitem_at_nowrap(i1) > getitem_at_nowrap(i2);});
       }
       struct Error err = util::awkward_numpyarray_sort<T>(
         ptr.get(),
         ptr_.get(),
         &result[0],
+        0, // offset
         starts.ptr().get(),
         parents.ptr().get(),
         parents.offset(),
@@ -986,29 +988,30 @@ namespace awkward {
                    bool stable,
                    bool keepdims) const override {
       std::shared_ptr<int64_t> ptr(
-        new int64_t[(size_t)length_], util::array_deleter<int64_t>());
-      std::vector<size_t> result(length_);
+        new int64_t[length_], util::array_deleter<int64_t>());
+      std::vector<int64_t> result(length_);
 
       std::iota(result.begin(), result.end(), 0);
       if(ascending  &&  !stable) {
         std::sort(result.begin(), result.end(),
-          [&](size_t i1, size_t i2) {return getitem_at_nowrap(i1) < getitem_at_nowrap(i2);});
+          [&](int64_t i1, int64_t i2) {return getitem_at_nowrap(i1) < getitem_at_nowrap(i2);});
       }
       else if(!ascending  &&  !stable) {
         std::sort(result.begin(), result.end(),
-          [&](size_t i1, size_t i2) {return getitem_at_nowrap(i1) > getitem_at_nowrap(i2);});
+          [&](int64_t i1, int64_t i2) {return getitem_at_nowrap(i1) > getitem_at_nowrap(i2);});
       }
       else if(ascending  &&  stable) {
         std::stable_sort(result.begin(), result.end(),
-          [&](size_t i1, size_t i2) {return getitem_at_nowrap(i1) < getitem_at_nowrap(i2);});
+          [&](int64_t i1, int64_t i2) {return getitem_at_nowrap(i1) < getitem_at_nowrap(i2);});
       }
       else if(!ascending  &&  stable) {
         std::stable_sort(result.begin(), result.end(),
-          [&](size_t i1, size_t i2) {return getitem_at_nowrap(i1) > getitem_at_nowrap(i2);});
+          [&](int64_t i1, int64_t i2) {return getitem_at_nowrap(i1) > getitem_at_nowrap(i2);});
       }
       struct Error err = awkward_argsort_64(
         ptr.get(),
         &result[0],
+        0, // offset
         length_);
       util::handle_error(err, classname(), nullptr);
       ssize_t itemsize = 8;
