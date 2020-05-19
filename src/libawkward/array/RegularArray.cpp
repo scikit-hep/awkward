@@ -139,7 +139,8 @@ namespace awkward {
   bool
   RegularForm::equal(const FormPtr& other,
                      bool check_identities,
-                     bool check_parameters) const {
+                     bool check_parameters,
+                     bool compatibility_check) const {
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
       return false;
@@ -151,7 +152,8 @@ namespace awkward {
     if (RegularForm* t = dynamic_cast<RegularForm*>(other.get())) {
       return (content_.get()->equal(t->content(),
                                     check_identities,
-                                    check_parameters)  &&
+                                    check_parameters,
+                                    compatibility_check)  &&
               size_ == t->size());
     }
     else {

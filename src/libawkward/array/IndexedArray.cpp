@@ -146,7 +146,8 @@ namespace awkward {
   bool
   IndexedForm::equal(const FormPtr& other,
                      bool check_identities,
-                     bool check_parameters) const {
+                     bool check_parameters,
+                     bool compatibility_check) const {
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
       return false;
@@ -159,7 +160,8 @@ namespace awkward {
       return (index_ == t->index()  &&
               content_.get()->equal(t->content(),
                                     check_identities,
-                                    check_parameters));
+                                    check_parameters,
+                                    compatibility_check));
     }
     else {
       return false;
@@ -283,7 +285,8 @@ namespace awkward {
   bool
   IndexedOptionForm::equal(const FormPtr& other,
                            bool check_identities,
-                           bool check_parameters) const {
+                           bool check_parameters,
+                           bool compatibility_check) const {
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
       return false;
@@ -296,7 +299,8 @@ namespace awkward {
       return (index_ == t->index()  &&
               content_.get()->equal(t->content(),
                                     check_identities,
-                                    check_parameters));
+                                    check_parameters,
+                                    compatibility_check));
     }
     else {
       return false;
