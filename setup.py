@@ -21,7 +21,8 @@ extras = {"test": open("requirements-test.txt").read().strip().split(),
           "dev":  ['numba>=0.49.0;python_version>="3.6"',
                    'pandas>=0.24.0;python_version>="3.6"',
                    'numexpr;python_version>="3.6"',
-                   'autograd;python_version>="3.6"']}
+                   'autograd;python_version>="3.6"',
+                   'pyarrow>=0.17;python_version>="3.6" and sys_platform != "win32"']}
 extras["all"] = sum(extras.values(), [])
 
 tests_require = extras["test"]
@@ -183,20 +184,20 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
       </b></p>
     </td>
     <td width="33%" valign="top">
-      <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
-        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/panel-doxygen.png" width="268">
-      </a>
-      <p align="center"><b>
-        <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
-        C++<br>API reference
-        </a>
-      </b></p>
       <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
         <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/panel-sphinx.png" width="268">
       </a>
       <p align="center"><b>
         <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
         Python<br>API reference
+        </a>
+      </b></p>
+      <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
+        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/panel-doxygen.png" width="268">
+      </a>
+      <p align="center"><b>
+        <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
+        C++<br>API reference
         </a>
       </b></p>
     </td>
@@ -211,7 +212,7 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
         "numba_extensions": ["init = awkward1._connect._numba:register"]
       },
       test_suite = "tests",
-      python_requires = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*",
+      python_requires = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*",
       install_requires = install_requires,
       tests_require = extras["test"],
       extras_require = extras,

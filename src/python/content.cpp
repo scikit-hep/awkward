@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #include <pybind11/numpy.h>
 
@@ -2065,7 +2065,7 @@ make_VirtualArray(const py::handle& m, const std::string& name) {
           }
           catch (py::cast_error err) {
             throw std::invalid_argument(
-                "VirtualArray 'generator' must be a PyArrayGenerator or a "
+                "VirtualArray 'generator' must be an ArrayGenerator or a "
                 "SliceGenerator");
           }
         }

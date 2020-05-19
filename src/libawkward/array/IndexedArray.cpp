@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #include <sstream>
 #include <type_traits>
@@ -146,7 +146,8 @@ namespace awkward {
   bool
   IndexedForm::equal(const FormPtr& other,
                      bool check_identities,
-                     bool check_parameters) const {
+                     bool check_parameters,
+                     bool compatibility_check) const {
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
       return false;
@@ -159,7 +160,8 @@ namespace awkward {
       return (index_ == t->index()  &&
               content_.get()->equal(t->content(),
                                     check_identities,
-                                    check_parameters));
+                                    check_parameters,
+                                    compatibility_check));
     }
     else {
       return false;
@@ -283,7 +285,8 @@ namespace awkward {
   bool
   IndexedOptionForm::equal(const FormPtr& other,
                            bool check_identities,
-                           bool check_parameters) const {
+                           bool check_parameters,
+                           bool compatibility_check) const {
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
       return false;
@@ -296,7 +299,8 @@ namespace awkward {
       return (index_ == t->index()  &&
               content_.get()->equal(t->content(),
                                     check_identities,
-                                    check_parameters));
+                                    check_parameters,
+                                    compatibility_check));
     }
     else {
       return false;
@@ -1447,7 +1451,7 @@ namespace awkward {
 
     return std::make_shared<IndexedArrayOf<int64_t, ISOPTION>>(
       Identities::none(),
-      util::Parameters(),
+      parameters_,
       index,
       content);
   }
@@ -1623,13 +1627,13 @@ namespace awkward {
 
     if (ISOPTION  ||  other_isoption) {
       return std::make_shared<IndexedOptionArray64>(Identities::none(),
-                                                    util::Parameters(),
+                                                    parameters_,
                                                     index,
                                                     content);
     }
     else {
       return std::make_shared<IndexedArray64>(Identities::none(),
-                                              util::Parameters(),
+                                              parameters_,
                                               index,
                                               content);
     }

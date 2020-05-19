@@ -1,14 +1,13 @@
-# BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 from __future__ import absolute_import
 
 import re
 import keyword
+
 try:
-    from collections.abc import Sequence
     from collections.abc import Iterable
-except:
-    from collections import Sequence
+except ImportError:
     from collections import Iterable
 
 import numpy
@@ -21,8 +20,11 @@ import awkward1.operations.structure
 
 _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
-class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
-            awkward1._connect._pandas.PandasMixin):
+
+class Array(
+    awkward1._connect._numpy.NDArrayOperatorsMixin,
+    awkward1._connect._pandas.PandasMixin,
+):
     """
     Args:
         data (#ak.layout.Content, #ak.Array, np.ndarray, str, or iterable):
@@ -162,6 +164,13 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
     inside the Numba-compiled function; to make outputs, consider
     #ak.ArrayBuilder.
 
+    Arrow
+    *****
+
+    Arrays are convertible to and from [Apache Arrow](https://arrow.apache.org/),
+    a standard for representing nested data structures in columnar arrays.
+    See #ak.to_arrow and #ak.from_arrow.
+
     NumExpr
     *******
 
@@ -193,33 +202,33 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
     """
 
     def __init__(self, data, behavior=None, with_name=None, check_valid=False):
-        if isinstance(data, (awkward1.layout.Content,
-                             awkward1.partition.PartitionedArray)):
+        if isinstance(
+            data, (awkward1.layout.Content, awkward1.partition.PartitionedArray)
+        ):
             layout = data
         elif isinstance(data, Array):
             layout = data.layout
         elif isinstance(data, numpy.ndarray):
-            layout = awkward1.operations.convert.from_numpy(data,
-                                                            highlevel=False)
+            layout = awkward1.operations.convert.from_numpy(data, highlevel=False)
         elif isinstance(data, str):
-            layout = awkward1.operations.convert.from_json(data,
-                                                           highlevel=False)
+            layout = awkward1.operations.convert.from_json(data, highlevel=False)
         elif isinstance(data, dict):
             raise TypeError(
-                    "could not convert dict into an awkward1.Array; "
-                    "try awkward1.Record")
+                "could not convert dict into an awkward1.Array; " "try awkward1.Record"
+            )
         else:
-            layout = awkward1.operations.convert.from_iter(data,
-                                                           highlevel=False,
-                                                           allow_record=False)
-        if not isinstance(layout, (awkward1.layout.Content,
-                                   awkward1.partition.PartitionedArray)):
+            layout = awkward1.operations.convert.from_iter(
+                data, highlevel=False, allow_record=False
+            )
+        if not isinstance(
+            layout, (awkward1.layout.Content, awkward1.partition.PartitionedArray)
+        ):
             raise TypeError("could not convert data into an awkward1.Array")
 
         if with_name is not None:
-            layout = awkward1.operations.structure.with_name(layout,
-                                                             with_name,
-                                                             highlevel=False)
+            layout = awkward1.operations.structure.with_name(
+                layout, with_name, highlevel=False
+            )
         if self.__class__ is Array:
             self.__class__ = awkward1._util.arrayclass(layout, behavior)
 
@@ -274,13 +283,13 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
 
     @layout.setter
     def layout(self, layout):
-        if isinstance(layout, (awkward1.layout.Content,
-                               awkward1.partition.PartitionedArray)):
+        if isinstance(
+            layout, (awkward1.layout.Content, awkward1.partition.PartitionedArray)
+        ):
             self._layout = layout
             self._numbaview = None
         else:
-            raise TypeError(
-                    "layout must be a subclass of awkward1.layout.Content")
+            raise TypeError("layout must be a subclass of awkward1.layout.Content")
 
     @property
     def behavior(self):
@@ -307,7 +316,7 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
             self._behavior = behavior
         else:
             raise TypeError("behavior must be None or a dict")
-       
+
     class Mask(object):
         def __init__(self, array, valid_when):
             self._array = array
@@ -318,31 +327,31 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
 
         def __repr__(self, limit_value=40, limit_total=85):
             import awkward1.operations.structure
-            layout = awkward1.operations.structure.with_cache(self._layout,
-                                                              {},
-                                                              chain="last",
-                                                              highlevel=False)
-            value = awkward1._util.minimally_touching_string(limit_value,
-                                                             layout,
-                                                             self._behavior)
+
+            layout = awkward1.operations.structure.with_cache(
+                self._layout, {}, chain="last", highlevel=False
+            )
+            value = awkward1._util.minimally_touching_string(
+                limit_value, layout, self._behavior
+            )
 
             try:
                 name = super(Array, self._array).__getattribute__("__name__")
             except AttributeError:
                 name = type(self._array).__name__
-            limit_type = limit_total - (len(value) + len(name)
-                                        + len("<.mask  type=>"))
-            typestr = repr(str(awkward1._util.highlevel_type(
-                                   layout, self._array._behavior, True)))
+            limit_type = limit_total - (len(value) + len(name) + len("<.mask  type=>"))
+            typestr = repr(
+                str(awkward1._util.highlevel_type(layout, self._array._behavior, True))
+            )
             if len(typestr) > limit_type:
-                typestr = typestr[:(limit_type - 4)] + "..." + typestr[-1]
+                typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
             return "<{0}.mask {1} type={2}>".format(name, value, typestr)
 
         def __getitem__(self, where):
-            return awkward1.operations.structure.mask(self._array,
-                                                      where,
-                                                      self._valid_when)
+            return awkward1.operations.structure.mask(
+                self._array, where, self._valid_when
+            )
 
     @property
     def mask(self, valid_when=True):
@@ -389,11 +398,9 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         """
         return awkward1.operations.convert.to_list(self)
 
-    def tojson(self,
-               destination=None,
-               pretty=False,
-               maxdecimals=None,
-               buffersize=65536):
+    def tojson(
+        self, destination=None, pretty=False, maxdecimals=None, buffersize=65536
+    ):
         """
         Args:
             destination (None or str): If None, this method returns a JSON str;
@@ -428,11 +435,9 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
 
         See also #ak.to_json and #ak.from_json.
         """
-        return awkward1.operations.convert.to_json(self,
-                                                   destination,
-                                                   pretty,
-                                                   maxdecimals,
-                                                   buffersize)
+        return awkward1.operations.convert.to_json(
+            self, destination, pretty, maxdecimals, buffersize
+        )
 
     @property
     def nbytes(self):
@@ -875,11 +880,10 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         is not a factor in choosing one over the other.)
         """
         if not isinstance(where, str):
-            raise ValueError(
-                    "only fields may be assigned in-place (by field name)")
-        self._layout = awkward1.operations.structure.with_field(self._layout,
-                                                                what,
-                                                                where).layout
+            raise ValueError("only fields may be assigned in-place (by field name)")
+        self._layout = awkward1.operations.structure.with_field(
+            self._layout, what, where
+        ).layout
         self._numbaview = None
 
     def __getattr__(self, where):
@@ -929,10 +933,9 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
                     return self[where]
                 except Exception as err:
                     raise AttributeError(
-                            "while trying to get field {0}, an exception "
-                            "occurred:\n{1}: {2}".format(repr(where),
-                                                         type(err),
-                                                         str(err)))
+                        "while trying to get field {0}, an exception "
+                        "occurred:\n{1}: {2}".format(repr(where), type(err), str(err))
+                    )
             else:
                 raise AttributeError("no field named {0}".format(repr(where)))
 
@@ -941,10 +944,16 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         Lists all methods, properties, and field names (see #__getattr__)
         that can be accessed as attributes.
         """
-        return sorted(set(dir(super(Array, self))
-                          + [x for x in self._layout.keys()
-                               if _dir_pattern.match(x) and
-                                  not keyword.iskeyword(x)]))
+        return sorted(
+            set(
+                dir(super(Array, self))
+                + [
+                    x
+                    for x in self._layout.keys()
+                    if _dir_pattern.match(x) and not keyword.iskeyword(x)
+                ]
+            )
+        )
 
     @property
     def slot0(self):
@@ -968,54 +977,63 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         #__getitem__.)
         """
         return self["0"]
+
     @property
     def slot1(self):
         """
         Equivalent to #__getitem__ with `"1"`. See #slot0.
         """
         return self["1"]
+
     @property
     def slot2(self):
         """
         Equivalent to #__getitem__ with `"2"`. See #slot0.
         """
         return self["2"]
+
     @property
     def slot3(self):
         """
         Equivalent to #__getitem__ with `"3"`. See #slot0.
         """
         return self["3"]
+
     @property
     def slot4(self):
         """
         Equivalent to #__getitem__ with `"4"`. See #slot0.
         """
         return self["4"]
+
     @property
     def slot5(self):
         """
         Equivalent to #__getitem__ with `"5"`. See #slot0.
         """
         return self["5"]
+
     @property
     def slot6(self):
         """
         Equivalent to #__getitem__ with `"6"`. See #slot0.
         """
         return self["6"]
+
     @property
     def slot7(self):
         """
         Equivalent to #__getitem__ with `"7"`. See #slot0.
         """
         return self["7"]
+
     @property
     def slot8(self):
         """
         Equivalent to #__getitem__ with `"8"`. See #slot0.
         """
         return self["8"]
+
     @property
     def slot9(self):
         """
@@ -1077,13 +1095,13 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         data or JSON strings without loss (except for #type).
         """
         import awkward1.operations.structure
-        layout = awkward1.operations.structure.with_cache(self._layout,
-                                                          {},
-                                                          chain="last",
-                                                          highlevel=False)
-        return awkward1._util.minimally_touching_string(limit_value,
-                                                        layout,
-                                                        self._behavior)
+
+        layout = awkward1.operations.structure.with_cache(
+            self._layout, {}, chain="last", highlevel=False
+        )
+        return awkward1._util.minimally_touching_string(
+            limit_value, layout, self._behavior
+        )
 
     def __repr__(self, limit_value=40, limit_total=85):
         """
@@ -1101,23 +1119,22 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         of its string (the outermost data structures).
         """
         import awkward1.operations.structure
-        layout = awkward1.operations.structure.with_cache(self._layout,
-                                                          {},
-                                                          chain="last",
-                                                          highlevel=False)
-        value = awkward1._util.minimally_touching_string(limit_value,
-                                                         layout,
-                                                         self._behavior)
+
+        layout = awkward1.operations.structure.with_cache(
+            self._layout, {}, chain="last", highlevel=False
+        )
+        value = awkward1._util.minimally_touching_string(
+            limit_value, layout, self._behavior
+        )
 
         try:
             name = super(Array, self).__getattribute__("__name__")
         except AttributeError:
             name = type(self).__name__
         limit_type = limit_total - (len(value) + len(name) + len("<  type=>"))
-        typestr = repr(str(awkward1._util.highlevel_type(
-                               layout, self._behavior, True)))
+        typestr = repr(str(awkward1._util.highlevel_type(layout, self._behavior, True)))
         if len(typestr) > limit_type:
-            typestr = typestr[:(limit_type - 4)] + "..." + typestr[-1]
+            typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
         return "<{0} {1} type={2}>".format(name, value, typestr)
 
@@ -1151,18 +1168,16 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         """
         if awkward1._util.called_by_module("pandas"):
             try:
-                return awkward1._connect._numpy.convert_to_array(self._layout,
-                                                                 args,
-                                                                 kwargs)
-            except:
+                return awkward1._connect._numpy.convert_to_array(
+                    self._layout, args, kwargs
+                )
+            except Exception:
                 out = numpy.empty(len(self._layout), dtype="O")
                 for i, x in enumerate(self._layout):
                     out[i] = awkward1._util.wrap(x, self._behavior)
                 return out
         else:
-            return awkward1._connect._numpy.convert_to_array(self._layout,
-                                                             args,
-                                                             kwargs)
+            return awkward1._connect._numpy.convert_to_array(self._layout, args, kwargs)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         """
@@ -1221,10 +1236,7 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
 
         See also #__array_function__.
         """
-        return awkward1._connect._numpy.array_ufunc(ufunc,
-                                                    method,
-                                                    inputs,
-                                                    kwargs)
+        return awkward1._connect._numpy.array_ufunc(ufunc, method, inputs, kwargs)
 
     def __array_function__(self, func, types, args, kwargs):
         """
@@ -1243,10 +1255,7 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
 
         See also #__array_ufunc__.
         """
-        return awkward1._connect._numpy.array_function(func,
-                                                       types,
-                                                       args,
-                                                       kwargs)
+        return awkward1._connect._numpy.array_function(func, types, args, kwargs)
 
     @property
     def numba_type(self):
@@ -1258,13 +1267,17 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin,
         See [Numba documentation](https://numba.pydata.org/numba-doc/dev/reference/types.html)
         on types and signatures.
         """
-        import numba
         import awkward1._connect._numba
-        awkward1._connect._numba.register_and_check("ak.Array")
+
+        awkward1._connect._numba.register_and_check()
         if self._numbaview is None:
-            self._numbaview = \
-              awkward1._connect._numba.arrayview.ArrayView.fromarray(self)
+            self._numbaview = awkward1._connect._numba.arrayview.ArrayView.fromarray(
+                self
+            )
+        import numba
+
         return numba.typeof(self._numbaview)
+
 
 class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
     """
@@ -1292,20 +1305,21 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
 
     See also #ak.Array and #ak.behavior.
     """
+
     def __init__(self, data, behavior=None, with_name=None, check_valid=False):
         if isinstance(data, awkward1.layout.Record):
             layout = data
         elif isinstance(data, Record):
             layout = data.layout
         elif isinstance(data, str):
-            layout = awkward1.operations.convert.from_json(data,
-                                                           highlevel=False)
+            layout = awkward1.operations.convert.from_json(data, highlevel=False)
         elif isinstance(data, dict):
-            layout = awkward1.operations.convert.from_iter([data],
-                                                           highlevel=False)[0]
+            layout = awkward1.operations.convert.from_iter([data], highlevel=False)[0]
         elif isinstance(data, Iterable):
-            raise TypeError("could not convert non-dict into an "
-                            "awkward1.Record; try awkward1.Array")
+            raise TypeError(
+                "could not convert non-dict into an "
+                "awkward1.Record; try awkward1.Array"
+            )
         else:
             layout = None
         if not isinstance(layout, awkward1.layout.Record):
@@ -1315,9 +1329,9 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
             self.__class__ = awkward1._util.recordclass(layout, behavior)
 
         if with_name is not None:
-            layout = awkward1.operations.structure.with_name(layout,
-                                                             with_name,
-                                                             highlevel=False)
+            layout = awkward1.operations.structure.with_name(
+                layout, with_name, highlevel=False
+            )
 
         self.layout = layout
         self.behavior = behavior
@@ -1370,8 +1384,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
             self._layout = layout
             self._numbaview = None
         else:
-            raise TypeError(
-                    "layout must be a subclass of awkward1.layout.Record")
+            raise TypeError("layout must be a subclass of awkward1.layout.Record")
 
     @property
     def behavior(self):
@@ -1422,11 +1435,9 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         """
         return awkward1.operations.convert.to_list(self)
 
-    def tojson(self,
-               destination=None,
-               pretty=False,
-               maxdecimals=None,
-               buffersize=65536):
+    def tojson(
+        self, destination=None, pretty=False, maxdecimals=None, buffersize=65536
+    ):
         """
         Args:
             destination (None or str): If None, this method returns a JSON str;
@@ -1460,11 +1471,9 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
 
         See also #ak.to_json and #ak.from_json.
         """
-        return awkward1.operations.convert.to_json(self,
-                                                   destination,
-                                                   pretty,
-                                                   maxdecimals,
-                                                   buffersize)
+        return awkward1.operations.convert.to_json(
+            self, destination, pretty, maxdecimals, buffersize
+        )
 
     @property
     def nbytes(self):
@@ -1533,11 +1542,10 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         is not a factor in choosing one over the other.)
         """
         if not isinstance(where, str):
-            raise ValueError(
-                    "only fields may be assigned in-place (by field name)")
-        self._layout = awkward1.operations.structure.with_field(self._layout,
-                                                                what,
-                                                                where).layout
+            raise ValueError("only fields may be assigned in-place (by field name)")
+        self._layout = awkward1.operations.structure.with_field(
+            self._layout, what, where
+        ).layout
         self._numbaview = None
 
     def __getattr__(self, where):
@@ -1576,10 +1584,9 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
                     return self[where]
                 except Exception as err:
                     raise AttributeError(
-                            "while trying to get field {0}, an exception "
-                            "occurred:\n{1}: {2}".format(repr(where),
-                                                         type(err),
-                                                         str(err)))
+                        "while trying to get field {0}, an exception "
+                        "occurred:\n{1}: {2}".format(repr(where), type(err), str(err))
+                    )
             else:
                 raise AttributeError("no field named {0}".format(repr(where)))
 
@@ -1588,10 +1595,16 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         Lists all methods, properties, and field names (see #__getattr__)
         that can be accessed as attributes.
         """
-        return sorted(set(dir(super(Record, self))
-                          + [x for x in self._layout.keys()
-                               if _dir_pattern.match(x) and
-                               not keyword.iskeyword(x)]))
+        return sorted(
+            set(
+                dir(super(Record, self))
+                + [
+                    x
+                    for x in self._layout.keys()
+                    if _dir_pattern.match(x) and not keyword.iskeyword(x)
+                ]
+            )
+        )
 
     @property
     def slot0(self):
@@ -1602,6 +1615,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         See #ak.Array.slot0 for a more complete description.
         """
         return self["0"]
+
     @property
     def slot1(self):
         """
@@ -1611,6 +1625,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         See #ak.Array.slot0 for a more complete description.
         """
         return self["1"]
+
     @property
     def slot2(self):
         """
@@ -1620,6 +1635,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         See #ak.Array.slot0 for a more complete description.
         """
         return self["2"]
+
     @property
     def slot3(self):
         """
@@ -1629,6 +1645,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         See #ak.Array.slot0 for a more complete description.
         """
         return self["3"]
+
     @property
     def slot4(self):
         """
@@ -1638,6 +1655,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         See #ak.Array.slot0 for a more complete description.
         """
         return self["4"]
+
     @property
     def slot5(self):
         """
@@ -1647,6 +1665,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         See #ak.Array.slot0 for a more complete description.
         """
         return self["5"]
+
     @property
     def slot6(self):
         """
@@ -1656,6 +1675,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         See #ak.Array.slot0 for a more complete description.
         """
         return self["6"]
+
     @property
     def slot7(self):
         """
@@ -1665,6 +1685,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         See #ak.Array.slot0 for a more complete description.
         """
         return self["7"]
+
     @property
     def slot8(self):
         """
@@ -1674,6 +1695,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         See #ak.Array.slot0 for a more complete description.
         """
         return self["8"]
+
     @property
     def slot9(self):
         """
@@ -1695,13 +1717,13 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         See #ak.Array.__str__ for a more complete description.
         """
         import awkward1.operations.structure
-        layout = awkward1.operations.structure.with_cache(self._layout,
-                                                          {},
-                                                          chain="last",
-                                                          highlevel=False)
-        return awkward1._util.minimally_touching_string(limit_value + 2,
-                                                        layout,
-                                                        self._behavior)[1:-1]
+
+        layout = awkward1.operations.structure.with_cache(
+            self._layout, {}, chain="last", highlevel=False
+        )
+        return awkward1._util.minimally_touching_string(
+            limit_value + 2, layout, self._behavior
+        )[1:-1]
 
     def __repr__(self, limit_value=40, limit_total=85):
         """
@@ -1716,23 +1738,24 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         See #ak.Array.__repr__ for a more complete description.
         """
         import awkward1.operations.structure
-        layout = awkward1.operations.structure.with_cache(self._layout,
-                                                          {},
-                                                          chain="last",
-                                                          highlevel=False)
-        value = awkward1._util.minimally_touching_string(limit_value + 2,
-                                                         layout,
-                                                         self._behavior)[1:-1]
+
+        layout = awkward1.operations.structure.with_cache(
+            self._layout, {}, chain="last", highlevel=False
+        )
+        value = awkward1._util.minimally_touching_string(
+            limit_value + 2, layout, self._behavior
+        )[1:-1]
 
         try:
             name = super(Record, self).__getattribute__("__name__")
         except AttributeError:
             name = type(self).__name__
         limit_type = limit_total - (len(value) + len(name) + len("<  type=>"))
-        typestr = repr(str(awkward1._util.highlevel_type(
-                               layout, self._behavior, False)))
+        typestr = repr(
+            str(awkward1._util.highlevel_type(layout, self._behavior, False))
+        )
         if len(typestr) > limit_type:
-            typestr = typestr[:(limit_type - 4)] + "..." + typestr[-1]
+            typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
         return "<{0} {1} type={2}>".format(name, value, typestr)
 
@@ -1750,10 +1773,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
 
         See #ak.Array.__array_ufunc__ for a more complete description.
         """
-        return awkward1._connect._numpy.array_ufunc(ufunc,
-                                                    method,
-                                                    inputs,
-                                                    kwargs)
+        return awkward1._connect._numpy.array_ufunc(ufunc, method, inputs, kwargs)
 
     @property
     def numba_type(self):
@@ -1765,13 +1785,17 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         See [Numba documentation](https://numba.pydata.org/numba-doc/dev/reference/types.html)
         on types and signatures.
         """
-        import numba
         import awkward1._connect._numba
-        awkward1._connect._numba.register_and_check("ak.Record")
+
+        awkward1._connect._numba.register_and_check()
         if self._numbaview is None:
-            self._numbaview = \
-              awkward1._connect._numba.arrayview.RecordView.fromrecord(self)
+            self._numbaview = awkward1._connect._numba.arrayview.RecordView.fromrecord(
+                self
+            )
+        import numba
+
         return numba.typeof(self._numbaview)
+
 
 class ArrayBuilder(object):
     """
@@ -1895,8 +1919,7 @@ class ArrayBuilder(object):
     """
 
     def __init__(self, behavior=None, initial=1024, resize=1.5):
-        self._layout = awkward1.layout.ArrayBuilder(initial=initial,
-                                                    resize=resize)
+        self._layout = awkward1.layout.ArrayBuilder(initial=initial, resize=resize)
         self.behavior = behavior
 
     @classmethod
@@ -2008,7 +2031,7 @@ class ArrayBuilder(object):
         typestrs = awkward1._util.typestrs(self._behavior)
         typestr = repr(str(snapshot.type(typestrs)))
         if len(typestr) > limit_type:
-            typestr = typestr[:(limit_type - 4)] + "..." + typestr[-1]
+            typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
         return "<ArrayBuilder {0} type={1}>".format(value, typestr)
 
@@ -2020,8 +2043,7 @@ class ArrayBuilder(object):
 
         See #ak.Array.__array__ for a more complete description.
         """
-        return awkward1._connect._numpy.convert_to_array(
-                 self.snapshot(), args, kwargs)
+        return awkward1._connect._numpy.convert_to_array(self.snapshot(), args, kwargs)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         """
@@ -2031,10 +2053,7 @@ class ArrayBuilder(object):
 
         See #ak.Array.__array_ufunc__ for a more complete description.
         """
-        return awkward1._connect._numpy.array_ufunc(ufunc,
-                                                    method,
-                                                    inputs,
-                                                    kwargs)
+        return awkward1._connect._numpy.array_ufunc(ufunc, method, inputs, kwargs)
 
     def __array_function__(self, func, types, args, kwargs):
         """
@@ -2043,10 +2062,7 @@ class ArrayBuilder(object):
 
         See #ak.ArrayBuilder.__array_ufunc__ for a more complete description.
         """
-        return awkward1._connect._numpy.array_function(func,
-                                                       types,
-                                                       args,
-                                                       kwargs)
+        return awkward1._connect._numpy.array_function(func, types, args, kwargs)
 
     @property
     def numba_type(self):
@@ -2058,11 +2074,12 @@ class ArrayBuilder(object):
         See [Numba documentation](https://numba.pydata.org/numba-doc/dev/reference/types.html)
         on types and signatures.
         """
-        import numba
+        import awkward1._connect._numba
+
+        awkward1._connect._numba.register_and_check()
         import awkward1._connect._numba.builder
-        awkward1._connect._numba.register_and_check("ak.ArrayBuilder")
-        return awkward1._connect._numba.builder.ArrayBuilderType(
-                 self._behavior)
+
+        return awkward1._connect._numba.builder.ArrayBuilderType(self._behavior)
 
     def snapshot(self):
         """
@@ -2293,8 +2310,9 @@ class ArrayBuilder(object):
                 self._layout.append(obj.layout, at)
             else:
                 raise TypeError(
-                        "'append' method can only be used with 'at' when "
-                        "'obj' is an ak.Array")
+                    "'append' method can only be used with 'at' when "
+                    "'obj' is an ak.Array"
+                )
 
     def extend(self, obj):
         """
@@ -2315,19 +2333,22 @@ class ArrayBuilder(object):
 
         def __repr__(self, limit_value=40, limit_total=85):
             snapshot = self._arraybuilder.snapshot()
-            value = self._arraybuilder.__str__(limit_value=limit_value,
-                                               snapshot=snapshot)
+            value = self._arraybuilder.__str__(
+                limit_value=limit_value, snapshot=snapshot
+            )
 
-            limit_type = (limit_total - len(value)
-                          - len("<ArrayBuilder.  type=>") - len(self._name))
+            limit_type = (
+                limit_total
+                - len(value)
+                - len("<ArrayBuilder.  type=>")
+                - len(self._name)
+            )
             typestrs = awkward1._util.typestrs(self._arraybuilder._behavior)
             typestr = repr(str(snapshot.type(typestrs)))
             if len(typestr) > limit_type:
-                typestr = typestr[:(limit_type - 4)] + "..." + typestr[-1]
+                typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
-            return "<ArrayBuilder.{0} {1} type={2}>".format(self._name,
-                                                            value,
-                                                            typestr)
+            return "<ArrayBuilder.{0} {1} type={2}>".format(self._name, value, typestr)
 
     class List(_Nested):
         _name = "list"

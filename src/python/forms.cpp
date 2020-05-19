@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -12,11 +12,11 @@ make_Form(const py::handle& m, const std::string& name) {
   return (py::class_<ak::Form, std::shared_ptr<ak::Form>>(m, name.c_str())
       .def("__eq__", [](const std::shared_ptr<ak::Form>& self,
                         const std::shared_ptr<ak::Form>& other) -> bool {
-        return self.get()->equal(other, true, true);
+        return self.get()->equal(other, true, true, false);
       })
       .def("__ne__", [](const std::shared_ptr<ak::Form>& self,
                         const std::shared_ptr<ak::Form>& other) -> bool {
-        return !self.get()->equal(other, true, true);
+        return !self.get()->equal(other, true, true, false);
       })
       .def_static("fromjson", &ak::Form::fromjson)
   );

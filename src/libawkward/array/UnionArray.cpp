@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #include <sstream>
 #include <type_traits>
@@ -250,7 +250,8 @@ namespace awkward {
   bool
   UnionForm::equal(const FormPtr& other,
                    bool check_identities,
-                   bool check_parameters) const {
+                   bool check_parameters,
+                   bool compatibility_check) const {
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
       return false;
@@ -269,7 +270,8 @@ namespace awkward {
       for (int64_t i = 0;  i < numcontents();  i++) {
         if (!content(i).get()->equal(t->content(i),
                                      check_identities,
-                                     check_parameters)) {
+                                     check_parameters,
+                                     compatibility_check)) {
           return false;
         }
       }
@@ -1439,7 +1441,7 @@ namespace awkward {
     }
 
     return std::make_shared<UnionArray8_64>(Identities::none(),
-                                            util::Parameters(),
+                                            parameters_,
                                             tags,
                                             index,
                                             contents);
@@ -1616,7 +1618,7 @@ namespace awkward {
     }
 
     return std::make_shared<UnionArray8_64>(Identities::none(),
-                                            util::Parameters(),
+                                            parameters_,
                                             tags,
                                             index,
                                             contents);

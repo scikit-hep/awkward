@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #include <sstream>
 #include <algorithm>
@@ -223,7 +223,8 @@ namespace awkward {
   bool
   RecordForm::equal(const FormPtr& other,
                     bool check_identities,
-                    bool check_parameters) const {
+                    bool check_parameters,
+                    bool compatibility_check) const {
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
       return false;
@@ -260,7 +261,8 @@ namespace awkward {
           }
           if (!content(i).get()->equal(t->content(j),
                                        check_identities,
-                                       check_parameters)) {
+                                       check_parameters,
+                                       compatibility_check)) {
             return false;
           }
         }
@@ -273,7 +275,8 @@ namespace awkward {
         for (int64_t i = 0;  i < numfields();  i++) {
           if (!content(i).get()->equal(t->content(i),
                                        check_identities,
-                                       check_parameters)) {
+                                       check_parameters,
+                                       compatibility_check)) {
             return false;
           }
         }
@@ -1012,7 +1015,7 @@ namespace awkward {
       if (istuple() == rawother->istuple()  &&
           numfields() == 0  &&  rawother->numfields() == 0) {
         return std::make_shared<RecordArray>(Identities::none(),
-                                             util::Parameters(),
+                                             parameters_,
                                              contents_,
                                              util::RecordLookupPtr(nullptr),
                                              mylength + theirlength);
@@ -1028,7 +1031,7 @@ namespace awkward {
             contents.push_back(mine.get()->merge(theirs));
           }
           return std::make_shared<RecordArray>(Identities::none(),
-                                               util::Parameters(),
+                                               parameters_,
                                                contents,
                                                recordlookup_);
         }
@@ -1048,7 +1051,7 @@ namespace awkward {
             contents.push_back(mine.get()->merge(theirs));
           }
           return std::make_shared<RecordArray>(Identities::none(),
-                                               util::Parameters(),
+                                               parameters_,
                                                contents,
                                                recordlookup_);
         }

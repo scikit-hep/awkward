@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #include <sstream>
 
@@ -30,7 +30,7 @@ PyArrayGenerator::args() const {
   return args_;
 }
 
-const py::kwargs
+const py::dict
 PyArrayGenerator::kwargs() const {
   return kwargs_;
 }
@@ -83,6 +83,61 @@ PyArrayGenerator::tostring_part(const std::string& indent,
   return out.str();
 }
 
+const std::shared_ptr<ak::ArrayGenerator>
+PyArrayGenerator::shallow_copy() const {
+  return std::make_shared<PyArrayGenerator>(form_,
+                                            length_,
+                                            callable_,
+                                            args_,
+                                            kwargs_);
+}
+
+const std::shared_ptr<ak::ArrayGenerator>
+PyArrayGenerator::with_form(const std::shared_ptr<ak::Form>& form) const {
+  return std::make_shared<PyArrayGenerator>(form,
+                                            length_,
+                                            callable_,
+                                            args_,
+                                            kwargs_);
+}
+
+const std::shared_ptr<ak::ArrayGenerator>
+PyArrayGenerator::with_length(int64_t length) const {
+  return std::make_shared<PyArrayGenerator>(form_,
+                                            length,
+                                            callable_,
+                                            args_,
+                                            kwargs_);
+}
+
+
+const std::shared_ptr<ak::ArrayGenerator>
+PyArrayGenerator::with_callable(const py::object& callable) const {
+  return std::make_shared<PyArrayGenerator>(form_,
+                                            length_,
+                                            callable,
+                                            args_,
+                                            kwargs_);
+}
+
+const std::shared_ptr<ak::ArrayGenerator>
+PyArrayGenerator::with_args(const py::tuple& args) const {
+  return std::make_shared<PyArrayGenerator>(form_,
+                                            length_,
+                                            callable_,
+                                            args,
+                                            kwargs_);
+}
+
+const std::shared_ptr<ak::ArrayGenerator>
+PyArrayGenerator::with_kwargs(const py::dict& kwargs) const {
+  return std::make_shared<PyArrayGenerator>(form_,
+                                            length_,
+                                            callable_,
+                                            args_,
+                                            kwargs);
+}
+
 py::class_<PyArrayGenerator, std::shared_ptr<PyArrayGenerator>>
 make_PyArrayGenerator(const py::handle& m, const std::string& name) {
   return (py::class_<PyArrayGenerator,
@@ -118,6 +173,9 @@ make_PyArrayGenerator(const py::handle& m, const std::string& name) {
         , py::arg("kwargs") = py::dict()
         , py::arg("form") = py::none()
         , py::arg("length") = py::none())
+      .def_property_readonly("callable", &PyArrayGenerator::callable)
+      .def_property_readonly("args", &PyArrayGenerator::args)
+      .def_property_readonly("kwargs", &PyArrayGenerator::kwargs)
       .def_property_readonly("form", [](const PyArrayGenerator& self)
                                      -> py::object {
         ak::FormPtr form = self.form();
@@ -143,6 +201,31 @@ make_PyArrayGenerator(const py::handle& m, const std::string& name) {
       })
       .def("__repr__", [](const PyArrayGenerator& self) -> std::string {
         return self.tostring_part("", "", "");
+      })
+      .def("with_form", [](const PyArrayGenerator& self,
+                           const std::shared_ptr<ak::Form>& form) -> py::object {
+        std::shared_ptr<ak::ArrayGenerator> out = self.with_form(form);
+        return py::cast(out);
+      })
+      .def("with_length", [](const PyArrayGenerator& self,
+                             int64_t length) -> py::object {
+        std::shared_ptr<ak::ArrayGenerator> out = self.with_length(length);
+        return py::cast(out);
+      })
+      .def("with_callable", [](const PyArrayGenerator& self,
+                               const py::object& callable) -> py::object {
+        std::shared_ptr<ak::ArrayGenerator> out = self.with_callable(callable);
+        return py::cast(out);
+      })
+      .def("with_args", [](const PyArrayGenerator& self,
+                           const py::tuple& args) -> py::object {
+        std::shared_ptr<ak::ArrayGenerator> out = self.with_args(args);
+        return py::cast(out);
+      })
+      .def("with_kwargs", [](const PyArrayGenerator& self,
+                             const py::dict& kwargs) -> py::object {
+        std::shared_ptr<ak::ArrayGenerator> out = self.with_kwargs(kwargs);
+        return py::cast(out);
       })
   );
 }
@@ -212,6 +295,16 @@ make_SliceGenerator(const py::handle& m, const std::string& name) {
       })
       .def("__repr__", [](const ak::SliceGenerator& self) -> std::string {
         return self.tostring_part("", "", "");
+      })
+      .def("with_form", [](const ak::SliceGenerator& self,
+                           const std::shared_ptr<ak::Form>& form) -> py::object {
+        std::shared_ptr<ak::ArrayGenerator> out = self.with_form(form);
+        return py::cast(out);
+      })
+      .def("with_length", [](const ak::SliceGenerator& self,
+                             int64_t length) -> py::object {
+        std::shared_ptr<ak::ArrayGenerator> out = self.with_length(length);
+        return py::cast(out);
       })
   );
 }
