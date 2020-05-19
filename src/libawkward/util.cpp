@@ -4101,224 +4101,499 @@ namespace awkward {
     }
 
     template <>
+    Error awkward_numpyarray_argsort<bool>(
+        int64_t* toptr,
+        const bool* fromptr,
+        int64_t length,
+        const int64_t* offsets,
+        int64_t offsetslength,
+        bool ascending,
+        bool stable) {
+        return awkward_argsort_bool(
+          toptr,
+          fromptr,
+          length,
+          offsets,
+          offsetslength,
+          ascending,
+          stable);
+    }
+
+    template <>
+    Error awkward_numpyarray_argsort<int8_t>(
+        int64_t* toptr,
+        const int8_t* fromptr,
+        int64_t length,
+        const int64_t* offsets,
+        int64_t offsetslength,
+        bool ascending,
+        bool stable) {
+        return awkward_argsort_int8(
+          toptr,
+          fromptr,
+          length,
+          offsets,
+          offsetslength,
+          ascending,
+          stable);
+    }
+
+    template <>
+    Error awkward_numpyarray_argsort<uint8_t>(
+        int64_t* toptr,
+        const uint8_t* fromptr,
+        int64_t length,
+        const int64_t* offsets,
+        int64_t offsetslength,
+        bool ascending,
+        bool stable) {
+        return awkward_argsort_uint8(
+          toptr,
+          fromptr,
+          length,
+          offsets,
+          offsetslength,
+          ascending,
+          stable);
+    }
+
+    template <>
+    Error awkward_numpyarray_argsort<int16_t>(
+        int64_t* toptr,
+        const int16_t* fromptr,
+        int64_t length,
+        const int64_t* offsets,
+        int64_t offsetslength,
+        bool ascending,
+        bool stable) {
+        return awkward_argsort_int16(
+          toptr,
+          fromptr,
+          length,
+          offsets,
+          offsetslength,
+          ascending,
+          stable);
+    }
+
+    template <>
+    Error awkward_numpyarray_argsort<uint16_t>(
+        int64_t* toptr,
+        const uint16_t* fromptr,
+        int64_t length,
+        const int64_t* offsets,
+        int64_t offsetslength,
+        bool ascending,
+        bool stable) {
+        return awkward_argsort_uint16(
+          toptr,
+          fromptr,
+          length,
+          offsets,
+          offsetslength,
+          ascending,
+          stable);
+    }
+
+    template <>
+    Error awkward_numpyarray_argsort<int32_t>(
+        int64_t* toptr,
+        const int32_t* fromptr,
+        int64_t length,
+        const int64_t* offsets,
+        int64_t offsetslength,
+        bool ascending,
+        bool stable) {
+        return awkward_argsort_int32(
+          toptr,
+          fromptr,
+          length,
+          offsets,
+          offsetslength,
+          ascending,
+          stable);
+    }
+
+    template <>
+    Error awkward_numpyarray_argsort<uint32_t>(
+        int64_t* toptr,
+        const uint32_t* fromptr,
+        int64_t length,
+        const int64_t* offsets,
+        int64_t offsetslength,
+        bool ascending,
+        bool stable) {
+        return awkward_argsort_uint32(
+          toptr,
+          fromptr,
+          length,
+          offsets,
+          offsetslength,
+          ascending,
+          stable);
+    }
+
+    template <>
+    Error awkward_numpyarray_argsort<int64_t>(
+        int64_t* toptr,
+        const int64_t* fromptr,
+        int64_t length,
+        const int64_t* offsets,
+        int64_t offsetslength,
+        bool ascending,
+        bool stable) {
+        return awkward_argsort_int64(
+          toptr,
+          fromptr,
+          length,
+          offsets,
+          offsetslength,
+          ascending,
+          stable);
+    }
+
+    template <>
+    Error awkward_numpyarray_argsort<uint64_t>(
+        int64_t* toptr,
+        const uint64_t* fromptr,
+        int64_t length,
+        const int64_t* offsets,
+        int64_t offsetslength,
+        bool ascending,
+        bool stable) {
+        return awkward_argsort_uint64(
+          toptr,
+          fromptr,
+          length,
+          offsets,
+          offsetslength,
+          ascending,
+          stable);
+    }
+
+    template <>
+    Error awkward_numpyarray_argsort<float>(
+        int64_t* toptr,
+        const float* fromptr,
+        int64_t length,
+        const int64_t* offsets,
+        int64_t offsetslength,
+        bool ascending,
+        bool stable) {
+        return awkward_argsort_float32(
+          toptr,
+          fromptr,
+          length,
+          offsets,
+          offsetslength,
+          ascending,
+          stable);
+    }
+
+    template <>
+    Error awkward_numpyarray_argsort<double>(
+        int64_t* toptr,
+        const double* fromptr,
+        int64_t length,
+        const int64_t* offsets,
+        int64_t offsetslength,
+        bool ascending,
+        bool stable) {
+        return awkward_argsort_float64(
+          toptr,
+          fromptr,
+          length,
+          offsets,
+          offsetslength,
+          ascending,
+          stable);
+    }
+
+    template <>
     Error awkward_numpyarray_sort<bool>(
       bool* toptr,
       const bool* fromptr,
-      const int64_t* fromindex,
-      int64_t indexoffset,
+      int64_t length,
+      const int64_t* offsets,
+      int64_t offsetslength,
       const int64_t* starts,
       const int64_t* parents,
       int64_t parentsoffset,
-      int64_t length) {
+      int64_t parentslength,
+      bool ascending,
+      bool stable) {
       return awkward_sort_bool(
         toptr,
         fromptr,
-        fromindex,
-        indexoffset,
+        length,
+        offsets,
+        offsetslength,
         starts,
         parents,
         parentsoffset,
-        length);
+        parentslength,
+        ascending,
+        stable);
     }
     template <>
     Error awkward_numpyarray_sort<uint8_t>(
       uint8_t* toptr,
       const uint8_t* fromptr,
-      const int64_t* fromindex,
-      int64_t indexoffset,
+      int64_t length,
+      const int64_t* offsets,
+      int64_t offsetslength,
       const int64_t* starts,
       const int64_t* parents,
       int64_t parentsoffset,
-      int64_t length) {
+      int64_t parentslength,
+      bool ascending,
+      bool stable) {
       return awkward_sort_uint8(
         toptr,
         fromptr,
-        fromindex,
-        indexoffset,
+        length,
+        offsets,
+        offsetslength,
         starts,
         parents,
         parentsoffset,
-        length);
+        parentslength,
+        ascending,
+        stable);
     }
     template <>
     Error awkward_numpyarray_sort<int8_t>(
       int8_t* toptr,
       const int8_t* fromptr,
-      const int64_t* fromindex,
-      int64_t indexoffset,
+      int64_t length,
+      const int64_t* offsets,
+      int64_t offsetslength,
       const int64_t* starts,
       const int64_t* parents,
       int64_t parentsoffset,
-      int64_t length) {
+      int64_t parentslength,
+      bool ascending,
+      bool stable) {
       return awkward_sort_int8(
         toptr,
         fromptr,
-        fromindex,
-        indexoffset,
+        length,
+        offsets,
+        offsetslength,
         starts,
         parents,
         parentsoffset,
-        length);
+        parentslength,
+        ascending,
+        stable);
     }
     template <>
     Error awkward_numpyarray_sort<uint16_t>(
       uint16_t* toptr,
       const uint16_t* fromptr,
-      const int64_t* fromindex,
-      int64_t indexoffset,
+      int64_t length,
+      const int64_t* offsets,
+      int64_t offsetslength,
       const int64_t* starts,
       const int64_t* parents,
       int64_t parentsoffset,
-      int64_t length) {
+      int64_t parentslength,
+      bool ascending,
+      bool stable) {
       return awkward_sort_uint16(
         toptr,
         fromptr,
-        fromindex,
-        indexoffset,
+        length,
+        offsets,
+        offsetslength,
         starts,
         parents,
         parentsoffset,
-        length);
+        parentslength,
+        ascending,
+        stable);
     }
     template <>
     Error awkward_numpyarray_sort<int16_t>(
       int16_t* toptr,
       const int16_t* fromptr,
-      const int64_t* fromindex,
-      int64_t indexoffset,
+      int64_t length,
+      const int64_t* offsets,
+      int64_t offsetslength,
       const int64_t* starts,
       const int64_t* parents,
       int64_t parentsoffset,
-      int64_t length) {
+      int64_t parentslength,
+      bool ascending,
+      bool stable) {
       return awkward_sort_int16(
         toptr,
         fromptr,
-        fromindex,
-        indexoffset,
+        length,
+        offsets,
+        offsetslength,
         starts,
         parents,
         parentsoffset,
-        length);
+        parentslength,
+        ascending,
+        stable);
     }
     template <>
     Error awkward_numpyarray_sort<uint32_t>(
       uint32_t* toptr,
       const uint32_t* fromptr,
-      const int64_t* fromindex,
-      int64_t indexoffset,
+      int64_t length,
+      const int64_t* offsets,
+      int64_t offsetslength,
       const int64_t* starts,
       const int64_t* parents,
       int64_t parentsoffset,
-      int64_t length) {
+      int64_t parentslength,
+      bool ascending,
+      bool stable) {
       return awkward_sort_uint32(
         toptr,
         fromptr,
-        fromindex,
-        indexoffset,
+        length,
+        offsets,
+        offsetslength,
         starts,
         parents,
         parentsoffset,
-        length);
+        parentslength,
+        ascending,
+        stable);
     }
     template <>
     Error awkward_numpyarray_sort<int32_t>(
       int32_t* toptr,
       const int32_t* fromptr,
-      const int64_t* fromindex,
-      int64_t indexoffset,
+      int64_t length,
+      const int64_t* offsets,
+      int64_t offsetslength,
       const int64_t* starts,
       const int64_t* parents,
       int64_t parentsoffset,
-      int64_t length) {
+      int64_t parentslength,
+      bool ascending,
+      bool stable) {
       return awkward_sort_int32(
         toptr,
         fromptr,
-        fromindex,
-        indexoffset,
+        length,
+        offsets,
+        offsetslength,
         starts,
         parents,
         parentsoffset,
-        length);
+        parentslength,
+        ascending,
+        stable);
     }
     template <>
     Error awkward_numpyarray_sort<uint64_t>(
       uint64_t* toptr,
       const uint64_t* fromptr,
-      const int64_t* fromindex,
-      int64_t indexoffset,
+      int64_t length,
+      const int64_t* offsets,
+      int64_t offsetslength,
       const int64_t* starts,
       const int64_t* parents,
       int64_t parentsoffset,
-      int64_t length) {
+      int64_t parentslength,
+      bool ascending,
+      bool stable) {
       return awkward_sort_uint64(
         toptr,
         fromptr,
-        fromindex,
-        indexoffset,
+        length,
+        offsets,
+        offsetslength,
         starts,
         parents,
         parentsoffset,
-        length);
+        parentslength,
+        ascending,
+        stable);
     }
     template <>
     Error awkward_numpyarray_sort<int64_t>(
       int64_t* toptr,
       const int64_t* fromptr,
-      const int64_t* fromindex,
-      int64_t indexoffset,
+      int64_t length,
+      const int64_t* offsets,
+      int64_t offsetslength,
       const int64_t* starts,
       const int64_t* parents,
       int64_t parentsoffset,
-      int64_t length) {
+      int64_t parentslength,
+      bool ascending,
+      bool stable) {
       return awkward_sort_int64(
         toptr,
         fromptr,
-        fromindex,
-        indexoffset,
+        length,
+        offsets,
+        offsetslength,
         starts,
         parents,
         parentsoffset,
-        length);
+        parentslength,
+        ascending,
+        stable);
     }
     template <>
     Error awkward_numpyarray_sort<float>(
       float* toptr,
       const float* fromptr,
-      const int64_t* fromindex,
-      int64_t indexoffset,
+      int64_t length,
+      const int64_t* offsets,
+      int64_t offsetslength,
       const int64_t* starts,
       const int64_t* parents,
       int64_t parentsoffset,
-      int64_t length) {
+      int64_t parentslength,
+      bool ascending,
+      bool stable) {
       return awkward_sort_float32(
         toptr,
         fromptr,
-        fromindex,
-        indexoffset,
+        length,
+        offsets,
+        offsetslength,
         starts,
         parents,
         parentsoffset,
-        length);
+        parentslength,
+        ascending,
+        stable);
     }
     template <>
     Error awkward_numpyarray_sort<double>(
       double* toptr,
       const double* fromptr,
-      const int64_t* fromindex,
-      int64_t indexoffset,
+      int64_t length,
+      const int64_t* offsets,
+      int64_t offsetslength,
       const int64_t* starts,
       const int64_t* parents,
       int64_t parentsoffset,
-      int64_t length) {
+      int64_t parentslength,
+      bool ascending,
+      bool stable) {
       return awkward_sort_float64(
         toptr,
         fromptr,
-        fromindex,
-        indexoffset,
+        length,
+        offsets,
+        offsetslength,
         starts,
         parents,
         parentsoffset,
-        length);
+        parentslength,
+        ascending,
+        stable);
     }
 
   }

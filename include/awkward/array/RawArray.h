@@ -934,34 +934,23 @@ namespace awkward {
                 bool keepdims) const override {
       std::shared_ptr<T> ptr(
                     new T[length_], util::array_deleter<T>());
-      std::vector<int64_t> result(length_);
 
-      std::iota(result.begin(), result.end(), 0);
-      if(ascending  &&  !stable) {
-        std::sort(result.begin(), result.end(),
-          [&](int64_t i1, int64_t i2) {return getitem_at_nowrap(i1) < getitem_at_nowrap(i2);});
-      }
-      else if(!ascending  &&  !stable) {
-        std::sort(result.begin(), result.end(),
-          [&](int64_t i1, int64_t i2) {return getitem_at_nowrap(i1) > getitem_at_nowrap(i2);});
-      }
-      else if(ascending  &&  stable) {
-        std::stable_sort(result.begin(), result.end(),
-          [&](int64_t i1, int64_t i2) {return getitem_at_nowrap(i1) < getitem_at_nowrap(i2);});
-      }
-      else if(!ascending  &&  stable) {
-        std::stable_sort(result.begin(), result.end(),
-          [&](int64_t i1, int64_t i2) {return getitem_at_nowrap(i1) > getitem_at_nowrap(i2);});
-      }
+      Index64 offsets(2);
+      offsets.setitem_at_nowrap(0, 0);
+      offsets.setitem_at_nowrap(1, length_);
+
       struct Error err = util::awkward_numpyarray_sort<T>(
         ptr.get(),
         ptr_.get(),
-        &result[0],
-        0, // offset
+        length_,
+        offsets.ptr().get(),
+        offsets.length(),
         starts.ptr().get(),
         parents.ptr().get(),
         parents.offset(),
-        length_);
+        length_,
+        ascending,
+        stable);
       util::handle_error(err, classname(), nullptr);
 
       ContentPtr out = std::make_shared<RawArrayOf<T>>(Identities::none(),
@@ -989,31 +978,22 @@ namespace awkward {
                    bool keepdims) const override {
       std::shared_ptr<int64_t> ptr(
         new int64_t[length_], util::array_deleter<int64_t>());
-      std::vector<int64_t> result(length_);
 
-      std::iota(result.begin(), result.end(), 0);
-      if(ascending  &&  !stable) {
-        std::sort(result.begin(), result.end(),
-          [&](int64_t i1, int64_t i2) {return getitem_at_nowrap(i1) < getitem_at_nowrap(i2);});
-      }
-      else if(!ascending  &&  !stable) {
-        std::sort(result.begin(), result.end(),
-          [&](int64_t i1, int64_t i2) {return getitem_at_nowrap(i1) > getitem_at_nowrap(i2);});
-      }
-      else if(ascending  &&  stable) {
-        std::stable_sort(result.begin(), result.end(),
-          [&](int64_t i1, int64_t i2) {return getitem_at_nowrap(i1) < getitem_at_nowrap(i2);});
-      }
-      else if(!ascending  &&  stable) {
-        std::stable_sort(result.begin(), result.end(),
-          [&](int64_t i1, int64_t i2) {return getitem_at_nowrap(i1) > getitem_at_nowrap(i2);});
-      }
-      struct Error err = awkward_argsort_64(
+      int64_t ranges_length = 2;
+      Index64 outranges(ranges_length);
+      outranges.setitem_at_nowrap(0, 0);
+      outranges.setitem_at_nowrap(1, length_);
+
+      struct Error err = util::awkward_numpyarray_argsort<T>(
         ptr.get(),
-        &result[0],
-        0, // offset
-        length_);
+        ptr_.get(),
+        length_,
+        outranges.ptr().get(),
+        ranges_length,
+        ascending,
+        stable);
       util::handle_error(err, classname(), nullptr);
+
       ssize_t itemsize = 8;
       ContentPtr out = std::make_shared<RawArrayOf<int64_t>>(Identities::none(),
                                                        util::Parameters(),

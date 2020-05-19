@@ -819,10 +819,6 @@ namespace awkward {
                                            bool ascending,
                                            bool stable) const;
 
-  std::vector<int64_t>
-  sorting_ranges(const Index64& parents,
-                 int64_t outlength) const;
-
   /// @brief See #ptr.
   std::shared_ptr<void> ptr_;
   /// @brief See #shape.

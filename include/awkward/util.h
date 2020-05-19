@@ -1037,15 +1037,29 @@ namespace awkward {
 
     template <typename T>
     ERROR
+      awkward_numpyarray_argsort(
+        int64_t* toptr,
+        const T* fromptr,
+        int64_t length,
+        const int64_t* offsets,
+        int64_t offsetslength,
+        bool ascending,
+        bool stable);
+
+    template <typename T>
+    ERROR
       awkward_numpyarray_sort(
         T* toptr,
         const T* fromptr,
-        const int64_t* fromindex,
-        int64_t indexoffset,
+        int64_t length,
+        const int64_t* offsets,
+        int64_t offsetslength,
         const int64_t* starts,
         const int64_t* parents,
         int64_t parentsoffset,
-        int64_t length);
+        int64_t parentslength,
+        bool ascending,
+        bool stable);
   }
 }
 

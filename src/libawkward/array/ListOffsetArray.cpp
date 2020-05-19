@@ -1772,16 +1772,11 @@ namespace awkward {
         negaxis - 1, nextstarts, nextparents, nextcontent.get()->length(),
         ascending, stable, false);
 
-      std::vector<int64_t> result(nextlen);
-      std::iota(result.begin(), result.end(), 0);
-      std::sort(result.begin(), result.end(),
-        [&nextcarry](int64_t i1, int64_t i2) {return nextcarry.getitem_at(i1) < nextcarry.getitem_at(i2);});
-
       Index64 outcarry(nextlen);
       struct Error err5 =
         awkward_listoffsetarray_local_preparenext_64(
         outcarry.ptr().get(),
-        &result[0],
+        nextcarry.ptr().get(),
         nextlen);
       util::handle_error(err5, classname(), identities_.get());
 
@@ -1927,16 +1922,11 @@ namespace awkward {
         negaxis - 1, nextstarts, nextparents, maxnextparents + 1,
         ascending, stable, false);
 
-      std::vector<int64_t> result(nextlen);
-      std::iota(result.begin(), result.end(), 0);
-      std::sort(result.begin(), result.end(),
-        [&nextcarry](int64_t i1, int64_t i2) {return nextcarry.getitem_at(i1) < nextcarry.getitem_at(i2);});
-
       Index64 outcarry(nextlen);
       struct Error err5 =
         awkward_listoffsetarray_local_preparenext_64(
         outcarry.ptr().get(),
-        &result[0],
+        nextcarry.ptr().get(),
         nextlen);
       util::handle_error(err5, classname(), identities_.get());
 

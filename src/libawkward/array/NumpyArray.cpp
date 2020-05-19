@@ -4001,42 +4001,34 @@ namespace awkward {
       return ptr;
     }
 
-    std::vector<int64_t> result(length);
-    std::iota(result.begin(), result.end(), 0);
+    int64_t ranges_length = 0;
+    struct Error err1 = awkward_sorting_ranges_length(
+      &ranges_length,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
+    util::handle_error(err1, classname(), nullptr);
 
-    std::vector<int64_t> offsets = sorting_ranges(parents,
-                                                  outlength);
-
-    for (int64_t i = 0; i < offsets.size() - 1; i++) {
-      auto start = std::next(result.begin(), offsets[i]);
-      auto stop = std::next(result.begin(), offsets[i + 1]);
-
-      if (ascending  &&  !stable) {
-        std::sort(start, stop,
-          [&data](int64_t i1, int64_t i2) {return data[i1] < data[i2];});
-      }
-      else if (!ascending  &&  !stable) {
-        std::sort(start, stop,
-          [&data](int64_t i1, int64_t i2) {return data[i1] > data[i2];});
-      }
-      else if (ascending  &&  stable) {
-        std::stable_sort(start, stop,
-          [&data](int64_t i1, int64_t i2) {return data[i1] < data[i2];});
-      }
-      else if (!ascending  &&  stable) {
-        std::stable_sort(start, stop,
-          [&data](int64_t i1, int64_t i2) {return data[i1] > data[i2];});
-      }
-      std::transform(start, stop, start,
-                 [&](int64_t j) -> int64_t { return j - offsets[i]; });
-    }
-
-    struct Error err2 = awkward_argsort_64(
-      ptr.get(),
-      &result[0],
-      0, // offset
-      length);
+    Index64 outranges(ranges_length);
+    struct Error err2 = awkward_sorting_ranges(
+      outranges.ptr().get(),
+      ranges_length,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
     util::handle_error(err2, classname(), nullptr);
+
+    struct Error err3 = util::awkward_numpyarray_argsort<T>(
+      ptr.get(),
+      data,
+      length,
+      outranges.ptr().get(),
+      ranges_length,
+      ascending,
+      stable);
+    util::handle_error(err3, classname(), nullptr);
 
     return ptr;
   }
@@ -4058,70 +4050,40 @@ namespace awkward {
       return ptr;
     }
 
-    std::vector<int64_t> result(length);
-    std::iota(result.begin(), result.end(), 0);
-
-    std::vector<int64_t> offsets = sorting_ranges(parents,
-                                                  outlength);
-
-    for (int64_t i = 0; i < offsets.size() - 1; i++) {
-      auto start = std::next(result.begin(), offsets[i]);
-      auto stop = std::next(result.begin(), offsets[i + 1]);
-
-      if (ascending  &&  !stable) {
-        std::sort(start, stop,
-          [&data](int64_t i1, int64_t i2) {return data[i1] < data[i2];});
-      }
-      else if (!ascending  &&  !stable) {
-        std::sort(start, stop,
-          [&data](int64_t i1, int64_t i2) {return data[i1] > data[i2];});
-      }
-      else if (ascending  &&  stable) {
-        std::stable_sort(start, stop,
-          [&data](int64_t i1, int64_t i2) {return data[i1] < data[i2];});
-      }
-      else if (!ascending  &&  stable) {
-        std::stable_sort(start, stop,
-          [&data](int64_t i1, int64_t i2) {return data[i1] > data[i2];});
-      }
-    }
-
-    struct Error err2 = util::awkward_numpyarray_sort<T>(
-      ptr.get(),
-      data,
-      &result[0],
-      0, // offset
-      starts.ptr().get(),
-      parents.ptr().get(),
-      parents.offset(),
-      parents.length());
-    util::handle_error(err2, classname(), nullptr);
-
-    return ptr;
-  }
-
-  std::vector<int64_t>
-  NumpyArray::sorting_ranges(const Index64& parents,
-                             int64_t outlength) const {
-    std::vector<int64_t> result;
-    std::vector<int64_t> ranges(parents.length() + 1);
-    struct Error err = awkward_argsort_prepare_ranges(
-      &ranges[0],
+    int64_t ranges_length = 0;
+    struct Error err1 = awkward_sorting_ranges_length(
+      &ranges_length,
       parents.ptr().get(),
       parents.offset(),
       parents.length(),
       outlength);
-    util::handle_error(err, classname(), nullptr);
+    util::handle_error(err1, classname(), nullptr);
 
-    for (auto const& it : ranges) {
-      auto res = std::find(std::begin(ranges), std::end(ranges), it);
-      if (res != std::end(ranges)) {
-        if (result.empty() || result.back() != std::distance(std::begin(ranges), res)) {
-          result.emplace_back(std::distance(std::begin(ranges), res));
-        }
-      }
-    }
-    return result;
+    Index64 outranges(ranges_length);
+    struct Error err2 = awkward_sorting_ranges(
+      outranges.ptr().get(),
+      ranges_length,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
+    util::handle_error(err2, classname(), nullptr);
+
+    struct Error err3 = util::awkward_numpyarray_sort<T>(
+      ptr.get(),
+      data,
+      length,
+      outranges.ptr().get(),
+      ranges_length,
+      starts.ptr().get(),
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      ascending,
+      stable);
+    util::handle_error(err3, classname(), nullptr);
+
+    return ptr;
   }
-
+  
 }
