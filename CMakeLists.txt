@@ -105,6 +105,7 @@ set_target_properties(awkward-static PROPERTIES CXX_VISIBILITY_PRESET hidden)
 set_target_properties(awkward-static PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
 set_target_properties(awkward PROPERTIES CXX_VISIBILITY_PRESET hidden)
 set_target_properties(awkward PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
+
 if (APPLE)
   set_target_properties(awkward PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE INSTALL_RPATH "@loader_path")
 else()
