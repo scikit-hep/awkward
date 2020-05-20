@@ -1,7 +1,7 @@
 #include "awkward/kernel.h"
 #include "awkward/util.h"
 #include "awkward/cpu-kernels/operations.h"
-#include "awkward/cpu-kernels/util.h"
+#include "awkward/common_utils.h"
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/reducers.h"

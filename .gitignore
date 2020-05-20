@@ -29,6 +29,7 @@ cmake-build-debug
 GTAGS
 GPATH
 GRTAGS
+.vscode
 # ...
 
 ############################################################# LaTeX

@@ -5,7 +5,7 @@
 
 #include <memory>
 
-#include "awkward/cpu-kernels/util.h"
+#include "awkward/common_utils.h"
 #include "awkward/Index.h"
 #include "awkward/Identities.h"
 #include "awkward/Content.h"

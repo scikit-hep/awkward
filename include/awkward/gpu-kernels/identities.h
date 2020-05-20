@@ -1,7 +1,7 @@
 #ifndef AWKWARDGPU_IDENTITIES_H
 #define AWKWARDGPU_IDENTITIES_H
 
-#include "awkward/cpu-kernels/util.h"
+#include "awkward/common_utils.h"
 
 extern "C" {
 EXPORT_SYMBOL struct Error

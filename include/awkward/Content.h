@@ -6,7 +6,7 @@
 #include <cstdio>
 #include <map>
 
-#include "awkward/cpu-kernels/util.h"
+#include "awkward/common_utils.h"
 #include "awkward/Identities.h"
 #include "awkward/Slice.h"
 #include "awkward/io/json.h"

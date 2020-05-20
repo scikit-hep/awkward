@@ -7,7 +7,7 @@
 #include <map>
 #include <memory>
 
-#include "awkward/cpu-kernels/util.h"
+#include "awkward/common_utils.h"
 #include "awkward/util.h"
 
 namespace awkward {

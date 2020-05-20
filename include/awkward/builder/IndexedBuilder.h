@@ -5,7 +5,7 @@
 
 #include <vector>
 
-#include "awkward/cpu-kernels/util.h"
+#include "awkward/common_utils.h"
 #include "awkward/array/IndexedArray.h"
 #include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/GrowableBuffer.h"

@@ -9,7 +9,7 @@
 #include <typeindex>
 #include <vector>
 
-#include "awkward/cpu-kernels/util.h"
+#include "awkward/common_utils.h"
 #include "awkward/Slice.h"
 #include "awkward/Content.h"
 #include "awkward/kernel.h"

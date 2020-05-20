@@ -3,7 +3,7 @@
 #ifndef AWKWARD_ITERATOR_H_
 #define AWKWARD_ITERATOR_H_
 
-#include "awkward/cpu-kernels/util.h"
+#include "awkward/common_utils.h"
 #include "awkward/Content.h"
 
 namespace awkward {
