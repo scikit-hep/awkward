@@ -23,7 +23,7 @@ def test_apply_ufunc_to_same():
     a = awkward1.Array([{"a": 1}, {"a": 2}, {"a": 3}, {"a": 4}, {"a": 5}])
     df = pandas.DataFrame({"column": a})
     -df
-    assert (-df).a.values[2] == -3
+    assert (-df).column.values[2] == -3
 
 def test_basic():
     nparray = numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
