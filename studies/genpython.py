@@ -8,6 +8,7 @@ def preprocess(filename):
     templ = False
     tokens = {}
     templateids = []
+    templatecall = False
     with open(filename, "r") as f:
         for line in f:
             if line.endswith("\n"):
@@ -53,6 +54,14 @@ def preprocess(filename):
                 continue
             if func is True and re.search("<.*>", line) is not None:
                 line = line.replace(re.search("<.*>", line).group(), "")
+            elif func is True and re.search("<.*\n", line) is not None and ";" not in line and ")" not in line:
+                templatecall = True
+                line = line.replace(re.search("<.*\n", line).group(), "")
+            elif func is True and re.search(".*>", line) is not None and ";" not in line and "(" not in line[:re.search(".*>", line).span()[1]]:
+                line = line.replace(re.search(".*>", line).group(), "")
+                templatecall = False
+            elif func is True and templatecall is True:
+                line = ""
             if func is True and re.search("u?int\d{1,2}_t\*?", line) is not None:
                 if "=" not in line and "(" not in line:
                     varname = line[re.search("u?int\d{1,2}_t\*?", line).span()[1] + 1:]
