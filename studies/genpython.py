@@ -275,8 +275,8 @@ if __name__ == "__main__":
             if typename.endswith("*"):
                 typename = typename[:-1]
             # FIXME
-            if typename == "C" or typename == "T":
-                typename = "Any"
+            #if typename == "C" or typename == "T":
+            #    typename = "Any"
             print("{0} : {1}{2}".format(x["name"], typename, brackets))
         print()
         print("def {0}({1}):".format(decl.name, decl.arrange_args()))
