@@ -16,8 +16,8 @@ def preprocess(filename):
                 line = line.rstrip()
             if line.startswith("#"):
                 continue
-            if line.startswith("//"):
-                continue
+            if re.search("\/\/.*\n", line):
+                line = re.sub("\/\/.*\n", "\n", line)
             if line.startswith("template") and func is False:
                 templ = True
             if "typename" in line:
@@ -71,6 +71,16 @@ def preprocess(filename):
                             if x.endswith("*"):
                                 x = x[:-1]
                             line = line.replace(x, "int")
+            if func is True and line.find("bool") != -1:
+                if line.find("bool*") != -1:
+                    typename = "bool*"
+                else:
+                    typename = "bool"
+                if "=" not in line and "(" not in line:
+                    varname = line[line.find(typename) + len(typename) + 1:]
+                    varname = re.sub("[\W_]+", "", varname)
+                    tokens[funcname][varname] = "bool"
+                line = line.replace("bool", "int", 1)
             code += line
             if func is True and line.count("}") > 0:
                 for _ in range(line.count("}")):
@@ -139,7 +149,7 @@ class FuncBody(object):
                 self.code += binaryop
         elif item.__class__.__name__ == "If":
             ifstmt = " "*indent + "if {0}:\n".format(self.traverse(item.cond, 0, called=True))
-            ifstmt += " "*(indent + 4) + "{0}\n".format(self.traverse(item.iftrue, 0, called=True))
+            ifstmt += "{0}\n".format(self.traverse(item.iftrue, indent + 4, called=True))
             if item.iffalse is not None:
                 ifstmt += " "*indent + "else:\n"
                 ifstmt += "{0}\n".format(self.traverse(item.iffalse, indent + 4, called=True))
@@ -148,7 +158,10 @@ class FuncBody(object):
             else:
                 self.code += ifstmt
         elif item.__class__.__name__ == "For":
-            forstmt = "{0}".format(self.traverse(item.init, indent, called=True))
+            if item.init is not None:
+                forstmt = "{0}".format(self.traverse(item.init, indent, called=True))
+            else:
+                forstmt = ""
             forstmt += " "*indent + "while {0}:\n".format(self.traverse(item.cond, 0, called=True))
             for i in range(len(item.stmt.block_items)):
                 forstmt += self.traverse(item.stmt.block_items[i], indent+4, called=True) + "\n"
@@ -213,6 +226,12 @@ class FuncBody(object):
             for i in range(len(item.block_items)):
                 compound += self.traverse(item.block_items[i], indent + 4, called=True) + "\n"
             return compound
+        elif item.__class__.__name__ == "TernaryOp":
+            stmt = " "*indent + "{0} if {1} else {2}".format(self.traverse(item.iftrue, 0, called=True), self.traverse(item.cond, 0, called=True), self.traverse(item.iffalse, 0, called=True))
+            if called:
+                return stmt
+            else:
+                self.code += stmt
         elif item.__class__.__name__ == "EmptyStatement":
             pass
         else:
