@@ -649,3 +649,27 @@ ERROR awkward_listoffsetarray_local_preparenext_64(
   }
   return success();
 }
+
+ERROR awkward_indexedarray_local_preparenext_64(
+    int64_t* nextoutindex,
+    const int64_t* starts,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t parentslength,
+    const int64_t* nextparents,
+    int64_t nextparentsoffset) {
+  int64_t j = 0;
+  for (int64_t i = 0; i < parentslength; i++) {
+    int64_t parent = parents[i] + parentsoffset;
+    int64_t start = starts[parent];
+    int64_t nextparent = nextparents[j] + nextparentsoffset;
+    if (parent == nextparent) {
+      nextoutindex[i] = j;
+      ++j;
+    }
+    else {
+      nextoutindex[i] = -1;
+    }
+  }
+  return success();
+}

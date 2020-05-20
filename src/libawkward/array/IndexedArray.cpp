@@ -7,6 +7,7 @@
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/cpu-kernels/operations.h"
 #include "awkward/cpu-kernels/reducers.h"
+#include "awkward/cpu-kernels/sorting.h"
 #include "awkward/type/OptionType.h"
 #include "awkward/type/ArrayType.h"
 #include "awkward/type/UnknownType.h"
@@ -2025,19 +2026,15 @@ namespace awkward {
                                            keepdims);
 
     Index64 nextoutindex(index_.length());
-    int64_t j = 0;
-    for (int64_t i = 0; i < parents.length(); i++) {
-      int64_t parent = parents.getitem_at_nowrap(i);
-      int64_t start = starts.getitem_at_nowrap(parent);
-      int64_t nextparent = nextparents.getitem_at_nowrap(j);
-      if (parent == nextparent) {
-        nextoutindex.setitem_at_nowrap(i, j);
-        ++j;
-      }
-      else {
-        nextoutindex.setitem_at_nowrap(i, -1);
-      }
-    }
+    struct Error err3 = awkward_indexedarray_local_preparenext_64(
+        nextoutindex.ptr().get(),
+        starts.ptr().get(),
+        parents.ptr().get(),
+        parents.offset(),
+        parents.length(),
+        nextparents.ptr().get(),
+        nextparents.offset());
+    util::handle_error(err3, classname(), identities_.get());
 
     out = std::make_shared<IndexedOptionArray64>(Identities::none(),
                                                  util::Parameters(),
@@ -2061,13 +2058,13 @@ namespace awkward {
             "sort_next with unbranching depth > negaxis expects a "
             "ListOffsetArray64 whose offsets start at zero");
         }
-        struct Error err3 = awkward_indexedarray_reduce_next_fix_offsets_64(
+        struct Error err4 = awkward_indexedarray_reduce_next_fix_offsets_64(
           outoffsets.ptr().get(),
           starts.ptr().get(),
           starts.offset(),
           starts.length(),
           outindex.length());
-        util::handle_error(err3, classname(), identities_.get());
+        util::handle_error(err4, classname(), identities_.get());
 
         return std::make_shared<ListOffsetArray64>(
           raw->identities(),
@@ -2130,19 +2127,15 @@ namespace awkward {
                                               keepdims);
 
     Index64 nextoutindex(index_.length());
-    int64_t j = 0;
-    for (int64_t i = 0; i < parents.length(); i++) {
-      int64_t parent = parents.getitem_at_nowrap(i);
-      int64_t start = starts.getitem_at_nowrap(parent);
-      int64_t nextparent = nextparents.getitem_at_nowrap(j);
-      if (parent == nextparent) {
-        nextoutindex.setitem_at_nowrap(i, j);
-        ++j;
-      }
-      else {
-        nextoutindex.setitem_at_nowrap(i, -1);
-      }
-    }
+    struct Error err3 = awkward_indexedarray_local_preparenext_64(
+        nextoutindex.ptr().get(),
+        starts.ptr().get(),
+        parents.ptr().get(),
+        parents.offset(),
+        parents.length(),
+        nextparents.ptr().get(),
+        nextparents.offset());
+    util::handle_error(err3, classname(), identities_.get());
 
     out = std::make_shared<IndexedOptionArray64>(Identities::none(),
                                                  util::Parameters(),
@@ -2166,13 +2159,13 @@ namespace awkward {
               "argsort_next with unbranching depth > negaxis expects a "
               "ListOffsetArray64 whose offsets start at zero");
         }
-        struct Error err3 = awkward_indexedarray_reduce_next_fix_offsets_64(
+        struct Error err4 = awkward_indexedarray_reduce_next_fix_offsets_64(
           outoffsets.ptr().get(),
           starts.ptr().get(),
           starts.offset(),
           starts.length(),
           outindex.length());
-        util::handle_error(err3, classname(), identities_.get());
+        util::handle_error(err4, classname(), identities_.get());
 
         return std::make_shared<ListOffsetArray64>(
           raw->identities(),

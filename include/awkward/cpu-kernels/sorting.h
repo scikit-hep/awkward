@@ -272,7 +272,7 @@ extern "C" {
       int64_t parentslength,
       bool ascending,
       bool stable);
-      
+
   EXPORT_SYMBOL struct Error
     awkward_sort_float64(
       double* toptr,
@@ -292,6 +292,16 @@ extern "C" {
       int64_t* outcarry,
       const int64_t* result,
       int64_t nextlen);
+
+  EXPORT_SYMBOL struct Error
+    awkward_indexedarray_local_preparenext_64(
+      int64_t* outcarry,
+      const int64_t* starts,
+      const int64_t* parents,
+      int64_t parentsoffset,
+      int64_t parentslength,
+      const int64_t* nextparents,
+      int64_t nextparentsoffset);
 
 }
 
