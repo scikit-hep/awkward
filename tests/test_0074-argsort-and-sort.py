@@ -358,6 +358,18 @@ def test_RecordArray():
      {'x': 7.7, 'y': [7]},
      {'x': 8.8, 'y': []}]
 
+    assert awkward1.to_list(array.layout.sort(-1, True, False)) == {
+      'x': [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8],
+      'y': [[], [1], [2, 2], [3, 3, 3], [4, 4, 4, 4], [5, 5, 5], [6, 6], [7], []]}
+
+    assert awkward1.to_list(array.layout.sort(-1, False, False)) == {
+      'x': [8.8, 7.7, 6.6, 5.5, 4.4, 3.3, 2.2, 1.1, 0.0],
+      'y': [[], [1], [2, 2], [3, 3, 3], [4, 4, 4, 4], [5, 5, 5], [6, 6], [7], []]}
+
+    assert awkward1.to_list(array.layout.argsort(-1, True, False)) == {
+      'x': [0, 1, 2, 3, 4, 5, 6, 7, 8],
+      'y': [[], [0], [0, 1], [0, 1, 2], [0, 1, 2, 3], [0, 1, 2], [0, 1], [0], []]}
+
     assert awkward1.to_list(array.x.layout.argsort(0, True, False)) == [0, 1, 2, 3, 4, 5, 6, 7, 8]
     assert awkward1.to_list(array.x.layout.argsort(0, False, False)) == [8, 7, 6, 5, 4, 3, 2, 1, 0]
 
@@ -417,3 +429,14 @@ def test_ByteMaskedArray():
         None,
         None,
         [9.9, 8.8, 7.7, 6.6]]
+
+def test_UnionArray():
+    content0 = awkward1.from_iter([[1.1, 2.2, 3.3], [], [4.4, 5.5]], highlevel=False)
+    content1 = awkward1.from_iter(["one", "two", "three", "four", "five"], highlevel=False)
+    tags = awkward1.layout.Index8(numpy.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=numpy.int8))
+    index = awkward1.layout.Index32(numpy.array([0, 1, 0, 1, 2, 2, 4, 3], dtype=numpy.int32))
+    array = awkward1.layout.UnionArray8_32(tags, index, [content0, content1])
+
+    with pytest.raises(ValueError) as err:
+        array.sort(0, True, False)
+    assert str(err.value) == "cannot sort UnionArray8_32"
