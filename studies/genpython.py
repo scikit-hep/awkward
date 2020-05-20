@@ -67,7 +67,7 @@ def preprocess(filename):
                     varname = line[re.search("u?int\d{1,2}_t\*?", line).span()[1] + 1:]
                     varname = re.sub("[\W_]+", "", varname)
                     tokens[funcname][varname] = re.search("u?int\d{1,2}_t\*?", line).group()
-                line = line.replace(re.search("u?int\d{1,2}_t\*?", line).group(), "int", 1)
+                line = line.replace(re.search("u?int\d{1,2}_t\*?", line).group(), "int")
             if func is True and templ is True:
                 for x in templateids:
                     if x in line:
@@ -124,10 +124,16 @@ class FuncBody(object):
             else:
                 self.code += constant
         elif item.__class__.__name__ == "Decl":
-            if called:
-                return " "*indent + "{0} = {1}".format(item.name, self.traverse(item.init, 0, called=True))
+            if item.init is not None:
+                stmt = " "*indent + "{0} = {1}".format(item.name, self.traverse(item.init, 0, called=True))
+                if not called:
+                    stmt = stmt + "\n"
             else:
-                self.code += " "*indent + "{0} = {1}\n".format(item.name, self.traverse(item.init, 0, called=True))
+                stmt = ""
+            if called:
+                return stmt
+            else:
+                self.code += stmt
         elif item.__class__.__name__ == "Assignment":
             assignstmt = " "*indent + "{0} = {1}\n".format(self.traverse(item.lvalue, 0, called=True), self.traverse(item.rvalue, 0, called=True))
             if called:
@@ -168,7 +174,7 @@ class FuncBody(object):
                 self.code += ifstmt
         elif item.__class__.__name__ == "For":
             if item.init is not None:
-                forstmt = "{0}".format(self.traverse(item.init, indent, called=True))
+                forstmt = "{0}\n".format(self.traverse(item.init, indent, called=True))
             else:
                 forstmt = ""
             forstmt += " "*indent + "while {0}:\n".format(self.traverse(item.cond, 0, called=True))
@@ -181,15 +187,17 @@ class FuncBody(object):
                 self.code += forstmt
         elif item.__class__.__name__ == "UnaryOp":
             if item.op[1:] == "++":
-                unaryop = " "*indent + "{0} = {0} + 1\n".format(item.expr.name)
+                unaryop = " "*indent + "{0} = {0} + 1\n".format(self.traverse(item.expr, 0, called=True))
             elif item.op[1:] == "--":
-                unaryop = " " * indent + "{0} = {0} - 1\n".format(item.expr.name)
+                unaryop = " " * indent + "{0} = {0} - 1\n".format(self.traverse(item.expr, 0, called=True))
             elif item.op == "*":
                 unaryop = " "*indent + "{0}".format(self.traverse(item.expr, 0, called=True))
             elif item.op == "-":
                 unaryop = " "*indent + "-{0}".format(self.traverse(item.expr, 0, called=True))
+            elif item.op == "!":
+                unaryop = " "*indent + "not {0}".format(self.traverse(item.expr, 0, called=True))
             else:
-                raise NotImplementedError("Please inform the developers about the error")
+                raise NotImplementedError("Unhandled Unary Operator case. Please inform the developers about the error")
             if called:
                 return unaryop
             else:
@@ -241,6 +249,14 @@ class FuncBody(object):
                 return stmt
             else:
                 self.code += stmt
+        elif item.__class__.__name__ == "While":
+            forstmt = " " * indent + "while {0}:\n".format(self.traverse(item.cond, 0, called=True))
+            for i in range(len(item.stmt.block_items)):
+                forstmt += self.traverse(item.stmt.block_items[i], indent + 4, called=True) + "\n"
+            if called:
+                return forstmt
+            else:
+                self.code += forstmt
         elif item.__class__.__name__ == "EmptyStatement":
             pass
         else:
