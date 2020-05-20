@@ -110,7 +110,11 @@ class FuncBody(object):
             else:
                 self.code += " "*indent + "{0} = {1}\n".format(item.name, self.traverse(item.init, 0, called=True))
         elif item.__class__.__name__ == "Assignment":
-            self.code += " "*indent + "{0} = {1}\n".format(self.traverse(item.lvalue, 0, called=True), self.traverse(item.rvalue, 0, called=True))
+            assignstmt = " "*indent + "{0} = {1}\n".format(self.traverse(item.lvalue, 0, called=True), self.traverse(item.rvalue, 0, called=True))
+            if called:
+                return assignstmt
+            else:
+                self.code += assignstmt
         elif item.__class__.__name__ == "FuncCall":
             if item.args is not None:
                 return " "*indent + "{0}({1})".format(item.name.name, self.traverse(item.args, 0, called=True))
@@ -148,7 +152,6 @@ class FuncBody(object):
             forstmt += " "*indent + "while {0}:\n".format(self.traverse(item.cond, 0, called=True))
             for i in range(len(item.stmt.block_items)):
                 forstmt += self.traverse(item.stmt.block_items[i], indent+4, called=True) + "\n"
-                print(forstmt)
             forstmt += " "*(indent+4) + "{0}\n".format(self.traverse(item.next, 0, called=True))
             if called:
                 return forstmt
@@ -257,7 +260,6 @@ filename = args.filename
 
 if __name__ == "__main__":
     pfile, tokens = preprocess(filename)
-    print(pfile)
     ast = pycparser.c_parser.CParser().parse(pfile)
     for i in range(len(ast.ext)):
         decl = FuncDecl(ast.ext[i].decl)
@@ -272,6 +274,7 @@ if __name__ == "__main__":
                 typename = x["type"]
             if typename.endswith("*"):
                 typename = typename[:-1]
+            # FIXME
             if typename == "C" or typename == "T":
                 typename = "Any"
             print("{0} : {1}{2}".format(x["name"], typename, brackets))
