@@ -2767,8 +2767,8 @@ namespace awkward {
           + format_ + std::string("\""));
       }
 
-      out = std::make_shared<NumpyArray>(Identities::none(),
-                                         util::Parameters(),
+      out = std::make_shared<NumpyArray>(identities_,
+                                         parameters_,
                                          ptr,
                                          shape_,
                                          strides_,
@@ -4138,5 +4138,5 @@ namespace awkward {
 
     return ptr;
   }
-  
+
 }

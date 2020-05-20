@@ -13,7 +13,6 @@ def test_EmptyArray():
     array = awkward1.layout.EmptyArray()
     assert awkward1.to_list(array.sort(0, True, False)) == []
     assert awkward1.to_list(array.argsort(0, True, False)) == []
-#    raise ValueError
 
 def test_NumpyArray():
     array = awkward1.layout.NumpyArray(numpy.array([3.3, 2.2, 1.1, 5.5, 4.4]))
@@ -437,6 +436,16 @@ def test_UnionArray():
     index = awkward1.layout.Index32(numpy.array([0, 1, 0, 1, 2, 2, 4, 3], dtype=numpy.int32))
     array = awkward1.layout.UnionArray8_32(tags, index, [content0, content1])
 
+    assert awkward1.to_list(array) == ['one', 'two', [1.1, 2.2, 3.3], [], 'three', [4.4, 5.5], 'five', 'four']
+    assert awkward1.to_list(content1) == ['one', 'two', 'three', 'four', 'five']
+
+    # FIXME: sort strings rather then characters
+    assert awkward1.to_list(content1.sort(0, True, False)) == ['fhe', 'fio', 'onree', 'toue', 'twvr']
+    assert awkward1.to_list(content1.sort(0, False, False)) == ['twv', 'tou', 'onrre', 'fioe', 'fhee']
+
+    assert awkward1.to_list(content1.sort(1, True, False)) == ['eno', 'otw', 'eehrt', 'foru', 'efiv']
+    assert awkward1.to_list(content1.sort(1, False, False)) == ['one', 'wto', 'trhee', 'urof', 'vife']
+
     with pytest.raises(ValueError) as err:
-        array.sort(0, True, False)
+        array.sort(1, True, False)
     assert str(err.value) == "cannot sort UnionArray8_32"
