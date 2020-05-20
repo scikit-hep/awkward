@@ -14,6 +14,11 @@ py27 = (sys.version_info[0] < 3)
 
 pandas = pytest.importorskip("pandas")
 
+def test_numpy_structured_arrays_cant_be_pandas_printed():
+    a = awkward1.Array([{"a": 1}, {"a": 2}, {"a": 3}, {"a": 4}, {"a": 5}])
+    df = pandas.DataFrame({"column": a})
+    repr(df)
+
 def test_basic():
     nparray = numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
     akarray = awkward1.Array(nparray, check_valid=True)

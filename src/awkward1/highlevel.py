@@ -1166,7 +1166,12 @@ class Array(
         Only exception: Pandas can generate NumPy `"O"` arrays to print
         Array fragments to the screen.
         """
-        if awkward1._util.called_by_module("pandas"):
+        if awkward1._util.called_by_module("pandas.io.formats.format"):
+            out = numpy.empty(len(self._layout), dtype="O")
+            for i, x in enumerate(self._layout):
+                out[i] = awkward1._util.wrap(x, self._behavior)
+            return out
+        elif awkward1._util.called_by_module("pandas"):
             try:
                 return awkward1._connect._numpy.convert_to_array(
                     self._layout, args, kwargs
