@@ -2973,6 +2973,46 @@ namespace awkward {
   }
 
   const ContentPtr
+  NumpyArray::sort_asstrings(const Index64& offsets,
+                             bool ascending,
+                             bool stable) const {
+    std::shared_ptr<Content> out;
+    int64_t offset = byteoffset_ / itemsize_;
+    std::shared_ptr<void> ptr;
+
+    Index64 outoffsets(offsets.length());
+
+    if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
+      ptr = string_sort<uint8_t>(reinterpret_cast<uint8_t*>(ptr_.get()),
+                                 length(),
+                                 offsets,
+                                 outoffsets,
+                                 ascending,
+                                 stable);
+    } else {
+      throw std::invalid_argument(
+        std::string("cannot sort NumpyArray as strings with format \"")
+        + format_ + std::string("\""));
+    }
+
+    out = std::make_shared<NumpyArray>(identities_,
+                                       parameters_,
+                                       ptr,
+                                       shape_,
+                                       strides_,
+                                       0,
+                                       itemsize_,
+                                       format_);
+
+   out = std::make_shared<ListOffsetArray64>(Identities::none(),
+                                             util::Parameters(),
+                                             outoffsets,
+                                             out);
+
+   return out;
+  }
+
+  const ContentPtr
   NumpyArray::getitem_next(const SliceAt& at,
                            const Slice& tail,
                            const Index64& advanced) const {
@@ -4135,6 +4175,35 @@ namespace awkward {
       ascending,
       stable);
     util::handle_error(err3, classname(), nullptr);
+
+    return ptr;
+  }
+
+  template<typename T>
+  const std::shared_ptr<void>
+  NumpyArray::string_sort(const T* data,
+                          int64_t length,
+                          const Index64& offsets,
+                          Index64& outoffsets,
+                          bool ascending,
+                          bool stable) const {
+    std::shared_ptr<T> ptr(
+      new T[length], util::array_deleter<T>());
+
+    if (length == 0) {
+      return ptr;
+    }
+
+    struct Error err = util::awkward_numpyarray_sort_asstrings(
+      ptr.get(),
+      data,
+      length,
+      offsets.ptr().get(),
+      offsets.length(),
+      outoffsets.ptr().get(),
+      ascending,
+      stable);
+    util::handle_error(err, classname(), nullptr);
 
     return ptr;
   }

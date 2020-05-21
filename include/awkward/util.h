@@ -1060,6 +1060,19 @@ namespace awkward {
         int64_t parentslength,
         bool ascending,
         bool stable);
+
+    template <typename T>
+    ERROR
+      awkward_numpyarray_sort_asstrings(
+        T* toptr,
+        const T* fromptr,
+        int64_t length,
+        const int64_t* offsets,
+        int64_t offsetslength,
+        int64_t* outoffsets,
+        bool ascending,
+        bool stable);
+
   }
 }
 

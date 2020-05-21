@@ -1713,6 +1713,21 @@ namespace awkward {
     bool stable,
     bool keepdims) const {
 
+    // if this is array of strings, axis parameter is ignored
+    // and this array is sorted
+    if (util::parameter_isstring(parameters_, "__array__")) {
+      if (NumpyArray* content = dynamic_cast<NumpyArray*>(content_.get())) {
+        ContentPtr out = content->sort_asstrings(offsets_,
+                                                 ascending,
+                                                 stable);
+
+        return std::make_shared<RegularArray>(Identities::none(),
+                                               util::Parameters(),
+                                               out,
+                                               out.get()->length());
+      }
+    }
+
     std::pair<bool, int64_t> branchdepth = branch_depth();
 
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {

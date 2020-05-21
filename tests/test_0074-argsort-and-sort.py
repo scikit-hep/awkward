@@ -439,12 +439,20 @@ def test_UnionArray():
     assert awkward1.to_list(array) == ['one', 'two', [1.1, 2.2, 3.3], [], 'three', [4.4, 5.5], 'five', 'four']
     assert awkward1.to_list(content1) == ['one', 'two', 'three', 'four', 'five']
 
-    # FIXME: sort strings rather then characters
-    assert awkward1.to_list(content1.sort(0, True, False)) == ['fhe', 'fio', 'onree', 'toue', 'twvr']
-    assert awkward1.to_list(content1.sort(0, False, False)) == ['twv', 'tou', 'onrre', 'fioe', 'fhee']
+    assert awkward1.to_list(content1.sort(0, True, False)) == ['five', 'four', 'one', 'three', 'two']
+    assert awkward1.to_list(content1.sort(0, False, False)) == ['two', 'three', 'one', 'four', 'five']
 
-    assert awkward1.to_list(content1.sort(1, True, False)) == ['eno', 'otw', 'eehrt', 'foru', 'efiv']
-    assert awkward1.to_list(content1.sort(1, False, False)) == ['one', 'wto', 'trhee', 'urof', 'vife']
+    assert awkward1.to_list(content1.sort(1, True, False)) == ['five', 'four', 'one', 'three', 'two']
+    assert awkward1.to_list(content1.sort(1, False, False)) == ['two', 'three', 'one', 'four', 'five']
+
+    # Scots Gaellic from google translate
+    content2 = awkward1.from_iter(["aon", "dhà", "trì", "ceithir", "còig", "sia", "seachd", "ochdone"], highlevel=False)
+    assert awkward1.to_list(content2.sort(1, True, False)) == ['aon', 'ceithir', 'còig', 'dhà', 'ochdone', 'seachd', 'sia', 'trì']
+
+    # some random mixture of letters
+    content3 = awkward1.from_iter(["aon", "àon", "aìn", "coig", "còig", "sia", "sìa", "ain"], highlevel=False)
+    assert awkward1.to_list(content3.sort(1, True, False)) == ['ain', 'aon', 'aìn', 'coig', 'còig', 'sia', 'sìa', 'àon']
+    assert awkward1.to_list(content3.sort(1, False, False)) == ['àon', 'sìa', 'sia', 'còig', 'coig', 'aìn', 'aon', 'ain']
 
     with pytest.raises(ValueError) as err:
         array.sort(1, True, False)

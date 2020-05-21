@@ -4596,5 +4596,26 @@ namespace awkward {
         stable);
     }
 
+    template <>
+    Error awkward_numpyarray_sort_asstrings<uint8_t>(
+        uint8_t* toptr,
+        const uint8_t* fromptr,
+        int64_t length,
+        const int64_t* offsets,
+        int64_t offsetslength,
+        int64_t* outoffsets,
+        bool ascending,
+        bool stable) {
+      return awkward_numpyarray_sort_asstrings_uint8(
+        toptr,
+        fromptr,
+        length,
+        offsets,
+        offsetslength,
+        outoffsets,
+        ascending,
+        stable);
+    }
+
   }
 }

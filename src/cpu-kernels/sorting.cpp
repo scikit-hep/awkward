@@ -636,22 +636,22 @@ ERROR awkward_sort_float64(
 }
 
 ERROR awkward_listoffsetarray_local_preparenext_64(
-  int64_t* outcarry,
-  const int64_t* incarry,
-  int64_t nextlen) {
-  std::vector<int64_t> result(nextlen);
+  int64_t* tocarry,
+  const int64_t* fromindex,
+  int64_t length) {
+  std::vector<int64_t> result(length);
   std::iota(result.begin(), result.end(), 0);
   std::sort(result.begin(), result.end(),
-    [&incarry](int64_t i1, int64_t i2) {return incarry[i1] < incarry[i2];});
+    [&fromindex](int64_t i1, int64_t i2) {return fromindex[i1] < fromindex[i2];});
 
-  for(int64_t i = 0; i < nextlen; i++) {
-    outcarry[i] = result[i];
+  for(int64_t i = 0; i < length; i++) {
+    tocarry[i] = result[i];
   }
   return success();
 }
 
 ERROR awkward_indexedarray_local_preparenext_64(
-    int64_t* nextoutindex,
+    int64_t* tocarry,
     const int64_t* starts,
     const int64_t* parents,
     int64_t parentsoffset,
@@ -664,12 +664,78 @@ ERROR awkward_indexedarray_local_preparenext_64(
     int64_t start = starts[parent];
     int64_t nextparent = nextparents[j] + nextparentsoffset;
     if (parent == nextparent) {
-      nextoutindex[i] = j;
+      tocarry[i] = j;
       ++j;
     }
     else {
-      nextoutindex[i] = -1;
+      tocarry[i] = -1;
     }
   }
+  return success();
+}
+
+// This function relies on std::sort to do the right
+// thing with std::strings
+ERROR awkward_numpyarray_sort_asstrings_uint8(
+    uint8_t* toptr,
+    const uint8_t* fromptr,
+    int64_t length,
+    const int64_t* offsets,
+    int64_t offsetslength,
+    int64_t* outoffsets,
+    bool ascending,
+    bool stable) {
+
+  // convert array of characters to
+  // an std container of strings
+  std::vector<std::string> words;
+
+  for (int64_t k = 0; k < offsetslength - 1; k++) {
+    int64_t start = offsets[k];
+    int64_t stop = offsets[k + 1];
+    int64_t slen = start;
+    std::string str;
+    for (uint8_t i = (uint8_t)start; slen < stop; i++) {
+      slen++;
+      str += (char)fromptr[i];
+    }
+    words.emplace_back(str);
+  }
+
+  // sort the container
+  if (ascending  &&  !stable) {
+    std::sort(words.begin(), words.end(), std::less<std::string>());
+  }
+  else if (!ascending  &&  !stable) {
+    std::sort(words.begin(), words.end(), std::greater<std::string>());
+  }
+  else if (ascending  &&  stable) {
+    std::stable_sort(words.begin(), words.end(), std::less<std::string>());
+  }
+  else if (!ascending  &&  stable) {
+    std::stable_sort(words.begin(), words.end(), std::greater<std::string>());
+  }
+
+  // convert the strings to an array of characters
+  // and fill the outer memory via a pointer
+  int64_t k = 0;
+  for (const auto& str : words) {
+    std::vector<char> cstr(str.c_str(), str.c_str() + str.size());
+    for (const auto& c : cstr) {
+      toptr[k] = (uint8_t)c;
+      k++;
+    }
+  }
+
+  // collect sorted string lengths
+  // that are the new offsets for a ListOffsetArray
+  int64_t o = 0;
+  outoffsets[o] = (int64_t)0;
+  o++;
+  for (const auto& r : words) {
+    outoffsets[o] = outoffsets[o - 1] + (int64_t)r.size();
+    o++;
+  }
+
   return success();
 }

@@ -885,11 +885,6 @@ namespace awkward {
              bool mask,
              bool keepdims) const;
 
-    const ContentPtr
-      recurse(int64_t axis,
-              bool mask,
-              bool keepdims) const;
-
     /// @brief This array with one axis sorted by applying a sorting algorithm
     ///
     /// This operation is implemented on each node through #sort_next.

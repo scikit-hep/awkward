@@ -9,7 +9,7 @@ extern "C" {
   EXPORT_SYMBOL struct Error
   awkward_sorting_ranges(
     int64_t* toindex,
-    int64_t tolength,
+    int64_t length,
     const int64_t* parents,
     int64_t parentsoffset,
     int64_t parentslength,
@@ -20,7 +20,7 @@ extern "C" {
     int64_t* tolength,
     const int64_t* parents,
     int64_t parentsoffset,
-    int64_t length,
+    int64_t parentslength,
     int64_t outlength);
 
   EXPORT_SYMBOL struct Error
@@ -289,19 +289,30 @@ extern "C" {
 
   EXPORT_SYMBOL struct Error
     awkward_listoffsetarray_local_preparenext_64(
-      int64_t* outcarry,
-      const int64_t* result,
-      int64_t nextlen);
+      int64_t* tocarry,
+      const int64_t* fromindex,
+      int64_t length);
 
   EXPORT_SYMBOL struct Error
     awkward_indexedarray_local_preparenext_64(
-      int64_t* outcarry,
+      int64_t* tocarry,
       const int64_t* starts,
       const int64_t* parents,
       int64_t parentsoffset,
       int64_t parentslength,
       const int64_t* nextparents,
       int64_t nextparentsoffset);
+
+  EXPORT_SYMBOL struct Error
+    awkward_numpyarray_sort_asstrings_uint8(
+      uint8_t* toptr,
+      const uint8_t* fromptr,
+      int64_t length,
+      const int64_t* offsets,
+      int64_t offsetslength,
+      int64_t* outoffsets,
+      bool ascending,
+      bool stable);
 
 }
 

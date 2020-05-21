@@ -10,7 +10,6 @@
 #include <vector>
 
 #include "awkward/cpu-kernels/util.h"
-#include "awkward/cpu-kernels/operations.h"
 #include "awkward/Slice.h"
 #include "awkward/Content.h"
 
@@ -515,6 +514,11 @@ namespace awkward {
                 bool keepdims) const override;
 
     const ContentPtr
+      sort_asstrings(const Index64& offsets,
+                     bool ascending,
+                     bool stable) const;
+
+    const ContentPtr
       argsort_next(int64_t negaxis,
                    const Index64& starts,
                    const Index64& parents,
@@ -824,6 +828,14 @@ namespace awkward {
                                            int64_t outlength,
                                            bool ascending,
                                            bool stable) const;
+
+   template<typename T>
+   const std::shared_ptr<void> string_sort(const T* data,
+                                          int64_t length,
+                                          const Index64& offsets,
+                                          Index64& outoffsets,
+                                          bool ascending,
+                                          bool stable) const;
 
   /// @brief See #ptr.
   std::shared_ptr<void> ptr_;

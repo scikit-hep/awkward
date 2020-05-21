@@ -949,7 +949,7 @@ namespace awkward {
         starts.ptr().get(),
         parents.ptr().get(),
         parents.offset(),
-        length_,
+        parents.length(),
         ascending,
         stable);
       util::handle_error(err, classname(), nullptr);
