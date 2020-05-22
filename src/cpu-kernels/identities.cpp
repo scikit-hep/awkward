@@ -68,7 +68,7 @@ ERROR awkward_identities_from_listoffsetarray(
         toptr[j*(fromwidth + 1) + k] =
           fromptr[fromptroffset + i*(fromwidth) + k];
       }
-      toptr[j*(fromwidth + 1) + fromwidth] = ID(j - start);
+      toptr[j*(fromwidth + 1) + fromwidth] = (ID)(j - start);
     }
   }
   return success();
@@ -219,7 +219,7 @@ ERROR awkward_identities_from_listarray(
         toptr[j*(fromwidth + 1) + k] =
           fromptr[fromptroffset + i*(fromwidth) + k];
       }
-      toptr[j*(fromwidth + 1) + fromwidth] = ID(j - start);
+      toptr[j*(fromwidth + 1) + fromwidth] = (ID)(j - start);
     }
   }
   *uniquecontents = true;
@@ -391,7 +391,7 @@ ERROR awkward_identities_from_regulararray(
         toptr[(i*size + j)*(fromwidth + 1) + k] =
           fromptr[fromptroffset + i*fromwidth + k];
       }
-      toptr[(i*size + j)*(fromwidth + 1) + fromwidth] = ID(j);
+      toptr[(i*size + j)*(fromwidth + 1) + fromwidth] = (ID)(j);
     }
   }
   for (int64_t k = (fromlength + 1)*size*(fromwidth + 1);

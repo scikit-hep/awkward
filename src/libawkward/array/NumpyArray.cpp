@@ -337,7 +337,8 @@ namespace awkward {
   bool
   NumpyForm::equal(const FormPtr& other,
                    bool check_identities,
-                   bool check_parameters) const {
+                   bool check_parameters,
+                   bool compatibility_check) const {
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
       return false;

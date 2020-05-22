@@ -12,11 +12,11 @@ make_Form(const py::handle& m, const std::string& name) {
   return (py::class_<ak::Form, std::shared_ptr<ak::Form>>(m, name.c_str())
       .def("__eq__", [](const std::shared_ptr<ak::Form>& self,
                         const std::shared_ptr<ak::Form>& other) -> bool {
-        return self.get()->equal(other, true, true);
+        return self.get()->equal(other, true, true, false);
       })
       .def("__ne__", [](const std::shared_ptr<ak::Form>& self,
                         const std::shared_ptr<ak::Form>& other) -> bool {
-        return !self.get()->equal(other, true, true);
+        return !self.get()->equal(other, true, true, false);
       })
       .def_static("fromjson", &ak::Form::fromjson)
   );

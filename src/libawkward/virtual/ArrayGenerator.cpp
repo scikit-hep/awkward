@@ -11,6 +11,8 @@ namespace awkward {
       : form_(form)
       , length_(length) { }
 
+  ArrayGenerator::~ArrayGenerator() = default;
+
   const FormPtr
   ArrayGenerator::form() const {
     return form_;
@@ -31,7 +33,7 @@ namespace awkward {
           + std::to_string(out.get()->length()));
     }
     if (form_.get() != nullptr  &&
-        !form_.get()->equal(out.get()->form(true), true, true)) {
+        !form_.get()->equal(out.get()->form(true), true, true, true)) {
       throw std::invalid_argument(
           std::string("generated array does not conform to expected form:\n\n")
           + form_.get()->tostring() + std::string("\n\nbut generated:\n\n")
@@ -92,5 +94,29 @@ namespace awkward {
              indent + std::string("    "), "<content>", "</content>\n");
     out << indent << "</SliceGenerator>" << post;
     return out.str();
+  }
+
+  const std::shared_ptr<ArrayGenerator>
+  SliceGenerator::shallow_copy() const {
+    return std::make_shared<SliceGenerator>(form_,
+                                            length_,
+                                            content_,
+                                            slice_);
+  }
+
+  const std::shared_ptr<ArrayGenerator>
+  SliceGenerator::with_form(const FormPtr& form) const {
+    return std::make_shared<SliceGenerator>(form,
+                                            length_,
+                                            content_,
+                                            slice_);
+  }
+
+  const std::shared_ptr<ArrayGenerator>
+  SliceGenerator::with_length(int64_t length) const {
+    return std::make_shared<SliceGenerator>(form_,
+                                            length,
+                                            content_,
+                                            slice_);
   }
 }
