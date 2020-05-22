@@ -113,10 +113,11 @@ class FuncBody(object):
             for node in item:
                 self.traverse(node, indent)
         elif item.__class__.__name__ == "Return":
+            stmt = " "*indent + "return {0}".format(self.traverse(item.expr, 0, called=True))
             if called:
-                return " "*indent + "return {0}".format(self.traverse(item.expr, 0, called=True))
+                return stmt
             else:
-                self.code += " "*indent + "return {0}\n".format(self.traverse(item.expr, 0, called=True))
+                self.code += stmt + "\n"
         elif item.__class__.__name__ == "Constant":
             constant = " "*indent + "{0}".format(item.value)
             if called:
@@ -135,11 +136,11 @@ class FuncBody(object):
             else:
                 self.code += stmt
         elif item.__class__.__name__ == "Assignment":
-            assignstmt = " "*indent + "{0} = {1}\n".format(self.traverse(item.lvalue, 0, called=True), self.traverse(item.rvalue, 0, called=True))
+            assignstmt = " "*indent + "{0} = {1}".format(self.traverse(item.lvalue, 0, called=True), self.traverse(item.rvalue, 0, called=True))
             if called:
                 return assignstmt
             else:
-                self.code += assignstmt
+                self.code += assignstmt + "\n"
         elif item.__class__.__name__ == "FuncCall":
             if item.args is not None:
                 return " "*indent + "{0}({1})".format(item.name.name, self.traverse(item.args, 0, called=True))
@@ -187,9 +188,9 @@ class FuncBody(object):
                 self.code += forstmt
         elif item.__class__.__name__ == "UnaryOp":
             if item.op[1:] == "++":
-                unaryop = " "*indent + "{0} = {0} + 1\n".format(self.traverse(item.expr, 0, called=True))
+                unaryop = " "*indent + "{0} = {0} + 1".format(self.traverse(item.expr, 0, called=True))
             elif item.op[1:] == "--":
-                unaryop = " " * indent + "{0} = {0} - 1\n".format(self.traverse(item.expr, 0, called=True))
+                unaryop = " " * indent + "{0} = {0} - 1".format(self.traverse(item.expr, 0, called=True))
             elif item.op == "*":
                 unaryop = " "*indent + "{0}".format(self.traverse(item.expr, 0, called=True))
             elif item.op == "-":
@@ -201,7 +202,7 @@ class FuncBody(object):
             if called:
                 return unaryop
             else:
-                self.code += unaryop
+                self.code += unaryop + "\n"
         elif item.__class__.__name__ == "DeclList":
             decllist = " "*indent
             for i in range(len(item.decls)):
@@ -209,11 +210,10 @@ class FuncBody(object):
                     decllist += "{0}".format(self.traverse(item.decls[i], 0, called=True))
                 else:
                     decllist += ", {0}".format(self.traverse(item.decls[i], 0, called=True))
-            decllist += "\n"
             if called:
                 return decllist
             else:
-                self.code += decllist
+                self.code += decllist + "\n"
         elif item.__class__.__name__ == "ArrayRef":
             arrayref = " "*indent + "{0}[{1}]".format(self.traverse(item.name, 0, called=True), self.traverse(item.subscript, 0, called=True))
             if called:
@@ -240,9 +240,13 @@ class FuncBody(object):
                 self.code += ID
         elif item.__class__.__name__ == "Compound":
             compound = ""
-            for i in range(len(item.block_items)):
-                compound += self.traverse(item.block_items[i], indent + 4, called=True) + "\n"
-            return compound
+            if called:
+                for i in range(len(item.block_items)):
+                    compound += self.traverse(item.block_items[i], indent, called=True) + "\n"
+            else:
+                for i in range(len(item.block_items)):
+                    compound += self.traverse(item.block_items[i], indent + 4, called=True) + "\n"
+            return compound[:-1]
         elif item.__class__.__name__ == "TernaryOp":
             stmt = " "*indent + "{0} if {1} else {2}".format(self.traverse(item.iftrue, 0, called=True), self.traverse(item.cond, 0, called=True), self.traverse(item.iffalse, 0, called=True))
             if called:
