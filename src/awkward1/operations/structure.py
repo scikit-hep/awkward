@@ -417,9 +417,10 @@ def with_field(base, what, where=None, highlevel=True):
     Args:
         base: Data containing records or tuples.
         what: Data to add as a new field.
-        where (None or str): If None, the new field has no name (can be
-            accessed as an integer slot number in a string); otherwise, the
-            name of the new field.
+        where (None or str or list): If None, the new field has no name (can be
+            accessed as an integer slot number in a string); If str, the name
+            of the new field. If list, it is interpreted as a path where to add
+            the field in a nested record.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
 
@@ -432,42 +433,54 @@ def with_field(base, what, where=None, highlevel=True):
     #ak.with_field, so performance is not a factor in choosing one over the
     other.)
     """
-    base = awkward1.operations.convert.to_layout(
-        base, allow_record=True, allow_other=False
-    )
-    if base.numfields < 0:
-        raise ValueError("no tuples or records in array; cannot add a new " "field")
 
-    what = awkward1.operations.convert.to_layout(
-        what, allow_record=True, allow_other=True
-    )
-
-    keys = base.keys()
-    if where in base.keys():
-        keys.remove(where)
-        base = base[keys]
-
-    def getfunction(inputs, depth):
-        base, what = inputs
-        if isinstance(base, awkward1.layout.RecordArray):
-            if not isinstance(what, awkward1.layout.Content):
-                what = awkward1.layout.NumpyArray(
-                    numpy.lib.stride_tricks.as_strided(
-                        [what], shape=(len(base),), strides=(0,)
-                    )
-                )
-            return lambda: (base.setitem_field(where, what),)
-        else:
-            return None
-
-    behavior = awkward1._util.behaviorof(base, what)
-    out = awkward1._util.broadcast_and_apply([base, what], getfunction, behavior)
-    assert isinstance(out, tuple) and len(out) == 1
-
-    if highlevel:
-        return awkward1._util.wrap(out[0], behavior=behavior)
+    if isinstance(where, (list, tuple)) and len(where) > 1:
+        return with_field(
+            base,
+            with_field(base[where[0]], what, where=where[1:], highlevel=highlevel),
+            where=where[0],
+            highlevel=highlevel
+        )
     else:
-        return out[0]
+        if isinstance(where, (list, tuple)):
+            where = where[0]
+
+        base = awkward1.operations.convert.to_layout(
+            base, allow_record=True, allow_other=False
+        )
+        if base.numfields < 0:
+            raise ValueError("no tuples or records in array; cannot add a new " "field")
+
+        what = awkward1.operations.convert.to_layout(
+            what, allow_record=True, allow_other=True
+        )
+
+        keys = base.keys()
+        if where in base.keys():
+            keys.remove(where)
+            base = base[keys]
+
+        def getfunction(inputs, depth):
+            base, what = inputs
+            if isinstance(base, awkward1.layout.RecordArray):
+                if not isinstance(what, awkward1.layout.Content):
+                    what = awkward1.layout.NumpyArray(
+                        numpy.lib.stride_tricks.as_strided(
+                            [what], shape=(len(base),), strides=(0,)
+                        )
+                    )
+                return lambda: (base.setitem_field(where, what),)
+            else:
+                return None
+
+        behavior = awkward1._util.behaviorof(base, what)
+        out = awkward1._util.broadcast_and_apply([base, what], getfunction, behavior)
+        assert isinstance(out, tuple) and len(out) == 1
+
+        if highlevel:
+            return awkward1._util.wrap(out[0], behavior=behavior)
+        else:
+            return out[0]
 
 
 def with_parameter(array, parameter, value, highlevel=True):
