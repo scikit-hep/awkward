@@ -3,12 +3,12 @@
 
 #include "awkward/common_utils.h"
 
-namespace kernel {
+namespace kernel
+{
 
-template<typename T>
-ERROR new_identities(int64_t memory_loc,
-                     T *toptr,
-                     int64_t length);
+    template <typename T>
+    ERROR new_identities(T *toptr,
+                         int64_t length);
 
 };
 

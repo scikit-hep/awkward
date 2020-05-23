@@ -6,38 +6,29 @@
 #include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/reducers.h"
 
-#ifdef ENABLE_GPU_KERNELS
-  #include "awkward/gpu-kernels/identities.h"
+#ifdef CUDA_KERNELS
+#include "awkward/cuda-kernels/identities.h"
 #endif
 
-namespace kernel {
-template<>
-ERROR new_identities<int32_t>(int64_t memory_loc,
-                              int32_t *toptr,
-                              int64_t length) {
-  if (memory_loc < 0)
+namespace kernel
+{
+  template <>
+  ERROR new_identities<int32_t>(int32_t *toptr,
+                                int64_t length)
+  {
+#ifdef CUDA_KERNELS
+    return awkward_cuda_new_identities32(toptr, length);
+#endif
     return awkward_new_identities32(toptr, length);
-  #ifdef ENABLE_GPU_KERNELS
-  else {
-    return awkward_gpu_new_identities32(memory_loc, toptr, length);
   }
-  #endif
-}
 
-template<>
-ERROR new_identities<int64_t>(int64_t memory_loc,
-                              int64_t *toptr,
-                              int64_t length) {
-  if (memory_loc < 0)
+  template <>
+  ERROR new_identities<int64_t>(int64_t *toptr,
+                                int64_t length)
+  {
+#ifdef CUDA_KERNELS
+    return awkward_cuda_new_identities64(toptr, length);
+#endif
     return awkward_new_identities64(toptr, length);
-  #ifdef ENABLE_GPU_KERNELS
-  else {
-    return awkward_gpu_new_identities64(memory_loc, toptr, length);
   }
-  #endif
-}
-}
-
-
-
-
+} // namespace kernel
