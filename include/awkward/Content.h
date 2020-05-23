@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #ifndef AWKWARD_CONTENT_H_
 #define AWKWARD_CONTENT_H_
@@ -59,10 +59,20 @@ namespace awkward {
 
     /// @brief Returns `true` if this Form is equal to the other Form; `false`
     /// otherwise.
+    ///
+    /// @param check_identities If `true`, Forms are not equal unless they both
+    /// #has_identities.
+    /// @param check_parameters If `true`, Forms are not equal unless they have
+    /// the same #parameters.
+    /// @param compatibility_check If `true`, this is part of a compatibility
+    /// check between an expected Form (`this`) and a generated array's Form
+    /// (`other`). When the expected Form is a VirtualForm, it's allowed to be
+    /// less specific than the `other` VirtualForm.
     virtual bool
       equal(const FormPtr& other,
             bool check_identities,
-            bool check_parameters) const = 0;
+            bool check_parameters,
+            bool compatibility_check) const = 0;
 
     /// @brief The parameter associated with `key` at the first level
     /// that has a non-null value, descending only as deep as the first

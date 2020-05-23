@@ -1,4 +1,4 @@
-# BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 from __future__ import absolute_import
 
@@ -8,6 +8,7 @@ import awkward1._util
 import awkward1._connect._numpy
 import awkward1.layout
 import awkward1.operations.convert
+
 
 def count(array, axis=None, keepdims=False, mask_identity=False):
     """
@@ -78,23 +79,26 @@ def count(array, axis=None, keepdims=False, mask_identity=False):
     If it is desirable to include None values in #ak.count, use #ak.fill_none
     to turn the None values into something that would be counted.
     """
-    layout = awkward1.operations.convert.to_layout(array,
-                                                   allow_record=False,
-                                                   allow_other=False)
+    layout = awkward1.operations.convert.to_layout(
+        array, allow_record=False, allow_other=False
+    )
     if axis is None:
+
         def reduce(xs):
             if len(xs) == 1:
                 return xs[0]
             else:
                 return xs[0] + reduce(xs[1:])
-        return reduce([numpy.size(x)
-                         for x in awkward1._util.completely_flatten(layout)])
+
+        return reduce(
+            [numpy.size(x) for x in awkward1._util.completely_flatten(layout)]
+        )
     else:
         behavior = awkward1._util.behaviorof(array)
-        return awkward1._util.wrap(layout.count(axis=axis,
-                                                mask=mask_identity,
-                                                keepdims=keepdims),
-                                   behavior)
+        return awkward1._util.wrap(
+            layout.count(axis=axis, mask=mask_identity, keepdims=keepdims), behavior
+        )
+
 
 @awkward1._connect._numpy.implements(numpy.count_nonzero)
 def count_nonzero(array, axis=None, keepdims=False, mask_identity=False):
@@ -128,23 +132,27 @@ def count_nonzero(array, axis=None, keepdims=False, mask_identity=False):
     count None values. If it is desirable to count them, use #ak.fill_none
     to turn them into something that would be counted.
     """
-    layout = awkward1.operations.convert.to_layout(array,
-                                                   allow_record=False,
-                                                   allow_other=False)
+    layout = awkward1.operations.convert.to_layout(
+        array, allow_record=False, allow_other=False
+    )
     if axis is None:
+
         def reduce(xs):
             if len(xs) == 1:
                 return xs[0]
             else:
                 return xs[0] + reduce(xs[1:])
-        return reduce([numpy.count_nonzero(x)
-                         for x in awkward1._util.completely_flatten(layout)])
+
+        return reduce(
+            [numpy.count_nonzero(x) for x in awkward1._util.completely_flatten(layout)]
+        )
     else:
         behavior = awkward1._util.behaviorof(array)
-        return awkward1._util.wrap(layout.count_nonzero(axis=axis,
-                                                        mask=mask_identity,
-                                                        keepdims=keepdims),
-                                   behavior)
+        return awkward1._util.wrap(
+            layout.count_nonzero(axis=axis, mask=mask_identity, keepdims=keepdims),
+            behavior,
+        )
+
 
 @awkward1._connect._numpy.implements(numpy.sum)
 def sum(array, axis=None, keepdims=False, mask_identity=False):
@@ -318,23 +326,24 @@ def sum(array, axis=None, keepdims=False, mask_identity=False):
     the identity of addition, but it is reduced to None if
     `mask_identity=True`.
     """
-    layout = awkward1.operations.convert.to_layout(array,
-                                                   allow_record=False,
-                                                   allow_other=False)
+    layout = awkward1.operations.convert.to_layout(
+        array, allow_record=False, allow_other=False
+    )
     if axis is None:
+
         def reduce(xs):
             if len(xs) == 1:
                 return xs[0]
             else:
                 return xs[0] + reduce(xs[1:])
-        return reduce([numpy.sum(x)
-                         for x in awkward1._util.completely_flatten(layout)])
+
+        return reduce([numpy.sum(x) for x in awkward1._util.completely_flatten(layout)])
     else:
         behavior = awkward1._util.behaviorof(array)
-        return awkward1._util.wrap(layout.sum(axis=axis,
-                                              mask=mask_identity,
-                                              keepdims=keepdims),
-                                   behavior)
+        return awkward1._util.wrap(
+            layout.sum(axis=axis, mask=mask_identity, keepdims=keepdims), behavior
+        )
+
 
 @awkward1._connect._numpy.implements(numpy.prod)
 def prod(array, axis=None, keepdims=False, mask_identity=False):
@@ -364,23 +373,26 @@ def prod(array, axis=None, keepdims=False, mask_identity=False):
     See #ak.sum for a more complete description of nested list and missing
     value (None) handling in reducers.
     """
-    layout = awkward1.operations.convert.to_layout(array,
-                                                   allow_record=False,
-                                                   allow_other=False)
+    layout = awkward1.operations.convert.to_layout(
+        array, allow_record=False, allow_other=False
+    )
     if axis is None:
+
         def reduce(xs):
             if len(xs) == 1:
                 return xs[0]
             else:
                 return xs[0] * reduce(xs[1:])
-        return reduce([numpy.prod(x)
-                         for x in awkward1._util.completely_flatten(layout)])
+
+        return reduce(
+            [numpy.prod(x) for x in awkward1._util.completely_flatten(layout)]
+        )
     else:
         behavior = awkward1._util.behaviorof(array)
-        return awkward1._util.wrap(layout.prod(axis=axis,
-                                               mask=mask_identity,
-                                               keepdims=keepdims),
-                                   behavior)
+        return awkward1._util.wrap(
+            layout.prod(axis=axis, mask=mask_identity, keepdims=keepdims), behavior
+        )
+
 
 @awkward1._connect._numpy.implements(numpy.any)
 def any(array, axis=None, keepdims=False, mask_identity=False):
@@ -412,23 +424,24 @@ def any(array, axis=None, keepdims=False, mask_identity=False):
     See #ak.sum for a more complete description of nested list and missing
     value (None) handling in reducers.
     """
-    layout = awkward1.operations.convert.to_layout(array,
-                                                   allow_record=False,
-                                                   allow_other=False)
+    layout = awkward1.operations.convert.to_layout(
+        array, allow_record=False, allow_other=False
+    )
     if axis is None:
+
         def reduce(xs):
             if len(xs) == 1:
                 return xs[0]
             else:
                 return xs[0] or reduce(xs[1:])
-        return reduce([numpy.any(x)
-                         for x in awkward1._util.completely_flatten(layout)])
+
+        return reduce([numpy.any(x) for x in awkward1._util.completely_flatten(layout)])
     else:
         behavior = awkward1._util.behaviorof(array)
-        return awkward1._util.wrap(layout.any(axis=axis,
-                                              mask=mask_identity,
-                                              keepdims=keepdims),
-                                   behavior)
+        return awkward1._util.wrap(
+            layout.any(axis=axis, mask=mask_identity, keepdims=keepdims), behavior
+        )
+
 
 @awkward1._connect._numpy.implements(numpy.all)
 def all(array, axis=None, keepdims=False, mask_identity=False):
@@ -460,23 +473,24 @@ def all(array, axis=None, keepdims=False, mask_identity=False):
     See #ak.sum for a more complete description of nested list and missing
     value (None) handling in reducers.
     """
-    layout = awkward1.operations.convert.to_layout(array,
-                                                   allow_record=False,
-                                                   allow_other=False)
+    layout = awkward1.operations.convert.to_layout(
+        array, allow_record=False, allow_other=False
+    )
     if axis is None:
+
         def reduce(xs):
             if len(xs) == 1:
                 return xs[0]
             else:
                 return xs[0] and reduce(xs[1:])
-        return reduce([numpy.all(x)
-                         for x in awkward1._util.completely_flatten(layout)])
+
+        return reduce([numpy.all(x) for x in awkward1._util.completely_flatten(layout)])
     else:
         behavior = awkward1._util.behaviorof(array)
-        return awkward1._util.wrap(layout.all(axis=axis,
-                                              mask=mask_identity,
-                                              keepdims=keepdims),
-                                   behavior)
+        return awkward1._util.wrap(
+            layout.all(axis=axis, mask=mask_identity, keepdims=keepdims), behavior
+        )
+
 
 @awkward1._connect._numpy.implements(numpy.min)
 def min(array, axis=None, keepdims=False, mask_identity=True):
@@ -509,10 +523,11 @@ def min(array, axis=None, keepdims=False, mask_identity=True):
     See #ak.sum for a more complete description of nested list and missing
     value (None) handling in reducers.
     """
-    layout = awkward1.operations.convert.to_layout(array,
-                                                   allow_record=False,
-                                                   allow_other=False)
+    layout = awkward1.operations.convert.to_layout(
+        array, allow_record=False, allow_other=False
+    )
     if axis is None:
+
         def reduce(xs):
             if len(xs) == 0:
                 return None
@@ -521,14 +536,15 @@ def min(array, axis=None, keepdims=False, mask_identity=True):
             else:
                 x, y = xs[0], reduce(xs[1:])
                 return x if x < y else y
+
         tmp = awkward1._util.completely_flatten(layout)
         return reduce([numpy.min(x) for x in tmp if len(x) > 0])
     else:
         behavior = awkward1._util.behaviorof(array)
-        return awkward1._util.wrap(layout.min(axis=axis,
-                                              mask=mask_identity,
-                                              keepdims=keepdims),
-                                   behavior)
+        return awkward1._util.wrap(
+            layout.min(axis=axis, mask=mask_identity, keepdims=keepdims), behavior
+        )
+
 
 @awkward1._connect._numpy.implements(numpy.max)
 def max(array, axis=None, keepdims=False, mask_identity=True):
@@ -561,10 +577,11 @@ def max(array, axis=None, keepdims=False, mask_identity=True):
     See #ak.sum for a more complete description of nested list and missing
     value (None) handling in reducers.
     """
-    layout = awkward1.operations.convert.to_layout(array,
-                                                   allow_record=False,
-                                                   allow_other=False)
+    layout = awkward1.operations.convert.to_layout(
+        array, allow_record=False, allow_other=False
+    )
     if axis is None:
+
         def reduce(xs):
             if len(xs) == 0:
                 return None
@@ -573,14 +590,15 @@ def max(array, axis=None, keepdims=False, mask_identity=True):
             else:
                 x, y = xs[0], reduce(xs[1:])
                 return x if x > y else y
+
         tmp = awkward1._util.completely_flatten(layout)
         return reduce([numpy.max(x) for x in tmp if len(x) > 0])
     else:
         behavior = awkward1._util.behaviorof(array)
-        return awkward1._util.wrap(layout.max(axis=axis,
-                                              mask=mask_identity,
-                                              keepdims=keepdims),
-                                   behavior)
+        return awkward1._util.wrap(
+            layout.max(axis=axis, mask=mask_identity, keepdims=keepdims), behavior
+        )
+
 
 @awkward1._connect._numpy.implements(numpy.argmin)
 def argmin(array, axis=None, keepdims=False, mask_identity=True):
@@ -617,9 +635,9 @@ def argmin(array, axis=None, keepdims=False, mask_identity=True):
     See #ak.sum for a more complete description of nested list and missing
     value (None) handling in reducers.
     """
-    layout = awkward1.operations.convert.to_layout(array,
-                                                   allow_record=False,
-                                                   allow_other=False)
+    layout = awkward1.operations.convert.to_layout(
+        array, allow_record=False, allow_other=False
+    )
 
     if axis is None:
         if isinstance(layout, awkward1.partition.PartitionedArray):
@@ -647,10 +665,10 @@ def argmin(array, axis=None, keepdims=False, mask_identity=True):
 
     else:
         behavior = awkward1._util.behaviorof(array)
-        return awkward1._util.wrap(layout.argmin(axis=axis,
-                                                 mask=mask_identity,
-                                                 keepdims=keepdims),
-                                   behavior)
+        return awkward1._util.wrap(
+            layout.argmin(axis=axis, mask=mask_identity, keepdims=keepdims), behavior
+        )
+
 
 @awkward1._connect._numpy.implements(numpy.argmax)
 def argmax(array, axis=None, keepdims=False, mask_identity=True):
@@ -687,9 +705,9 @@ def argmax(array, axis=None, keepdims=False, mask_identity=True):
     See #ak.sum for a more complete description of nested list and missing
     value (None) handling in reducers.
     """
-    layout = awkward1.operations.convert.to_layout(array,
-                                                   allow_record=False,
-                                                   allow_other=False)
+    layout = awkward1.operations.convert.to_layout(
+        array, allow_record=False, allow_other=False
+    )
 
     if axis is None:
         if isinstance(layout, awkward1.partition.PartitionedArray):
@@ -717,13 +735,14 @@ def argmax(array, axis=None, keepdims=False, mask_identity=True):
 
     else:
         behavior = awkward1._util.behaviorof(array)
-        return awkward1._util.wrap(layout.argmax(axis=axis,
-                                                 mask=mask_identity,
-                                                 keepdims=keepdims),
-                                   behavior)
+        return awkward1._util.wrap(
+            layout.argmax(axis=axis, mask=mask_identity, keepdims=keepdims), behavior
+        )
+
 
 # The following are not strictly reducers, but are defined in terms of
 # reducers and ufuncs.
+
 
 def moment(x, n, weight=None, axis=None, keepdims=False, mask_identity=True):
     """
@@ -769,24 +788,25 @@ def moment(x, n, weight=None, axis=None, keepdims=False, mask_identity=True):
     """
     with numpy.errstate(invalid="ignore"):
         if weight is None:
-            sumw   = count(x,
-                           axis=axis,
-                           keepdims=keepdims,
-                           mask_identity=mask_identity)
-            sumwxn = sum(x**n,
-                         axis=axis,
-                         keepdims=keepdims,
-                         mask_identity=mask_identity)
+            sumw = count(x, axis=axis, keepdims=keepdims, mask_identity=mask_identity)
+            sumwxn = sum(
+                x ** n, axis=axis, keepdims=keepdims, mask_identity=mask_identity
+            )
         else:
-            sumw   = sum(x*0 + weight,
-                         axis=axis,
-                         keepdims=keepdims,
-                         mask_identity=mask_identity)
-            sumwxn = sum((x*weight)**n,
-                         axis=axis,
-                         keepdims=keepdims,
-                         mask_identity=mask_identity)
+            sumw = sum(
+                x * 0 + weight,
+                axis=axis,
+                keepdims=keepdims,
+                mask_identity=mask_identity,
+            )
+            sumwxn = sum(
+                (x * weight) ** n,
+                axis=axis,
+                keepdims=keepdims,
+                mask_identity=mask_identity,
+            )
         return numpy.true_divide(sumwxn, sumw)
+
 
 @awkward1._connect._numpy.implements(numpy.mean)
 def mean(x, weight=None, axis=None, keepdims=False, mask_identity=True):
@@ -852,24 +872,20 @@ def mean(x, weight=None, axis=None, keepdims=False, mask_identity=True):
     """
     with numpy.errstate(invalid="ignore"):
         if weight is None:
-            sumw  = count(x,
-                          axis=axis,
-                          keepdims=keepdims,
-                          mask_identity=mask_identity)
-            sumwx = sum(x,
-                        axis=axis,
-                        keepdims=keepdims,
-                        mask_identity=mask_identity)
+            sumw = count(x, axis=axis, keepdims=keepdims, mask_identity=mask_identity)
+            sumwx = sum(x, axis=axis, keepdims=keepdims, mask_identity=mask_identity)
         else:
-            sumw  = sum(x*0 + weight,
-                        axis=axis,
-                        keepdims=keepdims,
-                        mask_identity=mask_identity)
-            sumwx = sum(x*weight,
-                        axis=axis,
-                        keepdims=keepdims,
-                        mask_identity=mask_identity)
+            sumw = sum(
+                x * 0 + weight,
+                axis=axis,
+                keepdims=keepdims,
+                mask_identity=mask_identity,
+            )
+            sumwx = sum(
+                x * weight, axis=axis, keepdims=keepdims, mask_identity=mask_identity
+            )
         return numpy.true_divide(sumwx, sumw)
+
 
 @awkward1._connect._numpy.implements(numpy.var)
 def var(x, weight=None, ddof=0, axis=None, keepdims=False, mask_identity=True):
@@ -921,31 +937,37 @@ def var(x, weight=None, ddof=0, axis=None, keepdims=False, mask_identity=True):
     non-reducer.
     """
     with numpy.errstate(invalid="ignore"):
-        xmean = mean(x, weight=weight,
-                  axis=axis, keepdims=keepdims, mask_identity=mask_identity)
+        xmean = mean(
+            x, weight=weight, axis=axis, keepdims=keepdims, mask_identity=mask_identity
+        )
         if weight is None:
-            sumw   = count(x,
-                           axis=axis,
-                           keepdims=keepdims,
-                           mask_identity=mask_identity)
-            sumwxx = sum((x - xmean)**2,
-                         axis=axis,
-                         keepdims=keepdims,
-                         mask_identity=mask_identity)
+            sumw = count(x, axis=axis, keepdims=keepdims, mask_identity=mask_identity)
+            sumwxx = sum(
+                (x - xmean) ** 2,
+                axis=axis,
+                keepdims=keepdims,
+                mask_identity=mask_identity,
+            )
         else:
-            sumw   = sum(x*0 + weight,
-                         axis=axis,
-                         keepdims=keepdims,
-                         mask_identity=mask_identity)
-            sumwxx = sum((x - xmean)**2 * weight,
-                         axis=axis,
-                         keepdims=keepdims,
-                         mask_identity=mask_identity)
+            sumw = sum(
+                x * 0 + weight,
+                axis=axis,
+                keepdims=keepdims,
+                mask_identity=mask_identity,
+            )
+            sumwxx = sum(
+                (x - xmean) ** 2 * weight,
+                axis=axis,
+                keepdims=keepdims,
+                mask_identity=mask_identity,
+            )
         if ddof != 0:
-            return (numpy.true_divide(sumwxx, sumw) *
-                    numpy.true_divide(sumw, sumw - ddof))
+            return numpy.true_divide(sumwxx, sumw) * numpy.true_divide(
+                sumw, sumw - ddof
+            )
         else:
             return numpy.true_divide(sumwxx, sumw)
+
 
 @awkward1._connect._numpy.implements(numpy.std)
 def std(x, weight=None, ddof=0, axis=None, keepdims=False, mask_identity=True):
@@ -991,12 +1013,17 @@ def std(x, weight=None, ddof=0, axis=None, keepdims=False, mask_identity=True):
     non-reducer.
     """
     with numpy.errstate(invalid="ignore"):
-        return numpy.sqrt(var(x,
-                              weight=weight,
-                              ddof=ddof,
-                              axis=axis,
-                              keepdims=keepdims,
-                              mask_identity=mask_identity))
+        return numpy.sqrt(
+            var(
+                x,
+                weight=weight,
+                ddof=ddof,
+                axis=axis,
+                keepdims=keepdims,
+                mask_identity=mask_identity,
+            )
+        )
+
 
 def covar(x, y, weight=None, axis=None, keepdims=False, mask_identity=True):
     """
@@ -1037,33 +1064,35 @@ def covar(x, y, weight=None, axis=None, keepdims=False, mask_identity=True):
     non-reducer.
     """
     with numpy.errstate(invalid="ignore"):
-        xmean = mean(x, weight=weight,
-                     axis=axis,
-                     keepdims=keepdims,
-                     mask_identity=mask_identity)
-        ymean = mean(y, weight=weight,
-                     axis=axis,
-                     keepdims=keepdims,
-                     mask_identity=mask_identity)
+        xmean = mean(
+            x, weight=weight, axis=axis, keepdims=keepdims, mask_identity=mask_identity
+        )
+        ymean = mean(
+            y, weight=weight, axis=axis, keepdims=keepdims, mask_identity=mask_identity
+        )
         if weight is None:
-            sumw = count(x,
-                         axis=axis,
-                         keepdims=keepdims,
-                         mask_identity=mask_identity)
-            sumwxy = sum((x - xmean)*(y - ymean),
-                         axis=axis,
-                         keepdims=keepdims,
-                         mask_identity=mask_identity)
+            sumw = count(x, axis=axis, keepdims=keepdims, mask_identity=mask_identity)
+            sumwxy = sum(
+                (x - xmean) * (y - ymean),
+                axis=axis,
+                keepdims=keepdims,
+                mask_identity=mask_identity,
+            )
         else:
-            sumw = sum(x*0 + weight,
-                       axis=axis,
-                       keepdims=keepdims,
-                       mask_identity=mask_identity)
-            sumwxy = sum((x - xmean)*(y - ymean)*weight,
-                         axis=axis,
-                         keepdims=keepdims,
-                         mask_identity=mask_identity)
+            sumw = sum(
+                x * 0 + weight,
+                axis=axis,
+                keepdims=keepdims,
+                mask_identity=mask_identity,
+            )
+            sumwxy = sum(
+                (x - xmean) * (y - ymean) * weight,
+                axis=axis,
+                keepdims=keepdims,
+                mask_identity=mask_identity,
+            )
         return numpy.true_divide(sumwxy, sumw)
+
 
 def corr(x, y, weight=None, axis=None, keepdims=False, mask_identity=True):
     """
@@ -1106,50 +1135,47 @@ def corr(x, y, weight=None, axis=None, keepdims=False, mask_identity=True):
     non-reducer.
     """
     with numpy.errstate(invalid="ignore"):
-        xmean = mean(x, weight=weight,
-                     axis=axis,
-                     keepdims=keepdims,
-                     mask_identity=mask_identity)
-        ymean = mean(y, weight=weight,
-                     axis=axis,
-                     keepdims=keepdims,
-                     mask_identity=mask_identity)
+        xmean = mean(
+            x, weight=weight, axis=axis, keepdims=keepdims, mask_identity=mask_identity
+        )
+        ymean = mean(
+            y, weight=weight, axis=axis, keepdims=keepdims, mask_identity=mask_identity
+        )
         xdiff = x - xmean
         ydiff = y - ymean
         if weight is None:
-            sumwxx = sum(xdiff**2,
-                         axis=axis,
-                         keepdims=keepdims,
-                         mask_identity=mask_identity)
-            sumwyy = sum(ydiff**2,
-                         axis=axis,
-                         keepdims=keepdims,
-                         mask_identity=mask_identity)
-            sumwxy = sum(xdiff*ydiff,
-                         axis=axis,
-                         keepdims=keepdims,
-                         mask_identity=mask_identity)
+            sumwxx = sum(
+                xdiff ** 2, axis=axis, keepdims=keepdims, mask_identity=mask_identity
+            )
+            sumwyy = sum(
+                ydiff ** 2, axis=axis, keepdims=keepdims, mask_identity=mask_identity
+            )
+            sumwxy = sum(
+                xdiff * ydiff, axis=axis, keepdims=keepdims, mask_identity=mask_identity
+            )
         else:
-            sumwxx = sum((xdiff**2)*weight,
-                         axis=axis,
-                         keepdims=keepdims,
-                         mask_identity=mask_identity)
-            sumwyy = sum((ydiff**2)*weight,
-                         axis=axis,
-                         keepdims=keepdims,
-                         mask_identity=mask_identity)
-            sumwxy = sum((xdiff*ydiff)*weight,
-                         axis=axis,
-                         keepdims=keepdims,
-                         mask_identity=mask_identity)
+            sumwxx = sum(
+                (xdiff ** 2) * weight,
+                axis=axis,
+                keepdims=keepdims,
+                mask_identity=mask_identity,
+            )
+            sumwyy = sum(
+                (ydiff ** 2) * weight,
+                axis=axis,
+                keepdims=keepdims,
+                mask_identity=mask_identity,
+            )
+            sumwxy = sum(
+                (xdiff * ydiff) * weight,
+                axis=axis,
+                keepdims=keepdims,
+                mask_identity=mask_identity,
+            )
         return numpy.true_divide(sumwxy, numpy.sqrt(sumwxx * sumwyy))
 
-def linear_fit(x,
-               y,
-               weight=None,
-               axis=None,
-               keepdims=False,
-               mask_identity=True):
+
+def linear_fit(x, y, weight=None, axis=None, keepdims=False, mask_identity=True):
     """
     Args:
         x: one coordinate to use in the linear fit.
@@ -1204,88 +1230,99 @@ def linear_fit(x,
     """
     with numpy.errstate(invalid="ignore"):
         if weight is None:
-            sumw = count(x, axis=axis,
-                     keepdims=keepdims, mask_identity=mask_identity)
-            sumwx  = sum(x,
-                         axis=axis,
-                         keepdims=keepdims,
-                         mask_identity=mask_identity)
-            sumwy  = sum(y,
-                         axis=axis,
-                         keepdims=keepdims,
-                         mask_identity=mask_identity)
-            sumwxx = sum(x**2,
-                         axis=axis,
-                         keepdims=keepdims,
-                         mask_identity=mask_identity)
-            sumwxy = sum(x*y,
-                         axis=axis,
-                         keepdims=keepdims,
-                         mask_identity=mask_identity)
+            sumw = count(x, axis=axis, keepdims=keepdims, mask_identity=mask_identity)
+            sumwx = sum(x, axis=axis, keepdims=keepdims, mask_identity=mask_identity)
+            sumwy = sum(y, axis=axis, keepdims=keepdims, mask_identity=mask_identity)
+            sumwxx = sum(
+                x ** 2, axis=axis, keepdims=keepdims, mask_identity=mask_identity
+            )
+            sumwxy = sum(
+                x * y, axis=axis, keepdims=keepdims, mask_identity=mask_identity
+            )
         else:
-            sumw = sum(x*0 + weight,
-                       axis=axis,
-                       keepdims=keepdims,
-                       mask_identity=mask_identity)
-            sumwx  = sum(x*weight,
-                         axis=axis,
-                         keepdims=keepdims,
-                         mask_identity=mask_identity)
-            sumwy  = sum(y*weight,
-                         axis=axis,
-                         keepdims=keepdims,
-                         mask_identity=mask_identity)
-            sumwxx = sum((x**2)*weight,
-                         axis=axis,
-                         keepdims=keepdims,
-                         mask_identity=mask_identity)
-            sumwxy = sum(x*y*weight,
-                         axis=axis,
-                         keepdims=keepdims,
-                         mask_identity=mask_identity)
-        delta           = (sumw*sumwxx) - (sumwx*sumwx)
-        intercept       = numpy.true_divide(((sumwxx*sumwy) - (sumwx*sumwxy)),
-                                            delta)
-        slope           = numpy.true_divide(((sumw*sumwxy) - (sumwx*sumwy)),
-                                            delta)
+            sumw = sum(
+                x * 0 + weight,
+                axis=axis,
+                keepdims=keepdims,
+                mask_identity=mask_identity,
+            )
+            sumwx = sum(
+                x * weight, axis=axis, keepdims=keepdims, mask_identity=mask_identity
+            )
+            sumwy = sum(
+                y * weight, axis=axis, keepdims=keepdims, mask_identity=mask_identity
+            )
+            sumwxx = sum(
+                (x ** 2) * weight,
+                axis=axis,
+                keepdims=keepdims,
+                mask_identity=mask_identity,
+            )
+            sumwxy = sum(
+                x * y * weight,
+                axis=axis,
+                keepdims=keepdims,
+                mask_identity=mask_identity,
+            )
+        delta = (sumw * sumwxx) - (sumwx * sumwx)
+        intercept = numpy.true_divide(((sumwxx * sumwy) - (sumwx * sumwxy)), delta)
+        slope = numpy.true_divide(((sumw * sumwxy) - (sumwx * sumwy)), delta)
         intercept_error = numpy.sqrt(numpy.true_divide(sumwxx, delta))
-        slope_error     = numpy.sqrt(numpy.true_divide(sumw, delta))
+        slope_error = numpy.sqrt(numpy.true_divide(sumw, delta))
 
-        intercept       = awkward1.operations.convert.to_layout(
-                          intercept, allow_record=True, allow_other=True)
-        slope           = awkward1.operations.convert.to_layout(
-                          slope, allow_record=True, allow_other=True)
+        intercept = awkward1.operations.convert.to_layout(
+            intercept, allow_record=True, allow_other=True
+        )
+        slope = awkward1.operations.convert.to_layout(
+            slope, allow_record=True, allow_other=True
+        )
         intercept_error = awkward1.operations.convert.to_layout(
-                          intercept_error, allow_record=True, allow_other=True)
-        slope_error     = awkward1.operations.convert.to_layout(
-                          slope_error, allow_record=True, allow_other=True)
+            intercept_error, allow_record=True, allow_other=True
+        )
+        slope_error = awkward1.operations.convert.to_layout(
+            slope_error, allow_record=True, allow_other=True
+        )
 
         scalar = False
-        if not isinstance(intercept,
-                          (awkward1.layout.Content,
-                           awkward1.layout.Record,
-                           awkward1.partition.PartitionedArray)):
+        if not isinstance(
+            intercept,
+            (
+                awkward1.layout.Content,
+                awkward1.layout.Record,
+                awkward1.partition.PartitionedArray,
+            ),
+        ):
             intercept = awkward1.layout.NumpyArray(numpy.array([intercept]))
             scalar = True
-        if not isinstance(slope,
-                          (awkward1.layout.Content,
-                           awkward1.layout.Record,
-                           awkward1.partition.PartitionedArray)):
+        if not isinstance(
+            slope,
+            (
+                awkward1.layout.Content,
+                awkward1.layout.Record,
+                awkward1.partition.PartitionedArray,
+            ),
+        ):
             slope = awkward1.layout.NumpyArray(numpy.array([slope]))
             scalar = True
-        if not isinstance(intercept_error,
-                          (awkward1.layout.Content,
-                           awkward1.layout.Record,
-                           awkward1.partition.PartitionedArray)):
-            intercept_error = awkward1.layout.NumpyArray(
-                                numpy.array([intercept_error]))
+        if not isinstance(
+            intercept_error,
+            (
+                awkward1.layout.Content,
+                awkward1.layout.Record,
+                awkward1.partition.PartitionedArray,
+            ),
+        ):
+            intercept_error = awkward1.layout.NumpyArray(numpy.array([intercept_error]))
             scalar = True
-        if not isinstance(slope_error,
-                          (awkward1.layout.Content,
-                           awkward1.layout.Record,
-                           awkward1.partition.PartitionedArray)):
-            slope_error = awkward1.layout.NumpyArray(
-                            numpy.array([slope_error]))
+        if not isinstance(
+            slope_error,
+            (
+                awkward1.layout.Content,
+                awkward1.layout.Record,
+                awkward1.partition.PartitionedArray,
+            ),
+        ):
+            slope_error = awkward1.layout.NumpyArray(numpy.array([slope_error]))
             scalar = True
 
         sample = None
@@ -1299,39 +1336,38 @@ def linear_fit(x,
             sample = slope_error
 
         if sample is not None:
-            intercept, slope, intercept_error, slope_error = \
-                awkward1.partition.partition_as(sample, (intercept,
-                                                         slope,
-                                                         intercept_error,
-                                                         slope_error))
+            (
+                intercept,
+                slope,
+                intercept_error,
+                slope_error,
+            ) = awkward1.partition.partition_as(
+                sample, (intercept, slope, intercept_error, slope_error)
+            )
             output = []
-            for a, b, c, d in awkward1.partition.iterate(sample.numpartitions,
-                                                         (intercept,
-                                                          slope,
-                                                          intercept_error,
-                                                          slope_error)):
-                output.append(awkward1.layout.RecordArray([a, b, c, d],
-                                                          ["intercept",
-                                                           "slope",
-                                                           "intercept_error",
-                                                           "slope_error"],
-                                      parameters={"__record__": "LinearFit"}))
+            for a, b, c, d in awkward1.partition.iterate(
+                sample.numpartitions, (intercept, slope, intercept_error, slope_error)
+            ):
+                output.append(
+                    awkward1.layout.RecordArray(
+                        [a, b, c, d],
+                        ["intercept", "slope", "intercept_error", "slope_error"],
+                        parameters={"__record__": "LinearFit"},
+                    )
+                )
             out = awkward1.partition.IrregularlyPartitionedArray(output)
 
         else:
-            out = awkward1.layout.RecordArray([intercept,
-                                               slope,
-                                               intercept_error,
-                                               slope_error],
-                                              ["intercept",
-                                               "slope",
-                                               "intercept_error",
-                                               "slope_error"],
-                                      parameters={"__record__": "LinearFit"})
+            out = awkward1.layout.RecordArray(
+                [intercept, slope, intercept_error, slope_error],
+                ["intercept", "slope", "intercept_error", "slope_error"],
+                parameters={"__record__": "LinearFit"},
+            )
             if scalar:
                 out = out[0]
 
         return awkward1._util.wrap(out, awkward1._util.behaviorof(x, y))
+
 
 def softmax(x, axis=None, keepdims=False, mask_identity=False):
     """
@@ -1372,10 +1408,12 @@ def softmax(x, axis=None, keepdims=False, mask_identity=False):
     """
     with numpy.errstate(invalid="ignore"):
         expx = numpy.exp(x)
-        denom = sum(expx,
-                  axis=axis, keepdims=keepdims, mask_identity=mask_identity)
+        denom = sum(expx, axis=axis, keepdims=keepdims, mask_identity=mask_identity)
         return numpy.true_divide(expx, denom)
 
-__all__ = [x for x in list(globals())
-             if not x.startswith("_") and
-             x not in ("collections", "numpy", "awkward1")]
+
+__all__ = [
+    x
+    for x in list(globals())
+    if not x.startswith("_") and x not in ("collections", "numpy", "awkward1")
+]

@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #ifndef AWKWARDCPU_OPERATIONS_H_
 #define AWKWARDCPU_OPERATIONS_H_
@@ -607,6 +607,13 @@ extern "C" {
       bool* toptr,
       int64_t tooffset,
       const bool* fromptr,
+      int64_t fromoffset,
+      int64_t length);
+  EXPORT_SYMBOL struct Error
+    awkward_numpyarray_fill_tobyte_frombyte(
+      int8_t* toptr,
+      int64_t tooffset,
+      const int8_t* fromptr,
       int64_t fromoffset,
       int64_t length);
 

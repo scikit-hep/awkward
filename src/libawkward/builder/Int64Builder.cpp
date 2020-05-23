@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #include "awkward/Identities.h"
 #include "awkward/array/NumpyArray.h"
@@ -18,7 +18,7 @@ namespace awkward {
     out.get()->setthat(out);
     return out;
   }
- 
+
   Int64Builder::Int64Builder(const ArrayBuilderOptions& options,
                              const GrowableBuffer<int64_t>& buffer)
       : options_(options)

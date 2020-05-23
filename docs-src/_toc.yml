@@ -41,6 +41,15 @@
     - file: how-to-create-lazy-dask
       title: "Lazy arrays and Dask"
 
+- file: how-to-use-in-numba
+  title: "Using arrays in Numba"
+  expand_sections: true
+  sections:
+    - file: how-to-use-in-numba-features
+      title: "Supported features"
+    - file: how-to-use-in-numba-arraybuilder
+      title: "Building array output"
+
 - file: how-to-examine
   title: "Examining arrays"
   expand_sections: true

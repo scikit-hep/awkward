@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #ifndef AWKWARD_NUMPYARRAY_H_
 #define AWKWARD_NUMPYARRAY_H_
@@ -89,7 +89,8 @@ namespace awkward {
     bool
       equal(const FormPtr& other,
             bool check_identities,
-            bool check_parameters) const override;
+            bool check_parameters,
+            bool compatibility_check) const override;
 
   private:
     const std::vector<int64_t> inner_shape_;
@@ -593,6 +594,11 @@ namespace awkward {
                    const Index64& advanced) const override;
 
   protected:
+    /// @brief Internal function to merge two byte arrays without promoting
+    /// the types to int64.
+    const ContentPtr
+      merge_bytes(const std::shared_ptr<NumpyArray>& other) const;
+
     /// @brief Internal function that propagates the derivation of a contiguous
     /// version of this array from one axis to the next.
     ///
