@@ -6,7 +6,7 @@
 #include <cmath>
 #include <cstring>
 
-#include "awkward/cpu-kernels/util.h"
+#include "awkward/common.h"
 #include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/Index.h"
 

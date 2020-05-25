@@ -9,9 +9,10 @@
 #include <typeindex>
 #include <vector>
 
-#include "awkward/cpu-kernels/util.h"
+#include "awkward/common.h"
 #include "awkward/Slice.h"
 #include "awkward/Content.h"
+#include "awkward/kernel.h"
 
 namespace awkward {
   /// @class NumpyForm

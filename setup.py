@@ -27,6 +27,9 @@ extras["all"] = sum(extras.values(), [])
 
 tests_require = extras["test"]
 
+AWKWARD_BUILD_CUDA = (os.environ.get("AWKWARD_BUILD_CUDA")
+                      in ("1", "true", "True", "TRUE", "on", "On", "ON", "yes", "Yes", "YES"))
+
 class CMakeExtension(Extension):
     def __init__(self, name, sourcedir=""):
         Extension.__init__(self, name, sources=[])
@@ -56,6 +59,9 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
            cmake_args.append("-DCMAKE_CXX_COMPILER={0}".format(compiler_path))
         except AttributeError:
             print("Not able to access compiler path (on Windows), using CMake default")
+
+        if AWKWARD_BUILD_CUDA:
+            cmake_args.append("-DBUILD_CUDA_KERNELS=ON")
 
         cfg = "Debug" if self.debug else "Release"
         build_args = ["--config", cfg]
@@ -132,6 +138,9 @@ else:
                           os.path.join(libdir, "libawkward-cpu-kernels" + shared),
                           os.path.join(libdir, "libawkward-static" + static),
                           os.path.join(libdir, "libawkward" + shared)])]
+    if AWKWARD_BUILD_CUDA:
+        libraries[0][1].append(os.path.join(libdir, "libawkward-cuda-kernels-static" + static))
+        libraries[0][1].append(os.path.join(libdir, "libawkward-cuda-kernels" + shared))
 
     Install = setuptools.command.install.install
 
@@ -141,14 +150,15 @@ setup(name = "awkward1",
       include_package_data = True,
       package_data = {"": ["*.dll"]},
       data_files = libraries + [
-          ("include/awkward",             glob.glob("include/awkward/*.h")),
-          ("include/awkward/cpu-kernels", glob.glob("include/awkward/cpu-kernels/*.h")),
-          ("include/awkward/python",      glob.glob("include/awkward/python/*.h")),
-          ("include/awkward/array",       glob.glob("include/awkward/array/*.h")),
-          ("include/awkward/builder",     glob.glob("include/awkward/builder/*.h")),
-          ("include/awkward/partition",   glob.glob("include/awkward/partition/*.h")),
-          ("include/awkward/io",          glob.glob("include/awkward/io/*.h")),
-          ("include/awkward/type",        glob.glob("include/awkward/type/*.h"))],
+          ("include/awkward",              glob.glob("include/awkward/*.h")),
+          ("include/awkward/cpu-kernels",  glob.glob("include/awkward/cpu-kernels/*.h")),
+          ("include/awkward/cuda-kernels", glob.glob("include/awkward/cuda-kernels/*.h")),
+          ("include/awkward/python",       glob.glob("include/awkward/python/*.h")),
+          ("include/awkward/array",        glob.glob("include/awkward/array/*.h")),
+          ("include/awkward/builder",      glob.glob("include/awkward/builder/*.h")),
+          ("include/awkward/partition",    glob.glob("include/awkward/partition/*.h")),
+          ("include/awkward/io",           glob.glob("include/awkward/io/*.h")),
+          ("include/awkward/type",         glob.glob("include/awkward/type/*.h"))],
       version = open("VERSION_INFO").read().strip(),
       author = "Jim Pivarski",
       author_email = "pivarski@princeton.edu",

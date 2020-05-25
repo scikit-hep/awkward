@@ -8,7 +8,7 @@
 #include <map>
 #include <memory>
 
-#include "awkward/cpu-kernels/util.h"
+#include "awkward/common.h"
 
 namespace awkward {
   class Identities;
