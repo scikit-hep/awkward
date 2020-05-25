@@ -1907,7 +1907,7 @@ namespace awkward {
                                          tail);
   }
 
-  template class ListOffsetArrayOf<int32_t>;
-  template class ListOffsetArrayOf<uint32_t>;
-  template class ListOffsetArrayOf<int64_t>;
+  template class EXPORT_SYMBOL ListOffsetArrayOf<int32_t>;
+  template class EXPORT_SYMBOL ListOffsetArrayOf<uint32_t>;
+  template class EXPORT_SYMBOL ListOffsetArrayOf<int64_t>;
 }
