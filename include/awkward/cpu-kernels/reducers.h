@@ -3,7 +3,7 @@
 #ifndef AWKWARDCPU_REDUCERS_H_
 #define AWKWARDCPU_REDUCERS_H_
 
-#include "awkward/common_utils.h"
+#include "awkward/common.h"
 
 extern "C" {
   EXPORT_SYMBOL struct Error

@@ -81,10 +81,10 @@ A Contribution might only touch one layer of the code or it might involve more t
 
 ### Deployment products
 
-Awkward Array consists of three shared libraries,
+Awkward Array consists of two (or three) shared libraries,
 
    * `libawkward-cpu-kernels.so` (or `.dylib`, etc.)
-   * `libawkward-cuda-kernels.so`
+   * `libawkward-cuda-kernels.so` (if compiled with CUDA support)
    * `libawkward.so`
 
 and a Python library shipped as binary wheels or (in rare cases) a source tarball to be compiled. The pip and conda deployments include all shared libraries with the Python package and put C++ headers in the system-dependent location for `includes`, in a directory named `awkward`.

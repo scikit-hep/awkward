@@ -26,12 +26,9 @@ docs-sphinx/_auto
 ############################################################# IDEs
 .idea
 cmake-build-debug
-<<<<<<< HEAD
 GTAGS
 GPATH
 GRTAGS
-=======
->>>>>>> master
 .vscode
 # ...
 

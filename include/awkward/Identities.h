@@ -8,7 +8,7 @@
 #include <map>
 #include <memory>
 
-#include "awkward/common_utils.h"
+#include "awkward/common.h"
 #include "awkward/Index.h"
 
 namespace awkward {

@@ -1,7 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
-#ifndef AWKWARD_COMMON_UTILS_H_
-#define AWKWARD_COMMON_UTILS_H_
+#ifndef AWKWARD_COMMON_H_
+#define AWKWARD_COMMON_H_
 
 #ifdef _MSC_VER
   #define EXPORT_SYMBOL __declspec(dllexport)
@@ -46,7 +46,7 @@ extern "C" {
   const int64_t  kMaxInt64  = 9223372036854775806;   // 2**63 - 2: see below
   const int64_t  kSliceNone = kMaxInt64 + 1;         // for Slice::none()
 
-  inline EXPORT_SYMBOL struct Error
+  inline struct Error
     success() {
         struct Error out;
         out.str = nullptr;
@@ -56,7 +56,7 @@ extern "C" {
         return out;
     };
 
-  inline EXPORT_SYMBOL struct Error
+  inline struct Error
     failure(const char* str, int64_t identity, int64_t attempt) {
         struct Error out;
         out.str = str;
@@ -67,4 +67,4 @@ extern "C" {
     };
 }
 
-#endif // AWKWARD_COMMON_UTILS_H_
+#endif // AWKWARD_COMMON_H_

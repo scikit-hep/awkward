@@ -6,7 +6,7 @@
 #include <cstdio>
 #include <string>
 
-#include "awkward/common_utils.h"
+#include "awkward/common.h"
 #include "awkward/util.h"
 #include "awkward/Index.h"
 #include "awkward/builder/ArrayBuilderOptions.h"

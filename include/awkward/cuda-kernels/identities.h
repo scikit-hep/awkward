@@ -1,7 +1,7 @@
 #ifndef AWKWARD_CUDA_IDENTITIES_H
 #define AWKWARD_CUDA_IDENTITIES_H
 
-#include "awkward/common_utils.h"
+#include "awkward/common.h"
 
 extern "C"
 {

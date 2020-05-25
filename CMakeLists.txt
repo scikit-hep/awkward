@@ -32,14 +32,14 @@ add_definitions(-DVERSION_INFO="${VERSION_INFO}")
 project(awkward LANGUAGES CXX VERSION ${VERSION_INFO})
 
 # Finding CUDA
-option(BUILD_WITH_CUDA "Build GPU Kernels with CUDA" OFF)
-if(BUILD_WITH_CUDA)
+option(BUILD_CUDA_KERNELS "Build GPU Kernels with CUDA" OFF)
+if(BUILD_CUDA_KERNELS)
   # Release additional checks once CUDA Kernels if officially released
   # include(CheckLanguage)
   # check_language(CUDA)
   # if(CMAKE_CUDA_COMPILER)
   #   enable_language(CUDA)
-  add_definitions( -DCUDA_KERNELS )
+  add_definitions( -DBUILD_CUDA_KERNELS )
   # else()
   #   message(FATAL_ERROR "NO CUDA COMPILER FOUND! PLEASE CHECK YOUR CUDA PATH, CMake will now exit")
   # endif()
@@ -47,7 +47,7 @@ endif()
 
 # Three tiers: [cpu-kernels (extern "C" interface), cuda-kernels (extern "C" interface)], libawkward (C++), and Python modules.
 file(GLOB CPU_KERNEL_SOURCES CONFIGURE_DEPENDS "src/cpu-kernels/*.cpp")
-if(BUILD_WITH_CUDA)
+if(BUILD_CUDA_KERNELS)
   file(GLOB CUDA_KERNEL_SOURCES CONFIGURE_DEPENDS "src/cuda-kernels/*.cpp")
 endif()
 file(GLOB_RECURSE LIBAWKWARD_SOURCES CONFIGURE_DEPENDS "src/libawkward/*.cpp")
@@ -84,7 +84,7 @@ set_target_properties(awkward-cpu-kernels PROPERTIES CXX_VISIBILITY_PRESET hidde
 set_target_properties(awkward-cpu-kernels PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
 
 #First tier: cuda-kernels, conditional compilation
-if(BUILD_WITH_CUDA)
+if(BUILD_CUDA_KERNELS)
   add_library(awkward-cuda-kernels-objects OBJECT ${CUDA_KERNEL_SOURCES})
   set_target_properties(awkward-cuda-kernels-objects PROPERTIES POSITION_INDEPENDENT_CODE 1)
   add_library(awkward-cuda-kernels-static STATIC $<TARGET_OBJECTS:awkward-cuda-kernels-objects>)
@@ -100,12 +100,12 @@ endif()
 
 if (APPLE)
   set_target_properties(awkward-cpu-kernels PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE INSTALL_RPATH "@loader_path")
-  if(BUILD_WITH_CUDA)
+  if(BUILD_CUDA_KERNELS)
     set_target_properties(awkward-cuda-kernels PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE INSTALL_RPATH "@loader_path")
   endif()
 else()
   set_target_properties(awkward-cpu-kernels PROPERTIES BUILD_RPATH_USE_ORIGIN TRUE)
-  if(BUILD_WITH_CUDA)
+  if(BUILD_CUDA_KERNELS)
     set_target_properties(awkward-cuda-kernels PROPERTIES BUILD_RPATH_USE_ORIGIN TRUE)
   endif()
 endif()
@@ -123,7 +123,7 @@ add_library(awkward        SHARED $<TARGET_OBJECTS:awkward-objects>)
 target_link_libraries(awkward-static PRIVATE awkward-cpu-kernels-static)
 target_link_libraries(awkward        PRIVATE awkward-cpu-kernels-static)
 
-if(BUILD_WITH_CUDA)
+if(BUILD_CUDA_KERNELS)
   target_link_libraries(awkward-static PRIVATE awkward-cuda-kernels-static)
   target_link_libraries(awkward        PRIVATE awkward-cuda-kernels-static)
 endif()
@@ -161,7 +161,7 @@ if (PYBUILD)
     set_target_properties(_ext PROPERTIES BUILD_RPATH_USE_ORIGIN TRUE)
   endif()
 
-  if(BUILD_WITH_CUDA)
+  if(BUILD_CUDA_KERNELS)
     install(TARGETS awkward-static awkward awkward-cpu-kernels awkward-cpu-kernels-static awkward-cuda-kernels awkward-cuda-kernels-static
             _ext
             LIBRARY DESTINATION awkward1 ARCHIVE DESTINATION awkward1)
@@ -173,7 +173,7 @@ if (PYBUILD)
 
 # Third tier: install without Python modules.
 else()
-  if(BUILD_WITH_CUDA)
+  if(BUILD_CUDA_KERNELS)
     install(TARGETS awkward-static awkward awkward-cpu-kernels awkward-cpu-kernels-static awkward-cuda-kernels awkward-cuda-kernels-static
             LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
   else()

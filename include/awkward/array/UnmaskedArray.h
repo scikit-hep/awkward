@@ -7,7 +7,7 @@
 #include <memory>
 #include <vector>
 
-#include "awkward/common_utils.h"
+#include "awkward/common.h"
 #include "awkward/Slice.h"
 #include "awkward/Index.h"
 #include "awkward/Content.h"

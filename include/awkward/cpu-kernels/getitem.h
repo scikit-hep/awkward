@@ -3,7 +3,7 @@
 #ifndef AWKWARDCPU_GETITEM_H_
 #define AWKWARDCPU_GETITEM_H_
 
-#include "awkward/common_utils.h"
+#include "awkward/common.h"
 
 extern "C" {
   EXPORT_SYMBOL void

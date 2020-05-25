@@ -12,7 +12,7 @@
 #include <stdexcept>
 #include <typeinfo>
 
-#include "awkward/common_utils.h"
+#include "awkward/common.h"
 #include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/cpu-kernels/operations.h"

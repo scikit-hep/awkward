@@ -3,7 +3,7 @@
 #ifndef AWKWARD_ITERATOR_H_
 #define AWKWARD_ITERATOR_H_
 
-#include "awkward/common_utils.h"
+#include "awkward/common.h"
 #include "awkward/Content.h"
 
 namespace awkward {
@@ -18,7 +18,7 @@ namespace awkward {
   class EXPORT_SYMBOL Iterator {
   public:
     /// @brief Creates an Iterator from a full set of parameters.
-    /// 
+    ///
     /// @param content The array to iterate over.
     Iterator(const ContentPtr& content);
 

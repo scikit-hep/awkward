@@ -3,7 +3,7 @@
 #ifndef AWKWARD_STRINGBUILDER_H_
 #define AWKWARD_STRINGBUILDER_H_
 
-#include "awkward/common_utils.h"
+#include "awkward/common.h"
 #include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/GrowableBuffer.h"
 #include "awkward/builder/Builder.h"

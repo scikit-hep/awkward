@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-#include "awkward/common_utils.h"
+#include "awkward/common.h"
 #include "awkward/Content.h"
 #include "awkward/type/Type.h"
 

@@ -6,7 +6,7 @@
 #include <cmath>
 #include <cstring>
 
-#include "awkward/common_utils.h"
+#include "awkward/common.h"
 
 namespace awkward {
   /// @class ArrayBuilderOptions

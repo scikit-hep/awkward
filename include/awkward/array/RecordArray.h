@@ -7,7 +7,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "awkward/common_utils.h"
+#include "awkward/common.h"
 #include "awkward/Identities.h"
 #include "awkward/Content.h"
 

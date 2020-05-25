@@ -9,7 +9,7 @@
 #include <typeindex>
 #include <vector>
 
-#include "awkward/common_utils.h"
+#include "awkward/common.h"
 #include "awkward/Slice.h"
 #include "awkward/Content.h"
 #include "awkward/kernel.h"
@@ -184,11 +184,7 @@ namespace awkward {
     /// The format may be specified explicitly.
     NumpyArray(const Index64 index, const std::string& format);
 
-    /// @brief A GPU Flag decides the location of the instance of this class
-   int64_t memory_loc = -1; // This will be resolved once the content markers are in place
-
-
-      /// @brief Reference-counted pointer to the array buffer.
+    /// @brief Reference-counted pointer to the array buffer.
     const std::shared_ptr<void>
       ptr() const;
 

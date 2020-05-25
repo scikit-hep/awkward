@@ -7,7 +7,7 @@
 #include <string>
 
 #include "awkward/builder/ArrayBuilderOptions.h"
-#include "awkward/common_utils.h"
+#include "awkward/common.h"
 #include "awkward/util.h"
 
 namespace awkward {
