@@ -4168,9 +4168,6 @@ namespace awkward {
       length,
       outranges.ptr().get(),
       ranges_length,
-      starts.ptr().get(),
-      parents.ptr().get(),
-      parents.offset(),
       parents.length(),
       ascending,
       stable);

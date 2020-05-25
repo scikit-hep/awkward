@@ -436,7 +436,12 @@ def test_UnionArray():
     index = awkward1.layout.Index32(numpy.array([0, 1, 0, 1, 2, 2, 4, 3], dtype=numpy.int32))
     array = awkward1.layout.UnionArray8_32(tags, index, [content0, content1])
 
-    assert awkward1.to_list(array) == ['one', 'two', [1.1, 2.2, 3.3], [], 'three', [4.4, 5.5], 'five', 'four']
+    with pytest.raises(ValueError) as err:
+        array.sort(1, True, False)
+    assert str(err.value) == "cannot sort UnionArray8_32"
+
+def test_sort_strings():
+    content1 = awkward1.from_iter(["one", "two", "three", "four", "five"], highlevel=False)
     assert awkward1.to_list(content1) == ['one', 'two', 'three', 'four', 'five']
 
     assert awkward1.to_list(content1.sort(0, True, False)) == ['five', 'four', 'one', 'three', 'two']
@@ -454,6 +459,8 @@ def test_UnionArray():
     assert awkward1.to_list(content3.sort(1, True, False)) == ['ain', 'aon', 'aìn', 'coig', 'còig', 'sia', 'sìa', 'àon']
     assert awkward1.to_list(content3.sort(1, False, False)) == ['àon', 'sìa', 'sia', 'còig', 'coig', 'aìn', 'aon', 'ain']
 
-    with pytest.raises(ValueError) as err:
-        array.sort(1, True, False)
-    assert str(err.value) == "cannot sort UnionArray8_32"
+def test_sort_bytestrings():
+    array = awkward1.from_iter([b"one", b"two", b"three", b"two", b"two", b"one", b"three"], highlevel=False)
+    assert awkward1.to_list(array) == [b'one', b'two', b'three', b'two', b'two', b'one', b'three']
+
+    assert awkward1.to_list(array.sort(0, True, False)) == [b'one', b'one', b'three', b'three', b'two', b'two', b'two']

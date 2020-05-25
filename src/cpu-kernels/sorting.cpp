@@ -14,24 +14,19 @@ ERROR awkward_sorting_ranges(
   int64_t parentsoffset,
   int64_t parentslength,
   int64_t outlength) {
-  std::vector<int64_t> ranges(parentslength + 1);
-  for (int64_t i = 0; i < parentslength; i++) {
-    ranges[i] = parents[i];
-  }
-  ranges[parentslength] = outlength;
-
-  std::vector<int64_t> result;
-  for (auto const& it : ranges) {
-    auto res = std::find(std::begin(ranges), std::end(ranges), it);
-    if (res != std::end(ranges)) {
-      if (result.empty() || result.back() != std::distance(std::begin(ranges), res)) {
-        result.emplace_back(std::distance(std::begin(ranges), res));
-      }
+  int64_t j = 0;
+  int64_t k = 0;
+  toindex[0] = k;
+  k++; j++;
+  for (int64_t i = 1; i < parentslength; i++) {
+    if(parents[i - 1] != parents[i]) {
+      toindex[j] = k;
+      j++;
     }
+    k++;
   }
-  for (int64_t i = 0; i < tolength; i++) {
-    toindex[i] = result[i];
-  }
+  toindex[tolength - 1] = parentslength;
+
   return success();
 }
 
@@ -41,21 +36,10 @@ ERROR awkward_sorting_ranges_length(
   int64_t parentsoffset,
   int64_t parentslength,
   int64_t outlength) {
-  std::vector<int64_t> ranges(parentslength + 1);
-  for (int64_t i = 0; i < parentslength; i++) {
-    ranges[i] = parents[i];
-  }
-  ranges[parentslength] = outlength;
-
-  int64_t length = 0;
-  std::vector<int64_t> result;
-  for (auto const& it : ranges) {
-    auto res = std::find(std::begin(ranges), std::end(ranges), it);
-    if (res != std::end(ranges)) {
-      if (result.empty() || result.back() != std::distance(std::begin(ranges), res)) {
-        result.emplace_back(std::distance(std::begin(ranges), res));
-        length++;
-      }
+  int64_t length = 2;
+  for (int64_t i = 1; i < parentslength; i++) {
+    if(parents[i - 1] != parents[i]) {
+      length++;
     }
   }
   *tolength = length;
@@ -310,9 +294,6 @@ ERROR awkward_sort(
   int64_t length,
   const int64_t* offsets,
   int64_t offsetslength,
-  const int64_t* starts,
-  const int64_t* parents,
-  int64_t parentsoffset,
   int64_t parentslength,
   bool ascending,
   bool stable) {
@@ -341,9 +322,6 @@ ERROR awkward_sort(
   }
 
   for (int64_t i = 0;  i < parentslength;  i++) {
-    int64_t parent = parents[parentsoffset + i];
-    int64_t start = starts[parent];
-
     toptr[i] = fromptr[index[i]];
   }
   return success();
@@ -355,9 +333,6 @@ ERROR awkward_sort_bool(
   int64_t length,
   const int64_t* offsets,
   int64_t offsetslength,
-  const int64_t* starts,
-  const int64_t* parents,
-  int64_t parentsoffset,
   int64_t parentslength,
   bool ascending,
   bool stable) {
@@ -367,9 +342,6 @@ ERROR awkward_sort_bool(
     length,
     offsets,
     offsetslength,
-    starts,
-    parents,
-    parentsoffset,
     parentslength,
     ascending,
     stable);
@@ -381,9 +353,6 @@ ERROR awkward_sort_int8(
   int64_t length,
   const int64_t* offsets,
   int64_t offsetslength,
-  const int64_t* starts,
-  const int64_t* parents,
-  int64_t parentsoffset,
   int64_t parentslength,
   bool ascending,
   bool stable) {
@@ -393,9 +362,6 @@ ERROR awkward_sort_int8(
     length,
     offsets,
     offsetslength,
-    starts,
-    parents,
-    parentsoffset,
     parentslength,
     ascending,
     stable);
@@ -407,9 +373,6 @@ ERROR awkward_sort_uint8(
   int64_t length,
   const int64_t* offsets,
   int64_t offsetslength,
-  const int64_t* starts,
-  const int64_t* parents,
-  int64_t parentsoffset,
   int64_t parentslength,
   bool ascending,
   bool stable) {
@@ -419,9 +382,6 @@ ERROR awkward_sort_uint8(
     length,
     offsets,
     offsetslength,
-    starts,
-    parents,
-    parentsoffset,
     parentslength,
     ascending,
     stable);
@@ -433,9 +393,6 @@ ERROR awkward_sort_int16(
   int64_t length,
   const int64_t* offsets,
   int64_t offsetslength,
-  const int64_t* starts,
-  const int64_t* parents,
-  int64_t parentsoffset,
   int64_t parentslength,
   bool ascending,
   bool stable) {
@@ -445,9 +402,6 @@ ERROR awkward_sort_int16(
     length,
     offsets,
     offsetslength,
-    starts,
-    parents,
-    parentsoffset,
     parentslength,
     ascending,
     stable);
@@ -459,9 +413,6 @@ ERROR awkward_sort_uint16(
   int64_t length,
   const int64_t* offsets,
   int64_t offsetslength,
-  const int64_t* starts,
-  const int64_t* parents,
-  int64_t parentsoffset,
   int64_t parentslength,
   bool ascending,
   bool stable) {
@@ -471,9 +422,6 @@ ERROR awkward_sort_uint16(
     length,
     offsets,
     offsetslength,
-    starts,
-    parents,
-    parentsoffset,
     parentslength,
     ascending,
     stable);
@@ -485,9 +433,6 @@ ERROR awkward_sort_int32(
   int64_t length,
   const int64_t* offsets,
   int64_t offsetslength,
-  const int64_t* starts,
-  const int64_t* parents,
-  int64_t parentsoffset,
   int64_t parentslength,
   bool ascending,
   bool stable) {
@@ -497,9 +442,6 @@ ERROR awkward_sort_int32(
     length,
     offsets,
     offsetslength,
-    starts,
-    parents,
-    parentsoffset,
     parentslength,
     ascending,
     stable);
@@ -511,9 +453,6 @@ ERROR awkward_sort_uint32(
   int64_t length,
   const int64_t* offsets,
   int64_t offsetslength,
-  const int64_t* starts,
-  const int64_t* parents,
-  int64_t parentsoffset,
   int64_t parentslength,
   bool ascending,
   bool stable) {
@@ -523,9 +462,6 @@ ERROR awkward_sort_uint32(
     length,
     offsets,
     offsetslength,
-    starts,
-    parents,
-    parentsoffset,
     parentslength,
     ascending,
     stable);
@@ -537,9 +473,6 @@ ERROR awkward_sort_int64(
   int64_t length,
   const int64_t* offsets,
   int64_t offsetslength,
-  const int64_t* starts,
-  const int64_t* parents,
-  int64_t parentsoffset,
   int64_t parentslength,
   bool ascending,
   bool stable) {
@@ -549,9 +482,6 @@ ERROR awkward_sort_int64(
     length,
     offsets,
     offsetslength,
-    starts,
-    parents,
-    parentsoffset,
     parentslength,
     ascending,
     stable);
@@ -563,9 +493,6 @@ ERROR awkward_sort_uint64(
   int64_t length,
   const int64_t* offsets,
   int64_t offsetslength,
-  const int64_t* starts,
-  const int64_t* parents,
-  int64_t parentsoffset,
   int64_t parentslength,
   bool ascending,
   bool stable) {
@@ -575,9 +502,6 @@ ERROR awkward_sort_uint64(
     length,
     offsets,
     offsetslength,
-    starts,
-    parents,
-    parentsoffset,
     parentslength,
     ascending,
     stable);
@@ -589,9 +513,6 @@ ERROR awkward_sort_float32(
   int64_t length,
   const int64_t* offsets,
   int64_t offsetslength,
-  const int64_t* starts,
-  const int64_t* parents,
-  int64_t parentsoffset,
   int64_t parentslength,
   bool ascending,
   bool stable) {
@@ -601,9 +522,6 @@ ERROR awkward_sort_float32(
     length,
     offsets,
     offsetslength,
-    starts,
-    parents,
-    parentsoffset,
     parentslength,
     ascending,
     stable);
@@ -615,9 +533,6 @@ ERROR awkward_sort_float64(
   int64_t length,
   const int64_t* offsets,
   int64_t offsetslength,
-  const int64_t* starts,
-  const int64_t* parents,
-  int64_t parentsoffset,
   int64_t parentslength,
   bool ascending,
   bool stable) {
@@ -627,9 +542,6 @@ ERROR awkward_sort_float64(
     length,
     offsets,
     offsetslength,
-    starts,
-    parents,
-    parentsoffset,
     parentslength,
     ascending,
     stable);

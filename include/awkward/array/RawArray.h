@@ -946,9 +946,6 @@ namespace awkward {
         length_,
         offsets.ptr().get(),
         offsets.length(),
-        starts.ptr().get(),
-        parents.ptr().get(),
-        parents.offset(),
         parents.length(),
         ascending,
         stable);
