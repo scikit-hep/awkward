@@ -417,10 +417,10 @@ def with_field(base, what, where=None, highlevel=True):
     Args:
         base: Data containing records or tuples.
         what: Data to add as a new field.
-        where (None or str or list): If None, the new field has no name (can be
-            accessed as an integer slot number in a string); If str, the name
-            of the new field. If list, it is interpreted as a path where to add
-            the field in a nested record.
+        where (None or str or non-empy iterable of str): If None, the new field
+            has no name (can be accessed as an integer slot number in a
+            string); If str, the name of the new field. If iterable, it is
+            interpreted as a path where to add the field in a nested record.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
 
@@ -434,7 +434,21 @@ def with_field(base, what, where=None, highlevel=True):
     other.)
     """
 
-    if isinstance(where, (list, tuple)) and len(where) > 1:
+    if not (
+        where is None
+        or isinstance(where, str)
+        or (isinstance(where, Iterable) and all(isinstance(x, str) for x in where))
+    ):
+        raise TypeError(
+            "New fields may only be assigned by field name(s) "
+            "or as a new integer slot by passing None for 'where'"
+        )
+    if (
+        not isinstance(where, str)
+        and isinstance(where, Iterable)
+        and all(isinstance(x, str) for x in where)
+        and len(where) > 1
+    ):
         return with_field(
             base,
             with_field(base[where[0]], what, where=where[1:], highlevel=highlevel),
@@ -442,7 +456,7 @@ def with_field(base, what, where=None, highlevel=True):
             highlevel=highlevel
         )
     else:
-        if isinstance(where, (list, tuple)):
+        if not (isinstance(where, str) or where is None):
             where = where[0]
 
         base = awkward1.operations.convert.to_layout(
