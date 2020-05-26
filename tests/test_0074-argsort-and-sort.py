@@ -450,15 +450,6 @@ def test_sort_strings():
     assert awkward1.to_list(content1.sort(1, True, False)) == ['five', 'four', 'one', 'three', 'two']
     assert awkward1.to_list(content1.sort(1, False, False)) == ['two', 'three', 'one', 'four', 'five']
 
-    # # Scots Gaellic from google translate
-    # content2 = awkward1.from_iter(["aon", "dhà", "trì", "ceithir", "còig", "sia", "seachd", "ochdone"], highlevel=False)
-    # assert awkward1.to_list(content2.sort(1, True, False)) == ['aon', 'ceithir', 'còig', 'dhà', 'ochdone', 'seachd', 'sia', 'trì']
-    #
-    # # some random mixture of letters
-    # content3 = awkward1.from_iter(["aon", "àon", "aìn", "coig", "còig", "sia", "sìa", "ain"], highlevel=False)
-    # assert awkward1.to_list(content3.sort(1, True, False)) == ['ain', 'aon', 'aìn', 'coig', 'còig', 'sia', 'sìa', 'àon']
-    # assert awkward1.to_list(content3.sort(1, False, False)) == ['àon', 'sìa', 'sia', 'còig', 'coig', 'aìn', 'aon', 'ain']
-
 def test_sort_bytestrings():
     array = awkward1.from_iter([b"one", b"two", b"three", b"two", b"two", b"one", b"three"], highlevel=False)
     assert awkward1.to_list(array) == [b'one', b'two', b'three', b'two', b'two', b'one', b'three']
