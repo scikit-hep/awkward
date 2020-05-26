@@ -21,6 +21,8 @@ def preprocess(filename):
                 line = re.sub("\/\/.*\n", "\n", line)
             if line.startswith("template") and func is False:
                 templ = True
+            if "delete []" in line:
+                continue
             if "typename" in line:
                 iterate = True
                 tempids = []
@@ -62,12 +64,14 @@ def preprocess(filename):
                 templatecall = False
             elif func is True and templatecall is True:
                 line = ""
+            if func is True and re.search("[\W_]*=[\W_]*new u?int\d{1,2}_t\[.\];", line) is not None:
+                line = line.replace(re.search("[\W_]*=[\W_]*new u?int\d{1,2}_t\[.\];", line).group(), ";")
             if func is True and re.search("u?int\d{1,2}_t\*?", line) is not None:
                 if "=" not in line and "(" not in line:
                     varname = line[re.search("u?int\d{1,2}_t\*?", line).span()[1] + 1:]
                     varname = re.sub("[\W_]+", "", varname)
                     tokens[funcname][varname] = re.search("u?int\d{1,2}_t\*?", line).group()
-                line = line.replace(re.search("u?int\d{1,2}_t\*?", line).group(), "int")
+                line = line.replace(re.search("u?int\d{1,2}_t", line).group(), "int")
             if func is True and templ is True:
                 for x in templateids:
                     if x in line:
@@ -127,6 +131,10 @@ class FuncBody(object):
         elif item.__class__.__name__ == "Decl":
             if item.init is not None:
                 stmt = " "*indent + "{0} = {1}".format(item.name, self.traverse(item.init, 0, called=True))
+                if not called:
+                    stmt = stmt + "\n"
+            elif item.type.__class__.__name__ == "PtrDecl":
+                stmt = " "*indent + "{0} = []".format(item.name)
                 if not called:
                     stmt = stmt + "\n"
             else:
