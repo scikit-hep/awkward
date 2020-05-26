@@ -854,6 +854,21 @@ class Array(
         (#ak.layout.Content arrays are immutable; field assignment replaces
         the #layout with an array that has the new field using #ak.with_field.)
 
+        However, a field can be assigned deeply into a nested record e.g.
+
+            >>> nested = ak.zip({"a" : ak.zip({"x" : [1, 2, 3]})})
+            >>> nested["a", "y"] = 2 * nested.a.x
+            >>> ak.to_list(nested)
+            [{'a': {'x': 1, 'y': 2}}, {'a': {'x': 2, 'y': 4}}, {'a': {'x': 3, 'y': 6}}]
+
+        Note that the following does **not** work:
+
+            >>> nested["a"]["y"] = 2 * nested.a.x # does not work, nested["a"] is a copy!
+
+        Always assign by passing the whole path to the top level
+
+            >>> nested["a", "y"] = 2 * nested.a.x
+
         If necessary, the new field will be broadcasted to fit the array.
         For example, given an `array` like
 
