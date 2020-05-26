@@ -459,6 +459,7 @@ def with_field(base, what, where=None, highlevel=True):
         if not (isinstance(where, str) or where is None):
             where = where[0]
 
+        behavior = awkward1._util.behaviorof(base, what)
         base = awkward1.operations.convert.to_layout(
             base, allow_record=True, allow_other=False
         )
@@ -486,12 +487,10 @@ def with_field(base, what, where=None, highlevel=True):
         if where in base.keys():
             keys.remove(where)
         if len(keys) == 0:
-            # only key was removed, so just create new Record
-            behavior = awkward1._util.behaviorof(base, what)
+            # the only key was removed, so just create new Record
             out = (awkward1.layout.RecordArray([what], [where]),)
         else:
             base = base[keys]
-            behavior = awkward1._util.behaviorof(base, what)
             out = awkward1._util.broadcast_and_apply([base, what], getfunction, behavior)
         assert isinstance(out, tuple) and len(out) == 1
 
