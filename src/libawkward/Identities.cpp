@@ -330,6 +330,6 @@ namespace awkward {
     return getitem_range_nowrap(regular_start, regular_stop);
   }
 
-  template class IdentitiesOf<int32_t>;
-  template class IdentitiesOf<int64_t>;
+  template class EXPORT_SYMBOL IdentitiesOf<int32_t>;
+  template class EXPORT_SYMBOL IdentitiesOf<int64_t>;
 }

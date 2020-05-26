@@ -651,7 +651,7 @@ namespace awkward {
       Identities32* rawidentities =
         reinterpret_cast<Identities32*>(newidentities.get());
       struct Error err = awkward_new_identities32(rawidentities->ptr().get(),
-                                                  length());
+                                                length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
     }

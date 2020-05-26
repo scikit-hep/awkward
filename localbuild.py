@@ -3,10 +3,6 @@
 # BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
 import sys
-if sys.version_info <= (3, 0):
-    sys.stdout.write("Sorry, Python 3.x is supported, not Python 2.x\n")
-    sys.exit(1)
-
 import argparse
 import subprocess
 import shutil
@@ -23,10 +19,12 @@ arguments.add_argument("--no-buildpython", action="store_true")
 arguments.add_argument("--no-dependencies", action="store_true")
 arguments.add_argument("-j", default=str(multiprocessing.cpu_count()))
 arguments.add_argument("--pytest", default=None)
+arguments.add_argument("--build-cuda", action="store_true")
 args = arguments.parse_args()
 
 args.buildpython = not args.no_buildpython
 args.dependencies = not args.no_dependencies
+
 
 if sys.version_info[0] >= 3:
     git_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], stdout=subprocess.PIPE)
@@ -42,7 +40,8 @@ if args.clean:
 thisstate = {"release": args.release,
              "ctest": args.ctest,
              "buildpython": args.buildpython,
-             "python_executable": sys.executable}
+             "python_executable": sys.executable,
+             "build_cuda": args.build_cuda}
 
 try:
     localbuild_time = os.stat("localbuild").st_mtime
@@ -81,6 +80,9 @@ if (os.stat("CMakeLists.txt").st_mtime >= localbuild_time or
 
     if args.buildpython:
         newdir_args.extend(["-DPYTHON_EXECUTABLE=" + thisstate["python_executable"], "-DPYBUILD=ON"])
+
+    if args.build_cuda:
+        newdir_args.append("-DBUILD_CUDA_KERNELS=ON")
 
     check_call(["cmake"] + newdir_args)
     json.dump(thisstate, open("localbuild/laststate.json", "w"))

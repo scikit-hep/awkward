@@ -11,7 +11,7 @@ set(SIMPLE_TYPES Debug Release)
 if(CMAKE_BUILD_TYPE IN_LIST SIMPLE_TYPES)
   message(STATUS "${CMAKE_BUILD_TYPE}")
 else()
-  message(STATUS "CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
+  message(STATUS "CMAKE_BUILD_TYPE = " ${CMAKE_BUILD_TYPE})
 endif()
 
 # This is a C++11 project, but Windows starts at C++14.
@@ -31,8 +31,25 @@ add_definitions(-DVERSION_INFO="${VERSION_INFO}")
 # Let CMake know the version too
 project(awkward LANGUAGES CXX VERSION ${VERSION_INFO})
 
-# Three tiers: cpu-kernels (extern "C" interface), libawkward (C++), and Python modules.
+# Finding CUDA
+option(BUILD_CUDA_KERNELS "Build GPU Kernels with CUDA" OFF)
+if(BUILD_CUDA_KERNELS)
+  # Release additional checks once CUDA Kernels if officially released
+  # include(CheckLanguage)
+  # check_language(CUDA)
+  # if(CMAKE_CUDA_COMPILER)
+  #   enable_language(CUDA)
+  add_definitions( -DBUILD_CUDA_KERNELS )
+  # else()
+  #   message(FATAL_ERROR "NO CUDA COMPILER FOUND! PLEASE CHECK YOUR CUDA PATH, CMake will now exit")
+  # endif()
+endif()
+
+# Three tiers: [cpu-kernels (extern "C" interface), cuda-kernels (extern "C" interface)], libawkward (C++), and Python modules.
 file(GLOB CPU_KERNEL_SOURCES CONFIGURE_DEPENDS "src/cpu-kernels/*.cpp")
+if(BUILD_CUDA_KERNELS)
+  file(GLOB CUDA_KERNEL_SOURCES CONFIGURE_DEPENDS "src/cuda-kernels/*.cpp")
+endif()
 file(GLOB_RECURSE LIBAWKWARD_SOURCES CONFIGURE_DEPENDS "src/libawkward/*.cpp")
 
 include_directories(include)
@@ -65,10 +82,32 @@ set_target_properties(awkward-cpu-kernels-static PROPERTIES CXX_VISIBILITY_PRESE
 set_target_properties(awkward-cpu-kernels-static PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
 set_target_properties(awkward-cpu-kernels PROPERTIES CXX_VISIBILITY_PRESET hidden)
 set_target_properties(awkward-cpu-kernels PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
+
+#First tier: cuda-kernels, conditional compilation
+if(BUILD_CUDA_KERNELS)
+  add_library(awkward-cuda-kernels-objects OBJECT ${CUDA_KERNEL_SOURCES})
+  set_target_properties(awkward-cuda-kernels-objects PROPERTIES POSITION_INDEPENDENT_CODE 1)
+  add_library(awkward-cuda-kernels-static STATIC $<TARGET_OBJECTS:awkward-cuda-kernels-objects>)
+  set_property(TARGET awkward-cuda-kernels-static PROPERTY POSITION_INDEPENDENT_CODE ON)
+  add_library(awkward-cuda-kernels        SHARED $<TARGET_OBJECTS:awkward-cuda-kernels-objects>)
+  set_target_properties(awkward-cuda-kernels-objects PROPERTIES CXX_VISIBILITY_PRESET hidden)
+  set_target_properties(awkward-cuda-kernels-objects PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
+  set_target_properties(awkward-cuda-kernels-static PROPERTIES CXX_VISIBILITY_PRESET hidden)
+  set_target_properties(awkward-cuda-kernels-static PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
+  set_target_properties(awkward-cuda-kernels PROPERTIES CXX_VISIBILITY_PRESET hidden)
+  set_target_properties(awkward-cuda-kernels PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
+endif()
+
 if (APPLE)
   set_target_properties(awkward-cpu-kernels PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE INSTALL_RPATH "@loader_path")
+  if(BUILD_CUDA_KERNELS)
+    set_target_properties(awkward-cuda-kernels PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE INSTALL_RPATH "@loader_path")
+  endif()
 else()
   set_target_properties(awkward-cpu-kernels PROPERTIES BUILD_RPATH_USE_ORIGIN TRUE)
+  if(BUILD_CUDA_KERNELS)
+    set_target_properties(awkward-cuda-kernels PROPERTIES BUILD_RPATH_USE_ORIGIN TRUE)
+  endif()
 endif()
 
 # Second tier: libawkward (object files, static library, and dynamic library).
@@ -83,12 +122,19 @@ set_property(TARGET awkward-static PROPERTY POSITION_INDEPENDENT_CODE ON)
 add_library(awkward        SHARED $<TARGET_OBJECTS:awkward-objects>)
 target_link_libraries(awkward-static PRIVATE awkward-cpu-kernels-static)
 target_link_libraries(awkward        PRIVATE awkward-cpu-kernels-static)
+
+if(BUILD_CUDA_KERNELS)
+  target_link_libraries(awkward-static PRIVATE awkward-cuda-kernels-static)
+  target_link_libraries(awkward        PRIVATE awkward-cuda-kernels-static)
+endif()
+
 set_target_properties(awkward-objects PROPERTIES CXX_VISIBILITY_PRESET hidden)
 set_target_properties(awkward-objects PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
 set_target_properties(awkward-static PROPERTIES CXX_VISIBILITY_PRESET hidden)
 set_target_properties(awkward-static PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
 set_target_properties(awkward PROPERTIES CXX_VISIBILITY_PRESET hidden)
 set_target_properties(awkward PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
+
 if (APPLE)
   set_target_properties(awkward PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE INSTALL_RPATH "@loader_path")
 else()
@@ -109,20 +155,34 @@ if (PYBUILD)
   pybind11_add_module(_ext ${LAYOUT_SOURCES})
   set_target_properties(_ext PROPERTIES CXX_VISIBILITY_PRESET hidden)
   set_target_properties(_ext PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
-  target_link_libraries(_ext PRIVATE awkward-static)
+  if (MSVC)
+    target_link_libraries(_ext PRIVATE awkward-static)
+  else()
+    target_link_libraries(_ext PRIVATE awkward)
+  endif()
   if (APPLE)
     set_target_properties(_ext PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE INSTALL_RPATH "@loader_path")
   else()
     set_target_properties(_ext PROPERTIES BUILD_RPATH_USE_ORIGIN TRUE)
   endif()
 
+  if(BUILD_CUDA_KERNELS)
+    install(TARGETS awkward-static awkward awkward-cpu-kernels awkward-cpu-kernels-static awkward-cuda-kernels awkward-cuda-kernels-static
+            _ext
+            LIBRARY DESTINATION awkward1 ARCHIVE DESTINATION awkward1)
+  else()
   install(TARGETS awkward-static awkward awkward-cpu-kernels awkward-cpu-kernels-static
           _ext
           LIBRARY DESTINATION awkward1 ARCHIVE DESTINATION awkward1)
+  endif()
 
 # Third tier: install without Python modules.
 else()
-  install(TARGETS awkward-static awkward awkward-cpu-kernels awkward-cpu-kernels-static
-          LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
-
+  if(BUILD_CUDA_KERNELS)
+    install(TARGETS awkward-static awkward awkward-cpu-kernels awkward-cpu-kernels-static awkward-cuda-kernels awkward-cuda-kernels-static
+            LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+  else()
+    install(TARGETS awkward-static awkward awkward-cpu-kernels awkward-cpu-kernels-static
+            LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+  endif()
 endif()

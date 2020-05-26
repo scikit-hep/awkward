@@ -1938,7 +1938,7 @@ namespace awkward {
                                                  tail);
   }
 
-  template class UnionArrayOf<int8_t, int32_t>;
-  template class UnionArrayOf<int8_t, uint32_t>;
-  template class UnionArrayOf<int8_t, int64_t>;
+  template class EXPORT_SYMBOL UnionArrayOf<int8_t, int32_t>;
+  template class EXPORT_SYMBOL UnionArrayOf<int8_t, uint32_t>;
+  template class EXPORT_SYMBOL UnionArrayOf<int8_t, int64_t>;
 }
