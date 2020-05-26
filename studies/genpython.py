@@ -166,7 +166,7 @@ class FuncBody(object):
             else:
                 self.code += exprlist
         elif item.__class__.__name__ == "BinaryOp":
-            binaryop = " "*indent + "{0} {1} {2}".format(self.traverse(item.left, 0, called=True), item.op, self.traverse(item.right, 0, called=True))
+            binaryop = " "*indent + "({0} {1} {2})".format(self.traverse(item.left, 0, called=True), item.op, self.traverse(item.right, 0, called=True))
             if called:
                 return binaryop
             else:
