@@ -2054,7 +2054,7 @@ class ArrayBuilder(object):
 
         limit_type = limit_total - len(value) - len("<ArrayBuilder  type=>")
         typestrs = awkward1._util.typestrs(self._behavior)
-        typestr = repr(str(snapshot.type(typestrs)))
+        typestr = repr(str(snapshot.layout.type(typestrs)))
         if len(typestr) > limit_type:
             typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
@@ -2369,7 +2369,7 @@ class ArrayBuilder(object):
                 - len(self._name)
             )
             typestrs = awkward1._util.typestrs(self._arraybuilder._behavior)
-            typestr = repr(str(snapshot.type(typestrs)))
+            typestr = repr(str(snapshot.layout.type(typestrs)))
             if len(typestr) > limit_type:
                 typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
