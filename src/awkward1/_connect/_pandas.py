@@ -361,7 +361,6 @@ def dfs(array, levelname=lambda i: "sub" * i + "entry", anonymous="values"):
     for column, row_arrays, col_names in recurse(layout2, [], ()):
         if isinstance(layout, awkward1.layout.Record):
             row_arrays = row_arrays[1:]  # Record --> one-element RecordArray
-
         if len(col_names) == 0:
             columns = [anonymous]
         else:
@@ -397,9 +396,12 @@ def dfs(array, levelname=lambda i: "sub" * i + "entry", anonymous="values"):
             tables[-1] = pandas.concat([tables[-1], newframe], axis=1)
 
         else:
-            index = pandas.MultiIndex.from_arrays(
-                row_arrays, names=[levelname(i) for i in range(len(row_arrays))]
-            )
+            if len(row_arrays) == 0:
+                index = pandas.RangeIndex(len(column), name=levelname(0))
+            else:
+                index = pandas.MultiIndex.from_arrays(
+                    row_arrays, names=[levelname(i) for i in range(len(row_arrays))]
+                )
             tables.append(pandas.DataFrame(data=column, index=index, columns=columns))
 
         last_row_arrays = row_arrays
