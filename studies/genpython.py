@@ -178,7 +178,7 @@ class FuncBody(object):
                 ifstmt += " "*indent + "else:\n"
                 ifstmt += "{0}\n".format(self.traverse(item.iffalse, indent + 4, called=True))
             if called:
-                return ifstmt
+                return ifstmt[:-1]
             else:
                 self.code += ifstmt
         elif item.__class__.__name__ == "For":
@@ -191,7 +191,7 @@ class FuncBody(object):
                 forstmt += self.traverse(item.stmt.block_items[i], indent+4, called=True) + "\n"
             forstmt += " "*(indent+4) + "{0}\n".format(self.traverse(item.next, 0, called=True))
             if called:
-                return forstmt
+                return forstmt[:-1]
             else:
                 self.code += forstmt
         elif item.__class__.__name__ == "UnaryOp":
