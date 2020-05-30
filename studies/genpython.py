@@ -296,10 +296,12 @@ class FuncDecl(object):
     def arrange_args(self):
         arranged = ""
         for i in range(len(self.args)):
-            if i == 0:
-                arranged += "{0}".format(self.args[i]["name"])
+            if i != 0:
+                arranged += ", "
+            if self.args[i]["list"] == 0:
+                arranged += "{0}: {1}".format(self.args[i]["name"], self.args[i]["type"])
             else:
-                arranged += ", {0}".format(self.args[i]["name"])
+                arranged += "{0}: List[{1}]".format(self.args[i]["name"], self.args[i]["type"])
         return arranged
 
 arg_parser = argparse.ArgumentParser()
@@ -315,12 +317,6 @@ if __name__ == "__main__":
         body = FuncBody(ast.ext[i].body)
         print(decl.name)
         print("----------------------------------------------------")
-        for x in decl.args:
-            brackets = "[]"*x["list"]
-            typename = x["type"]
-            if typename.endswith("*"):
-                typename = typename[:-1]
-            print("{0} : {1}{2}".format(x["name"], typename, brackets))
         print()
         funcgen = "def {0}({1}):\n".format(decl.name, decl.arrange_args())
         funcgen += body.code
