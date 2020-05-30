@@ -321,7 +321,7 @@ if __name__ == "__main__":
     for i in range(len(ast.ext)):
         decl = FuncDecl(ast.ext[i].decl)
         body = FuncBody(ast.ext[i].body)
-        print("{0} : {1}".format(decl.name, tokens[decl.name]["type"]))
+        print(decl.name)
         print("----------------------------------------------------")
         for x in decl.args:
             brackets = "[]"*x["list"]
