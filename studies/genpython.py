@@ -1,6 +1,7 @@
 import argparse
 import pycparser
 import re
+import black
 
 def preprocess(filename):
     code = ""
@@ -321,6 +322,7 @@ if __name__ == "__main__":
                 typename = typename[:-1]
             print("{0} : {1}{2}".format(x["name"], typename, brackets))
         print()
-        print("def {0}({1}):".format(decl.name, decl.arrange_args()))
-        print(body.code)
+        funcgen = "def {0}({1}):\n".format(decl.name, decl.arrange_args())
+        funcgen += body.code
+        print(funcgen)
         print()
