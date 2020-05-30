@@ -72,11 +72,6 @@ def preprocess(filename):
                 for x in templateids:
                     if x in line:
                         if line[line.find(x)-1] == " " or line[line.find(x)-1] == "*" or line[line.find(x)-1]:
-                            if "=" not in line:
-                                varnamestart = line.find(x) + len(x) + 1
-                                varnameend = line[varnamestart:].find(",") + varnamestart
-                                varname = line[varnamestart:varnameend]
-                                tokens[funcname][varname] = x
                             if x.endswith("*"):
                                 x = x[:-1]
                             line = line.replace(x, "int")
