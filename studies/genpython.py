@@ -298,10 +298,7 @@ class FuncDecl(object):
         for i in range(len(self.args)):
             if i != 0:
                 arranged += ", "
-            if self.args[i]["list"] == 0:
-                arranged += "{0}: {1}".format(self.args[i]["name"], self.args[i]["type"])
-            else:
-                arranged += "{0}: List[{1}]".format(self.args[i]["name"], self.args[i]["type"])
+            arranged += "{0}: ".format(self.args[i]["name"]) + "List["*self.args[i]["list"] + self.args[i]["type"] + "]"*self.args[i]["list"]
         return arranged
 
 arg_parser = argparse.ArgumentParser()
