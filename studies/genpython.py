@@ -67,10 +67,6 @@ def preprocess(filename):
             if func is True and re.search("[\W_]*=[\W_]*new u?int\d{1,2}_t\[.\];", line) is not None:
                 line = line.replace(re.search("[\W_]*=[\W_]*new u?int\d{1,2}_t\[.\];", line).group(), ";")
             if func is True and re.search("u?int\d{1,2}_t\*?", line) is not None:
-                if "=" not in line and "(" not in line:
-                    varname = line[re.search("u?int\d{1,2}_t\*?", line).span()[1] + 1:]
-                    varname = re.sub("[\W_]+", "", varname)
-                    tokens[funcname][varname] = re.search("u?int\d{1,2}_t\*?", line).group()
                 line = line.replace(re.search("u?int\d{1,2}_t", line).group(), "int")
             if func is True and templ is True:
                 for x in templateids:
@@ -325,15 +321,9 @@ if __name__ == "__main__":
         print("----------------------------------------------------")
         for x in decl.args:
             brackets = "[]"*x["list"]
-            if x["name"] in tokens[decl.name]:
-                typename = tokens[decl.name][x["name"]]
-            else:
-                typename = x["type"]
+            typename = x["type"]
             if typename.endswith("*"):
                 typename = typename[:-1]
-            # FIXME
-            #if typename == "C" or typename == "T":
-            #    typename = "Any"
             print("{0} : {1}{2}".format(x["name"], typename, brackets))
         print()
         print("def {0}({1}):".format(decl.name, decl.arrange_args()))
