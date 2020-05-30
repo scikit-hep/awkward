@@ -1591,8 +1591,8 @@ ERROR awkward_indexedarray_fill(
   int64_t length,
   int64_t base) {
   for (int64_t i = 0;  i < length;  i++) {
-    FROM from = fromindex[fromindexoffset + i];
-    toindex[toindexoffset + i] = from < 0 ? -1 : (TO)(from + base);
+    FROM fromval = fromindex[fromindexoffset + i];
+    toindex[toindexoffset + i] = fromval < 0 ? -1 : (TO)(fromval + base);
   }
   return success();
 }

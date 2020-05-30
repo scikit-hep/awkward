@@ -158,11 +158,17 @@ class FuncBody(object):
             else:
                 self.code += exprlist
         elif item.__class__.__name__ == "BinaryOp":
+            if item.op == "&&":
+                operator = "and"
+            elif item.op == "||":
+                operator = "or"
+            else:
+                operator = item.op
             if called:
-                binaryop = " " * indent + "({0} {1} {2})".format(self.traverse(item.left, 0, called=True), item.op, self.traverse(item.right, 0, called=True))
+                binaryop = " " * indent + "({0} {1} {2})".format(self.traverse(item.left, 0, called=True), operator, self.traverse(item.right, 0, called=True))
                 return binaryop
             else:
-                binaryop = " " * indent + "{0} {1} {2}".format(self.traverse(item.left, 0, called=True), item.op, self.traverse(item.right, 0, called=True))
+                binaryop = " " * indent + "{0} {1} {2}".format(self.traverse(item.left, 0, called=True), operator, self.traverse(item.right, 0, called=True))
                 self.code += binaryop
         elif item.__class__.__name__ == "If":
             ifstmt = " "*indent + "if {0}:\n".format(self.traverse(item.cond, 0, called=True))
@@ -216,7 +222,10 @@ class FuncBody(object):
             else:
                 self.code += decllist + "\n"
         elif item.__class__.__name__ == "ArrayRef":
-            arrayref = " "*indent + "{0}[{1}]".format(self.traverse(item.name, 0, called=True), self.traverse(item.subscript, 0, called=True))
+            if item.subscript.__class__.__name__ == "UnaryOp":
+                arrayref = " "*indent + "{0};".format(self.traverse(item.subscript, 0, called=True)) + " {0}[{1}]".format(self.traverse(item.name, 0, called=True), self.traverse(item.subscript.expr, 0, called=True))
+            else:
+                arrayref = " "*indent + "{0}[{1}]".format(self.traverse(item.name, 0, called=True), self.traverse(item.subscript, 0, called=True))
             if called:
                 return arrayref
             else:
@@ -309,6 +318,8 @@ filename = args.filename
 if __name__ == "__main__":
     pfile, tokens = preprocess(filename)
     ast = pycparser.c_parser.CParser().parse(pfile)
+    # Initialize black config
+    blackmode = black.FileMode()
     for i in range(len(ast.ext)):
         decl = FuncDecl(ast.ext[i].decl)
         body = FuncBody(ast.ext[i].body)
@@ -317,5 +328,6 @@ if __name__ == "__main__":
         print()
         funcgen = "def {0}({1}):\n".format(decl.name, decl.arrange_args())
         funcgen += body.code
-        print(funcgen)
+        gencode = black.format_str(funcgen, mode=blackmode)
+        print(gencode)
         print()
