@@ -164,11 +164,16 @@ class FuncBody(object):
                 operator = "or"
             else:
                 operator = item.op
+            binaryopl = "{0}".format(self.traverse(item.left, 0, called=True))
+            binaryopr = "{0}".format(self.traverse(item.right, 0, called=True))
+            if called and item.left.__class__.__name__ == "BinaryOp":
+                binaryopl = "("+binaryopl+")"
+            if called and item.right.__class__.__name__ == "BinaryOp":
+                binaryopr = "("+binaryopr+")"
+            binaryop = " "*indent + "{0} {1} {2}".format(binaryopl, operator, binaryopr)
             if called:
-                binaryop = " " * indent + "({0} {1} {2})".format(self.traverse(item.left, 0, called=True), operator, self.traverse(item.right, 0, called=True))
                 return binaryop
             else:
-                binaryop = " " * indent + "{0} {1} {2}".format(self.traverse(item.left, 0, called=True), operator, self.traverse(item.right, 0, called=True))
                 self.code += binaryop
         elif item.__class__.__name__ == "If":
             ifstmt = " "*indent + "if {0}:\n".format(self.traverse(item.cond, 0, called=True))
