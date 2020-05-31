@@ -186,14 +186,19 @@ class FuncBody(object):
             else:
                 self.code += ifstmt
         elif item.__class__.__name__ == "For":
-            if item.init is not None:
-                forstmt = "{0}\n".format(self.traverse(item.init, indent, called=True))
+            if (item.init is not None) and (item.next is not None) and (item.cond is not None) and (item.init.decls[0].init.__class__.__name__ == "Constant") and (len(item.init.decls) == 1) and (item.init.decls[0].init.value == "0") and (item.next.op == "p++") and (item.cond.op == "<") and (item.cond.left.name == item.init.decls[0].name):
+                forstmt = " "*indent + "for {0} in range({1}):\n".format(item.init.decls[0].name, self.traverse(item.cond.right, 0, called=True))
+                for i in range(len(item.stmt.block_items)):
+                    forstmt += self.traverse(item.stmt.block_items[i], indent+4, called=True) + "\n"
             else:
-                forstmt = ""
-            forstmt += " "*indent + "while {0}:\n".format(self.traverse(item.cond, 0, called=True))
-            for i in range(len(item.stmt.block_items)):
-                forstmt += self.traverse(item.stmt.block_items[i], indent+4, called=True) + "\n"
-            forstmt += " "*(indent+4) + "{0}\n".format(self.traverse(item.next, 0, called=True))
+                if item.init is not None:
+                    forstmt = "{0}\n".format(self.traverse(item.init, indent, called=True))
+                else:
+                    forstmt = ""
+                forstmt += " "*indent + "while {0}:\n".format(self.traverse(item.cond, 0, called=True))
+                for i in range(len(item.stmt.block_items)):
+                    forstmt += self.traverse(item.stmt.block_items[i], indent+4, called=True) + "\n"
+                forstmt += " "*(indent+4) + "{0}\n".format(self.traverse(item.next, 0, called=True))
             if called:
                 return forstmt[:-1]
             else:
