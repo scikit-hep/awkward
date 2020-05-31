@@ -1,7 +1,6 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #include <cstring>
-#include <vector>
 
 #include "awkward/cpu-kernels/getitem.h"
 
@@ -2115,14 +2114,27 @@ ERROR awkward_unionarray_regular_index(
   const C* fromtags,
   int64_t tagsoffset,
   int64_t length) {
-  std::vector<I> current;
+  C size = 0;
   for (int64_t i = 0;  i < length;  i++) {
-    C tag = fromtags[tagsoffset + i];
-    while (current.size() <= (size_t)tag) {
-      current.push_back(0);
+    size += fromtags[tagsoffset + i];
+  }
+  if (size > 0) {
+    I current[size];
+    int64_t count = 0;
+    for (int64_t i = 0;  i < length;  i++) {
+      C tag = fromtags[tagsoffset + i];
+      while (count <= (size_t)tag) {
+        current[count] = 0;
+        count++;
+      }
+      toindex[(size_t)i] = current[(size_t)tag];
+      current[(size_t)tag]++;
     }
-    toindex[(size_t)i] = current[(size_t)tag];
-    current[(size_t)tag]++;
+  }
+  else {
+    for (int64_t i = 0;  i < length;  i++) {
+      toindex[(size_t)i] = (size_t)i;
+    }
   }
   return success();
 }
