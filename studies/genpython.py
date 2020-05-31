@@ -57,7 +57,7 @@ def preprocess(filename):
                 continue
             if func is True and re.search("<.*>", line) is not None:
                 line = line.replace(re.search("<.*>", line).group(), "")
-            elif func is True and re.search("<.*\n", line) is not None and ";" not in line and ")" not in line:
+            elif func is True and re.search("<.*\n", line) is not None and ";" not in line and ")" not in line and "[" not in line:
                 templatecall = True
                 line = line.replace(re.search("<.*\n", line).group(), "")
             elif func is True and re.search(".*>", line) is not None and ";" not in line and "(" not in line[:re.search(".*>", line).span()[1]]:
