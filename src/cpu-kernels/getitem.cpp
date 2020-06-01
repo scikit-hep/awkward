@@ -2130,6 +2130,7 @@ ERROR awkward_unionarray_regular_index(
       toindex[(size_t)i] = current[(size_t)tag];
       current[(size_t)tag]++;
     }
+    delete [] current;
   }
   else {
     for (int64_t i = 0;  i < length;  i++) {
