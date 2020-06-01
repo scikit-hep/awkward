@@ -111,6 +111,8 @@ class FuncBody(object):
         elif item.__class__.__name__ == "Return":
             if item.expr.name.name == "failure":
                 stmt = " "*indent + "raise ValueError({0})".format(item.expr.args.exprs[0].value)
+            elif item.expr.name.name == "success" and item.expr.args is None:
+                stmt = " "*indent + "return"
             else:
                 stmt = " "*indent + "return {0}".format(self.traverse(item.expr, 0, called=True))
             if called:
