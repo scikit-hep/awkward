@@ -2108,18 +2108,40 @@ ERROR awkward_indexedarray64_getitem_carry_64(
     lencarry);
 }
 
-template <typename C, typename I>
-ERROR awkward_unionarray_regular_index(
-  I* toindex,
+template <typename C>
+ERROR awkward_unionarray_regular_index_getsize(
+  int64_t* size,
   const C* fromtags,
   int64_t tagsoffset,
   int64_t length) {
-  C size = 0;
+  *size = 0;
   for (int64_t i = 0;  i < length;  i++) {
-    size += fromtags[tagsoffset + i];
+    *size += (int64_t)fromtags[tagsoffset + i];
   }
+  return success();
+}
+
+ERROR awkward_unionarray8_regular_index_getsize(
+  int64_t* size,
+  const int8_t* fromtags,
+  int64_t tagsoffset,
+  int64_t length) {
+  return awkward_unionarray_regular_index_getsize<int8_t>(
+    size,
+    fromtags,
+    tagsoffset,
+    length);
+}
+
+template <typename C, typename I>
+ERROR awkward_unionarray_regular_index(
+  I* toindex,
+  I* current,
+  int64_t size,
+  const C* fromtags,
+  int64_t tagsoffset,
+  int64_t length) {
   if (size > 0) {
-    I* current = new I[size];
     int64_t count = 0;
     for (int64_t i = 0;  i < length;  i++) {
       C tag = fromtags[tagsoffset + i];
@@ -2130,7 +2152,6 @@ ERROR awkward_unionarray_regular_index(
       toindex[(size_t)i] = current[(size_t)tag];
       current[(size_t)tag]++;
     }
-    delete [] current;
   }
   else {
     for (int64_t i = 0;  i < length;  i++) {
@@ -2141,33 +2162,45 @@ ERROR awkward_unionarray_regular_index(
 }
 ERROR awkward_unionarray8_32_regular_index(
   int32_t* toindex,
+  int32_t* current,
+  int64_t size,
   const int8_t* fromtags,
   int64_t tagsoffset,
   int64_t length) {
   return awkward_unionarray_regular_index<int8_t, int32_t>(
     toindex,
+    current,
+    size,
     fromtags,
     tagsoffset,
     length);
 }
 ERROR awkward_unionarray8_U32_regular_index(
   uint32_t* toindex,
+  uint32_t* current,
+  int64_t size,
   const int8_t* fromtags,
   int64_t tagsoffset,
   int64_t length) {
   return awkward_unionarray_regular_index<int8_t, uint32_t>(
     toindex,
+    current,
+    size,
     fromtags,
     tagsoffset,
     length);
 }
 ERROR awkward_unionarray8_64_regular_index(
   int64_t* toindex,
+  int64_t* current,
+  int64_t size,
   const int8_t* fromtags,
   int64_t tagsoffset,
   int64_t length) {
   return awkward_unionarray_regular_index<int8_t, int64_t>(
     toindex,
+    current,
+    size,
     fromtags,
     tagsoffset,
     length);
