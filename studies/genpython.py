@@ -109,7 +109,10 @@ class FuncBody(object):
             for node in item:
                 self.traverse(node, indent)
         elif item.__class__.__name__ == "Return":
-            stmt = " "*indent + "return {0}".format(self.traverse(item.expr, 0, called=True))
+            if item.expr.name.name == "failure":
+                stmt = " "*indent + "raise ValueError({0})".format(item.expr.args.exprs[0].value)
+            else:
+                stmt = " "*indent + "return {0}".format(self.traverse(item.expr, 0, called=True))
             if called:
                 return stmt
             else:
