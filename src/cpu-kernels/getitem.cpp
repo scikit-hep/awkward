@@ -2116,8 +2116,12 @@ ERROR awkward_unionarray_regular_index_getsize(
   int64_t length) {
   *size = 0;
   for (int64_t i = 0;  i < length;  i++) {
-    *size += (int64_t)fromtags[tagsoffset + i];
+    int64_t tag = (int64_t)fromtags[tagsoffset + i];
+    if (*size < tag) {
+      *size = tag;
+    }
   }
+  *size = *size + 1;
   return success();
 }
 
@@ -2141,22 +2145,14 @@ ERROR awkward_unionarray_regular_index(
   const C* fromtags,
   int64_t tagsoffset,
   int64_t length) {
-  if (size > 0) {
-    int64_t count = 0;
-    for (int64_t i = 0;  i < length;  i++) {
-      C tag = fromtags[tagsoffset + i];
-      while (count <= (size_t)tag) {
-        current[count] = 0;
-        count++;
-      }
-      toindex[(size_t)i] = current[(size_t)tag];
-      current[(size_t)tag]++;
-    }
+  int64_t count = 0;
+  for (int64_t k = 0;  k < size;  k++) {
+    current[k] = 0;
   }
-  else {
-    for (int64_t i = 0;  i < length;  i++) {
-      toindex[(size_t)i] = (size_t)i;
-    }
+  for (int64_t i = 0;  i < length;  i++) {
+    C tag = fromtags[tagsoffset + i];
+    toindex[(size_t)i] = current[(size_t)tag];
+    current[(size_t)tag]++;
   }
   return success();
 }
