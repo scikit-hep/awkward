@@ -1,6 +1,5 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
-#include <cstring>
 #include <vector>
 
 #include "awkward/cpu-kernels/getitem.h"
