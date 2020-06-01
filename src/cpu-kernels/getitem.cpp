@@ -2119,7 +2119,7 @@ ERROR awkward_unionarray_regular_index(
     size += fromtags[tagsoffset + i];
   }
   if (size > 0) {
-    I current[size];
+    I* current = new I[size];
     int64_t count = 0;
     for (int64_t i = 0;  i < length;  i++) {
       C tag = fromtags[tagsoffset + i];
