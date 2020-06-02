@@ -55,12 +55,12 @@ def preprocess(filename):
                     for _ in range(line.count("{")):
                         parans.append("{")
                 continue
-            if func is True and re.search("<.*>", line) is not None:
+            if func is True and re.search("<.*>", line) is not None and "||" not in line and "&&" not in line:
                 line = line.replace(re.search("<.*>", line).group(), "")
-            elif func is True and re.search("<.*\n", line) is not None and ";" not in line and ")" not in line and "[" not in line:
+            elif func is True and re.search("<.*\n", line) is not None and ";" not in line and ")" not in line and "[" not in line and "||" not in line and "&&" not in line:
                 templatecall = True
                 line = line.replace(re.search("<.*\n", line).group(), "")
-            elif func is True and re.search(".*>", line) is not None and ";" not in line and "(" not in line[:re.search(".*>", line).span()[1]]:
+            elif func is True and re.search(".*>", line) is not None and ";" not in line and "(" not in line[:re.search(".*>", line).span()[1]] and "||" not in line and "&&" not in line:
                 line = line.replace(re.search(".*>", line).group(), "")
                 templatecall = False
             elif func is True and templatecall is True:
@@ -69,6 +69,12 @@ def preprocess(filename):
                 line = line.replace(re.search("[\W_]*=[\W_]*new u?int\d{1,2}_t\[.\];", line).group(), ";")
             if func is True and re.search("u?int\d{1,2}_t\*?", line) is not None:
                 line = line.replace(re.search("u?int\d{1,2}_t", line).group(), "int")
+            if func is True and " ERROR " in line:
+                line = line.replace("ERROR", "int", 1)
+            if func is True and "(size_t)" in line:
+                line = line.replace("(size_t)", "")
+            if func is True and "std::" in line:
+                line = line.replace("std::", "")
             if func is True and templ is True:
                 for x in templateids:
                     if x in line:
@@ -109,9 +115,9 @@ class FuncBody(object):
             for node in item:
                 self.traverse(node, indent)
         elif item.__class__.__name__ == "Return":
-            if item.expr.name.name == "failure":
+            if item.expr.__class__.__name__ == "FuncCall" and item.expr.name.name == "failure":
                 stmt = " "*indent + "raise ValueError({0})".format(item.expr.args.exprs[0].value)
-            elif item.expr.name.name == "success" and item.expr.args is None:
+            elif item.expr.__class__.__name__ == "FuncCall" and item.expr.name.name == "success" and item.expr.args is None:
                 stmt = " "*indent + "return"
             else:
                 stmt = " "*indent + "return {0}".format(self.traverse(item.expr, 0, called=True))
@@ -148,6 +154,8 @@ class FuncBody(object):
                 self.code += assignstmt + "\n"
         elif item.__class__.__name__ == "FuncCall":
             if item.args is not None:
+                if item.name.name == "memcpy":
+                    return " "*indent + "{0}[{1}:{1}+{2}] = {3}[{4}:{4}+{2}]".format(item.args.exprs[0].expr.name.name, self.traverse(item.args.exprs[0].expr.subscript, 0, called=True), item.args.exprs[2].name, item.args.exprs[1].expr.name.name, self.traverse(item.args.exprs[1].expr.subscript, 0, called=True))
                 return " "*indent + "{0}({1})".format(item.name.name, self.traverse(item.args, 0, called=True))
             else:
                 return " " * indent + "{0}()".format(item.name.name)
@@ -219,6 +227,8 @@ class FuncBody(object):
                 unaryop = " "*indent + "-{0}".format(self.traverse(item.expr, 0, called=True))
             elif item.op == "!":
                 unaryop = " "*indent + "not {0}".format(self.traverse(item.expr, 0, called=True))
+            elif item.op == "&":
+                unaryop = " "*indent + "{0}".format(self.traverse(item.expr, 0, called=True))
             else:
                 raise NotImplementedError("Unhandled Unary Operator case. Please inform the developers about the error")
             if called:
@@ -286,6 +296,12 @@ class FuncBody(object):
                 return forstmt
             else:
                 self.code += forstmt
+        elif item.__class__.__name__ == "StructRef":
+            stmt = " "*indent + "{0}{1}{2}".format(self.traverse(item.name, 0, called=True), item.type, self.traverse(item.field, 0, called=True))
+            if called:
+                return stmt
+            else:
+                self.code += stmt
         elif item.__class__.__name__ == "EmptyStatement":
             pass
         else:
