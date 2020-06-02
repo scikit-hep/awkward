@@ -6,6 +6,7 @@
 [![DOI](https://zenodo.org/badge/137079949.svg)](https://zenodo.org/badge/latestdoi/137079949)
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
+
 Awkward Array is a library for **nested, variable-sized data**, including arbitrary-length lists, records, mixed types, and missing data, using **NumPy-like idioms**.
 
 Arrays are **dynamically typed**, but operations on them are **compiled and fast**. Their behavior coincides with NumPy when array dimensions are regular and generalizes when they're not.
@@ -87,10 +88,12 @@ Or you can build it locally for incremental development. The following reuses a 
 python localbuild.py --pytest tests
 ```
 
-   * [Continuous integration](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=3&_a=summary) and [continuous deployment](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=4&_a=summary) are hosted by Azure Pipelines.
-   * [Release history](https://awkward-array.readthedocs.io/en/latest/_auto/changelog.html) (changelog) is hosted by ReadTheDocs.
-   * [CONTRIBUTING.md](CONTRIBUTING.md) provides more information on how to contribute.
-   * The [LICENSE](https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE) is BSD-3.
+   * [Continuous integration](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=3&_a=summary) and [continuous deployment](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=4&_a=summary) are hosted by [Azure Pipelines](https://azure.microsoft.com/en-us/services/devops/pipelines/).
+   * [Release history](https://awkward-array.readthedocs.io/en/latest/_auto/changelog.html) (changelog) is hosted by [ReadTheDocs](https://readthedocs.org).
+   * [awkward-array.org](https://awkward-array.org) is hosted by [Netlify](https://www.netlify.com).
+   * [CONTRIBUTING.md](CONTRIBUTING.md) for technical information on how to contribute.
+   * [Code of conduct](https://scikit-hep.org/code-of-conduct) for how we work together.
+   * The [LICENSE](LICENSE) is BSD-3.
 
 ## Using Awkward Array as a dependency
 
