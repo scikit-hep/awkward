@@ -46,7 +46,9 @@ def preprocess(filename):
                     parans.append("{")
             if func is False and re.search("\s.*\(", line):
                 funcname = re.search("\s.*\(", line).group()[1:-1]
-                tokens[funcname] = {"type": line.lstrip().split(" ")[0]}
+                tokens[funcname] = {}
+                if tempids:
+                    tokens[funcname]["templateparams"] = tempids
                 line = line.replace(line.split(" ")[0], "int")
                 func = True
                 parans = []
@@ -55,6 +57,27 @@ def preprocess(filename):
                     for _ in range(line.count("{")):
                         parans.append("{")
                 continue
+            if func is True and "return" in line:
+                for x in tokens.keys():
+                    if tokens[x].__class__.__name__ == "dict" and "templateparams" in tokens[x].keys():
+                        if re.search(" {0}<.*".format(x), line) is not None:
+                            if "templateargs" not in tokens[x].keys():
+                                tokens[x]["templateargs"] = []
+                            iterate = True
+                            count = 0
+                            while iterate:
+                                if re.search("<[^,]*,", line) is not None:
+                                    tokens[x]["templateargs"].append(line[count:][re.search("<[^,]*,", line[count:]).span()[0]+1:re.search("<[^,]*,", line[count:]).span()[1]-1])
+                                    count = re.search("<[^,]*,", line[count:])
+                                if re.search("<[^,]*,", line) is None:
+                                    iterate = False
+                            if re.search("<[^,]*>", line[count:]) is not None:
+                                tokens[x]["templateargs"].append(line[count:][
+                                                                        re.search("<[^,]*>", line[count:]).span()[0] + 1:
+                                                                        re.search("<[^,]*>", line[count:]).span()[
+                                                                            1] - 1])
+                            elif re.search("[^,]*>", line[count:]) is not None:
+                                tokens[x]["templateargs"].append(line[count:][re.search("[^,]*>", line[count:]).span()[0]:re.search("[^,]*>", line[count:]).span()[1]-1])
             if func is True and re.search("<.*>", line) is not None and "||" not in line and "&&" not in line:
                 line = line.replace(re.search("<.*>", line).group(), "")
             elif func is True and re.search("<.*\n", line) is not None and ";" not in line and ")" not in line and "[" not in line and "||" not in line and "&&" not in line:
@@ -79,6 +102,11 @@ def preprocess(filename):
                 for x in templateids:
                     if x in line:
                         if line[line.find(x)-1] == " " or line[line.find(x)-1] == "*" or line[line.find(x)-1]:
+                            if "=" not in line:
+                                varnamestart = line.find(x) + len(x) + 1
+                                varnameend = line[varnamestart:].find(",") + varnamestart
+                                varname = line[varnamestart:varnameend]
+                                tokens[funcname][varname] = x[:-1] if x.endswith("*") else x
                             if x.endswith("*"):
                                 x = x[:-1]
                             line = line.replace(x, "int")
@@ -100,6 +128,7 @@ def preprocess(filename):
                     func = False
                     templ = False
                     templateids = []
+                    tempids = []
 
     return code,tokens
 
@@ -309,9 +338,10 @@ class FuncBody(object):
 
 class FuncDecl(object):
 
-    def __init__(self, ast):
+    def __init__(self, ast, typelist):
         self.ast = ast
         self.name = ast.name
+        self.typelist = typelist[self.name]
         self.args = []
         self.returntype = self.ast.type.type.type.names[0]
         self.traverse()
@@ -338,6 +368,8 @@ class FuncDecl(object):
         for i in range(len(self.args)):
             if i != 0:
                 arranged += ", "
+            if self.args[i]["name"] in self.typelist.keys():
+                self.args[i]["type"] = self.typelist[self.args[i]["name"]]
             arranged += "{0}: ".format(self.args[i]["name"]) + "List["*self.args[i]["list"] + self.args[i]["type"] + "]"*self.args[i]["list"]
         return arranged
 
@@ -346,19 +378,53 @@ arg_parser.add_argument("filename")
 args = arg_parser.parse_args()
 filename = args.filename
 
+def process_templateargs(tokens, name):
+    assert("templateargs" in tokens[name].keys())
+    templateargs = []
+    for x in tokens[name]["templateargs"]:
+        if re.search("u?int\d{1,2}_t", x) is not None:
+            templateargs.append("int")
+    templateargs = list(dict.fromkeys(templateargs))
+    tokens[name]["templateargs"] = templateargs
+    return tokens
+
+def arrange_args(templateargs):
+    arranged = ""
+    for i in range(len(templateargs)):
+        if i != 0:
+            arranged += ", "
+        arranged += templateargs[i]
+    return arranged
+
+def arrange_body(body, indent):
+    finalbody = ""
+    for line in body.splitlines():
+        finalbody += " "*indent + line + "\n"
+    return finalbody
+
 if __name__ == "__main__":
     pfile, tokens = preprocess(filename)
     ast = pycparser.c_parser.CParser().parse(pfile)
     # Initialize black config
     blackmode = black.FileMode()
     for i in range(len(ast.ext)):
-        decl = FuncDecl(ast.ext[i].decl)
+        decl = FuncDecl(ast.ext[i].decl, tokens)
         body = FuncBody(ast.ext[i].body)
         print(decl.name)
         print("----------------------------------------------------")
         print()
-        funcgen = "def {0}({1}):\n".format(decl.name, decl.arrange_args())
-        funcgen += body.code
+        indent = 0
+        if "templateparams" in tokens[decl.name].keys() and "templateargs" in tokens[decl.name].keys():
+            funcgen = decl.name + "_all={}\n"
+            tokens = process_templateargs(tokens, decl.name)
+            for temptype in tokens[decl.name]["templateparams"]:
+                funcgen += " "*indent + "for {0} in ({1}):\n".format(temptype, arrange_args(tokens[decl.name]["templateargs"]))
+                indent += 4
+        else:
+            funcgen = ""
+        funcgen += " "*indent + "def {0}({1}):\n".format(decl.name, decl.arrange_args())
+        funcgen += arrange_body(body.code, indent)
+        #print(funcgen)
         gencode = black.format_str(funcgen, mode=blackmode)
         print(gencode)
         print()
