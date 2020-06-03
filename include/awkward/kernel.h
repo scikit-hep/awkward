@@ -7,9 +7,9 @@
 #include "awkward/Index.h"
 
 namespace kernel {
-    template<typename T, typename F, typename U>
-    T* get_ptr(T* array, F input_array_1, U input_array_2) {
-      if(input_array_1.ptr_lib == cpu_kernels && input_array_2.ptr_lib == cpu_kernels) {
+    template<typename T>
+    T* get_ptr(T* array, KernelsLib input_array_1, KernelsLib input_array_2) {
+      if(input_array_1 == cpu_kernels && input_array_2 == cpu_kernels) {
         return array;
       }
       else {
