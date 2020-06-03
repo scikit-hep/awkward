@@ -653,26 +653,23 @@ if __name__ == "__main__":
     blackmode = black.FileMode()
     for i in range(len(ast.ext)):
         decl = FuncDecl(ast.ext[i].decl, tokens)
-        body = FuncBody(ast.ext[i].body)
-        print(decl.name)
-        print("----------------------------------------------------")
-        print()
-        indent = 0
-        funcgen = ""
         if (
             "templateparams" in tokens[decl.name].keys()
             and "templateargs" in tokens[decl.name].keys()
         ):
+            body = FuncBody(ast.ext[i].body)
+            indent = 0
+            funcgen = ""
             tokens = process_templateargs(tokens, decl.name)
             for temptype in tokens[decl.name]["templateparams"]:
                 funcgen += " " * indent + "for {0} in ({1}):\n".format(
                     temptype, arrange_args(tokens[decl.name]["templateargs"][temptype])
                 )
                 indent += 4
-        funcgen += " " * indent + "def {0}({1}):\n".format(
-            decl.name, decl.arrange_args()
-        )
-        funcgen += arrange_body(body.code, indent)
-        gencode = black.format_str(funcgen, mode=blackmode)
-        print(gencode)
-        print()
+            funcgen += " " * indent + "def {0}({1}):\n".format(
+                decl.name, decl.arrange_args()
+            )
+            funcgen += arrange_body(body.code, indent)
+            gencode = black.format_str(funcgen, mode=blackmode)
+            print(gencode)
+            print()
