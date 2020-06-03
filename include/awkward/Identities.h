@@ -363,6 +363,10 @@ namespace awkward {
     const IdentitiesPtr
       getitem_range(int64_t start, int64_t stop) const;
 
+    /// @brief An enum type that indicates the type of kernels on which
+    /// an instance of this class would run it's operations on.
+    KernelsLib ptr_lib = cpu_kernels;
+
   private:
     /// @brief See #ptr.
     const std::shared_ptr<T> ptr_;

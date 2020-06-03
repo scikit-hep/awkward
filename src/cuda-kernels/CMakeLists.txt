@@ -22,6 +22,7 @@ else()
    message(FATAL_ERROR "NO CUDA COMPILER FOUND! PLEASE CHECK YOUR CUDA PATH, CMake will now exit")
 endif()
 
+# Is there a cleaner way to do this?
 include_directories(../../include)
 
 file(GLOB CUDA_KERNEL_SOURCES CONFIGURE_DEPENDS "src/identities.cpp")

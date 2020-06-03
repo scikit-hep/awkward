@@ -7,8 +7,8 @@
 #include <map>
 #include <memory>
 
-#include "awkward/common.h"
 #include "awkward/util.h"
+#include "awkward/common.h"
 
 namespace awkward {
   template <typename T>
@@ -193,6 +193,10 @@ namespace awkward {
     /// See also #shallow_copy.
     const IndexOf<T>
       deep_copy() const;
+
+    /// @brief An enum type that indicates the type of kernels on which
+    /// an instance of this class would run it's operations on.
+    KernelsLib ptr_lib = cpu_kernels;
 
   private:
     /// @brief See #ptr.
