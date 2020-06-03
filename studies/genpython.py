@@ -622,6 +622,13 @@ def process_templateargs(tokens, name):
     return tokens
 
 
+def remove_return(code):
+    if code[code.rfind("\n", 0, code.rfind("\n")) :].strip() == "return":
+        k = code.rfind("return")
+        code = code[:k] + code[k+6:]
+    return code
+
+
 def arrange_args(templateargs):
     arranged = ""
     for i in range(len(templateargs)):
@@ -635,6 +642,7 @@ def arrange_body(body, indent):
     finalbody = ""
     for line in body.splitlines():
         finalbody += " " * indent + line + "\n"
+    finalbody = remove_return(finalbody)
     return finalbody
 
 
