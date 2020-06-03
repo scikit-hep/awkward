@@ -3,6 +3,7 @@ import pycparser
 import re
 import black
 
+
 def preprocess(filename):
     code = ""
     func = False
@@ -21,8 +22,8 @@ def preprocess(filename):
                 line = line.rstrip()
             if line.startswith("#"):
                 continue
-            if re.search("\/\/.*\n", line):
-                line = re.sub("\/\/.*\n", "\n", line)
+            if re.search("//.*\n", line):
+                line = re.sub("//.*\n", "\n", line)
             if line.startswith("template") and func is False:
                 templ = True
             if "delete []" in line:
@@ -31,16 +32,28 @@ def preprocess(filename):
                 iterate = True
                 while iterate:
                     if re.search("typename [^,]*,", line) is not None:
-                        tempids.append(line[re.search("typename [^,]*,", line).span()[0]+9:re.search("typename [^,]*,", line).span()[1]-1])
-                        line = line[re.search("typename [^,]*,", line).span()[1]:]
+                        tempids.append(
+                            line[
+                                re.search("typename [^,]*,", line).span()[0]
+                                + 9 : re.search("typename [^,]*,", line).span()[1]
+                                - 1
+                            ]
+                        )
+                        line = line[re.search("typename [^,]*,", line).span()[1] :]
                     if re.search("typename [^,]*,", line) is None:
                         iterate = False
                 if "bool" in line:
                     loc = line.find("bool")
-                    tempids.append(line[line.find("bool")+4:line.find(">")])
+                    tempids.append(line[line.find("bool") + 4 : line.find(">")])
                 if re.search("typename [^,]*>", line) is not None:
-                    tempids.append(line[re.search("typename [^,]*>", line).span()[0]+9:re.search("typename [^,]*>", line).span()[1]-1])
-                    line = line[re.search("typename [^,]*>", line).span()[1]:]
+                    tempids.append(
+                        line[
+                            re.search("typename [^,]*>", line).span()[0]
+                            + 9 : re.search("typename [^,]*>", line).span()[1]
+                            - 1
+                        ]
+                    )
+                    line = line[re.search("typename [^,]*>", line).span()[1] :]
                 for x in tempids:
                     templateids.append(x + "*")
                 for x in tempids:
@@ -62,64 +75,135 @@ def preprocess(filename):
                     for _ in range(line.count("{")):
                         parans.append("{")
                 continue
-            if func is True and (re.search("return .*<.+", line) is not None or templatetype) and (line[-2:] == ",\n" or line[-3:] == ">(\n"):
+            if (
+                func is True
+                and (re.search("return .*<.+", line) is not None or templatetype)
+                and (line[-2:] == ",\n" or line[-3:] == ">(\n")
+            ):
                 if re.search("return .*<.+", line) is not None:
-                    x = line[re.search("return .*<", line).span()[0]+6:re.search("return .*<", line).span()[1]-1].strip()
+                    x = line[
+                        re.search("return .*<", line).span()[0]
+                        + 6 : re.search("return .*<", line).span()[1]
+                        - 1
+                    ].strip()
                 templatetype = True
                 if "templateargs" not in tokens[x].keys():
                     tokens[x]["templateargs"] = {}
                 count = 0
                 if re.search("<[^,>]*,", line) is not None and "return" in line:
-                    if tokens[x]["templateparams"][ith] not in tokens[x]["templateargs"].keys():
+                    if (
+                        tokens[x]["templateparams"][ith]
+                        not in tokens[x]["templateargs"].keys()
+                    ):
                         tokens[x]["templateargs"][tokens[x]["templateparams"][ith]] = []
-                    tokens[x]["templateargs"][tokens[x]["templateparams"][ith]].append(line[
-                                                                                       re.search("<[^,>]*,",
-                                                                                                 line[
-                                                                                                 count:]).span()[
-                                                                                           0] + 1:
-                                                                                       re.search("<[^,>]*,",
-                                                                                                 line[
-                                                                                                 count:]).span()[
-                                                                                           1] - 1])
+                    tokens[x]["templateargs"][tokens[x]["templateparams"][ith]].append(
+                        line[
+                            re.search("<[^,>]*,", line[count:]).span()[0]
+                            + 1 : re.search("<[^,>]*,", line[count:]).span()[1]
+                            - 1
+                        ]
+                    )
                     count += re.search("<[^,>]*,", line[count:]).span()[1]
                     ith += 1
                 if line[count:].strip() != "":
                     iterate = True
                 while iterate and templatetype:
                     if re.search("[^,<>]*,", line[count:]) is not None:
-                        if tokens[x]["templateparams"][ith] not in tokens[x]["templateargs"].keys():
-                            tokens[x]["templateargs"][tokens[x]["templateparams"][ith]] = []
-                        tokens[x]["templateargs"][tokens[x]["templateparams"][ith]].append((line[count:][re.search("[^,<>]*,", line[count:]).span()[0]:re.search("[^,><]*,", line[count:]).span()[1]-1]).strip())
+                        if (
+                            tokens[x]["templateparams"][ith]
+                            not in tokens[x]["templateargs"].keys()
+                        ):
+                            tokens[x]["templateargs"][
+                                tokens[x]["templateparams"][ith]
+                            ] = []
+                        tokens[x]["templateargs"][
+                            tokens[x]["templateparams"][ith]
+                        ].append(
+                            (
+                                line[count:][
+                                    re.search("[^,<>]*,", line[count:])
+                                    .span()[0] : re.search("[^,><]*,", line[count:])
+                                    .span()[1]
+                                    - 1
+                                ]
+                            ).strip()
+                        )
                         count += re.search("[^,><]*,", line[count:]).span()[1]
                         ith += 1
                     if re.search("[^,]*,", line[count:]) is None:
                         iterate = False
-                if re.search("<[^,]*>", line) is not None and "||" not in line and "&&" not in line:
+                if (
+                    re.search("<[^,]*>", line) is not None
+                    and "||" not in line
+                    and "&&" not in line
+                ):
                     templatetype = False
-                    if tokens[x]["templateparams"][ith] not in tokens[x]["templateargs"].keys():
+                    if (
+                        tokens[x]["templateparams"][ith]
+                        not in tokens[x]["templateargs"].keys()
+                    ):
                         tokens[x]["templateargs"][tokens[x]["templateparams"][ith]] = []
-                    tokens[x]["templateargs"][tokens[x]["templateparams"][ith]].append(line[count:][
-                                                            re.search("<[^,]*>", line[count:]).span()[0] + 1:
-                                                            re.search("<[^,]*>", line[count:]).span()[
-                                                                1] - 1])
+                    tokens[x]["templateargs"][tokens[x]["templateparams"][ith]].append(
+                        line[count:][
+                            re.search("<[^,]*>", line[count:]).span()[0]
+                            + 1 : re.search("<[^,]*>", line[count:]).span()[1]
+                            - 1
+                        ]
+                    )
                 elif re.search("[^,]*>", line[count:]) is not None:
                     templatetype = False
-                    if tokens[x]["templateparams"][ith] not in tokens[x]["templateargs"].keys():
+                    if (
+                        tokens[x]["templateparams"][ith]
+                        not in tokens[x]["templateargs"].keys()
+                    ):
                         tokens[x]["templateargs"][tokens[x]["templateparams"][ith]] = []
-                    tokens[x]["templateargs"][tokens[x]["templateparams"][ith]].append(line[count:][re.search("[^,]*>", line[count:]).span()[0]:re.search("[^,]*>", line[count:]).span()[1]-1])
+                    tokens[x]["templateargs"][tokens[x]["templateparams"][ith]].append(
+                        line[count:][
+                            re.search("[^,]*>", line[count:])
+                            .span()[0] : re.search("[^,]*>", line[count:])
+                            .span()[1]
+                            - 1
+                        ]
+                    )
                     ith = 0
-            if func is True and re.search("<.*>", line) is not None and "||" not in line and "&&" not in line:
+            if (
+                func is True
+                and re.search("<.*>", line) is not None
+                and "||" not in line
+                and "&&" not in line
+            ):
                 line = line.replace(re.search("<.*>", line).group(), "")
-            elif func is True and re.search("<.*\n", line) is not None and ";" not in line and ")" not in line and "[" not in line and "||" not in line and "&&" not in line:
+            elif (
+                func is True
+                and re.search("<.*\n", line) is not None
+                and ";" not in line
+                and ")" not in line
+                and "[" not in line
+                and "||" not in line
+                and "&&" not in line
+            ):
                 templatecall = True
                 line = line.replace(re.search("<.*\n", line).group(), "")
-            elif func is True and re.search(".*>", line) is not None and ";" not in line and "(" not in line[:re.search(".*>", line).span()[1]] and "||" not in line and "&&" not in line:
+            elif (
+                func is True
+                and re.search(".*>", line) is not None
+                and ";" not in line
+                and "(" not in line[: re.search(".*>", line).span()[1]]
+                and "||" not in line
+                and "&&" not in line
+            ):
                 line = line.replace(re.search(".*>", line).group(), "")
                 templatecall = False
             elif func is True and templatecall is True:
                 line = ""
-            if func is True and re.search("[\W_]*=[\W_]*new u?int\d{1,2}_t\[.\];", line) is not None:
-                line = line.replace(re.search("[\W_]*=[\W_]*new u?int\d{1,2}_t\[.\];", line).group(), ";")
+            if (
+                func is True
+                and re.search("[\W_]*=[\W_]*new u?int\d{1,2}_t\[.\];", line) is not None
+            ):
+                line = line.replace(
+                    re.search("[\W_]*=[\W_]*new u?int\d{1,2}_t\[.\];", line).group(),
+                    ";",
+                )
             if func is True and re.search("u?int\d{1,2}_t\*?", line) is not None:
                 line = line.replace(re.search("u?int\d{1,2}_t", line).group(), "int")
             if func is True and " ERROR " in line:
@@ -131,12 +215,20 @@ def preprocess(filename):
             if func is True and templ is True:
                 for x in templateids:
                     if x in line:
-                        if line[line.find(x)-1] == " " or line[line.find(x)-1] == "*" or line[line.find(x)-1]:
+                        if (
+                            line[line.find(x) - 1] == " "
+                            or line[line.find(x) - 1] == "*"
+                            or line[line.find(x) - 1]
+                        ):
                             if "=" not in line:
                                 varnamestart = line.find(x) + len(x) + 1
-                                varnameend = line[varnamestart:].find(",") + varnamestart
+                                varnameend = (
+                                    line[varnamestart:].find(",") + varnamestart
+                                )
                                 varname = line[varnamestart:varnameend]
-                                tokens[funcname][varname] = x[:-1] if x.endswith("*") else x
+                                tokens[funcname][varname] = (
+                                    x[:-1] if x.endswith("*") else x
+                                )
                             if x.endswith("*"):
                                 x = x[:-1]
                             line = line.replace(x, "int")
@@ -146,7 +238,7 @@ def preprocess(filename):
                 else:
                     typename = "bool"
                 if "=" not in line and "(" not in line:
-                    varname = line[line.find(typename) + len(typename) + 1:]
+                    varname = line[line.find(typename) + len(typename) + 1 :]
                     varname = re.sub("[\W_]+", "", varname)
                     tokens[funcname][varname] = "bool"
                 line = line.replace("bool", "int", 1)
@@ -160,10 +252,10 @@ def preprocess(filename):
                     templateids = []
                     tempids = []
 
-    return code,tokens
+    return code, tokens
+
 
 class FuncBody(object):
-
     def __init__(self, ast):
         self.ast = ast
         self.code = ""
@@ -174,29 +266,42 @@ class FuncBody(object):
             for node in item:
                 self.traverse(node, indent)
         elif item.__class__.__name__ == "Return":
-            if item.expr.__class__.__name__ == "FuncCall" and item.expr.name.name == "failure":
-                stmt = " "*indent + "raise ValueError({0})".format(item.expr.args.exprs[0].value)
-            elif item.expr.__class__.__name__ == "FuncCall" and item.expr.name.name == "success" and item.expr.args is None:
-                stmt = " "*indent + "return"
+            if (
+                item.expr.__class__.__name__ == "FuncCall"
+                and item.expr.name.name == "failure"
+            ):
+                stmt = " " * indent + "raise ValueError({0})".format(
+                    item.expr.args.exprs[0].value
+                )
+            elif (
+                item.expr.__class__.__name__ == "FuncCall"
+                and item.expr.name.name == "success"
+                and item.expr.args is None
+            ):
+                stmt = " " * indent + "return"
             else:
-                stmt = " "*indent + "return {0}".format(self.traverse(item.expr, 0, called=True))
+                stmt = " " * indent + "return {0}".format(
+                    self.traverse(item.expr, 0, called=True)
+                )
             if called:
                 return stmt
             else:
                 self.code += stmt + "\n"
         elif item.__class__.__name__ == "Constant":
-            constant = " "*indent + "{0}".format(item.value)
+            stmt = " " * indent + "{0}".format(item.value)
             if called:
-                return constant
+                return stmt
             else:
-                self.code += constant
+                self.code += stmt
         elif item.__class__.__name__ == "Decl":
             if item.init is not None:
-                stmt = " "*indent + "{0} = {1}".format(item.name, self.traverse(item.init, 0, called=True))
+                stmt = " " * indent + "{0} = {1}".format(
+                    item.name, self.traverse(item.init, 0, called=True)
+                )
                 if not called:
                     stmt = stmt + "\n"
             elif item.type.__class__.__name__ == "PtrDecl":
-                stmt = " "*indent + "{0} = []".format(item.name)
+                stmt = " " * indent + "{0} = []".format(item.name)
                 if not called:
                     stmt = stmt + "\n"
             else:
@@ -206,29 +311,44 @@ class FuncBody(object):
             else:
                 self.code += stmt
         elif item.__class__.__name__ == "Assignment":
-            assignstmt = " "*indent + "{0} = {1}".format(self.traverse(item.lvalue, 0, called=True), self.traverse(item.rvalue, 0, called=True))
+            stmt = " " * indent + "{0} = {1}".format(
+                self.traverse(item.lvalue, 0, called=True),
+                self.traverse(item.rvalue, 0, called=True),
+            )
             if called:
-                return assignstmt
+                return stmt
             else:
-                self.code += assignstmt + "\n"
+                self.code += stmt + "\n"
         elif item.__class__.__name__ == "FuncCall":
             if item.args is not None:
                 if item.name.name == "memcpy":
-                    return " "*indent + "{0}[{1}:{1}+{2}] = {3}[{4}:{4}+{2}]".format(item.args.exprs[0].expr.name.name, self.traverse(item.args.exprs[0].expr.subscript, 0, called=True), item.args.exprs[2].name, item.args.exprs[1].expr.name.name, self.traverse(item.args.exprs[1].expr.subscript, 0, called=True))
-                return " "*indent + "{0}({1})".format(item.name.name, self.traverse(item.args, 0, called=True))
+                    return " " * indent + "{0}[{1}:{1}+{2}] = {3}[{4}:{4}+{2}]".format(
+                        item.args.exprs[0].expr.name.name,
+                        self.traverse(
+                            item.args.exprs[0].expr.subscript, 0, called=True
+                        ),
+                        item.args.exprs[2].name,
+                        item.args.exprs[1].expr.name.name,
+                        self.traverse(
+                            item.args.exprs[1].expr.subscript, 0, called=True
+                        ),
+                    )
+                return " " * indent + "{0}({1})".format(
+                    item.name.name, self.traverse(item.args, 0, called=True)
+                )
             else:
                 return " " * indent + "{0}()".format(item.name.name)
         elif item.__class__.__name__ == "ExprList":
-            exprlist = " "*indent
+            stmt = " " * indent
             for i in range(len(item.exprs)):
                 if i == 0:
-                    exprlist += "{0}".format(self.traverse(item.exprs[i], 0, called=True))
+                    stmt += "{0}".format(self.traverse(item.exprs[i], 0, called=True))
                 else:
-                    exprlist += ", {0}".format(self.traverse(item.exprs[i], 0, called=True))
+                    stmt += ", {0}".format(self.traverse(item.exprs[i], 0, called=True))
             if called:
-                return exprlist
+                return stmt
             else:
-                self.code += exprlist
+                self.code += stmt
         elif item.__class__.__name__ == "BinaryOp":
             if item.op == "&&":
                 operator = "and"
@@ -239,124 +359,196 @@ class FuncBody(object):
             binaryopl = "{0}".format(self.traverse(item.left, 0, called=True))
             binaryopr = "{0}".format(self.traverse(item.right, 0, called=True))
             if called and item.left.__class__.__name__ == "BinaryOp":
-                binaryopl = "("+binaryopl+")"
+                binaryopl = "(" + binaryopl + ")"
             if called and item.right.__class__.__name__ == "BinaryOp":
-                binaryopr = "("+binaryopr+")"
-            binaryop = " "*indent + "{0} {1} {2}".format(binaryopl, operator, binaryopr)
+                binaryopr = "(" + binaryopr + ")"
+            stmt = " " * indent + "{0} {1} {2}".format(binaryopl, operator, binaryopr)
             if called:
-                return binaryop
+                return stmt
             else:
-                self.code += binaryop
+                self.code += stmt
         elif item.__class__.__name__ == "If":
-            ifstmt = " "*indent + "if {0}:\n".format(self.traverse(item.cond, 0, called=True))
-            ifstmt += "{0}\n".format(self.traverse(item.iftrue, indent + 4, called=True))
+            stmt = " " * indent + "if {0}:\n".format(
+                self.traverse(item.cond, 0, called=True)
+            )
+            stmt += "{0}\n".format(self.traverse(item.iftrue, indent + 4, called=True))
             if item.iffalse is not None:
-                ifstmt += " "*indent + "else:\n"
-                ifstmt += "{0}\n".format(self.traverse(item.iffalse, indent + 4, called=True))
+                stmt += " " * indent + "else:\n"
+                stmt += "{0}\n".format(
+                    self.traverse(item.iffalse, indent + 4, called=True)
+                )
             if called:
-                return ifstmt[:-1]
+                return stmt[:-1]
             else:
-                self.code += ifstmt
+                self.code += stmt
         elif item.__class__.__name__ == "For":
-            if (item.init is not None) and (item.next is not None) and (item.cond is not None) and (item.init.decls[0].init.__class__.__name__ == "Constant") and (len(item.init.decls) == 1) and (item.init.decls[0].init.value == "0") and (item.next.op == "p++") and (item.cond.op == "<") and (item.cond.left.name == item.init.decls[0].name):
-                forstmt = " "*indent + "for {0} in range({1}):\n".format(item.init.decls[0].name, self.traverse(item.cond.right, 0, called=True))
+            if (
+                (item.init is not None)
+                and (item.next is not None)
+                and (item.cond is not None)
+                and (item.init.decls[0].init.__class__.__name__ == "Constant")
+                and (len(item.init.decls) == 1)
+                and (item.init.decls[0].init.value == "0")
+                and (item.next.op == "p++")
+                and (item.cond.op == "<")
+                and (item.cond.left.name == item.init.decls[0].name)
+            ):
+                stmt = " " * indent + "for {0} in range({1}):\n".format(
+                    item.init.decls[0].name,
+                    self.traverse(item.cond.right, 0, called=True),
+                )
                 for i in range(len(item.stmt.block_items)):
-                    forstmt += self.traverse(item.stmt.block_items[i], indent+4, called=True) + "\n"
+                    stmt += (
+                        self.traverse(item.stmt.block_items[i], indent + 4, called=True)
+                        + "\n"
+                    )
             else:
                 if item.init is not None:
-                    forstmt = "{0}\n".format(self.traverse(item.init, indent, called=True))
+                    stmt = "{0}\n".format(self.traverse(item.init, indent, called=True))
                 else:
-                    forstmt = ""
-                forstmt += " "*indent + "while {0}:\n".format(self.traverse(item.cond, 0, called=True))
+                    stmt = ""
+                stmt += " " * indent + "while {0}:\n".format(
+                    self.traverse(item.cond, 0, called=True)
+                )
                 for i in range(len(item.stmt.block_items)):
-                    forstmt += self.traverse(item.stmt.block_items[i], indent+4, called=True) + "\n"
-                forstmt += " "*(indent+4) + "{0}\n".format(self.traverse(item.next, 0, called=True))
+                    stmt += (
+                        self.traverse(item.stmt.block_items[i], indent + 4, called=True)
+                        + "\n"
+                    )
+                stmt += " " * (indent + 4) + "{0}\n".format(
+                    self.traverse(item.next, 0, called=True)
+                )
             if called:
-                return forstmt[:-1]
+                return stmt[:-1]
             else:
-                self.code += forstmt
+                self.code += stmt
         elif item.__class__.__name__ == "UnaryOp":
             if item.op[1:] == "++":
-                unaryop = " "*indent + "{0} = {0} + 1".format(self.traverse(item.expr, 0, called=True))
+                stmt = " " * indent + "{0} = {0} + 1".format(
+                    self.traverse(item.expr, 0, called=True)
+                )
             elif item.op[1:] == "--":
-                unaryop = " " * indent + "{0} = {0} - 1".format(self.traverse(item.expr, 0, called=True))
+                stmt = " " * indent + "{0} = {0} - 1".format(
+                    self.traverse(item.expr, 0, called=True)
+                )
             elif item.op == "*":
-                unaryop = " "*indent + "{0}".format(self.traverse(item.expr, 0, called=True))
+                stmt = " " * indent + "{0}".format(
+                    self.traverse(item.expr, 0, called=True)
+                )
             elif item.op == "-":
-                unaryop = " "*indent + "-{0}".format(self.traverse(item.expr, 0, called=True))
+                stmt = " " * indent + "-{0}".format(
+                    self.traverse(item.expr, 0, called=True)
+                )
             elif item.op == "!":
-                unaryop = " "*indent + "not {0}".format(self.traverse(item.expr, 0, called=True))
+                stmt = " " * indent + "not {0}".format(
+                    self.traverse(item.expr, 0, called=True)
+                )
             elif item.op == "&":
-                unaryop = " "*indent + "{0}".format(self.traverse(item.expr, 0, called=True))
+                stmt = " " * indent + "{0}".format(
+                    self.traverse(item.expr, 0, called=True)
+                )
             else:
-                raise NotImplementedError("Unhandled Unary Operator case. Please inform the developers about the error")
+                raise NotImplementedError(
+                    "Unhandled Unary Operator case. Please inform the developers about the error"
+                )
             if called:
-                return unaryop
+                return stmt
             else:
-                self.code += unaryop + "\n"
+                self.code += stmt + "\n"
         elif item.__class__.__name__ == "DeclList":
-            decllist = " "*indent
+            stmt = " " * indent
             for i in range(len(item.decls)):
                 if i == 0:
-                    decllist += "{0}".format(self.traverse(item.decls[i], 0, called=True))
+                    stmt += "{0}".format(self.traverse(item.decls[i], 0, called=True))
                 else:
-                    decllist += ", {0}".format(self.traverse(item.decls[i], 0, called=True))
+                    stmt += ", {0}".format(self.traverse(item.decls[i], 0, called=True))
             if called:
-                return decllist
+                return stmt
             else:
-                self.code += decllist + "\n"
+                self.code += stmt + "\n"
         elif item.__class__.__name__ == "ArrayRef":
             if item.subscript.__class__.__name__ == "UnaryOp":
-                arrayref = " "*indent + "{0};".format(self.traverse(item.subscript, 0, called=True)) + " {0}[{1}]".format(self.traverse(item.name, 0, called=True), self.traverse(item.subscript.expr, 0, called=True))
+                stmt = (
+                    " " * indent
+                    + "{0};".format(self.traverse(item.subscript, 0, called=True))
+                    + " {0}[{1}]".format(
+                        self.traverse(item.name, 0, called=True),
+                        self.traverse(item.subscript.expr, 0, called=True),
+                    )
+                )
             else:
-                arrayref = " "*indent + "{0}[{1}]".format(self.traverse(item.name, 0, called=True), self.traverse(item.subscript, 0, called=True))
+                stmt = " " * indent + "{0}[{1}]".format(
+                    self.traverse(item.name, 0, called=True),
+                    self.traverse(item.subscript, 0, called=True),
+                )
             if called:
-                return arrayref
+                return stmt
             else:
-                self.code += arrayref
+                self.code += stmt
         elif item.__class__.__name__ == "Cast":
-            cast = " "*indent + "{0}({1})".format(self.traverse(item.to_type, 0, called=True), self.traverse(item.expr, 0, called=True))
+            stmt = " " * indent + "{0}({1})".format(
+                self.traverse(item.to_type, 0, called=True),
+                self.traverse(item.expr, 0, called=True),
+            )
             if called:
-                return cast
+                return stmt
             else:
-                self.code += cast
+                self.code += stmt
         elif item.__class__.__name__ == "Typename":
-            typename = " "*indent + "{0}".format(item.type.type.names[0])
+            stmt = " " * indent + "{0}".format(item.type.type.names[0])
             if called:
-                return typename
+                return stmt
             else:
-                self.code += typename
+                self.code += stmt
         elif item.__class__.__name__ == "ID":
-            ID = " "*indent + "{0}".format(item.name)
+            stmt = " " * indent + "{0}".format(item.name)
             if called:
-                return ID
+                return stmt
             else:
-                self.code += ID
+                self.code += stmt
         elif item.__class__.__name__ == "Compound":
-            compound = ""
+            stmt = ""
             if called:
                 for i in range(len(item.block_items)):
-                    compound += self.traverse(item.block_items[i], indent, called=True) + "\n"
+                    stmt += (
+                        self.traverse(item.block_items[i], indent, called=True) + "\n"
+                    )
             else:
                 for i in range(len(item.block_items)):
-                    compound += self.traverse(item.block_items[i], indent + 4, called=True) + "\n"
-            return compound[:-1]
+                    stmt += (
+                        self.traverse(item.block_items[i], indent + 4, called=True)
+                        + "\n"
+                    )
+            return stmt[:-1]
         elif item.__class__.__name__ == "TernaryOp":
-            stmt = " "*indent + "{0} if {1} else {2}".format(self.traverse(item.iftrue, 0, called=True), self.traverse(item.cond, 0, called=True), self.traverse(item.iffalse, 0, called=True))
+            stmt = " " * indent + "{0} if {1} else {2}".format(
+                self.traverse(item.iftrue, 0, called=True),
+                self.traverse(item.cond, 0, called=True),
+                self.traverse(item.iffalse, 0, called=True),
+            )
             if called:
                 return stmt
             else:
                 self.code += stmt
         elif item.__class__.__name__ == "While":
-            forstmt = " " * indent + "while {0}:\n".format(self.traverse(item.cond, 0, called=True))
+            stmt = " " * indent + "while {0}:\n".format(
+                self.traverse(item.cond, 0, called=True)
+            )
             for i in range(len(item.stmt.block_items)):
-                forstmt += self.traverse(item.stmt.block_items[i], indent + 4, called=True) + "\n"
+                stmt += (
+                    self.traverse(item.stmt.block_items[i], indent + 4, called=True)
+                    + "\n"
+                )
             if called:
-                return forstmt
+                return stmt
             else:
-                self.code += forstmt
+                self.code += stmt
         elif item.__class__.__name__ == "StructRef":
-            stmt = " "*indent + "{0}{1}{2}".format(self.traverse(item.name, 0, called=True), item.type, self.traverse(item.field, 0, called=True))
+            stmt = " " * indent + "{0}{1}{2}".format(
+                self.traverse(item.name, 0, called=True),
+                item.type,
+                self.traverse(item.field, 0, called=True),
+            )
             if called:
                 return stmt
             else:
@@ -366,8 +558,8 @@ class FuncBody(object):
         else:
             raise Exception("Unable to parse {0}".format(item.__class__.__name__))
 
-class FuncDecl(object):
 
+class FuncDecl(object):
     def __init__(self, ast, typelist):
         self.ast = ast
         self.name = ast.name
@@ -381,9 +573,9 @@ class FuncDecl(object):
             params = self.ast.type.args.params
             for param in params:
                 typename, listcount = self.iterclass(param.type, 0)
-                self.args.append({"name": param.name,
-                                  "type": typename,
-                                  "list": listcount})
+                self.args.append(
+                    {"name": param.name, "type": typename, "list": listcount}
+                )
 
     def iterclass(self, obj, count):
         if obj.__class__.__name__ == "IdentifierType":
@@ -391,7 +583,7 @@ class FuncDecl(object):
         elif obj.__class__.__name__ == "TypeDecl":
             return self.iterclass(obj.type, count)
         elif obj.__class__.__name__ == "PtrDecl":
-            return self.iterclass(obj.type, count+1)
+            return self.iterclass(obj.type, count + 1)
 
     def arrange_args(self):
         arranged = ""
@@ -400,13 +592,20 @@ class FuncDecl(object):
                 arranged += ", "
             if self.args[i]["name"] in self.typelist.keys():
                 self.args[i]["type"] = self.typelist[self.args[i]["name"]]
-            arranged += "{0}: ".format(self.args[i]["name"]) + "List["*self.args[i]["list"] + self.args[i]["type"] + "]"*self.args[i]["list"]
+            arranged += (
+                "{0}: ".format(self.args[i]["name"])
+                + "List[" * self.args[i]["list"]
+                + self.args[i]["type"]
+                + "]" * self.args[i]["list"]
+            )
         return arranged
+
 
 arg_parser = argparse.ArgumentParser()
 arg_parser.add_argument("filename")
 args = arg_parser.parse_args()
 filename = args.filename
+
 
 def process_templateargs(tokens, name):
     for x in tokens[name]["templateargs"].keys():
@@ -422,6 +621,7 @@ def process_templateargs(tokens, name):
         tokens[name]["templateargs"][x] = templateargs
     return tokens
 
+
 def arrange_args(templateargs):
     arranged = ""
     for i in range(len(templateargs)):
@@ -430,11 +630,13 @@ def arrange_args(templateargs):
         arranged += templateargs[i]
     return arranged
 
+
 def arrange_body(body, indent):
     finalbody = ""
     for line in body.splitlines():
-        finalbody += " "*indent + line + "\n"
+        finalbody += " " * indent + line + "\n"
     return finalbody
+
 
 if __name__ == "__main__":
     pfile, tokens = preprocess(filename)
@@ -449,14 +651,20 @@ if __name__ == "__main__":
         print()
         indent = 0
         funcgen = ""
-        if "templateparams" in tokens[decl.name].keys() and "templateargs" in tokens[decl.name].keys():
+        if (
+            "templateparams" in tokens[decl.name].keys()
+            and "templateargs" in tokens[decl.name].keys()
+        ):
             tokens = process_templateargs(tokens, decl.name)
             for temptype in tokens[decl.name]["templateparams"]:
-                funcgen += " "*indent + "for {0} in ({1}):\n".format(temptype, arrange_args(tokens[decl.name]["templateargs"][temptype]))
+                funcgen += " " * indent + "for {0} in ({1}):\n".format(
+                    temptype, arrange_args(tokens[decl.name]["templateargs"][temptype])
+                )
                 indent += 4
-        funcgen += " "*indent + "def {0}({1}):\n".format(decl.name, decl.arrange_args())
+        funcgen += " " * indent + "def {0}({1}):\n".format(
+            decl.name, decl.arrange_args()
+        )
         funcgen += arrange_body(body.code, indent)
-        #print(funcgen)
         gencode = black.format_str(funcgen, mode=blackmode)
         print(gencode)
         print()
