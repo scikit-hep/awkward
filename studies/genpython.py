@@ -10,6 +10,9 @@ def preprocess(filename):
     tokens = {}
     templateids = []
     templatecall = False
+    tempids = []
+    templatetype = False
+    ith = 0
     with open(filename, "r") as f:
         for line in f:
             if line.endswith("\n"):
@@ -26,13 +29,15 @@ def preprocess(filename):
                 continue
             if "typename" in line:
                 iterate = True
-                tempids = []
                 while iterate:
                     if re.search("typename [^,]*,", line) is not None:
                         tempids.append(line[re.search("typename [^,]*,", line).span()[0]+9:re.search("typename [^,]*,", line).span()[1]-1])
                         line = line[re.search("typename [^,]*,", line).span()[1]:]
                     if re.search("typename [^,]*,", line) is None:
                         iterate = False
+                if "bool" in line:
+                    loc = line.find("bool")
+                    tempids.append(line[line.find("bool")+4:line.find(">")])
                 if re.search("typename [^,]*>", line) is not None:
                     tempids.append(line[re.search("typename [^,]*>", line).span()[0]+9:re.search("typename [^,]*>", line).span()[1]-1])
                     line = line[re.search("typename [^,]*>", line).span()[1]:]
@@ -47,7 +52,7 @@ def preprocess(filename):
             if func is False and re.search("\s.*\(", line):
                 funcname = re.search("\s.*\(", line).group()[1:-1]
                 tokens[funcname] = {}
-                if tempids:
+                if "tempids" in locals() and tempids:
                     tokens[funcname]["templateparams"] = tempids
                 line = line.replace(line.split(" ")[0], "int")
                 func = True
@@ -57,27 +62,52 @@ def preprocess(filename):
                     for _ in range(line.count("{")):
                         parans.append("{")
                 continue
-            if func is True and "return" in line:
-                for x in tokens.keys():
-                    if tokens[x].__class__.__name__ == "dict" and "templateparams" in tokens[x].keys():
-                        if re.search(" {0}<.*".format(x), line) is not None:
-                            if "templateargs" not in tokens[x].keys():
-                                tokens[x]["templateargs"] = []
-                            iterate = True
-                            count = 0
-                            while iterate:
-                                if re.search("<[^,]*,", line) is not None:
-                                    tokens[x]["templateargs"].append(line[count:][re.search("<[^,]*,", line[count:]).span()[0]+1:re.search("<[^,]*,", line[count:]).span()[1]-1])
-                                    count = re.search("<[^,]*,", line[count:])
-                                if re.search("<[^,]*,", line) is None:
-                                    iterate = False
-                            if re.search("<[^,]*>", line[count:]) is not None:
-                                tokens[x]["templateargs"].append(line[count:][
-                                                                        re.search("<[^,]*>", line[count:]).span()[0] + 1:
-                                                                        re.search("<[^,]*>", line[count:]).span()[
-                                                                            1] - 1])
-                            elif re.search("[^,]*>", line[count:]) is not None:
-                                tokens[x]["templateargs"].append(line[count:][re.search("[^,]*>", line[count:]).span()[0]:re.search("[^,]*>", line[count:]).span()[1]-1])
+            if func is True and (re.search("return .*<.+", line) is not None or templatetype) and (line[-2:] == ",\n" or line[-3:] == ">(\n"):
+                if re.search("return .*<.+", line) is not None:
+                    x = line[re.search("return .*<", line).span()[0]+6:re.search("return .*<", line).span()[1]-1].strip()
+                templatetype = True
+                if "templateargs" not in tokens[x].keys():
+                    tokens[x]["templateargs"] = {}
+                count = 0
+                if re.search("<[^,>]*,", line) is not None and "return" in line:
+                    if tokens[x]["templateparams"][ith] not in tokens[x]["templateargs"].keys():
+                        tokens[x]["templateargs"][tokens[x]["templateparams"][ith]] = []
+                    tokens[x]["templateargs"][tokens[x]["templateparams"][ith]].append(line[
+                                                                                       re.search("<[^,>]*,",
+                                                                                                 line[
+                                                                                                 count:]).span()[
+                                                                                           0] + 1:
+                                                                                       re.search("<[^,>]*,",
+                                                                                                 line[
+                                                                                                 count:]).span()[
+                                                                                           1] - 1])
+                    count += re.search("<[^,>]*,", line[count:]).span()[1]
+                    ith += 1
+                if line[count:].strip() != "":
+                    iterate = True
+                while iterate and templatetype:
+                    if re.search("[^,<>]*,", line[count:]) is not None:
+                        if tokens[x]["templateparams"][ith] not in tokens[x]["templateargs"].keys():
+                            tokens[x]["templateargs"][tokens[x]["templateparams"][ith]] = []
+                        tokens[x]["templateargs"][tokens[x]["templateparams"][ith]].append((line[count:][re.search("[^,<>]*,", line[count:]).span()[0]:re.search("[^,><]*,", line[count:]).span()[1]-1]).strip())
+                        count += re.search("[^,><]*,", line[count:]).span()[1]
+                        ith += 1
+                    if re.search("[^,]*,", line[count:]) is None:
+                        iterate = False
+                if re.search("<[^,]*>", line) is not None and "||" not in line and "&&" not in line:
+                    templatetype = False
+                    if tokens[x]["templateparams"][ith] not in tokens[x]["templateargs"].keys():
+                        tokens[x]["templateargs"][tokens[x]["templateparams"][ith]] = []
+                    tokens[x]["templateargs"][tokens[x]["templateparams"][ith]].append(line[count:][
+                                                            re.search("<[^,]*>", line[count:]).span()[0] + 1:
+                                                            re.search("<[^,]*>", line[count:]).span()[
+                                                                1] - 1])
+                elif re.search("[^,]*>", line[count:]) is not None:
+                    templatetype = False
+                    if tokens[x]["templateparams"][ith] not in tokens[x]["templateargs"].keys():
+                        tokens[x]["templateargs"][tokens[x]["templateparams"][ith]] = []
+                    tokens[x]["templateargs"][tokens[x]["templateparams"][ith]].append(line[count:][re.search("[^,]*>", line[count:]).span()[0]:re.search("[^,]*>", line[count:]).span()[1]-1])
+                    ith = 0
             if func is True and re.search("<.*>", line) is not None and "||" not in line and "&&" not in line:
                 line = line.replace(re.search("<.*>", line).group(), "")
             elif func is True and re.search("<.*\n", line) is not None and ";" not in line and ")" not in line and "[" not in line and "||" not in line and "&&" not in line:
@@ -379,13 +409,17 @@ args = arg_parser.parse_args()
 filename = args.filename
 
 def process_templateargs(tokens, name):
-    assert("templateargs" in tokens[name].keys())
-    templateargs = []
-    for x in tokens[name]["templateargs"]:
-        if re.search("u?int\d{1,2}_t", x) is not None:
-            templateargs.append("int")
-    templateargs = list(dict.fromkeys(templateargs))
-    tokens[name]["templateargs"] = templateargs
+    for x in tokens[name]["templateargs"].keys():
+        templateargs = []
+        for arg in tokens[name]["templateargs"][x]:
+            if re.search("u?int\d{1,2}_t", arg) is not None:
+                templateargs.append("int")
+            elif "double" in arg or "float" in arg:
+                templateargs.append("float")
+            elif "bool" in arg or "true" in arg or "false" in arg:
+                templateargs.append("bool")
+        templateargs = list(dict.fromkeys(templateargs))
+        tokens[name]["templateargs"][x] = templateargs
     return tokens
 
 def arrange_args(templateargs):
@@ -414,14 +448,12 @@ if __name__ == "__main__":
         print("----------------------------------------------------")
         print()
         indent = 0
+        funcgen = ""
         if "templateparams" in tokens[decl.name].keys() and "templateargs" in tokens[decl.name].keys():
-            funcgen = decl.name + "_all={}\n"
             tokens = process_templateargs(tokens, decl.name)
             for temptype in tokens[decl.name]["templateparams"]:
-                funcgen += " "*indent + "for {0} in ({1}):\n".format(temptype, arrange_args(tokens[decl.name]["templateargs"]))
+                funcgen += " "*indent + "for {0} in ({1}):\n".format(temptype, arrange_args(tokens[decl.name]["templateargs"][temptype]))
                 indent += 4
-        else:
-            funcgen = ""
         funcgen += " "*indent + "def {0}({1}):\n".format(decl.name, decl.arrange_args())
         funcgen += arrange_body(body.code, indent)
         #print(funcgen)
