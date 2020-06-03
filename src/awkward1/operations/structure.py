@@ -475,9 +475,7 @@ def with_field(base, what, where=None, highlevel=True):
             if isinstance(base, awkward1.layout.RecordArray):
                 if not isinstance(what, awkward1.layout.Content):
                     what = awkward1.layout.NumpyArray(
-                        numpy.lib.stride_tricks.as_strided(
-                            [what], shape=(len(base),), strides=(0,)
-                        )
+                        numpy.repeat(what, len(base))
                     )
                 return lambda: (base.setitem_field(where, what),)
             else:
