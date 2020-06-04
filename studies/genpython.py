@@ -311,8 +311,9 @@ class FuncBody(object):
             else:
                 self.code += stmt
         elif item.__class__.__name__ == "Assignment":
-            stmt = " " * indent + "{0} = {1}".format(
+            stmt = " " * indent + "{0} {1} {2}".format(
                 self.traverse(item.lvalue, 0, called=True),
+                item.op,
                 self.traverse(item.rvalue, 0, called=True),
             )
             if called:
@@ -625,7 +626,7 @@ def process_templateargs(tokens, name):
 def remove_return(code):
     if code[code.rfind("\n", 0, code.rfind("\n")) :].strip() == "return":
         k = code.rfind("return")
-        code = code[:k] + code[k+6:]
+        code = code[:k] + code[k + 6 :]
     return code
 
 
