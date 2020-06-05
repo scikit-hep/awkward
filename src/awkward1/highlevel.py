@@ -1566,8 +1566,11 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         in-place. (Internally, this method uses #ak.with_field, so performance
         is not a factor in choosing one over the other.)
         """
-        if not isinstance(where, str):
-            raise ValueError("only fields may be assigned in-place (by field name)")
+        if not (
+            isinstance(where, str)
+            or (isinstance(where, tuple) and all(isinstance(x, str) for x in where))
+        ):
+            raise TypeError("only fields may be assigned in-place (by field name)")
         self._layout = awkward1.operations.structure.with_field(
             self._layout, what, where
         ).layout
