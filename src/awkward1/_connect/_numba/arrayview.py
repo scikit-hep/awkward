@@ -510,6 +510,9 @@ class type_getitem(numba.core.typing.templates.AbstractTemplate):
         if len(args) == 2 and len(kwargs) == 0 and isinstance(args[0], ArrayViewType):
             viewtype, wheretype = args
             if isinstance(wheretype, numba.types.Integer):
+
+                print("HERE", viewtype)
+
                 return viewtype.type.getitem_at_check(viewtype)(viewtype, wheretype)
             elif (
                 isinstance(wheretype, numba.types.SliceType) and not wheretype.has_step
