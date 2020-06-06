@@ -381,14 +381,16 @@ namespace awkward {
                          const std::vector<ssize_t>& strides,
                          ssize_t byteoffset,
                          ssize_t itemsize,
-                         const std::string format)
+                         const std::string format,
+                         const KernelsLib ptr_lib)
       : Content(identities, parameters)
       , ptr_(ptr)
       , shape_(shape)
       , strides_(strides)
       , byteoffset_(byteoffset)
       , itemsize_(itemsize)
-      , format_(format) {
+      , format_(format)
+      , ptr_lib_(ptr_lib){
     if (shape.size() != strides.size()) {
       throw std::invalid_argument(
         std::string("len(shape), which is ") + std::to_string(shape.size())
@@ -420,7 +422,8 @@ namespace awkward {
                  std::vector<ssize_t>({ (ssize_t)sizeof(int8_t) }),
                  0,
                  sizeof(int8_t),
-                 format) { }
+                 format,
+                 index.ptr_lib()) { }
 
   NumpyArray::NumpyArray(const IndexU8 index, const std::string& format)
     : NumpyArray(Identities::none(),
@@ -440,7 +443,8 @@ namespace awkward {
                  std::vector<ssize_t>({ (ssize_t)sizeof(int32_t) }),
                  0,
                  sizeof(int32_t),
-                 format) { }
+                 format,
+                 index.ptr_lib()) { }
 
   NumpyArray::NumpyArray(const IndexU32 index, const std::string& format)
     : NumpyArray(Identities::none(),
@@ -450,7 +454,8 @@ namespace awkward {
                  std::vector<ssize_t>({ (ssize_t)sizeof(uint32_t) }),
                  0,
                  sizeof(uint32_t),
-                 format) { }
+                 format,
+                 index.ptr_lib()) { }
 
   NumpyArray::NumpyArray(const Index64 index, const std::string& format)
     : NumpyArray(Identities::none(),
@@ -460,7 +465,8 @@ namespace awkward {
                  std::vector<ssize_t>({ (ssize_t)sizeof(int64_t) }),
                  0,
                  sizeof(int64_t),
-                 format) { }
+                 format,
+                 index.ptr_lib()) { }
 
   const std::shared_ptr<void>
   NumpyArray::ptr() const {
@@ -495,6 +501,11 @@ namespace awkward {
   ssize_t
   NumpyArray::ndim() const {
     return (ssize_t)shape_.size();
+  }
+
+  KernelsLib
+  NumpyArray::ptr_lib() const {
+    return ptr_lib_;
   }
 
   bool

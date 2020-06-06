@@ -68,11 +68,13 @@ namespace awkward {
   IdentitiesOf<T>::IdentitiesOf(const Ref ref,
                                 const FieldLoc& fieldloc,
                                 int64_t width,
-                                int64_t length)
+                                int64_t length,
+                                KernelsLib ptr_lib)
       : Identities(ref, fieldloc, 0, width, length)
       , ptr_(std::shared_ptr<T>(
           length*width == 0 ? nullptr : new T[(size_t)(length*width)],
-          util::array_deleter<T>())) { }
+          util::array_deleter<T>()))
+      , ptr_lib_(ptr_lib) { }
 
   template <typename T>
   IdentitiesOf<T>::IdentitiesOf(const Ref ref,
@@ -80,9 +82,11 @@ namespace awkward {
                                 int64_t offset,
                                 int64_t width,
                                 int64_t length,
-                                const std::shared_ptr<T> ptr)
+                                const std::shared_ptr<T> ptr,
+                                KernelsLib ptr_lib)
       : Identities(ref, fieldloc, offset, width, length)
-      , ptr_(ptr) { }
+      , ptr_(ptr)
+      , ptr_lib_(ptr_lib) { }
 
   template <typename T>
   const std::shared_ptr<T>
@@ -330,6 +334,11 @@ namespace awkward {
     return getitem_range_nowrap(regular_start, regular_stop);
   }
 
-  template class EXPORT_SYMBOL IdentitiesOf<int32_t>;
+    template<typename T>
+    KernelsLib IdentitiesOf<T>::ptr_lib() const {
+      return ptr_lib_;
+    }
+
+    template class EXPORT_SYMBOL IdentitiesOf<int32_t>;
   template class EXPORT_SYMBOL IdentitiesOf<int64_t>;
 }

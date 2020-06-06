@@ -183,17 +183,20 @@ namespace awkward {
     /// buffer.
     /// @param length Number of elements in the array.
     /// @param itemsize Number of bytes per item; should agree with the format.
+    /// @param Choose the Kernel Library for this array, default:= cpu_kernels
     RawArrayOf<T>(const IdentitiesPtr& identities,
                   const util::Parameters& parameters,
                   const std::shared_ptr<T>& ptr,
                   const int64_t offset,
                   const int64_t length,
-                  const int64_t itemsize)
+                  const int64_t itemsize,
+                  const KernelsLib ptr_lib = cpu_kernels)
         : Content(identities, parameters)
         , ptr_(ptr)
         , offset_(offset)
         , length_(length)
-        , itemsize_(itemsize) {
+        , itemsize_(itemsize)
+        , ptr_lib_(ptr_lib) {
       if (sizeof(T) != itemsize) {
         throw std::invalid_argument("sizeof(T) != itemsize");
       }
@@ -205,12 +208,14 @@ namespace awkward {
     RawArrayOf<T>(const IdentitiesPtr& identities,
                   const util::Parameters& parameters,
                   const std::shared_ptr<T>& ptr,
-                  const int64_t length)
+                  const int64_t length,
+                  const KernelsLib ptr_lib = cpu_kernels)
         : Content(identities, parameters)
         , ptr_(ptr)
         , offset_(0)
         , length_(length)
-        , itemsize_(sizeof(T)) { }
+        , itemsize_(sizeof(T))
+        , ptr_lib_(ptr_lib) { }
 
     /// @brief Creates a RawArray without providing a #ptr to data and without
     /// having to specify #itemsize.
@@ -220,13 +225,15 @@ namespace awkward {
     /// The #itemsize is computed as `sizeof(T)`.
     RawArrayOf<T>(const IdentitiesPtr& identities,
                   const util::Parameters& parameters,
-                  const int64_t length)
+                  const int64_t length,
+                  const KernelsLib ptr_lib = cpu_kernels)
         : Content(identities, parameters)
         , ptr_(std::shared_ptr<T>(new T[(size_t)length],
                                   util::array_deleter<T>()))
         , offset_(0)
         , length_(length)
-        , itemsize_(sizeof(T)) { }
+        , itemsize_(sizeof(T))
+        , ptr_lib_(ptr_lib) { }
 
     /// @brief Reference-counted pointer to the array buffer.
     const std::shared_ptr<T>
@@ -269,6 +276,11 @@ namespace awkward {
     ssize_t
       bytelength() const {
       return (ssize_t)itemsize_*(ssize_t)length_;
+    }
+
+    KernelsLib
+      ptr_lib() const {
+      return ptr_lib_;
     }
 
     /// @brief Dereferences a selected item as a `uint8_t`.
@@ -1070,6 +1082,7 @@ namespace awkward {
     const int64_t offset_;
     const int64_t length_;
     const int64_t itemsize_;
+    const KernelsLib ptr_lib_;
   };
 }
 

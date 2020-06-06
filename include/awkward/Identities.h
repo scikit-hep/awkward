@@ -283,23 +283,30 @@ namespace awkward {
     /// @param width The number of integers in each identity tuple.
     /// @param length The number of identities in the array.
     /// @param ptr Reference-counted pointer to the array buffer.
+    /// @param Choose the Kernel Library for this array, default:= cpu_kernels.
     IdentitiesOf<T>(const Ref ref,
                     const FieldLoc& fieldloc,
                     int64_t offset,
                     int64_t width,
                     int64_t length,
-                    const std::shared_ptr<T> ptr);
+                    const std::shared_ptr<T> ptr,
+                    KernelsLib ptr_lib = cpu_kernels);
 
     /// @brief Allocates a new array buffer with a given #ref, #fieldloc,
     /// #length and #width.
     IdentitiesOf<T>(const Ref ref,
                     const FieldLoc& fieldloc,
                     int64_t width,
-                    int64_t length);
+                    int64_t length,
+                    KernelsLib ptr_lib = cpu_kernels);
 
     /// @brief Reference-counted pointer to the array buffer.
     const std::shared_ptr<T>
       ptr() const;
+
+    /// @brief The Kernel Library that ptr uses.
+    KernelsLib
+      ptr_lib() const;
 
     const std::string
       classname() const override;
@@ -366,6 +373,8 @@ namespace awkward {
   private:
     /// @brief See #ptr.
     const std::shared_ptr<T> ptr_;
+    /// @brief See #ptr_lib.
+    const KernelsLib ptr_lib_;
   };
 
 #if !defined AWKWARD_IDENTITIES_NO_EXTERN_TEMPLATE && !defined _MSC_VER

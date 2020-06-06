@@ -55,19 +55,22 @@ namespace awkward {
   Index::~Index() = default;
 
   template <typename T>
-  IndexOf<T>::IndexOf(int64_t length)
+  IndexOf<T>::IndexOf(int64_t length, KernelsLib ptr_lib)
       : ptr_(std::shared_ptr<T>(length == 0 ? nullptr : new T[(size_t)length],
                                 util::array_deleter<T>()))
       , offset_(0)
-      , length_(length) { }
+      , length_(length)
+      , ptr_lib_(ptr_lib) { }
 
   template <typename T>
   IndexOf<T>::IndexOf(const std::shared_ptr<T>& ptr,
                       int64_t offset,
-                      int64_t length)
+                      int64_t length,
+                      KernelsLib ptr_lib)
       : ptr_(ptr)
       , offset_(offset)
-      , length_(length) { }
+      , length_(length)
+      , ptr_lib_(ptr_lib) { }
 
   template <typename T>
   const std::shared_ptr<T>
@@ -307,6 +310,11 @@ namespace awkward {
     }
     return IndexOf<T>(ptr, 0, length_);
   }
+
+    template<typename T>
+    KernelsLib IndexOf<T>::ptr_lib() const {
+      return ptr_lib_;
+    }
 
   template class EXPORT_SYMBOL IndexOf<int8_t>;
   template class EXPORT_SYMBOL IndexOf<uint8_t>;

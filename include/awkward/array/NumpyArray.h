@@ -156,7 +156,8 @@ namespace awkward {
                const std::vector<ssize_t>& strides,
                ssize_t byteoffset,
                ssize_t itemsize,
-               const std::string format);
+               const std::string format,
+               const KernelsLib ptr_lib = cpu_kernels);
 
     /// @brief Creates a NumpyArray from an {@link IndexOf Index8}.
     NumpyArray(const Index8 index);
@@ -187,6 +188,9 @@ namespace awkward {
     /// @brief Reference-counted pointer to the array buffer.
     const std::shared_ptr<void>
       ptr() const;
+
+    KernelsLib
+      ptr_lib() const;
 
     /// @brief Number of elements in each dimension. A one-dimensional
     /// array has a shape of length one.
@@ -796,10 +800,13 @@ namespace awkward {
   const ssize_t itemsize_;
   /// @brief See #format.
   const std::string format_;
+  /// @brief See #ptr_lib
+  const KernelsLib ptr_lib_;
 
   /// @brief Mapping from (platform dependent) `std::type_index` to pybind11
   /// format string (see #format).
   static const std::unordered_map<std::type_index, std::string> format_map;
+
   };
 }
 
