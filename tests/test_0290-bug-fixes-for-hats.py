@@ -14,8 +14,7 @@ numba = pytest.importorskip("numba")
 def test_unmasked():
     @numba.njit
     def find_it(array):
-        for i in range(3):
-            item = array[i]
+        for item in array:
             if item is None:
                 pass
             elif item.x == 3:
@@ -30,8 +29,7 @@ def test_unmasked():
 def test_indexedoption():
     @numba.njit
     def find_it(array):
-        for i in range(4):
-            item = array[i]
+        for item in array:
             if item is None:
                 pass
             elif item.x == 3:
@@ -44,7 +42,7 @@ def test_indexedoption():
 def test_indexed_1():
     @numba.njit
     def f1(array, check):
-        for i in range(3):
+        for i in range(len(array)):
             item = array[i]
             if item.x == check:
                 return i
@@ -63,8 +61,7 @@ def test_indexed_1():
 def test_indexed_2():
     @numba.njit
     def f1(array, check):
-        for i in range(3):
-            item = array[i]
+        for item in array:
             if item.x == check:
                 return item
         return None
