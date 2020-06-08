@@ -677,7 +677,7 @@ if __name__ == "__main__":
                 funcgen = ""
                 tokens = process_templateargs(tokens, decl.name)
                 funcprototype = "{0}({1})".format(decl.name, decl.arrange_args())
-                doccode += ".. py:attribute:: " + funcprototype + "\n\n"
+                doccode += ".. py:function:: " + funcprototype + "\n\n"
                 doccode += ".. code-block:: python\n\n"
                 for temptype in tokens[decl.name]["templateparams"]:
                     funcgen += " " * indent + "for {0} in ({1}):\n".format(
