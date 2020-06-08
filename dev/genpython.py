@@ -656,6 +656,7 @@ if __name__ == "__main__":
     # Initialize black config
     blackmode = black.FileMode()
     gencode = ""
+    doccode = ""
     for filename in filenames:
         pfile, tokens = preprocess(filename)
         ast = pycparser.c_parser.CParser().parse(pfile)
@@ -665,15 +666,15 @@ if __name__ == "__main__":
                 "templateparams" in tokens[decl.name].keys()
                 and "templateargs" in tokens[decl.name].keys()
             ):
-                # print(decl.name)
-                # print("----------------------------------------------------------")
+                doccode += decl.name + "\n"
+                doccode += "----------------------------------------------------------\n"
                 body = FuncBody(ast.ext[i].body)
                 indent = 0
                 funcgen = ""
                 tokens = process_templateargs(tokens, decl.name)
                 funcprototype = "{0}({1})".format(decl.name, decl.arrange_args())
-                # print(".. py:function:: " + funcprototype + "\n")
-                # print(".. code-block:: python\n")
+                doccode += ".. py:function:: " + funcprototype + "\n\n"
+                doccode += ".. code-block:: python\n\n"
                 for temptype in tokens[decl.name]["templateparams"]:
                     funcgen += " " * indent + "for {0} in ({1}):\n".format(
                         temptype,
@@ -682,6 +683,9 @@ if __name__ == "__main__":
                     indent += 4
                 funcgen += " " * indent + "def " + funcprototype + ":\n"
                 funcgen += arrange_body(body.code, indent)
-                gencode += indent_code(black.format_str(funcgen, mode=blackmode), 4)
-                gencode += "\n"
-        print(gencode)
+                doccode += indent_code(black.format_str(funcgen, mode=blackmode), 4) + "\n"
+                gencode += black.format_str(funcgen, mode=blackmode) + "\n"
+    with open("cpukernels.py", "w") as f:
+        f.write(gencode)
+    with open("cpukernels.rst", "w") as f:
+        f.write(doccode)
