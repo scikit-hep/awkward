@@ -657,8 +657,7 @@ if __name__ == "__main__":
     # Initialize black config
     blackmode = black.FileMode()
     gencode = ""
-    doccode = "cpukernels\n"
-    doccode += "----------------------------------------------------------\n"
+    docdict = {}
     for filename in filenames:
         pfile, tokens = preprocess(filename)
         ast = pycparser.c_parser.CParser().parse(pfile)
@@ -668,7 +667,7 @@ if __name__ == "__main__":
                 "templateparams" in tokens[decl.name].keys()
                 and "templateargs" in tokens[decl.name].keys()
             ):
-                doccode += decl.name + "\n"
+                doccode = decl.name + "\n"
                 doccode += (
                     "===========================================================\n"
                 )
@@ -691,6 +690,7 @@ if __name__ == "__main__":
                     indent_code(black.format_str(funcgen, mode=blackmode), 4) + "\n"
                 )
                 gencode += black.format_str(funcgen, mode=blackmode) + "\n"
+                docdict[decl.name] = doccode
     current_dir = os.path.dirname(os.path.realpath(__file__))
     with open(os.path.join(current_dir, "cpukernels.py"), "w") as f:
         f.write(gencode)
@@ -700,7 +700,10 @@ if __name__ == "__main__":
             "w",
         ) as f:
             print("Writing cpukernels.rst")
-            f.write(doccode)
+            f.write("cpukernels\n")
+            f.write("----------------------------------------------------------\n")
+            for name in sorted(docdict.keys()):
+                f.write(docdict[name])
         if os.path.isfile(
             os.path.join(current_dir, "..", "docs-sphinx", "_auto", "toctree.txt",)
         ):
