@@ -691,45 +691,23 @@ if __name__ == "__main__":
                     indent_code(black.format_str(funcgen, mode=blackmode), 4) + "\n"
                 )
                 gencode += black.format_str(funcgen, mode=blackmode) + "\n"
-    with open(
-        os.path.join(os.path.dirname(os.path.realpath(__file__)), "cpukernels.py"), "w"
-    ) as f:
+    current_dir = os.path.dirname(os.path.realpath(__file__))
+    with open(os.path.join(current_dir, "cpukernels.py"), "w") as f:
         f.write(gencode)
-    if os.path.isdir(
-        os.path.join(
-            os.path.dirname(os.path.realpath(__file__)), "..", "docs-sphinx", "_auto"
-        )
-    ):
+    if os.path.isdir(os.path.join(current_dir, "..", "docs-sphinx", "_auto")):
         with open(
-            os.path.join(
-                os.path.dirname(os.path.realpath(__file__)),
-                "..",
-                "docs-sphinx",
-                "_auto",
-                "cpukernels.rst",
-            ),
+            os.path.join(current_dir, "..", "docs-sphinx", "_auto", "cpukernels.rst",),
             "w",
         ) as f:
             print("Writing cpukernels.rst")
             f.write(doccode)
         if os.path.isfile(
-            os.path.join(
-                os.path.dirname(os.path.realpath(__file__)),
-                "..",
-                "docs-sphinx",
-                "_auto",
-                "toctree.txt",
-            )
+            os.path.join(current_dir, "..", "docs-sphinx", "_auto", "toctree.txt",)
         ):
             with open(
-                os.path.join(
-                    os.path.dirname(os.path.realpath(__file__)),
-                    "..",
-                    "docs-sphinx",
-                    "_auto",
-                    "toctree.txt",
-                ),
-                "a",
+                os.path.join(current_dir, "..", "docs-sphinx", "_auto", "toctree.txt",),
+                "r+",
             ) as f:
-                print("Updating toctree.txt")
-                f.write(" " * 4 + "_auto/cpukernels.rst")
+                if "_auto/cpukernels.rst" not in f.read():
+                    print("Updating toctree.txt")
+                    f.write(" " * 4 + "_auto/cpukernels.rst")
