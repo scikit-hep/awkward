@@ -603,9 +603,9 @@ class FuncDecl(object):
 
 
 arg_parser = argparse.ArgumentParser()
-arg_parser.add_argument("filename")
+arg_parser.add_argument("filenames", nargs="+")
 args = arg_parser.parse_args()
-filename = args.filename
+filenames = args.filenames
 
 
 def process_templateargs(tokens, name):
@@ -639,38 +639,49 @@ def arrange_args(templateargs):
     return arranged
 
 
+def indent_code(code, indent):
+    finalcode = ""
+    for line in code.splitlines():
+        finalcode += " " * indent + line + "\n"
+    return finalcode
+
+
 def arrange_body(body, indent):
-    finalbody = ""
-    for line in body.splitlines():
-        finalbody += " " * indent + line + "\n"
+    finalbody = indent_code(body, indent)
     finalbody = remove_return(finalbody)
     return finalbody
 
 
 if __name__ == "__main__":
-    pfile, tokens = preprocess(filename)
-    ast = pycparser.c_parser.CParser().parse(pfile)
     # Initialize black config
     blackmode = black.FileMode()
-    for i in range(len(ast.ext)):
-        decl = FuncDecl(ast.ext[i].decl, tokens)
-        if (
-            "templateparams" in tokens[decl.name].keys()
-            and "templateargs" in tokens[decl.name].keys()
-        ):
-            body = FuncBody(ast.ext[i].body)
-            indent = 0
-            funcgen = ""
-            tokens = process_templateargs(tokens, decl.name)
-            for temptype in tokens[decl.name]["templateparams"]:
-                funcgen += " " * indent + "for {0} in ({1}):\n".format(
-                    temptype, arrange_args(tokens[decl.name]["templateargs"][temptype])
-                )
-                indent += 4
-            funcgen += " " * indent + "def {0}({1}):\n".format(
-                decl.name, decl.arrange_args()
-            )
-            funcgen += arrange_body(body.code, indent)
-            gencode = black.format_str(funcgen, mode=blackmode)
-            print(gencode)
-            print()
+    gencode = ""
+    for filename in filenames:
+        pfile, tokens = preprocess(filename)
+        ast = pycparser.c_parser.CParser().parse(pfile)
+        for i in range(len(ast.ext)):
+            decl = FuncDecl(ast.ext[i].decl, tokens)
+            if (
+                "templateparams" in tokens[decl.name].keys()
+                and "templateargs" in tokens[decl.name].keys()
+            ):
+                # print(decl.name)
+                # print("----------------------------------------------------------")
+                body = FuncBody(ast.ext[i].body)
+                indent = 0
+                funcgen = ""
+                tokens = process_templateargs(tokens, decl.name)
+                funcprototype = "{0}({1})".format(decl.name, decl.arrange_args())
+                # print(".. py:function:: " + funcprototype + "\n")
+                # print(".. code-block:: python\n")
+                for temptype in tokens[decl.name]["templateparams"]:
+                    funcgen += " " * indent + "for {0} in ({1}):\n".format(
+                        temptype,
+                        arrange_args(tokens[decl.name]["templateargs"][temptype]),
+                    )
+                    indent += 4
+                funcgen += " " * indent + "def " + funcprototype + ":\n"
+                funcgen += arrange_body(body.code, indent)
+                gencode += indent_code(black.format_str(funcgen, mode=blackmode), 4)
+                gencode += "\n"
+        print(gencode)
