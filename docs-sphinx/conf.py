@@ -54,8 +54,38 @@ master_doc = "index"
 
 import os
 import subprocess
+
 subprocess.check_call(["doxygen", os.path.join("docs-doxygen", "Doxyfile")], cwd="..")
 
 exec(open("prepare_docstrings.py").read(), dict(globals()))
+
+pythongen = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)), "..", "dev", "genpython.py"
+)
+identities = os.path.join(
+    os.path.join(
+        os.path.dirname(os.path.realpath(__file__)), "..", "src", "cpu-kernels"
+    ),
+    "identities.cpp",
+)
+operations = os.path.join(
+    os.path.join(
+        os.path.dirname(os.path.realpath(__file__)), "..", "src", "cpu-kernels"
+    ),
+    "operations.cpp",
+)
+reducers = os.path.join(
+    os.path.join(
+        os.path.dirname(os.path.realpath(__file__)), "..", "src", "cpu-kernels"
+    ),
+    "reducers.cpp",
+)
+getitem = os.path.join(
+    os.path.join(
+        os.path.dirname(os.path.realpath(__file__)), "..", "src", "cpu-kernels"
+    ),
+    "getitem.cpp",
+)
+subprocess.check_call(["python", pythongen, identities, operations, reducers, getitem])
 
 exec(open("make_changelog.py").read(), dict(globals()))

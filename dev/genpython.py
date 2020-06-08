@@ -1,3 +1,4 @@
+import os
 import argparse
 import pycparser
 import re
@@ -656,7 +657,8 @@ if __name__ == "__main__":
     # Initialize black config
     blackmode = black.FileMode()
     gencode = ""
-    doccode = ""
+    doccode = "cpukernels\n"
+    doccode += "----------------------------------------------------------\n"
     for filename in filenames:
         pfile, tokens = preprocess(filename)
         ast = pycparser.c_parser.CParser().parse(pfile)
@@ -667,13 +669,15 @@ if __name__ == "__main__":
                 and "templateargs" in tokens[decl.name].keys()
             ):
                 doccode += decl.name + "\n"
-                doccode += "----------------------------------------------------------\n"
+                doccode += (
+                    "===========================================================\n"
+                )
                 body = FuncBody(ast.ext[i].body)
                 indent = 0
                 funcgen = ""
                 tokens = process_templateargs(tokens, decl.name)
                 funcprototype = "{0}({1})".format(decl.name, decl.arrange_args())
-                doccode += ".. py:function:: " + funcprototype + "\n\n"
+                doccode += ".. py:attribute:: " + funcprototype + "\n\n"
                 doccode += ".. code-block:: python\n\n"
                 for temptype in tokens[decl.name]["templateparams"]:
                     funcgen += " " * indent + "for {0} in ({1}):\n".format(
@@ -683,9 +687,49 @@ if __name__ == "__main__":
                     indent += 4
                 funcgen += " " * indent + "def " + funcprototype + ":\n"
                 funcgen += arrange_body(body.code, indent)
-                doccode += indent_code(black.format_str(funcgen, mode=blackmode), 4) + "\n"
+                doccode += (
+                    indent_code(black.format_str(funcgen, mode=blackmode), 4) + "\n"
+                )
                 gencode += black.format_str(funcgen, mode=blackmode) + "\n"
-    with open("cpukernels.py", "w") as f:
+    with open(
+        os.path.join(os.path.dirname(os.path.realpath(__file__)), "cpukernels.py"), "w"
+    ) as f:
         f.write(gencode)
-    with open("cpukernels.rst", "w") as f:
-        f.write(doccode)
+    if os.path.isdir(
+        os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "..", "docs-sphinx", "_auto"
+        )
+    ):
+        with open(
+            os.path.join(
+                os.path.dirname(os.path.realpath(__file__)),
+                "..",
+                "docs-sphinx",
+                "_auto",
+                "cpukernels.rst",
+            ),
+            "w",
+        ) as f:
+            print("Writing cpukernels.rst")
+            f.write(doccode)
+        if os.path.isfile(
+            os.path.join(
+                os.path.dirname(os.path.realpath(__file__)),
+                "..",
+                "docs-sphinx",
+                "_auto",
+                "toctree.txt",
+            )
+        ):
+            with open(
+                os.path.join(
+                    os.path.dirname(os.path.realpath(__file__)),
+                    "..",
+                    "docs-sphinx",
+                    "_auto",
+                    "toctree.txt",
+                ),
+                "a",
+            ) as f:
+                print("Updating toctree.txt")
+                f.write(" " * 4 + "_auto/cpukernels.rst")
