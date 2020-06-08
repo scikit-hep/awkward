@@ -15,6 +15,42 @@
 
 namespace kernel {
   template <>
+  int8_t* ptr_alloc(int64_t length, KernelsLib ptr_lib) {
+    if(ptr_lib == cpu_kernels)
+      return awkward_cpu_ptri8_alloc(length);
+  }
+
+  template <>
+  uint8_t* ptr_alloc(int64_t length, KernelsLib ptr_lib) {
+    if(ptr_lib == cpu_kernels)
+      return awkward_cpu_ptriU8_alloc(length);
+  }
+
+  template <>
+  int32_t* ptr_alloc(int64_t length, KernelsLib ptr_lib) {
+    if(ptr_lib == cpu_kernels)
+      return awkward_cpu_ptri32_alloc(length);
+  }
+
+  template <>
+  uint32_t* ptr_alloc(int64_t length, KernelsLib ptr_lib) {
+    if(ptr_lib == cpu_kernels)
+      return awkward_cpu_ptriU32_alloc(length);
+  }
+
+  template <>
+  int64_t* ptr_alloc(int64_t length, KernelsLib ptr_lib) {
+    if(ptr_lib == cpu_kernels)
+      return awkward_cpu_ptri64_alloc(length);
+  }
+
+  template <>
+  double* ptr_alloc(int64_t length, KernelsLib ptr_lib) {
+    if(ptr_lib == cpu_kernels)
+      return awkward_cpu_ptrd_alloc(length);
+  }
+
+  template <>
   ERROR new_identities<int32_t>(int32_t *toptr,
                                 int64_t length) {
 #ifdef BUILD_CUDA_KERNELS

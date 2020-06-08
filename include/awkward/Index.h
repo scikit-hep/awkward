@@ -9,6 +9,7 @@
 
 #include "awkward/common.h"
 #include "awkward/util.h"
+#include "awkward/kernel.h"
 
 namespace awkward {
   template <typename T>

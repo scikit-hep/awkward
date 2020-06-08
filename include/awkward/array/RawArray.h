@@ -13,6 +13,7 @@
 #include <typeinfo>
 
 #include "awkward/common.h"
+#include "awkward/kernel.h"
 #include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/cpu-kernels/operations.h"
@@ -228,8 +229,8 @@ namespace awkward {
                   const int64_t length,
                   const KernelsLib ptr_lib = cpu_kernels)
         : Content(identities, parameters)
-        , ptr_(std::shared_ptr<T>(new T[(size_t)length],
-                                  util::array_deleter<T>()))
+        , ptr_(kernel::ptr_alloc<T>((size_t)length, ptr_lib_),
+                                    util::array_deleter<T>())
         , offset_(0)
         , length_(length)
         , itemsize_(sizeof(T))
