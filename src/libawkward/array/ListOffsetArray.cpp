@@ -791,7 +791,7 @@ namespace awkward {
       IndexOf<T> stops = util::make_stops(offsets_);
       Index64 tonum(length());
       struct Error err = util::awkward_listarray_num_64<T>(
-        tonum.ptr().get(),
+        kernel::get_ptr<int64_t>(tonum.ptr().get(), starts.ptr_lib, stops.ptr_lib),
         starts.ptr().get(),
         starts.offset(),
         stops.ptr().get(),

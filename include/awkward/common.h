@@ -72,4 +72,10 @@ extern "C" {
   };
 }
 
+enum KernelsLib {
+    cpu_kernels,
+    cuda_kernels
+};
+
+
 #endif // AWKWARD_COMMON_H_

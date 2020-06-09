@@ -9,6 +9,7 @@
 #include "awkward/Index.h"
 #include "awkward/Identities.h"
 #include "awkward/Content.h"
+#include <awkward/kernel.h>
 
 namespace awkward {
   /// @class ListOffsetForm

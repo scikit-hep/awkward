@@ -1078,6 +1078,10 @@ namespace awkward {
         "undefined operation: RawArray::getitem_next_jagged(jagged)");
     }
 
+    /// @brief An enum type that indicates the type of kernels on which
+    /// an instance of this class would run it's operations on.
+    KernelsLib ptr_lib = cpu_kernels;
+
   private:
     const std::shared_ptr<T> ptr_;
     const int64_t offset_;
