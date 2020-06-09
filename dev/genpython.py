@@ -702,7 +702,7 @@ if __name__ == "__main__":
             "w",
         ) as f:
             print("Writing cpukernels.rst")
-            f.write("cpukernels\n")
+            f.write("kernels\n")
             f.write("----------------------------------------------------------\n")
             for name in sorted(docdict.keys()):
                 f.write(docdict[name])
