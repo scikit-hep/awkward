@@ -250,7 +250,8 @@ namespace awkward {
   bool
   UnionForm::equal(const FormPtr& other,
                    bool check_identities,
-                   bool check_parameters) const {
+                   bool check_parameters,
+                   bool compatibility_check) const {
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
       return false;
@@ -269,7 +270,8 @@ namespace awkward {
       for (int64_t i = 0;  i < numcontents();  i++) {
         if (!content(i).get()->equal(t->content(i),
                                      check_identities,
-                                     check_parameters)) {
+                                     check_parameters,
+                                     compatibility_check)) {
           return false;
         }
       }
@@ -319,13 +321,23 @@ namespace awkward {
   const IndexOf<I>
   UnionArrayOf<T, I>::regular_index(const IndexOf<T>& tags) {
     int64_t lentags = tags.length();
-    IndexOf<I> outindex(lentags);
-    struct Error err = util::awkward_unionarray_regular_index<T, I>(
-      outindex.ptr().get(),
+    int64_t size;
+    struct Error err1 = awkward_unionarray8_regular_index_getsize(
+      &size,
       tags.ptr().get(),
       tags.offset(),
       lentags);
-    util::handle_error(err, "UnionArray", nullptr);
+    util::handle_error(err1, "UnionArray", nullptr);
+    IndexOf<I> current(size);
+    IndexOf<I> outindex(lentags);
+    struct Error err2 = util::awkward_unionarray_regular_index<T, I>(
+      outindex.ptr().get(),
+      current.ptr().get(),
+      size,
+      tags.ptr().get(),
+      tags.offset(),
+      lentags);
+    util::handle_error(err2, "UnionArray", nullptr);
     return outindex;
   }
 
@@ -1888,7 +1900,7 @@ namespace awkward {
                                                  tail);
   }
 
-  template class UnionArrayOf<int8_t, int32_t>;
-  template class UnionArrayOf<int8_t, uint32_t>;
-  template class UnionArrayOf<int8_t, int64_t>;
+  template class EXPORT_SYMBOL UnionArrayOf<int8_t, int32_t>;
+  template class EXPORT_SYMBOL UnionArrayOf<int8_t, uint32_t>;
+  template class EXPORT_SYMBOL UnionArrayOf<int8_t, int64_t>;
 }

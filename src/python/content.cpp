@@ -2051,7 +2051,7 @@ make_VirtualArray(const py::handle& m, const std::string& name) {
           }
           catch (py::cast_error err) {
             throw std::invalid_argument(
-                "VirtualArray 'generator' must be a PyArrayGenerator or a "
+                "VirtualArray 'generator' must be an ArrayGenerator or a "
                 "SliceGenerator");
           }
         }

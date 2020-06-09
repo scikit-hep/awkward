@@ -337,7 +337,8 @@ namespace awkward {
   bool
   NumpyForm::equal(const FormPtr& other,
                    bool check_identities,
-                   bool check_parameters) const {
+                   bool check_parameters,
+                   bool compatibility_check) const {
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
       return false;
@@ -647,7 +648,7 @@ namespace awkward {
       Identities32* rawidentities =
         reinterpret_cast<Identities32*>(newidentities.get());
       struct Error err = awkward_new_identities32(rawidentities->ptr().get(),
-                                                  length());
+                                                length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
     }

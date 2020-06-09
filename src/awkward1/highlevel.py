@@ -854,6 +854,21 @@ class Array(
         (#ak.layout.Content arrays are immutable; field assignment replaces
         the #layout with an array that has the new field using #ak.with_field.)
 
+        However, a field can be assigned deeply into a nested record e.g.
+
+            >>> nested = ak.zip({"a" : ak.zip({"x" : [1, 2, 3]})})
+            >>> nested["a", "y"] = 2 * nested.a.x
+            >>> ak.to_list(nested)
+            [{'a': {'x': 1, 'y': 2}}, {'a': {'x': 2, 'y': 4}}, {'a': {'x': 3, 'y': 6}}]
+
+        Note that the following does **not** work:
+
+            >>> nested["a"]["y"] = 2 * nested.a.x # does not work, nested["a"] is a copy!
+
+        Always assign by passing the whole path to the top level
+
+            >>> nested["a", "y"] = 2 * nested.a.x
+
         If necessary, the new field will be broadcasted to fit the array.
         For example, given an `array` like
 
@@ -879,8 +894,11 @@ class Array(
         in-place. (Internally, this method uses #ak.with_field, so performance
         is not a factor in choosing one over the other.)
         """
-        if not isinstance(where, str):
-            raise ValueError("only fields may be assigned in-place (by field name)")
+        if not (
+            isinstance(where, str)
+            or (isinstance(where, tuple) and all(isinstance(x, str) for x in where))
+        ):
+            raise TypeError("only fields may be assigned in-place (by field name)")
         self._layout = awkward1.operations.structure.with_field(
             self._layout, what, where
         ).layout
@@ -1166,7 +1184,14 @@ class Array(
         Only exception: Pandas can generate NumPy `"O"` arrays to print
         Array fragments to the screen.
         """
-        if awkward1._util.called_by_module("pandas"):
+        if awkward1._util.called_by_module(
+            "pandas.io.formats.format"
+        ) or awkward1._util.called_by_module("pandas.core.generic"):
+            out = numpy.empty(len(self._layout), dtype="O")
+            for i, x in enumerate(self._layout):
+                out[i] = awkward1._util.wrap(x, self._behavior)
+            return out
+        elif awkward1._util.called_by_module("pandas"):
             try:
                 return awkward1._connect._numpy.convert_to_array(
                     self._layout, args, kwargs
@@ -1541,8 +1566,11 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         in-place. (Internally, this method uses #ak.with_field, so performance
         is not a factor in choosing one over the other.)
         """
-        if not isinstance(where, str):
-            raise ValueError("only fields may be assigned in-place (by field name)")
+        if not (
+            isinstance(where, str)
+            or (isinstance(where, tuple) and all(isinstance(x, str) for x in where))
+        ):
+            raise TypeError("only fields may be assigned in-place (by field name)")
         self._layout = awkward1.operations.structure.with_field(
             self._layout, what, where
         ).layout
@@ -2029,7 +2057,7 @@ class ArrayBuilder(object):
 
         limit_type = limit_total - len(value) - len("<ArrayBuilder  type=>")
         typestrs = awkward1._util.typestrs(self._behavior)
-        typestr = repr(str(snapshot.type(typestrs)))
+        typestr = repr(str(snapshot.layout.type(typestrs)))
         if len(typestr) > limit_type:
             typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
@@ -2344,7 +2372,7 @@ class ArrayBuilder(object):
                 - len(self._name)
             )
             typestrs = awkward1._util.typestrs(self._arraybuilder._behavior)
-            typestr = repr(str(snapshot.type(typestrs)))
+            typestr = repr(str(snapshot.layout.type(typestrs)))
             if len(typestr) > limit_type:
                 typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 

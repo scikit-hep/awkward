@@ -146,7 +146,8 @@ namespace awkward {
   bool
   IndexedForm::equal(const FormPtr& other,
                      bool check_identities,
-                     bool check_parameters) const {
+                     bool check_parameters,
+                     bool compatibility_check) const {
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
       return false;
@@ -159,7 +160,8 @@ namespace awkward {
       return (index_ == t->index()  &&
               content_.get()->equal(t->content(),
                                     check_identities,
-                                    check_parameters));
+                                    check_parameters,
+                                    compatibility_check));
     }
     else {
       return false;
@@ -283,7 +285,8 @@ namespace awkward {
   bool
   IndexedOptionForm::equal(const FormPtr& other,
                            bool check_identities,
-                           bool check_parameters) const {
+                           bool check_parameters,
+                           bool compatibility_check) const {
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
       return false;
@@ -296,7 +299,8 @@ namespace awkward {
       return (index_ == t->index()  &&
               content_.get()->equal(t->content(),
                                     check_identities,
-                                    check_parameters));
+                                    check_parameters,
+                                    compatibility_check));
     }
     else {
       return false;
@@ -2124,9 +2128,12 @@ namespace awkward {
     return std::pair<Index64, IndexOf<T>>(nextcarry, outindex);
   }
 
-  template class IndexedArrayOf<int32_t, false>;
-  template class IndexedArrayOf<uint32_t, false>;
-  template class IndexedArrayOf<int64_t, false>;
-  template class IndexedArrayOf<int32_t, true>;
-  template class IndexedArrayOf<int64_t, true>;
+  // IndexedArrayOf<int64_t, true> has to be first, or ld on darwin
+  // will hide the typeinfo symbol
+  template class EXPORT_SYMBOL IndexedArrayOf<int64_t, true>;
+
+  template class EXPORT_SYMBOL IndexedArrayOf<int32_t, false>;
+  template class EXPORT_SYMBOL IndexedArrayOf<uint32_t, false>;
+  template class EXPORT_SYMBOL IndexedArrayOf<int64_t, false>;
+  template class EXPORT_SYMBOL IndexedArrayOf<int32_t, true>;
 }

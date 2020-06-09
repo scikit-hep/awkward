@@ -7,7 +7,7 @@
 #include <memory>
 #include <vector>
 
-#include "awkward/cpu-kernels/util.h"
+#include "awkward/common.h"
 #include "awkward/Slice.h"
 #include "awkward/Index.h"
 #include "awkward/Content.h"
@@ -79,7 +79,8 @@ namespace awkward {
     bool
       equal(const FormPtr& other,
             bool check_identities,
-            bool check_parameters) const override;
+            bool check_parameters,
+            bool compatibility_check) const override;
 
   private:
     Index::Form mask_;

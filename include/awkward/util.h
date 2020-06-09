@@ -8,7 +8,7 @@
 #include <map>
 #include <memory>
 
-#include "awkward/cpu-kernels/util.h"
+#include "awkward/common.h"
 
 namespace awkward {
   class Identities;
@@ -642,10 +642,22 @@ namespace awkward {
 
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
+    template <typename T>
+    ERROR
+      awkward_unionarray_regular_index_getsize(
+        int64_t* size,
+        const T* fromtags,
+        int64_t tagsoffset,
+        int64_t length);
+
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T, typename I>
     ERROR
       awkward_unionarray_regular_index(
         I* toindex,
+        I* current,
+        int64_t size,
         const T* fromtags,
         int64_t tagsoffset,
         int64_t length);

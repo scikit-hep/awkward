@@ -3,7 +3,7 @@
 #ifndef AWKWARD_BOOLBUILDER_H_
 #define AWKWARD_BOOLBUILDER_H_
 
-#include "awkward/cpu-kernels/util.h"
+#include "awkward/common.h"
 #include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/GrowableBuffer.h"
 #include "awkward/builder/Builder.h"

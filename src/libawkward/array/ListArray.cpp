@@ -160,7 +160,8 @@ namespace awkward {
   bool
   ListForm::equal(const FormPtr& other,
                   bool check_identities,
-                  bool check_parameters) const {
+                  bool check_parameters,
+                  bool compatibility_check) const {
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
       return false;
@@ -174,7 +175,8 @@ namespace awkward {
               stops_ == t->stops()  &&
               content_.get()->equal(t->content(),
                                     check_identities,
-                                    check_parameters));
+                                    check_parameters,
+                                    compatibility_check));
     }
     else {
       return false;
@@ -1792,7 +1794,7 @@ namespace awkward {
                                                outcontent);
   }
 
-  template class ListArrayOf<int32_t>;
-  template class ListArrayOf<uint32_t>;
-  template class ListArrayOf<int64_t>;
+  template class EXPORT_SYMBOL ListArrayOf<int32_t>;
+  template class EXPORT_SYMBOL ListArrayOf<uint32_t>;
+  template class EXPORT_SYMBOL ListArrayOf<int64_t>;
 }

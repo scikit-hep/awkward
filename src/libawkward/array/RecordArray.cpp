@@ -223,7 +223,8 @@ namespace awkward {
   bool
   RecordForm::equal(const FormPtr& other,
                     bool check_identities,
-                    bool check_parameters) const {
+                    bool check_parameters,
+                    bool compatibility_check) const {
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
       return false;
@@ -260,7 +261,8 @@ namespace awkward {
           }
           if (!content(i).get()->equal(t->content(j),
                                        check_identities,
-                                       check_parameters)) {
+                                       check_parameters,
+                                       compatibility_check)) {
             return false;
           }
         }
@@ -273,7 +275,8 @@ namespace awkward {
         for (int64_t i = 0;  i < numfields();  i++) {
           if (!content(i).get()->equal(t->content(i),
                                        check_identities,
-                                       check_parameters)) {
+                                       check_parameters,
+                                       compatibility_check)) {
             return false;
           }
         }

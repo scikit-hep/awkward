@@ -7,7 +7,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "awkward/cpu-kernels/util.h"
+#include "awkward/common.h"
 #include "awkward/Identities.h"
 #include "awkward/Content.h"
 
@@ -84,7 +84,8 @@ namespace awkward {
     bool
       equal(const FormPtr& other,
             bool check_identities,
-            bool check_parameters) const override;
+            bool check_parameters,
+            bool compatibility_check) const override;
 
   private:
     const util::RecordLookupPtr recordlookup_;

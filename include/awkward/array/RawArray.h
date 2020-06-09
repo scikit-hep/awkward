@@ -12,7 +12,7 @@
 #include <stdexcept>
 #include <typeinfo>
 
-#include "awkward/cpu-kernels/util.h"
+#include "awkward/common.h"
 #include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/cpu-kernels/operations.h"
@@ -117,7 +117,8 @@ namespace awkward {
     bool
       equal(const FormPtr& other,
             bool check_identities,
-            bool check_parameters) const {
+            bool check_parameters,
+            bool compatibility_check) const {
       throw std::runtime_error("FIXME: RawForm::equal");
     }
 

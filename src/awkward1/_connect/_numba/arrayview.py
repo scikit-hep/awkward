@@ -904,7 +904,7 @@ def register_binary_operator(binop):
     class type_binary_operator(numba.core.typing.templates.AbstractTemplate):
         def generic(self, args, kwargs):
             if len(args) == 2 and len(kwargs) == 0:
-                behavior = None
+                left, right, behavior = None, None, None
 
                 if isinstance(args[0], RecordViewType):
                     left = args[0].arrayviewtype.type

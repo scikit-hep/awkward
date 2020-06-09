@@ -9,9 +9,10 @@
 #include <typeindex>
 #include <vector>
 
-#include "awkward/cpu-kernels/util.h"
+#include "awkward/common.h"
 #include "awkward/Slice.h"
 #include "awkward/Content.h"
+#include "awkward/kernel.h"
 
 namespace awkward {
   /// @class NumpyForm
@@ -88,7 +89,8 @@ namespace awkward {
     bool
       equal(const FormPtr& other,
             bool check_identities,
-            bool check_parameters) const override;
+            bool check_parameters,
+            bool compatibility_check) const override;
 
   private:
     const std::vector<int64_t> inner_shape_;

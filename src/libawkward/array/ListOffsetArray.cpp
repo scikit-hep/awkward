@@ -151,7 +151,8 @@ namespace awkward {
   bool
   ListOffsetForm::equal(const FormPtr& other,
                         bool check_identities,
-                        bool check_parameters) const {
+                        bool check_parameters,
+                        bool compatibility_check) const {
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
       return false;
@@ -164,7 +165,8 @@ namespace awkward {
       return (offsets_ == t->offsets()  &&
               content_.get()->equal(t->content(),
                                     check_identities,
-                                    check_parameters));
+                                    check_parameters,
+                                    compatibility_check));
     }
     else {
       return false;
@@ -1905,7 +1907,7 @@ namespace awkward {
                                          tail);
   }
 
-  template class ListOffsetArrayOf<int32_t>;
-  template class ListOffsetArrayOf<uint32_t>;
-  template class ListOffsetArrayOf<int64_t>;
+  template class EXPORT_SYMBOL ListOffsetArrayOf<int32_t>;
+  template class EXPORT_SYMBOL ListOffsetArrayOf<uint32_t>;
+  template class EXPORT_SYMBOL ListOffsetArrayOf<int64_t>;
 }

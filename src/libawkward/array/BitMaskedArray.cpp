@@ -151,7 +151,8 @@ namespace awkward {
   bool
   BitMaskedForm::equal(const FormPtr& other,
                        bool check_identities,
-                       bool check_parameters) const {
+                       bool check_parameters,
+                       bool compatibility_check) const {
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
       return false;
@@ -164,7 +165,8 @@ namespace awkward {
       return (mask_ == t->mask()  &&
               content_.get()->equal(t->content(),
                                     check_identities,
-                                    check_parameters)  &&
+                                    check_parameters,
+                                    compatibility_check)  &&
               valid_when_ == t->valid_when()  &&
               lsb_order_ == t->lsb_order());
     }
