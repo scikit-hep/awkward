@@ -1,5 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+import copy
 import os
 import argparse
 import pycparser
@@ -92,6 +93,9 @@ def preprocess(filename):
                 templatetype = True
                 if "templateargs" not in tokens[x].keys():
                     tokens[x]["templateargs"] = {}
+                if "childfunc" not in tokens[x].keys():
+                    tokens[x]["childfunc"] = set()
+                tokens[x]["childfunc"].add(funcname)
                 count = 0
                 if re.search("<[^,>]*,", line) is not None and "return" in line:
                     if (
@@ -663,42 +667,51 @@ if __name__ == "__main__":
     for filename in filenames:
         pfile, tokens = preprocess(filename)
         ast = pycparser.c_parser.CParser().parse(pfile)
+        funcs = {}
         for i in range(len(ast.ext)):
             decl = FuncDecl(ast.ext[i].decl, tokens)
+            body = FuncBody(ast.ext[i].body)
+            funcs[decl.name] = {}
+            funcs[decl.name]["def"] = decl
+            funcs[decl.name]["body"] = body
+        for name in funcs.keys():
             if (
-                "templateparams" in tokens[decl.name].keys()
-                and "templateargs" in tokens[decl.name].keys()
+                "templateparams" in tokens[name].keys()
+                and "templateargs" in tokens[name].keys()
             ):
-                doccode = decl.name + "\n"
+                doccode = name + "\n"
                 doccode += (
                     "===========================================================\n"
                 )
-                body = FuncBody(ast.ext[i].body)
                 indent = 0
                 funcgen = ""
-                tokens = process_templateargs(tokens, decl.name)
-                funcprototype = "{0}({1})".format(decl.name, decl.arrange_args())
-                doccode += ".. py:function:: " + funcprototype + "\n\n"
+                tokens = process_templateargs(tokens, name)
+                funcprototype = "{0}({1})".format(name, funcs[name]["def"].arrange_args())
+                for childfunc in tokens[name]["childfunc"]:
+                    doccode += ".. py:function:: {0}({1})".format(funcs[childfunc]["def"].name, funcs[childfunc]["def"].arrange_args()) + funcprototype + "\n\n"
                 doccode += ".. code-block:: python\n\n"
-                for temptype in tokens[decl.name]["templateparams"]:
-                    if len(tokens[decl.name]["templateargs"][temptype]) == 1:
+                for temptype in tokens[name]["templateparams"]:
+                    if len(tokens[name]["templateargs"][temptype]) == 1:
                         funcgen += " " * indent + "{0} = {1}\n".format(
                             temptype.strip(),
-                            arrange_args(tokens[decl.name]["templateargs"][temptype]),
+                            arrange_args(tokens[name]["templateargs"][temptype]),
                         )
                     else:
                         funcgen += " " * indent + "for {0} in ({1}):\n".format(
                             temptype.strip(),
-                            arrange_args(tokens[decl.name]["templateargs"][temptype]),
+                            arrange_args(tokens[name]["templateargs"][temptype]),
                         )
                         indent += 4
+                callindent = copy.copy(indent)
                 funcgen += " " * indent + "def " + funcprototype + ":\n"
-                funcgen += arrange_body(body.code, indent)
+                funcgen += arrange_body(funcs[name]["body"].code, indent)
+                for childfunc in tokens[name]["childfunc"]:
+                    funcgen += indent_code("{0} = {1}\n".format(funcs[childfunc]["def"].name, name), callindent)
                 doccode += (
                     indent_code(black.format_str(funcgen, mode=blackmode), 4) + "\n"
                 )
                 gencode += black.format_str(funcgen, mode=blackmode) + "\n"
-                docdict[decl.name] = doccode
+                docdict[name] = doccode
     current_dir = os.path.dirname(os.path.realpath(__file__))
     with open(os.path.join(current_dir, "cpukernels.py"), "w") as f:
         f.write(gencode)
