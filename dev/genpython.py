@@ -686,9 +686,18 @@ if __name__ == "__main__":
                 indent = 0
                 funcgen = ""
                 tokens = process_templateargs(tokens, name)
-                funcprototype = "{0}({1})".format(name, funcs[name]["def"].arrange_args())
+                funcprototype = "{0}({1})".format(
+                    name, funcs[name]["def"].arrange_args()
+                )
                 for childfunc in tokens[name]["childfunc"]:
-                    doccode += ".. py:function:: {0}({1})".format(funcs[childfunc]["def"].name, funcs[childfunc]["def"].arrange_args()) + funcprototype + "\n\n"
+                    doccode += (
+                        ".. py:function:: {0}({1})".format(
+                            funcs[childfunc]["def"].name,
+                            funcs[childfunc]["def"].arrange_args(),
+                        )
+                        + funcprototype
+                        + "\n\n"
+                    )
                 doccode += ".. code-block:: python\n\n"
                 for temptype in tokens[name]["templateparams"]:
                     if len(tokens[name]["templateargs"][temptype]) == 1:
@@ -706,7 +715,10 @@ if __name__ == "__main__":
                 funcgen += " " * indent + "def " + funcprototype + ":\n"
                 funcgen += arrange_body(funcs[name]["body"].code, indent)
                 for childfunc in tokens[name]["childfunc"]:
-                    funcgen += indent_code("{0} = {1}\n".format(funcs[childfunc]["def"].name, name), callindent)
+                    funcgen += indent_code(
+                        "{0} = {1}\n".format(funcs[childfunc]["def"].name, name),
+                        callindent,
+                    )
                 doccode += (
                     indent_code(black.format_str(funcgen, mode=blackmode), 4) + "\n"
                 )
