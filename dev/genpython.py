@@ -681,11 +681,17 @@ if __name__ == "__main__":
                 doccode += ".. py:function:: " + funcprototype + "\n\n"
                 doccode += ".. code-block:: python\n\n"
                 for temptype in tokens[decl.name]["templateparams"]:
-                    funcgen += " " * indent + "for {0} in ({1}):\n".format(
-                        temptype,
-                        arrange_args(tokens[decl.name]["templateargs"][temptype]),
-                    )
-                    indent += 4
+                    if len(tokens[decl.name]["templateargs"][temptype]) == 1:
+                        funcgen += " " * indent + "{0} = {1}\n".format(
+                            temptype.strip(),
+                            arrange_args(tokens[decl.name]["templateargs"][temptype]),
+                        )
+                    else:
+                        funcgen += " " * indent + "for {0} in ({1}):\n".format(
+                            temptype.strip(),
+                            arrange_args(tokens[decl.name]["templateargs"][temptype]),
+                        )
+                        indent += 4
                 funcgen += " " * indent + "def " + funcprototype + ":\n"
                 funcgen += arrange_body(body.code, indent)
                 doccode += (
