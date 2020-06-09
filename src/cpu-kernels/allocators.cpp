@@ -38,9 +38,23 @@ extern "C" {
     return nullptr;
   }
 
+  float *awkward_cpu_ptrf_alloc(int64_t length) {
+    if(length != 0) {
+      return (float *)(malloc(sizeof(float) * length));
+    }
+    return nullptr;
+  }
+
   double *awkward_cpu_ptrd_alloc(int64_t length) {
     if(length != 0) {
       return (double *)(malloc(sizeof(double) * length));
+    }
+    return nullptr;
+  }
+
+  bool *awkward_cpu_ptrb_alloc(int64_t length) {
+    if(length != 0) {
+      return (bool *)(malloc(sizeof(bool) * length));
     }
     return nullptr;
   }

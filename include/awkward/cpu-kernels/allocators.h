@@ -17,6 +17,10 @@ extern "C" {
 
   int64_t *awkward_cpu_ptri64_alloc(int64_t length);
 
+  float *awkward_cpu_ptrf_alloc(int64_t length);
+
   double *awkward_cpu_ptrd_alloc(int64_t length);
+
+  bool *awkward_cpu_ptrb_alloc(int64_t length);
 };
 #endif //AWKWARD_ALLOCATORS_H_

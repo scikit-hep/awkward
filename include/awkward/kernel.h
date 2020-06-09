@@ -26,9 +26,13 @@ namespace kernel {
     int64_t* ptr_alloc(int64_t length, KernelsLib ptr_lib);
 
     template <>
+    float *ptr_alloc(int64_t length, KernelsLib ptr_lib);
+
+    template <>
     double* ptr_alloc(int64_t length, KernelsLib ptr_lib);
 
-
+    template <>
+    bool *ptr_alloc(int64_t length, KernelsLib ptr_lib);
 
     template <typename T>
     ERROR new_identities(T *toptr,

@@ -45,9 +45,21 @@ namespace kernel {
   }
 
   template <>
+  float* ptr_alloc(int64_t length, KernelsLib ptr_lib) {
+    if(ptr_lib == cpu_kernels)
+      return awkward_cpu_ptrf_alloc(length);
+  }
+
+  template <>
   double* ptr_alloc(int64_t length, KernelsLib ptr_lib) {
     if(ptr_lib == cpu_kernels)
       return awkward_cpu_ptrd_alloc(length);
+  }
+
+  template <>
+  bool* ptr_alloc(int64_t length, KernelsLib ptr_lib) {
+    if(ptr_lib == cpu_kernels)
+      return awkward_cpu_ptrb_alloc(length);
   }
 
   template <>
