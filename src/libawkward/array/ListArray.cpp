@@ -1721,13 +1721,13 @@ namespace awkward {
                                                             util::Parameters(),
                                                             smalloffsets,
                                                             nextcontent);
-      out = next.get()->getitem_next_jagged(util::make_starts(smalloffsets),
+      out = next.get()->getitem_next_jagged(util::make_starts(smalloffsets, cuda_kernels),
                                             util::make_stops(smalloffsets),
                                             slicecontent.content(),
                                             tail);
     }
     else {
-      out = Content::getitem_next_jagged(util::make_starts(smalloffsets),
+      out = Content::getitem_next_jagged(util::make_starts(smalloffsets, cuda_kernels),
                                          util::make_stops(smalloffsets),
                                          slicecontent.content(),
                                          tail);
@@ -1784,7 +1784,7 @@ namespace awkward {
 
     Index64 sliceoffsets = slicecontent.offsets();
     ContentPtr outcontent = content_.get()->getitem_next_jagged(
-      util::make_starts(sliceoffsets),
+      util::make_starts(sliceoffsets, cuda_kernels),
       util::make_stops(sliceoffsets),
       slicecontent.content(),
       tail);

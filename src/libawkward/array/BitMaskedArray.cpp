@@ -233,7 +233,7 @@ namespace awkward {
 
   const Index8
   BitMaskedArray::bytemask() const {
-    Index8 bytemask(mask_.length() * 8, );
+    Index8 bytemask(mask_.length() * 8);
     struct Error err = awkward_bitmaskedarray_to_bytemaskedarray(
       bytemask.ptr().get(),
       mask_.ptr().get(),

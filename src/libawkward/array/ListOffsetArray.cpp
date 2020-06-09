@@ -192,7 +192,7 @@ namespace awkward {
   template <typename T>
   const IndexOf<T>
   ListOffsetArrayOf<T>::starts() const {
-    return util::make_starts(offsets_);
+    return util::make_starts(offsets_, cuda_kernels);
   }
 
   template <typename T>
@@ -262,7 +262,7 @@ namespace awkward {
         + std::to_string(offsets.length() - 1));
     }
 
-    IndexOf<T> starts = util::make_starts(offsets_);
+    IndexOf<T> starts = util::make_starts(offsets_, cuda_kernels);
     IndexOf<T> stops = util::make_stops(offsets_);
 
     int64_t carrylen = offsets.getitem_at_nowrap(offsets.length() - 1);
@@ -681,7 +681,7 @@ namespace awkward {
     ContentPtr listarray = std::make_shared<ListArrayOf<T>>(
                              identities_,
                              parameters_,
-                             util::make_starts(offsets_),
+                             util::make_starts(offsets_, cuda_kernels),
                              util::make_stops(offsets_),
                              content_);
     return listarray.get()->getitem_next_jagged(slicestarts,
@@ -693,7 +693,7 @@ namespace awkward {
   template <typename T>
   const ContentPtr
   ListOffsetArrayOf<T>::carry(const Index64& carry) const {
-    IndexOf<T> starts = util::make_starts(offsets_);
+    IndexOf<T> starts = util::make_starts(offsets_, cuda_kernels);
     IndexOf<T> stops = util::make_stops(offsets_);
     IndexOf<T> nextstarts(carry.length());
     IndexOf<T> nextstops(carry.length());
@@ -752,7 +752,7 @@ namespace awkward {
   template <typename T>
   const std::string
   ListOffsetArrayOf<T>::validityerror(const std::string& path) const {
-    IndexOf<T> starts = util::make_starts(offsets_);
+    IndexOf<T> starts = util::make_starts(offsets_, cuda_kernels);
     IndexOf<T> stops = util::make_stops(offsets_);
     struct Error err = util::awkward_listarray_validity<T>(
       starts.ptr().get(),
@@ -787,11 +787,11 @@ namespace awkward {
       return NumpyArray(out).getitem_at_nowrap(0);
     }
     else if (toaxis == depth + 1) {
-      IndexOf<T> starts = util::make_starts(offsets_);
-      IndexOf<T> stops = util::make_stops(offsets_);
-      Index64 tonum(length());
+      IndexOf<T> starts = util::make_starts(offsets_, offsets_.ptr_lib());
+      IndexOf<T> stops = util::make_stops(offsets_, offsets_.ptr_lib());
+      Index64 tonum(length(), offsets_.ptr_lib());
       struct Error err = util::awkward_listarray_num_64<T>(
-        kernel::get_ptr<int64_t>(tonum.ptr().get(), starts.ptr_lib, stops.ptr_lib),
+        tonum.ptr().get(),
         starts.ptr().get(),
         starts.offset(),
         stops.ptr().get(),
@@ -1005,7 +1005,7 @@ namespace awkward {
     Index64 starts(mylength + theirlength);
     Index64 stops(mylength + theirlength);
 
-    IndexOf<T> self_starts = util::make_starts(offsets_);
+    IndexOf<T> self_starts = util::make_starts(offsets_, cuda_kernels);
     IndexOf<T> self_stops = util::make_stops(offsets_);
 
     if (std::is_same<T, int32_t>::value) {
@@ -1529,7 +1529,7 @@ namespace awkward {
       ContentPtr trimmed = content_.get()->getitem_range_nowrap(globalstart,
                                                                 globalstop);
       ContentPtr outcontent = trimmed.get()->reduce_next(
-        reducer, negaxis, util::make_starts(offsets_), nextparents,
+        reducer, negaxis, util::make_starts(offsets_, cuda_kernels), nextparents,
         offsets_.length() - 1, mask, keepdims);
 
       Index64 outoffsets(outlength + 1);
@@ -1616,7 +1616,7 @@ namespace awkward {
     }
 
     else if (toaxis == depth + 1) {
-      IndexOf<T> starts = util::make_starts(offsets_);
+      IndexOf<T> starts = util::make_starts(offsets_, cuda_kernels);
       IndexOf<T> stops = util::make_stops(offsets_);
 
       int64_t totallen;
@@ -1692,7 +1692,7 @@ namespace awkward {
         "ListOffsetArray::getitem_next(SliceAt): advanced.length() != 0");
     }
     int64_t lenstarts = offsets_.length() - 1;
-    IndexOf<T> starts = util::make_starts(offsets_);
+    IndexOf<T> starts = util::make_starts(offsets_, cuda_kernels);
     IndexOf<T> stops = util::make_stops(offsets_);
     SliceItemPtr nexthead = tail.head();
     Slice nexttail = tail.tail();
@@ -1716,7 +1716,7 @@ namespace awkward {
                                      const Slice& tail,
                                      const Index64& advanced) const {
     int64_t lenstarts = offsets_.length() - 1;
-    IndexOf<T> starts = util::make_starts(offsets_);
+    IndexOf<T> starts = util::make_starts(offsets_, cuda_kernels);
     IndexOf<T> stops = util::make_stops(offsets_);
     SliceItemPtr nexthead = tail.head();
     Slice nexttail = tail.tail();
@@ -1794,7 +1794,7 @@ namespace awkward {
                                      const Slice& tail,
                                      const Index64& advanced) const {
     int64_t lenstarts = offsets_.length() - 1;
-    IndexOf<T> starts = util::make_starts(offsets_);
+    IndexOf<T> starts = util::make_starts(offsets_, cuda_kernels);
     IndexOf<T> stops = util::make_stops(offsets_);
     SliceItemPtr nexthead = tail.head();
     Slice nexttail = tail.tail();
@@ -1850,7 +1850,7 @@ namespace awkward {
                                      const Index64& advanced) const {
     ListArrayOf<T> listarray(identities_,
                              parameters_,
-                             util::make_starts(offsets_),
+                             util::make_starts(offsets_, cuda_kernels),
                              util::make_stops(offsets_),
                              content_);
     return listarray.getitem_next(jagged, tail, advanced);
@@ -1864,7 +1864,7 @@ namespace awkward {
                                             const Slice& tail) const {
     ListArrayOf<T> listarray(identities_,
                              parameters_,
-                             util::make_starts(offsets_),
+                             util::make_starts(offsets_, cuda_kernels),
                              util::make_stops(offsets_),
                              content_);
     return listarray.getitem_next_jagged(slicestarts,
@@ -1881,7 +1881,7 @@ namespace awkward {
                                             const Slice& tail) const {
     ListArrayOf<T> listarray(identities_,
                              parameters_,
-                             util::make_starts(offsets_),
+                             util::make_starts(offsets_, cuda_kernels),
                              util::make_stops(offsets_),
                              content_);
     return listarray.getitem_next_jagged(slicestarts,
@@ -1898,7 +1898,7 @@ namespace awkward {
                                             const Slice& tail) const {
     ListArrayOf<T> listarray(identities_,
                              parameters_,
-                             util::make_starts(offsets_),
+                             util::make_starts(offsets_, cuda_kernels),
                              util::make_stops(offsets_),
                              content_);
     return listarray.getitem_next_jagged(slicestarts,

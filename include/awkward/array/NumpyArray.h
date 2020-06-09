@@ -787,10 +787,6 @@ namespace awkward {
   void
     tojson_string(ToJson& builder, bool include_beginendlist) const;
 
-  /// @brief An enum type that indicates the type of kernels on which
-  /// an instance of this class would run it's operations on.
-  KernelsLib ptr_lib = cpu_kernels;
-
   private:
   /// @brief See #ptr.
   std::shared_ptr<void> ptr_;

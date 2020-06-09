@@ -90,15 +90,15 @@ namespace awkward {
     /// {@link ListOffsetArrayOf ListOffsetArray}, for instance) into a
     /// `starts` index by viewing it with the last element dropped.
     template <typename T>
-    IndexOf<T>
-      make_starts(const IndexOf<T>& offsets);
+    IndexOf <T>
+      make_starts(const IndexOf <T> &offsets, KernelsLib ptr_lib = KernelsLib::cpu_kernels);
 
     /// @brief Converts an `offsets` index (from
     /// {@link ListOffsetArrayOf ListOffsetArray}, for instance) into a
     /// `stops` index by viewing it with the first element dropped.
     template <typename T>
     IndexOf<T>
-      make_stops(const IndexOf<T>& offsets);
+      make_stops(const IndexOf<T>& offsets, KernelsLib ptr_lib = KernelsLib::cpu_kernels);
 
     using RecordLookup    = std::vector<std::string>;
     using RecordLookupPtr = std::shared_ptr<RecordLookup>;
