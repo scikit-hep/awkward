@@ -318,11 +318,19 @@ class FuncBody(object):
             else:
                 self.code += stmt
         elif item.__class__.__name__ == "Assignment":
-            stmt = " " * indent + "{0} {1} {2}".format(
-                self.traverse(item.lvalue, 0, called=True),
-                item.op,
-                self.traverse(item.rvalue, 0, called=True),
-            )
+            if item.lvalue.__class__.__name__ == "UnaryOp" and item.lvalue.op == "*":
+                stmt = " " * indent + "{0}[0] {1} {2}".format(
+                    item.lvalue.expr.name,
+                    item.op,
+                    self.traverse(item.rvalue, 0, called=True),
+                )
+            else:
+                stmt = " " * indent + "{0} {1} {2}".format(
+                    self.traverse(item.lvalue, 0, called=True),
+                    item.op,
+                    self.traverse(item.rvalue, 0, called=True),
+                )
+
             if called:
                 return stmt
             else:
