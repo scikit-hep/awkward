@@ -89,7 +89,7 @@ namespace awkward {
                KernelsLib ptr_lib = cpu_kernels);
 
     /// @brief Allocates a new integer array buffer with a given #length.
-    IndexOf<T>(int64_t length, KernelsLib ptr_lib = cpu_kernels);
+    IndexOf<T>(int64_t length, KernelsLib ptr_lib = KernelsLib::cpu_kernels);
 
     /// @brief Reference-counted pointer to the integer array buffer.
     const std::shared_ptr<T>
@@ -211,7 +211,7 @@ namespace awkward {
     /// @brief See #length.
     const int64_t length_;
     /// @brief See #ptr_lib
-    const KernelsLib ptr_lib_;
+    KernelsLib ptr_lib_ = cpu_kernels;
   };
 
 #if !defined AWKWARD_INDEX_NO_EXTERN_TEMPLATE && !defined _MSC_VER
