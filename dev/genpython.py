@@ -749,14 +749,14 @@ if __name__ == "__main__":
                 gencode += black.format_str(funcgen, mode=blackmode) + "\n"
                 docdict[name] = doccode
     current_dir = os.path.dirname(os.path.realpath(__file__))
-    with open(os.path.join(current_dir, "cpukernels.py"), "w") as f:
+    with open(os.path.join(current_dir, "kernels.py"), "w") as f:
         f.write(gencode)
     if os.path.isdir(os.path.join(current_dir, "..", "docs-sphinx", "_auto")):
         with open(
-            os.path.join(current_dir, "..", "docs-sphinx", "_auto", "cpukernels.rst",),
+            os.path.join(current_dir, "..", "docs-sphinx", "_auto", "kernels.rst",),
             "w",
         ) as f:
-            print("Writing cpukernels.rst")
+            print("Writing kernels.rst")
             f.write("kernels\n")
             f.write("----------------------------------------------------------\n")
             for name in sorted(docdict.keys()):
@@ -768,6 +768,6 @@ if __name__ == "__main__":
                 os.path.join(current_dir, "..", "docs-sphinx", "_auto", "toctree.txt",),
                 "r+",
             ) as f:
-                if "_auto/cpukernels.rst" not in f.read():
+                if "_auto/kernels.rst" not in f.read():
                     print("Updating toctree.txt")
-                    f.write(" " * 4 + "_auto/cpukernels.rst")
+                    f.write(" " * 4 + "_auto/kernels.rst")
