@@ -402,17 +402,33 @@ class FuncBody(object):
                 (item.init is not None)
                 and (item.next is not None)
                 and (item.cond is not None)
-                and (item.init.decls[0].init.__class__.__name__ == "Constant")
                 and (len(item.init.decls) == 1)
-                and (item.init.decls[0].init.value == "0")
+                and (
+                    item.init.decls[0].init.__class__.__name__ == "Constant"
+                    or item.init.decls[0].init.__class__.__name__ == "ID"
+                )
                 and (item.next.op == "p++")
                 and (item.cond.op == "<")
                 and (item.cond.left.name == item.init.decls[0].name)
             ):
-                stmt = " " * indent + "for {0} in range({1}):\n".format(
-                    item.init.decls[0].name,
-                    self.traverse(item.cond.right, 0, called=True),
-                )
+                if item.init.decls[0].init.__class__.__name__ == "Constant":
+                    if item.init.decls[0].init.value == "0":
+                        stmt = " " * indent + "for {0} in range({1}):\n".format(
+                            item.init.decls[0].name,
+                            self.traverse(item.cond.right, 0, called=True),
+                        )
+                    else:
+                        stmt = " " * indent + "for {0} in range({1}, {2}):\n".format(
+                            item.init.decls[0].name,
+                            item.init.decls[0].init.value,
+                            self.traverse(item.cond.right, 0, called=True),
+                        )
+                else:
+                    stmt = " " * indent + "for {0} in range({1}, {2}):\n".format(
+                        item.init.decls[0].name,
+                        item.init.decls[0].init.name,
+                        self.traverse(item.cond.right, 0, called=True),
+                    )
                 for i in range(len(item.stmt.block_items)):
                     stmt += (
                         self.traverse(item.stmt.block_items[i], indent + 4, called=True)
