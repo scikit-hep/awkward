@@ -2652,7 +2652,7 @@ ERROR awkward_ListArray_min_range(
   int64_t stopsoffset) {
   int64_t shorter = fromstops[stopsoffset + 0] - fromstarts[startsoffset + 0];
   for (int64_t i = 1;  i < lenstarts;  i++) {
-    int64_t range = fromstops[startsoffset + i] - fromstarts[stopsoffset + i];
+    int64_t range = fromstops[stopsoffset + i] - fromstarts[startsoffset + i];
     shorter = (shorter < range) ? shorter : range;
   }
   *tomin = shorter;
@@ -2715,7 +2715,7 @@ ERROR awkward_ListArray_rpad_and_clip_length_axis1(
   int64_t stopsoffset) {
   int64_t length = 0;
   for (int64_t i = 0;  i < lenstarts;  i++) {
-    int64_t range = fromstops[startsoffset + i] - fromstarts[stopsoffset + i];
+    int64_t range = fromstops[stopsoffset + i] - fromstarts[startsoffset + i];
     length += (target > range) ? target : range;
   }
   *tolength = length;
@@ -2787,7 +2787,7 @@ ERROR awkward_ListArray_rpad_axis1(
   int64_t offset = 0;
   for (int64_t i = 0; i < length; i++) {
     tostarts[i] = offset;
-    int64_t range = fromstops[startsoffset + i] - fromstarts[stopsoffset + i];
+    int64_t range = fromstops[stopsoffset + i] - fromstarts[startsoffset + i];
     for (int64_t j = 0; j < range; j++) {
      toindex[offset + j] = fromstarts[startsoffset + i] + j;
     }
