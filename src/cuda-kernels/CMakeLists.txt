@@ -12,11 +12,12 @@ if(CMAKE_CUDA_COMPILER)
 else()
   message(FATAL_ERROR "NO CUDA COMPILER FOUND! PLEASE CHECK YOUR CUDA PATH, CMake will now exit")
 endif()
+set(CMAKE_CXX_STANDARD 11)
 
 # We can avoid this by introducing this CMakeLists to the top level CMakeLists
 include_directories(../../include)
 
-file(GLOB CUDA_KERNEL_SOURCES CONFIGURE_DEPENDS "src/*.cpp" "src/*.cu")
+file(GLOB CUDA_KERNEL_SOURCES CONFIGURE_DEPENDS "src/*.cu")
 
 include(CTest)
 

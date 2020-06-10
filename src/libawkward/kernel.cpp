@@ -18,7 +18,25 @@ namespace kernel {
   int8_t* ptr_alloc(int64_t length, KernelsLib ptr_lib) {
     if(ptr_lib == cpu_kernels)
       return awkward_cpu_ptri8_alloc(length);
+    else if(ptr_lib == cuda_kernels) {
+      auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_NOW);
+      std::cout << handle << "\n";
+      if (!handle) {
+        fputs (dlerror(), stderr);
+        return nullptr;
+      }
+      typedef int8_t* (func_awkward_cuda_ptri8_alloc_t)(int64_t length);
+      typedef int (func_awkward_cuda_ptr_loc_t)(int8_t* ptr);
+      func_awkward_cuda_ptri8_alloc_t *func_awkward_cuda_ptri8_alloc = reinterpret_cast<func_awkward_cuda_ptri8_alloc_t *>
+                                                                                        (dlsym(handle, "awkward_cuda_ptri8_alloc"));
+
+      func_awkward_cuda_ptr_loc_t *func_awkward_cuda_ptr_loc = reinterpret_cast<func_awkward_cuda_ptr_loc_t *>(dlsym(handle, "awkward_cuda_ptr_loc"));
+      auto ptr = (*func_awkward_cuda_ptri8_alloc)(length);
+      std::cout << "Device " << (*func_awkward_cuda_ptr_loc)(ptr) << "\n";
+      return ptr;
+    }
   }
+
 
   template <>
   uint8_t* ptr_alloc(int64_t length, KernelsLib ptr_lib) {
