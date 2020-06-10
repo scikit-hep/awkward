@@ -1,6 +1,4 @@
-//
-// Created by trickarcher on 09/06/20.
-//
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #ifndef AWKWARD_ALLOCATORS_CUH_
 #define AWKWARD_ALLOCATORS_CUH_
@@ -8,7 +6,7 @@
 #include <stdint.h>
 
 extern "C" {
-  int awkward_cuda_ptr_loc(int8_t* ptr);
+  int awkward_cuda_ptr_loc(void* ptr);
 
   int8_t *awkward_cuda_ptri8_alloc(int64_t length);
 

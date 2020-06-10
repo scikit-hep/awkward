@@ -210,9 +210,6 @@ namespace kernel {
     KernelsLib ptr_lib_;
   };
 
-
-
-
   template <>
   int8_t* ptr_alloc(int64_t length, KernelsLib ptr_lib);
 
@@ -236,10 +233,6 @@ namespace kernel {
 
   template <>
   bool *ptr_alloc(int64_t length, KernelsLib ptr_lib);
-
-  template <typename T>
-  ERROR new_identities(T *toptr,
-                       int64_t length);
 };
 
 #endif //AWKWARD_KERNEL_H

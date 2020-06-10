@@ -20,19 +20,19 @@ namespace kernel {
       return awkward_cpu_ptri8_alloc(length);
     else if(ptr_lib == cuda_kernels) {
       auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_NOW);
-      std::cout << handle << "\n";
+      
       if (!handle) {
         fputs (dlerror(), stderr);
         return nullptr;
       }
       typedef int8_t* (func_awkward_cuda_ptri8_alloc_t)(int64_t length);
-      typedef int (func_awkward_cuda_ptr_loc_t)(int8_t* ptr);
+      typedef int (func_awkward_cuda_ptr_loc_t)(void* ptr);
       func_awkward_cuda_ptri8_alloc_t *func_awkward_cuda_ptri8_alloc = reinterpret_cast<func_awkward_cuda_ptri8_alloc_t *>
                                                                                         (dlsym(handle, "awkward_cuda_ptri8_alloc"));
 
       func_awkward_cuda_ptr_loc_t *func_awkward_cuda_ptr_loc = reinterpret_cast<func_awkward_cuda_ptr_loc_t *>(dlsym(handle, "awkward_cuda_ptr_loc"));
       auto ptr = (*func_awkward_cuda_ptri8_alloc)(length);
-      std::cout << "Device " << (*func_awkward_cuda_ptr_loc)(ptr) << "\n";
+      std::cout << "Device " << (*func_awkward_cuda_ptr_loc)(static_cast<void*>(ptr)) << "\n";
       return ptr;
     }
   }
@@ -42,59 +42,160 @@ namespace kernel {
   uint8_t* ptr_alloc(int64_t length, KernelsLib ptr_lib) {
     if(ptr_lib == cpu_kernels)
       return awkward_cpu_ptriU8_alloc(length);
+    else if(ptr_lib == cuda_kernels) {
+      auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_NOW);
+
+      if (!handle) {
+        fputs (dlerror(), stderr);
+        return nullptr;
+      }
+      typedef uint8_t* (func_awkward_cuda_ptriU8_alloc_t)(int64_t length);
+      typedef int (func_awkward_cuda_ptr_loc_t)(void* ptr);
+      func_awkward_cuda_ptriU8_alloc_t *func_awkward_cuda_ptriU8_alloc = reinterpret_cast<func_awkward_cuda_ptriU8_alloc_t *>
+      (dlsym(handle, "awkward_cuda_ptriU8_alloc"));
+
+      func_awkward_cuda_ptr_loc_t *func_awkward_cuda_ptr_loc = reinterpret_cast<func_awkward_cuda_ptr_loc_t *>(dlsym(handle, "awkward_cuda_ptr_loc"));
+      auto ptr = (*func_awkward_cuda_ptriU8_alloc)(length);
+      std::cout << "Device " << (*func_awkward_cuda_ptr_loc)(static_cast<void*>(ptr)) << "\n";
+      return ptr;
+    }
   }
 
   template <>
   int32_t* ptr_alloc(int64_t length, KernelsLib ptr_lib) {
     if(ptr_lib == cpu_kernels)
       return awkward_cpu_ptri32_alloc(length);
+    else if(ptr_lib == cuda_kernels) {
+      auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_NOW);
+
+      if (!handle) {
+        fputs (dlerror(), stderr);
+        return nullptr;
+      }
+      typedef int32_t* (func_awkward_cuda_ptri32_alloc_t)(int64_t length);
+      typedef int (func_awkward_cuda_ptr_loc_t)(void* ptr);
+      func_awkward_cuda_ptri32_alloc_t *func_awkward_cuda_ptri32_alloc = reinterpret_cast<func_awkward_cuda_ptri32_alloc_t *>
+      (dlsym(handle, "awkward_cuda_ptri32_alloc"));
+
+      func_awkward_cuda_ptr_loc_t *func_awkward_cuda_ptr_loc = reinterpret_cast<func_awkward_cuda_ptr_loc_t *>(dlsym(handle, "awkward_cuda_ptr_loc"));
+      auto ptr = (*func_awkward_cuda_ptri32_alloc)(length);
+      std::cout << "Device " << (*func_awkward_cuda_ptr_loc)(static_cast<void*>(ptr)) << "\n";
+      return ptr;
+    }
   }
 
   template <>
   uint32_t* ptr_alloc(int64_t length, KernelsLib ptr_lib) {
     if(ptr_lib == cpu_kernels)
       return awkward_cpu_ptriU32_alloc(length);
+    else if(ptr_lib == cuda_kernels) {
+      auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_NOW);
+
+      if (!handle) {
+        fputs (dlerror(), stderr);
+        return nullptr;
+      }
+      typedef uint32_t* (func_awkward_cuda_ptriU32_alloc_t)(int64_t length);
+      typedef int (func_awkward_cuda_ptr_loc_t)(void* ptr);
+      func_awkward_cuda_ptriU32_alloc_t *func_awkward_cuda_ptriU32_alloc = reinterpret_cast<func_awkward_cuda_ptriU32_alloc_t *>
+      (dlsym(handle, "awkward_cuda_ptriU32_alloc"));
+
+      func_awkward_cuda_ptr_loc_t *func_awkward_cuda_ptr_loc = reinterpret_cast<func_awkward_cuda_ptr_loc_t *>(dlsym(handle, "awkward_cuda_ptr_loc"));
+      auto ptr = (*func_awkward_cuda_ptriU32_alloc)(length);
+      std::cout << "Device " << (*func_awkward_cuda_ptr_loc)(static_cast<void*>(ptr)) << "\n";
+      return ptr;
+    }
   }
 
   template <>
   int64_t* ptr_alloc(int64_t length, KernelsLib ptr_lib) {
     if(ptr_lib == cpu_kernels)
       return awkward_cpu_ptri64_alloc(length);
+    else if(ptr_lib == cuda_kernels) {
+      auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_NOW);
+
+      if (!handle) {
+        fputs (dlerror(), stderr);
+        return nullptr;
+      }
+      typedef int64_t* (func_awkward_cuda_ptri64_alloc_t)(int64_t length);
+      typedef int (func_awkward_cuda_ptr_loc_t)(void* ptr);
+      func_awkward_cuda_ptri64_alloc_t *func_awkward_cuda_ptri64_alloc = reinterpret_cast<func_awkward_cuda_ptri64_alloc_t *>
+      (dlsym(handle, "awkward_cuda_ptri64_alloc"));
+
+      func_awkward_cuda_ptr_loc_t *func_awkward_cuda_ptr_loc = reinterpret_cast<func_awkward_cuda_ptr_loc_t *>(dlsym(handle, "awkward_cuda_ptr_loc"));
+      auto ptr = (*func_awkward_cuda_ptri64_alloc)(length);
+      std::cout << "Device " << (*func_awkward_cuda_ptr_loc)(static_cast<void*>(ptr)) << "\n";
+      return ptr;
+    }
   }
 
   template <>
   float* ptr_alloc(int64_t length, KernelsLib ptr_lib) {
     if(ptr_lib == cpu_kernels)
       return awkward_cpu_ptrf_alloc(length);
+    else if(ptr_lib == cuda_kernels) {
+      auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_NOW);
+
+      if (!handle) {
+        fputs (dlerror(), stderr);
+        return nullptr;
+      }
+      typedef float* (func_awkward_cuda_ptrf_alloc_t)(int64_t length);
+      typedef int (func_awkward_cuda_ptr_loc_t)(void* ptr);
+      func_awkward_cuda_ptrf_alloc_t *func_awkward_cuda_ptrf_alloc = reinterpret_cast<func_awkward_cuda_ptrf_alloc_t *>
+      (dlsym(handle, "awkward_cuda_ptrf_alloc"));
+
+      func_awkward_cuda_ptr_loc_t *func_awkward_cuda_ptr_loc = reinterpret_cast<func_awkward_cuda_ptr_loc_t *>(dlsym(handle, "awkward_cuda_ptr_loc"));
+      auto ptr = (*func_awkward_cuda_ptrf_alloc)(length);
+      std::cout << "Device " << (*func_awkward_cuda_ptr_loc)(static_cast<void*>(ptr)) << "\n";
+      return ptr;
+    }
   }
 
   template <>
   double* ptr_alloc(int64_t length, KernelsLib ptr_lib) {
     if(ptr_lib == cpu_kernels)
       return awkward_cpu_ptrd_alloc(length);
+    else if(ptr_lib == cuda_kernels) {
+      auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_NOW);
+
+      if (!handle) {
+        fputs (dlerror(), stderr);
+        return nullptr;
+      }
+      typedef double* (func_awkward_cuda_ptrd_alloc_t)(int64_t length);
+      typedef int (func_awkward_cuda_ptr_loc_t)(void* ptr);
+      func_awkward_cuda_ptrd_alloc_t *func_awkward_cuda_ptrd_alloc = reinterpret_cast<func_awkward_cuda_ptrd_alloc_t *>
+      (dlsym(handle, "awkward_cuda_ptri64_alloc"));
+
+      func_awkward_cuda_ptr_loc_t *func_awkward_cuda_ptr_loc = reinterpret_cast<func_awkward_cuda_ptr_loc_t *>(dlsym(handle, "awkward_cuda_ptr_loc"));
+      auto ptr = (*func_awkward_cuda_ptrd_alloc)(length);
+      std::cout << "Device " << (*func_awkward_cuda_ptr_loc)(static_cast<void*>(ptr)) << "\n";
+      return ptr;
+    }
   }
 
   template <>
   bool* ptr_alloc(int64_t length, KernelsLib ptr_lib) {
     if(ptr_lib == cpu_kernels)
       return awkward_cpu_ptrb_alloc(length);
-  }
+    else if(ptr_lib == cuda_kernels) {
+      auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_NOW);
 
-  template <>
-  ERROR new_identities<int32_t>(int32_t *toptr,
-                                int64_t length) {
-#ifdef BUILD_CUDA_KERNELS
-    return awkward_cuda_new_identities32(toptr, length);
-#endif
-    return awkward_new_identities32(toptr, length);
-  }
+      if (!handle) {
+        fputs (dlerror(), stderr);
+        return nullptr;
+      }
+      typedef bool* (func_awkward_cuda_ptrb_alloc_t)(int64_t length);
+      typedef int (func_awkward_cuda_ptr_loc_t)(void* ptr);
+      func_awkward_cuda_ptrb_alloc_t *func_awkward_cuda_ptrb_alloc = reinterpret_cast<func_awkward_cuda_ptrb_alloc_t *>
+      (dlsym(handle, "awkward_cuda_ptrb_alloc"));
 
-  template <>
-  ERROR new_identities<int64_t>(int64_t *toptr,
-                                int64_t length) {
-#ifdef BUILD_CUDA_KERNELS
-    return awkward_cuda_new_identities64(toptr, length);
-#endif
-    return awkward_new_identities64(toptr, length);
+      func_awkward_cuda_ptr_loc_t *func_awkward_cuda_ptr_loc = reinterpret_cast<func_awkward_cuda_ptr_loc_t *>(dlsym(handle, "awkward_cuda_ptr_loc"));
+      auto ptr = (*func_awkward_cuda_ptrb_alloc)(length);
+      std::cout << "Device " << (*func_awkward_cuda_ptr_loc)(static_cast<void*>(ptr)) << "\n";
+      return ptr;
+    }
   }
 }

@@ -102,12 +102,7 @@ endif()
 addtest(test0016 tests/test_0016-finish-getitem-for-rawarray.cpp)
 addtest(test0019 tests/test_0019-use-json-library.cpp)
 addtest(test0030 tests/test_0030-recordarray-in-numba.cpp)
-add_executable(test_cuda_alloc tests/test_cuda_alloc.cpp)
-target_link_libraries(test_cuda_alloc awkward-static awkward-cpu-kernels-static)
-#set_target_properties(test_cuda_alloc PROPERTIES CXX_VISIBILITY_PRESET hidden)
-#set_target_properties(test_cuda_alloc PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
-#set_target_properties(test_cuda_alloc PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
-#set_target_properties(test_cuda_alloc PROPERTIES CXX_STANDARD 11)
+addtest(test_cuda_alloc tests/test_cuda_alloc.cpp)
 
 # Third tier: Python modules.
 if (PYBUILD)
