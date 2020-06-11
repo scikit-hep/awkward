@@ -79,100 +79,23 @@ def preprocess(filename):
                     for _ in range(line.count("{")):
                         parans.append("{")
                 continue
-            if (
-                func is True
-                and (re.search("return .*<.+", line) is not None or templatetype)
-                and (line[-2:] == ",\n" or line[-3:] == ">(\n")
-            ):
-                if re.search("return .*<.+", line) is not None:
+            if func is True and "return awkward" in line:
+                if re.search("return .*<", line) is not None:
                     x = line[
                         re.search("return .*<", line).span()[0]
                         + 6 : re.search("return .*<", line).span()[1]
                         - 1
                     ].strip()
-                templatetype = True
-                if "templateargs" not in tokens[x].keys():
-                    tokens[x]["templateargs"] = {}
+                else:
+                    x = line[
+                        re.search("return .*\(", line).span()[0]
+                        + 6 : re.search("return .*\(", line).span()[1]
+                        - 1
+                    ].strip()
                 if "childfunc" not in tokens[x].keys():
                     tokens[x]["childfunc"] = set()
                 tokens[x]["childfunc"].add(funcname)
-                count = 0
-                if re.search("<[^,>]*,", line) is not None and "return" in line:
-                    if (
-                        tokens[x]["templateparams"][ith]
-                        not in tokens[x]["templateargs"].keys()
-                    ):
-                        tokens[x]["templateargs"][tokens[x]["templateparams"][ith]] = []
-                    tokens[x]["templateargs"][tokens[x]["templateparams"][ith]].append(
-                        line[
-                            re.search("<[^,>]*,", line[count:]).span()[0]
-                            + 1 : re.search("<[^,>]*,", line[count:]).span()[1]
-                            - 1
-                        ]
-                    )
-                    count += re.search("<[^,>]*,", line[count:]).span()[1]
-                    ith += 1
-                if line[count:].strip() != "":
-                    iterate = True
-                while iterate and templatetype:
-                    if re.search("[^,<>]*,", line[count:]) is not None:
-                        if (
-                            tokens[x]["templateparams"][ith]
-                            not in tokens[x]["templateargs"].keys()
-                        ):
-                            tokens[x]["templateargs"][
-                                tokens[x]["templateparams"][ith]
-                            ] = []
-                        tokens[x]["templateargs"][
-                            tokens[x]["templateparams"][ith]
-                        ].append(
-                            (
-                                line[count:][
-                                    re.search("[^,<>]*,", line[count:])
-                                    .span()[0] : re.search("[^,><]*,", line[count:])
-                                    .span()[1]
-                                    - 1
-                                ]
-                            ).strip()
-                        )
-                        count += re.search("[^,><]*,", line[count:]).span()[1]
-                        ith += 1
-                    if re.search("[^,]*,", line[count:]) is None:
-                        iterate = False
-                if (
-                    re.search("<[^,]*>", line) is not None
-                    and "||" not in line
-                    and "&&" not in line
-                ):
-                    templatetype = False
-                    if (
-                        tokens[x]["templateparams"][ith]
-                        not in tokens[x]["templateargs"].keys()
-                    ):
-                        tokens[x]["templateargs"][tokens[x]["templateparams"][ith]] = []
-                    tokens[x]["templateargs"][tokens[x]["templateparams"][ith]].append(
-                        line[count:][
-                            re.search("<[^,]*>", line[count:]).span()[0]
-                            + 1 : re.search("<[^,]*>", line[count:]).span()[1]
-                            - 1
-                        ]
-                    )
-                elif re.search("[^,]*>", line[count:]) is not None:
-                    templatetype = False
-                    if (
-                        tokens[x]["templateparams"][ith]
-                        not in tokens[x]["templateargs"].keys()
-                    ):
-                        tokens[x]["templateargs"][tokens[x]["templateparams"][ith]] = []
-                    tokens[x]["templateargs"][tokens[x]["templateparams"][ith]].append(
-                        line[count:][
-                            re.search("[^,]*>", line[count:])
-                            .span()[0] : re.search("[^,]*>", line[count:])
-                            .span()[1]
-                            - 1
-                        ]
-                    )
-                    ith = 0
+                tokens[funcname]["gen"] = False
             if (
                 func is True
                 and re.search("<.*>", line) is not None
@@ -633,27 +556,6 @@ class FuncDecl(object):
         return arranged
 
 
-arg_parser = argparse.ArgumentParser()
-arg_parser.add_argument("filenames", nargs="+")
-args = arg_parser.parse_args()
-filenames = args.filenames
-
-
-def process_templateargs(tokens, name):
-    for x in tokens[name]["templateargs"].keys():
-        templateargs = []
-        for arg in tokens[name]["templateargs"][x]:
-            if re.search("u?int\d{1,2}_t", arg) is not None:
-                templateargs.append("int")
-            elif "double" in arg or "float" in arg:
-                templateargs.append("float")
-            elif "bool" in arg or "true" in arg or "false" in arg:
-                templateargs.append("bool")
-        templateargs = list(dict.fromkeys(templateargs))
-        tokens[name]["templateargs"][x] = templateargs
-    return tokens
-
-
 def remove_return(code):
     if code[code.rfind("\n", 0, code.rfind("\n")) :].strip() == "return":
         k = code.rfind("return")
@@ -683,9 +585,13 @@ def arrange_body(body, indent):
     return finalbody
 
 
+arg_parser = argparse.ArgumentParser()
+arg_parser.add_argument("filenames", nargs="+")
+args = arg_parser.parse_args()
+filenames = args.filenames
+
 if __name__ == "__main__":
-    # Initialize black config
-    blackmode = black.FileMode()
+    blackmode = black.FileMode()  # Initialize black config
     gencode = ""
     docdict = {}
     for filename in filenames:
@@ -699,50 +605,33 @@ if __name__ == "__main__":
             funcs[decl.name]["def"] = decl
             funcs[decl.name]["body"] = body
         for name in funcs.keys():
-            if (
-                "templateparams" in tokens[name].keys()
-                and "templateargs" in tokens[name].keys()
-            ):
+            if "gen" not in tokens[name].keys():
                 doccode = name + "\n"
-                doccode += (
-                    "===========================================================\n"
-                )
+                doccode += "=================================================================\n"
                 indent = 0
                 funcgen = ""
-                tokens = process_templateargs(tokens, name)
                 funcprototype = "{0}({1})".format(
                     name, funcs[name]["def"].arrange_args()
                 )
-                for childfunc in tokens[name]["childfunc"]:
-                    doccode += (
-                        ".. py:function:: {0}({1})".format(
-                            funcs[childfunc]["def"].name,
-                            funcs[childfunc]["def"].arrange_args(),
+                if "childfunc" in tokens[name].keys():
+                    for childfunc in tokens[name]["childfunc"]:
+                        doccode += (
+                            ".. py:function:: {0}({1})".format(
+                                funcs[childfunc]["def"].name,
+                                funcs[childfunc]["def"].arrange_args(),
+                            )
+                            + "\n\n"
                         )
-                        + funcprototype
-                        + "\n\n"
-                    )
-                doccode += ".. code-block:: python\n\n"
-                for temptype in tokens[name]["templateparams"]:
-                    if len(tokens[name]["templateargs"][temptype]) == 1:
-                        funcgen += " " * indent + "{0} = {1}\n".format(
-                            temptype.strip(),
-                            arrange_args(tokens[name]["templateargs"][temptype]),
-                        )
-                    else:
-                        funcgen += " " * indent + "for {0} in ({1}):\n".format(
-                            temptype.strip(),
-                            arrange_args(tokens[name]["templateargs"][temptype]),
-                        )
-                        indent += 4
                 callindent = copy.copy(indent)
+                doccode += ".. code-block:: python\n\n"
                 funcgen += " " * indent + "def " + funcprototype + ":\n"
                 funcgen += arrange_body(funcs[name]["body"].code, indent)
-                for childfunc in tokens[name]["childfunc"]:
-                    funcgen += indent_code(
-                        "{0} = {1}\n".format(funcs[childfunc]["def"].name, name),
-                        callindent,
-                    )
+                if "childfunc" in tokens[name].keys():
+                    for childfunc in tokens[name]["childfunc"]:
+                        funcgen += indent_code(
+                            "{0} = {1}\n".format(funcs[childfunc]["def"].name, name),
+                            callindent,
+                        )
                 doccode += (
                     indent_code(black.format_str(funcgen, mode=blackmode), 4) + "\n"
                 )
@@ -750,6 +639,7 @@ if __name__ == "__main__":
                 docdict[name] = doccode
     current_dir = os.path.dirname(os.path.realpath(__file__))
     with open(os.path.join(current_dir, "kernels.py"), "w") as f:
+        print("Writing kernels.py")
         f.write(gencode)
     if os.path.isdir(os.path.join(current_dir, "..", "docs-sphinx", "_auto")):
         with open(
