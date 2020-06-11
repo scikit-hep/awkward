@@ -241,19 +241,11 @@ class FuncBody(object):
             else:
                 self.code += stmt
         elif item.__class__.__name__ == "Assignment":
-            if item.lvalue.__class__.__name__ == "UnaryOp" and item.lvalue.op == "*":
-                stmt = " " * indent + "{0}[0] {1} {2}".format(
-                    item.lvalue.expr.name,
-                    item.op,
-                    self.traverse(item.rvalue, 0, called=True),
-                )
-            else:
-                stmt = " " * indent + "{0} {1} {2}".format(
-                    self.traverse(item.lvalue, 0, called=True),
-                    item.op,
-                    self.traverse(item.rvalue, 0, called=True),
-                )
-
+            stmt = " " * indent + "{0} {1} {2}".format(
+                self.traverse(item.lvalue, 0, called=True),
+                item.op,
+                self.traverse(item.rvalue, 0, called=True),
+            )
             if called:
                 return stmt
             else:
@@ -387,7 +379,7 @@ class FuncBody(object):
                     self.traverse(item.expr, 0, called=True)
                 )
             elif item.op == "*":
-                stmt = " " * indent + "{0}".format(
+                stmt = " " * indent + "{0}[0]".format(
                     self.traverse(item.expr, 0, called=True)
                 )
             elif item.op == "-":
@@ -422,7 +414,10 @@ class FuncBody(object):
             else:
                 self.code += stmt + "\n"
         elif item.__class__.__name__ == "ArrayRef":
-            if item.subscript.__class__.__name__ == "UnaryOp":
+            if (
+                item.subscript.__class__.__name__ == "UnaryOp"
+                and item.subscript.op[1:] == "++"
+            ):
                 stmt = (
                     " " * indent
                     + "{0};".format(self.traverse(item.subscript, 0, called=True))
