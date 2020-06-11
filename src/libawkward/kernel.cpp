@@ -23,7 +23,6 @@ namespace kernel {
       
       if (!handle) {
         fprintf(stderr, "dlopen failed: %s\n", dlerror());
-        exit(EXIT_FAILURE);
         return nullptr;
       }
       typedef int8_t* (func_awkward_cuda_ptri8_alloc_t)(int64_t length);
@@ -47,7 +46,7 @@ namespace kernel {
       auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_NOW);
 
       if (!handle) {
-        fputs (dlerror(), stderr);
+        fprintf(stderr, "dlopen failed: %s\n", dlerror());
         return nullptr;
       }
       typedef uint8_t* (func_awkward_cuda_ptriU8_alloc_t)(int64_t length);
@@ -70,7 +69,7 @@ namespace kernel {
       auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_NOW);
 
       if (!handle) {
-        fputs (dlerror(), stderr);
+        fprintf(stderr, "dlopen failed: %s\n", dlerror());
         return nullptr;
       }
       typedef int32_t* (func_awkward_cuda_ptri32_alloc_t)(int64_t length);
@@ -93,7 +92,7 @@ namespace kernel {
       auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_NOW);
 
       if (!handle) {
-        fputs (dlerror(), stderr);
+        fprintf(stderr, "dlopen failed: %s\n", dlerror());
         return nullptr;
       }
       typedef uint32_t* (func_awkward_cuda_ptriU32_alloc_t)(int64_t length);
@@ -116,7 +115,7 @@ namespace kernel {
       auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_NOW);
 
       if (!handle) {
-        fputs (dlerror(), stderr);
+        fprintf(stderr, "dlopen failed: %s\n", dlerror());
         return nullptr;
       }
       typedef int64_t* (func_awkward_cuda_ptri64_alloc_t)(int64_t length);
@@ -139,7 +138,7 @@ namespace kernel {
       auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_NOW);
 
       if (!handle) {
-        fputs (dlerror(), stderr);
+        fprintf(stderr, "dlopen failed: %s\n", dlerror());
         return nullptr;
       }
       typedef float* (func_awkward_cuda_ptrf_alloc_t)(int64_t length);
@@ -162,7 +161,7 @@ namespace kernel {
       auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_NOW);
 
       if (!handle) {
-        fputs (dlerror(), stderr);
+        fprintf(stderr, "dlopen failed: %s\n", dlerror());
         return nullptr;
       }
       typedef double* (func_awkward_cuda_ptrd_alloc_t)(int64_t length);
@@ -185,7 +184,7 @@ namespace kernel {
       auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_NOW);
 
       if (!handle) {
-        fputs (dlerror(), stderr);
+        fprintf(stderr, "dlopen failed: %s\n", dlerror());
         return nullptr;
       }
       typedef bool* (func_awkward_cuda_ptrb_alloc_t)(int64_t length);

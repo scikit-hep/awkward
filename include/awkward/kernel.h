@@ -29,8 +29,7 @@ namespace kernel {
           auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_NOW);
           std::cout << handle << "\n";
           if (!handle) {
-            fprintf(stderr, "dlopen failed: %s\n", dlerror());
-            exit(EXIT_FAILURE);
+            fputs (dlerror(), stderr);
           }
           typedef void* (func_awkward_cuda_ptri8_dealloc_t)(int8_t* ptr);
           func_awkward_cuda_ptri8_dealloc_t *func_awkward_cuda_ptri8_dealloc = reinterpret_cast<func_awkward_cuda_ptri8_dealloc_t *>
