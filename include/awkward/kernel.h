@@ -26,10 +26,11 @@ namespace kernel {
         if(ptr_lib_ == cpu_kernels)
           delete[] p;
         else if(ptr_lib_ == cuda_kernels) {
-          auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_NOW);
+          auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_NOW);
           std::cout << handle << "\n";
           if (!handle) {
-            fputs (dlerror(), stderr);
+            fprintf(stderr, "dlopen failed: %s\n", dlerror());
+            exit(EXIT_FAILURE);
           }
           typedef void* (func_awkward_cuda_ptri8_dealloc_t)(int8_t* ptr);
           func_awkward_cuda_ptri8_dealloc_t *func_awkward_cuda_ptri8_dealloc = reinterpret_cast<func_awkward_cuda_ptri8_dealloc_t *>
@@ -51,7 +52,7 @@ namespace kernel {
       if(ptr_lib_ == cpu_kernels)
         delete[] p;
       else if(ptr_lib_ == cuda_kernels) {
-        auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_NOW);
+        auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_NOW);
         std::cout << handle << "\n";
         if (!handle) {
           fputs (dlerror(), stderr);
@@ -76,7 +77,7 @@ namespace kernel {
       if(ptr_lib_ == cpu_kernels)
         delete[] p;
       else if(ptr_lib_ == cuda_kernels) {
-        auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_NOW);
+        auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_NOW);
         std::cout << handle << "\n";
         if (!handle) {
           fputs (dlerror(), stderr);
@@ -101,7 +102,7 @@ namespace kernel {
       if(ptr_lib_ == cpu_kernels)
         delete[] p;
       else if(ptr_lib_ == cuda_kernels) {
-        auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_NOW);
+        auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_NOW);
         if (!handle) {
           fputs (dlerror(), stderr);
         }
@@ -125,7 +126,7 @@ namespace kernel {
       if(ptr_lib_ == cpu_kernels)
         delete[] p;
       else if(ptr_lib_ == cuda_kernels) {
-        auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_NOW);
+        auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_NOW);
         if (!handle) {
           fputs (dlerror(), stderr);
         }
@@ -149,7 +150,7 @@ namespace kernel {
       if(ptr_lib_ == cpu_kernels)
         delete[] p;
       else if(ptr_lib_ == cuda_kernels) {
-        auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_NOW);
+        auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_NOW);
         if (!handle) {
           fputs (dlerror(), stderr);
         }
@@ -173,7 +174,7 @@ namespace kernel {
       if(ptr_lib_ == cpu_kernels)
         delete[] p;
       else if(ptr_lib_ == cuda_kernels) {
-        auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_NOW);
+        auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_NOW);
         if (!handle) {
           fputs (dlerror(), stderr);
         }
@@ -197,7 +198,7 @@ namespace kernel {
       if(ptr_lib_ == cpu_kernels)
         delete[] p;
       else if(ptr_lib_ == cuda_kernels) {
-        auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_NOW);
+        auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_NOW);
         if (!handle) {
           fputs (dlerror(), stderr);
         }
