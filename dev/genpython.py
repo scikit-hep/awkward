@@ -16,8 +16,6 @@ def preprocess(filename):
     templateids = []
     templatecall = False
     tempids = []
-    templatetype = False
-    ith = 0
     with open(filename, "r") as f:
         for line in f:
             if line.endswith("\n"):
@@ -47,7 +45,6 @@ def preprocess(filename):
                     if re.search("typename [^,]*,", line) is None:
                         iterate = False
                 if "bool" in line:
-                    loc = line.find("bool")
                     tempids.append(line[line.find("bool") + 4 : line.find(">")])
                 if re.search("typename [^,]*>", line) is not None:
                     tempids.append(
@@ -57,7 +54,6 @@ def preprocess(filename):
                             - 1
                         ]
                     )
-                    line = line[re.search("typename [^,]*>", line).span()[1] :]
                 for x in tempids:
                     templateids.append(x + "*")
                 for x in tempids:
@@ -69,8 +65,6 @@ def preprocess(filename):
             if func is False and re.search("\s.*\(", line):
                 funcname = re.search("\s.*\(", line).group()[1:-1]
                 tokens[funcname] = {}
-                if "tempids" in locals() and tempids:
-                    tokens[funcname]["templateparams"] = tempids
                 line = line.replace(line.split(" ")[0], "int")
                 func = True
                 parans = []
@@ -150,15 +144,6 @@ def preprocess(filename):
                             or line[line.find(x) - 1] == "*"
                             or line[line.find(x) - 1]
                         ):
-                            if "=" not in line:
-                                varnamestart = line.find(x) + len(x) + 1
-                                varnameend = (
-                                    line[varnamestart:].find(",") + varnamestart
-                                )
-                                varname = line[varnamestart:varnameend]
-                                tokens[funcname][varname] = (
-                                    x[:-1] if x.endswith("*") else x
-                                )
                             if x.endswith("*"):
                                 x = x[:-1]
                             line = line.replace(x, "int")
