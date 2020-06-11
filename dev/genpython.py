@@ -510,10 +510,9 @@ class FuncBody(object):
 
 
 class FuncDecl(object):
-    def __init__(self, ast, typelist):
+    def __init__(self, ast):
         self.ast = ast
         self.name = ast.name
-        self.typelist = typelist[self.name]
         self.args = []
         self.returntype = self.ast.type.type.type.names[0]
         self.traverse()
@@ -540,14 +539,7 @@ class FuncDecl(object):
         for i in range(len(self.args)):
             if i != 0:
                 arranged += ", "
-            if self.args[i]["name"] in self.typelist.keys():
-                self.args[i]["type"] = self.typelist[self.args[i]["name"]]
-            arranged += (
-                "{0}: ".format(self.args[i]["name"])
-                + "List[" * self.args[i]["list"]
-                + self.args[i]["type"]
-                + "]" * self.args[i]["list"]
-            )
+            arranged = "{0}".format(self.args[i]["name"])
         return arranged
 
 
@@ -594,7 +586,7 @@ if __name__ == "__main__":
         ast = pycparser.c_parser.CParser().parse(pfile)
         funcs = {}
         for i in range(len(ast.ext)):
-            decl = FuncDecl(ast.ext[i].decl, tokens)
+            decl = FuncDecl(ast.ext[i].decl)
             body = FuncBody(ast.ext[i].body)
             funcs[decl.name] = {}
             funcs[decl.name]["def"] = decl
