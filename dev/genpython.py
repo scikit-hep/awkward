@@ -510,9 +510,10 @@ class FuncBody(object):
 
 
 class FuncDecl(object):
-    def __init__(self, ast):
+    def __init__(self, ast, typelist):
         self.ast = ast
         self.name = ast.name
+        self.typelist = typelist[self.name]
         self.args = []
         self.returntype = self.ast.type.type.type.names[0]
         self.traverse()
@@ -534,12 +535,22 @@ class FuncDecl(object):
         elif obj.__class__.__name__ == "PtrDecl":
             return self.iterclass(obj.type, count + 1)
 
-    def arrange_args(self):
+    def arrange_args(self, types):
         arranged = ""
         for i in range(len(self.args)):
             if i != 0:
                 arranged += ", "
-            arranged = "{0}".format(self.args[i]["name"])
+            if types:
+                if self.args[i]["name"] in self.typelist.keys():
+                    self.args[i]["type"] = self.typelist[self.args[i]["name"]]
+                arranged += (
+                    "{0}: ".format(self.args[i]["name"])
+                    + "List[" * self.args[i]["list"]
+                    + self.args[i]["type"]
+                    + "]" * self.args[i]["list"]
+                )
+            else:
+                arranged += "{0} ".format(self.args[i]["name"])
         return arranged
 
 
@@ -586,7 +597,7 @@ if __name__ == "__main__":
         ast = pycparser.c_parser.CParser().parse(pfile)
         funcs = {}
         for i in range(len(ast.ext)):
-            decl = FuncDecl(ast.ext[i].decl)
+            decl = FuncDecl(ast.ext[i].decl, tokens)
             body = FuncBody(ast.ext[i].body)
             funcs[decl.name] = {}
             funcs[decl.name]["def"] = decl
@@ -597,21 +608,25 @@ if __name__ == "__main__":
                 doccode += "=================================================================\n"
                 indent = 0
                 funcgen = ""
-                funcprototype = "{0}({1})".format(
-                    name, funcs[name]["def"].arrange_args()
-                )
                 if "childfunc" in tokens[name].keys():
                     for childfunc in tokens[name]["childfunc"]:
                         doccode += (
                             ".. py:function:: {0}({1})".format(
                                 funcs[childfunc]["def"].name,
-                                funcs[childfunc]["def"].arrange_args(),
+                                funcs[childfunc]["def"].arrange_args(types=True),
                             )
                             + "\n\n"
                         )
                 callindent = copy.copy(indent)
                 doccode += ".. code-block:: python\n\n"
-                funcgen += " " * indent + "def " + funcprototype + ":\n"
+                funcgen += (
+                    " " * indent
+                    + "def "
+                    + "{0}({1})".format(
+                        name, funcs[name]["def"].arrange_args(types=False)
+                    )
+                    + ":\n"
+                )
                 funcgen += arrange_body(funcs[name]["body"].code, indent)
                 if "childfunc" in tokens[name].keys():
                     for childfunc in tokens[name]["childfunc"]:
