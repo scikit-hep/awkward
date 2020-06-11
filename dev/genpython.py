@@ -128,6 +128,18 @@ def preprocess(filename):
                     re.search("[\W_]*=[\W_]*new u?int\d{1,2}_t\[.\];", line).group(),
                     ";",
                 )
+            if (
+                func is True
+                and re.search("u?int\d{1,2}_t\*?", line) is not None
+                and "=" not in line
+                and (line.count(",") == 1 or ") {" in line)
+            ):
+                tokens[funcname][
+                    line[re.search("u?int\d{1,2}_t\*?", line).span()[1] :]
+                    .strip()
+                    .replace(",", "")
+                    .replace(") {", "")
+                ] = re.search("u?int\d{1,2}_t", line).group()
             if func is True and re.search("u?int\d{1,2}_t\*?", line) is not None:
                 line = line.replace(re.search("u?int\d{1,2}_t", line).group(), "int")
             if func is True and " ERROR " in line:
