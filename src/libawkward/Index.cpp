@@ -58,7 +58,7 @@ namespace awkward {
   IndexOf<T>::IndexOf(int64_t length, KernelsLib ptr_lib)
     : ptr_(std::shared_ptr<T>(kernel::ptr_alloc<T>(length, ptr_lib),
                               kernel::array_deleter<T>(ptr_lib)))
-    , offset_(0)
+      , offset_(0)
       , length_(length)
       , ptr_lib_(ptr_lib) { }
 
@@ -202,7 +202,7 @@ namespace awkward {
   template <typename T>
   void
   IndexOf<T>::setitem_at_nowrap(int64_t at, T value) const {
-    util::awkward_index_setitem_at_nowrap<T>(ptr_.get(), offset_, at, value);
+    kernel::index_setitem_at_nowrap<T>(ptr_.get(), offset_, at, value, ptr_lib());
   }
 
   template <typename T>
@@ -320,6 +320,7 @@ namespace awkward {
     IndexOf<T> IndexOf<T>::to_cuda() {
 //       ptr_ = std::make_shared<T>(kernel::ptr_alloc<T>(ptr(), offset(), length(), ptr_lib()), kernel::array_deleter<T>(ptr_lib()));
       T* cuda_ptr = kernel::host_to_device_buff_transfer(ptr().get(), length(), cuda_kernels);
+//      std::cout << cuda_ptr[3] << "\n";
       return IndexOf<T>(std::shared_ptr<T>(cuda_ptr, kernel::array_deleter<T>(cuda_kernels)), offset(), length(), cuda_kernels);
     }
 

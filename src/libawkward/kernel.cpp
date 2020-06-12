@@ -458,6 +458,120 @@ namespace kernel {
       return item;
     }
   }
+
+  template<>
+  void index_setitem_at_nowrap(int8_t* ptr, int64_t offset, int64_t at, int8_t value, KernelsLib ptr_lib) {
+    if (ptr_lib == cpu_kernels)
+      awkward_index8_setitem_at_nowrap(ptr, offset, at, value);
+    else if (ptr_lib == cuda_kernels) {
+      auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
+
+      if (!handle) {
+        fprintf(stderr, "dlopen failed: %s\n", dlerror());
+      }
+      typedef void (func_awkward_cuda_index8_setitem_at_nowrap_t)(const int8_t *ptr, int64_t offset, int64_t at, int8_t value);
+      func_awkward_cuda_index8_setitem_at_nowrap_t *func_awkward_cuda_index8_setitem_at_nowrap = reinterpret_cast<func_awkward_cuda_index8_setitem_at_nowrap_t *>
+      (dlsym(handle, "awkward_cuda_index8_setitem_at_nowrap"));
+
+      (*func_awkward_cuda_index8_setitem_at_nowrap)(ptr, offset, at, value);
+    }
+  }
+
+  template<>
+  void index_setitem_at_nowrap(uint8_t* ptr, int64_t offset, int64_t at, uint8_t value, KernelsLib ptr_lib) {
+    if (ptr_lib == cpu_kernels)
+      awkward_indexU8_setitem_at_nowrap(ptr, offset, at, value);
+    else if (ptr_lib == cuda_kernels) {
+      auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
+
+      if (!handle) {
+        fprintf(stderr, "dlopen failed: %s\n", dlerror());
+      }
+      typedef void (func_awkward_cuda_indexU8_setitem_at_nowrap_t)(const uint8_t *ptr, int64_t offset, int64_t at, uint8_t value);
+      func_awkward_cuda_indexU8_setitem_at_nowrap_t *func_awkward_cuda_indexU8_setitem_at_nowrap = reinterpret_cast<func_awkward_cuda_indexU8_setitem_at_nowrap_t *>
+      (dlsym(handle, "awkward_cuda_indexU8_setitem_at_nowrap"));
+
+      (*func_awkward_cuda_indexU8_setitem_at_nowrap)(ptr, offset, at, value);
+    }
+  }
+
+  template<>
+  void index_setitem_at_nowrap(int32_t* ptr, int64_t offset, int64_t at, int32_t value, KernelsLib ptr_lib) {
+    if (ptr_lib == cpu_kernels)
+      awkward_index32_setitem_at_nowrap(ptr, offset, at, value);
+    else if (ptr_lib == cuda_kernels) {
+      auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
+
+      if (!handle) {
+        fprintf(stderr, "dlopen failed: %s\n", dlerror());
+      }
+      typedef void (func_awkward_cuda_index32_setitem_at_nowrap_t)(const int32_t *ptr, int64_t offset, int64_t at, int32_t value);
+      func_awkward_cuda_index32_setitem_at_nowrap_t *func_awkward_cuda_index32_setitem_at_nowrap = reinterpret_cast<func_awkward_cuda_index32_setitem_at_nowrap_t *>
+      (dlsym(handle, "awkward_cuda_index32_setitem_at_nowrap"));
+
+      (*func_awkward_cuda_index32_setitem_at_nowrap)(ptr, offset, at, value);
+    }
+  }
+
+  template<>
+  void index_setitem_at_nowrap(uint32_t* ptr, int64_t offset, int64_t at, uint32_t value, KernelsLib ptr_lib) {
+    if (ptr_lib == cpu_kernels)
+      awkward_indexU32_setitem_at_nowrap(ptr, offset, at, value);
+    else if (ptr_lib == cuda_kernels) {
+      auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
+
+      if (!handle) {
+        fprintf(stderr, "dlopen failed: %s\n", dlerror());
+      }
+      typedef void (func_awkward_cuda_indexU32_setitem_at_nowrap_t)(const uint32_t *ptr, int64_t offset, int64_t at, uint32_t value);
+      func_awkward_cuda_indexU32_setitem_at_nowrap_t *func_awkward_cuda_indexU32_setitem_at_nowrap = reinterpret_cast<func_awkward_cuda_indexU32_setitem_at_nowrap_t *>
+      (dlsym(handle, "awkward_cuda_indexU32_setitem_at_nowrap"));
+
+      (*func_awkward_cuda_indexU32_setitem_at_nowrap)(ptr, offset, at, value);
+    }
+  }
+
+  template<>
+  void index_setitem_at_nowrap(int64_t* ptr, int64_t offset, int64_t at, int64_t value, KernelsLib ptr_lib) {
+    if (ptr_lib == cpu_kernels)
+      awkward_index64_setitem_at_nowrap(ptr, offset, at, value);
+    else if (ptr_lib == cuda_kernels) {
+      auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
+
+      if (!handle) {
+        fprintf(stderr, "dlopen failed: %s\n", dlerror());
+      }
+      typedef void (func_awkward_cuda_index64_setitem_at_nowrap_t)(const int64_t *ptr, int64_t offset, int64_t at, int64_t value);
+      func_awkward_cuda_index64_setitem_at_nowrap_t *func_awkward_cuda_index64_setitem_at_nowrap = reinterpret_cast<func_awkward_cuda_index64_setitem_at_nowrap_t *>
+      (dlsym(handle, "awkward_cuda_index64_setitem_at_nowrap"));
+
+      (*func_awkward_cuda_index64_setitem_at_nowrap)(ptr, offset, at, value);
+    }
+  }
+
+  void cuda_listarray8_num_32(int32_t* tonum,
+                              const int8_t* fromstarts,
+                              int32_t startsoffset,
+                              const int8_t* fromstops,
+                              int32_t stopsoffset,
+                              int32_t length) {
+
+      auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
+
+      if (!handle) {
+        fprintf(stderr, "dlopen failed: %s\n", dlerror());
+      }
+      typedef void (func_awkward_cuda_listarray8_num_32_t)(int32_t* tonum,
+                                                           const int8_t* fromstarts,
+                                                           int32_t startsoffset,
+                                                           const int8_t* fromstops,
+                                                           int32_t stopsoffset,
+                                                           int32_t length);
+    func_awkward_cuda_listarray8_num_32_t *func_awkward_cuda_listarray8_num_32 = reinterpret_cast<func_awkward_cuda_listarray8_num_32_t *>
+      (dlsym(handle, "awkward_cuda_listarray8_num_32"));
+
+      (*func_awkward_cuda_listarray8_num_32)(tonum, fromstarts, startsoffset, fromstops, stopsoffset, length);
+  }
 }
 
 

@@ -7,13 +7,13 @@
 #include "awkward/common.h"
 
 extern "C" {
-EXPORT_SYMBOL struct Error
-  awkward_cuda_listarray32_num_64(
-    int64_t* tonum,
-    const int32_t* fromstarts,
-    int64_t startsoffset,
-    const int32_t* fromstops,
-    int64_t stopsoffset,
-    int64_t length);
+  void
+  awkward_cuda_listarray8_num_32(
+    int32_t* tonum,
+    const int8_t* fromstarts,
+    int32_t startsoffset,
+    const int8_t* fromstops,
+    int32_t stopsoffset,
+    int32_t length);
 };
 #endif //AWKWARD_CUDA_KERNELS_OPERATIONS_CUH

@@ -19,6 +19,9 @@ namespace kernel {
     template <typename T>
     T index_getitem_at_nowrap(T* ptr, int64_t offset, int64_t at, KernelsLib ptr_lib);
 
+    template <typename T>
+    void index_setitem_at_nowrap(T* ptr, int64_t offset, int64_t at, T value, KernelsLib ptr_lib);
+
     template<typename T>
     class EXPORT_SYMBOL array_deleter;
 
@@ -276,6 +279,28 @@ namespace kernel {
 
   template<>
   int64_t index_getitem_at_nowrap(int64_t * ptr, int64_t offset, int64_t at, KernelsLib ptr_lib);
+
+  template<>
+  void index_setitem_at_nowrap(int8_t* ptr, int64_t offset, int64_t at, int8_t value, KernelsLib ptr_lib);
+
+  template<>
+  void index_setitem_at_nowrap(uint8_t* ptr, int64_t offset, int64_t at, uint8_t value, KernelsLib ptr_lib);
+
+  template<>
+  void index_setitem_at_nowrap(int32_t* ptr, int64_t offset, int64_t at, int32_t value, KernelsLib ptr_lib);
+
+  template<>
+  void index_setitem_at_nowrap(uint32_t* ptr, int64_t offset, int64_t at, uint32_t value, KernelsLib ptr_lib);
+
+  template<>
+  void index_setitem_at_nowrap(int64_t * ptr, int64_t offset, int64_t at, int64_t value, KernelsLib ptr_lib);
+
+  void cuda_listarray8_num_32(int32_t* tonum,
+                              const int8_t* fromstarts,
+                              int32_t startsoffset,
+                              const int8_t* fromstops,
+                              int32_t stopsoffset,
+                              int32_t length);
 };
 
 #endif //AWKWARD_KERNEL_H

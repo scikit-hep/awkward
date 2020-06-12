@@ -11,6 +11,12 @@ extern "C" {
   int32_t awkward_cuda_index32_getitem_at_nowrap(const int32_t* ptr, int64_t offset, int64_t at);
   uint32_t awkward_cuda_indexU32_getitem_at_nowrap(const uint32_t* ptr, int64_t offset, int64_t at);
   int64_t awkward_cuda_index64_getitem_at_nowrap(const int64_t * ptr, int64_t offset, int64_t at);
+
+  void awkward_cuda_index8_setitem_at_nowrap(const int8_t* ptr, int64_t offset, int64_t at, int8_t value);
+  void awkward_cuda_indexU8_setitem_at_nowrap(const uint8_t* ptr, int64_t offset, int64_t at, uint8_t value);
+  void awkward_cuda_index32_setitem_at_nowrap(const int32_t* ptr, int64_t offset, int64_t at, int32_t value);
+  void awkward_cuda_indexU32_setitem_at_nowrap(const uint32_t* ptr, int64_t offset, int64_t at, uint32_t value);
+  void awkward_cuda_index64_setitem_at_nowrap(const int64_t* ptr, int64_t offset, int64_t at, int64_t value);
 };
 
 #endif //AWKWARD_GETITEM_CUH_

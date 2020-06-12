@@ -30,4 +30,19 @@ extern "C" {
     cudaMemcpy(&item, &ptr[(int64_t) (offset + at)], sizeof(int64_t), cudaMemcpyDeviceToHost);
     return item;
   }
+  void awkward_cuda_index8_setitem_at_nowrap(const int8_t* ptr, int64_t offset, int64_t at, int8_t value) {
+    cudaMemcpy((void *) &ptr[(int64_t) (offset + at)], &value, sizeof(int8_t), cudaMemcpyHostToDevice);
+  }
+  void awkward_cuda_indexU8_setitem_at_nowrap(const uint8_t* ptr, int64_t offset, int64_t at, uint8_t value) {
+    cudaMemcpy((void *) &ptr[(int64_t) (offset + at)], &value, sizeof(uint8_t), cudaMemcpyHostToDevice);
+  }
+  void awkward_cuda_index32_setitem_at_nowrap(const int32_t* ptr, int64_t offset, int64_t at, int32_t value) {
+    cudaMemcpy((void *) &ptr[(int64_t) (offset + at)], &value, sizeof(int32_t), cudaMemcpyHostToDevice);
+  }
+  void awkward_cuda_indexU32_setitem_at_nowrap(const uint32_t* ptr, int64_t offset, int64_t at, uint32_t value) {
+    cudaMemcpy((void *) &ptr[(int64_t) (offset + at)], &value, sizeof(uint32_t), cudaMemcpyHostToDevice);
+  }
+  void awkward_cuda_index64_setitem_at_nowrap(const int64_t* ptr, int64_t offset, int64_t at, int64_t value) {
+    cudaMemcpy((void *) &ptr[(int64_t) (offset + at)], &value, sizeof(int64_t), cudaMemcpyHostToDevice);
+  }
 }

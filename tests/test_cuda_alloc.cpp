@@ -3,22 +3,45 @@
 #include <memory>
 
 #include <awkward/Index.h>
+#include "awkward/builder/ArrayBuilderOptions.h"
+#include "awkward/builder/ArrayBuilder.h"
+#include "awkward/kernel.h"
+#include "awkward/cpu-kernels/operations.h"
+
+#include "awkward/array/NumpyArray.h"
 
 namespace ak = awkward;
 
 int main(int, char**) {
-  std::shared_ptr<int8_t> sh(new int8_t[10], std::default_delete<int8_t[]>());
-  for(int i = 0;i < 10; i++) {
-    sh.get()[i] = i + 1;
-  }
+  std::shared_ptr<int8_t> main_index_arr(new int8_t[5], std::default_delete<int8_t[]>());
+  main_index_arr.get()[0] = 0;
+  main_index_arr.get()[1] = 3;
+  main_index_arr.get()[2] = 4;
+  main_index_arr.get()[3] = 4;
+  main_index_arr.get()[4] = 5;
 
+  std::shared_ptr<int8_t> main_offsets_arr(new int8_t[6], std::default_delete<int8_t[]>());
+  main_offsets_arr.get()[0] = 0;
+  main_offsets_arr.get()[1] = 3;
+  main_offsets_arr.get()[2] = 3;
+  main_offsets_arr.get()[3] = 5;
+  main_offsets_arr.get()[4] = 6;
+  main_offsets_arr.get()[5] = 10;
 
-  std::shared_ptr<ak::IndexOf<int8_t>> ptr_1 = std::make_shared<ak::IndexOf<int8_t>>(sh, 0, 10, cpu_kernels);
-  auto cuda_ptr = ptr_1->to_cuda();
-  std::cout << "Pointer " << (int64_t )cuda_ptr.getitem_at_nowrap(5) << "\n";
-  std::shared_ptr<ak::IndexOf<uint8_t>> ptr_2 = std::make_shared<ak::IndexOf<uint8_t>>(8192, cuda_kernels);
-  std::shared_ptr<ak::IndexOf<int32_t>> ptr_3 = std::make_shared<ak::IndexOf<int32_t>>(8192, cuda_kernels);
-  std::shared_ptr<ak::IndexOf<uint32_t>> ptr_4 = std::make_shared<ak::IndexOf<uint32_t>>(8192, cuda_kernels);
-  std::shared_ptr<ak::IndexOf<int64_t>> ptr_5 = std::make_shared<ak::IndexOf<int64_t>>(8192, cuda_kernels);
+  std::shared_ptr<ak::IndexOf<int8_t>> main_index = std::make_shared<ak::IndexOf<int8_t>>(main_index_arr, 0, 5);
+  std::shared_ptr<ak::IndexOf<int8_t>> main_offsets = std::make_shared<ak::IndexOf<int8_t>>(main_offsets_arr, 0, 6);
+  auto tonum_temp = ak::IndexOf<int32_t>(5, cpu_kernels);
+
+  auto cuda_index = main_index->to_cuda();
+  auto cuda_offsets = main_offsets->to_cuda();
+  auto starts = ak::IndexOf<int8_t>(std::shared_ptr<int8_t>(cuda_offsets.ptr().get(), kernel::array_deleter<int8_t>(cuda_offsets.ptr_lib())), cuda_offsets.offset(), cuda_offsets.length(), cuda_offsets.ptr_lib());
+  auto stops = ak::IndexOf<int8_t>(std::shared_ptr<int8_t>(cuda_offsets.ptr().get(), kernel::array_deleter<int8_t>(cuda_offsets.ptr_lib())), cuda_offsets.offset(), cuda_offsets.length(), cuda_offsets.ptr_lib());
+  auto tonum = ak::IndexOf<int32_t>(5, cuda_kernels);
+  std::cout << tonum.tostring() << "\n";
+  std::cout << starts.tostring() << "\n";
+  std::cout << stops.tostring() << "\n";
+  kernel::cuda_listarray8_num_32(tonum.ptr().get(), starts.ptr().get(), 0, stops.ptr().get(), 1, 5);
+
+  std::cout << tonum.tostring();
   return 0;
 }
