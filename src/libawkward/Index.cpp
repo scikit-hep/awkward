@@ -196,7 +196,7 @@ namespace awkward {
   template <typename T>
   T
   IndexOf<T>::getitem_at_nowrap(int64_t at) const {
-    return util::awkward_index_getitem_at_nowrap<T>(ptr_.get(), offset_, at);
+    return kernel::index_getitem_at_nowrap<T>(ptr_.get(), offset_, at, ptr_lib());
   }
 
   template <typename T>
@@ -314,6 +314,13 @@ namespace awkward {
     template<typename T>
     KernelsLib IndexOf<T>::ptr_lib() const {
       return ptr_lib_;
+    }
+
+    template<typename T>
+    IndexOf<T> IndexOf<T>::to_cuda() {
+//       ptr_ = std::make_shared<T>(kernel::ptr_alloc<T>(ptr(), offset(), length(), ptr_lib()), kernel::array_deleter<T>(ptr_lib()));
+      T* cuda_ptr = kernel::host_to_device_buff_transfer(ptr().get(), length(), cuda_kernels);
+      return IndexOf<T>(std::shared_ptr<T>(cuda_ptr, kernel::array_deleter<T>(cuda_kernels)), offset(), length(), cuda_kernels);
     }
 
   template class EXPORT_SYMBOL IndexOf<int8_t>;

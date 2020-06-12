@@ -10,6 +10,8 @@ extern "C" {
 
   int8_t *awkward_cuda_ptri8_alloc(int64_t length);
 
+  int8_t* awkward_cuda_host_to_device_buffi8_transfer(int8_t* ptr, int64_t length);
+
   void *awkward_cuda_ptri8_dealloc(int8_t* ptr);
   
   uint8_t *awkward_cuda_ptriU8_alloc(int64_t length);

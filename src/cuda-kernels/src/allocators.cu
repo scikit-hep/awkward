@@ -10,6 +10,13 @@ extern "C" {
     return att.device;
   }
 
+  int8_t* awkward_cuda_host_to_device_buffi8_transfer (int8_t* ptr, int64_t length) {
+    int8_t* cuda_ptr;
+    cudaError_t err = cudaMallocManaged((void**)&cuda_ptr, sizeof(int8_t) * length);
+    cudaError_t err_1 = cudaMemcpy(cuda_ptr, ptr, sizeof(int8_t) * length, cudaMemcpyHostToDevice);
+    return cuda_ptr;
+  }
+
   int8_t *awkward_cuda_ptri8_alloc(int64_t length) {
     if(length != 0) {
       int8_t *ptr;

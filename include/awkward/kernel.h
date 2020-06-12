@@ -5,12 +5,19 @@
 
 #include "awkward/common.h"
 #include "awkward/cpu-kernels/allocators.h"
+#include "awkward/cpu-kernels/getitem.h"
 #include <dlfcn.h>
 
 
 namespace kernel {
     template<typename T>
     T* ptr_alloc(int64_t length, KernelsLib ptr_lib);
+
+    template <typename T>
+    T* host_to_device_buff_transfer(T* ptr, int64_t length, KernelsLib ptr_lib);
+
+    template <typename T>
+    T index_getitem_at_nowrap(T* ptr, int64_t offset, int64_t at, KernelsLib ptr_lib);
 
     template<typename T>
     class EXPORT_SYMBOL array_deleter;
@@ -26,8 +33,7 @@ namespace kernel {
         if(ptr_lib_ == cpu_kernels)
           delete[] p;
         else if(ptr_lib_ == cuda_kernels) {
-          auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_NOW);
-          std::cout << handle << "\n";
+          auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
           if (!handle) {
             fputs (dlerror(), stderr);
           }
@@ -51,8 +57,7 @@ namespace kernel {
       if(ptr_lib_ == cpu_kernels)
         delete[] p;
       else if(ptr_lib_ == cuda_kernels) {
-        auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_NOW);
-        std::cout << handle << "\n";
+        auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
         if (!handle) {
           fputs (dlerror(), stderr);
         }
@@ -76,8 +81,7 @@ namespace kernel {
       if(ptr_lib_ == cpu_kernels)
         delete[] p;
       else if(ptr_lib_ == cuda_kernels) {
-        auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_NOW);
-        std::cout << handle << "\n";
+        auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
         if (!handle) {
           fputs (dlerror(), stderr);
         }
@@ -101,7 +105,7 @@ namespace kernel {
       if(ptr_lib_ == cpu_kernels)
         delete[] p;
       else if(ptr_lib_ == cuda_kernels) {
-        auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_NOW);
+        auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
         if (!handle) {
           fputs (dlerror(), stderr);
         }
@@ -125,7 +129,7 @@ namespace kernel {
       if(ptr_lib_ == cpu_kernels)
         delete[] p;
       else if(ptr_lib_ == cuda_kernels) {
-        auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_NOW);
+        auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
         if (!handle) {
           fputs (dlerror(), stderr);
         }
@@ -149,7 +153,7 @@ namespace kernel {
       if(ptr_lib_ == cpu_kernels)
         delete[] p;
       else if(ptr_lib_ == cuda_kernels) {
-        auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_NOW);
+        auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
         if (!handle) {
           fputs (dlerror(), stderr);
         }
@@ -173,7 +177,7 @@ namespace kernel {
       if(ptr_lib_ == cpu_kernels)
         delete[] p;
       else if(ptr_lib_ == cuda_kernels) {
-        auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_NOW);
+        auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
         if (!handle) {
           fputs (dlerror(), stderr);
         }
@@ -197,7 +201,7 @@ namespace kernel {
       if(ptr_lib_ == cpu_kernels)
         delete[] p;
       else if(ptr_lib_ == cuda_kernels) {
-        auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_NOW);
+        auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
         if (!handle) {
           fputs (dlerror(), stderr);
         }
@@ -213,26 +217,65 @@ namespace kernel {
   template <>
   int8_t* ptr_alloc(int64_t length, KernelsLib ptr_lib);
 
+  template<>
+  int8_t* host_to_device_buff_transfer(int8_t* ptr, int64_t length, KernelsLib ptr_lib);
+
   template <>
   uint8_t* ptr_alloc(int64_t length, KernelsLib ptr_lib);
+
+  template<>
+  uint8_t* host_to_device_buff_transfer(uint8_t* ptr, int64_t length, KernelsLib ptr_lib);
 
   template <>
   int32_t* ptr_alloc(int64_t length, KernelsLib ptr_lib);
 
+  template<>
+  int32_t * host_to_device_buff_transfer(int32_t * ptr, int64_t length, KernelsLib ptr_lib);
+
   template <>
   uint32_t* ptr_alloc(int64_t length, KernelsLib ptr_lib);
+
+  template<>
+  uint32_t* host_to_device_buff_transfer(uint32_t* ptr, int64_t length, KernelsLib ptr_lib);
 
   template <>
   int64_t* ptr_alloc(int64_t length, KernelsLib ptr_lib);
 
+  template<>
+  int64_t* host_to_device_buff_transfer(int64_t* ptr, int64_t length, KernelsLib ptr_lib);
+
   template <>
   float *ptr_alloc(int64_t length, KernelsLib ptr_lib);
+
+  template<>
+  float* host_to_device_buff_transfer(float* ptr, int64_t length, KernelsLib ptr_lib);
 
   template <>
   double* ptr_alloc(int64_t length, KernelsLib ptr_lib);
 
+  template<>
+  double* host_to_device_buff_transfer(double* ptr, int64_t length, KernelsLib ptr_lib);
+
   template <>
   bool *ptr_alloc(int64_t length, KernelsLib ptr_lib);
+
+  template<>
+  bool* host_to_device_buff_transfer(bool* ptr, int64_t length, KernelsLib ptr_lib);
+
+  template<>
+  int8_t index_getitem_at_nowrap(int8_t* ptr, int64_t offset, int64_t at, KernelsLib ptr_lib);
+
+  template<>
+  uint8_t index_getitem_at_nowrap(uint8_t* ptr, int64_t offset, int64_t at, KernelsLib ptr_lib);
+
+  template<>
+  int32_t index_getitem_at_nowrap(int32_t* ptr, int64_t offset, int64_t at, KernelsLib ptr_lib);
+
+  template<>
+  uint32_t index_getitem_at_nowrap(uint32_t* ptr, int64_t offset, int64_t at, KernelsLib ptr_lib);
+
+  template<>
+  int64_t index_getitem_at_nowrap(int64_t * ptr, int64_t offset, int64_t at, KernelsLib ptr_lib);
 };
 
 #endif //AWKWARD_KERNEL_H

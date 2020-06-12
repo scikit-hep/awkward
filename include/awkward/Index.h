@@ -203,6 +203,9 @@ namespace awkward {
     const IndexOf<T>
       deep_copy() const;
 
+    IndexOf<T>
+      to_cuda();
+
   private:
     /// @brief See #ptr.
     const std::shared_ptr<T> ptr_;
@@ -211,7 +214,7 @@ namespace awkward {
     /// @brief See #length.
     const int64_t length_;
     /// @brief See #ptr_lib
-    KernelsLib ptr_lib_ = cpu_kernels;
+    const KernelsLib ptr_lib_;
   };
 
 #if !defined AWKWARD_INDEX_NO_EXTERN_TEMPLATE && !defined _MSC_VER
