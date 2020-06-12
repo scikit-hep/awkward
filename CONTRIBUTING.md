@@ -36,6 +36,12 @@ Most pull requests are merged with the "squash and merge" feature, so details ab
 
 It is unnecessary to manually edit (rebase) your commit history. If, however, you do want to save a pull request as multiple commits on `master`, ask me and we'll discuss.
 
+### Building documentation locally
+
+We use [sphinx](https://pypi.org/project/Sphinx/) to generate documentation.  
+To build documentation locally, the command is -  
+`sphinx-build <path to awkward-1.0/docs-sphinx/> <path to desired output directory>`
+
 ### Continuous integration
 
 Pull requests must pass all [continuous integration](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=3&_a=summary) tests before they are merged. I will sometimes cancel non-essential builds to give priority to pull requests that are almost ready to be merged. If you needed the result of the build as a diagnostic, you can ask me to restart your job or make a trivial change to trigger a new build.
