@@ -3306,6 +3306,8 @@ void awkward_listarray_combinations_step(
 template <typename C, typename T>
 ERROR awkward_listarray_combinations(
   T** tocarry,
+  int64_t* toindex,
+  int64_t* fromindex,
   int64_t n,
   bool replacement,
   const C* starts,
@@ -3313,9 +3315,6 @@ ERROR awkward_listarray_combinations(
   const C* stops,
   int64_t stopsoffset,
   int64_t length) {
-  // delete these before any return!
-  int64_t* toindex = new int64_t[n];
-  int64_t* fromindex = new int64_t[n];
   for (int64_t j = 0;  j < n;  j++) {
     toindex[j] = 0;
   }
@@ -3331,12 +3330,12 @@ ERROR awkward_listarray_combinations(
                                            n,
                                            replacement);
   }
-  delete [] toindex;
-  delete [] fromindex;
   return success();
 }
 ERROR awkward_listarray32_combinations_64(
   int64_t** tocarry,
+  int64_t* toindex,
+  int64_t* fromindex,
   int64_t n,
   bool replacement,
   const int32_t* starts,
@@ -3346,6 +3345,8 @@ ERROR awkward_listarray32_combinations_64(
   int64_t length) {
   return awkward_listarray_combinations<int32_t, int64_t>(
     tocarry,
+    toindex,
+    fromindex,
     n,
     replacement,
     starts,
@@ -3356,6 +3357,8 @@ ERROR awkward_listarray32_combinations_64(
 }
 ERROR awkward_listarrayU32_combinations_64(
   int64_t** tocarry,
+  int64_t* toindex,
+  int64_t* fromindex,
   int64_t n,
   bool replacement,
   const uint32_t* starts,
@@ -3365,6 +3368,8 @@ ERROR awkward_listarrayU32_combinations_64(
   int64_t length) {
   return awkward_listarray_combinations<uint32_t, int64_t>(
     tocarry,
+    toindex,
+    fromindex,
     n,
     replacement,
     starts,
@@ -3375,6 +3380,8 @@ ERROR awkward_listarrayU32_combinations_64(
 }
 ERROR awkward_listarray64_combinations_64(
   int64_t** tocarry,
+  int64_t* toindex,
+  int64_t* fromindex,
   int64_t n,
   bool replacement,
   const int64_t* starts,
@@ -3384,6 +3391,8 @@ ERROR awkward_listarray64_combinations_64(
   int64_t length) {
   return awkward_listarray_combinations<int64_t, int64_t>(
     tocarry,
+    toindex,
+    fromindex,
     n,
     replacement,
     starts,
@@ -3396,13 +3405,12 @@ ERROR awkward_listarray64_combinations_64(
 template <typename C, typename T>
 ERROR awkward_regulararray_combinations(
   T** tocarry,
+  int64_t* toindex,
+  int64_t* fromindex,
   int64_t n,
   bool replacement,
   int64_t size,
   int64_t length) {
-  // delete these before any return!
-  int64_t* toindex = new int64_t[n];
-  int64_t* fromindex = new int64_t[n];
   for (int64_t j = 0;  j < n;  j++) {
     toindex[j] = 0;
   }
@@ -3418,18 +3426,20 @@ ERROR awkward_regulararray_combinations(
                                            n,
                                            replacement);
   }
-  delete [] toindex;
-  delete [] fromindex;
   return success();
 }
 ERROR awkward_regulararray_combinations_64(
   int64_t** tocarry,
+  int64_t* toindex,
+  int64_t* fromindex,
   int64_t n,
   bool replacement,
   int64_t size,
   int64_t length) {
   return awkward_regulararray_combinations<int32_t, int64_t>(
     tocarry,
+    toindex,
+    fromindex,
     n,
     replacement,
     size,
