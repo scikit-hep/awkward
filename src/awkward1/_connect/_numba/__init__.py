@@ -28,9 +28,9 @@ or
     else:
         if not checked_version and distutils.version.LooseVersion(
             numba.__version__
-        ) < distutils.version.LooseVersion("0.49"):
+        ) < distutils.version.LooseVersion("0.50"):
             raise ImportError(
-                "awkward1 can only work with numba 0.49 or later "
+                "awkward1 can only work with numba 0.50 or later "
                 "(you have version {0})".format(numba.__version__)
             )
         checked_version = True
@@ -38,6 +38,7 @@ or
 
 
 def register():
+    import numba
     import awkward1._connect._numba.arrayview
     import awkward1._connect._numba.layout
     import awkward1._connect._numba.builder
@@ -61,13 +62,6 @@ def register():
     n.ArrayBuilderType = awkward1._connect._numba.builder.ArrayBuilderType
     n.ArrayBuilderModel = awkward1._connect._numba.builder.ArrayBuilderModel
 
-
-try:
-    import numba
-except ImportError:
-    pass
-else:
-
     @numba.extending.typeof_impl.register(awkward1.highlevel.Array)
     def typeof_Array(obj, c):
         return obj.numba_type
@@ -86,6 +80,7 @@ def repr_behavior(behavior):
 
 
 def castint(context, builder, fromtype, totype, val):
+    import numba
     import llvmlite.ir.types
 
     if isinstance(fromtype, llvmlite.ir.types.IntType):
