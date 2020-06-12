@@ -868,8 +868,12 @@ namespace awkward {
       tocarry.push_back(ptr);
       tocarryraw.push_back(ptr.get());
     }
+    IndexOf<int64_t> toindex(n);
+    IndexOf<int64_t> fromindex(n);
     struct Error err = awkward_regulararray_combinations_64(
       tocarryraw.data(),
+      toindex.ptr().get(),
+      fromindex.ptr().get(),
       n,
       replacement,
       length(),

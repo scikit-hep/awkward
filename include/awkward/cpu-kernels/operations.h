@@ -1270,6 +1270,8 @@ extern "C" {
   EXPORT_SYMBOL struct Error
     awkward_listarray32_combinations_64(
       int64_t** tocarry,
+      int64_t* toindex,
+      int64_t* fromindex,
       int64_t n,
       bool replacement,
       const int32_t* starts,
@@ -1280,6 +1282,8 @@ extern "C" {
   EXPORT_SYMBOL struct Error
     awkward_listarrayU32_combinations_64(
       int64_t** tocarry,
+      int64_t* toindex,
+      int64_t* fromindex,
       int64_t n,
       bool replacement,
       const uint32_t* starts,
@@ -1290,6 +1294,8 @@ extern "C" {
   EXPORT_SYMBOL struct Error
     awkward_listarray64_combinations_64(
       int64_t** tocarry,
+      int64_t* toindex,
+      int64_t* fromindex,
       int64_t n,
       bool replacement,
       const int64_t* starts,
@@ -1301,6 +1307,8 @@ extern "C" {
   EXPORT_SYMBOL struct Error
     awkward_regulararray_combinations_64(
       int64_t** tocarry,
+      int64_t* toindex,
+      int64_t* fromindex,
       int64_t n,
       bool replacement,
       int64_t size,

@@ -28,8 +28,6 @@ def preprocess(filename):
                 line = re.sub("//.*\n", "\n", line)
             if line.startswith("template") and func is False:
                 templ = True
-            if "delete []" in line:
-                continue
             if "typename" in line:
                 iterate = True
                 while iterate:
@@ -120,14 +118,6 @@ def preprocess(filename):
                 templatecall = False
             elif func is True and templatecall is True:
                 line = ""
-            if (
-                func is True
-                and re.search("[\W_]*=[\W_]*new u?int\d{1,2}_t\[.\];", line) is not None
-            ):
-                line = line.replace(
-                    re.search("[\W_]*=[\W_]*new u?int\d{1,2}_t\[.\];", line).group(),
-                    ";",
-                )
             if (
                 func is True
                 and re.search("u?int\d{1,2}_t\*?", line) is not None
