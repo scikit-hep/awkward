@@ -636,8 +636,20 @@ if __name__ == "__main__":
             "w",
         ) as f:
             print("Writing kernels.rst")
-            f.write("kernels\n")
-            f.write("----------------------------------------------------------\n")
+            f.write("""Kernel interface and specification
+----------------------------------
+
+All array manipulation takes place in the lowest layer of the Awkward Array project, the "kernels." The primary implementation of these kernels are in ``libawkward-cpu-kernels.so`` (or similar names on MacOS and Windows), which has a pure C interface.
+
+A second implementation, ``libawkward-cuda-kernels.so``, is provided as a separate package, ``awkward1-cuda``, which handles arrays that reside on GPUs if CUDA is available. It satisfies the same C interface and implements the same behaviors.
+
+.. raw:: html
+
+    <img src="../_static/awkward-1-0-layers.svg" style="max-width: 500px; margin-left: auto; margin-right: auto;">
+
+The interface, as well as specifications for each function's behavior through a normative Python implementation, are presented below.
+
+""")
             for name in sorted(docdict.keys()):
                 f.write(docdict[name])
         if os.path.isfile(
