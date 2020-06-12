@@ -1020,6 +1020,8 @@ namespace awkward {
     ERROR
       awkward_listarray_combinations_64(
         int64_t** tocarry,
+        int64_t* toindex,
+        int64_t* fromindex,
         int64_t n,
         bool replacement,
         const T* starts,

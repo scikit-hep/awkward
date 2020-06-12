@@ -1947,14 +1947,14 @@ ERROR awkward_indexedarray_getitem_adjust_outindex(
   int64_t j = 0;
   int64_t k = 0;
   for (int64_t i = 0;  i < fromindexlength;  i++) {
-    T from = fromindex[fromindexoffset + i];
-    tomask[i] = (from < 0);
-    if (from < 0) {
+    T fromval = fromindex[fromindexoffset + i];
+    tomask[i] = (fromval < 0);
+    if (fromval < 0) {
       toindex[k] = -1;
       k++;
     }
-    else if (j < nonzerolength  &&  from == nonzero[nonzerooffset + j]) {
-      tononzero[j] = from + (k - j);
+    else if (j < nonzerolength  &&  fromval == nonzero[nonzerooffset + j]) {
+      tononzero[j] = fromval + (k - j);
       toindex[k] = j;
       j++;
       k++;

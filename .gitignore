@@ -2,6 +2,7 @@ studies/**/sample-*
 docs/demos/countries.geojson
 docs/demos/test-program
 docs/demos/test-program.cpp
+dev/kernels.py
 
 dependent-project/CMakeFiles
 dependent-project/CMakeCache.txt

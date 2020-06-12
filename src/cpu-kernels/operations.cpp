@@ -1589,8 +1589,8 @@ ERROR awkward_indexedarray_fill(
   int64_t length,
   int64_t base) {
   for (int64_t i = 0;  i < length;  i++) {
-    FROM from = fromindex[fromindexoffset + i];
-    toindex[toindexoffset + i] = from < 0 ? -1 : (TO)(from + base);
+    FROM fromval = fromindex[fromindexoffset + i];
+    toindex[toindexoffset + i] = fromval < 0 ? -1 : (TO)(fromval + base);
   }
   return success();
 }
@@ -2652,8 +2652,8 @@ ERROR awkward_ListArray_min_range(
   int64_t stopsoffset) {
   int64_t shorter = fromstops[stopsoffset + 0] - fromstarts[startsoffset + 0];
   for (int64_t i = 1;  i < lenstarts;  i++) {
-    int64_t range = fromstops[startsoffset + i] - fromstarts[stopsoffset + i];
-    shorter = (shorter < range) ? shorter : range;
+    int64_t rangeval = fromstops[stopsoffset + i] - fromstarts[startsoffset + i];
+    shorter = (shorter < rangeval) ? shorter : rangeval;
   }
   *tomin = shorter;
   return success();
@@ -2715,8 +2715,8 @@ ERROR awkward_ListArray_rpad_and_clip_length_axis1(
   int64_t stopsoffset) {
   int64_t length = 0;
   for (int64_t i = 0;  i < lenstarts;  i++) {
-    int64_t range = fromstops[startsoffset + i] - fromstarts[stopsoffset + i];
-    length += (target > range) ? target : range;
+    int64_t rangeval = fromstops[stopsoffset + i] - fromstarts[startsoffset + i];
+    length += (target > rangeval) ? target : rangeval;
   }
   *tolength = length;
   return success();
@@ -2787,14 +2787,14 @@ ERROR awkward_ListArray_rpad_axis1(
   int64_t offset = 0;
   for (int64_t i = 0; i < length; i++) {
     tostarts[i] = offset;
-    int64_t range = fromstops[startsoffset + i] - fromstarts[stopsoffset + i];
-    for (int64_t j = 0; j < range; j++) {
+    int64_t rangeval = fromstops[stopsoffset + i] - fromstarts[startsoffset + i];
+    for (int64_t j = 0; j < rangeval; j++) {
      toindex[offset + j] = fromstarts[startsoffset + i] + j;
     }
-    for (int64_t j = range; j < target; j++) {
+    for (int64_t j = rangeval; j < target; j++) {
      toindex[offset + j] = -1;
     }
-    offset = (target > range) ? tostarts[i] + target : tostarts[i] + range;
+    offset = (target > rangeval) ? tostarts[i] + target : tostarts[i] + rangeval;
     tostops[i] = offset;
    }
   return success();
@@ -2871,9 +2871,9 @@ ERROR awkward_ListOffsetArray_rpad_and_clip_axis1(
   int64_t length,
   int64_t target) {
   for (int64_t i = 0; i < length; i++) {
-    int64_t range = (T)(fromoffsets[offsetsoffset + i + 1] -
+    int64_t rangeval = (T)(fromoffsets[offsetsoffset + i + 1] -
                         fromoffsets[offsetsoffset + i]);
-    int64_t shorter = (target < range) ? target : range;
+    int64_t shorter = (target < rangeval) ? target : rangeval;
     for (int64_t j = 0; j < shorter; j++) {
       toindex[i*target + j] = (T)fromoffsets[offsetsoffset + i] + j;
     }
@@ -2934,9 +2934,9 @@ ERROR awkward_ListOffsetArray_rpad_length_axis1(
   int64_t length = 0;
   tooffsets[0] = 0;
   for (int64_t i = 0; i < fromlength; i++) {
-    int64_t range =
+    int64_t rangeval =
       fromoffsets[offsetsoffset + i + 1] - fromoffsets[offsetsoffset + i];
-    int64_t longer = (target < range) ? range : target;
+    int64_t longer = (target < rangeval) ? rangeval : target;
     length = length + longer;
     tooffsets[i + 1] = tooffsets[i] + longer;
   }
@@ -2999,12 +2999,12 @@ ERROR awkward_ListOffsetArray_rpad_axis1(
   int64_t target) {
   int64_t count = 0;
   for (int64_t i = 0; i < fromlength; i++) {
-    int64_t range =
+    int64_t rangeval =
       (T)(fromoffsets[offsetsoffset + i + 1] - fromoffsets[offsetsoffset + i]);
-    for (int64_t j = 0; j < range; j++) {
+    for (int64_t j = 0; j < rangeval; j++) {
       toindex[count++] = (T)fromoffsets[offsetsoffset + i] + j;
     }
-    for (int64_t j = range; j < target; j++) {
+    for (int64_t j = rangeval; j < target; j++) {
       toindex[count++] = -1;
     }
   }
@@ -3306,6 +3306,8 @@ void awkward_listarray_combinations_step(
 template <typename C, typename T>
 ERROR awkward_listarray_combinations(
   T** tocarry,
+  int64_t* toindex,
+  int64_t* fromindex,
   int64_t n,
   bool replacement,
   const C* starts,
@@ -3313,9 +3315,6 @@ ERROR awkward_listarray_combinations(
   const C* stops,
   int64_t stopsoffset,
   int64_t length) {
-  // delete these before any return!
-  int64_t* toindex = new int64_t[n];
-  int64_t* fromindex = new int64_t[n];
   for (int64_t j = 0;  j < n;  j++) {
     toindex[j] = 0;
   }
@@ -3331,12 +3330,12 @@ ERROR awkward_listarray_combinations(
                                            n,
                                            replacement);
   }
-  delete [] toindex;
-  delete [] fromindex;
   return success();
 }
 ERROR awkward_listarray32_combinations_64(
   int64_t** tocarry,
+  int64_t* toindex,
+  int64_t* fromindex,
   int64_t n,
   bool replacement,
   const int32_t* starts,
@@ -3346,6 +3345,8 @@ ERROR awkward_listarray32_combinations_64(
   int64_t length) {
   return awkward_listarray_combinations<int32_t, int64_t>(
     tocarry,
+    toindex,
+    fromindex,
     n,
     replacement,
     starts,
@@ -3356,6 +3357,8 @@ ERROR awkward_listarray32_combinations_64(
 }
 ERROR awkward_listarrayU32_combinations_64(
   int64_t** tocarry,
+  int64_t* toindex,
+  int64_t* fromindex,
   int64_t n,
   bool replacement,
   const uint32_t* starts,
@@ -3365,6 +3368,8 @@ ERROR awkward_listarrayU32_combinations_64(
   int64_t length) {
   return awkward_listarray_combinations<uint32_t, int64_t>(
     tocarry,
+    toindex,
+    fromindex,
     n,
     replacement,
     starts,
@@ -3375,6 +3380,8 @@ ERROR awkward_listarrayU32_combinations_64(
 }
 ERROR awkward_listarray64_combinations_64(
   int64_t** tocarry,
+  int64_t* toindex,
+  int64_t* fromindex,
   int64_t n,
   bool replacement,
   const int64_t* starts,
@@ -3384,6 +3391,8 @@ ERROR awkward_listarray64_combinations_64(
   int64_t length) {
   return awkward_listarray_combinations<int64_t, int64_t>(
     tocarry,
+    toindex,
+    fromindex,
     n,
     replacement,
     starts,
@@ -3396,13 +3405,12 @@ ERROR awkward_listarray64_combinations_64(
 template <typename C, typename T>
 ERROR awkward_regulararray_combinations(
   T** tocarry,
+  int64_t* toindex,
+  int64_t* fromindex,
   int64_t n,
   bool replacement,
   int64_t size,
   int64_t length) {
-  // delete these before any return!
-  int64_t* toindex = new int64_t[n];
-  int64_t* fromindex = new int64_t[n];
   for (int64_t j = 0;  j < n;  j++) {
     toindex[j] = 0;
   }
@@ -3418,18 +3426,20 @@ ERROR awkward_regulararray_combinations(
                                            n,
                                            replacement);
   }
-  delete [] toindex;
-  delete [] fromindex;
   return success();
 }
 ERROR awkward_regulararray_combinations_64(
   int64_t** tocarry,
+  int64_t* toindex,
+  int64_t* fromindex,
   int64_t n,
   bool replacement,
   int64_t size,
   int64_t length) {
   return awkward_regulararray_combinations<int32_t, int64_t>(
     tocarry,
+    toindex,
+    fromindex,
     n,
     replacement,
     size,
