@@ -182,4 +182,6 @@ The Awkward Array project is divided into 3 layers with 5 main components.
 
 The C++ classes, cpu-kernels, and gpu-kernels are described in the `C++ API reference <_static/index.html>`__.
 
+The kernels (cpu-kernels and cuda-kernels) are documented on the :doc:`_auto/kernels` page, with interfaces and normative Python implementations.
+
 .. include:: _auto/toctree.txt
