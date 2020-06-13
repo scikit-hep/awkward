@@ -33,8 +33,9 @@ namespace kernel {
       /// @brief Called by `std::shared_ptr` when its reference count reaches
       /// zero.
       void operator()(int8_t const *p) {
-        if(ptr_lib_ == cpu_kernels)
+        if (ptr_lib_ == cpu_kernels) {
           delete[] p;
+        }
         else if(ptr_lib_ == cuda_kernels) {
           auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
           if (!handle) {
