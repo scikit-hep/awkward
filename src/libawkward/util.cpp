@@ -3954,6 +3954,8 @@ namespace awkward {
     template <>
     Error awkward_listarray_combinations_64<int32_t>(
       int64_t** tocarry,
+      int64_t* toindex,
+      int64_t* fromindex,
       int64_t n,
       bool replacement,
       const int32_t* starts,
@@ -3963,6 +3965,8 @@ namespace awkward {
       int64_t length) {
       return awkward_listarray32_combinations_64(
         tocarry,
+        toindex,
+        fromindex,
         n,
         replacement,
         starts,
@@ -3974,6 +3978,8 @@ namespace awkward {
     template <>
     Error awkward_listarray_combinations_64<uint32_t>(
       int64_t** tocarry,
+      int64_t* toindex,
+      int64_t* fromindex,
       int64_t n,
       bool replacement,
       const uint32_t* starts,
@@ -3983,6 +3989,8 @@ namespace awkward {
       int64_t length) {
       return awkward_listarrayU32_combinations_64(
         tocarry,
+        toindex,
+        fromindex,
         n,
         replacement,
         starts,
@@ -3994,6 +4002,8 @@ namespace awkward {
     template <>
     Error awkward_listarray_combinations_64<int64_t>(
       int64_t** tocarry,
+      int64_t* toindex,
+      int64_t* fromindex,
       int64_t n,
       bool replacement,
       const int64_t* starts,
@@ -4003,6 +4013,8 @@ namespace awkward {
       int64_t length) {
       return awkward_listarray64_combinations_64(
         tocarry,
+        toindex,
+        fromindex,
         n,
         replacement,
         starts,

@@ -1340,8 +1340,12 @@ namespace awkward {
         tocarry.push_back(ptr);
         tocarryraw.push_back(ptr.get());
       }
+      int64_t* toindex = new int64_t[n];
+      int64_t* fromindex = new int64_t[n];
       struct Error err2 = util::awkward_listarray_combinations_64<T>(
         tocarryraw.data(),
+        toindex,
+        fromindex,
         n,
         replacement,
         starts_.ptr().get(),
