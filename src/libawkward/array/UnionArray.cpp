@@ -330,7 +330,7 @@ namespace awkward {
     util::handle_error(err1, "UnionArray", nullptr);
     IndexOf<I> current(size);
     IndexOf<I> outindex(lentags);
-    struct Error err2 = util::awkward_unionarray_regular_index<T, I>(
+    struct Error err2 = kernel::unionarray_regular_index<T, I>(
       outindex.ptr().get(),
       current.ptr().get(),
       size,
@@ -417,7 +417,7 @@ namespace awkward {
     }
     int64_t lenout;
     Index64 tmpcarry(lentags);
-    struct Error err = util::awkward_unionarray_project_64<T, I>(
+    struct Error err = kernel::unionarray_project_64<T, I>(
       &lenout,
       tmpcarry.ptr().get(),
       tags_.ptr().get(),
@@ -456,7 +456,7 @@ namespace awkward {
           for (size_t k = 0;  k < contents.size();  k++) {
             if (contents[k].get()->mergeable(innercontents[j], mergebool)) {
               struct Error err =
-                util::awkward_unionarray_simplify8_32_to8_64<T, I>(
+                kernel::unionarray_simplify8_32_to8_64<T, I>(
                 tags.ptr().get(),
                 index.ptr().get(),
                 tags_.ptr().get(),
@@ -480,7 +480,7 @@ namespace awkward {
           }
           if (unmerged) {
             struct Error err =
-              util::awkward_unionarray_simplify8_32_to8_64<T, I>(
+              kernel::unionarray_simplify8_32_to8_64<T, I>(
               tags.ptr().get(),
               index.ptr().get(),
               tags_.ptr().get(),
@@ -511,7 +511,7 @@ namespace awkward {
           for (size_t k = 0;  k < contents.size();  k++) {
             if (contents[k].get()->mergeable(innercontents[j], mergebool)) {
               struct Error err =
-                util::awkward_unionarray_simplify8_U32_to8_64<T, I>(
+                kernel::unionarray_simplify8_U32_to8_64<T, I>(
                 tags.ptr().get(),
                 index.ptr().get(),
                 tags_.ptr().get(),
@@ -535,7 +535,7 @@ namespace awkward {
           }
           if (unmerged) {
             struct Error err =
-              util::awkward_unionarray_simplify8_U32_to8_64<T, I>(
+              kernel::unionarray_simplify8_U32_to8_64<T, I>(
               tags.ptr().get(),
               index.ptr().get(),
               tags_.ptr().get(),
@@ -566,7 +566,7 @@ namespace awkward {
           for (size_t k = 0;  k < contents.size();  k++) {
             if (contents[k].get()->mergeable(innercontents[j], mergebool)) {
               struct Error err =
-                util::awkward_unionarray_simplify8_64_to8_64<T, I>(
+                kernel::unionarray_simplify8_64_to8_64<T, I>(
                 tags.ptr().get(),
                 index.ptr().get(),
                 tags_.ptr().get(),
@@ -590,7 +590,7 @@ namespace awkward {
           }
           if (unmerged) {
             struct Error err =
-              util::awkward_unionarray_simplify8_64_to8_64<T, I>(
+              kernel::unionarray_simplify8_64_to8_64<T, I>(
               tags.ptr().get(),
               index.ptr().get(),
               tags_.ptr().get(),
@@ -616,7 +616,7 @@ namespace awkward {
         for (size_t k = 0;  k < contents.size();  k++) {
           if (contents[k].get()->mergeable(contents_[i], mergebool)) {
             struct Error err =
-              util::awkward_unionarray_simplify_one_to8_64<T, I>(
+              kernel::unionarray_simplify_one_to8_64<T, I>(
               tags.ptr().get(),
               index.ptr().get(),
               tags_.ptr().get(),
@@ -635,7 +635,7 @@ namespace awkward {
         }
         if (unmerged) {
           struct Error err =
-            util::awkward_unionarray_simplify_one_to8_64<T, I>(
+            kernel::unionarray_simplify_one_to8_64<T, I>(
             tags.ptr().get(),
             index.ptr().get(),
             tags_.ptr().get(),
@@ -757,7 +757,7 @@ namespace awkward {
                                            content.get()->length());
           Identities32* rawsubidentities =
             reinterpret_cast<Identities32*>(subidentities.get());
-          struct Error err = util::awkward_identities32_from_unionarray<T, I>(
+          struct Error err = kernel::identities32_from_unionarray<T, I>(
             &uniquecontents,
             rawsubidentities->ptr().get(),
             rawidentities->ptr().get(),
@@ -788,7 +788,7 @@ namespace awkward {
                                            content.get()->length());
           Identities64* rawsubidentities =
             reinterpret_cast<Identities64*>(subidentities.get());
-          struct Error err = util::awkward_identities64_from_unionarray<T, I>(
+          struct Error err = kernel::identities64_from_unionarray<T, I>(
             &uniquecontents,
             rawsubidentities->ptr().get(),
             rawidentities->ptr().get(),
@@ -1141,7 +1141,7 @@ namespace awkward {
     }
     int64_t lencarry = carry.length();
     IndexOf<T> nexttags(lencarry);
-    struct Error err1 = util::awkward_index_carry_64<T>(
+    struct Error err1 = kernel::index_carry_64<T>(
       nexttags.ptr().get(),
       tags_.ptr().get(),
       carry.ptr().get(),
@@ -1150,7 +1150,7 @@ namespace awkward {
       lencarry);
     util::handle_error(err1, classname(), identities_.get());
     IndexOf<I> nextindex(lencarry);
-    struct Error err2 = util::awkward_index_carry_nocheck_64<I>(
+    struct Error err2 = kernel::index_carry_nocheck_64<I>(
       nextindex.ptr().get(),
       index_.ptr().get(),
       carry.ptr().get(),
@@ -1234,7 +1234,7 @@ namespace awkward {
     for (int64_t i = 0;  i < numcontents();  i++) {
       lencontents.push_back(content(i).get()->length());
     }
-    struct Error err = util::awkward_unionarray_validity<T, I>(
+    struct Error err = kernel::unionarray_validity<T, I>(
       tags_.ptr().get(),
       tags_.offset(),
       index_.ptr().get(),
@@ -1313,7 +1313,7 @@ namespace awkward {
 
       if (has_offsets) {
         int64_t total_length;
-        struct Error err1 = util::awkward_unionarray_flatten_length_64<T, I>(
+        struct Error err1 = kernel::unionarray_flatten_length_64<T, I>(
           &total_length,
           tags_.ptr().get(),
           tags_.offset(),
@@ -1327,7 +1327,7 @@ namespace awkward {
         Index8 totags(total_length);
         Index64 toindex(total_length);
         Index64 tooffsets(tags_.length() + 1);
-        struct Error err2 = util::awkward_unionarray_flatten_combine_64<T, I>(
+        struct Error err2 = kernel::unionarray_flatten_combine_64<T, I>(
           totags.ptr().get(),
           toindex.ptr().get(),
           tooffsets.ptr().get(),
