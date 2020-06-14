@@ -1388,20 +1388,20 @@ namespace awkward {
     ContentPtrVec contents({ other });
     contents.insert(contents.end(), contents_.begin(), contents_.end());
 
-    struct Error err1 = awkward_unionarray_filltags_to8_const(
+    struct Error err1 = kernel::unionarray_filltags_const<int8_t>(
       tags.ptr().get(),
       0,
       theirlength,
       0);
     util::handle_error(err1, classname(), identities_.get());
-    struct Error err2 = awkward_unionarray_fillindex_to64_count(
+    struct Error err2 = kernel::unionarray_fillindex_count<int64_t>(
       index.ptr().get(),
       0,
       theirlength);
     util::handle_error(err2, classname(), identities_.get());
 
     if (std::is_same<T, int8_t>::value) {
-      struct Error err = awkward_unionarray_filltags_to8_from8(
+      struct Error err = kernel::unionarray_filltags<int8_t, int8_t>(
         tags.ptr().get(),
         theirlength,
         reinterpret_cast<int8_t*>(tags_.ptr().get()),
@@ -1415,7 +1415,7 @@ namespace awkward {
     }
 
     if (std::is_same<I, int32_t>::value) {
-      struct Error err = awkward_unionarray_fillindex_to64_from32(
+      struct Error err = kernel::unionarray_fillindex<int32_t, int64_t>(
         index.ptr().get(),
         theirlength,
         reinterpret_cast<int32_t*>(index_.ptr().get()),
@@ -1424,7 +1424,7 @@ namespace awkward {
       util::handle_error(err, classname(), identities_.get());
     }
     else if (std::is_same<I, uint32_t>::value) {
-      struct Error err = awkward_unionarray_fillindex_to64_fromU32(
+      struct Error err = kernel::unionarray_fillindex<uint32_t, int64_t>(
         index.ptr().get(),
         theirlength,
         reinterpret_cast<uint32_t*>(index_.ptr().get()),
@@ -1433,7 +1433,7 @@ namespace awkward {
       util::handle_error(err, classname(), identities_.get());
     }
     else if (std::is_same<I, int64_t>::value) {
-      struct Error err = awkward_unionarray_fillindex_to64_from64(
+      struct Error err = kernel::unionarray_fillindex<int64_t, int64_t>(
         index.ptr().get(),
         theirlength,
         reinterpret_cast<int64_t*>(index_.ptr().get()),
@@ -1478,7 +1478,7 @@ namespace awkward {
     Index64 index(mylength + theirlength);
 
     if (std::is_same<T, int8_t>::value) {
-      struct Error err = awkward_unionarray_filltags_to8_from8(
+      struct Error err = kernel::unionarray_filltags<int8_t, int8_t>(
         tags.ptr().get(),
         0,
         reinterpret_cast<int8_t*>(tags_.ptr().get()),
@@ -1492,7 +1492,7 @@ namespace awkward {
     }
 
     if (std::is_same<I, int32_t>::value) {
-      struct Error err = awkward_unionarray_fillindex_to64_from32(
+      struct Error err = kernel::unionarray_fillindex<int32_t, int64_t>(
         index.ptr().get(),
         0,
         reinterpret_cast<int32_t*>(index_.ptr().get()),
@@ -1501,7 +1501,7 @@ namespace awkward {
       util::handle_error(err, classname(), identities_.get());
     }
     else if (std::is_same<I, uint32_t>::value) {
-      struct Error err = awkward_unionarray_fillindex_to64_fromU32(
+      struct Error err = kernel::unionarray_fillindex<uint32_t, int64_t>(
         index.ptr().get(),
         0,
         reinterpret_cast<uint32_t*>(index_.ptr().get()),
@@ -1510,7 +1510,7 @@ namespace awkward {
       util::handle_error(err, classname(), identities_.get());
     }
     else if (std::is_same<I, int64_t>::value) {
-      struct Error err = awkward_unionarray_fillindex_to64_from64(
+      struct Error err = kernel::unionarray_fillindex<int64_t, int64_t>(
         index.ptr().get(),
         0,
         reinterpret_cast<int64_t*>(index_.ptr().get()),
@@ -1530,7 +1530,7 @@ namespace awkward {
                       other_contents.begin(),
                       other_contents.end());
       Index8 other_tags = rawother->tags();
-      struct Error err1 = awkward_unionarray_filltags_to8_from8(
+      struct Error err1 = kernel::unionarray_filltags<int8_t, int8_t>(
         tags.ptr().get(),
         mylength,
         other_tags.ptr().get(),
@@ -1541,7 +1541,7 @@ namespace awkward {
                          rawother->classname(),
                          rawother->identities().get());
       Index32 other_index = rawother->index();
-      struct Error err2 = awkward_unionarray_fillindex_to64_from32(
+      struct Error err2 = kernel::unionarray_fillindex<int32_t, int64_t>(
         index.ptr().get(),
         mylength,
         other_index.ptr().get(),
@@ -1558,7 +1558,7 @@ namespace awkward {
                       other_contents.begin(),
                       other_contents.end());
       Index8 other_tags = rawother->tags();
-      struct Error err1 = awkward_unionarray_filltags_to8_from8(
+      struct Error err1 = kernel::unionarray_filltags<int8_t, int8_t>(
         tags.ptr().get(),
         mylength,
         other_tags.ptr().get(),
@@ -1569,7 +1569,7 @@ namespace awkward {
                          rawother->classname(),
                          rawother->identities().get());
       IndexU32 other_index = rawother->index();
-      struct Error err2 = awkward_unionarray_fillindex_to64_fromU32(
+      struct Error err2 = kernel::unionarray_fillindex<uint32_t, int64_t>(
         index.ptr().get(),
         mylength,
         other_index.ptr().get(),
@@ -1586,7 +1586,7 @@ namespace awkward {
                       other_contents.begin(),
                       other_contents.end());
       Index8 other_tags = rawother->tags();
-      struct Error err1 = awkward_unionarray_filltags_to8_from8(
+      struct Error err1 = kernel::unionarray_filltags<int8_t, int8_t>(
         tags.ptr().get(),
         mylength,
         other_tags.ptr().get(),
@@ -1597,7 +1597,7 @@ namespace awkward {
                          rawother->classname(),
                          rawother->identities().get());
       Index64 other_index = rawother->index();
-      struct Error err2 = awkward_unionarray_fillindex_to64_from64(
+      struct Error err2 = kernel::unionarray_fillindex<int64_t, int64_t>(
         index.ptr().get(),
         mylength,
         other_index.ptr().get(),
@@ -1609,13 +1609,13 @@ namespace awkward {
     }
     else {
       contents.push_back(other);
-      struct Error err1 = awkward_unionarray_filltags_to8_const(
+      struct Error err1 = kernel::unionarray_filltags_const<int8_t>(
         tags.ptr().get(),
         mylength,
         theirlength,
         numcontents());
       util::handle_error(err1, classname(), identities_.get());
-      struct Error err2 = awkward_unionarray_fillindex_to64_count(
+      struct Error err2 = kernel::unionarray_fillindex_count<int64_t>(
         index.ptr().get(),
         mylength,
         theirlength);

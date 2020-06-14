@@ -221,7 +221,7 @@ namespace awkward {
     if (size_ == 1) {
       int64_t carrylen = offsets.getitem_at_nowrap(offsets.length() - 1);
       Index64 nextcarry(carrylen);
-      struct Error err = awkward_regulararray_broadcast_tooffsets64_size1(
+      struct Error err = kernel::regulararray_broadcast_tooffsets_size1<int64_t>(
         nextcarry.ptr().get(),
         offsets.ptr().get(),
         offsets.offset(),
@@ -234,7 +234,7 @@ namespace awkward {
                                                  nextcontent);
     }
     else {
-      struct Error err = awkward_regulararray_broadcast_tooffsets64(
+      struct Error err = kernel::regulararray_broadcast_tooffsets<int64_t>(
         offsets.ptr().get(),
         offsets.offset(),
         offsets.length(),
@@ -603,7 +603,7 @@ namespace awkward {
     }
     else if (toaxis == depth + 1) {
       Index64 tonum(length());
-      struct Error err = awkward_regulararray_num_64(
+      struct Error err = kernel::regulararray_num<int64_t>(
         tonum.ptr().get(),
         size_,
         length());
@@ -845,7 +845,7 @@ namespace awkward {
     }
     else if (toaxis == depth + 1) {
       Index64 index(length() * target);
-      struct Error err = awkward_RegularArray_rpad_and_clip_axis1_64(
+      struct Error err = kernel::RegularArray_rpad_and_clip_axis1<int64_t>(
         index.ptr().get(),
         target,
         size_,
@@ -896,7 +896,7 @@ namespace awkward {
     }
     else if (axis == depth + 1) {
       Index64 localindex(length()*size_);
-      struct Error err = awkward_regulararray_localindex_64(
+      struct Error err = kernel::regulararray_localindex<int64_t>(
         localindex.ptr().get(),
         size_,
         length());
@@ -968,7 +968,7 @@ namespace awkward {
       }
       IndexOf<int64_t> toindex(size);
       IndexOf<int64_t> fromindex(size);
-      struct Error err = awkward_regulararray_combinations_64(
+      struct Error err = kernel::regulararray_combinations<int64_t>(
         tocarryraw.data(),
         toindex.ptr().get(),
         fromindex.ptr().get(),

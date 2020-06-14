@@ -1368,7 +1368,7 @@ namespace awkward {
       Index64 starts(offsets_.length() - 1);
       Index64 stops(offsets_.length() - 1);
 
-      struct Error err1 = awkward_index_rpad_and_clip_axis1_64(
+      struct Error err1 = kernel::index_rpad_and_clip_axis1<int64_t>(
         starts.ptr().get(),
         stops.ptr().get(),
         target,

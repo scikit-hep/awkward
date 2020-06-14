@@ -414,7 +414,7 @@ namespace awkward {
     }
     else {
       Index8 out(index_.length());
-      struct Error err = awkward_zero_mask8(
+      struct Error err = kernel::zero_mask<int8_t>(
         out.ptr().get(),
         index_.length());
       util::handle_error(err, classname(), identities_.get());
@@ -1407,7 +1407,7 @@ namespace awkward {
     Index64 index(theirlength + mylength);
 
     ContentPtr content = other.get()->merge(content_);
-    struct Error err1 = awkward_indexedarray_fill_to64_count(
+    struct Error err1 = kernel::indexedarray_fill_count<int64_t>(
       index.ptr().get(),
       0,
       theirlength,
@@ -1416,7 +1416,7 @@ namespace awkward {
 
     int64_t mycontentlength = content_.get()->length();
     if (std::is_same<T, int32_t>::value) {
-      struct Error err2 = awkward_indexedarray_fill_to64_from32(
+      struct Error err2 = kernel::indexedarray_fill<int32_t, int64_t>(
         index.ptr().get(),
         theirlength,
         reinterpret_cast<int32_t*>(index_.ptr().get()),
@@ -1426,7 +1426,7 @@ namespace awkward {
       util::handle_error(err2, classname(), identities_.get());
     }
     else if (std::is_same<T, uint32_t>::value) {
-      struct Error err2 = awkward_indexedarray_fill_to64_fromU32(
+      struct Error err2 = kernel::indexedarray_fill<uint32_t, int64_t>(
         index.ptr().get(),
         theirlength,
         reinterpret_cast<uint32_t*>(index_.ptr().get()),
@@ -1436,7 +1436,7 @@ namespace awkward {
       util::handle_error(err2, classname(), identities_.get());
     }
     if (std::is_same<T, int64_t>::value) {
-      struct Error err2 = awkward_indexedarray_fill_to64_from64(
+      struct Error err2 = kernel::indexedarray_fill<int64_t, int64_t>(
         index.ptr().get(),
         theirlength,
         reinterpret_cast<int64_t*>(index_.ptr().get()),
@@ -1488,7 +1488,7 @@ namespace awkward {
     Index64 index(mylength + theirlength);
 
     if (std::is_same<T, int32_t>::value) {
-      struct Error err = awkward_indexedarray_fill_to64_from32(
+      struct Error err = kernel::indexedarray_fill<int32_t, int64_t>(
         index.ptr().get(),
         0,
         reinterpret_cast<int32_t*>(index_.ptr().get()),
@@ -1498,7 +1498,7 @@ namespace awkward {
       util::handle_error(err, classname(), identities_.get());
     }
     else if (std::is_same<T, uint32_t>::value) {
-      struct Error err = awkward_indexedarray_fill_to64_fromU32(
+      struct Error err = kernel::indexedarray_fill<uint32_t, int64_t>(
         index.ptr().get(),
         0,
         reinterpret_cast<uint32_t*>(index_.ptr().get()),
@@ -1508,7 +1508,7 @@ namespace awkward {
       util::handle_error(err, classname(), identities_.get());
     }
     else if (std::is_same<T, int64_t>::value) {
-      struct Error err = awkward_indexedarray_fill_to64_from64(
+      struct Error err = kernel::indexedarray_fill<int64_t, int64_t>(
         index.ptr().get(),
         0,
         reinterpret_cast<int64_t*>(index_.ptr().get()),
@@ -1542,7 +1542,7 @@ namespace awkward {
         dynamic_cast<IndexedArray32*>(replaced_other.get())) {
       content = content_.get()->merge(rawother->content());
       Index32 other_index = rawother->index();
-      struct Error err = awkward_indexedarray_fill_to64_from32(
+      struct Error err = kernel::indexedarray_fill<int32_t, int64_t>(
         index.ptr().get(),
         mylength,
         other_index.ptr().get(),
@@ -1557,7 +1557,7 @@ namespace awkward {
              dynamic_cast<IndexedArrayU32*>(replaced_other.get())) {
       content = content_.get()->merge(rawother->content());
       IndexU32 other_index = rawother->index();
-      struct Error err = awkward_indexedarray_fill_to64_fromU32(
+      struct Error err = kernel::indexedarray_fill<uint32_t, int64_t>(
         index.ptr().get(),
         mylength,
         other_index.ptr().get(),
@@ -1572,7 +1572,7 @@ namespace awkward {
              dynamic_cast<IndexedArray64*>(replaced_other.get())) {
       content = content_.get()->merge(rawother->content());
       Index64 other_index = rawother->index();
-      struct Error err = awkward_indexedarray_fill_to64_from64(
+      struct Error err = kernel::indexedarray_fill<int64_t, int64_t>(
         index.ptr().get(),
         mylength,
         other_index.ptr().get(),
@@ -1587,7 +1587,7 @@ namespace awkward {
              dynamic_cast<IndexedOptionArray32*>(replaced_other.get())) {
       content = content_.get()->merge(rawother->content());
       Index32 other_index = rawother->index();
-      struct Error err = awkward_indexedarray_fill_to64_from32(
+      struct Error err = kernel::indexedarray_fill<int32_t, int64_t>(
         index.ptr().get(),
         mylength,
         other_index.ptr().get(),
@@ -1603,7 +1603,7 @@ namespace awkward {
              dynamic_cast<IndexedOptionArray64*>(replaced_other.get())) {
       content = content_.get()->merge(rawother->content());
       Index64 other_index = rawother->index();
-      struct Error err = awkward_indexedarray_fill_to64_from64(
+      struct Error err = kernel::indexedarray_fill<int64_t, int64_t>(
         index.ptr().get(),
         mylength,
         other_index.ptr().get(),
@@ -1617,7 +1617,7 @@ namespace awkward {
     }
     else {
       content = content_.get()->merge(replaced_other);
-      struct Error err = awkward_indexedarray_fill_to64_count(
+      struct Error err = kernel::indexedarray_fill_count<int64_t>(
         index.ptr().get(),
         mylength,
         theirlength,
@@ -1758,7 +1758,7 @@ namespace awkward {
         Index8 mask = bytemask();
         Index64 index(mask.length());
         struct Error err =
-          awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_64(
+          kernel::IndexedOptionArray_rpad_and_clip_mask_axis1<int64_t>(
           index.ptr().get(),
           mask.ptr().get(),
           mask.length());
@@ -1798,7 +1798,7 @@ namespace awkward {
         Index8 mask = bytemask();
         Index64 index(mask.length());
         struct Error err =
-          awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_64(
+          kernel::IndexedOptionArray_rpad_and_clip_mask_axis1<int64_t>(
           index.ptr().get(),
           mask.ptr().get(),
           mask.length());

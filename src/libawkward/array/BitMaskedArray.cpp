@@ -234,7 +234,7 @@ namespace awkward {
   const Index8
   BitMaskedArray::bytemask() const {
     Index8 bytemask(mask_.length() * 8);
-    struct Error err = awkward_bitmaskedarray_to_bytemaskedarray(
+    struct Error err = kernel::bitmaskedarray_to_bytemaskedarray(
       bytemask.ptr().get(),
       mask_.ptr().get(),
       mask_.offset(),
@@ -268,7 +268,7 @@ namespace awkward {
   const std::shared_ptr<ByteMaskedArray>
   BitMaskedArray::toByteMaskedArray() const {
     Index8 bytemask(mask_.length() * 8);
-    struct Error err = awkward_bitmaskedarray_to_bytemaskedarray(
+    struct Error err = kernel::bitmaskedarray_to_bytemaskedarray(
       bytemask.ptr().get(),
       mask_.ptr().get(),
       mask_.offset(),
@@ -287,7 +287,7 @@ namespace awkward {
   const std::shared_ptr<IndexedOptionArray64>
   BitMaskedArray::toIndexedOptionArray64() const {
     Index64 index(mask_.length() * 8);
-    struct Error err = awkward_bitmaskedarray_to_indexedoptionarray_64(
+    struct Error err = kernel::bitmaskedarray_to_indexedoptionarray<int64_t>(
       index.ptr().get(),
       mask_.ptr().get(),
       mask_.offset(),

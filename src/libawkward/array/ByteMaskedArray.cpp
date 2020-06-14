@@ -234,7 +234,7 @@ namespace awkward {
     }
 
     Index8 nextmask(length());
-    struct Error err = awkward_bytemaskedarray_overlay_mask8(
+    struct Error err = kernel::bytemaskedarray_overlay_mask<int8_t>(
       nextmask.ptr().get(),
       mask.ptr().get(),
       mask.offset(),
@@ -851,7 +851,7 @@ namespace awkward {
       Index8 mask = bytemask();
       Index64 index(mask.length());
       struct Error err =
-        awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_64(
+        kernel::IndexedOptionArray_rpad_and_clip_mask_axis1<int64_t>(
         index.ptr().get(),
         mask.ptr().get(),
         mask.length());
@@ -886,7 +886,7 @@ namespace awkward {
       Index8 mask = bytemask();
       Index64 index(mask.length());
       struct Error err =
-        awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_64(
+        kernel::IndexedOptionArray_rpad_and_clip_mask_axis1<int64_t>(
         index.ptr().get(),
         mask.ptr().get(),
         mask.length());

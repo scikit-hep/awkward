@@ -172,7 +172,7 @@ namespace awkward {
   const Index8
   UnmaskedArray::bytemask() const {
     Index8 out(length());
-    struct Error err = awkward_zero_mask8(
+    struct Error err = kernel::zero_mask<int8_t>(
       out.ptr().get(),
       length());
     util::handle_error(err, classname(), identities_.get());

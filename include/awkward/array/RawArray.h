@@ -898,7 +898,7 @@ namespace awkward {
         throw std::invalid_argument("axis exceeds the depth of this array");
       }
       Index64 index(target);
-      struct Error err = awkward_index_rpad_and_clip_axis0_64(
+      struct Error err = kernel::index_rpad_and_clip_axis0<int64_t>(
         index.ptr().get(),
         target,
         length());

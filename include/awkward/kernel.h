@@ -12,269 +12,6 @@ namespace kernel {
 
   template <typename T>
   ERROR
-  listarray_num_64(
-    int64_t* tonum,
-    const T* fromstarts,
-    int64_t startsoffset,
-    const T* fromstops,
-    int64_t stopsoffset,
-    int64_t length  ,
-    KernelsLib ptr_lib = cpu_kernels);
-
-  
-  template <typename T>
-  ERROR
-  listoffsetarray_flatten_offsets_64(
-    int64_t* tooffsets,
-    const T* outeroffsets,
-    int64_t outeroffsetsoffset,
-    int64_t outeroffsetslen,
-    const int64_t* inneroffsets,
-    int64_t inneroffsetsoffset,
-    int64_t inneroffsetslen  ,
-    KernelsLib ptr_lib = cpu_kernels);
-
-  
-  template <typename T>
-  ERROR
-  indexedarray_flatten_none2empty_64(
-    int64_t* outoffsets,
-    const T* outindex,
-    int64_t outindexoffset,
-    int64_t outindexlength,
-    const int64_t* offsets,
-    int64_t offsetsoffset,
-    int64_t offsetslength  ,
-    KernelsLib ptr_lib = cpu_kernels);
-
-  
-  template <typename T, typename I>
-  ERROR
-  unionarray_flatten_length_64(
-    int64_t* total_length,
-    const T* fromtags,
-    int64_t fromtagsoffset,
-    const I* fromindex,
-    int64_t fromindexoffset,
-    int64_t length,
-    int64_t** offsetsraws,
-    int64_t* offsetsoffsets  ,
-    KernelsLib ptr_lib = cpu_kernels);
-
-  
-  template <typename T, typename I>
-  ERROR
-  unionarray_flatten_combine_64(
-    int8_t* totags,
-    int64_t* toindex,
-    int64_t* tooffsets,
-    const T* fromtags,
-    int64_t fromtagsoffset,
-    const I* fromindex,
-    int64_t fromindexoffset,
-    int64_t length,
-    int64_t** offsetsraws,
-    int64_t* offsetsoffsets  ,
-    KernelsLib ptr_lib = cpu_kernels);
-
-  
-  template <typename T>
-  ERROR
-  indexedarray_flatten_nextcarry_64(
-    int64_t* tocarry,
-    const T* fromindex,
-    int64_t indexoffset,
-    int64_t lenindex,
-    int64_t lencontent  ,
-    KernelsLib ptr_lib = cpu_kernels);
-
-  template <typename T>
-  ERROR
-  indexedarray_overlay_mask8_to64(
-    int64_t* toindex,
-    const int8_t* mask,
-    int64_t maskoffset,
-    const T* fromindex,
-    int64_t indexoffset,
-    int64_t length  ,
-    KernelsLib ptr_lib = cpu_kernels);
-
-  
-  template <typename T>
-  ERROR
-  indexedarray_mask8(
-    int8_t* tomask,
-    const T* fromindex,
-    int64_t indexoffset,
-    int64_t length  ,
-    KernelsLib ptr_lib = cpu_kernels);
-
-  
-  template <typename T>
-  ERROR
-  indexedarray_simplify32_to64(
-    int64_t* toindex,
-    const T* outerindex,
-    int64_t outeroffset,
-    int64_t outerlength,
-    const int32_t* innerindex,
-    int64_t inneroffset,
-    int64_t innerlength  ,
-    KernelsLib ptr_lib = cpu_kernels);
-
-  
-  template <typename T>
-  ERROR
-  indexedarray_simplifyU32_to64(
-    int64_t* toindex,
-    const T* outerindex,
-    int64_t outeroffset,
-    int64_t outerlength,
-    const uint32_t* innerindex,
-    int64_t inneroffset,
-    int64_t innerlength  ,
-    KernelsLib ptr_lib = cpu_kernels);
-
-  
-  template <typename T>
-  ERROR
-  indexedarray_simplify64_to64(
-    int64_t* toindex,
-    const T* outerindex,
-    int64_t outeroffset,
-    int64_t outerlength,
-    const int64_t* innerindex,
-    int64_t inneroffset,
-    int64_t innerlength  ,
-    KernelsLib ptr_lib = cpu_kernels);
-  
-  template <typename T>
-  ERROR
-  listarray_compact_offsets64(
-    int64_t* tooffsets,
-    const T* fromstarts,
-    const T* fromstops,
-    int64_t startsoffset,
-    int64_t stopsoffset,
-    int64_t length  ,
-    KernelsLib ptr_lib = cpu_kernels);
-
-  
-  template <typename T>
-  ERROR
-  listoffsetarray_compact_offsets64(
-    int64_t* tooffsets,
-    const T* fromoffsets,
-    int64_t offsetsoffset,
-    int64_t length  ,
-    KernelsLib ptr_lib = cpu_kernels);
-
-  
-  template <typename T>
-  ERROR
-  listarray_broadcast_tooffsets64(
-    int64_t* tocarry,
-    const int64_t* fromoffsets,
-    int64_t offsetsoffset,
-    int64_t offsetslength,
-    const T* fromstarts,
-    int64_t startsoffset,
-    const T* fromstops,
-    int64_t stopsoffset,
-    int64_t lencontent  ,
-    KernelsLib ptr_lib = cpu_kernels);
-
-  
-  template <typename T>
-  ERROR
-  listoffsetarray_toRegularArray(
-    int64_t* size,
-    const T* fromoffsets,
-    int64_t offsetsoffset,
-    int64_t offsetslength  ,
-    KernelsLib ptr_lib = cpu_kernels);
-
-  
-  template <typename T, typename I>
-  ERROR
-  unionarray_simplify8_32_to8_64(
-    int8_t* totags,
-    int64_t* toindex,
-    const T* outertags,
-    int64_t outertagsoffset,
-    const I* outerindex,
-    int64_t outerindexoffset,
-    const int8_t* innertags,
-    int64_t innertagsoffset,
-    const int32_t* innerindex,
-    int64_t innerindexoffset,
-    int64_t towhich,
-    int64_t innerwhich,
-    int64_t outerwhich,
-    int64_t length,
-    int64_t base  ,
-    KernelsLib ptr_lib = cpu_kernels);
-
-  
-  template <typename T, typename I>
-  ERROR
-  unionarray_simplify8_U32_to8_64(
-    int8_t* totags,
-    int64_t* toindex,
-    const T* outertags,
-    int64_t outertagsoffset,
-    const I* outerindex,
-    int64_t outerindexoffset,
-    const int8_t* innertags,
-    int64_t innertagsoffset,
-    const uint32_t* innerindex,
-    int64_t innerindexoffset,
-    int64_t towhich,
-    int64_t innerwhich,
-    int64_t outerwhich,
-    int64_t length,
-    int64_t base  ,
-    KernelsLib ptr_lib = cpu_kernels);
-
-  
-  template <typename T, typename I>
-  ERROR
-  unionarray_simplify8_64_to8_64(
-    int8_t* totags,
-    int64_t* toindex,
-    const T* outertags,
-    int64_t outertagsoffset,
-    const I* outerindex,
-    int64_t outerindexoffset,
-    const int8_t* innertags,
-    int64_t innertagsoffset,
-    const int64_t* innerindex,
-    int64_t innerindexoffset,
-    int64_t towhich,
-    int64_t innerwhich,
-    int64_t outerwhich,
-    int64_t length,
-    int64_t base  ,
-    KernelsLib ptr_lib = cpu_kernels);
-
-  
-  template <typename T, typename I>
-  ERROR
-  unionarray_simplify_one_to8_64(
-    int8_t* totags,
-    int64_t* toindex,
-    const T* fromtags,
-    int64_t fromtagsoffset,
-    const I* fromindex,
-    int64_t fromindexoffset,
-    int64_t towhich,
-    int64_t fromwhich,
-    int64_t length,
-    int64_t base  ,
-    KernelsLib ptr_lib = cpu_kernels);
-
-  template <typename T>
-  ERROR
   indexedarray_reduce_next_64(
     int64_t* nextcarry,
     int64_t* nextparents,
@@ -283,167 +20,6 @@ namespace kernel {
     int64_t indexoffset,
     int64_t* parents,
     int64_t parentsoffset,
-    int64_t length  ,
-    KernelsLib ptr_lib = cpu_kernels);
-
-  
-  template <typename T>
-  ERROR
-  UnionArray_fillna_64(
-    int64_t* toindex,
-    const T* fromindex,
-    int64_t offset,
-    int64_t length  ,
-    KernelsLib ptr_lib = cpu_kernels);
-
-  
-  template <typename T>
-  ERROR
-  ListArray_min_range(
-    int64_t* tomin,
-    const T* fromstarts,
-    const T* fromstops,
-    int64_t lenstarts,
-    int64_t startsoffset,
-    int64_t stopsoffset  ,
-    KernelsLib ptr_lib = cpu_kernels);
-
-  
-  template <typename T>
-  ERROR
-  ListArray_rpad_axis1_64(
-    int64_t* toindex,
-    const T* fromstarts,
-    const T* fromstops,
-    T* tostarts,
-    T* tostops,
-    int64_t target,
-    int64_t length,
-    int64_t startsoffset,
-    int64_t stopsoffset  ,
-    KernelsLib ptr_lib = cpu_kernels);
-
-  
-  template <typename T>
-  ERROR
-  ListArray_rpad_and_clip_length_axis1(
-    int64_t* tolength,
-    const T* fromstarts,
-    const T* fromstops,
-    int64_t target,
-    int64_t lenstarts,
-    int64_t startsoffset,
-    int64_t stopsoffset  ,
-    KernelsLib ptr_lib = cpu_kernels);
-
-  
-  template <typename T>
-  ERROR
-  ListOffsetArray_rpad_length_axis1(
-    T* tooffsets,
-    const T* fromoffsets,
-    int64_t offsetsoffset,
-    int64_t fromlength,
-    int64_t target,
-    int64_t* tolength  ,
-    KernelsLib ptr_lib = cpu_kernels);
-
-  
-  template <typename T>
-  ERROR
-  ListOffsetArray_rpad_axis1_64(
-    int64_t* toindex,
-    const T* fromoffsets,
-    int64_t offsetsoffset,
-    int64_t fromlength,
-    int64_t target  ,
-    KernelsLib ptr_lib = cpu_kernels);
-
-  
-  template <typename T>
-  ERROR
-  ListOffsetArray_rpad_and_clip_axis1_64(
-    int64_t* toindex,
-    const T* fromoffsets,
-    int64_t offsetsoffset,
-    int64_t length,
-    int64_t target  ,
-    KernelsLib ptr_lib = cpu_kernels);
-
-  
-  template <typename T>
-  ERROR
-  listarray_validity(
-    const T* starts,
-    int64_t startsoffset,
-    const T* stops,
-    int64_t stopsoffset,
-    int64_t length,
-    int64_t lencontent  ,
-    KernelsLib ptr_lib = cpu_kernels);
-
-  
-  template <typename T>
-  ERROR
-  indexedarray_validity(
-    const T* index,
-    int64_t indexoffset,
-    int64_t length,
-    int64_t lencontent,
-    bool isoption  ,
-    KernelsLib ptr_lib = cpu_kernels);
-
-  
-  template <typename T, typename I>
-  ERROR
-  unionarray_validity(
-    const T* tags,
-    int64_t tagsoffset,
-    const I* index,
-    int64_t indexoffset,
-    int64_t length,
-    int64_t numcontents,
-    const int64_t* lencontents  ,
-    KernelsLib ptr_lib = cpu_kernels);
-
-  
-  template <typename T>
-  ERROR
-  listarray_localindex_64(
-    int64_t* toindex,
-    const T* offsets,
-    int64_t offsetsoffset,
-    int64_t length  ,
-    KernelsLib ptr_lib = cpu_kernels);
-
-  
-  template <typename T>
-  ERROR
-  listarray_combinations_length_64(
-    int64_t* totallen,
-    int64_t* tooffsets,
-    int64_t n,
-    bool replacement,
-    const T* starts,
-    int64_t startsoffset,
-    const T* stops,
-    int64_t stopsoffset,
-    int64_t length  ,
-    KernelsLib ptr_lib = cpu_kernels);
-
-  
-  template <typename T>
-  ERROR
-  listarray_combinations_64(
-    int64_t** tocarry,
-    int64_t* toindex,
-    int64_t* fromindex,
-    int64_t n,
-    bool replacement,
-    const T* starts,
-    int64_t startsoffset,
-    const T* stops,
-    int64_t stopsoffset,
     int64_t length  ,
     KernelsLib ptr_lib = cpu_kernels);
 
@@ -1226,6 +802,602 @@ namespace kernel {
     int64_t fromoffset,
     int64_t fromlength,
     int64_t tolength);
+
+  /// @brief Operations Kernels
+  template <typename T>
+  ERROR
+  listarray_num_64(
+    int64_t* tonum,
+    const T* fromstarts,
+    int64_t startsoffset,
+    const T* fromstops,
+    int64_t stopsoffset,
+    int64_t length  ,
+    KernelsLib ptr_lib = cpu_kernels);
+
+  template <typename T>
+  ERROR regulararray_num(
+    T* tonum,
+    int64_t size,
+    int64_t length);
+
+  template <typename T>
+  ERROR
+  listoffsetarray_flatten_offsets_64(
+    int64_t* tooffsets,
+    const T* outeroffsets,
+    int64_t outeroffsetsoffset,
+    int64_t outeroffsetslen,
+    const int64_t* inneroffsets,
+    int64_t inneroffsetsoffset,
+    int64_t inneroffsetslen  ,
+    KernelsLib ptr_lib = cpu_kernels);
+
+
+  template <typename T>
+  ERROR
+  indexedarray_flatten_none2empty_64(
+    int64_t* outoffsets,
+    const T* outindex,
+    int64_t outindexoffset,
+    int64_t outindexlength,
+    const int64_t* offsets,
+    int64_t offsetsoffset,
+    int64_t offsetslength  ,
+    KernelsLib ptr_lib = cpu_kernels);
+
+
+  template <typename T, typename I>
+  ERROR
+  unionarray_flatten_length_64(
+    int64_t* total_length,
+    const T* fromtags,
+    int64_t fromtagsoffset,
+    const I* fromindex,
+    int64_t fromindexoffset,
+    int64_t length,
+    int64_t** offsetsraws,
+    int64_t* offsetsoffsets  ,
+    KernelsLib ptr_lib = cpu_kernels);
+
+
+  template <typename T, typename I>
+  ERROR
+  unionarray_flatten_combine_64(
+    int8_t* totags,
+    int64_t* toindex,
+    int64_t* tooffsets,
+    const T* fromtags,
+    int64_t fromtagsoffset,
+    const I* fromindex,
+    int64_t fromindexoffset,
+    int64_t length,
+    int64_t** offsetsraws,
+    int64_t* offsetsoffsets  ,
+    KernelsLib ptr_lib = cpu_kernels);
+
+
+  template <typename T>
+  ERROR
+  indexedarray_flatten_nextcarry_64(
+    int64_t* tocarry,
+    const T* fromindex,
+    int64_t indexoffset,
+    int64_t lenindex,
+    int64_t lencontent  ,
+    KernelsLib ptr_lib = cpu_kernels);
+
+  template <typename T>
+  ERROR
+  indexedarray_overlay_mask8_to64(
+    int64_t* toindex,
+    const int8_t* mask,
+    int64_t maskoffset,
+    const T* fromindex,
+    int64_t indexoffset,
+    int64_t length  ,
+    KernelsLib ptr_lib = cpu_kernels);
+
+
+  template <typename T>
+  ERROR
+  indexedarray_mask8(
+    int8_t* tomask,
+    const T* fromindex,
+    int64_t indexoffset,
+    int64_t length  ,
+    KernelsLib ptr_lib = cpu_kernels);
+
+  template <typename M>
+  ERROR bytemaskedarray_mask(
+    M* tomask,
+    const M* frommask,
+    int64_t maskoffset,
+    int64_t length,
+    bool validwhen);
+
+  template <typename M>
+  ERROR zero_mask(
+    M* tomask,
+    int64_t length);
+
+  template <typename T>
+  ERROR
+  indexedarray_simplify32_to64(
+    int64_t* toindex,
+    const T* outerindex,
+    int64_t outeroffset,
+    int64_t outerlength,
+    const int32_t* innerindex,
+    int64_t inneroffset,
+    int64_t innerlength  ,
+    KernelsLib ptr_lib = cpu_kernels);
+
+
+  template <typename T>
+  ERROR
+  indexedarray_simplifyU32_to64(
+    int64_t* toindex,
+    const T* outerindex,
+    int64_t outeroffset,
+    int64_t outerlength,
+    const uint32_t* innerindex,
+    int64_t inneroffset,
+    int64_t innerlength  ,
+    KernelsLib ptr_lib = cpu_kernels);
+
+
+  template <typename T>
+  ERROR
+  indexedarray_simplify64_to64(
+    int64_t* toindex,
+    const T* outerindex,
+    int64_t outeroffset,
+    int64_t outerlength,
+    const int64_t* innerindex,
+    int64_t inneroffset,
+    int64_t innerlength  ,
+    KernelsLib ptr_lib = cpu_kernels);
+
+  template <typename T>
+  ERROR
+  listarray_compact_offsets64(
+    int64_t* tooffsets,
+    const T* fromstarts,
+    const T* fromstops,
+    int64_t startsoffset,
+    int64_t stopsoffset,
+    int64_t length  ,
+    KernelsLib ptr_lib = cpu_kernels);
+
+
+  template <typename T>
+  ERROR
+  listoffsetarray_compact_offsets64(
+    int64_t* tooffsets,
+    const T* fromoffsets,
+    int64_t offsetsoffset,
+    int64_t length  ,
+    KernelsLib ptr_lib = cpu_kernels);
+
+
+  template <typename T>
+  ERROR
+  listarray_broadcast_tooffsets64(
+    int64_t* tocarry,
+    const int64_t* fromoffsets,
+    int64_t offsetsoffset,
+    int64_t offsetslength,
+    const T* fromstarts,
+    int64_t startsoffset,
+    const T* fromstops,
+    int64_t stopsoffset,
+    int64_t lencontent  ,
+    KernelsLib ptr_lib = cpu_kernels);
+
+  template <typename T>
+  ERROR regulararray_broadcast_tooffsets(
+    const T* fromoffsets,
+    int64_t offsetsoffset,
+    int64_t offsetslength,
+    int64_t size);
+
+  template <typename T>
+  ERROR regulararray_broadcast_tooffsets_size1(
+    T* tocarry,
+    const T* fromoffsets,
+    int64_t offsetsoffset,
+    int64_t offsetslength);
+
+  template <typename T>
+  ERROR
+  listoffsetarray_toRegularArray(
+    int64_t* size,
+    const T* fromoffsets,
+    int64_t offsetsoffset,
+    int64_t offsetslength  ,
+    KernelsLib ptr_lib = cpu_kernels);
+
+  template <typename FROM, typename TO>
+  ERROR numpyarray_fill(
+    TO* toptr,
+    int64_t tooffset,
+    const FROM* fromptr,
+    int64_t fromoffset,
+    int64_t length);
+
+  template <typename TO>
+  ERROR numpyarray_fill_frombool(
+    TO* toptr,
+    int64_t tooffset,
+    const bool* fromptr,
+    int64_t fromoffset,
+    int64_t length);
+
+  ERROR numpyarray_fill_to64_fromU64(
+    int64_t* toptr,
+    int64_t tooffset,
+    const uint64_t* fromptr,
+    int64_t fromoffset,
+    int64_t length);
+
+  template <typename FROM, typename TO>
+  ERROR indexedarray_fill(
+    TO* toindex,
+    int64_t toindexoffset,
+    const FROM* fromindex,
+    int64_t fromindexoffset,
+    int64_t length,
+    int64_t base);
+
+  template <typename TO>
+  ERROR indexedarray_fill_count(
+    TO* toindex,
+    int64_t toindexoffset,
+    int64_t length,
+    int64_t base);
+
+  template <typename FROM, typename TO>
+  ERROR unionarray_filltags(
+    TO* totags,
+    int64_t totagsoffset,
+    const FROM* fromtags,
+    int64_t fromtagsoffset,
+    int64_t length,
+    int64_t base);
+
+  template <typename FROM, typename TO>
+  ERROR unionarray_fillindex(
+    TO* toindex,
+    int64_t toindexoffset,
+    const FROM* fromindex,
+    int64_t fromindexoffset,
+    int64_t length);
+
+  template <typename TO>
+  ERROR unionarray_filltags_const(
+    TO* totags,
+    int64_t totagsoffset,
+    int64_t length,
+    int64_t base);
+
+  template <typename TO>
+  ERROR unionarray_fillindex_count(
+    TO* toindex,
+    int64_t toindexoffset,
+    int64_t length);
+
+  template <typename T, typename I>
+  ERROR
+  unionarray_simplify8_32_to8_64(
+    int8_t* totags,
+    int64_t* toindex,
+    const T* outertags,
+    int64_t outertagsoffset,
+    const I* outerindex,
+    int64_t outerindexoffset,
+    const int8_t* innertags,
+    int64_t innertagsoffset,
+    const int32_t* innerindex,
+    int64_t innerindexoffset,
+    int64_t towhich,
+    int64_t innerwhich,
+    int64_t outerwhich,
+    int64_t length,
+    int64_t base  ,
+    KernelsLib ptr_lib = cpu_kernels);
+
+
+  template <typename T, typename I>
+  ERROR
+  unionarray_simplify8_U32_to8_64(
+    int8_t* totags,
+    int64_t* toindex,
+    const T* outertags,
+    int64_t outertagsoffset,
+    const I* outerindex,
+    int64_t outerindexoffset,
+    const int8_t* innertags,
+    int64_t innertagsoffset,
+    const uint32_t* innerindex,
+    int64_t innerindexoffset,
+    int64_t towhich,
+    int64_t innerwhich,
+    int64_t outerwhich,
+    int64_t length,
+    int64_t base  ,
+    KernelsLib ptr_lib = cpu_kernels);
+
+
+  template <typename T, typename I>
+  ERROR
+  unionarray_simplify8_64_to8_64(
+    int8_t* totags,
+    int64_t* toindex,
+    const T* outertags,
+    int64_t outertagsoffset,
+    const I* outerindex,
+    int64_t outerindexoffset,
+    const int8_t* innertags,
+    int64_t innertagsoffset,
+    const int64_t* innerindex,
+    int64_t innerindexoffset,
+    int64_t towhich,
+    int64_t innerwhich,
+    int64_t outerwhich,
+    int64_t length,
+    int64_t base  ,
+    KernelsLib ptr_lib = cpu_kernels);
+
+
+  template <typename T, typename I>
+  ERROR
+  unionarray_simplify_one_to8_64(
+    int8_t* totags,
+    int64_t* toindex,
+    const T* fromtags,
+    int64_t fromtagsoffset,
+    const I* fromindex,
+    int64_t fromindexoffset,
+    int64_t towhich,
+    int64_t fromwhich,
+    int64_t length,
+    int64_t base  ,
+    KernelsLib ptr_lib = cpu_kernels);
+
+  template <typename T>
+  ERROR
+  listarray_validity(
+    const T* starts,
+    int64_t startsoffset,
+    const T* stops,
+    int64_t stopsoffset,
+    int64_t length,
+    int64_t lencontent  ,
+    KernelsLib ptr_lib = cpu_kernels);
+
+
+  template <typename T>
+  ERROR
+  indexedarray_validity(
+    const T* index,
+    int64_t indexoffset,
+    int64_t length,
+    int64_t lencontent,
+    bool isoption  ,
+    KernelsLib ptr_lib = cpu_kernels);
+
+
+  template <typename T, typename I>
+  ERROR
+  unionarray_validity(
+    const T* tags,
+    int64_t tagsoffset,
+    const I* index,
+    int64_t indexoffset,
+    int64_t length,
+    int64_t numcontents,
+    const int64_t* lencontents  ,
+    KernelsLib ptr_lib = cpu_kernels);
+
+  template <typename T>
+  ERROR
+  UnionArray_fillna_64(
+    int64_t* toindex,
+    const T* fromindex,
+    int64_t offset,
+    int64_t length  ,
+    KernelsLib ptr_lib = cpu_kernels);
+
+  template <typename T>
+  ERROR IndexedOptionArray_rpad_and_clip_mask_axis1(
+    T* toindex,
+    const int8_t* frommask,
+    int64_t length);
+
+  template <typename T>
+  ERROR index_rpad_and_clip_axis0(
+    T* toindex,
+    int64_t target,
+    int64_t length);
+
+  template <typename T>
+  ERROR index_rpad_and_clip_axis1(
+    T* tostarts,
+    T* tostops,
+    int64_t target,
+    int64_t length);
+
+  template <typename T>
+  ERROR RegularArray_rpad_and_clip_axis1(
+    T* toindex,
+    int64_t target,
+    int64_t size,
+    int64_t length);
+
+  template <typename T>
+  ERROR
+  ListArray_min_range(
+    int64_t* tomin,
+    const T* fromstarts,
+    const T* fromstops,
+    int64_t lenstarts,
+    int64_t startsoffset,
+    int64_t stopsoffset  ,
+    KernelsLib ptr_lib = cpu_kernels);
+
+  template <typename T>
+  ERROR
+  ListArray_rpad_and_clip_length_axis1(
+    int64_t* tolength,
+    const T* fromstarts,
+    const T* fromstops,
+    int64_t target,
+    int64_t lenstarts,
+    int64_t startsoffset,
+    int64_t stopsoffset  ,
+    KernelsLib ptr_lib = cpu_kernels);
+
+  template <typename T>
+  ERROR
+  ListArray_rpad_axis1_64(
+    int64_t* toindex,
+    const T* fromstarts,
+    const T* fromstops,
+    T* tostarts,
+    T* tostops,
+    int64_t target,
+    int64_t length,
+    int64_t startsoffset,
+    int64_t stopsoffset  ,
+    KernelsLib ptr_lib = cpu_kernels);
+
+  template <typename T>
+  ERROR
+  ListOffsetArray_rpad_and_clip_axis1_64(
+    int64_t* toindex,
+    const T* fromoffsets,
+    int64_t offsetsoffset,
+    int64_t length,
+    int64_t target  ,
+    KernelsLib ptr_lib = cpu_kernels);
+
+  template <typename T>
+  ERROR
+  ListOffsetArray_rpad_length_axis1(
+    T* tooffsets,
+    const T* fromoffsets,
+    int64_t offsetsoffset,
+    int64_t fromlength,
+    int64_t target,
+    int64_t* tolength  ,
+    KernelsLib ptr_lib = cpu_kernels);
+
+  template <typename T>
+  ERROR
+  ListOffsetArray_rpad_axis1_64(
+    int64_t* toindex,
+    const T* fromoffsets,
+    int64_t offsetsoffset,
+    int64_t fromlength,
+    int64_t target  ,
+    KernelsLib ptr_lib = cpu_kernels);
+
+  template <typename T>
+  ERROR localindex(
+    T* toindex,
+    int64_t length);
+
+  template <typename T>
+  ERROR
+  listarray_localindex_64(
+    int64_t* toindex,
+    const T* offsets,
+    int64_t offsetsoffset,
+    int64_t length  ,
+    KernelsLib ptr_lib = cpu_kernels);
+
+  template <typename T>
+  ERROR regulararray_localindex(
+    T* toindex,
+    int64_t size,
+    int64_t length);
+
+  template <typename T>
+  ERROR combinations(
+    T* toindex,
+    int64_t n,
+    bool replacement,
+    int64_t singlelen);
+
+  template <typename T>
+  ERROR
+  listarray_combinations_length_64(
+    int64_t* totallen,
+    int64_t* tooffsets,
+    int64_t n,
+    bool replacement,
+    const T* starts,
+    int64_t startsoffset,
+    const T* stops,
+    int64_t stopsoffset,
+    int64_t length  ,
+    KernelsLib ptr_lib = cpu_kernels);
+
+  template <typename T>
+  ERROR
+  listarray_combinations_64(
+    int64_t** tocarry,
+    int64_t* toindex,
+    int64_t* fromindex,
+    int64_t n,
+    bool replacement,
+    const T* starts,
+    int64_t startsoffset,
+    const T* stops,
+    int64_t stopsoffset,
+    int64_t length  ,
+    KernelsLib ptr_lib = cpu_kernels);
+
+  template <typename T>
+  ERROR regulararray_combinations(
+    T** tocarry,
+    int64_t* toindex,
+    int64_t* fromindex,
+    int64_t n,
+    bool replacement,
+    int64_t size,
+    int64_t length);
+
+  template <typename M>
+  ERROR bytemaskedarray_overlay_mask(
+    M* tomask,
+    const M* theirmask,
+    int64_t theirmaskoffset,
+    const M* mymask,
+    int64_t mymaskoffset,
+    int64_t length,
+    bool validwhen);
+
+  ERROR bitmaskedarray_to_bytemaskedarray(
+    int8_t* tobytemask,
+    const uint8_t* frombitmask,
+    int64_t bitmaskoffset,
+    int64_t bitmasklength,
+    bool validwhen,
+    bool lsb_order);
+
+  template <typename T>
+  ERROR bitmaskedarray_to_indexedoptionarray(
+    T* toindex,
+    const uint8_t* frombitmask,
+    int64_t bitmaskoffset,
+    int64_t bitmasklength,
+    bool validwhen,
+    bool lsb_order);
+
+
+
 
 };
 
