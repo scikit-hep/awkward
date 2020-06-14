@@ -288,7 +288,7 @@ namespace awkward {
   const IndexOf<int32_t>
   UnionArrayOf<int8_t, int32_t>::sparse_index(int64_t len) {
     IndexOf<int32_t> outindex(len);
-    struct Error err = awkward_carry_arange_32(
+    struct Error err = kernel::carry_arange<int32_t>(
       outindex.ptr().get(),
       len);
     util::handle_error(err, "UnionArray", nullptr);
@@ -299,7 +299,7 @@ namespace awkward {
   const IndexOf<uint32_t>
   UnionArrayOf<int8_t, uint32_t>::sparse_index(int64_t len) {
     IndexOf<uint32_t> outindex(len);
-    struct Error err = awkward_carry_arange_U32(
+    struct Error err = kernel::carry_arange<uint32_t>(
       outindex.ptr().get(),
       len);
     util::handle_error(err, "UnionArray", nullptr);
@@ -310,7 +310,7 @@ namespace awkward {
   const IndexOf<int64_t>
   UnionArrayOf<int8_t, int64_t>::sparse_index(int64_t len) {
     IndexOf<int64_t> outindex(len);
-    struct Error err = awkward_carry_arange_64(
+    struct Error err = kernel::carry_arange<int64_t>(
       outindex.ptr().get(),
       len);
     util::handle_error(err, "UnionArray", nullptr);
@@ -1022,7 +1022,7 @@ namespace awkward {
   UnionArrayOf<T, I>::getitem_range(int64_t start, int64_t stop) const {
     int64_t regular_start = start;
     int64_t regular_stop = stop;
-    awkward_regularize_rangeslice(&regular_start, &regular_stop,
+    kernel::regularize_rangeslice(&regular_start, &regular_stop,
       true, start != Slice::none(), stop != Slice::none(), tags_.length());
     if (identities_.get() != nullptr  &&
         regular_stop > identities_.get()->length()) {

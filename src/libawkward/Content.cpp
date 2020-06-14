@@ -1063,7 +1063,7 @@ namespace awkward {
     Index64 index(missing.index());
     Index64 outindex(index.length()*length);
 
-    struct Error err = awkward_missing_repeat_64(
+    struct Error err = kernel::missing_repeat<int64_t>(
       outindex.ptr().get(),
       index.ptr().get(),
       index.offset(),
@@ -1090,7 +1090,7 @@ namespace awkward {
     }
     Index64 missingindex = missing.index();
     bool same;
-    struct Error err = awkward_slicemissing_check_same(
+    struct Error err = kernel::slicemissing_check_same(
       &same,
       bytemask.ptr().get(),
       bytemask.offset(),

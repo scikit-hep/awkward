@@ -599,7 +599,7 @@ namespace awkward {
       getitem_range(int64_t start, int64_t stop) const override {
       int64_t regular_start = start;
       int64_t regular_stop = stop;
-      awkward_regularize_rangeslice(&regular_start, &regular_stop, true,
+      kernel::regularize_rangeslice(&regular_start, &regular_stop, true,
         start != Slice::none(), stop != Slice::none(), length_);
       if (identities_.get() != nullptr  &&
           regular_stop > identities_.get()->length()) {
@@ -657,7 +657,7 @@ namespace awkward {
       carry(const Index64& carry) const override {
       std::shared_ptr<T> ptr(new T[(size_t)carry.length()],
                              util::array_deleter<T>());
-      struct Error err = awkward_numpyarray_getitem_next_null_64(
+      struct Error err = kernel::numpyarray_getitem_next_null<int64_t>(
         reinterpret_cast<uint8_t*>(ptr.get()),
         reinterpret_cast<uint8_t*>(ptr_.get()),
         carry.length(),
@@ -975,7 +975,7 @@ namespace awkward {
         else if (step == 0) {
           throw std::invalid_argument("slice step must not be 0");
         }
-        awkward_regularize_rangeslice(&start, &stop, step > 0,
+        kernel::regularize_rangeslice(&start, &stop, step > 0,
           range.hasstart(), range.hasstop(), length_);
 
         int64_t numer = std::abs(start - stop);
@@ -1006,7 +1006,7 @@ namespace awkward {
         throw std::runtime_error("array.ndim != 1");
       }
       Index64 flathead = array.ravel();
-      struct Error err = awkward_regularize_arrayslice_64(
+      struct Error err = kernel::regularize_arrayslice<int64_t>(
         flathead.ptr().get(),
         flathead.length(),
         length_);

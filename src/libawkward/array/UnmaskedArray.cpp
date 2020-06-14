@@ -199,7 +199,7 @@ namespace awkward {
   const ContentPtr
   UnmaskedArray::toIndexedOptionArray64() const {
     Index64 index(length());
-    struct Error err = awkward_carry_arange_64(
+    struct Error err = kernel::carry_arange<int64_t>(
       index.ptr().get(),
       length());
     util::handle_error(err, classname(), identities_.get());
@@ -418,7 +418,7 @@ namespace awkward {
   UnmaskedArray::getitem_range(int64_t start, int64_t stop) const {
     int64_t regular_start = start;
     int64_t regular_stop = stop;
-    awkward_regularize_rangeslice(&regular_start, &regular_stop,
+    kernel::regularize_rangeslice(&regular_start, &regular_stop,
       true, start != Slice::none(), stop != Slice::none(), length());
     if (identities_.get() != nullptr  &&
         regular_stop > identities_.get()->length()) {

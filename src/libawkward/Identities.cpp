@@ -240,7 +240,7 @@ namespace awkward {
     IdentitiesOf<T>* rawout = reinterpret_cast<IdentitiesOf<T>*>(out.get());
 
     if (std::is_same<T, int32_t>::value) {
-      struct Error err = awkward_identities32_getitem_carry_64(
+      struct Error err = kernel::identities_getitem_carry<int32_t, int64_t>(
         reinterpret_cast<int32_t*>(rawout->ptr().get()),
         reinterpret_cast<int32_t*>(ptr_.get()),
         carry.ptr().get(),
@@ -251,7 +251,7 @@ namespace awkward {
       util::handle_error(err, classname(), nullptr);
     }
     else if (std::is_same<T, int64_t>::value) {
-      struct Error err = awkward_identities64_getitem_carry_64(
+      struct Error err = kernel::identities_getitem_carry<int64_t, int64_t>(
         reinterpret_cast<int64_t*>(rawout->ptr().get()),
         reinterpret_cast<int64_t*>(ptr_.get()),
         carry.ptr().get(),
@@ -325,7 +325,7 @@ namespace awkward {
   IdentitiesOf<T>::getitem_range(int64_t start, int64_t stop) const {
     int64_t regular_start = start;
     int64_t regular_stop = stop;
-    awkward_regularize_rangeslice(&regular_start, &regular_stop,
+    kernel::regularize_rangeslice(&regular_start, &regular_stop,
       true, start != Slice::none(), stop != Slice::none(), length_);
     return getitem_range_nowrap(regular_start, regular_stop);
   }

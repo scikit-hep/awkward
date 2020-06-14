@@ -497,7 +497,7 @@ namespace awkward {
   RegularArray::getitem_range(int64_t start, int64_t stop) const {
     int64_t regular_start = start;
     int64_t regular_stop = stop;
-    awkward_regularize_rangeslice(&regular_start, &regular_stop,
+    kernel::regularize_rangeslice(&regular_start, &regular_stop,
       true, start != Slice::none(), stop != Slice::none(), length());
     if (identities_.get() != nullptr  &&
         regular_stop > identities_.get()->length()) {
@@ -541,7 +541,7 @@ namespace awkward {
   RegularArray::carry(const Index64& carry) const {
     Index64 nextcarry(carry.length()*size_);
 
-    struct Error err = awkward_regulararray_getitem_carry_64(
+    struct Error err = kernel::regulararray_getitem_carry<int64_t>(
       nextcarry.ptr().get(),
       carry.ptr().get(),
       carry.length(),
@@ -1023,7 +1023,7 @@ namespace awkward {
     Slice nexttail = tail.tail();
     Index64 nextcarry(len);
 
-    struct Error err = awkward_regulararray_getitem_next_at_64(
+    struct Error err = kernel::regulararray_getitem_next_at<int64_t>(
       nextcarry.ptr().get(),
       at.at(),
       len,
@@ -1049,7 +1049,7 @@ namespace awkward {
     int64_t regular_start = range.start();
     int64_t regular_stop = range.stop();
     int64_t regular_step = std::abs(range.step());
-    awkward_regularize_rangeslice(&regular_start,
+    kernel::regularize_rangeslice(&regular_start,
                                   &regular_stop,
                                   range.step() > 0,
                                   range.start() != Slice::none(),
@@ -1073,7 +1073,7 @@ namespace awkward {
 
     Index64 nextcarry(len*nextsize);
 
-    struct Error err = awkward_regulararray_getitem_next_range_64(
+    struct Error err = kernel::regulararray_getitem_next_range<int64_t>(
       nextcarry.ptr().get(),
       regular_start,
       range.step(),
@@ -1095,7 +1095,7 @@ namespace awkward {
       Index64 nextadvanced(len*nextsize);
 
       struct Error err =
-        awkward_regulararray_getitem_next_range_spreadadvanced_64(
+        kernel::regulararray_getitem_next_range_spreadadvanced<int64_t>(
         nextadvanced.ptr().get(),
         advanced.ptr().get(),
         len,
@@ -1120,7 +1120,7 @@ namespace awkward {
     Index64 flathead = array.ravel();
     Index64 regular_flathead(flathead.length());
 
-    struct Error err = awkward_regulararray_getitem_next_array_regularize_64(
+    struct Error err = kernel::regulararray_getitem_next_array_regularize<int64_t>(
       regular_flathead.ptr().get(),
       flathead.ptr().get(),
       flathead.length(),
@@ -1131,7 +1131,7 @@ namespace awkward {
       Index64 nextcarry(len*flathead.length());
       Index64 nextadvanced(len*flathead.length());
 
-      struct Error err = awkward_regulararray_getitem_next_array_64(
+      struct Error err = kernel::regulararray_getitem_next_array<int64_t>(
         nextcarry.ptr().get(),
         nextadvanced.ptr().get(),
         regular_flathead.ptr().get(),
@@ -1152,7 +1152,7 @@ namespace awkward {
       Index64 nextcarry(len);
       Index64 nextadvanced(len);
 
-      struct Error err = awkward_regulararray_getitem_next_array_advanced_64(
+      struct Error err = kernel::regulararray_getitem_next_array_advanced<int64_t>(
         nextcarry.ptr().get(),
         nextadvanced.ptr().get(),
         advanced.ptr().get(),

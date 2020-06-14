@@ -203,7 +203,7 @@ namespace awkward {
   const ContentPtr
   ByteMaskedArray::project() const {
     int64_t numnull;
-    struct Error err1 = awkward_bytemaskedarray_numnull(
+    struct Error err1 = kernel::bytemaskedarray_numnull(
       &numnull,
       mask_.ptr().get(),
       mask_.offset(),
@@ -212,7 +212,7 @@ namespace awkward {
     util::handle_error(err1, classname(), identities_.get());
 
     Index64 nextcarry(length() - numnull);
-    struct Error err2 = awkward_bytemaskedarray_getitem_nextcarry_64(
+    struct Error err2 = kernel::bytemaskedarray_getitem_nextcarry<int64_t>(
       nextcarry.ptr().get(),
       mask_.ptr().get(),
       mask_.offset(),
@@ -290,7 +290,7 @@ namespace awkward {
   const std::shared_ptr<IndexedOptionArray64>
   ByteMaskedArray::toIndexedOptionArray64() const {
     Index64 index(length());
-    struct Error err = awkward_bytemaskedarray_toindexedarray_64(
+    struct Error err = kernel::bytemaskedarray_toindexedarray<int64_t>(
       index.ptr().get(),
       mask_.ptr().get(),
       mask_.offset(),
@@ -545,7 +545,7 @@ namespace awkward {
   ByteMaskedArray::getitem_range(int64_t start, int64_t stop) const {
     int64_t regular_start = start;
     int64_t regular_stop = stop;
-    awkward_regularize_rangeslice(&regular_start, &regular_stop,
+    kernel::regularize_rangeslice(&regular_start, &regular_stop,
       true, start != Slice::none(), stop != Slice::none(), length());
     if (identities_.get() != nullptr  &&
         regular_stop > identities_.get()->length()) {
@@ -641,7 +641,7 @@ namespace awkward {
   const ContentPtr
   ByteMaskedArray::carry(const Index64& carry) const {
     Index8 nextmask(carry.length());
-    struct Error err = awkward_bytemaskedarray_getitem_carry_64(
+    struct Error err = kernel::bytemaskedarray_getitem_carry<int64_t>(
       nextmask.ptr().get(),
       mask_.ptr().get(),
       mask_.offset(),
@@ -918,7 +918,7 @@ namespace awkward {
                                bool mask,
                                bool keepdims) const {
     int64_t numnull;
-    struct Error err1 = awkward_bytemaskedarray_numnull(
+    struct Error err1 = kernel::bytemaskedarray_numnull(
       &numnull,
       mask_.ptr().get(),
       mask_.offset(),
@@ -1138,7 +1138,7 @@ namespace awkward {
 
   const std::pair<Index64, Index64>
   ByteMaskedArray::nextcarry_outindex(int64_t& numnull) const {
-    struct Error err1 = awkward_bytemaskedarray_numnull(
+    struct Error err1 = kernel::bytemaskedarray_numnull(
       &numnull,
       mask_.ptr().get(),
       mask_.offset(),
@@ -1148,7 +1148,7 @@ namespace awkward {
 
     Index64 nextcarry(length() - numnull);
     Index64 outindex(length());
-    struct Error err2 = awkward_bytemaskedarray_getitem_nextcarry_outindex_64(
+    struct Error err2 = kernel::bytemaskedarray_getitem_nextcarry_outindex<int64_t>(
       nextcarry.ptr().get(),
       outindex.ptr().get(),
       mask_.ptr().get(),

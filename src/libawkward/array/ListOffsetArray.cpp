@@ -624,7 +624,7 @@ namespace awkward {
   ListOffsetArrayOf<T>::getitem_range(int64_t start, int64_t stop) const {
     int64_t regular_start = start;
     int64_t regular_stop = stop;
-    awkward_regularize_rangeslice(&regular_start, &regular_stop,
+    kernel::regularize_rangeslice(&regular_start, &regular_stop,
       true, start != Slice::none(), stop != Slice::none(),
       offsets_.length() - 1);
     if (identities_.get() != nullptr  &&
@@ -1238,7 +1238,7 @@ namespace awkward {
         Index64 adjustedoffsets(offsets.get()->length());
         Index64 adjustednonzero(nonzero.length());
 
-        struct Error err = awkward_listoffsetarray_getitem_adjust_offsets_64(
+        struct Error err = kernel::listoffsetarray_getitem_adjust_offsets<int64_t>(
           adjustedoffsets.ptr().get(),
           adjustednonzero.ptr().get(),
           offsets.get()->ptr().get(),
@@ -1266,7 +1266,7 @@ namespace awkward {
           Index64 adjustednonzero(nonzero.length());
 
           struct Error err =
-            awkward_listoffsetarray_getitem_adjust_offsets_index_64(
+            kernel::listoffsetarray_getitem_adjust_offsets_index<int64_t>(
             adjustedoffsets.ptr().get(),
             adjustednonzero.ptr().get(),
             offsets.get()->ptr().get(),

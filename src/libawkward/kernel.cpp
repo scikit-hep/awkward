@@ -625,726 +625,6 @@ namespace kernel {
   }
 
   template <>
-  Error index_carry_64<int8_t>(
-    int8_t* toindex,
-    const int8_t* fromindex,
-    const int64_t* carry,
-    int64_t fromindexoffset,
-    int64_t lenfromindex,
-    int64_t length,
-    KernelsLib ptr_lib) {
-    return awkward_index8_carry_64(
-      toindex,
-      fromindex,
-      carry,
-      fromindexoffset,
-      lenfromindex,
-      length);
-  }
-  template <>
-  Error index_carry_64<uint8_t>(
-    uint8_t* toindex,
-    const uint8_t* fromindex,
-    const int64_t* carry,
-    int64_t fromindexoffset,
-    int64_t lenfromindex,
-    int64_t length,
-    KernelsLib ptr_lib) {
-    return awkward_indexU8_carry_64(
-      toindex,
-      fromindex,
-      carry,
-      fromindexoffset,
-      lenfromindex,
-      length);
-  }
-  template <>
-  Error index_carry_64<int32_t>(
-    int32_t* toindex,
-    const int32_t* fromindex,
-    const int64_t* carry,
-    int64_t fromindexoffset,
-    int64_t lenfromindex,
-    int64_t length,
-    KernelsLib ptr_lib) {
-    return awkward_index32_carry_64(
-      toindex,
-      fromindex,
-      carry,
-      fromindexoffset,
-      lenfromindex,
-      length);
-  }
-  template <>
-  Error index_carry_64<uint32_t>(
-    uint32_t* toindex,
-    const uint32_t* fromindex,
-    const int64_t* carry,
-    int64_t fromindexoffset,
-    int64_t lenfromindex,
-    int64_t length,
-    KernelsLib ptr_lib) {
-    return awkward_indexU32_carry_64(
-      toindex,
-      fromindex,
-      carry,
-      fromindexoffset,
-      lenfromindex,
-      length);
-  }
-  template <>
-  Error index_carry_64<int64_t>(
-    int64_t* toindex,
-    const int64_t* fromindex,
-    const int64_t* carry,
-    int64_t fromindexoffset,
-    int64_t lenfromindex,
-    int64_t length,
-    KernelsLib ptr_lib) {
-    return awkward_index64_carry_64(
-      toindex,
-      fromindex,
-      carry,
-      fromindexoffset,
-      lenfromindex,
-      length);
-  }
-
-  template <>
-  Error index_carry_nocheck_64<int8_t>(
-    int8_t* toindex,
-    const int8_t* fromindex,
-    const int64_t* carry,
-    int64_t fromindexoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
-    return awkward_index8_carry_nocheck_64(
-      toindex,
-      fromindex,
-      carry,
-      fromindexoffset,
-      length);
-  }
-  template <>
-  Error index_carry_nocheck_64<uint8_t>(
-    uint8_t* toindex,
-    const uint8_t* fromindex,
-    const int64_t* carry,
-    int64_t fromindexoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
-    return awkward_indexU8_carry_nocheck_64(
-      toindex,
-      fromindex,
-      carry,
-      fromindexoffset,
-      length);
-  }
-  template <>
-  Error index_carry_nocheck_64<int32_t>(
-    int32_t* toindex,
-    const int32_t* fromindex,
-    const int64_t* carry,
-    int64_t fromindexoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
-    return awkward_index32_carry_nocheck_64(
-      toindex,
-      fromindex,
-      carry,
-      fromindexoffset,
-      length);
-  }
-  template <>
-  Error index_carry_nocheck_64<uint32_t>(
-    uint32_t* toindex,
-    const uint32_t* fromindex,
-    const int64_t* carry,
-    int64_t fromindexoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
-    return awkward_indexU32_carry_nocheck_64(
-      toindex,
-      fromindex,
-      carry,
-      fromindexoffset,
-      length);
-  }
-  template <>
-  Error index_carry_nocheck_64<int64_t>(
-    int64_t* toindex,
-    const int64_t* fromindex,
-    const int64_t* carry,
-    int64_t fromindexoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
-    return awkward_index64_carry_nocheck_64(
-      toindex,
-      fromindex,
-      carry,
-      fromindexoffset,
-      length);
-  }
-
-  template <>
-  Error listarray_getitem_next_at_64<int32_t>(
-    int64_t* tocarry,
-    const int32_t* fromstarts,
-    const int32_t* fromstops,
-    int64_t lenstarts,
-    int64_t startsoffset,
-    int64_t stopsoffset,
-    int64_t at,
-    KernelsLib ptr_lib) {
-    return awkward_listarray32_getitem_next_at_64(
-      tocarry,
-      fromstarts,
-      fromstops,
-      lenstarts,
-      startsoffset,
-      stopsoffset,
-      at);
-  }
-  template <>
-  Error listarray_getitem_next_at_64<uint32_t>(
-    int64_t* tocarry,
-    const uint32_t* fromstarts,
-    const uint32_t* fromstops,
-    int64_t lenstarts,
-    int64_t startsoffset,
-    int64_t stopsoffset,
-    int64_t at,
-    KernelsLib ptr_lib) {
-    return awkward_listarrayU32_getitem_next_at_64(
-      tocarry,
-      fromstarts,
-      fromstops,
-      lenstarts,
-      startsoffset,
-      stopsoffset,
-      at);
-  }
-  template <>
-  Error listarray_getitem_next_at_64<int64_t>(
-    int64_t* tocarry,
-    const int64_t* fromstarts,
-    const int64_t* fromstops,
-    int64_t lenstarts,
-    int64_t startsoffset,
-    int64_t stopsoffset,
-    int64_t at,
-    KernelsLib ptr_lib) {
-    return awkward_listarray64_getitem_next_at_64(
-      tocarry,
-      fromstarts,
-      fromstops,
-      lenstarts,
-      startsoffset,
-      stopsoffset,
-      at);
-  }
-
-  template <>
-  Error listarray_getitem_next_range_carrylength<int32_t>(
-    int64_t* carrylength,
-    const int32_t* fromstarts,
-    const int32_t* fromstops,
-    int64_t lenstarts,
-    int64_t startsoffset,
-    int64_t stopsoffset,
-    int64_t start,
-    int64_t stop,
-    int64_t step,
-    KernelsLib ptr_lib) {
-    return awkward_listarray32_getitem_next_range_carrylength(
-      carrylength,
-      fromstarts,
-      fromstops,
-      lenstarts,
-      startsoffset,
-      stopsoffset,
-      start,
-      stop,
-      step);
-  }
-  template <>
-  Error listarray_getitem_next_range_carrylength<uint32_t>(
-    int64_t* carrylength,
-    const uint32_t* fromstarts,
-    const uint32_t* fromstops,
-    int64_t lenstarts,
-    int64_t startsoffset,
-    int64_t stopsoffset,
-    int64_t start,
-    int64_t stop,
-    int64_t step,
-    KernelsLib ptr_lib) {
-    return awkward_listarrayU32_getitem_next_range_carrylength(
-      carrylength,
-      fromstarts,
-      fromstops,
-      lenstarts,
-      startsoffset,
-      stopsoffset,
-      start,
-      stop,
-      step);
-  }
-  template <>
-  Error listarray_getitem_next_range_carrylength<int64_t>(
-    int64_t* carrylength,
-    const int64_t* fromstarts,
-    const int64_t* fromstops,
-    int64_t lenstarts,
-    int64_t startsoffset,
-    int64_t stopsoffset,
-    int64_t start,
-    int64_t stop,
-    int64_t step,
-    KernelsLib ptr_lib) {
-    return awkward_listarray64_getitem_next_range_carrylength(
-      carrylength,
-      fromstarts,
-      fromstops,
-      lenstarts,
-      startsoffset,
-      stopsoffset,
-      start,
-      stop,
-      step);
-  }
-
-  template <>
-  Error listarray_getitem_next_range_64<int32_t>(
-    int32_t* tooffsets,
-    int64_t* tocarry,
-    const int32_t* fromstarts,
-    const int32_t* fromstops,
-    int64_t lenstarts,
-    int64_t startsoffset,
-    int64_t stopsoffset,
-    int64_t start,
-    int64_t stop,
-    int64_t step,
-    KernelsLib ptr_lib) {
-    return awkward_listarray32_getitem_next_range_64(
-      tooffsets,
-      tocarry,
-      fromstarts,
-      fromstops,
-      lenstarts,
-      startsoffset,
-      stopsoffset,
-      start,
-      stop,
-      step);
-  }
-  template <>
-  Error listarray_getitem_next_range_64<uint32_t>(
-    uint32_t* tooffsets,
-    int64_t* tocarry,
-    const uint32_t* fromstarts,
-    const uint32_t* fromstops,
-    int64_t lenstarts,
-    int64_t startsoffset,
-    int64_t stopsoffset,
-    int64_t start,
-    int64_t stop,
-    int64_t step,
-    KernelsLib ptr_lib) {
-    return awkward_listarrayU32_getitem_next_range_64(
-      tooffsets,
-      tocarry,
-      fromstarts,
-      fromstops,
-      lenstarts,
-      startsoffset,
-      stopsoffset,
-      start,
-      stop,
-      step);
-  }
-  template <>
-  Error listarray_getitem_next_range_64<int64_t>(
-    int64_t* tooffsets,
-    int64_t* tocarry,
-    const int64_t* fromstarts,
-    const int64_t* fromstops,
-    int64_t lenstarts,
-    int64_t startsoffset,
-    int64_t stopsoffset,
-    int64_t start,
-    int64_t stop,
-    int64_t step,
-    KernelsLib ptr_lib) {
-    return awkward_listarray64_getitem_next_range_64(
-      tooffsets,
-      tocarry,
-      fromstarts,
-      fromstops,
-      lenstarts,
-      startsoffset,
-      stopsoffset,
-      start,
-      stop,
-      step);
-  }
-
-  template <>
-  Error listarray_getitem_next_range_counts_64<int32_t>(
-    int64_t* total,
-    const int32_t* fromoffsets,
-    int64_t lenstarts,
-    KernelsLib ptr_lib) {
-    return awkward_listarray32_getitem_next_range_counts_64(
-      total,
-      fromoffsets,
-      lenstarts);
-  }
-  template <>
-  Error listarray_getitem_next_range_counts_64<uint32_t>(
-    int64_t* total,
-    const uint32_t* fromoffsets,
-    int64_t lenstarts,
-    KernelsLib ptr_lib) {
-    return awkward_listarrayU32_getitem_next_range_counts_64(
-      total,
-      fromoffsets,
-      lenstarts);
-  }
-  template <>
-  Error listarray_getitem_next_range_counts_64<int64_t>(
-    int64_t* total,
-    const int64_t* fromoffsets,
-    int64_t lenstarts,
-    KernelsLib ptr_lib) {
-    return awkward_listarray64_getitem_next_range_counts_64(
-      total,
-      fromoffsets,
-      lenstarts);
-  }
-
-  template <>
-  Error listarray_getitem_next_range_spreadadvanced_64<int32_t>(
-    int64_t* toadvanced,
-    const int64_t* fromadvanced,
-    const int32_t* fromoffsets,
-    int64_t lenstarts,
-    KernelsLib ptr_lib) {
-    return awkward_listarray32_getitem_next_range_spreadadvanced_64(
-      toadvanced,
-      fromadvanced,
-      fromoffsets,
-      lenstarts);
-  }
-  template <>
-  Error listarray_getitem_next_range_spreadadvanced_64<uint32_t>(
-    int64_t* toadvanced,
-    const int64_t* fromadvanced,
-    const uint32_t* fromoffsets,
-    int64_t lenstarts,
-    KernelsLib ptr_lib) {
-    return awkward_listarrayU32_getitem_next_range_spreadadvanced_64(
-      toadvanced,
-      fromadvanced,
-      fromoffsets,
-      lenstarts);
-  }
-  template <>
-  Error listarray_getitem_next_range_spreadadvanced_64<int64_t>(
-    int64_t* toadvanced,
-    const int64_t* fromadvanced,
-    const int64_t* fromoffsets,
-    int64_t lenstarts,
-    KernelsLib ptr_lib) {
-    return awkward_listarray64_getitem_next_range_spreadadvanced_64(
-      toadvanced,
-      fromadvanced,
-      fromoffsets,
-      lenstarts);
-  }
-
-  template <>
-  Error listarray_getitem_next_array_64<int32_t>(
-    int64_t* tocarry,
-    int64_t* toadvanced,
-    const int32_t* fromstarts,
-    const int32_t* fromstops,
-    const int64_t* fromarray,
-    int64_t startsoffset,
-    int64_t stopsoffset,
-    int64_t lenstarts,
-    int64_t lenarray,
-    int64_t lencontent,
-    KernelsLib ptr_lib) {
-    return awkward_listarray32_getitem_next_array_64(
-      tocarry,
-      toadvanced,
-      fromstarts,
-      fromstops,
-      fromarray,
-      startsoffset,
-      stopsoffset,
-      lenstarts,
-      lenarray,
-      lencontent);
-  }
-  template <>
-  Error listarray_getitem_next_array_64<uint32_t>(
-    int64_t* tocarry,
-    int64_t* toadvanced,
-    const uint32_t* fromstarts,
-    const uint32_t* fromstops,
-    const int64_t* fromarray,
-    int64_t startsoffset,
-    int64_t stopsoffset,
-    int64_t lenstarts,
-    int64_t lenarray,
-    int64_t lencontent,
-    KernelsLib ptr_lib) {
-    return awkward_listarrayU32_getitem_next_array_64(
-      tocarry,
-      toadvanced,
-      fromstarts,
-      fromstops,
-      fromarray,
-      startsoffset,
-      stopsoffset,
-      lenstarts,
-      lenarray,
-      lencontent);
-  }
-  template <>
-  Error listarray_getitem_next_array_64<int64_t>(
-    int64_t* tocarry,
-    int64_t* toadvanced,
-    const int64_t* fromstarts,
-    const int64_t* fromstops,
-    const int64_t* fromarray,
-    int64_t startsoffset,
-    int64_t stopsoffset,
-    int64_t lenstarts,
-    int64_t lenarray,
-    int64_t lencontent,
-    KernelsLib ptr_lib) {
-    return awkward_listarray64_getitem_next_array_64(
-      tocarry,
-      toadvanced,
-      fromstarts,
-      fromstops,
-      fromarray,
-      startsoffset,
-      stopsoffset,
-      lenstarts,
-      lenarray,
-      lencontent);
-  }
-
-  template <>
-  Error listarray_getitem_next_array_advanced_64<int32_t>(
-    int64_t* tocarry,
-    int64_t* toadvanced,
-    const int32_t* fromstarts,
-    const int32_t* fromstops,
-    const int64_t* fromarray,
-    const int64_t* fromadvanced,
-    int64_t startsoffset,
-    int64_t stopsoffset,
-    int64_t lenstarts,
-    int64_t lenarray,
-    int64_t lencontent,
-    KernelsLib ptr_lib) {
-    return awkward_listarray32_getitem_next_array_advanced_64(
-      tocarry,
-      toadvanced,
-      fromstarts,
-      fromstops,
-      fromarray,
-      fromadvanced,
-      startsoffset,
-      stopsoffset,
-      lenstarts,
-      lenarray,
-      lencontent);
-  }
-  template <>
-  Error listarray_getitem_next_array_advanced_64<uint32_t>(
-    int64_t* tocarry,
-    int64_t* toadvanced,
-    const uint32_t* fromstarts,
-    const uint32_t* fromstops,
-    const int64_t* fromarray,
-    const int64_t* fromadvanced,
-    int64_t startsoffset,
-    int64_t stopsoffset,
-    int64_t lenstarts,
-    int64_t lenarray,
-    int64_t lencontent,
-    KernelsLib ptr_lib) {
-    return awkward_listarrayU32_getitem_next_array_advanced_64(
-      tocarry,
-      toadvanced,
-      fromstarts,
-      fromstops,
-      fromarray,
-      fromadvanced,
-      startsoffset,
-      stopsoffset,
-      lenstarts,
-      lenarray,
-      lencontent);
-  }
-  template <>
-  Error listarray_getitem_next_array_advanced_64<int64_t>(
-    int64_t* tocarry,
-    int64_t* toadvanced,
-    const int64_t* fromstarts,
-    const int64_t* fromstops,
-    const int64_t* fromarray,
-    const int64_t* fromadvanced,
-    int64_t startsoffset,
-    int64_t stopsoffset,
-    int64_t lenstarts,
-    int64_t lenarray,
-    int64_t lencontent,
-    KernelsLib ptr_lib) {
-    return awkward_listarray64_getitem_next_array_advanced_64(
-      tocarry,
-      toadvanced,
-      fromstarts,
-      fromstops,
-      fromarray,
-      fromadvanced,
-      startsoffset,
-      stopsoffset,
-      lenstarts,
-      lenarray,
-      lencontent);
-  }
-
-  template <>
-  Error listarray_getitem_carry_64<int32_t>(
-    int32_t* tostarts,
-    int32_t* tostops,
-    const int32_t* fromstarts,
-    const int32_t* fromstops,
-    const int64_t* fromcarry,
-    int64_t startsoffset,
-    int64_t stopsoffset,
-    int64_t lenstarts,
-    int64_t lencarry,
-    KernelsLib ptr_lib) {
-    return awkward_listarray32_getitem_carry_64(
-      tostarts,
-      tostops,
-      fromstarts,
-      fromstops,
-      fromcarry,
-      startsoffset,
-      stopsoffset,
-      lenstarts,
-      lencarry);
-  }
-  template <>
-  Error listarray_getitem_carry_64<uint32_t>(
-    uint32_t* tostarts,
-    uint32_t* tostops,
-    const uint32_t* fromstarts,
-    const uint32_t* fromstops,
-    const int64_t* fromcarry,
-    int64_t startsoffset,
-    int64_t stopsoffset,
-    int64_t lenstarts,
-    int64_t lencarry,
-    KernelsLib ptr_lib) {
-    return awkward_listarrayU32_getitem_carry_64(
-      tostarts,
-      tostops,
-      fromstarts,
-      fromstops,
-      fromcarry,
-      startsoffset,
-      stopsoffset,
-      lenstarts,
-      lencarry);
-  }
-  template <>
-  Error listarray_getitem_carry_64<int64_t>(
-    int64_t* tostarts,
-    int64_t* tostops,
-    const int64_t* fromstarts,
-    const int64_t* fromstops,
-    const int64_t* fromcarry,
-    int64_t startsoffset,
-    int64_t stopsoffset,
-    int64_t lenstarts,
-    int64_t lencarry,
-    KernelsLib ptr_lib) {
-    return awkward_listarray64_getitem_carry_64(
-      tostarts,
-      tostops,
-      fromstarts,
-      fromstops,
-      fromcarry,
-      startsoffset,
-      stopsoffset,
-      lenstarts,
-      lencarry);
-  }
-
-  template <>
-  Error listarray_num_64<int32_t>(
-    int64_t* tonum,
-    const int32_t* fromstarts,
-    int64_t startsoffset,
-    const int32_t* fromstops,
-    int64_t stopsoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
-    return awkward_listarray32_num_64(
-      tonum,
-      fromstarts,
-      startsoffset,
-      fromstops,
-      stopsoffset,
-      length);
-  }
-  template <>
-  Error listarray_num_64<uint32_t>(
-    int64_t* tonum,
-    const uint32_t* fromstarts,
-    int64_t startsoffset,
-    const uint32_t* fromstops,
-    int64_t stopsoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
-    return awkward_listarrayU32_num_64(
-      tonum,
-      fromstarts,
-      startsoffset,
-      fromstops,
-      stopsoffset,
-      length);
-  }
-  template <>
-  Error listarray_num_64<int64_t>(
-    int64_t* tonum,
-    const int64_t* fromstarts,
-    int64_t startsoffset,
-    const int64_t* fromstops,
-    int64_t stopsoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
-    return awkward_listarray64_num_64(
-      tonum,
-      fromstarts,
-      startsoffset,
-      fromstops,
-      stopsoffset,
-      length);
-  }
-
-  template <>
   Error listoffsetarray_flatten_offsets_64<int32_t>(
     int64_t* tooffsets,
     const int32_t* outeroffsets,
@@ -1653,248 +933,6 @@ namespace kernel {
   }
 
   template <>
-  Error indexedarray_numnull<int32_t>(
-    int64_t* numnull,
-    const int32_t* fromindex,
-    int64_t indexoffset,
-    int64_t lenindex,
-    KernelsLib ptr_lib) {
-    return awkward_indexedarray32_numnull(
-      numnull,
-      fromindex,
-      indexoffset,
-      lenindex);
-  }
-  template <>
-  Error indexedarray_numnull<uint32_t>(
-    int64_t* numnull,
-    const uint32_t* fromindex,
-    int64_t indexoffset,
-    int64_t lenindex,
-    KernelsLib ptr_lib) {
-    return awkward_indexedarrayU32_numnull(
-      numnull,
-      fromindex,
-      indexoffset,
-      lenindex);
-  }
-  template <>
-  Error indexedarray_numnull<int64_t>(
-    int64_t* numnull,
-    const int64_t* fromindex,
-    int64_t indexoffset,
-    int64_t lenindex,
-    KernelsLib ptr_lib) {
-    return awkward_indexedarray64_numnull(
-      numnull,
-      fromindex,
-      indexoffset,
-      lenindex);
-  }
-
-  template <>
-  Error indexedarray_getitem_nextcarry_outindex_64<int32_t>(
-    int64_t* tocarry,
-    int32_t* toindex,
-    const int32_t* fromindex,
-    int64_t indexoffset,
-    int64_t lenindex,
-    int64_t lencontent,
-    KernelsLib ptr_lib) {
-    return awkward_indexedarray32_getitem_nextcarry_outindex_64(
-      tocarry,
-      toindex,
-      fromindex,
-      indexoffset,
-      lenindex,
-      lencontent);
-  }
-  template <>
-  Error indexedarray_getitem_nextcarry_outindex_64<uint32_t>(
-    int64_t* tocarry,
-    uint32_t* toindex,
-    const uint32_t* fromindex,
-    int64_t indexoffset,
-    int64_t lenindex,
-    int64_t lencontent,
-    KernelsLib ptr_lib) {
-    return awkward_indexedarrayU32_getitem_nextcarry_outindex_64(
-      tocarry,
-      toindex,
-      fromindex,
-      indexoffset,
-      lenindex,
-      lencontent);
-  }
-  template <>
-  Error indexedarray_getitem_nextcarry_outindex_64<int64_t>(
-    int64_t* tocarry,
-    int64_t* toindex,
-    const int64_t* fromindex,
-    int64_t indexoffset,
-    int64_t lenindex,
-    int64_t lencontent,
-    KernelsLib ptr_lib) {
-    return awkward_indexedarray64_getitem_nextcarry_outindex_64(
-      tocarry,
-      toindex,
-      fromindex,
-      indexoffset,
-      lenindex,
-      lencontent);
-  }
-
-  template <>
-  Error indexedarray_getitem_nextcarry_outindex_mask_64<int32_t>(
-    int64_t* tocarry,
-    int64_t* toindex,
-    const int32_t* fromindex,
-    int64_t indexoffset,
-    int64_t lenindex,
-    int64_t lencontent,
-    KernelsLib ptr_lib) {
-    return awkward_indexedarray32_getitem_nextcarry_outindex_mask_64(
-      tocarry,
-      toindex,
-      fromindex,
-      indexoffset,
-      lenindex,
-      lencontent);
-  }
-  template <>
-  Error indexedarray_getitem_nextcarry_outindex_mask_64<uint32_t>(
-    int64_t* tocarry,
-    int64_t* toindex,
-    const uint32_t* fromindex,
-    int64_t indexoffset,
-    int64_t lenindex,
-    int64_t lencontent,
-    KernelsLib ptr_lib) {
-    return awkward_indexedarrayU32_getitem_nextcarry_outindex_mask_64(
-      tocarry,
-      toindex,
-      fromindex,
-      indexoffset,
-      lenindex,
-      lencontent);
-  }
-  template <>
-  Error indexedarray_getitem_nextcarry_outindex_mask_64<int64_t>(
-    int64_t* tocarry,
-    int64_t* toindex,
-    const int64_t* fromindex,
-    int64_t indexoffset,
-    int64_t lenindex,
-    int64_t lencontent,
-    KernelsLib ptr_lib) {
-    return awkward_indexedarray64_getitem_nextcarry_outindex_mask_64(
-      tocarry,
-      toindex,
-      fromindex,
-      indexoffset,
-      lenindex,
-      lencontent);
-  }
-
-  template <>
-  Error indexedarray_getitem_nextcarry_64<int32_t>(
-    int64_t* tocarry,
-    const int32_t* fromindex,
-    int64_t indexoffset,
-    int64_t lenindex,
-    int64_t lencontent,
-    KernelsLib ptr_lib) {
-    return awkward_indexedarray32_getitem_nextcarry_64(
-      tocarry,
-      fromindex,
-      indexoffset,
-      lenindex,
-      lencontent);
-  }
-  template <>
-  Error indexedarray_getitem_nextcarry_64<uint32_t>(
-    int64_t* tocarry,
-    const uint32_t* fromindex,
-    int64_t indexoffset,
-    int64_t lenindex,
-    int64_t lencontent,
-    KernelsLib ptr_lib) {
-    return awkward_indexedarrayU32_getitem_nextcarry_64(
-      tocarry,
-      fromindex,
-      indexoffset,
-      lenindex,
-      lencontent);
-  }
-  template <>
-  Error indexedarray_getitem_nextcarry_64<int64_t>(
-    int64_t* tocarry,
-    const int64_t* fromindex,
-    int64_t indexoffset,
-    int64_t lenindex,
-    int64_t lencontent,
-    KernelsLib ptr_lib) {
-    return awkward_indexedarray64_getitem_nextcarry_64(
-      tocarry,
-      fromindex,
-      indexoffset,
-      lenindex,
-      lencontent);
-  }
-
-  template <>
-  Error indexedarray_getitem_carry_64<int32_t>(
-    int32_t* toindex,
-    const int32_t* fromindex,
-    const int64_t* fromcarry,
-    int64_t indexoffset,
-    int64_t lenindex,
-    int64_t lencarry,
-    KernelsLib ptr_lib) {
-    return awkward_indexedarray32_getitem_carry_64(
-      toindex,
-      fromindex,
-      fromcarry,
-      indexoffset,
-      lenindex,
-      lencarry);
-  }
-  template <>
-  Error indexedarray_getitem_carry_64<uint32_t>(
-    uint32_t* toindex,
-    const uint32_t* fromindex,
-    const int64_t* fromcarry,
-    int64_t indexoffset,
-    int64_t lenindex,
-    int64_t lencarry,
-    KernelsLib ptr_lib) {
-    return awkward_indexedarrayU32_getitem_carry_64(
-      toindex,
-      fromindex,
-      fromcarry,
-      indexoffset,
-      lenindex,
-      lencarry);
-  }
-  template <>
-  Error indexedarray_getitem_carry_64<int64_t>(
-    int64_t* toindex,
-    const int64_t* fromindex,
-    const int64_t* fromcarry,
-    int64_t indexoffset,
-    int64_t lenindex,
-    int64_t lencarry,
-    KernelsLib ptr_lib) {
-    return awkward_indexedarray64_getitem_carry_64(
-      toindex,
-      fromindex,
-      fromcarry,
-      indexoffset,
-      lenindex,
-      lencarry);
-  }
-
-  template <>
   Error indexedarray_overlay_mask8_to64<int32_t>(
     int64_t* toindex,
     const int8_t* mask,
@@ -2158,142 +1196,6 @@ namespace kernel {
       innerindex,
       inneroffset,
       innerlength);
-  }
-
-  template <>
-  Error unionarray_regular_index_getsize<int8_t>(
-    int64_t* size,
-    const int8_t* fromtags,
-    int64_t tagsoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
-    return awkward_unionarray8_regular_index_getsize(
-      size,
-      fromtags,
-      tagsoffset,
-      length);
-  }
-
-  template <>
-  Error unionarray_regular_index<int8_t,
-    int32_t>(
-    int32_t* toindex,
-    int32_t* current,
-    int64_t size,
-    const int8_t* fromtags,
-    int64_t tagsoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
-    return awkward_unionarray8_32_regular_index(
-      toindex,
-      current,
-      size,
-      fromtags,
-      tagsoffset,
-      length);
-  }
-  template <>
-  Error unionarray_regular_index<int8_t,
-    uint32_t>(
-    uint32_t* toindex,
-    uint32_t* current,
-    int64_t size,
-    const int8_t* fromtags,
-    int64_t tagsoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
-    return awkward_unionarray8_U32_regular_index(
-      toindex,
-      current,
-      size,
-      fromtags,
-      tagsoffset,
-      length);
-  }
-  template <>
-  Error unionarray_regular_index<int8_t,
-    int64_t>(
-    int64_t* toindex,
-    int64_t* current,
-    int64_t size,
-    const int8_t* fromtags,
-    int64_t tagsoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
-    return awkward_unionarray8_64_regular_index(
-      toindex,
-      current,
-      size,
-      fromtags,
-      tagsoffset,
-      length);
-  }
-
-  template <>
-  Error unionarray_project_64<int8_t,
-    int32_t>(
-    int64_t* lenout,
-    int64_t* tocarry,
-    const int8_t* fromtags,
-    int64_t tagsoffset,
-    const int32_t* fromindex,
-    int64_t indexoffset,
-    int64_t length,
-    int64_t which,
-    KernelsLib ptr_lib) {
-    return awkward_unionarray8_32_project_64(
-      lenout,
-      tocarry,
-      fromtags,
-      tagsoffset,
-      fromindex,
-      indexoffset,
-      length,
-      which);
-  }
-  template <>
-  Error unionarray_project_64<int8_t,
-    uint32_t>(
-    int64_t* lenout,
-    int64_t* tocarry,
-    const int8_t* fromtags,
-    int64_t tagsoffset,
-    const uint32_t* fromindex,
-    int64_t indexoffset,
-    int64_t length,
-    int64_t which,
-    KernelsLib ptr_lib) {
-    return awkward_unionarray8_U32_project_64(
-      lenout,
-      tocarry,
-      fromtags,
-      tagsoffset,
-      fromindex,
-      indexoffset,
-      length,
-      which);
-  }
-  template <>
-  Error unionarray_project_64<int8_t,
-    int64_t>(
-    int64_t* lenout,
-    int64_t* tocarry,
-    const int8_t* fromtags,
-    int64_t tagsoffset,
-    const int64_t* fromindex,
-    int64_t indexoffset,
-    int64_t length,
-    int64_t which,
-    KernelsLib ptr_lib) {
-    return awkward_unionarray8_64_project_64(
-      lenout,
-      tocarry,
-      fromtags,
-      tagsoffset,
-      fromindex,
-      indexoffset,
-      length,
-      which);
   }
 
   template <>
@@ -2902,264 +1804,6 @@ namespace kernel {
       fromwhich,
       length,
       base);
-  }
-
-  template <>
-  Error listarray_getitem_jagged_expand_64<int32_t>(
-    int64_t* multistarts,
-    int64_t* multistops,
-    const int64_t* singleoffsets,
-    int64_t* tocarry,
-    const int32_t* fromstarts,
-    int64_t fromstartsoffset,
-    const int32_t* fromstops,
-    int64_t fromstopsoffset,
-    int64_t jaggedsize,
-    int64_t length,
-    KernelsLib ptr_lib) {
-    return awkward_listarray32_getitem_jagged_expand_64(
-      multistarts,
-      multistops,
-      singleoffsets,
-      tocarry,
-      fromstarts,
-      fromstartsoffset,
-      fromstops,
-      fromstopsoffset,
-      jaggedsize,
-      length);
-  }
-  template <>
-  Error listarray_getitem_jagged_expand_64(
-    int64_t* multistarts,
-    int64_t* multistops,
-    const int64_t* singleoffsets,
-    int64_t* tocarry,
-    const uint32_t* fromstarts,
-    int64_t fromstartsoffset,
-    const uint32_t* fromstops,
-    int64_t fromstopsoffset,
-    int64_t jaggedsize,
-    int64_t length,
-    KernelsLib ptr_lib) {
-    return awkward_listarrayU32_getitem_jagged_expand_64(
-      multistarts,
-      multistops,
-      singleoffsets,
-      tocarry,
-      fromstarts,
-      fromstartsoffset,
-      fromstops,
-      fromstopsoffset,
-      jaggedsize,
-      length);
-  }
-  template <>
-  Error listarray_getitem_jagged_expand_64(
-    int64_t* multistarts,
-    int64_t* multistops,
-    const int64_t* singleoffsets,
-    int64_t* tocarry,
-    const int64_t* fromstarts,
-    int64_t fromstartsoffset,
-    const int64_t* fromstops,
-    int64_t fromstopsoffset,
-    int64_t jaggedsize,
-    int64_t length,
-    KernelsLib ptr_lib) {
-    return awkward_listarray64_getitem_jagged_expand_64(
-      multistarts,
-      multistops,
-      singleoffsets,
-      tocarry,
-      fromstarts,
-      fromstartsoffset,
-      fromstops,
-      fromstopsoffset,
-      jaggedsize,
-      length);
-  }
-
-  template <>
-  Error listarray_getitem_jagged_apply_64<int32_t>(
-    int64_t* tooffsets,
-    int64_t* tocarry,
-    const int64_t* slicestarts,
-    int64_t slicestartsoffset,
-    const int64_t* slicestops,
-    int64_t slicestopsoffset,
-    int64_t sliceouterlen,
-    const int64_t* sliceindex,
-    int64_t sliceindexoffset,
-    int64_t sliceinnerlen,
-    const int32_t* fromstarts,
-    int64_t fromstartsoffset,
-    const int32_t* fromstops,
-    int64_t fromstopsoffset,
-    int64_t contentlen,
-    KernelsLib ptr_lib) {
-    return awkward_listarray32_getitem_jagged_apply_64(
-      tooffsets,
-      tocarry,
-      slicestarts,
-      slicestartsoffset,
-      slicestops,
-      slicestopsoffset,
-      sliceouterlen,
-      sliceindex,
-      sliceindexoffset,
-      sliceinnerlen,
-      fromstarts,
-      fromstartsoffset,
-      fromstops,
-      fromstopsoffset,
-      contentlen);
-  }
-  template <>
-  Error listarray_getitem_jagged_apply_64<uint32_t>(
-    int64_t* tooffsets,
-    int64_t* tocarry,
-    const int64_t* slicestarts,
-    int64_t slicestartsoffset,
-    const int64_t* slicestops,
-    int64_t slicestopsoffset,
-    int64_t sliceouterlen,
-    const int64_t* sliceindex,
-    int64_t sliceindexoffset,
-    int64_t sliceinnerlen,
-    const uint32_t* fromstarts,
-    int64_t fromstartsoffset,
-    const uint32_t* fromstops,
-    int64_t fromstopsoffset,
-    int64_t contentlen,
-    KernelsLib ptr_lib) {
-    return awkward_listarrayU32_getitem_jagged_apply_64(
-      tooffsets,
-      tocarry,
-      slicestarts,
-      slicestartsoffset,
-      slicestops,
-      slicestopsoffset,
-      sliceouterlen,
-      sliceindex,
-      sliceindexoffset,
-      sliceinnerlen,
-      fromstarts,
-      fromstartsoffset,
-      fromstops,
-      fromstopsoffset,
-      contentlen);
-  }
-  template <>
-  Error listarray_getitem_jagged_apply_64<int64_t>(
-    int64_t* tooffsets,
-    int64_t* tocarry,
-    const int64_t* slicestarts,
-    int64_t slicestartsoffset,
-    const int64_t* slicestops,
-    int64_t slicestopsoffset,
-    int64_t sliceouterlen,
-    const int64_t* sliceindex,
-    int64_t sliceindexoffset,
-    int64_t sliceinnerlen,
-    const int64_t* fromstarts,
-    int64_t fromstartsoffset,
-    const int64_t* fromstops,
-    int64_t fromstopsoffset,
-    int64_t contentlen,
-    KernelsLib ptr_lib) {
-    return awkward_listarray64_getitem_jagged_apply_64(
-      tooffsets,
-      tocarry,
-      slicestarts,
-      slicestartsoffset,
-      slicestops,
-      slicestopsoffset,
-      sliceouterlen,
-      sliceindex,
-      sliceindexoffset,
-      sliceinnerlen,
-      fromstarts,
-      fromstartsoffset,
-      fromstops,
-      fromstopsoffset,
-      contentlen);
-  }
-
-  template <>
-  Error listarray_getitem_jagged_descend_64<int32_t>(
-    int64_t* tooffsets,
-    const int64_t* slicestarts,
-    int64_t slicestartsoffset,
-    const int64_t* slicestops,
-    int64_t slicestopsoffset,
-    int64_t sliceouterlen,
-    const int32_t* fromstarts,
-    int64_t fromstartsoffset,
-    const int32_t* fromstops,
-    int64_t fromstopsoffset,
-    KernelsLib ptr_lib) {
-    return awkward_listarray32_getitem_jagged_descend_64(
-      tooffsets,
-      slicestarts,
-      slicestartsoffset,
-      slicestops,
-      slicestopsoffset,
-      sliceouterlen,
-      fromstarts,
-      fromstartsoffset,
-      fromstops,
-      fromstopsoffset);
-  }
-  template <>
-  Error listarray_getitem_jagged_descend_64<uint32_t>(
-    int64_t* tooffsets,
-    const int64_t* slicestarts,
-    int64_t slicestartsoffset,
-    const int64_t* slicestops,
-    int64_t slicestopsoffset,
-    int64_t sliceouterlen,
-    const uint32_t* fromstarts,
-    int64_t fromstartsoffset,
-    const uint32_t* fromstops,
-    int64_t fromstopsoffset,
-    KernelsLib ptr_lib) {
-    return awkward_listarrayU32_getitem_jagged_descend_64(
-      tooffsets,
-      slicestarts,
-      slicestartsoffset,
-      slicestops,
-      slicestopsoffset,
-      sliceouterlen,
-      fromstarts,
-      fromstartsoffset,
-      fromstops,
-      fromstopsoffset);
-  }
-  template <>
-  Error listarray_getitem_jagged_descend_64<int64_t>(
-    int64_t* tooffsets,
-    const int64_t* slicestarts,
-    int64_t slicestartsoffset,
-    const int64_t* slicestops,
-    int64_t slicestopsoffset,
-    int64_t sliceouterlen,
-    const int64_t* fromstarts,
-    int64_t fromstartsoffset,
-    const int64_t* fromstops,
-    int64_t fromstopsoffset,
-    KernelsLib ptr_lib) {
-    return awkward_listarray64_getitem_jagged_descend_64(
-      tooffsets,
-      slicestarts,
-      slicestartsoffset,
-      slicestops,
-      slicestopsoffset,
-      sliceouterlen,
-      fromstarts,
-      fromstartsoffset,
-      fromstops,
-      fromstopsoffset);
   }
 
   template <>
@@ -3938,6 +2582,1974 @@ namespace kernel {
   }
 
   template <>
+  Error listarray_num_64<int32_t>(
+    int64_t* tonum,
+    const int32_t* fromstarts,
+    int64_t startsoffset,
+    const int32_t* fromstops,
+    int64_t stopsoffset,
+    int64_t length,
+    KernelsLib ptr_lib) {
+    return awkward_listarray32_num_64(
+      tonum,
+      fromstarts,
+      startsoffset,
+      fromstops,
+      stopsoffset,
+      length);
+  }
+  template <>
+  Error listarray_num_64<uint32_t>(
+    int64_t* tonum,
+    const uint32_t* fromstarts,
+    int64_t startsoffset,
+    const uint32_t* fromstops,
+    int64_t stopsoffset,
+    int64_t length,
+    KernelsLib ptr_lib) {
+    return awkward_listarrayU32_num_64(
+      tonum,
+      fromstarts,
+      startsoffset,
+      fromstops,
+      stopsoffset,
+      length);
+  }
+  template <>
+  Error listarray_num_64<int64_t>(
+    int64_t* tonum,
+    const int64_t* fromstarts,
+    int64_t startsoffset,
+    const int64_t* fromstops,
+    int64_t stopsoffset,
+    int64_t length,
+    KernelsLib ptr_lib) {
+    return awkward_listarray64_num_64(
+      tonum,
+      fromstarts,
+      startsoffset,
+      fromstops,
+      stopsoffset,
+      length);
+  }
+
+  /// @brief getitem kernels
+  void regularize_rangeslice(
+    int64_t* start,
+    int64_t* stop,
+    bool posstep,
+    bool hasstart,
+    bool hasstop,
+    int64_t length) {
+    return awkward_regularize_rangeslice(
+      start,
+      stop,
+      posstep,
+      hasstart,
+      hasstop,
+      length);
+  }
+
+  template <>
+  ERROR regularize_arrayslice(
+    int64_t* flatheadptr,
+    int64_t lenflathead,
+    int64_t length) {
+    return awkward_regularize_arrayslice_64(
+      flatheadptr,
+      lenflathead,
+      length);
+  }
+
+  template <>
+  ERROR index_to_index64(
+    int64_t* toptr,
+    const int8_t* fromptr,
+    int64_t length) {
+    return awkward_index8_to_index64(
+      toptr,
+      fromptr,
+      length);
+  }
+  template <>
+  ERROR index_to_index64(
+    int64_t* toptr,
+    const uint8_t* fromptr,
+    int64_t length) {
+    return awkward_indexU8_to_index64(
+      toptr,
+      fromptr,
+      length);
+  }
+  template <>
+  ERROR index_to_index64(
+    int64_t* toptr,
+    const int32_t* fromptr,
+    int64_t length) {
+    return awkward_index32_to_index64(
+      toptr,
+      fromptr,
+      length);
+  }
+  template <>
+  ERROR index_to_index64(
+    int64_t* toptr,
+    const uint32_t* fromptr,
+    int64_t length) {
+    return awkward_indexU32_to_index64(
+      toptr,
+      fromptr,
+      length);
+  }
+
+  template <>
+  Error index_carry_64<int8_t>(
+    int8_t* toindex,
+    const int8_t* fromindex,
+    const int64_t* carry,
+    int64_t fromindexoffset,
+    int64_t lenfromindex,
+    int64_t length,
+    KernelsLib ptr_lib) {
+    return awkward_index8_carry_64(
+      toindex,
+      fromindex,
+      carry,
+      fromindexoffset,
+      lenfromindex,
+      length);
+  }
+  template <>
+  Error index_carry_64<uint8_t>(
+    uint8_t* toindex,
+    const uint8_t* fromindex,
+    const int64_t* carry,
+    int64_t fromindexoffset,
+    int64_t lenfromindex,
+    int64_t length,
+    KernelsLib ptr_lib) {
+    return awkward_indexU8_carry_64(
+      toindex,
+      fromindex,
+      carry,
+      fromindexoffset,
+      lenfromindex,
+      length);
+  }
+  template <>
+  Error index_carry_64<int32_t>(
+    int32_t* toindex,
+    const int32_t* fromindex,
+    const int64_t* carry,
+    int64_t fromindexoffset,
+    int64_t lenfromindex,
+    int64_t length,
+    KernelsLib ptr_lib) {
+    return awkward_index32_carry_64(
+      toindex,
+      fromindex,
+      carry,
+      fromindexoffset,
+      lenfromindex,
+      length);
+  }
+  template <>
+  Error index_carry_64<uint32_t>(
+    uint32_t* toindex,
+    const uint32_t* fromindex,
+    const int64_t* carry,
+    int64_t fromindexoffset,
+    int64_t lenfromindex,
+    int64_t length,
+    KernelsLib ptr_lib) {
+    return awkward_indexU32_carry_64(
+      toindex,
+      fromindex,
+      carry,
+      fromindexoffset,
+      lenfromindex,
+      length);
+  }
+  template <>
+  Error index_carry_64<int64_t>(
+    int64_t* toindex,
+    const int64_t* fromindex,
+    const int64_t* carry,
+    int64_t fromindexoffset,
+    int64_t lenfromindex,
+    int64_t length,
+    KernelsLib ptr_lib) {
+    return awkward_index64_carry_64(
+      toindex,
+      fromindex,
+      carry,
+      fromindexoffset,
+      lenfromindex,
+      length);
+  }
+
+  template <>
+  Error index_carry_nocheck_64<int8_t>(
+    int8_t* toindex,
+    const int8_t* fromindex,
+    const int64_t* carry,
+    int64_t fromindexoffset,
+    int64_t length,
+    KernelsLib ptr_lib) {
+    return awkward_index8_carry_nocheck_64(
+      toindex,
+      fromindex,
+      carry,
+      fromindexoffset,
+      length);
+  }
+  template <>
+  Error index_carry_nocheck_64<uint8_t>(
+    uint8_t* toindex,
+    const uint8_t* fromindex,
+    const int64_t* carry,
+    int64_t fromindexoffset,
+    int64_t length,
+    KernelsLib ptr_lib) {
+    return awkward_indexU8_carry_nocheck_64(
+      toindex,
+      fromindex,
+      carry,
+      fromindexoffset,
+      length);
+  }
+  template <>
+  Error index_carry_nocheck_64<int32_t>(
+    int32_t* toindex,
+    const int32_t* fromindex,
+    const int64_t* carry,
+    int64_t fromindexoffset,
+    int64_t length,
+    KernelsLib ptr_lib) {
+    return awkward_index32_carry_nocheck_64(
+      toindex,
+      fromindex,
+      carry,
+      fromindexoffset,
+      length);
+  }
+  template <>
+  Error index_carry_nocheck_64<uint32_t>(
+    uint32_t* toindex,
+    const uint32_t* fromindex,
+    const int64_t* carry,
+    int64_t fromindexoffset,
+    int64_t length,
+    KernelsLib ptr_lib) {
+    return awkward_indexU32_carry_nocheck_64(
+      toindex,
+      fromindex,
+      carry,
+      fromindexoffset,
+      length);
+  }
+  template <>
+  Error index_carry_nocheck_64<int64_t>(
+    int64_t* toindex,
+    const int64_t* fromindex,
+    const int64_t* carry,
+    int64_t fromindexoffset,
+    int64_t length,
+    KernelsLib ptr_lib) {
+    return awkward_index64_carry_nocheck_64(
+      toindex,
+      fromindex,
+      carry,
+      fromindexoffset,
+      length);
+  }
+
+  template <>
+  ERROR slicearray_ravel(
+    int64_t* toptr,
+    const int64_t* fromptr,
+    int64_t ndim,
+    const int64_t* shape,
+    const int64_t* strides) {
+    return awkward_slicearray_ravel_64(
+      toptr,
+      fromptr,
+      ndim,
+      shape,
+      strides);
+  }
+
+  ERROR slicemissing_check_same(
+    bool* same,
+    const int8_t* bytemask,
+    int64_t bytemaskoffset,
+    const int64_t* missingindex,
+    int64_t missingindexoffset,
+    int64_t length) {
+    return awkward_slicemissing_check_same(
+      same,
+      bytemask,
+      bytemaskoffset,
+      missingindex,
+      missingindexoffset,
+      length);
+  }
+
+  template <>
+  ERROR carry_arange(
+    int32_t* toptr,
+    int64_t length) {
+    return awkward_carry_arange_32(
+      toptr,
+      length);
+  }
+  template <>
+  ERROR carry_arange(
+    uint32_t* toptr,
+    int64_t length) {
+    return awkward_carry_arange_U32(
+      toptr,
+      length);
+  }
+  template <>
+  ERROR carry_arange(
+    int64_t* toptr,
+    int64_t length) {
+    return awkward_carry_arange_64(
+      toptr,
+      length);
+  }
+
+  template <>
+  ERROR identities_getitem_carry(
+    int32_t* newidentitiesptr,
+    const int32_t* identitiesptr,
+    const int64_t* carryptr,
+    int64_t lencarry,
+    int64_t offset,
+    int64_t width,
+    int64_t length) {
+    return awkward_identities32_getitem_carry_64(
+      newidentitiesptr,
+      identitiesptr,
+      carryptr,
+      lencarry,
+      offset,
+      width,
+      length);
+  }
+  template <>
+  ERROR identities_getitem_carry(
+    int64_t* newidentitiesptr,
+    const int64_t* identitiesptr,
+    const int64_t* carryptr,
+    int64_t lencarry,
+    int64_t offset,
+    int64_t width,
+    int64_t length) {
+    return awkward_identities64_getitem_carry_64(
+      newidentitiesptr,
+      identitiesptr,
+      carryptr,
+      lencarry,
+      offset,
+      width,
+      length);
+  }
+
+  template <>
+  ERROR numpyarray_contiguous_copy(
+    uint8_t* toptr,
+    const uint8_t* fromptr,
+    int64_t len,
+    int64_t stride,
+    int64_t offset,
+    const int64_t* pos) {
+    return awkward_numpyarray_contiguous_copy_64(
+      toptr,
+      fromptr,
+      len,
+      stride,
+      offset,
+      pos);
+  }
+
+  template <>
+  ERROR numpyarray_contiguous_next(
+    int64_t* topos,
+    const int64_t* frompos,
+    int64_t len,
+    int64_t skip,
+    int64_t stride) {
+    return awkward_numpyarray_contiguous_next_64(
+      topos,
+      frompos,
+      len,
+      skip,
+      stride);
+  }
+
+  template <>
+  ERROR numpyarray_getitem_next_null(
+    uint8_t* toptr,
+    const uint8_t* fromptr,
+    int64_t len,
+    int64_t stride,
+    int64_t offset,
+    const int64_t* pos) {
+    return awkward_numpyarray_getitem_next_null_64(
+      toptr,
+      fromptr,
+      len,
+      stride,
+      offset,
+      pos);
+  }
+
+  template <>
+  ERROR numpyarray_getitem_next_at(
+    int64_t* nextcarryptr,
+    const int64_t* carryptr,
+    int64_t lencarry,
+    int64_t skip,
+    int64_t at) {
+    return awkward_numpyarray_getitem_next_at_64(
+      nextcarryptr,
+      carryptr,
+      lencarry,
+      skip,
+      at);
+  }
+
+  template <>
+  ERROR numpyarray_getitem_next_range(
+    int64_t* nextcarryptr,
+    const int64_t* carryptr,
+    int64_t lencarry,
+    int64_t lenhead,
+    int64_t skip,
+    int64_t start,
+    int64_t step) {
+    return awkward_numpyarray_getitem_next_range_64(
+      nextcarryptr,
+      carryptr,
+      lencarry,
+      lenhead,
+      skip,
+      start,
+      step);
+  }
+
+  template <>
+  ERROR numpyarray_getitem_next_range_advanced(
+    int64_t* nextcarryptr,
+    int64_t* nextadvancedptr,
+    const int64_t* carryptr,
+    const int64_t* advancedptr,
+    int64_t lencarry,
+    int64_t lenhead,
+    int64_t skip,
+    int64_t start,
+    int64_t step) {
+    return awkward_numpyarray_getitem_next_range_advanced_64(
+      nextcarryptr,
+      nextadvancedptr,
+      carryptr,
+      advancedptr,
+      lencarry,
+      lenhead,
+      skip,
+      start,
+      step);
+  }
+
+  template <>
+  ERROR numpyarray_getitem_next_array(
+    int64_t* nextcarryptr,
+    int64_t* nextadvancedptr,
+    const int64_t* carryptr,
+    const int64_t* flatheadptr,
+    int64_t lencarry,
+    int64_t lenflathead,
+    int64_t skip) {
+    return awkward_numpyarray_getitem_next_array_64(
+      nextcarryptr,
+      nextadvancedptr,
+      carryptr,
+      flatheadptr,
+      lencarry,
+      lenflathead,
+      skip);
+  }
+
+  template <>
+  ERROR numpyarray_getitem_next_array_advanced(
+    int64_t* nextcarryptr,
+    const int64_t* carryptr,
+    const int64_t* advancedptr,
+    const int64_t* flatheadptr,
+    int64_t lencarry,
+    int64_t skip) {
+    return awkward_numpyarray_getitem_next_array_advanced_64(
+      nextcarryptr,
+      carryptr,
+      advancedptr,
+      flatheadptr,
+      lencarry,
+      skip);
+  }
+
+  ERROR numpyarray_getitem_boolean_numtrue(
+    int64_t* numtrue,
+    const int8_t* fromptr,
+    int64_t byteoffset,
+    int64_t length,
+    int64_t stride) {
+    return awkward_numpyarray_getitem_boolean_numtrue(
+      numtrue,
+      fromptr,
+      byteoffset,
+      length,
+      stride);
+  }
+
+  template <>
+  ERROR numpyarray_getitem_boolean_nonzero(
+    int64_t* toptr,
+    const int8_t* fromptr,
+    int64_t byteoffset,
+    int64_t length,
+    int64_t stride) {
+    return awkward_numpyarray_getitem_boolean_nonzero_64(
+      toptr,
+      fromptr,
+      byteoffset,
+      length,
+      stride);
+  }
+
+  template <>
+  Error listarray_getitem_next_at_64<int32_t>(
+    int64_t* tocarry,
+    const int32_t* fromstarts,
+    const int32_t* fromstops,
+    int64_t lenstarts,
+    int64_t startsoffset,
+    int64_t stopsoffset,
+    int64_t at,
+    KernelsLib ptr_lib) {
+    return awkward_listarray32_getitem_next_at_64(
+      tocarry,
+      fromstarts,
+      fromstops,
+      lenstarts,
+      startsoffset,
+      stopsoffset,
+      at);
+  }
+  template <>
+  Error listarray_getitem_next_at_64<uint32_t>(
+    int64_t* tocarry,
+    const uint32_t* fromstarts,
+    const uint32_t* fromstops,
+    int64_t lenstarts,
+    int64_t startsoffset,
+    int64_t stopsoffset,
+    int64_t at,
+    KernelsLib ptr_lib) {
+    return awkward_listarrayU32_getitem_next_at_64(
+      tocarry,
+      fromstarts,
+      fromstops,
+      lenstarts,
+      startsoffset,
+      stopsoffset,
+      at);
+  }
+  template <>
+  Error listarray_getitem_next_at_64<int64_t>(
+    int64_t* tocarry,
+    const int64_t* fromstarts,
+    const int64_t* fromstops,
+    int64_t lenstarts,
+    int64_t startsoffset,
+    int64_t stopsoffset,
+    int64_t at,
+    KernelsLib ptr_lib) {
+    return awkward_listarray64_getitem_next_at_64(
+      tocarry,
+      fromstarts,
+      fromstops,
+      lenstarts,
+      startsoffset,
+      stopsoffset,
+      at);
+  }
+
+  template <>
+  Error listarray_getitem_next_range_carrylength<int32_t>(
+    int64_t* carrylength,
+    const int32_t* fromstarts,
+    const int32_t* fromstops,
+    int64_t lenstarts,
+    int64_t startsoffset,
+    int64_t stopsoffset,
+    int64_t start,
+    int64_t stop,
+    int64_t step,
+    KernelsLib ptr_lib) {
+    return awkward_listarray32_getitem_next_range_carrylength(
+      carrylength,
+      fromstarts,
+      fromstops,
+      lenstarts,
+      startsoffset,
+      stopsoffset,
+      start,
+      stop,
+      step);
+  }
+  template <>
+  Error listarray_getitem_next_range_carrylength<uint32_t>(
+    int64_t* carrylength,
+    const uint32_t* fromstarts,
+    const uint32_t* fromstops,
+    int64_t lenstarts,
+    int64_t startsoffset,
+    int64_t stopsoffset,
+    int64_t start,
+    int64_t stop,
+    int64_t step,
+    KernelsLib ptr_lib) {
+    return awkward_listarrayU32_getitem_next_range_carrylength(
+      carrylength,
+      fromstarts,
+      fromstops,
+      lenstarts,
+      startsoffset,
+      stopsoffset,
+      start,
+      stop,
+      step);
+  }
+  template <>
+  Error listarray_getitem_next_range_carrylength<int64_t>(
+    int64_t* carrylength,
+    const int64_t* fromstarts,
+    const int64_t* fromstops,
+    int64_t lenstarts,
+    int64_t startsoffset,
+    int64_t stopsoffset,
+    int64_t start,
+    int64_t stop,
+    int64_t step,
+    KernelsLib ptr_lib) {
+    return awkward_listarray64_getitem_next_range_carrylength(
+      carrylength,
+      fromstarts,
+      fromstops,
+      lenstarts,
+      startsoffset,
+      stopsoffset,
+      start,
+      stop,
+      step);
+  }
+
+  template <>
+  Error listarray_getitem_next_range_64<int32_t>(
+    int32_t* tooffsets,
+    int64_t* tocarry,
+    const int32_t* fromstarts,
+    const int32_t* fromstops,
+    int64_t lenstarts,
+    int64_t startsoffset,
+    int64_t stopsoffset,
+    int64_t start,
+    int64_t stop,
+    int64_t step,
+    KernelsLib ptr_lib) {
+    return awkward_listarray32_getitem_next_range_64(
+      tooffsets,
+      tocarry,
+      fromstarts,
+      fromstops,
+      lenstarts,
+      startsoffset,
+      stopsoffset,
+      start,
+      stop,
+      step);
+  }
+  template <>
+  Error listarray_getitem_next_range_64<uint32_t>(
+    uint32_t* tooffsets,
+    int64_t* tocarry,
+    const uint32_t* fromstarts,
+    const uint32_t* fromstops,
+    int64_t lenstarts,
+    int64_t startsoffset,
+    int64_t stopsoffset,
+    int64_t start,
+    int64_t stop,
+    int64_t step,
+    KernelsLib ptr_lib) {
+    return awkward_listarrayU32_getitem_next_range_64(
+      tooffsets,
+      tocarry,
+      fromstarts,
+      fromstops,
+      lenstarts,
+      startsoffset,
+      stopsoffset,
+      start,
+      stop,
+      step);
+  }
+  template <>
+  Error listarray_getitem_next_range_64<int64_t>(
+    int64_t* tooffsets,
+    int64_t* tocarry,
+    const int64_t* fromstarts,
+    const int64_t* fromstops,
+    int64_t lenstarts,
+    int64_t startsoffset,
+    int64_t stopsoffset,
+    int64_t start,
+    int64_t stop,
+    int64_t step,
+    KernelsLib ptr_lib) {
+    return awkward_listarray64_getitem_next_range_64(
+      tooffsets,
+      tocarry,
+      fromstarts,
+      fromstops,
+      lenstarts,
+      startsoffset,
+      stopsoffset,
+      start,
+      stop,
+      step);
+  }
+
+  template <>
+  Error listarray_getitem_next_range_counts_64<int32_t>(
+    int64_t* total,
+    const int32_t* fromoffsets,
+    int64_t lenstarts,
+    KernelsLib ptr_lib) {
+    return awkward_listarray32_getitem_next_range_counts_64(
+      total,
+      fromoffsets,
+      lenstarts);
+  }
+  template <>
+  Error listarray_getitem_next_range_counts_64<uint32_t>(
+    int64_t* total,
+    const uint32_t* fromoffsets,
+    int64_t lenstarts,
+    KernelsLib ptr_lib) {
+    return awkward_listarrayU32_getitem_next_range_counts_64(
+      total,
+      fromoffsets,
+      lenstarts);
+  }
+  template <>
+  Error listarray_getitem_next_range_counts_64<int64_t>(
+    int64_t* total,
+    const int64_t* fromoffsets,
+    int64_t lenstarts,
+    KernelsLib ptr_lib) {
+    return awkward_listarray64_getitem_next_range_counts_64(
+      total,
+      fromoffsets,
+      lenstarts);
+  }
+
+  template <>
+  Error listarray_getitem_next_range_spreadadvanced_64<int32_t>(
+    int64_t* toadvanced,
+    const int64_t* fromadvanced,
+    const int32_t* fromoffsets,
+    int64_t lenstarts,
+    KernelsLib ptr_lib) {
+    return awkward_listarray32_getitem_next_range_spreadadvanced_64(
+      toadvanced,
+      fromadvanced,
+      fromoffsets,
+      lenstarts);
+  }
+  template <>
+  Error listarray_getitem_next_range_spreadadvanced_64<uint32_t>(
+    int64_t* toadvanced,
+    const int64_t* fromadvanced,
+    const uint32_t* fromoffsets,
+    int64_t lenstarts,
+    KernelsLib ptr_lib) {
+    return awkward_listarrayU32_getitem_next_range_spreadadvanced_64(
+      toadvanced,
+      fromadvanced,
+      fromoffsets,
+      lenstarts);
+  }
+  template <>
+  Error listarray_getitem_next_range_spreadadvanced_64<int64_t>(
+    int64_t* toadvanced,
+    const int64_t* fromadvanced,
+    const int64_t* fromoffsets,
+    int64_t lenstarts,
+    KernelsLib ptr_lib) {
+    return awkward_listarray64_getitem_next_range_spreadadvanced_64(
+      toadvanced,
+      fromadvanced,
+      fromoffsets,
+      lenstarts);
+  }
+
+  template <>
+  Error listarray_getitem_next_array_64<int32_t>(
+    int64_t* tocarry,
+    int64_t* toadvanced,
+    const int32_t* fromstarts,
+    const int32_t* fromstops,
+    const int64_t* fromarray,
+    int64_t startsoffset,
+    int64_t stopsoffset,
+    int64_t lenstarts,
+    int64_t lenarray,
+    int64_t lencontent,
+    KernelsLib ptr_lib) {
+    return awkward_listarray32_getitem_next_array_64(
+      tocarry,
+      toadvanced,
+      fromstarts,
+      fromstops,
+      fromarray,
+      startsoffset,
+      stopsoffset,
+      lenstarts,
+      lenarray,
+      lencontent);
+  }
+  template <>
+  Error listarray_getitem_next_array_64<uint32_t>(
+    int64_t* tocarry,
+    int64_t* toadvanced,
+    const uint32_t* fromstarts,
+    const uint32_t* fromstops,
+    const int64_t* fromarray,
+    int64_t startsoffset,
+    int64_t stopsoffset,
+    int64_t lenstarts,
+    int64_t lenarray,
+    int64_t lencontent,
+    KernelsLib ptr_lib) {
+    return awkward_listarrayU32_getitem_next_array_64(
+      tocarry,
+      toadvanced,
+      fromstarts,
+      fromstops,
+      fromarray,
+      startsoffset,
+      stopsoffset,
+      lenstarts,
+      lenarray,
+      lencontent);
+  }
+  template <>
+  Error listarray_getitem_next_array_64<int64_t>(
+    int64_t* tocarry,
+    int64_t* toadvanced,
+    const int64_t* fromstarts,
+    const int64_t* fromstops,
+    const int64_t* fromarray,
+    int64_t startsoffset,
+    int64_t stopsoffset,
+    int64_t lenstarts,
+    int64_t lenarray,
+    int64_t lencontent,
+    KernelsLib ptr_lib) {
+    return awkward_listarray64_getitem_next_array_64(
+      tocarry,
+      toadvanced,
+      fromstarts,
+      fromstops,
+      fromarray,
+      startsoffset,
+      stopsoffset,
+      lenstarts,
+      lenarray,
+      lencontent);
+  }
+
+  template <>
+  Error listarray_getitem_next_array_advanced_64<int32_t>(
+    int64_t* tocarry,
+    int64_t* toadvanced,
+    const int32_t* fromstarts,
+    const int32_t* fromstops,
+    const int64_t* fromarray,
+    const int64_t* fromadvanced,
+    int64_t startsoffset,
+    int64_t stopsoffset,
+    int64_t lenstarts,
+    int64_t lenarray,
+    int64_t lencontent,
+    KernelsLib ptr_lib) {
+    return awkward_listarray32_getitem_next_array_advanced_64(
+      tocarry,
+      toadvanced,
+      fromstarts,
+      fromstops,
+      fromarray,
+      fromadvanced,
+      startsoffset,
+      stopsoffset,
+      lenstarts,
+      lenarray,
+      lencontent);
+  }
+  template <>
+  Error listarray_getitem_next_array_advanced_64<uint32_t>(
+    int64_t* tocarry,
+    int64_t* toadvanced,
+    const uint32_t* fromstarts,
+    const uint32_t* fromstops,
+    const int64_t* fromarray,
+    const int64_t* fromadvanced,
+    int64_t startsoffset,
+    int64_t stopsoffset,
+    int64_t lenstarts,
+    int64_t lenarray,
+    int64_t lencontent,
+    KernelsLib ptr_lib) {
+    return awkward_listarrayU32_getitem_next_array_advanced_64(
+      tocarry,
+      toadvanced,
+      fromstarts,
+      fromstops,
+      fromarray,
+      fromadvanced,
+      startsoffset,
+      stopsoffset,
+      lenstarts,
+      lenarray,
+      lencontent);
+  }
+  template <>
+  Error listarray_getitem_next_array_advanced_64<int64_t>(
+    int64_t* tocarry,
+    int64_t* toadvanced,
+    const int64_t* fromstarts,
+    const int64_t* fromstops,
+    const int64_t* fromarray,
+    const int64_t* fromadvanced,
+    int64_t startsoffset,
+    int64_t stopsoffset,
+    int64_t lenstarts,
+    int64_t lenarray,
+    int64_t lencontent,
+    KernelsLib ptr_lib) {
+    return awkward_listarray64_getitem_next_array_advanced_64(
+      tocarry,
+      toadvanced,
+      fromstarts,
+      fromstops,
+      fromarray,
+      fromadvanced,
+      startsoffset,
+      stopsoffset,
+      lenstarts,
+      lenarray,
+      lencontent);
+  }
+
+  template <>
+  Error listarray_getitem_carry_64<int32_t>(
+    int32_t* tostarts,
+    int32_t* tostops,
+    const int32_t* fromstarts,
+    const int32_t* fromstops,
+    const int64_t* fromcarry,
+    int64_t startsoffset,
+    int64_t stopsoffset,
+    int64_t lenstarts,
+    int64_t lencarry,
+    KernelsLib ptr_lib) {
+    return awkward_listarray32_getitem_carry_64(
+      tostarts,
+      tostops,
+      fromstarts,
+      fromstops,
+      fromcarry,
+      startsoffset,
+      stopsoffset,
+      lenstarts,
+      lencarry);
+  }
+  template <>
+  Error listarray_getitem_carry_64<uint32_t>(
+    uint32_t* tostarts,
+    uint32_t* tostops,
+    const uint32_t* fromstarts,
+    const uint32_t* fromstops,
+    const int64_t* fromcarry,
+    int64_t startsoffset,
+    int64_t stopsoffset,
+    int64_t lenstarts,
+    int64_t lencarry,
+    KernelsLib ptr_lib) {
+    return awkward_listarrayU32_getitem_carry_64(
+      tostarts,
+      tostops,
+      fromstarts,
+      fromstops,
+      fromcarry,
+      startsoffset,
+      stopsoffset,
+      lenstarts,
+      lencarry);
+  }
+  template <>
+  Error listarray_getitem_carry_64<int64_t>(
+    int64_t* tostarts,
+    int64_t* tostops,
+    const int64_t* fromstarts,
+    const int64_t* fromstops,
+    const int64_t* fromcarry,
+    int64_t startsoffset,
+    int64_t stopsoffset,
+    int64_t lenstarts,
+    int64_t lencarry,
+    KernelsLib ptr_lib) {
+    return awkward_listarray64_getitem_carry_64(
+      tostarts,
+      tostops,
+      fromstarts,
+      fromstops,
+      fromcarry,
+      startsoffset,
+      stopsoffset,
+      lenstarts,
+      lencarry);
+  }
+
+  template <>
+  ERROR regulararray_getitem_next_at(
+    int64_t* tocarry,
+    int64_t at,
+    int64_t len,
+    int64_t size) {
+    return awkward_regulararray_getitem_next_at_64(
+      tocarry,
+      at,
+      len,
+      size);
+  }
+
+  template <>
+  ERROR regulararray_getitem_next_range(
+    int64_t* tocarry,
+    int64_t regular_start,
+    int64_t step,
+    int64_t len,
+    int64_t size,
+    int64_t nextsize) {
+    return awkward_regulararray_getitem_next_range_64(
+      tocarry,
+      regular_start,
+      step,
+      len,
+      size,
+      nextsize);
+  }
+
+  template <>
+  ERROR regulararray_getitem_next_range_spreadadvanced(
+    int64_t* toadvanced,
+    const int64_t* fromadvanced,
+    int64_t len,
+    int64_t nextsize) {
+    return awkward_regulararray_getitem_next_range_spreadadvanced_64(
+      toadvanced,
+      fromadvanced,
+      len,
+      nextsize);
+  }
+
+  template <>
+  ERROR regulararray_getitem_next_array_regularize(
+    int64_t* toarray,
+    const int64_t* fromarray,
+    int64_t lenarray,
+    int64_t size) {
+    return awkward_regulararray_getitem_next_array_regularize_64(
+      toarray,
+      fromarray,
+      lenarray,
+      size);
+  }
+
+  template <>
+  ERROR regulararray_getitem_next_array(
+    int64_t* tocarry,
+    int64_t* toadvanced,
+    const int64_t* fromarray,
+    int64_t len,
+    int64_t lenarray,
+    int64_t size) {
+    return awkward_regulararray_getitem_next_array_64(
+      tocarry,
+      toadvanced,
+      fromarray,
+      len,
+      lenarray,
+      size);
+  }
+
+  template <>
+  ERROR regulararray_getitem_next_array_advanced(
+    int64_t* tocarry,
+    int64_t* toadvanced,
+    const int64_t* fromadvanced,
+    const int64_t* fromarray,
+    int64_t len,
+    int64_t lenarray,
+    int64_t size) {
+    return awkward_regulararray_getitem_next_array_advanced_64(
+      tocarry,
+      toadvanced,
+      fromadvanced,
+      fromarray,
+      len,
+      lenarray,
+      size);
+  }
+
+  template <>
+  ERROR regulararray_getitem_carry(
+    int64_t* tocarry,
+    const int64_t* fromcarry,
+    int64_t lencarry,
+    int64_t size) {
+    return awkward_regulararray_getitem_carry_64(
+      tocarry,
+      fromcarry,
+      lencarry,
+      size);
+  }
+
+  template <>
+  Error indexedarray_numnull<int32_t>(
+    int64_t* numnull,
+    const int32_t* fromindex,
+    int64_t indexoffset,
+    int64_t lenindex,
+    KernelsLib ptr_lib) {
+    return awkward_indexedarray32_numnull(
+      numnull,
+      fromindex,
+      indexoffset,
+      lenindex);
+  }
+  template <>
+  Error indexedarray_numnull<uint32_t>(
+    int64_t* numnull,
+    const uint32_t* fromindex,
+    int64_t indexoffset,
+    int64_t lenindex,
+    KernelsLib ptr_lib) {
+    return awkward_indexedarrayU32_numnull(
+      numnull,
+      fromindex,
+      indexoffset,
+      lenindex);
+  }
+  template <>
+  Error indexedarray_numnull<int64_t>(
+    int64_t* numnull,
+    const int64_t* fromindex,
+    int64_t indexoffset,
+    int64_t lenindex,
+    KernelsLib ptr_lib) {
+    return awkward_indexedarray64_numnull(
+      numnull,
+      fromindex,
+      indexoffset,
+      lenindex);
+  }
+
+  template <>
+  Error indexedarray_getitem_nextcarry_outindex_64<int32_t>(
+    int64_t* tocarry,
+    int32_t* toindex,
+    const int32_t* fromindex,
+    int64_t indexoffset,
+    int64_t lenindex,
+    int64_t lencontent,
+    KernelsLib ptr_lib) {
+    return awkward_indexedarray32_getitem_nextcarry_outindex_64(
+      tocarry,
+      toindex,
+      fromindex,
+      indexoffset,
+      lenindex,
+      lencontent);
+  }
+  template <>
+  Error indexedarray_getitem_nextcarry_outindex_64<uint32_t>(
+    int64_t* tocarry,
+    uint32_t* toindex,
+    const uint32_t* fromindex,
+    int64_t indexoffset,
+    int64_t lenindex,
+    int64_t lencontent,
+    KernelsLib ptr_lib) {
+    return awkward_indexedarrayU32_getitem_nextcarry_outindex_64(
+      tocarry,
+      toindex,
+      fromindex,
+      indexoffset,
+      lenindex,
+      lencontent);
+  }
+  template <>
+  Error indexedarray_getitem_nextcarry_outindex_64<int64_t>(
+    int64_t* tocarry,
+    int64_t* toindex,
+    const int64_t* fromindex,
+    int64_t indexoffset,
+    int64_t lenindex,
+    int64_t lencontent,
+    KernelsLib ptr_lib) {
+    return awkward_indexedarray64_getitem_nextcarry_outindex_64(
+      tocarry,
+      toindex,
+      fromindex,
+      indexoffset,
+      lenindex,
+      lencontent);
+  }
+
+  template <>
+  Error indexedarray_getitem_nextcarry_outindex_mask_64<int32_t>(
+    int64_t* tocarry,
+    int64_t* toindex,
+    const int32_t* fromindex,
+    int64_t indexoffset,
+    int64_t lenindex,
+    int64_t lencontent,
+    KernelsLib ptr_lib) {
+    return awkward_indexedarray32_getitem_nextcarry_outindex_mask_64(
+      tocarry,
+      toindex,
+      fromindex,
+      indexoffset,
+      lenindex,
+      lencontent);
+  }
+  template <>
+  Error indexedarray_getitem_nextcarry_outindex_mask_64<uint32_t>(
+    int64_t* tocarry,
+    int64_t* toindex,
+    const uint32_t* fromindex,
+    int64_t indexoffset,
+    int64_t lenindex,
+    int64_t lencontent,
+    KernelsLib ptr_lib) {
+    return awkward_indexedarrayU32_getitem_nextcarry_outindex_mask_64(
+      tocarry,
+      toindex,
+      fromindex,
+      indexoffset,
+      lenindex,
+      lencontent);
+  }
+  template <>
+  Error indexedarray_getitem_nextcarry_outindex_mask_64<int64_t>(
+    int64_t* tocarry,
+    int64_t* toindex,
+    const int64_t* fromindex,
+    int64_t indexoffset,
+    int64_t lenindex,
+    int64_t lencontent,
+    KernelsLib ptr_lib) {
+    return awkward_indexedarray64_getitem_nextcarry_outindex_mask_64(
+      tocarry,
+      toindex,
+      fromindex,
+      indexoffset,
+      lenindex,
+      lencontent);
+  }
+
+  template <>
+  ERROR listoffsetarray_getitem_adjust_offsets(
+    int64_t* tooffsets,
+    int64_t* tononzero,
+    const int64_t* fromoffsets,
+    int64_t offsetsoffset,
+    int64_t length,
+    const int64_t* nonzero,
+    int64_t nonzerooffset,
+    int64_t nonzerolength) {
+    return awkward_listoffsetarray_getitem_adjust_offsets_64(
+      tooffsets,
+      tononzero,
+      fromoffsets,
+      offsetsoffset,
+      length,
+      nonzero,
+      nonzerooffset,
+      nonzerolength);
+  }
+
+  template <>
+  ERROR listoffsetarray_getitem_adjust_offsets_index(
+    int64_t* tooffsets,
+    int64_t* tononzero,
+    const int64_t* fromoffsets,
+    int64_t offsetsoffset,
+    int64_t length,
+    const int64_t* index,
+    int64_t indexoffset,
+    int64_t indexlength,
+    const int64_t* nonzero,
+    int64_t nonzerooffset,
+    int64_t nonzerolength,
+    const int8_t* originalmask,
+    int64_t maskoffset,
+    int64_t masklength) {
+    return awkward_listoffsetarray_getitem_adjust_offsets_index_64(
+      tooffsets,
+      tononzero,
+      fromoffsets,
+      offsetsoffset,
+      length,
+      index,
+      indexoffset,
+      indexlength,
+      nonzero,
+      nonzerooffset,
+      nonzerolength,
+      originalmask,
+      maskoffset,
+      masklength);
+  }
+
+  template <>
+  ERROR indexedarray_getitem_adjust_outindex(
+    int8_t* tomask,
+    int64_t* toindex,
+    int64_t* tononzero,
+    const int64_t* fromindex,
+    int64_t fromindexoffset,
+    int64_t fromindexlength,
+    const int64_t* nonzero,
+    int64_t nonzerooffset,
+    int64_t nonzerolength) {
+    return awkward_indexedarray_getitem_adjust_outindex_64(
+      tomask,
+      toindex,
+      tononzero,
+      fromindex,
+      fromindexoffset,
+      fromindexlength,
+      nonzero,
+      nonzerooffset,
+      nonzerolength);
+  }
+
+  template <>
+  ERROR indexedarray_getitem_nextcarry_64(
+    int64_t* tocarry,
+    const int32_t* fromindex,
+    int64_t indexoffset,
+    int64_t lenindex,
+    int64_t lencontent,
+    KernelsLib ptr_lib) {
+    return awkward_indexedarray32_getitem_nextcarry_64(
+      tocarry,
+      fromindex,
+      indexoffset,
+      lenindex,
+      lencontent);
+  }
+  template <>
+  ERROR indexedarray_getitem_nextcarry_64(
+    int64_t* tocarry,
+    const uint32_t* fromindex,
+    int64_t indexoffset,
+    int64_t lenindex,
+    int64_t lencontent,
+    KernelsLib ptr_lib) {
+    return awkward_indexedarrayU32_getitem_nextcarry_64(
+      tocarry,
+      fromindex,
+      indexoffset,
+      lenindex,
+      lencontent);
+  }
+  template <>
+  ERROR indexedarray_getitem_nextcarry_64(
+    int64_t* tocarry,
+    const int64_t* fromindex,
+    int64_t indexoffset,
+    int64_t lenindex,
+    int64_t lencontent,
+    KernelsLib ptr_lib) {
+    return awkward_indexedarray64_getitem_nextcarry_64(
+      tocarry,
+      fromindex,
+      indexoffset,
+      lenindex,
+      lencontent);
+  }
+
+  template <>
+  Error indexedarray_getitem_carry_64<int32_t>(
+    int32_t* toindex,
+    const int32_t* fromindex,
+    const int64_t* fromcarry,
+    int64_t indexoffset,
+    int64_t lenindex,
+    int64_t lencarry,
+    KernelsLib ptr_lib) {
+    return awkward_indexedarray32_getitem_carry_64(
+      toindex,
+      fromindex,
+      fromcarry,
+      indexoffset,
+      lenindex,
+      lencarry);
+  }
+  template <>
+  Error indexedarray_getitem_carry_64<uint32_t>(
+    uint32_t* toindex,
+    const uint32_t* fromindex,
+    const int64_t* fromcarry,
+    int64_t indexoffset,
+    int64_t lenindex,
+    int64_t lencarry,
+    KernelsLib ptr_lib) {
+    return awkward_indexedarrayU32_getitem_carry_64(
+      toindex,
+      fromindex,
+      fromcarry,
+      indexoffset,
+      lenindex,
+      lencarry);
+  }
+  template <>
+  Error indexedarray_getitem_carry_64<int64_t>(
+    int64_t* toindex,
+    const int64_t* fromindex,
+    const int64_t* fromcarry,
+    int64_t indexoffset,
+    int64_t lenindex,
+    int64_t lencarry,
+    KernelsLib ptr_lib) {
+    return awkward_indexedarray64_getitem_carry_64(
+      toindex,
+      fromindex,
+      fromcarry,
+      indexoffset,
+      lenindex,
+      lencarry);
+  }
+
+  template <>
+  Error unionarray_regular_index_getsize<int8_t>(
+    int64_t* size,
+    const int8_t* fromtags,
+    int64_t tagsoffset,
+    int64_t length,
+    KernelsLib ptr_lib) {
+    return awkward_unionarray8_regular_index_getsize(
+      size,
+      fromtags,
+      tagsoffset,
+      length);
+  }
+
+  template <>
+  Error unionarray_regular_index<int8_t,
+    int32_t>(
+    int32_t* toindex,
+    int32_t* current,
+    int64_t size,
+    const int8_t* fromtags,
+    int64_t tagsoffset,
+    int64_t length,
+    KernelsLib ptr_lib) {
+    return awkward_unionarray8_32_regular_index(
+      toindex,
+      current,
+      size,
+      fromtags,
+      tagsoffset,
+      length);
+  }
+  template <>
+  Error unionarray_regular_index<int8_t,
+    uint32_t>(
+    uint32_t* toindex,
+    uint32_t* current,
+    int64_t size,
+    const int8_t* fromtags,
+    int64_t tagsoffset,
+    int64_t length,
+    KernelsLib ptr_lib) {
+    return awkward_unionarray8_U32_regular_index(
+      toindex,
+      current,
+      size,
+      fromtags,
+      tagsoffset,
+      length);
+  }
+  template <>
+  Error unionarray_regular_index<int8_t,
+    int64_t>(
+    int64_t* toindex,
+    int64_t* current,
+    int64_t size,
+    const int8_t* fromtags,
+    int64_t tagsoffset,
+    int64_t length,
+    KernelsLib ptr_lib) {
+    return awkward_unionarray8_64_regular_index(
+      toindex,
+      current,
+      size,
+      fromtags,
+      tagsoffset,
+      length);
+  }
+
+  template <>
+  Error unionarray_project_64<int8_t,
+    int32_t>(
+    int64_t* lenout,
+    int64_t* tocarry,
+    const int8_t* fromtags,
+    int64_t tagsoffset,
+    const int32_t* fromindex,
+    int64_t indexoffset,
+    int64_t length,
+    int64_t which,
+    KernelsLib ptr_lib) {
+    return awkward_unionarray8_32_project_64(
+      lenout,
+      tocarry,
+      fromtags,
+      tagsoffset,
+      fromindex,
+      indexoffset,
+      length,
+      which);
+  }
+  template <>
+  Error unionarray_project_64<int8_t,
+    uint32_t>(
+    int64_t* lenout,
+    int64_t* tocarry,
+    const int8_t* fromtags,
+    int64_t tagsoffset,
+    const uint32_t* fromindex,
+    int64_t indexoffset,
+    int64_t length,
+    int64_t which,
+    KernelsLib ptr_lib) {
+    return awkward_unionarray8_U32_project_64(
+      lenout,
+      tocarry,
+      fromtags,
+      tagsoffset,
+      fromindex,
+      indexoffset,
+      length,
+      which);
+  }
+  template <>
+  Error unionarray_project_64<int8_t,
+    int64_t>(
+    int64_t* lenout,
+    int64_t* tocarry,
+    const int8_t* fromtags,
+    int64_t tagsoffset,
+    const int64_t* fromindex,
+    int64_t indexoffset,
+    int64_t length,
+    int64_t which,
+    KernelsLib ptr_lib) {
+    return awkward_unionarray8_64_project_64(
+      lenout,
+      tocarry,
+      fromtags,
+      tagsoffset,
+      fromindex,
+      indexoffset,
+      length,
+      which);
+  }
+
+  template <>
+  ERROR missing_repeat(
+    int64_t* outindex,
+    const int64_t* index,
+    int64_t indexoffset,
+    int64_t indexlength,
+    int64_t repetitions,
+    int64_t regularsize) {
+    return awkward_missing_repeat_64(
+      outindex,
+      index,
+      indexoffset,
+      indexlength,
+      repetitions,
+      regularsize);
+  }
+
+  template <>
+  ERROR regulararray_getitem_jagged_expand(
+    int64_t* multistarts,
+    int64_t* multistops,
+    const int64_t* singleoffsets,
+    int64_t regularsize,
+    int64_t regularlength) {
+    return awkward_regulararray_getitem_jagged_expand_64(
+      multistarts,
+      multistops,
+      singleoffsets,
+      regularsize,
+      regularlength);
+  }
+
+  template <>
+  Error listarray_getitem_jagged_expand_64<int32_t>(
+    int64_t* multistarts,
+    int64_t* multistops,
+    const int64_t* singleoffsets,
+    int64_t* tocarry,
+    const int32_t* fromstarts,
+    int64_t fromstartsoffset,
+    const int32_t* fromstops,
+    int64_t fromstopsoffset,
+    int64_t jaggedsize,
+    int64_t length,
+    KernelsLib ptr_lib) {
+    return awkward_listarray32_getitem_jagged_expand_64(
+      multistarts,
+      multistops,
+      singleoffsets,
+      tocarry,
+      fromstarts,
+      fromstartsoffset,
+      fromstops,
+      fromstopsoffset,
+      jaggedsize,
+      length);
+  }
+  template <>
+  Error listarray_getitem_jagged_expand_64(
+    int64_t* multistarts,
+    int64_t* multistops,
+    const int64_t* singleoffsets,
+    int64_t* tocarry,
+    const uint32_t* fromstarts,
+    int64_t fromstartsoffset,
+    const uint32_t* fromstops,
+    int64_t fromstopsoffset,
+    int64_t jaggedsize,
+    int64_t length,
+    KernelsLib ptr_lib) {
+    return awkward_listarrayU32_getitem_jagged_expand_64(
+      multistarts,
+      multistops,
+      singleoffsets,
+      tocarry,
+      fromstarts,
+      fromstartsoffset,
+      fromstops,
+      fromstopsoffset,
+      jaggedsize,
+      length);
+  }
+  template <>
+  Error listarray_getitem_jagged_expand_64(
+    int64_t* multistarts,
+    int64_t* multistops,
+    const int64_t* singleoffsets,
+    int64_t* tocarry,
+    const int64_t* fromstarts,
+    int64_t fromstartsoffset,
+    const int64_t* fromstops,
+    int64_t fromstopsoffset,
+    int64_t jaggedsize,
+    int64_t length,
+    KernelsLib ptr_lib) {
+    return awkward_listarray64_getitem_jagged_expand_64(
+      multistarts,
+      multistops,
+      singleoffsets,
+      tocarry,
+      fromstarts,
+      fromstartsoffset,
+      fromstops,
+      fromstopsoffset,
+      jaggedsize,
+      length);
+  }
+
+  template <>
+  ERROR listarray_getitem_jagged_carrylen(
+    int64_t* carrylen,
+    const int64_t* slicestarts,
+    int64_t slicestartsoffset,
+    const int64_t* slicestops,
+    int64_t slicestopsoffset,
+    int64_t sliceouterlen) {
+    return awkward_listarray_getitem_jagged_carrylen_64(
+      carrylen,
+      slicestarts,
+      slicestartsoffset,
+      slicestops,
+      slicestopsoffset,
+      sliceouterlen);
+  }
+
+  template <>
+  Error listarray_getitem_jagged_apply_64<int32_t>(
+    int64_t* tooffsets,
+    int64_t* tocarry,
+    const int64_t* slicestarts,
+    int64_t slicestartsoffset,
+    const int64_t* slicestops,
+    int64_t slicestopsoffset,
+    int64_t sliceouterlen,
+    const int64_t* sliceindex,
+    int64_t sliceindexoffset,
+    int64_t sliceinnerlen,
+    const int32_t* fromstarts,
+    int64_t fromstartsoffset,
+    const int32_t* fromstops,
+    int64_t fromstopsoffset,
+    int64_t contentlen,
+    KernelsLib ptr_lib) {
+    return awkward_listarray32_getitem_jagged_apply_64(
+      tooffsets,
+      tocarry,
+      slicestarts,
+      slicestartsoffset,
+      slicestops,
+      slicestopsoffset,
+      sliceouterlen,
+      sliceindex,
+      sliceindexoffset,
+      sliceinnerlen,
+      fromstarts,
+      fromstartsoffset,
+      fromstops,
+      fromstopsoffset,
+      contentlen);
+  }
+  template <>
+  Error listarray_getitem_jagged_apply_64<uint32_t>(
+    int64_t* tooffsets,
+    int64_t* tocarry,
+    const int64_t* slicestarts,
+    int64_t slicestartsoffset,
+    const int64_t* slicestops,
+    int64_t slicestopsoffset,
+    int64_t sliceouterlen,
+    const int64_t* sliceindex,
+    int64_t sliceindexoffset,
+    int64_t sliceinnerlen,
+    const uint32_t* fromstarts,
+    int64_t fromstartsoffset,
+    const uint32_t* fromstops,
+    int64_t fromstopsoffset,
+    int64_t contentlen,
+    KernelsLib ptr_lib) {
+    return awkward_listarrayU32_getitem_jagged_apply_64(
+      tooffsets,
+      tocarry,
+      slicestarts,
+      slicestartsoffset,
+      slicestops,
+      slicestopsoffset,
+      sliceouterlen,
+      sliceindex,
+      sliceindexoffset,
+      sliceinnerlen,
+      fromstarts,
+      fromstartsoffset,
+      fromstops,
+      fromstopsoffset,
+      contentlen);
+  }
+  template <>
+  Error listarray_getitem_jagged_apply_64<int64_t>(
+    int64_t* tooffsets,
+    int64_t* tocarry,
+    const int64_t* slicestarts,
+    int64_t slicestartsoffset,
+    const int64_t* slicestops,
+    int64_t slicestopsoffset,
+    int64_t sliceouterlen,
+    const int64_t* sliceindex,
+    int64_t sliceindexoffset,
+    int64_t sliceinnerlen,
+    const int64_t* fromstarts,
+    int64_t fromstartsoffset,
+    const int64_t* fromstops,
+    int64_t fromstopsoffset,
+    int64_t contentlen,
+    KernelsLib ptr_lib) {
+    return awkward_listarray64_getitem_jagged_apply_64(
+      tooffsets,
+      tocarry,
+      slicestarts,
+      slicestartsoffset,
+      slicestops,
+      slicestopsoffset,
+      sliceouterlen,
+      sliceindex,
+      sliceindexoffset,
+      sliceinnerlen,
+      fromstarts,
+      fromstartsoffset,
+      fromstops,
+      fromstopsoffset,
+      contentlen);
+  }
+
+  template <>
+  ERROR listarray_getitem_jagged_numvalid(
+    int64_t* numvalid,
+    const int64_t* slicestarts,
+    int64_t slicestartsoffset,
+    const int64_t* slicestops,
+    int64_t slicestopsoffset,
+    int64_t length,
+    const int64_t* missing,
+    int64_t missingoffset,
+    int64_t missinglength) {
+    return awkward_listarray_getitem_jagged_numvalid_64(
+      numvalid,
+      slicestarts,
+      slicestartsoffset,
+      slicestops,
+      slicestopsoffset,
+      length,
+      missing,
+      missingoffset,
+      missinglength);
+  }
+
+  template <>
+  ERROR listarray_getitem_jagged_shrink(
+    int64_t* tocarry,
+    int64_t* tosmalloffsets,
+    int64_t* tolargeoffsets,
+    const int64_t* slicestarts,
+    int64_t slicestartsoffset,
+    const int64_t* slicestops,
+    int64_t slicestopsoffset,
+    int64_t length,
+    const int64_t* missing,
+    int64_t missingoffset) {
+    return awkward_listarray_getitem_jagged_shrink_64(
+      tocarry,
+      tosmalloffsets,
+      tolargeoffsets,
+      slicestarts,
+      slicestartsoffset,
+      slicestops,
+      slicestopsoffset,
+      length,
+      missing,
+      missingoffset);
+  }
+
+  template <>
+  Error listarray_getitem_jagged_descend_64<int32_t>(
+    int64_t* tooffsets,
+    const int64_t* slicestarts,
+    int64_t slicestartsoffset,
+    const int64_t* slicestops,
+    int64_t slicestopsoffset,
+    int64_t sliceouterlen,
+    const int32_t* fromstarts,
+    int64_t fromstartsoffset,
+    const int32_t* fromstops,
+    int64_t fromstopsoffset,
+    KernelsLib ptr_lib) {
+    return awkward_listarray32_getitem_jagged_descend_64(
+      tooffsets,
+      slicestarts,
+      slicestartsoffset,
+      slicestops,
+      slicestopsoffset,
+      sliceouterlen,
+      fromstarts,
+      fromstartsoffset,
+      fromstops,
+      fromstopsoffset);
+  }
+  template <>
+  Error listarray_getitem_jagged_descend_64<uint32_t>(
+    int64_t* tooffsets,
+    const int64_t* slicestarts,
+    int64_t slicestartsoffset,
+    const int64_t* slicestops,
+    int64_t slicestopsoffset,
+    int64_t sliceouterlen,
+    const uint32_t* fromstarts,
+    int64_t fromstartsoffset,
+    const uint32_t* fromstops,
+    int64_t fromstopsoffset,
+    KernelsLib ptr_lib) {
+    return awkward_listarrayU32_getitem_jagged_descend_64(
+      tooffsets,
+      slicestarts,
+      slicestartsoffset,
+      slicestops,
+      slicestopsoffset,
+      sliceouterlen,
+      fromstarts,
+      fromstartsoffset,
+      fromstops,
+      fromstopsoffset);
+  }
+  template <>
+  Error listarray_getitem_jagged_descend_64<int64_t>(
+    int64_t* tooffsets,
+    const int64_t* slicestarts,
+    int64_t slicestartsoffset,
+    const int64_t* slicestops,
+    int64_t slicestopsoffset,
+    int64_t sliceouterlen,
+    const int64_t* fromstarts,
+    int64_t fromstartsoffset,
+    const int64_t* fromstops,
+    int64_t fromstopsoffset,
+    KernelsLib ptr_lib) {
+    return awkward_listarray64_getitem_jagged_descend_64(
+      tooffsets,
+      slicestarts,
+      slicestartsoffset,
+      slicestops,
+      slicestopsoffset,
+      sliceouterlen,
+      fromstarts,
+      fromstartsoffset,
+      fromstops,
+      fromstopsoffset);
+  }
+
+  template <>
   int8_t index_getitem_at_nowrap<int8_t>(
     const int8_t* ptr,
     int64_t offset,
@@ -4057,5 +4669,83 @@ namespace kernel {
       offset,
       at,
       value);
+  }
+
+  template <>
+  ERROR bytemaskedarray_getitem_carry(
+    int8_t* tomask,
+    const int8_t* frommask,
+    int64_t frommaskoffset,
+    int64_t lenmask,
+    const int64_t* fromcarry,
+    int64_t lencarry) {
+    return awkward_bytemaskedarray_getitem_carry_64(
+      tomask,
+      frommask,
+      frommaskoffset,
+      lenmask,
+      fromcarry,
+      lencarry);
+  }
+
+  ERROR bytemaskedarray_numnull(
+    int64_t* numnull,
+    const int8_t* mask,
+    int64_t maskoffset,
+    int64_t length,
+    bool validwhen) {
+    return awkward_bytemaskedarray_numnull(
+      numnull,
+      mask,
+      maskoffset,
+      length,
+      validwhen);
+  }
+
+  template <>
+  ERROR bytemaskedarray_getitem_nextcarry(
+    int64_t* tocarry,
+    const int8_t* mask,
+    int64_t maskoffset,
+    int64_t length,
+    bool validwhen) {
+    return awkward_bytemaskedarray_getitem_nextcarry_64(
+      tocarry,
+      mask,
+      maskoffset,
+      length,
+      validwhen);
+  }
+
+  template <>
+  ERROR bytemaskedarray_getitem_nextcarry_outindex(
+    int64_t* tocarry,
+    int64_t* toindex,
+    const int8_t* mask,
+    int64_t maskoffset,
+    int64_t length,
+    bool validwhen) {
+    return awkward_bytemaskedarray_getitem_nextcarry_outindex_64(
+      tocarry,
+      toindex,
+      mask,
+      maskoffset,
+      length,
+      validwhen);
+  }
+
+  template <>
+  ERROR bytemaskedarray_toindexedarray(
+    int64_t* toindex,
+    const int8_t* mask,
+    int64_t maskoffset,
+    int64_t length,
+    bool validwhen) {
+    return awkward_bytemaskedarray_toindexedarray_64(
+      toindex,
+      mask,
+      maskoffset,
+      length,
+      validwhen);
   }
 }

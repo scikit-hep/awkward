@@ -626,7 +626,7 @@ namespace awkward {
   ListArrayOf<T>::getitem_range(int64_t start, int64_t stop) const {
     int64_t regular_start = start;
     int64_t regular_stop = stop;
-    awkward_regularize_rangeslice(&regular_start, &regular_stop,
+    kernel::regularize_rangeslice(&regular_start, &regular_stop,
       true, start != Slice::none(), stop != Slice::none(), starts_.length());
     if (regular_stop > stops_.length()) {
       util::handle_error(
@@ -1631,7 +1631,7 @@ namespace awkward {
     }
 
     int64_t carrylen;
-    struct Error err1 = awkward_listarray_getitem_jagged_carrylen_64(
+    struct Error err1 = kernel::listarray_getitem_jagged_carrylen<int64_t>(
       &carrylen,
       slicestarts.ptr().get(),
       slicestarts.offset(),
@@ -1689,7 +1689,7 @@ namespace awkward {
 
     Index64 missing = slicecontent.index();
     int64_t numvalid;
-    struct Error err1 = awkward_listarray_getitem_jagged_numvalid_64(
+    struct Error err1 = kernel::listarray_getitem_jagged_numvalid<int64_t>(
       &numvalid,
       slicestarts.ptr().get(),
       slicestarts.offset(),
@@ -1704,7 +1704,7 @@ namespace awkward {
     Index64 nextcarry(numvalid);
     Index64 smalloffsets(slicestarts.length() + 1);
     Index64 largeoffsets(slicestarts.length() + 1);
-    struct Error err2 = awkward_listarray_getitem_jagged_shrink_64(
+    struct Error err2 = kernel::listarray_getitem_jagged_shrink<int64_t>(
       nextcarry.ptr().get(),
       smalloffsets.ptr().get(),
       largeoffsets.ptr().get(),

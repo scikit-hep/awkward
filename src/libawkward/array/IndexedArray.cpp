@@ -1073,7 +1073,7 @@ namespace awkward {
                                              int64_t stop) const {
     int64_t regular_start = start;
     int64_t regular_stop = stop;
-    awkward_regularize_rangeslice(&regular_start, &regular_stop,
+    kernel::regularize_rangeslice(&regular_start, &regular_stop,
       true, start != Slice::none(), stop != Slice::none(), index_.length());
     if (identities_.get() != nullptr  &&
         regular_stop > identities_.get()->length()) {

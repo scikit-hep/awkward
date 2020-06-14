@@ -1051,7 +1051,7 @@ namespace awkward {
   NumpyArray::getitem_range(int64_t start, int64_t stop) const {
     int64_t regular_start = start;
     int64_t regular_stop = stop;
-    awkward_regularize_rangeslice(&regular_start, &regular_stop,
+    kernel::regularize_rangeslice(&regular_start, &regular_stop,
       true, start != Slice::none(), stop != Slice::none(), shape_[0]);
     return getitem_range_nowrap(regular_start, regular_stop);
   }
@@ -1207,7 +1207,7 @@ namespace awkward {
                            const Slice& tail,
                            const Index64& advanced) const {
     Index64 carry(shape_[0]);
-    struct Error err = awkward_carry_arange_64(carry.ptr().get(), shape_[0]);
+    struct Error err = kernel::carry_arange<int64_t>(carry.ptr().get(), shape_[0]);
     util::handle_error(err, classname(), identities_.get());
     return getitem_next(head,
                         tail,
@@ -1223,7 +1223,7 @@ namespace awkward {
     std::shared_ptr<void> ptr(
       new uint8_t[(size_t)(carry.length()*strides_[0])],
       util::array_deleter<uint8_t>());
-    struct Error err = awkward_numpyarray_getitem_next_null_64(
+    struct Error err = kernel::numpyarray_getitem_next_null<int64_t>(
       reinterpret_cast<uint8_t*>(ptr.get()),
       reinterpret_cast<uint8_t*>(ptr_.get()),
       carry.length(),
@@ -2334,7 +2334,7 @@ namespace awkward {
     }
     else if (format_.compare("?") == 0) {
       int64_t numtrue;
-      struct Error err1 = awkward_numpyarray_getitem_boolean_numtrue(
+      struct Error err1 = kernel::numpyarray_getitem_boolean_numtrue(
         &numtrue,
         reinterpret_cast<int8_t*>(ptr_.get()),
         (int64_t)byteoffset_,
@@ -2343,7 +2343,7 @@ namespace awkward {
       util::handle_error(err1, classname(), identities_.get());
 
       Index64 index(numtrue);
-      struct Error err2 = awkward_numpyarray_getitem_boolean_nonzero_64(
+      struct Error err2 = kernel::numpyarray_getitem_boolean_nonzero<int64_t>(
         index.ptr().get(),
         reinterpret_cast<int8_t*>(ptr_.get()),
         (int64_t)byteoffset_,
@@ -2759,7 +2759,7 @@ namespace awkward {
       std::shared_ptr<void> ptr(
         new uint8_t[(size_t)(bytepos.length()*strides_[0])],
         util::array_deleter<uint8_t>());
-      struct Error err = awkward_numpyarray_contiguous_copy_64(
+      struct Error err = kernel::numpyarray_contiguous_copy<int64_t>(
         reinterpret_cast<uint8_t*>(ptr.get()),
         reinterpret_cast<uint8_t*>(ptr_.get()),
         bytepos.length(),
@@ -2781,7 +2781,7 @@ namespace awkward {
       std::shared_ptr<void> ptr(
         new uint8_t[(size_t)(bytepos.length()*itemsize_)],
         util::array_deleter<uint8_t>());
-      struct Error err = awkward_numpyarray_contiguous_copy_64(
+      struct Error err = kernel::numpyarray_contiguous_copy<int64_t>(
         reinterpret_cast<uint8_t*>(ptr.get()),
         reinterpret_cast<uint8_t*>(ptr_.get()),
         bytepos.length(),
@@ -2811,7 +2811,7 @@ namespace awkward {
                       format_);
 
       Index64 nextbytepos(bytepos.length()*shape_[1]);
-      struct Error err = awkward_numpyarray_contiguous_next_64(
+      struct Error err = kernel::numpyarray_contiguous_next<int64_t>(
         nextbytepos.ptr().get(),
         bytepos.ptr().get(),
         bytepos.length(),
@@ -2934,7 +2934,7 @@ namespace awkward {
     if (step == Slice::none()) {
       step = 1;
     }
-    awkward_regularize_rangeslice(&start, &stop, step > 0,
+    kernel::regularize_rangeslice(&start, &stop, step > 0,
       range.hasstart(), range.hasstop(), (int64_t)shape_[1]);
 
     int64_t numer = std::abs(start - stop);
@@ -3037,7 +3037,7 @@ namespace awkward {
     if (head.get() == nullptr) {
       std::shared_ptr<void> ptr(new uint8_t[(size_t)(carry.length()*stride)],
                                 util::array_deleter<uint8_t>());
-      struct Error err = awkward_numpyarray_getitem_next_null_64(
+      struct Error err = kernel::numpyarray_getitem_next_null<int64_t>(
         reinterpret_cast<uint8_t*>(ptr.get()),
         reinterpret_cast<uint8_t*>(ptr_.get()),
         carry.length(),
@@ -3180,7 +3180,7 @@ namespace awkward {
     }
 
     Index64 nextcarry(carry.length());
-    struct Error err = awkward_numpyarray_getitem_next_at_64(
+    struct Error err = kernel::numpyarray_getitem_next_at<int64_t>(
       nextcarry.ptr().get(),
       carry.ptr().get(),
       carry.length(),
@@ -3229,7 +3229,7 @@ namespace awkward {
     if (step == Slice::none()) {
       step = 1;
     }
-    awkward_regularize_rangeslice(&start,
+    kernel::regularize_rangeslice(&start,
                                   &stop,
                                   step > 0,
                                   range.hasstart(),
@@ -3255,7 +3255,7 @@ namespace awkward {
 
     if (advanced.length() == 0) {
       Index64 nextcarry(carry.length()*lenhead);
-      struct Error err = awkward_numpyarray_getitem_next_range_64(
+      struct Error err = kernel::numpyarray_getitem_next_range<int64_t>(
         nextcarry.ptr().get(),
         carry.ptr().get(),
         carry.length(),
@@ -3293,7 +3293,7 @@ namespace awkward {
     else {
       Index64 nextcarry(carry.length()*lenhead);
       Index64 nextadvanced(carry.length()*lenhead);
-      struct Error err = awkward_numpyarray_getitem_next_range_advanced_64(
+      struct Error err = kernel::numpyarray_getitem_next_range_advanced<int64_t>(
         nextcarry.ptr().get(),
         nextadvanced.ptr().get(),
         carry.ptr().get(),
@@ -3434,7 +3434,7 @@ namespace awkward {
     Slice nexttail = tail.tail();
 
     Index64 flathead = array.ravel();
-    struct Error err = awkward_regularize_arrayslice_64(
+    struct Error err = kernel::regularize_arrayslice<int64_t>(
       flathead.ptr().get(),
       flathead.length(),
       shape_[1]);
@@ -3443,7 +3443,7 @@ namespace awkward {
     if (advanced.length() == 0) {
       Index64 nextcarry(carry.length()*flathead.length());
       Index64 nextadvanced(carry.length()*flathead.length());
-      struct Error err = awkward_numpyarray_getitem_next_array_64(
+      struct Error err = kernel::numpyarray_getitem_next_array<int64_t>(
         nextcarry.ptr().get(),
         nextadvanced.ptr().get(),
         carry.ptr().get(),
@@ -3488,7 +3488,7 @@ namespace awkward {
 
     else {
       Index64 nextcarry(carry.length());
-      struct Error err = awkward_numpyarray_getitem_next_array_advanced_64(
+      struct Error err = kernel::numpyarray_getitem_next_array_advanced<int64_t>(
         nextcarry.ptr().get(),
         carry.ptr().get(),
         advanced.ptr().get(),
