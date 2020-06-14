@@ -10,21 +10,7 @@ namespace kernel {
   template <typename T>
   class IndexOf;
 
-  template <typename T>
-  ERROR
-  indexedarray_reduce_next_64(
-    int64_t* nextcarry,
-    int64_t* nextparents,
-    int64_t* outindex,
-    const T* index,
-    int64_t indexoffset,
-    int64_t* parents,
-    int64_t parentsoffset,
-    int64_t length  ,
-    KernelsLib ptr_lib = cpu_kernels);
-
   /// @brief getitem kernels
-
   void regularize_rangeslice(
     int64_t* start,
     int64_t* stop,
@@ -62,8 +48,7 @@ namespace kernel {
     const int64_t* carry,
     int64_t fromindexoffset,
     int64_t lenfromindex,
-    int64_t length  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t length);
 
   template <typename T>
   ERROR
@@ -72,8 +57,7 @@ namespace kernel {
     const T* fromindex,
     const int64_t* carry,
     int64_t fromindexoffset,
-    int64_t length  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t length);
 
   template <typename T>
   ERROR slicearray_ravel(
@@ -105,6 +89,12 @@ namespace kernel {
     int64_t offset,
     int64_t width,
     int64_t length);
+
+  template <typename T>
+  ERROR numpyarray_contiguous_init(
+    T* toptr,
+    int64_t skip,
+    int64_t stride);
 
   template <typename T>
   ERROR numpyarray_contiguous_copy(
@@ -205,8 +195,7 @@ namespace kernel {
     int64_t lenstarts,
     int64_t startsoffset,
     int64_t stopsoffset,
-    int64_t at  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t at);
 
 
   template <typename T>
@@ -220,8 +209,7 @@ namespace kernel {
     int64_t stopsoffset,
     int64_t start,
     int64_t stop,
-    int64_t step  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t step);
 
   template <typename T>
   ERROR
@@ -235,8 +223,7 @@ namespace kernel {
     int64_t stopsoffset,
     int64_t start,
     int64_t stop,
-    int64_t step  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t step);
 
 
   template <typename T>
@@ -244,8 +231,7 @@ namespace kernel {
   listarray_getitem_next_range_counts_64(
     int64_t* total,
     const T* fromoffsets,
-    int64_t lenstarts  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t lenstarts);
 
 
   template <typename T>
@@ -254,8 +240,7 @@ namespace kernel {
     int64_t* toadvanced,
     const int64_t* fromadvanced,
     const T* fromoffsets,
-    int64_t lenstarts  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t lenstarts);
 
 
   template <typename T>
@@ -270,8 +255,7 @@ namespace kernel {
     int64_t stopsoffset,
     int64_t lenstarts,
     int64_t lenarray,
-    int64_t lencontent  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t lencontent);
 
 
   template <typename T>
@@ -287,8 +271,7 @@ namespace kernel {
     int64_t stopsoffset,
     int64_t lenstarts,
     int64_t lenarray,
-    int64_t lencontent  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t lencontent);
 
 
   template <typename T>
@@ -302,8 +285,7 @@ namespace kernel {
     int64_t startsoffset,
     int64_t stopsoffset,
     int64_t lenstarts,
-    int64_t lencarry  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t lencarry);
 
   template <typename T>
   ERROR regulararray_getitem_next_at(
@@ -367,8 +349,7 @@ namespace kernel {
     int64_t* numnull,
     const T* fromindex,
     int64_t indexoffset,
-    int64_t lenindex  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t lenindex);
 
   template <typename T>
   ERROR
@@ -378,8 +359,7 @@ namespace kernel {
     const T* fromindex,
     int64_t indexoffset,
     int64_t lenindex,
-    int64_t lencontent  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t lencontent);
 
   template <typename T>
   ERROR
@@ -389,8 +369,7 @@ namespace kernel {
     const T* fromindex,
     int64_t indexoffset,
     int64_t lenindex,
-    int64_t lencontent  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t lencontent);
 
   template <typename T>
   ERROR listoffsetarray_getitem_adjust_offsets(
@@ -439,8 +418,7 @@ namespace kernel {
     const T* fromindex,
     int64_t indexoffset,
     int64_t lenindex,
-    int64_t lencontent  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t lencontent);
 
 
   template <typename T>
@@ -451,8 +429,7 @@ namespace kernel {
     const int64_t* fromcarry,
     int64_t indexoffset,
     int64_t lenindex,
-    int64_t lencarry  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t lencarry);
 
   template <typename T>
   ERROR
@@ -460,8 +437,7 @@ namespace kernel {
     int64_t* size,
     const T* fromtags,
     int64_t tagsoffset,
-    int64_t length  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t length);
 
   template <typename T, typename I>
   ERROR
@@ -471,8 +447,7 @@ namespace kernel {
     int64_t size,
     const T* fromtags,
     int64_t tagsoffset,
-    int64_t length  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t length);
 
   template <typename T, typename I>
   ERROR
@@ -484,8 +459,7 @@ namespace kernel {
     const I* fromindex,
     int64_t indexoffset,
     int64_t length,
-    int64_t which  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t which);
 
   template <typename T>
   ERROR missing_repeat(
@@ -516,8 +490,7 @@ namespace kernel {
     const T* fromstops,
     int64_t fromstopsoffset,
     int64_t jaggedsize,
-    int64_t length  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t length);
 
   template <typename T>
   ERROR listarray_getitem_jagged_carrylen(
@@ -545,8 +518,7 @@ namespace kernel {
     int64_t fromstartsoffset,
     const T* fromstops,
     int64_t fromstopsoffset,
-    int64_t contentlen  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t contentlen);
 
   template <typename T>
   ERROR listarray_getitem_jagged_numvalid(
@@ -585,16 +557,14 @@ namespace kernel {
     const T* fromstarts,
     int64_t fromstartsoffset,
     const T* fromstops,
-    int64_t fromstopsoffset  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t fromstopsoffset);
 
   template<typename T>
   T
   index_getitem_at_nowrap(
     const T* ptr,
     int64_t offset,
-    int64_t at  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t at);
 
   template<typename T>
   void
@@ -602,8 +572,7 @@ namespace kernel {
     T* ptr,
     int64_t offset,
     int64_t at,
-    T value  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    T value);
 
   template <typename T>
   ERROR bytemaskedarray_getitem_carry(
@@ -668,8 +637,7 @@ namespace kernel {
     int64_t offsetsoffset,
     int64_t tolength,
     int64_t fromlength,
-    int64_t fromwidth  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t fromwidth);
 
 
   template <typename T>
@@ -682,8 +650,7 @@ namespace kernel {
     int64_t offsetsoffset,
     int64_t tolength,
     int64_t fromlength,
-    int64_t fromwidth  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t fromwidth);
 
 
   template <typename T>
@@ -699,8 +666,7 @@ namespace kernel {
     int64_t stopsoffset,
     int64_t tolength,
     int64_t fromlength,
-    int64_t fromwidth  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t fromwidth);
 
 
   template <typename T>
@@ -716,8 +682,7 @@ namespace kernel {
     int64_t stopsoffset,
     int64_t tolength,
     int64_t fromlength,
-    int64_t fromwidth  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t fromwidth);
 
   template <typename ID>
   ERROR identities_from_regulararray(
@@ -741,8 +706,7 @@ namespace kernel {
     int64_t indexoffset,
     int64_t tolength,
     int64_t fromlength,
-    int64_t fromwidth  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t fromwidth);
 
 
   template <typename T>
@@ -756,8 +720,7 @@ namespace kernel {
     int64_t indexoffset,
     int64_t tolength,
     int64_t fromlength,
-    int64_t fromwidth  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t fromwidth);
 
 
   template <typename T, typename I>
@@ -774,8 +737,7 @@ namespace kernel {
     int64_t tolength,
     int64_t fromlength,
     int64_t fromwidth,
-    int64_t which  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t which);
 
 
   template <typename T, typename I>
@@ -792,8 +754,7 @@ namespace kernel {
     int64_t tolength,
     int64_t fromlength,
     int64_t fromwidth,
-    int64_t which  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t which);
 
   template <typename ID>
   ERROR identities_extend(
@@ -812,8 +773,7 @@ namespace kernel {
     int64_t startsoffset,
     const T* fromstops,
     int64_t stopsoffset,
-    int64_t length  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t length);
 
   template <typename T>
   ERROR regulararray_num(
@@ -830,8 +790,7 @@ namespace kernel {
     int64_t outeroffsetslen,
     const int64_t* inneroffsets,
     int64_t inneroffsetsoffset,
-    int64_t inneroffsetslen  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t inneroffsetslen);
 
 
   template <typename T>
@@ -843,8 +802,7 @@ namespace kernel {
     int64_t outindexlength,
     const int64_t* offsets,
     int64_t offsetsoffset,
-    int64_t offsetslength  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t offsetslength);
 
 
   template <typename T, typename I>
@@ -857,8 +815,7 @@ namespace kernel {
     int64_t fromindexoffset,
     int64_t length,
     int64_t** offsetsraws,
-    int64_t* offsetsoffsets  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t* offsetsoffsets);
 
 
   template <typename T, typename I>
@@ -873,8 +830,7 @@ namespace kernel {
     int64_t fromindexoffset,
     int64_t length,
     int64_t** offsetsraws,
-    int64_t* offsetsoffsets  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t* offsetsoffsets);
 
 
   template <typename T>
@@ -884,8 +840,7 @@ namespace kernel {
     const T* fromindex,
     int64_t indexoffset,
     int64_t lenindex,
-    int64_t lencontent  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t lencontent);
 
   template <typename T>
   ERROR
@@ -895,8 +850,7 @@ namespace kernel {
     int64_t maskoffset,
     const T* fromindex,
     int64_t indexoffset,
-    int64_t length  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t length);
 
 
   template <typename T>
@@ -905,8 +859,7 @@ namespace kernel {
     int8_t* tomask,
     const T* fromindex,
     int64_t indexoffset,
-    int64_t length  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t length);
 
   template <typename M>
   ERROR bytemaskedarray_mask(
@@ -930,8 +883,7 @@ namespace kernel {
     int64_t outerlength,
     const int32_t* innerindex,
     int64_t inneroffset,
-    int64_t innerlength  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t innerlength);
 
 
   template <typename T>
@@ -943,8 +895,7 @@ namespace kernel {
     int64_t outerlength,
     const uint32_t* innerindex,
     int64_t inneroffset,
-    int64_t innerlength  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t innerlength);
 
 
   template <typename T>
@@ -956,8 +907,7 @@ namespace kernel {
     int64_t outerlength,
     const int64_t* innerindex,
     int64_t inneroffset,
-    int64_t innerlength  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t innerlength);
 
   template <typename T>
   ERROR
@@ -967,9 +917,13 @@ namespace kernel {
     const T* fromstops,
     int64_t startsoffset,
     int64_t stopsoffset,
-    int64_t length  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t length);
 
+  template <typename T>
+  ERROR regulararray_compact_offsets(
+    T* tooffsets,
+    int64_t length,
+    int64_t size);
 
   template <typename T>
   ERROR
@@ -977,8 +931,7 @@ namespace kernel {
     int64_t* tooffsets,
     const T* fromoffsets,
     int64_t offsetsoffset,
-    int64_t length  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t length);
 
 
   template <typename T>
@@ -992,8 +945,7 @@ namespace kernel {
     int64_t startsoffset,
     const T* fromstops,
     int64_t stopsoffset,
-    int64_t lencontent  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t lencontent);
 
   template <typename T>
   ERROR regulararray_broadcast_tooffsets(
@@ -1015,8 +967,7 @@ namespace kernel {
     int64_t* size,
     const T* fromoffsets,
     int64_t offsetsoffset,
-    int64_t offsetslength  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t offsetslength);
 
   template <typename FROM, typename TO>
   ERROR numpyarray_fill(
@@ -1040,6 +991,19 @@ namespace kernel {
     const uint64_t* fromptr,
     int64_t fromoffset,
     int64_t length);
+
+  template <typename FROM, typename TO>
+  ERROR listarray_fill(
+    TO* tostarts,
+    int64_t tostartsoffset,
+    TO* tostops,
+    int64_t tostopsoffset,
+    const FROM* fromstarts,
+    int64_t fromstartsoffset,
+    const FROM* fromstops,
+    int64_t fromstopsoffset,
+    int64_t length,
+    int64_t base);
 
   template <typename FROM, typename TO>
   ERROR indexedarray_fill(
@@ -1104,8 +1068,7 @@ namespace kernel {
     int64_t innerwhich,
     int64_t outerwhich,
     int64_t length,
-    int64_t base  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t base);
 
 
   template <typename T, typename I>
@@ -1125,8 +1088,7 @@ namespace kernel {
     int64_t innerwhich,
     int64_t outerwhich,
     int64_t length,
-    int64_t base  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t base);
 
 
   template <typename T, typename I>
@@ -1146,8 +1108,7 @@ namespace kernel {
     int64_t innerwhich,
     int64_t outerwhich,
     int64_t length,
-    int64_t base  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t base);
 
 
   template <typename T, typename I>
@@ -1162,8 +1123,7 @@ namespace kernel {
     int64_t towhich,
     int64_t fromwhich,
     int64_t length,
-    int64_t base  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t base);
 
   template <typename T>
   ERROR
@@ -1173,8 +1133,7 @@ namespace kernel {
     const T* stops,
     int64_t stopsoffset,
     int64_t length,
-    int64_t lencontent  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t lencontent);
 
 
   template <typename T>
@@ -1184,8 +1143,7 @@ namespace kernel {
     int64_t indexoffset,
     int64_t length,
     int64_t lencontent,
-    bool isoption  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    bool isoption);
 
 
   template <typename T, typename I>
@@ -1197,8 +1155,7 @@ namespace kernel {
     int64_t indexoffset,
     int64_t length,
     int64_t numcontents,
-    const int64_t* lencontents  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    const int64_t* lencontents);
 
   template <typename T>
   ERROR
@@ -1206,8 +1163,7 @@ namespace kernel {
     int64_t* toindex,
     const T* fromindex,
     int64_t offset,
-    int64_t length  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t length);
 
   template <typename T>
   ERROR IndexedOptionArray_rpad_and_clip_mask_axis1(
@@ -1243,8 +1199,7 @@ namespace kernel {
     const T* fromstops,
     int64_t lenstarts,
     int64_t startsoffset,
-    int64_t stopsoffset  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t stopsoffset);
 
   template <typename T>
   ERROR
@@ -1255,8 +1210,7 @@ namespace kernel {
     int64_t target,
     int64_t lenstarts,
     int64_t startsoffset,
-    int64_t stopsoffset  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t stopsoffset);
 
   template <typename T>
   ERROR
@@ -1269,8 +1223,7 @@ namespace kernel {
     int64_t target,
     int64_t length,
     int64_t startsoffset,
-    int64_t stopsoffset  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t stopsoffset);
 
   template <typename T>
   ERROR
@@ -1279,8 +1232,7 @@ namespace kernel {
     const T* fromoffsets,
     int64_t offsetsoffset,
     int64_t length,
-    int64_t target  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t target);
 
   template <typename T>
   ERROR
@@ -1290,8 +1242,7 @@ namespace kernel {
     int64_t offsetsoffset,
     int64_t fromlength,
     int64_t target,
-    int64_t* tolength  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t* tolength);
 
   template <typename T>
   ERROR
@@ -1300,8 +1251,7 @@ namespace kernel {
     const T* fromoffsets,
     int64_t offsetsoffset,
     int64_t fromlength,
-    int64_t target  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t target);
 
   template <typename T>
   ERROR localindex(
@@ -1314,8 +1264,7 @@ namespace kernel {
     int64_t* toindex,
     const T* offsets,
     int64_t offsetsoffset,
-    int64_t length  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t length);
 
   template <typename T>
   ERROR regulararray_localindex(
@@ -1341,8 +1290,7 @@ namespace kernel {
     int64_t startsoffset,
     const T* stops,
     int64_t stopsoffset,
-    int64_t length  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t length);
 
   template <typename T>
   ERROR
@@ -1356,8 +1304,7 @@ namespace kernel {
     int64_t startsoffset,
     const T* stops,
     int64_t stopsoffset,
-    int64_t length  ,
-    KernelsLib ptr_lib = cpu_kernels);
+    int64_t length);
 
   template <typename T>
   ERROR regulararray_combinations(
@@ -1396,7 +1343,211 @@ namespace kernel {
     bool validwhen,
     bool lsb_order);
 
+  /// @brief Reducers Kernels
+  ERROR reduce_count_64(
+    int64_t* toptr,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength);
 
+  template <typename IN>
+  ERROR reduce_countnonzero(
+    int64_t* toptr,
+    const IN* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength);
+
+  template <typename OUT, typename IN>
+  ERROR reduce_sum(
+    OUT* toptr,
+    const IN* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength);
+
+  template <typename IN>
+  ERROR reduce_sum_bool(
+    bool* toptr,
+    const IN* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength);
+
+  template <typename OUT, typename IN>
+  ERROR reduce_prod(
+    OUT* toptr,
+    const IN* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength);
+
+  template <typename IN>
+  ERROR reduce_prod_bool(
+    bool* toptr,
+    const IN* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength);
+
+  template <typename OUT, typename IN>
+  ERROR reduce_min(
+    OUT* toptr,
+    const IN* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength,
+    OUT identity);
+
+  template <typename OUT, typename IN>
+  ERROR reduce_max(
+    OUT* toptr,
+    const IN* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength,
+    OUT identity);
+
+  template <typename OUT, typename IN>
+  ERROR reduce_argmin(
+    OUT* toptr,
+    const IN* fromptr,
+    int64_t fromptroffset,
+    const int64_t* starts,
+    int64_t startsoffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength);
+
+  template <typename OUT, typename IN>
+  ERROR reduce_argmax(
+    OUT* toptr,
+    const IN* fromptr,
+    int64_t fromptroffset,
+    const int64_t* starts,
+    int64_t startsoffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength);
+
+  ERROR content_reduce_zeroparents_64(
+    int64_t* toparents,
+    int64_t length);
+
+  ERROR listoffsetarray_reduce_global_startstop_64(
+    int64_t* globalstart,
+    int64_t* globalstop,
+    const int64_t* offsets,
+    int64_t offsetsoffset,
+    int64_t length);
+
+  ERROR listoffsetarray_reduce_nonlocal_maxcount_offsetscopy_64(
+    int64_t* maxcount,
+    int64_t* offsetscopy,
+    const int64_t* offsets,
+    int64_t offsetsoffset,
+    int64_t length);
+
+  ERROR listoffsetarray_reduce_nonlocal_preparenext_64(
+    int64_t* nextcarry,
+    int64_t* nextparents,
+    int64_t nextlen,
+    int64_t* maxnextparents,
+    int64_t* distincts,
+    int64_t distinctslen,
+    int64_t* offsetscopy,
+    const int64_t* offsets,
+    int64_t offsetsoffset,
+    int64_t length,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t maxcount);
+
+  ERROR listoffsetarray_reduce_nonlocal_nextstarts_64(
+    int64_t* nextstarts,
+    const int64_t* nextparents,
+    int64_t nextlen);
+
+  ERROR listoffsetarray_reduce_nonlocal_findgaps_64(
+    int64_t* gaps,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents);
+
+  ERROR listoffsetarray_reduce_nonlocal_outstartsstops_64(
+    int64_t* outstarts,
+    int64_t* outstops,
+    const int64_t* distincts,
+    int64_t lendistincts,
+    const int64_t* gaps,
+    int64_t outlength);
+
+  ERROR listoffsetarray_reduce_local_nextparents_64(
+    int64_t* nextparents,
+    const int64_t* offsets,
+    int64_t offsetsoffset,
+    int64_t length);
+
+  ERROR listoffsetarray_reduce_local_outoffsets_64(
+    int64_t* outoffsets,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength);
+
+  template <typename T>
+  ERROR
+  indexedarray_reduce_next_64(
+    int64_t* nextcarry,
+    int64_t* nextparents,
+    int64_t* outindex,
+    const T* index,
+    int64_t indexoffset,
+    int64_t* parents,
+    int64_t parentsoffset,
+    int64_t length);
+
+  ERROR indexedarray_reduce_next_fix_offsets_64(
+    int64_t* outoffsets,
+    const int64_t* starts,
+    int64_t startsoffset,
+    int64_t startslength,
+    int64_t outindexlength);
+
+  ERROR numpyarray_reduce_mask_bytemaskedarray(
+    int8_t* toptr,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength);
+
+  ERROR bytemaskedarray_reduce_next_64(
+    int64_t* nextcarry,
+    int64_t* nextparents,
+    int64_t* outindex,
+    const int8_t* mask,
+    int64_t maskoffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t length,
+    bool validwhen);
 
 
 };

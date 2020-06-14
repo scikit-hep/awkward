@@ -693,7 +693,7 @@ namespace awkward {
     starts.setitem_at_nowrap(0, 0);
 
     Index64 parents(length());
-    struct Error err = awkward_content_reduce_zeroparents_64(
+    struct Error err = kernel::content_reduce_zeroparents_64(
       parents.ptr().get(),
       length());
     util::handle_error(err, classname(), identities_.get());

@@ -189,7 +189,7 @@ namespace awkward {
   RegularArray::compact_offsets64(bool start_at_zero) const {
     int64_t len = length();
     Index64 out(len + 1);
-    struct Error err = awkward_regulararray_compact_offsets64(
+    struct Error err = kernel::regulararray_compact_offsets<int64_t>(
       out.ptr().get(),
       len,
       size_);
@@ -290,7 +290,7 @@ namespace awkward {
                                          content_.get()->length());
         Identities32* rawsubidentities =
           reinterpret_cast<Identities32*>(subidentities.get());
-        struct Error err = awkward_identities32_from_regulararray(
+        struct Error err = kernel::identities_from_regulararray<int32_t>(
           rawsubidentities->ptr().get(),
           rawidentities->ptr().get(),
           rawidentities->offset(),
@@ -1187,7 +1187,7 @@ namespace awkward {
     Index64 singleoffsets = jagged.offsets();
     Index64 multistarts(jagged.length()*regularlength);
     Index64 multistops(jagged.length()*regularlength);
-    struct Error err = awkward_regulararray_getitem_jagged_expand_64(
+    struct Error err = kernel::regulararray_getitem_jagged_expand<int64_t>(
       multistarts.ptr().get(),
       multistops.ptr().get(),
       singleoffsets.ptr().get(),

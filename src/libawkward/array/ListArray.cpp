@@ -408,7 +408,7 @@ namespace awkward {
       Identities32* rawidentities =
         reinterpret_cast<Identities32*>(newidentities.get());
       struct Error err =
-        awkward_new_identities32(rawidentities->ptr().get(), length());
+        kernel::new_identities<int32_t>(rawidentities->ptr().get(), length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
     }
@@ -951,7 +951,7 @@ namespace awkward {
     Index64 stops(mylength + theirlength);
 
     if (std::is_same<T, int32_t>::value) {
-      struct Error err = awkward_listarray_fill_to64_from32(
+      struct Error err = kernel::listarray_fill<int32_t, int64_t>(
         starts.ptr().get(),
         0,
         stops.ptr().get(),
@@ -965,7 +965,7 @@ namespace awkward {
       util::handle_error(err, classname(), identities_.get());
     }
     else if (std::is_same<T, uint32_t>::value) {
-      struct Error err = awkward_listarray_fill_to64_fromU32(
+      struct Error err = kernel::listarray_fill<uint32_t, int64_t>(
         starts.ptr().get(),
         0,
         stops.ptr().get(),
@@ -979,7 +979,7 @@ namespace awkward {
       util::handle_error(err, classname(), identities_.get());
     }
     else if (std::is_same<T, int64_t>::value) {
-      struct Error err = awkward_listarray_fill_to64_from64(
+      struct Error err = kernel::listarray_fill<int64_t, int64_t>(
         starts.ptr().get(),
         0,
         stops.ptr().get(),
@@ -1003,7 +1003,7 @@ namespace awkward {
       content = content_.get()->merge(rawother->content());
       Index32 other_starts = rawother->starts();
       Index32 other_stops = rawother->stops();
-      struct Error err = awkward_listarray_fill_to64_from32(
+      struct Error err = kernel::listarray_fill<int32_t, int64_t>(
         starts.ptr().get(),
         mylength,
         stops.ptr().get(),
@@ -1023,7 +1023,7 @@ namespace awkward {
       content = content_.get()->merge(rawother->content());
       IndexU32 other_starts = rawother->starts();
       IndexU32 other_stops = rawother->stops();
-      struct Error err = awkward_listarray_fill_to64_fromU32(
+      struct Error err = kernel::listarray_fill<uint32_t, int64_t>(
         starts.ptr().get(),
         mylength,
         stops.ptr().get(),
@@ -1043,7 +1043,7 @@ namespace awkward {
       content = content_.get()->merge(rawother->content());
       Index64 other_starts = rawother->starts();
       Index64 other_stops = rawother->stops();
-      struct Error err = awkward_listarray_fill_to64_from64(
+      struct Error err = kernel::listarray_fill<int64_t, int64_t>(
         starts.ptr().get(),
         mylength,
         stops.ptr().get(),
@@ -1063,7 +1063,7 @@ namespace awkward {
       content = content_.get()->merge(rawother->content());
       Index32 other_starts = rawother->starts();
       Index32 other_stops = rawother->stops();
-      struct Error err = awkward_listarray_fill_to64_from32(
+      struct Error err = kernel::listarray_fill<int32_t, int64_t>(
         starts.ptr().get(),
         mylength,
         stops.ptr().get(),
@@ -1082,7 +1082,7 @@ namespace awkward {
       content = content_.get()->merge(rawother->content());
       IndexU32 other_starts = rawother->starts();
       IndexU32 other_stops = rawother->stops();
-      struct Error err = awkward_listarray_fill_to64_fromU32(
+      struct Error err = kernel::listarray_fill<uint32_t, int64_t>(
         starts.ptr().get(),
         mylength,
         stops.ptr().get(),
@@ -1102,7 +1102,7 @@ namespace awkward {
       content = content_.get()->merge(rawother->content());
       Index64 other_starts = rawother->starts();
       Index64 other_stops = rawother->stops();
-      struct Error err = awkward_listarray_fill_to64_from64(
+      struct Error err = kernel::listarray_fill<int64_t, int64_t>(
         starts.ptr().get(),
         mylength,
         stops.ptr().get(),
@@ -1125,7 +1125,7 @@ namespace awkward {
       content = content_.get()->merge(rawother->content());
       Index64 other_starts = rawother->starts();
       Index64 other_stops = rawother->stops();
-      struct Error err = awkward_listarray_fill_to64_from64(
+      struct Error err = kernel::listarray_fill<int64_t, int64_t>(
         starts.ptr().get(),
         mylength,
         stops.ptr().get(),

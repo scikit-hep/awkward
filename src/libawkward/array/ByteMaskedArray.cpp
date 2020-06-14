@@ -256,7 +256,7 @@ namespace awkward {
     }
     else {
       Index8 out(length());
-      struct Error err = awkward_bytemaskedarray_mask8(
+      struct Error err = kernel::bytemaskedarray_mask<int8_t>(
         out.ptr().get(),
         mask_.ptr().get(),
         mask_.offset(),
@@ -929,7 +929,7 @@ namespace awkward {
     Index64 nextparents(length() - numnull);
     Index64 nextcarry(length() - numnull);
     Index64 outindex(length());
-    struct Error err2 = awkward_bytemaskedarray_reduce_next_64(
+    struct Error err2 = kernel::bytemaskedarray_reduce_next_64(
       nextcarry.ptr().get(),
       nextparents.ptr().get(),
       outindex.ptr().get(),
@@ -967,7 +967,7 @@ namespace awkward {
             "reduce_next with unbranching depth > negaxis expects "
             "a ListOffsetArray64 whose offsets start at zero");
         }
-        struct Error err3 = awkward_indexedarray_reduce_next_fix_offsets_64(
+        struct Error err3 = kernel::indexedarray_reduce_next_fix_offsets_64(
           outoffsets.ptr().get(),
           starts.ptr().get(),
           starts.offset(),

@@ -2539,7 +2539,7 @@ namespace awkward {
 
       if (mask) {
         Index8 mask(outlength);
-        struct Error err = awkward_numpyarray_reduce_mask_bytemaskedarray(
+        struct Error err = kernel::numpyarray_reduce_mask_bytemaskedarray(
           mask.ptr().get(),
           parents.ptr().get(),
           parents.offset(),
@@ -2745,9 +2745,9 @@ namespace awkward {
     else {
       Index64 bytepos(shape_[0]);
       struct Error err =
-        awkward_numpyarray_contiguous_init_64(bytepos.ptr().get(),
-                                              shape_[0],
-                                              strides_[0]);
+        kernel::numpyarray_contiguous_init<int64_t>(bytepos.ptr().get(),
+                                                    shape_[0],
+                                                    strides_[0]);
       util::handle_error(err, classname(), identities_.get());
       return contiguous_next(bytepos);
     }

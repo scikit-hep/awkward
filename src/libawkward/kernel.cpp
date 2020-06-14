@@ -14,72 +14,6 @@
 #include "awkward/kernel.h"
 
 namespace kernel {
-  template <>
-  Error indexedarray_reduce_next_64<int32_t>(
-    int64_t* nextcarry,
-    int64_t* nextparents,
-    int64_t* outindex,
-    const int32_t* index,
-    int64_t indexoffset,
-    int64_t* parents,
-    int64_t parentsoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
-    return awkward_indexedarray32_reduce_next_64(
-      nextcarry,
-      nextparents,
-      outindex,
-      index,
-      indexoffset,
-      parents,
-      parentsoffset,
-      length);
-  }
-
-  template <>
-  Error indexedarray_reduce_next_64<uint32_t>(
-    int64_t* nextcarry,
-    int64_t* nextparents,
-    int64_t* outindex,
-    const uint32_t* index,
-    int64_t indexoffset,
-    int64_t* parents,
-    int64_t parentsoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
-    return awkward_indexedarrayU32_reduce_next_64(
-      nextcarry,
-      nextparents,
-      outindex,
-      index,
-      indexoffset,
-      parents,
-      parentsoffset,
-      length);
-  }
-
-  template <>
-  Error indexedarray_reduce_next_64<int64_t>(
-    int64_t* nextcarry,
-    int64_t* nextparents,
-    int64_t* outindex,
-    const int64_t* index,
-    int64_t indexoffset,
-    int64_t* parents,
-    int64_t parentsoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
-    return awkward_indexedarray64_reduce_next_64(
-      nextcarry,
-      nextparents,
-      outindex,
-      index,
-      indexoffset,
-      parents,
-      parentsoffset,
-      length);
-  }
-
   /// @brief getitem kernels
   void regularize_rangeslice(
     int64_t* start,
@@ -156,8 +90,7 @@ namespace kernel {
     const int64_t* carry,
     int64_t fromindexoffset,
     int64_t lenfromindex,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_index8_carry_64(
       toindex,
       fromindex,
@@ -173,8 +106,7 @@ namespace kernel {
     const int64_t* carry,
     int64_t fromindexoffset,
     int64_t lenfromindex,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_indexU8_carry_64(
       toindex,
       fromindex,
@@ -190,8 +122,7 @@ namespace kernel {
     const int64_t* carry,
     int64_t fromindexoffset,
     int64_t lenfromindex,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_index32_carry_64(
       toindex,
       fromindex,
@@ -207,8 +138,7 @@ namespace kernel {
     const int64_t* carry,
     int64_t fromindexoffset,
     int64_t lenfromindex,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_indexU32_carry_64(
       toindex,
       fromindex,
@@ -224,8 +154,7 @@ namespace kernel {
     const int64_t* carry,
     int64_t fromindexoffset,
     int64_t lenfromindex,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_index64_carry_64(
       toindex,
       fromindex,
@@ -241,8 +170,7 @@ namespace kernel {
     const int8_t* fromindex,
     const int64_t* carry,
     int64_t fromindexoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_index8_carry_nocheck_64(
       toindex,
       fromindex,
@@ -256,8 +184,7 @@ namespace kernel {
     const uint8_t* fromindex,
     const int64_t* carry,
     int64_t fromindexoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_indexU8_carry_nocheck_64(
       toindex,
       fromindex,
@@ -271,8 +198,7 @@ namespace kernel {
     const int32_t* fromindex,
     const int64_t* carry,
     int64_t fromindexoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_index32_carry_nocheck_64(
       toindex,
       fromindex,
@@ -286,8 +212,7 @@ namespace kernel {
     const uint32_t* fromindex,
     const int64_t* carry,
     int64_t fromindexoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_indexU32_carry_nocheck_64(
       toindex,
       fromindex,
@@ -301,8 +226,7 @@ namespace kernel {
     const int64_t* fromindex,
     const int64_t* carry,
     int64_t fromindexoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_index64_carry_nocheck_64(
       toindex,
       fromindex,
@@ -403,6 +327,18 @@ namespace kernel {
       width,
       length);
   }
+
+  template <>
+  ERROR numpyarray_contiguous_init(
+    int64_t* toptr,
+    int64_t skip,
+    int64_t stride) {
+    return awkward_numpyarray_contiguous_init_64(
+      toptr,
+      skip,
+      stride);
+  }
+
 
   template <>
   ERROR numpyarray_contiguous_copy(
@@ -583,8 +519,7 @@ namespace kernel {
     int64_t lenstarts,
     int64_t startsoffset,
     int64_t stopsoffset,
-    int64_t at,
-    KernelsLib ptr_lib) {
+    int64_t at) {
     return awkward_listarray32_getitem_next_at_64(
       tocarry,
       fromstarts,
@@ -602,8 +537,7 @@ namespace kernel {
     int64_t lenstarts,
     int64_t startsoffset,
     int64_t stopsoffset,
-    int64_t at,
-    KernelsLib ptr_lib) {
+    int64_t at) {
     return awkward_listarrayU32_getitem_next_at_64(
       tocarry,
       fromstarts,
@@ -621,8 +555,7 @@ namespace kernel {
     int64_t lenstarts,
     int64_t startsoffset,
     int64_t stopsoffset,
-    int64_t at,
-    KernelsLib ptr_lib) {
+    int64_t at) {
     return awkward_listarray64_getitem_next_at_64(
       tocarry,
       fromstarts,
@@ -643,8 +576,7 @@ namespace kernel {
     int64_t stopsoffset,
     int64_t start,
     int64_t stop,
-    int64_t step,
-    KernelsLib ptr_lib) {
+    int64_t step) {
     return awkward_listarray32_getitem_next_range_carrylength(
       carrylength,
       fromstarts,
@@ -666,8 +598,7 @@ namespace kernel {
     int64_t stopsoffset,
     int64_t start,
     int64_t stop,
-    int64_t step,
-    KernelsLib ptr_lib) {
+    int64_t step) {
     return awkward_listarrayU32_getitem_next_range_carrylength(
       carrylength,
       fromstarts,
@@ -689,8 +620,7 @@ namespace kernel {
     int64_t stopsoffset,
     int64_t start,
     int64_t stop,
-    int64_t step,
-    KernelsLib ptr_lib) {
+    int64_t step) {
     return awkward_listarray64_getitem_next_range_carrylength(
       carrylength,
       fromstarts,
@@ -714,8 +644,7 @@ namespace kernel {
     int64_t stopsoffset,
     int64_t start,
     int64_t stop,
-    int64_t step,
-    KernelsLib ptr_lib) {
+    int64_t step) {
     return awkward_listarray32_getitem_next_range_64(
       tooffsets,
       tocarry,
@@ -739,8 +668,7 @@ namespace kernel {
     int64_t stopsoffset,
     int64_t start,
     int64_t stop,
-    int64_t step,
-    KernelsLib ptr_lib) {
+    int64_t step) {
     return awkward_listarrayU32_getitem_next_range_64(
       tooffsets,
       tocarry,
@@ -764,8 +692,7 @@ namespace kernel {
     int64_t stopsoffset,
     int64_t start,
     int64_t stop,
-    int64_t step,
-    KernelsLib ptr_lib) {
+    int64_t step) {
     return awkward_listarray64_getitem_next_range_64(
       tooffsets,
       tocarry,
@@ -783,8 +710,7 @@ namespace kernel {
   Error listarray_getitem_next_range_counts_64<int32_t>(
     int64_t* total,
     const int32_t* fromoffsets,
-    int64_t lenstarts,
-    KernelsLib ptr_lib) {
+    int64_t lenstarts) {
     return awkward_listarray32_getitem_next_range_counts_64(
       total,
       fromoffsets,
@@ -794,8 +720,7 @@ namespace kernel {
   Error listarray_getitem_next_range_counts_64<uint32_t>(
     int64_t* total,
     const uint32_t* fromoffsets,
-    int64_t lenstarts,
-    KernelsLib ptr_lib) {
+    int64_t lenstarts) {
     return awkward_listarrayU32_getitem_next_range_counts_64(
       total,
       fromoffsets,
@@ -805,8 +730,7 @@ namespace kernel {
   Error listarray_getitem_next_range_counts_64<int64_t>(
     int64_t* total,
     const int64_t* fromoffsets,
-    int64_t lenstarts,
-    KernelsLib ptr_lib) {
+    int64_t lenstarts) {
     return awkward_listarray64_getitem_next_range_counts_64(
       total,
       fromoffsets,
@@ -818,8 +742,7 @@ namespace kernel {
     int64_t* toadvanced,
     const int64_t* fromadvanced,
     const int32_t* fromoffsets,
-    int64_t lenstarts,
-    KernelsLib ptr_lib) {
+    int64_t lenstarts) {
     return awkward_listarray32_getitem_next_range_spreadadvanced_64(
       toadvanced,
       fromadvanced,
@@ -831,8 +754,7 @@ namespace kernel {
     int64_t* toadvanced,
     const int64_t* fromadvanced,
     const uint32_t* fromoffsets,
-    int64_t lenstarts,
-    KernelsLib ptr_lib) {
+    int64_t lenstarts) {
     return awkward_listarrayU32_getitem_next_range_spreadadvanced_64(
       toadvanced,
       fromadvanced,
@@ -844,8 +766,7 @@ namespace kernel {
     int64_t* toadvanced,
     const int64_t* fromadvanced,
     const int64_t* fromoffsets,
-    int64_t lenstarts,
-    KernelsLib ptr_lib) {
+    int64_t lenstarts) {
     return awkward_listarray64_getitem_next_range_spreadadvanced_64(
       toadvanced,
       fromadvanced,
@@ -864,8 +785,7 @@ namespace kernel {
     int64_t stopsoffset,
     int64_t lenstarts,
     int64_t lenarray,
-    int64_t lencontent,
-    KernelsLib ptr_lib) {
+    int64_t lencontent) {
     return awkward_listarray32_getitem_next_array_64(
       tocarry,
       toadvanced,
@@ -889,8 +809,7 @@ namespace kernel {
     int64_t stopsoffset,
     int64_t lenstarts,
     int64_t lenarray,
-    int64_t lencontent,
-    KernelsLib ptr_lib) {
+    int64_t lencontent) {
     return awkward_listarrayU32_getitem_next_array_64(
       tocarry,
       toadvanced,
@@ -914,8 +833,7 @@ namespace kernel {
     int64_t stopsoffset,
     int64_t lenstarts,
     int64_t lenarray,
-    int64_t lencontent,
-    KernelsLib ptr_lib) {
+    int64_t lencontent) {
     return awkward_listarray64_getitem_next_array_64(
       tocarry,
       toadvanced,
@@ -941,8 +859,7 @@ namespace kernel {
     int64_t stopsoffset,
     int64_t lenstarts,
     int64_t lenarray,
-    int64_t lencontent,
-    KernelsLib ptr_lib) {
+    int64_t lencontent) {
     return awkward_listarray32_getitem_next_array_advanced_64(
       tocarry,
       toadvanced,
@@ -968,8 +885,7 @@ namespace kernel {
     int64_t stopsoffset,
     int64_t lenstarts,
     int64_t lenarray,
-    int64_t lencontent,
-    KernelsLib ptr_lib) {
+    int64_t lencontent) {
     return awkward_listarrayU32_getitem_next_array_advanced_64(
       tocarry,
       toadvanced,
@@ -995,8 +911,7 @@ namespace kernel {
     int64_t stopsoffset,
     int64_t lenstarts,
     int64_t lenarray,
-    int64_t lencontent,
-    KernelsLib ptr_lib) {
+    int64_t lencontent) {
     return awkward_listarray64_getitem_next_array_advanced_64(
       tocarry,
       toadvanced,
@@ -1021,8 +936,7 @@ namespace kernel {
     int64_t startsoffset,
     int64_t stopsoffset,
     int64_t lenstarts,
-    int64_t lencarry,
-    KernelsLib ptr_lib) {
+    int64_t lencarry) {
     return awkward_listarray32_getitem_carry_64(
       tostarts,
       tostops,
@@ -1044,8 +958,7 @@ namespace kernel {
     int64_t startsoffset,
     int64_t stopsoffset,
     int64_t lenstarts,
-    int64_t lencarry,
-    KernelsLib ptr_lib) {
+    int64_t lencarry) {
     return awkward_listarrayU32_getitem_carry_64(
       tostarts,
       tostops,
@@ -1067,8 +980,7 @@ namespace kernel {
     int64_t startsoffset,
     int64_t stopsoffset,
     int64_t lenstarts,
-    int64_t lencarry,
-    KernelsLib ptr_lib) {
+    int64_t lencarry) {
     return awkward_listarray64_getitem_carry_64(
       tostarts,
       tostops,
@@ -1191,8 +1103,7 @@ namespace kernel {
     int64_t* numnull,
     const int32_t* fromindex,
     int64_t indexoffset,
-    int64_t lenindex,
-    KernelsLib ptr_lib) {
+    int64_t lenindex) {
     return awkward_indexedarray32_numnull(
       numnull,
       fromindex,
@@ -1204,8 +1115,7 @@ namespace kernel {
     int64_t* numnull,
     const uint32_t* fromindex,
     int64_t indexoffset,
-    int64_t lenindex,
-    KernelsLib ptr_lib) {
+    int64_t lenindex) {
     return awkward_indexedarrayU32_numnull(
       numnull,
       fromindex,
@@ -1217,8 +1127,7 @@ namespace kernel {
     int64_t* numnull,
     const int64_t* fromindex,
     int64_t indexoffset,
-    int64_t lenindex,
-    KernelsLib ptr_lib) {
+    int64_t lenindex) {
     return awkward_indexedarray64_numnull(
       numnull,
       fromindex,
@@ -1233,8 +1142,7 @@ namespace kernel {
     const int32_t* fromindex,
     int64_t indexoffset,
     int64_t lenindex,
-    int64_t lencontent,
-    KernelsLib ptr_lib) {
+    int64_t lencontent) {
     return awkward_indexedarray32_getitem_nextcarry_outindex_64(
       tocarry,
       toindex,
@@ -1250,8 +1158,7 @@ namespace kernel {
     const uint32_t* fromindex,
     int64_t indexoffset,
     int64_t lenindex,
-    int64_t lencontent,
-    KernelsLib ptr_lib) {
+    int64_t lencontent) {
     return awkward_indexedarrayU32_getitem_nextcarry_outindex_64(
       tocarry,
       toindex,
@@ -1267,8 +1174,7 @@ namespace kernel {
     const int64_t* fromindex,
     int64_t indexoffset,
     int64_t lenindex,
-    int64_t lencontent,
-    KernelsLib ptr_lib) {
+    int64_t lencontent) {
     return awkward_indexedarray64_getitem_nextcarry_outindex_64(
       tocarry,
       toindex,
@@ -1285,8 +1191,7 @@ namespace kernel {
     const int32_t* fromindex,
     int64_t indexoffset,
     int64_t lenindex,
-    int64_t lencontent,
-    KernelsLib ptr_lib) {
+    int64_t lencontent) {
     return awkward_indexedarray32_getitem_nextcarry_outindex_mask_64(
       tocarry,
       toindex,
@@ -1302,8 +1207,7 @@ namespace kernel {
     const uint32_t* fromindex,
     int64_t indexoffset,
     int64_t lenindex,
-    int64_t lencontent,
-    KernelsLib ptr_lib) {
+    int64_t lencontent) {
     return awkward_indexedarrayU32_getitem_nextcarry_outindex_mask_64(
       tocarry,
       toindex,
@@ -1319,8 +1223,7 @@ namespace kernel {
     const int64_t* fromindex,
     int64_t indexoffset,
     int64_t lenindex,
-    int64_t lencontent,
-    KernelsLib ptr_lib) {
+    int64_t lencontent) {
     return awkward_indexedarray64_getitem_nextcarry_outindex_mask_64(
       tocarry,
       toindex,
@@ -1413,8 +1316,7 @@ namespace kernel {
     const int32_t* fromindex,
     int64_t indexoffset,
     int64_t lenindex,
-    int64_t lencontent,
-    KernelsLib ptr_lib) {
+    int64_t lencontent) {
     return awkward_indexedarray32_getitem_nextcarry_64(
       tocarry,
       fromindex,
@@ -1428,8 +1330,7 @@ namespace kernel {
     const uint32_t* fromindex,
     int64_t indexoffset,
     int64_t lenindex,
-    int64_t lencontent,
-    KernelsLib ptr_lib) {
+    int64_t lencontent) {
     return awkward_indexedarrayU32_getitem_nextcarry_64(
       tocarry,
       fromindex,
@@ -1443,8 +1344,7 @@ namespace kernel {
     const int64_t* fromindex,
     int64_t indexoffset,
     int64_t lenindex,
-    int64_t lencontent,
-    KernelsLib ptr_lib) {
+    int64_t lencontent) {
     return awkward_indexedarray64_getitem_nextcarry_64(
       tocarry,
       fromindex,
@@ -1460,8 +1360,7 @@ namespace kernel {
     const int64_t* fromcarry,
     int64_t indexoffset,
     int64_t lenindex,
-    int64_t lencarry,
-    KernelsLib ptr_lib) {
+    int64_t lencarry) {
     return awkward_indexedarray32_getitem_carry_64(
       toindex,
       fromindex,
@@ -1477,8 +1376,7 @@ namespace kernel {
     const int64_t* fromcarry,
     int64_t indexoffset,
     int64_t lenindex,
-    int64_t lencarry,
-    KernelsLib ptr_lib) {
+    int64_t lencarry) {
     return awkward_indexedarrayU32_getitem_carry_64(
       toindex,
       fromindex,
@@ -1494,8 +1392,7 @@ namespace kernel {
     const int64_t* fromcarry,
     int64_t indexoffset,
     int64_t lenindex,
-    int64_t lencarry,
-    KernelsLib ptr_lib) {
+    int64_t lencarry) {
     return awkward_indexedarray64_getitem_carry_64(
       toindex,
       fromindex,
@@ -1510,8 +1407,7 @@ namespace kernel {
     int64_t* size,
     const int8_t* fromtags,
     int64_t tagsoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_unionarray8_regular_index_getsize(
       size,
       fromtags,
@@ -1527,8 +1423,7 @@ namespace kernel {
     int64_t size,
     const int8_t* fromtags,
     int64_t tagsoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_unionarray8_32_regular_index(
       toindex,
       current,
@@ -1545,8 +1440,7 @@ namespace kernel {
     int64_t size,
     const int8_t* fromtags,
     int64_t tagsoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_unionarray8_U32_regular_index(
       toindex,
       current,
@@ -1563,8 +1457,7 @@ namespace kernel {
     int64_t size,
     const int8_t* fromtags,
     int64_t tagsoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_unionarray8_64_regular_index(
       toindex,
       current,
@@ -1584,8 +1477,7 @@ namespace kernel {
     const int32_t* fromindex,
     int64_t indexoffset,
     int64_t length,
-    int64_t which,
-    KernelsLib ptr_lib) {
+    int64_t which) {
     return awkward_unionarray8_32_project_64(
       lenout,
       tocarry,
@@ -1606,8 +1498,7 @@ namespace kernel {
     const uint32_t* fromindex,
     int64_t indexoffset,
     int64_t length,
-    int64_t which,
-    KernelsLib ptr_lib) {
+    int64_t which) {
     return awkward_unionarray8_U32_project_64(
       lenout,
       tocarry,
@@ -1628,8 +1519,7 @@ namespace kernel {
     const int64_t* fromindex,
     int64_t indexoffset,
     int64_t length,
-    int64_t which,
-    KernelsLib ptr_lib) {
+    int64_t which) {
     return awkward_unionarray8_64_project_64(
       lenout,
       tocarry,
@@ -1684,8 +1574,7 @@ namespace kernel {
     const int32_t* fromstops,
     int64_t fromstopsoffset,
     int64_t jaggedsize,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_listarray32_getitem_jagged_expand_64(
       multistarts,
       multistops,
@@ -1709,8 +1598,7 @@ namespace kernel {
     const uint32_t* fromstops,
     int64_t fromstopsoffset,
     int64_t jaggedsize,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_listarrayU32_getitem_jagged_expand_64(
       multistarts,
       multistops,
@@ -1734,8 +1622,7 @@ namespace kernel {
     const int64_t* fromstops,
     int64_t fromstopsoffset,
     int64_t jaggedsize,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_listarray64_getitem_jagged_expand_64(
       multistarts,
       multistops,
@@ -1782,8 +1669,7 @@ namespace kernel {
     int64_t fromstartsoffset,
     const int32_t* fromstops,
     int64_t fromstopsoffset,
-    int64_t contentlen,
-    KernelsLib ptr_lib) {
+    int64_t contentlen) {
     return awkward_listarray32_getitem_jagged_apply_64(
       tooffsets,
       tocarry,
@@ -1817,8 +1703,7 @@ namespace kernel {
     int64_t fromstartsoffset,
     const uint32_t* fromstops,
     int64_t fromstopsoffset,
-    int64_t contentlen,
-    KernelsLib ptr_lib) {
+    int64_t contentlen) {
     return awkward_listarrayU32_getitem_jagged_apply_64(
       tooffsets,
       tocarry,
@@ -1852,8 +1737,7 @@ namespace kernel {
     int64_t fromstartsoffset,
     const int64_t* fromstops,
     int64_t fromstopsoffset,
-    int64_t contentlen,
-    KernelsLib ptr_lib) {
+    int64_t contentlen) {
     return awkward_listarray64_getitem_jagged_apply_64(
       tooffsets,
       tocarry,
@@ -1931,8 +1815,7 @@ namespace kernel {
     const int32_t* fromstarts,
     int64_t fromstartsoffset,
     const int32_t* fromstops,
-    int64_t fromstopsoffset,
-    KernelsLib ptr_lib) {
+    int64_t fromstopsoffset) {
     return awkward_listarray32_getitem_jagged_descend_64(
       tooffsets,
       slicestarts,
@@ -1956,8 +1839,7 @@ namespace kernel {
     const uint32_t* fromstarts,
     int64_t fromstartsoffset,
     const uint32_t* fromstops,
-    int64_t fromstopsoffset,
-    KernelsLib ptr_lib) {
+    int64_t fromstopsoffset) {
     return awkward_listarrayU32_getitem_jagged_descend_64(
       tooffsets,
       slicestarts,
@@ -1981,8 +1863,7 @@ namespace kernel {
     const int64_t* fromstarts,
     int64_t fromstartsoffset,
     const int64_t* fromstops,
-    int64_t fromstopsoffset,
-    KernelsLib ptr_lib) {
+    int64_t fromstopsoffset) {
     return awkward_listarray64_getitem_jagged_descend_64(
       tooffsets,
       slicestarts,
@@ -2000,8 +1881,7 @@ namespace kernel {
   int8_t index_getitem_at_nowrap<int8_t>(
     const int8_t* ptr,
     int64_t offset,
-    int64_t at,
-    KernelsLib ptr_lib) {
+    int64_t at) {
     return awkward_index8_getitem_at_nowrap(
       ptr,
       offset,
@@ -2011,8 +1891,7 @@ namespace kernel {
   uint8_t index_getitem_at_nowrap<uint8_t>(
     const uint8_t* ptr,
     int64_t offset,
-    int64_t at,
-    KernelsLib ptr_lib) {
+    int64_t at) {
     return awkward_indexU8_getitem_at_nowrap(
       ptr,
       offset,
@@ -2022,8 +1901,7 @@ namespace kernel {
   int32_t index_getitem_at_nowrap<int32_t>(
     const int32_t* ptr,
     int64_t offset,
-    int64_t at,
-    KernelsLib ptr_lib) {
+    int64_t at) {
     return awkward_index32_getitem_at_nowrap(
       ptr,
       offset,
@@ -2033,8 +1911,7 @@ namespace kernel {
   uint32_t index_getitem_at_nowrap<uint32_t>(
     const uint32_t* ptr,
     int64_t offset,
-    int64_t at,
-    KernelsLib ptr_lib) {
+    int64_t at) {
     return awkward_indexU32_getitem_at_nowrap(
       ptr,
       offset,
@@ -2044,8 +1921,7 @@ namespace kernel {
   int64_t index_getitem_at_nowrap<int64_t>(
     const int64_t* ptr,
     int64_t offset,
-    int64_t at,
-    KernelsLib ptr_lib) {
+    int64_t at) {
     return awkward_index64_getitem_at_nowrap(
       ptr,
       offset,
@@ -2057,8 +1933,7 @@ namespace kernel {
     int8_t* ptr,
     int64_t offset,
     int64_t at,
-    int8_t value,
-    KernelsLib ptr_lib) {
+    int8_t value) {
     awkward_index8_setitem_at_nowrap(
       ptr,
       offset,
@@ -2070,8 +1945,7 @@ namespace kernel {
     uint8_t* ptr,
     int64_t offset,
     int64_t at,
-    uint8_t value,
-    KernelsLib ptr_lib) {
+    uint8_t value) {
     awkward_indexU8_setitem_at_nowrap(
       ptr,
       offset,
@@ -2083,8 +1957,7 @@ namespace kernel {
     int32_t* ptr,
     int64_t offset,
     int64_t at,
-    int32_t value,
-    KernelsLib ptr_lib) {
+    int32_t value) {
     awkward_index32_setitem_at_nowrap(
       ptr,
       offset,
@@ -2096,8 +1969,7 @@ namespace kernel {
     uint32_t* ptr,
     int64_t offset,
     int64_t at,
-    uint32_t value,
-    KernelsLib ptr_lib) {
+    uint32_t value) {
     awkward_indexU32_setitem_at_nowrap(
       ptr,
       offset,
@@ -2109,8 +1981,7 @@ namespace kernel {
     int64_t* ptr,
     int64_t offset,
     int64_t at,
-    int64_t value,
-    KernelsLib ptr_lib) {
+    int64_t value) {
     awkward_index64_setitem_at_nowrap(
       ptr,
       offset,
@@ -2235,8 +2106,7 @@ namespace kernel {
     int64_t offsetsoffset,
     int64_t tolength,
     int64_t fromlength,
-    int64_t fromwidth,
-    KernelsLib ptr_lib) {
+    int64_t fromwidth) {
     return awkward_identities32_from_listoffsetarray32(
       toptr,
       fromptr,
@@ -2256,8 +2126,7 @@ namespace kernel {
     int64_t offsetsoffset,
     int64_t tolength,
     int64_t fromlength,
-    int64_t fromwidth,
-    KernelsLib ptr_lib) {
+    int64_t fromwidth) {
     return awkward_identities32_from_listoffsetarrayU32(
       toptr,
       fromptr,
@@ -2277,8 +2146,7 @@ namespace kernel {
     int64_t offsetsoffset,
     int64_t tolength,
     int64_t fromlength,
-    int64_t fromwidth,
-    KernelsLib ptr_lib) {
+    int64_t fromwidth) {
     return awkward_identities32_from_listoffsetarray64(
       toptr,
       fromptr,
@@ -2298,8 +2166,7 @@ namespace kernel {
     int64_t offsetsoffset,
     int64_t tolength,
     int64_t fromlength,
-    int64_t fromwidth,
-    KernelsLib ptr_lib) {
+    int64_t fromwidth) {
     return awkward_identities64_from_listoffsetarray32(
       toptr,
       fromptr,
@@ -2319,8 +2186,7 @@ namespace kernel {
     int64_t offsetsoffset,
     int64_t tolength,
     int64_t fromlength,
-    int64_t fromwidth,
-    KernelsLib ptr_lib) {
+    int64_t fromwidth) {
     return awkward_identities64_from_listoffsetarrayU32(
       toptr,
       fromptr,
@@ -2340,8 +2206,7 @@ namespace kernel {
     int64_t offsetsoffset,
     int64_t tolength,
     int64_t fromlength,
-    int64_t fromwidth,
-    KernelsLib ptr_lib) {
+    int64_t fromwidth) {
     return awkward_identities64_from_listoffsetarray64(
       toptr,
       fromptr,
@@ -2365,8 +2230,7 @@ namespace kernel {
     int64_t stopsoffset,
     int64_t tolength,
     int64_t fromlength,
-    int64_t fromwidth,
-    KernelsLib ptr_lib) {
+    int64_t fromwidth) {
     return awkward_identities32_from_listarray32(
       uniquecontents,
       toptr,
@@ -2392,8 +2256,7 @@ namespace kernel {
     int64_t stopsoffset,
     int64_t tolength,
     int64_t fromlength,
-    int64_t fromwidth,
-    KernelsLib ptr_lib) {
+    int64_t fromwidth) {
     return awkward_identities32_from_listarrayU32(
       uniquecontents,
       toptr,
@@ -2419,8 +2282,7 @@ namespace kernel {
     int64_t stopsoffset,
     int64_t tolength,
     int64_t fromlength,
-    int64_t fromwidth,
-    KernelsLib ptr_lib) {
+    int64_t fromwidth) {
     return awkward_identities32_from_listarray64(
       uniquecontents,
       toptr,
@@ -2446,8 +2308,7 @@ namespace kernel {
     int64_t stopsoffset,
     int64_t tolength,
     int64_t fromlength,
-    int64_t fromwidth,
-    KernelsLib ptr_lib) {
+    int64_t fromwidth) {
     return awkward_identities64_from_listarray32(
       uniquecontents,
       toptr,
@@ -2473,8 +2334,7 @@ namespace kernel {
     int64_t stopsoffset,
     int64_t tolength,
     int64_t fromlength,
-    int64_t fromwidth,
-    KernelsLib ptr_lib) {
+    int64_t fromwidth) {
     return awkward_identities64_from_listarrayU32(
       uniquecontents,
       toptr,
@@ -2500,8 +2360,7 @@ namespace kernel {
     int64_t stopsoffset,
     int64_t tolength,
     int64_t fromlength,
-    int64_t fromwidth,
-    KernelsLib ptr_lib) {
+    int64_t fromwidth) {
     return awkward_identities64_from_listarray64(
       uniquecontents,
       toptr,
@@ -2525,7 +2384,7 @@ namespace kernel {
     int64_t tolength,
     int64_t fromlength,
     int64_t fromwidth) {
-    return kernel::identities_from_regulararray<int32_t>(
+    return awkward_identities32_from_regulararray(
       toptr,
       fromptr,
       fromptroffset,
@@ -2563,8 +2422,7 @@ namespace kernel {
     int64_t indexoffset,
     int64_t tolength,
     int64_t fromlength,
-    int64_t fromwidth,
-    KernelsLib ptr_lib) {
+    int64_t fromwidth) {
     return awkward_identities32_from_indexedarray32(
       uniquecontents,
       toptr,
@@ -2586,8 +2444,7 @@ namespace kernel {
     int64_t indexoffset,
     int64_t tolength,
     int64_t fromlength,
-    int64_t fromwidth,
-    KernelsLib ptr_lib) {
+    int64_t fromwidth) {
     return awkward_identities32_from_indexedarrayU32(
       uniquecontents,
       toptr,
@@ -2609,8 +2466,7 @@ namespace kernel {
     int64_t indexoffset,
     int64_t tolength,
     int64_t fromlength,
-    int64_t fromwidth,
-    KernelsLib ptr_lib) {
+    int64_t fromwidth) {
     return awkward_identities32_from_indexedarray64(
       uniquecontents,
       toptr,
@@ -2632,8 +2488,7 @@ namespace kernel {
     int64_t indexoffset,
     int64_t tolength,
     int64_t fromlength,
-    int64_t fromwidth,
-    KernelsLib ptr_lib) {
+    int64_t fromwidth) {
     return awkward_identities64_from_indexedarray32(
       uniquecontents,
       toptr,
@@ -2655,8 +2510,7 @@ namespace kernel {
     int64_t indexoffset,
     int64_t tolength,
     int64_t fromlength,
-    int64_t fromwidth,
-    KernelsLib ptr_lib) {
+    int64_t fromwidth) {
     return awkward_identities64_from_indexedarrayU32(
       uniquecontents,
       toptr,
@@ -2678,8 +2532,7 @@ namespace kernel {
     int64_t indexoffset,
     int64_t tolength,
     int64_t fromlength,
-    int64_t fromwidth,
-    KernelsLib ptr_lib) {
+    int64_t fromwidth) {
     return awkward_identities64_from_indexedarray64(
       uniquecontents,
       toptr,
@@ -2706,8 +2559,7 @@ namespace kernel {
     int64_t tolength,
     int64_t fromlength,
     int64_t fromwidth,
-    int64_t which,
-    KernelsLib ptr_lib) {
+    int64_t which) {
     return awkward_identities32_from_unionarray8_32(
       uniquecontents,
       toptr,
@@ -2736,8 +2588,7 @@ namespace kernel {
     int64_t tolength,
     int64_t fromlength,
     int64_t fromwidth,
-    int64_t which,
-    KernelsLib ptr_lib) {
+    int64_t which) {
     return awkward_identities32_from_unionarray8_U32(
       uniquecontents,
       toptr,
@@ -2766,8 +2617,7 @@ namespace kernel {
     int64_t tolength,
     int64_t fromlength,
     int64_t fromwidth,
-    int64_t which,
-    KernelsLib ptr_lib) {
+    int64_t which) {
     return awkward_identities32_from_unionarray8_64(
       uniquecontents,
       toptr,
@@ -2796,8 +2646,7 @@ namespace kernel {
     int64_t tolength,
     int64_t fromlength,
     int64_t fromwidth,
-    int64_t which,
-    KernelsLib ptr_lib) {
+    int64_t which) {
     return awkward_identities64_from_unionarray8_32(
       uniquecontents,
       toptr,
@@ -2826,8 +2675,7 @@ namespace kernel {
     int64_t tolength,
     int64_t fromlength,
     int64_t fromwidth,
-    int64_t which,
-    KernelsLib ptr_lib) {
+    int64_t which) {
     return awkward_identities64_from_unionarray8_U32(
       uniquecontents,
       toptr,
@@ -2856,8 +2704,7 @@ namespace kernel {
     int64_t tolength,
     int64_t fromlength,
     int64_t fromwidth,
-    int64_t which,
-    KernelsLib ptr_lib) {
+    int64_t which) {
     return awkward_identities64_from_unionarray8_64(
       uniquecontents,
       toptr,
@@ -2910,8 +2757,7 @@ namespace kernel {
     int64_t startsoffset,
     const int32_t* fromstops,
     int64_t stopsoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_listarray32_num_64(
       tonum,
       fromstarts,
@@ -2927,8 +2773,7 @@ namespace kernel {
     int64_t startsoffset,
     const uint32_t* fromstops,
     int64_t stopsoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_listarrayU32_num_64(
       tonum,
       fromstarts,
@@ -2944,8 +2789,7 @@ namespace kernel {
     int64_t startsoffset,
     const int64_t* fromstops,
     int64_t stopsoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_listarray64_num_64(
       tonum,
       fromstarts,
@@ -2974,8 +2818,7 @@ namespace kernel {
     int64_t outeroffsetslen,
     const int64_t* inneroffsets,
     int64_t inneroffsetsoffset,
-    int64_t inneroffsetslen,
-    KernelsLib ptr_lib) {
+    int64_t inneroffsetslen) {
     return awkward_listoffsetarray32_flatten_offsets_64(
       tooffsets,
       outeroffsets,
@@ -2993,8 +2836,7 @@ namespace kernel {
     int64_t outeroffsetslen,
     const int64_t* inneroffsets,
     int64_t inneroffsetsoffset,
-    int64_t inneroffsetslen,
-    KernelsLib ptr_lib) {
+    int64_t inneroffsetslen) {
     return awkward_listoffsetarrayU32_flatten_offsets_64(
       tooffsets,
       outeroffsets,
@@ -3012,8 +2854,7 @@ namespace kernel {
     int64_t outeroffsetslen,
     const int64_t* inneroffsets,
     int64_t inneroffsetsoffset,
-    int64_t inneroffsetslen,
-    KernelsLib ptr_lib) {
+    int64_t inneroffsetslen) {
     return awkward_listoffsetarray64_flatten_offsets_64(
       tooffsets,
       outeroffsets,
@@ -3032,8 +2873,7 @@ namespace kernel {
     int64_t outindexlength,
     const int64_t* offsets,
     int64_t offsetsoffset,
-    int64_t offsetslength,
-    KernelsLib ptr_lib) {
+    int64_t offsetslength) {
     return awkward_indexedarray32_flatten_none2empty_64(
       outoffsets,
       outindex,
@@ -3051,8 +2891,7 @@ namespace kernel {
     int64_t outindexlength,
     const int64_t* offsets,
     int64_t offsetsoffset,
-    int64_t offsetslength,
-    KernelsLib ptr_lib) {
+    int64_t offsetslength) {
     return awkward_indexedarrayU32_flatten_none2empty_64(
       outoffsets,
       outindex,
@@ -3070,8 +2909,7 @@ namespace kernel {
     int64_t outindexlength,
     const int64_t* offsets,
     int64_t offsetsoffset,
-    int64_t offsetslength,
-    KernelsLib ptr_lib) {
+    int64_t offsetslength) {
     return awkward_indexedarray64_flatten_none2empty_64(
       outoffsets,
       outindex,
@@ -3092,8 +2930,7 @@ namespace kernel {
     int64_t fromindexoffset,
     int64_t length,
     int64_t** offsetsraws,
-    int64_t* offsetsoffsets,
-    KernelsLib ptr_lib) {
+    int64_t* offsetsoffsets) {
     return awkward_unionarray32_flatten_length_64(
       total_length,
       fromtags,
@@ -3114,8 +2951,7 @@ namespace kernel {
     int64_t fromindexoffset,
     int64_t length,
     int64_t** offsetsraws,
-    int64_t* offsetsoffsets,
-    KernelsLib ptr_lib) {
+    int64_t* offsetsoffsets) {
     return awkward_unionarrayU32_flatten_length_64(
       total_length,
       fromtags,
@@ -3136,8 +2972,7 @@ namespace kernel {
     int64_t fromindexoffset,
     int64_t length,
     int64_t** offsetsraws,
-    int64_t* offsetsoffsets,
-    KernelsLib ptr_lib) {
+    int64_t* offsetsoffsets) {
     return awkward_unionarray64_flatten_length_64(
       total_length,
       fromtags,
@@ -3161,8 +2996,7 @@ namespace kernel {
     int64_t fromindexoffset,
     int64_t length,
     int64_t** offsetsraws,
-    int64_t* offsetsoffsets,
-    KernelsLib ptr_lib) {
+    int64_t* offsetsoffsets) {
     return awkward_unionarray32_flatten_combine_64(
       totags,
       toindex,
@@ -3187,8 +3021,7 @@ namespace kernel {
     int64_t fromindexoffset,
     int64_t length,
     int64_t** offsetsraws,
-    int64_t* offsetsoffsets,
-    KernelsLib ptr_lib) {
+    int64_t* offsetsoffsets) {
     return awkward_unionarrayU32_flatten_combine_64(
       totags,
       toindex,
@@ -3213,8 +3046,7 @@ namespace kernel {
     int64_t fromindexoffset,
     int64_t length,
     int64_t** offsetsraws,
-    int64_t* offsetsoffsets,
-    KernelsLib ptr_lib) {
+    int64_t* offsetsoffsets) {
     return awkward_unionarray64_flatten_combine_64(
       totags,
       toindex,
@@ -3234,8 +3066,7 @@ namespace kernel {
     const int32_t* fromindex,
     int64_t indexoffset,
     int64_t lenindex,
-    int64_t lencontent,
-    KernelsLib ptr_lib) {
+    int64_t lencontent) {
     return awkward_indexedarray32_flatten_nextcarry_64(
       tocarry,
       fromindex,
@@ -3249,8 +3080,7 @@ namespace kernel {
     const uint32_t* fromindex,
     int64_t indexoffset,
     int64_t lenindex,
-    int64_t lencontent,
-    KernelsLib ptr_lib) {
+    int64_t lencontent) {
     return awkward_indexedarrayU32_flatten_nextcarry_64(
       tocarry,
       fromindex,
@@ -3264,8 +3094,7 @@ namespace kernel {
     const int64_t* fromindex,
     int64_t indexoffset,
     int64_t lenindex,
-    int64_t lencontent,
-    KernelsLib ptr_lib) {
+    int64_t lencontent) {
     return awkward_indexedarray64_flatten_nextcarry_64(
       tocarry,
       fromindex,
@@ -3281,8 +3110,7 @@ namespace kernel {
     int64_t maskoffset,
     const int32_t* fromindex,
     int64_t indexoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_indexedarray32_overlay_mask8_to64(
       toindex,
       mask,
@@ -3298,8 +3126,7 @@ namespace kernel {
     int64_t maskoffset,
     const uint32_t* fromindex,
     int64_t indexoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_indexedarrayU32_overlay_mask8_to64(
       toindex,
       mask,
@@ -3315,8 +3142,7 @@ namespace kernel {
     int64_t maskoffset,
     const int64_t* fromindex,
     int64_t indexoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_indexedarray64_overlay_mask8_to64(
       toindex,
       mask,
@@ -3331,8 +3157,7 @@ namespace kernel {
     int8_t* tomask,
     const int32_t* fromindex,
     int64_t indexoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_indexedarray32_mask8(
       tomask,
       fromindex,
@@ -3344,8 +3169,7 @@ namespace kernel {
     int8_t* tomask,
     const uint32_t* fromindex,
     int64_t indexoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_indexedarrayU32_mask8(
       tomask,
       fromindex,
@@ -3357,8 +3181,7 @@ namespace kernel {
     int8_t* tomask,
     const int64_t* fromindex,
     int64_t indexoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_indexedarray64_mask8(
       tomask,
       fromindex,
@@ -3396,8 +3219,7 @@ namespace kernel {
     int64_t outerlength,
     const int32_t* innerindex,
     int64_t inneroffset,
-    int64_t innerlength,
-    KernelsLib ptr_lib) {
+    int64_t innerlength) {
     return awkward_indexedarray32_simplify32_to64(
       toindex,
       outerindex,
@@ -3415,8 +3237,7 @@ namespace kernel {
     int64_t outerlength,
     const int32_t* innerindex,
     int64_t inneroffset,
-    int64_t innerlength,
-    KernelsLib ptr_lib) {
+    int64_t innerlength) {
     return awkward_indexedarrayU32_simplify32_to64(
       toindex,
       outerindex,
@@ -3434,8 +3255,7 @@ namespace kernel {
     int64_t outerlength,
     const int32_t* innerindex,
     int64_t inneroffset,
-    int64_t innerlength,
-    KernelsLib ptr_lib) {
+    int64_t innerlength) {
     return awkward_indexedarray64_simplify32_to64(
       toindex,
       outerindex,
@@ -3454,8 +3274,7 @@ namespace kernel {
     int64_t outerlength,
     const uint32_t* innerindex,
     int64_t inneroffset,
-    int64_t innerlength,
-    KernelsLib ptr_lib) {
+    int64_t innerlength) {
     return awkward_indexedarray32_simplifyU32_to64(
       toindex,
       outerindex,
@@ -3473,8 +3292,7 @@ namespace kernel {
     int64_t outerlength,
     const uint32_t* innerindex,
     int64_t inneroffset,
-    int64_t innerlength,
-    KernelsLib ptr_lib) {
+    int64_t innerlength) {
     return awkward_indexedarrayU32_simplifyU32_to64(
       toindex,
       outerindex,
@@ -3492,8 +3310,7 @@ namespace kernel {
     int64_t outerlength,
     const uint32_t* innerindex,
     int64_t inneroffset,
-    int64_t innerlength,
-    KernelsLib ptr_lib) {
+    int64_t innerlength) {
     return awkward_indexedarray64_simplifyU32_to64(
       toindex,
       outerindex,
@@ -3512,8 +3329,7 @@ namespace kernel {
     int64_t outerlength,
     const int64_t* innerindex,
     int64_t inneroffset,
-    int64_t innerlength,
-    KernelsLib ptr_lib) {
+    int64_t innerlength) {
     return awkward_indexedarray32_simplify64_to64(
       toindex,
       outerindex,
@@ -3531,8 +3347,7 @@ namespace kernel {
     int64_t outerlength,
     const int64_t* innerindex,
     int64_t inneroffset,
-    int64_t innerlength,
-    KernelsLib ptr_lib) {
+    int64_t innerlength) {
     return awkward_indexedarrayU32_simplify64_to64(
       toindex,
       outerindex,
@@ -3550,8 +3365,7 @@ namespace kernel {
     int64_t outerlength,
     const int64_t* innerindex,
     int64_t inneroffset,
-    int64_t innerlength,
-    KernelsLib ptr_lib) {
+    int64_t innerlength) {
     return awkward_indexedarray64_simplify64_to64(
       toindex,
       outerindex,
@@ -3569,8 +3383,7 @@ namespace kernel {
     const int32_t* fromstops,
     int64_t startsoffset,
     int64_t stopsoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_listarray32_compact_offsets64(
       tooffsets,
       fromstarts,
@@ -3586,8 +3399,7 @@ namespace kernel {
     const uint32_t* fromstops,
     int64_t startsoffset,
     int64_t stopsoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_listarrayU32_compact_offsets64(
       tooffsets,
       fromstarts,
@@ -3603,8 +3415,7 @@ namespace kernel {
     const int64_t* fromstops,
     int64_t startsoffset,
     int64_t stopsoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_listarray64_compact_offsets64(
       tooffsets,
       fromstarts,
@@ -3615,12 +3426,22 @@ namespace kernel {
   }
 
   template <>
+  ERROR regulararray_compact_offsets(
+    int64_t* tooffsets,
+    int64_t length,
+    int64_t size) {
+    return awkward_regulararray_compact_offsets64(
+      tooffsets,
+      length,
+      size);
+  }
+
+  template <>
   Error listoffsetarray_compact_offsets64(
     int64_t* tooffsets,
     const int32_t* fromoffsets,
     int64_t offsetsoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_listoffsetarray32_compact_offsets64(
       tooffsets,
       fromoffsets,
@@ -3632,8 +3453,7 @@ namespace kernel {
     int64_t* tooffsets,
     const uint32_t* fromoffsets,
     int64_t offsetsoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_listoffsetarrayU32_compact_offsets64(
       tooffsets,
       fromoffsets,
@@ -3645,8 +3465,7 @@ namespace kernel {
     int64_t* tooffsets,
     const int64_t* fromoffsets,
     int64_t offsetsoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_listoffsetarray64_compact_offsets64(
       tooffsets,
       fromoffsets,
@@ -3664,8 +3483,7 @@ namespace kernel {
     int64_t startsoffset,
     const int32_t* fromstops,
     int64_t stopsoffset,
-    int64_t lencontent,
-    KernelsLib ptr_lib) {
+    int64_t lencontent) {
     return awkward_listarray32_broadcast_tooffsets64(
       tocarry,
       fromoffsets,
@@ -3687,8 +3505,7 @@ namespace kernel {
     int64_t startsoffset,
     const uint32_t* fromstops,
     int64_t stopsoffset,
-    int64_t lencontent,
-    KernelsLib ptr_lib) {
+    int64_t lencontent) {
     return awkward_listarrayU32_broadcast_tooffsets64(
       tocarry,
       fromoffsets,
@@ -3710,8 +3527,7 @@ namespace kernel {
     int64_t startsoffset,
     const int64_t* fromstops,
     int64_t stopsoffset,
-    int64_t lencontent,
-    KernelsLib ptr_lib) {
+    int64_t lencontent) {
     return awkward_listarray64_broadcast_tooffsets64(
       tocarry,
       fromoffsets,
@@ -3755,8 +3571,7 @@ namespace kernel {
     int64_t* size,
     const int32_t* fromoffsets,
     int64_t offsetsoffset,
-    int64_t offsetslength,
-    KernelsLib ptr_lib) {
+    int64_t offsetslength) {
     return awkward_listoffsetarray32_toRegularArray(
       size,
       fromoffsets,
@@ -3768,8 +3583,7 @@ namespace kernel {
     int64_t* size,
     const uint32_t* fromoffsets,
     int64_t offsetsoffset,
-    int64_t offsetslength,
-    KernelsLib ptr_lib) {
+    int64_t offsetslength) {
     return awkward_listoffsetarrayU32_toRegularArray(
       size,
       fromoffsets,
@@ -3781,8 +3595,7 @@ namespace kernel {
     int64_t* size,
     const int64_t* fromoffsets,
     int64_t offsetsoffset,
-    int64_t offsetslength,
-    KernelsLib ptr_lib) {
+    int64_t offsetslength) {
     return awkward_listoffsetarray64_toRegularArray(
       size,
       fromoffsets,
@@ -4113,6 +3926,79 @@ namespace kernel {
   }
 
   template <>
+  ERROR listarray_fill(
+    int64_t* tostarts,
+    int64_t tostartsoffset,
+    int64_t* tostops,
+    int64_t tostopsoffset,
+    const int32_t* fromstarts,
+    int64_t fromstartsoffset,
+    const int32_t* fromstops,
+    int64_t fromstopsoffset,
+    int64_t length,
+    int64_t base) {
+    return awkward_listarray_fill_to64_from32(
+      tostarts,
+      tostartsoffset,
+      tostops,
+      tostopsoffset,
+      fromstarts,
+      fromstartsoffset,
+      fromstops,
+      fromstopsoffset,
+      length,
+      base);
+  }
+  template <>
+  ERROR listarray_fill(
+    int64_t* tostarts,
+    int64_t tostartsoffset,
+    int64_t* tostops,
+    int64_t tostopsoffset,
+    const uint32_t* fromstarts,
+    int64_t fromstartsoffset,
+    const uint32_t* fromstops,
+    int64_t fromstopsoffset,
+    int64_t length,
+    int64_t base) {
+    return awkward_listarray_fill_to64_fromU32(
+      tostarts,
+      tostartsoffset,
+      tostops,
+      tostopsoffset,
+      fromstarts,
+      fromstartsoffset,
+      fromstops,
+      fromstopsoffset,
+      length,
+      base);
+  }
+  template <>
+  ERROR listarray_fill(
+    int64_t* tostarts,
+    int64_t tostartsoffset,
+    int64_t* tostops,
+    int64_t tostopsoffset,
+    const int64_t* fromstarts,
+    int64_t fromstartsoffset,
+    const int64_t* fromstops,
+    int64_t fromstopsoffset,
+    int64_t length,
+    int64_t base) {
+    return awkward_listarray_fill_to64_from64(
+      tostarts,
+      tostartsoffset,
+      tostops,
+      tostopsoffset,
+      fromstarts,
+      fromstartsoffset,
+      fromstops,
+      fromstopsoffset,
+      length,
+      base);
+  }
+
+  template <>
   ERROR indexedarray_fill(
     int64_t* toindex,
     int64_t toindexoffset,
@@ -4275,8 +4161,7 @@ namespace kernel {
     int64_t innerwhich,
     int64_t outerwhich,
     int64_t length,
-    int64_t base,
-    KernelsLib ptr_lib) {
+    int64_t base) {
     return awkward_unionarray8_32_simplify8_32_to8_64(
       totags,
       toindex,
@@ -4311,8 +4196,7 @@ namespace kernel {
     int64_t innerwhich,
     int64_t outerwhich,
     int64_t length,
-    int64_t base,
-    KernelsLib ptr_lib) {
+    int64_t base) {
     return awkward_unionarray8_U32_simplify8_32_to8_64(
       totags,
       toindex,
@@ -4347,8 +4231,7 @@ namespace kernel {
     int64_t innerwhich,
     int64_t outerwhich,
     int64_t length,
-    int64_t base,
-    KernelsLib ptr_lib) {
+    int64_t base) {
     return awkward_unionarray8_64_simplify8_32_to8_64(
       totags,
       toindex,
@@ -4384,8 +4267,7 @@ namespace kernel {
     int64_t innerwhich,
     int64_t outerwhich,
     int64_t length,
-    int64_t base,
-    KernelsLib ptr_lib) {
+    int64_t base) {
     return awkward_unionarray8_32_simplify8_U32_to8_64(
       totags,
       toindex,
@@ -4420,8 +4302,7 @@ namespace kernel {
     int64_t innerwhich,
     int64_t outerwhich,
     int64_t length,
-    int64_t base,
-    KernelsLib ptr_lib) {
+    int64_t base) {
     return awkward_unionarray8_U32_simplify8_U32_to8_64(
       totags,
       toindex,
@@ -4456,8 +4337,7 @@ namespace kernel {
     int64_t innerwhich,
     int64_t outerwhich,
     int64_t length,
-    int64_t base,
-    KernelsLib ptr_lib) {
+    int64_t base) {
     return awkward_unionarray8_64_simplify8_U32_to8_64(
       totags,
       toindex,
@@ -4493,8 +4373,7 @@ namespace kernel {
     int64_t innerwhich,
     int64_t outerwhich,
     int64_t length,
-    int64_t base,
-    KernelsLib ptr_lib) {
+    int64_t base) {
     return awkward_unionarray8_32_simplify8_64_to8_64(
       totags,
       toindex,
@@ -4529,8 +4408,7 @@ namespace kernel {
     int64_t innerwhich,
     int64_t outerwhich,
     int64_t length,
-    int64_t base,
-    KernelsLib ptr_lib) {
+    int64_t base) {
     return awkward_unionarray8_U32_simplify8_64_to8_64(
       totags,
       toindex,
@@ -4565,8 +4443,7 @@ namespace kernel {
     int64_t innerwhich,
     int64_t outerwhich,
     int64_t length,
-    int64_t base,
-    KernelsLib ptr_lib) {
+    int64_t base) {
     return awkward_unionarray8_64_simplify8_64_to8_64(
       totags,
       toindex,
@@ -4597,8 +4474,7 @@ namespace kernel {
     int64_t towhich,
     int64_t fromwhich,
     int64_t length,
-    int64_t base,
-    KernelsLib ptr_lib) {
+    int64_t base) {
     return awkward_unionarray8_32_simplify_one_to8_64(
       totags,
       toindex,
@@ -4623,8 +4499,7 @@ namespace kernel {
     int64_t towhich,
     int64_t fromwhich,
     int64_t length,
-    int64_t base,
-    KernelsLib ptr_lib) {
+    int64_t base) {
     return awkward_unionarray8_U32_simplify_one_to8_64(
       totags,
       toindex,
@@ -4649,8 +4524,7 @@ namespace kernel {
     int64_t towhich,
     int64_t fromwhich,
     int64_t length,
-    int64_t base,
-    KernelsLib ptr_lib) {
+    int64_t base) {
     return awkward_unionarray8_64_simplify_one_to8_64(
       totags,
       toindex,
@@ -4671,8 +4545,7 @@ namespace kernel {
     const int32_t* stops,
     int64_t stopsoffset,
     int64_t length,
-    int64_t lencontent,
-    KernelsLib ptr_lib) {
+    int64_t lencontent) {
     return awkward_listarray32_validity(
       starts,
       startsoffset,
@@ -4688,8 +4561,7 @@ namespace kernel {
     const uint32_t* stops,
     int64_t stopsoffset,
     int64_t length,
-    int64_t lencontent,
-    KernelsLib ptr_lib) {
+    int64_t lencontent) {
     return awkward_listarrayU32_validity(
       starts,
       startsoffset,
@@ -4705,8 +4577,7 @@ namespace kernel {
     const int64_t* stops,
     int64_t stopsoffset,
     int64_t length,
-    int64_t lencontent,
-    KernelsLib ptr_lib) {
+    int64_t lencontent) {
     return awkward_listarray64_validity(
       starts,
       startsoffset,
@@ -4722,8 +4593,7 @@ namespace kernel {
     int64_t indexoffset,
     int64_t length,
     int64_t lencontent,
-    bool isoption,
-    KernelsLib ptr_lib) {
+    bool isoption) {
     return awkward_indexedarray32_validity(
       index,
       indexoffset,
@@ -4737,8 +4607,7 @@ namespace kernel {
     int64_t indexoffset,
     int64_t length,
     int64_t lencontent,
-    bool isoption,
-    KernelsLib ptr_lib) {
+    bool isoption) {
     return awkward_indexedarrayU32_validity(
       index,
       indexoffset,
@@ -4752,8 +4621,7 @@ namespace kernel {
     int64_t indexoffset,
     int64_t length,
     int64_t lencontent,
-    bool isoption,
-    KernelsLib ptr_lib) {
+    bool isoption) {
     return awkward_indexedarray64_validity(
       index,
       indexoffset,
@@ -4771,8 +4639,7 @@ namespace kernel {
     int64_t indexoffset,
     int64_t length,
     int64_t numcontents,
-    const int64_t* lencontents,
-    KernelsLib ptr_lib) {
+    const int64_t* lencontents) {
     return awkward_unionarray8_32_validity(
       tags,
       tagsoffset,
@@ -4791,8 +4658,7 @@ namespace kernel {
     int64_t indexoffset,
     int64_t length,
     int64_t numcontents,
-    const int64_t* lencontents,
-    KernelsLib ptr_lib) {
+    const int64_t* lencontents) {
     return awkward_unionarray8_U32_validity(
       tags,
       tagsoffset,
@@ -4811,8 +4677,7 @@ namespace kernel {
     int64_t indexoffset,
     int64_t length,
     int64_t numcontents,
-    const int64_t* lencontents,
-    KernelsLib ptr_lib) {
+    const int64_t* lencontents) {
     return awkward_unionarray8_64_validity(
       tags,
       tagsoffset,
@@ -4828,8 +4693,7 @@ namespace kernel {
     int64_t* toindex,
     const int32_t* fromindex,
     int64_t offset,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_UnionArray_fillna_from32_to64(
       toindex,
       fromindex,
@@ -4841,8 +4705,7 @@ namespace kernel {
     int64_t* toindex,
     const uint32_t* fromindex,
     int64_t offset,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_UnionArray_fillna_fromU32_to64(
       toindex,
       fromindex,
@@ -4854,8 +4717,7 @@ namespace kernel {
     int64_t* toindex,
     const int64_t* fromindex,
     int64_t offset,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_UnionArray_fillna_from64_to64(
       toindex,
       fromindex,
@@ -4918,8 +4780,7 @@ namespace kernel {
     const int32_t* fromstops,
     int64_t lenstarts,
     int64_t startsoffset,
-    int64_t stopsoffset,
-    KernelsLib ptr_lib) {
+    int64_t stopsoffset) {
     return awkward_ListArray32_min_range(
       tomin,
       fromstarts,
@@ -4935,8 +4796,7 @@ namespace kernel {
     const uint32_t* fromstops,
     int64_t lenstarts,
     int64_t startsoffset,
-    int64_t stopsoffset,
-    KernelsLib ptr_lib) {
+    int64_t stopsoffset) {
     return awkward_ListArrayU32_min_range(
       tomin,
       fromstarts,
@@ -4952,8 +4812,7 @@ namespace kernel {
     const int64_t* fromstops,
     int64_t lenstarts,
     int64_t startsoffset,
-    int64_t stopsoffset,
-    KernelsLib ptr_lib) {
+    int64_t stopsoffset) {
     return awkward_ListArray64_min_range(
       tomin,
       fromstarts,
@@ -4971,8 +4830,7 @@ namespace kernel {
     int64_t target,
     int64_t lenstarts,
     int64_t startsoffset,
-    int64_t stopsoffset,
-    KernelsLib ptr_lib) {
+    int64_t stopsoffset) {
     return awkward_ListArray32_rpad_and_clip_length_axis1(
       tolength,
       fromstarts,
@@ -4990,8 +4848,7 @@ namespace kernel {
     int64_t target,
     int64_t lenstarts,
     int64_t startsoffset,
-    int64_t stopsoffset,
-    KernelsLib ptr_lib) {
+    int64_t stopsoffset) {
     return awkward_ListArrayU32_rpad_and_clip_length_axis1(
       tolength,
       fromstarts,
@@ -5009,8 +4866,7 @@ namespace kernel {
     int64_t target,
     int64_t lenstarts,
     int64_t startsoffset,
-    int64_t stopsoffset,
-    KernelsLib ptr_lib) {
+    int64_t stopsoffset) {
     return awkward_ListArray64_rpad_and_clip_length_axis1(
       tolength,
       fromstarts,
@@ -5031,8 +4887,7 @@ namespace kernel {
     int64_t target,
     int64_t length,
     int64_t startsoffset,
-    int64_t stopsoffset,
-    KernelsLib ptr_lib) {
+    int64_t stopsoffset) {
     return awkward_ListArray32_rpad_axis1_64(
       toindex,
       fromstarts,
@@ -5054,8 +4909,7 @@ namespace kernel {
     int64_t target,
     int64_t length,
     int64_t startsoffset,
-    int64_t stopsoffset,
-    KernelsLib ptr_lib) {
+    int64_t stopsoffset) {
     return awkward_ListArrayU32_rpad_axis1_64(
       toindex,
       fromstarts,
@@ -5077,8 +4931,7 @@ namespace kernel {
     int64_t target,
     int64_t length,
     int64_t startsoffset,
-    int64_t stopsoffset,
-    KernelsLib ptr_lib) {
+    int64_t stopsoffset) {
     return awkward_ListArray64_rpad_axis1_64(
       toindex,
       fromstarts,
@@ -5097,8 +4950,7 @@ namespace kernel {
     const int32_t* fromoffsets,
     int64_t offsetsoffset,
     int64_t length,
-    int64_t target,
-    KernelsLib ptr_lib) {
+    int64_t target) {
     return awkward_ListOffsetArray32_rpad_and_clip_axis1_64(
       toindex,
       fromoffsets,
@@ -5112,8 +4964,7 @@ namespace kernel {
     const uint32_t* fromoffsets,
     int64_t offsetsoffset,
     int64_t length,
-    int64_t target,
-    KernelsLib ptr_lib) {
+    int64_t target) {
     return awkward_ListOffsetArrayU32_rpad_and_clip_axis1_64(
       toindex,
       fromoffsets,
@@ -5127,8 +4978,7 @@ namespace kernel {
     const int64_t* fromoffsets,
     int64_t offsetsoffset,
     int64_t length,
-    int64_t target,
-    KernelsLib ptr_lib) {
+    int64_t target) {
     return awkward_ListOffsetArray64_rpad_and_clip_axis1_64(
       toindex,
       fromoffsets,
@@ -5144,8 +4994,7 @@ namespace kernel {
     int64_t offsetsoffset,
     int64_t fromlength,
     int64_t length,
-    int64_t* tocount,
-    KernelsLib ptr_lib) {
+    int64_t* tocount) {
     return awkward_ListOffsetArray32_rpad_length_axis1(
       tooffsets,
       fromoffsets,
@@ -5161,8 +5010,7 @@ namespace kernel {
     int64_t offsetsoffset,
     int64_t fromlength,
     int64_t length,
-    int64_t* tocount,
-    KernelsLib ptr_lib) {
+    int64_t* tocount) {
     return awkward_ListOffsetArrayU32_rpad_length_axis1(
       tooffsets,
       fromoffsets,
@@ -5178,8 +5026,7 @@ namespace kernel {
     int64_t offsetsoffset,
     int64_t fromlength,
     int64_t length,
-    int64_t* tocount,
-    KernelsLib ptr_lib) {
+    int64_t* tocount) {
     return awkward_ListOffsetArray64_rpad_length_axis1(
       tooffsets,
       fromoffsets,
@@ -5195,8 +5042,7 @@ namespace kernel {
     const int32_t* fromoffsets,
     int64_t offsetsoffset,
     int64_t fromlength,
-    int64_t target,
-    KernelsLib ptr_lib) {
+    int64_t target) {
     return awkward_ListOffsetArray32_rpad_axis1_64(
       toindex,
       fromoffsets,
@@ -5210,8 +5056,7 @@ namespace kernel {
     const uint32_t* fromoffsets,
     int64_t offsetsoffset,
     int64_t fromlength,
-    int64_t target,
-    KernelsLib ptr_lib) {
+    int64_t target) {
     return awkward_ListOffsetArrayU32_rpad_axis1_64(
       toindex,
       fromoffsets,
@@ -5225,8 +5070,7 @@ namespace kernel {
     const int64_t* fromoffsets,
     int64_t offsetsoffset,
     int64_t fromlength,
-    int64_t target,
-    KernelsLib ptr_lib) {
+    int64_t target) {
     return awkward_ListOffsetArray64_rpad_axis1_64(
       toindex,
       fromoffsets,
@@ -5249,8 +5093,7 @@ namespace kernel {
     int64_t* toindex,
     const int32_t* offsets,
     int64_t offsetsoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_listarray32_localindex_64(
       toindex,
       offsets,
@@ -5262,8 +5105,7 @@ namespace kernel {
     int64_t* toindex,
     const uint32_t* offsets,
     int64_t offsetsoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_listarrayU32_localindex_64(
       toindex,
       offsets,
@@ -5275,8 +5117,7 @@ namespace kernel {
     int64_t* toindex,
     const int64_t* offsets,
     int64_t offsetsoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_listarray64_localindex_64(
       toindex,
       offsets,
@@ -5318,8 +5159,7 @@ namespace kernel {
     int64_t startsoffset,
     const int32_t* stops,
     int64_t stopsoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_listarray32_combinations_length_64(
       totallen,
       tooffsets,
@@ -5341,8 +5181,7 @@ namespace kernel {
     int64_t startsoffset,
     const uint32_t* stops,
     int64_t stopsoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_listarrayU32_combinations_length_64(
       totallen,
       tooffsets,
@@ -5364,8 +5203,7 @@ namespace kernel {
     int64_t startsoffset,
     const int64_t* stops,
     int64_t stopsoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_listarray64_combinations_length_64(
       totallen,
       tooffsets,
@@ -5389,8 +5227,7 @@ namespace kernel {
     int64_t startsoffset,
     const int32_t* stops,
     int64_t stopsoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_listarray32_combinations_64(
       tocarry,
       toindex,
@@ -5414,8 +5251,7 @@ namespace kernel {
     int64_t startsoffset,
     const uint32_t* stops,
     int64_t stopsoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_listarrayU32_combinations_64(
       tocarry,
       toindex,
@@ -5439,8 +5275,7 @@ namespace kernel {
     int64_t startsoffset,
     const int64_t* stops,
     int64_t stopsoffset,
-    int64_t length,
-    KernelsLib ptr_lib) {
+    int64_t length) {
     return awkward_listarray64_combinations_64(
       tocarry,
       toindex,
@@ -5523,5 +5358,2399 @@ namespace kernel {
       bitmasklength,
       validwhen,
       lsb_order);
+  }
+
+  ///@brief Reducers kernels
+  ERROR reduce_count_64(
+    int64_t* toptr,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_count_64(
+      toptr,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+
+  template <>
+  ERROR reduce_countnonzero(
+    int64_t* toptr,
+    const bool* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_countnonzero_bool_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_countnonzero(
+    int64_t* toptr,
+    const uint8_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_countnonzero_uint8_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_countnonzero(
+    int64_t* toptr,
+    const int8_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_countnonzero_int8_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_countnonzero(
+    int64_t* toptr,
+    const int16_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_countnonzero_int16_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_countnonzero(
+    int64_t* toptr,
+    const uint16_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_countnonzero_uint16_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_countnonzero(
+    int64_t* toptr,
+    const int32_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_countnonzero_int32_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_countnonzero(
+    int64_t* toptr,
+    const uint32_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_countnonzero_uint32_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_countnonzero(
+    int64_t* toptr,
+    const int64_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_countnonzero_int64_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_countnonzero(
+    int64_t* toptr,
+    const uint64_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_countnonzero_uint64_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_countnonzero(
+    int64_t* toptr,
+    const float* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_countnonzero_float32_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_countnonzero(
+    int64_t* toptr,
+    const double* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_countnonzero_float64_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+
+  template <>
+  ERROR reduce_sum(
+    int64_t* toptr,
+    const bool* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_sum_int64_bool_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_sum(
+    int64_t* toptr,
+    const int8_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_sum_int64_int8_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_sum(
+    uint64_t* toptr,
+    const uint8_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_sum_uint64_uint8_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_sum(
+    int64_t* toptr,
+    const int16_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_sum_int64_int16_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_sum(
+    uint64_t* toptr,
+    const uint16_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_sum_uint64_uint16_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_sum(
+    int64_t* toptr,
+    const int32_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_sum_int64_int32_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_sum(
+    uint64_t* toptr,
+    const uint32_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_sum_uint64_uint32_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_sum(
+    int64_t* toptr,
+    const int64_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_sum_int64_int64_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_sum(
+    uint64_t* toptr,
+    const uint64_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_sum_uint64_uint64_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_sum(
+    float* toptr,
+    const float* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_sum_float32_float32_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_sum(
+    double* toptr,
+    const double* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_sum_float64_float64_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_sum(
+    int32_t* toptr,
+    const bool* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_sum_int32_bool_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_sum(
+    int32_t* toptr,
+    const int8_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_sum_int32_int8_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_sum(
+    uint32_t* toptr,
+    const uint8_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_sum_uint32_uint8_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_sum(
+    int32_t* toptr,
+    const int16_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_sum_int32_int16_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_sum(
+    uint32_t* toptr,
+    const uint16_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_sum_uint32_uint16_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_sum(
+    int32_t* toptr,
+    const int32_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_sum_int32_int32_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_sum(
+    uint32_t* toptr,
+    const uint32_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_sum_uint32_uint32_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+
+  template <>
+  ERROR reduce_sum_bool(
+    bool* toptr,
+    const bool* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_sum_bool_bool_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_sum_bool(
+    bool* toptr,
+    const int8_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_sum_bool_int8_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_sum_bool(
+    bool* toptr,
+    const uint8_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_sum_bool_uint8_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_sum_bool(
+    bool* toptr,
+    const int16_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_sum_bool_int16_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_sum_bool(
+    bool* toptr,
+    const uint16_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_sum_bool_uint16_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_sum_bool(
+    bool* toptr,
+    const int32_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_sum_bool_int32_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_sum_bool(
+    bool* toptr,
+    const uint32_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_sum_bool_uint32_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_sum_bool(
+    bool* toptr,
+    const int64_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_sum_bool_int64_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_sum_bool(
+    bool* toptr,
+    const uint64_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_sum_bool_uint64_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_sum_bool(
+    bool* toptr,
+    const float* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_sum_bool_float32_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_sum_bool(
+    bool* toptr,
+    const double* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_sum_bool_float64_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+
+  template <>
+  ERROR reduce_prod(
+    int64_t* toptr,
+    const bool* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_prod_int64_bool_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_prod(
+    int64_t* toptr,
+    const int8_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_prod_int64_int8_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_prod(
+    uint64_t* toptr,
+    const uint8_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_prod_uint64_uint8_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_prod(
+    int64_t* toptr,
+    const int16_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_prod_int64_int16_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_prod(
+    uint64_t* toptr,
+    const uint16_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_prod_uint64_uint16_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_prod(
+    int64_t* toptr,
+    const int32_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_prod_int64_int32_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_prod(
+    uint64_t* toptr,
+    const uint32_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_prod_uint64_uint32_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_prod(
+    int64_t* toptr,
+    const int64_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_prod_int64_int64_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_prod(
+    uint64_t* toptr,
+    const uint64_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_prod_uint64_uint64_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_prod(
+    float* toptr,
+    const float* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_prod_float32_float32_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_prod(
+    double* toptr,
+    const double* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_prod_float64_float64_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_prod(
+    int32_t* toptr,
+    const bool* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_prod_int32_bool_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_prod(
+    int32_t* toptr,
+    const int8_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_prod_int32_int8_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_prod(
+    uint32_t* toptr,
+    const uint8_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_prod_uint32_uint8_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_prod(
+    int32_t* toptr,
+    const int16_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_prod_int32_int16_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_prod(
+    uint32_t* toptr,
+    const uint16_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_prod_uint32_uint16_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_prod(
+    int32_t* toptr,
+    const int32_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_prod_int32_int32_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_prod(
+    uint32_t* toptr,
+    const uint32_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_prod_uint32_uint32_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+
+  template <>
+  ERROR reduce_prod_bool(
+    bool* toptr,
+    const bool* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_prod_bool_bool_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_prod_bool(
+    bool* toptr,
+    const int8_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_prod_bool_int8_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_prod_bool(
+    bool* toptr,
+    const uint8_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_prod_bool_uint8_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_prod_bool(
+    bool* toptr,
+    const int16_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_prod_bool_int16_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_prod_bool(
+    bool* toptr,
+    const uint16_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_prod_bool_uint16_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_prod_bool(
+    bool* toptr,
+    const int32_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_prod_bool_int32_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_prod_bool(
+    bool* toptr,
+    const uint32_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_prod_bool_uint32_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_prod_bool(
+    bool* toptr,
+    const int64_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_prod_bool_int64_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_prod_bool(
+    bool* toptr,
+    const uint64_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_prod_bool_uint64_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_prod_bool(
+    bool* toptr,
+    const float* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_prod_bool_float32_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_prod_bool(
+    bool* toptr,
+    const double* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_prod_bool_float64_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+
+  template <>
+  ERROR reduce_min(
+    int8_t* toptr,
+    const int8_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength,
+    int8_t identity) {
+    return awkward_reduce_min_int8_int8_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength,
+      identity);
+  }
+  template <>
+  ERROR reduce_min(
+    uint8_t* toptr,
+    const uint8_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength,
+    uint8_t identity) {
+    return awkward_reduce_min_uint8_uint8_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength,
+      identity);
+  }
+  template <>
+  ERROR reduce_min(
+    int16_t* toptr,
+    const int16_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength,
+    int16_t identity) {
+    return awkward_reduce_min_int16_int16_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength,
+      identity);
+  }
+  template <>
+  ERROR reduce_min(
+    uint16_t* toptr,
+    const uint16_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength,
+    uint16_t identity) {
+    return awkward_reduce_min_uint16_uint16_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength,
+      identity);
+  }
+  template <>
+  ERROR reduce_min(
+    int32_t* toptr,
+    const int32_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength,
+    int32_t identity) {
+    return awkward_reduce_min_int32_int32_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength,
+      identity);
+  }
+  template <>
+  ERROR reduce_min(
+    uint32_t* toptr,
+    const uint32_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength,
+    uint32_t identity) {
+    return awkward_reduce_min_uint32_uint32_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength,
+      identity);
+  }
+  template <>
+  ERROR reduce_min(
+    int64_t* toptr,
+    const int64_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength,
+    int64_t identity) {
+    return awkward_reduce_min_int64_int64_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength,
+      identity);
+  }
+  template <>
+  ERROR reduce_min(
+    uint64_t* toptr,
+    const uint64_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength,
+    uint64_t identity) {
+    return awkward_reduce_min_uint64_uint64_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength,
+      identity);
+  }
+  template <>
+  ERROR reduce_min(
+    float* toptr,
+    const float* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength,
+    float identity) {
+    return awkward_reduce_min_float32_float32_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength,
+      identity);
+  }
+  template <>
+  ERROR reduce_min(
+    double* toptr,
+    const double* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength,
+    double identity) {
+    return awkward_reduce_min_float64_float64_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength,
+      identity);
+  }
+
+  template <>
+  ERROR reduce_max(
+    int8_t* toptr,
+    const int8_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength,
+    int8_t identity) {
+    return awkward_reduce_max_int8_int8_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength,
+      identity);
+  }
+  template <>
+  ERROR reduce_max(
+    uint8_t* toptr,
+    const uint8_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength,
+    uint8_t identity) {
+    return awkward_reduce_max_uint8_uint8_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength,
+      identity);
+  }
+  template <>
+  ERROR reduce_max(
+    int16_t* toptr,
+    const int16_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength,
+    int16_t identity) {
+    return awkward_reduce_max_int16_int16_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength,
+      identity);
+  }
+  template <>
+  ERROR reduce_max(
+    uint16_t* toptr,
+    const uint16_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength,
+    uint16_t identity) {
+    return awkward_reduce_max_uint16_uint16_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength,
+      identity);
+  }
+  template <>
+  ERROR reduce_max(
+    int32_t* toptr,
+    const int32_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength,
+    int32_t identity) {
+    return awkward_reduce_max_int32_int32_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength,
+      identity);
+  }
+  template <>
+  ERROR reduce_max(
+    uint32_t* toptr,
+    const uint32_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength,
+    uint32_t identity) {
+    return awkward_reduce_max_uint32_uint32_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength,
+      identity);
+  }
+  template <>
+  ERROR reduce_max(
+    int64_t* toptr,
+    const int64_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength,
+    int64_t identity) {
+    return awkward_reduce_max_int64_int64_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength,
+      identity);
+  }
+  template <>
+  ERROR reduce_max(
+    uint64_t* toptr,
+    const uint64_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength,
+    uint64_t identity) {
+    return awkward_reduce_max_uint64_uint64_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength,
+      identity);
+  }
+  template <>
+  ERROR reduce_max(
+    float* toptr,
+    const float* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength,
+    float identity) {
+    return awkward_reduce_max_float32_float32_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength,
+      identity);
+  }
+  template <>
+  ERROR reduce_max(
+    double* toptr,
+    const double* fromptr,
+    int64_t fromptroffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength,
+    double identity) {
+    return awkward_reduce_max_float64_float64_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength,
+      identity);
+  }
+
+  template <>
+  ERROR reduce_argmin(
+    int64_t* toptr,
+    const bool* fromptr,
+    int64_t fromptroffset,
+    const int64_t* starts,
+    int64_t startsoffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_argmin_bool_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      starts,
+      startsoffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_argmin(
+    int64_t* toptr,
+    const int8_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* starts,
+    int64_t startsoffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_argmin_int8_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      starts,
+      startsoffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_argmin(
+    int64_t* toptr,
+    const uint8_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* starts,
+    int64_t startsoffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_argmin_uint8_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      starts,
+      startsoffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_argmin(
+    int64_t* toptr,
+    const int16_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* starts,
+    int64_t startsoffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_argmin_int16_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      starts,
+      startsoffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_argmin(
+    int64_t* toptr,
+    const uint16_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* starts,
+    int64_t startsoffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_argmin_uint16_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      starts,
+      startsoffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_argmin(
+    int64_t* toptr,
+    const int32_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* starts,
+    int64_t startsoffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_argmin_int32_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      starts,
+      startsoffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_argmin(
+    int64_t* toptr,
+    const uint32_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* starts,
+    int64_t startsoffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_argmin_uint32_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      starts,
+      startsoffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_argmin(
+    int64_t* toptr,
+    const int64_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* starts,
+    int64_t startsoffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_argmin_int64_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      starts,
+      startsoffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_argmin(
+    int64_t* toptr,
+    const uint64_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* starts,
+    int64_t startsoffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_argmin_uint64_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      starts,
+      startsoffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_argmin(
+    int64_t* toptr,
+    const float* fromptr,
+    int64_t fromptroffset,
+    const int64_t* starts,
+    int64_t startsoffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_argmin_float32_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      starts,
+      startsoffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_argmin(
+    int64_t* toptr,
+    const double* fromptr,
+    int64_t fromptroffset,
+    const int64_t* starts,
+    int64_t startsoffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_argmin_float64_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      starts,
+      startsoffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+
+
+  template <>
+  ERROR reduce_argmax(
+    int64_t* toptr,
+    const bool* fromptr,
+    int64_t fromptroffset,
+    const int64_t* starts,
+    int64_t startsoffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_argmax_bool_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      starts,
+      startsoffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_argmax(
+    int64_t* toptr,
+    const int8_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* starts,
+    int64_t startsoffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_argmax_int8_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      starts,
+      startsoffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_argmax(
+    int64_t* toptr,
+    const uint8_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* starts,
+    int64_t startsoffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_argmax_uint8_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      starts,
+      startsoffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_argmax(
+    int64_t* toptr,
+    const int16_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* starts,
+    int64_t startsoffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_argmax_int16_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      starts,
+      startsoffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_argmax(
+    int64_t* toptr,
+    const uint16_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* starts,
+    int64_t startsoffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_argmax_uint16_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      starts,
+      startsoffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_argmax(
+    int64_t* toptr,
+    const int32_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* starts,
+    int64_t startsoffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_argmax_int32_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      starts,
+      startsoffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_argmax(
+    int64_t* toptr,
+    const uint32_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* starts,
+    int64_t startsoffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_argmax_uint32_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      starts,
+      startsoffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_argmax(
+    int64_t* toptr,
+    const int64_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* starts,
+    int64_t startsoffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_argmax_int64_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      starts,
+      startsoffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_argmax(
+    int64_t* toptr,
+    const uint64_t* fromptr,
+    int64_t fromptroffset,
+    const int64_t* starts,
+    int64_t startsoffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_argmax_uint64_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      starts,
+      startsoffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_argmax(
+    int64_t* toptr,
+    const float* fromptr,
+    int64_t fromptroffset,
+    const int64_t* starts,
+    int64_t startsoffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_argmax_float32_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      starts,
+      startsoffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+  template <>
+  ERROR reduce_argmax(
+    int64_t* toptr,
+    const double* fromptr,
+    int64_t fromptroffset,
+    const int64_t* starts,
+    int64_t startsoffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_reduce_argmax_float64_64(
+      toptr,
+      fromptr,
+      fromptroffset,
+      starts,
+      startsoffset,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+
+  ERROR content_reduce_zeroparents_64(
+    int64_t* toparents,
+    int64_t length) {
+    return awkward_content_reduce_zeroparents_64(
+      toparents,
+      length);
+  }
+
+  ERROR listoffsetarray_reduce_global_startstop_64(
+    int64_t* globalstart,
+    int64_t* globalstop,
+    const int64_t* offsets,
+    int64_t offsetsoffset,
+    int64_t length) {
+    return awkward_listoffsetarray_reduce_global_startstop_64(
+      globalstart,
+      globalstop,
+      offsets,
+      offsetsoffset,
+      length);
+  }
+
+  ERROR listoffsetarray_reduce_nonlocal_maxcount_offsetscopy_64(
+    int64_t* maxcount,
+    int64_t* offsetscopy,
+    const int64_t* offsets,
+    int64_t offsetsoffset,
+    int64_t length) {
+    return awkward_listoffsetarray_reduce_nonlocal_maxcount_offsetscopy_64(
+      maxcount,
+      offsetscopy,
+      offsets,
+      offsetsoffset,
+      length);
+  }
+
+  ERROR listoffsetarray_reduce_nonlocal_preparenext_64(
+    int64_t* nextcarry,
+    int64_t* nextparents,
+    int64_t nextlen,
+    int64_t* maxnextparents,
+    int64_t* distincts,
+    int64_t distinctslen,
+    int64_t* offsetscopy,
+    const int64_t* offsets,
+    int64_t offsetsoffset,
+    int64_t length,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t maxcount) {
+    return awkward_listoffsetarray_reduce_nonlocal_preparenext_64(
+      nextcarry,
+      nextparents,
+      nextlen,
+      maxnextparents,
+      distincts,
+      distinctslen,
+      offsetscopy,
+      offsets,
+      offsetsoffset,
+      length,
+      parents,
+      parentsoffset,
+      maxcount);
+  }
+
+  ERROR listoffsetarray_reduce_nonlocal_nextstarts_64(
+    int64_t* nextstarts,
+    const int64_t* nextparents,
+    int64_t nextlen) {
+    return awkward_listoffsetarray_reduce_nonlocal_nextstarts_64(
+      nextstarts,
+      nextparents,
+      nextlen);
+  }
+
+  ERROR listoffsetarray_reduce_nonlocal_findgaps_64(
+    int64_t* gaps,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents) {
+    return awkward_listoffsetarray_reduce_nonlocal_findgaps_64(
+      gaps,
+      parents,
+      parentsoffset,
+      lenparents);
+  }
+
+  ERROR listoffsetarray_reduce_nonlocal_outstartsstops_64(
+    int64_t* outstarts,
+    int64_t* outstops,
+    const int64_t* distincts,
+    int64_t lendistincts,
+    const int64_t* gaps,
+    int64_t outlength) {
+    return awkward_listoffsetarray_reduce_nonlocal_outstartsstops_64(
+      outstarts,
+      outstops,
+      distincts,
+      lendistincts,
+      gaps,
+      outlength);
+  }
+
+  ERROR listoffsetarray_reduce_local_nextparents_64(
+    int64_t* nextparents,
+    const int64_t* offsets,
+    int64_t offsetsoffset,
+    int64_t length) {
+    return awkward_listoffsetarray_reduce_local_nextparents_64(
+      nextparents,
+      offsets,
+      offsetsoffset,
+      length);
+  }
+
+  ERROR listoffsetarray_reduce_local_outoffsets_64(
+    int64_t* outoffsets,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_listoffsetarray_reduce_local_outoffsets_64(
+      outoffsets,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+
+  template <>
+  Error indexedarray_reduce_next_64<int32_t>(
+    int64_t* nextcarry,
+    int64_t* nextparents,
+    int64_t* outindex,
+    const int32_t* index,
+    int64_t indexoffset,
+    int64_t* parents,
+    int64_t parentsoffset,
+    int64_t length) {
+    return awkward_indexedarray32_reduce_next_64(
+      nextcarry,
+      nextparents,
+      outindex,
+      index,
+      indexoffset,
+      parents,
+      parentsoffset,
+      length);
+  }
+
+  template <>
+  Error indexedarray_reduce_next_64<uint32_t>(
+    int64_t* nextcarry,
+    int64_t* nextparents,
+    int64_t* outindex,
+    const uint32_t* index,
+    int64_t indexoffset,
+    int64_t* parents,
+    int64_t parentsoffset,
+    int64_t length) {
+    return awkward_indexedarrayU32_reduce_next_64(
+      nextcarry,
+      nextparents,
+      outindex,
+      index,
+      indexoffset,
+      parents,
+      parentsoffset,
+      length);
+  }
+
+  template <>
+  Error indexedarray_reduce_next_64<int64_t>(
+    int64_t* nextcarry,
+    int64_t* nextparents,
+    int64_t* outindex,
+    const int64_t* index,
+    int64_t indexoffset,
+    int64_t* parents,
+    int64_t parentsoffset,
+    int64_t length) {
+    return awkward_indexedarray64_reduce_next_64(
+      nextcarry,
+      nextparents,
+      outindex,
+      index,
+      indexoffset,
+      parents,
+      parentsoffset,
+      length);
+  }
+
+  ERROR indexedarray_reduce_next_fix_offsets_64(
+    int64_t* outoffsets,
+    const int64_t* starts,
+    int64_t startsoffset,
+    int64_t startslength,
+    int64_t outindexlength) {
+    return awkward_indexedarray_reduce_next_fix_offsets_64(
+      outoffsets,
+      starts,
+      startsoffset,
+      startslength,
+      outindexlength);
+  }
+
+  ERROR numpyarray_reduce_mask_bytemaskedarray(
+    int8_t* toptr,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t lenparents,
+    int64_t outlength) {
+    return awkward_numpyarray_reduce_mask_bytemaskedarray(
+      toptr,
+      parents,
+      parentsoffset,
+      lenparents,
+      outlength);
+  }
+
+  ERROR bytemaskedarray_reduce_next_64(
+    int64_t* nextcarry,
+    int64_t* nextparents,
+    int64_t* outindex,
+    const int8_t* mask,
+    int64_t maskoffset,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t length,
+    bool validwhen) {
+    return awkward_bytemaskedarray_reduce_next_64(
+      nextcarry,
+      nextparents,
+      outindex,
+      mask,
+      maskoffset,
+      parents,
+      parentsoffset,
+      length,
+      validwhen);
   }
 }

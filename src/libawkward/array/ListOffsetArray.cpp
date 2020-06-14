@@ -1009,7 +1009,7 @@ namespace awkward {
     IndexOf<T> self_stops = util::make_stops(offsets_);
 
     if (std::is_same<T, int32_t>::value) {
-      struct Error err = awkward_listarray_fill_to64_from32(
+      struct Error err = kernel::listarray_fill<int32_t, int64_t>(
         starts.ptr().get(),
         0,
         stops.ptr().get(),
@@ -1023,7 +1023,7 @@ namespace awkward {
       util::handle_error(err, classname(), identities_.get());
     }
     else if (std::is_same<T, uint32_t>::value) {
-      struct Error err = awkward_listarray_fill_to64_fromU32(
+      struct Error err = kernel::listarray_fill<uint32_t, int64_t>(
         starts.ptr().get(),
         0,
         stops.ptr().get(),
@@ -1037,7 +1037,7 @@ namespace awkward {
       util::handle_error(err, classname(), identities_.get());
     }
     else if (std::is_same<T, int64_t>::value) {
-      struct Error err = awkward_listarray_fill_to64_from64(
+      struct Error err = kernel::listarray_fill<int64_t, int64_t>(
         starts.ptr().get(),
         0,
         stops.ptr().get(),
@@ -1061,7 +1061,7 @@ namespace awkward {
       content = content_.get()->merge(rawother->content());
       Index32 other_starts = rawother->starts();
       Index32 other_stops = rawother->stops();
-      struct Error err = awkward_listarray_fill_to64_from32(
+      struct Error err = kernel::listarray_fill<int32_t, int64_t>(
         starts.ptr().get(),
         mylength,
         stops.ptr().get(),
@@ -1081,7 +1081,7 @@ namespace awkward {
       content = content_.get()->merge(rawother->content());
       IndexU32 other_starts = rawother->starts();
       IndexU32 other_stops = rawother->stops();
-      struct Error err = awkward_listarray_fill_to64_fromU32(
+      struct Error err = kernel::listarray_fill<uint32_t, int64_t>(
         starts.ptr().get(),
         mylength,
         stops.ptr().get(),
@@ -1101,7 +1101,7 @@ namespace awkward {
       content = content_.get()->merge(rawother->content());
       Index64 other_starts = rawother->starts();
       Index64 other_stops = rawother->stops();
-      struct Error err = awkward_listarray_fill_to64_from64(
+      struct Error err = kernel::listarray_fill<int64_t, int64_t>(
         starts.ptr().get(),
         mylength,
         stops.ptr().get(),
@@ -1121,7 +1121,7 @@ namespace awkward {
       content = content_.get()->merge(rawother->content());
       Index32 other_starts = rawother->starts();
       Index32 other_stops = rawother->stops();
-      struct Error err = awkward_listarray_fill_to64_from32(
+      struct Error err = kernel::listarray_fill<int32_t, int64_t>(
         starts.ptr().get(),
         mylength,
         stops.ptr().get(),
@@ -1141,7 +1141,7 @@ namespace awkward {
       content = content_.get()->merge(rawother->content());
       IndexU32 other_starts = rawother->starts();
       IndexU32 other_stops = rawother->stops();
-      struct Error err = awkward_listarray_fill_to64_fromU32(
+      struct Error err = kernel::listarray_fill<uint32_t, int64_t>(
         starts.ptr().get(),
         mylength,
         stops.ptr().get(),
@@ -1161,7 +1161,7 @@ namespace awkward {
       content = content_.get()->merge(rawother->content());
       Index64 other_starts = rawother->starts();
       Index64 other_stops = rawother->stops();
-      struct Error err = awkward_listarray_fill_to64_from64(
+      struct Error err = kernel::listarray_fill<int64_t, int64_t>(
         starts.ptr().get(),
         mylength,
         stops.ptr().get(),
@@ -1184,7 +1184,7 @@ namespace awkward {
       content = content_.get()->merge(rawother->content());
       Index64 other_starts = rawother->starts();
       Index64 other_stops = rawother->stops();
-      struct Error err = awkward_listarray_fill_to64_from64(
+      struct Error err = kernel::listarray_fill<int64_t, int64_t>(
         starts.ptr().get(),
         mylength,
         stops.ptr().get(),
@@ -1222,7 +1222,7 @@ namespace awkward {
       offsets_.ptr(), offsets_.offset(), offsets_.length());
     if (start != 0) {
       offsets = std::make_shared<Index64>(offsets_.length());
-      struct Error err = awkward_listoffsetarray64_compact_offsets64(
+      struct Error err = kernel::listoffsetarray_compact_offsets64<int64_t>(
         offsets.get()->ptr().get(),
         offsets_.ptr().get(),
         offsets_.offset(),
@@ -1419,7 +1419,7 @@ namespace awkward {
 
       int64_t globalstart;
       int64_t globalstop;
-      struct Error err1 = awkward_listoffsetarray_reduce_global_startstop_64(
+      struct Error err1 = kernel::listoffsetarray_reduce_global_startstop_64(
         &globalstart,
         &globalstop,
         offsets_.ptr().get(),
@@ -1431,7 +1431,7 @@ namespace awkward {
       int64_t maxcount;
       Index64 offsetscopy(offsets_.length());
       struct Error err2 =
-        awkward_listoffsetarray_reduce_nonlocal_maxcount_offsetscopy_64(
+        kernel::listoffsetarray_reduce_nonlocal_maxcount_offsetscopy_64(
         &maxcount,
         offsetscopy.ptr().get(),
         offsets_.ptr().get(),
@@ -1444,7 +1444,7 @@ namespace awkward {
       int64_t maxnextparents;
       Index64 distincts(maxcount * outlength);
       struct Error err3 =
-        awkward_listoffsetarray_reduce_nonlocal_preparenext_64(
+        kernel::listoffsetarray_reduce_nonlocal_preparenext_64(
         nextcarry.ptr().get(),
         nextparents.ptr().get(),
         nextlen,
@@ -1462,7 +1462,7 @@ namespace awkward {
 
       Index64 nextstarts(maxnextparents + 1);
       struct Error err4 =
-        awkward_listoffsetarray_reduce_nonlocal_nextstarts_64(
+        kernel::listoffsetarray_reduce_nonlocal_nextstarts_64(
         nextstarts.ptr().get(),
         nextparents.ptr().get(),
         nextlen);
@@ -1474,7 +1474,7 @@ namespace awkward {
         mask, false);
 
       Index64 gaps(outlength);
-      struct Error err5 = awkward_listoffsetarray_reduce_nonlocal_findgaps_64(
+      struct Error err5 = kernel::listoffsetarray_reduce_nonlocal_findgaps_64(
         gaps.ptr().get(),
         parents.ptr().get(),
         parents.offset(),
@@ -1484,7 +1484,7 @@ namespace awkward {
       Index64 outstarts(outlength);
       Index64 outstops(outlength);
       struct Error err6 =
-        awkward_listoffsetarray_reduce_nonlocal_outstartsstops_64(
+        kernel::listoffsetarray_reduce_nonlocal_outstartsstops_64(
         outstarts.ptr().get(),
         outstops.ptr().get(),
         distincts.ptr().get(),
@@ -1510,7 +1510,7 @@ namespace awkward {
     else {
       int64_t globalstart;
       int64_t globalstop;
-      struct Error err1 = awkward_listoffsetarray_reduce_global_startstop_64(
+      struct Error err1 = kernel::listoffsetarray_reduce_global_startstop_64(
         &globalstart,
         &globalstop,
         offsets_.ptr().get(),
@@ -1519,7 +1519,7 @@ namespace awkward {
       util::handle_error(err1, classname(), identities_.get());
 
       Index64 nextparents(globalstop - globalstart);
-      struct Error err2 = awkward_listoffsetarray_reduce_local_nextparents_64(
+      struct Error err2 = kernel::listoffsetarray_reduce_local_nextparents_64(
         nextparents.ptr().get(),
         offsets_.ptr().get(),
         offsets_.offset(),
@@ -1533,7 +1533,7 @@ namespace awkward {
         offsets_.length() - 1, mask, keepdims);
 
       Index64 outoffsets(outlength + 1);
-      struct Error err3 = awkward_listoffsetarray_reduce_local_outoffsets_64(
+      struct Error err3 = kernel::listoffsetarray_reduce_local_outoffsets_64(
         outoffsets.ptr().get(),
         parents.ptr().get(),
         parents.offset(),

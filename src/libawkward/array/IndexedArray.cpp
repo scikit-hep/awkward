@@ -1673,7 +1673,7 @@ namespace awkward {
           Index8 originalmask(length());
           Index64 adjustedindex(nonzero.length() + numnull);
           Index64 adjustednonzero(nonzero.length());
-          struct Error err3 = awkward_indexedarray_getitem_adjust_outindex_64(
+          struct Error err3 = kernel::indexedarray_getitem_adjust_outindex(
             originalmask.ptr().get(),
             adjustedindex.ptr().get(),
             adjustednonzero.ptr().get(),
@@ -1882,7 +1882,7 @@ namespace awkward {
             "reduce_next with unbranching depth > negaxis expects a "
             "ListOffsetArray64 whose offsets start at zero");
         }
-        struct Error err3 = awkward_indexedarray_reduce_next_fix_offsets_64(
+        struct Error err3 = kernel::indexedarray_reduce_next_fix_offsets_64(
           outoffsets.ptr().get(),
           starts.ptr().get(),
           starts.offset(),
