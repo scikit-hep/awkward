@@ -14,615 +14,6 @@
 #include "awkward/kernel.h"
 
 namespace kernel {
-  template <>
-  Error identities32_from_listoffsetarray<int32_t>(
-    int32_t* toptr,
-    const int32_t* fromptr,
-    const int32_t* fromoffsets,
-    int64_t fromptroffset,
-    int64_t offsetsoffset,
-    int64_t tolength,
-    int64_t fromlength,
-    int64_t fromwidth,
-    KernelsLib ptr_lib) {
-    return awkward_identities32_from_listoffsetarray32(
-      toptr,
-      fromptr,
-      fromoffsets,
-      fromptroffset,
-      offsetsoffset,
-      tolength,
-      fromlength,
-      fromwidth);
-  }
-  template <>
-  Error identities32_from_listoffsetarray<uint32_t>(
-    int32_t* toptr,
-    const int32_t* fromptr,
-    const uint32_t* fromoffsets,
-    int64_t fromptroffset,
-    int64_t offsetsoffset,
-    int64_t tolength,
-    int64_t fromlength,
-    int64_t fromwidth,
-    KernelsLib ptr_lib) {
-    return awkward_identities32_from_listoffsetarrayU32(
-      toptr,
-      fromptr,
-      fromoffsets,
-      fromptroffset,
-      offsetsoffset,
-      tolength,
-      fromlength,
-      fromwidth);
-  }
-  template <>
-  Error identities32_from_listoffsetarray<int64_t>(
-    int32_t* toptr,
-    const int32_t* fromptr,
-    const int64_t* fromoffsets,
-    int64_t fromptroffset,
-    int64_t offsetsoffset,
-    int64_t tolength,
-    int64_t fromlength,
-    int64_t fromwidth,
-    KernelsLib ptr_lib) {
-    return awkward_identities32_from_listoffsetarray64(
-      toptr,
-      fromptr,
-      fromoffsets,
-      fromptroffset,
-      offsetsoffset,
-      tolength,
-      fromlength,
-      fromwidth);
-  }
-  template <>
-  Error identities64_from_listoffsetarray<int32_t>(
-    int64_t* toptr,
-    const int64_t* fromptr,
-    const int32_t* fromoffsets,
-    int64_t fromptroffset,
-    int64_t offsetsoffset,
-    int64_t tolength,
-    int64_t fromlength,
-    int64_t fromwidth,
-    KernelsLib ptr_lib) {
-    return awkward_identities64_from_listoffsetarray32(
-      toptr,
-      fromptr,
-      fromoffsets,
-      fromptroffset,
-      offsetsoffset,
-      tolength,
-      fromlength,
-      fromwidth);
-  }
-  template <>
-  Error identities64_from_listoffsetarray<uint32_t>(
-    int64_t* toptr,
-    const int64_t* fromptr,
-    const uint32_t* fromoffsets,
-    int64_t fromptroffset,
-    int64_t offsetsoffset,
-    int64_t tolength,
-    int64_t fromlength,
-    int64_t fromwidth,
-    KernelsLib ptr_lib) {
-    return awkward_identities64_from_listoffsetarrayU32(
-      toptr,
-      fromptr,
-      fromoffsets,
-      fromptroffset,
-      offsetsoffset,
-      tolength,
-      fromlength,
-      fromwidth);
-  }
-  template <>
-  Error identities64_from_listoffsetarray<int64_t>(
-    int64_t* toptr,
-    const int64_t* fromptr,
-    const int64_t* fromoffsets,
-    int64_t fromptroffset,
-    int64_t offsetsoffset,
-    int64_t tolength,
-    int64_t fromlength,
-    int64_t fromwidth,
-    KernelsLib ptr_lib) {
-    return awkward_identities64_from_listoffsetarray64(
-      toptr,
-      fromptr,
-      fromoffsets,
-      fromptroffset,
-      offsetsoffset,
-      tolength,
-      fromlength,
-      fromwidth);
-  }
-
-  template <>
-  Error identities32_from_listarray<int32_t>(
-    bool* uniquecontents,
-    int32_t* toptr,
-    const int32_t* fromptr,
-    const int32_t* fromstarts,
-    const int32_t* fromstops,
-    int64_t fromptroffset,
-    int64_t startsoffset,
-    int64_t stopsoffset,
-    int64_t tolength,
-    int64_t fromlength,
-    int64_t fromwidth,
-    KernelsLib ptr_lib) {
-    return awkward_identities32_from_listarray32(
-      uniquecontents,
-      toptr,
-      fromptr,
-      fromstarts,
-      fromstops,
-      fromptroffset,
-      startsoffset,
-      stopsoffset,
-      tolength,
-      fromlength,
-      fromwidth);
-  }
-  template <>
-  Error identities32_from_listarray<uint32_t>(
-    bool* uniquecontents,
-    int32_t* toptr,
-    const int32_t* fromptr,
-    const uint32_t* fromstarts,
-    const uint32_t* fromstops,
-    int64_t fromptroffset,
-    int64_t startsoffset,
-    int64_t stopsoffset,
-    int64_t tolength,
-    int64_t fromlength,
-    int64_t fromwidth,
-    KernelsLib ptr_lib) {
-    return awkward_identities32_from_listarrayU32(
-      uniquecontents,
-      toptr,
-      fromptr,
-      fromstarts,
-      fromstops,
-      fromptroffset,
-      startsoffset,
-      stopsoffset,
-      tolength,
-      fromlength,
-      fromwidth);
-  }
-  template <>
-  Error identities32_from_listarray<int64_t>(
-    bool* uniquecontents,
-    int32_t* toptr,
-    const int32_t* fromptr,
-    const int64_t* fromstarts,
-    const int64_t* fromstops,
-    int64_t fromptroffset,
-    int64_t startsoffset,
-    int64_t stopsoffset,
-    int64_t tolength,
-    int64_t fromlength,
-    int64_t fromwidth,
-    KernelsLib ptr_lib) {
-    return awkward_identities32_from_listarray64(
-      uniquecontents,
-      toptr,
-      fromptr,
-      fromstarts,
-      fromstops,
-      fromptroffset,
-      startsoffset,
-      stopsoffset,
-      tolength,
-      fromlength,
-      fromwidth);
-  }
-  template <>
-  Error identities64_from_listarray<int32_t>(
-    bool* uniquecontents,
-    int64_t* toptr,
-    const int64_t* fromptr,
-    const int32_t* fromstarts,
-    const int32_t* fromstops,
-    int64_t fromptroffset,
-    int64_t startsoffset,
-    int64_t stopsoffset,
-    int64_t tolength,
-    int64_t fromlength,
-    int64_t fromwidth,
-    KernelsLib ptr_lib) {
-    return awkward_identities64_from_listarray32(
-      uniquecontents,
-      toptr,
-      fromptr,
-      fromstarts,
-      fromstops,
-      fromptroffset,
-      startsoffset,
-      stopsoffset,
-      tolength,
-      fromlength,
-      fromwidth);
-  }
-  template <>
-  Error identities64_from_listarray<uint32_t>(
-    bool* uniquecontents,
-    int64_t* toptr,
-    const int64_t* fromptr,
-    const uint32_t* fromstarts,
-    const uint32_t* fromstops,
-    int64_t fromptroffset,
-    int64_t startsoffset,
-    int64_t stopsoffset,
-    int64_t tolength,
-    int64_t fromlength,
-    int64_t fromwidth,
-    KernelsLib ptr_lib) {
-    return awkward_identities64_from_listarrayU32(
-      uniquecontents,
-      toptr,
-      fromptr,
-      fromstarts,
-      fromstops,
-      fromptroffset,
-      startsoffset,
-      stopsoffset,
-      tolength,
-      fromlength,
-      fromwidth);
-  }
-  template <>
-  Error identities64_from_listarray<int64_t>(
-    bool* uniquecontents,
-    int64_t* toptr,
-    const int64_t* fromptr,
-    const int64_t* fromstarts,
-    const int64_t* fromstops,
-    int64_t fromptroffset,
-    int64_t startsoffset,
-    int64_t stopsoffset,
-    int64_t tolength,
-    int64_t fromlength,
-    int64_t fromwidth,
-    KernelsLib ptr_lib) {
-    return awkward_identities64_from_listarray64(
-      uniquecontents,
-      toptr,
-      fromptr,
-      fromstarts,
-      fromstops,
-      fromptroffset,
-      startsoffset,
-      stopsoffset,
-      tolength,
-      fromlength,
-      fromwidth);
-  }
-
-  template <>
-  Error identities32_from_indexedarray<int32_t>(
-    bool* uniquecontents,
-    int32_t* toptr,
-    const int32_t* fromptr,
-    const int32_t* fromindex,
-    int64_t fromptroffset,
-    int64_t indexoffset,
-    int64_t tolength,
-    int64_t fromlength,
-    int64_t fromwidth,
-    KernelsLib ptr_lib) {
-    return awkward_identities32_from_indexedarray32(
-      uniquecontents,
-      toptr,
-      fromptr,
-      fromindex,
-      fromptroffset,
-      indexoffset,
-      tolength,
-      fromlength,
-      fromwidth);
-  }
-  template <>
-  Error identities32_from_indexedarray<uint32_t>(
-    bool* uniquecontents,
-    int32_t* toptr,
-    const int32_t* fromptr,
-    const uint32_t* fromindex,
-    int64_t fromptroffset,
-    int64_t indexoffset,
-    int64_t tolength,
-    int64_t fromlength,
-    int64_t fromwidth,
-    KernelsLib ptr_lib) {
-    return awkward_identities32_from_indexedarrayU32(
-      uniquecontents,
-      toptr,
-      fromptr,
-      fromindex,
-      fromptroffset,
-      indexoffset,
-      tolength,
-      fromlength,
-      fromwidth);
-  }
-  template <>
-  Error identities32_from_indexedarray<int64_t>(
-    bool* uniquecontents,
-    int32_t* toptr,
-    const int32_t* fromptr,
-    const int64_t* fromindex,
-    int64_t fromptroffset,
-    int64_t indexoffset,
-    int64_t tolength,
-    int64_t fromlength,
-    int64_t fromwidth,
-    KernelsLib ptr_lib) {
-    return awkward_identities32_from_indexedarray64(
-      uniquecontents,
-      toptr,
-      fromptr,
-      fromindex,
-      fromptroffset,
-      indexoffset,
-      tolength,
-      fromlength,
-      fromwidth);
-  }
-  template <>
-  Error identities64_from_indexedarray<int32_t>(
-    bool* uniquecontents,
-    int64_t* toptr,
-    const int64_t* fromptr,
-    const int32_t* fromindex,
-    int64_t fromptroffset,
-    int64_t indexoffset,
-    int64_t tolength,
-    int64_t fromlength,
-    int64_t fromwidth,
-    KernelsLib ptr_lib) {
-    return awkward_identities64_from_indexedarray32(
-      uniquecontents,
-      toptr,
-      fromptr,
-      fromindex,
-      fromptroffset,
-      indexoffset,
-      tolength,
-      fromlength,
-      fromwidth);
-  }
-  template <>
-  Error identities64_from_indexedarray<uint32_t>(
-    bool* uniquecontents,
-    int64_t* toptr,
-    const int64_t* fromptr,
-    const uint32_t* fromindex,
-    int64_t fromptroffset,
-    int64_t indexoffset,
-    int64_t tolength,
-    int64_t fromlength,
-    int64_t fromwidth,
-    KernelsLib ptr_lib) {
-    return awkward_identities64_from_indexedarrayU32(
-      uniquecontents,
-      toptr,
-      fromptr,
-      fromindex,
-      fromptroffset,
-      indexoffset,
-      tolength,
-      fromlength,
-      fromwidth);
-  }
-  template <>
-  Error identities64_from_indexedarray<int64_t>(
-    bool* uniquecontents,
-    int64_t* toptr,
-    const int64_t* fromptr,
-    const int64_t* fromindex,
-    int64_t fromptroffset,
-    int64_t indexoffset,
-    int64_t tolength,
-    int64_t fromlength,
-    int64_t fromwidth,
-    KernelsLib ptr_lib) {
-    return awkward_identities64_from_indexedarray64(
-      uniquecontents,
-      toptr,
-      fromptr,
-      fromindex,
-      fromptroffset,
-      indexoffset,
-      tolength,
-      fromlength,
-      fromwidth);
-  }
-
-  template <>
-  Error identities32_from_unionarray<int8_t,
-    int32_t>(
-    bool* uniquecontents,
-    int32_t* toptr,
-    const int32_t* fromptr,
-    const int8_t* fromtags,
-    const int32_t* fromindex,
-    int64_t fromptroffset,
-    int64_t tagsoffset,
-    int64_t indexoffset,
-    int64_t tolength,
-    int64_t fromlength,
-    int64_t fromwidth,
-    int64_t which,
-    KernelsLib ptr_lib) {
-    return awkward_identities32_from_unionarray8_32(
-      uniquecontents,
-      toptr,
-      fromptr,
-      fromtags,
-      fromindex,
-      fromptroffset,
-      tagsoffset,
-      indexoffset,
-      tolength,
-      fromlength,
-      fromwidth,
-      which);
-  }
-  template <>
-  Error identities32_from_unionarray<int8_t,
-    uint32_t>(
-    bool* uniquecontents,
-    int32_t* toptr,
-    const int32_t* fromptr,
-    const int8_t* fromtags,
-    const uint32_t* fromindex,
-    int64_t fromptroffset,
-    int64_t tagsoffset,
-    int64_t indexoffset,
-    int64_t tolength,
-    int64_t fromlength,
-    int64_t fromwidth,
-    int64_t which,
-    KernelsLib ptr_lib) {
-    return awkward_identities32_from_unionarray8_U32(
-      uniquecontents,
-      toptr,
-      fromptr,
-      fromtags,
-      fromindex,
-      fromptroffset,
-      tagsoffset,
-      indexoffset,
-      tolength,
-      fromlength,
-      fromwidth,
-      which);
-  }
-  template <>
-  Error identities32_from_unionarray<int8_t,
-    int64_t>(
-    bool* uniquecontents,
-    int32_t* toptr,
-    const int32_t* fromptr,
-    const int8_t* fromtags,
-    const int64_t* fromindex,
-    int64_t fromptroffset,
-    int64_t tagsoffset,
-    int64_t indexoffset,
-    int64_t tolength,
-    int64_t fromlength,
-    int64_t fromwidth,
-    int64_t which,
-    KernelsLib ptr_lib) {
-    return awkward_identities32_from_unionarray8_64(
-      uniquecontents,
-      toptr,
-      fromptr,
-      fromtags,
-      fromindex,
-      fromptroffset,
-      tagsoffset,
-      indexoffset,
-      tolength,
-      fromlength,
-      fromwidth,
-      which);
-  }
-  template <>
-  Error identities64_from_unionarray<int8_t,
-    int32_t>(
-    bool* uniquecontents,
-    int64_t* toptr,
-    const int64_t* fromptr,
-    const int8_t* fromtags,
-    const int32_t* fromindex,
-    int64_t fromptroffset,
-    int64_t tagsoffset,
-    int64_t indexoffset,
-    int64_t tolength,
-    int64_t fromlength,
-    int64_t fromwidth,
-    int64_t which,
-    KernelsLib ptr_lib) {
-    return awkward_identities64_from_unionarray8_32(
-      uniquecontents,
-      toptr,
-      fromptr,
-      fromtags,
-      fromindex,
-      fromptroffset,
-      tagsoffset,
-      indexoffset,
-      tolength,
-      fromlength,
-      fromwidth,
-      which);
-  }
-  template <>
-  Error identities64_from_unionarray<int8_t,
-    uint32_t>(
-    bool* uniquecontents,
-    int64_t* toptr,
-    const int64_t* fromptr,
-    const int8_t* fromtags,
-    const uint32_t* fromindex,
-    int64_t fromptroffset,
-    int64_t tagsoffset,
-    int64_t indexoffset,
-    int64_t tolength,
-    int64_t fromlength,
-    int64_t fromwidth,
-    int64_t which,
-    KernelsLib ptr_lib) {
-    return awkward_identities64_from_unionarray8_U32(
-      uniquecontents,
-      toptr,
-      fromptr,
-      fromtags,
-      fromindex,
-      fromptroffset,
-      tagsoffset,
-      indexoffset,
-      tolength,
-      fromlength,
-      fromwidth,
-      which);
-  }
-  template <>
-  Error identities64_from_unionarray<int8_t,
-    int64_t>(
-    bool* uniquecontents,
-    int64_t* toptr,
-    const int64_t* fromptr,
-    const int8_t* fromtags,
-    const int64_t* fromindex,
-    int64_t fromptroffset,
-    int64_t tagsoffset,
-    int64_t indexoffset,
-    int64_t tolength,
-    int64_t fromlength,
-    int64_t fromwidth,
-    int64_t which,
-    KernelsLib ptr_lib) {
-    return awkward_identities64_from_unionarray8_64(
-      uniquecontents,
-      toptr,
-      fromptr,
-      fromtags,
-      fromindex,
-      fromptroffset,
-      tagsoffset,
-      indexoffset,
-      tolength,
-      fromlength,
-      fromwidth,
-      which);
-  }
 
   template <>
   Error listoffsetarray_flatten_offsets_64<int32_t>(
@@ -4747,5 +4138,711 @@ namespace kernel {
       maskoffset,
       length,
       validwhen);
+  }
+
+  /// @brief identities kernels
+  template <>
+  ERROR new_identities(
+    int32_t* toptr,
+    int64_t length) {
+    return awkward_new_identities32(
+      toptr,
+      length);
+  }
+  template <>
+  ERROR new_identities(
+    int64_t* toptr,
+    int64_t length) {
+    return awkward_new_identities64(
+      toptr,
+      length);
+  }
+
+  ERROR identities32_to_identities64(
+    int64_t* toptr,
+    const int32_t* fromptr,
+    int64_t length,
+    int64_t width) {
+    return awkward_identities32_to_identities64(
+      toptr,
+      fromptr,
+      length,
+      width);
+  }
+
+  template <>
+  Error identities32_from_listoffsetarray<int32_t>(
+    int32_t* toptr,
+    const int32_t* fromptr,
+    const int32_t* fromoffsets,
+    int64_t fromptroffset,
+    int64_t offsetsoffset,
+    int64_t tolength,
+    int64_t fromlength,
+    int64_t fromwidth,
+    KernelsLib ptr_lib) {
+    return awkward_identities32_from_listoffsetarray32(
+      toptr,
+      fromptr,
+      fromoffsets,
+      fromptroffset,
+      offsetsoffset,
+      tolength,
+      fromlength,
+      fromwidth);
+  }
+  template <>
+  Error identities32_from_listoffsetarray<uint32_t>(
+    int32_t* toptr,
+    const int32_t* fromptr,
+    const uint32_t* fromoffsets,
+    int64_t fromptroffset,
+    int64_t offsetsoffset,
+    int64_t tolength,
+    int64_t fromlength,
+    int64_t fromwidth,
+    KernelsLib ptr_lib) {
+    return awkward_identities32_from_listoffsetarrayU32(
+      toptr,
+      fromptr,
+      fromoffsets,
+      fromptroffset,
+      offsetsoffset,
+      tolength,
+      fromlength,
+      fromwidth);
+  }
+  template <>
+  Error identities32_from_listoffsetarray<int64_t>(
+    int32_t* toptr,
+    const int32_t* fromptr,
+    const int64_t* fromoffsets,
+    int64_t fromptroffset,
+    int64_t offsetsoffset,
+    int64_t tolength,
+    int64_t fromlength,
+    int64_t fromwidth,
+    KernelsLib ptr_lib) {
+    return awkward_identities32_from_listoffsetarray64(
+      toptr,
+      fromptr,
+      fromoffsets,
+      fromptroffset,
+      offsetsoffset,
+      tolength,
+      fromlength,
+      fromwidth);
+  }
+  template <>
+  Error identities64_from_listoffsetarray<int32_t>(
+    int64_t* toptr,
+    const int64_t* fromptr,
+    const int32_t* fromoffsets,
+    int64_t fromptroffset,
+    int64_t offsetsoffset,
+    int64_t tolength,
+    int64_t fromlength,
+    int64_t fromwidth,
+    KernelsLib ptr_lib) {
+    return awkward_identities64_from_listoffsetarray32(
+      toptr,
+      fromptr,
+      fromoffsets,
+      fromptroffset,
+      offsetsoffset,
+      tolength,
+      fromlength,
+      fromwidth);
+  }
+  template <>
+  Error identities64_from_listoffsetarray<uint32_t>(
+    int64_t* toptr,
+    const int64_t* fromptr,
+    const uint32_t* fromoffsets,
+    int64_t fromptroffset,
+    int64_t offsetsoffset,
+    int64_t tolength,
+    int64_t fromlength,
+    int64_t fromwidth,
+    KernelsLib ptr_lib) {
+    return awkward_identities64_from_listoffsetarrayU32(
+      toptr,
+      fromptr,
+      fromoffsets,
+      fromptroffset,
+      offsetsoffset,
+      tolength,
+      fromlength,
+      fromwidth);
+  }
+  template <>
+  Error identities64_from_listoffsetarray<int64_t>(
+    int64_t* toptr,
+    const int64_t* fromptr,
+    const int64_t* fromoffsets,
+    int64_t fromptroffset,
+    int64_t offsetsoffset,
+    int64_t tolength,
+    int64_t fromlength,
+    int64_t fromwidth,
+    KernelsLib ptr_lib) {
+    return awkward_identities64_from_listoffsetarray64(
+      toptr,
+      fromptr,
+      fromoffsets,
+      fromptroffset,
+      offsetsoffset,
+      tolength,
+      fromlength,
+      fromwidth);
+  }
+
+  template <>
+  Error identities32_from_listarray<int32_t>(
+    bool* uniquecontents,
+    int32_t* toptr,
+    const int32_t* fromptr,
+    const int32_t* fromstarts,
+    const int32_t* fromstops,
+    int64_t fromptroffset,
+    int64_t startsoffset,
+    int64_t stopsoffset,
+    int64_t tolength,
+    int64_t fromlength,
+    int64_t fromwidth,
+    KernelsLib ptr_lib) {
+    return awkward_identities32_from_listarray32(
+      uniquecontents,
+      toptr,
+      fromptr,
+      fromstarts,
+      fromstops,
+      fromptroffset,
+      startsoffset,
+      stopsoffset,
+      tolength,
+      fromlength,
+      fromwidth);
+  }
+  template <>
+  Error identities32_from_listarray<uint32_t>(
+    bool* uniquecontents,
+    int32_t* toptr,
+    const int32_t* fromptr,
+    const uint32_t* fromstarts,
+    const uint32_t* fromstops,
+    int64_t fromptroffset,
+    int64_t startsoffset,
+    int64_t stopsoffset,
+    int64_t tolength,
+    int64_t fromlength,
+    int64_t fromwidth,
+    KernelsLib ptr_lib) {
+    return awkward_identities32_from_listarrayU32(
+      uniquecontents,
+      toptr,
+      fromptr,
+      fromstarts,
+      fromstops,
+      fromptroffset,
+      startsoffset,
+      stopsoffset,
+      tolength,
+      fromlength,
+      fromwidth);
+  }
+  template <>
+  Error identities32_from_listarray<int64_t>(
+    bool* uniquecontents,
+    int32_t* toptr,
+    const int32_t* fromptr,
+    const int64_t* fromstarts,
+    const int64_t* fromstops,
+    int64_t fromptroffset,
+    int64_t startsoffset,
+    int64_t stopsoffset,
+    int64_t tolength,
+    int64_t fromlength,
+    int64_t fromwidth,
+    KernelsLib ptr_lib) {
+    return awkward_identities32_from_listarray64(
+      uniquecontents,
+      toptr,
+      fromptr,
+      fromstarts,
+      fromstops,
+      fromptroffset,
+      startsoffset,
+      stopsoffset,
+      tolength,
+      fromlength,
+      fromwidth);
+  }
+  template <>
+  Error identities64_from_listarray<int32_t>(
+    bool* uniquecontents,
+    int64_t* toptr,
+    const int64_t* fromptr,
+    const int32_t* fromstarts,
+    const int32_t* fromstops,
+    int64_t fromptroffset,
+    int64_t startsoffset,
+    int64_t stopsoffset,
+    int64_t tolength,
+    int64_t fromlength,
+    int64_t fromwidth,
+    KernelsLib ptr_lib) {
+    return awkward_identities64_from_listarray32(
+      uniquecontents,
+      toptr,
+      fromptr,
+      fromstarts,
+      fromstops,
+      fromptroffset,
+      startsoffset,
+      stopsoffset,
+      tolength,
+      fromlength,
+      fromwidth);
+  }
+  template <>
+  Error identities64_from_listarray<uint32_t>(
+    bool* uniquecontents,
+    int64_t* toptr,
+    const int64_t* fromptr,
+    const uint32_t* fromstarts,
+    const uint32_t* fromstops,
+    int64_t fromptroffset,
+    int64_t startsoffset,
+    int64_t stopsoffset,
+    int64_t tolength,
+    int64_t fromlength,
+    int64_t fromwidth,
+    KernelsLib ptr_lib) {
+    return awkward_identities64_from_listarrayU32(
+      uniquecontents,
+      toptr,
+      fromptr,
+      fromstarts,
+      fromstops,
+      fromptroffset,
+      startsoffset,
+      stopsoffset,
+      tolength,
+      fromlength,
+      fromwidth);
+  }
+  template <>
+  Error identities64_from_listarray<int64_t>(
+    bool* uniquecontents,
+    int64_t* toptr,
+    const int64_t* fromptr,
+    const int64_t* fromstarts,
+    const int64_t* fromstops,
+    int64_t fromptroffset,
+    int64_t startsoffset,
+    int64_t stopsoffset,
+    int64_t tolength,
+    int64_t fromlength,
+    int64_t fromwidth,
+    KernelsLib ptr_lib) {
+    return awkward_identities64_from_listarray64(
+      uniquecontents,
+      toptr,
+      fromptr,
+      fromstarts,
+      fromstops,
+      fromptroffset,
+      startsoffset,
+      stopsoffset,
+      tolength,
+      fromlength,
+      fromwidth);
+  }
+
+  template <>
+  ERROR identities_from_regulararray(
+    int32_t* toptr,
+    const int32_t* fromptr,
+    int64_t fromptroffset,
+    int64_t size,
+    int64_t tolength,
+    int64_t fromlength,
+    int64_t fromwidth) {
+    return kernel::identities_from_regulararray<int32_t>(
+      toptr,
+      fromptr,
+      fromptroffset,
+      size,
+      tolength,
+      fromlength,
+      fromwidth);
+  }
+  template <>
+  ERROR identities_from_regulararray(
+    int64_t* toptr,
+    const int64_t* fromptr,
+    int64_t fromptroffset,
+    int64_t size,
+    int64_t tolength,
+    int64_t fromlength,
+    int64_t fromwidth) {
+    return awkward_identities64_from_regulararray(
+      toptr,
+      fromptr,
+      fromptroffset,
+      size,
+      tolength,
+      fromlength,
+      fromwidth);
+  }
+
+  template <>
+  Error identities32_from_indexedarray<int32_t>(
+    bool* uniquecontents,
+    int32_t* toptr,
+    const int32_t* fromptr,
+    const int32_t* fromindex,
+    int64_t fromptroffset,
+    int64_t indexoffset,
+    int64_t tolength,
+    int64_t fromlength,
+    int64_t fromwidth,
+    KernelsLib ptr_lib) {
+    return awkward_identities32_from_indexedarray32(
+      uniquecontents,
+      toptr,
+      fromptr,
+      fromindex,
+      fromptroffset,
+      indexoffset,
+      tolength,
+      fromlength,
+      fromwidth);
+  }
+  template <>
+  Error identities32_from_indexedarray<uint32_t>(
+    bool* uniquecontents,
+    int32_t* toptr,
+    const int32_t* fromptr,
+    const uint32_t* fromindex,
+    int64_t fromptroffset,
+    int64_t indexoffset,
+    int64_t tolength,
+    int64_t fromlength,
+    int64_t fromwidth,
+    KernelsLib ptr_lib) {
+    return awkward_identities32_from_indexedarrayU32(
+      uniquecontents,
+      toptr,
+      fromptr,
+      fromindex,
+      fromptroffset,
+      indexoffset,
+      tolength,
+      fromlength,
+      fromwidth);
+  }
+  template <>
+  Error identities32_from_indexedarray<int64_t>(
+    bool* uniquecontents,
+    int32_t* toptr,
+    const int32_t* fromptr,
+    const int64_t* fromindex,
+    int64_t fromptroffset,
+    int64_t indexoffset,
+    int64_t tolength,
+    int64_t fromlength,
+    int64_t fromwidth,
+    KernelsLib ptr_lib) {
+    return awkward_identities32_from_indexedarray64(
+      uniquecontents,
+      toptr,
+      fromptr,
+      fromindex,
+      fromptroffset,
+      indexoffset,
+      tolength,
+      fromlength,
+      fromwidth);
+  }
+  template <>
+  Error identities64_from_indexedarray<int32_t>(
+    bool* uniquecontents,
+    int64_t* toptr,
+    const int64_t* fromptr,
+    const int32_t* fromindex,
+    int64_t fromptroffset,
+    int64_t indexoffset,
+    int64_t tolength,
+    int64_t fromlength,
+    int64_t fromwidth,
+    KernelsLib ptr_lib) {
+    return awkward_identities64_from_indexedarray32(
+      uniquecontents,
+      toptr,
+      fromptr,
+      fromindex,
+      fromptroffset,
+      indexoffset,
+      tolength,
+      fromlength,
+      fromwidth);
+  }
+  template <>
+  Error identities64_from_indexedarray<uint32_t>(
+    bool* uniquecontents,
+    int64_t* toptr,
+    const int64_t* fromptr,
+    const uint32_t* fromindex,
+    int64_t fromptroffset,
+    int64_t indexoffset,
+    int64_t tolength,
+    int64_t fromlength,
+    int64_t fromwidth,
+    KernelsLib ptr_lib) {
+    return awkward_identities64_from_indexedarrayU32(
+      uniquecontents,
+      toptr,
+      fromptr,
+      fromindex,
+      fromptroffset,
+      indexoffset,
+      tolength,
+      fromlength,
+      fromwidth);
+  }
+  template <>
+  Error identities64_from_indexedarray<int64_t>(
+    bool* uniquecontents,
+    int64_t* toptr,
+    const int64_t* fromptr,
+    const int64_t* fromindex,
+    int64_t fromptroffset,
+    int64_t indexoffset,
+    int64_t tolength,
+    int64_t fromlength,
+    int64_t fromwidth,
+    KernelsLib ptr_lib) {
+    return awkward_identities64_from_indexedarray64(
+      uniquecontents,
+      toptr,
+      fromptr,
+      fromindex,
+      fromptroffset,
+      indexoffset,
+      tolength,
+      fromlength,
+      fromwidth);
+  }
+
+  template <>
+  Error identities32_from_unionarray<int8_t,
+    int32_t>(
+    bool* uniquecontents,
+    int32_t* toptr,
+    const int32_t* fromptr,
+    const int8_t* fromtags,
+    const int32_t* fromindex,
+    int64_t fromptroffset,
+    int64_t tagsoffset,
+    int64_t indexoffset,
+    int64_t tolength,
+    int64_t fromlength,
+    int64_t fromwidth,
+    int64_t which,
+    KernelsLib ptr_lib) {
+    return awkward_identities32_from_unionarray8_32(
+      uniquecontents,
+      toptr,
+      fromptr,
+      fromtags,
+      fromindex,
+      fromptroffset,
+      tagsoffset,
+      indexoffset,
+      tolength,
+      fromlength,
+      fromwidth,
+      which);
+  }
+  template <>
+  Error identities32_from_unionarray<int8_t,
+    uint32_t>(
+    bool* uniquecontents,
+    int32_t* toptr,
+    const int32_t* fromptr,
+    const int8_t* fromtags,
+    const uint32_t* fromindex,
+    int64_t fromptroffset,
+    int64_t tagsoffset,
+    int64_t indexoffset,
+    int64_t tolength,
+    int64_t fromlength,
+    int64_t fromwidth,
+    int64_t which,
+    KernelsLib ptr_lib) {
+    return awkward_identities32_from_unionarray8_U32(
+      uniquecontents,
+      toptr,
+      fromptr,
+      fromtags,
+      fromindex,
+      fromptroffset,
+      tagsoffset,
+      indexoffset,
+      tolength,
+      fromlength,
+      fromwidth,
+      which);
+  }
+  template <>
+  Error identities32_from_unionarray<int8_t,
+    int64_t>(
+    bool* uniquecontents,
+    int32_t* toptr,
+    const int32_t* fromptr,
+    const int8_t* fromtags,
+    const int64_t* fromindex,
+    int64_t fromptroffset,
+    int64_t tagsoffset,
+    int64_t indexoffset,
+    int64_t tolength,
+    int64_t fromlength,
+    int64_t fromwidth,
+    int64_t which,
+    KernelsLib ptr_lib) {
+    return awkward_identities32_from_unionarray8_64(
+      uniquecontents,
+      toptr,
+      fromptr,
+      fromtags,
+      fromindex,
+      fromptroffset,
+      tagsoffset,
+      indexoffset,
+      tolength,
+      fromlength,
+      fromwidth,
+      which);
+  }
+  template <>
+  Error identities64_from_unionarray<int8_t,
+    int32_t>(
+    bool* uniquecontents,
+    int64_t* toptr,
+    const int64_t* fromptr,
+    const int8_t* fromtags,
+    const int32_t* fromindex,
+    int64_t fromptroffset,
+    int64_t tagsoffset,
+    int64_t indexoffset,
+    int64_t tolength,
+    int64_t fromlength,
+    int64_t fromwidth,
+    int64_t which,
+    KernelsLib ptr_lib) {
+    return awkward_identities64_from_unionarray8_32(
+      uniquecontents,
+      toptr,
+      fromptr,
+      fromtags,
+      fromindex,
+      fromptroffset,
+      tagsoffset,
+      indexoffset,
+      tolength,
+      fromlength,
+      fromwidth,
+      which);
+  }
+  template <>
+  Error identities64_from_unionarray<int8_t,
+    uint32_t>(
+    bool* uniquecontents,
+    int64_t* toptr,
+    const int64_t* fromptr,
+    const int8_t* fromtags,
+    const uint32_t* fromindex,
+    int64_t fromptroffset,
+    int64_t tagsoffset,
+    int64_t indexoffset,
+    int64_t tolength,
+    int64_t fromlength,
+    int64_t fromwidth,
+    int64_t which,
+    KernelsLib ptr_lib) {
+    return awkward_identities64_from_unionarray8_U32(
+      uniquecontents,
+      toptr,
+      fromptr,
+      fromtags,
+      fromindex,
+      fromptroffset,
+      tagsoffset,
+      indexoffset,
+      tolength,
+      fromlength,
+      fromwidth,
+      which);
+  }
+  template <>
+  Error identities64_from_unionarray<int8_t,
+    int64_t>(
+    bool* uniquecontents,
+    int64_t* toptr,
+    const int64_t* fromptr,
+    const int8_t* fromtags,
+    const int64_t* fromindex,
+    int64_t fromptroffset,
+    int64_t tagsoffset,
+    int64_t indexoffset,
+    int64_t tolength,
+    int64_t fromlength,
+    int64_t fromwidth,
+    int64_t which,
+    KernelsLib ptr_lib) {
+    return awkward_identities64_from_unionarray8_64(
+      uniquecontents,
+      toptr,
+      fromptr,
+      fromtags,
+      fromindex,
+      fromptroffset,
+      tagsoffset,
+      indexoffset,
+      tolength,
+      fromlength,
+      fromwidth,
+      which);
+  }
+
+  template <>
+  ERROR identities_extend(
+    int32_t* toptr,
+    const int32_t* fromptr,
+    int64_t fromoffset,
+    int64_t fromlength,
+    int64_t tolength) {
+    return awkward_identities32_extend(
+      toptr,
+      fromptr,
+      fromoffset,
+      fromlength,
+      tolength);
+  }
+  template <>
+  ERROR identities_extend(
+    int64_t* toptr,
+    const int64_t* fromptr,
+    int64_t fromoffset,
+    int64_t fromlength,
+    int64_t tolength) {
+    return awkward_identities64_extend(
+      toptr,
+      fromptr,
+      fromoffset,
+      fromlength,
+      tolength);
   }
 }

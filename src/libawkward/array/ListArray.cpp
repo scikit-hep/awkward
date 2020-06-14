@@ -420,7 +420,7 @@ namespace awkward {
       Identities64* rawidentities =
         reinterpret_cast<Identities64*>(newidentities.get());
       struct Error err =
-        awkward_new_identities64(rawidentities->ptr().get(), length());
+        kernel::new_identities<int64_t>(rawidentities->ptr().get(), length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
     }

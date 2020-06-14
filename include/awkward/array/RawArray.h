@@ -314,7 +314,7 @@ namespace awkward {
                                          Identities::FieldLoc(), 1, length());
         Identities64* rawidentities =
           reinterpret_cast<Identities64*>(newidentities.get());
-        awkward_new_identities64(rawidentities->ptr().get(), length());
+        kernel::new_identities<int64_t>(rawidentities->ptr().get(), length());
         setidentities(newidentities);
       }
     }

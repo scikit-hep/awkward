@@ -868,8 +868,8 @@ namespace awkward {
                                        length());
       Identities32* rawidentities =
         reinterpret_cast<Identities32*>(newidentities.get());
-      struct Error err = awkward_new_identities32(rawidentities->ptr().get(),
-                                                  length());
+      struct Error err = kernel::new_identities<int32_t>(rawidentities->ptr().get(),
+                                                         length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
     }
@@ -881,8 +881,8 @@ namespace awkward {
                                        length());
       Identities64* rawidentities =
         reinterpret_cast<Identities64*>(newidentities.get());
-      struct Error err = awkward_new_identities64(rawidentities->ptr().get(),
-                                                  length());
+      struct Error err = kernel::new_identities<int64_t>(rawidentities->ptr().get(),
+                                                         length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
     }
