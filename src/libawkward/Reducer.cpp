@@ -1100,7 +1100,7 @@ namespace awkward {
 #if defined _MSC_VER || defined __i386__
     std::shared_ptr<int32_t> ptr(new int32_t[(size_t)outlength],
                                  util::array_deleter<int32_t>());
-    struct Error err = kernel::reduce_prod<int32_t, int8_t>(
+    struct Error err = kernel::reduce_prod<int32_t, int16_t>(
       ptr.get(),
       data,
       offset,
