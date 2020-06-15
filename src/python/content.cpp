@@ -1275,6 +1275,20 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
              py::arg("keys") = py::none(),
              py::arg("parameters") = py::none(),
              py::arg("axis") = 1)
+          .def("sort",
+               [](const T&self,
+                  int64_t axis,
+                  bool ascending,
+                  bool stable) -> py::object {
+               return box(self.sort(axis, ascending, false));
+          })
+          .def("argsort",
+               [](const T&self,
+                  int64_t axis,
+                  bool ascending,
+                  bool stable) -> py::object {
+               return box(self.argsort(axis, ascending, false));
+          })
 
   ;
 }

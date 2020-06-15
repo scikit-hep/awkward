@@ -802,6 +802,40 @@ namespace awkward {
   }
 
   const ContentPtr
+  BitMaskedArray::sort_next(int64_t negaxis,
+                            const Index64& starts,
+                            const Index64& parents,
+                            int64_t outlength,
+                            bool ascending,
+                            bool stable,
+                            bool keepdims) const {
+    return toByteMaskedArray().get()->sort_next(negaxis,
+                                                starts,
+                                                parents,
+                                                outlength,
+                                                ascending,
+                                                stable,
+                                                keepdims);
+  }
+
+  const ContentPtr
+  BitMaskedArray::argsort_next(int64_t negaxis,
+                               const Index64& starts,
+                               const Index64& parents,
+                               int64_t outlength,
+                               bool ascending,
+                               bool stable,
+                               bool keepdims) const {
+    return toByteMaskedArray().get()->argsort_next(negaxis,
+                                                   starts,
+                                                   parents,
+                                                   outlength,
+                                                   ascending,
+                                                   stable,
+                                                   keepdims);
+  }
+
+  const ContentPtr
   BitMaskedArray::getitem_next(const SliceAt& at,
                                const Slice& tail,
                                const Index64& advanced) const {

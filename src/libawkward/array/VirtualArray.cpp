@@ -629,6 +629,40 @@ namespace awkward {
   }
 
   const ContentPtr
+  VirtualArray::sort_next(int64_t negaxis,
+                          const Index64& starts,
+                          const Index64& parents,
+                          int64_t outlength,
+                          bool ascending,
+                          bool stable,
+                          bool keepdims) const {
+    return array().get()->sort_next(negaxis,
+                                    starts,
+                                    parents,
+                                    outlength,
+                                    ascending,
+                                    stable,
+                                    keepdims);
+  }
+
+  const ContentPtr
+  VirtualArray::argsort_next(int64_t negaxis,
+                             const Index64& starts,
+                             const Index64& parents,
+                             int64_t outlength,
+                             bool ascending,
+                             bool stable,
+                             bool keepdims) const {
+    return array().get()->argsort_next(negaxis,
+                                       starts,
+                                       parents,
+                                       outlength,
+                                       ascending,
+                                       stable,
+                                       keepdims);
+  }
+
+  const ContentPtr
   VirtualArray::localindex(int64_t axis, int64_t depth) const {
     return array().get()->localindex(axis, depth);
   }

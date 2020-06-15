@@ -452,6 +452,43 @@ namespace awkward {
   }
 
   const ContentPtr
+  EmptyArray::sort_next(int64_t negaxis,
+                        const Index64& starts,
+                        const Index64& parents,
+                        int64_t outlength,
+                        bool ascending,
+                        bool stable,
+                        bool keepdims) const {
+    ContentPtr asnumpy = toNumpyArray("d", 8);
+    return asnumpy.get()->sort_next(negaxis,
+                                    starts,
+                                    parents,
+                                    outlength,
+                                    ascending,
+                                    stable,
+                                    keepdims);
+  }
+
+  const ContentPtr
+  EmptyArray::argsort_next(int64_t negaxis,
+                           const Index64& starts,
+                           const Index64& parents,
+                           int64_t outlength,
+                           bool ascending,
+                           bool stable,
+                           bool keepdims) const {
+    ContentPtr asnumpy = toNumpyArray("d", 8);
+    ContentPtr out = asnumpy.get()->argsort_next(negaxis,
+                                                 starts,
+                                                 parents,
+                                                 outlength,
+                                                 ascending,
+                                                 stable,
+                                                 keepdims);
+    return out;
+  }
+
+  const ContentPtr
   EmptyArray::getitem_next(const SliceAt& at,
                            const Slice& tail,
                            const Index64& advanced) const {
