@@ -1018,13 +1018,26 @@ namespace awkward {
                           bool ascending,
                           bool stable,
                           bool keepdims) const {
-    return toListOffsetArray64(true).get()->sort_next(negaxis,
-                                                      starts,
-                                                      parents,
-                                                      outlength,
-                                                      ascending,
-                                                      stable,
-                                                      keepdims);
+    std::shared_ptr<Content> out = toListOffsetArray64(true).get()->sort_next(
+                                       negaxis,
+                                       starts,
+                                       parents,
+                                       outlength,
+                                       ascending,
+                                       stable,
+                                       keepdims);
+    if (RegularArray* raw1 =
+            dynamic_cast<RegularArray*>(out.get())) {
+      if (ListOffsetArray64* raw2 =
+              dynamic_cast<ListOffsetArray64*>(raw1->content().get())) {
+        return std::make_shared<RegularArray>(
+            raw1->identities(),
+            raw1->parameters(),
+            raw2->toRegularArray(),
+            raw1->size());
+      }
+    }
+    return out;
   }
 
   const ContentPtr
@@ -1035,13 +1048,26 @@ namespace awkward {
                              bool ascending,
                              bool stable,
                              bool keepdims) const {
-    return toListOffsetArray64(true).get()->argsort_next(negaxis,
-                                                         starts,
-                                                         parents,
-                                                         outlength,
-                                                         ascending,
-                                                         stable,
-                                                         keepdims);
+    std::shared_ptr<Content> out = toListOffsetArray64(true).get()->argsort_next(
+                                       negaxis,
+                                       starts,
+                                       parents,
+                                       outlength,
+                                       ascending,
+                                       stable,
+                                       keepdims);
+    if (RegularArray* raw1 =
+            dynamic_cast<RegularArray*>(out.get())) {
+      if (ListOffsetArray64* raw2 =
+              dynamic_cast<ListOffsetArray64*>(raw1->content().get())) {
+        return std::make_shared<RegularArray>(
+            raw1->identities(),
+            raw1->parameters(),
+            raw2->toRegularArray(),
+            raw1->size());
+      }
+    }
+    return out;
   }
 
   const ContentPtr
