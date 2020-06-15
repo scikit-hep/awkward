@@ -9,6 +9,7 @@
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/cpu-kernels/operations.h"
 #include "awkward/cpu-kernels/reducers.h"
+#include "awkward/cpu-kernels/sorting.h"
 
 #include "awkward/util.h"
 #include "awkward/Identities.h"
@@ -18,18 +19,17 @@ namespace rj = rapidjson;
 namespace awkward {
   namespace util {
     void
-    handle_error(const struct Error& err,
-                 const std::string& classname,
-                 const Identities* identities) {
+    handle_error(const struct Error &err,
+                 const std::string &classname,
+                 const Identities *identities) {
       if (err.str != nullptr) {
         std::stringstream out;
         out << "in " << classname;
-        if (err.identity != kSliceNone  &&  identities != nullptr) {
-          if (0 <= err.identity  &&  err.identity < identities->length()) {
+        if (err.identity != kSliceNone && identities != nullptr) {
+          if (0 <= err.identity && err.identity < identities->length()) {
             out << " with identity ["
                 << identities->identity_at(err.identity) << "]";
-          }
-          else {
+          } else {
             out << " with invalid identity";
           }
         }
@@ -41,34 +41,38 @@ namespace awkward {
       }
     }
 
-    template <typename T>
-    IndexOf<T> make_starts(const IndexOf<T>& offsets) {
+    template<typename T>
+    IndexOf<T> make_starts(const IndexOf<T> &offsets) {
       return IndexOf<T>(offsets.ptr(),
                         offsets.offset(),
                         offsets.length() - 1);
     }
 
-    template <typename T>
-    IndexOf<T> make_stops(const IndexOf<T>& offsets) {
+    template<typename T>
+    IndexOf<T> make_stops(const IndexOf<T> &offsets) {
       return IndexOf<T>(offsets.ptr(),
                         offsets.offset() + 1,
                         offsets.length() - 1);
     }
 
-    template IndexOf<int32_t>  make_starts(const IndexOf<int32_t>& offsets);
-    template IndexOf<uint32_t> make_starts(const IndexOf<uint32_t>& offsets);
-    template IndexOf<int64_t>  make_starts(const IndexOf<int64_t>& offsets);
-    template IndexOf<int32_t>  make_stops(const IndexOf<int32_t>& offsets);
-    template IndexOf<uint32_t> make_stops(const IndexOf<uint32_t>& offsets);
-    template IndexOf<int64_t>  make_stops(const IndexOf<int64_t>& offsets);
+    template IndexOf<int32_t> make_starts(const IndexOf<int32_t> &offsets);
+
+    template IndexOf<uint32_t> make_starts(const IndexOf<uint32_t> &offsets);
+
+    template IndexOf<int64_t> make_starts(const IndexOf<int64_t> &offsets);
+
+    template IndexOf<int32_t> make_stops(const IndexOf<int32_t> &offsets);
+
+    template IndexOf<uint32_t> make_stops(const IndexOf<uint32_t> &offsets);
+
+    template IndexOf<int64_t> make_stops(const IndexOf<int64_t> &offsets);
 
     std::string
-    quote(const std::string& x, bool doublequote) {
+    quote(const std::string &x, bool doublequote) {
       // TODO: escape characters, possibly using RapidJSON.
       if (doublequote) {
         return std::string("\"") + x + std::string("\"");
-      }
-      else {
+      } else {
         return std::string("'") + x + std::string("'");
       }
     }
@@ -76,65 +80,64 @@ namespace awkward {
     RecordLookupPtr
     init_recordlookup(int64_t numfields) {
       RecordLookupPtr out = std::make_shared<RecordLookup>();
-      for (int64_t i = 0;  i < numfields;  i++) {
+      for (int64_t i = 0; i < numfields; i++) {
         out.get()->push_back(std::to_string(i));
       }
       return out;
     }
 
     int64_t
-    fieldindex(const RecordLookupPtr& recordlookup,
-               const std::string& key,
+    fieldindex(const RecordLookupPtr &recordlookup,
+               const std::string &key,
                int64_t numfields) {
       int64_t out = -1;
       if (recordlookup.get() != nullptr) {
-        for (size_t i = 0;  i < recordlookup.get()->size();  i++) {
+        for (size_t i = 0; i < recordlookup.get()->size(); i++) {
           if (recordlookup.get()->at(i) == key) {
-            out = (int64_t)i;
+            out = (int64_t) i;
             break;
           }
         }
       }
       if (out == -1) {
         try {
-          out = (int64_t)std::stoi(key);
+          out = (int64_t) std::stoi(key);
         }
         catch (std::invalid_argument err) {
           throw std::invalid_argument(
             std::string("key ") + quote(key, true)
             + std::string(" does not exist (not in record)"));
         }
-        if (!(0 <= out  &&  out < numfields)) {
+        if (!(0 <= out && out < numfields)) {
           throw std::invalid_argument(
             std::string("key interpreted as fieldindex ") + key
             + std::string(" for records with only " + std::to_string(numfields)
-            + std::string(" fields")));
+                          + std::string(" fields")));
         }
       }
       return out;
     }
 
     const std::string
-    key(const RecordLookupPtr& recordlookup,
+    key(const RecordLookupPtr &recordlookup,
         int64_t fieldindex,
         int64_t numfields) {
       if (fieldindex >= numfields) {
         throw std::invalid_argument(
           std::string("fieldindex ") + std::to_string(fieldindex)
           + std::string(" for records with only " + std::to_string(numfields)
-          + std::string(" fields")));
+                        + std::string(" fields")));
       }
       if (recordlookup.get() != nullptr) {
-        return recordlookup.get()->at((size_t)fieldindex);
-      }
-      else {
+        return recordlookup.get()->at((size_t) fieldindex);
+      } else {
         return std::to_string(fieldindex);
       }
     }
 
     bool
-    haskey(const RecordLookupPtr& recordlookup,
-           const std::string& key,
+    haskey(const RecordLookupPtr &recordlookup,
+           const std::string &key,
            int64_t numfields) {
       try {
         fieldindex(recordlookup, key, numfields);
@@ -146,16 +149,15 @@ namespace awkward {
     }
 
     const std::vector<std::string>
-    keys(const RecordLookupPtr& recordlookup, int64_t numfields) {
+    keys(const RecordLookupPtr &recordlookup, int64_t numfields) {
       std::vector<std::string> out;
       if (recordlookup.get() != nullptr) {
         out.insert(out.end(),
                    recordlookup.get()->begin(),
                    recordlookup.get()->end());
-      }
-      else {
+      } else {
         int64_t cols = numfields;
-        for (int64_t j = 0;  j < cols;  j++) {
+        for (int64_t j = 0; j < cols; j++) {
           out.push_back(std::to_string(j));
         }
       }
@@ -163,15 +165,14 @@ namespace awkward {
     }
 
     bool
-    parameter_equals(const Parameters& parameters,
-                     const std::string& key,
-                     const std::string& value) {
+    parameter_equals(const Parameters &parameters,
+                     const std::string &key,
+                     const std::string &value) {
       auto item = parameters.find(key);
       std::string myvalue;
       if (item == parameters.end()) {
         myvalue = "null";
-      }
-      else {
+      } else {
         myvalue = item->second;
       }
       rj::Document mine;
@@ -182,7 +183,7 @@ namespace awkward {
     }
 
     bool
-    parameters_equal(const Parameters& self, const Parameters& other) {
+    parameters_equal(const Parameters &self, const Parameters &other) {
       std::set<std::string> checked;
       for (auto pair : self) {
         if (!parameter_equals(other, pair.first, pair.second)) {
@@ -201,7 +202,7 @@ namespace awkward {
     }
 
     bool
-    parameter_isstring(const Parameters& parameters, const std::string& key) {
+    parameter_isstring(const Parameters &parameters, const std::string &key) {
       auto item = parameters.find(key);
       if (item == parameters.end()) {
         return false;
@@ -212,7 +213,7 @@ namespace awkward {
     }
 
     bool
-    parameter_isname(const Parameters& parameters, const std::string& key) {
+    parameter_isname(const Parameters &parameters, const std::string &key) {
       auto item = parameters.find(key);
       if (item == parameters.end()) {
         return false;
@@ -226,15 +227,15 @@ namespace awkward {
       if (value.empty()) {
         return false;
       }
-      if (!((value[0] >= 'a'  &&  value[0] <= 'z')  ||
-            (value[0] >= 'A'  &&  value[0] <= 'Z')  ||
+      if (!((value[0] >= 'a' && value[0] <= 'z') ||
+            (value[0] >= 'A' && value[0] <= 'Z') ||
             (value[0] == '_'))) {
         return false;
       }
-      for (size_t i = 1;  i < value.length();  i++) {
-        if (!((value[i] >= 'a'  &&  value[i] <= 'z')  ||
-              (value[i] >= 'A'  &&  value[i] <= 'Z')  ||
-              (value[i] >= '0'  &&  value[i] <= '9')  ||
+      for (size_t i = 1; i < value.length(); i++) {
+        if (!((value[i] >= 'a' && value[i] <= 'z') ||
+              (value[i] >= 'A' && value[i] <= 'Z') ||
+              (value[i] >= '0' && value[i] <= '9') ||
               (value[i] == '_'))) {
           return false;
         }
@@ -243,7 +244,7 @@ namespace awkward {
     }
 
     const std::string
-    parameter_asstring(const Parameters& parameters, const std::string& key) {
+    parameter_asstring(const Parameters &parameters, const std::string &key) {
       auto item = parameters.find(key);
       if (item == parameters.end()) {
         throw std::runtime_error("parameter is null");
@@ -257,7 +258,7 @@ namespace awkward {
     }
 
     std::string
-    gettypestr(const Parameters& parameters, const TypeStrs& typestrs) {
+    gettypestr(const Parameters &parameters, const TypeStrs &typestrs) {
       auto item = parameters.find("__record__");
       if (item != parameters.end()) {
         std::string source = item->second;

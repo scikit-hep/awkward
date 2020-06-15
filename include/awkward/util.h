@@ -184,6 +184,43 @@ namespace awkward {
     std::string
       gettypestr(const Parameters& parameters,
                  const TypeStrs& typestrs);
+
+    template <typename T>
+    ERROR
+      awkward_numpyarray_argsort(
+        int64_t* toptr,
+        const T* fromptr,
+        int64_t length,
+        const int64_t* offsets,
+        int64_t offsetslength,
+        bool ascending,
+        bool stable);
+
+    template <typename T>
+    ERROR
+      awkward_numpyarray_sort(
+        T* toptr,
+        const T* fromptr,
+        int64_t length,
+        const int64_t* offsets,
+        int64_t offsetslength,
+        int64_t parentslength,
+        bool ascending,
+        bool stable);
+
+    template <typename T>
+    ERROR
+      awkward_numpyarray_sort_asstrings(
+        T* toptr,
+        const T* fromptr,
+        int64_t length,
+        const int64_t* offsets,
+        int64_t offsetslength,
+        int64_t* outoffsets,
+        bool ascending,
+        bool stable);
+
+>>>>>>> 1e08e1b6e5507445f94697600fa3191f51090cf9
   }
 }
 

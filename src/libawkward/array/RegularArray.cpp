@@ -1011,6 +1011,66 @@ namespace awkward {
   }
 
   const ContentPtr
+  RegularArray::sort_next(int64_t negaxis,
+                          const Index64& starts,
+                          const Index64& parents,
+                          int64_t outlength,
+                          bool ascending,
+                          bool stable,
+                          bool keepdims) const {
+    std::shared_ptr<Content> out = toListOffsetArray64(true).get()->sort_next(
+                                       negaxis,
+                                       starts,
+                                       parents,
+                                       outlength,
+                                       ascending,
+                                       stable,
+                                       keepdims);
+    if (RegularArray* raw1 =
+            dynamic_cast<RegularArray*>(out.get())) {
+      if (ListOffsetArray64* raw2 =
+              dynamic_cast<ListOffsetArray64*>(raw1->content().get())) {
+        return std::make_shared<RegularArray>(
+            raw1->identities(),
+            raw1->parameters(),
+            raw2->toRegularArray(),
+            raw1->size());
+      }
+    }
+    return out;
+  }
+
+  const ContentPtr
+  RegularArray::argsort_next(int64_t negaxis,
+                             const Index64& starts,
+                             const Index64& parents,
+                             int64_t outlength,
+                             bool ascending,
+                             bool stable,
+                             bool keepdims) const {
+    std::shared_ptr<Content> out = toListOffsetArray64(true).get()->argsort_next(
+                                       negaxis,
+                                       starts,
+                                       parents,
+                                       outlength,
+                                       ascending,
+                                       stable,
+                                       keepdims);
+    if (RegularArray* raw1 =
+            dynamic_cast<RegularArray*>(out.get())) {
+      if (ListOffsetArray64* raw2 =
+              dynamic_cast<ListOffsetArray64*>(raw1->content().get())) {
+        return std::make_shared<RegularArray>(
+            raw1->identities(),
+            raw1->parameters(),
+            raw2->toRegularArray(),
+            raw1->size());
+      }
+    }
+    return out;
+  }
+
+  const ContentPtr
   RegularArray::getitem_next(const SliceAt& at,
                              const Slice& tail,
                              const Index64& advanced) const {

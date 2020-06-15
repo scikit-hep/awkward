@@ -4,6 +4,7 @@
 #define AWKWARD_KERNEL_H_
 
 #include "awkward/common.h"
+#include "awkward/cpu-kernels/sorting.h"
 
 namespace kernel {
   /// @brief getitem kernels
@@ -1459,6 +1460,42 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t length,
     bool validwhen);
+
+  /// @brief sorting kernels
+  template <typename T>
+  ERROR
+  numpyarray_argsort(
+    int64_t* toptr,
+    const T* fromptr,
+    int64_t length,
+    const int64_t* offsets,
+    int64_t offsetslength,
+    bool ascending,
+    bool stable);
+
+  template <typename T>
+  ERROR
+  numpyarray_sort(
+    T* toptr,
+    const T* fromptr,
+    int64_t length,
+    const int64_t* offsets,
+    int64_t offsetslength,
+    int64_t parentslength,
+    bool ascending,
+    bool stable);
+
+  template <typename T>
+  ERROR
+  numpyarray_sort_asstrings(
+    T* toptr,
+    const T* fromptr,
+    int64_t length,
+    const int64_t* offsets,
+    int64_t offsetslength,
+    int64_t* outoffsets,
+    bool ascending,
+    bool stable);
 
 
 };

@@ -18,6 +18,7 @@
 #include "awkward/array/ByteMaskedArray.h"
 #include "awkward/array/BitMaskedArray.h"
 #include "awkward/array/VirtualArray.h"
+#include "awkward/array/RegularArray.h"
 
 #include "awkward/array/UnmaskedArray.h"
 
@@ -752,6 +753,68 @@ namespace awkward {
                                      parameters,
                                      axis,
                                      depth));
+    }
+  }
+
+  const ContentPtr
+  UnmaskedArray::sort_next(int64_t negaxis,
+                           const Index64& starts,
+                           const Index64& parents,
+                           int64_t outlength,
+                           bool ascending,
+                           bool stable,
+                           bool keepdims) const {
+    std::shared_ptr<Content> out = content_.get()->sort_next(negaxis,
+                                                             starts,
+                                                             parents,
+                                                             outlength,
+                                                             ascending,
+                                                             stable,
+                                                             keepdims);
+    if (RegularArray* raw = dynamic_cast<RegularArray*>(out.get())) {
+      std::shared_ptr<Content> wrapped = std::make_shared<UnmaskedArray>(
+          Identities::none(),
+          parameters_,
+          raw->content());
+      return std::make_shared<RegularArray>(
+          raw->identities(),
+          raw->parameters(),
+          wrapped,
+          raw->size());
+    }
+    else {
+      return out;
+    }
+  }
+
+  const ContentPtr
+  UnmaskedArray::argsort_next(int64_t negaxis,
+                              const Index64& starts,
+                              const Index64& parents,
+                              int64_t outlength,
+                              bool ascending,
+                              bool stable,
+                              bool keepdims) const {
+    std::shared_ptr<Content> out = content_.get()->argsort_next(negaxis,
+                                                                starts,
+                                                                parents,
+                                                                outlength,
+                                                                ascending,
+                                                                stable,
+                                                                keepdims);
+    if (RegularArray* raw = dynamic_cast<RegularArray*>(out.get())) {
+      std::shared_ptr<Content> wrapped = std::make_shared<UnmaskedArray>(
+          Identities::none(),
+          parameters_,
+          raw->content());
+      return std::make_shared<RegularArray>(
+          raw->identities(),
+          raw->parameters(),
+          wrapped,
+          raw->size());
+    }
+    else {
+      return out;
     }
   }
 

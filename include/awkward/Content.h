@@ -685,6 +685,43 @@ namespace awkward {
                   bool mask,
                   bool keepdims) const = 0;
 
+    /// @brief This array with one axis removed by applying a Reducer
+    ///
+    /// The user's entry point for this operation is #sort.
+    ///
+    /// @param negaxis The negative axis: `-axis`. That is, `negaxis = 1`
+    /// means the deepest axis level.
+    /// @param starts Staring positions of each group to combine as an
+    /// {@link IndexOf Index}. These are downward pointers from an outer
+    /// structure into this structure with the same meaning as in
+    /// {@link ListArrayOf ListArray}.
+    /// @param parents Groups to combine as an {@link IndexOf Index} of
+    /// upward pointers from this structure to the outer structure to reduce.
+    /// @param outlength The length of the array, after the operation
+    /// completes.
+    /// @param ascending If `true`, the values will be sorted in an ascending
+    /// order.
+    /// @param stable If `true`, the values will be sorted by a
+    /// stable sort algorithm to maintain the relative order of records with
+    /// equal keys (i.e. values).
+    virtual const ContentPtr
+      sort_next(int64_t negaxis,
+                const Index64& starts,
+                const Index64& parents,
+                int64_t outlength,
+                bool ascending,
+                bool stable,
+                bool keepdims) const = 0;
+
+    virtual const ContentPtr
+      argsort_next(int64_t negaxis,
+                   const Index64& starts,
+                   const Index64& parents,
+                   int64_t outlength,
+                   bool ascending,
+                   bool stable,
+                   bool keepdims) const = 0;
+
     /// @brief A (possibly nested) array of integers indicating the
     /// positions of elements within each nested list.
     ///
@@ -847,6 +884,37 @@ namespace awkward {
              int64_t axis,
              bool mask,
              bool keepdims) const;
+
+    /// @brief This array with one axis sorted by applying a sorting algorithm
+    ///
+    /// This operation is implemented on each node through #sort_next.
+    ///
+    /// @param axis The axis to sort.
+    /// Negative `axis` counts backward from the deepest levels (`-1` is
+    /// the last valid `axis`).
+    /// @param ascending If `true`, the values will be sorted in an ascending
+    /// order.
+    /// @param stable If `true`, the values will be sorted by a
+    /// stable sort algorithm to maintain the relative order of records with
+    /// equal keys (i.e. values).
+    const ContentPtr
+      sort(int64_t axis, bool ascending, bool stable) const;
+
+    /// @brief This array indices with one axis sorted by applying
+    ///        a sorting algorithm
+    ///
+    /// This operation is implemented on each node through #argsort_next.
+    ///
+    /// @param axis The axis to sort.
+    /// Negative `axis` counts backward from the deepest levels (`-1` is
+    /// the last valid `axis`).
+    /// @param ascending If `true`, the values will be sorted in an ascending
+    /// order.
+    /// @param stable If `true`, the values will be sorted by a
+    /// stable sort algorithm to maintain the relative order of records with
+    /// equal keys (i.e. values).
+    const ContentPtr
+      argsort(int64_t axis, bool ascending, bool stable) const;
 
     /// @brief String-to-JSON map that augments the meaning of this
     /// array.

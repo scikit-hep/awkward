@@ -1271,6 +1271,61 @@ namespace awkward {
   }
 
   const ContentPtr
+  RecordArray::sort_next(int64_t negaxis,
+                         const Index64& starts,
+                         const Index64& parents,
+                         int64_t outlength,
+                         bool ascending,
+                         bool stable,
+                         bool keepdims) const {
+    std::vector<ContentPtr> contents;
+    for (auto content : contents_) {
+      ContentPtr trimmed = content.get()->getitem_range_nowrap(0, length());
+      ContentPtr next = trimmed.get()->sort_next(negaxis,
+                                                 starts,
+                                                 parents,
+                                                 outlength,
+                                                 ascending,
+                                                 stable,
+                                                 keepdims);
+      contents.push_back(next);
+    }
+    return std::make_shared<RecordArray>(Identities::none(),
+                                         parameters_,
+                                         contents,
+                                         recordlookup_,
+                                         outlength);
+  }
+
+  const ContentPtr
+  RecordArray::argsort_next(int64_t negaxis,
+                            const Index64& starts,
+                            const Index64& parents,
+                            int64_t outlength,
+                            bool ascending,
+                            bool stable,
+                            bool keepdims) const {
+    std::vector<ContentPtr> contents;
+    for (auto content : contents_) {
+      ContentPtr trimmed = content.get()->getitem_range_nowrap(0, length());
+      ContentPtr next = trimmed.get()->argsort_next(negaxis,
+                                                    starts,
+                                                    parents,
+                                                    outlength,
+                                                    ascending,
+                                                    stable,
+                                                    keepdims);
+      contents.push_back(next);
+    }
+    return std::make_shared<RecordArray>(
+      Identities::none(),
+      util::Parameters(),
+      contents,
+      recordlookup_,
+      outlength);
+  }
+
+  const ContentPtr
   RecordArray::getitem_next(const SliceItemPtr& head,
                             const Slice& tail,
                             const Index64& advanced) const {
