@@ -36,6 +36,26 @@ Most pull requests are merged with the "squash and merge" feature, so details ab
 
 It is unnecessary to manually edit (rebase) your commit history. If, however, you do want to save a pull request as multiple commits on `master`, ask me and we'll discuss.
 
+### Building documentation locally
+
+We use [Sphinx](https://pypi.org/project/Sphinx/) to generate documentation.  
+
+You need some additional packages installed on your system to build the documentation - 
+* [Doxygen](https://www.doxygen.nl/download.html)
+* [pycparser](https://pypi.org/project/pycparser/)
+* [black](https://pypi.org/project/black/)
+* Sphinx and its dependencies ([Jinja2](https://pypi.org/project/Jinja2/), [sphinxcontrib-serializinghtml](https://pypi.org/project/sphinxcontrib-serializinghtml/), [sphinxcontrib-applehelp](https://pypi.org/project/sphinxcontrib-applehelp/), [sphinxcontrib-devhelp](https://pypi.org/project/sphinxcontrib-devhelp/), [sphinxcontrib-jsmath](https://pypi.org/project/sphinxcontrib-jsmath/), [sphinxcontrib-htmlhelp](https://pypi.org/project/sphinxcontrib-htmlhelp/), [sphinxcontrib-qthelp](https://pypi.org/project/sphinxcontrib-qthelp/), [Pygments](https://pypi.org/project/Pygments/), [docutils](https://pypi.org/project/docutils/), [snowballstemmer](https://pypi.org/project/snowballstemmer/), [Babel](https://pypi.org/project/Babel/), [alabaster](https://pypi.org/project/alabaster/), [imagesize](https://pypi.org/project/imagesize/), [requests](https://pypi.org/project/requests/), [setuptools](https://pypi.org/project/setuptools/), [packaging](https://pypi.org/project/packaging/))  
+
+
+To build documentation locally, execute the following command from the root directory of the project -  
+```sphinx-build docs-sphinx/ docs-sphinx/_build/```   
+this command executes multiple custom Python scripts(some require a working internet connection), in addition to using Sphinx and Doxygen to generate the required browser viewable documentation.
+
+To view the built documentation, open `docs-sphinx/_build/index.html` from the root directory of the project in your preferred web browser.
+
+Before re-building documentation, you might want to delete the files that were generated to create viewable documentation. A simple command to remove all of them is -   
+```rm -rf docs-shinx/_auto/ docs_sphinx/_build/ docs-sphinx/_static/```
+
 ### Continuous integration
 
 Pull requests must pass all [continuous integration](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=3&_a=summary) tests before they are merged. I will sometimes cancel non-essential builds to give priority to pull requests that are almost ready to be merged. If you needed the result of the build as a diagnostic, you can ask me to restart your job or make a trivial change to trigger a new build.
