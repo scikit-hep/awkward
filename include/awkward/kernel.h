@@ -621,17 +621,18 @@ namespace kernel {
     T* toptr,
     int64_t length);
 
-  ERROR identities32_to_identities64(
+  template <typename T>
+  ERROR identities_to_identities64(
     int64_t* toptr,
-    const int32_t* fromptr,
+    const T* fromptr,
     int64_t length,
     int64_t width);
 
-  template <typename T>
+  template <typename C, typename T>
   ERROR
-  identities32_from_listoffsetarray(
-    int32_t* toptr,
-    const int32_t* fromptr,
+  identities_from_listoffsetarray(
+    C* toptr,
+    const C* fromptr,
     const T* fromoffsets,
     int64_t fromptroffset,
     int64_t offsetsoffset,
@@ -653,28 +654,12 @@ namespace kernel {
     int64_t fromwidth);
 
 
-  template <typename T>
+  template <typename C, typename T>
   ERROR
-  identities32_from_listarray(
+  identities_from_listarray(
     bool* uniquecontents,
-    int32_t* toptr,
-    const int32_t* fromptr,
-    const T* fromstarts,
-    const T* fromstops,
-    int64_t fromptroffset,
-    int64_t startsoffset,
-    int64_t stopsoffset,
-    int64_t tolength,
-    int64_t fromlength,
-    int64_t fromwidth);
-
-
-  template <typename T>
-  ERROR
-  identities64_from_listarray(
-    bool* uniquecontents,
-    int64_t* toptr,
-    const int64_t* fromptr,
+    C* toptr,
+    const C* fromptr,
     const T* fromstarts,
     const T* fromstops,
     int64_t fromptroffset,
@@ -695,12 +680,12 @@ namespace kernel {
     int64_t fromwidth);
 
 
-  template <typename T>
+  template <typename C, typename T>
   ERROR
-  identities32_from_indexedarray(
+  identities_from_indexedarray(
     bool* uniquecontents,
-    int32_t* toptr,
-    const int32_t* fromptr,
+    C* toptr,
+    const C* fromptr,
     const T* fromindex,
     int64_t fromptroffset,
     int64_t indexoffset,
@@ -709,43 +694,12 @@ namespace kernel {
     int64_t fromwidth);
 
 
-  template <typename T>
+  template <typename C, typename T, typename I>
   ERROR
-  identities64_from_indexedarray(
+  identities_from_unionarray(
     bool* uniquecontents,
-    int64_t* toptr,
-    const int64_t* fromptr,
-    const T* fromindex,
-    int64_t fromptroffset,
-    int64_t indexoffset,
-    int64_t tolength,
-    int64_t fromlength,
-    int64_t fromwidth);
-
-
-  template <typename T, typename I>
-  ERROR
-  identities32_from_unionarray(
-    bool* uniquecontents,
-    int32_t* toptr,
-    const int32_t* fromptr,
-    const T* fromtags,
-    const I* fromindex,
-    int64_t fromptroffset,
-    int64_t tagsoffset,
-    int64_t indexoffset,
-    int64_t tolength,
-    int64_t fromlength,
-    int64_t fromwidth,
-    int64_t which);
-
-
-  template <typename T, typename I>
-  ERROR
-  identities64_from_unionarray(
-    bool* uniquecontents,
-    int64_t* toptr,
-    const int64_t* fromptr,
+    C* toptr,
+    const C* fromptr,
     const T* fromtags,
     const I* fromindex,
     int64_t fromptroffset,

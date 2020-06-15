@@ -373,7 +373,7 @@ namespace awkward {
                                          content_.get()->length());
         Identities32* rawsubidentities =
           reinterpret_cast<Identities32*>(subidentities.get());
-        struct Error err = kernel::identities32_from_listoffsetarray<T>(
+        struct Error err = kernel::identities_from_listoffsetarray<int32_t, T>(
           rawsubidentities->ptr().get(),
           rawidentities->ptr().get(),
           offsets_.ptr().get(),
@@ -394,7 +394,7 @@ namespace awkward {
                                          content_.get()->length());
         Identities64* rawsubidentities =
           reinterpret_cast<Identities64*>(subidentities.get());
-        struct Error err = kernel::identities64_from_listoffsetarray<T>(
+        struct Error err = kernel::identities_from_listoffsetarray<int64_t, T>(
           rawsubidentities->ptr().get(),
           rawidentities->ptr().get(),
           offsets_.ptr().get(),

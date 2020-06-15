@@ -134,7 +134,7 @@ namespace awkward {
                                                          width_,
                                                          length_);
       Identities64* raw = reinterpret_cast<Identities64*>(out.get());
-      kernel::identities32_to_identities64(
+      kernel::identities_to_identities64<int32_t>(
         raw->ptr().get(),
         reinterpret_cast<int32_t*>(ptr_.get()),
         length_,
