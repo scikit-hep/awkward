@@ -63,6 +63,13 @@ def test_IndexedOffsetArray():
 #        [   5.5, 1000. , 1000. ],
 #        [  -6.6,   -5.5,   -4.4]])
 
+    assert awkward1.to_list(array.sort(0, True, False)) == [
+        [-4.4, -5.5, -6.6],
+        [ 2.2,  1.1,  3.3],
+        [ 4.4, None,  5.5],
+        [ 5.5, None, None],
+        [None, None, None]]
+
     assert awkward1.to_list(array.sort(1, True, False)) == [
         [  1.1,  2.2,   3.3],
         [ None, None, None ],

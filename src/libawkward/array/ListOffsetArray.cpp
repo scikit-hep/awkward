@@ -1724,11 +1724,10 @@ namespace awkward {
         ContentPtr out = content->sort_asstrings(offsets_,
                                                  ascending,
                                                  stable);
-
         return std::make_shared<RegularArray>(Identities::none(),
-                                               util::Parameters(),
-                                               out,
-                                               out.get()->length());
+                                              util::Parameters(),
+                                              out,
+                                              out.get()->length());
       }
     }
 
@@ -1805,7 +1804,7 @@ namespace awkward {
       outcontent = outcontent.get()->carry(outcarry);
 
       ContentPtr out = std::make_shared<ListOffsetArray64>(Identities::none(),
-                                                           util::Parameters(),
+                                                           parameters_,
                                                            offsets_,
                                                            outcontent);
       if (keepdims) {
@@ -1843,9 +1842,9 @@ namespace awkward {
         offsets_.length() - 1, ascending, stable, false);
 
       ContentPtr out = std::make_shared<ListOffsetArray64>(Identities::none(),
-                                                 util::Parameters(),
-                                                 offsets_,
-                                                 outcontent);
+                                                           parameters_,
+                                                           offsets_,
+                                                           outcontent);
       if (keepdims) {
         out = std::make_shared<RegularArray>(Identities::none(),
                                              util::Parameters(),
@@ -1883,8 +1882,13 @@ namespace awkward {
                                            bool ascending,
                                            bool stable,
                                            bool keepdims) const {
-    std::pair<bool, int64_t> branchdepth = branch_depth();
+    // if this is array of strings, axis parameter is ignored
+    // and this array is sorted
+    if (util::parameter_isstring(parameters_, "__array__")) {
+      throw std::runtime_error("not implemented yet: argsort for strings");
+    }
 
+    std::pair<bool, int64_t> branchdepth = branch_depth();
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
       if (offsets_.length() - 1 != parents.length()) {
         throw std::runtime_error("offsets_.length() - 1 != parents.length()");
@@ -1993,9 +1997,9 @@ namespace awkward {
         offsets_.length() - 1, ascending, stable, false);
 
       ContentPtr out = std::make_shared<ListOffsetArray64>(Identities::none(),
-                                                 util::Parameters(),
-                                                 offsets_,
-                                                 outcontent);
+                                                           util::Parameters(),
+                                                           offsets_,
+                                                           outcontent);
       if (keepdims) {
         out = std::make_shared<RegularArray>(Identities::none(),
                                              util::Parameters(),

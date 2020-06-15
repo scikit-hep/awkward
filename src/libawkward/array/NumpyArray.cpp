@@ -2767,7 +2767,7 @@ namespace awkward {
           + format_ + std::string("\""));
       }
 
-      out = std::make_shared<NumpyArray>(identities_,
+      out = std::make_shared<NumpyArray>(Identities::none(),
                                          parameters_,
                                          ptr,
                                          shape_,
@@ -2777,7 +2777,8 @@ namespace awkward {
                                          format_);
 
       if (keepdims) {
-        out = std::make_shared<RegularArray>(Identities::none(),
+        out = std::make_shared<RegularArray>(
+          Identities::none(),
           util::Parameters(),
           out,
           parents.length() / starts.length());

@@ -1122,7 +1122,7 @@ namespace awkward {
           raw->parameters(),
           outoffsets,
           std::make_shared<IndexedOptionArray64>(Identities::none(),
-                                                 util::Parameters(),
+                                                 parameters_,
                                                  outindex,
                                                  raw->content()));
       }

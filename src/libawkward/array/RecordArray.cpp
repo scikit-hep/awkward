@@ -1291,7 +1291,7 @@ namespace awkward {
       contents.push_back(next);
     }
     return std::make_shared<RecordArray>(Identities::none(),
-                                         util::Parameters(),
+                                         parameters_,
                                          contents,
                                          recordlookup_,
                                          outlength);

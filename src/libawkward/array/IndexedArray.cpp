@@ -2036,10 +2036,11 @@ namespace awkward {
         nextparents.offset());
     util::handle_error(err3, classname(), identities_.get());
 
-    out = std::make_shared<IndexedOptionArray64>(Identities::none(),
-                                                 util::Parameters(),
-                                                 nextoutindex,
-                                                 out);
+    out = std::make_shared<IndexedArrayOf<int64_t, ISOPTION>>(
+            Identities::none(),
+            parameters_,
+            nextoutindex,
+            out);
 
     std::pair<bool, int64_t> branchdepth = branch_depth();
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
@@ -2070,10 +2071,11 @@ namespace awkward {
           raw->identities(),
           raw->parameters(),
           outoffsets,
-          std::make_shared<IndexedOptionArray64>(Identities::none(),
-                                                 util::Parameters(),
-                                                 outindex,
-                                                 raw->content()));
+          std::make_shared<IndexedArrayOf<int64_t, ISOPTION>>(
+            Identities::none(),
+            parameters_,
+            outindex,
+            raw->content()));
       }
       else {
         throw std::runtime_error(
@@ -2137,10 +2139,11 @@ namespace awkward {
         nextparents.offset());
     util::handle_error(err3, classname(), identities_.get());
 
-    out = std::make_shared<IndexedOptionArray64>(Identities::none(),
-                                                 util::Parameters(),
-                                                 nextoutindex,
-                                                 out);
+    out = std::make_shared<IndexedArrayOf<int64_t, ISOPTION>>(
+            Identities::none(),
+            util::Parameters(),
+            nextoutindex,
+            out);
 
     std::pair<bool, int64_t> branchdepth = branch_depth();
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
@@ -2171,7 +2174,8 @@ namespace awkward {
           raw->identities(),
           raw->parameters(),
           outoffsets,
-          std::make_shared<IndexedOptionArray64>(Identities::none(),
+          std::make_shared<IndexedArrayOf<int64_t, ISOPTION>>(
+            Identities::none(),
             util::Parameters(),
             outindex,
             raw->content()));

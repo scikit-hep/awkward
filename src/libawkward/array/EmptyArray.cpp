@@ -478,13 +478,13 @@ namespace awkward {
                            bool stable,
                            bool keepdims) const {
     ContentPtr asnumpy = toNumpyArray("d", 8);
-     ContentPtr out = asnumpy.get()->argsort_next(negaxis,
-                                       starts,
-                                       parents,
-                                       outlength,
-                                       ascending,
-                                       stable,
-                                       keepdims);
+    ContentPtr out = asnumpy.get()->argsort_next(negaxis,
+                                                 starts,
+                                                 parents,
+                                                 outlength,
+                                                 ascending,
+                                                 stable,
+                                                 keepdims);
     return out;
   }
 
