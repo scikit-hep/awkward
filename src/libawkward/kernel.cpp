@@ -7718,7 +7718,7 @@ namespace kernel {
 
   /// @brief sorting kernels
   template <>
-  Error awkward_numpyarray_argsort<bool>(
+  Error numpyarray_argsort<bool>(
     int64_t* toptr,
     const bool* fromptr,
     int64_t length,
@@ -8118,7 +8118,7 @@ namespace kernel {
       stable);
   }
   template <>
-  Error awkward_numpyarray_sort<double>(
+  Error numpyarray_sort<double>(
     double* toptr,
     const double* fromptr,
     int64_t length,
