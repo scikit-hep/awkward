@@ -1751,12 +1751,13 @@ namespace awkward {
 
       int64_t maxcount;
       Index64 offsetscopy(offsets_.length());
-      struct Error err2 = awkward_listoffsetarray_reduce_nonlocal_maxcount_offsetscopy_64(
-        &maxcount,
-        offsetscopy.ptr().get(),
-        offsets_.ptr().get(),
-        offsets_.offset(),
-        offsets_.length() - 1);
+      struct Error err2 =
+        awkward_listoffsetarray_reduce_nonlocal_maxcount_offsetscopy_64(
+          &maxcount,
+          offsetscopy.ptr().get(),
+          offsets_.ptr().get(),
+          offsets_.offset(),
+          offsets_.length() - 1);
       util::handle_error(err2, classname(), identities_.get());
 
       Index64 nextcarry(nextlen);

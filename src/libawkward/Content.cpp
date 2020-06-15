@@ -735,7 +735,8 @@ namespace awkward {
       if (!(0 < negaxis  &&  negaxis <= depth)) {
         throw std::invalid_argument(std::string("axis=") +
         std::to_string(axis) + std::string(" exceeds the depth of the nested "
-        "list structure (which is ") + std::to_string(depth) + std::string(")"));
+        "list structure (which is ") + std::to_string(depth) +
+        std::string(")"));
       }
     }
 
@@ -770,8 +771,8 @@ namespace awkward {
       if (negaxis <= 0) {
         throw std::invalid_argument(
           "cannot use non-negative axis on a nested list structure "
-          "of variable depth (negative axis counts from the leaves of the tree; "
-          "non-negative from the root)");
+          "of variable depth (negative axis counts from the leaves of the "
+          "tree; non-negative from the root)");
       }
       if (negaxis > depth) {
         throw std::invalid_argument(

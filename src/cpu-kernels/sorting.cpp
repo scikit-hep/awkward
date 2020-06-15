@@ -18,7 +18,7 @@ ERROR awkward_sorting_ranges(
   int64_t k = 0;
   toindex[0] = k;
   k++; j++;
-  for (int64_t i = 1; i < parentslength; i++) {
+  for (int64_t i = 1;  i < parentslength;  i++) {
     if(parents[i - 1] != parents[i]) {
       toindex[j] = k;
       j++;
@@ -37,7 +37,7 @@ ERROR awkward_sorting_ranges_length(
   int64_t parentslength,
   int64_t outlength) {
   int64_t length = 2;
-  for (int64_t i = 1; i < parentslength; i++) {
+  for (int64_t i = 1;  i < parentslength;  i++) {
     if(parents[i - 1] != parents[i]) {
       length++;
     }
@@ -59,28 +59,34 @@ ERROR awkward_argsort(
   std::vector<int64_t> result(length);
   std::iota(result.begin(), result.end(), 0);
 
-  for (int64_t i = 0; i < offsetslength - 1; i++) {
+  for (int64_t i = 0;  i < offsetslength - 1;  i++) {
     auto start = std::next(result.begin(), offsets[i]);
     auto stop = std::next(result.begin(), offsets[i + 1]);
 
-    if (ascending  &&  !stable) {
-      std::sort(start, stop,
-        [&fromptr](int64_t i1, int64_t i2) {return fromptr[i1] < fromptr[i2];});
-    }
-    else if (!ascending  &&  !stable) {
-      std::sort(start, stop,
-        [&fromptr](int64_t i1, int64_t i2) {return fromptr[i1] > fromptr[i2];});
-    }
-    else if (ascending  &&  stable) {
-      std::stable_sort(start, stop,
-        [&fromptr](int64_t i1, int64_t i2) {return fromptr[i1] < fromptr[i2];});
+    if (ascending  &&  stable) {
+      std::stable_sort(start, stop, [&fromptr](int64_t i1, int64_t i2) {
+        return fromptr[i1] < fromptr[i2];
+      });
     }
     else if (!ascending  &&  stable) {
-      std::stable_sort(start, stop,
-        [&fromptr](int64_t i1, int64_t i2) {return fromptr[i1] > fromptr[i2];});
+      std::stable_sort(start, stop, [&fromptr](int64_t i1, int64_t i2) {
+        return fromptr[i1] > fromptr[i2];
+      });
     }
-    std::transform(start, stop, start,
-               [&](int64_t j) -> int64_t { return j - offsets[i]; });
+    else if (ascending  &&  !stable) {
+      std::sort(start, stop, [&fromptr](int64_t i1, int64_t i2) {
+        return fromptr[i1] < fromptr[i2];
+      });
+    }
+    else {
+      std::sort(start, stop, [&fromptr](int64_t i1, int64_t i2) {
+        return fromptr[i1] > fromptr[i2];
+      });
+    }
+
+    std::transform(start, stop, start, [&](int64_t j) -> int64_t {
+      return j - offsets[i];
+    });
   }
 
   for (int64_t i = 0;  i < length;  i++) {
@@ -299,25 +305,30 @@ ERROR awkward_sort(
   bool stable) {
   std::vector<int64_t> index(length);
   std::iota(index.begin(), index.end(), 0);
-  for (int64_t i = 0; i < offsetslength - 1; i++) {
+
+  for (int64_t i = 0;  i < offsetslength - 1;  i++) {
     auto start = std::next(index.begin(), offsets[i]);
     auto stop = std::next(index.begin(), offsets[i + 1]);
 
-    if (ascending  &&  !stable) {
-      std::sort(start, stop,
-        [&fromptr](int64_t i1, int64_t i2) {return fromptr[i1] < fromptr[i2];});
-    }
-    else if (!ascending  &&  !stable) {
-      std::sort(start, stop,
-        [&fromptr](int64_t i1, int64_t i2) {return fromptr[i1] > fromptr[i2];});
-    }
-    else if (ascending  &&  stable) {
-      std::stable_sort(start, stop,
-        [&fromptr](int64_t i1, int64_t i2) {return fromptr[i1] < fromptr[i2];});
+    if (ascending  &&  stable) {
+      std::stable_sort(start, stop, [&fromptr](int64_t i1, int64_t i2) {
+        return fromptr[i1] < fromptr[i2];
+      });
     }
     else if (!ascending  &&  stable) {
-      std::stable_sort(start, stop,
-        [&fromptr](int64_t i1, int64_t i2) {return fromptr[i1] > fromptr[i2];});
+      std::stable_sort(start, stop, [&fromptr](int64_t i1, int64_t i2) {
+        return fromptr[i1] > fromptr[i2];
+      });
+    }
+    else if (ascending  &&  !stable) {
+      std::sort(start, stop, [&fromptr](int64_t i1, int64_t i2) {
+        return fromptr[i1] < fromptr[i2];
+      });
+    }
+    else {
+      std::sort(start, stop, [&fromptr](int64_t i1, int64_t i2) {
+        return fromptr[i1] > fromptr[i2];
+      });
     }
   }
 
@@ -554,7 +565,9 @@ ERROR awkward_listoffsetarray_local_preparenext_64(
   std::vector<int64_t> result(length);
   std::iota(result.begin(), result.end(), 0);
   std::sort(result.begin(), result.end(),
-    [&fromindex](int64_t i1, int64_t i2) {return fromindex[i1] < fromindex[i2];});
+    [&fromindex](int64_t i1, int64_t i2) {
+      return fromindex[i1] < fromindex[i2];
+    });
 
   for(int64_t i = 0; i < length; i++) {
     tocarry[i] = result[i];
@@ -571,7 +584,7 @@ ERROR awkward_indexedarray_local_preparenext_64(
     const int64_t* nextparents,
     int64_t nextparentsoffset) {
   int64_t j = 0;
-  for (int64_t i = 0; i < parentslength; i++) {
+  for (int64_t i = 0;  i < parentslength;  i++) {
     int64_t parent = parents[i] + parentsoffset;
     int64_t start = starts[parent];
     int64_t nextparent = nextparents[j] + nextparentsoffset;
@@ -602,12 +615,12 @@ ERROR awkward_numpyarray_sort_asstrings_uint8(
   // an std container of strings
   std::vector<std::string> words;
 
-  for (int64_t k = 0; k < offsetslength - 1; k++) {
+  for (int64_t k = 0;  k < offsetslength - 1;  k++) {
     int64_t start = offsets[k];
     int64_t stop = offsets[k + 1];
     int64_t slen = start;
     std::string str;
-    for (uint8_t i = (uint8_t)start; slen < stop; i++) {
+    for (uint8_t i = (uint8_t)start;  slen < stop;  i++) {
       slen++;
       str += (char)fromptr[i];
     }

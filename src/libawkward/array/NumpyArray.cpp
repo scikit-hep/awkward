@@ -2780,7 +2780,7 @@ namespace awkward {
         out = std::make_shared<RegularArray>(Identities::none(),
           util::Parameters(),
           out,
-          parents.length()/starts.length());
+          parents.length() / starts.length());
       }
 
       return out;
@@ -2963,10 +2963,11 @@ namespace awkward {
                                          format);
 
       if (keepdims) {
-        out = std::make_shared<RegularArray>(Identities::none(),
-                                             util::Parameters(),
-                                             out,
-                                             parents.length()/starts.length());
+        out = std::make_shared<RegularArray>(
+          Identities::none(),
+          util::Parameters(),
+          out,
+          parents.length() / starts.length());
       }
       return out;
     }

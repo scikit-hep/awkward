@@ -1317,7 +1317,12 @@ namespace awkward {
                                                     keepdims);
       contents.push_back(next);
     }
-    return std::make_shared<RecordArray>(Identities::none(), util::Parameters(), contents, recordlookup_, outlength);
+    return std::make_shared<RecordArray>(
+      Identities::none(),
+      util::Parameters(),
+      contents,
+      recordlookup_,
+      outlength);
   }
 
   const ContentPtr
