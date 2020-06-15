@@ -305,7 +305,7 @@ namespace awkward {
                                          Identities::FieldLoc(), 1, length());
         Identities32* rawidentities =
           reinterpret_cast<Identities32*>(newidentities.get());
-        awkward_new_identities32(rawidentities->ptr().get(), length());
+        kernel::new_identities<int32_t>(rawidentities->ptr().get(), length());
         setidentities(newidentities);
       }
       else {
