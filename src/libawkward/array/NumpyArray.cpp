@@ -4097,7 +4097,7 @@ namespace awkward {
     }
 
     int64_t ranges_length = 0;
-    struct Error err1 = awkward_sorting_ranges_length(
+    struct Error err1 = kernel::sorting_ranges_length(
       &ranges_length,
       parents.ptr().get(),
       parents.offset(),
@@ -4106,7 +4106,7 @@ namespace awkward {
     util::handle_error(err1, classname(), nullptr);
 
     Index64 outranges(ranges_length);
-    struct Error err2 = awkward_sorting_ranges(
+    struct Error err2 = kernel::sorting_ranges(
       outranges.ptr().get(),
       ranges_length,
       parents.ptr().get(),
@@ -4146,7 +4146,7 @@ namespace awkward {
     }
 
     int64_t ranges_length = 0;
-    struct Error err1 = awkward_sorting_ranges_length(
+    struct Error err1 = kernel::sorting_ranges_length(
       &ranges_length,
       parents.ptr().get(),
       parents.offset(),
@@ -4155,7 +4155,7 @@ namespace awkward {
     util::handle_error(err1, classname(), nullptr);
 
     Index64 outranges(ranges_length);
-    struct Error err2 = awkward_sorting_ranges(
+    struct Error err2 = kernel::sorting_ranges(
       outranges.ptr().get(),
       ranges_length,
       parents.ptr().get(),

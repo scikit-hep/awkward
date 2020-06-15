@@ -1060,7 +1060,7 @@ namespace awkward {
                              bool stable,
                              bool keepdims) const {
     int64_t numnull;
-    struct Error err1 = awkward_bytemaskedarray_numnull(
+    struct Error err1 = kernel::bytemaskedarray_numnull(
       &numnull,
       mask_.ptr().get(),
       mask_.offset(),
@@ -1071,7 +1071,7 @@ namespace awkward {
     Index64 nextparents(length() - numnull);
     Index64 nextcarry(length() - numnull);
     Index64 outindex(length());
-    struct Error err2 = awkward_bytemaskedarray_reduce_next_64(
+    struct Error err2 = kernel::bytemaskedarray_reduce_next_64(
       nextcarry.ptr().get(),
       nextparents.ptr().get(),
       outindex.ptr().get(),
@@ -1109,7 +1109,7 @@ namespace awkward {
             "sort_next with unbranching depth > negaxis expects "
             "a ListOffsetArray64 whose offsets start at zero");
         }
-        struct Error err3 = awkward_indexedarray_reduce_next_fix_offsets_64(
+        struct Error err3 = kernel::indexedarray_reduce_next_fix_offsets_64(
           outoffsets.ptr().get(),
           starts.ptr().get(),
           starts.offset(),
@@ -1145,7 +1145,7 @@ namespace awkward {
                                 bool stable,
                                 bool keepdims) const {
     int64_t numnull;
-    struct Error err1 = awkward_bytemaskedarray_numnull(
+    struct Error err1 = kernel::bytemaskedarray_numnull(
       &numnull,
       mask_.ptr().get(),
       mask_.offset(),
@@ -1156,7 +1156,7 @@ namespace awkward {
     Index64 nextparents(length() - numnull);
     Index64 nextcarry(length() - numnull);
     Index64 outindex(length());
-    struct Error err2 = awkward_bytemaskedarray_reduce_next_64(
+    struct Error err2 = kernel::bytemaskedarray_reduce_next_64(
       nextcarry.ptr().get(),
       nextparents.ptr().get(),
       outindex.ptr().get(),
@@ -1194,7 +1194,7 @@ namespace awkward {
             "argsort_next with unbranching depth > negaxis expects "
             "a ListOffsetArray64 whose offsets start at zero");
         }
-        struct Error err3 = awkward_indexedarray_reduce_next_fix_offsets_64(
+        struct Error err3 = kernel::indexedarray_reduce_next_fix_offsets_64(
           outoffsets.ptr().get(),
           starts.ptr().get(),
           starts.offset(),

@@ -1462,6 +1462,19 @@ namespace kernel {
     bool validwhen);
 
   /// @brief sorting kernels
+  ERROR sorting_ranges(
+    int64_t* toindex,
+    int64_t tolength,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t parentslength,
+    int64_t outlength);
+  ERROR sorting_ranges_length(
+    int64_t* tolength,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t parentslength,
+    int64_t outlength);
   template <typename T>
   ERROR
   numpyarray_argsort(
@@ -1496,6 +1509,20 @@ namespace kernel {
     int64_t* outoffsets,
     bool ascending,
     bool stable);
+
+  ERROR listoffsetarray_local_preparenext_64(
+    int64_t* tocarry,
+    const int64_t* fromindex,
+    int64_t length);
+
+  ERROR indexedarray_local_preparenext_64(
+    int64_t* tocarry,
+    const int64_t* starts,
+    const int64_t* parents,
+    int64_t parentsoffset,
+    int64_t parentslength,
+    const int64_t* nextparents,
+    int64_t nextparentsoffset);
 
 
 };

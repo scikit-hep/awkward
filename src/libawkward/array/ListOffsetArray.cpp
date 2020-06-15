@@ -1739,7 +1739,7 @@ namespace awkward {
       }
       int64_t globalstart;
       int64_t globalstop;
-      struct Error err1 = awkward_listoffsetarray_reduce_global_startstop_64(
+      struct Error err1 = kernel::listoffsetarray_reduce_global_startstop_64(
         &globalstart,
         &globalstop,
         offsets_.ptr().get(),
@@ -1751,7 +1751,7 @@ namespace awkward {
       int64_t maxcount;
       Index64 offsetscopy(offsets_.length());
       struct Error err2 =
-        awkward_listoffsetarray_reduce_nonlocal_maxcount_offsetscopy_64(
+        kernel::listoffsetarray_reduce_nonlocal_maxcount_offsetscopy_64(
           &maxcount,
           offsetscopy.ptr().get(),
           offsets_.ptr().get(),
@@ -1763,7 +1763,7 @@ namespace awkward {
       Index64 nextparents(nextlen);
       int64_t maxnextparents;
       Index64 distincts(maxcount * outlength);
-      struct Error err3 = awkward_listoffsetarray_reduce_nonlocal_preparenext_64(
+      struct Error err3 = kernel::listoffsetarray_reduce_nonlocal_preparenext_64(
         nextcarry.ptr().get(),
         nextparents.ptr().get(),
         nextlen,
@@ -1781,7 +1781,7 @@ namespace awkward {
 
       Index64 nextstarts(maxnextparents + 1);
       struct Error err4 =
-        awkward_listoffsetarray_reduce_nonlocal_nextstarts_64(
+        kernel::listoffsetarray_reduce_nonlocal_nextstarts_64(
         nextstarts.ptr().get(),
         nextparents.ptr().get(),
         nextlen);
@@ -1795,7 +1795,7 @@ namespace awkward {
 
       Index64 outcarry(nextlen);
       struct Error err5 =
-        awkward_listoffsetarray_local_preparenext_64(
+        kernel::listoffsetarray_local_preparenext_64(
         outcarry.ptr().get(),
         nextcarry.ptr().get(),
         nextlen);
@@ -1818,7 +1818,7 @@ namespace awkward {
     else {
       int64_t globalstart;
       int64_t globalstop;
-      struct Error err1 = awkward_listoffsetarray_reduce_global_startstop_64(
+      struct Error err1 = kernel::listoffsetarray_reduce_global_startstop_64(
         &globalstart,
         &globalstop,
         offsets_.ptr().get(),
@@ -1827,7 +1827,7 @@ namespace awkward {
       util::handle_error(err1, classname(), identities_.get());
 
       Index64 nextparents(globalstop - globalstart);
-      struct Error err2 = awkward_listoffsetarray_reduce_local_nextparents_64(
+      struct Error err2 = kernel::listoffsetarray_reduce_local_nextparents_64(
         nextparents.ptr().get(),
         offsets_.ptr().get(),
         offsets_.offset(),
@@ -1896,7 +1896,7 @@ namespace awkward {
 
       int64_t globalstart;
       int64_t globalstop;
-      struct Error err1 = awkward_listoffsetarray_reduce_global_startstop_64(
+      struct Error err1 = kernel::listoffsetarray_reduce_global_startstop_64(
         &globalstart,
         &globalstop,
         offsets_.ptr().get(),
@@ -1907,7 +1907,7 @@ namespace awkward {
 
       int64_t maxcount;
       Index64 offsetscopy(offsets_.length());
-      struct Error err2 = awkward_listoffsetarray_reduce_nonlocal_maxcount_offsetscopy_64(
+      struct Error err2 = kernel::listoffsetarray_reduce_nonlocal_maxcount_offsetscopy_64(
         &maxcount,
         offsetscopy.ptr().get(),
         offsets_.ptr().get(),
@@ -1919,7 +1919,7 @@ namespace awkward {
       Index64 nextparents(nextlen);
       int64_t maxnextparents;
       Index64 distincts(maxcount * outlength);
-      struct Error err3 = awkward_listoffsetarray_reduce_nonlocal_preparenext_64(
+      struct Error err3 = kernel::listoffsetarray_reduce_nonlocal_preparenext_64(
         nextcarry.ptr().get(),
         nextparents.ptr().get(),
         nextlen,
@@ -1936,7 +1936,7 @@ namespace awkward {
       util::handle_error(err3, classname(), identities_.get());
 
       Index64 nextstarts(maxnextparents + 1);
-      struct Error err4 = awkward_listoffsetarray_reduce_nonlocal_nextstarts_64(
+      struct Error err4 = kernel::listoffsetarray_reduce_nonlocal_nextstarts_64(
         nextstarts.ptr().get(),
         nextparents.ptr().get(),
         nextlen);
@@ -1950,7 +1950,7 @@ namespace awkward {
 
       Index64 outcarry(nextlen);
       struct Error err5 =
-        awkward_listoffsetarray_local_preparenext_64(
+        kernel::listoffsetarray_local_preparenext_64(
         outcarry.ptr().get(),
         nextcarry.ptr().get(),
         nextlen);
@@ -1973,7 +1973,7 @@ namespace awkward {
     else {
       int64_t globalstart;
       int64_t globalstop;
-      struct Error err1 = awkward_listoffsetarray_reduce_global_startstop_64(
+      struct Error err1 = kernel::listoffsetarray_reduce_global_startstop_64(
         &globalstart,
         &globalstop,
         offsets_.ptr().get(),
@@ -1982,7 +1982,7 @@ namespace awkward {
       util::handle_error(err1, classname(), identities_.get());
 
       Index64 nextparents(globalstop - globalstart);
-      struct Error err2 = awkward_listoffsetarray_reduce_local_nextparents_64(
+      struct Error err2 = kernel::listoffsetarray_reduce_local_nextparents_64(
         nextparents.ptr().get(),
         offsets_.ptr().get(),
         offsets_.offset(),

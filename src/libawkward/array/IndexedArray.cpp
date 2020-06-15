@@ -2026,7 +2026,7 @@ namespace awkward {
                                            keepdims);
 
     Index64 nextoutindex(index_.length());
-    struct Error err3 = awkward_indexedarray_local_preparenext_64(
+    struct Error err3 = kernel::indexedarray_local_preparenext_64(
         nextoutindex.ptr().get(),
         starts.ptr().get(),
         parents.ptr().get(),
@@ -2059,7 +2059,7 @@ namespace awkward {
             "sort_next with unbranching depth > negaxis expects a "
             "ListOffsetArray64 whose offsets start at zero");
         }
-        struct Error err4 = awkward_indexedarray_reduce_next_fix_offsets_64(
+        struct Error err4 = kernel::indexedarray_reduce_next_fix_offsets_64(
           outoffsets.ptr().get(),
           starts.ptr().get(),
           starts.offset(),
@@ -2129,7 +2129,7 @@ namespace awkward {
                                               keepdims);
 
     Index64 nextoutindex(index_.length());
-    struct Error err3 = awkward_indexedarray_local_preparenext_64(
+    struct Error err3 = kernel::indexedarray_local_preparenext_64(
         nextoutindex.ptr().get(),
         starts.ptr().get(),
         parents.ptr().get(),
@@ -2162,7 +2162,7 @@ namespace awkward {
               "argsort_next with unbranching depth > negaxis expects a "
               "ListOffsetArray64 whose offsets start at zero");
         }
-        struct Error err4 = awkward_indexedarray_reduce_next_fix_offsets_64(
+        struct Error err4 = kernel::indexedarray_reduce_next_fix_offsets_64(
           outoffsets.ptr().get(),
           starts.ptr().get(),
           starts.offset(),
