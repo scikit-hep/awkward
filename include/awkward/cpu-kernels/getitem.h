@@ -708,20 +708,33 @@ extern "C" {
       int64_t lencarry);
 
   EXPORT_SYMBOL struct Error
+    awkward_unionarray8_regular_index_getsize(
+      int64_t* size,
+      const int8_t* fromtags,
+      int64_t tagsoffset,
+      int64_t length);
+
+  EXPORT_SYMBOL struct Error
     awkward_unionarray8_32_regular_index(
       int32_t* toindex,
+      int32_t* current,
+      int64_t size,
       const int8_t* fromtags,
       int64_t tagsoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
     awkward_unionarray8_U32_regular_index(
       uint32_t* toindex,
+      uint32_t* current,
+      int64_t size,
       const int8_t* fromtags,
       int64_t tagsoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
     awkward_unionarray8_64_regular_index(
       int64_t* toindex,
+      int64_t* current,
+      int64_t size,
       const int8_t* fromtags,
       int64_t tagsoffset,
       int64_t length);

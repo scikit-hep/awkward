@@ -1,8 +1,5 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
-#include <cstring>
-#include <vector>
-
 #include "awkward/cpu-kernels/getitem.h"
 
 void awkward_regularize_rangeslice(
@@ -1950,14 +1947,14 @@ ERROR awkward_indexedarray_getitem_adjust_outindex(
   int64_t j = 0;
   int64_t k = 0;
   for (int64_t i = 0;  i < fromindexlength;  i++) {
-    T from = fromindex[fromindexoffset + i];
-    tomask[i] = (from < 0);
-    if (from < 0) {
+    T fromval = fromindex[fromindexoffset + i];
+    tomask[i] = (fromval < 0);
+    if (fromval < 0) {
       toindex[k] = -1;
       k++;
     }
-    else if (j < nonzerolength  &&  from == nonzero[nonzerooffset + j]) {
-      tononzero[j] = from + (k - j);
+    else if (j < nonzerolength  &&  fromval == nonzero[nonzerooffset + j]) {
+      tononzero[j] = fromval + (k - j);
       toindex[k] = j;
       j++;
       k++;
@@ -2109,18 +2106,49 @@ ERROR awkward_indexedarray64_getitem_carry_64(
     lencarry);
 }
 
-template <typename C, typename I>
-ERROR awkward_unionarray_regular_index(
-  I* toindex,
+template <typename C>
+ERROR awkward_unionarray_regular_index_getsize(
+  int64_t* size,
   const C* fromtags,
   int64_t tagsoffset,
   int64_t length) {
-  std::vector<I> current;
+  *size = 0;
+  for (int64_t i = 0;  i < length;  i++) {
+    int64_t tag = (int64_t)fromtags[tagsoffset + i];
+    if (*size < tag) {
+      *size = tag;
+    }
+  }
+  *size = *size + 1;
+  return success();
+}
+
+ERROR awkward_unionarray8_regular_index_getsize(
+  int64_t* size,
+  const int8_t* fromtags,
+  int64_t tagsoffset,
+  int64_t length) {
+  return awkward_unionarray_regular_index_getsize<int8_t>(
+    size,
+    fromtags,
+    tagsoffset,
+    length);
+}
+
+template <typename C, typename I>
+ERROR awkward_unionarray_regular_index(
+  I* toindex,
+  I* current,
+  int64_t size,
+  const C* fromtags,
+  int64_t tagsoffset,
+  int64_t length) {
+  int64_t count = 0;
+  for (int64_t k = 0;  k < size;  k++) {
+    current[k] = 0;
+  }
   for (int64_t i = 0;  i < length;  i++) {
     C tag = fromtags[tagsoffset + i];
-    while (current.size() <= (size_t)tag) {
-      current.push_back(0);
-    }
     toindex[(size_t)i] = current[(size_t)tag];
     current[(size_t)tag]++;
   }
@@ -2128,33 +2156,45 @@ ERROR awkward_unionarray_regular_index(
 }
 ERROR awkward_unionarray8_32_regular_index(
   int32_t* toindex,
+  int32_t* current,
+  int64_t size,
   const int8_t* fromtags,
   int64_t tagsoffset,
   int64_t length) {
   return awkward_unionarray_regular_index<int8_t, int32_t>(
     toindex,
+    current,
+    size,
     fromtags,
     tagsoffset,
     length);
 }
 ERROR awkward_unionarray8_U32_regular_index(
   uint32_t* toindex,
+  uint32_t* current,
+  int64_t size,
   const int8_t* fromtags,
   int64_t tagsoffset,
   int64_t length) {
   return awkward_unionarray_regular_index<int8_t, uint32_t>(
     toindex,
+    current,
+    size,
     fromtags,
     tagsoffset,
     length);
 }
 ERROR awkward_unionarray8_64_regular_index(
   int64_t* toindex,
+  int64_t* current,
+  int64_t size,
   const int8_t* fromtags,
   int64_t tagsoffset,
   int64_t length) {
   return awkward_unionarray_regular_index<int8_t, int64_t>(
     toindex,
+    current,
+    size,
     fromtags,
     tagsoffset,
     length);

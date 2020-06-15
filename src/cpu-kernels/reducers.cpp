@@ -1,8 +1,5 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
-#include <cstring>
-#include <vector>
-
 #include "awkward/cpu-kernels/reducers.h"
 
 ERROR awkward_reduce_count_64(
@@ -1721,7 +1718,7 @@ ERROR awkward_reduce_argmin(
   }
   for (int64_t i = 0;  i < lenparents;  i++) {
     int64_t parent = parents[parentsoffset + i];
-    int64_t start = starts[parent];
+    int64_t start = starts[startsoffset + parent];
     if (toptr[parent] == -1  ||
         fromptr[fromptroffset + i] <
           fromptr[fromptroffset + toptr[parent] + start]) {
@@ -1745,7 +1742,7 @@ ERROR awkward_reduce_argmin_bool_64(
   }
   for (int64_t i = 0;  i < lenparents;  i++) {
     int64_t parent = parents[parentsoffset + i];
-    int64_t start = starts[parent];
+    int64_t start = starts[startsoffset + parent];
     if (toptr[parent] == -1  ||
         (fromptr[fromptroffset + i] != 0) <
           (fromptr[fromptroffset + toptr[parent] + start] != 0)) {
@@ -1981,7 +1978,7 @@ ERROR awkward_reduce_argmax(
   }
   for (int64_t i = 0;  i < lenparents;  i++) {
     int64_t parent = parents[parentsoffset + i];
-    int64_t start = starts[parent];
+    int64_t start = starts[startsoffset + parent];
     if (toptr[parent] == -1  ||
         fromptr[fromptroffset + i] >
           fromptr[fromptroffset + toptr[parent] + start]) {
@@ -2005,7 +2002,7 @@ ERROR awkward_reduce_argmax_bool_64(
   }
   for (int64_t i = 0;  i < lenparents;  i++) {
     int64_t parent = parents[parentsoffset + i];
-    int64_t start = starts[parent];
+    int64_t start = starts[startsoffset + parent];
     if (toptr[parent] == -1  ||
         (fromptr[fromptroffset + i] != 0) >
           (fromptr[fromptroffset + toptr[parent] + start] != 0)) {

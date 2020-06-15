@@ -321,13 +321,23 @@ namespace awkward {
   const IndexOf<I>
   UnionArrayOf<T, I>::regular_index(const IndexOf<T>& tags) {
     int64_t lentags = tags.length();
-    IndexOf<I> outindex(lentags);
-    struct Error err = util::awkward_unionarray_regular_index<T, I>(
-      outindex.ptr().get(),
+    int64_t size;
+    struct Error err1 = awkward_unionarray8_regular_index_getsize(
+      &size,
       tags.ptr().get(),
       tags.offset(),
       lentags);
-    util::handle_error(err, "UnionArray", nullptr);
+    util::handle_error(err1, "UnionArray", nullptr);
+    IndexOf<I> current(size);
+    IndexOf<I> outindex(lentags);
+    struct Error err2 = util::awkward_unionarray_regular_index<T, I>(
+      outindex.ptr().get(),
+      current.ptr().get(),
+      size,
+      tags.ptr().get(),
+      tags.offset(),
+      lentags);
+    util::handle_error(err2, "UnionArray", nullptr);
     return outindex;
   }
 
