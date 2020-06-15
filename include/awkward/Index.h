@@ -86,7 +86,7 @@ namespace awkward {
     IndexOf<T>(const std::shared_ptr<T>& ptr,
                int64_t offset,
                int64_t length,
-               KernelsLib ptr_lib = cpu_kernels);
+               KernelsLib ptr_lib = KernelsLib::cpu_kernels);
 
     /// @brief Allocates a new integer array buffer with a given #length.
     IndexOf<T>(int64_t length, KernelsLib ptr_lib = KernelsLib::cpu_kernels);

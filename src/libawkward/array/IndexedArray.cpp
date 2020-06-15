@@ -1879,8 +1879,8 @@ namespace awkward {
         Index64 outoffsets(starts.length() + 1);
         if (starts.length() > 0  &&  starts.getitem_at_nowrap(0) != 0) {
           throw std::runtime_error(
-            "reduce_next with unbranching depth > negaxis expects a "
-            "ListOffsetArray64 whose offsets start at zero");
+            std::string("reduce_next with unbranching depth > negaxis expects a "
+            "ListOffsetArray64 whose offsets start at zero ") + std::to_string(starts.ptr_lib()));
         }
         struct Error err3 = awkward_indexedarray_reduce_next_fix_offsets_64(
           outoffsets.ptr().get(),

@@ -58,9 +58,9 @@ namespace awkward {
   IndexOf<T>::IndexOf(int64_t length, KernelsLib ptr_lib)
     : ptr_(std::shared_ptr<T>(kernel::ptr_alloc<T>(length, ptr_lib),
                               kernel::array_deleter<T>(ptr_lib)))
-      , offset_(0)
-      , length_(length)
-      , ptr_lib_(ptr_lib) { }
+    , offset_(0)
+    , length_(length)
+    , ptr_lib_(ptr_lib) { }
 
   template <typename T>
   IndexOf<T>::IndexOf(const std::shared_ptr<T>& ptr,
