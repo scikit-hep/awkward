@@ -6,10 +6,6 @@
 #include "awkward/common.h"
 
 namespace kernel {
-  class Identities;
-  template <typename T>
-  class IndexOf;
-
   /// @brief getitem kernels
   void regularize_rangeslice(
     int64_t* start,
@@ -718,7 +714,7 @@ namespace kernel {
     int64_t fromlength,
     int64_t tolength);
 
-  /// @brief Operations Kernels
+  /// @brief operations kernels
   template <typename T>
   ERROR
   listarray_num_64(
@@ -1297,7 +1293,7 @@ namespace kernel {
     bool validwhen,
     bool lsb_order);
 
-  /// @brief Reducers Kernels
+  /// @brief reducers kernels
   ERROR reduce_count_64(
     int64_t* toptr,
     const int64_t* parents,
