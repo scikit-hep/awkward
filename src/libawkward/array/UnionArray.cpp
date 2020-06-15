@@ -322,7 +322,7 @@ namespace awkward {
   UnionArrayOf<T, I>::regular_index(const IndexOf<T>& tags) {
     int64_t lentags = tags.length();
     int64_t size;
-    struct Error err1 = kernel::unionarray_regular_index_getsize<int8_t>(
+    struct Error err1 = kernel::unionarray8_regular_index_getsize(
       &size,
       tags.ptr().get(),
       tags.offset(),

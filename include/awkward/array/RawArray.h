@@ -657,7 +657,7 @@ namespace awkward {
       carry(const Index64& carry) const override {
       std::shared_ptr<T> ptr(new T[(size_t)carry.length()],
                              util::array_deleter<T>());
-      struct Error err = kernel::numpyarray_getitem_next_null<int64_t>(
+      struct Error err = kernel::numpyarray_getitem_next_null_64(
         reinterpret_cast<uint8_t*>(ptr.get()),
         reinterpret_cast<uint8_t*>(ptr_.get()),
         carry.length(),
@@ -898,7 +898,7 @@ namespace awkward {
         throw std::invalid_argument("axis exceeds the depth of this array");
       }
       Index64 index(target);
-      struct Error err = kernel::index_rpad_and_clip_axis0<int64_t>(
+      struct Error err = kernel::index_rpad_and_clip_axis0_64(
         index.ptr().get(),
         target,
         length());
@@ -1006,7 +1006,7 @@ namespace awkward {
         throw std::runtime_error("array.ndim != 1");
       }
       Index64 flathead = array.ravel();
-      struct Error err = kernel::regularize_arrayslice<int64_t>(
+      struct Error err = kernel::regularize_arrayslice_64(
         flathead.ptr().get(),
         flathead.length(),
         length_);

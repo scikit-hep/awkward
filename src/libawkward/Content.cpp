@@ -809,7 +809,7 @@ namespace awkward {
       return shallow_copy();
     }
     Index64 index(target);
-    struct Error err = kernel::index_rpad_and_clip_axis0<int64_t>(
+    struct Error err = kernel::index_rpad_and_clip_axis0_64(
       index.ptr().get(),
       target,
       length());
@@ -825,7 +825,7 @@ namespace awkward {
   const ContentPtr
   Content::localindex_axis0() const {
     Index64 localindex(length());
-    struct Error err = kernel::localindex<int64_t>(
+    struct Error err = kernel::localindex_64(
       localindex.ptr().get(),
       length());
     util::handle_error(err, classname(), identities_.get());
@@ -870,7 +870,7 @@ namespace awkward {
     }
     IndexOf<int64_t> toindex(n);
     IndexOf<int64_t> fromindex(n);
-    struct Error err = kernel::regulararray_combinations<int64_t>(
+    struct Error err = kernel::regulararray_combinations_64(
       tocarryraw.data(),
       toindex.ptr().get(),
       fromindex.ptr().get(),
@@ -1063,7 +1063,7 @@ namespace awkward {
     Index64 index(missing.index());
     Index64 outindex(index.length()*length);
 
-    struct Error err = kernel::missing_repeat<int64_t>(
+    struct Error err = kernel::missing_repeat_64(
       outindex.ptr().get(),
       index.ptr().get(),
       index.offset(),

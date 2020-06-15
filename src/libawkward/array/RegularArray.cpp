@@ -189,7 +189,7 @@ namespace awkward {
   RegularArray::compact_offsets64(bool start_at_zero) const {
     int64_t len = length();
     Index64 out(len + 1);
-    struct Error err = kernel::regulararray_compact_offsets<int64_t>(
+    struct Error err = kernel::regulararray_compact_offsets_64(
       out.ptr().get(),
       len,
       size_);
@@ -221,7 +221,7 @@ namespace awkward {
     if (size_ == 1) {
       int64_t carrylen = offsets.getitem_at_nowrap(offsets.length() - 1);
       Index64 nextcarry(carrylen);
-      struct Error err = kernel::regulararray_broadcast_tooffsets_size1<int64_t>(
+      struct Error err = kernel::regulararray_broadcast_tooffsets_size1_64(
         nextcarry.ptr().get(),
         offsets.ptr().get(),
         offsets.offset(),
@@ -234,7 +234,7 @@ namespace awkward {
                                                  nextcontent);
     }
     else {
-      struct Error err = kernel::regulararray_broadcast_tooffsets<int64_t>(
+      struct Error err = kernel::regulararray_broadcast_tooffsets_64(
         offsets.ptr().get(),
         offsets.offset(),
         offsets.length(),
@@ -541,7 +541,7 @@ namespace awkward {
   RegularArray::carry(const Index64& carry) const {
     Index64 nextcarry(carry.length()*size_);
 
-    struct Error err = kernel::regulararray_getitem_carry<int64_t>(
+    struct Error err = kernel::regulararray_getitem_carry_64(
       nextcarry.ptr().get(),
       carry.ptr().get(),
       carry.length(),
@@ -603,7 +603,7 @@ namespace awkward {
     }
     else if (toaxis == depth + 1) {
       Index64 tonum(length());
-      struct Error err = kernel::regulararray_num<int64_t>(
+      struct Error err = kernel::regulararray_num_64(
         tonum.ptr().get(),
         size_,
         length());
@@ -845,7 +845,7 @@ namespace awkward {
     }
     else if (toaxis == depth + 1) {
       Index64 index(length() * target);
-      struct Error err = kernel::RegularArray_rpad_and_clip_axis1<int64_t>(
+      struct Error err = kernel::RegularArray_rpad_and_clip_axis1_64(
         index.ptr().get(),
         target,
         size_,
@@ -896,7 +896,7 @@ namespace awkward {
     }
     else if (axis == depth + 1) {
       Index64 localindex(length()*size_);
-      struct Error err = kernel::regulararray_localindex<int64_t>(
+      struct Error err = kernel::regulararray_localindex_64(
         localindex.ptr().get(),
         size_,
         length());
@@ -968,7 +968,7 @@ namespace awkward {
       }
       IndexOf<int64_t> toindex(size);
       IndexOf<int64_t> fromindex(size);
-      struct Error err = kernel::regulararray_combinations<int64_t>(
+      struct Error err = kernel::regulararray_combinations_64(
         tocarryraw.data(),
         toindex.ptr().get(),
         fromindex.ptr().get(),
@@ -1023,7 +1023,7 @@ namespace awkward {
     Slice nexttail = tail.tail();
     Index64 nextcarry(len);
 
-    struct Error err = kernel::regulararray_getitem_next_at<int64_t>(
+    struct Error err = kernel::regulararray_getitem_next_at_64(
       nextcarry.ptr().get(),
       at.at(),
       len,
@@ -1073,7 +1073,7 @@ namespace awkward {
 
     Index64 nextcarry(len*nextsize);
 
-    struct Error err = kernel::regulararray_getitem_next_range<int64_t>(
+    struct Error err = kernel::regulararray_getitem_next_range_64(
       nextcarry.ptr().get(),
       regular_start,
       range.step(),
@@ -1095,7 +1095,7 @@ namespace awkward {
       Index64 nextadvanced(len*nextsize);
 
       struct Error err =
-        kernel::regulararray_getitem_next_range_spreadadvanced<int64_t>(
+        kernel::regulararray_getitem_next_range_spreadadvanced_64(
         nextadvanced.ptr().get(),
         advanced.ptr().get(),
         len,
@@ -1120,7 +1120,7 @@ namespace awkward {
     Index64 flathead = array.ravel();
     Index64 regular_flathead(flathead.length());
 
-    struct Error err = kernel::regulararray_getitem_next_array_regularize<int64_t>(
+    struct Error err = kernel::regulararray_getitem_next_array_regularize_64(
       regular_flathead.ptr().get(),
       flathead.ptr().get(),
       flathead.length(),
@@ -1131,7 +1131,7 @@ namespace awkward {
       Index64 nextcarry(len*flathead.length());
       Index64 nextadvanced(len*flathead.length());
 
-      struct Error err = kernel::regulararray_getitem_next_array<int64_t>(
+      struct Error err = kernel::regulararray_getitem_next_array_64(
         nextcarry.ptr().get(),
         nextadvanced.ptr().get(),
         regular_flathead.ptr().get(),
@@ -1152,7 +1152,7 @@ namespace awkward {
       Index64 nextcarry(len);
       Index64 nextadvanced(len);
 
-      struct Error err = kernel::regulararray_getitem_next_array_advanced<int64_t>(
+      struct Error err = kernel::regulararray_getitem_next_array_advanced_64(
         nextcarry.ptr().get(),
         nextadvanced.ptr().get(),
         advanced.ptr().get(),
@@ -1187,7 +1187,7 @@ namespace awkward {
     Index64 singleoffsets = jagged.offsets();
     Index64 multistarts(jagged.length()*regularlength);
     Index64 multistops(jagged.length()*regularlength);
-    struct Error err = kernel::regulararray_getitem_jagged_expand<int64_t>(
+    struct Error err = kernel::regulararray_getitem_jagged_expand_64(
       multistarts.ptr().get(),
       multistops.ptr().get(),
       singleoffsets.ptr().get(),

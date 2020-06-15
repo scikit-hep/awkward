@@ -31,8 +31,7 @@ namespace kernel {
       length);
   }
 
-  template <>
-  ERROR regularize_arrayslice(
+  ERROR regularize_arrayslice_64(
     int64_t* flatheadptr,
     int64_t lenflathead,
     int64_t length) {
@@ -235,8 +234,7 @@ namespace kernel {
       length);
   }
 
-  template <>
-  ERROR slicearray_ravel(
+  ERROR slicearray_ravel_64(
     int64_t* toptr,
     const int64_t* fromptr,
     int64_t ndim,
@@ -292,7 +290,7 @@ namespace kernel {
   }
 
   template <>
-  ERROR identities_getitem_carry(
+  ERROR identities_getitem_carry_64(
     int32_t* newidentitiesptr,
     const int32_t* identitiesptr,
     const int64_t* carryptr,
@@ -310,7 +308,7 @@ namespace kernel {
       length);
   }
   template <>
-  ERROR identities_getitem_carry(
+  ERROR identities_getitem_carry_64(
     int64_t* newidentitiesptr,
     const int64_t* identitiesptr,
     const int64_t* carryptr,
@@ -328,8 +326,7 @@ namespace kernel {
       length);
   }
 
-  template <>
-  ERROR numpyarray_contiguous_init(
+  ERROR numpyarray_contiguous_init_64(
     int64_t* toptr,
     int64_t skip,
     int64_t stride) {
@@ -340,8 +337,7 @@ namespace kernel {
   }
 
 
-  template <>
-  ERROR numpyarray_contiguous_copy(
+  ERROR numpyarray_contiguous_copy_64(
     uint8_t* toptr,
     const uint8_t* fromptr,
     int64_t len,
@@ -357,8 +353,7 @@ namespace kernel {
       pos);
   }
 
-  template <>
-  ERROR numpyarray_contiguous_next(
+  ERROR numpyarray_contiguous_next_64(
     int64_t* topos,
     const int64_t* frompos,
     int64_t len,
@@ -372,8 +367,7 @@ namespace kernel {
       stride);
   }
 
-  template <>
-  ERROR numpyarray_getitem_next_null(
+  ERROR numpyarray_getitem_next_null_64(
     uint8_t* toptr,
     const uint8_t* fromptr,
     int64_t len,
@@ -389,8 +383,7 @@ namespace kernel {
       pos);
   }
 
-  template <>
-  ERROR numpyarray_getitem_next_at(
+  ERROR numpyarray_getitem_next_at_64(
     int64_t* nextcarryptr,
     const int64_t* carryptr,
     int64_t lencarry,
@@ -404,8 +397,7 @@ namespace kernel {
       at);
   }
 
-  template <>
-  ERROR numpyarray_getitem_next_range(
+  ERROR numpyarray_getitem_next_range_64(
     int64_t* nextcarryptr,
     const int64_t* carryptr,
     int64_t lencarry,
@@ -423,8 +415,7 @@ namespace kernel {
       step);
   }
 
-  template <>
-  ERROR numpyarray_getitem_next_range_advanced(
+  ERROR numpyarray_getitem_next_range_advanced_64(
     int64_t* nextcarryptr,
     int64_t* nextadvancedptr,
     const int64_t* carryptr,
@@ -446,8 +437,7 @@ namespace kernel {
       step);
   }
 
-  template <>
-  ERROR numpyarray_getitem_next_array(
+  ERROR numpyarray_getitem_next_array_64(
     int64_t* nextcarryptr,
     int64_t* nextadvancedptr,
     const int64_t* carryptr,
@@ -465,8 +455,7 @@ namespace kernel {
       skip);
   }
 
-  template <>
-  ERROR numpyarray_getitem_next_array_advanced(
+  ERROR numpyarray_getitem_next_array_advanced_64(
     int64_t* nextcarryptr,
     const int64_t* carryptr,
     const int64_t* advancedptr,
@@ -496,8 +485,7 @@ namespace kernel {
       stride);
   }
 
-  template <>
-  ERROR numpyarray_getitem_boolean_nonzero(
+  ERROR numpyarray_getitem_boolean_nonzero_64(
     int64_t* toptr,
     const int8_t* fromptr,
     int64_t byteoffset,
@@ -993,8 +981,7 @@ namespace kernel {
       lencarry);
   }
 
-  template <>
-  ERROR regulararray_getitem_next_at(
+  ERROR regulararray_getitem_next_at_64(
     int64_t* tocarry,
     int64_t at,
     int64_t len,
@@ -1006,8 +993,7 @@ namespace kernel {
       size);
   }
 
-  template <>
-  ERROR regulararray_getitem_next_range(
+  ERROR regulararray_getitem_next_range_64(
     int64_t* tocarry,
     int64_t regular_start,
     int64_t step,
@@ -1023,8 +1009,7 @@ namespace kernel {
       nextsize);
   }
 
-  template <>
-  ERROR regulararray_getitem_next_range_spreadadvanced(
+  ERROR regulararray_getitem_next_range_spreadadvanced_64(
     int64_t* toadvanced,
     const int64_t* fromadvanced,
     int64_t len,
@@ -1036,8 +1021,7 @@ namespace kernel {
       nextsize);
   }
 
-  template <>
-  ERROR regulararray_getitem_next_array_regularize(
+  ERROR regulararray_getitem_next_array_regularize_64(
     int64_t* toarray,
     const int64_t* fromarray,
     int64_t lenarray,
@@ -1049,8 +1033,7 @@ namespace kernel {
       size);
   }
 
-  template <>
-  ERROR regulararray_getitem_next_array(
+  ERROR regulararray_getitem_next_array_64(
     int64_t* tocarry,
     int64_t* toadvanced,
     const int64_t* fromarray,
@@ -1066,8 +1049,7 @@ namespace kernel {
       size);
   }
 
-  template <>
-  ERROR regulararray_getitem_next_array_advanced(
+  ERROR regulararray_getitem_next_array_advanced_64(
     int64_t* tocarry,
     int64_t* toadvanced,
     const int64_t* fromadvanced,
@@ -1085,8 +1067,7 @@ namespace kernel {
       size);
   }
 
-  template <>
-  ERROR regulararray_getitem_carry(
+  ERROR regulararray_getitem_carry_64(
     int64_t* tocarry,
     const int64_t* fromcarry,
     int64_t lencarry,
@@ -1402,8 +1383,7 @@ namespace kernel {
       lencarry);
   }
 
-  template <>
-  Error unionarray_regular_index_getsize<int8_t>(
+  Error unionarray8_regular_index_getsize(
     int64_t* size,
     const int8_t* fromtags,
     int64_t tagsoffset,
@@ -1531,8 +1511,7 @@ namespace kernel {
       which);
   }
 
-  template <>
-  ERROR missing_repeat(
+  ERROR missing_repeat_64(
     int64_t* outindex,
     const int64_t* index,
     int64_t indexoffset,
@@ -1548,8 +1527,7 @@ namespace kernel {
       regularsize);
   }
 
-  template <>
-  ERROR regulararray_getitem_jagged_expand(
+  ERROR regulararray_getitem_jagged_expand_64(
     int64_t* multistarts,
     int64_t* multistops,
     const int64_t* singleoffsets,
@@ -1989,8 +1967,7 @@ namespace kernel {
       value);
   }
 
-  template <>
-  ERROR bytemaskedarray_getitem_carry(
+  ERROR bytemaskedarray_getitem_carry_64(
     int8_t* tomask,
     const int8_t* frommask,
     int64_t frommaskoffset,
@@ -2020,8 +1997,7 @@ namespace kernel {
       validwhen);
   }
 
-  template <>
-  ERROR bytemaskedarray_getitem_nextcarry(
+  ERROR bytemaskedarray_getitem_nextcarry_64(
     int64_t* tocarry,
     const int8_t* mask,
     int64_t maskoffset,
@@ -2052,8 +2028,7 @@ namespace kernel {
       validwhen);
   }
 
-  template <>
-  ERROR bytemaskedarray_toindexedarray(
+  ERROR bytemaskedarray_toindexedarray_64(
     int64_t* toindex,
     const int8_t* mask,
     int64_t maskoffset,
@@ -2800,8 +2775,7 @@ namespace kernel {
       length);
   }
 
-  template <>
-  ERROR regulararray_num(
+  ERROR regulararray_num_64(
     int64_t* tonum,
     int64_t size,
     int64_t length) {
@@ -3190,8 +3164,7 @@ namespace kernel {
       length);
   }
 
-  template <>
-  ERROR bytemaskedarray_mask(
+  ERROR bytemaskedarray_mask8(
     int8_t* tomask,
     const int8_t* frommask,
     int64_t maskoffset,
@@ -3205,8 +3178,7 @@ namespace kernel {
       validwhen);
   }
 
-  template <>
-  ERROR zero_mask(
+  ERROR zero_mask8(
     int8_t* tomask,
     int64_t length) {
     return awkward_zero_mask8(tomask, length);
@@ -3426,8 +3398,7 @@ namespace kernel {
       length);
   }
 
-  template <>
-  ERROR regulararray_compact_offsets(
+  ERROR regulararray_compact_offsets_64(
     int64_t* tooffsets,
     int64_t length,
     int64_t size) {
@@ -3541,26 +3512,24 @@ namespace kernel {
       lencontent);
   }
 
-  template <>
-  ERROR regulararray_broadcast_tooffsets(
+  ERROR regulararray_broadcast_tooffsets_64(
     const int64_t* fromoffsets,
     int64_t offsetsoffset,
     int64_t offsetslength,
     int64_t size) {
-    return awkward_regulararray_broadcast_tooffsets64(
+    return awkward_regulararray_broadcast_tooffsets_64(
       fromoffsets,
       offsetsoffset,
       offsetslength,
       size);
   }
 
-  template <>
-  ERROR regulararray_broadcast_tooffsets_size1(
+  ERROR regulararray_broadcast_tooffsets_size1_64(
     int64_t* tocarry,
     const int64_t* fromoffsets,
     int64_t offsetsoffset,
     int64_t offsetslength) {
-    return awkward_regulararray_broadcast_tooffsets64_size1(
+    return awkward_regulararray_broadcast_tooffsets_size1_64(
       tocarry,
       fromoffsets,
       offsetsoffset,
@@ -4726,8 +4695,7 @@ namespace kernel {
       length);
   }
 
-  template <>
-  ERROR IndexedOptionArray_rpad_and_clip_mask_axis1(
+  ERROR IndexedOptionArray_rpad_and_clip_mask_axis1_64(
     int64_t* toindex,
     const int8_t* frommask,
     int64_t length) {
@@ -4737,8 +4705,7 @@ namespace kernel {
       length);
   }
 
-  template <>
-  ERROR index_rpad_and_clip_axis0(
+  ERROR index_rpad_and_clip_axis0_64(
     int64_t* toindex,
     int64_t target,
     int64_t length) {
@@ -4761,8 +4728,7 @@ namespace kernel {
       length);
   }
 
-  template <>
-  ERROR RegularArray_rpad_and_clip_axis1(
+  ERROR RegularArray_rpad_and_clip_axis1_64(
     int64_t* toindex,
     int64_t target,
     int64_t size,
@@ -5080,8 +5046,7 @@ namespace kernel {
       target);
   }
 
-  template <>
-  ERROR localindex(
+  ERROR localindex_64(
     int64_t* toindex,
     int64_t length) {
     return awkward_localindex_64(
@@ -5126,8 +5091,7 @@ namespace kernel {
       length);
   }
 
-  template <>
-  ERROR regulararray_localindex(
+  ERROR regulararray_localindex_64(
     int64_t* toindex,
     int64_t size,
     int64_t length) {
@@ -5290,8 +5254,7 @@ namespace kernel {
       length);
   }
 
-  template <>
-  ERROR regulararray_combinations(
+  ERROR regulararray_combinations_64(
     int64_t** tocarry,
     int64_t* toindex,
     int64_t* fromindex,
@@ -5309,8 +5272,7 @@ namespace kernel {
       length);
   }
 
-  template <>
-  ERROR bytemaskedarray_overlay_mask(
+  ERROR bytemaskedarray_overlay_mask8(
     int8_t* tomask,
     const int8_t* theirmask,
     int64_t theirmaskoffset,
@@ -5344,8 +5306,7 @@ namespace kernel {
       lsb_order);
   }
 
-  template <>
-  ERROR bitmaskedarray_to_indexedoptionarray(
+  ERROR bitmaskedarray_to_indexedoptionarray_64(
     int64_t* toindex,
     const uint8_t* frombitmask,
     int64_t bitmaskoffset,
@@ -5377,7 +5338,7 @@ namespace kernel {
   }
 
   template <>
-  ERROR reduce_countnonzero(
+  ERROR reduce_countnonzero_64(
     int64_t* toptr,
     const bool* fromptr,
     int64_t fromptroffset,
@@ -5395,7 +5356,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_countnonzero(
+  ERROR reduce_countnonzero_64(
     int64_t* toptr,
     const uint8_t* fromptr,
     int64_t fromptroffset,
@@ -5413,7 +5374,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_countnonzero(
+  ERROR reduce_countnonzero_64(
     int64_t* toptr,
     const int8_t* fromptr,
     int64_t fromptroffset,
@@ -5431,7 +5392,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_countnonzero(
+  ERROR reduce_countnonzero_64(
     int64_t* toptr,
     const int16_t* fromptr,
     int64_t fromptroffset,
@@ -5449,7 +5410,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_countnonzero(
+  ERROR reduce_countnonzero_64(
     int64_t* toptr,
     const uint16_t* fromptr,
     int64_t fromptroffset,
@@ -5467,7 +5428,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_countnonzero(
+  ERROR reduce_countnonzero_64(
     int64_t* toptr,
     const int32_t* fromptr,
     int64_t fromptroffset,
@@ -5485,7 +5446,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_countnonzero(
+  ERROR reduce_countnonzero_64(
     int64_t* toptr,
     const uint32_t* fromptr,
     int64_t fromptroffset,
@@ -5503,7 +5464,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_countnonzero(
+  ERROR reduce_countnonzero_64(
     int64_t* toptr,
     const int64_t* fromptr,
     int64_t fromptroffset,
@@ -5521,7 +5482,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_countnonzero(
+  ERROR reduce_countnonzero_64(
     int64_t* toptr,
     const uint64_t* fromptr,
     int64_t fromptroffset,
@@ -5539,7 +5500,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_countnonzero(
+  ERROR reduce_countnonzero_64(
     int64_t* toptr,
     const float* fromptr,
     int64_t fromptroffset,
@@ -5557,7 +5518,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_countnonzero(
+  ERROR reduce_countnonzero_64(
     int64_t* toptr,
     const double* fromptr,
     int64_t fromptroffset,

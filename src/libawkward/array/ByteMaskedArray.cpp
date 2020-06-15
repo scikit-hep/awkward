@@ -212,7 +212,7 @@ namespace awkward {
     util::handle_error(err1, classname(), identities_.get());
 
     Index64 nextcarry(length() - numnull);
-    struct Error err2 = kernel::bytemaskedarray_getitem_nextcarry<int64_t>(
+    struct Error err2 = kernel::bytemaskedarray_getitem_nextcarry_64(
       nextcarry.ptr().get(),
       mask_.ptr().get(),
       mask_.offset(),
@@ -234,7 +234,7 @@ namespace awkward {
     }
 
     Index8 nextmask(length());
-    struct Error err = kernel::bytemaskedarray_overlay_mask<int8_t>(
+    struct Error err = kernel::bytemaskedarray_overlay_mask8(
       nextmask.ptr().get(),
       mask.ptr().get(),
       mask.offset(),
@@ -256,7 +256,7 @@ namespace awkward {
     }
     else {
       Index8 out(length());
-      struct Error err = kernel::bytemaskedarray_mask<int8_t>(
+      struct Error err = kernel::bytemaskedarray_mask8(
         out.ptr().get(),
         mask_.ptr().get(),
         mask_.offset(),
@@ -290,7 +290,7 @@ namespace awkward {
   const std::shared_ptr<IndexedOptionArray64>
   ByteMaskedArray::toIndexedOptionArray64() const {
     Index64 index(length());
-    struct Error err = kernel::bytemaskedarray_toindexedarray<int64_t>(
+    struct Error err = kernel::bytemaskedarray_toindexedarray_64(
       index.ptr().get(),
       mask_.ptr().get(),
       mask_.offset(),
@@ -641,7 +641,7 @@ namespace awkward {
   const ContentPtr
   ByteMaskedArray::carry(const Index64& carry) const {
     Index8 nextmask(carry.length());
-    struct Error err = kernel::bytemaskedarray_getitem_carry<int64_t>(
+    struct Error err = kernel::bytemaskedarray_getitem_carry_64(
       nextmask.ptr().get(),
       mask_.ptr().get(),
       mask_.offset(),
@@ -851,7 +851,7 @@ namespace awkward {
       Index8 mask = bytemask();
       Index64 index(mask.length());
       struct Error err =
-        kernel::IndexedOptionArray_rpad_and_clip_mask_axis1<int64_t>(
+        kernel::IndexedOptionArray_rpad_and_clip_mask_axis1_64(
         index.ptr().get(),
         mask.ptr().get(),
         mask.length());
@@ -886,7 +886,7 @@ namespace awkward {
       Index8 mask = bytemask();
       Index64 index(mask.length());
       struct Error err =
-        kernel::IndexedOptionArray_rpad_and_clip_mask_axis1<int64_t>(
+        kernel::IndexedOptionArray_rpad_and_clip_mask_axis1_64(
         index.ptr().get(),
         mask.ptr().get(),
         mask.length());

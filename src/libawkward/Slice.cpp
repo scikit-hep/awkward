@@ -300,7 +300,7 @@ namespace awkward {
 
     IndexOf<T> index(length);
     if (std::is_same<T, int64_t>::value) {
-      kernel::slicearray_ravel<int64_t>(index.ptr().get(),
+      kernel::slicearray_ravel_64(index.ptr().get(),
                                         index_.ptr().get(),
                                         ndim(),
                                         shape_.data(),

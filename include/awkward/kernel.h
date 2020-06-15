@@ -15,9 +15,8 @@ namespace kernel {
     bool hasstop,
     int64_t length);
 
-  template <typename T>
-  ERROR regularize_arrayslice(
-    T* flatheadptr,
+  ERROR regularize_arrayslice_64(
+    int64_t* flatheadptr,
     int64_t lenflathead,
     int64_t length);
 
@@ -55,10 +54,9 @@ namespace kernel {
     int64_t fromindexoffset,
     int64_t length);
 
-  template <typename T>
-  ERROR slicearray_ravel(
-    T* toptr,
-    const T* fromptr,
+  ERROR slicearray_ravel_64(
+    int64_t* toptr,
+    const int64_t* fromptr,
     int64_t ndim,
     const int64_t* shape,
     const int64_t* strides);
@@ -76,94 +74,85 @@ namespace kernel {
     T* toptr,
     int64_t length);
 
-  template <typename ID, typename T>
-  ERROR identities_getitem_carry(
+  template <typename ID>
+  ERROR identities_getitem_carry_64(
     ID* newidentitiesptr,
     const ID* identitiesptr,
-    const T* carryptr,
+    const int64_t* carryptr,
     int64_t lencarry,
     int64_t offset,
     int64_t width,
     int64_t length);
 
-  template <typename T>
-  ERROR numpyarray_contiguous_init(
-    T* toptr,
+  ERROR numpyarray_contiguous_init_64(
+    int64_t* toptr,
     int64_t skip,
     int64_t stride);
 
-  template <typename T>
-  ERROR numpyarray_contiguous_copy(
+  ERROR numpyarray_contiguous_copy_64(
     uint8_t* toptr,
     const uint8_t* fromptr,
     int64_t len,
     int64_t stride,
     int64_t offset,
-    const T* pos);
+    const int64_t* pos);
 
-  template <typename T>
-  ERROR numpyarray_contiguous_next(
-    T* topos,
-    const T* frompos,
+  ERROR numpyarray_contiguous_next_64(
+    int64_t* topos,
+    const int64_t* frompos,
     int64_t len,
     int64_t skip,
     int64_t stride);
 
-  template <typename T>
-  ERROR numpyarray_getitem_next_null(
+  ERROR numpyarray_getitem_next_null_64(
     uint8_t* toptr,
     const uint8_t* fromptr,
     int64_t len,
     int64_t stride,
     int64_t offset,
-    const T* pos);
+    const int64_t* pos);
 
-  template <typename T>
-  ERROR numpyarray_getitem_next_at(
-    T* nextcarryptr,
-    const T* carryptr,
+  ERROR numpyarray_getitem_next_at_64(
+    int64_t* nextcarryptr,
+    const int64_t* carryptr,
     int64_t lencarry,
     int64_t skip,
     int64_t at);
 
-  template <typename T>
-  ERROR numpyarray_getitem_next_range(
-    T* nextcarryptr,
-    const T* carryptr,
+  ERROR numpyarray_getitem_next_range_64(
+    int64_t* nextcarryptr,
+    const int64_t* carryptr,
     int64_t lencarry,
     int64_t lenhead,
     int64_t skip,
     int64_t start,
     int64_t step);
 
-  template <typename T>
-  ERROR numpyarray_getitem_next_range_advanced(
-    T* nextcarryptr,
-    T* nextadvancedptr,
-    const T* carryptr,
-    const T* advancedptr,
+  ERROR numpyarray_getitem_next_range_advanced_64(
+    int64_t* nextcarryptr,
+    int64_t* nextadvancedptr,
+    const int64_t* carryptr,
+    const int64_t* advancedptr,
     int64_t lencarry,
     int64_t lenhead,
     int64_t skip,
     int64_t start,
     int64_t step);
 
-  template <typename T>
-  ERROR numpyarray_getitem_next_array(
-    T* nextcarryptr,
-    T* nextadvancedptr,
-    const T* carryptr,
-    const T* flatheadptr,
+  ERROR numpyarray_getitem_next_array_64(
+    int64_t* nextcarryptr,
+    int64_t* nextadvancedptr,
+    const int64_t* carryptr,
+    const int64_t* flatheadptr,
     int64_t lencarry,
     int64_t lenflathead,
     int64_t skip);
 
-  template <typename T>
-  ERROR numpyarray_getitem_next_array_advanced(
-    T* nextcarryptr,
-    const T* carryptr,
-    const T* advancedptr,
-    const T* flatheadptr,
+  ERROR numpyarray_getitem_next_array_advanced_64(
+    int64_t* nextcarryptr,
+    const int64_t* carryptr,
+    const int64_t* advancedptr,
+    const int64_t* flatheadptr,
     int64_t lencarry,
     int64_t skip);
 
@@ -174,9 +163,8 @@ namespace kernel {
     int64_t length,
     int64_t stride);
 
-  template <typename T>
-  ERROR numpyarray_getitem_boolean_nonzero(
-    T* toptr,
+  ERROR numpyarray_getitem_boolean_nonzero_64(
+    int64_t* toptr,
     const int8_t* fromptr,
     int64_t byteoffset,
     int64_t length,
@@ -283,59 +271,52 @@ namespace kernel {
     int64_t lenstarts,
     int64_t lencarry);
 
-  template <typename T>
-  ERROR regulararray_getitem_next_at(
-    T* tocarry,
+  ERROR regulararray_getitem_next_at_64(
+    int64_t* tocarry,
     int64_t at,
     int64_t len,
     int64_t size);
 
-  template <typename T>
-  ERROR regulararray_getitem_next_range(
-    T* tocarry,
+  ERROR regulararray_getitem_next_range_64(
+    int64_t* tocarry,
     int64_t regular_start,
     int64_t step,
     int64_t len,
     int64_t size,
     int64_t nextsize);
 
-  template <typename T>
-  ERROR regulararray_getitem_next_range_spreadadvanced(
-    T* toadvanced,
-    const T* fromadvanced,
+  ERROR regulararray_getitem_next_range_spreadadvanced_64(
+    int64_t* toadvanced,
+    const int64_t* fromadvanced,
     int64_t len,
     int64_t nextsize);
 
-  template <typename T>
-  ERROR regulararray_getitem_next_array_regularize(
-    T* toarray,
-    const T* fromarray,
+  ERROR regulararray_getitem_next_array_regularize_64(
+    int64_t* toarray,
+    const int64_t* fromarray,
     int64_t lenarray,
     int64_t size);
 
-  template <typename T>
-  ERROR regulararray_getitem_next_array(
-    T* tocarry,
-    T* toadvanced,
-    const T* fromarray,
+  ERROR regulararray_getitem_next_array_64(
+    int64_t* tocarry,
+    int64_t* toadvanced,
+    const int64_t* fromarray,
     int64_t len,
     int64_t lenarray,
     int64_t size);
 
-  template <typename T>
-  ERROR regulararray_getitem_next_array_advanced(
-    T* tocarry,
-    T* toadvanced,
-    const T* fromadvanced,
-    const T* fromarray,
+  ERROR regulararray_getitem_next_array_advanced_64(
+    int64_t* tocarry,
+    int64_t* toadvanced,
+    const int64_t* fromadvanced,
+    const int64_t* fromarray,
     int64_t len,
     int64_t lenarray,
     int64_t size);
 
-  template <typename T>
-  ERROR regulararray_getitem_carry(
-    T* tocarry,
-    const T* fromcarry,
+  ERROR regulararray_getitem_carry_64(
+    int64_t* tocarry,
+    const int64_t* fromcarry,
     int64_t lencarry,
     int64_t size);
 
@@ -427,11 +408,10 @@ namespace kernel {
     int64_t lenindex,
     int64_t lencarry);
 
-  template <typename T>
   ERROR
-  unionarray_regular_index_getsize(
+  unionarray8_regular_index_getsize(
     int64_t* size,
-    const T* fromtags,
+    const int8_t* fromtags,
     int64_t tagsoffset,
     int64_t length);
 
@@ -457,20 +437,18 @@ namespace kernel {
     int64_t length,
     int64_t which);
 
-  template <typename T>
-  ERROR missing_repeat(
-    T* outindex,
-    const T* index,
+  ERROR missing_repeat_64(
+    int64_t* outindex,
+    const int64_t* index,
     int64_t indexoffset,
     int64_t indexlength,
     int64_t repetitions,
     int64_t regularsize);
 
-  template <typename T>
-  ERROR regulararray_getitem_jagged_expand(
-    T* multistarts,
-    T* multistops,
-    const T* singleoffsets,
+  ERROR regulararray_getitem_jagged_expand_64(
+    int64_t* multistarts,
+    int64_t * multistops,
+    const int64_t* singleoffsets,
     int64_t regularsize,
     int64_t regularlength);
 
@@ -570,13 +548,12 @@ namespace kernel {
     int64_t at,
     T value);
 
-  template <typename T>
-  ERROR bytemaskedarray_getitem_carry(
+  ERROR bytemaskedarray_getitem_carry_64(
     int8_t* tomask,
     const int8_t* frommask,
     int64_t frommaskoffset,
     int64_t lenmask,
-    const T* fromcarry,
+    const int64_t* fromcarry,
     int64_t lencarry);
 
   ERROR bytemaskedarray_numnull(
@@ -586,9 +563,8 @@ namespace kernel {
     int64_t length,
     bool validwhen);
 
-  template <typename T>
-  ERROR bytemaskedarray_getitem_nextcarry(
-    T* tocarry,
+  ERROR bytemaskedarray_getitem_nextcarry_64(
+    int64_t* tocarry,
     const int8_t* mask,
     int64_t maskoffset,
     int64_t length,
@@ -603,9 +579,8 @@ namespace kernel {
     int64_t length,
     bool validwhen);
 
-  template <typename T>
-  ERROR bytemaskedarray_toindexedarray(
-    T* toindex,
+  ERROR bytemaskedarray_toindexedarray_64(
+    int64_t* toindex,
     const int8_t* mask,
     int64_t maskoffset,
     int64_t length,
@@ -725,9 +700,8 @@ namespace kernel {
     int64_t stopsoffset,
     int64_t length);
 
-  template <typename T>
-  ERROR regulararray_num(
-    T* tonum,
+  ERROR regulararray_num_64(
+    int64_t* tonum,
     int64_t size,
     int64_t length);
 
@@ -811,17 +785,15 @@ namespace kernel {
     int64_t indexoffset,
     int64_t length);
 
-  template <typename M>
-  ERROR bytemaskedarray_mask(
-    M* tomask,
-    const M* frommask,
+  ERROR bytemaskedarray_mask8(
+    int8_t* tomask,
+    const int8_t* frommask,
     int64_t maskoffset,
     int64_t length,
     bool validwhen);
 
-  template <typename M>
-  ERROR zero_mask(
-    M* tomask,
+  ERROR zero_mask8(
+    int8_t* tomask,
     int64_t length);
 
   template <typename T>
@@ -869,9 +841,8 @@ namespace kernel {
     int64_t stopsoffset,
     int64_t length);
 
-  template <typename T>
-  ERROR regulararray_compact_offsets(
-    T* tooffsets,
+  ERROR regulararray_compact_offsets_64(
+    int64_t* tooffsets,
     int64_t length,
     int64_t size);
 
@@ -897,17 +868,15 @@ namespace kernel {
     int64_t stopsoffset,
     int64_t lencontent);
 
-  template <typename T>
-  ERROR regulararray_broadcast_tooffsets(
-    const T* fromoffsets,
+  ERROR regulararray_broadcast_tooffsets_64(
+    const int64_t* fromoffsets,
     int64_t offsetsoffset,
     int64_t offsetslength,
     int64_t size);
 
-  template <typename T>
-  ERROR regulararray_broadcast_tooffsets_size1(
-    T* tocarry,
-    const T* fromoffsets,
+  ERROR regulararray_broadcast_tooffsets_size1_64(
+    int64_t* tocarry,
+    const int64_t* fromoffsets,
     int64_t offsetsoffset,
     int64_t offsetslength);
 
@@ -1115,15 +1084,13 @@ namespace kernel {
     int64_t offset,
     int64_t length);
 
-  template <typename T>
-  ERROR IndexedOptionArray_rpad_and_clip_mask_axis1(
-    T* toindex,
+  ERROR IndexedOptionArray_rpad_and_clip_mask_axis1_64(
+    int64_t* toindex,
     const int8_t* frommask,
     int64_t length);
 
-  template <typename T>
-  ERROR index_rpad_and_clip_axis0(
-    T* toindex,
+  ERROR index_rpad_and_clip_axis0_64(
+    int64_t* toindex,
     int64_t target,
     int64_t length);
 
@@ -1134,9 +1101,8 @@ namespace kernel {
     int64_t target,
     int64_t length);
 
-  template <typename T>
-  ERROR RegularArray_rpad_and_clip_axis1(
-    T* toindex,
+  ERROR RegularArray_rpad_and_clip_axis1_64(
+    int64_t* toindex,
     int64_t target,
     int64_t size,
     int64_t length);
@@ -1203,9 +1169,8 @@ namespace kernel {
     int64_t fromlength,
     int64_t target);
 
-  template <typename T>
-  ERROR localindex(
-    T* toindex,
+  ERROR localindex_64(
+    int64_t* toindex,
     int64_t length);
 
   template <typename T>
@@ -1216,9 +1181,8 @@ namespace kernel {
     int64_t offsetsoffset,
     int64_t length);
 
-  template <typename T>
-  ERROR regulararray_localindex(
-    T* toindex,
+  ERROR regulararray_localindex_64(
+    int64_t* toindex,
     int64_t size,
     int64_t length);
 
@@ -1256,9 +1220,8 @@ namespace kernel {
     int64_t stopsoffset,
     int64_t length);
 
-  template <typename T>
-  ERROR regulararray_combinations(
-    T** tocarry,
+  ERROR regulararray_combinations_64(
+    int64_t** tocarry,
     int64_t* toindex,
     int64_t* fromindex,
     int64_t n,
@@ -1266,12 +1229,11 @@ namespace kernel {
     int64_t size,
     int64_t length);
 
-  template <typename M>
-  ERROR bytemaskedarray_overlay_mask(
-    M* tomask,
-    const M* theirmask,
+  ERROR bytemaskedarray_overlay_mask8(
+    int8_t* tomask,
+    const int8_t* theirmask,
     int64_t theirmaskoffset,
-    const M* mymask,
+    const int8_t* mymask,
     int64_t mymaskoffset,
     int64_t length,
     bool validwhen);
@@ -1284,9 +1246,8 @@ namespace kernel {
     bool validwhen,
     bool lsb_order);
 
-  template <typename T>
-  ERROR bitmaskedarray_to_indexedoptionarray(
-    T* toindex,
+  ERROR bitmaskedarray_to_indexedoptionarray_64(
+    int64_t* toindex,
     const uint8_t* frombitmask,
     int64_t bitmaskoffset,
     int64_t bitmasklength,
@@ -1302,7 +1263,7 @@ namespace kernel {
     int64_t outlength);
 
   template <typename IN>
-  ERROR reduce_countnonzero(
+  ERROR reduce_countnonzero_64(
     int64_t* toptr,
     const IN* fromptr,
     int64_t fromptroffset,

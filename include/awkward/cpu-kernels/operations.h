@@ -423,14 +423,14 @@ extern "C" {
       int64_t lencontent);
 
   EXPORT_SYMBOL struct Error
-    awkward_regulararray_broadcast_tooffsets64(
+    awkward_regulararray_broadcast_tooffsets_64(
       const int64_t* fromoffsets,
       int64_t offsetsoffset,
       int64_t offsetslength,
       int64_t size);
 
   EXPORT_SYMBOL struct Error
-    awkward_regulararray_broadcast_tooffsets64_size1(
+    awkward_regulararray_broadcast_tooffsets_size1_64(
       int64_t* tocarry,
       const int64_t* fromoffsets,
       int64_t offsetsoffset,

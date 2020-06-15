@@ -414,7 +414,7 @@ namespace awkward {
     }
     else {
       Index8 out(index_.length());
-      struct Error err = kernel::zero_mask<int8_t>(
+      struct Error err = kernel::zero_mask8(
         out.ptr().get(),
         index_.length());
       util::handle_error(err, classname(), identities_.get());
@@ -1758,7 +1758,7 @@ namespace awkward {
         Index8 mask = bytemask();
         Index64 index(mask.length());
         struct Error err =
-          kernel::IndexedOptionArray_rpad_and_clip_mask_axis1<int64_t>(
+          kernel::IndexedOptionArray_rpad_and_clip_mask_axis1_64(
           index.ptr().get(),
           mask.ptr().get(),
           mask.length());
@@ -1798,7 +1798,7 @@ namespace awkward {
         Index8 mask = bytemask();
         Index64 index(mask.length());
         struct Error err =
-          kernel::IndexedOptionArray_rpad_and_clip_mask_axis1<int64_t>(
+          kernel::IndexedOptionArray_rpad_and_clip_mask_axis1_64(
           index.ptr().get(),
           mask.ptr().get(),
           mask.length());

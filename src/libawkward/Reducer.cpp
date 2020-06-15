@@ -287,7 +287,7 @@ namespace awkward {
                                   int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  util::array_deleter<int64_t>());
-    struct Error err = kernel::reduce_countnonzero<bool>(
+    struct Error err = kernel::reduce_countnonzero_64<bool>(
       ptr.get(),
       data,
       offset,
@@ -307,7 +307,7 @@ namespace awkward {
                                   int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  util::array_deleter<int64_t>());
-    struct Error err = kernel::reduce_countnonzero<int8_t>(
+    struct Error err = kernel::reduce_countnonzero_64<int8_t>(
       ptr.get(),
       data,
       offset,
@@ -327,7 +327,7 @@ namespace awkward {
                                    int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  util::array_deleter<int64_t>());
-    struct Error err = kernel::reduce_countnonzero<uint8_t>(
+    struct Error err = kernel::reduce_countnonzero_64<uint8_t>(
       ptr.get(),
       data,
       offset,
@@ -347,7 +347,7 @@ namespace awkward {
                                    int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  util::array_deleter<int64_t>());
-    struct Error err = kernel::reduce_countnonzero<int16_t>(
+    struct Error err = kernel::reduce_countnonzero_64<int16_t>(
       ptr.get(),
       data,
       offset,
@@ -367,7 +367,7 @@ namespace awkward {
                                     int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  util::array_deleter<int64_t>());
-    struct Error err = kernel::reduce_countnonzero<uint16_t>(
+    struct Error err = kernel::reduce_countnonzero_64<uint16_t>(
       ptr.get(),
       data,
       offset,
@@ -387,7 +387,7 @@ namespace awkward {
                                    int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  util::array_deleter<int64_t>());
-    struct Error err = kernel::reduce_countnonzero<int32_t>(
+    struct Error err = kernel::reduce_countnonzero_64<int32_t>(
       ptr.get(),
       data,
       offset,
@@ -407,7 +407,7 @@ namespace awkward {
                                     int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  util::array_deleter<int64_t>());
-    struct Error err = kernel::reduce_countnonzero<uint32_t>(
+    struct Error err = kernel::reduce_countnonzero_64<uint32_t>(
       ptr.get(),
       data,
       offset,
@@ -427,7 +427,7 @@ namespace awkward {
                                    int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  util::array_deleter<int64_t>());
-    struct Error err = kernel::reduce_countnonzero<int64_t>(
+    struct Error err = kernel::reduce_countnonzero_64<int64_t>(
       ptr.get(),
       data,
       offset,
@@ -447,7 +447,7 @@ namespace awkward {
                                     int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  util::array_deleter<int64_t>());
-    struct Error err = kernel::reduce_countnonzero<uint64_t>(
+    struct Error err = kernel::reduce_countnonzero_64<uint64_t>(
       ptr.get(),
       data,
       offset,
@@ -467,7 +467,7 @@ namespace awkward {
                                      int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  util::array_deleter<int64_t>());
-    struct Error err = kernel::reduce_countnonzero<float>(
+    struct Error err = kernel::reduce_countnonzero_64<float>(
       ptr.get(),
       data,
       offset,
@@ -487,7 +487,7 @@ namespace awkward {
                                      int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  util::array_deleter<int64_t>());
-    struct Error err = kernel::reduce_countnonzero<double>(
+    struct Error err = kernel::reduce_countnonzero_64<double>(
       ptr.get(),
       data,
       offset,
