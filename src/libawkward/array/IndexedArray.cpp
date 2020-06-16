@@ -1408,7 +1408,7 @@ namespace awkward {
     Index64 index(theirlength + mylength);
 
     ContentPtr content = other.get()->merge(content_);
-    struct Error err1 = kernel::indexedarray_fill_count<int64_t>(
+    struct Error err1 = kernel::indexedarray_fill_to64_count(
       index.ptr().get(),
       0,
       theirlength,
@@ -1618,7 +1618,7 @@ namespace awkward {
     }
     else {
       content = content_.get()->merge(replaced_other);
-      struct Error err = kernel::indexedarray_fill_count<int64_t>(
+      struct Error err = kernel::indexedarray_fill_to64_count(
         index.ptr().get(),
         mylength,
         theirlength,
@@ -1674,7 +1674,7 @@ namespace awkward {
           Index8 originalmask(length());
           Index64 adjustedindex(nonzero.length() + numnull);
           Index64 adjustednonzero(nonzero.length());
-          struct Error err3 = kernel::indexedarray_getitem_adjust_outindex(
+          struct Error err3 = kernel::indexedarray_getitem_adjust_outindex_64(
             originalmask.ptr().get(),
             adjustedindex.ptr().get(),
             adjustednonzero.ptr().get(),

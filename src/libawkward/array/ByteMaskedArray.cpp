@@ -1318,7 +1318,7 @@ namespace awkward {
 
     Index64 nextcarry(length() - numnull);
     Index64 outindex(length());
-    struct Error err2 = kernel::bytemaskedarray_getitem_nextcarry_outindex<int64_t>(
+    struct Error err2 = kernel::bytemaskedarray_getitem_nextcarry_outindex_64(
       nextcarry.ptr().get(),
       outindex.ptr().get(),
       mask_.ptr().get(),

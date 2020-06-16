@@ -846,7 +846,7 @@ ERROR awkward_listarray_compact_offsets(
   }
   return success();
 }
-ERROR awkward_listarray32_compact_offsets64(
+ERROR awkward_listarray32_compact_offsets_64(
   int64_t* tooffsets,
   const int32_t* fromstarts,
   const int32_t* fromstops,
@@ -861,7 +861,7 @@ ERROR awkward_listarray32_compact_offsets64(
     stopsoffset,
     length);
 }
-ERROR awkward_listarrayU32_compact_offsets64(
+ERROR awkward_listarrayU32_compact_offsets_64(
   int64_t* tooffsets,
   const uint32_t* fromstarts,
   const uint32_t* fromstops,
@@ -876,7 +876,7 @@ ERROR awkward_listarrayU32_compact_offsets64(
     stopsoffset,
     length);
 }
-ERROR awkward_listarray64_compact_offsets64(
+ERROR awkward_listarray64_compact_offsets_64(
   int64_t* tooffsets,
   const int64_t* fromstarts,
   const int64_t* fromstops,
@@ -905,7 +905,7 @@ ERROR awkward_listoffsetarray_compact_offsets(
   }
   return success();
 }
-ERROR awkward_listoffsetarray32_compact_offsets64(
+ERROR awkward_listoffsetarray32_compact_offsets_64(
   int64_t* tooffsets,
   const int32_t* fromoffsets,
   int64_t offsetsoffset,
@@ -916,7 +916,7 @@ ERROR awkward_listoffsetarray32_compact_offsets64(
     offsetsoffset,
     length);
 }
-ERROR awkward_listoffsetarrayU32_compact_offsets64(
+ERROR awkward_listoffsetarrayU32_compact_offsets_64(
   int64_t* tooffsets,
   const uint32_t* fromoffsets,
   int64_t offsetsoffset,
@@ -927,7 +927,7 @@ ERROR awkward_listoffsetarrayU32_compact_offsets64(
     offsetsoffset,
     length);
 }
-ERROR awkward_listoffsetarray64_compact_offsets64(
+ERROR awkward_listoffsetarray64_compact_offsets_64(
   int64_t* tooffsets,
   const int64_t* fromoffsets,
   int64_t offsetsoffset,
@@ -973,7 +973,7 @@ ERROR awkward_listarray_broadcast_tooffsets(
   }
   return success();
 }
-ERROR awkward_listarray32_broadcast_tooffsets64(
+ERROR awkward_listarray32_broadcast_tooffsets_64(
   int64_t* tocarry,
   const int64_t* fromoffsets,
   int64_t offsetsoffset,
@@ -994,7 +994,7 @@ ERROR awkward_listarray32_broadcast_tooffsets64(
     stopsoffset,
     lencontent);
 }
-ERROR awkward_listarrayU32_broadcast_tooffsets64(
+ERROR awkward_listarrayU32_broadcast_tooffsets_64(
   int64_t* tocarry,
   const int64_t* fromoffsets,
   int64_t offsetsoffset,
@@ -1015,7 +1015,7 @@ ERROR awkward_listarrayU32_broadcast_tooffsets64(
     stopsoffset,
     lencontent);
 }
-ERROR awkward_listarray64_broadcast_tooffsets64(
+ERROR awkward_listarray64_broadcast_tooffsets_64(
   int64_t* tocarry,
   const int64_t* fromoffsets,
   int64_t offsetsoffset,

@@ -22,18 +22,9 @@ namespace kernel {
     int64_t length);
 
   template <typename T>
-  ERROR index_to_index64(
+  ERROR index_to_index_64(
     int64_t* toptr,
     const T* fromptr,
-    int64_t length);
-
-  template <typename C, typename T>
-  ERROR index_carry(
-    C* toindex,
-    const C* fromindex,
-    const T* carry,
-    int64_t fromindexoffset,
-    int64_t lenfromindex,
     int64_t length);
 
   template <typename T>
@@ -349,43 +340,40 @@ namespace kernel {
     int64_t lenindex,
     int64_t lencontent);
 
-  template <typename T>
-  ERROR listoffsetarray_getitem_adjust_offsets(
-    T* tooffsets,
-    T* tononzero,
-    const T* fromoffsets,
+  ERROR listoffsetarray_getitem_adjust_offsets_64(
+    int64_t* tooffsets,
+    int64_t* tononzero,
+    const int64_t* fromoffsets,
     int64_t offsetsoffset,
     int64_t length,
-    const T* nonzero,
+    const int64_t* nonzero,
     int64_t nonzerooffset,
     int64_t nonzerolength);
 
-  template <typename T>
-  ERROR listoffsetarray_getitem_adjust_offsets_index(
-    T* tooffsets,
-    T* tononzero,
-    const T* fromoffsets,
+  ERROR listoffsetarray_getitem_adjust_offsets_index_64(
+    int64_t* tooffsets,
+    int64_t* tononzero,
+    const int64_t* fromoffsets,
     int64_t offsetsoffset,
     int64_t length,
-    const T* index,
+    const int64_t* index,
     int64_t indexoffset,
     int64_t indexlength,
-    const T* nonzero,
+    const int64_t* nonzero,
     int64_t nonzerooffset,
     int64_t nonzerolength,
     const int8_t* originalmask,
     int64_t maskoffset,
     int64_t masklength);
 
-  template <typename T>
-  ERROR indexedarray_getitem_adjust_outindex(
+  ERROR indexedarray_getitem_adjust_outindex_64(
     int8_t* tomask,
-    T* toindex,
-    T* tononzero,
-    const T* fromindex,
+    int64_t* toindex,
+    int64_t* tononzero,
+    const int64_t* fromindex,
     int64_t fromindexoffset,
     int64_t fromindexlength,
-    const T* nonzero,
+    const int64_t* nonzero,
     int64_t nonzerooffset,
     int64_t nonzerolength);
 
@@ -416,22 +404,22 @@ namespace kernel {
     int64_t tagsoffset,
     int64_t length);
 
-  template <typename T, typename I>
+  template <typename I>
   ERROR
-  unionarray_regular_index(
+  unionarray8_regular_index(
     I* toindex,
     I* current,
     int64_t size,
-    const T* fromtags,
+    const int8_t* fromtags,
     int64_t tagsoffset,
     int64_t length);
 
-  template <typename T, typename I>
+  template <typename I>
   ERROR
-  unionarray_project_64(
+  unionarray8_project_64(
     int64_t* lenout,
     int64_t* tocarry,
-    const T* fromtags,
+    const int8_t* fromtags,
     int64_t tagsoffset,
     const I* fromindex,
     int64_t indexoffset,
@@ -467,12 +455,11 @@ namespace kernel {
     int64_t jaggedsize,
     int64_t length);
 
-  template <typename T>
-  ERROR listarray_getitem_jagged_carrylen(
+  ERROR listarray_getitem_jagged_carrylen_64(
     int64_t* carrylen,
-    const T* slicestarts,
+    const int64_t* slicestarts,
     int64_t slicestartsoffset,
-    const T* slicestops,
+    const int64_t* slicestops,
     int64_t slicestopsoffset,
     int64_t sliceouterlen);
 
@@ -495,29 +482,27 @@ namespace kernel {
     int64_t fromstopsoffset,
     int64_t contentlen);
 
-  template <typename T>
-  ERROR listarray_getitem_jagged_numvalid(
+  ERROR listarray_getitem_jagged_numvalid_64(
     int64_t* numvalid,
-    const T* slicestarts,
+    const int64_t* slicestarts,
     int64_t slicestartsoffset,
-    const T* slicestops,
+    const int64_t* slicestops,
     int64_t slicestopsoffset,
     int64_t length,
-    const T* missing,
+    const int64_t* missing,
     int64_t missingoffset,
     int64_t missinglength);
 
-  template <typename T>
-  ERROR listarray_getitem_jagged_shrink(
-    T* tocarry,
-    T* tosmalloffsets,
-    T* tolargeoffsets,
-    const T* slicestarts,
+  ERROR listarray_getitem_jagged_shrink_64(
+    int64_t* tocarry,
+    int64_t* tosmalloffsets,
+    int64_t* tolargeoffsets,
+    const int64_t* slicestarts,
     int64_t slicestartsoffset,
-    const T* slicestops,
+    const int64_t* slicestops,
     int64_t slicestopsoffset,
     int64_t length,
-    const T* missing,
+    const int64_t* missing,
     int64_t missingoffset);
 
   template <typename T>
@@ -571,10 +556,9 @@ namespace kernel {
     int64_t length,
     bool validwhen);
 
-  template <typename T>
-  ERROR bytemaskedarray_getitem_nextcarry_outindex(
-    T* tocarry,
-    T* toindex,
+  ERROR bytemaskedarray_getitem_nextcarry_outindex_64(
+    int64_t* tocarry,
+    int64_t* toindex,
     const int8_t* mask,
     int64_t maskoffset,
     int64_t length,
@@ -594,7 +578,7 @@ namespace kernel {
     int64_t length);
 
   template <typename T>
-  ERROR identities_to_identities64(
+  ERROR identities_to_identities_64(
     int64_t* toptr,
     const T* fromptr,
     int64_t length,
@@ -834,7 +818,7 @@ namespace kernel {
 
   template <typename T>
   ERROR
-  listarray_compact_offsets64(
+  listarray_compact_offsets_64(
     int64_t* tooffsets,
     const T* fromstarts,
     const T* fromstops,
@@ -849,7 +833,7 @@ namespace kernel {
 
   template <typename T>
   ERROR
-  listoffsetarray_compact_offsets64(
+  listoffsetarray_compact_offsets_64(
     int64_t* tooffsets,
     const T* fromoffsets,
     int64_t offsetsoffset,
@@ -858,7 +842,7 @@ namespace kernel {
 
   template <typename T>
   ERROR
-  listarray_broadcast_tooffsets64(
+  listarray_broadcast_tooffsets_64(
     int64_t* tocarry,
     const int64_t* fromoffsets,
     int64_t offsetsoffset,
@@ -934,18 +918,16 @@ namespace kernel {
     int64_t length,
     int64_t base);
 
-  template <typename TO>
-  ERROR indexedarray_fill_count(
-    TO* toindex,
+  ERROR indexedarray_fill_to64_count(
+    int64_t* toindex,
     int64_t toindexoffset,
     int64_t length,
     int64_t base);
 
-  template <typename FROM, typename TO>
-  ERROR unionarray_filltags(
-    TO* totags,
+  ERROR unionarray_filltags_to8_from8(
+    int8_t* totags,
     int64_t totagsoffset,
-    const FROM* fromtags,
+    const int8_t* fromtags,
     int64_t fromtagsoffset,
     int64_t length,
     int64_t base);
@@ -958,16 +940,14 @@ namespace kernel {
     int64_t fromindexoffset,
     int64_t length);
 
-  template <typename TO>
-  ERROR unionarray_filltags_const(
-    TO* totags,
+  ERROR unionarray_filltags_to8_const(
+    int8_t* totags,
     int64_t totagsoffset,
     int64_t length,
     int64_t base);
 
-  template <typename TO>
-  ERROR unionarray_fillindex_count(
-    TO* toindex,
+  ERROR unionarray_fillindex_count_64(
+    int64_t* toindex,
     int64_t toindexoffset,
     int64_t length);
 
@@ -1066,10 +1046,10 @@ namespace kernel {
     bool isoption);
 
 
-  template <typename T, typename I>
+  template <typename I>
   ERROR
-  unionarray_validity(
-    const T* tags,
+  unionarray8_validity(
+    const int8_t* tags,
     int64_t tagsoffset,
     const I* index,
     int64_t indexoffset,
@@ -1095,10 +1075,9 @@ namespace kernel {
     int64_t target,
     int64_t length);
 
-  template <typename T>
-  ERROR index_rpad_and_clip_axis1(
-    T* tostarts,
-    T* tostops,
+  ERROR index_rpad_and_clip_axis1_64(
+    int64_t* tostarts,
+    int64_t* tostops,
     int64_t target,
     int64_t length);
 

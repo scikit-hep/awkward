@@ -42,41 +42,41 @@ namespace kernel {
   }
 
   template <>
-  ERROR index_to_index64(
+  ERROR index_to_index_64(
     int64_t* toptr,
     const int8_t* fromptr,
     int64_t length) {
-    return awkward_index8_to_index64(
+    return awkward_index8_to_index_64(
       toptr,
       fromptr,
       length);
   }
   template <>
-  ERROR index_to_index64(
+  ERROR index_to_index_64(
     int64_t* toptr,
     const uint8_t* fromptr,
     int64_t length) {
-    return awkward_indexU8_to_index64(
+    return awkward_indexU8_to_index_64(
       toptr,
       fromptr,
       length);
   }
   template <>
-  ERROR index_to_index64(
+  ERROR index_to_index_64(
     int64_t* toptr,
     const int32_t* fromptr,
     int64_t length) {
-    return awkward_index32_to_index64(
+    return awkward_index32_to_index_64(
       toptr,
       fromptr,
       length);
   }
   template <>
-  ERROR index_to_index64(
+  ERROR index_to_index_64(
     int64_t* toptr,
     const uint32_t* fromptr,
     int64_t length) {
-    return awkward_indexU32_to_index64(
+    return awkward_indexU32_to_index_64(
       toptr,
       fromptr,
       length);
@@ -1214,8 +1214,7 @@ namespace kernel {
       lencontent);
   }
 
-  template <>
-  ERROR listoffsetarray_getitem_adjust_offsets(
+  ERROR listoffsetarray_getitem_adjust_offsets_64(
     int64_t* tooffsets,
     int64_t* tononzero,
     const int64_t* fromoffsets,
@@ -1235,8 +1234,7 @@ namespace kernel {
       nonzerolength);
   }
 
-  template <>
-  ERROR listoffsetarray_getitem_adjust_offsets_index(
+  ERROR listoffsetarray_getitem_adjust_offsets_index_64(
     int64_t* tooffsets,
     int64_t* tononzero,
     const int64_t* fromoffsets,
@@ -1268,8 +1266,7 @@ namespace kernel {
       masklength);
   }
 
-  template <>
-  ERROR indexedarray_getitem_adjust_outindex(
+  ERROR indexedarray_getitem_adjust_outindex_64(
     int8_t* tomask,
     int64_t* toindex,
     int64_t* tononzero,
@@ -1396,8 +1393,7 @@ namespace kernel {
   }
 
   template <>
-  Error unionarray_regular_index<int8_t,
-    int32_t>(
+  Error unionarray8_regular_index<int32_t>(
     int32_t* toindex,
     int32_t* current,
     int64_t size,
@@ -1413,8 +1409,7 @@ namespace kernel {
       length);
   }
   template <>
-  Error unionarray_regular_index<int8_t,
-    uint32_t>(
+  Error unionarray8_regular_index<uint32_t>(
     uint32_t* toindex,
     uint32_t* current,
     int64_t size,
@@ -1430,8 +1425,7 @@ namespace kernel {
       length);
   }
   template <>
-  Error unionarray_regular_index<int8_t,
-    int64_t>(
+  Error unionarray8_regular_index<int64_t>(
     int64_t* toindex,
     int64_t* current,
     int64_t size,
@@ -1448,8 +1442,7 @@ namespace kernel {
   }
 
   template <>
-  Error unionarray_project_64<int8_t,
-    int32_t>(
+  Error unionarray8_project_64<int32_t>(
     int64_t* lenout,
     int64_t* tocarry,
     const int8_t* fromtags,
@@ -1469,8 +1462,7 @@ namespace kernel {
       which);
   }
   template <>
-  Error unionarray_project_64<int8_t,
-    uint32_t>(
+  Error unionarray8_project_64<uint32_t>(
     int64_t* lenout,
     int64_t* tocarry,
     const int8_t* fromtags,
@@ -1490,8 +1482,7 @@ namespace kernel {
       which);
   }
   template <>
-  Error unionarray_project_64<int8_t,
-    int64_t>(
+  Error unionarray8_project_64<int64_t>(
     int64_t* lenout,
     int64_t* tocarry,
     const int8_t* fromtags,
@@ -1614,8 +1605,7 @@ namespace kernel {
       length);
   }
 
-  template <>
-  ERROR listarray_getitem_jagged_carrylen(
+  ERROR listarray_getitem_jagged_carrylen_64(
     int64_t* carrylen,
     const int64_t* slicestarts,
     int64_t slicestartsoffset,
@@ -1734,8 +1724,7 @@ namespace kernel {
       contentlen);
   }
 
-  template <>
-  ERROR listarray_getitem_jagged_numvalid(
+  ERROR listarray_getitem_jagged_numvalid_64(
     int64_t* numvalid,
     const int64_t* slicestarts,
     int64_t slicestartsoffset,
@@ -1757,8 +1746,7 @@ namespace kernel {
       missinglength);
   }
 
-  template <>
-  ERROR listarray_getitem_jagged_shrink(
+  ERROR listarray_getitem_jagged_shrink_64(
     int64_t* tocarry,
     int64_t* tosmalloffsets,
     int64_t* tolargeoffsets,
@@ -2011,8 +1999,7 @@ namespace kernel {
       validwhen);
   }
 
-  template <>
-  ERROR bytemaskedarray_getitem_nextcarry_outindex(
+  ERROR bytemaskedarray_getitem_nextcarry_outindex_64(
     int64_t* tocarry,
     int64_t* toindex,
     const int8_t* mask,
@@ -2061,12 +2048,12 @@ namespace kernel {
   }
 
   template <>
-  ERROR identities_to_identities64(
+  ERROR identities_to_identities_64(
     int64_t* toptr,
     const int32_t* fromptr,
     int64_t length,
     int64_t width) {
-    return awkward_identities32_to_identities64(
+    return awkward_identities32_to_identities_64(
       toptr,
       fromptr,
       length,
@@ -3350,14 +3337,14 @@ namespace kernel {
   }
 
   template <>
-  Error listarray_compact_offsets64(
+  Error listarray_compact_offsets_64(
     int64_t* tooffsets,
     const int32_t* fromstarts,
     const int32_t* fromstops,
     int64_t startsoffset,
     int64_t stopsoffset,
     int64_t length) {
-    return awkward_listarray32_compact_offsets64(
+    return awkward_listarray32_compact_offsets_64(
       tooffsets,
       fromstarts,
       fromstops,
@@ -3366,14 +3353,14 @@ namespace kernel {
       length);
   }
   template <>
-  Error listarray_compact_offsets64(
+  Error listarray_compact_offsets_64(
     int64_t* tooffsets,
     const uint32_t* fromstarts,
     const uint32_t* fromstops,
     int64_t startsoffset,
     int64_t stopsoffset,
     int64_t length) {
-    return awkward_listarrayU32_compact_offsets64(
+    return awkward_listarrayU32_compact_offsets_64(
       tooffsets,
       fromstarts,
       fromstops,
@@ -3382,14 +3369,14 @@ namespace kernel {
       length);
   }
   template <>
-  Error listarray_compact_offsets64(
+  Error listarray_compact_offsets_64(
     int64_t* tooffsets,
     const int64_t* fromstarts,
     const int64_t* fromstops,
     int64_t startsoffset,
     int64_t stopsoffset,
     int64_t length) {
-    return awkward_listarray64_compact_offsets64(
+    return awkward_listarray64_compact_offsets_64(
       tooffsets,
       fromstarts,
       fromstops,
@@ -3409,36 +3396,36 @@ namespace kernel {
   }
 
   template <>
-  Error listoffsetarray_compact_offsets64(
+  Error listoffsetarray_compact_offsets_64(
     int64_t* tooffsets,
     const int32_t* fromoffsets,
     int64_t offsetsoffset,
     int64_t length) {
-    return awkward_listoffsetarray32_compact_offsets64(
+    return awkward_listoffsetarray32_compact_offsets_64(
       tooffsets,
       fromoffsets,
       offsetsoffset,
       length);
   }
   template <>
-  Error listoffsetarray_compact_offsets64(
+  Error listoffsetarray_compact_offsets_64(
     int64_t* tooffsets,
     const uint32_t* fromoffsets,
     int64_t offsetsoffset,
     int64_t length) {
-    return awkward_listoffsetarrayU32_compact_offsets64(
+    return awkward_listoffsetarrayU32_compact_offsets_64(
       tooffsets,
       fromoffsets,
       offsetsoffset,
       length);
   }
   template <>
-  Error listoffsetarray_compact_offsets64(
+  Error listoffsetarray_compact_offsets_64(
     int64_t* tooffsets,
     const int64_t* fromoffsets,
     int64_t offsetsoffset,
     int64_t length) {
-    return awkward_listoffsetarray64_compact_offsets64(
+    return awkward_listoffsetarray64_compact_offsets_64(
       tooffsets,
       fromoffsets,
       offsetsoffset,
@@ -3446,7 +3433,7 @@ namespace kernel {
   }
 
   template <>
-  Error listarray_broadcast_tooffsets64<int32_t>(
+  Error listarray_broadcast_tooffsets_64<int32_t>(
     int64_t* tocarry,
     const int64_t* fromoffsets,
     int64_t offsetsoffset,
@@ -3456,7 +3443,7 @@ namespace kernel {
     const int32_t* fromstops,
     int64_t stopsoffset,
     int64_t lencontent) {
-    return awkward_listarray32_broadcast_tooffsets64(
+    return awkward_listarray32_broadcast_tooffsets_64(
       tocarry,
       fromoffsets,
       offsetsoffset,
@@ -3468,7 +3455,7 @@ namespace kernel {
       lencontent);
   }
   template <>
-  Error listarray_broadcast_tooffsets64<uint32_t>(
+  Error listarray_broadcast_tooffsets_64<uint32_t>(
     int64_t* tocarry,
     const int64_t* fromoffsets,
     int64_t offsetsoffset,
@@ -3478,7 +3465,7 @@ namespace kernel {
     const uint32_t* fromstops,
     int64_t stopsoffset,
     int64_t lencontent) {
-    return awkward_listarrayU32_broadcast_tooffsets64(
+    return awkward_listarrayU32_broadcast_tooffsets_64(
       tocarry,
       fromoffsets,
       offsetsoffset,
@@ -3490,7 +3477,7 @@ namespace kernel {
       lencontent);
   }
   template <>
-  Error listarray_broadcast_tooffsets64<int64_t>(
+  Error listarray_broadcast_tooffsets_64<int64_t>(
     int64_t* tocarry,
     const int64_t* fromoffsets,
     int64_t offsetsoffset,
@@ -3500,7 +3487,7 @@ namespace kernel {
     const int64_t* fromstops,
     int64_t stopsoffset,
     int64_t lencontent) {
-    return awkward_listarray64_broadcast_tooffsets64(
+    return awkward_listarray64_broadcast_tooffsets_64(
       tocarry,
       fromoffsets,
       offsetsoffset,
@@ -4017,8 +4004,7 @@ namespace kernel {
       base);
   }
 
-  template <>
-  ERROR indexedarray_fill_count(
+  ERROR indexedarray_fill_to64_count(
     int64_t* toindex,
     int64_t toindexoffset,
     int64_t length,
@@ -4030,8 +4016,7 @@ namespace kernel {
       base);
   }
 
-  template <>
-  ERROR unionarray_filltags(
+  ERROR unionarray_filltags_to8_from8(
     int8_t* totags,
     int64_t totagsoffset,
     const int8_t* fromtags,
@@ -4090,8 +4075,7 @@ namespace kernel {
       length);
   }
 
-  template <>
-  ERROR unionarray_filltags_const(
+  ERROR unionarray_filltags_to8_const(
     int8_t* totags,
     int64_t totagsoffset,
     int64_t length,
@@ -4103,8 +4087,7 @@ namespace kernel {
       base);
   }
 
-  template <>
-  ERROR unionarray_fillindex_count(
+  ERROR unionarray_fillindex_count_64(
     int64_t* toindex,
     int64_t toindexoffset,
     int64_t length) {
@@ -4601,8 +4584,7 @@ namespace kernel {
   }
 
   template <>
-  Error unionarray_validity<int8_t,
-    int32_t>(
+  Error unionarray8_validity<int32_t>(
     const int8_t* tags,
     int64_t tagsoffset,
     const int32_t* index,
@@ -4620,8 +4602,7 @@ namespace kernel {
       lencontents);
   }
   template <>
-  Error unionarray_validity<int8_t,
-    uint32_t>(
+  Error unionarray8_validity<uint32_t>(
     const int8_t* tags,
     int64_t tagsoffset,
     const uint32_t* index,
@@ -4639,8 +4620,7 @@ namespace kernel {
       lencontents);
   }
   template <>
-  Error unionarray_validity<int8_t,
-    int64_t>(
+  Error unionarray8_validity<int64_t>(
     const int8_t* tags,
     int64_t tagsoffset,
     const int64_t* index,
@@ -4715,8 +4695,7 @@ namespace kernel {
       length);
   }
 
-  template <>
-  ERROR index_rpad_and_clip_axis1(
+  ERROR index_rpad_and_clip_axis1_64(
     int64_t* tostarts,
     int64_t* tostops,
     int64_t target,

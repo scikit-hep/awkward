@@ -21,22 +21,22 @@ extern "C" {
       int64_t length);
 
   EXPORT_SYMBOL struct Error
-    awkward_index8_to_index64(
+    awkward_index8_to_index_64(
       int64_t* toptr,
       const int8_t* fromptr,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_indexU8_to_index64(
+    awkward_indexU8_to_index_64(
       int64_t* toptr,
       const uint8_t* fromptr,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_index32_to_index64(
+    awkward_index32_to_index_64(
       int64_t* toptr,
       const int32_t* fromptr,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_indexU32_to_index64(
+    awkward_indexU32_to_index_64(
       int64_t* toptr,
       const uint32_t* fromptr,
       int64_t length);

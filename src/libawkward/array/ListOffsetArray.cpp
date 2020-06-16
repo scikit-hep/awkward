@@ -227,7 +227,7 @@ namespace awkward {
       int64_t len = offsets_.length() - 1;
       Index64 out(len + 1);
       struct Error err =
-        kernel::listoffsetarray_compact_offsets64<int64_t>(
+        kernel::listoffsetarray_compact_offsets_64<int64_t>(
         out.ptr().get(),
         offsets_.ptr().get(),
         offsets_.offset(),
@@ -242,7 +242,7 @@ namespace awkward {
   ListOffsetArrayOf<T>::compact_offsets64(bool start_at_zero) const {
     int64_t len = offsets_.length() - 1;
     Index64 out(len + 1);
-    struct Error err = kernel::listoffsetarray_compact_offsets64<T>(
+    struct Error err = kernel::listoffsetarray_compact_offsets_64<T>(
       out.ptr().get(),
       offsets_.ptr().get(),
       offsets_.offset(),
@@ -270,7 +270,7 @@ namespace awkward {
 
     int64_t carrylen = offsets.getitem_at_nowrap(offsets.length() - 1);
     Index64 nextcarry(carrylen);
-    struct Error err = kernel::listarray_broadcast_tooffsets64<T>(
+    struct Error err = kernel::listarray_broadcast_tooffsets_64<T>(
       nextcarry.ptr().get(),
       offsets.ptr().get(),
       offsets.offset(),
@@ -1225,7 +1225,7 @@ namespace awkward {
       offsets_.ptr(), offsets_.offset(), offsets_.length());
     if (start != 0) {
       offsets = std::make_shared<Index64>(offsets_.length());
-      struct Error err = kernel::listoffsetarray_compact_offsets64<int64_t>(
+      struct Error err = kernel::listoffsetarray_compact_offsets_64<int64_t>(
         offsets.get()->ptr().get(),
         offsets_.ptr().get(),
         offsets_.offset(),
@@ -1241,7 +1241,7 @@ namespace awkward {
         Index64 adjustedoffsets(offsets.get()->length());
         Index64 adjustednonzero(nonzero.length());
 
-        struct Error err = kernel::listoffsetarray_getitem_adjust_offsets<int64_t>(
+        struct Error err = kernel::listoffsetarray_getitem_adjust_offsets_64(
           adjustedoffsets.ptr().get(),
           adjustednonzero.ptr().get(),
           offsets.get()->ptr().get(),
@@ -1269,7 +1269,7 @@ namespace awkward {
           Index64 adjustednonzero(nonzero.length());
 
           struct Error err =
-            kernel::listoffsetarray_getitem_adjust_offsets_index<int64_t>(
+            kernel::listoffsetarray_getitem_adjust_offsets_index_64(
             adjustedoffsets.ptr().get(),
             adjustednonzero.ptr().get(),
             offsets.get()->ptr().get(),
@@ -1371,7 +1371,7 @@ namespace awkward {
       Index64 starts(offsets_.length() - 1);
       Index64 stops(offsets_.length() - 1);
 
-      struct Error err1 = kernel::index_rpad_and_clip_axis1<int64_t>(
+      struct Error err1 = kernel::index_rpad_and_clip_axis1_64(
         starts.ptr().get(),
         stops.ptr().get(),
         target,

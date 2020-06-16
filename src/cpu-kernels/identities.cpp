@@ -26,7 +26,7 @@ ERROR awkward_new_identities64(
     length);
 }
 
-ERROR awkward_identities32_to_identities64(
+ERROR awkward_identities32_to_identities_64(
   int64_t* toptr,
   const int32_t* fromptr,
   int64_t length,

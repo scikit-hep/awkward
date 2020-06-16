@@ -245,8 +245,8 @@ namespace awkward {
       length_ == 0 ? nullptr : new int64_t[(size_t)length_],
       util::array_deleter<int64_t>());
     if (length_ != 0) {
-      kernel::index_to_index64<int8_t>(ptr.get(), &ptr_.get()[(size_t)offset_],
-                                       length_);
+      kernel::index_to_index_64<int8_t>(ptr.get(), &ptr_.get()[(size_t)offset_],
+                                        length_);
     }
     return IndexOf<int64_t>(ptr, 0, length_);
   }
@@ -257,8 +257,8 @@ namespace awkward {
       length_ == 0 ? nullptr : new int64_t[(size_t)length_],
       util::array_deleter<int64_t>());
     if (length_ != 0) {
-      kernel::index_to_index64<uint8_t>(ptr.get(), &ptr_.get()[(size_t)offset_],
-                                        length_);
+      kernel::index_to_index_64<uint8_t>(ptr.get(), &ptr_.get()[(size_t)offset_],
+                                         length_);
     }
     return IndexOf<int64_t>(ptr, 0, length_);
   }
@@ -269,9 +269,8 @@ namespace awkward {
       length_ == 0 ? nullptr : new int64_t[(size_t)length_],
       util::array_deleter<int64_t>());
     if (length_ != 0) {
-      kernel::index_to_index64<int32_t>(ptr.get(),
-                                        &ptr_.get()[(size_t)offset_],
-                                        length_);
+      kernel::index_to_index_64<int32_t>(ptr.get(),
+                                         &ptr_.get()[(size_t)offset_], length_);
     }
     return IndexOf<int64_t>(ptr, 0, length_);
   }
@@ -282,9 +281,9 @@ namespace awkward {
       length_ == 0 ? nullptr : new int64_t[(size_t)length_],
       util::array_deleter<int64_t>());
     if (length_ != 0) {
-      kernel::index_to_index64<uint32_t>(ptr.get(),
-                                         &ptr_.get()[(size_t)offset_],
-                                         length_);
+      kernel::index_to_index_64<uint32_t>(ptr.get(),
+                                          &ptr_.get()[(size_t)offset_],
+                                          length_);
     }
     return IndexOf<int64_t>(ptr, 0, length_);
   }

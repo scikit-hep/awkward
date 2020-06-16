@@ -345,7 +345,7 @@ extern "C" {
       int64_t size);
 
   EXPORT_SYMBOL struct Error
-    awkward_listarray32_compact_offsets64(
+    awkward_listarray32_compact_offsets_64(
       int64_t* tooffsets,
       const int32_t* fromstarts,
       const int32_t* fromstops,
@@ -353,7 +353,7 @@ extern "C" {
       int64_t stopsoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_listarrayU32_compact_offsets64(
+    awkward_listarrayU32_compact_offsets_64(
       int64_t* tooffsets,
       const uint32_t* fromstarts,
       const uint32_t* fromstops,
@@ -361,7 +361,7 @@ extern "C" {
       int64_t stopsoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_listarray64_compact_offsets64(
+    awkward_listarray64_compact_offsets_64(
       int64_t* tooffsets,
       const int64_t* fromstarts,
       const int64_t* fromstops,
@@ -370,26 +370,26 @@ extern "C" {
       int64_t length);
 
   EXPORT_SYMBOL struct Error
-    awkward_listoffsetarray32_compact_offsets64(
+    awkward_listoffsetarray32_compact_offsets_64(
       int64_t* tooffsets,
       const int32_t* fromoffsets,
       int64_t offsetsoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_listoffsetarrayU32_compact_offsets64(
+    awkward_listoffsetarrayU32_compact_offsets_64(
       int64_t* tooffsets,
       const uint32_t* fromoffsets,
       int64_t offsetsoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_listoffsetarray64_compact_offsets64(
+    awkward_listoffsetarray64_compact_offsets_64(
       int64_t* tooffsets,
       const int64_t* fromoffsets,
       int64_t offsetsoffset,
       int64_t length);
 
   EXPORT_SYMBOL struct Error
-    awkward_listarray32_broadcast_tooffsets64(
+    awkward_listarray32_broadcast_tooffsets_64(
       int64_t* tocarry,
       const int64_t* fromoffsets,
       int64_t offsetsoffset,
@@ -400,7 +400,7 @@ extern "C" {
       int64_t stopsoffset,
       int64_t lencontent);
   EXPORT_SYMBOL struct Error
-    awkward_listarrayU32_broadcast_tooffsets64(
+    awkward_listarrayU32_broadcast_tooffsets_64(
       int64_t* tocarry,
       const int64_t* fromoffsets,
       int64_t offsetsoffset,
@@ -411,7 +411,7 @@ extern "C" {
       int64_t stopsoffset,
       int64_t lencontent);
   EXPORT_SYMBOL struct Error
-    awkward_listarray64_broadcast_tooffsets64(
+    awkward_listarray64_broadcast_tooffsets_64(
       int64_t* tocarry,
       const int64_t* fromoffsets,
       int64_t offsetsoffset,

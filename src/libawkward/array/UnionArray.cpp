@@ -330,7 +330,7 @@ namespace awkward {
     util::handle_error(err1, "UnionArray", nullptr);
     IndexOf<I> current(size);
     IndexOf<I> outindex(lentags);
-    struct Error err2 = kernel::unionarray_regular_index<T, I>(
+    struct Error err2 = kernel::unionarray8_regular_index<I>(
       outindex.ptr().get(),
       current.ptr().get(),
       size,
@@ -417,7 +417,7 @@ namespace awkward {
     }
     int64_t lenout;
     Index64 tmpcarry(lentags);
-    struct Error err = kernel::unionarray_project_64<T, I>(
+    struct Error err = kernel::unionarray8_project_64<I>(
       &lenout,
       tmpcarry.ptr().get(),
       tags_.ptr().get(),
@@ -1234,7 +1234,7 @@ namespace awkward {
     for (int64_t i = 0;  i < numcontents();  i++) {
       lencontents.push_back(content(i).get()->length());
     }
-    struct Error err = kernel::unionarray_validity<T, I>(
+    struct Error err = kernel::unionarray8_validity<I>(
       tags_.ptr().get(),
       tags_.offset(),
       index_.ptr().get(),
@@ -1388,20 +1388,20 @@ namespace awkward {
     ContentPtrVec contents({ other });
     contents.insert(contents.end(), contents_.begin(), contents_.end());
 
-    struct Error err1 = kernel::unionarray_filltags_const<int8_t>(
+    struct Error err1 = kernel::unionarray_filltags_to8_const(
       tags.ptr().get(),
       0,
       theirlength,
       0);
     util::handle_error(err1, classname(), identities_.get());
-    struct Error err2 = kernel::unionarray_fillindex_count<int64_t>(
+    struct Error err2 = kernel::unionarray_fillindex_count_64(
       index.ptr().get(),
       0,
       theirlength);
     util::handle_error(err2, classname(), identities_.get());
 
     if (std::is_same<T, int8_t>::value) {
-      struct Error err = kernel::unionarray_filltags<int8_t, int8_t>(
+      struct Error err = kernel::unionarray_filltags_to8_from8(
         tags.ptr().get(),
         theirlength,
         reinterpret_cast<int8_t*>(tags_.ptr().get()),
@@ -1478,7 +1478,7 @@ namespace awkward {
     Index64 index(mylength + theirlength);
 
     if (std::is_same<T, int8_t>::value) {
-      struct Error err = kernel::unionarray_filltags<int8_t, int8_t>(
+      struct Error err = kernel::unionarray_filltags_to8_from8(
         tags.ptr().get(),
         0,
         reinterpret_cast<int8_t*>(tags_.ptr().get()),
@@ -1530,7 +1530,7 @@ namespace awkward {
                       other_contents.begin(),
                       other_contents.end());
       Index8 other_tags = rawother->tags();
-      struct Error err1 = kernel::unionarray_filltags<int8_t, int8_t>(
+      struct Error err1 = kernel::unionarray_filltags_to8_from8(
         tags.ptr().get(),
         mylength,
         other_tags.ptr().get(),
@@ -1558,7 +1558,7 @@ namespace awkward {
                       other_contents.begin(),
                       other_contents.end());
       Index8 other_tags = rawother->tags();
-      struct Error err1 = kernel::unionarray_filltags<int8_t, int8_t>(
+      struct Error err1 = kernel::unionarray_filltags_to8_from8(
         tags.ptr().get(),
         mylength,
         other_tags.ptr().get(),
@@ -1586,7 +1586,7 @@ namespace awkward {
                       other_contents.begin(),
                       other_contents.end());
       Index8 other_tags = rawother->tags();
-      struct Error err1 = kernel::unionarray_filltags<int8_t, int8_t>(
+      struct Error err1 = kernel::unionarray_filltags_to8_from8(
         tags.ptr().get(),
         mylength,
         other_tags.ptr().get(),
@@ -1609,13 +1609,13 @@ namespace awkward {
     }
     else {
       contents.push_back(other);
-      struct Error err1 = kernel::unionarray_filltags_const<int8_t>(
+      struct Error err1 = kernel::unionarray_filltags_to8_const(
         tags.ptr().get(),
         mylength,
         theirlength,
         numcontents());
       util::handle_error(err1, classname(), identities_.get());
-      struct Error err2 = kernel::unionarray_fillindex_count<int64_t>(
+      struct Error err2 = kernel::unionarray_fillindex_count_64(
         index.ptr().get(),
         mylength,
         theirlength);

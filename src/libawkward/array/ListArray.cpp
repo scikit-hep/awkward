@@ -224,7 +224,7 @@ namespace awkward {
   ListArrayOf<T>::compact_offsets64(bool start_at_zero) const {
     int64_t len = starts_.length();
     Index64 out(len + 1);
-    struct Error err = kernel::listarray_compact_offsets64<T>(
+    struct Error err = kernel::listarray_compact_offsets_64<T>(
       out.ptr().get(),
       starts_.ptr().get(),
       stops_.ptr().get(),
@@ -251,7 +251,7 @@ namespace awkward {
 
     int64_t carrylen = offsets.getitem_at_nowrap(offsets.length() - 1);
     Index64 nextcarry(carrylen);
-    struct Error err = kernel::listarray_broadcast_tooffsets64<T>(
+    struct Error err = kernel::listarray_broadcast_tooffsets_64<T>(
       nextcarry.ptr().get(),
       offsets.ptr().get(),
       offsets.offset(),
@@ -1667,7 +1667,7 @@ namespace awkward {
     }
 
     int64_t carrylen;
-    struct Error err1 = kernel::listarray_getitem_jagged_carrylen<int64_t>(
+    struct Error err1 = kernel::listarray_getitem_jagged_carrylen_64(
       &carrylen,
       slicestarts.ptr().get(),
       slicestarts.offset(),
@@ -1725,7 +1725,7 @@ namespace awkward {
 
     Index64 missing = slicecontent.index();
     int64_t numvalid;
-    struct Error err1 = kernel::listarray_getitem_jagged_numvalid<int64_t>(
+    struct Error err1 = kernel::listarray_getitem_jagged_numvalid_64(
       &numvalid,
       slicestarts.ptr().get(),
       slicestarts.offset(),
@@ -1740,7 +1740,7 @@ namespace awkward {
     Index64 nextcarry(numvalid);
     Index64 smalloffsets(slicestarts.length() + 1);
     Index64 largeoffsets(slicestarts.length() + 1);
-    struct Error err2 = kernel::listarray_getitem_jagged_shrink<int64_t>(
+    struct Error err2 = kernel::listarray_getitem_jagged_shrink_64(
       nextcarry.ptr().get(),
       smalloffsets.ptr().get(),
       largeoffsets.ptr().get(),
