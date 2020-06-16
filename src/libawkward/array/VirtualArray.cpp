@@ -487,7 +487,7 @@ namespace awkward {
   }
 
   const ContentPtr
-  VirtualArray::carry(const Index64& carry) const {
+  VirtualArray::carry(const Index64& carry, bool copy) const {
     ContentPtr peek = peek_array();
     if (peek.get() != nullptr) {
       return peek.get()->carry(carry);

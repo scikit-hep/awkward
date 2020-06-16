@@ -217,7 +217,7 @@ namespace awkward {
   }
 
   const ContentPtr
-  Record::carry(const Index64& carry) const {
+  Record::carry(const Index64& carry, bool copy) const {
     throw std::runtime_error("undefined operation: Record::carry");
   }
 

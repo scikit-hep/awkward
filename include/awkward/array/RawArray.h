@@ -63,7 +63,7 @@ namespace awkward {
 
     const std::string
       purelist_parameter(const std::string& key) const override {
-      parameter(key);
+      return parameter(key);
     }
 
     bool
@@ -117,7 +117,7 @@ namespace awkward {
     bool
       equal(const FormPtr& other,
             bool check_identities,
-            bool check_parameters) const {
+            bool check_parameters) const override {
       throw std::runtime_error("FIXME: RawForm::equal");
     }
 
@@ -653,7 +653,7 @@ namespace awkward {
     }
 
     const ContentPtr
-      carry(const Index64& carry) const override {
+      carry(const Index64& carry, bool copy) const override {
       std::shared_ptr<T> ptr(new T[(size_t)carry.length()],
                              util::array_deleter<T>());
       struct Error err = awkward_numpyarray_getitem_next_null_64(
@@ -989,7 +989,7 @@ namespace awkward {
           nextcarryptr[i] = start + step*i;
         }
 
-        return carry(nextcarry);
+        return carry(nextcarry, true);
       }
     }
 
@@ -1010,7 +1010,7 @@ namespace awkward {
         flathead.length(),
         length_);
       util::handle_error(err, classname(), identities_.get());
-      return carry(flathead);
+      return carry(flathead, true);
     }
 
     const ContentPtr

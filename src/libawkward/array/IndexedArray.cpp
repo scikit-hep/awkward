@@ -1184,7 +1184,7 @@ namespace awkward {
 
   template <typename T, bool ISOPTION>
   const ContentPtr
-  IndexedArrayOf<T, ISOPTION>::carry(const Index64& carry) const {
+  IndexedArrayOf<T, ISOPTION>::carry(const Index64& carry, bool copy) const {
     IndexOf<T> nextindex(carry.length());
     struct Error err = util::awkward_indexedarray_getitem_carry_64<T>(
       nextindex.ptr().get(),
@@ -1956,7 +1956,7 @@ namespace awkward {
         Index64 nextcarry = pair.first;
         IndexOf<T> outindex = pair.second;
 
-        ContentPtr next = content_.get()->carry(nextcarry);
+        ContentPtr next = content_.get()->carry(nextcarry, false);
         ContentPtr out = next.get()->combinations(n,
                                                   replacement,
                                                   recordlookup,

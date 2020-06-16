@@ -690,7 +690,7 @@ namespace awkward {
 
   template <typename T>
   const ContentPtr
-  ListOffsetArrayOf<T>::carry(const Index64& carry) const {
+  ListOffsetArrayOf<T>::carry(const Index64& carry, bool copy) const {
     IndexOf<T> starts = util::make_starts(offsets_);
     IndexOf<T> stops = util::make_stops(offsets_);
     IndexOf<T> nextstarts(carry.length());
@@ -1652,7 +1652,7 @@ namespace awkward {
 
       ContentPtrVec contents;
       for (auto ptr : tocarry) {
-        contents.push_back(content_.get()->carry(Index64(ptr, 0, totallen)));
+        contents.push_back(content_.get()->carry(Index64(ptr, 0, totallen), false));
       }
       ContentPtr recordarray = std::make_shared<RecordArray>(
         Identities::none(), parameters, contents, recordlookup);
@@ -1704,6 +1704,7 @@ namespace awkward {
       stops.offset(),
       at.at());
     util::handle_error(err, classname(), identities_.get());
+
     ContentPtr nextcontent = content_.get()->carry(nextcarry);
     return nextcontent.get()->getitem_next(nexthead, nexttail, advanced);
   }

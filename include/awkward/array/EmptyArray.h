@@ -160,7 +160,7 @@ namespace awkward {
       getitem_fields(const std::vector<std::string>& keys) const override;
 
     const ContentPtr
-      carry(const Index64& carry) const override;
+      carry(const Index64& carry, bool copy) const override;
 
     int64_t
       numfields() const override;

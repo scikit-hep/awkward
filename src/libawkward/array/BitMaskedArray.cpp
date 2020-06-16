@@ -624,8 +624,8 @@ namespace awkward {
   }
 
   const ContentPtr
-  BitMaskedArray::carry(const Index64& carry) const {
-    return toByteMaskedArray().get()->carry(carry);
+  BitMaskedArray::carry(const Index64& carry, bool copy) const {
+    return toByteMaskedArray().get()->carry(carry, copy);
   }
 
   int64_t

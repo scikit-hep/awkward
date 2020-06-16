@@ -536,7 +536,7 @@ namespace awkward {
   }
 
   const ContentPtr
-  RegularArray::carry(const Index64& carry) const {
+  RegularArray::carry(const Index64& carry, bool copy) const {
     Index64 nextcarry(carry.length()*size_);
 
     struct Error err = awkward_regulararray_getitem_carry_64(
@@ -974,7 +974,7 @@ namespace awkward {
 
       ContentPtrVec contents;
       for (auto ptr : tocarry) {
-        contents.push_back(content_.get()->carry(Index64(ptr, 0, totallen)));
+        contents.push_back(content_.get()->carry(Index64(ptr, 0, totallen), false));
       }
       ContentPtr recordarray =
         std::make_shared<RecordArray>(Identities::none(),
