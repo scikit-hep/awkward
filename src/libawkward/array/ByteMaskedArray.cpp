@@ -218,7 +218,7 @@ namespace awkward {
       valid_when_);
     util::handle_error(err2, classname(), identities_.get());
 
-    return content_.get()->carry(nextcarry);
+    return content_.get()->carry(nextcarry, true);
   }
 
   const ContentPtr

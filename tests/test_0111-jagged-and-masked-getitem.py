@@ -147,19 +147,8 @@ def test_records_missing():
     assert awkward1.to_list(array[:, awkward1.Array([1, None, 2, -1], check_valid=True)]) == [[{"x": 1, "y": 1.1}, None, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}], [{"x": 5, "y": 5.5}, None, {"x": 6, "y": 6.6}, {"x": 9, "y": 9.9}]]
 
     array = awkward1.Array([{"x": [0, 1, 2, 3], "y": [0.0, 1.1, 2.2, 3.3]}, {"x": [4, 5, 6, 7], "y": [4.4, 5.5, 6.6, 7.7]}, {"x": [8, 9, 10, 11], "y": [8.8, 9.9, 10.0, 11.1]}], check_valid=True)
-    # Segmentation fault:
-    # assert awkward1.to_list(array[:, awkward1.Array([1, None, 2, -1], check_valid=True)]) == [{"x": [1, None, 2, 3], "y": [1.1, None, 2.2, 3.3]}, {"x": [5, None, 6, 7], "y": [5.5, None, 6.6, 7.7]}, {"x": [9, None, 10, 11], "y": [9.9, None, 10.0, 11.1]}]
-    # assert awkward1.to_list(array[1:, awkward1.Array([1, None, 2, -1], check_valid=True)]) == [{"x": [5, None, 6, 7], "y": [5.5, None, 6.6, 7.7]}, {"x": [9, None, 10, 11], "y": [9.9, None, 10.0, 11.1]}]
-# tests/test_0111-jagged-and-masked-getitem.py::test_records_missing Fatal Python error: Segmentation fault
-#
-# Current thread 0x0000000101f39dc0 (most recent call first):
-#   File "/Users/yana/Projects/PR204/awkward-1.0/awkward1/highlevel.py", line 839 in __getitem__
-#   File "/Users/yana/Projects/PR204/awkward-1.0/tests/test_0111-jagged-and-masked-getitem.py", line 151 in test_records_missing
-# tests/test_0111-jagged-and-masked-getitem.py::test_records_missing Fatal Python error: Segmentation fault
-#
-# Current thread 0x000000010cdeddc0 (most recent call first):
-#   File "/Users/yana/Projects/PR204/awkward-1.0/awkward1/highlevel.py", line 839 in __getitem__
-#   File "/Users/yana/Projects/PR204/awkward-1.0/tests/test_0111-jagged-and-masked-getitem.py", line 152 in test_records_missing
+    assert awkward1.to_list(array[:, awkward1.Array([1, None, 2, -1], check_valid=True)]) == [{"x": [1, None, 2, 3], "y": [1.1, None, 2.2, 3.3]}, {"x": [5, None, 6, 7], "y": [5.5, None, 6.6, 7.7]}, {"x": [9, None, 10, 11], "y": [9.9, None, 10.0, 11.1]}]
+    assert awkward1.to_list(array[1:, awkward1.Array([1, None, 2, -1], check_valid=True)]) == [{"x": [5, None, 6, 7], "y": [5.5, None, 6.6, 7.7]}, {"x": [9, None, 10, 11], "y": [9.9, None, 10.0, 11.1]}]
 
 def test_jagged():
     array = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]], check_valid=True)

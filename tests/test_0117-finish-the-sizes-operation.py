@@ -239,13 +239,7 @@ def test_flatten_RecordArray():
     array = awkward1.Array([{"x": [], "y": [[3, 3, 3]]}, {"x": [[1]], "y": [[2, 2]]}, {"x": [[2], [2]], "y": [[1]]}, {"x": [[3], [3], [3]], "y": [[]]}])
     assert awkward1.to_list(awkward1.flatten(array, axis=2)) == [{"x": [], "y": [3, 3, 3]}, {"x": [1], "y": [2, 2]}, {"x": [2, 2], "y": [1]}, {"x": [3, 3, 3], "y": []}]
     assert awkward1.to_list(awkward1.flatten(array[1:], axis=2)) == [{"x": [1], "y": [2, 2]}, {"x": [2, 2], "y": [1]}, {"x": [3, 3, 3], "y": []}]
-    # Segmentation fault:
-#     assert awkward1.to_list(awkward1.flatten(array[:, 1:], axis=2)) == [{"x": [], "y": []}, {"x": [], "y": []}, {"x": [2], "y": []}, {"x": [3, 3], "y": []}]
-# tests/test_0117-finish-the-sizes-operation.py::test_flatten_RecordArray Fatal Python error: Segmentation fault
-#
-# Current thread 0x000000010a11bdc0 (most recent call first):
-#   File "/Users/yana/Projects/PR204/awkward-1.0/awkward1/highlevel.py", line 839 in __getitem__
-#   File "/Users/yana/Projects/PR204/awkward-1.0/tests/test_0117-finish-the-sizes-operation.py", line 243 in test_flatten_RecordArray
+    assert awkward1.to_list(awkward1.flatten(array[:, 1:], axis=2)) == [{"x": [], "y": []}, {"x": [], "y": []}, {"x": [2], "y": []}, {"x": [3, 3], "y": []}]
 
 def test_flatten_UnionArray():
     content1 = awkward1.from_iter([[1.1], [2.2, 2.2], [3.3, 3.3, 3.3]], highlevel=False)

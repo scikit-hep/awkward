@@ -265,16 +265,7 @@ def test_getitem_first_dimension_field():
     if not awkward1._util.py27 and not awkward1._util.py35:
         assert array.tojson() == '[{"x":0.0,"y":[]},{"x":1.1,"y":[1]},{"x":2.2,"y":[2,2]},{"x":3.3,"y":[3,3,3]},{"x":4.4,"y":[4,4,4,4]}]'
         assert array["y", :, :2].tojson() == "[[],[1],[2,2],[3,3],[4,4]]"
-
-        # Segmentation fault:
-        # assert array[["y"], :, :2].tojson() == '[{"y":[]},{"y":[1]},{"y":[2,2]},{"y":[3,3]},{"y":[4,4]}]'
-# tests/test_0056-partitioned-array.py::test_getitem_first_dimension_field Fatal Python error: Segmentation fault
-#
-# Current thread 0x000000010ada4dc0 (most recent call first):
-#   File "/Users/yana/Projects/PR204/awkward-1.0/awkward1/partition.py", line 398 in <listcomp>
-#   File "/Users/yana/Projects/PR204/awkward-1.0/awkward1/partition.py", line 398 in __getitem__
-#   File "/Users/yana/Projects/PR204/awkward-1.0/tests/test_0056-partitioned-array.py", line 270 in test_getitem_first_dimension_field
-
+        assert array[["y"], :, :2].tojson() == '[{"y":[]},{"y":[1]},{"y":[2,2]},{"y":[3,3]},{"y":[4,4]}]'
         assert array[:, "y", :2].tojson() == "[[],[1],[2,2],[3,3],[4,4]]"
         assert array["y", ..., :2].tojson() == "[[],[1],[2,2],[3,3],[4,4]]"
         assert array[numpy.newaxis, "y", :, :2].tojson() == "[[[],[1],[2,2],[3,3],[4,4]]]"

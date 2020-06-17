@@ -245,8 +245,7 @@ def test_setidentities():
     assert recordarray2["outer", 1, 0, "one"] == 2
     assert recordarray2[1, "outer", "one", 0] == 2
     assert recordarray2[1, "outer", 0, "one"] == 2
-    # Segmentation fault
-    # assert recordarray2[1, 0, "outer", "one"] == 2
+    assert recordarray2[1, 0, "outer", "one"] == 2
 
     with pytest.raises(ValueError) as excinfo:
         recordarray2["outer", 2, "two", 0, 99]
