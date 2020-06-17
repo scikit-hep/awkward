@@ -60,9 +60,8 @@ def test_getitem():
     assert awkward1.to_list(array2["y"]) == ["zero", "one", [], [1.1], "two", [1.1, 2.2], "four", "three"]
     assert awkward1.to_list(array2[:, "y", 1:]) == ["ero", "ne", [], [], "wo", [2.2], "our", "hree"]
     assert awkward1.to_list(array2["y", :, 1:]) == ["ero", "ne", [], [], "wo", [2.2], "our", "hree"]
-    # Segmentation fault:
     with pytest.raises(ValueError) as err:
-       array2[:, 1:, "y"]
+        array2[:, 1:, "y"]
     assert str(err.value) == "in NumpyArray, too many dimensions in slice"
     with pytest.raises(ValueError) as err:
         array2["z"]
