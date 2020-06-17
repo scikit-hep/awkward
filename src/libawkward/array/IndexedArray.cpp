@@ -354,7 +354,7 @@ namespace awkward {
         content_.get()->length());
       util::handle_error(err2, classname(), identities_.get());
 
-      return content_.get()->carry(nextcarry);
+      return content_.get()->carry(nextcarry, true);
     }
     else {
       Index64 nextcarry(length());
@@ -366,7 +366,7 @@ namespace awkward {
         content_.get()->length());
       util::handle_error(err, classname(), identities_.get());
 
-      return content_.get()->carry(nextcarry);
+      return content_.get()->carry(nextcarry, true);
     }
   }
 

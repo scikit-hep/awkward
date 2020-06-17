@@ -63,7 +63,7 @@ def test_getitem():
     # Segmentation fault:
     # with pytest.raises(ValueError) as err:
     #    array2[:, 1:, "y"]
-    assert str(err.value) == "in NumpyArray, too many dimensions in slice"
+    # assert str(err.value) == "in NumpyArray, too many dimensions in slice"
     with pytest.raises(ValueError) as err:
         array2["z"]
     assert str(err.value) == "key \"z\" does not exist (not in record)"
