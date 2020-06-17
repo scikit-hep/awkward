@@ -757,7 +757,7 @@ namespace awkward {
                                            content.get()->length());
           Identities32* rawsubidentities =
             reinterpret_cast<Identities32*>(subidentities.get());
-          struct Error err = kernel::identities_from_unionarray<int32_t, T, I>(
+          struct Error err = kernel::identities_from_unionarray8<int32_t, I>(
             &uniquecontents,
             rawsubidentities->ptr().get(),
             rawidentities->ptr().get(),
@@ -788,7 +788,7 @@ namespace awkward {
                                            content.get()->length());
           Identities64* rawsubidentities =
             reinterpret_cast<Identities64*>(subidentities.get());
-          struct Error err = kernel::identities_from_unionarray<int64_t, T, I>(
+          struct Error err = kernel::identities_from_unionarray8<int64_t, I>(
             &uniquecontents,
             rawsubidentities->ptr().get(),
             rawidentities->ptr().get(),

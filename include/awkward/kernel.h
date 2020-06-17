@@ -596,20 +596,6 @@ namespace kernel {
     int64_t fromlength,
     int64_t fromwidth);
 
-
-  template <typename T>
-  ERROR
-  identities64_from_listoffsetarray(
-    int64_t* toptr,
-    const int64_t* fromptr,
-    const T* fromoffsets,
-    int64_t fromptroffset,
-    int64_t offsetsoffset,
-    int64_t tolength,
-    int64_t fromlength,
-    int64_t fromwidth);
-
-
   template <typename C, typename T>
   ERROR
   identities_from_listarray(
@@ -650,13 +636,13 @@ namespace kernel {
     int64_t fromwidth);
 
 
-  template <typename C, typename T, typename I>
+  template <typename C, typename I>
   ERROR
-  identities_from_unionarray(
+  identities_from_unionarray8(
     bool* uniquecontents,
     C* toptr,
     const C* fromptr,
-    const T* fromtags,
+    const int8_t * fromtags,
     const I* fromindex,
     int64_t fromptroffset,
     int64_t tagsoffset,
@@ -1502,8 +1488,6 @@ namespace kernel {
     int64_t parentslength,
     const int64_t* nextparents,
     int64_t nextparentsoffset);
-
-
 };
 
 #endif //AWKWARD_KERNEL_H_

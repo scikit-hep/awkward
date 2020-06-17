@@ -2509,8 +2509,7 @@ namespace kernel {
   }
 
   template <>
-  Error identities_from_unionarray<int32_t, int8_t,
-    int32_t>(
+  Error identities_from_unionarray8<int32_t, int32_t>(
     bool* uniquecontents,
     int32_t* toptr,
     const int32_t* fromptr,
@@ -2538,8 +2537,7 @@ namespace kernel {
       which);
   }
   template <>
-  Error identities_from_unionarray<int32_t, int8_t,
-    uint32_t>(
+  Error identities_from_unionarray8<int32_t, uint32_t>(
     bool* uniquecontents,
     int32_t* toptr,
     const int32_t* fromptr,
@@ -2567,8 +2565,7 @@ namespace kernel {
       which);
   }
   template <>
-  Error identities_from_unionarray<int32_t, int8_t,
-    int64_t>(
+  Error identities_from_unionarray8<int32_t, int64_t>(
     bool* uniquecontents,
     int32_t* toptr,
     const int32_t* fromptr,
@@ -2596,8 +2593,7 @@ namespace kernel {
       which);
   }
   template <>
-  Error identities_from_unionarray<int64_t, int8_t,
-    int32_t>(
+  Error identities_from_unionarray8<int64_t, int32_t>(
     bool* uniquecontents,
     int64_t* toptr,
     const int64_t* fromptr,
@@ -2625,8 +2621,7 @@ namespace kernel {
       which);
   }
   template <>
-  Error identities_from_unionarray<int64_t, int8_t,
-    uint32_t>(
+  Error identities_from_unionarray8<int64_t, uint32_t>(
     bool* uniquecontents,
     int64_t* toptr,
     const int64_t* fromptr,
@@ -2654,8 +2649,7 @@ namespace kernel {
       which);
   }
   template <>
-  Error identities_from_unionarray<int64_t, int8_t,
-    int64_t>(
+  Error identities_from_unionarray8<int64_t, int64_t>(
     bool* uniquecontents,
     int64_t* toptr,
     const int64_t* fromptr,
