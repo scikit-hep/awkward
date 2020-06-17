@@ -309,7 +309,7 @@ namespace awkward {
                                          Identities::FieldLoc(), 1, length());
         Identities32* rawidentities =
           reinterpret_cast<Identities32*>(newidentities.get());
-        awkward_new_identities32(rawidentities->ptr().get(), length());
+        kernel::new_Identities<int32_t>(rawidentities->ptr().get(), length());
         setidentities(newidentities);
       }
       else {
@@ -318,7 +318,7 @@ namespace awkward {
                                          Identities::FieldLoc(), 1, length());
         Identities64* rawidentities =
           reinterpret_cast<Identities64*>(newidentities.get());
-        awkward_new_identities64(rawidentities->ptr().get(), length());
+        kernel::new_Identities<int64_t>(rawidentities->ptr().get(), length());
         setidentities(newidentities);
       }
     }
@@ -603,7 +603,7 @@ namespace awkward {
       getitem_range(int64_t start, int64_t stop) const override {
       int64_t regular_start = start;
       int64_t regular_stop = stop;
-      awkward_regularize_rangeslice(&regular_start, &regular_stop, true,
+      kernel::regularize_rangeslice(&regular_start, &regular_stop, true,
         start != Slice::none(), stop != Slice::none(), length_);
       if (identities_.get() != nullptr  &&
           regular_stop > identities_.get()->length()) {
@@ -661,7 +661,7 @@ namespace awkward {
       carry(const Index64& carry) const override {
       std::shared_ptr<T> ptr(new T[(size_t)carry.length()],
                              util::array_deleter<T>());
-      struct Error err = awkward_numpyarray_getitem_next_null_64(
+      struct Error err = kernel::NumpyArray_getitem_next_null_64(
         reinterpret_cast<uint8_t*>(ptr.get()),
         reinterpret_cast<uint8_t*>(ptr_.get()),
         carry.length(),
@@ -902,7 +902,7 @@ namespace awkward {
         throw std::invalid_argument("axis exceeds the depth of this array");
       }
       Index64 index(target);
-      struct Error err = awkward_index_rpad_and_clip_axis0_64(
+      struct Error err = kernel::index_rpad_and_clip_axis0_64(
         index.ptr().get(),
         target,
         length());
@@ -940,7 +940,7 @@ namespace awkward {
       offsets.setitem_at_nowrap(0, 0);
       offsets.setitem_at_nowrap(1, length_);
 
-      struct Error err = util::awkward_numpyarray_sort<T>(
+      struct Error err = kernel::NumpyArray_sort<T>(
         ptr.get(),
         ptr_.get(),
         length_,
@@ -982,7 +982,7 @@ namespace awkward {
       outranges.setitem_at_nowrap(0, 0);
       outranges.setitem_at_nowrap(1, length_);
 
-      struct Error err = util::awkward_numpyarray_argsort<T>(
+      struct Error err = kernel::NumpyArray_argsort<T>(
         ptr.get(),
         ptr_.get(),
         length_,
@@ -1062,7 +1062,7 @@ namespace awkward {
         else if (step == 0) {
           throw std::invalid_argument("slice step must not be 0");
         }
-        awkward_regularize_rangeslice(&start, &stop, step > 0,
+        kernel::regularize_rangeslice(&start, &stop, step > 0,
           range.hasstart(), range.hasstop(), length_);
 
         int64_t numer = std::abs(start - stop);
@@ -1093,7 +1093,7 @@ namespace awkward {
         throw std::runtime_error("array.ndim != 1");
       }
       Index64 flathead = array.ravel();
-      struct Error err = awkward_regularize_arrayslice_64(
+      struct Error err = kernel::regularize_arrayslice_64(
         flathead.ptr().get(),
         flathead.length(),
         length_);

@@ -203,7 +203,7 @@ namespace awkward {
   const ContentPtr
   ByteMaskedArray::project() const {
     int64_t numnull;
-    struct Error err1 = awkward_bytemaskedarray_numnull(
+    struct Error err1 = kernel::ByteMaskedArray_numnull(
       &numnull,
       mask_.ptr().get(),
       mask_.offset(),
@@ -212,7 +212,7 @@ namespace awkward {
     util::handle_error(err1, classname(), identities_.get());
 
     Index64 nextcarry(length() - numnull);
-    struct Error err2 = awkward_bytemaskedarray_getitem_nextcarry_64(
+    struct Error err2 = kernel::ByteMaskedArray_getitem_nextcarry_64(
       nextcarry.ptr().get(),
       mask_.ptr().get(),
       mask_.offset(),
@@ -234,7 +234,7 @@ namespace awkward {
     }
 
     Index8 nextmask(length());
-    struct Error err = awkward_bytemaskedarray_overlay_mask8(
+    struct Error err = kernel::ByteMaskedArray_overlay_mask8(
       nextmask.ptr().get(),
       mask.ptr().get(),
       mask.offset(),
@@ -256,7 +256,7 @@ namespace awkward {
     }
     else {
       Index8 out(length());
-      struct Error err = awkward_bytemaskedarray_mask8(
+      struct Error err = kernel::ByteMaskedArray_mask8(
         out.ptr().get(),
         mask_.ptr().get(),
         mask_.offset(),
@@ -290,7 +290,7 @@ namespace awkward {
   const std::shared_ptr<IndexedOptionArray64>
   ByteMaskedArray::toIndexedOptionArray64() const {
     Index64 index(length());
-    struct Error err = awkward_bytemaskedarray_toindexedarray_64(
+    struct Error err = kernel::ByteMaskedArray_toIndexedOptionArray64(
       index.ptr().get(),
       mask_.ptr().get(),
       mask_.offset(),
@@ -331,7 +331,7 @@ namespace awkward {
                                          content_.get()->length());
         Identities32* rawsubidentities =
           reinterpret_cast<Identities32*>(subidentities.get());
-        struct Error err = awkward_identities32_extend(
+        struct Error err = kernel::Identities_extend<int32_t>(
           rawsubidentities->ptr().get(),
           rawidentities->ptr().get(),
           rawidentities->offset(),
@@ -349,7 +349,7 @@ namespace awkward {
                                          content_.get()->length());
         Identities64* rawsubidentities =
           reinterpret_cast<Identities64*>(subidentities.get());
-        struct Error err = awkward_identities64_extend(
+        struct Error err = kernel::Identities_extend<int64_t>(
           rawsubidentities->ptr().get(),
           rawidentities->ptr().get(),
           rawidentities->offset(),
@@ -375,8 +375,8 @@ namespace awkward {
                                        length());
       Identities32* rawidentities =
         reinterpret_cast<Identities32*>(newidentities.get());
-      struct Error err = awkward_new_identities32(rawidentities->ptr().get(),
-                                                  length());
+      struct Error err = kernel::new_Identities<int32_t>(rawidentities->ptr().get(),
+                                                         length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
     }
@@ -389,7 +389,7 @@ namespace awkward {
       Identities64* rawidentities =
         reinterpret_cast<Identities64*>(newidentities.get());
       struct Error err =
-        awkward_new_identities64(rawidentities->ptr().get(), length());
+        kernel::new_Identities<int64_t>(rawidentities->ptr().get(), length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
     }
@@ -545,7 +545,7 @@ namespace awkward {
   ByteMaskedArray::getitem_range(int64_t start, int64_t stop) const {
     int64_t regular_start = start;
     int64_t regular_stop = stop;
-    awkward_regularize_rangeslice(&regular_start, &regular_stop,
+    kernel::regularize_rangeslice(&regular_start, &regular_stop,
       true, start != Slice::none(), stop != Slice::none(), length());
     if (identities_.get() != nullptr  &&
         regular_stop > identities_.get()->length()) {
@@ -641,7 +641,7 @@ namespace awkward {
   const ContentPtr
   ByteMaskedArray::carry(const Index64& carry) const {
     Index8 nextmask(carry.length());
-    struct Error err = awkward_bytemaskedarray_getitem_carry_64(
+    struct Error err = kernel::ByteMaskedArray_getitem_carry_64(
       nextmask.ptr().get(),
       mask_.ptr().get(),
       mask_.offset(),
@@ -750,7 +750,7 @@ namespace awkward {
       else {
         Index64 outoffsets(offsets.length() + numnull);
         struct Error err =
-          util::awkward_indexedarray_flatten_none2empty_64<int64_t>(
+          kernel::IndexedArray_flatten_none2empty_64<int64_t>(
           outoffsets.ptr().get(),
           outindex.ptr().get(),
           outindex.offset(),
@@ -851,7 +851,7 @@ namespace awkward {
       Index8 mask = bytemask();
       Index64 index(mask.length());
       struct Error err =
-        awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_64(
+        kernel::IndexedOptionArray_rpad_and_clip_mask_axis1_64(
         index.ptr().get(),
         mask.ptr().get(),
         mask.length());
@@ -886,7 +886,7 @@ namespace awkward {
       Index8 mask = bytemask();
       Index64 index(mask.length());
       struct Error err =
-        awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_64(
+        kernel::IndexedOptionArray_rpad_and_clip_mask_axis1_64(
         index.ptr().get(),
         mask.ptr().get(),
         mask.length());
@@ -918,7 +918,7 @@ namespace awkward {
                                bool mask,
                                bool keepdims) const {
     int64_t numnull;
-    struct Error err1 = awkward_bytemaskedarray_numnull(
+    struct Error err1 = kernel::ByteMaskedArray_numnull(
       &numnull,
       mask_.ptr().get(),
       mask_.offset(),
@@ -929,7 +929,7 @@ namespace awkward {
     Index64 nextparents(length() - numnull);
     Index64 nextcarry(length() - numnull);
     Index64 outindex(length());
-    struct Error err2 = awkward_bytemaskedarray_reduce_next_64(
+    struct Error err2 = kernel::ByteMaskedArray_reduce_next_64(
       nextcarry.ptr().get(),
       nextparents.ptr().get(),
       outindex.ptr().get(),
@@ -967,7 +967,7 @@ namespace awkward {
             "reduce_next with unbranching depth > negaxis expects "
             "a ListOffsetArray64 whose offsets start at zero");
         }
-        struct Error err3 = awkward_indexedarray_reduce_next_fix_offsets_64(
+        struct Error err3 = kernel::IndexedArray_reduce_next_fix_offsets_64(
           outoffsets.ptr().get(),
           starts.ptr().get(),
           starts.offset(),
@@ -1060,7 +1060,7 @@ namespace awkward {
                              bool stable,
                              bool keepdims) const {
     int64_t numnull;
-    struct Error err1 = awkward_bytemaskedarray_numnull(
+    struct Error err1 = kernel::ByteMaskedArray_numnull(
       &numnull,
       mask_.ptr().get(),
       mask_.offset(),
@@ -1071,7 +1071,7 @@ namespace awkward {
     Index64 nextparents(length() - numnull);
     Index64 nextcarry(length() - numnull);
     Index64 outindex(length());
-    struct Error err2 = awkward_bytemaskedarray_reduce_next_64(
+    struct Error err2 = kernel::ByteMaskedArray_reduce_next_64(
       nextcarry.ptr().get(),
       nextparents.ptr().get(),
       outindex.ptr().get(),
@@ -1109,7 +1109,7 @@ namespace awkward {
             "sort_next with unbranching depth > negaxis expects "
             "a ListOffsetArray64 whose offsets start at zero");
         }
-        struct Error err3 = awkward_indexedarray_reduce_next_fix_offsets_64(
+        struct Error err3 = kernel::IndexedArray_reduce_next_fix_offsets_64(
           outoffsets.ptr().get(),
           starts.ptr().get(),
           starts.offset(),
@@ -1145,7 +1145,7 @@ namespace awkward {
                                 bool stable,
                                 bool keepdims) const {
     int64_t numnull;
-    struct Error err1 = awkward_bytemaskedarray_numnull(
+    struct Error err1 = kernel::ByteMaskedArray_numnull(
       &numnull,
       mask_.ptr().get(),
       mask_.offset(),
@@ -1156,7 +1156,7 @@ namespace awkward {
     Index64 nextparents(length() - numnull);
     Index64 nextcarry(length() - numnull);
     Index64 outindex(length());
-    struct Error err2 = awkward_bytemaskedarray_reduce_next_64(
+    struct Error err2 = kernel::ByteMaskedArray_reduce_next_64(
       nextcarry.ptr().get(),
       nextparents.ptr().get(),
       outindex.ptr().get(),
@@ -1194,7 +1194,7 @@ namespace awkward {
             "argsort_next with unbranching depth > negaxis expects "
             "a ListOffsetArray64 whose offsets start at zero");
         }
-        struct Error err3 = awkward_indexedarray_reduce_next_fix_offsets_64(
+        struct Error err3 = kernel::IndexedArray_reduce_next_fix_offsets_64(
           outoffsets.ptr().get(),
           starts.ptr().get(),
           starts.offset(),
@@ -1308,7 +1308,7 @@ namespace awkward {
 
   const std::pair<Index64, Index64>
   ByteMaskedArray::nextcarry_outindex(int64_t& numnull) const {
-    struct Error err1 = awkward_bytemaskedarray_numnull(
+    struct Error err1 = kernel::ByteMaskedArray_numnull(
       &numnull,
       mask_.ptr().get(),
       mask_.offset(),
@@ -1318,7 +1318,7 @@ namespace awkward {
 
     Index64 nextcarry(length() - numnull);
     Index64 outindex(length());
-    struct Error err2 = awkward_bytemaskedarray_getitem_nextcarry_outindex_64(
+    struct Error err2 = kernel::ByteMaskedArray_getitem_nextcarry_outindex_64(
       nextcarry.ptr().get(),
       outindex.ptr().get(),
       mask_.ptr().get(),

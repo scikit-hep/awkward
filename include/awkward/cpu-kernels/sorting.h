@@ -255,13 +255,13 @@ extern "C" {
       bool stable);
 
   EXPORT_SYMBOL struct Error
-    awkward_listoffsetarray_local_preparenext_64(
+    awkward_ListOffsetArray_local_preparenext_64(
       int64_t* tocarry,
       const int64_t* fromindex,
       int64_t length);
 
   EXPORT_SYMBOL struct Error
-    awkward_indexedarray_local_preparenext_64(
+    awkward_IndexedArray_local_preparenext_64(
       int64_t* tocarry,
       const int64_t* starts,
       const int64_t* parents,
@@ -271,7 +271,7 @@ extern "C" {
       int64_t nextparentsoffset);
 
   EXPORT_SYMBOL struct Error
-    awkward_numpyarray_sort_asstrings_uint8(
+    awkward_NumpyArray_sort_asstrings_uint8(
       uint8_t* toptr,
       const uint8_t* fromptr,
       int64_t length,

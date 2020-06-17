@@ -193,13 +193,13 @@ namespace awkward {
   template <typename T>
   T
   IndexOf<T>::getitem_at_nowrap(int64_t at) const {
-    return util::awkward_index_getitem_at_nowrap<T>(ptr_.get(), offset_, at);
+    return kernel::index_getitem_at_nowrap<T>(ptr_.get(), offset_, at);
   }
 
   template <typename T>
   void
   IndexOf<T>::setitem_at_nowrap(int64_t at, T value) const {
-    util::awkward_index_setitem_at_nowrap<T>(ptr_.get(), offset_, at, value);
+    kernel::index_setitem_at_nowrap<T>(ptr_.get(), offset_, at, value);
   }
 
   template <typename T>
@@ -207,7 +207,7 @@ namespace awkward {
   IndexOf<T>::getitem_range(int64_t start, int64_t stop) const {
     int64_t regular_start = start;
     int64_t regular_stop = stop;
-    awkward_regularize_rangeslice(&regular_start, &regular_stop,
+    kernel::regularize_rangeslice(&regular_start, &regular_stop,
       true, start != Slice::none(), stop != Slice::none(), length_);
     return getitem_range_nowrap(regular_start, regular_stop);
   }
@@ -245,8 +245,8 @@ namespace awkward {
       length_ == 0 ? nullptr : new int64_t[(size_t)length_],
       util::array_deleter<int64_t>());
     if (length_ != 0) {
-      awkward_index8_to_index64(ptr.get(), &ptr_.get()[(size_t)offset_],
-                                length_);
+      kernel::Index_to_Index64<int8_t>(ptr.get(), &ptr_.get()[(size_t)offset_],
+                                       length_);
     }
     return IndexOf<int64_t>(ptr, 0, length_);
   }
@@ -257,8 +257,8 @@ namespace awkward {
       length_ == 0 ? nullptr : new int64_t[(size_t)length_],
       util::array_deleter<int64_t>());
     if (length_ != 0) {
-      awkward_indexU8_to_index64(ptr.get(), &ptr_.get()[(size_t)offset_],
-                                 length_);
+      kernel::Index_to_Index64<uint8_t>(ptr.get(), &ptr_.get()[(size_t)offset_],
+                                        length_);
     }
     return IndexOf<int64_t>(ptr, 0, length_);
   }
@@ -269,9 +269,8 @@ namespace awkward {
       length_ == 0 ? nullptr : new int64_t[(size_t)length_],
       util::array_deleter<int64_t>());
     if (length_ != 0) {
-      awkward_index32_to_index64(ptr.get(),
-                                 &ptr_.get()[(size_t)offset_],
-                                 length_);
+      kernel::Index_to_Index64<int32_t>(ptr.get(),
+                                        &ptr_.get()[(size_t)offset_], length_);
     }
     return IndexOf<int64_t>(ptr, 0, length_);
   }
@@ -282,9 +281,9 @@ namespace awkward {
       length_ == 0 ? nullptr : new int64_t[(size_t)length_],
       util::array_deleter<int64_t>());
     if (length_ != 0) {
-      awkward_indexU32_to_index64(ptr.get(),
-                                  &ptr_.get()[(size_t)offset_],
-                                  length_);
+      kernel::Index_to_Index64<uint32_t>(ptr.get(),
+                                         &ptr_.get()[(size_t)offset_],
+                                         length_);
     }
     return IndexOf<int64_t>(ptr, 0, length_);
   }

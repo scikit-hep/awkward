@@ -432,8 +432,8 @@ namespace awkward {
                                        len);
       Identities32* rawidentities =
         reinterpret_cast<Identities32*>(newidentities.get());
-      struct Error err = awkward_new_identities32(rawidentities->ptr().get(),
-                                                  len);
+      struct Error err = kernel::new_Identities<int32_t>(rawidentities->ptr().get(),
+                                                         len);
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
     }
@@ -445,7 +445,7 @@ namespace awkward {
       Identities64* rawidentities =
         reinterpret_cast<Identities64*>(newidentities.get());
       struct Error err =
-        awkward_new_identities64(rawidentities->ptr().get(), len);
+        kernel::new_Identities<int64_t>(rawidentities->ptr().get(), len);
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
     }
@@ -678,7 +678,7 @@ namespace awkward {
   RecordArray::getitem_range(int64_t start, int64_t stop) const {
     int64_t regular_start = start;
     int64_t regular_stop = stop;
-    awkward_regularize_rangeslice(&regular_start, &regular_stop,
+    kernel::regularize_rangeslice(&regular_start, &regular_stop,
       true, start != Slice::none(), stop != Slice::none(), length_);
     if (identities_.get() != nullptr  &&
         regular_stop > identities_.get()->length()) {

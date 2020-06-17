@@ -173,7 +173,7 @@ namespace awkward {
   const Index8
   UnmaskedArray::bytemask() const {
     Index8 out(length());
-    struct Error err = awkward_zero_mask8(
+    struct Error err = kernel::zero_mask8(
       out.ptr().get(),
       length());
     util::handle_error(err, classname(), identities_.get());
@@ -200,7 +200,7 @@ namespace awkward {
   const ContentPtr
   UnmaskedArray::toIndexedOptionArray64() const {
     Index64 index(length());
-    struct Error err = awkward_carry_arange_64(
+    struct Error err = kernel::carry_arange<int64_t>(
       index.ptr().get(),
       length());
     util::handle_error(err, classname(), identities_.get());
@@ -238,7 +238,7 @@ namespace awkward {
                                          content_.get()->length());
         Identities32* rawsubidentities =
           reinterpret_cast<Identities32*>(subidentities.get());
-        struct Error err = awkward_identities32_extend(
+        struct Error err = kernel::Identities_extend<int32_t>(
           rawsubidentities->ptr().get(),
           rawidentities->ptr().get(),
           rawidentities->offset(),
@@ -256,7 +256,7 @@ namespace awkward {
                                          content_.get()->length());
         Identities64* rawsubidentities =
           reinterpret_cast<Identities64*>(subidentities.get());
-        struct Error err = awkward_identities64_extend(
+        struct Error err = kernel::Identities_extend<int64_t>(
           rawsubidentities->ptr().get(),
           rawidentities->ptr().get(),
           rawidentities->offset(),
@@ -282,8 +282,8 @@ namespace awkward {
                                        length());
       Identities32* rawidentities =
         reinterpret_cast<Identities32*>(newidentities.get());
-      struct Error err = awkward_new_identities32(rawidentities->ptr().get(),
-                                                  length());
+      struct Error err = kernel::new_Identities<int32_t>(rawidentities->ptr().get(),
+                                                         length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
     }
@@ -295,8 +295,8 @@ namespace awkward {
                                        length());
       Identities64* rawidentities =
         reinterpret_cast<Identities64*>(newidentities.get());
-      struct Error err = awkward_new_identities64(rawidentities->ptr().get(),
-                                                  length());
+      struct Error err = kernel::new_Identities<int64_t>(rawidentities->ptr().get(),
+                                                         length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
     }
@@ -419,7 +419,7 @@ namespace awkward {
   UnmaskedArray::getitem_range(int64_t start, int64_t stop) const {
     int64_t regular_start = start;
     int64_t regular_stop = stop;
-    awkward_regularize_rangeslice(&regular_start, &regular_stop,
+    kernel::regularize_rangeslice(&regular_start, &regular_stop,
       true, start != Slice::none(), stop != Slice::none(), length());
     if (identities_.get() != nullptr  &&
         regular_stop > identities_.get()->length()) {
