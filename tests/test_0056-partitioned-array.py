@@ -267,8 +267,8 @@ def test_getitem_first_dimension_field():
         assert array["y", :, :2].tojson() == "[[],[1],[2,2],[3,3],[4,4]]"
 
         # Segmentation fault:
-        #assert array[["y"], :, :2].tojson() == '[{"y":[]},{"y":[1]},{"y":[2,2]},{"y":[3,3]},{"y":[4,4]}]'
-        
+        # assert array[["y"], :, :2].tojson() == '[{"y":[]},{"y":[1]},{"y":[2,2]},{"y":[3,3]},{"y":[4,4]}]'
+
         assert array[:, "y", :2].tojson() == "[[],[1],[2,2],[3,3],[4,4]]"
         assert array["y", ..., :2].tojson() == "[[],[1],[2,2],[3,3],[4,4]]"
         assert array[numpy.newaxis, "y", :, :2].tojson() == "[[[],[1],[2,2],[3,3],[4,4]]]"
