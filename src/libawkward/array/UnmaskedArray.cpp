@@ -238,7 +238,7 @@ namespace awkward {
                                          content_.get()->length());
         Identities32* rawsubidentities =
           reinterpret_cast<Identities32*>(subidentities.get());
-        struct Error err = kernel::identities_extend<int32_t>(
+        struct Error err = kernel::Identities_extend<int32_t>(
           rawsubidentities->ptr().get(),
           rawidentities->ptr().get(),
           rawidentities->offset(),
@@ -256,7 +256,7 @@ namespace awkward {
                                          content_.get()->length());
         Identities64* rawsubidentities =
           reinterpret_cast<Identities64*>(subidentities.get());
-        struct Error err = kernel::identities_extend<int64_t>(
+        struct Error err = kernel::Identities_extend<int64_t>(
           rawsubidentities->ptr().get(),
           rawidentities->ptr().get(),
           rawidentities->offset(),
@@ -282,7 +282,7 @@ namespace awkward {
                                        length());
       Identities32* rawidentities =
         reinterpret_cast<Identities32*>(newidentities.get());
-      struct Error err = kernel::new_identities<int32_t>(rawidentities->ptr().get(),
+      struct Error err = kernel::new_Identities<int32_t>(rawidentities->ptr().get(),
                                                          length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
@@ -295,7 +295,7 @@ namespace awkward {
                                        length());
       Identities64* rawidentities =
         reinterpret_cast<Identities64*>(newidentities.get());
-      struct Error err = kernel::new_identities<int64_t>(rawidentities->ptr().get(),
+      struct Error err = kernel::new_Identities<int64_t>(rawidentities->ptr().get(),
                                                          length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);

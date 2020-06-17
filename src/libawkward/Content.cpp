@@ -879,25 +879,25 @@ namespace awkward {
 
     ContentPtrVec contents({ shallow_copy(), other });
 
-    struct Error err1 = kernel::unionarray_filltags_to8_const(
+    struct Error err1 = kernel::UnionArray_filltags_to8_const(
       tags.ptr().get(),
       0,
       mylength,
       0);
     util::handle_error(err1, classname(), identities_.get());
-    struct Error err2 = kernel::unionarray_fillindex_count_64(
+    struct Error err2 = kernel::UnionArray_fillindex_count_64(
       index.ptr().get(),
       0,
       mylength);
     util::handle_error(err2, classname(), identities_.get());
 
-    struct Error err3 = kernel::unionarray_filltags_to8_const(
+    struct Error err3 = kernel::UnionArray_filltags_to8_const(
       tags.ptr().get(),
       mylength,
       theirlength,
       1);
     util::handle_error(err3, classname(), identities_.get());
-    struct Error err4 = kernel::unionarray_fillindex_count_64(
+    struct Error err4 = kernel::UnionArray_fillindex_count_64(
       index.ptr().get(),
       mylength,
       theirlength);
@@ -977,7 +977,7 @@ namespace awkward {
     }
     IndexOf<int64_t> toindex(n);
     IndexOf<int64_t> fromindex(n);
-    struct Error err = kernel::regulararray_combinations_64(
+    struct Error err = kernel::RegularArray_combinations_64(
       tocarryraw.data(),
       toindex.ptr().get(),
       fromindex.ptr().get(),

@@ -558,7 +558,7 @@ ERROR awkward_sort_float64(
     stable);
 }
 
-ERROR awkward_listoffsetarray_local_preparenext_64(
+ERROR awkward_ListOffsetArray_local_preparenext_64(
   int64_t* tocarry,
   const int64_t* fromindex,
   int64_t length) {
@@ -575,7 +575,7 @@ ERROR awkward_listoffsetarray_local_preparenext_64(
   return success();
 }
 
-ERROR awkward_indexedarray_local_preparenext_64(
+ERROR awkward_IndexedArray_local_preparenext_64(
     int64_t* tocarry,
     const int64_t* starts,
     const int64_t* parents,
@@ -601,7 +601,7 @@ ERROR awkward_indexedarray_local_preparenext_64(
 
 // This function relies on std::sort to do the right
 // thing with std::strings
-ERROR awkward_numpyarray_sort_asstrings_uint8(
+ERROR awkward_NumpyArray_sort_asstrings_uint8(
     uint8_t* toptr,
     const uint8_t* fromptr,
     int64_t length,

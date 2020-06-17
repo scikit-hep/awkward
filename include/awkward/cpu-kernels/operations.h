@@ -7,7 +7,7 @@
 
 extern "C" {
   EXPORT_SYMBOL struct Error
-    awkward_listarray32_num_64(
+    awkward_ListArray32_num_64(
       int64_t* tonum,
       const int32_t* fromstarts,
       int64_t startsoffset,
@@ -15,7 +15,7 @@ extern "C" {
       int64_t stopsoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_listarrayU32_num_64(
+    awkward_ListArrayU32_num_64(
       int64_t* tonum,
       const uint32_t* fromstarts,
       int64_t startsoffset,
@@ -23,7 +23,7 @@ extern "C" {
       int64_t stopsoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_listarray64_num_64(
+    awkward_ListArray64_num_64(
       int64_t* tonum,
       const int64_t* fromstarts,
       int64_t startsoffset,
@@ -32,29 +32,29 @@ extern "C" {
       int64_t length);
 
   EXPORT_SYMBOL struct Error
-    awkward_listoffsetarray32_count_64(
+    awkward_ListOffsetArray32_count_64(
       int64_t* tocount,
       const int32_t* fromoffsets,
       int64_t lenoffsets);
   EXPORT_SYMBOL struct Error
-    awkward_listoffsetarrayU32_count_64(
+    awkward_ListOffsetArrayU32_count_64(
       int64_t* tocount,
       const uint32_t* fromoffsets,
       int64_t lenoffsets);
   EXPORT_SYMBOL struct Error
-    awkward_listoffsetarray64_count_64(
+    awkward_ListOffsetArray64_count_64(
       int64_t* tocount,
       const int64_t* fromoffsets,
       int64_t lenoffsets);
 
   EXPORT_SYMBOL struct Error
-    awkward_regulararray_num_64(
+    awkward_RegularArray_num_64(
       int64_t* tonum,
       int64_t size,
       int64_t length);
 
   EXPORT_SYMBOL struct Error
-    awkward_listoffsetarray32_flatten_offsets_64(
+    awkward_ListOffsetArray32_flatten_offsets_64(
       int64_t* tooffsets,
       const int32_t* outeroffsets,
       int64_t outeroffsetsoffset,
@@ -63,7 +63,7 @@ extern "C" {
       int64_t inneroffsetsoffset,
       int64_t inneroffsetslen);
   EXPORT_SYMBOL struct Error
-    awkward_listoffsetarrayU32_flatten_offsets_64(
+    awkward_ListOffsetArrayU32_flatten_offsets_64(
       int64_t* tooffsets,
       const uint32_t* outeroffsets,
       int64_t outeroffsetsoffset,
@@ -72,7 +72,7 @@ extern "C" {
       int64_t inneroffsetsoffset,
       int64_t inneroffsetslen);
   EXPORT_SYMBOL struct Error
-    awkward_listoffsetarray64_flatten_offsets_64(
+    awkward_ListOffsetArray64_flatten_offsets_64(
       int64_t* tooffsets,
       const int64_t* outeroffsets,
       int64_t outeroffsetsoffset,
@@ -82,7 +82,7 @@ extern "C" {
       int64_t inneroffsetslen);
 
   EXPORT_SYMBOL struct Error
-    awkward_indexedarray32_flatten_none2empty_64(
+    awkward_IndexedArray32_flatten_none2empty_64(
       int64_t* outoffsets,
       const int32_t* outindex,
       int64_t outindexoffset,
@@ -91,7 +91,7 @@ extern "C" {
       int64_t offsetsoffset,
       int64_t offsetslength);
   EXPORT_SYMBOL struct Error
-    awkward_indexedarrayU32_flatten_none2empty_64(
+    awkward_IndexedArrayU32_flatten_none2empty_64(
       int64_t* outoffsets,
       const uint32_t* outindex,
       int64_t outindexoffset,
@@ -100,7 +100,7 @@ extern "C" {
       int64_t offsetsoffset,
       int64_t offsetslength);
   EXPORT_SYMBOL struct Error
-    awkward_indexedarray64_flatten_none2empty_64(
+    awkward_IndexedArray64_flatten_none2empty_64(
       int64_t* outoffsets,
       const int64_t* outindex,
       int64_t outindexoffset,
@@ -110,7 +110,7 @@ extern "C" {
       int64_t offsetslength);
 
   EXPORT_SYMBOL struct Error
-    awkward_unionarray32_flatten_length_64(
+    awkward_UnionArray32_flatten_length_64(
       int64_t* total_length,
       const int8_t* fromtags,
       int64_t fromtagsoffset,
@@ -120,7 +120,7 @@ extern "C" {
       int64_t** offsetsraws,
       int64_t* offsetsoffsets);
   EXPORT_SYMBOL struct Error
-    awkward_unionarrayU32_flatten_length_64(
+    awkward_UnionArrayU32_flatten_length_64(
       int64_t* total_length,
       const int8_t* fromtags,
       int64_t fromtagsoffset,
@@ -130,7 +130,7 @@ extern "C" {
       int64_t** offsetsraws,
       int64_t* offsetsoffsets);
   EXPORT_SYMBOL struct Error
-    awkward_unionarray64_flatten_length_64(
+    awkward_UnionArray64_flatten_length_64(
       int64_t* total_length,
       const int8_t* fromtags,
       int64_t fromtagsoffset,
@@ -141,7 +141,7 @@ extern "C" {
       int64_t* offsetsoffsets);
 
   EXPORT_SYMBOL struct Error
-    awkward_unionarray32_flatten_combine_64(
+    awkward_UnionArray32_flatten_combine_64(
       int8_t* totags,
       int64_t* toindex,
       int64_t* tooffsets,
@@ -153,7 +153,7 @@ extern "C" {
       int64_t** offsetsraws,
       int64_t* offsetsoffsets);
   EXPORT_SYMBOL struct Error
-    awkward_unionarrayU32_flatten_combine_64(
+    awkward_UnionArrayU32_flatten_combine_64(
       int8_t* totags,
       int64_t* toindex,
       int64_t* tooffsets,
@@ -165,7 +165,7 @@ extern "C" {
       int64_t** offsetsraws,
       int64_t* offsetsoffsets);
   EXPORT_SYMBOL struct Error
-    awkward_unionarray64_flatten_combine_64(
+    awkward_UnionArray64_flatten_combine_64(
       int8_t* totags,
       int64_t* toindex,
       int64_t* tooffsets,
@@ -178,21 +178,21 @@ extern "C" {
       int64_t* offsetsoffsets);
 
   EXPORT_SYMBOL struct Error
-    awkward_indexedarray32_flatten_nextcarry_64(
+    awkward_IndexedArray32_flatten_nextcarry_64(
       int64_t* tocarry,
       const int32_t* fromindex,
       int64_t indexoffset,
       int64_t lenindex,
       int64_t lencontent);
   EXPORT_SYMBOL struct Error
-    awkward_indexedarrayU32_flatten_nextcarry_64(
+    awkward_IndexedArrayU32_flatten_nextcarry_64(
       int64_t* tocarry,
       const uint32_t* fromindex,
       int64_t indexoffset,
       int64_t lenindex,
       int64_t lencontent);
   EXPORT_SYMBOL struct Error
-    awkward_indexedarray64_flatten_nextcarry_64(
+    awkward_IndexedArray64_flatten_nextcarry_64(
       int64_t* tocarry,
       const int64_t* fromindex,
       int64_t indexoffset,
@@ -200,7 +200,7 @@ extern "C" {
       int64_t lencontent);
 
   EXPORT_SYMBOL struct Error
-    awkward_indexedarray32_overlay_mask8_to64(
+    awkward_IndexedArray32_overlay_mask8_to64(
       int64_t* toindex,
       const int8_t* mask,
       int64_t maskoffset,
@@ -208,7 +208,7 @@ extern "C" {
       int64_t indexoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_indexedarrayU32_overlay_mask8_to64(
+    awkward_IndexedArrayU32_overlay_mask8_to64(
       int64_t* toindex,
       const int8_t* mask,
       int64_t maskoffset,
@@ -216,7 +216,7 @@ extern "C" {
       int64_t indexoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_indexedarray64_overlay_mask8_to64(
+    awkward_IndexedArray64_overlay_mask8_to64(
       int64_t* toindex,
       const int8_t* mask,
       int64_t maskoffset,
@@ -225,26 +225,26 @@ extern "C" {
       int64_t length);
 
   EXPORT_SYMBOL struct Error
-    awkward_indexedarray32_mask8(
+    awkward_IndexedArray32_mask8(
       int8_t* tomask,
       const int32_t* fromindex,
       int64_t indexoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_indexedarrayU32_mask8(
+    awkward_IndexedArrayU32_mask8(
       int8_t* tomask,
       const uint32_t* fromindex,
       int64_t indexoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_indexedarray64_mask8(
+    awkward_IndexedArray64_mask8(
       int8_t* tomask,
       const int64_t* fromindex,
       int64_t indexoffset,
       int64_t length);
 
   EXPORT_SYMBOL struct Error
-    awkward_bytemaskedarray_mask8(
+    awkward_ByteMaskedArray_mask8(
       int8_t* tomask,
       const int8_t* frommask,
       int64_t maskoffset,
@@ -257,7 +257,7 @@ extern "C" {
       int64_t length);
 
   EXPORT_SYMBOL struct Error
-    awkward_indexedarray32_simplify32_to64(
+    awkward_IndexedArray32_simplify32_to64(
       int64_t* toindex,
       const int32_t* outerindex,
       int64_t outeroffset,
@@ -266,7 +266,7 @@ extern "C" {
       int64_t inneroffset,
       int64_t innerlength);
   EXPORT_SYMBOL struct Error
-    awkward_indexedarray32_simplifyU32_to64(
+    awkward_IndexedArray32_simplifyU32_to64(
       int64_t* toindex,
       const int32_t* outerindex,
       int64_t outeroffset,
@@ -275,7 +275,7 @@ extern "C" {
       int64_t inneroffset,
       int64_t innerlength);
   EXPORT_SYMBOL struct Error
-    awkward_indexedarray32_simplify64_to64(
+    awkward_IndexedArray32_simplify64_to64(
       int64_t* toindex,
       const int32_t* outerindex,
       int64_t outeroffset,
@@ -284,7 +284,7 @@ extern "C" {
       int64_t inneroffset,
       int64_t innerlength);
   EXPORT_SYMBOL struct Error
-    awkward_indexedarrayU32_simplify32_to64(
+    awkward_IndexedArrayU32_simplify32_to64(
       int64_t* toindex,
       const uint32_t* outerindex,
       int64_t outeroffset,
@@ -293,7 +293,7 @@ extern "C" {
       int64_t inneroffset,
       int64_t innerlength);
   EXPORT_SYMBOL struct Error
-    awkward_indexedarrayU32_simplifyU32_to64(
+    awkward_IndexedArrayU32_simplifyU32_to64(
       int64_t* toindex,
       const uint32_t* outerindex,
       int64_t outeroffset,
@@ -302,7 +302,7 @@ extern "C" {
       int64_t inneroffset,
       int64_t innerlength);
   EXPORT_SYMBOL struct Error
-    awkward_indexedarrayU32_simplify64_to64(
+    awkward_IndexedArrayU32_simplify64_to64(
       int64_t* toindex,
       const uint32_t* outerindex,
       int64_t outeroffset,
@@ -311,7 +311,7 @@ extern "C" {
       int64_t inneroffset,
       int64_t innerlength);
   EXPORT_SYMBOL struct Error
-    awkward_indexedarray64_simplify32_to64(
+    awkward_IndexedArray64_simplify32_to64(
       int64_t* toindex,
       const int64_t* outerindex,
       int64_t outeroffset,
@@ -320,7 +320,7 @@ extern "C" {
       int64_t inneroffset,
       int64_t innerlength);
   EXPORT_SYMBOL struct Error
-    awkward_indexedarray64_simplifyU32_to64(
+    awkward_IndexedArray64_simplifyU32_to64(
       int64_t* toindex,
       const int64_t* outerindex,
       int64_t outeroffset,
@@ -329,7 +329,7 @@ extern "C" {
       int64_t inneroffset,
       int64_t innerlength);
   EXPORT_SYMBOL struct Error
-    awkward_indexedarray64_simplify64_to64(
+    awkward_IndexedArray64_simplify64_to64(
       int64_t* toindex,
       const int64_t* outerindex,
       int64_t outeroffset,
@@ -339,13 +339,13 @@ extern "C" {
       int64_t innerlength);
 
   EXPORT_SYMBOL struct Error
-    awkward_regulararray_compact_offsets64(
+    awkward_RegularArray_compact_offsets64(
       int64_t* tooffsets,
       int64_t length,
       int64_t size);
 
   EXPORT_SYMBOL struct Error
-    awkward_listarray32_compact_offsets_64(
+    awkward_ListArray32_compact_offsets_64(
       int64_t* tooffsets,
       const int32_t* fromstarts,
       const int32_t* fromstops,
@@ -353,7 +353,7 @@ extern "C" {
       int64_t stopsoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_listarrayU32_compact_offsets_64(
+    awkward_ListArrayU32_compact_offsets_64(
       int64_t* tooffsets,
       const uint32_t* fromstarts,
       const uint32_t* fromstops,
@@ -361,7 +361,7 @@ extern "C" {
       int64_t stopsoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_listarray64_compact_offsets_64(
+    awkward_ListArray64_compact_offsets_64(
       int64_t* tooffsets,
       const int64_t* fromstarts,
       const int64_t* fromstops,
@@ -370,26 +370,26 @@ extern "C" {
       int64_t length);
 
   EXPORT_SYMBOL struct Error
-    awkward_listoffsetarray32_compact_offsets_64(
+    awkward_ListOffsetArray32_compact_offsets_64(
       int64_t* tooffsets,
       const int32_t* fromoffsets,
       int64_t offsetsoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_listoffsetarrayU32_compact_offsets_64(
+    awkward_ListOffsetArrayU32_compact_offsets_64(
       int64_t* tooffsets,
       const uint32_t* fromoffsets,
       int64_t offsetsoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_listoffsetarray64_compact_offsets_64(
+    awkward_ListOffsetArray64_compact_offsets_64(
       int64_t* tooffsets,
       const int64_t* fromoffsets,
       int64_t offsetsoffset,
       int64_t length);
 
   EXPORT_SYMBOL struct Error
-    awkward_listarray32_broadcast_tooffsets_64(
+    awkward_ListArray32_broadcast_tooffsets_64(
       int64_t* tocarry,
       const int64_t* fromoffsets,
       int64_t offsetsoffset,
@@ -400,7 +400,7 @@ extern "C" {
       int64_t stopsoffset,
       int64_t lencontent);
   EXPORT_SYMBOL struct Error
-    awkward_listarrayU32_broadcast_tooffsets_64(
+    awkward_ListArrayU32_broadcast_tooffsets_64(
       int64_t* tocarry,
       const int64_t* fromoffsets,
       int64_t offsetsoffset,
@@ -411,7 +411,7 @@ extern "C" {
       int64_t stopsoffset,
       int64_t lencontent);
   EXPORT_SYMBOL struct Error
-    awkward_listarray64_broadcast_tooffsets_64(
+    awkward_ListArray64_broadcast_tooffsets_64(
       int64_t* tocarry,
       const int64_t* fromoffsets,
       int64_t offsetsoffset,
@@ -423,194 +423,194 @@ extern "C" {
       int64_t lencontent);
 
   EXPORT_SYMBOL struct Error
-    awkward_regulararray_broadcast_tooffsets_64(
+    awkward_RegularArray_broadcast_tooffsets_64(
       const int64_t* fromoffsets,
       int64_t offsetsoffset,
       int64_t offsetslength,
       int64_t size);
 
   EXPORT_SYMBOL struct Error
-    awkward_regulararray_broadcast_tooffsets_size1_64(
+    awkward_RegularArray_broadcast_tooffsets_size1_64(
       int64_t* tocarry,
       const int64_t* fromoffsets,
       int64_t offsetsoffset,
       int64_t offsetslength);
 
   EXPORT_SYMBOL struct Error
-    awkward_listoffsetarray32_toRegularArray(
+    awkward_ListOffsetArray32_toRegularArray(
       int64_t* size,
       const int32_t* fromoffsets,
       int64_t offsetsoffset,
       int64_t offsetslength);
   EXPORT_SYMBOL struct Error
-    awkward_listoffsetarrayU32_toRegularArray(
+    awkward_ListOffsetArrayU32_toRegularArray(
       int64_t* size,
       const uint32_t* fromoffsets,
       int64_t offsetsoffset,
       int64_t offsetslength);
   EXPORT_SYMBOL struct Error
-    awkward_listoffsetarray64_toRegularArray(
+    awkward_ListOffsetArray64_toRegularArray(
       int64_t* size,
       const int64_t* fromoffsets,
       int64_t offsetsoffset,
       int64_t offsetslength);
 
   EXPORT_SYMBOL struct Error
-    awkward_numpyarray_fill_todouble_fromdouble(
+    awkward_NumpyArray_fill_todouble_fromdouble(
       double* toptr,
       int64_t tooffset,
       const double* fromptr,
       int64_t fromoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_numpyarray_fill_todouble_fromfloat(
+    awkward_NumpyArray_fill_todouble_fromfloat(
       double* toptr,
       int64_t tooffset,
       const float* fromptr,
       int64_t fromoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_numpyarray_fill_todouble_from64(
+    awkward_NumpyArray_fill_todouble_from64(
       double* toptr,
       int64_t tooffset,
       const int64_t* fromptr,
       int64_t fromoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_numpyarray_fill_todouble_fromU64(
+    awkward_NumpyArray_fill_todouble_fromU64(
       double* toptr,
       int64_t tooffset,
       const uint64_t* fromptr,
       int64_t fromoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_numpyarray_fill_todouble_from32(
+    awkward_NumpyArray_fill_todouble_from32(
       double* toptr,
       int64_t tooffset,
       const int32_t* fromptr,
       int64_t fromoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_numpyarray_fill_todouble_fromU32(
+    awkward_NumpyArray_fill_todouble_fromU32(
       double* toptr,
       int64_t tooffset,
       const uint32_t* fromptr,
       int64_t fromoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_numpyarray_fill_todouble_from16(
+    awkward_NumpyArray_fill_todouble_from16(
       double* toptr,
       int64_t tooffset,
       const int16_t* fromptr,
       int64_t fromoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_numpyarray_fill_todouble_fromU16(
+    awkward_NumpyArray_fill_todouble_fromU16(
       double* toptr,
       int64_t tooffset,
       const uint16_t* fromptr,
       int64_t fromoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_numpyarray_fill_todouble_from8(
+    awkward_NumpyArray_fill_todouble_from8(
       double* toptr,
       int64_t tooffset,
       const int8_t* fromptr,
       int64_t fromoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_numpyarray_fill_todouble_fromU8(
+    awkward_NumpyArray_fill_todouble_fromU8(
       double* toptr,
       int64_t tooffset,
       const uint8_t* fromptr,
       int64_t fromoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_numpyarray_fill_todouble_frombool(
+    awkward_NumpyArray_fill_todouble_frombool(
       double* toptr,
       int64_t tooffset,
       const bool* fromptr,
       int64_t fromoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_numpyarray_fill_toU64_fromU64(
+    awkward_NumpyArray_fill_toU64_fromU64(
       uint64_t* toptr,
       int64_t tooffset,
       const uint64_t* fromptr,
       int64_t fromoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_numpyarray_fill_to64_from64(
+    awkward_NumpyArray_fill_to64_from64(
       int64_t* toptr,
       int64_t tooffset,
       const int64_t* fromptr,
       int64_t fromoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_numpyarray_fill_to64_fromU64(
+    awkward_NumpyArray_fill_to64_fromU64(
       int64_t* toptr,
       int64_t tooffset,
       const uint64_t* fromptr,
       int64_t fromoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_numpyarray_fill_to64_from32(
+    awkward_NumpyArray_fill_to64_from32(
       int64_t* toptr,
       int64_t tooffset,
       const int32_t* fromptr,
       int64_t fromoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_numpyarray_fill_to64_fromU32(
+    awkward_NumpyArray_fill_to64_fromU32(
       int64_t* toptr,
       int64_t tooffset,
       const uint32_t* fromptr,
       int64_t fromoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_numpyarray_fill_to64_from16(
+    awkward_NumpyArray_fill_to64_from16(
       int64_t* toptr,
       int64_t tooffset,
       const int16_t* fromptr,
       int64_t fromoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_numpyarray_fill_to64_fromU16(
+    awkward_NumpyArray_fill_to64_fromU16(
       int64_t* toptr,
       int64_t tooffset,
       const uint16_t* fromptr,
       int64_t fromoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_numpyarray_fill_to64_from8(
+    awkward_NumpyArray_fill_to64_from8(
       int64_t* toptr,
       int64_t tooffset,
       const int8_t* fromptr,
       int64_t fromoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_numpyarray_fill_to64_fromU8(
+    awkward_NumpyArray_fill_to64_fromU8(
       int64_t* toptr,
       int64_t tooffset,
       const uint8_t* fromptr,
       int64_t fromoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_numpyarray_fill_to64_frombool(
+    awkward_NumpyArray_fill_to64_frombool(
       int64_t* toptr,
       int64_t tooffset,
       const bool* fromptr,
       int64_t fromoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_numpyarray_fill_tobool_frombool(
+    awkward_NumpyArray_fill_tobool_frombool(
       bool* toptr,
       int64_t tooffset,
       const bool* fromptr,
       int64_t fromoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_numpyarray_fill_tobyte_frombyte(
+    awkward_NumpyArray_fill_tobyte_frombyte(
       int8_t* toptr,
       int64_t tooffset,
       const int8_t* fromptr,
@@ -618,7 +618,7 @@ extern "C" {
       int64_t length);
 
   EXPORT_SYMBOL struct Error
-    awkward_listarray_fill_to64_from32(
+    awkward_ListArray_fill_to64_from32(
       int64_t* tostarts,
       int64_t tostartsoffset,
       int64_t* tostops,
@@ -630,7 +630,7 @@ extern "C" {
       int64_t length,
       int64_t base);
   EXPORT_SYMBOL struct Error
-    awkward_listarray_fill_to64_fromU32(
+    awkward_ListArray_fill_to64_fromU32(
       int64_t* tostarts,
       int64_t tostartsoffset,
       int64_t* tostops,
@@ -642,7 +642,7 @@ extern "C" {
       int64_t length,
       int64_t base);
   EXPORT_SYMBOL struct Error
-    awkward_listarray_fill_to64_from64(
+    awkward_ListArray_fill_to64_from64(
       int64_t* tostarts,
       int64_t tostartsoffset,
       int64_t* tostops,
@@ -655,7 +655,7 @@ extern "C" {
       int64_t base);
 
   EXPORT_SYMBOL struct Error
-    awkward_indexedarray_fill_to64_from32(
+    awkward_IndexedArray_fill_to64_from32(
       int64_t* toindex,
       int64_t toindexoffset,
       const int32_t* fromindex,
@@ -663,7 +663,7 @@ extern "C" {
       int64_t length,
       int64_t base);
   EXPORT_SYMBOL struct Error
-    awkward_indexedarray_fill_to64_fromU32(
+    awkward_IndexedArray_fill_to64_fromU32(
       int64_t* toindex,
       int64_t toindexoffset,
       const uint32_t* fromindex,
@@ -671,7 +671,7 @@ extern "C" {
       int64_t length,
       int64_t base);
   EXPORT_SYMBOL struct Error
-    awkward_indexedarray_fill_to64_from64(
+    awkward_IndexedArray_fill_to64_from64(
       int64_t* toindex,
       int64_t toindexoffset,
       const int64_t* fromindex,
@@ -680,14 +680,14 @@ extern "C" {
       int64_t base);
 
   EXPORT_SYMBOL struct Error
-    awkward_indexedarray_fill_to64_count(
+    awkward_IndexedArray_fill_to64_count(
       int64_t* toindex,
       int64_t toindexoffset,
       int64_t length,
       int64_t base);
 
   EXPORT_SYMBOL struct Error
-    awkward_unionarray_filltags_to8_from8(
+    awkward_UnionArray_filltags_to8_from8(
       int8_t* totags,
       int64_t totagsoffset,
       const int8_t* fromtags,
@@ -696,21 +696,21 @@ extern "C" {
       int64_t base);
 
   EXPORT_SYMBOL struct Error
-    awkward_unionarray_fillindex_to64_from32(
+    awkward_UnionArray_fillindex_to64_from32(
       int64_t* toindex,
       int64_t toindexoffset,
       const int32_t* fromindex,
       int64_t fromindexoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_unionarray_fillindex_to64_fromU32(
+    awkward_UnionArray_fillindex_to64_fromU32(
       int64_t* toindex,
       int64_t toindexoffset,
       const uint32_t* fromindex,
       int64_t fromindexoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_unionarray_fillindex_to64_from64(
+    awkward_UnionArray_fillindex_to64_from64(
       int64_t* toindex,
       int64_t toindexoffset,
       const int64_t* fromindex,
@@ -718,20 +718,20 @@ extern "C" {
       int64_t length);
 
   EXPORT_SYMBOL struct Error
-    awkward_unionarray_filltags_to8_const(
+    awkward_UnionArray_filltags_to8_const(
       int8_t* totags,
       int64_t totagsoffset,
       int64_t length,
       int64_t base);
 
   EXPORT_SYMBOL struct Error
-    awkward_unionarray_fillindex_to64_count(
+    awkward_UnionArray_fillindex_to64_count(
       int64_t* toindex,
       int64_t toindexoffset,
       int64_t length);
 
   EXPORT_SYMBOL struct Error
-    awkward_unionarray8_32_simplify8_32_to8_64(
+    awkward_UnionArray8_32_simplify8_32_to8_64(
       int8_t* totags,
       int64_t* toindex,
       const int8_t* outertags,
@@ -748,7 +748,7 @@ extern "C" {
       int64_t length,
       int64_t base);
   EXPORT_SYMBOL struct Error
-    awkward_unionarray8_32_simplify8_U32_to8_64(
+    awkward_UnionArray8_32_simplify8_U32_to8_64(
       int8_t* totags,
       int64_t* toindex,
       const int8_t* outertags,
@@ -765,7 +765,7 @@ extern "C" {
       int64_t length,
       int64_t base);
   EXPORT_SYMBOL struct Error
-    awkward_unionarray8_32_simplify8_64_to8_64(
+    awkward_UnionArray8_32_simplify8_64_to8_64(
       int8_t* totags,
       int64_t* toindex,
       const int8_t* outertags,
@@ -782,7 +782,7 @@ extern "C" {
       int64_t length,
       int64_t base);
   EXPORT_SYMBOL struct Error
-    awkward_unionarray8_U32_simplify8_32_to8_64(
+    awkward_UnionArray8_U32_simplify8_32_to8_64(
       int8_t* totags,
       int64_t* toindex,
       const int8_t* outertags,
@@ -799,7 +799,7 @@ extern "C" {
       int64_t length,
       int64_t base);
   EXPORT_SYMBOL struct Error
-    awkward_unionarray8_U32_simplify8_U32_to8_64(
+    awkward_UnionArray8_U32_simplify8_U32_to8_64(
       int8_t* totags,
       int64_t* toindex,
       const int8_t* outertags,
@@ -816,7 +816,7 @@ extern "C" {
       int64_t length,
       int64_t base);
   EXPORT_SYMBOL struct Error
-    awkward_unionarray8_U32_simplify8_64_to8_64(
+    awkward_UnionArray8_U32_simplify8_64_to8_64(
       int8_t* totags,
       int64_t* toindex,
       const int8_t* outertags,
@@ -833,7 +833,7 @@ extern "C" {
       int64_t length,
       int64_t base);
   EXPORT_SYMBOL struct Error
-    awkward_unionarray8_64_simplify8_32_to8_64(
+    awkward_UnionArray8_64_simplify8_32_to8_64(
       int8_t* totags,
       int64_t* toindex,
       const int8_t* outertags,
@@ -850,7 +850,7 @@ extern "C" {
       int64_t length,
       int64_t base);
   EXPORT_SYMBOL struct Error
-    awkward_unionarray8_64_simplify8_U32_to8_64(
+    awkward_UnionArray8_64_simplify8_U32_to8_64(
       int8_t* totags,
       int64_t* toindex,
       const int8_t* outertags,
@@ -867,7 +867,7 @@ extern "C" {
       int64_t length,
       int64_t base);
   EXPORT_SYMBOL struct Error
-    awkward_unionarray8_64_simplify8_64_to8_64(
+    awkward_UnionArray8_64_simplify8_64_to8_64(
       int8_t* totags,
       int64_t* toindex,
       const int8_t* outertags,
@@ -885,7 +885,7 @@ extern "C" {
       int64_t base);
 
   EXPORT_SYMBOL struct Error
-    awkward_unionarray8_32_simplify_one_to8_64(
+    awkward_UnionArray8_32_simplify_one_to8_64(
       int8_t* totags,
       int64_t* toindex,
       const int8_t* fromtags,
@@ -897,7 +897,7 @@ extern "C" {
       int64_t length,
       int64_t base);
   EXPORT_SYMBOL struct Error
-    awkward_unionarray8_U32_simplify_one_to8_64(
+    awkward_UnionArray8_U32_simplify_one_to8_64(
       int8_t* totags,
       int64_t* toindex,
       const int8_t* fromtags,
@@ -909,7 +909,7 @@ extern "C" {
       int64_t length,
       int64_t base);
   EXPORT_SYMBOL struct Error
-    awkward_unionarray8_64_simplify_one_to8_64(
+    awkward_UnionArray8_64_simplify_one_to8_64(
       int8_t* totags,
       int64_t* toindex,
       const int8_t* fromtags,
@@ -1122,7 +1122,7 @@ extern "C" {
       int64_t target);
 
   EXPORT_SYMBOL struct Error
-    awkward_listarray32_validity(
+    awkward_ListArray32_validity(
       const int32_t* starts,
       int64_t startsoffset,
       const int32_t* stops,
@@ -1130,7 +1130,7 @@ extern "C" {
       int64_t length,
       int64_t lencontent);
   EXPORT_SYMBOL struct Error
-    awkward_listarrayU32_validity(
+    awkward_ListArrayU32_validity(
       const uint32_t* starts,
       int64_t startsoffset,
       const uint32_t* stops,
@@ -1138,7 +1138,7 @@ extern "C" {
       int64_t length,
       int64_t lencontent);
   EXPORT_SYMBOL struct Error
-    awkward_listarray64_validity(
+    awkward_ListArray64_validity(
       const int64_t* starts,
       int64_t startsoffset,
       const int64_t* stops,
@@ -1147,21 +1147,21 @@ extern "C" {
       int64_t lencontent);
 
   EXPORT_SYMBOL struct Error
-    awkward_indexedarray32_validity(
+    awkward_IndexedArray32_validity(
       const int32_t* index,
       int64_t indexoffset,
       int64_t length,
       int64_t lencontent,
       bool isoption);
   EXPORT_SYMBOL struct Error
-    awkward_indexedarrayU32_validity(
+    awkward_IndexedArrayU32_validity(
       const uint32_t* index,
       int64_t indexoffset,
       int64_t length,
       int64_t lencontent,
       bool isoption);
   EXPORT_SYMBOL struct Error
-    awkward_indexedarray64_validity(
+    awkward_IndexedArray64_validity(
       const int64_t* index,
       int64_t indexoffset,
       int64_t length,
@@ -1169,7 +1169,7 @@ extern "C" {
       bool isoption);
 
   EXPORT_SYMBOL struct Error
-    awkward_unionarray8_32_validity(
+    awkward_UnionArray8_32_validity(
       const int8_t* tags,
       int64_t tagsoffset,
       const int32_t* index,
@@ -1178,7 +1178,7 @@ extern "C" {
       int64_t numcontents,
       const int64_t* lencontents);
   EXPORT_SYMBOL struct Error
-    awkward_unionarray8_U32_validity(
+    awkward_UnionArray8_U32_validity(
       const int8_t* tags,
       int64_t tagsoffset,
       const uint32_t* index,
@@ -1187,7 +1187,7 @@ extern "C" {
       int64_t numcontents,
       const int64_t* lencontents);
   EXPORT_SYMBOL struct Error
-    awkward_unionarray8_64_validity(
+    awkward_UnionArray8_64_validity(
       const int8_t* tags,
       int64_t tagsoffset,
       const int64_t* index,
@@ -1202,26 +1202,26 @@ extern "C" {
       int64_t length);
 
   EXPORT_SYMBOL struct Error
-    awkward_listarray32_localindex_64(
+    awkward_ListArray32_localindex_64(
       int64_t* toindex,
       const int32_t* offsets,
       int64_t offsetsoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_listarrayU32_localindex_64(
+    awkward_ListArrayU32_localindex_64(
       int64_t* toindex,
       const uint32_t* offsets,
       int64_t offsetsoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_listarray64_localindex_64(
+    awkward_ListArray64_localindex_64(
       int64_t* toindex,
       const int64_t* offsets,
       int64_t offsetsoffset,
       int64_t length);
 
   EXPORT_SYMBOL struct Error
-    awkward_regulararray_localindex_64(
+    awkward_RegularArray_localindex_64(
       int64_t* toindex,
       int64_t size,
       int64_t length);
@@ -1234,7 +1234,7 @@ extern "C" {
       int64_t singlelen);
 
   EXPORT_SYMBOL struct Error
-    awkward_listarray32_combinations_length_64(
+    awkward_ListArray32_combinations_length_64(
       int64_t* totallen,
       int64_t* tooffsets,
       int64_t n,
@@ -1245,7 +1245,7 @@ extern "C" {
       int64_t stopsoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_listarrayU32_combinations_length_64(
+    awkward_ListArrayU32_combinations_length_64(
       int64_t* totallen,
       int64_t* tooffsets,
       int64_t n,
@@ -1256,7 +1256,7 @@ extern "C" {
       int64_t stopsoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_listarray64_combinations_length_64(
+    awkward_ListArray64_combinations_length_64(
       int64_t* totallen,
       int64_t* tooffsets,
       int64_t n,
@@ -1268,7 +1268,7 @@ extern "C" {
       int64_t length);
 
   EXPORT_SYMBOL struct Error
-    awkward_listarray32_combinations_64(
+    awkward_ListArray32_combinations_64(
       int64_t** tocarry,
       int64_t* toindex,
       int64_t* fromindex,
@@ -1280,7 +1280,7 @@ extern "C" {
       int64_t stopsoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_listarrayU32_combinations_64(
+    awkward_ListArrayU32_combinations_64(
       int64_t** tocarry,
       int64_t* toindex,
       int64_t* fromindex,
@@ -1292,7 +1292,7 @@ extern "C" {
       int64_t stopsoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_listarray64_combinations_64(
+    awkward_ListArray64_combinations_64(
       int64_t** tocarry,
       int64_t* toindex,
       int64_t* fromindex,
@@ -1305,7 +1305,7 @@ extern "C" {
       int64_t length);
 
   EXPORT_SYMBOL struct Error
-    awkward_regulararray_combinations_64(
+    awkward_RegularArray_combinations_64(
       int64_t** tocarry,
       int64_t* toindex,
       int64_t* fromindex,
@@ -1315,7 +1315,7 @@ extern "C" {
       int64_t length);
 
   EXPORT_SYMBOL struct Error
-    awkward_bytemaskedarray_overlay_mask8(
+    awkward_ByteMaskedArray_overlay_mask8(
       int8_t* tomask,
       const int8_t* theirmask,
       int64_t theirmaskoffset,
@@ -1325,7 +1325,7 @@ extern "C" {
       bool validwhen);
 
   EXPORT_SYMBOL struct Error
-    awkward_bitmaskedarray_to_bytemaskedarray(
+    awkward_BitMaskedArray_to_ByteMaskedArray(
       int8_t* tobytemask,
       const uint8_t* frombitmask,
       int64_t bitmaskoffset,
@@ -1333,7 +1333,7 @@ extern "C" {
       bool validwhen,
       bool lsb_order);
   EXPORT_SYMBOL struct Error
-    awkward_bitmaskedarray_to_indexedoptionarray64(
+    awkward_BitMaskedArray_to_IndexedOptionArray64(
       int64_t* toindex,
       const uint8_t* frombitmask,
       int64_t bitmaskoffset,

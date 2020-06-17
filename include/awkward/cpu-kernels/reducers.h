@@ -1091,7 +1091,7 @@ extern "C" {
       int64_t* toparents,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_listoffsetarray_reduce_global_startstop_64(
+    awkward_ListOffsetArray_reduce_global_startstop_64(
       int64_t* globalstart,
       int64_t* globalstop,
       const int64_t* offsets,
@@ -1099,14 +1099,14 @@ extern "C" {
       int64_t length);
 
   EXPORT_SYMBOL struct Error
-    awkward_listoffsetarray_reduce_nonlocal_maxcount_offsetscopy_64(
+    awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64(
       int64_t* maxcount,
       int64_t* offsetscopy,
       const int64_t* offsets,
       int64_t offsetsoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_listoffsetarray_reduce_nonlocal_preparenext_64(
+    awkward_ListOffsetArray_reduce_nonlocal_preparenext_64(
       int64_t* nextcarry,
       int64_t* nextparents,
       int64_t nextlen,
@@ -1121,18 +1121,18 @@ extern "C" {
       int64_t parentsoffset,
       int64_t maxcount);
   EXPORT_SYMBOL struct Error
-    awkward_listoffsetarray_reduce_nonlocal_nextstarts_64(
+    awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64(
       int64_t* nextstarts,
       const int64_t* nextparents,
       int64_t nextlen);
   EXPORT_SYMBOL struct Error
-    awkward_listoffsetarray_reduce_nonlocal_findgaps_64(
+    awkward_ListOffsetArray_reduce_nonlocal_findgaps_64(
       int64_t* gaps,
       const int64_t* parents,
       int64_t parentsoffset,
       int64_t lenparents);
   EXPORT_SYMBOL struct Error
-    awkward_listoffsetarray_reduce_nonlocal_outstartsstops_64(
+    awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64(
       int64_t* outstarts,
       int64_t* outstops,
       const int64_t* distincts,
@@ -1141,13 +1141,13 @@ extern "C" {
       int64_t outlength);
 
   EXPORT_SYMBOL struct Error
-    awkward_listoffsetarray_reduce_local_nextparents_64(
+    awkward_ListOffsetArray_reduce_local_nextparents_64(
       int64_t* nextparents,
       const int64_t* offsets,
       int64_t offsetsoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_listoffsetarray_reduce_local_outoffsets_64(
+    awkward_ListOffsetArray_reduce_local_outoffsets_64(
       int64_t* outoffsets,
       const int64_t* parents,
       int64_t parentsoffset,
@@ -1155,7 +1155,7 @@ extern "C" {
       int64_t outlength);
 
   EXPORT_SYMBOL struct Error
-    awkward_indexedarray32_reduce_next_64(
+    awkward_IndexedArray32_reduce_next_64(
       int64_t* nextcarry,
       int64_t* nextparents,
       int64_t* outindex,
@@ -1165,7 +1165,7 @@ extern "C" {
       int64_t parentsoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_indexedarrayU32_reduce_next_64(
+    awkward_IndexedArrayU32_reduce_next_64(
       int64_t* nextcarry,
       int64_t* nextparents,
       int64_t* outindex,
@@ -1175,7 +1175,7 @@ extern "C" {
       int64_t parentsoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
-    awkward_indexedarray64_reduce_next_64(
+    awkward_IndexedArray64_reduce_next_64(
       int64_t* nextcarry,
       int64_t* nextparents,
       int64_t* outindex,
@@ -1186,7 +1186,7 @@ extern "C" {
       int64_t length);
 
   EXPORT_SYMBOL struct Error
-    awkward_indexedarray_reduce_next_fix_offsets_64(
+    awkward_IndexedArray_reduce_next_fix_offsets_64(
       int64_t* outoffsets,
       const int64_t* starts,
       int64_t startsoffset,
@@ -1194,7 +1194,7 @@ extern "C" {
       int64_t outindexlength);
 
   EXPORT_SYMBOL struct Error
-    awkward_numpyarray_reduce_mask_bytemaskedarray_64(
+    awkward_NumpyArray_reduce_mask_ByteMaskedArray_64(
       int8_t* toptr,
       const int64_t* parents,
       int64_t parentsoffset,
@@ -1202,7 +1202,7 @@ extern "C" {
       int64_t outlength);
 
   EXPORT_SYMBOL struct Error
-    awkward_bytemaskedarray_reduce_next_64(
+    awkward_ByteMaskedArray_reduce_next_64(
       int64_t* nextcarry,
       int64_t* nextparents,
       int64_t* outindex,

@@ -309,7 +309,7 @@ namespace awkward {
                                          Identities::FieldLoc(), 1, length());
         Identities32* rawidentities =
           reinterpret_cast<Identities32*>(newidentities.get());
-        kernel::new_identities<int32_t>(rawidentities->ptr().get(), length());
+        kernel::new_Identities<int32_t>(rawidentities->ptr().get(), length());
         setidentities(newidentities);
       }
       else {
@@ -318,7 +318,7 @@ namespace awkward {
                                          Identities::FieldLoc(), 1, length());
         Identities64* rawidentities =
           reinterpret_cast<Identities64*>(newidentities.get());
-        kernel::new_identities<int64_t>(rawidentities->ptr().get(), length());
+        kernel::new_Identities<int64_t>(rawidentities->ptr().get(), length());
         setidentities(newidentities);
       }
     }
@@ -661,7 +661,7 @@ namespace awkward {
       carry(const Index64& carry) const override {
       std::shared_ptr<T> ptr(new T[(size_t)carry.length()],
                              util::array_deleter<T>());
-      struct Error err = kernel::numpyarray_getitem_next_null_64(
+      struct Error err = kernel::NumpyArray_getitem_next_null_64(
         reinterpret_cast<uint8_t*>(ptr.get()),
         reinterpret_cast<uint8_t*>(ptr_.get()),
         carry.length(),
@@ -940,7 +940,7 @@ namespace awkward {
       offsets.setitem_at_nowrap(0, 0);
       offsets.setitem_at_nowrap(1, length_);
 
-      struct Error err = kernel::numpyarray_sort<T>(
+      struct Error err = kernel::NumpyArray_sort<T>(
         ptr.get(),
         ptr_.get(),
         length_,
@@ -982,7 +982,7 @@ namespace awkward {
       outranges.setitem_at_nowrap(0, 0);
       outranges.setitem_at_nowrap(1, length_);
 
-      struct Error err = kernel::numpyarray_argsort<T>(
+      struct Error err = kernel::NumpyArray_argsort<T>(
         ptr.get(),
         ptr_.get(),
         length_,
