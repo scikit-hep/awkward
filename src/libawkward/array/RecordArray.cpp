@@ -738,7 +738,7 @@ namespace awkward {
     if (copy) {
       ContentPtrVec contents;
       for (auto content : contents_) {
-        contents.push_back(content.get()->carry(carry));
+        contents.push_back(content.get()->carry(carry, copy));
       }
       IdentitiesPtr identities(nullptr);
       if (identities_.get() != nullptr) {
