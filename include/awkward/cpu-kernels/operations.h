@@ -1,9 +1,9 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #ifndef AWKWARDCPU_OPERATIONS_H_
 #define AWKWARDCPU_OPERATIONS_H_
 
-#include "awkward/cpu-kernels/util.h"
+#include "awkward/common.h"
 
 extern "C" {
   EXPORT_SYMBOL struct Error
@@ -607,6 +607,13 @@ extern "C" {
       bool* toptr,
       int64_t tooffset,
       const bool* fromptr,
+      int64_t fromoffset,
+      int64_t length);
+  EXPORT_SYMBOL struct Error
+    awkward_numpyarray_fill_tobyte_frombyte(
+      int8_t* toptr,
+      int64_t tooffset,
+      const int8_t* fromptr,
       int64_t fromoffset,
       int64_t length);
 
@@ -1263,6 +1270,8 @@ extern "C" {
   EXPORT_SYMBOL struct Error
     awkward_listarray32_combinations_64(
       int64_t** tocarry,
+      int64_t* toindex,
+      int64_t* fromindex,
       int64_t n,
       bool replacement,
       const int32_t* starts,
@@ -1273,6 +1282,8 @@ extern "C" {
   EXPORT_SYMBOL struct Error
     awkward_listarrayU32_combinations_64(
       int64_t** tocarry,
+      int64_t* toindex,
+      int64_t* fromindex,
       int64_t n,
       bool replacement,
       const uint32_t* starts,
@@ -1283,6 +1294,8 @@ extern "C" {
   EXPORT_SYMBOL struct Error
     awkward_listarray64_combinations_64(
       int64_t** tocarry,
+      int64_t* toindex,
+      int64_t* fromindex,
       int64_t n,
       bool replacement,
       const int64_t* starts,
@@ -1294,6 +1307,8 @@ extern "C" {
   EXPORT_SYMBOL struct Error
     awkward_regulararray_combinations_64(
       int64_t** tocarry,
+      int64_t* toindex,
+      int64_t* fromindex,
       int64_t n,
       bool replacement,
       int64_t size,

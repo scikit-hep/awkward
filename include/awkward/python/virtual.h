@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #ifndef AWKWARDPY_VIRTUAL_H_
 #define AWKWARDPY_VIRTUAL_H_
@@ -27,16 +27,34 @@ public:
   const py::tuple
     args() const;
 
-  const py::kwargs
+  const py::dict
     kwargs() const;
 
   const ak::ContentPtr
     generate() const override;
 
   const std::string
-  tostring_part(const std::string& indent,
-                const std::string& pre,
-                const std::string& post) const override;
+    tostring_part(const std::string& indent,
+                  const std::string& pre,
+                  const std::string& post) const override;
+
+  const std::shared_ptr<ak::ArrayGenerator>
+    shallow_copy() const override;
+
+  const std::shared_ptr<ak::ArrayGenerator>
+    with_form(const ak::FormPtr& form) const override;
+
+  const std::shared_ptr<ak::ArrayGenerator>
+    with_length(int64_t length) const override;
+
+  const std::shared_ptr<ak::ArrayGenerator>
+    with_callable(const py::object& callable) const;
+
+  const std::shared_ptr<ak::ArrayGenerator>
+    with_args(const py::tuple& args) const;
+
+  const std::shared_ptr<ak::ArrayGenerator>
+    with_kwargs(const py::dict& kwargs) const;
 
 private:
   const py::object callable_;

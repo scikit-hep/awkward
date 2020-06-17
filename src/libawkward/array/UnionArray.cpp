@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #include <sstream>
 #include <type_traits>
@@ -250,7 +250,8 @@ namespace awkward {
   bool
   UnionForm::equal(const FormPtr& other,
                    bool check_identities,
-                   bool check_parameters) const {
+                   bool check_parameters,
+                   bool compatibility_check) const {
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
       return false;
@@ -269,7 +270,8 @@ namespace awkward {
       for (int64_t i = 0;  i < numcontents();  i++) {
         if (!content(i).get()->equal(t->content(i),
                                      check_identities,
-                                     check_parameters)) {
+                                     check_parameters,
+                                     compatibility_check)) {
           return false;
         }
       }
@@ -319,13 +321,23 @@ namespace awkward {
   const IndexOf<I>
   UnionArrayOf<T, I>::regular_index(const IndexOf<T>& tags) {
     int64_t lentags = tags.length();
-    IndexOf<I> outindex(lentags);
-    struct Error err = util::awkward_unionarray_regular_index<T, I>(
-      outindex.ptr().get(),
+    int64_t size;
+    struct Error err1 = awkward_unionarray8_regular_index_getsize(
+      &size,
       tags.ptr().get(),
       tags.offset(),
       lentags);
-    util::handle_error(err, "UnionArray", nullptr);
+    util::handle_error(err1, "UnionArray", nullptr);
+    IndexOf<I> current(size);
+    IndexOf<I> outindex(lentags);
+    struct Error err2 = util::awkward_unionarray_regular_index<T, I>(
+      outindex.ptr().get(),
+      current.ptr().get(),
+      size,
+      tags.ptr().get(),
+      tags.offset(),
+      lentags);
+    util::handle_error(err2, "UnionArray", nullptr);
     return outindex;
   }
 
@@ -1439,7 +1451,7 @@ namespace awkward {
     }
 
     return std::make_shared<UnionArray8_64>(Identities::none(),
-                                            util::Parameters(),
+                                            parameters_,
                                             tags,
                                             index,
                                             contents);
@@ -1616,7 +1628,7 @@ namespace awkward {
     }
 
     return std::make_shared<UnionArray8_64>(Identities::none(),
-                                            util::Parameters(),
+                                            parameters_,
                                             tags,
                                             index,
                                             contents);
@@ -1798,6 +1810,54 @@ namespace awkward {
 
   template <typename T, typename I>
   const ContentPtr
+  UnionArrayOf<T, I>::sort_next(int64_t negaxis,
+                                const Index64& starts,
+                                const Index64& parents,
+                                int64_t outlength,
+                                bool ascending,
+                                bool stable,
+                                bool keepdims) const {
+    ContentPtr simplified = simplify_uniontype(true);
+    if (dynamic_cast<UnionArray8_32*>(simplified.get())  ||
+        dynamic_cast<UnionArray8_U32*>(simplified.get())  ||
+        dynamic_cast<UnionArray8_64*>(simplified.get())) {
+      throw std::invalid_argument(std::string("cannot sort ") + classname());
+    }
+    return simplified.get()->sort_next(negaxis,
+                                       starts,
+                                       parents,
+                                       outlength,
+                                       ascending,
+                                       stable,
+                                       keepdims);
+  }
+
+  template <typename T, typename I>
+  const ContentPtr
+  UnionArrayOf<T, I>::argsort_next(int64_t negaxis,
+                                   const Index64& starts,
+                                   const Index64& parents,
+                                   int64_t outlength,
+                                   bool ascending,
+                                   bool stable,
+                                   bool keepdims) const {
+    ContentPtr simplified = simplify_uniontype(true);
+    if (dynamic_cast<UnionArray8_32*>(simplified.get())  ||
+        dynamic_cast<UnionArray8_U32*>(simplified.get())  ||
+        dynamic_cast<UnionArray8_64*>(simplified.get())) {
+      throw std::invalid_argument(std::string("cannot sort ") + classname());
+    }
+    return simplified.get()->argsort_next(negaxis,
+                                          starts,
+                                          parents,
+                                          outlength,
+                                          ascending,
+                                          stable,
+                                          keepdims);
+  }
+
+  template <typename T, typename I>
+  const ContentPtr
   UnionArrayOf<T, I>::getitem_next(const SliceAt& at,
                                    const Slice& tail,
                                    const Index64& advanced) const {
@@ -1888,7 +1948,7 @@ namespace awkward {
                                                  tail);
   }
 
-  template class UnionArrayOf<int8_t, int32_t>;
-  template class UnionArrayOf<int8_t, uint32_t>;
-  template class UnionArrayOf<int8_t, int64_t>;
+  template class EXPORT_SYMBOL UnionArrayOf<int8_t, int32_t>;
+  template class EXPORT_SYMBOL UnionArrayOf<int8_t, uint32_t>;
+  template class EXPORT_SYMBOL UnionArrayOf<int8_t, int64_t>;
 }

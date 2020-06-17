@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #ifndef AWKWARD_NUMPYARRAY_H_
 #define AWKWARD_NUMPYARRAY_H_
@@ -9,9 +9,10 @@
 #include <typeindex>
 #include <vector>
 
-#include "awkward/cpu-kernels/util.h"
+#include "awkward/common.h"
 #include "awkward/Slice.h"
 #include "awkward/Content.h"
+#include "awkward/kernel.h"
 
 namespace awkward {
   /// @class NumpyForm
@@ -88,7 +89,8 @@ namespace awkward {
     bool
       equal(const FormPtr& other,
             bool check_identities,
-            bool check_parameters) const override;
+            bool check_parameters,
+            bool compatibility_check) const override;
 
   private:
     const std::vector<int64_t> inner_shape_;
@@ -504,6 +506,29 @@ namespace awkward {
                   bool keepdims) const override;
 
     const ContentPtr
+      sort_next(int64_t negaxis,
+                const Index64& starts,
+                const Index64& parents,
+                int64_t outlength,
+                bool ascending,
+                bool stable,
+                bool keepdims) const override;
+
+    const ContentPtr
+      sort_asstrings(const Index64& offsets,
+                     bool ascending,
+                     bool stable) const;
+
+    const ContentPtr
+      argsort_next(int64_t negaxis,
+                   const Index64& starts,
+                   const Index64& parents,
+                   int64_t outlength,
+                   bool ascending,
+                   bool stable,
+                   bool keepdims) const override;
+
+    const ContentPtr
       localindex(int64_t axis, int64_t depth) const override;
 
     const ContentPtr
@@ -588,6 +613,11 @@ namespace awkward {
                    const Index64& advanced) const override;
 
   protected:
+    /// @brief Internal function to merge two byte arrays without promoting
+    /// the types to int64.
+    const ContentPtr
+      merge_bytes(const std::shared_ptr<NumpyArray>& other) const;
+
     /// @brief Internal function that propagates the derivation of a contiguous
     /// version of this array from one axis to the next.
     ///
@@ -777,6 +807,37 @@ namespace awkward {
     tojson_string(ToJson& builder, bool include_beginendlist) const;
 
   private:
+
+  /// @brief std::sort uses intro-sort
+  ///        std::stable_sort uses mergesort
+    template<typename T>
+    const std::shared_ptr<void> index_sort(const T* data,
+                                           int64_t length,
+                                           int64_t offset,
+                                           const Index64& starts,
+                                           const Index64& parents,
+                                           int64_t outlength,
+                                           bool ascending,
+                                           bool stable) const;
+
+    template<typename T>
+    const std::shared_ptr<void> array_sort(const T* data,
+                                           int64_t length,
+                                           int64_t offset,
+                                           const Index64& starts,
+                                           const Index64& parents,
+                                           int64_t outlength,
+                                           bool ascending,
+                                           bool stable) const;
+
+   template<typename T>
+   const std::shared_ptr<void> string_sort(const T* data,
+                                          int64_t length,
+                                          const Index64& offsets,
+                                          Index64& outoffsets,
+                                          bool ascending,
+                                          bool stable) const;
+
   /// @brief See #ptr.
   std::shared_ptr<void> ptr_;
   /// @brief See #shape.

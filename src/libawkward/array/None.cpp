@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #include <iomanip>
 #include <sstream>
@@ -235,6 +235,28 @@ namespace awkward {
                      int64_t axis,
                      int64_t depth) const {
     throw std::runtime_error("undefined operation: None::combinations");
+  }
+
+  const ContentPtr
+  None::sort_next(int64_t negaxis,
+                  const Index64& starts,
+                  const Index64& parents,
+                  int64_t outlength,
+                  bool ascending,
+                  bool stable,
+                  bool keepdims) const {
+    throw std::runtime_error("undefined operation: None::sort_next");
+  }
+
+  const ContentPtr
+  None::argsort_next(int64_t negaxis,
+                     const Index64& starts,
+                     const Index64& parents,
+                     int64_t outlength,
+                     bool ascending,
+                     bool stable,
+                     bool keepdims) const {
+    throw std::runtime_error("undefined operation: None::argsort_next");
   }
 
   const ContentPtr

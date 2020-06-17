@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #include <sstream>
 
@@ -434,6 +434,42 @@ namespace awkward {
   const std::shared_ptr<Record>
   Record::astuple() const {
     return std::make_shared<Record>(array_.get()->astuple(), at_);
+  }
+
+  const ContentPtr
+  Record::sort_next(int64_t negaxis,
+                    const Index64& starts,
+                    const Index64& parents,
+                    int64_t outlength,
+                    bool ascending,
+                    bool stable,
+                    bool keepdims) const {
+    ContentPtr next = array_.get()->getitem_at_nowrap(at_);
+    return next.get()->sort_next(negaxis,
+                                 starts,
+                                 parents,
+                                 outlength,
+                                 ascending,
+                                 stable,
+                                 keepdims);
+  }
+
+  const ContentPtr
+  Record::argsort_next(int64_t negaxis,
+                       const Index64& starts,
+                       const Index64& parents,
+                       int64_t outlength,
+                       bool ascending,
+                       bool stable,
+                       bool keepdims) const {
+    ContentPtr next = array_.get()->getitem_at_nowrap(at_);
+    return next.get()->argsort_next(negaxis,
+                                    starts,
+                                    parents,
+                                    outlength,
+                                    ascending,
+                                    stable,
+                                    keepdims);
   }
 
   const ContentPtr

@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #ifndef AWKWARD_UTIL_H_
 #define AWKWARD_UTIL_H_
@@ -8,7 +8,7 @@
 #include <map>
 #include <memory>
 
-#include "awkward/cpu-kernels/util.h"
+#include "awkward/common.h"
 
 namespace awkward {
   class Identities;
@@ -642,10 +642,22 @@ namespace awkward {
 
     /// @brief Wraps several cpu-kernels from the C interface with a template
     /// to make it easier and more type-safe to call.
+    template <typename T>
+    ERROR
+      awkward_unionarray_regular_index_getsize(
+        int64_t* size,
+        const T* fromtags,
+        int64_t tagsoffset,
+        int64_t length);
+
+    /// @brief Wraps several cpu-kernels from the C interface with a template
+    /// to make it easier and more type-safe to call.
     template <typename T, typename I>
     ERROR
       awkward_unionarray_regular_index(
         I* toindex,
+        I* current,
+        int64_t size,
         const T* fromtags,
         int64_t tagsoffset,
         int64_t length);
@@ -1008,6 +1020,8 @@ namespace awkward {
     ERROR
       awkward_listarray_combinations_64(
         int64_t** tocarry,
+        int64_t* toindex,
+        int64_t* fromindex,
         int64_t n,
         bool replacement,
         const T* starts,
@@ -1034,6 +1048,42 @@ namespace awkward {
         int64_t offset,
         int64_t at,
         T value);
+
+    template <typename T>
+    ERROR
+      awkward_numpyarray_argsort(
+        int64_t* toptr,
+        const T* fromptr,
+        int64_t length,
+        const int64_t* offsets,
+        int64_t offsetslength,
+        bool ascending,
+        bool stable);
+
+    template <typename T>
+    ERROR
+      awkward_numpyarray_sort(
+        T* toptr,
+        const T* fromptr,
+        int64_t length,
+        const int64_t* offsets,
+        int64_t offsetslength,
+        int64_t parentslength,
+        bool ascending,
+        bool stable);
+
+    template <typename T>
+    ERROR
+      awkward_numpyarray_sort_asstrings(
+        T* toptr,
+        const T* fromptr,
+        int64_t length,
+        const int64_t* offsets,
+        int64_t offsetslength,
+        int64_t* outoffsets,
+        bool ascending,
+        bool stable);
+
   }
 }
 

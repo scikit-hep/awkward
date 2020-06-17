@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #ifndef AWKWARD_NONE_H_
 #define AWKWARD_NONE_H_
@@ -7,7 +7,7 @@
 #include <memory>
 #include <vector>
 
-#include "awkward/cpu-kernels/util.h"
+#include "awkward/common.h"
 #include "awkward/Slice.h"
 #include "awkward/Content.h"
 
@@ -187,6 +187,25 @@ namespace awkward {
                   int64_t outlength,
                   bool mask,
                   bool keepdims) const override;
+
+    /// @exception std::runtime_error is always thrown
+    const ContentPtr
+      sort_next(int64_t negaxis,
+                const Index64& starts,
+                const Index64& parents,
+                int64_t outlength,
+                bool ascending,
+                bool stable,
+                bool keepdims) const override;
+
+    const ContentPtr
+      argsort_next(int64_t negaxis,
+                   const Index64& starts,
+                   const Index64& parents,
+                   int64_t outlength,
+                   bool ascending,
+                   bool stable,
+                   bool keepdims) const override;
 
     /// @exception std::runtime_error is always thrown
     const ContentPtr

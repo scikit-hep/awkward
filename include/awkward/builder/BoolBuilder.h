@@ -1,9 +1,9 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #ifndef AWKWARD_BOOLBUILDER_H_
 #define AWKWARD_BOOLBUILDER_H_
 
-#include "awkward/cpu-kernels/util.h"
+#include "awkward/common.h"
 #include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/GrowableBuffer.h"
 #include "awkward/builder/Builder.h"

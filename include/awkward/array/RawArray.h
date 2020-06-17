@@ -1,21 +1,24 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #ifndef AWKWARD_RAWARRAY_H_
 #define AWKWARD_RAWARRAY_H_
 
+#include <algorithm>
 #include <cstring>
-#include <vector>
-#include <string>
 #include <iomanip>
-#include <sstream>
 #include <memory>
+#include <numeric>
+#include <sstream>
 #include <stdexcept>
+#include <string>
 #include <typeinfo>
+#include <vector>
 
-#include "awkward/cpu-kernels/util.h"
+#include "awkward/common.h"
 #include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/cpu-kernels/operations.h"
+#include "awkward/cpu-kernels/sorting.h"
 #include "awkward/type/PrimitiveType.h"
 #include "awkward/util.h"
 #include "awkward/Slice.h"
@@ -23,6 +26,7 @@
 #include "awkward/array/EmptyArray.h"
 #include "awkward/array/IndexedArray.h"
 #include "awkward/array/NumpyArray.h"
+#include "awkward/array/RegularArray.h"
 #include "awkward/array/ByteMaskedArray.h"
 #include "awkward/array/BitMaskedArray.h"
 #include "awkward/array/UnmaskedArray.h"
@@ -117,7 +121,8 @@ namespace awkward {
     bool
       equal(const FormPtr& other,
             bool check_identities,
-            bool check_parameters) const override {
+            bool check_parameters,
+            bool compatibility_check) const override {
       throw std::runtime_error("FIXME: RawForm::equal");
     }
 
@@ -918,6 +923,89 @@ namespace awkward {
                   bool mask,
                   bool keepdims) const override {
       throw std::runtime_error("FIXME: RawArray:reduce_next");
+    }
+
+    const ContentPtr
+      sort_next(int64_t negaxis,
+                const Index64& starts,
+                const Index64& parents,
+                int64_t outlength,
+                bool ascending,
+                bool stable,
+                bool keepdims) const override {
+      std::shared_ptr<T> ptr(
+                    new T[length_], util::array_deleter<T>());
+
+      Index64 offsets(2);
+      offsets.setitem_at_nowrap(0, 0);
+      offsets.setitem_at_nowrap(1, length_);
+
+      struct Error err = util::awkward_numpyarray_sort<T>(
+        ptr.get(),
+        ptr_.get(),
+        length_,
+        offsets.ptr().get(),
+        offsets.length(),
+        parents.length(),
+        ascending,
+        stable);
+      util::handle_error(err, classname(), nullptr);
+
+      ContentPtr out = std::make_shared<RawArrayOf<T>>(Identities::none(),
+                                                       util::Parameters(),
+                                                       ptr,
+                                                       offset_,
+                                                       length_,
+                                                       itemsize_);
+
+      out = std::make_shared<RegularArray>(Identities::none(),
+                                           util::Parameters(),
+                                           out,
+                                           length_);
+
+      return out;
+    }
+
+    const ContentPtr
+      argsort_next(int64_t negaxis,
+                   const Index64& starts,
+                   const Index64& parents,
+                   int64_t outlength,
+                   bool ascending,
+                   bool stable,
+                   bool keepdims) const override {
+      std::shared_ptr<int64_t> ptr(
+        new int64_t[length_], util::array_deleter<int64_t>());
+
+      int64_t ranges_length = 2;
+      Index64 outranges(ranges_length);
+      outranges.setitem_at_nowrap(0, 0);
+      outranges.setitem_at_nowrap(1, length_);
+
+      struct Error err = util::awkward_numpyarray_argsort<T>(
+        ptr.get(),
+        ptr_.get(),
+        length_,
+        outranges.ptr().get(),
+        ranges_length,
+        ascending,
+        stable);
+      util::handle_error(err, classname(), nullptr);
+
+      ssize_t itemsize = 8;
+      ContentPtr out = std::make_shared<RawArrayOf<int64_t>>(Identities::none(),
+                                                       util::Parameters(),
+                                                       ptr,
+                                                       offset_,
+                                                       length_,
+                                                       itemsize);
+
+      out = std::make_shared<RegularArray>(Identities::none(),
+                                           util::Parameters(),
+                                           out,
+                                           length_);
+
+      return out;
     }
 
     const ContentPtr

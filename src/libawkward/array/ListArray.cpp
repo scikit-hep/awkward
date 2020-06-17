@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #include <sstream>
 #include <type_traits>
@@ -160,7 +160,8 @@ namespace awkward {
   bool
   ListForm::equal(const FormPtr& other,
                   bool check_identities,
-                  bool check_parameters) const {
+                  bool check_parameters,
+                  bool compatibility_check) const {
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
       return false;
@@ -174,7 +175,8 @@ namespace awkward {
               stops_ == t->stops()  &&
               content_.get()->equal(t->content(),
                                     check_identities,
-                                    check_parameters));
+                                    check_parameters,
+                                    compatibility_check));
     }
     else {
       return false;
@@ -1145,7 +1147,7 @@ namespace awkward {
     }
 
     return std::make_shared<ListArray64>(Identities::none(),
-                                         util::Parameters(),
+                                         parameters_,
                                          starts,
                                          stops,
                                          content);
@@ -1338,8 +1340,12 @@ namespace awkward {
         tocarry.push_back(ptr);
         tocarryraw.push_back(ptr.get());
       }
+      int64_t* toindex = new int64_t[n];
+      int64_t* fromindex = new int64_t[n];
       struct Error err2 = util::awkward_listarray_combinations_64<T>(
         tocarryraw.data(),
+        toindex,
+        fromindex,
         n,
         replacement,
         starts_.ptr().get(),
@@ -1380,6 +1386,42 @@ namespace awkward {
                                                  rawcompact->offsets(),
                                                  next);
     }
+  }
+
+  template <typename T>
+  const ContentPtr
+  ListArrayOf<T>::sort_next(int64_t negaxis,
+                            const Index64& starts,
+                            const Index64& parents,
+                            int64_t outlength,
+                            bool ascending,
+                            bool stable,
+                            bool keepdims) const {
+    return toListOffsetArray64(true).get()->sort_next(negaxis,
+                                                      starts,
+                                                      parents,
+                                                      outlength,
+                                                      ascending,
+                                                      stable,
+                                                      keepdims);
+  }
+
+  template <typename T>
+  const ContentPtr
+  ListArrayOf<T>::argsort_next(int64_t negaxis,
+                               const Index64& starts,
+                               const Index64& parents,
+                               int64_t outlength,
+                               bool ascending,
+                               bool stable,
+                               bool keepdims) const {
+    return toListOffsetArray64(true).get()->argsort_next(negaxis,
+                                                         starts,
+                                                         parents,
+                                                         outlength,
+                                                         ascending,
+                                                         stable,
+                                                         keepdims);
   }
 
   template <typename T>
@@ -1792,7 +1834,7 @@ namespace awkward {
                                                outcontent);
   }
 
-  template class ListArrayOf<int32_t>;
-  template class ListArrayOf<uint32_t>;
-  template class ListArrayOf<int64_t>;
+  template class EXPORT_SYMBOL ListArrayOf<int32_t>;
+  template class EXPORT_SYMBOL ListArrayOf<uint32_t>;
+  template class EXPORT_SYMBOL ListArrayOf<int64_t>;
 }

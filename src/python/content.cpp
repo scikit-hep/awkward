@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #include <pybind11/numpy.h>
 
@@ -1275,6 +1275,20 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
              py::arg("keys") = py::none(),
              py::arg("parameters") = py::none(),
              py::arg("axis") = 1)
+          .def("sort",
+               [](const T&self,
+                  int64_t axis,
+                  bool ascending,
+                  bool stable) -> py::object {
+               return box(self.sort(axis, ascending, false));
+          })
+          .def("argsort",
+               [](const T&self,
+                  int64_t axis,
+                  bool ascending,
+                  bool stable) -> py::object {
+               return box(self.argsort(axis, ascending, false));
+          })
 
   ;
 }
@@ -2051,7 +2065,7 @@ make_VirtualArray(const py::handle& m, const std::string& name) {
           }
           catch (py::cast_error err) {
             throw std::invalid_argument(
-                "VirtualArray 'generator' must be a PyArrayGenerator or a "
+                "VirtualArray 'generator' must be an ArrayGenerator or a "
                 "SliceGenerator");
           }
         }

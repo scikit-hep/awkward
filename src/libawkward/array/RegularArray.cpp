@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #include <iomanip>
 #include <sstream>
@@ -139,7 +139,8 @@ namespace awkward {
   bool
   RegularForm::equal(const FormPtr& other,
                      bool check_identities,
-                     bool check_parameters) const {
+                     bool check_parameters,
+                     bool compatibility_check) const {
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
       return false;
@@ -151,7 +152,8 @@ namespace awkward {
     if (RegularForm* t = dynamic_cast<RegularForm*>(other.get())) {
       return (content_.get()->equal(t->content(),
                                     check_identities,
-                                    check_parameters)  &&
+                                    check_parameters,
+                                    compatibility_check)  &&
               size_ == t->size());
     }
     else {
@@ -771,7 +773,7 @@ namespace awkward {
             0, rawother->size()*rawother->length());
         ContentPtr content = mine.get()->merge(theirs);
         return std::make_shared<RegularArray>(Identities::none(),
-                                              util::Parameters(),
+                                              parameters_,
                                               content,
                                               size_);
       }
@@ -964,8 +966,12 @@ namespace awkward {
         tocarry.push_back(ptr);
         tocarryraw.push_back(ptr.get());
       }
+      IndexOf<int64_t> toindex(size);
+      IndexOf<int64_t> fromindex(size);
       struct Error err = awkward_regulararray_combinations_64(
         tocarryraw.data(),
+        toindex.ptr().get(),
+        fromindex.ptr().get(),
         n,
         replacement,
         size_,
@@ -1002,6 +1008,66 @@ namespace awkward {
                                             next,
                                             size_);
     }
+  }
+
+  const ContentPtr
+  RegularArray::sort_next(int64_t negaxis,
+                          const Index64& starts,
+                          const Index64& parents,
+                          int64_t outlength,
+                          bool ascending,
+                          bool stable,
+                          bool keepdims) const {
+    std::shared_ptr<Content> out = toListOffsetArray64(true).get()->sort_next(
+                                       negaxis,
+                                       starts,
+                                       parents,
+                                       outlength,
+                                       ascending,
+                                       stable,
+                                       keepdims);
+    if (RegularArray* raw1 =
+            dynamic_cast<RegularArray*>(out.get())) {
+      if (ListOffsetArray64* raw2 =
+              dynamic_cast<ListOffsetArray64*>(raw1->content().get())) {
+        return std::make_shared<RegularArray>(
+            raw1->identities(),
+            raw1->parameters(),
+            raw2->toRegularArray(),
+            raw1->size());
+      }
+    }
+    return out;
+  }
+
+  const ContentPtr
+  RegularArray::argsort_next(int64_t negaxis,
+                             const Index64& starts,
+                             const Index64& parents,
+                             int64_t outlength,
+                             bool ascending,
+                             bool stable,
+                             bool keepdims) const {
+    std::shared_ptr<Content> out = toListOffsetArray64(true).get()->argsort_next(
+                                       negaxis,
+                                       starts,
+                                       parents,
+                                       outlength,
+                                       ascending,
+                                       stable,
+                                       keepdims);
+    if (RegularArray* raw1 =
+            dynamic_cast<RegularArray*>(out.get())) {
+      if (ListOffsetArray64* raw2 =
+              dynamic_cast<ListOffsetArray64*>(raw1->content().get())) {
+        return std::make_shared<RegularArray>(
+            raw1->identities(),
+            raw1->parameters(),
+            raw2->toRegularArray(),
+            raw1->size());
+      }
+    }
+    return out;
   }
 
   const ContentPtr

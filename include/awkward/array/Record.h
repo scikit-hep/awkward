@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #ifndef AWKWARD_RECORD_H_
 #define AWKWARD_RECORD_H_
@@ -209,6 +209,24 @@ namespace awkward {
                   int64_t outlength,
                   bool mask,
                   bool keepdims) const override;
+
+    const ContentPtr
+      sort_next(int64_t negaxis,
+                const Index64& starts,
+                const Index64& parents,
+                int64_t outlength,
+                bool ascending,
+                bool stable,
+                bool keepdims) const override;
+
+    const ContentPtr
+      argsort_next(int64_t negaxis,
+                   const Index64& starts,
+                   const Index64& parents,
+                   int64_t outlength,
+                   bool ascending,
+                   bool stable,
+                   bool keepdims) const override;
 
     const ContentPtr
       localindex(int64_t axis, int64_t depth) const override;

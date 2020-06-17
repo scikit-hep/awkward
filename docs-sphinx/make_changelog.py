@@ -83,7 +83,7 @@ with open("_auto/changelog.rst", "w") as outfile:
                 outfile.write("{0}{1}\n\n".format(date_text, assets_text))
 
             if tag in releases:
-                text = releases[tag].strip()
+                text = releases[tag].strip().replace("For details, see the [release history](https://awkward-array.readthedocs.io/en/latest/_auto/changelog.html).", "")
                 text = re.sub(r"([a-zA-Z0-9\-_]+/[a-zA-Z0-9\-_]+)#([1-9][0-9]*)", r"`\1#\2 <https://github.com/\1/issues/\2>`__", text)
                 text = re.sub(r"([^a-zA-Z0-9\-_])#([1-9][0-9]*)", r"\1`#\2 <https://github.com/scikit-hep/awkward-1.0/issues/\2>`__", text)
                 outfile.write(text + "\n\n")

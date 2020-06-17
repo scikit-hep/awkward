@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #include <cstring>
 #include <iomanip>
@@ -308,9 +308,9 @@ namespace awkward {
     return IndexOf<T>(ptr, 0, length_);
   }
 
-  template class IndexOf<int8_t>;
-  template class IndexOf<uint8_t>;
-  template class IndexOf<int32_t>;
-  template class IndexOf<uint32_t>;
-  template class IndexOf<int64_t>;
+  template class EXPORT_SYMBOL IndexOf<int8_t>;
+  template class EXPORT_SYMBOL IndexOf<uint8_t>;
+  template class EXPORT_SYMBOL IndexOf<int32_t>;
+  template class EXPORT_SYMBOL IndexOf<uint32_t>;
+  template class EXPORT_SYMBOL IndexOf<int64_t>;
 }

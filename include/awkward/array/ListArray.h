@@ -1,11 +1,11 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #ifndef AWKWARD_LISTARRAY_H_
 #define AWKWARD_LISTARRAY_H_
 
 #include <memory>
 
-#include "awkward/cpu-kernels/util.h"
+#include "awkward/common.h"
 #include "awkward/Index.h"
 #include "awkward/Identities.h"
 #include "awkward/Content.h"
@@ -75,7 +75,8 @@ namespace awkward {
     bool
       equal(const FormPtr& other,
             bool check_identities,
-            bool check_parameters) const override;
+            bool check_parameters,
+            bool compatibility_check) const override;
 
   private:
     Index::Form starts_;
@@ -332,6 +333,24 @@ namespace awkward {
                   int64_t outlength,
                   bool mask,
                   bool keepdims) const override;
+
+    const ContentPtr
+      sort_next(int64_t negaxis,
+                const Index64& starts,
+                const Index64& parents,
+                int64_t outlength,
+                bool ascending,
+                bool stable,
+                bool keepdims) const override;
+
+    const ContentPtr
+      argsort_next(int64_t negaxis,
+                   const Index64& starts,
+                   const Index64& parents,
+                   int64_t outlength,
+                   bool ascending,
+                   bool stable,
+                   bool keepdims) const override;
 
     const ContentPtr
       localindex(int64_t axis, int64_t depth) const override;

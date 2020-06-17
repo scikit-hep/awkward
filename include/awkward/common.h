@@ -1,7 +1,7 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
-#ifndef AWKWARDCPU_UTIL_H_
-#define AWKWARDCPU_UTIL_H_
+#ifndef AWKWARD_COMMON_H_
+#define AWKWARD_COMMON_H_
 
 #ifdef _MSC_VER
   #define EXPORT_SYMBOL __declspec(dllexport)
@@ -29,6 +29,7 @@
 #endif
 
 #include <iostream>
+#include <cstring>
 
 extern "C" {
   struct EXPORT_SYMBOL Error {
@@ -37,10 +38,6 @@ extern "C" {
     int64_t attempt;
     int64_t extra;
   };
-  EXPORT_SYMBOL struct Error
-    success();
-  EXPORT_SYMBOL struct Error
-    failure(const char* str, int64_t identity, int64_t attempt);
 
   const int8_t   kMaxInt8   =                 127;   // 2**7  - 1
   const uint8_t  kMaxUInt8  =                 255;   // 2**8  - 1
@@ -48,6 +45,26 @@ extern "C" {
   const uint32_t kMaxUInt32 =          4294967295;   // 2**32 - 1
   const int64_t  kMaxInt64  = 9223372036854775806;   // 2**63 - 2: see below
   const int64_t  kSliceNone = kMaxInt64 + 1;         // for Slice::none()
+
+  inline struct Error
+    success() {
+        struct Error out;
+        out.str = nullptr;
+        out.identity = kSliceNone;
+        out.attempt = kSliceNone;
+        out.extra = 0;
+        return out;
+    };
+
+  inline struct Error
+    failure(const char* str, int64_t identity, int64_t attempt) {
+        struct Error out;
+        out.str = str;
+        out.identity = identity;
+        out.attempt = attempt;
+        out.extra = 0;
+        return out;
+    };
 }
 
-#endif // AWKWARDCPU_UTIL_H_
+#endif // AWKWARD_COMMON_H_

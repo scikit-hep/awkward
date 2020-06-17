@@ -1,4 +1,4 @@
-# BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 from __future__ import absolute_import
 
@@ -13,6 +13,17 @@ import awkward1._connect._pandas
 py27 = (sys.version_info[0] < 3)
 
 pandas = pytest.importorskip("pandas")
+
+def test_numpy_structured_arrays_cant_be_pandas_printed():
+    a = awkward1.Array([{"a": 1}, {"a": 2}, {"a": 3}, {"a": 4}, {"a": 5}])
+    df = pandas.DataFrame({"column": a})
+    repr(df)
+
+def test_apply_ufunc_to_same():
+    a = awkward1.Array([{"a": 1}, {"a": 2}, {"a": 3}, {"a": 4}, {"a": 5}])
+    df = pandas.DataFrame({"column": a})
+    -df
+    assert (-df).column.values[2] == -3
 
 def test_basic():
     nparray = numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])

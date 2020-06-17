@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #ifndef AWKWARD_VIRTUALARRAY_H_
 #define AWKWARD_VIRTUALARRAY_H_
@@ -7,7 +7,7 @@
 #include <memory>
 #include <vector>
 
-#include "awkward/cpu-kernels/util.h"
+#include "awkward/common.h"
 #include "awkward/Slice.h"
 #include "awkward/Content.h"
 #include "awkward/virtual/ArrayGenerator.h"
@@ -76,7 +76,8 @@ namespace awkward {
     bool
       equal(const FormPtr& other,
             bool check_identities,
-            bool check_parameters) const override;
+            bool check_parameters,
+            bool compatibility_check) const override;
 
   private:
     const FormPtr form_;
@@ -276,6 +277,25 @@ namespace awkward {
                   int64_t outlength,
                   bool mask,
                   bool keepdims) const override;
+
+    const ContentPtr
+      sort_next(int64_t negaxis,
+                const Index64& starts,
+                const Index64& parents,
+                int64_t outlength,
+                bool ascending,
+                bool stable,
+                bool keepdims) const override;
+
+    const ContentPtr
+      argsort_next(int64_t negaxis,
+                   const Index64& starts,
+                   const Index64& parents,
+                   int64_t outlength,
+                   bool ascending,
+                   bool stable,
+                   bool keepdims) const override;
+
 
     const ContentPtr
       localindex(int64_t axis, int64_t depth) const override;

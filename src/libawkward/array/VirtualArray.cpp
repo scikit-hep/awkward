@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #include <iomanip>
 #include <sstream>
@@ -178,8 +178,9 @@ namespace awkward {
 
   bool
   VirtualForm::equal(const FormPtr& other,
-                      bool check_identities,
-                      bool check_parameters) const {
+                     bool check_identities,
+                     bool check_parameters,
+                     bool compatibility_check) const {
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
       return false;
@@ -188,22 +189,42 @@ namespace awkward {
         !util::parameters_equal(parameters_, other.get()->parameters())) {
       return false;
     }
+
     if (VirtualForm* t = dynamic_cast<VirtualForm*>(other.get())) {
-      if (form_.get() == nullptr  &&  t->form().get() != nullptr) {
-        return false;
+      if (compatibility_check) {
+        // Called by ArrayGenerator::generate_and_check; `this` is the expected
+        // Form and `t` is the Form of the generated array, so `this` is allowed
+        // to have less information than `t`.
+        if (form_.get() != nullptr  &&  t->form().get() != nullptr) {
+          if (!form_.get()->equal(t->form(),
+                                  check_identities,
+                                  check_parameters,
+                                  compatibility_check)) {
+            return false;
+          }
+        }
+        return true;
       }
-      else if (form_.get() != nullptr  &&  t->form().get() == nullptr) {
-        return false;
-      }
-      else if (form_.get() != nullptr  &&  t->form().get() != nullptr) {
-        if (!form_.get()->equal(t->form(),
-                                check_identities,
-                                check_parameters)) {
+      else {
+        // Called by Form.__eq__ in Python; should be an equivalence relation.
+        if (form_.get() == nullptr  &&  t->form().get() != nullptr) {
           return false;
         }
+        else if (form_.get() != nullptr  &&  t->form().get() == nullptr) {
+          return false;
+        }
+        else if (form_.get() != nullptr  &&  t->form().get() != nullptr) {
+          if (!form_.get()->equal(t->form(),
+                                  check_identities,
+                                  check_parameters,
+                                  compatibility_check)) {
+            return false;
+          }
+        }
+        return has_length_ == t->has_length();
       }
-      return has_length_ == t->has_length();
     }
+
     else {
       return false;
     }
@@ -605,6 +626,40 @@ namespace awkward {
                                       outlength,
                                       mask,
                                       keepdims);
+  }
+
+  const ContentPtr
+  VirtualArray::sort_next(int64_t negaxis,
+                          const Index64& starts,
+                          const Index64& parents,
+                          int64_t outlength,
+                          bool ascending,
+                          bool stable,
+                          bool keepdims) const {
+    return array().get()->sort_next(negaxis,
+                                    starts,
+                                    parents,
+                                    outlength,
+                                    ascending,
+                                    stable,
+                                    keepdims);
+  }
+
+  const ContentPtr
+  VirtualArray::argsort_next(int64_t negaxis,
+                             const Index64& starts,
+                             const Index64& parents,
+                             int64_t outlength,
+                             bool ascending,
+                             bool stable,
+                             bool keepdims) const {
+    return array().get()->argsort_next(negaxis,
+                                       starts,
+                                       parents,
+                                       outlength,
+                                       ascending,
+                                       stable,
+                                       keepdims);
   }
 
   const ContentPtr

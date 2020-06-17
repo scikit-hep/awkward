@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #ifndef AWKWARD_CONTENT_H_
 #define AWKWARD_CONTENT_H_
@@ -6,7 +6,7 @@
 #include <cstdio>
 #include <map>
 
-#include "awkward/cpu-kernels/util.h"
+#include "awkward/common.h"
 #include "awkward/Identities.h"
 #include "awkward/Slice.h"
 #include "awkward/io/json.h"
@@ -59,10 +59,20 @@ namespace awkward {
 
     /// @brief Returns `true` if this Form is equal to the other Form; `false`
     /// otherwise.
+    ///
+    /// @param check_identities If `true`, Forms are not equal unless they both
+    /// #has_identities.
+    /// @param check_parameters If `true`, Forms are not equal unless they have
+    /// the same #parameters.
+    /// @param compatibility_check If `true`, this is part of a compatibility
+    /// check between an expected Form (`this`) and a generated array's Form
+    /// (`other`). When the expected Form is a VirtualForm, it's allowed to be
+    /// less specific than the `other` VirtualForm.
     virtual bool
       equal(const FormPtr& other,
             bool check_identities,
-            bool check_parameters) const = 0;
+            bool check_parameters,
+            bool compatibility_check) const = 0;
 
     /// @brief The parameter associated with `key` at the first level
     /// that has a non-null value, descending only as deep as the first
@@ -675,6 +685,43 @@ namespace awkward {
                   bool mask,
                   bool keepdims) const = 0;
 
+    /// @brief This array with one axis removed by applying a Reducer
+    ///
+    /// The user's entry point for this operation is #sort.
+    ///
+    /// @param negaxis The negative axis: `-axis`. That is, `negaxis = 1`
+    /// means the deepest axis level.
+    /// @param starts Staring positions of each group to combine as an
+    /// {@link IndexOf Index}. These are downward pointers from an outer
+    /// structure into this structure with the same meaning as in
+    /// {@link ListArrayOf ListArray}.
+    /// @param parents Groups to combine as an {@link IndexOf Index} of
+    /// upward pointers from this structure to the outer structure to reduce.
+    /// @param outlength The length of the array, after the operation
+    /// completes.
+    /// @param ascending If `true`, the values will be sorted in an ascending
+    /// order.
+    /// @param stable If `true`, the values will be sorted by a
+    /// stable sort algorithm to maintain the relative order of records with
+    /// equal keys (i.e. values).
+    virtual const ContentPtr
+      sort_next(int64_t negaxis,
+                const Index64& starts,
+                const Index64& parents,
+                int64_t outlength,
+                bool ascending,
+                bool stable,
+                bool keepdims) const = 0;
+
+    virtual const ContentPtr
+      argsort_next(int64_t negaxis,
+                   const Index64& starts,
+                   const Index64& parents,
+                   int64_t outlength,
+                   bool ascending,
+                   bool stable,
+                   bool keepdims) const = 0;
+
     /// @brief A (possibly nested) array of integers indicating the
     /// positions of elements within each nested list.
     ///
@@ -837,6 +884,37 @@ namespace awkward {
              int64_t axis,
              bool mask,
              bool keepdims) const;
+
+    /// @brief This array with one axis sorted by applying a sorting algorithm
+    ///
+    /// This operation is implemented on each node through #sort_next.
+    ///
+    /// @param axis The axis to sort.
+    /// Negative `axis` counts backward from the deepest levels (`-1` is
+    /// the last valid `axis`).
+    /// @param ascending If `true`, the values will be sorted in an ascending
+    /// order.
+    /// @param stable If `true`, the values will be sorted by a
+    /// stable sort algorithm to maintain the relative order of records with
+    /// equal keys (i.e. values).
+    const ContentPtr
+      sort(int64_t axis, bool ascending, bool stable) const;
+
+    /// @brief This array indices with one axis sorted by applying
+    ///        a sorting algorithm
+    ///
+    /// This operation is implemented on each node through #argsort_next.
+    ///
+    /// @param axis The axis to sort.
+    /// Negative `axis` counts backward from the deepest levels (`-1` is
+    /// the last valid `axis`).
+    /// @param ascending If `true`, the values will be sorted in an ascending
+    /// order.
+    /// @param stable If `true`, the values will be sorted by a
+    /// stable sort algorithm to maintain the relative order of records with
+    /// equal keys (i.e. values).
+    const ContentPtr
+      argsort(int64_t axis, bool ascending, bool stable) const;
 
     /// @brief String-to-JSON map that augments the meaning of this
     /// array.

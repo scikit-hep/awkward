@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #include <iomanip>
 #include <sstream>
@@ -100,7 +100,8 @@ namespace awkward {
   bool
   EmptyForm::equal(const FormPtr& other,
                    bool check_identities,
-                   bool check_parameters) const {
+                   bool check_parameters,
+                   bool compatibility_check) const {
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
       return false;
@@ -448,6 +449,43 @@ namespace awkward {
       throw std::invalid_argument("in combinations, 'n' must be at least 1");
     }
     return std::make_shared<EmptyArray>(identities_, util::Parameters());
+  }
+
+  const ContentPtr
+  EmptyArray::sort_next(int64_t negaxis,
+                        const Index64& starts,
+                        const Index64& parents,
+                        int64_t outlength,
+                        bool ascending,
+                        bool stable,
+                        bool keepdims) const {
+    ContentPtr asnumpy = toNumpyArray("d", 8);
+    return asnumpy.get()->sort_next(negaxis,
+                                    starts,
+                                    parents,
+                                    outlength,
+                                    ascending,
+                                    stable,
+                                    keepdims);
+  }
+
+  const ContentPtr
+  EmptyArray::argsort_next(int64_t negaxis,
+                           const Index64& starts,
+                           const Index64& parents,
+                           int64_t outlength,
+                           bool ascending,
+                           bool stable,
+                           bool keepdims) const {
+    ContentPtr asnumpy = toNumpyArray("d", 8);
+    ContentPtr out = asnumpy.get()->argsort_next(negaxis,
+                                                 starts,
+                                                 parents,
+                                                 outlength,
+                                                 ascending,
+                                                 stable,
+                                                 keepdims);
+    return out;
   }
 
   const ContentPtr

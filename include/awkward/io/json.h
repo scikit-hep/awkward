@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #ifndef AWKWARD_IO_JSON_H_
 #define AWKWARD_IO_JSON_H_
@@ -7,7 +7,7 @@
 #include <string>
 
 #include "awkward/builder/ArrayBuilderOptions.h"
-#include "awkward/cpu-kernels/util.h"
+#include "awkward/common.h"
 #include "awkward/util.h"
 
 namespace awkward {

@@ -1,7 +1,4 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
-
-#include <cstring>
-#include <vector>
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #include "awkward/cpu-kernels/reducers.h"
 
@@ -1721,7 +1718,7 @@ ERROR awkward_reduce_argmin(
   }
   for (int64_t i = 0;  i < lenparents;  i++) {
     int64_t parent = parents[parentsoffset + i];
-    int64_t start = starts[parent];
+    int64_t start = starts[startsoffset + parent];
     if (toptr[parent] == -1  ||
         fromptr[fromptroffset + i] <
           fromptr[fromptroffset + toptr[parent] + start]) {
@@ -1745,7 +1742,7 @@ ERROR awkward_reduce_argmin_bool_64(
   }
   for (int64_t i = 0;  i < lenparents;  i++) {
     int64_t parent = parents[parentsoffset + i];
-    int64_t start = starts[parent];
+    int64_t start = starts[startsoffset + parent];
     if (toptr[parent] == -1  ||
         (fromptr[fromptroffset + i] != 0) <
           (fromptr[fromptroffset + toptr[parent] + start] != 0)) {
@@ -1981,7 +1978,7 @@ ERROR awkward_reduce_argmax(
   }
   for (int64_t i = 0;  i < lenparents;  i++) {
     int64_t parent = parents[parentsoffset + i];
-    int64_t start = starts[parent];
+    int64_t start = starts[startsoffset + parent];
     if (toptr[parent] == -1  ||
         fromptr[fromptroffset + i] >
           fromptr[fromptroffset + toptr[parent] + start]) {
@@ -2005,7 +2002,7 @@ ERROR awkward_reduce_argmax_bool_64(
   }
   for (int64_t i = 0;  i < lenparents;  i++) {
     int64_t parent = parents[parentsoffset + i];
-    int64_t start = starts[parent];
+    int64_t start = starts[startsoffset + parent];
     if (toptr[parent] == -1  ||
         (fromptr[fromptroffset + i] != 0) >
           (fromptr[fromptroffset + toptr[parent] + start] != 0)) {
@@ -2398,7 +2395,6 @@ ERROR awkward_listoffsetarray_reduce_local_outoffsets_64(
   int64_t parentsoffset,
   int64_t lenparents,
   int64_t outlength) {
-  outoffsets[outlength] = lenparents;
   int64_t k = 0;
   int64_t last = -1;
   for (int64_t i = 0;  i < lenparents;  i++) {
@@ -2407,6 +2403,10 @@ ERROR awkward_listoffsetarray_reduce_local_outoffsets_64(
       k++;
       last++;
     }
+  }
+  while (k <= outlength) {
+    outoffsets[k] = lenparents;
+    k++;
   }
   return success();
 }

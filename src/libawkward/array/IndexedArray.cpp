@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #include <sstream>
 #include <type_traits>
@@ -7,6 +7,7 @@
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/cpu-kernels/operations.h"
 #include "awkward/cpu-kernels/reducers.h"
+#include "awkward/cpu-kernels/sorting.h"
 #include "awkward/type/OptionType.h"
 #include "awkward/type/ArrayType.h"
 #include "awkward/type/UnknownType.h"
@@ -146,7 +147,8 @@ namespace awkward {
   bool
   IndexedForm::equal(const FormPtr& other,
                      bool check_identities,
-                     bool check_parameters) const {
+                     bool check_parameters,
+                     bool compatibility_check) const {
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
       return false;
@@ -159,7 +161,8 @@ namespace awkward {
       return (index_ == t->index()  &&
               content_.get()->equal(t->content(),
                                     check_identities,
-                                    check_parameters));
+                                    check_parameters,
+                                    compatibility_check));
     }
     else {
       return false;
@@ -283,7 +286,8 @@ namespace awkward {
   bool
   IndexedOptionForm::equal(const FormPtr& other,
                            bool check_identities,
-                           bool check_parameters) const {
+                           bool check_parameters,
+                           bool compatibility_check) const {
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
       return false;
@@ -296,7 +300,8 @@ namespace awkward {
       return (index_ == t->index()  &&
               content_.get()->equal(t->content(),
                                     check_identities,
-                                    check_parameters));
+                                    check_parameters,
+                                    compatibility_check));
     }
     else {
       return false;
@@ -1447,7 +1452,7 @@ namespace awkward {
 
     return std::make_shared<IndexedArrayOf<int64_t, ISOPTION>>(
       Identities::none(),
-      util::Parameters(),
+      parameters_,
       index,
       content);
   }
@@ -1623,13 +1628,13 @@ namespace awkward {
 
     if (ISOPTION  ||  other_isoption) {
       return std::make_shared<IndexedOptionArray64>(Identities::none(),
-                                                    util::Parameters(),
+                                                    parameters_,
                                                     index,
                                                     content);
     }
     else {
       return std::make_shared<IndexedArray64>(Identities::none(),
-                                              util::Parameters(),
+                                              parameters_,
                                               index,
                                               content);
     }
@@ -1982,6 +1987,212 @@ namespace awkward {
 
   template <typename T, bool ISOPTION>
   const ContentPtr
+  IndexedArrayOf<T, ISOPTION>::sort_next(int64_t negaxis,
+                                         const Index64& starts,
+                                         const Index64& parents,
+                                         int64_t outlength,
+                                         bool ascending,
+                                         bool stable,
+                                         bool keepdims) const {
+    int64_t numnull;
+    struct Error err1 = util::awkward_indexedarray_numnull<T>(
+      &numnull,
+      index_.ptr().get(),
+      index_.offset(),
+      index_.length());
+    util::handle_error(err1, classname(), identities_.get());
+
+    Index64 nextparents(index_.length() - numnull);
+    Index64 nextcarry(index_.length() - numnull);
+    Index64 outindex(index_.length());
+    struct Error err2 = util::awkward_indexedarray_reduce_next_64<T>(
+      nextcarry.ptr().get(),
+      nextparents.ptr().get(),
+      outindex.ptr().get(),
+      index_.ptr().get(),
+      index_.offset(),
+      parents.ptr().get(),
+      parents.offset(),
+      index_.length());
+    util::handle_error(err2, classname(), identities_.get());
+
+    ContentPtr next = content_.get()->carry(nextcarry);
+    ContentPtr out = next.get()->sort_next(negaxis,
+                                           starts,
+                                           nextparents,
+                                           outlength,
+                                           ascending,
+                                           stable,
+                                           keepdims);
+
+    Index64 nextoutindex(index_.length());
+    struct Error err3 = awkward_indexedarray_local_preparenext_64(
+        nextoutindex.ptr().get(),
+        starts.ptr().get(),
+        parents.ptr().get(),
+        parents.offset(),
+        parents.length(),
+        nextparents.ptr().get(),
+        nextparents.offset());
+    util::handle_error(err3, classname(), identities_.get());
+
+    out = std::make_shared<IndexedArrayOf<int64_t, ISOPTION>>(
+            Identities::none(),
+            parameters_,
+            nextoutindex,
+            out);
+
+    std::pair<bool, int64_t> branchdepth = branch_depth();
+    if (!branchdepth.first  &&  negaxis == branchdepth.second) {
+      return out;
+    }
+    else {
+      if (RegularArray* raw =
+        dynamic_cast<RegularArray*>(out.get())) {
+        out = raw->toListOffsetArray64(true);
+      }
+      if (ListOffsetArray64* raw =
+        dynamic_cast<ListOffsetArray64*>(out.get())) {
+        Index64 outoffsets(starts.length() + 1);
+        if (starts.length() > 0  &&  starts.getitem_at_nowrap(0) != 0) {
+          throw std::runtime_error(
+            "sort_next with unbranching depth > negaxis expects a "
+            "ListOffsetArray64 whose offsets start at zero");
+        }
+        struct Error err4 = awkward_indexedarray_reduce_next_fix_offsets_64(
+          outoffsets.ptr().get(),
+          starts.ptr().get(),
+          starts.offset(),
+          starts.length(),
+          outindex.length());
+        util::handle_error(err4, classname(), identities_.get());
+
+        return std::make_shared<ListOffsetArray64>(
+          raw->identities(),
+          raw->parameters(),
+          outoffsets,
+          std::make_shared<IndexedArrayOf<int64_t, ISOPTION>>(
+            Identities::none(),
+            parameters_,
+            outindex,
+            raw->content()));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("sort_next with unbranching depth > negaxis is only "
+                      "expected to return RegularArray or ListOffsetArray64; "
+                      "instead, it returned ") + out.get()->classname());
+      }
+    }
+
+    return out;
+  }
+
+  template <typename T, bool ISOPTION>
+  const ContentPtr
+  IndexedArrayOf<T, ISOPTION>::argsort_next(int64_t negaxis,
+                                            const Index64& starts,
+                                            const Index64& parents,
+                                            int64_t outlength,
+                                            bool ascending,
+                                            bool stable,
+                                            bool keepdims) const {
+    int64_t numnull;
+    struct Error err1 = util::awkward_indexedarray_numnull<T>(
+      &numnull,
+      index_.ptr().get(),
+      index_.offset(),
+      index_.length());
+    util::handle_error(err1, classname(), identities_.get());
+
+    Index64 nextparents(index_.length() - numnull);
+    Index64 nextcarry(index_.length() - numnull);
+    Index64 outindex(index_.length());
+    struct Error err2 = util::awkward_indexedarray_reduce_next_64<T>(
+      nextcarry.ptr().get(),
+      nextparents.ptr().get(),
+      outindex.ptr().get(),
+      index_.ptr().get(),
+      index_.offset(),
+      parents.ptr().get(),
+      parents.offset(),
+      index_.length());
+    util::handle_error(err2, classname(), identities_.get());
+
+    ContentPtr next = content_.get()->carry(nextcarry);
+    ContentPtr out = next.get()->argsort_next(negaxis,
+                                              starts,
+                                              nextparents,
+                                              outlength,
+                                              ascending,
+                                              stable,
+                                              keepdims);
+
+    Index64 nextoutindex(index_.length());
+    struct Error err3 = awkward_indexedarray_local_preparenext_64(
+        nextoutindex.ptr().get(),
+        starts.ptr().get(),
+        parents.ptr().get(),
+        parents.offset(),
+        parents.length(),
+        nextparents.ptr().get(),
+        nextparents.offset());
+    util::handle_error(err3, classname(), identities_.get());
+
+    out = std::make_shared<IndexedArrayOf<int64_t, ISOPTION>>(
+            Identities::none(),
+            util::Parameters(),
+            nextoutindex,
+            out);
+
+    std::pair<bool, int64_t> branchdepth = branch_depth();
+    if (!branchdepth.first  &&  negaxis == branchdepth.second) {
+      return out;
+    }
+    else {
+      if (RegularArray* raw =
+        dynamic_cast<RegularArray*>(out.get())) {
+          out = raw->toListOffsetArray64(true);
+      }
+      if (ListOffsetArray64* raw =
+        dynamic_cast<ListOffsetArray64*>(out.get())) {
+        Index64 outoffsets(starts.length() + 1);
+        if (starts.length() > 0  &&  starts.getitem_at_nowrap(0) != 0) {
+          throw std::runtime_error(
+              "argsort_next with unbranching depth > negaxis expects a "
+              "ListOffsetArray64 whose offsets start at zero");
+        }
+        struct Error err4 = awkward_indexedarray_reduce_next_fix_offsets_64(
+          outoffsets.ptr().get(),
+          starts.ptr().get(),
+          starts.offset(),
+          starts.length(),
+          outindex.length());
+        util::handle_error(err4, classname(), identities_.get());
+
+        return std::make_shared<ListOffsetArray64>(
+          raw->identities(),
+          raw->parameters(),
+          outoffsets,
+          std::make_shared<IndexedArrayOf<int64_t, ISOPTION>>(
+            Identities::none(),
+            util::Parameters(),
+            outindex,
+            raw->content()));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("argsort_next with unbranching depth > negaxis is only "
+                "expected to return RegularArray or ListOffsetArray64; "
+                "instead, it returned ") + out.get()->classname());
+      }
+    }
+
+    return out;
+  }
+
+  template <typename T, bool ISOPTION>
+  const ContentPtr
   IndexedArrayOf<T,
                  ISOPTION>::getitem_next(const SliceAt& at,
                                          const Slice& tail,
@@ -2124,9 +2335,12 @@ namespace awkward {
     return std::pair<Index64, IndexOf<T>>(nextcarry, outindex);
   }
 
-  template class IndexedArrayOf<int32_t, false>;
-  template class IndexedArrayOf<uint32_t, false>;
-  template class IndexedArrayOf<int64_t, false>;
-  template class IndexedArrayOf<int32_t, true>;
-  template class IndexedArrayOf<int64_t, true>;
+  // IndexedArrayOf<int64_t, true> has to be first, or ld on darwin
+  // will hide the typeinfo symbol
+  template class EXPORT_SYMBOL IndexedArrayOf<int64_t, true>;
+
+  template class EXPORT_SYMBOL IndexedArrayOf<int32_t, false>;
+  template class EXPORT_SYMBOL IndexedArrayOf<uint32_t, false>;
+  template class EXPORT_SYMBOL IndexedArrayOf<int64_t, false>;
+  template class EXPORT_SYMBOL IndexedArrayOf<int32_t, true>;
 }

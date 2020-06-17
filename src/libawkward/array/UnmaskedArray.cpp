@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #include <sstream>
 #include <type_traits>
@@ -18,6 +18,7 @@
 #include "awkward/array/ByteMaskedArray.h"
 #include "awkward/array/BitMaskedArray.h"
 #include "awkward/array/VirtualArray.h"
+#include "awkward/array/RegularArray.h"
 
 #include "awkward/array/UnmaskedArray.h"
 
@@ -121,7 +122,8 @@ namespace awkward {
   bool
   UnmaskedForm::equal(const FormPtr& other,
                       bool check_identities,
-                      bool check_parameters) const {
+                      bool check_parameters,
+                      bool compatibility_check) const {
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
       return false;
@@ -133,7 +135,8 @@ namespace awkward {
     if (UnmaskedForm* t = dynamic_cast<UnmaskedForm*>(other.get())) {
       return (content_.get()->equal(t->content(),
                                     check_identities,
-                                    check_parameters));
+                                    check_parameters,
+                                    compatibility_check));
     }
     else {
       return false;
@@ -750,6 +753,68 @@ namespace awkward {
                                      parameters,
                                      axis,
                                      depth));
+    }
+  }
+
+  const ContentPtr
+  UnmaskedArray::sort_next(int64_t negaxis,
+                           const Index64& starts,
+                           const Index64& parents,
+                           int64_t outlength,
+                           bool ascending,
+                           bool stable,
+                           bool keepdims) const {
+    std::shared_ptr<Content> out = content_.get()->sort_next(negaxis,
+                                                             starts,
+                                                             parents,
+                                                             outlength,
+                                                             ascending,
+                                                             stable,
+                                                             keepdims);
+    if (RegularArray* raw = dynamic_cast<RegularArray*>(out.get())) {
+      std::shared_ptr<Content> wrapped = std::make_shared<UnmaskedArray>(
+          Identities::none(),
+          parameters_,
+          raw->content());
+      return std::make_shared<RegularArray>(
+          raw->identities(),
+          raw->parameters(),
+          wrapped,
+          raw->size());
+    }
+    else {
+      return out;
+    }
+  }
+
+  const ContentPtr
+  UnmaskedArray::argsort_next(int64_t negaxis,
+                              const Index64& starts,
+                              const Index64& parents,
+                              int64_t outlength,
+                              bool ascending,
+                              bool stable,
+                              bool keepdims) const {
+    std::shared_ptr<Content> out = content_.get()->argsort_next(negaxis,
+                                                                starts,
+                                                                parents,
+                                                                outlength,
+                                                                ascending,
+                                                                stable,
+                                                                keepdims);
+    if (RegularArray* raw = dynamic_cast<RegularArray*>(out.get())) {
+      std::shared_ptr<Content> wrapped = std::make_shared<UnmaskedArray>(
+          Identities::none(),
+          parameters_,
+          raw->content());
+      return std::make_shared<RegularArray>(
+          raw->identities(),
+          raw->parameters(),
+          wrapped,
+          raw->size());
+    }
+    else {
+      return out;
     }
   }
 

@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #include <cstring>
 #include <atomic>
@@ -330,6 +330,6 @@ namespace awkward {
     return getitem_range_nowrap(regular_start, regular_stop);
   }
 
-  template class IdentitiesOf<int32_t>;
-  template class IdentitiesOf<int64_t>;
+  template class EXPORT_SYMBOL IdentitiesOf<int32_t>;
+  template class EXPORT_SYMBOL IdentitiesOf<int64_t>;
 }

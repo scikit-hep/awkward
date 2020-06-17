@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #include <sstream>
 #include <type_traits>
@@ -151,7 +151,8 @@ namespace awkward {
   bool
   BitMaskedForm::equal(const FormPtr& other,
                        bool check_identities,
-                       bool check_parameters) const {
+                       bool check_parameters,
+                       bool compatibility_check) const {
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
       return false;
@@ -164,7 +165,8 @@ namespace awkward {
       return (mask_ == t->mask()  &&
               content_.get()->equal(t->content(),
                                     check_identities,
-                                    check_parameters)  &&
+                                    check_parameters,
+                                    compatibility_check)  &&
               valid_when_ == t->valid_when()  &&
               lsb_order_ == t->lsb_order());
     }
@@ -271,7 +273,7 @@ namespace awkward {
       mask_.ptr().get(),
       mask_.offset(),
       mask_.length(),
-      valid_when_,
+      false,
       lsb_order_);
     util::handle_error(err, classname(), identities_.get());
     return std::make_shared<ByteMaskedArray>(
@@ -797,6 +799,40 @@ namespace awkward {
                                                    parameters,
                                                    axis,
                                                    depth);
+  }
+
+  const ContentPtr
+  BitMaskedArray::sort_next(int64_t negaxis,
+                            const Index64& starts,
+                            const Index64& parents,
+                            int64_t outlength,
+                            bool ascending,
+                            bool stable,
+                            bool keepdims) const {
+    return toByteMaskedArray().get()->sort_next(negaxis,
+                                                starts,
+                                                parents,
+                                                outlength,
+                                                ascending,
+                                                stable,
+                                                keepdims);
+  }
+
+  const ContentPtr
+  BitMaskedArray::argsort_next(int64_t negaxis,
+                               const Index64& starts,
+                               const Index64& parents,
+                               int64_t outlength,
+                               bool ascending,
+                               bool stable,
+                               bool keepdims) const {
+    return toByteMaskedArray().get()->argsort_next(negaxis,
+                                                   starts,
+                                                   parents,
+                                                   outlength,
+                                                   ascending,
+                                                   stable,
+                                                   keepdims);
   }
 
   const ContentPtr
