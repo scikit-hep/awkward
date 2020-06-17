@@ -41,6 +41,13 @@ namespace awkward {
       }
     }
 
+    void
+    handle_cuda_error(const struct Error& err) {
+      if(err.str != nullptr) {
+        throw std::invalid_argument(err.str);
+      }
+    }
+
     template <typename T>
     IndexOf<T> make_starts(const IndexOf<T>& offsets, KernelsLib ptr_lib) {
       return IndexOf<T>(offsets.ptr(),

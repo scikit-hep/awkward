@@ -8,13 +8,6 @@ int awkward_cuda_ptr_loc(void* ptr) {
   return att.device;
 }
 
-int8_t* awkward_cuda_host_to_device_buffi8_transfer (int8_t* ptr, int64_t length) {
-  int8_t* cuda_ptr;
-  cudaError_t err = cudaMallocManaged((void**)&cuda_ptr, sizeof(int8_t) * length);
-  cudaError_t err_1 = cudaMemcpy(cuda_ptr, ptr, sizeof(int8_t) * length, cudaMemcpyHostToDevice);
-  return cuda_ptr;
-}
-
 template <typename  T>
 T *awkward_cuda_ptr_alloc(int64_t length) {
   if(length != 0) {
@@ -57,52 +50,168 @@ float *awkward_cuda_ptrfloat32_alloc(int64_t length) {
 }
 double *awkward_cuda_ptrfloat64_alloc(int64_t length) {
   return awkward_cuda_ptr_alloc<double>(length);
-
 }
 
-void *awkward_cuda_ptri8_dealloc(int8_t* ptr) {
-  cudaError_t  err = cudaFree((void *)ptr);
+template <typename  T>
+Error awkward_cuda_ptr_dealloc(const T* ptr) {
+  cudaError_t  status = cudaFree((void *)ptr);
+  if(status != cudaError_t::cudaSuccess)
+    return failure(cudaGetErrorString(status), 0, kSliceNone);
+  return success();
+}
+Error awkward_cuda_ptrbool_dealloc(const bool* ptr) {
+  return awkward_cuda_ptr_dealloc<bool>(ptr);
+}
+Error awkward_cuda_ptr8_dealloc(const int8_t* ptr) {
+  return awkward_cuda_ptr_dealloc<int8_t>(ptr);
+}
+Error awkward_cuda_ptrU8_dealloc(const uint8_t* ptr) {
+  return awkward_cuda_ptr_dealloc<uint8_t>(ptr);
+}
+Error awkward_cuda_ptr16_dealloc(const int16_t* ptr) {
+  return awkward_cuda_ptr_dealloc<int16_t>(ptr);
+}
+Error awkward_cuda_ptrU16_dealloc(const uint16_t* ptr) {
+  return awkward_cuda_ptr_dealloc<uint16_t>(ptr);
+}
+Error awkward_cuda_ptr32_dealloc(const int32_t* ptr) {
+  return awkward_cuda_ptr_dealloc<int32_t>(ptr);
+}
+Error awkward_cuda_ptrU32_dealloc(const uint32_t* ptr) {
+  return awkward_cuda_ptr_dealloc<uint32_t>(ptr);
+}
+Error awkward_cuda_ptr64_dealloc(const int64_t* ptr) {
+  return awkward_cuda_ptr_dealloc<int64_t>(ptr);
+}
+Error awkward_cuda_ptrU64_dealloc(const uint64_t* ptr) {
+  return awkward_cuda_ptr_dealloc<uint64_t>(ptr);
+}
+Error awkward_cuda_ptrfloat32_dealloc(const float* ptr) {
+  return awkward_cuda_ptr_dealloc<float>(ptr);
+}
+Error awkward_cuda_ptrfloat64_dealloc(const double* ptr) {
+  return awkward_cuda_ptr_dealloc<double>(ptr);
 }
 
+template <typename T>
+Error awkward_cuda_H2D(
+  T** to_ptr,
+  T* from_ptr,
+  int64_t length) {
+  cudaError_t malloc_stat = cudaMallocManaged((void**)to_ptr,
+                                          sizeof(T) * length);
 
+  if(malloc_stat != cudaError_t::cudaSuccess)
+    return failure(cudaGetErrorString(malloc_stat), 0, kSliceNone);
 
-void *awkward_cuda_ptriU8_dealloc(uint8_t* ptr) {
-  cudaError_t  err = cudaFree((void *)ptr);
+  cudaError_t memcpy_stat = cudaMemcpy(to_ptr,
+                                       from_ptr,
+                                       sizeof(T) * length,
+                                       cudaMemcpyHostToDevice);
+
+  if(memcpy_stat != cudaError_t::cudaSuccess)
+    return failure(cudaGetErrorString(memcpy_stat), 0, kSliceNone);
+
+  return success();
 }
-
-
-
-void *awkward_cuda_ptri32_dealloc(int32_t* ptr) {
-  cudaError_t  err = cudaFree((void *)ptr);
+Error awkward_cuda_H2D_bool(
+  bool** to_ptr,
+  bool* from_ptr,
+  int64_t length) {
+  return awkward_cuda_H2D<bool>(
+    to_ptr,
+    from_ptr,
+    length);
 }
-
-
-
-void *awkward_cuda_ptriU32_dealloc(uint32_t* ptr) {
-  cudaError_t  err = cudaFree((void *)ptr);
+Error awkward_cuda_H2D_8(
+  int8_t** to_ptr,
+  int8_t* from_ptr,
+  int64_t length) {
+  return awkward_cuda_H2D<int8_t>(
+    to_ptr,
+    from_ptr,
+    length);
 }
-
-
-
-void *awkward_cuda_ptr64_dealloc(int64_t* ptr) {
-  cudaError_t  err = cudaFree((void *)ptr);
+Error awkward_cuda_H2D_U8(
+  uint8_t** to_ptr,
+  uint8_t* from_ptr,
+  int64_t length) {
+  return awkward_cuda_H2D<uint8_t>(
+    to_ptr,
+    from_ptr,
+    length);
 }
-
-
-
-void *awkward_cuda_ptrf_dealloc(float* ptr) {
-  cudaError_t  err = cudaFree((void *)ptr);
+Error awkward_cuda_H2D_16(
+  int16_t** to_ptr,
+  int16_t* from_ptr,
+  int64_t length) {
+  return awkward_cuda_H2D<int16_t>(
+    to_ptr,
+    from_ptr,
+    length);
 }
-
-
-void *awkward_cuda_ptrd_dealloc(double* ptr) {
-  cudaError_t  err = cudaFree((void *)ptr);
+Error awkward_cuda_H2D_U16(
+  uint16_t** to_ptr,
+  uint16_t* from_ptr,
+  int64_t length) {
+  return awkward_cuda_H2D<uint16_t>(
+    to_ptr,
+    from_ptr,
+    length);
 }
-
-
-
-void *awkward_cuda_ptrb_dealloc(bool* ptr) {
-  cudaError_t  err = cudaFree((void *)ptr);
+Error awkward_cuda_H2D_32(
+  int32_t** to_ptr,
+  int32_t* from_ptr,
+  int64_t length) {
+  return awkward_cuda_H2D<int32_t>(
+    to_ptr,
+    from_ptr,
+    length);
+}
+Error awkward_cuda_H2D_U32(
+  uint32_t** to_ptr,
+  uint32_t* from_ptr,
+  int64_t length) {
+  return awkward_cuda_H2D<uint32_t>(
+    to_ptr,
+    from_ptr,
+    length);
+}
+Error awkward_cuda_H2D_64(
+  int64_t** to_ptr,
+  int64_t* from_ptr,
+  int64_t length) {
+  return awkward_cuda_H2D<int64_t>(
+    to_ptr,
+    from_ptr,
+    length);
+}
+Error awkward_cuda_H2D_U64(
+  uint64_t** to_ptr,
+  uint64_t* from_ptr,
+  int64_t length) {
+  return awkward_cuda_H2D<uint64_t>(
+    to_ptr,
+    from_ptr,
+    length);
+}
+Error awkward_cuda_H2D_float32(
+  float** to_ptr,
+  float* from_ptr,
+  int64_t length) {
+  return awkward_cuda_H2D<float>(
+    to_ptr,
+    from_ptr,
+    length);
+}
+Error awkward_cuda_H2D_float64(
+  double** to_ptr,
+  double* from_ptr,
+  int64_t length) {
+  return awkward_cuda_H2D<double>(
+    to_ptr,
+    from_ptr,
+    length);
 }
 
 

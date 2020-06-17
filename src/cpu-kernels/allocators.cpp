@@ -2,60 +2,44 @@
 
 #include "awkward/cpu-kernels/allocators.h"
 
-extern "C" {
-  int8_t *awkward_cpu_ptri8_alloc(int64_t length) {
-    if(length != 0) {
-      return (int8_t *)(malloc(sizeof(int8_t) * length));
-    }
-    return nullptr;
-  }
 
-  uint8_t *awkward_cpu_ptriU8_alloc(int64_t length) {
-    if(length != 0) {
-      return (uint8_t *)(malloc(sizeof(uint8_t) * length));
-    }
-    return nullptr;
+template <typename T>
+T *awkward_cpu_ptr_alloc(int64_t length) {
+  if(length != 0) {
+    return new T[(size_t) length];
   }
-
-  int32_t *awkward_cpu_ptri32_alloc(int64_t length) {
-    if(length != 0) {
-      return (int32_t *)(malloc(sizeof(int32_t) * length));
-    }
-    return nullptr;
-  }
-
-  uint32_t *awkward_cpu_ptriU32_alloc(int64_t length) {
-    if(length != 0) {
-      return (uint32_t *)(malloc(sizeof(uint32_t) * length));
-    }
-    return nullptr;
-  }
-
-  int64_t *awkward_cpu_ptri64_alloc(int64_t length) {
-    if(length != 0) {
-      return (int64_t *)(malloc(sizeof(int64_t) * length));
-    }
-    return nullptr;
-  }
-
-  float *awkward_cpu_ptrf_alloc(int64_t length) {
-    if(length != 0) {
-      return (float *)(malloc(sizeof(float) * length));
-    }
-    return nullptr;
-  }
-
-  double *awkward_cpu_ptrd_alloc(int64_t length) {
-    if(length != 0) {
-      return (double *)(malloc(sizeof(double) * length));
-    }
-    return nullptr;
-  }
-
-  bool *awkward_cpu_ptrb_alloc(int64_t length) {
-    if(length != 0) {
-      return (bool *)(malloc(sizeof(bool) * length));
-    }
-    return nullptr;
-  }
+  return nullptr;
+}
+bool *awkward_cpu_ptrbool_alloc(int64_t length) {
+  return awkward_cpu_ptr_alloc<bool>(length);
+}
+int8_t *awkward_cpu_ptr8_alloc(int64_t length) {
+  return awkward_cpu_ptr_alloc<int8_t>(length);
+}
+uint8_t *awkward_cpu_ptrU8_alloc(int64_t length) {
+  return awkward_cpu_ptr_alloc<uint8_t>(length);
+}
+int16_t *awkward_cpu_ptr16_alloc(int64_t length) {
+  return awkward_cpu_ptr_alloc<int16_t>(length);
+}
+uint16_t *awkward_cpu_ptrU16_alloc(int64_t length) {
+  return awkward_cpu_ptr_alloc<uint16_t>(length);
+}
+int32_t *awkward_cpu_ptr32_alloc(int64_t length) {
+  return awkward_cpu_ptr_alloc<int32_t>(length);
+}
+uint32_t *awkward_cpu_ptrU32_alloc(int64_t length) {
+  return awkward_cpu_ptr_alloc<uint32_t>(length);
+}
+int64_t *awkward_cpu_ptr64_alloc(int64_t length) {
+  return awkward_cpu_ptr_alloc<int64_t>(length);
+}
+uint64_t *awkward_cpu_ptrU64_alloc(int64_t length) {
+  return awkward_cpu_ptr_alloc<uint64_t>(length);
+}
+float *awkward_cpu_ptrfloat32_alloc(int64_t length) {
+  return awkward_cpu_ptr_alloc<float>(length);
+}
+double *awkward_cpu_ptrfloat64_alloc(int64_t length) {
+  return awkward_cpu_ptr_alloc<double>(length);
 }

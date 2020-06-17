@@ -71,8 +71,7 @@ namespace awkward {
                                 int64_t length,
                                 KernelsLib ptr_lib)
       : Identities(ref, fieldloc, 0, width, length)
-      , ptr_(kernel::ptr_alloc<T>((ssize_t)width*length, ptr_lib),
-          util::array_deleter<T>())
+      , ptr_(kernel::ptr_alloc<T>((ssize_t)width*length, ptr_lib))
       , ptr_lib_(ptr_lib) { }
 
   template <typename T>

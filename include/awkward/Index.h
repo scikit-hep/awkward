@@ -203,8 +203,8 @@ namespace awkward {
     const IndexOf<T>
       deep_copy() const;
 
-    IndexOf<T>
-      to_cuda();
+//    IndexOf<T>
+//      to_gpu();
 
   private:
     /// @brief See #ptr.

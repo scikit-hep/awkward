@@ -1232,8 +1232,7 @@ namespace awkward {
   const ContentPtr
   NumpyArray::carry(const Index64& carry) const {
     std::shared_ptr<void> ptr(
-      kernel::ptr_alloc<uint8_t>((size_t)(carry.length()*strides_[0]), ptr_lib_),
-      util::array_deleter<uint8_t>());
+      kernel::ptr_alloc<uint8_t>((size_t)(carry.length()*strides_[0]), ptr_lib_));
     struct Error err = awkward_numpyarray_getitem_next_null_64(
       reinterpret_cast<uint8_t*>(ptr.get()),
       reinterpret_cast<uint8_t*>(ptr_.get()),
@@ -1707,8 +1706,7 @@ namespace awkward {
       }
 
       std::shared_ptr<void> ptr(
-        kernel::ptr_alloc<uint8_t>((size_t)(itemsize*(self_flatlength + other_flatlength)), ptr_lib_),
-        util::array_deleter<uint8_t>());
+        kernel::ptr_alloc<uint8_t>((size_t)(itemsize*(self_flatlength + other_flatlength)), ptr_lib_));
 
       NumpyArray contiguous_other = rawother->contiguous();
 
@@ -2193,8 +2191,7 @@ namespace awkward {
     NumpyArray contiguous_other = other.get()->contiguous();
 
     std::shared_ptr<void> ptr(
-      kernel::ptr_alloc<uint8_t>((size_t)(length() + other.get()->length()), ptr_lib_),
-      util::array_deleter<uint8_t>());
+      kernel::ptr_alloc<uint8_t>((size_t)(length() + other.get()->length()), ptr_lib_));
 
     struct Error err;
 
@@ -2768,8 +2765,7 @@ namespace awkward {
   NumpyArray::contiguous_next(const Index64& bytepos) const {
     if (iscontiguous()) {
       std::shared_ptr<void> ptr(
-        kernel::ptr_alloc<uint8_t>((size_t)(bytepos.length()*strides_[0]), ptr_lib_),
-        util::array_deleter<uint8_t>());
+        kernel::ptr_alloc<uint8_t>((size_t)(bytepos.length()*strides_[0]), ptr_lib_));
       struct Error err = awkward_numpyarray_contiguous_copy_64(
         reinterpret_cast<uint8_t*>(ptr.get()),
         reinterpret_cast<uint8_t*>(ptr_.get()),
@@ -2790,8 +2786,7 @@ namespace awkward {
 
     else if (shape_.size() == 1) {
       std::shared_ptr<void> ptr(
-        kernel::ptr_alloc<uint8_t>((size_t)(bytepos.length()*itemsize_), ptr_lib_),
-        util::array_deleter<uint8_t>());
+        kernel::ptr_alloc<uint8_t>((size_t)(bytepos.length()*itemsize_), ptr_lib_));
       struct Error err = awkward_numpyarray_contiguous_copy_64(
         reinterpret_cast<uint8_t*>(ptr.get()),
         reinterpret_cast<uint8_t*>(ptr_.get()),
@@ -3046,8 +3041,7 @@ namespace awkward {
                            int64_t stride,
                            bool first) const {
     if (head.get() == nullptr) {
-      std::shared_ptr<void> ptr(kernel::ptr_alloc<uint8_t>((size_t)(carry.length()*stride), ptr_lib_),
-                                util::array_deleter<uint8_t>());
+      std::shared_ptr<void> ptr(kernel::ptr_alloc<uint8_t>((size_t)(carry.length()*stride), ptr_lib_));
       struct Error err = awkward_numpyarray_getitem_next_null_64(
         reinterpret_cast<uint8_t*>(ptr.get()),
         reinterpret_cast<uint8_t*>(ptr_.get()),

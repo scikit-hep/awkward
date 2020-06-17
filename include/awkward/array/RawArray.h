@@ -229,8 +229,7 @@ namespace awkward {
                   const int64_t length,
                   const KernelsLib ptr_lib = cpu_kernels)
         : Content(identities, parameters)
-        , ptr_(kernel::ptr_alloc<T>((size_t)length, ptr_lib),
-                                    util::array_deleter<T>())
+        , ptr_(kernel::ptr_alloc<T>((size_t)length, ptr_lib))
         , offset_(0)
         , length_(length)
         , itemsize_(sizeof(T))

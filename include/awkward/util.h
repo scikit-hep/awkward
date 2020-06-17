@@ -9,6 +9,7 @@
 #include <memory>
 
 #include "awkward/common.h"
+#include "dlfcn.h"
 
 namespace awkward {
   class Identities;
@@ -16,6 +17,22 @@ namespace awkward {
   class IndexOf;
 
   namespace util {
+    /// @brief If the Error struct contains an error message (from a
+    /// cpu-kernel through the C interface), raise that error as a C++
+    /// exception.
+    ///
+    /// @param err The Error struct from a cpu-kernel.
+    /// @param classname The name of this class to include in the error
+    /// message.
+    /// @param id The Identities to include in the error message.
+    void
+    handle_error(const struct Error& err,
+                 const std::string& classname,
+                 const Identities* id);
+
+    void
+    handle_cuda_error(const struct Error& err);
+
     /// @class array_deleter
     ///
     /// @brief Used as a `std::shared_ptr` deleter (second argument) to
@@ -36,6 +53,279 @@ namespace awkward {
       /// zero.
       void operator()(T const *p) {
         delete[] p;
+      }
+    };
+
+    template <typename T>
+    class EXPORT_SYMBOL cuda_array_deleter;
+
+    template <>
+    class cuda_array_deleter<bool>{
+      public:
+      /// @brief Called by `std::shared_ptr` when its reference count reaches
+      /// zero.
+      void operator()(bool const *p) {
+
+        auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
+        if (!handle) {
+          Error err = failure("Failed to find awkward1[cuda]",
+                              0,
+                              kSliceNone);
+
+          awkward::util::handle_cuda_error(err);
+        }
+
+        typedef Error (func_awkward_cuda_ptrbool_dealloc_t)(const bool* ptr);
+        func_awkward_cuda_ptrbool_dealloc_t *func_awkward_cuda_ptrbool_dealloc =
+          reinterpret_cast<func_awkward_cuda_ptrbool_dealloc_t *>
+          (dlsym(handle, "awkward_cuda_ptrbool_dealloc"));
+
+        util::handle_cuda_error((*func_awkward_cuda_ptrbool_dealloc)(p));
+      }
+    };
+    template <>
+    class cuda_array_deleter<int8_t>{
+      public:
+      /// @brief Called by `std::shared_ptr` when its reference count reaches
+      /// zero.
+      void operator()(int8_t const *p) {
+
+        auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
+        if (!handle) {
+          Error err = failure("Failed to find awkward1[cuda]",
+                              0,
+                              kSliceNone);
+
+          awkward::util::handle_cuda_error(err);
+        }
+
+        typedef Error (func_awkward_cuda_ptr8_dealloc_t)(const int8_t* ptr);
+        func_awkward_cuda_ptr8_dealloc_t *func_awkward_cuda_ptr8_dealloc =
+          reinterpret_cast<func_awkward_cuda_ptr8_dealloc_t *>
+          (dlsym(handle, "awkward_cuda_ptr8_dealloc"));
+
+        util::handle_cuda_error((*func_awkward_cuda_ptr8_dealloc)(p));
+      }
+    };
+    template <>
+    class cuda_array_deleter<uint8_t>{
+      public:
+      /// @brief Called by `std::shared_ptr` when its reference count reaches
+      /// zero.
+      void operator()(uint8_t const *p) {
+
+        auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
+        if (!handle) {
+          Error err = failure("Failed to find awkward1[cuda]",
+                              0,
+                              kSliceNone);
+
+          awkward::util::handle_cuda_error(err);
+        }
+
+        typedef Error (func_awkward_cuda_ptrU8_dealloc_t)(const uint8_t* ptr);
+        func_awkward_cuda_ptrU8_dealloc_t *func_awkward_cuda_ptrU8_dealloc =
+          reinterpret_cast<func_awkward_cuda_ptrU8_dealloc_t *>
+          (dlsym(handle, "awkward_cuda_ptrU8_dealloc"));
+
+        util::handle_cuda_error((*func_awkward_cuda_ptrU8_dealloc)(p));
+      }
+    };
+    template <>
+    class cuda_array_deleter<int16_t>{
+      public:
+      /// @brief Called by `std::shared_ptr` when its reference count reaches
+      /// zero.
+      void operator()(int16_t const *p) {
+
+        auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
+        if (!handle) {
+          Error err = failure("Failed to find awkward1[cuda]",
+                              0,
+                              kSliceNone);
+
+          awkward::util::handle_cuda_error(err);
+        }
+
+        typedef Error (func_awkward_cuda_ptr16_dealloc_t)(const int16_t* ptr);
+        func_awkward_cuda_ptr16_dealloc_t *func_awkward_cuda_ptr16_dealloc =
+          reinterpret_cast<func_awkward_cuda_ptr16_dealloc_t *>
+          (dlsym(handle, "awkward_cuda_ptr16_dealloc"));
+
+        util::handle_cuda_error((*func_awkward_cuda_ptr16_dealloc)(p));
+      }
+    };
+    template <>
+    class cuda_array_deleter<uint16_t>{
+      public:
+      /// @brief Called by `std::shared_ptr` when its reference count reaches
+      /// zero.
+      void operator()(uint16_t const *p) {
+
+        auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
+        if (!handle) {
+          Error err = failure("Failed to find awkward1[cuda]",
+                              0,
+                              kSliceNone);
+
+          awkward::util::handle_cuda_error(err);
+        }
+
+        typedef Error (func_awkward_cuda_ptrU16_dealloc_t)(const uint16_t* ptr);
+        func_awkward_cuda_ptrU16_dealloc_t *func_awkward_cuda_ptrU16_dealloc =
+          reinterpret_cast<func_awkward_cuda_ptrU16_dealloc_t *>
+          (dlsym(handle, "awkward_cuda_ptrU16_dealloc"));
+
+        util::handle_cuda_error((*func_awkward_cuda_ptrU16_dealloc)(p));
+      }
+    };
+    template <>
+    class cuda_array_deleter<int32_t>{
+      public:
+      /// @brief Called by `std::shared_ptr` when its reference count reaches
+      /// zero.
+      void operator()(int32_t const *p) {
+
+        auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
+        if (!handle) {
+          Error err = failure("Failed to find awkward1[cuda]",
+                              0,
+                              kSliceNone);
+
+          awkward::util::handle_cuda_error(err);
+        }
+
+        typedef Error (func_awkward_cuda_ptr32_dealloc_t)(const int32_t* ptr);
+        func_awkward_cuda_ptr32_dealloc_t *func_awkward_cuda_ptr32_dealloc =
+          reinterpret_cast<func_awkward_cuda_ptr32_dealloc_t *>
+          (dlsym(handle, "awkward_cuda_ptr32_dealloc"));
+
+        util::handle_cuda_error((*func_awkward_cuda_ptr32_dealloc)(p));
+      }
+    };
+    template <>
+    class cuda_array_deleter<uint32_t>{
+      public:
+      /// @brief Called by `std::shared_ptr` when its reference count reaches
+      /// zero.
+      void operator()(uint32_t const *p) {
+
+        auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
+        if (!handle) {
+          Error err = failure("Failed to find awkward1[cuda]",
+                              0,
+                              kSliceNone);
+
+          awkward::util::handle_cuda_error(err);
+        }
+
+        typedef Error (func_awkward_cuda_ptrU32_dealloc_t)(const uint32_t* ptr);
+        func_awkward_cuda_ptrU32_dealloc_t *func_awkward_cuda_ptrU32_dealloc =
+          reinterpret_cast<func_awkward_cuda_ptrU32_dealloc_t *>
+          (dlsym(handle, "awkward_cuda_ptrU32_dealloc"));
+
+        util::handle_cuda_error((*func_awkward_cuda_ptrU32_dealloc)(p));
+      }
+    };
+    template <>
+    class cuda_array_deleter<int64_t>{
+      public:
+      /// @brief Called by `std::shared_ptr` when its reference count reaches
+      /// zero.
+      void operator()(int64_t const *p) {
+
+        auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
+        if (!handle) {
+          Error err = failure("Failed to find awkward1[cuda]",
+                              0,
+                              kSliceNone);
+
+          awkward::util::handle_cuda_error(err);
+        }
+
+        typedef Error (func_awkward_cuda_ptr64_dealloc_t)(const int64_t* ptr);
+        func_awkward_cuda_ptr64_dealloc_t *func_awkward_cuda_ptr64_dealloc =
+          reinterpret_cast<func_awkward_cuda_ptr64_dealloc_t *>
+          (dlsym(handle, "awkward_cuda_ptr64_dealloc"));
+
+        util::handle_cuda_error((*func_awkward_cuda_ptr64_dealloc)(p));
+      }
+    };
+    template <>
+    class cuda_array_deleter<uint64_t>{
+      public:
+      /// @brief Called by `std::shared_ptr` when its reference count reaches
+      /// zero.
+      void operator()(uint64_t const *p) {
+
+        auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
+        if (!handle) {
+          Error err = failure("Failed to find awkward1[cuda]",
+                              0,
+                              kSliceNone);
+
+          awkward::util::handle_cuda_error(err);
+        }
+
+        typedef Error (func_awkward_cuda_ptrU64_dealloc_t)(const uint64_t* ptr);
+        func_awkward_cuda_ptrU64_dealloc_t *func_awkward_cuda_ptrU64_dealloc =
+          reinterpret_cast<func_awkward_cuda_ptrU64_dealloc_t *>
+          (dlsym(handle, "awkward_cuda_ptrU64_dealloc"));
+
+        util::handle_cuda_error((*func_awkward_cuda_ptrU64_dealloc)(p));
+      }
+    };
+    template <>
+    class cuda_array_deleter<float>{
+      public:
+      /// @brief Called by `std::shared_ptr` when its reference count reaches
+      /// zero.
+      void operator()(float const *p) {
+
+        auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
+        if (!handle) {
+          Error err = failure("Failed to find awkward1[cuda]",
+                              0,
+                              kSliceNone);
+
+          awkward::util::handle_cuda_error(err);
+        }
+
+        typedef Error (func_awkward_cuda_ptrfloat32_dealloc_t)(const float*
+        ptr);
+        func_awkward_cuda_ptrfloat32_dealloc_t
+          *func_awkward_cuda_ptrfloat32_dealloc =
+          reinterpret_cast<func_awkward_cuda_ptrfloat32_dealloc_t *>
+          (dlsym(handle, "awkward_cuda_ptrfloat32_dealloc"));
+
+        util::handle_cuda_error((*func_awkward_cuda_ptrfloat32_dealloc)(p));
+      }
+    };
+    template <>
+    class cuda_array_deleter<double>{
+      public:
+      /// @brief Called by `std::shared_ptr` when its reference count reaches
+      /// zero.
+      void operator()(double const *p) {
+
+        auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
+        if (!handle) {
+          Error err = failure("Failed to find awkward1[cuda]",
+                              0,
+                              kSliceNone);
+
+          awkward::util::handle_cuda_error(err);
+        }
+
+        typedef Error (func_awkward_cuda_ptrfloat64_dealloc_t)(const double*
+        ptr);
+        func_awkward_cuda_ptrfloat64_dealloc_t
+          *func_awkward_cuda_ptrfloat64_dealloc =
+          reinterpret_cast<func_awkward_cuda_ptrfloat64_dealloc_t *>
+          (dlsym(handle, "awkward_cuda_ptrfloat64_dealloc"));
+
+        awkward::util::handle_cuda_error((*func_awkward_cuda_ptrfloat64_dealloc)
+        (p));
       }
     };
 
@@ -72,19 +362,6 @@ namespace awkward {
     /// [scikit-hep/awkward-1.0#186](https://github.com/scikit-hep/awkward-1.0/issues/186).
     std::string
       quote(const std::string& x, bool doublequote);
-
-    /// @brief If the Error struct contains an error message (from a
-    /// cpu-kernel through the C interface), raise that error as a C++
-    /// exception.
-    ///
-    /// @param err The Error struct from a cpu-kernel.
-    /// @param classname The name of this class to include in the error
-    /// message.
-    /// @param id The Identities to include in the error message.
-    void
-      handle_error(const struct Error& err,
-                   const std::string& classname,
-                   const Identities* id);
 
     /// @brief Converts an `offsets` index (from
     /// {@link ListOffsetArrayOf ListOffsetArray}, for instance) into a

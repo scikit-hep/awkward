@@ -4,44 +4,80 @@
 #define AWKWARD_ALLOCATORS_CUH_
 
 #include <stdint.h>
+#include "awkward/common.h"
 
 extern "C" {
   int awkward_cuda_ptr_loc(void* ptr);
 
-  int8_t *awkward_cuda_ptri8_alloc(int64_t length);
+  bool *awkward_cuda_ptrbool_alloc(int64_t length);
+  int8_t *awkward_cuda_ptr8_alloc(int64_t length);
+  uint8_t *awkward_cuda_ptrU8_alloc(int64_t length);
+  int16_t *awkward_cuda_ptr16_alloc(int64_t length);
+  uint16_t *awkward_cuda_ptrU16_alloc(int64_t length);
+  int32_t *awkward_cuda_ptr32_alloc(int64_t length);
+  uint32_t *awkward_cuda_ptrU32_alloc(int64_t length);
+  int64_t *awkward_cuda_ptr64_alloc(int64_t length);
+  uint64_t *awkward_cuda_ptrU64_alloc(int64_t length);
+  float *awkward_cuda_ptrfloat32_alloc(int64_t length);
+  double *awkward_cuda_ptrfloat64_alloc(int64_t length);
 
-  int8_t* awkward_cuda_host_to_device_buffi8_transfer(int8_t* ptr, int64_t length);
+  Error awkward_cuda_ptrbool_dealloc(const bool* ptr);
+  Error awkward_cuda_ptr8_dealloc(const int8_t* ptr);
+  Error awkward_cuda_ptrU8_dealloc(const uint8_t* ptr);
+  Error awkward_cuda_ptr16_dealloc(const int16_t* ptr);
+  Error awkward_cuda_ptrU16_dealloc(const uint16_t* ptr);
+  Error awkward_cuda_ptr32_dealloc(const int32_t* ptr);
+  Error awkward_cuda_ptrU32_dealloc(const uint32_t* ptr);
+  Error awkward_cuda_ptr64_dealloc(const int64_t* ptr);
+  Error awkward_cuda_ptrU64_dealloc(const uint64_t* ptr);
+  Error awkward_cuda_ptrfloat32_dealloc(const float* ptr);
+  Error awkward_cuda_ptrfloat64_dealloc(const double* ptr);
 
-  void *awkward_cuda_ptri8_dealloc(int8_t* ptr);
-  
-  uint8_t *awkward_cuda_ptriU8_alloc(int64_t length);
+  Error awkward_cuda_H2D_bool(
+    bool** to_ptr,
+    bool* from_ptr,
+    int64_t length);
+  Error awkward_cuda_H2D_8(
+    int8_t** to_ptr,
+    int8_t* from_ptr,
+    int64_t length);
+  Error awkward_cuda_H2D_U8(
+      uint8_t** to_ptr,
+      uint8_t* from_ptr,
+      int64_t length);
+  Error awkward_cuda_H2D_16(
+      int16_t** to_ptr,
+      int16_t* from_ptr,
+      int64_t length);
+  Error awkward_cuda_H2D_U16(
+      uint16_t** to_ptr,
+      uint16_t* from_ptr,
+      int64_t length);
+  Error awkward_cuda_H2D_32(
+      int32_t** to_ptr,
+      int32_t* from_ptr,
+      int64_t length);
+  Error awkward_cuda_H2D_U32(
+      uint32_t** to_ptr,
+      uint32_t* from_ptr,
+      int64_t length);
+  Error awkward_cuda_H2D_64(
+    int64_t** to_ptr,
+    int64_t* from_ptr,
+    int64_t length);
+  Error awkward_cuda_H2D_U64(
+    uint64_t** to_ptr,
+    uint64_t* from_ptr,
+    int64_t length);
+  Error awkward_cuda_H2D_float32(
+    float** to_ptr,
+    float* from_ptr,
+    int64_t length);
+  Error awkward_cuda_H2D_float64(
+    double** to_ptr,
+    double* from_ptr,
+    int64_t length);
+}
 
-  void *awkward_cuda_ptriU8_dealloc(uint8_t* ptr);
-  
-  int32_t *awkward_cuda_ptri32_alloc(int64_t length);
-
-  void *awkward_cuda_ptri32_dealloc(int32_t* ptr);
-
-  
-  uint32_t *awkward_cuda_ptriU32_alloc(int64_t length);
-
-  void *awkward_cuda_ptrU32_dealloc(uint32_t* ptr);
-  
-  int64_t *awkward_cuda_ptri64_alloc(int64_t length);
-
-  void *awkward_cuda_ptri64_dealloc(int64_t* ptr);
-  
-  float *awkward_cuda_ptrf_alloc(int64_t length);
-
-  void *awkward_cuda_ptrf_dealloc(float* ptr);
-  
-  double *awkward_cuda_ptrd_alloc(int64_t length);
-
-  void *awkward_cuda_ptrd_dealloc(double* ptr);
-  
-  bool *awkward_cuda_ptrb_alloc(int64_t length);
-
-  void *awkward_cuda_ptrb_dealloc(bool* ptr);
-};
 
 #endif //AWKWARD_ALLOCATORS_CUH_
