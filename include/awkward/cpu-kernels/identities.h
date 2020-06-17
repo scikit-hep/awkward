@@ -16,7 +16,7 @@ extern "C" {
       int64_t length);
 
   EXPORT_SYMBOL struct Error
-    awkward_identities32_to_identities_64(
+    awkward_identities32_to_identities64(
       int64_t* toptr,
       const int32_t* fromptr,
       int64_t length,

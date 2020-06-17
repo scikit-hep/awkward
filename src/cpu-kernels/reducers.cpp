@@ -2506,7 +2506,7 @@ ERROR awkward_indexedarray_reduce_next_fix_offsets_64(
   return success();
 }
 
-ERROR awkward_numpyarray_reduce_mask_bytemaskedarray(
+ERROR awkward_numpyarray_reduce_mask_bytemaskedarray_64(
   int8_t* toptr,
   const int64_t* parents,
   int64_t parentsoffset,

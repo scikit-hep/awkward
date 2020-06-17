@@ -322,7 +322,7 @@ namespace awkward {
   UnionArrayOf<T, I>::regular_index(const IndexOf<T>& tags) {
     int64_t lentags = tags.length();
     int64_t size;
-    struct Error err1 = kernel::unionarray8_regular_index_getsize(
+    struct Error err1 = kernel::unionarray_regular_index_getsize<T>(
       &size,
       tags.ptr().get(),
       tags.offset(),
@@ -330,7 +330,7 @@ namespace awkward {
     util::handle_error(err1, "UnionArray", nullptr);
     IndexOf<I> current(size);
     IndexOf<I> outindex(lentags);
-    struct Error err2 = kernel::unionarray8_regular_index<I>(
+    struct Error err2 = kernel::unionarray_regular_index<T, I>(
       outindex.ptr().get(),
       current.ptr().get(),
       size,
@@ -417,7 +417,7 @@ namespace awkward {
     }
     int64_t lenout;
     Index64 tmpcarry(lentags);
-    struct Error err = kernel::unionarray8_project_64<I>(
+    struct Error err = kernel::unionarray_project_64<T, I>(
       &lenout,
       tmpcarry.ptr().get(),
       tags_.ptr().get(),
@@ -757,7 +757,7 @@ namespace awkward {
                                            content.get()->length());
           Identities32* rawsubidentities =
             reinterpret_cast<Identities32*>(subidentities.get());
-          struct Error err = kernel::identities_from_unionarray8<int32_t, I>(
+          struct Error err = kernel::identities_from_unionarray<int32_t, T, I>(
             &uniquecontents,
             rawsubidentities->ptr().get(),
             rawidentities->ptr().get(),
@@ -788,7 +788,7 @@ namespace awkward {
                                            content.get()->length());
           Identities64* rawsubidentities =
             reinterpret_cast<Identities64*>(subidentities.get());
-          struct Error err = kernel::identities_from_unionarray8<int64_t, I>(
+          struct Error err = kernel::identities_from_unionarray<int64_t, T, I>(
             &uniquecontents,
             rawsubidentities->ptr().get(),
             rawidentities->ptr().get(),
@@ -1234,7 +1234,7 @@ namespace awkward {
     for (int64_t i = 0;  i < numcontents();  i++) {
       lencontents.push_back(content(i).get()->length());
     }
-    struct Error err = kernel::unionarray8_validity<I>(
+    struct Error err = kernel::unionarray_validity<T, I>(
       tags_.ptr().get(),
       tags_.offset(),
       index_.ptr().get(),

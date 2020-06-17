@@ -62,7 +62,7 @@ ERROR awkward_regularize_arrayslice_64(
     length);
 }
 
-ERROR awkward_index8_to_index_64(
+ERROR awkward_index8_to_index64(
   int64_t* toptr,
   const int8_t* fromptr,
   int64_t length) {
@@ -71,7 +71,7 @@ ERROR awkward_index8_to_index_64(
   }
   return success();
 }
-ERROR awkward_indexU8_to_index_64(
+ERROR awkward_indexU8_to_index64(
   int64_t* toptr,
   const uint8_t* fromptr,
   int64_t length) {
@@ -80,7 +80,7 @@ ERROR awkward_indexU8_to_index_64(
   }
   return success();
 }
-ERROR awkward_index32_to_index_64(
+ERROR awkward_index32_to_index64(
   int64_t* toptr,
   const int32_t* fromptr,
   int64_t length) {
@@ -89,7 +89,7 @@ ERROR awkward_index32_to_index_64(
   }
   return success();
 }
-ERROR awkward_indexU32_to_index_64(
+ERROR awkward_indexU32_to_index64(
   int64_t* toptr,
   const uint32_t* fromptr,
   int64_t length) {
@@ -339,21 +339,21 @@ ERROR awkward_carry_arange(
   }
   return success();
 }
-ERROR awkward_carry_arange_32(
+ERROR awkward_carry_arange32(
   int32_t* toptr,
   int64_t length) {
   return awkward_carry_arange<int32_t>(
     toptr,
     length);
 }
-ERROR awkward_carry_arange_U32(
+ERROR awkward_carry_arangeU32(
   uint32_t* toptr,
   int64_t length) {
   return awkward_carry_arange<uint32_t>(
     toptr,
     length);
 }
-ERROR awkward_carry_arange_64(
+ERROR awkward_carry_arange64(
   int64_t* toptr,
   int64_t length) {
   return awkward_carry_arange<int64_t>(

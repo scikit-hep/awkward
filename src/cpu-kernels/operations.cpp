@@ -3660,7 +3660,7 @@ ERROR awkward_bitmaskedarray_to_indexedoptionarray(
   }
   return success();
 }
-ERROR awkward_bitmaskedarray_to_indexedoptionarray_64(
+ERROR awkward_bitmaskedarray_to_indexedoptionarray64(
   int64_t* toindex,
   const uint8_t* frombitmask,
   int64_t bitmaskoffset,

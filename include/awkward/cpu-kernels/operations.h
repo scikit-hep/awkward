@@ -1333,7 +1333,7 @@ extern "C" {
       bool validwhen,
       bool lsb_order);
   EXPORT_SYMBOL struct Error
-    awkward_bitmaskedarray_to_indexedoptionarray_64(
+    awkward_bitmaskedarray_to_indexedoptionarray64(
       int64_t* toindex,
       const uint8_t* frombitmask,
       int64_t bitmaskoffset,

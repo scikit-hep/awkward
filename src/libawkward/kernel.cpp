@@ -42,41 +42,41 @@ namespace kernel {
   }
 
   template <>
-  ERROR index_to_index_64(
+  ERROR index_to_index64(
     int64_t* toptr,
     const int8_t* fromptr,
     int64_t length) {
-    return awkward_index8_to_index_64(
+    return awkward_index8_to_index64(
       toptr,
       fromptr,
       length);
   }
   template <>
-  ERROR index_to_index_64(
+  ERROR index_to_index64(
     int64_t* toptr,
     const uint8_t* fromptr,
     int64_t length) {
-    return awkward_indexU8_to_index_64(
+    return awkward_indexU8_to_index64(
       toptr,
       fromptr,
       length);
   }
   template <>
-  ERROR index_to_index_64(
+  ERROR index_to_index64(
     int64_t* toptr,
     const int32_t* fromptr,
     int64_t length) {
-    return awkward_index32_to_index_64(
+    return awkward_index32_to_index64(
       toptr,
       fromptr,
       length);
   }
   template <>
-  ERROR index_to_index_64(
+  ERROR index_to_index64(
     int64_t* toptr,
     const uint32_t* fromptr,
     int64_t length) {
-    return awkward_indexU32_to_index_64(
+    return awkward_indexU32_to_index64(
       toptr,
       fromptr,
       length);
@@ -268,7 +268,7 @@ namespace kernel {
   ERROR carry_arange(
     int32_t* toptr,
     int64_t length) {
-    return awkward_carry_arange_32(
+    return awkward_carry_arange32(
       toptr,
       length);
   }
@@ -276,7 +276,7 @@ namespace kernel {
   ERROR carry_arange(
     uint32_t* toptr,
     int64_t length) {
-    return awkward_carry_arange_U32(
+    return awkward_carry_arangeU32(
       toptr,
       length);
   }
@@ -284,7 +284,7 @@ namespace kernel {
   ERROR carry_arange(
     int64_t* toptr,
     int64_t length) {
-    return awkward_carry_arange_64(
+    return awkward_carry_arange64(
       toptr,
       length);
   }
@@ -1380,7 +1380,8 @@ namespace kernel {
       lencarry);
   }
 
-  Error unionarray8_regular_index_getsize(
+  template <>
+  Error unionarray_regular_index_getsize<int8_t>(
     int64_t* size,
     const int8_t* fromtags,
     int64_t tagsoffset,
@@ -1393,7 +1394,7 @@ namespace kernel {
   }
 
   template <>
-  Error unionarray8_regular_index<int32_t>(
+  Error unionarray_regular_index<int8_t, int32_t>(
     int32_t* toindex,
     int32_t* current,
     int64_t size,
@@ -1409,7 +1410,7 @@ namespace kernel {
       length);
   }
   template <>
-  Error unionarray8_regular_index<uint32_t>(
+  Error unionarray_regular_index<int8_t, uint32_t>(
     uint32_t* toindex,
     uint32_t* current,
     int64_t size,
@@ -1425,7 +1426,7 @@ namespace kernel {
       length);
   }
   template <>
-  Error unionarray8_regular_index<int64_t>(
+  Error unionarray_regular_index<int8_t, int64_t>(
     int64_t* toindex,
     int64_t* current,
     int64_t size,
@@ -1442,7 +1443,7 @@ namespace kernel {
   }
 
   template <>
-  Error unionarray8_project_64<int32_t>(
+  Error unionarray_project_64<int8_t, int32_t>(
     int64_t* lenout,
     int64_t* tocarry,
     const int8_t* fromtags,
@@ -1462,7 +1463,7 @@ namespace kernel {
       which);
   }
   template <>
-  Error unionarray8_project_64<uint32_t>(
+  Error unionarray_project_64<int8_t, uint32_t>(
     int64_t* lenout,
     int64_t* tocarry,
     const int8_t* fromtags,
@@ -1482,7 +1483,7 @@ namespace kernel {
       which);
   }
   template <>
-  Error unionarray8_project_64<int64_t>(
+  Error unionarray_project_64<int8_t, int64_t>(
     int64_t* lenout,
     int64_t* tocarry,
     const int8_t* fromtags,
@@ -2048,12 +2049,12 @@ namespace kernel {
   }
 
   template <>
-  ERROR identities_to_identities_64(
+  ERROR identities_to_identities64(
     int64_t* toptr,
     const int32_t* fromptr,
     int64_t length,
     int64_t width) {
-    return awkward_identities32_to_identities_64(
+    return awkward_identities32_to_identities64(
       toptr,
       fromptr,
       length,
@@ -2509,7 +2510,7 @@ namespace kernel {
   }
 
   template <>
-  Error identities_from_unionarray8<int32_t, int32_t>(
+  Error identities_from_unionarray<int32_t, int8_t, int32_t>(
     bool* uniquecontents,
     int32_t* toptr,
     const int32_t* fromptr,
@@ -2537,7 +2538,7 @@ namespace kernel {
       which);
   }
   template <>
-  Error identities_from_unionarray8<int32_t, uint32_t>(
+  Error identities_from_unionarray<int32_t, int8_t, uint32_t>(
     bool* uniquecontents,
     int32_t* toptr,
     const int32_t* fromptr,
@@ -2565,7 +2566,7 @@ namespace kernel {
       which);
   }
   template <>
-  Error identities_from_unionarray8<int32_t, int64_t>(
+  Error identities_from_unionarray<int32_t, int8_t, int64_t>(
     bool* uniquecontents,
     int32_t* toptr,
     const int32_t* fromptr,
@@ -2593,7 +2594,7 @@ namespace kernel {
       which);
   }
   template <>
-  Error identities_from_unionarray8<int64_t, int32_t>(
+  Error identities_from_unionarray<int64_t, int8_t, int32_t>(
     bool* uniquecontents,
     int64_t* toptr,
     const int64_t* fromptr,
@@ -2621,7 +2622,7 @@ namespace kernel {
       which);
   }
   template <>
-  Error identities_from_unionarray8<int64_t, uint32_t>(
+  Error identities_from_unionarray<int64_t, int8_t, uint32_t>(
     bool* uniquecontents,
     int64_t* toptr,
     const int64_t* fromptr,
@@ -2649,7 +2650,7 @@ namespace kernel {
       which);
   }
   template <>
-  Error identities_from_unionarray8<int64_t, int64_t>(
+  Error identities_from_unionarray<int64_t, int8_t, int64_t>(
     bool* uniquecontents,
     int64_t* toptr,
     const int64_t* fromptr,
@@ -4578,7 +4579,7 @@ namespace kernel {
   }
 
   template <>
-  Error unionarray8_validity<int32_t>(
+  Error unionarray_validity<int8_t, int32_t>(
     const int8_t* tags,
     int64_t tagsoffset,
     const int32_t* index,
@@ -4596,7 +4597,7 @@ namespace kernel {
       lencontents);
   }
   template <>
-  Error unionarray8_validity<uint32_t>(
+  Error unionarray_validity<int8_t, uint32_t>(
     const int8_t* tags,
     int64_t tagsoffset,
     const uint32_t* index,
@@ -4614,7 +4615,7 @@ namespace kernel {
       lencontents);
   }
   template <>
-  Error unionarray8_validity<int64_t>(
+  Error unionarray_validity<int8_t, int64_t>(
     const int8_t* tags,
     int64_t tagsoffset,
     const int64_t* index,
@@ -5279,14 +5280,14 @@ namespace kernel {
       lsb_order);
   }
 
-  ERROR bitmaskedarray_to_indexedoptionarray_64(
+  ERROR bitmaskedarray_to_indexedoptionarray64(
     int64_t* toindex,
     const uint8_t* frombitmask,
     int64_t bitmaskoffset,
     int64_t bitmasklength,
     bool validwhen,
     bool lsb_order) {
-    return awkward_bitmaskedarray_to_indexedoptionarray_64(
+    return awkward_bitmaskedarray_to_indexedoptionarray64(
       toindex,
       frombitmask,
       bitmaskoffset,
@@ -5510,7 +5511,7 @@ namespace kernel {
   }
 
   template <>
-  ERROR reduce_sum(
+  ERROR reduce_sum_64(
     int64_t* toptr,
     const bool* fromptr,
     int64_t fromptroffset,
@@ -5528,7 +5529,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_sum(
+  ERROR reduce_sum_64(
     int64_t* toptr,
     const int8_t* fromptr,
     int64_t fromptroffset,
@@ -5546,7 +5547,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_sum(
+  ERROR reduce_sum_64(
     uint64_t* toptr,
     const uint8_t* fromptr,
     int64_t fromptroffset,
@@ -5564,7 +5565,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_sum(
+  ERROR reduce_sum_64(
     int64_t* toptr,
     const int16_t* fromptr,
     int64_t fromptroffset,
@@ -5582,7 +5583,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_sum(
+  ERROR reduce_sum_64(
     uint64_t* toptr,
     const uint16_t* fromptr,
     int64_t fromptroffset,
@@ -5600,7 +5601,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_sum(
+  ERROR reduce_sum_64(
     int64_t* toptr,
     const int32_t* fromptr,
     int64_t fromptroffset,
@@ -5618,7 +5619,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_sum(
+  ERROR reduce_sum_64(
     uint64_t* toptr,
     const uint32_t* fromptr,
     int64_t fromptroffset,
@@ -5636,7 +5637,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_sum(
+  ERROR reduce_sum_64(
     int64_t* toptr,
     const int64_t* fromptr,
     int64_t fromptroffset,
@@ -5654,7 +5655,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_sum(
+  ERROR reduce_sum_64(
     uint64_t* toptr,
     const uint64_t* fromptr,
     int64_t fromptroffset,
@@ -5672,7 +5673,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_sum(
+  ERROR reduce_sum_64(
     float* toptr,
     const float* fromptr,
     int64_t fromptroffset,
@@ -5690,7 +5691,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_sum(
+  ERROR reduce_sum_64(
     double* toptr,
     const double* fromptr,
     int64_t fromptroffset,
@@ -5708,7 +5709,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_sum(
+  ERROR reduce_sum_64(
     int32_t* toptr,
     const bool* fromptr,
     int64_t fromptroffset,
@@ -5726,7 +5727,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_sum(
+  ERROR reduce_sum_64(
     int32_t* toptr,
     const int8_t* fromptr,
     int64_t fromptroffset,
@@ -5744,7 +5745,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_sum(
+  ERROR reduce_sum_64(
     uint32_t* toptr,
     const uint8_t* fromptr,
     int64_t fromptroffset,
@@ -5762,7 +5763,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_sum(
+  ERROR reduce_sum_64(
     int32_t* toptr,
     const int16_t* fromptr,
     int64_t fromptroffset,
@@ -5780,7 +5781,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_sum(
+  ERROR reduce_sum_64(
     uint32_t* toptr,
     const uint16_t* fromptr,
     int64_t fromptroffset,
@@ -5798,7 +5799,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_sum(
+  ERROR reduce_sum_64(
     int32_t* toptr,
     const int32_t* fromptr,
     int64_t fromptroffset,
@@ -5816,7 +5817,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_sum(
+  ERROR reduce_sum_64(
     uint32_t* toptr,
     const uint32_t* fromptr,
     int64_t fromptroffset,
@@ -5835,7 +5836,7 @@ namespace kernel {
   }
 
   template <>
-  ERROR reduce_sum_bool(
+  ERROR reduce_sum_bool_64(
     bool* toptr,
     const bool* fromptr,
     int64_t fromptroffset,
@@ -5853,7 +5854,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_sum_bool(
+  ERROR reduce_sum_bool_64(
     bool* toptr,
     const int8_t* fromptr,
     int64_t fromptroffset,
@@ -5871,7 +5872,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_sum_bool(
+  ERROR reduce_sum_bool_64(
     bool* toptr,
     const uint8_t* fromptr,
     int64_t fromptroffset,
@@ -5889,7 +5890,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_sum_bool(
+  ERROR reduce_sum_bool_64(
     bool* toptr,
     const int16_t* fromptr,
     int64_t fromptroffset,
@@ -5907,7 +5908,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_sum_bool(
+  ERROR reduce_sum_bool_64(
     bool* toptr,
     const uint16_t* fromptr,
     int64_t fromptroffset,
@@ -5925,7 +5926,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_sum_bool(
+  ERROR reduce_sum_bool_64(
     bool* toptr,
     const int32_t* fromptr,
     int64_t fromptroffset,
@@ -5943,7 +5944,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_sum_bool(
+  ERROR reduce_sum_bool_64(
     bool* toptr,
     const uint32_t* fromptr,
     int64_t fromptroffset,
@@ -5961,7 +5962,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_sum_bool(
+  ERROR reduce_sum_bool_64(
     bool* toptr,
     const int64_t* fromptr,
     int64_t fromptroffset,
@@ -5979,7 +5980,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_sum_bool(
+  ERROR reduce_sum_bool_64(
     bool* toptr,
     const uint64_t* fromptr,
     int64_t fromptroffset,
@@ -5997,7 +5998,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_sum_bool(
+  ERROR reduce_sum_bool_64(
     bool* toptr,
     const float* fromptr,
     int64_t fromptroffset,
@@ -6015,7 +6016,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_sum_bool(
+  ERROR reduce_sum_bool_64(
     bool* toptr,
     const double* fromptr,
     int64_t fromptroffset,
@@ -6034,7 +6035,7 @@ namespace kernel {
   }
 
   template <>
-  ERROR reduce_prod(
+  ERROR reduce_prod_64(
     int64_t* toptr,
     const bool* fromptr,
     int64_t fromptroffset,
@@ -6052,7 +6053,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_prod(
+  ERROR reduce_prod_64(
     int64_t* toptr,
     const int8_t* fromptr,
     int64_t fromptroffset,
@@ -6070,7 +6071,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_prod(
+  ERROR reduce_prod_64(
     uint64_t* toptr,
     const uint8_t* fromptr,
     int64_t fromptroffset,
@@ -6088,7 +6089,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_prod(
+  ERROR reduce_prod_64(
     int64_t* toptr,
     const int16_t* fromptr,
     int64_t fromptroffset,
@@ -6106,7 +6107,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_prod(
+  ERROR reduce_prod_64(
     uint64_t* toptr,
     const uint16_t* fromptr,
     int64_t fromptroffset,
@@ -6124,7 +6125,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_prod(
+  ERROR reduce_prod_64(
     int64_t* toptr,
     const int32_t* fromptr,
     int64_t fromptroffset,
@@ -6142,7 +6143,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_prod(
+  ERROR reduce_prod_64(
     uint64_t* toptr,
     const uint32_t* fromptr,
     int64_t fromptroffset,
@@ -6160,7 +6161,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_prod(
+  ERROR reduce_prod_64(
     int64_t* toptr,
     const int64_t* fromptr,
     int64_t fromptroffset,
@@ -6178,7 +6179,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_prod(
+  ERROR reduce_prod_64(
     uint64_t* toptr,
     const uint64_t* fromptr,
     int64_t fromptroffset,
@@ -6196,7 +6197,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_prod(
+  ERROR reduce_prod_64(
     float* toptr,
     const float* fromptr,
     int64_t fromptroffset,
@@ -6214,7 +6215,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_prod(
+  ERROR reduce_prod_64(
     double* toptr,
     const double* fromptr,
     int64_t fromptroffset,
@@ -6232,7 +6233,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_prod(
+  ERROR reduce_prod_64(
     int32_t* toptr,
     const bool* fromptr,
     int64_t fromptroffset,
@@ -6250,7 +6251,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_prod(
+  ERROR reduce_prod_64(
     int32_t* toptr,
     const int8_t* fromptr,
     int64_t fromptroffset,
@@ -6268,7 +6269,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_prod(
+  ERROR reduce_prod_64(
     uint32_t* toptr,
     const uint8_t* fromptr,
     int64_t fromptroffset,
@@ -6286,7 +6287,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_prod(
+  ERROR reduce_prod_64(
     int32_t* toptr,
     const int16_t* fromptr,
     int64_t fromptroffset,
@@ -6304,7 +6305,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_prod(
+  ERROR reduce_prod_64(
     uint32_t* toptr,
     const uint16_t* fromptr,
     int64_t fromptroffset,
@@ -6322,7 +6323,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_prod(
+  ERROR reduce_prod_64(
     int32_t* toptr,
     const int32_t* fromptr,
     int64_t fromptroffset,
@@ -6340,7 +6341,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_prod(
+  ERROR reduce_prod_64(
     uint32_t* toptr,
     const uint32_t* fromptr,
     int64_t fromptroffset,
@@ -6359,7 +6360,7 @@ namespace kernel {
   }
 
   template <>
-  ERROR reduce_prod_bool(
+  ERROR reduce_prod_bool_64(
     bool* toptr,
     const bool* fromptr,
     int64_t fromptroffset,
@@ -6377,7 +6378,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_prod_bool(
+  ERROR reduce_prod_bool_64(
     bool* toptr,
     const int8_t* fromptr,
     int64_t fromptroffset,
@@ -6395,7 +6396,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_prod_bool(
+  ERROR reduce_prod_bool_64(
     bool* toptr,
     const uint8_t* fromptr,
     int64_t fromptroffset,
@@ -6413,7 +6414,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_prod_bool(
+  ERROR reduce_prod_bool_64(
     bool* toptr,
     const int16_t* fromptr,
     int64_t fromptroffset,
@@ -6431,7 +6432,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_prod_bool(
+  ERROR reduce_prod_bool_64(
     bool* toptr,
     const uint16_t* fromptr,
     int64_t fromptroffset,
@@ -6449,7 +6450,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_prod_bool(
+  ERROR reduce_prod_bool_64(
     bool* toptr,
     const int32_t* fromptr,
     int64_t fromptroffset,
@@ -6467,7 +6468,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_prod_bool(
+  ERROR reduce_prod_bool_64(
     bool* toptr,
     const uint32_t* fromptr,
     int64_t fromptroffset,
@@ -6485,7 +6486,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_prod_bool(
+  ERROR reduce_prod_bool_64(
     bool* toptr,
     const int64_t* fromptr,
     int64_t fromptroffset,
@@ -6503,7 +6504,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_prod_bool(
+  ERROR reduce_prod_bool_64(
     bool* toptr,
     const uint64_t* fromptr,
     int64_t fromptroffset,
@@ -6521,7 +6522,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_prod_bool(
+  ERROR reduce_prod_bool_64(
     bool* toptr,
     const float* fromptr,
     int64_t fromptroffset,
@@ -6539,7 +6540,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_prod_bool(
+  ERROR reduce_prod_bool_64(
     bool* toptr,
     const double* fromptr,
     int64_t fromptroffset,
@@ -6558,7 +6559,7 @@ namespace kernel {
   }
 
   template <>
-  ERROR reduce_min(
+  ERROR reduce_min_64(
     int8_t* toptr,
     const int8_t* fromptr,
     int64_t fromptroffset,
@@ -6578,7 +6579,7 @@ namespace kernel {
       identity);
   }
   template <>
-  ERROR reduce_min(
+  ERROR reduce_min_64(
     uint8_t* toptr,
     const uint8_t* fromptr,
     int64_t fromptroffset,
@@ -6598,7 +6599,7 @@ namespace kernel {
       identity);
   }
   template <>
-  ERROR reduce_min(
+  ERROR reduce_min_64(
     int16_t* toptr,
     const int16_t* fromptr,
     int64_t fromptroffset,
@@ -6618,7 +6619,7 @@ namespace kernel {
       identity);
   }
   template <>
-  ERROR reduce_min(
+  ERROR reduce_min_64(
     uint16_t* toptr,
     const uint16_t* fromptr,
     int64_t fromptroffset,
@@ -6638,7 +6639,7 @@ namespace kernel {
       identity);
   }
   template <>
-  ERROR reduce_min(
+  ERROR reduce_min_64(
     int32_t* toptr,
     const int32_t* fromptr,
     int64_t fromptroffset,
@@ -6658,7 +6659,7 @@ namespace kernel {
       identity);
   }
   template <>
-  ERROR reduce_min(
+  ERROR reduce_min_64(
     uint32_t* toptr,
     const uint32_t* fromptr,
     int64_t fromptroffset,
@@ -6678,7 +6679,7 @@ namespace kernel {
       identity);
   }
   template <>
-  ERROR reduce_min(
+  ERROR reduce_min_64(
     int64_t* toptr,
     const int64_t* fromptr,
     int64_t fromptroffset,
@@ -6698,7 +6699,7 @@ namespace kernel {
       identity);
   }
   template <>
-  ERROR reduce_min(
+  ERROR reduce_min_64(
     uint64_t* toptr,
     const uint64_t* fromptr,
     int64_t fromptroffset,
@@ -6718,7 +6719,7 @@ namespace kernel {
       identity);
   }
   template <>
-  ERROR reduce_min(
+  ERROR reduce_min_64(
     float* toptr,
     const float* fromptr,
     int64_t fromptroffset,
@@ -6738,7 +6739,7 @@ namespace kernel {
       identity);
   }
   template <>
-  ERROR reduce_min(
+  ERROR reduce_min_64(
     double* toptr,
     const double* fromptr,
     int64_t fromptroffset,
@@ -6759,7 +6760,7 @@ namespace kernel {
   }
 
   template <>
-  ERROR reduce_max(
+  ERROR reduce_max_64(
     int8_t* toptr,
     const int8_t* fromptr,
     int64_t fromptroffset,
@@ -6779,7 +6780,7 @@ namespace kernel {
       identity);
   }
   template <>
-  ERROR reduce_max(
+  ERROR reduce_max_64(
     uint8_t* toptr,
     const uint8_t* fromptr,
     int64_t fromptroffset,
@@ -6799,7 +6800,7 @@ namespace kernel {
       identity);
   }
   template <>
-  ERROR reduce_max(
+  ERROR reduce_max_64(
     int16_t* toptr,
     const int16_t* fromptr,
     int64_t fromptroffset,
@@ -6819,7 +6820,7 @@ namespace kernel {
       identity);
   }
   template <>
-  ERROR reduce_max(
+  ERROR reduce_max_64(
     uint16_t* toptr,
     const uint16_t* fromptr,
     int64_t fromptroffset,
@@ -6839,7 +6840,7 @@ namespace kernel {
       identity);
   }
   template <>
-  ERROR reduce_max(
+  ERROR reduce_max_64(
     int32_t* toptr,
     const int32_t* fromptr,
     int64_t fromptroffset,
@@ -6859,7 +6860,7 @@ namespace kernel {
       identity);
   }
   template <>
-  ERROR reduce_max(
+  ERROR reduce_max_64(
     uint32_t* toptr,
     const uint32_t* fromptr,
     int64_t fromptroffset,
@@ -6879,7 +6880,7 @@ namespace kernel {
       identity);
   }
   template <>
-  ERROR reduce_max(
+  ERROR reduce_max_64(
     int64_t* toptr,
     const int64_t* fromptr,
     int64_t fromptroffset,
@@ -6899,7 +6900,7 @@ namespace kernel {
       identity);
   }
   template <>
-  ERROR reduce_max(
+  ERROR reduce_max_64(
     uint64_t* toptr,
     const uint64_t* fromptr,
     int64_t fromptroffset,
@@ -6919,7 +6920,7 @@ namespace kernel {
       identity);
   }
   template <>
-  ERROR reduce_max(
+  ERROR reduce_max_64(
     float* toptr,
     const float* fromptr,
     int64_t fromptroffset,
@@ -6939,7 +6940,7 @@ namespace kernel {
       identity);
   }
   template <>
-  ERROR reduce_max(
+  ERROR reduce_max_64(
     double* toptr,
     const double* fromptr,
     int64_t fromptroffset,
@@ -6960,7 +6961,7 @@ namespace kernel {
   }
 
   template <>
-  ERROR reduce_argmin(
+  ERROR reduce_argmin_64(
     int64_t* toptr,
     const bool* fromptr,
     int64_t fromptroffset,
@@ -6982,7 +6983,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_argmin(
+  ERROR reduce_argmin_64(
     int64_t* toptr,
     const int8_t* fromptr,
     int64_t fromptroffset,
@@ -7004,7 +7005,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_argmin(
+  ERROR reduce_argmin_64(
     int64_t* toptr,
     const uint8_t* fromptr,
     int64_t fromptroffset,
@@ -7026,7 +7027,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_argmin(
+  ERROR reduce_argmin_64(
     int64_t* toptr,
     const int16_t* fromptr,
     int64_t fromptroffset,
@@ -7048,7 +7049,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_argmin(
+  ERROR reduce_argmin_64(
     int64_t* toptr,
     const uint16_t* fromptr,
     int64_t fromptroffset,
@@ -7070,7 +7071,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_argmin(
+  ERROR reduce_argmin_64(
     int64_t* toptr,
     const int32_t* fromptr,
     int64_t fromptroffset,
@@ -7092,7 +7093,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_argmin(
+  ERROR reduce_argmin_64(
     int64_t* toptr,
     const uint32_t* fromptr,
     int64_t fromptroffset,
@@ -7114,7 +7115,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_argmin(
+  ERROR reduce_argmin_64(
     int64_t* toptr,
     const int64_t* fromptr,
     int64_t fromptroffset,
@@ -7136,7 +7137,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_argmin(
+  ERROR reduce_argmin_64(
     int64_t* toptr,
     const uint64_t* fromptr,
     int64_t fromptroffset,
@@ -7158,7 +7159,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_argmin(
+  ERROR reduce_argmin_64(
     int64_t* toptr,
     const float* fromptr,
     int64_t fromptroffset,
@@ -7180,7 +7181,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_argmin(
+  ERROR reduce_argmin_64(
     int64_t* toptr,
     const double* fromptr,
     int64_t fromptroffset,
@@ -7204,7 +7205,7 @@ namespace kernel {
 
 
   template <>
-  ERROR reduce_argmax(
+  ERROR reduce_argmax_64(
     int64_t* toptr,
     const bool* fromptr,
     int64_t fromptroffset,
@@ -7226,7 +7227,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_argmax(
+  ERROR reduce_argmax_64(
     int64_t* toptr,
     const int8_t* fromptr,
     int64_t fromptroffset,
@@ -7248,7 +7249,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_argmax(
+  ERROR reduce_argmax_64(
     int64_t* toptr,
     const uint8_t* fromptr,
     int64_t fromptroffset,
@@ -7270,7 +7271,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_argmax(
+  ERROR reduce_argmax_64(
     int64_t* toptr,
     const int16_t* fromptr,
     int64_t fromptroffset,
@@ -7292,7 +7293,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_argmax(
+  ERROR reduce_argmax_64(
     int64_t* toptr,
     const uint16_t* fromptr,
     int64_t fromptroffset,
@@ -7314,7 +7315,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_argmax(
+  ERROR reduce_argmax_64(
     int64_t* toptr,
     const int32_t* fromptr,
     int64_t fromptroffset,
@@ -7336,7 +7337,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_argmax(
+  ERROR reduce_argmax_64(
     int64_t* toptr,
     const uint32_t* fromptr,
     int64_t fromptroffset,
@@ -7358,7 +7359,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_argmax(
+  ERROR reduce_argmax_64(
     int64_t* toptr,
     const int64_t* fromptr,
     int64_t fromptroffset,
@@ -7380,7 +7381,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_argmax(
+  ERROR reduce_argmax_64(
     int64_t* toptr,
     const uint64_t* fromptr,
     int64_t fromptroffset,
@@ -7402,7 +7403,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_argmax(
+  ERROR reduce_argmax_64(
     int64_t* toptr,
     const float* fromptr,
     int64_t fromptroffset,
@@ -7424,7 +7425,7 @@ namespace kernel {
       outlength);
   }
   template <>
-  ERROR reduce_argmax(
+  ERROR reduce_argmax_64(
     int64_t* toptr,
     const double* fromptr,
     int64_t fromptroffset,
@@ -7653,13 +7654,13 @@ namespace kernel {
       outindexlength);
   }
 
-  ERROR numpyarray_reduce_mask_bytemaskedarray(
+  ERROR numpyarray_reduce_mask_bytemaskedarray_64(
     int8_t* toptr,
     const int64_t* parents,
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    return awkward_numpyarray_reduce_mask_bytemaskedarray(
+    return awkward_numpyarray_reduce_mask_bytemaskedarray_64(
       toptr,
       parents,
       parentsoffset,

@@ -2542,7 +2542,7 @@ namespace awkward {
 
       if (mask) {
         Index8 mask(outlength);
-        struct Error err = kernel::numpyarray_reduce_mask_bytemaskedarray(
+        struct Error err = kernel::numpyarray_reduce_mask_bytemaskedarray_64(
           mask.ptr().get(),
           parents.ptr().get(),
           parents.offset(),

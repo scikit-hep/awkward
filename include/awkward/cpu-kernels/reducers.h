@@ -1194,7 +1194,7 @@ extern "C" {
       int64_t outindexlength);
 
   EXPORT_SYMBOL struct Error
-    awkward_numpyarray_reduce_mask_bytemaskedarray(
+    awkward_numpyarray_reduce_mask_bytemaskedarray_64(
       int8_t* toptr,
       const int64_t* parents,
       int64_t parentsoffset,

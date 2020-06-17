@@ -7,7 +7,8 @@
 #include "awkward/cpu-kernels/sorting.h"
 
 namespace kernel {
-  /// @brief getitem kernels
+  /////////////////////////////////// awkward/cpu-kernels/getitem.h
+
   void regularize_rangeslice(
     int64_t* start,
     int64_t* stop,
@@ -22,7 +23,7 @@ namespace kernel {
     int64_t length);
 
   template <typename T>
-  ERROR index_to_index_64(
+  ERROR index_to_index64(
     int64_t* toptr,
     const T* fromptr,
     int64_t length);
@@ -397,29 +398,30 @@ namespace kernel {
     int64_t lenindex,
     int64_t lencarry);
 
+  template <typename T>
   ERROR
-  unionarray8_regular_index_getsize(
+  unionarray_regular_index_getsize(
     int64_t* size,
-    const int8_t* fromtags,
+    const T* fromtags,
     int64_t tagsoffset,
     int64_t length);
 
-  template <typename I>
+  template <typename T, typename I>
   ERROR
-  unionarray8_regular_index(
+  unionarray_regular_index(
     I* toindex,
     I* current,
     int64_t size,
-    const int8_t* fromtags,
+    const T* fromtags,
     int64_t tagsoffset,
     int64_t length);
 
-  template <typename I>
+  template <typename T, typename I>
   ERROR
-  unionarray8_project_64(
+  unionarray_project_64(
     int64_t* lenout,
     int64_t* tocarry,
-    const int8_t* fromtags,
+    const T* fromtags,
     int64_t tagsoffset,
     const I* fromindex,
     int64_t indexoffset,
@@ -571,14 +573,15 @@ namespace kernel {
     int64_t length,
     bool validwhen);
 
-  /// @brief identities kernels
+  /////////////////////////////////// awkward/cpu-kernels/identities.h
+
   template <typename T>
   ERROR new_identities(
     T* toptr,
     int64_t length);
 
   template <typename T>
-  ERROR identities_to_identities_64(
+  ERROR identities_to_identities64(
     int64_t* toptr,
     const T* fromptr,
     int64_t length,
@@ -636,13 +639,13 @@ namespace kernel {
     int64_t fromwidth);
 
 
-  template <typename C, typename I>
+  template <typename C, typename T, typename I>
   ERROR
-  identities_from_unionarray8(
+  identities_from_unionarray(
     bool* uniquecontents,
     C* toptr,
     const C* fromptr,
-    const int8_t * fromtags,
+    const T* fromtags,
     const I* fromindex,
     int64_t fromptroffset,
     int64_t tagsoffset,
@@ -660,7 +663,8 @@ namespace kernel {
     int64_t fromlength,
     int64_t tolength);
 
-  /// @brief operations kernels
+  /////////////////////////////////// awkward/cpu-kernels/operations.h
+
   template <typename T>
   ERROR
   listarray_num_64(
@@ -1032,10 +1036,10 @@ namespace kernel {
     bool isoption);
 
 
-  template <typename I>
+  template <typename T, typename I>
   ERROR
-  unionarray8_validity(
-    const int8_t* tags,
+  unionarray_validity(
+    const T* tags,
     int64_t tagsoffset,
     const I* index,
     int64_t indexoffset,
@@ -1212,7 +1216,7 @@ namespace kernel {
     bool validwhen,
     bool lsb_order);
 
-  ERROR bitmaskedarray_to_indexedoptionarray_64(
+  ERROR bitmaskedarray_to_indexedoptionarray64(
     int64_t* toindex,
     const uint8_t* frombitmask,
     int64_t bitmaskoffset,
@@ -1220,7 +1224,8 @@ namespace kernel {
     bool validwhen,
     bool lsb_order);
 
-  /// @brief reducers kernels
+  /////////////////////////////////// awkward/cpu-kernels/reducers.h
+
   ERROR reduce_count_64(
     int64_t* toptr,
     const int64_t* parents,
@@ -1239,7 +1244,7 @@ namespace kernel {
     int64_t outlength);
 
   template <typename OUT, typename IN>
-  ERROR reduce_sum(
+  ERROR reduce_sum_64(
     OUT* toptr,
     const IN* fromptr,
     int64_t fromptroffset,
@@ -1249,7 +1254,7 @@ namespace kernel {
     int64_t outlength);
 
   template <typename IN>
-  ERROR reduce_sum_bool(
+  ERROR reduce_sum_bool_64(
     bool* toptr,
     const IN* fromptr,
     int64_t fromptroffset,
@@ -1259,7 +1264,7 @@ namespace kernel {
     int64_t outlength);
 
   template <typename OUT, typename IN>
-  ERROR reduce_prod(
+  ERROR reduce_prod_64(
     OUT* toptr,
     const IN* fromptr,
     int64_t fromptroffset,
@@ -1269,7 +1274,7 @@ namespace kernel {
     int64_t outlength);
 
   template <typename IN>
-  ERROR reduce_prod_bool(
+  ERROR reduce_prod_bool_64(
     bool* toptr,
     const IN* fromptr,
     int64_t fromptroffset,
@@ -1279,7 +1284,7 @@ namespace kernel {
     int64_t outlength);
 
   template <typename OUT, typename IN>
-  ERROR reduce_min(
+  ERROR reduce_min_64(
     OUT* toptr,
     const IN* fromptr,
     int64_t fromptroffset,
@@ -1290,7 +1295,7 @@ namespace kernel {
     OUT identity);
 
   template <typename OUT, typename IN>
-  ERROR reduce_max(
+  ERROR reduce_max_64(
     OUT* toptr,
     const IN* fromptr,
     int64_t fromptroffset,
@@ -1301,7 +1306,7 @@ namespace kernel {
     OUT identity);
 
   template <typename OUT, typename IN>
-  ERROR reduce_argmin(
+  ERROR reduce_argmin_64(
     OUT* toptr,
     const IN* fromptr,
     int64_t fromptroffset,
@@ -1313,7 +1318,7 @@ namespace kernel {
     int64_t outlength);
 
   template <typename OUT, typename IN>
-  ERROR reduce_argmax(
+  ERROR reduce_argmax_64(
     OUT* toptr,
     const IN* fromptr,
     int64_t fromptroffset,
@@ -1408,7 +1413,7 @@ namespace kernel {
     int64_t startslength,
     int64_t outindexlength);
 
-  ERROR numpyarray_reduce_mask_bytemaskedarray(
+  ERROR numpyarray_reduce_mask_bytemaskedarray_64(
     int8_t* toptr,
     const int64_t* parents,
     int64_t parentsoffset,
@@ -1426,7 +1431,8 @@ namespace kernel {
     int64_t length,
     bool validwhen);
 
-  /// @brief sorting kernels
+  /////////////////////////////////// awkward/cpu-kernels/sorting.h
+
   ERROR sorting_ranges(
     int64_t* toindex,
     int64_t tolength,
