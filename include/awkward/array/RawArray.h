@@ -658,7 +658,7 @@ namespace awkward {
     }
 
     const ContentPtr
-      carry(const Index64& carry, bool copy) const override {
+      carry(const Index64& carry, bool must_be_eager) const override {
       std::shared_ptr<T> ptr(new T[(size_t)carry.length()],
                              util::array_deleter<T>());
       struct Error err = awkward_numpyarray_getitem_next_null_64(
@@ -1077,7 +1077,7 @@ namespace awkward {
           nextcarryptr[i] = start + step*i;
         }
 
-        return carry(nextcarry, true);
+        return carry(nextcarry, false);
       }
     }
 
@@ -1098,7 +1098,7 @@ namespace awkward {
         flathead.length(),
         length_);
       util::handle_error(err, classname(), identities_.get());
-      return carry(flathead, true);
+      return carry(flathead, false);
     }
 
     const ContentPtr

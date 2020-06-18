@@ -695,7 +695,7 @@ namespace awkward {
 
   template <typename T>
   const ContentPtr
-  ListOffsetArrayOf<T>::carry(const Index64& carry, bool copy) const {
+  ListOffsetArrayOf<T>::carry(const Index64& carry, bool must_be_eager) const {
     IndexOf<T> starts = util::make_starts(offsets_);
     IndexOf<T> stops = util::make_stops(offsets_);
     IndexOf<T> nextstarts(carry.length());

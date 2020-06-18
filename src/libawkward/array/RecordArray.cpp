@@ -737,11 +737,11 @@ namespace awkward {
   }
 
   const ContentPtr
-  RecordArray::carry(const Index64& carry, bool copy) const {
-    if (copy) {
+  RecordArray::carry(const Index64& carry, bool must_be_eager) const {
+    if (must_be_eager) {
       ContentPtrVec contents;
       for (auto content : contents_) {
-        contents.push_back(content.get()->carry(carry, copy));
+        contents.push_back(content.get()->carry(carry, must_be_eager));
       }
       IdentitiesPtr identities(nullptr);
       if (identities_.get() != nullptr) {

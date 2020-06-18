@@ -538,7 +538,7 @@ namespace awkward {
   }
 
   const ContentPtr
-  RegularArray::carry(const Index64& carry, bool copy) const {
+  RegularArray::carry(const Index64& carry, bool must_be_eager) const {
     Index64 nextcarry(carry.length()*size_);
 
     struct Error err = awkward_regulararray_getitem_carry_64(

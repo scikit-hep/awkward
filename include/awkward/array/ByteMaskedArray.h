@@ -248,7 +248,7 @@ namespace awkward {
                    const Index64& advanced) const override;
 
     const ContentPtr
-      carry(const Index64& carry, bool copy) const override;
+      carry(const Index64& carry, bool must_be_eager) const override;
 
     int64_t
       numfields() const override;

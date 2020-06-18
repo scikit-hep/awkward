@@ -135,7 +135,7 @@ namespace awkward {
 
     /// @exception std::runtime_error is always thrown
     const ContentPtr
-      carry(const Index64& carry, bool copy) const override;
+      carry(const Index64& carry, bool must_be_eager) const override;
 
     int64_t
       purelist_depth() const override;

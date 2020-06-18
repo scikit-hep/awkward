@@ -501,14 +501,14 @@ namespace awkward {
   }
 
   const ContentPtr
-  UnmaskedArray::carry(const Index64& carry, bool copy) const {
+  UnmaskedArray::carry(const Index64& carry, bool must_be_eager) const {
     IdentitiesPtr identities(nullptr);
     if (identities_.get() != nullptr) {
       identities = identities_.get()->getitem_carry_64(carry);
     }
     return std::make_shared<UnmaskedArray>(identities,
                                            parameters_,
-                                           content_.get()->carry(carry, copy));
+                                           content_.get()->carry(carry, must_be_eager));
   }
 
   int64_t

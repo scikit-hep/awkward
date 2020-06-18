@@ -112,7 +112,7 @@ namespace awkward {
 
     /// @exception std::runtime_error is always thrown
     const ContentPtr
-      carry(const Index64& carry, bool copy) const override;
+      carry(const Index64& carry, bool must_be_eager) const override;
 
     /// @exception std::runtime_error is always thrown
     int64_t

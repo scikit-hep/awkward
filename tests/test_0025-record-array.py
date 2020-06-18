@@ -236,8 +236,8 @@ def test_setidentities():
     recordarray2 = awkward1.layout.RecordArray({"outer": awkward1.layout.RegularArray(recordarray, 1)})
     recordarray2.setidentities()
     assert recordarray2["outer"].identities.fieldloc == [(0, "outer")]
-    assert recordarray2["outer", 0, "one"].identities.fieldloc == [(0, 'outer')] ### [(0, "outer"), (1, "one")]
-    assert recordarray2["outer", 0, "two"].identities.fieldloc == [(0, 'outer')] ### [(0, "outer"), (1, "two")]
+    assert recordarray2["outer", 0, "one"].content.identities.fieldloc == [(0, "outer"), (1, "one")]
+    assert recordarray2["outer", 0, "two"].content.identities.fieldloc == [(0, "outer"), (1, "two")]
     assert recordarray2["outer", "one", 0].identities.fieldloc == [(0, "outer"), (1, "one")]
     assert recordarray2["outer", "two", 0].identities.fieldloc == [(0, "outer"), (1, "two")]
     assert recordarray2["outer", "one", 1, 0] == 2

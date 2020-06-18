@@ -683,7 +683,7 @@ namespace awkward {
 
   template <typename T>
   const ContentPtr
-  ListArrayOf<T>::carry(const Index64& carry, bool copy) const {
+  ListArrayOf<T>::carry(const Index64& carry, bool must_be_eager) const {
     int64_t lenstarts = starts_.length();
     if (stops_.length() < lenstarts) {
       util::handle_error(

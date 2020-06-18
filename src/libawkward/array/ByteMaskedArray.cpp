@@ -639,7 +639,7 @@ namespace awkward {
   }
 
   const ContentPtr
-  ByteMaskedArray::carry(const Index64& carry, bool copy) const {
+  ByteMaskedArray::carry(const Index64& carry, bool must_be_eager) const {
     Index8 nextmask(carry.length());
     struct Error err = awkward_bytemaskedarray_getitem_carry_64(
       nextmask.ptr().get(),
