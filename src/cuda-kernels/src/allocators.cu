@@ -1,12 +1,6 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
-#include "awkward/cuda-kernels/allocators.cuh"
-
-int awkward_cuda_ptr_loc(void* ptr) {
-  cudaPointerAttributes att;
-  auto err = cudaPointerGetAttributes(&att, ptr);
-  return att.device;
-}
+#include "awkward/cuda-kernels/cuda_allocators.h"
 
 template <typename  T>
 T *awkward_cuda_ptr_alloc(int64_t length) {
@@ -59,42 +53,42 @@ Error awkward_cuda_ptr_dealloc(const T* ptr) {
     return failure(cudaGetErrorString(status), 0, kSliceNone);
   return success();
 }
-Error awkward_cuda_ptrbool_dealloc(const bool* ptr) {
+ERROR awkward_cuda_ptrbool_dealloc(const bool *ptr) {
   return awkward_cuda_ptr_dealloc<bool>(ptr);
 }
-Error awkward_cuda_ptr8_dealloc(const int8_t* ptr) {
+ERROR awkward_cuda_ptr8_dealloc(const int8_t *ptr) {
   return awkward_cuda_ptr_dealloc<int8_t>(ptr);
 }
-Error awkward_cuda_ptrU8_dealloc(const uint8_t* ptr) {
+ERROR awkward_cuda_ptrU8_dealloc(const uint8_t *ptr) {
   return awkward_cuda_ptr_dealloc<uint8_t>(ptr);
 }
-Error awkward_cuda_ptr16_dealloc(const int16_t* ptr) {
+ERROR awkward_cuda_ptr16_dealloc(const int16_t *ptr) {
   return awkward_cuda_ptr_dealloc<int16_t>(ptr);
 }
-Error awkward_cuda_ptrU16_dealloc(const uint16_t* ptr) {
+ERROR awkward_cuda_ptrU16_dealloc(const uint16_t *ptr) {
   return awkward_cuda_ptr_dealloc<uint16_t>(ptr);
 }
-Error awkward_cuda_ptr32_dealloc(const int32_t* ptr) {
+ERROR awkward_cuda_ptr32_dealloc(const int32_t *ptr) {
   return awkward_cuda_ptr_dealloc<int32_t>(ptr);
 }
-Error awkward_cuda_ptrU32_dealloc(const uint32_t* ptr) {
+ERROR awkward_cuda_ptrU32_dealloc(const uint32_t *ptr) {
   return awkward_cuda_ptr_dealloc<uint32_t>(ptr);
 }
-Error awkward_cuda_ptr64_dealloc(const int64_t* ptr) {
+ERROR awkward_cuda_ptr64_dealloc(const int64_t *ptr) {
   return awkward_cuda_ptr_dealloc<int64_t>(ptr);
 }
-Error awkward_cuda_ptrU64_dealloc(const uint64_t* ptr) {
+ERROR awkward_cuda_ptrU64_dealloc(const uint64_t *ptr) {
   return awkward_cuda_ptr_dealloc<uint64_t>(ptr);
 }
-Error awkward_cuda_ptrfloat32_dealloc(const float* ptr) {
+ERROR awkward_cuda_ptrfloat32_dealloc(const float *ptr) {
   return awkward_cuda_ptr_dealloc<float>(ptr);
 }
-Error awkward_cuda_ptrfloat64_dealloc(const double* ptr) {
+ERROR awkward_cuda_ptrfloat64_dealloc(const double *ptr) {
   return awkward_cuda_ptr_dealloc<double>(ptr);
 }
 
 template <typename T>
-Error awkward_cuda_H2D(
+ERROR awkward_cuda_H2D(
   T** to_ptr,
   T* from_ptr,
   int64_t length) {
@@ -104,7 +98,7 @@ Error awkward_cuda_H2D(
   if(malloc_stat != cudaError_t::cudaSuccess)
     return failure(cudaGetErrorString(malloc_stat), 0, kSliceNone);
 
-  cudaError_t memcpy_stat = cudaMemcpy(to_ptr,
+  cudaError_t memcpy_stat = cudaMemcpy(*to_ptr,
                                        from_ptr,
                                        sizeof(T) * length,
                                        cudaMemcpyHostToDevice);
@@ -114,105 +108,103 @@ Error awkward_cuda_H2D(
 
   return success();
 }
-Error awkward_cuda_H2D_bool(
-  bool** to_ptr,
-  bool* from_ptr,
+ERROR awkward_cuda_H2Dbool(
+  bool **to_ptr,
+  bool *from_ptr,
   int64_t length) {
   return awkward_cuda_H2D<bool>(
     to_ptr,
     from_ptr,
     length);
 }
-Error awkward_cuda_H2D_8(
-  int8_t** to_ptr,
-  int8_t* from_ptr,
+ERROR awkward_cuda_H2D8(
+  int8_t **to_ptr,
+  int8_t *from_ptr,
   int64_t length) {
   return awkward_cuda_H2D<int8_t>(
     to_ptr,
     from_ptr,
     length);
 }
-Error awkward_cuda_H2D_U8(
-  uint8_t** to_ptr,
-  uint8_t* from_ptr,
+ERROR awkward_cuda_H2DU8(
+  uint8_t **to_ptr,
+  uint8_t *from_ptr,
   int64_t length) {
   return awkward_cuda_H2D<uint8_t>(
     to_ptr,
     from_ptr,
     length);
 }
-Error awkward_cuda_H2D_16(
-  int16_t** to_ptr,
-  int16_t* from_ptr,
+ERROR awkward_cuda_H2D16(
+  int16_t **to_ptr,
+  int16_t *from_ptr,
   int64_t length) {
   return awkward_cuda_H2D<int16_t>(
     to_ptr,
     from_ptr,
     length);
 }
-Error awkward_cuda_H2D_U16(
-  uint16_t** to_ptr,
-  uint16_t* from_ptr,
+ERROR awkward_cuda_H2DU16(
+  uint16_t **to_ptr,
+  uint16_t *from_ptr,
   int64_t length) {
   return awkward_cuda_H2D<uint16_t>(
     to_ptr,
     from_ptr,
     length);
 }
-Error awkward_cuda_H2D_32(
-  int32_t** to_ptr,
-  int32_t* from_ptr,
+ERROR awkward_cuda_H2D32(
+  int32_t **to_ptr,
+  int32_t *from_ptr,
   int64_t length) {
   return awkward_cuda_H2D<int32_t>(
     to_ptr,
     from_ptr,
     length);
 }
-Error awkward_cuda_H2D_U32(
-  uint32_t** to_ptr,
-  uint32_t* from_ptr,
+ERROR awkward_cuda_H2DU32(
+  uint32_t **to_ptr,
+  uint32_t *from_ptr,
   int64_t length) {
   return awkward_cuda_H2D<uint32_t>(
     to_ptr,
     from_ptr,
     length);
 }
-Error awkward_cuda_H2D_64(
-  int64_t** to_ptr,
-  int64_t* from_ptr,
+Error awkward_cuda_H2D64(
+  int64_t **to_ptr,
+  int64_t *from_ptr,
   int64_t length) {
   return awkward_cuda_H2D<int64_t>(
     to_ptr,
     from_ptr,
     length);
 }
-Error awkward_cuda_H2D_U64(
-  uint64_t** to_ptr,
-  uint64_t* from_ptr,
+ERROR awkward_cuda_H2DU64(
+  uint64_t **to_ptr,
+  uint64_t *from_ptr,
   int64_t length) {
   return awkward_cuda_H2D<uint64_t>(
     to_ptr,
     from_ptr,
     length);
 }
-Error awkward_cuda_H2D_float32(
-  float** to_ptr,
-  float* from_ptr,
+ERROR awkward_cuda_H2Dfloat32(
+  float **to_ptr,
+  float *from_ptr,
   int64_t length) {
   return awkward_cuda_H2D<float>(
     to_ptr,
     from_ptr,
     length);
 }
-Error awkward_cuda_H2D_float64(
-  double** to_ptr,
-  double* from_ptr,
+ERROR awkward_cuda_H2Dfloat64(
+  double **to_ptr,
+  double *from_ptr,
   int64_t length) {
   return awkward_cuda_H2D<double>(
     to_ptr,
     from_ptr,
     length);
 }
-
-
 

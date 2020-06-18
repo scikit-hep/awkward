@@ -1,6 +1,6 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
-#include "awkward/cuda-kernels/operations.cuh"
+#include "awkward/cuda-kernels/cuda_operations.h"
 #include <stdio.h>
 
 extern "C" {
@@ -26,6 +26,11 @@ extern "C" {
     const int8_t* fromstops,
     int32_t stopsoffset,
     int32_t length) {
-    cuda_listarray8_num32<<<1, length>>>(tonum, fromstarts, startsoffset, fromstops, stopsoffset);
+    cuda_listarray8_num32<<<1, length>>>(
+      tonum,
+      fromstarts,
+      startsoffset,
+      fromstops,
+      stopsoffset);
   }
 }

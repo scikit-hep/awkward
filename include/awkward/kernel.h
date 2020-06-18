@@ -7,20 +7,16 @@
 #include "awkward/util.h"
 #include "awkward/cpu-kernels/allocators.h"
 #include "awkward/cpu-kernels/getitem.h"
-#include <dlfcn.h>
 
+#ifndef _MSC_VER
+  #include "dlfcn.h"
+#endif
 
 namespace kernel {
   template<typename T>
   std::shared_ptr<T>
     ptr_alloc(int64_t length,
               KernelsLib ptr_lib);
-
-  template <typename T>
-  T*
-    host_to_device_buff_transfer(T* ptr,
-                                 int64_t length,
-                                 KernelsLib ptr_lib);
 
   template <typename T>
   T
@@ -36,6 +32,7 @@ namespace kernel {
                             int64_t at,
                             T value,
                             KernelsLib ptr_lib);
+
 };
 
 #endif //AWKWARD_KERNEL_H

@@ -148,6 +148,15 @@ namespace awkward {
         out << (int64_t)getitem_at_nowrap(i);
       }
     }
+    if(ptr_lib_ == KernelsLib::cuda_kernels) {
+      out << "]\" offset=\"" << offset_ << "\" length=\"" << length_
+          << "\" at=\"0x" << std::hex << std::setw(12) << std::setfill('0')
+          << reinterpret_cast<ssize_t>(ptr_.get())
+          << "\" on=\"[" << util::get_ptr_device_num(ptr_.get(),
+            ptr_lib_) << "]" << util::get_ptr_device_name(ptr_.get(), ptr_lib_)
+          << "\" KernelsLib=\"" << "cuda_kernels" << "\"/>" << post;
+      return out.str();
+    }
     out << "]\" offset=\"" << offset_ << "\" length=\"" << length_
         << "\" at=\"0x" << std::hex << std::setw(12) << std::setfill('0')
         << reinterpret_cast<ssize_t>(ptr_.get()) << "\"/>" << post;
@@ -315,19 +324,27 @@ namespace awkward {
       return ptr_lib_;
     }
 
-//    template<typename T>
-//    IndexOf<T> IndexOf<T>::to_gpu() {
-//      if(ptr_lib() == KernelsLib::cuda_kernels) {
-//        T *cuda_ptr = kernel::host_to_device_buff_transfer(ptr().get(),
-//                                                           length(),
-//                                                           cuda_kernels);
-//        return IndexOf<T>(std::shared_ptr<T>(cuda_ptr,
-//                                             util::cuda_array_deleter<T>()),
-//                          offset(),
-//                          length(),
-//                          cuda_kernels);
-//      }
-//    }
+    template<typename T>
+    const IndexOf<T>
+    IndexOf<T>::to_gpu(KernelsLib ptr_lib) const {
+      #ifndef _MSC_VER
+        if (ptr_lib == KernelsLib::cuda_kernels) {
+          T *cuda_ptr;
+          Error err = util::H2D<T>(&cuda_ptr,
+                                   ptr().get(),
+                                   length(),
+                                   cuda_kernels);
+          util::handle_cuda_error(err);
+
+          return IndexOf<T>(std::shared_ptr<T>(cuda_ptr,
+                                               util::cuda_array_deleter<T>()),
+                            offset(),
+                            length(),
+                            cuda_kernels);
+        }
+      #endif
+      throw std::invalid_argument("Invalid kernel lib/OS for gpu ops");
+    }
 
   template class EXPORT_SYMBOL IndexOf<int8_t>;
   template class EXPORT_SYMBOL IndexOf<uint8_t>;

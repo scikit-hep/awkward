@@ -48,6 +48,349 @@ namespace awkward {
       }
     }
 
+    template <>
+    Error H2D(
+      bool** to_ptr,
+      bool* from_ptr,
+      int64_t length,
+      KernelsLib ptr_lib) {
+      #ifndef _MSC_VER
+        if(ptr_lib == KernelsLib::cuda_kernels) {
+          auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
+
+          if(!handle) {
+            Error err = failure("Failed to find awkward1[cuda]",
+                                0,
+                                kSliceNone);
+
+            handle_cuda_error(err);
+          }
+          typedef Error (func_awkward_cuda_H2Dbool_t)
+            (bool **to_ptr, bool *from_ptr, int64_t length);
+          func_awkward_cuda_H2Dbool_t
+            *func_awkward_cuda_H2Dbool =
+            reinterpret_cast<func_awkward_cuda_H2Dbool_t *>
+            (dlsym(handle, "awkward_cuda_H2Dbool"));
+
+          return (*func_awkward_cuda_H2Dbool)(to_ptr, from_ptr, length);
+        }
+      #endif
+      return failure("No suitable kernel for transfer",
+                     0,
+                     kSliceNone);
+    }
+    template <>
+    Error H2D(
+      int8_t** to_ptr,
+      int8_t* from_ptr,
+      int64_t length,
+      KernelsLib ptr_lib) {
+      #ifndef _MSC_VER
+        if(ptr_lib == KernelsLib::cuda_kernels) {
+          auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
+          if(!handle) {
+            Error err = failure("Failed to find awkward1[cuda]",
+                                0,
+                                kSliceNone);
+
+            handle_cuda_error(err);
+          }
+
+          typedef Error (func_awkward_cuda_H2D8_t)
+            (int8_t **to_ptr, int8_t *from_ptr, int8_t length);
+          func_awkward_cuda_H2D8_t
+            *func_awkward_cuda_H2D8 =
+            reinterpret_cast<func_awkward_cuda_H2D8_t *>
+            (dlsym(handle, "awkward_cuda_H2D8"));
+
+          return (*func_awkward_cuda_H2D8)(to_ptr, from_ptr, length);
+        }
+      #endif
+      return failure("No suitable kernel for transfer",
+                     0,
+                     kSliceNone);
+    }
+    template <>
+    Error H2D(
+      uint8_t** to_ptr,
+      uint8_t* from_ptr,
+      int64_t length,
+      KernelsLib ptr_lib) {
+      #ifndef _MSC_VER
+        if(ptr_lib == KernelsLib::cuda_kernels) {
+          auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
+
+          if(!handle) {
+            Error err = failure("Failed to find awkward1[cuda]",
+                                0,
+                                kSliceNone);
+
+            handle_cuda_error(err);
+          }
+          typedef Error (func_awkward_cuda_H2DU8_t)
+            (uint8_t **to_ptr, uint8_t *from_ptr, int64_t length);
+          func_awkward_cuda_H2DU8_t
+            *func_awkward_cuda_H2DU8 =
+            reinterpret_cast<func_awkward_cuda_H2DU8_t *>
+            (dlsym(handle, "awkward_cuda_H2DU8"));
+
+          return (*func_awkward_cuda_H2DU8)(to_ptr, from_ptr, length);
+        }
+      #endif
+      return failure("No suitable kernel for transfer",
+                     0,
+                     kSliceNone);
+    }
+    template <>
+    Error H2D(
+      int16_t** to_ptr,
+      int16_t* from_ptr,
+      int64_t length,
+      KernelsLib ptr_lib) {
+      #ifndef _MSC_VER
+        if(ptr_lib == KernelsLib::cuda_kernels) {
+          auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
+
+          if(!handle) {
+            Error err = failure("Failed to find awkward1[cuda]",
+                                0,
+                                kSliceNone);
+
+            handle_cuda_error(err);
+          }
+          typedef Error (func_awkward_cuda_H2D16_t)
+            (int16_t **to_ptr, int16_t *from_ptr, int64_t length);
+          func_awkward_cuda_H2D16_t
+            *func_awkward_cuda_H2D16 =
+            reinterpret_cast<func_awkward_cuda_H2D16_t *>
+            (dlsym(handle, "awkward_cuda_H2D16"));
+
+          return (*func_awkward_cuda_H2D16)(to_ptr, from_ptr, length);
+        }
+      #endif
+      return failure("No suitable kernel for transfer",
+                     0,
+                     kSliceNone);
+    }
+    template <>
+    Error H2D(
+      uint16_t** to_ptr,
+      uint16_t* from_ptr,
+      int64_t length,
+      KernelsLib ptr_lib) {
+      #ifndef _MSC_VER
+        if(ptr_lib == KernelsLib::cuda_kernels) {
+          auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
+
+          if(!handle) {
+            Error err = failure("Failed to find awkward1[cuda]",
+                                0,
+                                kSliceNone);
+
+            handle_cuda_error(err);
+          }
+          typedef Error (func_awkward_cuda_H2DU16_t)
+            (uint16_t **to_ptr, uint16_t *from_ptr, int64_t length);
+          func_awkward_cuda_H2DU16_t
+            *func_awkward_cuda_H2DU16 =
+            reinterpret_cast<func_awkward_cuda_H2DU16_t *>
+            (dlsym(handle, "awkward_cuda_H2DU16"));
+
+          return (*func_awkward_cuda_H2DU16)(to_ptr, from_ptr, length);
+        }
+      #endif
+      return failure("No suitable kernel for transfer",
+                     0,
+                     kSliceNone);
+    }
+    template <>
+    Error H2D(
+      int32_t** to_ptr,
+      int32_t* from_ptr,
+      int64_t length,
+      KernelsLib ptr_lib) {
+      #ifndef _MSC_VER
+        if(ptr_lib == KernelsLib::cuda_kernels) {
+          auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
+
+          if(!handle) {
+            Error err = failure("Failed to find awkward1[cuda]",
+                                0,
+                                kSliceNone);
+
+            handle_cuda_error(err);
+          }
+          typedef Error (func_awkward_cuda_H2D32_t)
+            (int32_t **to_ptr, int32_t *from_ptr, int64_t length);
+          func_awkward_cuda_H2D32_t
+            *func_awkward_cuda_H2D32 =
+            reinterpret_cast<func_awkward_cuda_H2D32_t *>
+            (dlsym(handle, "awkward_cuda_H2D32"));
+
+          return (*func_awkward_cuda_H2D32)(to_ptr, from_ptr, length);
+        }
+      #endif
+      return failure("No suitable kernel for transfer",
+                     0,
+                     kSliceNone);
+    }
+    template <>
+    Error H2D(
+      uint32_t** to_ptr,
+      uint32_t* from_ptr,
+      int64_t length,
+      KernelsLib ptr_lib) {
+      #ifndef _MSC_VER
+        if(ptr_lib == KernelsLib::cuda_kernels) {
+          auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
+
+          if(!handle) {
+            Error err = failure("Failed to find awkward1[cuda]",
+                                0,
+                                kSliceNone);
+
+            handle_cuda_error(err);
+          }
+          typedef Error (func_awkward_cuda_H2DU32_t)
+            (uint32_t **to_ptr, uint32_t *from_ptr, int64_t length);
+          func_awkward_cuda_H2DU32_t
+            *func_awkward_cuda_H2DU32 =
+            reinterpret_cast<func_awkward_cuda_H2DU32_t *>
+            (dlsym(handle, "awkward_cuda_H2DU32"));
+
+          return (*func_awkward_cuda_H2DU32)(to_ptr, from_ptr, length);
+        }
+      #endif
+      return failure("No suitable kernel for transfer",
+                     0,
+                     kSliceNone);
+    }
+    template <>
+    Error H2D(
+      int64_t** to_ptr,
+      int64_t* from_ptr,
+      int64_t length,
+      KernelsLib ptr_lib) {
+      #ifndef _MSC_VER
+        if(ptr_lib == KernelsLib::cuda_kernels) {
+          auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
+
+          if(!handle) {
+            Error err = failure("Failed to find awkward1[cuda]",
+                                0,
+                                kSliceNone);
+
+            handle_cuda_error(err);
+          }
+          typedef Error (func_awkward_cuda_H2D64_t)
+            (int64_t **to_ptr, int64_t *from_ptr, int64_t length);
+          func_awkward_cuda_H2D64_t
+            *func_awkward_cuda_H2D64 =
+            reinterpret_cast<func_awkward_cuda_H2D64_t *>
+            (dlsym(handle, "func_awkward_cuda_H2D64"));
+
+          return (*func_awkward_cuda_H2D64)(to_ptr, from_ptr, length);
+        }
+      #endif
+      return failure("No suitable kernel for transfer",
+                     0,
+                     kSliceNone);
+    }
+    template <>
+    Error H2D(
+      uint64_t** to_ptr,
+      uint64_t* from_ptr,
+      int64_t length,
+      KernelsLib ptr_lib) {
+      #ifndef _MSC_VER
+        if(ptr_lib == KernelsLib::cuda_kernels) {
+          auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
+
+          if(!handle) {
+            Error err = failure("Failed to find awkward1[cuda]",
+                                0,
+                                kSliceNone);
+
+            handle_cuda_error(err);
+          }
+          typedef Error (func_awkward_cuda_H2DU64_t)
+            (uint64_t **to_ptr, uint64_t *from_ptr, int64_t length);
+          func_awkward_cuda_H2DU64_t
+            *func_awkward_cuda_H2DU64 =
+            reinterpret_cast<func_awkward_cuda_H2DU64_t *>
+            (dlsym(handle, "awkward_cuda_H2DU64"));
+
+          return (*func_awkward_cuda_H2DU64)(to_ptr, from_ptr, length);
+        }
+      #endif
+      return failure("No suitable kernel for transfer",
+                     0,
+                     kSliceNone);
+    }
+    template <>
+    Error H2D(
+      float** to_ptr,
+      float* from_ptr,
+      int64_t length,
+      KernelsLib ptr_lib) {
+      #ifndef _MSC_VER
+        if(ptr_lib == KernelsLib::cuda_kernels) {
+          auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
+
+          if(!handle) {
+            Error err = failure("Failed to find awkward1[cuda]",
+                                0,
+                                kSliceNone);
+
+            handle_cuda_error(err);
+          }
+          typedef Error (func_awkward_cuda_H2Dfloat32_t)
+            (float **to_ptr, float *from_ptr, int64_t length);
+          func_awkward_cuda_H2Dfloat32_t
+            *func_awkward_cuda_H2Dfloat32 =
+            reinterpret_cast<func_awkward_cuda_H2Dfloat32_t *>
+            (dlsym(handle, "awkward_cuda_H2Dfloat32"));
+
+          return (*func_awkward_cuda_H2Dfloat32)(to_ptr, from_ptr, length);
+        }
+      #endif
+      return failure("No suitable kernel for transfer",
+                     0,
+                     kSliceNone);
+    }
+    template <>
+    Error H2D(
+      double** to_ptr,
+      double* from_ptr,
+      int64_t length,
+      KernelsLib ptr_lib) {
+      #ifndef _MSC_VER
+        if(ptr_lib == KernelsLib::cuda_kernels) {
+          auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
+
+          if(!handle) {
+            Error err = failure("Failed to find awkward1[cuda]",
+                                0,
+                                kSliceNone);
+
+            handle_cuda_error(err);
+          }
+          typedef Error (func_awkward_cuda_H2Dfloat64_t)
+            (double **to_ptr, double *from_ptr, int64_t length);
+          func_awkward_cuda_H2Dfloat64_t
+            *func_awkward_cuda_H2Dfloat64 =
+            reinterpret_cast<func_awkward_cuda_H2Dfloat64_t *>
+            (dlsym(handle, "awkward_cuda_H2Dfloat64"));
+
+          return (*func_awkward_cuda_H2Dfloat64)(to_ptr, from_ptr, length);
+        }
+      #endif
+      return failure("No suitable kernel for transfer",
+                     0,
+                     kSliceNone);
+    }
+
+
     template <typename T>
     IndexOf<T> make_starts(const IndexOf<T>& offsets, KernelsLib ptr_lib) {
       return IndexOf<T>(offsets.ptr(),
