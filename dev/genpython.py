@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
-import copy
 import os
 import argparse
 import pycparser
@@ -8,7 +7,7 @@ import re
 import black
 
 
-def preprocess(filename):
+def preprocess(filename, special=False):
     code = ""
     func = False
     templ = False
@@ -16,6 +15,7 @@ def preprocess(filename):
     templateids = []
     templatecall = False
     tempids = []
+    funcer = False
     with open(filename, "r") as f:
         for line in f:
             if line.endswith("\n"):
@@ -57,10 +57,12 @@ def preprocess(filename):
                 for x in tempids:
                     templateids.append(x)
                 continue
-            if func is True and line.count("{") > 0:
+            if func is True and line.count("{") > 0 and not special:
                 for _ in range(line.count("{")):
                     parans.append("{")
             if func is False and re.search("\s.*\(", line):
+                if special and "{" not in line:
+                    funcer = True
                 funcname = re.search("\s.*\(", line).group()[1:-1]
                 tokens[funcname] = {}
                 line = line.replace(line.split(" ")[0], "int")
@@ -159,15 +161,28 @@ def preprocess(filename):
                     varname = re.sub("[\W_]+", "", varname)
                     tokens[funcname][varname] = "bool"
                 line = line.replace("bool", "int", 1)
-            code += line
-            if func is True and line.count("}") > 0:
-                for _ in range(line.count("}")):
-                    parans.pop()
+            if funcer and "{" in line and special:
+                funcer = False
+            elif special and "return" in line and "(" in line:
+                if ")" not in line:
+                    line = line.replace("\n", "")
+                    if line.strip().endswith(";"):
+                        line = line[:-1] + ")" + ";"
+                    else:
+                        line = line + ")" + ";"
+                line = line + "\n" + "}" + "\n"
+            elif special and not funcer:
+                continue
+            if func and line.count("}") > 0:
+                if not special:
+                    for _ in range(line.count("}")):
+                        parans.pop()
                 if len(parans) == 0:
                     func = False
                     templ = False
                     templateids = []
                     tempids = []
+            code += line
 
     return code, tokens
 
@@ -580,15 +595,19 @@ if __name__ == "__main__":
     gencode = ""
     docdict = {}
     for filename in filenames:
-        pfile, tokens = preprocess(filename)
+        if "sorting.cpp" in filename:
+            pfile, tokens = preprocess(filename, special=True)
+        else:
+            pfile, tokens = preprocess(filename)
         ast = pycparser.c_parser.CParser().parse(pfile)
         funcs = {}
         for i in range(len(ast.ext)):
             decl = FuncDecl(ast.ext[i].decl, tokens)
-            body = FuncBody(ast.ext[i].body)
             funcs[decl.name] = {}
             funcs[decl.name]["def"] = decl
-            funcs[decl.name]["body"] = body
+            if "sorting.cpp" not in filename:
+                body = FuncBody(ast.ext[i].body)
+                funcs[decl.name]["body"] = body
         for name in funcs.keys():
             if "gen" not in tokens[name].keys():
                 doccode = name + "\n"
@@ -604,8 +623,6 @@ if __name__ == "__main__":
                             )
                             + "\n\n"
                         )
-                callindent = copy.copy(indent)
-                doccode += ".. code-block:: python\n\n"
                 funcgen += (
                     " " * indent
                     + "def "
@@ -614,17 +631,27 @@ if __name__ == "__main__":
                     )
                     + ":\n"
                 )
-                funcgen += arrange_body(funcs[name]["body"].code, indent)
+                if "sorting.cpp" not in filename:
+                    funcgen += arrange_body(funcs[name]["body"].code, indent)
                 if "childfunc" in tokens[name].keys():
                     for childfunc in tokens[name]["childfunc"]:
                         funcgen += indent_code(
                             "{0} = {1}\n".format(funcs[childfunc]["def"].name, name),
-                            callindent,
+                            indent,
                         )
-                doccode += (
-                    indent_code(black.format_str(funcgen, mode=blackmode), 4) + "\n"
-                )
-                gencode += black.format_str(funcgen, mode=blackmode) + "\n"
+                if "sorting.cpp" not in filename:
+                    doccode += ".. code-block:: python\n\n"
+                    doccode += (
+                        indent_code(black.format_str(funcgen, mode=blackmode), 4) + "\n"
+                    )
+                    gencode += black.format_str(funcgen, mode=blackmode) + "\n"
+                else:
+                    doccode += (
+                        ".. py:function:: {0}({1})".format(
+                            name, funcs[name]["def"].arrange_args(types=False)
+                        )
+                        + "\n\n"
+                    )
                 docdict[name] = doccode
     current_dir = os.path.dirname(os.path.realpath(__file__))
     with open(os.path.join(current_dir, "kernels.py"), "w") as f:
@@ -636,7 +663,8 @@ if __name__ == "__main__":
             "w",
         ) as f:
             print("Writing kernels.rst")
-            f.write("""Kernel interface and specification
+            f.write(
+                """Kernel interface and specification
 ----------------------------------
 
 All array manipulation takes place in the lowest layer of the Awkward Array project, the "kernels." The primary implementation of these kernels are in ``libawkward-cpu-kernels.so`` (or similar names on MacOS and Windows), which has a pure C interface.
@@ -649,7 +677,8 @@ A second implementation, ``libawkward-cuda-kernels.so``, is provided as a separa
 
 The interface, as well as specifications for each function's behavior through a normative Python implementation, are presented below.
 
-""")
+"""
+            )
             for name in sorted(docdict.keys()):
                 f.write(docdict[name])
         if os.path.isfile(
