@@ -1453,7 +1453,7 @@ namespace awkward {
       stops_.offset(),
       at.at());
     util::handle_error(err, classname(), identities_.get());
-    ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
+    ContentPtr nextcontent = content_.get()->carry(nextcarry);
     return nextcontent.get()->getitem_next(nexthead, nexttail, advanced);
   }
 

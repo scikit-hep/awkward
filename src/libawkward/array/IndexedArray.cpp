@@ -1925,7 +1925,7 @@ namespace awkward {
         Index64 nextcarry = pair.first;
         IndexOf<T> outindex = pair.second;
 
-        ContentPtr next = content_.get()->carry(nextcarry, true);
+        ContentPtr next = content_.get()->carry(nextcarry);
         ContentPtr out = next.get()->localindex(axis, depth);
         IndexedArrayOf<T, ISOPTION> out2(identities_,
                                          util::Parameters(),

@@ -554,7 +554,7 @@ namespace awkward {
     }
     return std::make_shared<RegularArray>(identities,
                                           parameters_,
-                                          content_.get()->carry(nextcarry),
+                                          content_.get()->carry(nextcarry, must_be_eager),
                                           size_);
   }
 

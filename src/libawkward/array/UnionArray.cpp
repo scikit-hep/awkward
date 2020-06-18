@@ -658,7 +658,7 @@ namespace awkward {
     }
 
     if (contents.size() == 1) {
-      return contents[0].get()->carry(index, true);
+      return contents[0].get()->carry(index);
     }
     else {
       return std::make_shared<UnionArray8_64>(identities_,

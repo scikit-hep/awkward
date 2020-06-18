@@ -738,14 +738,14 @@ namespace awkward {
 
   const ContentPtr
   RecordArray::carry(const Index64& carry, bool must_be_eager) const {
+    IdentitiesPtr identities(nullptr);
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->getitem_carry_64(carry);
+    }
     if (must_be_eager) {
       ContentPtrVec contents;
       for (auto content : contents_) {
         contents.push_back(content.get()->carry(carry, must_be_eager));
-      }
-      IdentitiesPtr identities(nullptr);
-      if (identities_.get() != nullptr) {
-        identities = identities_.get()->getitem_carry_64(carry);
       }
       return std::make_shared<RecordArray>(identities,
                                            parameters_,
@@ -755,10 +755,6 @@ namespace awkward {
 
     }
     else {
-      IdentitiesPtr identities(nullptr);
-      if (identities_.get() != nullptr) {
-        identities = identities_.get()->getitem_carry_64(carry);
-      }
       return std::make_shared<IndexedArray64>(identities,
                                               util::Parameters(),
                                               carry,

@@ -252,7 +252,7 @@ def test_setidentities():
     assert str(excinfo.value).endswith(' with identity [2, "outer", 0, "two"] attempting to get 99, index out of range')
     assert recordarray2.identity == ()
     assert recordarray2[2].identity == (2,)
-    assert recordarray2[2, "outer"].identity == (0, 'outer') ### (2, "outer")
+    assert recordarray2[2, "outer"].identity == (0, 'outer') ## (2, "outer")
     assert recordarray2[2, "outer", 0].identity == (2, "outer", 0)
     assert recordarray2[2, "outer", 0, "two"].identity == (2, "outer", 0, "two")
 
