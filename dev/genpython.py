@@ -7,7 +7,7 @@ import re
 import black
 
 
-def preprocess(filename, special=False):
+def preprocess(filename, skip_implementation=False):
     code = ""
     func = False
     templ = False
@@ -57,11 +57,11 @@ def preprocess(filename, special=False):
                 for x in tempids:
                     templateids.append(x)
                 continue
-            if func is True and line.count("{") > 0 and not special:
+            if func is True and line.count("{") > 0 and not skip_implementation:
                 for _ in range(line.count("{")):
                     parans.append("{")
             if func is False and re.search("\s.*\(", line):
-                if special and "{" not in line:
+                if skip_implementation and "{" not in line:
                     funcer = True
                 funcname = re.search("\s.*\(", line).group()[1:-1]
                 tokens[funcname] = {}
@@ -161,9 +161,9 @@ def preprocess(filename, special=False):
                     varname = re.sub("[\W_]+", "", varname)
                     tokens[funcname][varname] = "bool"
                 line = line.replace("bool", "int", 1)
-            if funcer and "{" in line and special:
+            if funcer and "{" in line and skip_implementation:
                 funcer = False
-            elif special and "return" in line and "(" in line:
+            elif skip_implementation and "return" in line and "(" in line:
                 if ")" not in line:
                     line = line.replace("\n", "")
                     if line.strip().endswith(";"):
@@ -171,10 +171,10 @@ def preprocess(filename, special=False):
                     else:
                         line = line + ")" + ";"
                 line = line + "\n" + "}" + "\n"
-            elif special and not funcer:
+            elif skip_implementation and not funcer:
                 continue
             if func and line.count("}") > 0:
-                if not special:
+                if not skip_implementation:
                     for _ in range(line.count("}")):
                         parans.pop()
                 if len(parans) == 0:
@@ -596,7 +596,7 @@ if __name__ == "__main__":
     docdict = {}
     for filename in filenames:
         if "sorting.cpp" in filename:
-            pfile, tokens = preprocess(filename, special=True)
+            pfile, tokens = preprocess(filename, skip_implementation=True)
         else:
             pfile, tokens = preprocess(filename)
         ast = pycparser.c_parser.CParser().parse(pfile)
