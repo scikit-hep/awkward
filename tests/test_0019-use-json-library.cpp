@@ -52,7 +52,7 @@ int main(int, char**) {
   slice.append(ak::SliceRange(ak::Slice::none(), ak::Slice::none(), -1));
   slice.append(ak::SliceRange(ak::Slice::none(), ak::Slice::none(), 2));
   slice.append(ak::SliceRange(1, ak::Slice::none(), ak::Slice::none()));
-  std::cout << array->tostring() << "\n";
+
   if (array.get()->getitem(slice).get()->tojson(false, 1) !=
          "[[[7.7,8.8,9.9]],[],[[]],[[1.1,2.2],[4.4]]]")
     return -1;

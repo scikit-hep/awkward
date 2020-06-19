@@ -32,7 +32,8 @@ set_target_properties(awkward-cuda-kernels-static PROPERTIES VISIBILITY_INLINES_
 set_target_properties(awkward-cuda-kernels PROPERTIES CXX_VISIBILITY_PRESET hidden)
 set_target_properties(awkward-cuda-kernels PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
 
-install(TARGETS awkward-cuda-kernels awkward-cuda-kernels-static)
+install(TARGETS awkward-cuda-kernels awkward-cuda-kernels-static
+        LIBRARY DESTINATION awkward1 ARCHIVE DESTINATION awkward1)
 
 
 
