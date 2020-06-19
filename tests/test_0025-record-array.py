@@ -256,6 +256,50 @@ def test_setidentities():
     assert recordarray2[2, "outer", 0].identity == (2, "outer", 0)
     assert recordarray2[2, "outer", 0, "two"].identity == (2, "outer", 0, "two")
 
+def test_identities():
+    a = awkward1.from_iter([
+        {"outer": [{"x": 0, "y": []}, {"x": 1, "y": [1]}, {"x": 2, "y": [1, 2]}]},
+        {"outer": []},
+        {"outer": [{"x": 3, "y": [1, 2, 3]}, {"x": 4, "y": [1, 2, 3, 4]}]}
+        ], highlevel=False)
+    a.setidentities()
+
+    b = awkward1.from_iter([
+        {"outer": {"x": 0, "y": []}},
+        {"outer": {"x": 1, "y": [1]}},
+        {"outer": {"x": 2, "y": [1, 2]}},
+        {"outer": {"x": 3, "y": [1, 2, 3]}},
+        {"outer": {"x": 4, "y": [1, 2, 3, 4]}}
+    ], highlevel=False)
+    b.setidentities()
+
+    assert awkward1.to_list(a) == [{u'outer': [{u'x': 0, u'y': []},
+                                               {u'x': 1, u'y': [1]},
+                                               {u'x': 2, u'y': [1, 2]}]},
+                                   {u'outer': []},
+                                   {u'outer': [{u'x': 3, u'y': [1, 2, 3]},
+                                               {u'x': 4, u'y': [1, 2, 3, 4]}]}]
+    assert a.identity == ()
+    assert a[2].identity == (2,)
+    assert a[2, "outer"].identity == (0, 'outer')
+    assert a[2, "outer", 0].identity == (2, 'outer', 0)
+    assert a[2, "outer", 0, "y"].identity == (2, u'outer', 0, u'y')
+
+    assert awkward1.to_list(b) == [{u'outer': {u'x': 0, u'y': []}},
+                                   {u'outer': {u'x': 1, u'y': [1]}},
+                                   {u'outer': {u'x': 2, u'y': [1, 2]}},
+                                   {u'outer': {u'x': 3, u'y': [1, 2, 3]}},
+                                   {u'outer': {u'x': 4, u'y': [1, 2, 3, 4]}}]
+    assert b.identity == ()
+    assert b[2].identity == (2,)
+    assert b[2, "outer"].identity == (2, u'outer')
+    with pytest.raises(ValueError) as excinfo:
+        b[2, "outer", 0].identity == (2, 'outer', 0)
+    assert str(excinfo.value).endswith("in NumpyArray, too many dimensions in slice")
+    with pytest.raises(ValueError) as excinfo:
+        b[2, "outer", 0, "y"].identity
+    assert str(excinfo.value).endswith("in NumpyArray, too many dimensions in slice")
+
 def test_builder_tuple():
     typestrs = {}
     builder = awkward1.layout.ArrayBuilder()
