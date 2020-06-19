@@ -725,21 +725,24 @@ if __name__ == "__main__":
                 )
                     funcgen += remove_return(funcs[name]["body"].code)
                 else:
-                    doccode += "*(The following Python code is translated from C++ manually and may contain inaccuracies)*\n\n"
-                    funcgen += eval("doc_"+name) + "\n"
+                    doccode += "*(The following Python code is translated from C++ manually and may not be normative)*\n\n"
+                    funcgen += black.format_str(eval("doc_"+name), mode=blackmode) + "\n\n"
+                funcgentemp = ""
                 if "childfunc" in tokens[name].keys():
                     for childfunc in tokens[name]["childfunc"]:
                         if "sorting.cpp" in filename:
-                            funcgen += " "*4
-                        funcgen += "{0} = {1}\n".format(funcs[childfunc]["def"].name, name)
+                            funcgentemp += " "*4
+                        funcgentemp += "{0} = {1}\n".format(funcs[childfunc]["def"].name, name)
                 doccode += ".. code-block:: python\n\n"
                 if "sorting.cpp" not in filename:
+                    funcgen = funcgen + funcgentemp
                     doccode += (
                         indent_code(black.format_str(funcgen, mode=blackmode), 4) + "\n"
                     )
                     gencode += black.format_str(funcgen, mode=blackmode) + "\n"
                 else:
-                    doccode += funcgen + "\n"
+                    doccode += indent_code(funcgen, 4) + funcgentemp + "\n"
+                    gencode += funcgen + funcgentemp + "\n"
                 docdict[name] = doccode
     current_dir = os.path.dirname(os.path.realpath(__file__))
     with open(os.path.join(current_dir, "kernels.py"), "w") as f:
