@@ -725,7 +725,7 @@ if __name__ == "__main__":
                 )
                     funcgen += remove_return(funcs[name]["body"].code)
                 else:
-                    doccode += "(The following Python code is translated from C++ manually and may contain inaccuracies)\n\n"
+                    doccode += "*(The following Python code is translated from C++ manually and may contain inaccuracies)*\n\n"
                     funcgen += eval("doc_"+name) + "\n"
                 if "childfunc" in tokens[name].keys():
                     for childfunc in tokens[name]["childfunc"]:
