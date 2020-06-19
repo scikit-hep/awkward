@@ -7,6 +7,12 @@
 
 #include "awkward/cpu-kernels/sorting.h"
 
+#if defined(__clang__) || defined(__GNUC__)
+  #define RESTRICT __restrict__
+#elif defined(_MSC_VER)
+  #define RESTRICT __restrict
+#endif
+
 ERROR awkward_sorting_ranges(
   int64_t* toindex,
   int64_t tolength,

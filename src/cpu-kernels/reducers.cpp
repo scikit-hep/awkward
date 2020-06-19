@@ -2,6 +2,12 @@
 
 #include "awkward/cpu-kernels/reducers.h"
 
+#if defined(__clang__) || defined(__GNUC__)
+  #define RESTRICT __restrict__
+#elif defined(_MSC_VER)
+  #define RESTRICT __restrict
+#endif
+
 ERROR awkward_reduce_count_64(
   int64_t* toptr,
   const int64_t* parents,
