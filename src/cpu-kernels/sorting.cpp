@@ -619,12 +619,12 @@ ERROR awkward_NumpyArray_sort_asstrings_uint8(
     int64_t start = offsets[k];
     int64_t stop = offsets[k + 1];
     int64_t slen = start;
-    std::string str;
+    std::string strvar;
     for (uint8_t i = (uint8_t)start;  slen < stop;  i++) {
       slen++;
-      str += (char)fromptr[i];
+      strvar += (char)fromptr[i];
     }
-    words.emplace_back(str);
+    words.emplace_back(strvar);
   }
 
   // sort the container
@@ -644,8 +644,8 @@ ERROR awkward_NumpyArray_sort_asstrings_uint8(
   // convert the strings to an array of characters
   // and fill the outer memory via a pointer
   int64_t k = 0;
-  for (const auto& str : words) {
-    std::vector<char> cstr(str.c_str(), str.c_str() + str.size());
+  for (const auto& strvar : words) {
+    std::vector<char> cstr(strvar.c_str(), strvar.c_str() + strvar.size());
     for (const auto& c : cstr) {
       toptr[k] = (uint8_t)c;
       k++;
