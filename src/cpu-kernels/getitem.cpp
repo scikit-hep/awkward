@@ -2,12 +2,6 @@
 
 #include "awkward/cpu-kernels/getitem.h"
 
-#if defined(__clang__) || defined(__GNUC__)
-  #define RESTRICT __restrict__
-#elif defined(_MSC_VER)
-  #define RESTRICT __restrict
-#endif
-
 void awkward_regularize_rangeslice(
   int64_t* start,
   int64_t* stop,

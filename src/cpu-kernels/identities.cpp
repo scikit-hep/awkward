@@ -2,12 +2,6 @@
 
 #include "awkward/cpu-kernels/identities.h"
 
-#if defined(__clang__) || defined(__GNUC__)
-  #define RESTRICT __restrict__
-#elif defined(_MSC_VER)
-  #define RESTRICT __restrict
-#endif
-
 template <typename T>
 ERROR awkward_new_Identities(
   T* toptr,
