@@ -2,9 +2,8 @@
 
 #include "awkward/cpu-kernels/identities.h"
 
-// labels
-// toptr: outparam
-// length: inparam
+/// @param toptr outparam
+/// @param length inparam
 template <typename T>
 ERROR awkward_new_Identities(
   T* toptr,
@@ -29,6 +28,10 @@ ERROR awkward_new_Identities64(
     length);
 }
 
+/// @param toptr outparam
+/// @param fromptr inparam role: inputarray
+/// @param length inparam role: arraylen
+/// @param width inparam role: arraylen
 ERROR awkward_Identities32_to_Identities64(
   int64_t* toptr,
   const int32_t* fromptr,

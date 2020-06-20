@@ -16,7 +16,7 @@ def preprocess(filename, skip_implementation=False):
     templatecall = False
     tempids = []
     labels = {}
-    labeling = False
+    roledoc = ""
     funcer = False
     with open(filename, "r") as f:
         for line in f:
@@ -26,13 +26,16 @@ def preprocess(filename, skip_implementation=False):
                 line = line.rstrip()
             if line.startswith("#"):
                 continue
-            if "//label" in line.replace(" ", "") and not func:
-                labeling = True
+            if "//@param" in line.replace(" ", "") and not func:
+                line = re.sub(" +", " ", line)
+                line = line[line.find("@param")+7:]
+                key = line.split()[0]
+                value = line.split()[1]
+                labels[key] = value
+                line = "".join(line.split())
+                if "role:" in line:
+                    roledoc += key + " role: " + line[line.find("role:")+5:] + "\n"
                 continue
-            if labeling and not func and line.replace(" ", "").startswith("//"):
-                labels[
-                    line.replace(" ", "")[2 : line.replace(" ", "").find(":")].strip()
-                ] = line[line.find(":") + 1 : line.find("\n")].strip()
             if re.search("//.*\n", line):
                 line = re.sub("//.*\n", "\n", line)
             if line.startswith("template") and func is False:
@@ -75,8 +78,9 @@ def preprocess(filename, skip_implementation=False):
                 funcname = re.search("\s.*\(", line).group()[1:-1]
                 tokens[funcname] = {}
                 tokens[funcname]["labels"] = labels
+                tokens[funcname]["roles"] = roledoc
                 labels = {}
-                labeling = False
+                roledoc = ""
                 line = line.replace(line.split(" ")[0], "int")
                 func = True
                 parans = []
@@ -192,6 +196,7 @@ def preprocess(filename, skip_implementation=False):
                 if len(parans) == 0:
                     func = False
                     labels = {}
+                    roledoc = ""
                     templ = False
                     templateids = []
                     tempids = []
@@ -589,6 +594,7 @@ def arrange_args(templateargs):
         arranged += templateargs[i]
     return arranged
 
+
 def indent_code(code, indent):
     finalcode = ""
     for line in code.splitlines():
@@ -602,7 +608,7 @@ args = arg_parser.parse_args()
 filenames = args.filenames
 
 if __name__ == "__main__":
-    doc_awkward_sorting_ranges = ("""
+    doc_awkward_sorting_ranges = """
     def awkward_sorting_ranges(toindex, tolength, parents, parentsoffset, parentslength, outlength):
         toindex[0] = k
         k = k + 1
@@ -613,16 +619,16 @@ if __name__ == "__main__":
                 j = j + 1
             k = k + 1
         toindex[tolength - 1] = parentslength
-    """)
-    doc_awkward_sorting_ranges_length = ("""
+    """
+    doc_awkward_sorting_ranges_length = """
     def awkward_sorting_ranges_length(tolength, parents, parentsoffset, parentslength, outlength):
         length = 2
         for i in range(1, parentslength):
             if parents[i-1] != parents[i]:
                 length = length + 1
         tolength[0] = length
-    """)
-    doc_awkward_argsort = ("""
+    """
+    doc_awkward_argsort = """
     def awkward_argsort(toptr, fromptr, length, offsets, offsetslength, ascending, stable):
         result = [0]*length
         for i in range(length):
@@ -636,8 +642,8 @@ if __name__ == "__main__":
                 result[j] = result[j] - offsets[i]
         for i in range(length):
             toptr[i] = result[i]
-    """)
-    doc_awkward_sort = ("""
+    """
+    doc_awkward_sort = """
     def awkward_sort(toptr, fromptr, length, offsets, offsetslength, parentslength, ascending, stable):
         result = [0]*length
         for i in range(length):
@@ -649,8 +655,8 @@ if __name__ == "__main__":
                 result[offsets[i]:offsets[i + 1]] = [ x for _, x in sorted(zip(fromptr[offsets[i]:offsets[i+1]], result[offsets[i]:offsets[i+1]]), reverse=True)]
         for i in range(parentslength):
             toptr[i] = fromptr[index[i]]
-    """)
-    doc_awkward_ListOffsetArray_local_preparenext_64 = ("""
+    """
+    doc_awkward_ListOffsetArray_local_preparenext_64 = """
     def awkward_ListOffsetArray_local_preparenext_64(tocarry, fromindex, length):
         result = [0]*length
         for i in range(length):
@@ -658,8 +664,8 @@ if __name__ == "__main__":
         result = [ x for _, x in sorted(zip(fromindex, result))]
         for i in range(length):
             tocarry[i] = result[i]
-    """)
-    doc_awkward_IndexedArray_local_preparenext_64 = ("""
+    """
+    doc_awkward_IndexedArray_local_preparenext_64 = """
     def awkward_IndexedArray_local_preparenext_64(tocarry, starts, parents, parentsoffset, parentslength, nextparents, nextparentsoffset):
         j = 0
         for i in range(parentslength):
@@ -671,8 +677,8 @@ if __name__ == "__main__":
                 j = j + 1
             else:
                 tocarry[i] = -1
-    """)
-    doc_awkward_NumpyArray_sort_asstrings_uint8 = ("""
+    """
+    doc_awkward_NumpyArray_sort_asstrings_uint8 = """
     def awkward_NumpyArray_sort_asstrings_uint8(toptr, fromptr, length, offsets, offsetslength, outoffsets, ascending, stable):
         words = []
         for k in range(offsetslength - 1):
@@ -701,7 +707,7 @@ if __name__ == "__main__":
         for r in words:
             outoffsets[o] = outoffsets[o - 1] + len(r)
             o = o + 1
-    """)
+    """
     blackmode = black.FileMode()  # Initialize black config
     gencode = ""
     docdict = {}
@@ -733,50 +739,43 @@ if __name__ == "__main__":
                             )
                             + "\n\n"
                         )
-<<<<<<< HEAD
-                callindent = copy.copy(indent)
-                doccode += ".. code-block:: python\n\n"
-                if not tokens[name]["labels"]:
-                    funcgen += (
-                        " " * indent
-                        + "def "
-                        + "{0}({1})".format(name, funcs[name]["def"].arrange_args(),)
-                        + ":\n"
-                    )
-                else:
-                    funcgen += (
-                        " " * indent
-                        + "def "
-                        + "{0}({1})".format(
-                            name,
-                            funcs[name]["def"].arrange_args(
-                                labels=tokens[name]["labels"]
-                            ),
-                        )
-                        + ":\n"
-                    )
-                funcgen += arrange_body(funcs[name]["body"].code, indent)
-=======
                 if "sorting.cpp" not in filename:
-                    funcgen += (
-                    "def "
-                    + "{0}({1})".format(
-                        name, funcs[name]["def"].arrange_args(types=False)
-                    )
-                    + ":\n"
-                )
+                    if not tokens[name]["labels"]:
+                        funcgen += (
+                            "def "
+                            + "{0}({1})".format(
+                                name, funcs[name]["def"].arrange_args(),
+                            )
+                            + ":\n"
+                        )
+                    else:
+                        funcgen += (
+                            "def "
+                            + "{0}({1})".format(
+                                name,
+                                funcs[name]["def"].arrange_args(
+                                    labels=tokens[name]["labels"]
+                                ),
+                            )
+                            + ":\n"
+                        )
                     funcgen += remove_return(funcs[name]["body"].code)
                 else:
                     doccode += "*(The following Python code is translated from C++ manually and may not be normative)*\n\n"
-                    funcgen += black.format_str(eval("doc_"+name), mode=blackmode) + "\n\n"
+                    funcgen += (
+                        black.format_str(eval("doc_" + name), mode=blackmode) + "\n\n"
+                    )
                 funcgentemp = ""
->>>>>>> master
                 if "childfunc" in tokens[name].keys():
                     for childfunc in tokens[name]["childfunc"]:
                         if "sorting.cpp" in filename:
-                            funcgentemp += " "*4
-                        funcgentemp += "{0} = {1}\n".format(funcs[childfunc]["def"].name, name)
+                            funcgentemp += " " * 4
+                        funcgentemp += "{0} = {1}\n".format(
+                            funcs[childfunc]["def"].name, name
+                        )
                 doccode += ".. code-block:: python\n\n"
+                if tokens[name]["roles"] != "":
+                    doccode += indent_code('"""\n' + tokens[name]["roles"] + '"""\n\n', 4)
                 if "sorting.cpp" not in filename:
                     funcgen = funcgen + funcgentemp
                     doccode += (

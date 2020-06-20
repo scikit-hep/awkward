@@ -150,12 +150,11 @@ We don't currently use linters like clang-tidy or flake8, but I'm open to it.
 
 #### Contributing to files in src/cpu-kernels/
 
-Make sure to prepend each function definition with - 
+Make sure to prepend each function definition with -
 ```
-// labels
-// function param1: inparam
-// function param2: inparam
-// function param3: outparam
+/// @param param1 inparam/outparam (optional role: rolename)
+/// @param param2 inparam/outparam (optional role: rolename)
+/// @param param3 inparam/outparam (optional role: rolename)
 ....
 ```
 
