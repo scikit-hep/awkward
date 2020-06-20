@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
-import copy
 import os
 import argparse
 import pycparser
@@ -8,7 +7,7 @@ import re
 import black
 
 
-def preprocess(filename):
+def preprocess(filename, skip_implementation=False):
     code = ""
     func = False
     templ = False
@@ -18,6 +17,7 @@ def preprocess(filename):
     tempids = []
     labels = {}
     labeling = False
+    funcer = False
     with open(filename, "r") as f:
         for line in f:
             if line.endswith("\n"):
@@ -66,10 +66,12 @@ def preprocess(filename):
                 for x in tempids:
                     templateids.append(x)
                 continue
-            if func is True and line.count("{") > 0:
+            if func is True and line.count("{") > 0 and not skip_implementation:
                 for _ in range(line.count("{")):
                     parans.append("{")
             if func is False and re.search("\s.*\(", line):
+                if skip_implementation and "{" not in line:
+                    funcer = True
                 funcname = re.search("\s.*\(", line).group()[1:-1]
                 tokens[funcname] = {}
                 tokens[funcname]["labels"] = labels
@@ -171,16 +173,29 @@ def preprocess(filename):
                     varname = re.sub("[\W_]+", "", varname)
                     tokens[funcname][varname] = "bool"
                 line = line.replace("bool", "int", 1)
-            code += line
-            if func is True and line.count("}") > 0:
-                for _ in range(line.count("}")):
-                    parans.pop()
+            if funcer and "{" in line and skip_implementation:
+                funcer = False
+            elif skip_implementation and "return" in line and "(" in line:
+                if ")" not in line:
+                    line = line.replace("\n", "")
+                    if line.strip().endswith(";"):
+                        line = line[:-1] + ")" + ";"
+                    else:
+                        line = line + ")" + ";"
+                line = line + "\n" + "}" + "\n"
+            elif skip_implementation and not funcer:
+                continue
+            if func and line.count("}") > 0:
+                if not skip_implementation:
+                    for _ in range(line.count("}")):
+                        parans.pop()
                 if len(parans) == 0:
                     func = False
                     labels = {}
                     templ = False
                     templateids = []
                     tempids = []
+            code += line
 
     return code, tokens
 
@@ -574,18 +589,11 @@ def arrange_args(templateargs):
         arranged += templateargs[i]
     return arranged
 
-
 def indent_code(code, indent):
     finalcode = ""
     for line in code.splitlines():
         finalcode += " " * indent + line + "\n"
     return finalcode
-
-
-def arrange_body(body, indent):
-    finalbody = indent_code(body, indent)
-    finalbody = remove_return(finalbody)
-    return finalbody
 
 
 arg_parser = argparse.ArgumentParser()
@@ -594,24 +602,127 @@ args = arg_parser.parse_args()
 filenames = args.filenames
 
 if __name__ == "__main__":
+    doc_awkward_sorting_ranges = ("""
+    def awkward_sorting_ranges(toindex, tolength, parents, parentsoffset, parentslength, outlength):
+        toindex[0] = k
+        k = k + 1
+        j = j + 1
+        for i in range(1, parentslength):
+            if parents[i-1] != parents[i]:
+                toindex[j] = k
+                j = j + 1
+            k = k + 1
+        toindex[tolength - 1] = parentslength
+    """)
+    doc_awkward_sorting_ranges_length = ("""
+    def awkward_sorting_ranges_length(tolength, parents, parentsoffset, parentslength, outlength):
+        length = 2
+        for i in range(1, parentslength):
+            if parents[i-1] != parents[i]:
+                length = length + 1
+        tolength[0] = length
+    """)
+    doc_awkward_argsort = ("""
+    def awkward_argsort(toptr, fromptr, length, offsets, offsetslength, ascending, stable):
+        result = [0]*length
+        for i in range(length):
+            result[i] = i
+        for i in range(offsetslength - 1):
+            if ascending:
+                result[offsets[i]:offsets[i + 1]] = [ x for _, x in sorted(zip(fromptr[offsets[i]:offsets[i+1]], result[offsets[i]:offsets[i+1]]))]
+            else:
+                result[offsets[i]:offsets[i + 1]] = [ x for _, x in sorted(zip(fromptr[offsets[i]:offsets[i+1]], result[offsets[i]:offsets[i+1]]), reverse=True)]
+            for j in range(offset[i], offset[i+1]):
+                result[j] = result[j] - offsets[i]
+        for i in range(length):
+            toptr[i] = result[i]
+    """)
+    doc_awkward_sort = ("""
+    def awkward_sort(toptr, fromptr, length, offsets, offsetslength, parentslength, ascending, stable):
+        result = [0]*length
+        for i in range(length):
+            result[i] = i
+        for i in range(offsetslength - 1):
+            if ascending:
+                result[offsets[i]:offsets[i + 1]] = [ x for _, x in sorted(zip(fromptr[offsets[i]:offsets[i+1]], result[offsets[i]:offsets[i+1]]))]
+            else:
+                result[offsets[i]:offsets[i + 1]] = [ x for _, x in sorted(zip(fromptr[offsets[i]:offsets[i+1]], result[offsets[i]:offsets[i+1]]), reverse=True)]
+        for i in range(parentslength):
+            toptr[i] = fromptr[index[i]]
+    """)
+    doc_awkward_ListOffsetArray_local_preparenext_64 = ("""
+    def awkward_ListOffsetArray_local_preparenext_64(tocarry, fromindex, length):
+        result = [0]*length
+        for i in range(length):
+            result[i] = i
+        result = [ x for _, x in sorted(zip(fromindex, result))]
+        for i in range(length):
+            tocarry[i] = result[i]
+    """)
+    doc_awkward_IndexedArray_local_preparenext_64 = ("""
+    def awkward_IndexedArray_local_preparenext_64(tocarry, starts, parents, parentsoffset, parentslength, nextparents, nextparentsoffset):
+        j = 0
+        for i in range(parentslength):
+            parent = parents[i] + parentsoffset
+            start = starts[parent]
+            nextparent = nextparents[i] + nextparentsoffset
+            if parent == nextparent:
+                tocarry[i] = j
+                j = j + 1
+            else:
+                tocarry[i] = -1
+    """)
+    doc_awkward_NumpyArray_sort_asstrings_uint8 = ("""
+    def awkward_NumpyArray_sort_asstrings_uint8(toptr, fromptr, length, offsets, offsetslength, outoffsets, ascending, stable):
+        words = []
+        for k in range(offsetslength - 1):
+            start = offsets[k]
+            stop = offsets[k + 1]
+            slen = copy.copy(start)
+            strvar = ""
+            i = copy.copy(start)
+            while (slen < stop):
+                slen = slen + 1
+                strvar = strvar + str(fromptr[i])
+            words.append(strvar)
+        if ascending:
+            words.sort()
+        else:
+            words.sort(reverse=True)
+        k = 0
+        for strvar in words:
+            cstr = [ch for ch in strvar]
+            for c in cstr:
+                toptr[k] = c
+                k = k + 1
+        o = 0
+        outoffsets[o] = 0
+        o = o + 1
+        for r in words:
+            outoffsets[o] = outoffsets[o - 1] + len(r)
+            o = o + 1
+    """)
     blackmode = black.FileMode()  # Initialize black config
     gencode = ""
     docdict = {}
     for filename in filenames:
-        pfile, tokens = preprocess(filename)
+        if "sorting.cpp" in filename:
+            pfile, tokens = preprocess(filename, skip_implementation=True)
+        else:
+            pfile, tokens = preprocess(filename)
         ast = pycparser.c_parser.CParser().parse(pfile)
         funcs = {}
         for i in range(len(ast.ext)):
             decl = FuncDecl(ast.ext[i].decl, tokens)
-            body = FuncBody(ast.ext[i].body)
             funcs[decl.name] = {}
             funcs[decl.name]["def"] = decl
-            funcs[decl.name]["body"] = body
+            if "sorting.cpp" not in filename:
+                body = FuncBody(ast.ext[i].body)
+                funcs[decl.name]["body"] = body
         for name in funcs.keys():
             if "gen" not in tokens[name].keys():
                 doccode = name + "\n"
                 doccode += "=================================================================\n"
-                indent = 0
                 funcgen = ""
                 if "childfunc" in tokens[name].keys():
                     for childfunc in tokens[name]["childfunc"]:
@@ -622,6 +733,7 @@ if __name__ == "__main__":
                             )
                             + "\n\n"
                         )
+<<<<<<< HEAD
                 callindent = copy.copy(indent)
                 doccode += ".. code-block:: python\n\n"
                 if not tokens[name]["labels"]:
@@ -644,16 +756,36 @@ if __name__ == "__main__":
                         + ":\n"
                     )
                 funcgen += arrange_body(funcs[name]["body"].code, indent)
+=======
+                if "sorting.cpp" not in filename:
+                    funcgen += (
+                    "def "
+                    + "{0}({1})".format(
+                        name, funcs[name]["def"].arrange_args(types=False)
+                    )
+                    + ":\n"
+                )
+                    funcgen += remove_return(funcs[name]["body"].code)
+                else:
+                    doccode += "*(The following Python code is translated from C++ manually and may not be normative)*\n\n"
+                    funcgen += black.format_str(eval("doc_"+name), mode=blackmode) + "\n\n"
+                funcgentemp = ""
+>>>>>>> master
                 if "childfunc" in tokens[name].keys():
                     for childfunc in tokens[name]["childfunc"]:
-                        funcgen += indent_code(
-                            "{0} = {1}\n".format(funcs[childfunc]["def"].name, name),
-                            callindent,
-                        )
-                doccode += (
-                    indent_code(black.format_str(funcgen, mode=blackmode), 4) + "\n"
-                )
-                gencode += black.format_str(funcgen, mode=blackmode) + "\n"
+                        if "sorting.cpp" in filename:
+                            funcgentemp += " "*4
+                        funcgentemp += "{0} = {1}\n".format(funcs[childfunc]["def"].name, name)
+                doccode += ".. code-block:: python\n\n"
+                if "sorting.cpp" not in filename:
+                    funcgen = funcgen + funcgentemp
+                    doccode += (
+                        indent_code(black.format_str(funcgen, mode=blackmode), 4) + "\n"
+                    )
+                    gencode += black.format_str(funcgen, mode=blackmode) + "\n"
+                else:
+                    doccode += indent_code(funcgen, 4) + funcgentemp + "\n"
+                    gencode += funcgen + funcgentemp + "\n"
                 docdict[name] = doccode
     current_dir = os.path.dirname(os.path.realpath(__file__))
     with open(os.path.join(current_dir, "kernels.py"), "w") as f:
