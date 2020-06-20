@@ -16,6 +16,8 @@ def preprocess(filename):
     templateids = []
     templatecall = False
     tempids = []
+    labels = {}
+    labeling = False
     with open(filename, "r") as f:
         for line in f:
             if line.endswith("\n"):
@@ -24,6 +26,13 @@ def preprocess(filename):
                 line = line.rstrip()
             if line.startswith("#"):
                 continue
+            if "//label" in line.replace(" ", "") and not func:
+                labeling = True
+                continue
+            if labeling and not func and line.replace(" ", "").startswith("//"):
+                labels[
+                    line.replace(" ", "")[2 : line.replace(" ", "").find(":")].strip()
+                ] = line[line.find(":") + 1 : line.find("\n")].strip()
             if re.search("//.*\n", line):
                 line = re.sub("//.*\n", "\n", line)
             if line.startswith("template") and func is False:
@@ -63,6 +72,9 @@ def preprocess(filename):
             if func is False and re.search("\s.*\(", line):
                 funcname = re.search("\s.*\(", line).group()[1:-1]
                 tokens[funcname] = {}
+                tokens[funcname]["labels"] = labels
+                labels = {}
+                labeling = False
                 line = line.replace(line.split(" ")[0], "int")
                 func = True
                 parans = []
@@ -165,6 +177,7 @@ def preprocess(filename):
                     parans.pop()
                 if len(parans) == 0:
                     func = False
+                    labels = {}
                     templ = False
                     templateids = []
                     tempids = []
@@ -522,7 +535,8 @@ class FuncDecl(object):
         elif obj.__class__.__name__ == "PtrDecl":
             return self.iterclass(obj.type, count + 1)
 
-    def arrange_args(self, types):
+    def arrange_args(self, types=False, labels=False):
+        assert not (types and labels)
         arranged = ""
         for i in range(len(self.args)):
             if i != 0:
@@ -535,6 +549,10 @@ class FuncDecl(object):
                     + "List[" * self.args[i]["list"]
                     + self.args[i]["type"]
                     + "]" * self.args[i]["list"]
+                )
+            elif labels:
+                arranged += "{0}: {1}".format(
+                    self.args[i]["name"], labels[self.args[i]["name"]]
                 )
             else:
                 arranged += "{0} ".format(self.args[i]["name"])
@@ -606,14 +624,25 @@ if __name__ == "__main__":
                         )
                 callindent = copy.copy(indent)
                 doccode += ".. code-block:: python\n\n"
-                funcgen += (
-                    " " * indent
-                    + "def "
-                    + "{0}({1})".format(
-                        name, funcs[name]["def"].arrange_args(types=False)
+                if not tokens[name]["labels"]:
+                    funcgen += (
+                        " " * indent
+                        + "def "
+                        + "{0}({1})".format(name, funcs[name]["def"].arrange_args(),)
+                        + ":\n"
                     )
-                    + ":\n"
-                )
+                else:
+                    funcgen += (
+                        " " * indent
+                        + "def "
+                        + "{0}({1})".format(
+                            name,
+                            funcs[name]["def"].arrange_args(
+                                labels=tokens[name]["labels"]
+                            ),
+                        )
+                        + ":\n"
+                    )
                 funcgen += arrange_body(funcs[name]["body"].code, indent)
                 if "childfunc" in tokens[name].keys():
                     for childfunc in tokens[name]["childfunc"]:
@@ -636,7 +665,8 @@ if __name__ == "__main__":
             "w",
         ) as f:
             print("Writing kernels.rst")
-            f.write("""Kernel interface and specification
+            f.write(
+                """Kernel interface and specification
 ----------------------------------
 
 All array manipulation takes place in the lowest layer of the Awkward Array project, the "kernels." The primary implementation of these kernels are in ``libawkward-cpu-kernels.so`` (or similar names on MacOS and Windows), which has a pure C interface.
@@ -649,7 +679,8 @@ A second implementation, ``libawkward-cuda-kernels.so``, is provided as a separa
 
 The interface, as well as specifications for each function's behavior through a normative Python implementation, are presented below.
 
-""")
+"""
+            )
             for name in sorted(docdict.keys()):
                 f.write(docdict[name])
         if os.path.isfile(

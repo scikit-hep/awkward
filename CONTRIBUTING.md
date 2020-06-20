@@ -148,6 +148,17 @@ We don't, however, use automated formatters like clang-format or black. Automate
 
 We don't currently use linters like clang-tidy or flake8, but I'm open to it.
 
+#### Contributing to files in src/cpu-kernels/
+
+Make sure to prepend each function definition with - 
+```
+// labels
+// function param1: inparam
+// function param2: inparam
+// function param3: outparam
+....
+```
+
 ### Fully qualified names
 
 We don't import names in C++ (`using`) or Python (`import from`) so that it's easy to see where objects come from and find all instances with a text search. This is sometimes in tension with the 80-character limit.
