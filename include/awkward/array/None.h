@@ -257,6 +257,9 @@ namespace awkward {
                           const Index64& slicestops,
                           const SliceJagged64& slicecontent,
                           const Slice& tail) const override;
+
+    ContentPtr
+      to_gpu(KernelsLib ptr_lib);
   };
 
   /// A constant value with type None.

@@ -393,6 +393,9 @@ namespace awkward {
                           const SliceJagged64& slicecontent,
                           const Slice& tail) const override;
 
+    ContentPtr
+      to_gpu(KernelsLib ptr_lib) override;
+
   private:
     /// @brief See #mask.
     const IndexU8 mask_;

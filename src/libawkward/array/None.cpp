@@ -308,5 +308,11 @@ namespace awkward {
       "undefined operation: None::getitem_next_jagged(jagged)");
   }
 
+  ContentPtr
+  None::to_gpu(KernelsLib ptr_lib) {
+    throw std::runtime_error(
+      "undefined operation: None::to_gpu(ptr_lib)");
+  }
+
   const ContentPtr none = std::make_shared<None>();
 }

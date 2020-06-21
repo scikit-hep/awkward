@@ -1242,4 +1242,15 @@ namespace awkward {
                                            tail);
   }
 
+  ContentPtr
+  RegularArray::to_gpu(KernelsLib ptr_lib) {
+    if(ptr_lib == KernelsLib::cuda_kernels) {
+      ContentPtr cuda_content = content_->to_gpu(KernelsLib::cuda_kernels);
+      return std::make_shared<RegularArray>(identities(),
+                                            parameters(),
+                                            cuda_content,
+                                            size());
+    }
+  }
+
 }

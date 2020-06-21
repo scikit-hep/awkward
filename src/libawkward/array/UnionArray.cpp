@@ -1880,6 +1880,28 @@ namespace awkward {
                                                       tail);
   }
 
+
+  template <typename T, typename I>
+  ContentPtr
+  UnionArrayOf<T, I>::to_gpu(KernelsLib ptr_lib) {
+    if(ptr_lib == cuda_kernels) {
+      IndexOf<T> cuda_tags = tags_.to_gpu(KernelsLib::cuda_kernels);
+      IndexOf<I> cuda_index = index_.to_gpu(KernelsLib::cuda_kernels);
+
+      ContentPtrVec cuda_content_vec;
+      for(auto const i : contents_) {
+        ContentPtr cuda_ptr = i->to_gpu(KernelsLib::cuda_kernels);
+        cuda_content_vec.emplace_back(cuda_ptr);
+      }
+
+      return std::make_shared<UnionArrayOf<T, I>>(identities(),
+                                                  parameters(),
+                                                  cuda_tags,
+                                                  cuda_index,
+                                                  cuda_content_vec);
+    }
+  }
+
   template <typename T, typename I>
   template <typename S>
   const ContentPtr

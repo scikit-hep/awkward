@@ -820,6 +820,16 @@ namespace awkward {
                                                       tail);
   }
 
+  ContentPtr
+  UnmaskedArray::to_gpu(KernelsLib ptr_lib) {
+    if(ptr_lib == KernelsLib::cuda_kernels) {
+      ContentPtr cuda_content = content_->to_gpu(KernelsLib::cuda_kernels);
+      return std::make_shared<UnmaskedArray>(identities(),
+                                             parameters(),
+                                             cuda_content);
+    }
+  }
+
   template <typename S>
   const ContentPtr
   UnmaskedArray::getitem_next_jagged_generic(const Index64& slicestarts,

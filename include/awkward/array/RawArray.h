@@ -258,6 +258,12 @@ namespace awkward {
       return itemsize_;
     }
 
+    const KernelsLib
+    ptr_lib() const {
+      return ptr_lib_;
+    }
+
+
     /// @brief Location of item zero in the buffer, relative to
     /// `ptr`, measured in bytes, rather than number of elements; see #offset.
     ssize_t
@@ -278,10 +284,6 @@ namespace awkward {
       return (ssize_t)itemsize_*(ssize_t)length_;
     }
 
-    KernelsLib
-      ptr_lib() const {
-      return ptr_lib_;
-    }
 
     /// @brief Dereferences a selected item as a `uint8_t`.
     uint8_t
@@ -1075,6 +1077,33 @@ namespace awkward {
                           const Slice& tail) const override {
       throw std::runtime_error(
         "undefined operation: RawArray::getitem_next_jagged(jagged)");
+    }
+
+    ContentPtr
+      to_gpu(KernelsLib ptr_lib) override {
+      if(ptr_lib == KernelsLib::cuda_kernels) {
+        T* cuda_ptr;
+        if(ptr_lib_ != KernelsLib::cuda_kernels) {
+          Error err = util::H2D<T>(&cuda_ptr,
+                                   ptr_.get(),
+                                   length_,
+                                   KernelsLib::cuda_kernels);
+          util::handle_cuda_error(err);
+        }
+        else {
+          cuda_ptr = ptr_.get();
+        }
+
+        return std::make_shared<RawArrayOf<T>>(identities(),
+                                               parameters(),
+                                               std::shared_ptr<T>(
+                                                 cuda_ptr,
+                                                 util::cuda_array_deleter<T>()),
+                                               offset(),
+                                               length(),
+                                               itemsize(),
+                                               ptr_lib_);
+      }
     }
 
   private:

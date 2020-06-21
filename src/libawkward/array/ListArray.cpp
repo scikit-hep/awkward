@@ -1799,6 +1799,22 @@ namespace awkward {
                                                outcontent);
   }
 
+  template <typename T>
+  ContentPtr
+  ListArrayOf<T>::to_gpu(KernelsLib ptr_lib) {
+    if(ptr_lib == KernelsLib::cuda_kernels) {
+      IndexOf<T> cuda_starts = starts_.to_gpu(KernelsLib::cuda_kernels);
+      IndexOf<T> cuda_stops = stops_.to_gpu(KernelsLib::cuda_kernels);
+      ContentPtr cuda_content= content_->to_gpu(KernelsLib::cuda_kernels);
+
+      return std::make_shared<ListArrayOf<T>>(identities(),
+                                              parameters(),
+                                              cuda_starts,
+                                              cuda_stops,
+                                              cuda_content);
+    }
+  }
+
   template class EXPORT_SYMBOL ListArrayOf<int32_t>;
   template class EXPORT_SYMBOL ListArrayOf<uint32_t>;
   template class EXPORT_SYMBOL ListArrayOf<int64_t>;

@@ -1116,6 +1116,19 @@ namespace awkward {
                                                       tail);
   }
 
+  ContentPtr
+  ByteMaskedArray::to_gpu(KernelsLib ptr_lib) {
+    if(ptr_lib == KernelsLib::cuda_kernels) {
+      Index8 cuda_mask = mask_.to_gpu(KernelsLib::cuda_kernels);
+      ContentPtr cuda_content = content_->to_gpu(KernelsLib::cuda_kernels);
+      return std::make_shared<ByteMaskedArray>(identities(),
+                                               parameters(),
+                                               cuda_mask,
+                                               cuda_content,
+                                               valid_when());
+    }
+  }
+
   template <typename S>
   const ContentPtr
   ByteMaskedArray::getitem_next_jagged_generic(const Index64& slicestarts,

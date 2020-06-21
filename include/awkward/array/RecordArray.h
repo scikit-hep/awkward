@@ -397,6 +397,9 @@ namespace awkward {
                           const SliceJagged64& slicecontent,
                           const Slice& tail) const override;
 
+    ContentPtr
+      to_gpu(KernelsLib ptr_lib) const;
+
   protected:
     template <typename S>
     const ContentPtr

@@ -176,7 +176,7 @@ namespace awkward {
 
   template <typename T>
   const IdentitiesPtr
-  IdentitiesOf<T>::getitem_range_nowrap(int64_t start, int64_t stop) const {
+  IdentitiesOf<T>:: getitem_range_nowrap(int64_t start, int64_t stop) const {
     if (!(0 <= start  &&  start < length_  &&  0 <= stop  &&  stop <= length_)
         &&  start != stop) {
       throw std::runtime_error(
@@ -332,11 +332,42 @@ namespace awkward {
     return getitem_range_nowrap(regular_start, regular_stop);
   }
 
-    template<typename T>
-    KernelsLib IdentitiesOf<T>::ptr_lib() const {
-      return ptr_lib_;
-    }
+  template<typename T>
+  KernelsLib IdentitiesOf<T>::ptr_lib() const {
+    return ptr_lib_;
+  }
 
-    template class EXPORT_SYMBOL IdentitiesOf<int32_t>;
+  template <typename T>
+  IdentitiesPtr
+  IdentitiesOf<T>::to_gpu(KernelsLib ptr_lib) const{
+    if(ptr_lib == cuda_kernels) {
+
+      T *cuda_ptr;
+      if(ptr_lib_ != KernelsLib::cuda_kernels) {
+        Error err = util::H2D<T>(&cuda_ptr,
+                                 ptr_.get(),
+                                 width_ * length_,
+                                 KernelsLib::cuda_kernels);
+
+
+        util::handle_cuda_error(err);
+      }
+      else {
+        cuda_ptr = ptr_.get();
+      }
+
+      return std::make_shared<IdentitiesOf<T>>(ref(),
+                                               fieldloc(),
+                                               offset(),
+                                               width(),
+                                               length(),
+                                               std::shared_ptr<T>(
+                                                 cuda_ptr,
+                                                 util::cuda_array_deleter<T>()),
+                                               KernelsLib::cuda_kernels);
+    }
+  }
+
+  template class EXPORT_SYMBOL IdentitiesOf<int32_t>;
   template class EXPORT_SYMBOL IdentitiesOf<int64_t>;
 }

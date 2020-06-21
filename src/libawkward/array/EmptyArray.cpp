@@ -540,4 +540,12 @@ namespace awkward {
       "undefined operation: EmptyArray::getitem_next_jagged(jagged)");
   }
 
+  ContentPtr
+  EmptyArray::to_gpu(KernelsLib ptr_lib) {
+    if(ptr_lib == KernelsLib::cuda_kernels) {
+      return std::make_shared<EmptyArray>(identities(),
+                                          parameters());
+    }
+  }
+
 }

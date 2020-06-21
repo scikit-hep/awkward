@@ -529,4 +529,10 @@ namespace awkward {
       "undefined operation: Record::getitem_next_jagged(jagged)");
   }
 
+  ContentPtr
+  Record::to_gpu(KernelsLib ptr_lib) {
+    throw std::runtime_error(
+      "undefined operation: Record::to_gpu(ptr_lib)");
+  }
+
 }

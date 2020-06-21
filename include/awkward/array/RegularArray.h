@@ -334,6 +334,9 @@ namespace awkward {
                           const SliceJagged64& slicecontent,
                           const Slice& tail) const override;
 
+    ContentPtr
+      to_gpu(KernelsLib ptr_lib) override;
+
   private:
     const ContentPtr content_;
     int64_t size_;

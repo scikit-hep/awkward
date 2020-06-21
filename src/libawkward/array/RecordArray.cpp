@@ -1399,6 +1399,23 @@ namespace awkward {
                                                       tail);
   }
 
+  ContentPtr
+  RecordArray::to_gpu(KernelsLib ptr_lib) const {
+    if(ptr_lib == KernelsLib::cuda_kernels) {
+      ContentPtrVec cuda_content_vec;
+      for(auto i : contents_) {
+        ContentPtr cuda_ptr = i->to_gpu(KernelsLib::cuda_kernels);
+        cuda_content_vec.emplace_back(cuda_ptr);
+      }
+
+      return std::make_shared<RecordArray>(identities(),
+                                           parameters(),
+                                           cuda_content_vec,
+                                           recordlookup(),
+                                           length());
+    }
+  }
+
   template <typename S>
   const ContentPtr
   RecordArray::getitem_next_jagged_generic(const Index64& slicestarts,

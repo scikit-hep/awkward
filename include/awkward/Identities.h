@@ -370,6 +370,9 @@ namespace awkward {
     const IdentitiesPtr
       getitem_range(int64_t start, int64_t stop) const;
 
+    IdentitiesPtr
+      to_gpu(KernelsLib ptr_lib) const;
+
   private:
     /// @brief See #ptr.
     const std::shared_ptr<T> ptr_;
