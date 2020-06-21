@@ -3677,4 +3677,206 @@ namespace awkward {
       builder.endlist();
     }
   }
+
+  std::shared_ptr<NumpyArray>
+  NumpyArray::to_gpu(KernelsLib ptr_lib) const {
+    if (ptr_lib == KernelsLib::cuda_kernels) {
+      ssize_t length = 1;
+      for (auto i : shape_) {
+        length = length * i;
+      }
+
+      if (format_.compare("?") == 0) {
+        bool *cuda_ptr;
+        Error err = util::H2D<bool>(&cuda_ptr,
+                                    reinterpret_cast<bool *>(ptr_.get()),
+                                    length,
+                                    KernelsLib::cuda_kernels);
+        return std::make_shared<NumpyArray>(identities(),
+                                            parameters(),
+                                            std::shared_ptr<void>(cuda_ptr,
+                                                                  util::cuda_array_deleter<bool>()),
+                                            shape(),
+                                            strides(),
+                                            byteoffset(),
+                                            itemsize(),
+                                            format(),
+                                            KernelsLib::cuda_kernels);
+      } else if (format_.compare("b") == 0) {
+        int8_t *cuda_ptr;
+        Error err = util::H2D<int8_t>(&cuda_ptr,
+                                      reinterpret_cast<int8_t *>(ptr_.get()),
+                                      length,
+                                      KernelsLib::cuda_kernels);
+
+        return std::make_shared<NumpyArray>(identities(),
+                                            parameters(),
+                                            std::shared_ptr<int8_t>(cuda_ptr,
+                                                                  util::cuda_array_deleter<int8_t>()),
+                                            shape(),
+                                            strides(),
+                                            byteoffset(),
+                                            itemsize(),
+                                            format(),
+                                            KernelsLib::cuda_kernels);
+      } else if (format_.compare("B") == 0) {
+        uint8_t *cuda_ptr;
+        Error err = util::H2D<uint8_t>(&cuda_ptr,
+                                       reinterpret_cast<uint8_t *>(ptr_.get()),
+                                       length,
+                                       KernelsLib::cuda_kernels);
+        return std::make_shared<NumpyArray>(identities(),
+                                            parameters(),
+                                            std::shared_ptr<void>(cuda_ptr,
+                                                                  util::cuda_array_deleter<uint8_t>()),
+                                            shape(),
+                                            strides(),
+                                            byteoffset(),
+                                            itemsize(),
+                                            format(),
+                                            KernelsLib::cuda_kernels);
+      } else if (format_.compare("h") == 0) {
+        int16_t *cuda_ptr;
+        Error err = util::H2D<int16_t>(&cuda_ptr,
+                                       reinterpret_cast<int16_t *>(ptr_.get()),
+                                       length,
+                                       KernelsLib::cuda_kernels);
+        return std::make_shared<NumpyArray>(identities(),
+                                            parameters(),
+                                            std::shared_ptr<void>(cuda_ptr,
+                                                                  util::cuda_array_deleter<int16_t>()),
+                                            shape(),
+                                            strides(),
+                                            byteoffset(),
+                                            itemsize(),
+                                            format(),
+                                            KernelsLib::cuda_kernels);
+      } else if (format_.compare("H") == 0) {
+        uint16_t *cuda_ptr;
+        Error err = util::H2D<uint16_t>(&cuda_ptr,
+                                        reinterpret_cast<uint16_t *>(ptr_.get()),
+                                        length,
+                                        KernelsLib::cuda_kernels);
+        return std::make_shared<NumpyArray>(identities(),
+                                            parameters(),
+                                            std::shared_ptr<void>(cuda_ptr,
+                                                                  util::cuda_array_deleter<uint16_t>()),
+                                            shape(),
+                                            strides(),
+                                            byteoffset(),
+                                            itemsize(),
+                                            format(),
+                                            KernelsLib::cuda_kernels);
+      } else if (format_.compare("i") == 0) {
+        int32_t *cuda_ptr;
+        Error err = util::H2D<int32_t>(&cuda_ptr,
+                                       reinterpret_cast<int32_t *>(ptr_.get()),
+                                       length,
+                                       KernelsLib::cuda_kernels);
+        util::handle_cuda_error(err);
+        return std::make_shared<NumpyArray>(identities(),
+                                            parameters(),
+                                            std::shared_ptr<void>(cuda_ptr,
+                                                                  util::cuda_array_deleter<int32_t>()),
+                                            shape(),
+                                            strides(),
+                                            byteoffset(),
+                                            itemsize(),
+                                            format(),
+                                            KernelsLib::cuda_kernels);
+      } else if (format_.compare("I") == 0) {
+        uint32_t *cuda_ptr;
+        Error err = util::H2D<uint32_t>(&cuda_ptr,
+                                        reinterpret_cast<uint32_t *>(ptr_.get()),
+                                        length,
+                                        KernelsLib::cuda_kernels);
+        return std::make_shared<NumpyArray>(identities(),
+                                            parameters(),
+                                            std::shared_ptr<void>(cuda_ptr,
+                                                                  util::cuda_array_deleter<uint32_t>()),
+                                            shape(),
+                                            strides(),
+                                            byteoffset(),
+                                            itemsize(),
+                                            format(),
+                                            KernelsLib::cuda_kernels);
+      } else if (format_.compare("l") == 0) {
+        int64_t *cuda_ptr;
+        Error err = util::H2D<int64_t>(&cuda_ptr,
+                                       reinterpret_cast<int64_t *>(ptr_.get()),
+                                       length,
+                                       KernelsLib::cuda_kernels);
+        return std::make_shared<NumpyArray>(identities(),
+                                            parameters(),
+                                            std::shared_ptr<void>(cuda_ptr,
+                                                                  util::cuda_array_deleter<int64_t>()),
+                                            shape(),
+                                            strides(),
+                                            byteoffset(),
+                                            itemsize(),
+                                            format(),
+                                            KernelsLib::cuda_kernels);
+      } else if (format_.compare("L") == 0) {
+        uint64_t *cuda_ptr;
+        Error err = util::H2D<uint64_t>(&cuda_ptr,
+                                        reinterpret_cast<uint64_t *>(ptr_.get()),
+                                        length,
+                                        KernelsLib::cuda_kernels);
+        return std::make_shared<NumpyArray>(identities(),
+                                            parameters(),
+                                            std::shared_ptr<void>(cuda_ptr,
+                                                                  util::cuda_array_deleter<uint64_t>()),
+                                            shape(),
+                                            strides(),
+                                            byteoffset(),
+                                            itemsize(),
+                                            format(),
+                                            KernelsLib::cuda_kernels);
+      } else if (format_.compare("f") == 0) {
+        float *cuda_ptr;
+        Error err = util::H2D<float>(&cuda_ptr,
+                                     reinterpret_cast<float *>(ptr_.get()),
+                                     length,
+                                     KernelsLib::cuda_kernels);
+        return std::make_shared<NumpyArray>(identities(),
+                                            parameters(),
+                                            std::shared_ptr<void>(cuda_ptr,
+                                                                  util::cuda_array_deleter<float>()),
+                                            shape(),
+                                            strides(),
+                                            byteoffset(),
+                                            itemsize(),
+                                            format(),
+                                            KernelsLib::cuda_kernels);
+      } else if (format_.compare("d") == 0) {
+        double *cuda_ptr;
+        Error err = util::H2D<double>(&cuda_ptr,
+                                      reinterpret_cast<double *>(ptr_.get()),
+                                      length,
+                                      KernelsLib::cuda_kernels);
+        return std::make_shared<NumpyArray>(identities(),
+                                            parameters(),
+                                            std::shared_ptr<void>(cuda_ptr,
+                                                                  util::cuda_array_deleter<double>()),
+                                            shape(),
+                                            strides(),
+                                            byteoffset(),
+                                            itemsize(),
+                                            format(),
+                                            KernelsLib::cuda_kernels);
+      } else {
+        Error err = failure("Unknown Numpy dtype", 0, kSliceNone);
+        util::handle_cuda_error(err);
+        return std::make_shared<NumpyArray>(identities(),
+                                            parameters(),
+                                            nullptr,
+                                            shape(),
+                                            strides(),
+                                            byteoffset(),
+                                            itemsize(),
+                                            format(),
+                                            KernelsLib::cuda_kernels);
+      }
+    }
+  }
 }

@@ -56,7 +56,7 @@ namespace awkward {
       KernelsLib ptr_lib) {
       #ifndef _MSC_VER
         if(ptr_lib == KernelsLib::cuda_kernels) {
-          auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
+          auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
 
           if(!handle) {
             Error err = failure("Failed to find awkward1[cuda]",
@@ -87,7 +87,7 @@ namespace awkward {
       KernelsLib ptr_lib) {
       #ifndef _MSC_VER
         if(ptr_lib == KernelsLib::cuda_kernels) {
-          auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
+          auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
           if(!handle) {
             Error err = failure("Failed to find awkward1[cuda]",
                                 0,
@@ -118,7 +118,7 @@ namespace awkward {
       KernelsLib ptr_lib) {
       #ifndef _MSC_VER
         if(ptr_lib == KernelsLib::cuda_kernels) {
-          auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
+          auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
 
           if(!handle) {
             Error err = failure("Failed to find awkward1[cuda]",
@@ -149,7 +149,7 @@ namespace awkward {
       KernelsLib ptr_lib) {
       #ifndef _MSC_VER
         if(ptr_lib == KernelsLib::cuda_kernels) {
-          auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
+          auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
 
           if(!handle) {
             Error err = failure("Failed to find awkward1[cuda]",
@@ -180,7 +180,7 @@ namespace awkward {
       KernelsLib ptr_lib) {
       #ifndef _MSC_VER
         if(ptr_lib == KernelsLib::cuda_kernels) {
-          auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
+          auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
 
           if(!handle) {
             Error err = failure("Failed to find awkward1[cuda]",
@@ -211,7 +211,7 @@ namespace awkward {
       KernelsLib ptr_lib) {
       #ifndef _MSC_VER
         if(ptr_lib == KernelsLib::cuda_kernels) {
-          auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
+          auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
 
           if(!handle) {
             Error err = failure("Failed to find awkward1[cuda]",
@@ -242,7 +242,7 @@ namespace awkward {
       KernelsLib ptr_lib) {
       #ifndef _MSC_VER
         if(ptr_lib == KernelsLib::cuda_kernels) {
-          auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
+          auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
 
           if(!handle) {
             Error err = failure("Failed to find awkward1[cuda]",
@@ -273,7 +273,7 @@ namespace awkward {
       KernelsLib ptr_lib) {
       #ifndef _MSC_VER
         if(ptr_lib == KernelsLib::cuda_kernels) {
-          auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
+          auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
 
           if(!handle) {
             Error err = failure("Failed to find awkward1[cuda]",
@@ -304,7 +304,7 @@ namespace awkward {
       KernelsLib ptr_lib) {
       #ifndef _MSC_VER
         if(ptr_lib == KernelsLib::cuda_kernels) {
-          auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
+          auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
 
           if(!handle) {
             Error err = failure("Failed to find awkward1[cuda]",
@@ -335,7 +335,7 @@ namespace awkward {
       KernelsLib ptr_lib) {
       #ifndef _MSC_VER
         if(ptr_lib == KernelsLib::cuda_kernels) {
-          auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
+          auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
 
           if(!handle) {
             Error err = failure("Failed to find awkward1[cuda]",
@@ -366,7 +366,7 @@ namespace awkward {
       KernelsLib ptr_lib) {
       #ifndef _MSC_VER
         if(ptr_lib == KernelsLib::cuda_kernels) {
-          auto handle = dlopen("libawkward-cuda-kernels.so", RTLD_LAZY);
+          auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
 
           if(!handle) {
             Error err = failure("Failed to find awkward1[cuda]",

@@ -20,7 +20,8 @@ int main(int, char**) {
 //  main_index_arr.get()[3] = 4;
 //  main_index_arr.get()[4] = 5;
 //
-  std::shared_ptr<int8_t> main_offsets_arr(new int8_t[6], std::default_delete<int8_t[]>());
+  std::shared_ptr<int32_t> main_offsets_arr(new int32_t[6],
+    std::default_delete<int32_t[]>());
   main_offsets_arr.get()[0] = 0;
   main_offsets_arr.get()[1] = 3;
   main_offsets_arr.get()[2] = 3;
@@ -28,11 +29,15 @@ int main(int, char**) {
   main_offsets_arr.get()[4] = 6;
   main_offsets_arr.get()[5] = 10;
 
-  ak::Index8 outoffsetsts(5, cuda_kernels);
-  std::shared_ptr<ak::IndexOf<int8_t>> main_offsets = std::make_shared<ak::IndexOf<int8_t>>(main_offsets_arr, 0, 6);
-  auto cuda_arr = main_offsets->to_gpu(cuda_kernels);
-  std::cout << cuda_arr.tostring() << "\n";
-  std::cout << main_offsets->tostring() << "\n";
+  ak::Index32 outoffsetsts(main_offsets_arr, 0, 6);
+  ak::NumpyArray numpyArray(outoffsetsts);
+  std::cout << numpyArray.format() << "\n";
+  auto cuda_arr1 = numpyArray.to_gpu(cuda_kernels);
+  std::cout << cuda_arr1->tostring() << "\n";
+//  std::shared_ptr<ak::IndexOf<int8_t>> main_offsets = std::make_shared<ak::IndexOf<int8_t>>(main_offsets_arr, 0, 6);
+//  auto cuda_arr = main_offsets->to_gpu(cuda_kernels);
+//  std::cout << cuda_arr.tostring() << "\n";
+//  std::cout << main_offsets->tostring() << "\n";
 }
 
 

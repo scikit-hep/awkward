@@ -593,6 +593,11 @@ namespace awkward {
                    const Slice& tail,
                    const Index64& advanced) const override;
 
+    /// @brief An utility function to create a new instance of NumpyArray on the
+    /// GPU identical to this one.
+    std::shared_ptr<NumpyArray>
+      to_gpu(KernelsLib ptr_lib) const;
+
   protected:
     /// @brief Internal function to merge two byte arrays without promoting
     /// the types to int64.

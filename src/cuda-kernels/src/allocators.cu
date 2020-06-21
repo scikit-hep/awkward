@@ -49,8 +49,11 @@ double *awkward_cuda_ptrfloat64_alloc(int64_t length) {
 template <typename  T>
 Error awkward_cuda_ptr_dealloc(const T* ptr) {
   cudaError_t  status = cudaFree((void *)ptr);
-  if(status != cudaError_t::cudaSuccess)
-    return failure(cudaGetErrorString(status), 0, kSliceNone);
+  if(status != cudaError_t::cudaSuccess) {
+      std::cout << "Reached3" << "\n";
+      return failure(cudaGetErrorString(status), 0, kSliceNone);
+  }
+
   return success();
 }
 ERROR awkward_cuda_ptrbool_dealloc(const bool *ptr) {
@@ -94,18 +97,17 @@ ERROR awkward_cuda_H2D(
   int64_t length) {
   cudaError_t malloc_stat = cudaMallocManaged((void**)to_ptr,
                                           sizeof(T) * length);
-
-  if(malloc_stat != cudaError_t::cudaSuccess)
-    return failure(cudaGetErrorString(malloc_stat), 0, kSliceNone);
-
+  if(malloc_stat != cudaError_t::cudaSuccess) {
+      return failure(cudaGetErrorString(malloc_stat), 0,kSliceNone);
+  }
   cudaError_t memcpy_stat = cudaMemcpy(*to_ptr,
                                        from_ptr,
                                        sizeof(T) * length,
                                        cudaMemcpyHostToDevice);
 
-  if(memcpy_stat != cudaError_t::cudaSuccess)
-    return failure(cudaGetErrorString(memcpy_stat), 0, kSliceNone);
-
+  if(memcpy_stat != cudaError_t::cudaSuccess) {
+      return failure(cudaGetErrorString(memcpy_stat), 0, kSliceNone);
+  }
   return success();
 }
 ERROR awkward_cuda_H2Dbool(
