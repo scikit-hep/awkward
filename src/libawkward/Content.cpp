@@ -1241,6 +1241,11 @@ namespace awkward {
     return out;
   }
 
+  ContentPtr
+  Content::to_gpu(KernelsLib ptr_lib) {
+    return nullptr;
+  }
+
   const std::string
   Content::parameters_tostring(const std::string& indent,
                                const std::string& pre,

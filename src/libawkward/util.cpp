@@ -287,7 +287,7 @@ namespace awkward {
           func_awkward_cuda_H2D64_t
             *func_awkward_cuda_H2D64 =
             reinterpret_cast<func_awkward_cuda_H2D64_t *>
-            (dlsym(handle, "func_awkward_cuda_H2D64"));
+            (dlsym(handle, "awkward_cuda_H2D64"));
 
           return (*func_awkward_cuda_H2D64)(to_ptr, from_ptr, length);
         }

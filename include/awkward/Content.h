@@ -1116,6 +1116,9 @@ namespace awkward {
     static int64_t
       axis_wrap_if_negative(int64_t axis);
 
+    virtual ContentPtr
+      to_gpu(KernelsLib ptr_lib);
+
   protected:
     /// @brief Internal function to wrap putative #getitem output with enough
     /// RegularArray nodes to satisfy a given `shape`.

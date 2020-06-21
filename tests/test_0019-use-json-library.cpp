@@ -41,7 +41,6 @@ int main(int, char**) {
   ak::ArrayBuilder builder(ak::ArrayBuilderOptions(1024, 2.0));
   for (auto x : vector) fill(builder, x);
   std::shared_ptr<ak::Content> array = builder.snapshot();
-  std::cout << array->tostring() << "\n";
 
   // array[-1][0][1] == 7.7
   std::shared_ptr<ak::NumpyArray> scalar = std::dynamic_pointer_cast<ak::NumpyArray>(array.get()->getitem_at(-1).get()->getitem_at(0).get()->getitem_at(1));
@@ -52,6 +51,9 @@ int main(int, char**) {
   slice.append(ak::SliceRange(ak::Slice::none(), ak::Slice::none(), -1));
   slice.append(ak::SliceRange(ak::Slice::none(), ak::Slice::none(), 2));
   slice.append(ak::SliceRange(1, ak::Slice::none(), ak::Slice::none()));
+
+  auto cuda_arr =  array->to_gpu(KernelsLib::cuda_kernels);
+  std::cout << cuda_arr->tostring() << "\n";
 
   if (array.get()->getitem(slice).get()->tojson(false, 1) !=
          "[[[7.7,8.8,9.9]],[],[[]],[[1.1,2.2],[4.4]]]")

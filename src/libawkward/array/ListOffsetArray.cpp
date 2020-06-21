@@ -1911,6 +1911,19 @@ namespace awkward {
                                          tail);
   }
 
+  template <typename T>
+  ContentPtr
+  ListOffsetArrayOf<T>::to_gpu(KernelsLib ptr_lib) {
+    if(ptr_lib == KernelsLib::cuda_kernels) {
+      IndexOf<T> cuda_offsets = offsets_.to_gpu(KernelsLib::cuda_kernels);
+      ContentPtr cuda_content = content_->to_gpu(KernelsLib::cuda_kernels);
+      return std::make_shared<ListOffsetArrayOf<T>>(identities(),
+                                                    parameters(),
+                                                    cuda_offsets,
+                                                    cuda_content);
+    }
+  }
+
   template class EXPORT_SYMBOL ListOffsetArrayOf<int32_t>;
   template class EXPORT_SYMBOL ListOffsetArrayOf<uint32_t>;
   template class EXPORT_SYMBOL ListOffsetArrayOf<int64_t>;

@@ -595,8 +595,8 @@ namespace awkward {
 
     /// @brief An utility function to create a new instance of NumpyArray on the
     /// GPU identical to this one.
-    std::shared_ptr<NumpyArray>
-      to_gpu(KernelsLib ptr_lib) const;
+    ContentPtr
+      to_gpu(KernelsLib ptr_lib) override;
 
   protected:
     /// @brief Internal function to merge two byte arrays without promoting

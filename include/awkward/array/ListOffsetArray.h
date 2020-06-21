@@ -371,6 +371,9 @@ namespace awkward {
                           const SliceJagged64& slicecontent,
                           const Slice& tail) const override;
 
+    ContentPtr
+      to_gpu(KernelsLib ptr_lib) override;
+
   private:
     /// @brief See #offsets.
     const IndexOf<T> offsets_;

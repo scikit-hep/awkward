@@ -3678,8 +3678,8 @@ namespace awkward {
     }
   }
 
-  std::shared_ptr<NumpyArray>
-  NumpyArray::to_gpu(KernelsLib ptr_lib) const {
+  ContentPtr
+  NumpyArray::to_gpu(KernelsLib ptr_lib) {
     if (ptr_lib == KernelsLib::cuda_kernels) {
       ssize_t length = 1;
       for (auto i : shape_) {
@@ -3694,8 +3694,9 @@ namespace awkward {
                                     KernelsLib::cuda_kernels);
         return std::make_shared<NumpyArray>(identities(),
                                             parameters(),
-                                            std::shared_ptr<void>(cuda_ptr,
-                                                                  util::cuda_array_deleter<bool>()),
+                                            std::shared_ptr<void>(
+                                              cuda_ptr,
+                                              util::cuda_array_deleter<bool>()),
                                             shape(),
                                             strides(),
                                             byteoffset(),
@@ -3711,8 +3712,9 @@ namespace awkward {
 
         return std::make_shared<NumpyArray>(identities(),
                                             parameters(),
-                                            std::shared_ptr<int8_t>(cuda_ptr,
-                                                                  util::cuda_array_deleter<int8_t>()),
+                                            std::shared_ptr<int8_t>(
+                                              cuda_ptr,
+                                              util::cuda_array_deleter<int8_t>()),
                                             shape(),
                                             strides(),
                                             byteoffset(),
@@ -3727,8 +3729,9 @@ namespace awkward {
                                        KernelsLib::cuda_kernels);
         return std::make_shared<NumpyArray>(identities(),
                                             parameters(),
-                                            std::shared_ptr<void>(cuda_ptr,
-                                                                  util::cuda_array_deleter<uint8_t>()),
+                                            std::shared_ptr<void>(
+                                              cuda_ptr,
+                                              util::cuda_array_deleter<uint8_t>()),
                                             shape(),
                                             strides(),
                                             byteoffset(),
@@ -3743,8 +3746,9 @@ namespace awkward {
                                        KernelsLib::cuda_kernels);
         return std::make_shared<NumpyArray>(identities(),
                                             parameters(),
-                                            std::shared_ptr<void>(cuda_ptr,
-                                                                  util::cuda_array_deleter<int16_t>()),
+                                            std::shared_ptr<void>(
+                                              cuda_ptr,
+                                              util::cuda_array_deleter<int16_t>()),
                                             shape(),
                                             strides(),
                                             byteoffset(),
@@ -3759,8 +3763,9 @@ namespace awkward {
                                         KernelsLib::cuda_kernels);
         return std::make_shared<NumpyArray>(identities(),
                                             parameters(),
-                                            std::shared_ptr<void>(cuda_ptr,
-                                                                  util::cuda_array_deleter<uint16_t>()),
+                                            std::shared_ptr<void>(
+                                              cuda_ptr,
+                                              util::cuda_array_deleter<uint16_t>()),
                                             shape(),
                                             strides(),
                                             byteoffset(),
@@ -3776,8 +3781,9 @@ namespace awkward {
         util::handle_cuda_error(err);
         return std::make_shared<NumpyArray>(identities(),
                                             parameters(),
-                                            std::shared_ptr<void>(cuda_ptr,
-                                                                  util::cuda_array_deleter<int32_t>()),
+                                            std::shared_ptr<void>(
+                                              cuda_ptr,
+                                              util::cuda_array_deleter<int32_t>()),
                                             shape(),
                                             strides(),
                                             byteoffset(),
@@ -3792,8 +3798,9 @@ namespace awkward {
                                         KernelsLib::cuda_kernels);
         return std::make_shared<NumpyArray>(identities(),
                                             parameters(),
-                                            std::shared_ptr<void>(cuda_ptr,
-                                                                  util::cuda_array_deleter<uint32_t>()),
+                                            std::shared_ptr<void>(
+                                              cuda_ptr,
+                                              util::cuda_array_deleter<uint32_t>()),
                                             shape(),
                                             strides(),
                                             byteoffset(),
@@ -3808,8 +3815,9 @@ namespace awkward {
                                        KernelsLib::cuda_kernels);
         return std::make_shared<NumpyArray>(identities(),
                                             parameters(),
-                                            std::shared_ptr<void>(cuda_ptr,
-                                                                  util::cuda_array_deleter<int64_t>()),
+                                            std::shared_ptr<void>(
+                                              cuda_ptr,
+                                              util::cuda_array_deleter<int64_t>()),
                                             shape(),
                                             strides(),
                                             byteoffset(),
@@ -3824,8 +3832,9 @@ namespace awkward {
                                         KernelsLib::cuda_kernels);
         return std::make_shared<NumpyArray>(identities(),
                                             parameters(),
-                                            std::shared_ptr<void>(cuda_ptr,
-                                                                  util::cuda_array_deleter<uint64_t>()),
+                                            std::shared_ptr<void>(
+                                              cuda_ptr,
+                                              util::cuda_array_deleter<uint64_t>()),
                                             shape(),
                                             strides(),
                                             byteoffset(),
@@ -3840,8 +3849,9 @@ namespace awkward {
                                      KernelsLib::cuda_kernels);
         return std::make_shared<NumpyArray>(identities(),
                                             parameters(),
-                                            std::shared_ptr<void>(cuda_ptr,
-                                                                  util::cuda_array_deleter<float>()),
+                                            std::shared_ptr<void>(
+                                              cuda_ptr,
+                                              util::cuda_array_deleter<float>()),
                                             shape(),
                                             strides(),
                                             byteoffset(),
@@ -3856,8 +3866,9 @@ namespace awkward {
                                       KernelsLib::cuda_kernels);
         return std::make_shared<NumpyArray>(identities(),
                                             parameters(),
-                                            std::shared_ptr<void>(cuda_ptr,
-                                                                  util::cuda_array_deleter<double>()),
+                                            std::shared_ptr<void>(
+                                              cuda_ptr,
+                                              util::cuda_array_deleter<double>()),
                                             shape(),
                                             strides(),
                                             byteoffset(),
