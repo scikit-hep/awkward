@@ -756,7 +756,7 @@ namespace awkward {
     }
     else {
       return std::make_shared<IndexedArray64>(identities,
-                                              util::Parameters(),
+                                              parameters_,
                                               carry,
                                               shallow_copy());
     }

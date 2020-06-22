@@ -21,6 +21,7 @@
 #include "awkward/array/BitMaskedArray.h"
 #include "awkward/array/UnmaskedArray.h"
 #include "awkward/array/RegularArray.h"
+#include "awkward/array/RecordArray.h"
 #include "awkward/array/ListOffsetArray.h"
 #include "awkward/array/VirtualArray.h"
 
@@ -1172,7 +1173,17 @@ namespace awkward {
     }
     else if (SliceField* field =
              dynamic_cast<SliceField*>(head.get())) {
-      return Content::getitem_next(*field, tail, advanced);
+      if (dynamic_cast<RecordArray*>(content_.get())) {
+        int64_t numnull;
+        std::pair<Index64, IndexOf<T>> pair = nextcarry_outindex(numnull);
+        Index64 nextcarry = pair.first;
+        IndexOf<T> outindex = pair.second;
+
+        ContentPtr next = content_.get()->carry(nextcarry, true);
+        return next.get()->getitem_next(head, tail, advanced);
+      } else {
+        return Content::getitem_next(*field, tail, advanced);
+      }
     }
     else if (SliceFields* fields =
              dynamic_cast<SliceFields*>(head.get())) {
