@@ -804,6 +804,11 @@ ERROR awkward_Identities64_from_UnionArray8_64(
     which);
 }
 
+/// @param toptr outparam
+/// @param fromptr inparam role: array
+/// @param fromoffset inparam role: fromptr offset
+/// @param fromlength inparam role: len
+/// @param tolength inparam role: toptr len
 template <typename ID>
 ERROR awkward_Identities_extend(
   ID* toptr,
