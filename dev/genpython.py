@@ -26,15 +26,15 @@ def preprocess(filename, skip_implementation=False):
                 line = line.rstrip()
             if line.startswith("#"):
                 continue
-            if "//@param" in line.replace(" ", "") and not func:
+            if "///@param" in line.replace(" ", "") and not func:
                 line = re.sub(" +", " ", line)
-                line = line[line.find("@param")+7:]
+                line = line[line.find("@param") + 7 :]
                 key = line.split()[0]
                 value = line.split()[1]
                 labels[key] = value
                 line = "".join(line.split())
                 if "role:" in line:
-                    roledoc += key + " role: " + line[line.find("role:")+5:] + "\n"
+                    roledoc += key + " role: " + line[line.find("role:") + 5 :] + "\n"
                 continue
             if re.search("//.*\n", line):
                 line = re.sub("//.*\n", "\n", line)
@@ -471,7 +471,13 @@ class FuncBody(object):
             else:
                 self.code += stmt
         elif item.__class__.__name__ == "ID":
-            stmt = " " * indent + "{0}".format(item.name)
+            if item.name == "true":
+                name = "True"
+            elif item.name == "false":
+                name = "False"
+            else:
+                name = item.name
+            stmt = " " * indent + "{0}".format(name)
             if called:
                 return stmt
             else:
@@ -608,8 +614,8 @@ args = arg_parser.parse_args()
 filenames = args.filenames
 
 if __name__ == "__main__":
-    doc_awkward_sorting_ranges = """
-    def awkward_sorting_ranges(toindex, tolength, parents, parentsoffset, parentslength, outlength):
+    doc_awkward_sorting_ranges_def = "def awkward_sorting_ranges(toindex, tolength, parents, parentsoffset, parentslength, outlength):"
+    doc_awkward_sorting_ranges_body = """
         toindex[0] = k
         k = k + 1
         j = j + 1
@@ -620,16 +626,16 @@ if __name__ == "__main__":
             k = k + 1
         toindex[tolength - 1] = parentslength
     """
-    doc_awkward_sorting_ranges_length = """
-    def awkward_sorting_ranges_length(tolength, parents, parentsoffset, parentslength, outlength):
+    doc_awkward_sorting_ranges_length_def = "def awkward_sorting_ranges_length(tolength, parents, parentsoffset, parentslength, outlength):"
+    doc_awkward_sorting_ranges_length_body = """
         length = 2
         for i in range(1, parentslength):
             if parents[i-1] != parents[i]:
                 length = length + 1
         tolength[0] = length
     """
-    doc_awkward_argsort = """
-    def awkward_argsort(toptr, fromptr, length, offsets, offsetslength, ascending, stable):
+    doc_awkward_argsort_def = "def awkward_argsort(toptr, fromptr, length, offsets, offsetslength, ascending, stable):"
+    doc_awkward_argsort_body = """
         result = [0]*length
         for i in range(length):
             result[i] = i
@@ -643,8 +649,8 @@ if __name__ == "__main__":
         for i in range(length):
             toptr[i] = result[i]
     """
-    doc_awkward_sort = """
-    def awkward_sort(toptr, fromptr, length, offsets, offsetslength, parentslength, ascending, stable):
+    doc_awkward_sort_def = "def awkward_sort(toptr, fromptr, length, offsets, offsetslength, parentslength, ascending, stable):"
+    doc_awkward_sort_body = """
         result = [0]*length
         for i in range(length):
             result[i] = i
@@ -656,8 +662,10 @@ if __name__ == "__main__":
         for i in range(parentslength):
             toptr[i] = fromptr[index[i]]
     """
-    doc_awkward_ListOffsetArray_local_preparenext_64 = """
-    def awkward_ListOffsetArray_local_preparenext_64(tocarry, fromindex, length):
+    doc_awkward_ListOffsetArray_local_preparenext_64_def = (
+        "def awkward_ListOffsetArray_local_preparenext_64(tocarry, fromindex, length):"
+    )
+    doc_awkward_ListOffsetArray_local_preparenext_64_body = """
         result = [0]*length
         for i in range(length):
             result[i] = i
@@ -665,8 +673,8 @@ if __name__ == "__main__":
         for i in range(length):
             tocarry[i] = result[i]
     """
-    doc_awkward_IndexedArray_local_preparenext_64 = """
-    def awkward_IndexedArray_local_preparenext_64(tocarry, starts, parents, parentsoffset, parentslength, nextparents, nextparentsoffset):
+    doc_awkward_IndexedArray_local_preparenext_64_def = "def awkward_IndexedArray_local_preparenext_64(tocarry, starts, parents, parentsoffset, parentslength, nextparents, nextparentsoffset):"
+    doc_awkward_IndexedArray_local_preparenext_64_body = """
         j = 0
         for i in range(parentslength):
             parent = parents[i] + parentsoffset
@@ -678,8 +686,8 @@ if __name__ == "__main__":
             else:
                 tocarry[i] = -1
     """
-    doc_awkward_NumpyArray_sort_asstrings_uint8 = """
-    def awkward_NumpyArray_sort_asstrings_uint8(toptr, fromptr, length, offsets, offsetslength, outoffsets, ascending, stable):
+    doc_awkward_NumpyArray_sort_asstrings_uint8_def = "def awkward_NumpyArray_sort_asstrings_uint8(toptr, fromptr, length, offsets, offsetslength, outoffsets, ascending, stable):"
+    doc_awkward_NumpyArray_sort_asstrings_uint8_body = """
         words = []
         for k in range(offsetslength - 1):
             start = offsets[k]
@@ -709,7 +717,12 @@ if __name__ == "__main__":
             o = o + 1
     """
     blackmode = black.FileMode()  # Initialize black config
-    gencode = ""
+    gencode = """import copy
+
+kMaxInt64  = 9223372036854775806
+kSliceNone = kMaxInt64 + 1
+
+"""
     docdict = {}
     for filename in filenames:
         if "sorting.cpp" in filename:
@@ -739,6 +752,16 @@ if __name__ == "__main__":
                             )
                             + "\n\n"
                         )
+                        gencode += "def {0}({1}):".format(
+                            funcs[childfunc]["def"].name,
+                            funcs[childfunc]["def"].arrange_args(types=True),
+                        )
+                        if "sorting.cpp" in filename:
+                            gencode += indent_code(eval("doc_" + name + "_body"), 4)
+                        else:
+                            gencode += "\n" + indent_code(
+                                remove_return(funcs[name]["body"].code), 4
+                            )
                 if "sorting.cpp" not in filename:
                     if not tokens[name]["labels"]:
                         funcgen += (
@@ -763,7 +786,13 @@ if __name__ == "__main__":
                 else:
                     doccode += "*(The following Python code is translated from C++ manually and may not be normative)*\n\n"
                     funcgen += (
-                        black.format_str(eval("doc_" + name), mode=blackmode) + "\n\n"
+                        black.format_str(
+                            eval("doc_" + name + "_def")
+                            + "\n"
+                            + eval("doc_" + name + "_body"),
+                            mode=blackmode,
+                        )
+                        + "\n\n"
                     )
                 funcgentemp = ""
                 if "childfunc" in tokens[name].keys():
@@ -775,21 +804,25 @@ if __name__ == "__main__":
                         )
                 doccode += ".. code-block:: python\n\n"
                 if tokens[name]["roles"] != "":
-                    doccode += indent_code('"""\n' + tokens[name]["roles"] + '"""\n\n', 4)
+                    doccode += indent_code(
+                        '"""\n' + tokens[name]["roles"] + '"""\n\n', 4
+                    )
                 if "sorting.cpp" not in filename:
                     funcgen = funcgen + funcgentemp
                     doccode += (
                         indent_code(black.format_str(funcgen, mode=blackmode), 4) + "\n"
                     )
-                    gencode += black.format_str(funcgen, mode=blackmode) + "\n"
+                    if "childfunc" not in tokens[name].keys():
+                        gencode += funcgen + "\n"
                 else:
                     doccode += indent_code(funcgen, 4) + funcgentemp + "\n"
-                    gencode += funcgen + funcgentemp + "\n"
+                    if "childfunc" not in tokens[name].keys():
+                        gencode += funcgen + funcgentemp + "\n"
                 docdict[name] = doccode
     current_dir = os.path.dirname(os.path.realpath(__file__))
     with open(os.path.join(current_dir, "kernels.py"), "w") as f:
         print("Writing kernels.py")
-        f.write(gencode)
+        f.write(black.format_str(gencode, mode=blackmode))
     if os.path.isdir(os.path.join(current_dir, "..", "docs-sphinx", "_auto")):
         with open(
             os.path.join(current_dir, "..", "docs-sphinx", "_auto", "kernels.rst",),
