@@ -54,8 +54,6 @@ def preprocess(filename, skip_implementation=False):
                         line = line[re.search("typename [^,]*,", line).span()[1] :]
                     if re.search("typename [^,]*,", line) is None:
                         iterate = False
-                if "bool" in line:
-                    tempids.append(line[line.find("bool") + 4 : line.find(">")])
                 if re.search("typename [^,]*>", line) is not None:
                     tempids.append(
                         line[

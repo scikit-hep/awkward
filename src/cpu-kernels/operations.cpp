@@ -2328,15 +2328,16 @@ ERROR awkward_ListArray64_validity(
     lencontent);
 }
 
-template <typename C, bool ISOPTION>
+template <typename C>
 ERROR awkward_IndexedArray_validity(
   const C* index,
   int64_t indexoffset,
   int64_t length,
-  int64_t lencontent) {
+  int64_t lencontent,
+  bool isoption) {
   for (int64_t i = 0;  i < length;  i++) {
     C idx = index[indexoffset + i];
-    if (!ISOPTION) {
+    if (!isoption) {
       if (idx < 0) {
         return failure("index[i] < 0", i, kSliceNone);
       }
@@ -2353,20 +2354,12 @@ ERROR awkward_IndexedArray32_validity(
   int64_t length,
   int64_t lencontent,
   bool isoption) {
-  if (isoption) {
-    return awkward_IndexedArray_validity<int32_t, true>(
+  return awkward_IndexedArray_validity<int32_t>(
     index,
     indexoffset,
     length,
-    lencontent);
-  }
-  else {
-    return awkward_IndexedArray_validity<int32_t, false>(
-    index,
-    indexoffset,
-    length,
-    lencontent);
-  }
+    lencontent,
+    isoption);
 }
 ERROR awkward_IndexedArrayU32_validity(
   const uint32_t* index,
@@ -2374,20 +2367,12 @@ ERROR awkward_IndexedArrayU32_validity(
   int64_t length,
   int64_t lencontent,
   bool isoption) {
-  if (isoption) {
-    return awkward_IndexedArray_validity<uint32_t, true>(
+  return awkward_IndexedArray_validity<uint32_t>(
     index,
     indexoffset,
     length,
-    lencontent);
-  }
-  else {
-    return awkward_IndexedArray_validity<uint32_t, false>(
-    index,
-    indexoffset,
-    length,
-    lencontent);
-  }
+    lencontent,
+    isoption);
 }
 ERROR awkward_IndexedArray64_validity(
   const int64_t* index,
@@ -2395,20 +2380,12 @@ ERROR awkward_IndexedArray64_validity(
   int64_t length,
   int64_t lencontent,
   bool isoption) {
-  if (isoption) {
-    return awkward_IndexedArray_validity<int64_t, true>(
+  return awkward_IndexedArray_validity<int64_t>(
     index,
     indexoffset,
     length,
-    lencontent);
-  }
-  else {
-    return awkward_IndexedArray_validity<int64_t, false>(
-    index,
-    indexoffset,
-    length,
-    lencontent);
-  }
+    lencontent,
+    isoption);
 }
 
 template <typename T, typename I>
