@@ -1113,18 +1113,17 @@ namespace awkward {
     to_cpu(kernel::Lib ptr_lib) {
 #ifndef _MSC_VER
       if(ptr_lib == kernel::Lib::cuda_kernels) {
-        T* cpu_ptr;
+        std::shared_ptr<T> cpu_ptr = kernel::ptr_alloc<T>(kernel::Lib::cpu_kernels,
+                                                          length());
         Error err = kernel::H2D<T>(kernel::Lib::cuda_kernels,
-                                   &cpu_ptr,
+                                   cpu_ptr.get(),
                                    ptr_.get(),
                                    length_);
         util::handle_cuda_error(err);
 
         return std::make_shared<RawArrayOf<T>>(identities(),
                                                parameters(),
-                                               std::shared_ptr<T>(
-                                                 cpu_ptr,
-                                                 kernel::array_deleter<T>()),
+                                               cpu_ptr,
                                                offset(),
                                                length(),
                                                itemsize(),

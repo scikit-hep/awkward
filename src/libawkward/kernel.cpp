@@ -16,28 +16,331 @@
 using namespace awkward;
 
 namespace kernel {
-  class LibraryPathCallback {
-    public:
-    const std::string library_path() {
-      return std::string("/home/trickarcher/gsoc_2020/awkward-1"
-                         ".0/src/cuda-kernels/build/libawkward-cuda-kernels.so");
+
+  std::shared_ptr<LibraryCallback> lib_callback = std::make_shared<LibraryCallback>();
+
+#ifndef _MSC_VER
+
+//  const char* awkward_cuda_path() {
+//    // Remove this when callback is implemented
+//    lib_callback().add_cuda_library_path_callback(std::make_shared<LibraryPathCallback>());
+//
+//    for(auto i : lib_path_callbacks.at(kernel::Lib::cuda_kernels)) {
+//      auto handle = dlopen(i.library_path().c_str(), RTLD_NOW);
+//      if(handle != nullptr)
+//        return i.library_path().c_str();
+//    }
+//  }
+
+  template<>
+  void cuda_array_deleter<bool>::operator()(bool const *p) {
+    auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+    if (!handle) {
+      Error err = failure("Failed to find awkward1[cuda]",
+                          0,
+                          kSliceNone);
+
+      util::handle_cuda_error(err);
     }
-  };
 
-  class LibraryCallback {
-    public:
-    void add_cuda_library_path_callback(
-      const std::shared_ptr<LibraryPathCallback> &callback) {
-      std::lock_guard<std::mutex> lock(lib_path_callbacks_mutex);
-      lib_path_callbacks.at(kernel::Lib::cuda_kernels).push_back(*callback);
+    typedef Error (func_awkward_cuda_ptrbool_dealloc_t)(const bool *ptr);
+    func_awkward_cuda_ptrbool_dealloc_t *func_awkward_cuda_ptrbool_dealloc =
+      reinterpret_cast<func_awkward_cuda_ptrbool_dealloc_t *>
+      (dlsym(handle, "awkward_cuda_ptrbool_dealloc"));
+
+    util::handle_cuda_error((*func_awkward_cuda_ptrbool_dealloc)(p));
+  }
+
+  template<>
+  void cuda_array_deleter<int8_t>::operator()(int8_t const *p) {
+    auto handle = dlopen(kernel::lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+    if (!handle) {
+      Error err = failure("Failed to find awkward1[cuda]",
+                          0,
+                          kSliceNone);
+
+      awkward::util::handle_cuda_error(err);
     }
 
-    private:
-    std::map<kernel::Lib, std::vector<LibraryPathCallback>> lib_path_callbacks =
-      {{kernel::Lib::cuda_kernels, std::vector<LibraryPathCallback>()}};
+    typedef Error (func_awkward_cuda_ptr8_dealloc_t)(const int8_t *ptr);
+    func_awkward_cuda_ptr8_dealloc_t *func_awkward_cuda_ptr8_dealloc =
+      reinterpret_cast<func_awkward_cuda_ptr8_dealloc_t *>
+      (dlsym(handle, "awkward_cuda_ptr8_dealloc"));
 
-    std::mutex lib_path_callbacks_mutex;
-  };
+    util::handle_cuda_error((*func_awkward_cuda_ptr8_dealloc)(p));
+  }
+
+
+  template<>
+  void cuda_array_deleter<uint8_t>::operator()(uint8_t const *p) {
+    auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+    if (!handle) {
+      Error err = failure("Failed to find awkward1[cuda]",
+                          0,
+                          kSliceNone);
+
+      awkward::util::handle_cuda_error(err);
+    }
+
+    typedef Error (func_awkward_cuda_ptrU8_dealloc_t)(const uint8_t *ptr);
+    func_awkward_cuda_ptrU8_dealloc_t *func_awkward_cuda_ptrU8_dealloc =
+      reinterpret_cast<func_awkward_cuda_ptrU8_dealloc_t *>
+      (dlsym(handle, "awkward_cuda_ptrU8_dealloc"));
+
+    util::handle_cuda_error((*func_awkward_cuda_ptrU8_dealloc)(p));
+  }
+
+
+  template<>
+  void cuda_array_deleter<int16_t>::operator()(int16_t const *p) {
+    auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+    if (!handle) {
+      Error err = failure("Failed to find awkward1[cuda]",
+                          0,
+                          kSliceNone);
+
+      awkward::util::handle_cuda_error(err);
+    }
+
+    typedef Error (func_awkward_cuda_ptr16_dealloc_t)(const int16_t *ptr);
+    func_awkward_cuda_ptr16_dealloc_t *func_awkward_cuda_ptr16_dealloc =
+      reinterpret_cast<func_awkward_cuda_ptr16_dealloc_t *>
+      (dlsym(handle, "awkward_cuda_ptr16_dealloc"));
+
+    util::handle_cuda_error((*func_awkward_cuda_ptr16_dealloc)(p));
+  }
+
+  template<>
+  void cuda_array_deleter<uint16_t>::operator()(uint16_t const *p) {
+    auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+    if (!handle) {
+      Error err = failure("Failed to find awkward1[cuda]",
+                          0,
+                          kSliceNone);
+
+      awkward::util::handle_cuda_error(err);
+    }
+
+    typedef Error (func_awkward_cuda_ptrU16_dealloc_t)(const uint16_t *ptr);
+    func_awkward_cuda_ptrU16_dealloc_t *func_awkward_cuda_ptrU16_dealloc =
+      reinterpret_cast<func_awkward_cuda_ptrU16_dealloc_t *>
+      (dlsym(handle, "awkward_cuda_ptrU16_dealloc"));
+
+    util::handle_cuda_error((*func_awkward_cuda_ptrU16_dealloc)(p));
+  }
+
+
+  template<>
+  void cuda_array_deleter<int32_t>::operator()(int32_t const *p) {
+    auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+    if (!handle) {
+      Error err = failure("Failed to find awkward1[cuda]",
+                          0,
+                          kSliceNone);
+
+      awkward::util::handle_cuda_error(err);
+    }
+
+    typedef Error (func_awkward_cuda_ptr32_dealloc_t)(const int32_t *ptr);
+    func_awkward_cuda_ptr32_dealloc_t *func_awkward_cuda_ptr32_dealloc =
+      reinterpret_cast<func_awkward_cuda_ptr32_dealloc_t *>
+      (dlsym(handle, "awkward_cuda_ptr32_dealloc"));
+
+    util::handle_cuda_error((*func_awkward_cuda_ptr32_dealloc)(p));
+  }
+
+  template<>
+  void cuda_array_deleter<uint32_t>::operator()(uint32_t const *p) {
+    auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+    if (!handle) {
+      Error err = failure("Failed to find awkward1[cuda]",
+                          0,
+                          kSliceNone);
+
+      awkward::util::handle_cuda_error(err);
+    }
+
+    typedef Error (func_awkward_cuda_ptrU32_dealloc_t)(const uint32_t *ptr);
+    func_awkward_cuda_ptrU32_dealloc_t *func_awkward_cuda_ptrU32_dealloc =
+      reinterpret_cast<func_awkward_cuda_ptrU32_dealloc_t *>
+      (dlsym(handle, "awkward_cuda_ptrU32_dealloc"));
+
+    util::handle_cuda_error((*func_awkward_cuda_ptrU32_dealloc)(p));
+  }
+
+  template<>
+  void cuda_array_deleter<int64_t>::operator()(int64_t const *p) {
+    auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+    if (!handle) {
+      Error err = failure("Failed to find awkward1[cuda]",
+                          0,
+                          kSliceNone);
+
+      awkward::util::handle_cuda_error(err);
+    }
+
+    typedef Error (func_awkward_cuda_ptr64_dealloc_t)(const int64_t *ptr);
+    func_awkward_cuda_ptr64_dealloc_t *func_awkward_cuda_ptr64_dealloc =
+      reinterpret_cast<func_awkward_cuda_ptr64_dealloc_t *>
+      (dlsym(handle, "awkward_cuda_ptr64_dealloc"));
+
+    util::handle_cuda_error((*func_awkward_cuda_ptr64_dealloc)(p));
+  }
+
+  template<>
+  void cuda_array_deleter<uint64_t>::operator()(uint64_t const *p) {
+    auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+    if (!handle) {
+      Error err = failure("Failed to find awkward1[cuda]",
+                          0,
+                          kSliceNone);
+
+      awkward::util::handle_cuda_error(err);
+    }
+
+    typedef Error (func_awkward_cuda_ptrU64_dealloc_t)(const uint64_t *ptr);
+    func_awkward_cuda_ptrU64_dealloc_t *func_awkward_cuda_ptrU64_dealloc =
+      reinterpret_cast<func_awkward_cuda_ptrU64_dealloc_t *>
+      (dlsym(handle, "awkward_cuda_ptrU64_dealloc"));
+
+    util::handle_cuda_error((*func_awkward_cuda_ptrU64_dealloc)(p));
+  }
+
+  template<>
+  void cuda_array_deleter<float>::operator()(float const *p) {
+
+    auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+    if (!handle) {
+      Error err = failure("Failed to find awkward1[cuda]",
+                          0,
+                          kSliceNone);
+
+      awkward::util::handle_cuda_error(err);
+    }
+
+    typedef Error (func_awkward_cuda_ptrfloat32_dealloc_t)(const float *
+    ptr);
+    func_awkward_cuda_ptrfloat32_dealloc_t
+      *func_awkward_cuda_ptrfloat32_dealloc =
+      reinterpret_cast<func_awkward_cuda_ptrfloat32_dealloc_t *>
+      (dlsym(handle, "awkward_cuda_ptrfloat32_dealloc"));
+
+    util::handle_cuda_error((*func_awkward_cuda_ptrfloat32_dealloc)(p));
+  }
+
+  template<>
+  void cuda_array_deleter<double>::operator()(double const *p) {
+    auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+    if (!handle) {
+      Error err = failure("Failed to find awkward1[cuda]",
+                          0,
+                          kSliceNone);
+
+      awkward::util::handle_cuda_error(err);
+    }
+
+    typedef Error (func_awkward_cuda_ptrfloat64_dealloc_t)(const double *
+    ptr);
+    func_awkward_cuda_ptrfloat64_dealloc_t
+      *func_awkward_cuda_ptrfloat64_dealloc =
+      reinterpret_cast<func_awkward_cuda_ptrfloat64_dealloc_t *>
+      (dlsym(handle, "awkward_cuda_ptrfloat64_dealloc"));
+
+    awkward::util::handle_cuda_error((*func_awkward_cuda_ptrfloat64_dealloc)
+                                       (p));
+  }
+#endif
+
+  template<typename T>
+  int get_ptr_device_num(kernel::Lib ptr_lib, T *ptr) {
+#ifndef _MSC_VER
+    if(ptr_lib == kernel::Lib::cuda_kernels) {
+      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+
+      if(!handle) {
+        Error err = failure("Failed to find awkward1[cuda]",
+                            0,
+                            kSliceNone);
+
+        util::handle_cuda_error(err);
+        return -1;
+      }
+
+      int device_num = -1;
+
+      typedef Error (func_awkward_cuda_ptr_device_num_t)
+        (int &device_num, void *ptr);
+
+      func_awkward_cuda_ptr_device_num_t
+        *func_awkward_cuda_ptr_device_num =
+        reinterpret_cast<func_awkward_cuda_ptr_device_num_t *>
+        (dlsym(handle, "awkward_cuda_ptr_device_num"));
+
+      Error err = (*func_awkward_cuda_ptr_device_num)(device_num, (void *) ptr);
+      util::handle_cuda_error(err);
+      return
+        device_num;
+    }
+#endif
+    return -1;
+  }
+
+  template int get_ptr_device_num(kernel::Lib ptr_lib, bool* ptr);
+  template int get_ptr_device_num(kernel::Lib ptr_lib, int8_t* ptr);
+  template int get_ptr_device_num(kernel::Lib ptr_lib, uint8_t* ptr);
+  template int get_ptr_device_num(kernel::Lib ptr_lib, int16_t* ptr);
+  template int get_ptr_device_num(kernel::Lib ptr_lib, uint16_t* ptr);
+  template int get_ptr_device_num(kernel::Lib ptr_lib, int32_t* ptr);
+  template int get_ptr_device_num(kernel::Lib ptr_lib, uint32_t* ptr);
+  template int get_ptr_device_num(kernel::Lib ptr_lib, int64_t* ptr);
+  template int get_ptr_device_num(kernel::Lib ptr_lib, uint64_t* ptr);
+  template int get_ptr_device_num(kernel::Lib ptr_lib, float* ptr);
+  template int get_ptr_device_num(kernel::Lib ptr_lib, double* ptr);
+
+  template <typename T>
+  std::string get_ptr_device_name(kernel::Lib ptr_lib, T* ptr){
+#ifndef _MSC_VER
+    if(ptr_lib == kernel::Lib::cuda_kernels) {
+      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+
+      if(!handle) {
+        Error err = failure("Failed to find awkward1[cuda]",
+                            0,
+                            kSliceNone);
+
+        util::handle_cuda_error(err);
+        return std::string("");
+      }
+
+      std::string device_name = std::string("");
+
+      typedef Error (func_awkward_cuda_ptr_device_name_t)
+        (std::string& device_name, void* ptr);
+      func_awkward_cuda_ptr_device_name_t
+        *func_awkward_cuda_ptr_device_name =
+        reinterpret_cast<func_awkward_cuda_ptr_device_name_t *>
+        (dlsym(handle, "awkward_cuda_ptr_device_name"));
+
+      Error err = (*func_awkward_cuda_ptr_device_name)(device_name,
+                                                       (void*)ptr);
+      util::handle_cuda_error(err);
+      return device_name;
+    }
+#endif
+    return std::string("");
+  }
+
+  template std::string get_ptr_device_name(kernel::Lib ptr_lib, bool* ptr);
+  template std::string get_ptr_device_name(kernel::Lib ptr_lib, int8_t* ptr);
+  template std::string get_ptr_device_name(kernel::Lib ptr_lib, uint8_t* ptr);
+  template std::string get_ptr_device_name(kernel::Lib ptr_lib, int16_t* ptr);
+  template std::string get_ptr_device_name(kernel::Lib ptr_lib, uint16_t* ptr);
+  template std::string get_ptr_device_name(kernel::Lib ptr_lib, int32_t* ptr);
+  template std::string get_ptr_device_name(kernel::Lib ptr_lib, uint32_t* ptr);
+  template std::string get_ptr_device_name(kernel::Lib ptr_lib, int64_t* ptr);
+  template std::string get_ptr_device_name(kernel::Lib ptr_lib, uint64_t* ptr);
+  template std::string get_ptr_device_name(kernel::Lib ptr_lib, float* ptr);
+  template std::string get_ptr_device_name(kernel::Lib ptr_lib, double* ptr);
 
   template <>
   Error H2D(
@@ -47,7 +350,7 @@ namespace kernel {
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
 
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -78,7 +381,7 @@ namespace kernel {
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
                             0,
@@ -109,7 +412,7 @@ namespace kernel {
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
 
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -140,7 +443,7 @@ namespace kernel {
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
 
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -171,7 +474,7 @@ namespace kernel {
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
 
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -202,8 +505,7 @@ namespace kernel {
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
-
+      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
                             0,
@@ -233,7 +535,7 @@ namespace kernel {
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
 
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -264,7 +566,7 @@ namespace kernel {
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
 
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -295,7 +597,7 @@ namespace kernel {
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
 
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -326,7 +628,7 @@ namespace kernel {
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
 
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -357,7 +659,7 @@ namespace kernel {
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
 
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -384,12 +686,12 @@ namespace kernel {
   template <>
   Error D2H(
     kernel::Lib ptr_lib,
-    bool** to_ptr,
+    bool* to_ptr,
     bool* from_ptr,
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
 
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -399,7 +701,7 @@ namespace kernel {
         util::handle_cuda_error(err);
       }
       typedef Error (func_awkward_cuda_D2Hbool_t)
-        (bool **to_ptr, bool *from_ptr, int64_t length);
+        (bool *to_ptr, bool *from_ptr, int64_t length);
       func_awkward_cuda_D2Hbool_t
         *func_awkward_cuda_D2Hbool =
         reinterpret_cast<func_awkward_cuda_D2Hbool_t *>
@@ -415,12 +717,12 @@ namespace kernel {
   template <>
   Error D2H(
     kernel::Lib ptr_lib,
-    int8_t** to_ptr,
+    int8_t* to_ptr,
     int8_t* from_ptr,
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
                             0,
@@ -430,7 +732,7 @@ namespace kernel {
       }
 
       typedef Error (func_awkward_cuda_D2H8_t)
-        (int8_t **to_ptr, int8_t *from_ptr, int8_t length);
+        (int8_t *to_ptr, int8_t *from_ptr, int8_t length);
       func_awkward_cuda_D2H8_t
         *func_awkward_cuda_D2H8 =
         reinterpret_cast<func_awkward_cuda_D2H8_t *>
@@ -446,12 +748,12 @@ namespace kernel {
   template <>
   Error D2H(
     kernel::Lib ptr_lib,
-    uint8_t** to_ptr,
+    uint8_t* to_ptr,
     uint8_t* from_ptr,
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
 
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -461,7 +763,7 @@ namespace kernel {
         util::handle_cuda_error(err);
       }
       typedef Error (func_awkward_cuda_D2HU8_t)
-        (uint8_t **to_ptr, uint8_t *from_ptr, int64_t length);
+        (uint8_t *to_ptr, uint8_t *from_ptr, int64_t length);
       func_awkward_cuda_D2HU8_t
         *func_awkward_cuda_D2HU8 =
         reinterpret_cast<func_awkward_cuda_D2HU8_t *>
@@ -477,12 +779,12 @@ namespace kernel {
   template <>
   Error D2H(
     kernel::Lib ptr_lib,
-    int16_t** to_ptr,
+    int16_t* to_ptr,
     int16_t* from_ptr,
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
 
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -492,7 +794,7 @@ namespace kernel {
         util::handle_cuda_error(err);
       }
       typedef Error (func_awkward_cuda_D2H16_t)
-        (int16_t **to_ptr, int16_t *from_ptr, int64_t length);
+        (int16_t *to_ptr, int16_t *from_ptr, int64_t length);
       func_awkward_cuda_D2H16_t
         *func_awkward_cuda_D2H16 =
         reinterpret_cast<func_awkward_cuda_D2H16_t *>
@@ -508,12 +810,12 @@ namespace kernel {
   template <>
   Error D2H(
     kernel::Lib ptr_lib,
-    uint16_t** to_ptr,
+    uint16_t* to_ptr,
     uint16_t* from_ptr,
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
 
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -523,7 +825,7 @@ namespace kernel {
         util::handle_cuda_error(err);
       }
       typedef Error (func_awkward_cuda_D2HU16_t)
-        (uint16_t **to_ptr, uint16_t *from_ptr, int64_t length);
+        (uint16_t *to_ptr, uint16_t *from_ptr, int64_t length);
       func_awkward_cuda_D2HU16_t
         *func_awkward_cuda_D2HU16 =
         reinterpret_cast<func_awkward_cuda_D2HU16_t *>
@@ -539,12 +841,12 @@ namespace kernel {
   template <>
   Error D2H(
     kernel::Lib ptr_lib,
-    int32_t** to_ptr,
+    int32_t* to_ptr,
     int32_t* from_ptr,
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
 
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -554,7 +856,7 @@ namespace kernel {
         util::handle_cuda_error(err);
       }
       typedef Error (func_awkward_cuda_D2H32_t)
-        (int32_t **to_ptr, int32_t *from_ptr, int64_t length);
+        (int32_t *to_ptr, int32_t *from_ptr, int64_t length);
       func_awkward_cuda_D2H32_t
         *func_awkward_cuda_D2H32 =
         reinterpret_cast<func_awkward_cuda_D2H32_t *>
@@ -570,12 +872,12 @@ namespace kernel {
   template <>
   Error D2H(
     kernel::Lib ptr_lib,
-    uint32_t** to_ptr,
+    uint32_t* to_ptr,
     uint32_t* from_ptr,
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
 
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -585,7 +887,7 @@ namespace kernel {
         util::handle_cuda_error(err);
       }
       typedef Error (func_awkward_cuda_D2HU32_t)
-        (uint32_t **to_ptr, uint32_t *from_ptr, int64_t length);
+        (uint32_t *to_ptr, uint32_t *from_ptr, int64_t length);
       func_awkward_cuda_D2HU32_t
         *func_awkward_cuda_D2HU32 =
         reinterpret_cast<func_awkward_cuda_D2HU32_t *>
@@ -601,12 +903,12 @@ namespace kernel {
   template <>
   Error D2H(
     kernel::Lib ptr_lib,
-    int64_t** to_ptr,
+    int64_t* to_ptr,
     int64_t* from_ptr,
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
 
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -616,7 +918,7 @@ namespace kernel {
         util::handle_cuda_error(err);
       }
       typedef Error (func_awkward_cuda_D2H64_t)
-        (int64_t **to_ptr, int64_t *from_ptr, int64_t length);
+        (int64_t *to_ptr, int64_t *from_ptr, int64_t length);
       func_awkward_cuda_D2H64_t
         *func_awkward_cuda_D2H64 =
         reinterpret_cast<func_awkward_cuda_D2H64_t *>
@@ -632,12 +934,12 @@ namespace kernel {
   template <>
   Error D2H(
     kernel::Lib ptr_lib,
-    uint64_t** to_ptr,
+    uint64_t* to_ptr,
     uint64_t* from_ptr,
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
 
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -647,7 +949,7 @@ namespace kernel {
         util::handle_cuda_error(err);
       }
       typedef Error (func_awkward_cuda_D2HU64_t)
-        (uint64_t **to_ptr, uint64_t *from_ptr, int64_t length);
+        (uint64_t *to_ptr, uint64_t *from_ptr, int64_t length);
       func_awkward_cuda_D2HU64_t
         *func_awkward_cuda_D2HU64 =
         reinterpret_cast<func_awkward_cuda_D2HU64_t *>
@@ -663,12 +965,12 @@ namespace kernel {
   template <>
   Error D2H(
     kernel::Lib ptr_lib,
-    float** to_ptr,
+    float* to_ptr,
     float* from_ptr,
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
 
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -678,7 +980,7 @@ namespace kernel {
         util::handle_cuda_error(err);
       }
       typedef Error (func_awkward_cuda_D2Hfloat32_t)
-        (float **to_ptr, float *from_ptr, int64_t length);
+        (float *to_ptr, float *from_ptr, int64_t length);
       func_awkward_cuda_D2Hfloat32_t
         *func_awkward_cuda_D2Hfloat32 =
         reinterpret_cast<func_awkward_cuda_D2Hfloat32_t *>
@@ -694,12 +996,12 @@ namespace kernel {
   template <>
   Error D2H(
     kernel::Lib ptr_lib,
-    double** to_ptr,
+    double* to_ptr,
     double* from_ptr,
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
 
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -709,7 +1011,7 @@ namespace kernel {
         util::handle_cuda_error(err);
       }
       typedef Error (func_awkward_cuda_D2Hfloat64_t)
-        (double **to_ptr, double *from_ptr, int64_t length);
+        (double *to_ptr, double *from_ptr, int64_t length);
       func_awkward_cuda_D2Hfloat64_t
         *func_awkward_cuda_D2Hfloat64 =
         reinterpret_cast<func_awkward_cuda_D2Hfloat64_t *>
@@ -728,7 +1030,7 @@ namespace kernel {
   std::shared_ptr<bool> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
     #ifndef _MSC_VER
       if (ptr_lib == kernel::Lib::cuda_kernels) {
-        auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+        auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
 
         if (!handle) {
           Error err = failure("Failed to find awkward1[cuda]",
@@ -756,7 +1058,7 @@ namespace kernel {
   std::shared_ptr<int8_t> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
     #ifndef _MSC_VER
       if (ptr_lib == kernel::Lib::cuda_kernels) {
-        auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+        auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
 
         if (!handle) {
           Error err = failure("Failed to find awkward1[cuda]",
@@ -782,7 +1084,7 @@ namespace kernel {
   std::shared_ptr<uint8_t> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
     #ifndef _MSC_VER
       if (ptr_lib == kernel::Lib::cuda_kernels) {
-        auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+        auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
 
         if (!handle) {
           Error err = failure("Failed to find awkward1[cuda]",
@@ -810,7 +1112,7 @@ namespace kernel {
   std::shared_ptr<int16_t> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
     #ifndef _MSC_VER
       if (ptr_lib == kernel::Lib::cuda_kernels) {
-        auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+        auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
 
         if (!handle) {
           Error err = failure("Failed to find awkward1[cuda]",
@@ -838,7 +1140,7 @@ namespace kernel {
   std::shared_ptr<uint16_t> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
     #ifndef _MSC_VER
       if (ptr_lib == kernel::Lib::cuda_kernels) {
-        auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+        auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
 
         if (!handle) {
           Error err = failure("Failed to find awkward1[cuda]",
@@ -866,7 +1168,7 @@ namespace kernel {
   std::shared_ptr<int32_t> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
     #ifndef _MSC_VER
       if(ptr_lib == kernel::Lib::cuda_kernels) {
-        auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+        auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
 
         if (!handle) {
           Error err = failure("Failed to find awkward1[cuda]",
@@ -894,7 +1196,7 @@ namespace kernel {
   std::shared_ptr<uint32_t> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
     #ifndef _MSC_VER
       if(ptr_lib == kernel::Lib::cuda_kernels) {
-        auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+        auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
 
         if (!handle) {
           Error err = failure("Failed to find awkward1[cuda]",
@@ -922,7 +1224,7 @@ namespace kernel {
   std::shared_ptr<int64_t> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
     #ifndef _MSC_VER
       if(ptr_lib == kernel::Lib::cuda_kernels) {
-        auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+        auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
 
         if (!handle) {
           Error err = failure("Failed to find awkward1[cuda]",
@@ -950,7 +1252,7 @@ namespace kernel {
   std::shared_ptr<uint64_t> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
     #ifndef _MSC_VER
       if(ptr_lib == kernel::Lib::cuda_kernels) {
-        auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+        auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
 
         if (!handle) {
           Error err = failure("Failed to find awkward1[cuda]",
@@ -978,7 +1280,7 @@ namespace kernel {
   std::shared_ptr<float> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
     #ifndef _MSC_VER
       if(ptr_lib == kernel::Lib::cuda_kernels) {
-        auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+        auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
 
         if (!handle) {
           Error err = failure("Failed to find awkward1[cuda]",
@@ -1006,7 +1308,7 @@ namespace kernel {
   std::shared_ptr<double> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
     #ifndef _MSC_VER
       if(ptr_lib == kernel::Lib::cuda_kernels) {
-        auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+        auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
 
         if (!handle) {
           Error err = failure("Failed to find awkward1[cuda]",
@@ -1038,7 +1340,7 @@ namespace kernel {
                                  int64_t at) {
     #ifndef _MSC_VER
       if (ptr_lib == kernel::Lib::cuda_kernels) {
-        auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+        auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
 
         if (!handle) {
           Error err = failure("Failed to find awkward1[cuda]",
@@ -1067,7 +1369,7 @@ namespace kernel {
                                   int64_t at) {
     #ifndef _MSC_VER
       if(ptr_lib == kernel::Lib::cuda_kernels) {
-        auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+        auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
 
         if (!handle) {
           Error err = failure("Failed to find awkward1[cuda]",
@@ -1097,7 +1399,7 @@ namespace kernel {
                                   int64_t at) {
     #ifndef _MSC_VER
       if (ptr_lib == kernel::Lib::cuda_kernels) {
-        auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+        auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
 
         if (!handle) {
           Error err = failure("Failed to find awkward1[cuda]",
@@ -1127,7 +1429,7 @@ namespace kernel {
                                    int64_t at) {
     #ifndef _MSC_VER
       if (ptr_lib == kernel::Lib::cuda_kernels) {
-        auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+        auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
 
         if (!handle) {
           Error err = failure("Failed to find awkward1[cuda]",
@@ -1157,7 +1459,7 @@ namespace kernel {
                                   int64_t at) {
     #ifndef _MSC_VER
       if(ptr_lib == kernel::Lib::cuda_kernels) {
-        auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+        auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
 
         if (!handle) {
           Error err = failure("Failed to find awkward1[cuda]",
@@ -1188,7 +1490,7 @@ namespace kernel {
                                int8_t value) {
     #ifndef _MSC_VER
       if(ptr_lib == kernel::Lib::cuda_kernels) {
-        auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+        auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
 
         if (!handle) {
           Error err = failure("Failed to find awkward1[cuda]",
@@ -1218,7 +1520,7 @@ namespace kernel {
                                uint8_t value) {
     #ifndef _MSC_VER
       if(ptr_lib == kernel::Lib::cuda_kernels) {
-        auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+        auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
 
         if (!handle) {
           Error err = failure("Failed to find awkward1[cuda]",
@@ -1248,7 +1550,7 @@ namespace kernel {
                                int32_t value) {
     #ifndef _MSC_VER
       if(ptr_lib == kernel::Lib::cuda_kernels) {
-        auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+        auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
 
         if (!handle) {
           Error err = failure("Failed to find awkward1[cuda]",
@@ -1278,7 +1580,7 @@ namespace kernel {
                                uint32_t value) {
     #ifndef _MSC_VER
       if(ptr_lib == kernel::Lib::cuda_kernels) {
-        auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+        auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
 
         if (!handle) {
           Error err = failure("Failed to find awkward1[cuda]",
@@ -1308,7 +1610,7 @@ namespace kernel {
                                int64_t value) {
     #ifndef _MSC_VER
       if(ptr_lib == kernel::Lib::cuda_kernels) {
-        auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+        auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
 
         if (!handle) {
           Error err = failure("Failed to find awkward1[cuda]",

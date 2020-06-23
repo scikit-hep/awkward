@@ -377,10 +377,11 @@ namespace awkward {
 #ifndef _MSC_VER
     if(ptr_lib_ ==kernel::Lib::cuda_kernels) {
 
-      T *cpu_ptr;
+      std::shared_ptr<T> cpu_ptr = kernel::ptr_alloc<T>(kernel::Lib::cpu_kernels,
+                                                        width_ * length_);
 
-      Error err =  kernel::H2D<T>(kernel::Lib::cuda_kernels,
-                                  &cpu_ptr,
+      Error err =  kernel::D2H<T>(kernel::Lib::cuda_kernels,
+                                  cpu_ptr.get(),
                                   ptr_.get(),
                                   width_ * length_);
 
@@ -392,9 +393,7 @@ namespace awkward {
                                                offset(),
                                                width(),
                                                length(),
-                                               std::shared_ptr<T>(
-                                                 cpu_ptr,
-                                                 kernel::array_deleter<T>()),
+                                               cpu_ptr,
                                                kernel::Lib::cpu_kernels);
     }
 #endif
