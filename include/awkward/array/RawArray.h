@@ -191,7 +191,7 @@ namespace awkward {
                   const int64_t offset,
                   const int64_t length,
                   const int64_t itemsize,
-                  const KernelsLib ptr_lib = cpu_kernels)
+                  const kernel::Lib ptr_lib = kernel::Lib::cpu_kernels)
         : Content(identities, parameters)
         , ptr_(ptr)
         , offset_(offset)
@@ -210,7 +210,7 @@ namespace awkward {
                   const util::Parameters& parameters,
                   const std::shared_ptr<T>& ptr,
                   const int64_t length,
-                  const KernelsLib ptr_lib = cpu_kernels)
+                  const kernel::Lib ptr_lib = kernel::Lib::cpu_kernels)
         : Content(identities, parameters)
         , ptr_(ptr)
         , offset_(0)
@@ -227,9 +227,9 @@ namespace awkward {
     RawArrayOf<T>(const IdentitiesPtr& identities,
                   const util::Parameters& parameters,
                   const int64_t length,
-                  const KernelsLib ptr_lib = cpu_kernels)
+                  const kernel::Lib ptr_lib = kernel::Lib::cpu_kernels)
         : Content(identities, parameters)
-        , ptr_(kernel::ptr_alloc<T>((size_t)length, ptr_lib))
+        , ptr_(kernel::ptr_alloc<T>(ptr_lib_, (size_t)length))
         , offset_(0)
         , length_(length)
         , itemsize_(sizeof(T))
@@ -258,7 +258,7 @@ namespace awkward {
       return itemsize_;
     }
 
-    const KernelsLib
+    const kernel::Lib
     ptr_lib() const {
       return ptr_lib_;
     }
@@ -559,7 +559,7 @@ namespace awkward {
       int64_t offset = offset_;
       if (copyarrays) {
         ptr = std::shared_ptr<T>(new T[(size_t)length_],
-                                 util::array_deleter<T>());
+                                 kernel::array_deleter<T>());
         memcpy(ptr.get(), &ptr_.get()[(size_t)offset_],
                sizeof(T)*((size_t)length_));
         offset = 0;
@@ -670,7 +670,7 @@ namespace awkward {
     const ContentPtr
       carry(const Index64& carry) const override {
       std::shared_ptr<T> ptr(new T[(size_t)carry.length()],
-                             util::array_deleter<T>());
+                             kernel::array_deleter<T>());
       struct Error err = awkward_numpyarray_getitem_next_null_64(
         reinterpret_cast<uint8_t*>(ptr.get()),
         reinterpret_cast<uint8_t*>(ptr_.get()),
@@ -859,7 +859,7 @@ namespace awkward {
           dynamic_cast<RawArrayOf<T>*>(other.get())) {
         std::shared_ptr<T> ptr =
           std::shared_ptr<T>(new T[(size_t)(length_ + rawother->length())],
-                             util::array_deleter<T>());
+                             kernel::array_deleter<T>());
         memcpy(ptr.get(),
                &ptr_.get()[(size_t)offset_],
                sizeof(T)*((size_t)length_));
@@ -1080,14 +1080,14 @@ namespace awkward {
     }
 
     ContentPtr
-      to_gpu(KernelsLib ptr_lib) override {
-      if(ptr_lib == KernelsLib::cuda_kernels) {
+      to_gpu(kernel::Lib ptr_lib) override {
+      if(ptr_lib == kernel::Lib::cuda_kernels) {
         T* cuda_ptr;
-        if(ptr_lib_ != KernelsLib::cuda_kernels) {
-          Error err = util::H2D<T>(&cuda_ptr,
-                                   ptr_.get(),
-                                   length_,
-                                   KernelsLib::cuda_kernels);
+        if(ptr_lib_ != kernel::Lib::cuda_kernels) {
+          Error err = kernel::H2D<T>(kernel::Lib::cuda_kernels,
+                                     &cuda_ptr,
+                                     ptr_.get(),
+                                     length_);
           util::handle_cuda_error(err);
         }
         else {
@@ -1098,7 +1098,7 @@ namespace awkward {
                                                parameters(),
                                                std::shared_ptr<T>(
                                                  cuda_ptr,
-                                                 util::cuda_array_deleter<T>()),
+                                                 kernel::cuda_array_deleter<T>()),
                                                offset(),
                                                length(),
                                                itemsize(),
@@ -1111,7 +1111,7 @@ namespace awkward {
     const int64_t offset_;
     const int64_t length_;
     const int64_t itemsize_;
-    const KernelsLib ptr_lib_;
+    const kernel::Lib ptr_lib_;
   };
 }
 

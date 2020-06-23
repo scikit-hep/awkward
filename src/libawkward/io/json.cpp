@@ -267,7 +267,7 @@ namespace awkward {
   class ToJsonFile::Impl {
   public:
     Impl(FILE* destination, int64_t maxdecimals, int64_t buffersize)
-        : buffer_(new char[(size_t)buffersize], util::array_deleter<char>())
+        : buffer_(new char[(size_t)buffersize], kernel::array_deleter<char>())
         , stream_(destination,
                   buffer_.get(),
                   ((size_t)buffersize)*sizeof(char))
@@ -365,7 +365,7 @@ namespace awkward {
   class ToJsonPrettyFile::Impl {
   public:
     Impl(FILE* destination, int64_t maxdecimals, int64_t buffersize)
-        : buffer_(new char[(size_t)buffersize], util::array_deleter<char>())
+        : buffer_(new char[(size_t)buffersize], kernel::array_deleter<char>())
         , stream_(destination,
                   buffer_.get(),
                   ((size_t)buffersize)*sizeof(char))
@@ -560,7 +560,7 @@ namespace awkward {
     Handler handler(options);
     rj::Reader reader;
     std::shared_ptr<char> buffer(new char[(size_t)buffersize],
-                                 util::array_deleter<char>());
+                                 kernel::array_deleter<char>());
     rj::FileReadStream stream(source,
                               buffer.get(),
                               ((size_t)buffersize)*sizeof(char));

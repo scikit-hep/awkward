@@ -1883,14 +1883,14 @@ namespace awkward {
 
   template <typename T, typename I>
   ContentPtr
-  UnionArrayOf<T, I>::to_gpu(KernelsLib ptr_lib) {
-    if(ptr_lib == cuda_kernels) {
-      IndexOf<T> cuda_tags = tags_.to_gpu(KernelsLib::cuda_kernels);
-      IndexOf<I> cuda_index = index_.to_gpu(KernelsLib::cuda_kernels);
+  UnionArrayOf<T, I>::to_gpu(kernel::Lib ptr_lib) {
+    if(ptr_lib ==kernel::Lib::cuda_kernels) {
+      IndexOf<T> cuda_tags = tags_.to_gpu(kernel::Lib::cuda_kernels);
+      IndexOf<I> cuda_index = index_.to_gpu(kernel::Lib::cuda_kernels);
 
       ContentPtrVec cuda_content_vec;
       for(auto const i : contents_) {
-        ContentPtr cuda_ptr = i->to_gpu(KernelsLib::cuda_kernels);
+        ContentPtr cuda_ptr = i->to_gpu(kernel::Lib::cuda_kernels);
         cuda_content_vec.emplace_back(cuda_ptr);
       }
 

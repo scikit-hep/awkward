@@ -32,7 +32,7 @@ int main(int, char**) {
   ak::Index32 outoffsetsts(main_offsets_arr, 0, 6);
   ak::NumpyArray numpyArray(outoffsetsts);
   std::cout << numpyArray.format() << "\n";
-  auto cuda_arr1 = numpyArray.to_gpu(cuda_kernels);
+  auto cuda_arr1 = numpyArray.to_gpu(kernel::Lib::cuda_kernels);
   std::cout << cuda_arr1->tostring() << "\n";
 //  std::shared_ptr<ak::IndexOf<int8_t>> main_offsets = std::make_shared<ak::IndexOf<int8_t>>(main_offsets_arr, 0, 6);
 //  auto cuda_arr = main_offsets->to_gpu(cuda_kernels);

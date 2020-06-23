@@ -787,8 +787,8 @@ namespace awkward {
       return NumpyArray(out).getitem_at_nowrap(0);
     }
     else if (toaxis == depth + 1) {
-      IndexOf<T> starts = util::make_starts(offsets_, offsets_.ptr_lib());
-      IndexOf<T> stops = util::make_stops(offsets_, offsets_.ptr_lib());
+      IndexOf<T> starts = util::make_starts(offsets_);
+      IndexOf<T> stops = util::make_stops(offsets_);
       Index64 tonum(length(), offsets_.ptr_lib());
       struct Error err = util::awkward_listarray_num_64<T>(
         tonum.ptr().get(),
@@ -1637,7 +1637,7 @@ namespace awkward {
       std::vector<int64_t*> tocarryraw;
       for (int64_t j = 0;  j < n;  j++) {
         std::shared_ptr<int64_t> ptr(new int64_t[(size_t)totallen],
-                                     util::array_deleter<int64_t>());
+                                     kernel::array_deleter<int64_t>());
         tocarry.push_back(ptr);
         tocarryraw.push_back(ptr.get());
       }
@@ -1913,10 +1913,10 @@ namespace awkward {
 
   template <typename T>
   ContentPtr
-  ListOffsetArrayOf<T>::to_gpu(KernelsLib ptr_lib) {
-    if(ptr_lib == KernelsLib::cuda_kernels) {
-      IndexOf<T> cuda_offsets = offsets_.to_gpu(KernelsLib::cuda_kernels);
-      ContentPtr cuda_content = content_->to_gpu(KernelsLib::cuda_kernels);
+  ListOffsetArrayOf<T>::to_gpu(kernel::Lib ptr_lib) {
+    if(ptr_lib == kernel::Lib::cuda_kernels) {
+      IndexOf<T> cuda_offsets = offsets_.to_gpu(kernel::Lib::cuda_kernels);
+      ContentPtr cuda_content = content_->to_gpu(kernel::Lib::cuda_kernels);
       return std::make_shared<ListOffsetArrayOf<T>>(identities(),
                                                     parameters(),
                                                     cuda_offsets,

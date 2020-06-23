@@ -382,7 +382,7 @@ namespace awkward {
                          ssize_t byteoffset,
                          ssize_t itemsize,
                          const std::string format,
-                         const KernelsLib ptr_lib)
+                         const kernel::Lib ptr_lib)
       : Content(identities, parameters)
       , ptr_(ptr)
       , shape_(shape)
@@ -503,7 +503,7 @@ namespace awkward {
     return (ssize_t)shape_.size();
   }
 
-  KernelsLib
+  kernel::Lib
   NumpyArray::ptr_lib() const {
     return ptr_lib_;
   }
@@ -1232,7 +1232,7 @@ namespace awkward {
   const ContentPtr
   NumpyArray::carry(const Index64& carry) const {
     std::shared_ptr<void> ptr(
-      kernel::ptr_alloc<uint8_t>((size_t)(carry.length()*strides_[0]), ptr_lib_));
+      kernel::ptr_alloc<uint8_t>(ptr_lib_, (size_t)(carry.length()*strides_[0])));
     struct Error err = awkward_numpyarray_getitem_next_null_64(
       reinterpret_cast<uint8_t*>(ptr.get()),
       reinterpret_cast<uint8_t*>(ptr_.get()),
@@ -1706,7 +1706,7 @@ namespace awkward {
       }
 
       std::shared_ptr<void> ptr(
-        kernel::ptr_alloc<uint8_t>((size_t)(itemsize*(self_flatlength + other_flatlength)), ptr_lib_));
+        kernel::ptr_alloc<uint8_t>(ptr_lib_, (size_t)(itemsize*(self_flatlength + other_flatlength))));
 
       NumpyArray contiguous_other = rawother->contiguous();
 
@@ -2191,7 +2191,7 @@ namespace awkward {
     NumpyArray contiguous_other = other.get()->contiguous();
 
     std::shared_ptr<void> ptr(
-      kernel::ptr_alloc<uint8_t>((size_t)(length() + other.get()->length()), ptr_lib_));
+      kernel::ptr_alloc<uint8_t>(ptr_lib_, (size_t)(length() + other.get()->length())));
 
     struct Error err;
 
@@ -2765,7 +2765,7 @@ namespace awkward {
   NumpyArray::contiguous_next(const Index64& bytepos) const {
     if (iscontiguous()) {
       std::shared_ptr<void> ptr(
-        kernel::ptr_alloc<uint8_t>((size_t)(bytepos.length()*strides_[0]), ptr_lib_));
+        kernel::ptr_alloc<uint8_t>(ptr_lib_, (size_t)(bytepos.length()*strides_[0])));
       struct Error err = awkward_numpyarray_contiguous_copy_64(
         reinterpret_cast<uint8_t*>(ptr.get()),
         reinterpret_cast<uint8_t*>(ptr_.get()),
@@ -2786,7 +2786,7 @@ namespace awkward {
 
     else if (shape_.size() == 1) {
       std::shared_ptr<void> ptr(
-        kernel::ptr_alloc<uint8_t>((size_t)(bytepos.length()*itemsize_), ptr_lib_));
+        kernel::ptr_alloc<uint8_t>(ptr_lib_, (size_t)(bytepos.length()*itemsize_)));
       struct Error err = awkward_numpyarray_contiguous_copy_64(
         reinterpret_cast<uint8_t*>(ptr.get()),
         reinterpret_cast<uint8_t*>(ptr_.get()),
@@ -3041,7 +3041,7 @@ namespace awkward {
                            int64_t stride,
                            bool first) const {
     if (head.get() == nullptr) {
-      std::shared_ptr<void> ptr(kernel::ptr_alloc<uint8_t>((size_t)(carry.length()*stride), ptr_lib_));
+      std::shared_ptr<void> ptr(kernel::ptr_alloc<uint8_t>(ptr_lib_, (size_t)(carry.length()*stride)));
       struct Error err = awkward_numpyarray_getitem_next_null_64(
         reinterpret_cast<uint8_t*>(ptr.get()),
         reinterpret_cast<uint8_t*>(ptr_.get()),
@@ -3679,8 +3679,8 @@ namespace awkward {
   }
 
   ContentPtr
-  NumpyArray::to_gpu(KernelsLib ptr_lib) {
-    if (ptr_lib == KernelsLib::cuda_kernels) {
+  NumpyArray::to_gpu(kernel::Lib ptr_lib) {
+    if (ptr_lib == kernel::Lib::cuda_kernels) {
       ssize_t length = 1;
       for (auto i : shape_) {
         length = length * i;
@@ -3688,11 +3688,11 @@ namespace awkward {
 
       if (format_.compare("?") == 0) {
         bool *cuda_ptr;
-        if(ptr_lib_ != KernelsLib::cuda_kernels) {
-          Error err = util::H2D<bool>(&cuda_ptr,
-                                      reinterpret_cast<bool *>(ptr_.get()),
-                                      length,
-                                      KernelsLib::cuda_kernels);
+        if(ptr_lib_ != kernel::Lib::cuda_kernels) {
+          Error err =  kernel::H2D<bool>(kernel::Lib::cuda_kernels,
+                                         &cuda_ptr,
+                                         reinterpret_cast<bool *>(ptr_.get()),
+                                         length);
           util::handle_cuda_error(err);
         }
         else {
@@ -3703,20 +3703,20 @@ namespace awkward {
                                             parameters(),
                                             std::shared_ptr<void>(
                                               cuda_ptr,
-                                              util::cuda_array_deleter<bool>()),
+                                              kernel::cuda_array_deleter<bool>()),
                                             shape(),
                                             strides(),
                                             byteoffset(),
                                             itemsize(),
                                             format(),
-                                            KernelsLib::cuda_kernels);
+                                            kernel::Lib::cuda_kernels);
       } else if (format_.compare("b") == 0) {
         int8_t *cuda_ptr;
-        if(ptr_lib_ != KernelsLib::cuda_kernels) {
-          Error err = util::H2D<int8_t>(&cuda_ptr,
-                                        reinterpret_cast<int8_t *>(ptr_.get()),
-                                        length,
-                                        KernelsLib::cuda_kernels);
+        if(ptr_lib_ != kernel::Lib::cuda_kernels) {
+          Error err =  kernel::H2D<int8_t>(kernel::Lib::cuda_kernels,
+                                           &cuda_ptr,
+                                           reinterpret_cast<int8_t *>(ptr_.get()),
+                                           length);
           util::handle_cuda_error(err);
         }
         else {
@@ -3728,20 +3728,20 @@ namespace awkward {
                                             parameters(),
                                             std::shared_ptr<int8_t>(
                                               cuda_ptr,
-                                              util::cuda_array_deleter<int8_t>()),
+                                              kernel::cuda_array_deleter<int8_t>()),
                                             shape(),
                                             strides(),
                                             byteoffset(),
                                             itemsize(),
                                             format(),
-                                            KernelsLib::cuda_kernels);
+                                            kernel::Lib::cuda_kernels);
       } else if (format_.compare("B") == 0) {
         uint8_t *cuda_ptr;
-        if(ptr_lib_ != KernelsLib::cuda_kernels) {
-          Error err = util::H2D<uint8_t>(&cuda_ptr,
-                                         reinterpret_cast<uint8_t *>(ptr_.get()),
-                                         length,
-                                         KernelsLib::cuda_kernels);
+        if(ptr_lib_ != kernel::Lib::cuda_kernels) {
+          Error err =  kernel::H2D<uint8_t>(kernel::Lib::cuda_kernels,
+                                            &cuda_ptr,
+                                            reinterpret_cast<uint8_t *>(ptr_.get()),
+                                            length);
           util::handle_cuda_error(err);
         }
         else {
@@ -3752,21 +3752,21 @@ namespace awkward {
                                             parameters(),
                                             std::shared_ptr<void>(
                                               cuda_ptr,
-                                              util::cuda_array_deleter<uint8_t>()),
+                                              kernel::cuda_array_deleter<uint8_t>()),
                                             shape(),
                                             strides(),
                                             byteoffset(),
                                             itemsize(),
                                             format(),
-                                            KernelsLib::cuda_kernels);
+                                            kernel::Lib::cuda_kernels);
       } else if (format_.compare("h") == 0) {
         int16_t *cuda_ptr;
 
-        if(ptr_lib_ != KernelsLib::cuda_kernels) {
-          Error err = util::H2D<int16_t>(&cuda_ptr,
-                                         reinterpret_cast<int16_t *>(ptr_.get()),
-                                         length,
-                                         KernelsLib::cuda_kernels);
+        if(ptr_lib_ != kernel::Lib::cuda_kernels) {
+          Error err =  kernel::H2D<int16_t>(kernel::Lib::cuda_kernels,
+                                            &cuda_ptr,
+                                            reinterpret_cast<int16_t *>(ptr_.get()),
+                                            length);
           util::handle_cuda_error(err);
         }
         else {
@@ -3777,21 +3777,21 @@ namespace awkward {
                                             parameters(),
                                             std::shared_ptr<void>(
                                               cuda_ptr,
-                                              util::cuda_array_deleter<int16_t>()),
+                                              kernel::cuda_array_deleter<int16_t>()),
                                             shape(),
                                             strides(),
                                             byteoffset(),
                                             itemsize(),
                                             format(),
-                                            KernelsLib::cuda_kernels);
+                                            kernel::Lib::cuda_kernels);
       } else if (format_.compare("H") == 0) {
         uint16_t *cuda_ptr;
 
-        if(ptr_lib_ != KernelsLib::cuda_kernels) {
-          Error err = util::H2D<uint16_t>(&cuda_ptr,
-                                          reinterpret_cast<uint16_t *>(ptr_.get()),
-                                          length,
-                                          KernelsLib::cuda_kernels);
+        if(ptr_lib_ != kernel::Lib::cuda_kernels) {
+          Error err =  kernel::H2D<uint16_t>(kernel::Lib::cuda_kernels,
+                                             &cuda_ptr,
+                                             reinterpret_cast<uint16_t *>(ptr_.get()),
+                                             length);
           util::handle_cuda_error(err);
         }
         else {
@@ -3802,21 +3802,21 @@ namespace awkward {
                                             parameters(),
                                             std::shared_ptr<void>(
                                               cuda_ptr,
-                                              util::cuda_array_deleter<uint16_t>()),
+                                              kernel::cuda_array_deleter<uint16_t>()),
                                             shape(),
                                             strides(),
                                             byteoffset(),
                                             itemsize(),
                                             format(),
-                                            KernelsLib::cuda_kernels);
+                                            kernel::Lib::cuda_kernels);
       } else if (format_.compare("i") == 0) {
         int32_t *cuda_ptr;
 
-        if(ptr_lib_ != KernelsLib::cuda_kernels) {
-          Error err = util::H2D<int32_t>(&cuda_ptr,
-                                         reinterpret_cast<int32_t *>(ptr_.get()),
-                                         length,
-                                         KernelsLib::cuda_kernels);
+        if(ptr_lib_ != kernel::Lib::cuda_kernels) {
+          Error err =  kernel::H2D<int32_t>(kernel::Lib::cuda_kernels,
+                                            &cuda_ptr,
+                                            reinterpret_cast<int32_t *>(ptr_.get()),
+                                            length);
           util::handle_cuda_error(err);
         } else {
           cuda_ptr = reinterpret_cast<int32_t*>(ptr_.get());
@@ -3826,21 +3826,21 @@ namespace awkward {
                                             parameters(),
                                             std::shared_ptr<void>(
                                               cuda_ptr,
-                                              util::cuda_array_deleter<int32_t>()),
+                                              kernel::cuda_array_deleter<int32_t>()),
                                             shape(),
                                             strides(),
                                             byteoffset(),
                                             itemsize(),
                                             format(),
-                                            KernelsLib::cuda_kernels);
+                                            kernel::Lib::cuda_kernels);
       } else if (format_.compare("I") == 0) {
         uint32_t *cuda_ptr;
 
-        if(ptr_lib_ != KernelsLib::cuda_kernels) {
-          Error err = util::H2D<uint32_t>(&cuda_ptr,
-                                          reinterpret_cast<uint32_t *>(ptr_.get()),
-                                          length,
-                                          KernelsLib::cuda_kernels);
+        if(ptr_lib_ != kernel::Lib::cuda_kernels) {
+          Error err =  kernel::H2D<uint32_t>(kernel::Lib::cuda_kernels,
+                                             &cuda_ptr,
+                                             reinterpret_cast<uint32_t *>(ptr_.get()),
+                                             length);
           util::handle_cuda_error(err);
         }
         else {
@@ -3851,21 +3851,21 @@ namespace awkward {
                                             parameters(),
                                             std::shared_ptr<void>(
                                               cuda_ptr,
-                                              util::cuda_array_deleter<uint32_t>()),
+                                              kernel::cuda_array_deleter<uint32_t>()),
                                             shape(),
                                             strides(),
                                             byteoffset(),
                                             itemsize(),
                                             format(),
-                                            KernelsLib::cuda_kernels);
+                                            kernel::Lib::cuda_kernels);
       } else if (format_.compare("l") == 0) {
         int64_t *cuda_ptr;
 
-        if(ptr_lib_ != KernelsLib::cuda_kernels) {
-          Error err = util::H2D<int64_t>(&cuda_ptr,
-                                         reinterpret_cast<int64_t *>(ptr_.get()),
-                                         length,
-                                         KernelsLib::cuda_kernels);
+        if(ptr_lib_ != kernel::Lib::cuda_kernels) {
+          Error err =  kernel::H2D<int64_t>(kernel::Lib::cuda_kernels,
+                                            &cuda_ptr,
+                                            reinterpret_cast<int64_t *>(ptr_.get()),
+                                            length);
           util::handle_cuda_error(err);
         }
         else {
@@ -3876,21 +3876,21 @@ namespace awkward {
                                             parameters(),
                                             std::shared_ptr<void>(
                                               cuda_ptr,
-                                              util::cuda_array_deleter<int64_t>()),
+                                              kernel::cuda_array_deleter<int64_t>()),
                                             shape(),
                                             strides(),
                                             byteoffset(),
                                             itemsize(),
                                             format(),
-                                            KernelsLib::cuda_kernels);
+                                            kernel::Lib::cuda_kernels);
       } else if (format_.compare("L") == 0) {
         uint64_t *cuda_ptr;
 
-        if(ptr_lib_ != KernelsLib::cuda_kernels) {
-          Error err = util::H2D<uint64_t>(&cuda_ptr,
-                                          reinterpret_cast<uint64_t *>(ptr_.get()),
-                                          length,
-                                          KernelsLib::cuda_kernels);
+        if(ptr_lib_ != kernel::Lib::cuda_kernels) {
+          Error err =  kernel::H2D<uint64_t>(kernel::Lib::cuda_kernels,
+                                             &cuda_ptr,
+                                             reinterpret_cast<uint64_t *>(ptr_.get()),
+                                             length);
           util::handle_cuda_error(err);
         }
         else {
@@ -3901,21 +3901,21 @@ namespace awkward {
                                             parameters(),
                                             std::shared_ptr<void>(
                                               cuda_ptr,
-                                              util::cuda_array_deleter<uint64_t>()),
+                                              kernel::cuda_array_deleter<uint64_t>()),
                                             shape(),
                                             strides(),
                                             byteoffset(),
                                             itemsize(),
                                             format(),
-                                            KernelsLib::cuda_kernels);
+                                            kernel::Lib::cuda_kernels);
       } else if (format_.compare("f") == 0) {
         float *cuda_ptr;
 
-        if(ptr_lib_ != KernelsLib::cuda_kernels) {
-          Error err = util::H2D<float>(&cuda_ptr,
-                                       reinterpret_cast<float *>(ptr_.get()),
-                                       length,
-                                       KernelsLib::cuda_kernels);
+        if(ptr_lib_ != kernel::Lib::cuda_kernels) {
+          Error err =  kernel::H2D<float>(kernel::Lib::cuda_kernels,
+                                          &cuda_ptr,
+                                          reinterpret_cast<float *>(ptr_.get()),
+                                          length);
           util::handle_cuda_error(err);
         }
         else {
@@ -3926,21 +3926,21 @@ namespace awkward {
                                             parameters(),
                                             std::shared_ptr<void>(
                                               cuda_ptr,
-                                              util::cuda_array_deleter<float>()),
+                                              kernel::cuda_array_deleter<float>()),
                                             shape(),
                                             strides(),
                                             byteoffset(),
                                             itemsize(),
                                             format(),
-                                            KernelsLib::cuda_kernels);
+                                            kernel::Lib::cuda_kernels);
       } else if (format_.compare("d") == 0) {
         double *cuda_ptr;
 
-        if(ptr_lib_ != KernelsLib::cuda_kernels) {
-          Error err = util::H2D<double>(&cuda_ptr,
-                                        reinterpret_cast<double *>(ptr_.get()),
-                                        length,
-                                        KernelsLib::cuda_kernels);
+        if(ptr_lib_ != kernel::Lib::cuda_kernels) {
+          Error err =  kernel::H2D<double>(kernel::Lib::cuda_kernels,
+                                           &cuda_ptr,
+                                           reinterpret_cast<double *>(ptr_.get()),
+                                           length);
           util::handle_cuda_error(err);
         }
         else {
@@ -3951,13 +3951,13 @@ namespace awkward {
                                             parameters(),
                                             std::shared_ptr<void>(
                                               cuda_ptr,
-                                              util::cuda_array_deleter<double>()),
+                                              kernel::cuda_array_deleter<double>()),
                                             shape(),
                                             strides(),
                                             byteoffset(),
                                             itemsize(),
                                             format(),
-                                            KernelsLib::cuda_kernels);
+                                            kernel::Lib::cuda_kernels);
       } else {
         Error err = failure("Unknown Numpy dtype", 0, kSliceNone);
         util::handle_cuda_error(err);
@@ -3969,7 +3969,7 @@ namespace awkward {
                                             byteoffset(),
                                             itemsize(),
                                             format(),
-                                            KernelsLib::cuda_kernels);
+                                            kernel::Lib::cuda_kernels);
       }
     }
   }

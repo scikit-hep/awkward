@@ -427,7 +427,7 @@ namespace awkward {
                           const Slice& tail) const override;
 
     ContentPtr
-      to_gpu(KernelsLib ptr_lib) override;
+      to_gpu(kernel::Lib ptr_lib) override;
 
   protected:
     template <typename S>

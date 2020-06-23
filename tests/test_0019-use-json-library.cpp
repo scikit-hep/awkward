@@ -52,7 +52,7 @@ int main(int, char**) {
   slice.append(ak::SliceRange(ak::Slice::none(), ak::Slice::none(), 2));
   slice.append(ak::SliceRange(1, ak::Slice::none(), ak::Slice::none()));
 
-  auto cuda_arr =  array->to_gpu(KernelsLib::cuda_kernels);
+  auto cuda_arr =  array->to_gpu(kernel::Lib::cuda_kernels);
   std::cout << cuda_arr->tostring() << "\n";
 
   if (array.get()->getitem(slice).get()->tojson(false, 1) !=

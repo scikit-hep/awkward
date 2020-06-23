@@ -33,9 +33,9 @@ namespace ak = awkward;
 /// reference count is held for all C++ references to the object.
 ///
 /// See also
-///   - awkward::util::array_deleter, which frees array buffers, rather
+///   - kernel::array_deleter, which frees array buffers, rather
 ///     than objects.
-///   - awkward::util::no_deleter, which does not free memory at all (for
+///   - kernel::no_deleter, which does not free memory at all (for
 ///     borrowed references).
 template<typename T>
 class pyobject_deleter {

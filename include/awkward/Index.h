@@ -86,10 +86,10 @@ namespace awkward {
     IndexOf<T>(const std::shared_ptr<T>& ptr,
                int64_t offset,
                int64_t length,
-               KernelsLib ptr_lib = KernelsLib::cpu_kernels);
+               kernel::Lib ptr_lib = kernel::Lib::cpu_kernels);
 
     /// @brief Allocates a new integer array buffer with a given #length.
-    IndexOf<T>(int64_t length, KernelsLib ptr_lib = KernelsLib::cpu_kernels);
+    IndexOf<T>(int64_t length, kernel::Lib ptr_lib = kernel::Lib::cpu_kernels);
 
     /// @brief Reference-counted pointer to the integer array buffer.
     const std::shared_ptr<T>
@@ -109,7 +109,7 @@ namespace awkward {
       length() const;
 
     /// @brief The Kernel Library that ptr uses.
-    KernelsLib
+    kernel::Lib
       ptr_lib() const;
 
     /// @brief User-friendly name of this class: `"Index8"`, `"IndexU8"`,
@@ -204,7 +204,7 @@ namespace awkward {
       deep_copy() const;
 
     const IndexOf<T>
-      to_gpu(KernelsLib ptr_lib) const;
+      to_gpu(kernel::Lib ptr_lib) const;
 
   private:
     /// @brief See #ptr.
@@ -214,7 +214,7 @@ namespace awkward {
     /// @brief See #length.
     const int64_t length_;
     /// @brief See #ptr_lib
-    const KernelsLib ptr_lib_;
+    const kernel::Lib ptr_lib_;
   };
 
 #if !defined AWKWARD_INDEX_NO_EXTERN_TEMPLATE && !defined _MSC_VER

@@ -69,9 +69,9 @@ namespace awkward {
                                 const FieldLoc& fieldloc,
                                 int64_t width,
                                 int64_t length,
-                                KernelsLib ptr_lib)
+                                kernel::Lib ptr_lib)
       : Identities(ref, fieldloc, 0, width, length)
-      , ptr_(kernel::ptr_alloc<T>((ssize_t)width*length, ptr_lib))
+      , ptr_(kernel::ptr_alloc<T>(ptr_lib, (ssize_t)width*length))
       , ptr_lib_(ptr_lib) { }
 
   template <typename T>
@@ -81,7 +81,7 @@ namespace awkward {
                                 int64_t width,
                                 int64_t length,
                                 const std::shared_ptr<T> ptr,
-                                KernelsLib ptr_lib)
+                                kernel::Lib ptr_lib)
       : Identities(ref, fieldloc, offset, width, length)
       , ptr_(ptr)
       , ptr_lib_(ptr_lib) { }
@@ -218,7 +218,7 @@ namespace awkward {
   const IdentitiesPtr
   IdentitiesOf<T>::deep_copy() const {
     std::shared_ptr<T> ptr(length_ == 0 ? nullptr : new T[(size_t)length_],
-                           util::array_deleter<T>());
+                           kernel::array_deleter<T>());
     if (length_ != 0) {
       memcpy(ptr.get(),
              &ptr_.get()[(size_t)offset_],
@@ -333,21 +333,21 @@ namespace awkward {
   }
 
   template<typename T>
-  KernelsLib IdentitiesOf<T>::ptr_lib() const {
+  kernel::Lib IdentitiesOf<T>::ptr_lib() const {
     return ptr_lib_;
   }
 
   template <typename T>
   IdentitiesPtr
-  IdentitiesOf<T>::to_gpu(KernelsLib ptr_lib) const{
-    if(ptr_lib == cuda_kernels) {
+  IdentitiesOf<T>::to_gpu(kernel::Lib ptr_lib) const{
+    if(ptr_lib ==kernel::Lib::cuda_kernels) {
 
       T *cuda_ptr;
-      if(ptr_lib_ != KernelsLib::cuda_kernels) {
-        Error err = util::H2D<T>(&cuda_ptr,
-                                 ptr_.get(),
-                                 width_ * length_,
-                                 KernelsLib::cuda_kernels);
+      if(ptr_lib_ != kernel::Lib::cuda_kernels) {
+        Error err =  kernel::H2D<T>(kernel::Lib::cuda_kernels,
+                                    &cuda_ptr,
+                                    ptr_.get(),
+                                    width_ * length_);
 
 
         util::handle_cuda_error(err);
@@ -363,8 +363,8 @@ namespace awkward {
                                                length(),
                                                std::shared_ptr<T>(
                                                  cuda_ptr,
-                                                 util::cuda_array_deleter<T>()),
-                                               KernelsLib::cuda_kernels);
+                                                 kernel::cuda_array_deleter<T>()),
+                                               kernel::Lib::cuda_kernels);
     }
   }
 

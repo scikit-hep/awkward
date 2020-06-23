@@ -1400,11 +1400,11 @@ namespace awkward {
   }
 
   ContentPtr
-  RecordArray::to_gpu(KernelsLib ptr_lib) const {
-    if(ptr_lib == KernelsLib::cuda_kernels) {
+  RecordArray::to_gpu(kernel::Lib ptr_lib) const {
+    if(ptr_lib == kernel::Lib::cuda_kernels) {
       ContentPtrVec cuda_content_vec;
       for(auto i : contents_) {
-        ContentPtr cuda_ptr = i->to_gpu(KernelsLib::cuda_kernels);
+        ContentPtr cuda_ptr = i->to_gpu(kernel::Lib::cuda_kernels);
         cuda_content_vec.emplace_back(cuda_ptr);
       }
 

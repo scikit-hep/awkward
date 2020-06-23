@@ -157,7 +157,7 @@ namespace awkward {
                ssize_t byteoffset,
                ssize_t itemsize,
                const std::string format,
-               const KernelsLib ptr_lib = cpu_kernels);
+               const kernel::Lib ptr_lib =kernel::Lib::cpu_kernels);
 
     /// @brief Creates a NumpyArray from an {@link IndexOf Index8}.
     NumpyArray(const Index8 index);
@@ -189,7 +189,7 @@ namespace awkward {
     const std::shared_ptr<void>
       ptr() const;
 
-    KernelsLib
+    kernel::Lib
       ptr_lib() const;
 
     /// @brief Number of elements in each dimension. A one-dimensional
@@ -596,7 +596,7 @@ namespace awkward {
     /// @brief An utility function to create a new instance of NumpyArray on the
     /// GPU identical to this one.
     ContentPtr
-      to_gpu(KernelsLib ptr_lib) override;
+      to_gpu(kernel::Lib ptr_lib) override;
 
   protected:
     /// @brief Internal function to merge two byte arrays without promoting
@@ -806,7 +806,7 @@ namespace awkward {
   /// @brief See #format.
   const std::string format_;
   /// @brief See #ptr_lib
-  const KernelsLib ptr_lib_;
+  const kernel::Lib ptr_lib_;
 
   /// @brief Mapping from (platform dependent) `std::type_index` to pybind11
   /// format string (see #format).

@@ -290,7 +290,7 @@ namespace awkward {
                     int64_t width,
                     int64_t length,
                     const std::shared_ptr<T> ptr,
-                    KernelsLib ptr_lib = cpu_kernels);
+                    kernel::Lib ptr_lib =kernel::Lib::cpu_kernels);
 
     /// @brief Allocates a new array buffer with a given #ref, #fieldloc,
     /// #length and #width.
@@ -298,14 +298,14 @@ namespace awkward {
                     const FieldLoc& fieldloc,
                     int64_t width,
                     int64_t length,
-                    KernelsLib ptr_lib = cpu_kernels);
+                    kernel::Lib ptr_lib =kernel::Lib::cpu_kernels);
 
     /// @brief Reference-counted pointer to the array buffer.
     const std::shared_ptr<T>
       ptr() const;
 
     /// @brief The Kernel Library that ptr uses.
-    KernelsLib
+    kernel::Lib
       ptr_lib() const;
 
     const std::string
@@ -371,13 +371,13 @@ namespace awkward {
       getitem_range(int64_t start, int64_t stop) const;
 
     IdentitiesPtr
-      to_gpu(KernelsLib ptr_lib) const;
+      to_gpu(kernel::Lib ptr_lib) const;
 
   private:
     /// @brief See #ptr.
     const std::shared_ptr<T> ptr_;
     /// @brief See #ptr_lib.
-    const KernelsLib ptr_lib_;
+    const kernel::Lib ptr_lib_;
   };
 
 #if !defined AWKWARD_IDENTITIES_NO_EXTERN_TEMPLATE && !defined _MSC_VER

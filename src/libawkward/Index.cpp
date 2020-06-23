@@ -55,17 +55,17 @@ namespace awkward {
   Index::~Index() = default;
 
   template <typename T>
-  IndexOf<T>::IndexOf(int64_t length, KernelsLib ptr_lib)
-    : ptr_(kernel::ptr_alloc<T>(length, ptr_lib))
+  IndexOf<T>::IndexOf(int64_t length, kernel::Lib ptr_lib)
+    : ptr_lib_(ptr_lib)
+    , ptr_(kernel::ptr_alloc<T>(ptr_lib, length))
     , offset_(0)
-    , length_(length)
-    , ptr_lib_(ptr_lib) { }
+    , length_(length) { }
 
   template <typename T>
   IndexOf<T>::IndexOf(const std::shared_ptr<T>& ptr,
                       int64_t offset,
                       int64_t length,
-                      KernelsLib ptr_lib)
+                      kernel::Lib ptr_lib)
       : ptr_(ptr)
       , offset_(offset)
       , length_(length)
@@ -148,13 +148,13 @@ namespace awkward {
         out << (int64_t)getitem_at_nowrap(i);
       }
     }
-    if(ptr_lib_ == KernelsLib::cuda_kernels) {
+    if(ptr_lib_ == kernel::Lib::cuda_kernels) {
       out << "]\" offset=\"" << offset_ << "\" length=\"" << length_
           << "\" at=\"0x" << std::hex << std::setw(12) << std::setfill('0')
           << reinterpret_cast<ssize_t>(ptr_.get())
-          << "\" on=\"[" << util::get_ptr_device_num(ptr_.get(),
-            ptr_lib_) << "]" << util::get_ptr_device_name(ptr_.get(), ptr_lib_)
-          << "\" KernelsLib=\"" << "cuda_kernels" << "\"/>" << post;
+          << "\" on=\"[" << kernel::get_ptr_device_num(ptr_lib(), ptr_.get())
+          << "]" << kernel::get_ptr_device_name(ptr_lib(), ptr_.get())
+          << "\" Lib=\"" << "cuda_kernels" << "\"/>" << post;
       return out.str();
     }
     out << "]\" offset=\"" << offset_ << "\" length=\"" << length_
@@ -204,13 +204,13 @@ namespace awkward {
   template <typename T>
   T
   IndexOf<T>::getitem_at_nowrap(int64_t at) const {
-    return kernel::index_getitem_at_nowrap<T>(ptr_.get(), offset_, at, ptr_lib());
+    return kernel::index_getitem_at_nowrap<T>(ptr_lib(), ptr_.get(), offset_, at);
   }
 
   template <typename T>
   void
   IndexOf<T>::setitem_at_nowrap(int64_t at, T value) const {
-    kernel::index_setitem_at_nowrap<T>(ptr_.get(), offset_, at, value, ptr_lib());
+    kernel::index_setitem_at_nowrap<T>(ptr_lib(), ptr_.get(), offset_, at, value);
   }
 
   template <typename T>
@@ -254,7 +254,7 @@ namespace awkward {
   IndexOf<int64_t> IndexOf<int8_t>::to64() const {
     std::shared_ptr<int64_t> ptr(
       length_ == 0 ? nullptr : new int64_t[(size_t)length_],
-      util::array_deleter<int64_t>());
+      kernel::array_deleter<int64_t>());
     if (length_ != 0) {
       awkward_index8_to_index64(ptr.get(), &ptr_.get()[(size_t)offset_],
                                 length_);
@@ -266,7 +266,7 @@ namespace awkward {
   IndexOf<int64_t> IndexOf<uint8_t>::to64() const {
     std::shared_ptr<int64_t> ptr(
       length_ == 0 ? nullptr : new int64_t[(size_t)length_],
-      util::array_deleter<int64_t>());
+      kernel::array_deleter<int64_t>());
     if (length_ != 0) {
       awkward_indexU8_to_index64(ptr.get(), &ptr_.get()[(size_t)offset_],
                                  length_);
@@ -278,7 +278,7 @@ namespace awkward {
   IndexOf<int64_t> IndexOf<int32_t>::to64() const {
     std::shared_ptr<int64_t> ptr(
       length_ == 0 ? nullptr : new int64_t[(size_t)length_],
-      util::array_deleter<int64_t>());
+      kernel::array_deleter<int64_t>());
     if (length_ != 0) {
       awkward_index32_to_index64(ptr.get(),
                                  &ptr_.get()[(size_t)offset_],
@@ -291,7 +291,7 @@ namespace awkward {
   IndexOf<int64_t> IndexOf<uint32_t>::to64() const {
     std::shared_ptr<int64_t> ptr(
       length_ == 0 ? nullptr : new int64_t[(size_t)length_],
-      util::array_deleter<int64_t>());
+      kernel::array_deleter<int64_t>());
     if (length_ != 0) {
       awkward_indexU32_to_index64(ptr.get(),
                                   &ptr_.get()[(size_t)offset_],
@@ -310,7 +310,7 @@ namespace awkward {
   IndexOf<T>::deep_copy() const {
     std::shared_ptr<T> ptr(
       length_ == 0 ? nullptr : new T[(size_t)length_],
-      util::array_deleter<T>());
+      kernel::array_deleter<T>());
     if (length_ != 0) {
       memcpy(ptr.get(),
              &ptr_.get()[(size_t)offset_],
@@ -320,21 +320,21 @@ namespace awkward {
   }
 
     template<typename T>
-    KernelsLib IndexOf<T>::ptr_lib() const {
+    kernel::Lib IndexOf<T>::ptr_lib() const {
       return ptr_lib_;
     }
 
     template<typename T>
     const IndexOf<T>
-    IndexOf<T>::to_gpu(KernelsLib ptr_lib) const {
+    IndexOf<T>::to_gpu(kernel::Lib ptr_lib) const {
       #ifndef _MSC_VER
-        if (ptr_lib == KernelsLib::cuda_kernels) {
+        if (ptr_lib == kernel::Lib::cuda_kernels) {
           T *cuda_ptr;
-          if(ptr_lib_ != KernelsLib::cuda_kernels) {
-            Error err = util::H2D<T>(&cuda_ptr,
-                                     ptr().get(),
-                                     length(),
-                                     cuda_kernels);
+          if(ptr_lib_ != kernel::Lib::cuda_kernels) {
+            Error err =  kernel::H2D<T>(kernel::Lib::cuda_kernels,
+                                        &cuda_ptr,
+                                        ptr().get(),
+                                        length());
             util::handle_cuda_error(err);
           }
           else {
@@ -342,10 +342,10 @@ namespace awkward {
           }
 
           return IndexOf<T>(std::shared_ptr<T>(cuda_ptr,
-                                               util::cuda_array_deleter<T>()),
+                                               kernel::cuda_array_deleter<T>()),
                             offset(),
                             length(),
-                            cuda_kernels);
+                           kernel::Lib::cuda_kernels);
         }
       #endif
       throw std::invalid_argument("Invalid kernel lib/OS for gpu ops");

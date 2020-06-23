@@ -530,7 +530,7 @@ namespace awkward {
   }
 
   ContentPtr
-  Record::to_gpu(KernelsLib ptr_lib) {
+  Record::to_gpu(kernel::Lib ptr_lib) {
     throw std::runtime_error(
       "undefined operation: Record::to_gpu(ptr_lib)");
   }

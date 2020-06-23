@@ -259,7 +259,7 @@ namespace awkward {
                           const Slice& tail) const override;
 
     ContentPtr
-      to_gpu(KernelsLib ptr_lib);
+      to_gpu(kernel::Lib ptr_lib);
   };
 
   /// A constant value with type None.

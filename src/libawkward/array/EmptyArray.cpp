@@ -126,7 +126,7 @@ namespace awkward {
 
   const std::shared_ptr<NumpyArray>
   EmptyArray::toNumpyArray(const std::string& format, ssize_t itemsize) const {
-    std::shared_ptr<void> ptr(new uint8_t[0], util::array_deleter<uint8_t>());
+    std::shared_ptr<void> ptr(new uint8_t[0], kernel::array_deleter<uint8_t>());
     std::vector<ssize_t> shape({ 0 });
     std::vector<ssize_t> strides({ itemsize });
     return std::make_shared<NumpyArray>(identities_,
@@ -541,8 +541,8 @@ namespace awkward {
   }
 
   ContentPtr
-  EmptyArray::to_gpu(KernelsLib ptr_lib) {
-    if(ptr_lib == KernelsLib::cuda_kernels) {
+  EmptyArray::to_gpu(kernel::Lib ptr_lib) {
+    if(ptr_lib == kernel::Lib::cuda_kernels) {
       return std::make_shared<EmptyArray>(identities(),
                                           parameters());
     }

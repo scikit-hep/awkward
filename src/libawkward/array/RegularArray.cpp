@@ -962,7 +962,7 @@ namespace awkward {
       std::vector<int64_t*> tocarryraw;
       for (int64_t j = 0;  j < n;  j++) {
         std::shared_ptr<int64_t> ptr(new int64_t[(size_t)totallen],
-                                     util::array_deleter<int64_t>());
+                                     kernel::array_deleter<int64_t>());
         tocarry.push_back(ptr);
         tocarryraw.push_back(ptr.get());
       }
@@ -1243,9 +1243,9 @@ namespace awkward {
   }
 
   ContentPtr
-  RegularArray::to_gpu(KernelsLib ptr_lib) {
-    if(ptr_lib == KernelsLib::cuda_kernels) {
-      ContentPtr cuda_content = content_->to_gpu(KernelsLib::cuda_kernels);
+  RegularArray::to_gpu(kernel::Lib ptr_lib) {
+    if(ptr_lib == kernel::Lib::cuda_kernels) {
+      ContentPtr cuda_content = content_->to_gpu(kernel::Lib::cuda_kernels);
       return std::make_shared<RegularArray>(identities(),
                                             parameters(),
                                             cuda_content,

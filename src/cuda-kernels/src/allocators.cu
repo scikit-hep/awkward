@@ -210,3 +210,119 @@ ERROR awkward_cuda_H2Dfloat64(
     length);
 }
 
+template <typename T>
+ERROR awkward_cuda_D2H(
+        T** to_ptr,
+        T* from_ptr,
+        int64_t length) {
+
+    cudaError_t memcpy_stat = cudaMemcpy(*to_ptr,
+                                         from_ptr,
+                                         sizeof(T) * length,
+                                         cudaMemcpyDeviceToHost);
+
+    if(memcpy_stat != cudaError_t::cudaSuccess) {
+        return failure(cudaGetErrorString(memcpy_stat), 0, kSliceNone);
+    }
+    return success();
+}
+ERROR awkward_cuda_D2Hbool(
+        bool **to_ptr,
+        bool *from_ptr,
+        int64_t length) {
+    return awkward_cuda_D2H<bool>(
+            to_ptr,
+            from_ptr,
+            length);
+}
+ERROR awkward_cuda_D2H8(
+        int8_t **to_ptr,
+        int8_t *from_ptr,
+        int64_t length) {
+    return awkward_cuda_D2H<int8_t>(
+            to_ptr,
+            from_ptr,
+            length);
+}
+ERROR awkward_cuda_D2HU8(
+        uint8_t **to_ptr,
+        uint8_t *from_ptr,
+        int64_t length) {
+    return awkward_cuda_D2H<uint8_t>(
+            to_ptr,
+            from_ptr,
+            length);
+}
+ERROR awkward_cuda_D2H16(
+        int16_t **to_ptr,
+        int16_t *from_ptr,
+        int64_t length) {
+    return awkward_cuda_D2H<int16_t>(
+            to_ptr,
+            from_ptr,
+            length);
+}
+ERROR awkward_cuda_D2HU16(
+        uint16_t **to_ptr,
+        uint16_t *from_ptr,
+        int64_t length) {
+    return awkward_cuda_D2H<uint16_t>(
+            to_ptr,
+            from_ptr,
+            length);
+}
+ERROR awkward_cuda_D2H32(
+        int32_t **to_ptr,
+        int32_t *from_ptr,
+        int64_t length) {
+    return awkward_cuda_D2H<int32_t>(
+            to_ptr,
+            from_ptr,
+            length);
+}
+ERROR awkward_cuda_D2HU32(
+        uint32_t **to_ptr,
+        uint32_t *from_ptr,
+        int64_t length) {
+    return awkward_cuda_D2H<uint32_t>(
+            to_ptr,
+            from_ptr,
+            length);
+}
+Error awkward_cuda_D2H64(
+        int64_t **to_ptr,
+        int64_t *from_ptr,
+        int64_t length) {
+    return awkward_cuda_D2H<int64_t>(
+            to_ptr,
+            from_ptr,
+            length);
+}
+ERROR awkward_cuda_D2HU64(
+        uint64_t **to_ptr,
+        uint64_t *from_ptr,
+        int64_t length) {
+    return awkward_cuda_D2H<uint64_t>(
+            to_ptr,
+            from_ptr,
+            length);
+}
+ERROR awkward_cuda_D2Hfloat32(
+        float **to_ptr,
+        float *from_ptr,
+        int64_t length) {
+    return awkward_cuda_D2H<float>(
+            to_ptr,
+            from_ptr,
+            length);
+}
+ERROR awkward_cuda_D2Hfloat64(
+        double **to_ptr,
+        double *from_ptr,
+        int64_t length) {
+    return awkward_cuda_D2H<double>(
+            to_ptr,
+            from_ptr,
+            length);
+}
+
