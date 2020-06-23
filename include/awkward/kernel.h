@@ -25,9 +25,7 @@ namespace kernel {
     LibraryPathCallback() {}
 
     const std::string library_path() const {
-      return std::string("/home/trickarcher/gsoc_2020/awkward-1"
-                         ".0/src/cuda-kernels/build/libawkward-cuda-kernels.so");
-    }
+      return std::string("dummy_path");
   };
 
   class LibraryCallback {

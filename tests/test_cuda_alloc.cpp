@@ -76,7 +76,7 @@ int main(int, char**) {
   auto cpu_arr8 = numpyArray8.to_cpu();
   std::cout << cpu_arr8->tostring() << "\n";
   auto cpu_arrU8 = numpyArrayU8.to_cpu();
-  std::cout << cpu_arrU8->tostring() << "\n";
+//  std::cout << cpu_arrU8->tostring() << "\n";
   auto cpu_arr32 = numpyArray32.to_cpu();
   std::cout << cpu_arr32->tostring() << "\n";
   auto cpu_arrU32 = numpyArrayU32.to_cpu();
