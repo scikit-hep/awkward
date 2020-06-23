@@ -686,7 +686,7 @@ namespace kernel {
   template <>
   Error D2H(
     kernel::Lib ptr_lib,
-    bool* to_ptr,
+    bool** to_ptr,
     bool* from_ptr,
     int64_t length) {
 #ifndef _MSC_VER
@@ -701,7 +701,7 @@ namespace kernel {
         util::handle_cuda_error(err);
       }
       typedef Error (func_awkward_cuda_D2Hbool_t)
-        (bool *to_ptr, bool *from_ptr, int64_t length);
+        (bool **to_ptr, bool *from_ptr, int64_t length);
       func_awkward_cuda_D2Hbool_t
         *func_awkward_cuda_D2Hbool =
         reinterpret_cast<func_awkward_cuda_D2Hbool_t *>
@@ -717,7 +717,7 @@ namespace kernel {
   template <>
   Error D2H(
     kernel::Lib ptr_lib,
-    int8_t* to_ptr,
+    int8_t** to_ptr,
     int8_t* from_ptr,
     int64_t length) {
 #ifndef _MSC_VER
@@ -732,7 +732,7 @@ namespace kernel {
       }
 
       typedef Error (func_awkward_cuda_D2H8_t)
-        (int8_t *to_ptr, int8_t *from_ptr, int8_t length);
+        (int8_t **to_ptr, int8_t *from_ptr, int8_t length);
       func_awkward_cuda_D2H8_t
         *func_awkward_cuda_D2H8 =
         reinterpret_cast<func_awkward_cuda_D2H8_t *>
@@ -748,7 +748,7 @@ namespace kernel {
   template <>
   Error D2H(
     kernel::Lib ptr_lib,
-    uint8_t* to_ptr,
+    uint8_t** to_ptr,
     uint8_t* from_ptr,
     int64_t length) {
 #ifndef _MSC_VER
@@ -763,7 +763,7 @@ namespace kernel {
         util::handle_cuda_error(err);
       }
       typedef Error (func_awkward_cuda_D2HU8_t)
-        (uint8_t *to_ptr, uint8_t *from_ptr, int64_t length);
+        (uint8_t **to_ptr, uint8_t *from_ptr, int64_t length);
       func_awkward_cuda_D2HU8_t
         *func_awkward_cuda_D2HU8 =
         reinterpret_cast<func_awkward_cuda_D2HU8_t *>
@@ -779,7 +779,7 @@ namespace kernel {
   template <>
   Error D2H(
     kernel::Lib ptr_lib,
-    int16_t* to_ptr,
+    int16_t** to_ptr,
     int16_t* from_ptr,
     int64_t length) {
 #ifndef _MSC_VER
@@ -794,7 +794,7 @@ namespace kernel {
         util::handle_cuda_error(err);
       }
       typedef Error (func_awkward_cuda_D2H16_t)
-        (int16_t *to_ptr, int16_t *from_ptr, int64_t length);
+        (int16_t **to_ptr, int16_t *from_ptr, int64_t length);
       func_awkward_cuda_D2H16_t
         *func_awkward_cuda_D2H16 =
         reinterpret_cast<func_awkward_cuda_D2H16_t *>
@@ -810,7 +810,7 @@ namespace kernel {
   template <>
   Error D2H(
     kernel::Lib ptr_lib,
-    uint16_t* to_ptr,
+    uint16_t** to_ptr,
     uint16_t* from_ptr,
     int64_t length) {
 #ifndef _MSC_VER
@@ -825,7 +825,7 @@ namespace kernel {
         util::handle_cuda_error(err);
       }
       typedef Error (func_awkward_cuda_D2HU16_t)
-        (uint16_t *to_ptr, uint16_t *from_ptr, int64_t length);
+        (uint16_t **to_ptr, uint16_t *from_ptr, int64_t length);
       func_awkward_cuda_D2HU16_t
         *func_awkward_cuda_D2HU16 =
         reinterpret_cast<func_awkward_cuda_D2HU16_t *>
@@ -841,7 +841,7 @@ namespace kernel {
   template <>
   Error D2H(
     kernel::Lib ptr_lib,
-    int32_t* to_ptr,
+    int32_t** to_ptr,
     int32_t* from_ptr,
     int64_t length) {
 #ifndef _MSC_VER
@@ -856,7 +856,7 @@ namespace kernel {
         util::handle_cuda_error(err);
       }
       typedef Error (func_awkward_cuda_D2H32_t)
-        (int32_t *to_ptr, int32_t *from_ptr, int64_t length);
+        (int32_t **to_ptr, int32_t *from_ptr, int64_t length);
       func_awkward_cuda_D2H32_t
         *func_awkward_cuda_D2H32 =
         reinterpret_cast<func_awkward_cuda_D2H32_t *>
@@ -872,7 +872,7 @@ namespace kernel {
   template <>
   Error D2H(
     kernel::Lib ptr_lib,
-    uint32_t* to_ptr,
+    uint32_t** to_ptr,
     uint32_t* from_ptr,
     int64_t length) {
 #ifndef _MSC_VER
@@ -887,7 +887,7 @@ namespace kernel {
         util::handle_cuda_error(err);
       }
       typedef Error (func_awkward_cuda_D2HU32_t)
-        (uint32_t *to_ptr, uint32_t *from_ptr, int64_t length);
+        (uint32_t **to_ptr, uint32_t *from_ptr, int64_t length);
       func_awkward_cuda_D2HU32_t
         *func_awkward_cuda_D2HU32 =
         reinterpret_cast<func_awkward_cuda_D2HU32_t *>
@@ -903,7 +903,7 @@ namespace kernel {
   template <>
   Error D2H(
     kernel::Lib ptr_lib,
-    int64_t* to_ptr,
+    int64_t** to_ptr,
     int64_t* from_ptr,
     int64_t length) {
 #ifndef _MSC_VER
@@ -918,7 +918,7 @@ namespace kernel {
         util::handle_cuda_error(err);
       }
       typedef Error (func_awkward_cuda_D2H64_t)
-        (int64_t *to_ptr, int64_t *from_ptr, int64_t length);
+        (int64_t **to_ptr, int64_t *from_ptr, int64_t length);
       func_awkward_cuda_D2H64_t
         *func_awkward_cuda_D2H64 =
         reinterpret_cast<func_awkward_cuda_D2H64_t *>
@@ -934,7 +934,7 @@ namespace kernel {
   template <>
   Error D2H(
     kernel::Lib ptr_lib,
-    uint64_t* to_ptr,
+    uint64_t** to_ptr,
     uint64_t* from_ptr,
     int64_t length) {
 #ifndef _MSC_VER
@@ -949,7 +949,7 @@ namespace kernel {
         util::handle_cuda_error(err);
       }
       typedef Error (func_awkward_cuda_D2HU64_t)
-        (uint64_t *to_ptr, uint64_t *from_ptr, int64_t length);
+        (uint64_t **to_ptr, uint64_t *from_ptr, int64_t length);
       func_awkward_cuda_D2HU64_t
         *func_awkward_cuda_D2HU64 =
         reinterpret_cast<func_awkward_cuda_D2HU64_t *>
@@ -965,7 +965,7 @@ namespace kernel {
   template <>
   Error D2H(
     kernel::Lib ptr_lib,
-    float* to_ptr,
+    float** to_ptr,
     float* from_ptr,
     int64_t length) {
 #ifndef _MSC_VER
@@ -980,7 +980,7 @@ namespace kernel {
         util::handle_cuda_error(err);
       }
       typedef Error (func_awkward_cuda_D2Hfloat32_t)
-        (float *to_ptr, float *from_ptr, int64_t length);
+        (float **to_ptr, float *from_ptr, int64_t length);
       func_awkward_cuda_D2Hfloat32_t
         *func_awkward_cuda_D2Hfloat32 =
         reinterpret_cast<func_awkward_cuda_D2Hfloat32_t *>
@@ -996,7 +996,7 @@ namespace kernel {
   template <>
   Error D2H(
     kernel::Lib ptr_lib,
-    double* to_ptr,
+    double** to_ptr,
     double* from_ptr,
     int64_t length) {
 #ifndef _MSC_VER
@@ -1011,7 +1011,7 @@ namespace kernel {
         util::handle_cuda_error(err);
       }
       typedef Error (func_awkward_cuda_D2Hfloat64_t)
-        (double *to_ptr, double *from_ptr, int64_t length);
+        (double **to_ptr, double *from_ptr, int64_t length);
       func_awkward_cuda_D2Hfloat64_t
         *func_awkward_cuda_D2Hfloat64 =
         reinterpret_cast<func_awkward_cuda_D2Hfloat64_t *>

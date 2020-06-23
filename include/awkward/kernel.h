@@ -131,7 +131,7 @@ namespace kernel {
   Error
   D2H(
     kernel::Lib ptr_lib,
-    T *to_ptr,
+    T **to_ptr,
     T *from_ptr,
     int64_t length);
 

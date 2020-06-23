@@ -55,6 +55,11 @@ int main(int, char**) {
   auto cuda_arr =  array->to_gpu(kernel::Lib::cuda_kernels);
   std::cout << cuda_arr->tostring() << "\n";
 
+  auto cpu_arr = cuda_arr->to_cpu();
+
+  std::cout << cpu_arr->tostring() << "\n";
+
+
   if (array.get()->getitem(slice).get()->tojson(false, 1) !=
          "[[[7.7,8.8,9.9]],[],[[]],[[1.1,2.2],[4.4]]]")
     return -1;

@@ -20,26 +20,70 @@ int main(int, char**) {
 //  main_index_arr.get()[3] = 4;
 //  main_index_arr.get()[4] = 5;
 //
-  std::shared_ptr<int32_t> main_offsets_arr(new int32_t[6],
-    std::default_delete<int32_t[]>());
-  main_offsets_arr.get()[0] = 0;
-  main_offsets_arr.get()[1] = 3;
-  main_offsets_arr.get()[2] = 3;
-  main_offsets_arr.get()[3] = 5;
-  main_offsets_arr.get()[4] = 6;
-  main_offsets_arr.get()[5] = 10;
 
-  ak::Index32 outoffsetsts(main_offsets_arr, 0, 6);
-  ak::NumpyArray numpyArray(outoffsetsts);
-  std::cout << numpyArray.format() << "\n";
-  auto cuda_arr1 = numpyArray.to_gpu(kernel::Lib::cuda_kernels);
-  std::cout << cuda_arr1->tostring() << "\n";
-  auto cpu_arr = cuda_arr1->to_cpu();
-  std::cout << cpu_arr->tostring() << "\n";
-//  std::shared_ptr<ak::IndexOf<int8_t>> main_offsets = std::make_shared<ak::IndexOf<int8_t>>(main_offsets_arr, 0, 6);
-//  auto cuda_arr = main_offsets->to_gpu(cuda_kernels);
-//  std::cout << cuda_arr.tostring() << "\n";
-//  std::cout << main_offsets->tostring() << "\n";
+  int8_t arr8[] = {1,2,3,4,5};
+  uint8_t arrU8[] = {1,2,3,4,5};
+  int32_t arr32[] = {1,2,3,4,5};
+  uint32_t arrU32[] = {1,2,3,4,5};
+  int64_t arr64[] = {1,2,3,4,5};
+  float arrf[] = {1,2,3,4,5};
+
+  std::shared_ptr<int8_t> main_arr8(arr8,
+                                      kernel::array_deleter<int8_t>());
+  std::shared_ptr<uint8_t> main_arrU8(arrU8,
+                                      kernel::array_deleter<uint8_t>());
+  std::shared_ptr<int32_t> main_arr32(arr32,
+                                      kernel::array_deleter<int32_t>());
+  std::shared_ptr<uint32_t> main_arrU32(arrU32,
+                                        kernel::array_deleter<uint32_t>());
+  std::shared_ptr<int64_t> main_arr64(arr64,
+                                      kernel::array_deleter<int64_t>());
+//  std::shared_ptr<float> main_arrf(arrf,
+//                                    std::default_delete<float[]>());
+
+  ak::Index8 index_arr8(main_arr8, 0, 5);
+  ak::IndexU8 index_arrU8(main_arrU8, 0, 5);
+  ak::Index32 index_arr32(main_arr32, 0, 5);
+  ak::IndexU32 index_arrU32(main_arrU32, 0, 5);
+  ak::Index64 index_arr64(main_arr64, 0, 5);
+
+  auto cuda_arr8 = index_arr8.to_gpu(kernel::Lib::cuda_kernels);
+  std::cout << cuda_arr8.tostring() << "\n";
+  auto cuda_arrU8 = index_arrU8.to_gpu(kernel::Lib::cuda_kernels);
+  std::cout << cuda_arrU8.tostring() << "\n";
+  auto cuda_arr32 = index_arr32.to_gpu(kernel::Lib::cuda_kernels);
+  std::cout << cuda_arr32.tostring() << "\n";
+  auto cuda_arrU32 = index_arrU32.to_gpu(kernel::Lib::cuda_kernels);
+  std::cout << cuda_arrU32.tostring() << "\n";
+  auto cuda_arr64 = index_arr64.to_gpu(kernel::Lib::cuda_kernels);
+  std::cout << cuda_arr64.tostring() << "\n";
+
+  std::cout << "\n";
+
+  ak::NumpyArray numpyArray8(cuda_arr8);
+  std::cout << numpyArray8.tostring() << "\n";
+  ak::NumpyArray numpyArrayU8(cuda_arrU8);
+  std::cout << numpyArrayU8.tostring() << "\n";
+  ak::NumpyArray numpyArray32(cuda_arr32);
+  std::cout << numpyArray32.tostring() << "\n";
+  ak::NumpyArray numpyArrayU32(cuda_arrU32);
+  std::cout << numpyArrayU32.tostring() << "\n";
+  ak::NumpyArray numpyArray64(cuda_arr64);
+  std::cout << numpyArray64.tostring() << "\n";
+
+  std::cout << "\n";
+
+  auto cpu_arr8 = numpyArray8.to_cpu();
+  std::cout << cpu_arr8->tostring() << "\n";
+  auto cpu_arrU8 = numpyArrayU8.to_cpu();
+  std::cout << cpu_arrU8->tostring() << "\n";
+  auto cpu_arr32 = numpyArray32.to_cpu();
+  std::cout << cpu_arr32->tostring() << "\n";
+  auto cpu_arrU32 = numpyArrayU32.to_cpu();
+  std::cout << cpu_arrU32->tostring() << "\n";
+  auto cpu_arr64 = numpyArray64.to_cpu();
+  std::cout << cpu_arr64->tostring() << "\n";
+
 }
 
 

@@ -3983,12 +3983,11 @@ namespace awkward {
       }
 
       if (format_.compare("?") == 0) {
-        std::shared_ptr<bool> cpu_ptr = kernel::ptr_alloc<bool>(kernel::Lib::cpu_kernels,
-                                                                length);
+        bool* cpu_ptr = new bool[length];
 
 
         Error err =  kernel::D2H<bool>(kernel::Lib::cuda_kernels,
-                                       cpu_ptr.get(),
+                                       &cpu_ptr,
                                        reinterpret_cast<bool *>(ptr_.get()),
                                        length);
         util::handle_cuda_error(err);
@@ -3996,7 +3995,8 @@ namespace awkward {
 
         return std::make_shared<NumpyArray>(identities(),
                                             parameters(),
-                                            cpu_ptr,
+                                            std::shared_ptr<void>(cpu_ptr,
+                                                                  kernel::array_deleter<bool>()),
                                             shape(),
                                             strides(),
                                             byteoffset(),
@@ -4004,12 +4004,11 @@ namespace awkward {
                                             format(),
                                             kernel::Lib::cpu_kernels);
       } else if (format_.compare("b") == 0) {
-        std::shared_ptr<int8_t> cpu_ptr = kernel::ptr_alloc<int8_t>(kernel::Lib::cpu_kernels,
-                                                                    length);
+        int8_t* cpu_ptr = new int8_t[length];
 
 
         Error err =  kernel::D2H<int8_t>(kernel::Lib::cuda_kernels,
-                                         cpu_ptr.get(),
+                                         &cpu_ptr,
                                          reinterpret_cast<int8_t *>(ptr_.get()),
                                          length);
         util::handle_cuda_error(err);
@@ -4018,7 +4017,8 @@ namespace awkward {
 
         return std::make_shared<NumpyArray>(identities(),
                                             parameters(),
-                                            cpu_ptr,
+                                            std::shared_ptr<void>(cpu_ptr,
+                                                                  kernel::array_deleter<int8_t>()),
                                             shape(),
                                             strides(),
                                             byteoffset(),
@@ -4026,19 +4026,19 @@ namespace awkward {
                                             format(),
                                             kernel::Lib::cpu_kernels);
       } else if (format_.compare("B") == 0) {
-        std::shared_ptr<uint8_t> cpu_ptr = kernel::ptr_alloc<uint8_t>(kernel::Lib::cpu_kernels,
-                                                                      length);
+        uint8_t* cpu_ptr = new uint8_t[length];
 
 
         Error err =  kernel::D2H<uint8_t>(kernel::Lib::cuda_kernels,
-                                          cpu_ptr.get(),
+                                          &cpu_ptr,
                                           reinterpret_cast<uint8_t *>(ptr_.get()),
                                           length);
         util::handle_cuda_error(err);
 
         return std::make_shared<NumpyArray>(identities(),
                                             parameters(),
-                                            cpu_ptr,
+                                            std::shared_ptr<void>(cpu_ptr,
+                                                                  kernel::array_deleter<uint8_t>()),
                                             shape(),
                                             strides(),
                                             byteoffset(),
@@ -4046,12 +4046,11 @@ namespace awkward {
                                             format(),
                                             kernel::Lib::cpu_kernels);
       } else if (format_.compare("h") == 0) {
-        std::shared_ptr<int16_t> cpu_ptr = kernel::ptr_alloc<int16_t>(kernel::Lib::cpu_kernels,
-                                                                      length);
+        int16_t* cpu_ptr = new int16_t[length];
 
 
         Error err =  kernel::D2H<int16_t>(kernel::Lib::cuda_kernels,
-                                          cpu_ptr.get(),
+                                          &cpu_ptr,
                                           reinterpret_cast<int16_t *>(ptr_.get()),
                                           length);
         util::handle_cuda_error(err);
@@ -4059,7 +4058,8 @@ namespace awkward {
 
         return std::make_shared<NumpyArray>(identities(),
                                             parameters(),
-                                            cpu_ptr,
+                                            std::shared_ptr<void>(cpu_ptr,
+                                                                  kernel::array_deleter<int16_t>()),
                                             shape(),
                                             strides(),
                                             byteoffset(),
@@ -4067,12 +4067,11 @@ namespace awkward {
                                             format(),
                                             kernel::Lib::cpu_kernels);
       } else if (format_.compare("H") == 0) {
-        std::shared_ptr<uint16_t> cpu_ptr = kernel::ptr_alloc<uint16_t>(kernel::Lib::cpu_kernels,
-                                                                       length);
+        uint16_t* cpu_ptr = new uint16_t[length];
 
 
         Error err =  kernel::D2H<uint16_t>(kernel::Lib::cuda_kernels,
-                                           cpu_ptr.get(),
+                                           &cpu_ptr,
                                            reinterpret_cast<uint16_t *>(ptr_.get()),
                                            length);
         util::handle_cuda_error(err);
@@ -4080,7 +4079,8 @@ namespace awkward {
 
         return std::make_shared<NumpyArray>(identities(),
                                             parameters(),
-                                            cpu_ptr,
+                                            std::shared_ptr<void>(cpu_ptr,
+                                                                  kernel::array_deleter<uint16_t>()),
                                             shape(),
                                             strides(),
                                             byteoffset(),
@@ -4088,11 +4088,10 @@ namespace awkward {
                                             format(),
                                             kernel::Lib::cpu_kernels);
       } else if (format_.compare("i") == 0) {
-        std::shared_ptr<int32_t> cpu_ptr = kernel::ptr_alloc<int32_t>(kernel::Lib::cpu_kernels,
-                                                                      length);
+        int32_t* cpu_ptr = new int32_t[length];
 
         Error err =  kernel::D2H<int32_t>(kernel::Lib::cuda_kernels,
-                                          cpu_ptr.get(),
+                                          &cpu_ptr,
                                           reinterpret_cast<int32_t *>(ptr_.get()),
                                           length);
         util::handle_cuda_error(err);
@@ -4100,7 +4099,8 @@ namespace awkward {
 
         return std::make_shared<NumpyArray>(identities(),
                                             parameters(),
-                                            cpu_ptr,
+                                            std::shared_ptr<void>(cpu_ptr,
+                                                                  kernel::array_deleter<int32_t>()),
                                             shape(),
                                             strides(),
                                             byteoffset(),
@@ -4108,19 +4108,19 @@ namespace awkward {
                                             format(),
                                             kernel::Lib::cpu_kernels);
       } else if (format_.compare("I") == 0) {
-        std::shared_ptr<uint32_t> cpu_ptr = kernel::ptr_alloc<uint32_t>(kernel::Lib::cpu_kernels,
-                                                                        length);
+        uint32_t* cpu_ptr = new uint32_t[length];
 
 
         Error err =  kernel::D2H<uint32_t>(kernel::Lib::cuda_kernels,
-                                           cpu_ptr.get(),
+                                           &cpu_ptr,
                                            reinterpret_cast<uint32_t *>(ptr_.get()),
                                            length);
         util::handle_cuda_error(err);
 
         return std::make_shared<NumpyArray>(identities(),
                                             parameters(),
-                                            cpu_ptr,
+                                            std::shared_ptr<void>(cpu_ptr,
+                                                                  kernel::array_deleter<uint32_t>()),
                                             shape(),
                                             strides(),
                                             byteoffset(),
@@ -4128,19 +4128,18 @@ namespace awkward {
                                             format(),
                                             kernel::Lib::cpu_kernels);
       } else if (format_.compare("l") == 0) {
-        std::shared_ptr<int64_t> cpu_ptr = kernel::ptr_alloc<int64_t>(kernel::Lib::cpu_kernels,
-                                                                      length);
-
+        int64_t* cpu_ptr = new int64_t[length];
 
         Error err =  kernel::D2H<int64_t>(kernel::Lib::cuda_kernels,
-                                          cpu_ptr.get(),
+                                          &cpu_ptr,
                                           reinterpret_cast<int64_t *>(ptr_.get()),
                                           length);
         util::handle_cuda_error(err);
 
         return std::make_shared<NumpyArray>(identities(),
                                             parameters(),
-                                            cpu_ptr,
+                                            std::shared_ptr<void>(cpu_ptr,
+                                                                  kernel::array_deleter<int64_t>()),
                                             shape(),
                                             strides(),
                                             byteoffset(),
@@ -4148,19 +4147,18 @@ namespace awkward {
                                             format(),
                                             kernel::Lib::cpu_kernels);
       } else if (format_.compare("L") == 0) {
-        std::shared_ptr<uint64_t> cpu_ptr = kernel::ptr_alloc<uint64_t>(kernel::Lib::cpu_kernels,
-                                                                        length);
-
+        uint64_t* cpu_ptr = new uint64_t[length];
 
         Error err =  kernel::D2H<uint64_t>(kernel::Lib::cuda_kernels,
-                                           cpu_ptr.get(),
+                                           &cpu_ptr,
                                            reinterpret_cast<uint64_t *>(ptr_.get()),
                                            length);
         util::handle_cuda_error(err);
 
         return std::make_shared<NumpyArray>(identities(),
                                             parameters(),
-                                            cpu_ptr,
+                                            std::shared_ptr<void>(cpu_ptr,
+                                                                  kernel::array_deleter<uint64_t>()),
                                             shape(),
                                             strides(),
                                             byteoffset(),
@@ -4168,13 +4166,10 @@ namespace awkward {
                                             format(),
                                             kernel::Lib::cpu_kernels);
       } else if (format_.compare("f") == 0) {
-        std::shared_ptr<float> cpu_ptr = kernel::ptr_alloc<float>(kernel::Lib::cpu_kernels,
-                                                                      length);
-
-
+        float* cpu_ptr = new float[length];
 
         Error err =  kernel::D2H<float>(kernel::Lib::cuda_kernels,
-                                        cpu_ptr.get(),
+                                        &cpu_ptr,
                                         reinterpret_cast<float *>(ptr_.get()),
                                         length);
         util::handle_cuda_error(err);
@@ -4182,7 +4177,8 @@ namespace awkward {
 
         return std::make_shared<NumpyArray>(identities(),
                                             parameters(),
-                                            cpu_ptr,
+                                            std::shared_ptr<void>(cpu_ptr,
+                                                                  kernel::array_deleter<float>()),
                                             shape(),
                                             strides(),
                                             byteoffset(),
@@ -4190,20 +4186,18 @@ namespace awkward {
                                             format(),
                                             kernel::Lib::cpu_kernels);
       } else if (format_.compare("d") == 0) {
-        std::shared_ptr<double> cpu_ptr = kernel::ptr_alloc<double>(kernel::Lib::cpu_kernels,
-                                                                    length);
-
-
+        double* cpu_ptr = new double[length];
 
         Error err =  kernel::D2H<double>(kernel::Lib::cuda_kernels,
-                                         cpu_ptr.get(),
+                                         &cpu_ptr,
                                          reinterpret_cast<double *>(ptr_.get()),
                                          length);
         util::handle_cuda_error(err);
 
         return std::make_shared<NumpyArray>(identities(),
                                             parameters(),
-                                            cpu_ptr,
+                                            std::shared_ptr<void>(cpu_ptr,
+                                                                  kernel::array_deleter<double>()),
                                             shape(),
                                             strides(),
                                             byteoffset(),

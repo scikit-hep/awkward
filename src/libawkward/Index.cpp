@@ -356,15 +356,15 @@ namespace awkward {
   IndexOf<T>::to_cpu() const {
 #ifndef _MSC_VER
     if (ptr_lib_ == kernel::Lib::cuda_kernels) {
-      std::shared_ptr<T> cpu_ptr = kernel::ptr_alloc<T>(kernel::Lib::cpu_kernels,
-                                                        length());
+      T* cpu_ptr = new T[length_];
       Error err =  kernel::D2H<T>(kernel::Lib::cuda_kernels,
-                                  cpu_ptr.get(),
+                                  &cpu_ptr,
                                   ptr().get(),
                                   length());
       util::handle_cuda_error(err);
 
-      return IndexOf<T>(cpu_ptr,
+      return IndexOf<T>(std::shared_ptr<T>(cpu_ptr,
+                                             kernel::array_deleter<T>()),
                         offset(),
                         length(),
                         kernel::Lib::cpu_kernels);
