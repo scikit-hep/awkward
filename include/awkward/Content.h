@@ -1119,6 +1119,9 @@ namespace awkward {
     virtual ContentPtr
       to_gpu(kernel::Lib ptr_lib);
 
+    virtual ContentPtr
+      to_cpu();
+
   protected:
     /// @brief Internal function to wrap putative #getitem output with enough
     /// RegularArray nodes to satisfy a given `shape`.

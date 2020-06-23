@@ -1903,6 +1903,26 @@ namespace awkward {
   }
 
   template <typename T, typename I>
+  ContentPtr
+  UnionArrayOf<T, I>::to_cpu() {
+
+    IndexOf<T> cpu_tags = tags_.to_cpu();
+    IndexOf<I> cpu_index = index_.to_cpu();
+
+    ContentPtrVec cpu_content_vec;
+    for(auto const i : contents_) {
+      ContentPtr cpu_ptr = i->to_cpu();
+      cpu_content_vec.emplace_back(cpu_ptr);
+    }
+
+    return std::make_shared<UnionArrayOf<T, I>>(identities(),
+                                                parameters(),
+                                                cpu_tags,
+                                                cpu_index,
+                                                cpu_content_vec);
+  }
+
+  template <typename T, typename I>
   template <typename S>
   const ContentPtr
   UnionArrayOf<T, I>::getitem_next_jagged_generic(const Index64& slicestarts,

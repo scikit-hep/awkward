@@ -830,6 +830,16 @@ namespace awkward {
     }
   }
 
+  ContentPtr
+  UnmaskedArray::to_cpu() {
+
+    ContentPtr cpu_content = content_->to_cpu();
+    return std::make_shared<UnmaskedArray>(identities(),
+                                           parameters(),
+                                           cpu_content);
+
+  }
+
   template <typename S>
   const ContentPtr
   UnmaskedArray::getitem_next_jagged_generic(const Index64& slicestarts,

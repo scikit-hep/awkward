@@ -1815,6 +1815,22 @@ namespace awkward {
     }
   }
 
+  template <typename T>
+  ContentPtr
+  ListArrayOf<T>::to_cpu() {
+
+    IndexOf<T> cpu_starts = starts_.to_cpu();
+    IndexOf<T> cpu_stops = stops_.to_cpu();
+    ContentPtr cpu_content = content_->to_cpu();
+
+    return std::make_shared<ListArrayOf<T>>(identities(),
+                                            parameters(),
+                                            cpu_starts,
+                                            cpu_stops,
+                                            cpu_content);
+
+  }
+
   template class EXPORT_SYMBOL ListArrayOf<int32_t>;
   template class EXPORT_SYMBOL ListArrayOf<uint32_t>;
   template class EXPORT_SYMBOL ListArrayOf<int64_t>;

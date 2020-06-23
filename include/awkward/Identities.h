@@ -373,6 +373,9 @@ namespace awkward {
     IdentitiesPtr
       to_gpu(kernel::Lib ptr_lib) const;
 
+    IdentitiesPtr
+      to_cpu() const;
+
   private:
     /// @brief See #ptr.
     const std::shared_ptr<T> ptr_;

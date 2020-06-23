@@ -331,14 +331,6 @@ namespace kernel {
 #endif
 
   template<typename T>
-  Error
-  H2D(
-    kernel::Lib ptr_lib,
-    T **to_ptr,
-    T *from_ptr,
-    int64_t length);
-
-  template<typename T>
   int get_ptr_device_num(kernel::Lib ptr_lib, T *ptr) {
 
 #ifndef _MSC_VER
@@ -426,6 +418,22 @@ namespace kernel {
     /// zero.
     void operator()(T const *p) { }
   };
+
+  template<typename T>
+  Error
+  H2D(
+    kernel::Lib ptr_lib,
+    T **to_ptr,
+    T *from_ptr,
+    int64_t length);
+
+  template<typename T>
+  Error
+  D2H(
+    kernel::Lib ptr_lib,
+    T **to_ptr,
+    T *from_ptr,
+    int64_t length);
 
 
   template<typename T>

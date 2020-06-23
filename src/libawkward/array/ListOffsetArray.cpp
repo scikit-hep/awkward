@@ -1924,6 +1924,18 @@ namespace awkward {
     }
   }
 
+  template <typename T>
+  ContentPtr
+  ListOffsetArrayOf<T>::to_cpu() {
+    IndexOf<T> cpu_offets = offsets_.to_cpu();
+    ContentPtr cpu_content = content_->to_cpu();
+    return std::make_shared<ListOffsetArrayOf<T>>(identities(),
+                                                  parameters(),
+                                                  cpu_offets,
+                                                  cpu_content);
+
+  }
+
   template class EXPORT_SYMBOL ListOffsetArrayOf<int32_t>;
   template class EXPORT_SYMBOL ListOffsetArrayOf<uint32_t>;
   template class EXPORT_SYMBOL ListOffsetArrayOf<int64_t>;

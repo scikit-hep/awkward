@@ -1253,4 +1253,14 @@ namespace awkward {
     }
   }
 
+  ContentPtr
+  RegularArray::to_cpu() {
+    ContentPtr cpu_content = content_->to_cpu();
+    return std::make_shared<RegularArray>(identities(),
+                                          parameters(),
+                                          cpu_content,
+                                          size());
+
+  }
+
 }

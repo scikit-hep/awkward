@@ -1416,6 +1416,23 @@ namespace awkward {
     }
   }
 
+  ContentPtr
+  RecordArray::to_cpu()  {
+
+    ContentPtrVec cpu_content_vec;
+    for(auto i : contents_) {
+      ContentPtr cpu_ptr = i->to_cpu();
+      cpu_content_vec.emplace_back(cpu_ptr);
+    }
+
+    return std::make_shared<RecordArray>(identities(),
+                                         parameters(),
+                                         cpu_content_vec,
+                                         recordlookup(),
+                                         length());
+
+  }
+
   template <typename S>
   const ContentPtr
   RecordArray::getitem_next_jagged_generic(const Index64& slicestarts,

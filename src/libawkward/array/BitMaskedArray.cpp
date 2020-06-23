@@ -880,4 +880,18 @@ namespace awkward {
                                               lsb_order());
     }
   }
+
+  ContentPtr
+  BitMaskedArray::to_cpu() {
+    IndexU8 cpu_mask = mask_.to_cpu();
+    ContentPtr  cpu_content = content_->to_cpu();
+    return std::make_shared<BitMaskedArray>(identities(),
+                                            parameters(),
+                                            cpu_mask,
+                                            cpu_content,
+                                            valid_when(),
+                                            length(),
+                                            lsb_order());
+
+  }
 }

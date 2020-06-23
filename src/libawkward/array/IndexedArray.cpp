@@ -2074,6 +2074,18 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
+  ContentPtr
+  IndexedArrayOf<T, ISOPTION>::to_cpu() {
+      IndexOf<T> cpu_index = index_.to_cpu();
+      ContentPtr cpu_content = content_->to_cpu();
+      return std::make_shared<IndexedArrayOf<T, ISOPTION>>(identities_,
+                                                           parameters(),
+                                                           cpu_index,
+                                                           cpu_content);
+
+  }
+
+  template <typename T, bool ISOPTION>
   template <typename S>
   const ContentPtr
   IndexedArrayOf<T, ISOPTION>::getitem_next_jagged_generic(

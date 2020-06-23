@@ -548,4 +548,10 @@ namespace awkward {
     }
   }
 
+  ContentPtr
+  EmptyArray::to_cpu() {
+      return std::make_shared<EmptyArray>(identities(),
+                                          parameters());
+  }
+
 }

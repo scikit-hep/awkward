@@ -1129,6 +1129,18 @@ namespace awkward {
     }
   }
 
+  ContentPtr
+  ByteMaskedArray::to_cpu() {
+    Index8 cpu_mask = mask_.to_cpu();
+    ContentPtr cpu_content = content_->to_cpu();
+    return std::make_shared<ByteMaskedArray>(identities(),
+                                             parameters(),
+                                             cpu_mask,
+                                             cpu_content,
+                                             valid_when());
+
+  }
+
   template <typename S>
   const ContentPtr
   ByteMaskedArray::getitem_next_jagged_generic(const Index64& slicestarts,

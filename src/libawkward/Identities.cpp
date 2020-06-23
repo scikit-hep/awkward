@@ -339,8 +339,9 @@ namespace awkward {
 
   template <typename T>
   IdentitiesPtr
-  IdentitiesOf<T>::to_gpu(kernel::Lib ptr_lib) const{
-    if(ptr_lib ==kernel::Lib::cuda_kernels) {
+  IdentitiesOf<T>::to_gpu(kernel::Lib ptr_lib) const {
+#ifndef _MSC_VER
+    if(ptr_lib == kernel::Lib::cuda_kernels) {
 
       T *cuda_ptr;
       if(ptr_lib_ != kernel::Lib::cuda_kernels) {
@@ -366,6 +367,44 @@ namespace awkward {
                                                  kernel::cuda_array_deleter<T>()),
                                                kernel::Lib::cuda_kernels);
     }
+#endif
+    throw std::invalid_argument("Invalid Kernel Library or OS for GPU Transfer");
+  }
+
+  template <typename T>
+  IdentitiesPtr
+  IdentitiesOf<T>::to_cpu() const {
+#ifndef _MSC_VER
+    if(ptr_lib_ ==kernel::Lib::cuda_kernels) {
+
+      T *cpu_ptr;
+
+      Error err =  kernel::H2D<T>(kernel::Lib::cuda_kernels,
+                                  &cpu_ptr,
+                                  ptr_.get(),
+                                  width_ * length_);
+
+
+      util::handle_cuda_error(err);
+
+      return std::make_shared<IdentitiesOf<T>>(ref(),
+                                               fieldloc(),
+                                               offset(),
+                                               width(),
+                                               length(),
+                                               std::shared_ptr<T>(
+                                                 cpu_ptr,
+                                                 kernel::array_deleter<T>()),
+                                               kernel::Lib::cpu_kernels);
+    }
+#endif
+    return std::make_shared<IdentitiesOf<T>>(ref_,
+                                             fieldloc_,
+                                             offset_,
+                                             width_,
+                                             length_,
+                                             ptr_,
+                                             kernel::Lib::cpu_kernels);
   }
 
   template class EXPORT_SYMBOL IdentitiesOf<int32_t>;

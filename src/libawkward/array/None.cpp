@@ -314,5 +314,12 @@ namespace awkward {
       "undefined operation: None::to_gpu(ptr_lib)");
   }
 
+  ContentPtr
+  None::to_cpu() {
+    throw std::runtime_error(
+      "undefined operation: None::to_cpu()");
+  }
+
+
   const ContentPtr none = std::make_shared<None>();
 }

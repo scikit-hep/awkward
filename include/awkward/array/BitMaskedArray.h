@@ -396,6 +396,9 @@ namespace awkward {
     ContentPtr
       to_gpu(kernel::Lib ptr_lib) override;
 
+    ContentPtr
+      to_cpu() override;
+
   private:
     /// @brief See #mask.
     const IndexU8 mask_;

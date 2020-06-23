@@ -1081,6 +1081,7 @@ namespace awkward {
 
     ContentPtr
       to_gpu(kernel::Lib ptr_lib) override {
+#ifndef _MSC_VER
       if(ptr_lib == kernel::Lib::cuda_kernels) {
         T* cuda_ptr;
         if(ptr_lib_ != kernel::Lib::cuda_kernels) {
@@ -1102,8 +1103,41 @@ namespace awkward {
                                                offset(),
                                                length(),
                                                itemsize(),
-                                               ptr_lib_);
+                                               kernel::Lib::cuda_kernels);
       }
+#endif
+      throw std::invalid_argument("Invalid Kernel Library or OS for GPU Transfer");
+    }
+
+    ContentPtr
+    to_cpu(kernel::Lib ptr_lib) {
+#ifndef _MSC_VER
+      if(ptr_lib == kernel::Lib::cuda_kernels) {
+        T* cpu_ptr;
+        Error err = kernel::H2D<T>(kernel::Lib::cuda_kernels,
+                                   &cpu_ptr,
+                                   ptr_.get(),
+                                   length_);
+        util::handle_cuda_error(err);
+
+        return std::make_shared<RawArrayOf<T>>(identities(),
+                                               parameters(),
+                                               std::shared_ptr<T>(
+                                                 cpu_ptr,
+                                                 kernel::array_deleter<T>()),
+                                               offset(),
+                                               length(),
+                                               itemsize(),
+                                               kernel::Lib::cpu_kernels);
+      }
+#endif
+      return std::make_shared<RawArrayOf<T>>(identities_,
+                                             parameters_,
+                                             ptr_,
+                                             offset_,
+                                             length_,
+                                             itemsize_,
+                                             kernel::Lib::cpu_kernels);
     }
 
   private:

@@ -206,6 +206,9 @@ namespace awkward {
     const IndexOf<T>
       to_gpu(kernel::Lib ptr_lib) const;
 
+    const IndexOf<T>
+      to_cpu() const;
+
   private:
     /// @brief See #ptr.
     const std::shared_ptr<T> ptr_;

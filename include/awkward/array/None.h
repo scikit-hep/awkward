@@ -260,6 +260,9 @@ namespace awkward {
 
     ContentPtr
       to_gpu(kernel::Lib ptr_lib);
+
+    ContentPtr
+      to_cpu() override;
   };
 
   /// A constant value with type None.

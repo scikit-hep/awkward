@@ -1246,6 +1246,11 @@ namespace awkward {
     return nullptr;
   }
 
+  ContentPtr
+  Content::to_cpu() {
+    return nullptr;
+  }
+
   const std::string
   Content::parameters_tostring(const std::string& indent,
                                const std::string& pre,

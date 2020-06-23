@@ -327,7 +327,7 @@ namespace awkward {
     template<typename T>
     const IndexOf<T>
     IndexOf<T>::to_gpu(kernel::Lib ptr_lib) const {
-      #ifndef _MSC_VER
+#ifndef _MSC_VER
         if (ptr_lib == kernel::Lib::cuda_kernels) {
           T *cuda_ptr;
           if(ptr_lib_ != kernel::Lib::cuda_kernels) {
@@ -347,9 +347,34 @@ namespace awkward {
                             length(),
                            kernel::Lib::cuda_kernels);
         }
-      #endif
-      throw std::invalid_argument("Invalid kernel lib/OS for gpu ops");
+#endif
+      throw std::invalid_argument("Invalid Kernel Library or OS for GPU Transfer");
     }
+
+  template<typename T>
+  const IndexOf<T>
+  IndexOf<T>::to_cpu() const {
+#ifndef _MSC_VER
+    if (ptr_lib_ == kernel::Lib::cuda_kernels) {
+      T *cpu_ptr;
+      Error err =  kernel::D2H<T>(kernel::Lib::cuda_kernels,
+                                  &cpu_ptr,
+                                  ptr().get(),
+                                  length());
+      util::handle_cuda_error(err);
+
+      return IndexOf<T>(std::shared_ptr<T>(cpu_ptr,
+                                           kernel::array_deleter<T>()),
+                        offset(),
+                        length(),
+                        kernel::Lib::cpu_kernels);
+    }
+#endif
+    return IndexOf<T>(ptr_,
+                      offset_,
+                      length_,
+                      kernel::Lib::cpu_kernels);
+  }
 
   template class EXPORT_SYMBOL IndexOf<int8_t>;
   template class EXPORT_SYMBOL IndexOf<uint8_t>;

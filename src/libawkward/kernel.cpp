@@ -381,6 +381,348 @@ namespace kernel {
                    kSliceNone);
   }
 
+  template <>
+  Error D2H(
+    kernel::Lib ptr_lib,
+    bool** to_ptr,
+    bool* from_ptr,
+    int64_t length) {
+#ifndef _MSC_VER
+    if(ptr_lib == kernel::Lib::cuda_kernels) {
+      auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+
+      if(!handle) {
+        Error err = failure("Failed to find awkward1[cuda]",
+                            0,
+                            kSliceNone);
+
+        util::handle_cuda_error(err);
+      }
+      typedef Error (func_awkward_cuda_D2Hbool_t)
+        (bool **to_ptr, bool *from_ptr, int64_t length);
+      func_awkward_cuda_D2Hbool_t
+        *func_awkward_cuda_D2Hbool =
+        reinterpret_cast<func_awkward_cuda_D2Hbool_t *>
+        (dlsym(handle, "awkward_cuda_D2Hbool"));
+
+      return (*func_awkward_cuda_D2Hbool)(to_ptr, from_ptr, length);
+    }
+#endif
+    return failure("No suitable kernel for transfer",
+                   0,
+                   kSliceNone);
+  }
+  template <>
+  Error D2H(
+    kernel::Lib ptr_lib,
+    int8_t** to_ptr,
+    int8_t* from_ptr,
+    int64_t length) {
+#ifndef _MSC_VER
+    if(ptr_lib == kernel::Lib::cuda_kernels) {
+      auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+      if(!handle) {
+        Error err = failure("Failed to find awkward1[cuda]",
+                            0,
+                            kSliceNone);
+
+        util::handle_cuda_error(err);
+      }
+
+      typedef Error (func_awkward_cuda_D2H8_t)
+        (int8_t **to_ptr, int8_t *from_ptr, int8_t length);
+      func_awkward_cuda_D2H8_t
+        *func_awkward_cuda_D2H8 =
+        reinterpret_cast<func_awkward_cuda_D2H8_t *>
+        (dlsym(handle, "awkward_cuda_D2H8"));
+
+      return (*func_awkward_cuda_D2H8)(to_ptr, from_ptr, length);
+    }
+#endif
+    return failure("No suitable kernel for transfer",
+                   0,
+                   kSliceNone);
+  }
+  template <>
+  Error D2H(
+    kernel::Lib ptr_lib,
+    uint8_t** to_ptr,
+    uint8_t* from_ptr,
+    int64_t length) {
+#ifndef _MSC_VER
+    if(ptr_lib == kernel::Lib::cuda_kernels) {
+      auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+
+      if(!handle) {
+        Error err = failure("Failed to find awkward1[cuda]",
+                            0,
+                            kSliceNone);
+
+        util::handle_cuda_error(err);
+      }
+      typedef Error (func_awkward_cuda_D2HU8_t)
+        (uint8_t **to_ptr, uint8_t *from_ptr, int64_t length);
+      func_awkward_cuda_D2HU8_t
+        *func_awkward_cuda_D2HU8 =
+        reinterpret_cast<func_awkward_cuda_D2HU8_t *>
+        (dlsym(handle, "awkward_cuda_D2HU8"));
+
+      return (*func_awkward_cuda_D2HU8)(to_ptr, from_ptr, length);
+    }
+#endif
+    return failure("No suitable kernel for transfer",
+                   0,
+                   kSliceNone);
+  }
+  template <>
+  Error D2H(
+    kernel::Lib ptr_lib,
+    int16_t** to_ptr,
+    int16_t* from_ptr,
+    int64_t length) {
+#ifndef _MSC_VER
+    if(ptr_lib == kernel::Lib::cuda_kernels) {
+      auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+
+      if(!handle) {
+        Error err = failure("Failed to find awkward1[cuda]",
+                            0,
+                            kSliceNone);
+
+        util::handle_cuda_error(err);
+      }
+      typedef Error (func_awkward_cuda_D2H16_t)
+        (int16_t **to_ptr, int16_t *from_ptr, int64_t length);
+      func_awkward_cuda_D2H16_t
+        *func_awkward_cuda_D2H16 =
+        reinterpret_cast<func_awkward_cuda_D2H16_t *>
+        (dlsym(handle, "awkward_cuda_D2H16"));
+
+      return (*func_awkward_cuda_D2H16)(to_ptr, from_ptr, length);
+    }
+#endif
+    return failure("No suitable kernel for transfer",
+                   0,
+                   kSliceNone);
+  }
+  template <>
+  Error D2H(
+    kernel::Lib ptr_lib,
+    uint16_t** to_ptr,
+    uint16_t* from_ptr,
+    int64_t length) {
+#ifndef _MSC_VER
+    if(ptr_lib == kernel::Lib::cuda_kernels) {
+      auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+
+      if(!handle) {
+        Error err = failure("Failed to find awkward1[cuda]",
+                            0,
+                            kSliceNone);
+
+        util::handle_cuda_error(err);
+      }
+      typedef Error (func_awkward_cuda_D2HU16_t)
+        (uint16_t **to_ptr, uint16_t *from_ptr, int64_t length);
+      func_awkward_cuda_D2HU16_t
+        *func_awkward_cuda_D2HU16 =
+        reinterpret_cast<func_awkward_cuda_D2HU16_t *>
+        (dlsym(handle, "awkward_cuda_D2HU16"));
+
+      return (*func_awkward_cuda_D2HU16)(to_ptr, from_ptr, length);
+    }
+#endif
+    return failure("No suitable kernel for transfer",
+                   0,
+                   kSliceNone);
+  }
+  template <>
+  Error D2H(
+    kernel::Lib ptr_lib,
+    int32_t** to_ptr,
+    int32_t* from_ptr,
+    int64_t length) {
+#ifndef _MSC_VER
+    if(ptr_lib == kernel::Lib::cuda_kernels) {
+      auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+
+      if(!handle) {
+        Error err = failure("Failed to find awkward1[cuda]",
+                            0,
+                            kSliceNone);
+
+        util::handle_cuda_error(err);
+      }
+      typedef Error (func_awkward_cuda_D2H32_t)
+        (int32_t **to_ptr, int32_t *from_ptr, int64_t length);
+      func_awkward_cuda_D2H32_t
+        *func_awkward_cuda_D2H32 =
+        reinterpret_cast<func_awkward_cuda_D2H32_t *>
+        (dlsym(handle, "awkward_cuda_D2H32"));
+
+      return (*func_awkward_cuda_D2H32)(to_ptr, from_ptr, length);
+    }
+#endif
+    return failure("No suitable kernel for transfer",
+                   0,
+                   kSliceNone);
+  }
+  template <>
+  Error D2H(
+    kernel::Lib ptr_lib,
+    uint32_t** to_ptr,
+    uint32_t* from_ptr,
+    int64_t length) {
+#ifndef _MSC_VER
+    if(ptr_lib == kernel::Lib::cuda_kernels) {
+      auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+
+      if(!handle) {
+        Error err = failure("Failed to find awkward1[cuda]",
+                            0,
+                            kSliceNone);
+
+        util::handle_cuda_error(err);
+      }
+      typedef Error (func_awkward_cuda_D2HU32_t)
+        (uint32_t **to_ptr, uint32_t *from_ptr, int64_t length);
+      func_awkward_cuda_D2HU32_t
+        *func_awkward_cuda_D2HU32 =
+        reinterpret_cast<func_awkward_cuda_D2HU32_t *>
+        (dlsym(handle, "awkward_cuda_D2HU32"));
+
+      return (*func_awkward_cuda_D2HU32)(to_ptr, from_ptr, length);
+    }
+#endif
+    return failure("No suitable kernel for transfer",
+                   0,
+                   kSliceNone);
+  }
+  template <>
+  Error D2H(
+    kernel::Lib ptr_lib,
+    int64_t** to_ptr,
+    int64_t* from_ptr,
+    int64_t length) {
+#ifndef _MSC_VER
+    if(ptr_lib == kernel::Lib::cuda_kernels) {
+      auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+
+      if(!handle) {
+        Error err = failure("Failed to find awkward1[cuda]",
+                            0,
+                            kSliceNone);
+
+        util::handle_cuda_error(err);
+      }
+      typedef Error (func_awkward_cuda_D2H64_t)
+        (int64_t **to_ptr, int64_t *from_ptr, int64_t length);
+      func_awkward_cuda_D2H64_t
+        *func_awkward_cuda_D2H64 =
+        reinterpret_cast<func_awkward_cuda_D2H64_t *>
+        (dlsym(handle, "awkward_cuda_D2H64"));
+
+      return (*func_awkward_cuda_D2H64)(to_ptr, from_ptr, length);
+    }
+#endif
+    return failure("No suitable kernel for transfer",
+                   0,
+                   kSliceNone);
+  }
+  template <>
+  Error D2H(
+    kernel::Lib ptr_lib,
+    uint64_t** to_ptr,
+    uint64_t* from_ptr,
+    int64_t length) {
+#ifndef _MSC_VER
+    if(ptr_lib == kernel::Lib::cuda_kernels) {
+      auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+
+      if(!handle) {
+        Error err = failure("Failed to find awkward1[cuda]",
+                            0,
+                            kSliceNone);
+
+        util::handle_cuda_error(err);
+      }
+      typedef Error (func_awkward_cuda_D2HU64_t)
+        (uint64_t **to_ptr, uint64_t *from_ptr, int64_t length);
+      func_awkward_cuda_D2HU64_t
+        *func_awkward_cuda_D2HU64 =
+        reinterpret_cast<func_awkward_cuda_D2HU64_t *>
+        (dlsym(handle, "awkward_cuda_D2HU64"));
+
+      return (*func_awkward_cuda_D2HU64)(to_ptr, from_ptr, length);
+    }
+#endif
+    return failure("No suitable kernel for transfer",
+                   0,
+                   kSliceNone);
+  }
+  template <>
+  Error D2H(
+    kernel::Lib ptr_lib,
+    float** to_ptr,
+    float* from_ptr,
+    int64_t length) {
+#ifndef _MSC_VER
+    if(ptr_lib == kernel::Lib::cuda_kernels) {
+      auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+
+      if(!handle) {
+        Error err = failure("Failed to find awkward1[cuda]",
+                            0,
+                            kSliceNone);
+
+        util::handle_cuda_error(err);
+      }
+      typedef Error (func_awkward_cuda_D2Hfloat32_t)
+        (float **to_ptr, float *from_ptr, int64_t length);
+      func_awkward_cuda_D2Hfloat32_t
+        *func_awkward_cuda_D2Hfloat32 =
+        reinterpret_cast<func_awkward_cuda_D2Hfloat32_t *>
+        (dlsym(handle, "awkward_cuda_D2Hfloat32"));
+
+      return (*func_awkward_cuda_D2Hfloat32)(to_ptr, from_ptr, length);
+    }
+#endif
+    return failure("No suitable kernel for transfer",
+                   0,
+                   kSliceNone);
+  }
+  template <>
+  Error D2H(
+    kernel::Lib ptr_lib,
+    double** to_ptr,
+    double* from_ptr,
+    int64_t length) {
+#ifndef _MSC_VER
+    if(ptr_lib == kernel::Lib::cuda_kernels) {
+      auto handle = dlopen("/home/trickarcher/gsoc_2020/awkward-1.0/src/cuda-kernels/build/libawkward-cuda-kernels.so", RTLD_LAZY);
+
+      if(!handle) {
+        Error err = failure("Failed to find awkward1[cuda]",
+                            0,
+                            kSliceNone);
+
+        util::handle_cuda_error(err);
+      }
+      typedef Error (func_awkward_cuda_D2Hfloat64_t)
+        (double **to_ptr, double *from_ptr, int64_t length);
+      func_awkward_cuda_D2Hfloat64_t
+        *func_awkward_cuda_D2Hfloat64 =
+        reinterpret_cast<func_awkward_cuda_D2Hfloat64_t *>
+        (dlsym(handle, "awkward_cuda_D2Hfloat64"));
+
+      return (*func_awkward_cuda_D2Hfloat64)(to_ptr, from_ptr, length);
+    }
+#endif
+    return failure("No suitable kernel for transfer",
+                   0,
+                   kSliceNone);
+  }
+
 
   template<>
   std::shared_ptr<bool> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {

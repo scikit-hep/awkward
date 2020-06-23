@@ -3973,4 +3973,257 @@ namespace awkward {
       }
     }
   }
+
+  ContentPtr
+  NumpyArray::to_cpu() {
+    if (ptr_lib_ == kernel::Lib::cuda_kernels) {
+      ssize_t length = 1;
+      for (auto i : shape_) {
+        length = length * i;
+      }
+
+      if (format_.compare("?") == 0) {
+        bool *cpu_ptr;
+
+        Error err =  kernel::D2H<bool>(kernel::Lib::cpu_kernels,
+                                       &cpu_ptr,
+                                       reinterpret_cast<bool *>(ptr_.get()),
+                                       length);
+        util::handle_cuda_error(err);
+        
+
+        return std::make_shared<NumpyArray>(identities(),
+                                            parameters(),
+                                            std::shared_ptr<void>(
+                                              cpu_ptr,
+                                              kernel::array_deleter<bool>()),
+                                            shape(),
+                                            strides(),
+                                            byteoffset(),
+                                            itemsize(),
+                                            format(),
+                                            kernel::Lib::cpu_kernels);
+      } else if (format_.compare("b") == 0) {
+        int8_t *cpu_ptr;
+
+        Error err =  kernel::D2H<int8_t>(kernel::Lib::cpu_kernels,
+                                         &cpu_ptr,
+                                         reinterpret_cast<int8_t *>(ptr_.get()),
+                                         length);
+        util::handle_cuda_error(err);
+
+
+
+        return std::make_shared<NumpyArray>(identities(),
+                                            parameters(),
+                                            std::shared_ptr<int8_t>(
+                                              cpu_ptr,
+                                              kernel::array_deleter<int8_t>()),
+                                            shape(),
+                                            strides(),
+                                            byteoffset(),
+                                            itemsize(),
+                                            format(),
+                                            kernel::Lib::cpu_kernels);
+      } else if (format_.compare("B") == 0) {
+        uint8_t *cpu_ptr;
+
+        Error err =  kernel::D2H<uint8_t>(kernel::Lib::cpu_kernels,
+                                          &cpu_ptr,
+                                          reinterpret_cast<uint8_t *>(ptr_.get()),
+                                          length);
+        util::handle_cuda_error(err);
+
+        return std::make_shared<NumpyArray>(identities(),
+                                            parameters(),
+                                            std::shared_ptr<void>(
+                                              cpu_ptr,
+                                              kernel::array_deleter<uint8_t>()),
+                                            shape(),
+                                            strides(),
+                                            byteoffset(),
+                                            itemsize(),
+                                            format(),
+                                            kernel::Lib::cpu_kernels);
+      } else if (format_.compare("h") == 0) {
+        int16_t *cpu_ptr;
+
+        Error err =  kernel::D2H<int16_t>(kernel::Lib::cpu_kernels,
+                                          &cpu_ptr,
+                                          reinterpret_cast<int16_t *>(ptr_.get()),
+                                          length);
+        util::handle_cuda_error(err);
+
+
+        return std::make_shared<NumpyArray>(identities(),
+                                            parameters(),
+                                            std::shared_ptr<void>(
+                                              cpu_ptr,
+                                              kernel::array_deleter<int16_t>()),
+                                            shape(),
+                                            strides(),
+                                            byteoffset(),
+                                            itemsize(),
+                                            format(),
+                                            kernel::Lib::cpu_kernels);
+      } else if (format_.compare("H") == 0) {
+        uint16_t *cpu_ptr;
+
+        Error err =  kernel::D2H<uint16_t>(kernel::Lib::cpu_kernels,
+                                           &cpu_ptr,
+                                           reinterpret_cast<uint16_t *>(ptr_.get()),
+                                           length);
+        util::handle_cuda_error(err);
+
+
+        return std::make_shared<NumpyArray>(identities(),
+                                            parameters(),
+                                            std::shared_ptr<void>(
+                                              cpu_ptr,
+                                              kernel::array_deleter<uint16_t>()),
+                                            shape(),
+                                            strides(),
+                                            byteoffset(),
+                                            itemsize(),
+                                            format(),
+                                            kernel::Lib::cpu_kernels);
+      } else if (format_.compare("i") == 0) {
+        int32_t *cpu_ptr;
+
+        Error err =  kernel::D2H<int32_t>(kernel::Lib::cpu_kernels,
+                                          &cpu_ptr,
+                                          reinterpret_cast<int32_t *>(ptr_.get()),
+                                          length);
+        util::handle_cuda_error(err);
+
+
+        return std::make_shared<NumpyArray>(identities(),
+                                            parameters(),
+                                            std::shared_ptr<void>(
+                                              cpu_ptr,
+                                              kernel::array_deleter<int32_t>()),
+                                            shape(),
+                                            strides(),
+                                            byteoffset(),
+                                            itemsize(),
+                                            format(),
+                                            kernel::Lib::cpu_kernels);
+      } else if (format_.compare("I") == 0) {
+        uint32_t *cpu_ptr;
+
+        Error err =  kernel::D2H<uint32_t>(kernel::Lib::cpu_kernels,
+                                           &cpu_ptr,
+                                           reinterpret_cast<uint32_t *>(ptr_.get()),
+                                           length);
+        util::handle_cuda_error(err);
+
+        return std::make_shared<NumpyArray>(identities(),
+                                            parameters(),
+                                            std::shared_ptr<void>(
+                                              cpu_ptr,
+                                              kernel::array_deleter<uint32_t>()),
+                                            shape(),
+                                            strides(),
+                                            byteoffset(),
+                                            itemsize(),
+                                            format(),
+                                            kernel::Lib::cpu_kernels);
+      } else if (format_.compare("l") == 0) {
+        int64_t *cpu_ptr;
+
+        Error err =  kernel::D2H<int64_t>(kernel::Lib::cpu_kernels,
+                                          &cpu_ptr,
+                                          reinterpret_cast<int64_t *>(ptr_.get()),
+                                          length);
+        util::handle_cuda_error(err);
+
+        return std::make_shared<NumpyArray>(identities(),
+                                            parameters(),
+                                            std::shared_ptr<void>(
+                                              cpu_ptr,
+                                              kernel::array_deleter<int64_t>()),
+                                            shape(),
+                                            strides(),
+                                            byteoffset(),
+                                            itemsize(),
+                                            format(),
+                                            kernel::Lib::cpu_kernels);
+      } else if (format_.compare("L") == 0) {
+        uint64_t *cpu_ptr;
+
+        Error err =  kernel::D2H<uint64_t>(kernel::Lib::cpu_kernels,
+                                           &cpu_ptr,
+                                           reinterpret_cast<uint64_t *>(ptr_.get()),
+                                           length);
+        util::handle_cuda_error(err);
+
+        return std::make_shared<NumpyArray>(identities(),
+                                            parameters(),
+                                            std::shared_ptr<void>(
+                                              cpu_ptr,
+                                              kernel::array_deleter<uint64_t>()),
+                                            shape(),
+                                            strides(),
+                                            byteoffset(),
+                                            itemsize(),
+                                            format(),
+                                            kernel::Lib::cpu_kernels);
+      } else if (format_.compare("f") == 0) {
+        float *cpu_ptr;
+
+
+        Error err =  kernel::D2H<float>(kernel::Lib::cpu_kernels,
+                                        &cpu_ptr,
+                                        reinterpret_cast<float *>(ptr_.get()),
+                                        length);
+        util::handle_cuda_error(err);
+
+
+        return std::make_shared<NumpyArray>(identities(),
+                                            parameters(),
+                                            std::shared_ptr<void>(
+                                              cpu_ptr,
+                                              kernel::array_deleter<float>()),
+                                            shape(),
+                                            strides(),
+                                            byteoffset(),
+                                            itemsize(),
+                                            format(),
+                                            kernel::Lib::cpu_kernels);
+      } else if (format_.compare("d") == 0) {
+        double *cpu_ptr;
+
+
+        Error err =  kernel::D2H<double>(kernel::Lib::cpu_kernels,
+                                         &cpu_ptr,
+                                         reinterpret_cast<double *>(ptr_.get()),
+                                         length);
+        util::handle_cuda_error(err);
+
+        return std::make_shared<NumpyArray>(identities(),
+                                            parameters(),
+                                            std::shared_ptr<void>(
+                                              cpu_ptr,
+                                              kernel::array_deleter<double>()),
+                                            shape(),
+                                            strides(),
+                                            byteoffset(),
+                                            itemsize(),
+                                            format(),
+                                            kernel::Lib::cpu_kernels);
+      } else {
+        Error err = failure("Unknown Numpy dtype", 0, kSliceNone);
+        util::handle_cuda_error(err);
+        return std::make_shared<NumpyArray>(identities(),
+                                            parameters(),
+                                            nullptr,
+                                            shape(),
+                                            strides(),
+                                            byteoffset(),
+                                            itemsize(),
+                                            format(),
+                                            kernel::Lib::cpu_kernels);
+      }
+    }
+  }
 }

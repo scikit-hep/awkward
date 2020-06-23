@@ -373,6 +373,9 @@ namespace awkward {
     ContentPtr
       to_gpu(kernel::Lib ptr_lib) override;
 
+    ContentPtr
+      to_cpu() override;
+
   protected:
     template <typename S>
     const ContentPtr
