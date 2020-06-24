@@ -53,11 +53,12 @@ int main(int, char**) {
   slice.append(ak::SliceRange(1, ak::Slice::none(), ak::Slice::none()));
 
   auto cuda_arr =  array->to_gpu(kernel::Lib::cuda_kernels);
-  std::cout << cuda_arr->tostring() << "\n";
+  auto arr = cuda_arr->num(0, 1);
+  std::cout << arr->tostring() << "\n";
 
   auto cpu_arr = cuda_arr->to_cpu();
-
-  std::cout << cpu_arr->tostring() << "\n";
+  auto arr1 = cpu_arr->num(0, 1);
+  std::cout << arr1->tostring() << "\n";
 
 
   if (array.get()->getitem(slice).get()->tojson(false, 1) !=

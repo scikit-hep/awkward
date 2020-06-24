@@ -156,6 +156,18 @@ namespace kernel {
                             int64_t at,
                             T value);
 
+  /////////////////////////////////// awkward/operations
+  template <typename T>
+  ERROR
+  ListArray_num_64(
+    kernel::Lib ptr_lib,
+    int64_t* tonum,
+    const T* fromstarts,
+    int64_t startsoffset,
+    const T* fromstops,
+    int64_t stopsoffset,
+    int64_t length);
+
 };
 
 #endif //AWKWARD_KERNEL_H

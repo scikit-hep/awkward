@@ -1631,6 +1631,155 @@ namespace kernel {
     #endif
     awkward_index64_setitem_at_nowrap(ptr, offset, at, value);
   }
+
+  template <>
+  Error ListArray_num_64<int32_t>(
+    kernel::Lib ptr_lib,
+    int64_t* tonum,
+    const int32_t* fromstarts,
+    int64_t startsoffset,
+    const int32_t* fromstops,
+    int64_t stopsoffset,
+    int64_t length) {
+
+#ifndef _MSC_VER
+    if(ptr_lib == kernel::Lib::cuda_kernels) {
+      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+
+      if (!handle) {
+        Error err = failure("Failed to find awkward1[cuda]",
+                            0,
+                            kSliceNone);
+
+        awkward::util::handle_cuda_error(err);
+      }
+      typedef Error (func_awkward_cuda_ListArray32_num_64_t)
+       (int64_t* tonum,
+        const int32_t* fromstarts,
+        int64_t startsoffset,
+        const int32_t* fromstops,
+        int64_t stopsoffset,
+        int64_t length);
+      func_awkward_cuda_ListArray32_num_64_t
+        *func_awkward_cuda_ListArray32_num_64 =
+        reinterpret_cast<func_awkward_cuda_ListArray32_num_64_t *>
+        (dlsym(handle, "awkward_cuda_ListArray32_num_64"));
+
+      return (*func_awkward_cuda_ListArray32_num_64)(
+        tonum,
+        fromstarts,
+        startsoffset,
+        fromstops,
+        stopsoffset,
+        length);
+    }
+#endif
+    return awkward_listarray32_num_64(
+      tonum,
+      fromstarts,
+      startsoffset,
+      fromstops,
+      stopsoffset,
+      length);
+  }
+  template <>
+  Error ListArray_num_64<uint32_t>(
+    kernel::Lib ptr_lib,
+    int64_t* tonum,
+    const uint32_t* fromstarts,
+    int64_t startsoffset,
+    const uint32_t* fromstops,
+    int64_t stopsoffset,
+    int64_t length) {
+#ifndef _MSC_VER
+    if(ptr_lib == kernel::Lib::cuda_kernels) {
+      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+
+      if (!handle) {
+        Error err = failure("Failed to find awkward1[cuda]",
+                            0,
+                            kSliceNone);
+
+        awkward::util::handle_cuda_error(err);
+      }
+      typedef Error (func_awkward_cuda_ListArrayU32_num_64_t)
+        (int64_t* tonum,
+         const uint32_t* fromstarts,
+         int64_t startsoffset,
+         const uint32_t* fromstops,
+         int64_t stopsoffset,
+         int64_t length);
+      func_awkward_cuda_ListArrayU32_num_64_t
+        *func_awkward_cuda_ListArrayU32_num_64 =
+        reinterpret_cast<func_awkward_cuda_ListArrayU32_num_64_t *>
+        (dlsym(handle, "awkward_cuda_ListArrayU32_num_64"));
+
+      return (*func_awkward_cuda_ListArrayU32_num_64)(
+        tonum,
+        fromstarts,
+        startsoffset,
+        fromstops,
+        stopsoffset,
+        length);
+    }
+#endif
+    return awkward_listarrayU32_num_64(
+      tonum,
+      fromstarts,
+      startsoffset,
+      fromstops,
+      stopsoffset,
+      length);
+  }
+  template <>
+  Error ListArray_num_64<int64_t>(
+    kernel::Lib ptr_lib,
+    int64_t* tonum,
+    const int64_t* fromstarts,
+    int64_t startsoffset,
+    const int64_t* fromstops,
+    int64_t stopsoffset,
+    int64_t length) {
+#ifndef _MSC_VER
+    if(ptr_lib == kernel::Lib::cuda_kernels) {
+      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+
+      if (!handle) {
+        Error err = failure("Failed to find awkward1[cuda]",
+                            0,
+                            kSliceNone);
+
+        awkward::util::handle_cuda_error(err);
+      }
+      typedef Error (func_awkward_cuda_ListArray64_num_64_t)
+        (int64_t* tonum,
+         const int64_t* fromstarts,
+         int64_t startsoffset,
+         const int64_t* fromstops,
+         int64_t stopsoffset,
+         int64_t length);
+      func_awkward_cuda_ListArray64_num_64_t
+        *func_awkward_cuda_ListArray64_num_64 =
+        reinterpret_cast<func_awkward_cuda_ListArray64_num_64_t *>
+        (dlsym(handle, "awkward_cuda_ListArray32_num_64"));
+
+      return (*func_awkward_cuda_ListArray64_num_64)(
+        tonum,
+        fromstarts,
+        startsoffset,
+        fromstops,
+        stopsoffset,
+        length);
+    }
+#endif
+    return awkward_listarray64_num_64(
+      tonum,
+      fromstarts,
+      startsoffset,
+      fromstops,
+      stopsoffset,
+      length);
+  }
 }
 
 
