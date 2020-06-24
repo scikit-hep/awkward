@@ -614,6 +614,8 @@ filenames = args.filenames
 if __name__ == "__main__":
     doc_awkward_sorting_ranges = """
     def awkward_sorting_ranges(toindex, tolength, parents, parentsoffset, parentslength, outlength):
+        j = 0
+        k = 0
         toindex[0] = k
         k = k + 1
         j = j + 1
@@ -649,14 +651,14 @@ if __name__ == "__main__":
     """
     doc_awkward_sort = """
     def awkward_sort(toptr, fromptr, length, offsets, offsetslength, parentslength, ascending, stable):
-        result = [0]*length
+        index = [0]*length
         for i in range(length):
-            result[i] = i
+            index[i] = i
         for i in range(offsetslength - 1):
             if ascending:
-                result[offsets[i]:offsets[i + 1]] = [ x for _, x in sorted(zip(fromptr[offsets[i]:offsets[i+1]], result[offsets[i]:offsets[i+1]]))]
+                index[offsets[i]:offsets[i + 1]] = [ x for _, x in sorted(zip(fromptr[offsets[i]:offsets[i+1]], index[offsets[i]:offsets[i+1]]))]
             else:
-                result[offsets[i]:offsets[i + 1]] = [ x for _, x in sorted(zip(fromptr[offsets[i]:offsets[i+1]], result[offsets[i]:offsets[i+1]]), reverse=True)]
+                index[offsets[i]:offsets[i + 1]] = [ x for _, x in sorted(zip(fromptr[offsets[i]:offsets[i+1]], index[offsets[i]:offsets[i+1]]), reverse=True)]
         for i in range(parentslength):
             toptr[i] = fromptr[index[i]]
     """
