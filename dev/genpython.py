@@ -642,7 +642,7 @@ if __name__ == "__main__":
                 result[offsets[i]:offsets[i + 1]] = [ x for _, x in sorted(zip(fromptr[offsets[i]:offsets[i+1]], result[offsets[i]:offsets[i+1]]))]
             else:
                 result[offsets[i]:offsets[i + 1]] = [ x for _, x in sorted(zip(fromptr[offsets[i]:offsets[i+1]], result[offsets[i]:offsets[i+1]]), reverse=True)]
-            for j in range(offset[i], offset[i+1]):
+            for j in range(offsets[i], offsets[i+1]):
                 result[j] = result[j] - offsets[i]
         for i in range(length):
             toptr[i] = result[i]
