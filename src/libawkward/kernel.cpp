@@ -15,6 +15,15 @@
 
 using namespace awkward;
 
+// FIXME-PR293: utility for trying to load libawkward-cuda-kernels.so
+// with exception-raising logic for "can't find library"
+// up to you: you don't need a util::handle_cuda_error
+
+// Error message:
+// install the 'awkward1-cuda-kernels' package with:
+//
+//     pip install awkward1[cuda] --upgrade
+
 namespace kernel {
 
   std::shared_ptr<LibraryCallback> lib_callback = std::make_shared<LibraryCallback>();
@@ -723,6 +732,7 @@ namespace kernel {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
       auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
                             0,

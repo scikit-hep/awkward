@@ -7,6 +7,8 @@
 
 namespace py = pybind11;
 
+// FIXME-PR293: declare a subclass of kernel::LibraryPathCallback
+
 void
 make_startup(py::module& m, const std::string& name);
 

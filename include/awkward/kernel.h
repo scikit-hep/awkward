@@ -20,6 +20,7 @@ namespace kernel {
     cuda_kernels
   };
 
+  // FIXME-PR293: abstract virtual class; library_path is a pure virtual method
   class LibraryPathCallback {
     public:
     LibraryPathCallback() {}
@@ -29,12 +30,13 @@ namespace kernel {
     }
   };
 
+  // FIXME-PR293: move the implementations to .cpp
   class LibraryCallback {
     public:
     LibraryCallback() {
       lib_path_callbacks[kernel::Lib::cuda_kernels] = std::vector<LibraryPathCallback>();
 
-      // Remove this when callback is implemented
+      // FIXME-PR293: Remove this when callback is implemented
       add_cuda_library_path_callback(std::make_shared<LibraryPathCallback>());
     }
 

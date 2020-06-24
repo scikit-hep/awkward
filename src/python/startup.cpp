@@ -7,6 +7,9 @@
 
 // namespace ak = awkward;
 
+// FIXME-PR293: implement the subclass of kernel::LibraryPathCallback
+// Its library_path method calls the code below
+
 void
 make_startup(py::module& m, const std::string& name) {
   m.def(name.c_str(), []() -> void {
