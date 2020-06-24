@@ -3679,7 +3679,7 @@ namespace awkward {
   }
 
   ContentPtr
-  NumpyArray::to_gpu(kernel::Lib ptr_lib) {
+  NumpyArray::to_gpu(kernel::Lib ptr_lib) const {
     if (ptr_lib == kernel::Lib::cuda_kernels) {
       ssize_t length = 1;
       for (auto i : shape_) {
@@ -3975,7 +3975,7 @@ namespace awkward {
   }
 
   ContentPtr
-  NumpyArray::to_cpu() {
+  NumpyArray::to_cpu() const {
     if (ptr_lib_ == kernel::Lib::cuda_kernels) {
       ssize_t length = 1;
       for (auto i : shape_) {

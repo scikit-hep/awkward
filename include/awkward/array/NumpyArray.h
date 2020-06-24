@@ -596,13 +596,13 @@ namespace awkward {
     /// @brief An utility function to create a new instance of NumpyArray on the
     /// GPU identical to this one.
     ContentPtr
-      to_gpu(kernel::Lib ptr_lib) override;
+      to_gpu(kernel::Lib ptr_lib) const override;
 
     /// @brief An utility function to create a new instance of NumpyArray on the
     /// CPU identical to the one on the GPU. Acts as a passthrough if already
     // on CPU
     ContentPtr
-    to_cpu() override;
+    to_cpu() const override;
 
   protected:
     /// @brief Internal function to merge two byte arrays without promoting

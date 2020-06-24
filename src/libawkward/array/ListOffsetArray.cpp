@@ -1913,7 +1913,7 @@ namespace awkward {
 
   template <typename T>
   ContentPtr
-  ListOffsetArrayOf<T>::to_gpu(kernel::Lib ptr_lib) {
+  ListOffsetArrayOf<T>::to_gpu(kernel::Lib ptr_lib) const {
     if(ptr_lib == kernel::Lib::cuda_kernels) {
       IndexOf<T> cuda_offsets = offsets_.to_gpu(kernel::Lib::cuda_kernels);
       ContentPtr cuda_content = content_->to_gpu(kernel::Lib::cuda_kernels);
@@ -1926,7 +1926,7 @@ namespace awkward {
 
   template <typename T>
   ContentPtr
-  ListOffsetArrayOf<T>::to_cpu() {
+  ListOffsetArrayOf<T>::to_cpu() const {
     IndexOf<T> cpu_offets = offsets_.to_cpu();
     ContentPtr cpu_content = content_->to_cpu();
     return std::make_shared<ListOffsetArrayOf<T>>(identities(),

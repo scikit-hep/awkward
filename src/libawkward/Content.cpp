@@ -1242,12 +1242,12 @@ namespace awkward {
   }
 
   ContentPtr
-  Content::to_gpu(kernel::Lib ptr_lib) {
+  Content::to_gpu(kernel::Lib ptr_lib) const{
     return nullptr;
   }
 
   ContentPtr
-  Content::to_cpu() {
+  Content::to_cpu() const{
     return nullptr;
   }
 

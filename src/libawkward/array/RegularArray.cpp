@@ -1243,7 +1243,7 @@ namespace awkward {
   }
 
   ContentPtr
-  RegularArray::to_gpu(kernel::Lib ptr_lib) {
+  RegularArray::to_gpu(kernel::Lib ptr_lib) const {
     if(ptr_lib == kernel::Lib::cuda_kernels) {
       ContentPtr cuda_content = content_->to_gpu(kernel::Lib::cuda_kernels);
       return std::make_shared<RegularArray>(identities(),
@@ -1254,7 +1254,7 @@ namespace awkward {
   }
 
   ContentPtr
-  RegularArray::to_cpu() {
+  RegularArray::to_cpu() const {
     ContentPtr cpu_content = content_->to_cpu();
     return std::make_shared<RegularArray>(identities(),
                                           parameters(),

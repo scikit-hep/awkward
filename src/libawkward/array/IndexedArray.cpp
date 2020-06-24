@@ -2062,7 +2062,7 @@ namespace awkward {
 
   template <typename T, bool ISOPTION>
   ContentPtr
-  IndexedArrayOf<T, ISOPTION>::to_gpu(kernel::Lib ptr_lib) {
+  IndexedArrayOf<T, ISOPTION>::to_gpu(kernel::Lib ptr_lib) const {
     if(ptr_lib == kernel::Lib::cuda_kernels) {
       IndexOf<T> cuda_index = index_.to_gpu(kernel::Lib::cuda_kernels);
       ContentPtr cuda_content = content_->to_gpu(kernel::Lib::cuda_kernels);
@@ -2075,7 +2075,7 @@ namespace awkward {
 
   template <typename T, bool ISOPTION>
   ContentPtr
-  IndexedArrayOf<T, ISOPTION>::to_cpu() {
+  IndexedArrayOf<T, ISOPTION>::to_cpu() const {
       IndexOf<T> cpu_index = index_.to_cpu();
       ContentPtr cpu_content = content_->to_cpu();
       return std::make_shared<IndexedArrayOf<T, ISOPTION>>(identities_,

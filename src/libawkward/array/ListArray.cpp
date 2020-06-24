@@ -1801,7 +1801,7 @@ namespace awkward {
 
   template <typename T>
   ContentPtr
-  ListArrayOf<T>::to_gpu(kernel::Lib ptr_lib) {
+  ListArrayOf<T>::to_gpu(kernel::Lib ptr_lib) const {
     if(ptr_lib == kernel::Lib::cuda_kernels) {
       IndexOf<T> cuda_starts = starts_.to_gpu(kernel::Lib::cuda_kernels);
       IndexOf<T> cuda_stops = stops_.to_gpu(kernel::Lib::cuda_kernels);
@@ -1817,7 +1817,7 @@ namespace awkward {
 
   template <typename T>
   ContentPtr
-  ListArrayOf<T>::to_cpu() {
+  ListArrayOf<T>::to_cpu() const {
 
     IndexOf<T> cpu_starts = starts_.to_cpu();
     IndexOf<T> cpu_stops = stops_.to_cpu();

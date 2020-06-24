@@ -398,10 +398,10 @@ namespace awkward {
                           const Slice& tail) const override;
 
     ContentPtr
-      to_gpu(kernel::Lib ptr_lib) const;
+      to_gpu(kernel::Lib ptr_lib) const override;
 
     ContentPtr
-      to_cpu() override;
+      to_cpu() const override;
 
   protected:
     template <typename S>

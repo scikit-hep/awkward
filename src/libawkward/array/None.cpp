@@ -309,13 +309,13 @@ namespace awkward {
   }
 
   ContentPtr
-  None::to_gpu(kernel::Lib ptr_lib) {
+  None::to_gpu(kernel::Lib ptr_lib) const {
     throw std::runtime_error(
       "undefined operation: None::to_gpu(ptr_lib)");
   }
 
   ContentPtr
-  None::to_cpu() {
+  None::to_cpu() const {
     throw std::runtime_error(
       "undefined operation: None::to_cpu()");
   }

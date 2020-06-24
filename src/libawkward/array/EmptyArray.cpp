@@ -541,7 +541,7 @@ namespace awkward {
   }
 
   ContentPtr
-  EmptyArray::to_gpu(kernel::Lib ptr_lib) {
+  EmptyArray::to_gpu(kernel::Lib ptr_lib) const {
     if(ptr_lib == kernel::Lib::cuda_kernels) {
       return std::make_shared<EmptyArray>(identities(),
                                           parameters());
@@ -549,7 +549,7 @@ namespace awkward {
   }
 
   ContentPtr
-  EmptyArray::to_cpu() {
+  EmptyArray::to_cpu() const {
       return std::make_shared<EmptyArray>(identities(),
                                           parameters());
   }

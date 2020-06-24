@@ -530,9 +530,42 @@ namespace awkward {
   }
 
   ContentPtr
-  Record::to_gpu(kernel::Lib ptr_lib) {
-    throw std::runtime_error(
-      "undefined operation: Record::to_gpu(ptr_lib)");
+  Record::to_gpu(kernel::Lib ptr_lib) const{
+    if(ptr_lib == kernel::Lib::cuda_kernels) {
+      ContentPtrVec cuda_content_vec;
+      for(auto i : array_->contents()) {
+        ContentPtr cuda_ptr = i->to_gpu(kernel::Lib::cuda_kernels);
+        cuda_content_vec.emplace_back(cuda_ptr);
+      }
+
+      std::shared_ptr<const RecordArray> cuda_record_arr  =
+        std::make_shared<const RecordArray>(array_->identities(),
+                                            array_->parameters(),
+                                            cuda_content_vec,
+                                            array_->recordlookup(),
+                                            array_->length());
+
+      return std::make_shared<Record>(cuda_record_arr,
+                                      at());
+    }
   }
 
+  ContentPtr
+  Record::to_cpu() const {
+    ContentPtrVec cpu_content_vec;
+    for(auto i : array_->contents()) {
+      ContentPtr cpu_ptr = i->to_cpu();
+      cpu_content_vec.emplace_back(cpu_ptr);
+    }
+
+    std::shared_ptr<const RecordArray> cpu_record_arr  =
+       std::make_shared<RecordArray>(identities(),
+                                     parameters(),
+                                     cpu_content_vec,
+                                     recordlookup(),
+                                     length());
+
+    return std::make_shared<Record>(cpu_record_arr,
+                                    at());
+  }
 }

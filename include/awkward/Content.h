@@ -1117,10 +1117,10 @@ namespace awkward {
       axis_wrap_if_negative(int64_t axis);
 
     virtual ContentPtr
-      to_gpu(kernel::Lib ptr_lib);
+      to_gpu(kernel::Lib ptr_lib) const;
 
     virtual ContentPtr
-      to_cpu();
+      to_cpu() const;
 
   protected:
     /// @brief Internal function to wrap putative #getitem output with enough

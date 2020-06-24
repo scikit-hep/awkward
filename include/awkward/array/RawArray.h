@@ -1080,7 +1080,7 @@ namespace awkward {
     }
 
     ContentPtr
-      to_gpu(kernel::Lib ptr_lib) override {
+      to_gpu(kernel::Lib ptr_lib) const override {
 #ifndef _MSC_VER
       if(ptr_lib == kernel::Lib::cuda_kernels) {
         T* cuda_ptr;
@@ -1110,9 +1110,9 @@ namespace awkward {
     }
 
     ContentPtr
-    to_cpu(kernel::Lib ptr_lib) {
+    to_cpu() {
 #ifndef _MSC_VER
-      if(ptr_lib == kernel::Lib::cuda_kernels) {
+      if(ptr_lib_ == kernel::Lib::cuda_kernels) {
         T* cpu_ptr = new T[length_];
         Error err = kernel::H2D<T>(kernel::Lib::cuda_kernels,
                                    cpu_ptr,

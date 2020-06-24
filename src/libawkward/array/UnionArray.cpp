@@ -1883,7 +1883,7 @@ namespace awkward {
 
   template <typename T, typename I>
   ContentPtr
-  UnionArrayOf<T, I>::to_gpu(kernel::Lib ptr_lib) {
+  UnionArrayOf<T, I>::to_gpu(kernel::Lib ptr_lib) const {
     if(ptr_lib ==kernel::Lib::cuda_kernels) {
       IndexOf<T> cuda_tags = tags_.to_gpu(kernel::Lib::cuda_kernels);
       IndexOf<I> cuda_index = index_.to_gpu(kernel::Lib::cuda_kernels);
@@ -1904,7 +1904,7 @@ namespace awkward {
 
   template <typename T, typename I>
   ContentPtr
-  UnionArrayOf<T, I>::to_cpu() {
+  UnionArrayOf<T, I>::to_cpu() const {
 
     IndexOf<T> cpu_tags = tags_.to_cpu();
     IndexOf<I> cpu_index = index_.to_cpu();

@@ -867,7 +867,7 @@ namespace awkward {
   }
 
   ContentPtr
-  BitMaskedArray::to_gpu(kernel::Lib ptr_lib) {
+  BitMaskedArray::to_gpu(kernel::Lib ptr_lib) const {
     if(ptr_lib == kernel::Lib::cuda_kernels) {
       IndexU8 cuda_mask = mask_.to_gpu(kernel::Lib::cuda_kernels);
       ContentPtr  cuda_content = content_->to_gpu(kernel::Lib::cuda_kernels);
@@ -882,7 +882,7 @@ namespace awkward {
   }
 
   ContentPtr
-  BitMaskedArray::to_cpu() {
+  BitMaskedArray::to_cpu() const {
     IndexU8 cpu_mask = mask_.to_cpu();
     ContentPtr  cpu_content = content_->to_cpu();
     return std::make_shared<BitMaskedArray>(identities(),

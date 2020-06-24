@@ -1417,7 +1417,7 @@ namespace awkward {
   }
 
   ContentPtr
-  RecordArray::to_cpu()  {
+  RecordArray::to_cpu() const{
 
     ContentPtrVec cpu_content_vec;
     for(auto i : contents_) {

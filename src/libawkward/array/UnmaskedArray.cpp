@@ -821,7 +821,7 @@ namespace awkward {
   }
 
   ContentPtr
-  UnmaskedArray::to_gpu(kernel::Lib ptr_lib) {
+  UnmaskedArray::to_gpu(kernel::Lib ptr_lib) const {
     if(ptr_lib == kernel::Lib::cuda_kernels) {
       ContentPtr cuda_content = content_->to_gpu(kernel::Lib::cuda_kernels);
       return std::make_shared<UnmaskedArray>(identities(),
@@ -831,7 +831,7 @@ namespace awkward {
   }
 
   ContentPtr
-  UnmaskedArray::to_cpu() {
+  UnmaskedArray::to_cpu() const {
 
     ContentPtr cpu_content = content_->to_cpu();
     return std::make_shared<UnmaskedArray>(identities(),
