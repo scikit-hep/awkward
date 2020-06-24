@@ -3,23 +3,12 @@
 #include <memory>
 
 #include <awkward/Index.h>
-#include "awkward/builder/ArrayBuilderOptions.h"
-#include "awkward/builder/ArrayBuilder.h"
 #include "awkward/kernel.h"
-#include "awkward/cpu-kernels/operations.h"
-
 #include "awkward/array/NumpyArray.h"
 
 namespace ak = awkward;
 
 int main(int, char**) {
-//  std::shared_ptr<int64_t> main_index_arr(new int64_t [5], std::default_delete<int64_t []>());
-//  main_index_arr.get()[0] = 0;
-//  main_index_arr.get()[1] = 3;
-//  main_index_arr.get()[2] = 4;
-//  main_index_arr.get()[3] = 4;
-//  main_index_arr.get()[4] = 5;
-//
 
   int8_t arr8[] = {1,2,3,4,5};
   uint8_t arrU8[] = {1,2,3,4,5};
@@ -38,15 +27,15 @@ int main(int, char**) {
                                         kernel::array_deleter<uint32_t>());
   std::shared_ptr<int64_t> main_arr64(arr64,
                                       kernel::array_deleter<int64_t>());
-//  std::shared_ptr<float> main_arrf(arrf,
-//                                    std::default_delete<float[]>());
+  std::shared_ptr<float> main_arrf(arrf,
+                                    std::default_delete<float[]>());
 
   ak::Index8 index_arr8(main_arr8, 0, 5);
   ak::IndexU8 index_arrU8(main_arrU8, 0, 5);
   ak::Index32 index_arr32(main_arr32, 0, 5);
   ak::IndexU32 index_arrU32(main_arrU32, 0, 5);
   ak::Index64 index_arr64(main_arr64, 0, 5);
-
+//
   auto cuda_arr8 = index_arr8.to_gpu(kernel::Lib::cuda_kernels);
   std::cout << cuda_arr8.tostring() << "\n";
   auto cuda_arrU8 = index_arrU8.to_gpu(kernel::Lib::cuda_kernels);

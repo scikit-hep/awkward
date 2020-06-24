@@ -25,7 +25,8 @@ namespace kernel {
     LibraryPathCallback() {}
 
     const std::string library_path() const {
-      return std::string("dummy_path");
+      return std::string("/");
+    }
   };
 
   class LibraryCallback {
@@ -46,10 +47,11 @@ namespace kernel {
     std::string awkward_cuda_path() {
       for(auto i : lib_path_callbacks.at(kernel::Lib::cuda_kernels)) {
         auto handle = dlopen(i.library_path().c_str(), RTLD_NOW);
-        if(handle)
+        if(handle) {
           return i.library_path();
+        }
       }
-      return "";
+      return std::string("/");
     }
 
     private:
