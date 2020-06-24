@@ -1,3 +1,0 @@
-include CMakeLists.txt
-recursive-include include *.h
-recursive-include src *.cpp

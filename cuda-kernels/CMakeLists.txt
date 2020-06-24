@@ -14,27 +14,28 @@ else()
 endif()
 
 # We can avoid this by introducing this CMakeLists to the top level CMakeLists
-include_directories(../../include)
+include_directories(../include)
 
-file(GLOB CUDA_KERNEL_SOURCES CONFIGURE_DEPENDS "src/*.cu")
+file(GLOB CUDA_KERNEL_SOURCES CONFIGURE_DEPENDS "../src/cuda-kernels/*.cu")
 
 include(CTest)
 
 add_library(awkward-cuda-kernels-objects OBJECT ${CUDA_KERNEL_SOURCES})
 set_target_properties(awkward-cuda-kernels-objects PROPERTIES POSITION_INDEPENDENT_CODE 1)
+
 add_library(awkward-cuda-kernels-static STATIC $<TARGET_OBJECTS:awkward-cuda-kernels-objects>)
 set_property(TARGET awkward-cuda-kernels-static PROPERTY POSITION_INDEPENDENT_CODE ON)
+
 add_library(awkward-cuda-kernels        SHARED $<TARGET_OBJECTS:awkward-cuda-kernels-objects>)
+
 set_target_properties(awkward-cuda-kernels-objects PROPERTIES CXX_VISIBILITY_PRESET hidden)
 set_target_properties(awkward-cuda-kernels-objects PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
+
 set_target_properties(awkward-cuda-kernels-static PROPERTIES CXX_VISIBILITY_PRESET hidden)
 set_target_properties(awkward-cuda-kernels-static PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
+
 set_target_properties(awkward-cuda-kernels PROPERTIES CXX_VISIBILITY_PRESET hidden)
 set_target_properties(awkward-cuda-kernels PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
 
 install(TARGETS awkward-cuda-kernels awkward-cuda-kernels-static
-        LIBRARY DESTINATION awkward1 ARCHIVE DESTINATION awkward1)
-
-
-
-
+        LIBRARY DESTINATION awkward1_cuda_kernels ARCHIVE DESTINATION awkward1_cuda_kernels)

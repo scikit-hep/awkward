@@ -39,7 +39,6 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         except AttributeError:
             print("Not able to access compiler path (on Windows), using CMake default")
 
-
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
         build_dir = self.build_temp
@@ -50,7 +49,7 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
 
 
 # Libraries do not exist yet, so they cannot be determined with a glob pattern.
-libdir = os.path.join(os.path.join("build", "lib.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1])), "awkward1")
+libdir = os.path.join(os.path.join("build", "lib.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1])), "awkward1_cuda_kernels")
 static = ".a"
 if platform.system() == "Darwin":
     shared = ".dylib"
@@ -59,15 +58,12 @@ else:
 libraries = [("lib", [os.path.join(libdir, "libawkward-cuda-kernels-static" + static),
                       os.path.join(libdir, "libawkward-cuda-kernels" + shared)])]
 
-setup(name = "awkward1-cuda-kernels",
-      packages = setuptools.find_packages(where="src"),
-      package_dir = {"": "src"},
-      include_package_data = True,
-      package_data = {"": ["*.dll"]},
+setup(name = "awkward1_cuda_kernels",
+      packages = setuptools.find_packages(),
       data_files = libraries + [
           ("include/awkward",              glob.glob("include/awkward/*.h")),
           ("include/awkward/cuda-kernels", glob.glob("include/awkward/cuda-kernels/*.h"))],
-      version = "0.0.1",
+      version = open("../VERSION_INFO").read().strip(),
       author = "Jim Pivarski",
       author_email = "pivarski@princeton.edu",
       maintainer = "Jim Pivarski",
@@ -80,7 +76,7 @@ setup(name = "awkward1-cuda-kernels",
       license = "BSD 3-clause",
       python_requires = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*",
 
-      ext_modules = [CMakeExtension("awkward-cuda-kernels")],
+      ext_modules = [CMakeExtension("awkward_cuda_kernels")],
       cmdclass = {"build_ext": CMakeBuild},
 
       classifiers = [
