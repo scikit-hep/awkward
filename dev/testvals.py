@@ -11,11 +11,12 @@ class Error(ctypes.Structure):
                 ("attempt", ctypes.c_int64),
                 ("extra", ctypes.c_int64)]
 
-awkward.awkward_new_Identities32.restype = Error
-awkward.awkward_new_Identities32.argtypes = ctypes.POINTER(ctypes.c_int32), ctypes.c_int64
+func = getattr(awkward, "awkward_new_Identities32")
+func.restype = Error
+func.argtypes = ctypes.POINTER(ctypes.c_int32), ctypes.c_int64
 
 for i in length:
     outarray = [0]*i
-    outarray = (ctypes.c_int32 * i)(*outarray)
-    awkward.awkward_new_Identities32(outarray, i)
+    outarray = (ctypes.c_int32 * i)(*outarray) #Delete file once this line has been ported
+    func(outarray, i)
     print(list(outarray))

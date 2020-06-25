@@ -1,10 +1,13 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
-import os
 import argparse
-import pycparser
+import ctypes
+import json
+import os
 import re
+
 import black
+import pycparser
 
 
 def preprocess(filename, skip_implementation=False):
@@ -16,7 +19,7 @@ def preprocess(filename, skip_implementation=False):
     templatecall = False
     tempids = []
     labels = {}
-    roledoc = ""
+    roledoc = {}
     funcer = False
     with open(filename, "r") as f:
         for line in f:
@@ -33,8 +36,11 @@ def preprocess(filename, skip_implementation=False):
                 value = line.split()[1]
                 labels[key] = value
                 line = "".join(line.split())
-                if "role:" in line:
-                    roledoc += key + " role: " + line[line.find("role:") + 5 :] + "\n"
+                roledoc[key] = {}
+                if "dep:" in line:
+                    roledoc[key]["dep"] = [
+                        x.strip() for x in line[line.find("dep:") + 4 :].split(",")
+                    ]
                 continue
             if re.search("//.*\n", line):
                 line = re.sub("//.*\n", "\n", line)
@@ -78,7 +84,7 @@ def preprocess(filename, skip_implementation=False):
                 tokens[funcname]["labels"] = labels
                 tokens[funcname]["roles"] = roledoc
                 labels = {}
-                roledoc = ""
+                roledoc = {}
                 line = line.replace(line.split(" ")[0], "int")
                 func = True
                 parans = []
@@ -194,7 +200,7 @@ def preprocess(filename, skip_implementation=False):
                 if len(parans) == 0:
                     func = False
                     labels = {}
-                    roledoc = ""
+                    roledoc = {}
                     templ = False
                     templateids = []
                     tempids = []
@@ -606,6 +612,47 @@ def indent_code(code, indent):
     return finalcode
 
 
+class Error(ctypes.Structure):
+    _fields_ = [
+        ("str", ctypes.POINTER(ctypes.c_char)),
+        ("identity", ctypes.c_int64),
+        ("attempt", ctypes.c_int64),
+        ("extra", ctypes.c_int64),
+    ]
+
+
+def gentests(funcs):
+    import kernels
+
+    lib = ctypes.CDLL("/home/reik/awkward-1.0/localbuild/libawkward-cpu-kernels.so")
+
+    with open("testcases.json") as f:
+        data = json.load(f)
+        for name, vals in funcs.items():
+            funcPy = getattr(kernels, name)
+            funcC = getattr(lib, name)
+            funcC.restype = Error
+            funcC.argtypes = ctypes.POINTER(ctypes.c_int32), ctypes.c_int64
+            tests = {}
+            for key, types in vals.items():
+                if (
+                    key != "gen"
+                    and key != "labels"
+                    and key != "roles"
+                    and key != "args"
+                ):
+                    for x in vals["args"]:
+                        if x["name"] == key:
+                            if x["list"] == 0:
+                                arr = "array"
+                            else:
+                                arr = "num"
+                    tests[key] = [
+                        data[vals[key]][arr]["success"],
+                        data[vals[key]][arr]["failure"],
+                    ]
+
+
 arg_parser = argparse.ArgumentParser()
 arg_parser.add_argument("filenames", nargs="+")
 args = arg_parser.parse_args()
@@ -720,8 +767,12 @@ if __name__ == "__main__":
 kMaxInt64  = 9223372036854775806
 kSliceNone = kMaxInt64 + 1
 
+outparam = None
+inparam = None
+
 """
     docdict = {}
+    func_callable = {}
     for filename in filenames:
         if "sorting.cpp" in filename:
             pfile, tokens = preprocess(filename, skip_implementation=True)
@@ -753,16 +804,14 @@ kSliceNone = kMaxInt64 + 1
                 if "sorting.cpp" not in filename:
                     if not tokens[name]["labels"]:
                         funcgen += (
-                            "def "
-                            + "{0}({1})".format(
+                            "def {0}({1})".format(
                                 name, funcs[name]["def"].arrange_args(),
                             )
                             + ":\n"
                         )
                     else:
                         funcgen += (
-                            "def "
-                            + "{0}({1})".format(
+                            "def {0}({1})".format(
                                 name,
                                 funcs[name]["def"].arrange_args(
                                     labels=tokens[name]["labels"]
@@ -785,10 +834,12 @@ kSliceNone = kMaxInt64 + 1
                             funcs[childfunc]["def"].name, name
                         )
                 doccode += ".. code-block:: python\n\n"
+                '''
                 if tokens[name]["roles"] != "":
                     doccode += indent_code(
                         '"""\n' + tokens[name]["roles"] + '"""\n\n', 4
                     )
+                '''
                 if "sorting.cpp" not in filename:
                     funcgen = funcgen + funcgentemp
                     doccode += (
@@ -799,10 +850,14 @@ kSliceNone = kMaxInt64 + 1
                     doccode += indent_code(funcgen, 4) + funcgentemp + "\n"
                     gencode += funcgen + funcgentemp + "\n"
                 docdict[name] = doccode
+            else:
+                func_callable[name] = tokens[name]
+                func_callable[name]["args"] = funcs[decl.name]["def"].args
     current_dir = os.path.dirname(os.path.realpath(__file__))
     with open(os.path.join(current_dir, "kernels.py"), "w") as f:
         print("Writing kernels.py")
         f.write(gencode)
+    gentests(func_callable)
     if os.path.isdir(os.path.join(current_dir, "..", "docs-sphinx", "_auto")):
         with open(
             os.path.join(current_dir, "..", "docs-sphinx", "_auto", "kernels.rst",),
