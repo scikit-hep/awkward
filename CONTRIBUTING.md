@@ -158,6 +158,8 @@ Make sure to prepend each function definition with -
 ....
 ```
 
+Avoid using [Python keywords](https://docs.python.org/3/reference/lexical_analysis.html#keywords) in files residing inside `src/cpu-kernels/`
+
 ### Fully qualified names
 
 We don't import names in C++ (`using`) or Python (`import from`) so that it's easy to see where objects come from and find all instances with a text search. This is sometimes in tension with the 80-character limit.
