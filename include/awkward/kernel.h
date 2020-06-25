@@ -15,6 +15,7 @@
 using namespace awkward;
 
 namespace kernel {
+
   enum Lib {
     cpu_kernels,
     cuda_kernels
@@ -25,36 +26,21 @@ namespace kernel {
     public:
     LibraryPathCallback() {}
 
-    const std::string library_path() const {
+    virtual const std::string library_path() const {
       return std::string("/");
-    }
+    };
   };
 
   // FIXME-PR293: move the implementations to .cpp
   class LibraryCallback {
     public:
-    LibraryCallback() {
-      lib_path_callbacks[kernel::Lib::cuda_kernels] = std::vector<LibraryPathCallback>();
+    LibraryCallback();
 
-      // FIXME-PR293: Remove this when callback is implemented
-      add_cuda_library_path_callback(std::make_shared<LibraryPathCallback>());
-    }
+    void add_library_path_callback(
+      kernel::Lib ptr_lib,
+      const std::shared_ptr<LibraryPathCallback> &callback);
 
-    void add_cuda_library_path_callback(
-      const std::shared_ptr<LibraryPathCallback> &callback) {
-      std::lock_guard<std::mutex> lock(lib_path_callbacks_mutex);
-      lib_path_callbacks.at(kernel::Lib::cuda_kernels).push_back(*callback);
-    }
-
-    std::string awkward_cuda_path() {
-      for(auto i : lib_path_callbacks.at(kernel::Lib::cuda_kernels)) {
-        auto handle = dlopen(i.library_path().c_str(), RTLD_NOW);
-        if(handle) {
-          return i.library_path();
-        }
-      }
-      return std::string("/");
-    }
+    std::string awkward_library_path(kernel::Lib ptr_lib);
 
     private:
     std::map<kernel::Lib, std::vector<LibraryPathCallback>> lib_path_callbacks;
@@ -62,6 +48,7 @@ namespace kernel {
     std::mutex lib_path_callbacks_mutex;
   };
 
+  extern std::shared_ptr<LibraryCallback> lib_callback;
 
   /// @class array_deleter
   ///

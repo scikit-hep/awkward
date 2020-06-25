@@ -63,7 +63,7 @@ setup(name = "awkward1_cuda_kernels",
       data_files = libraries + [
           ("include/awkward",              glob.glob("include/awkward/*.h")),
           ("include/awkward/cuda-kernels", glob.glob("include/awkward/cuda-kernels/*.h"))],
-      version = open("../VERSION_INFO").read().strip(),
+      version = open("VERSION_INFO").read().strip(),
       author = "Jim Pivarski",
       author_email = "pivarski@princeton.edu",
       maintainer = "Jim Pivarski",

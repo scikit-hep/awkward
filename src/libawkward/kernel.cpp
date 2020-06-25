@@ -26,11 +26,32 @@ using namespace awkward;
 
 namespace kernel {
 
+  LibraryCallback::LibraryCallback() {
+    lib_path_callbacks[kernel::Lib::cuda_kernels] = std::vector<LibraryPathCallback>();
+  }
+
+  void LibraryCallback::add_library_path_callback(
+    kernel::Lib ptr_lib,
+    const std::shared_ptr<LibraryPathCallback> &callback) {
+    std::lock_guard<std::mutex> lock(lib_path_callbacks_mutex);
+    lib_path_callbacks.at(ptr_lib).push_back(*callback);
+  }
+
+  std::string LibraryCallback::awkward_library_path(kernel::Lib ptr_lib) {
+    for(auto i : lib_path_callbacks.at(ptr_lib)) {
+      auto handle = dlopen(i.library_path().c_str(), RTLD_NOW);
+      if(handle) {
+        return i.library_path();
+      }
+    }
+    return std::string("/");
+  }
+
   std::shared_ptr<LibraryCallback> lib_callback = std::make_shared<LibraryCallback>();
 
 #ifndef _MSC_VER
 
-//  const char* awkward_cuda_path() {
+//  const char* awkward_library_path(kernel::Lib::cuda_kernels) {
 //    // Remove this when callback is implemented
 //    lib_callback().add_cuda_library_path_callback(std::make_shared<LibraryPathCallback>());
 //
@@ -43,7 +64,7 @@ namespace kernel {
 
   template<>
   void cuda_array_deleter<bool>::operator()(bool const *p) {
-    auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+    auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
     if (!handle) {
       Error err = failure("Failed to find awkward1[cuda]",
                           0,
@@ -62,7 +83,7 @@ namespace kernel {
 
   template<>
   void cuda_array_deleter<int8_t>::operator()(int8_t const *p) {
-    auto handle = dlopen(kernel::lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+    auto handle = dlopen(kernel::lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
     if (!handle) {
       Error err = failure("Failed to find awkward1[cuda]",
                           0,
@@ -82,7 +103,7 @@ namespace kernel {
 
   template<>
   void cuda_array_deleter<uint8_t>::operator()(uint8_t const *p) {
-    auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+    auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
     if (!handle) {
       Error err = failure("Failed to find awkward1[cuda]",
                           0,
@@ -102,7 +123,7 @@ namespace kernel {
 
   template<>
   void cuda_array_deleter<int16_t>::operator()(int16_t const *p) {
-    auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+    auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
     if (!handle) {
       Error err = failure("Failed to find awkward1[cuda]",
                           0,
@@ -121,7 +142,7 @@ namespace kernel {
 
   template<>
   void cuda_array_deleter<uint16_t>::operator()(uint16_t const *p) {
-    auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+    auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
     if (!handle) {
       Error err = failure("Failed to find awkward1[cuda]",
                           0,
@@ -141,7 +162,7 @@ namespace kernel {
 
   template<>
   void cuda_array_deleter<int32_t>::operator()(int32_t const *p) {
-    auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+    auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
     if (!handle) {
       Error err = failure("Failed to find awkward1[cuda]",
                           0,
@@ -160,7 +181,7 @@ namespace kernel {
 
   template<>
   void cuda_array_deleter<uint32_t>::operator()(uint32_t const *p) {
-    auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+    auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
     if (!handle) {
       Error err = failure("Failed to find awkward1[cuda]",
                           0,
@@ -179,7 +200,7 @@ namespace kernel {
 
   template<>
   void cuda_array_deleter<int64_t>::operator()(int64_t const *p) {
-    auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+    auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
     if (!handle) {
       Error err = failure("Failed to find awkward1[cuda]",
                           0,
@@ -198,7 +219,7 @@ namespace kernel {
 
   template<>
   void cuda_array_deleter<uint64_t>::operator()(uint64_t const *p) {
-    auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+    auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
     if (!handle) {
       Error err = failure("Failed to find awkward1[cuda]",
                           0,
@@ -218,7 +239,7 @@ namespace kernel {
   template<>
   void cuda_array_deleter<float>::operator()(float const *p) {
 
-    auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+    auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
     if (!handle) {
       Error err = failure("Failed to find awkward1[cuda]",
                           0,
@@ -239,7 +260,7 @@ namespace kernel {
 
   template<>
   void cuda_array_deleter<double>::operator()(double const *p) {
-    auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+    auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
     if (!handle) {
       Error err = failure("Failed to find awkward1[cuda]",
                           0,
@@ -264,7 +285,7 @@ namespace kernel {
   int get_ptr_device_num(kernel::Lib ptr_lib, T *ptr) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -310,7 +331,7 @@ namespace kernel {
   std::string get_ptr_device_name(kernel::Lib ptr_lib, T* ptr){
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -359,7 +380,7 @@ namespace kernel {
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -390,7 +411,7 @@ namespace kernel {
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
                             0,
@@ -421,7 +442,7 @@ namespace kernel {
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -452,7 +473,7 @@ namespace kernel {
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -483,7 +504,7 @@ namespace kernel {
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -514,7 +535,7 @@ namespace kernel {
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
                             0,
@@ -544,7 +565,7 @@ namespace kernel {
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -575,7 +596,7 @@ namespace kernel {
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -606,7 +627,7 @@ namespace kernel {
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -637,7 +658,7 @@ namespace kernel {
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -668,7 +689,7 @@ namespace kernel {
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -700,7 +721,7 @@ namespace kernel {
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -731,7 +752,7 @@ namespace kernel {
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -763,7 +784,7 @@ namespace kernel {
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -794,7 +815,7 @@ namespace kernel {
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -825,7 +846,7 @@ namespace kernel {
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -856,7 +877,7 @@ namespace kernel {
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -887,7 +908,7 @@ namespace kernel {
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -918,7 +939,7 @@ namespace kernel {
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -949,7 +970,7 @@ namespace kernel {
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -980,7 +1001,7 @@ namespace kernel {
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -1011,7 +1032,7 @@ namespace kernel {
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
       if(!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -1040,7 +1061,7 @@ namespace kernel {
   std::shared_ptr<bool> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
     #ifndef _MSC_VER
       if (ptr_lib == kernel::Lib::cuda_kernels) {
-        auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+        auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
         if (!handle) {
           Error err = failure("Failed to find awkward1[cuda]",
@@ -1068,7 +1089,7 @@ namespace kernel {
   std::shared_ptr<int8_t> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
     #ifndef _MSC_VER
       if (ptr_lib == kernel::Lib::cuda_kernels) {
-        auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+        auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
         if (!handle) {
           Error err = failure("Failed to find awkward1[cuda]",
@@ -1094,7 +1115,7 @@ namespace kernel {
   std::shared_ptr<uint8_t> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
     #ifndef _MSC_VER
       if (ptr_lib == kernel::Lib::cuda_kernels) {
-        auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+        auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
         if (!handle) {
           Error err = failure("Failed to find awkward1[cuda]",
@@ -1122,7 +1143,7 @@ namespace kernel {
   std::shared_ptr<int16_t> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
     #ifndef _MSC_VER
       if (ptr_lib == kernel::Lib::cuda_kernels) {
-        auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+        auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
         if (!handle) {
           Error err = failure("Failed to find awkward1[cuda]",
@@ -1150,7 +1171,7 @@ namespace kernel {
   std::shared_ptr<uint16_t> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
     #ifndef _MSC_VER
       if (ptr_lib == kernel::Lib::cuda_kernels) {
-        auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+        auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
         if (!handle) {
           Error err = failure("Failed to find awkward1[cuda]",
@@ -1178,7 +1199,7 @@ namespace kernel {
   std::shared_ptr<int32_t> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
     #ifndef _MSC_VER
       if(ptr_lib == kernel::Lib::cuda_kernels) {
-        auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+        auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
         if (!handle) {
           Error err = failure("Failed to find awkward1[cuda]",
@@ -1206,7 +1227,7 @@ namespace kernel {
   std::shared_ptr<uint32_t> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
     #ifndef _MSC_VER
       if(ptr_lib == kernel::Lib::cuda_kernels) {
-        auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+        auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
         if (!handle) {
           Error err = failure("Failed to find awkward1[cuda]",
@@ -1234,7 +1255,7 @@ namespace kernel {
   std::shared_ptr<int64_t> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
     #ifndef _MSC_VER
       if(ptr_lib == kernel::Lib::cuda_kernels) {
-        auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+        auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
         if (!handle) {
           Error err = failure("Failed to find awkward1[cuda]",
@@ -1262,7 +1283,7 @@ namespace kernel {
   std::shared_ptr<uint64_t> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
     #ifndef _MSC_VER
       if(ptr_lib == kernel::Lib::cuda_kernels) {
-        auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+        auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
         if (!handle) {
           Error err = failure("Failed to find awkward1[cuda]",
@@ -1290,7 +1311,7 @@ namespace kernel {
   std::shared_ptr<float> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
     #ifndef _MSC_VER
       if(ptr_lib == kernel::Lib::cuda_kernels) {
-        auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+        auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
         if (!handle) {
           Error err = failure("Failed to find awkward1[cuda]",
@@ -1318,7 +1339,7 @@ namespace kernel {
   std::shared_ptr<double> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
     #ifndef _MSC_VER
       if(ptr_lib == kernel::Lib::cuda_kernels) {
-        auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+        auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
         if (!handle) {
           Error err = failure("Failed to find awkward1[cuda]",
@@ -1350,7 +1371,7 @@ namespace kernel {
                                  int64_t at) {
     #ifndef _MSC_VER
       if (ptr_lib == kernel::Lib::cuda_kernels) {
-        auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+        auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
         if (!handle) {
           Error err = failure("Failed to find awkward1[cuda]",
@@ -1379,7 +1400,7 @@ namespace kernel {
                                   int64_t at) {
     #ifndef _MSC_VER
       if(ptr_lib == kernel::Lib::cuda_kernels) {
-        auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+        auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
         if (!handle) {
           Error err = failure("Failed to find awkward1[cuda]",
@@ -1409,7 +1430,7 @@ namespace kernel {
                                   int64_t at) {
     #ifndef _MSC_VER
       if (ptr_lib == kernel::Lib::cuda_kernels) {
-        auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+        auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
         if (!handle) {
           Error err = failure("Failed to find awkward1[cuda]",
@@ -1439,7 +1460,7 @@ namespace kernel {
                                    int64_t at) {
     #ifndef _MSC_VER
       if (ptr_lib == kernel::Lib::cuda_kernels) {
-        auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+        auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
         if (!handle) {
           Error err = failure("Failed to find awkward1[cuda]",
@@ -1469,7 +1490,7 @@ namespace kernel {
                                   int64_t at) {
     #ifndef _MSC_VER
       if(ptr_lib == kernel::Lib::cuda_kernels) {
-        auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+        auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
         if (!handle) {
           Error err = failure("Failed to find awkward1[cuda]",
@@ -1500,7 +1521,7 @@ namespace kernel {
                                int8_t value) {
     #ifndef _MSC_VER
       if(ptr_lib == kernel::Lib::cuda_kernels) {
-        auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+        auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
         if (!handle) {
           Error err = failure("Failed to find awkward1[cuda]",
@@ -1530,7 +1551,7 @@ namespace kernel {
                                uint8_t value) {
     #ifndef _MSC_VER
       if(ptr_lib == kernel::Lib::cuda_kernels) {
-        auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+        auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
         if (!handle) {
           Error err = failure("Failed to find awkward1[cuda]",
@@ -1560,7 +1581,7 @@ namespace kernel {
                                int32_t value) {
     #ifndef _MSC_VER
       if(ptr_lib == kernel::Lib::cuda_kernels) {
-        auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+        auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
         if (!handle) {
           Error err = failure("Failed to find awkward1[cuda]",
@@ -1590,7 +1611,7 @@ namespace kernel {
                                uint32_t value) {
     #ifndef _MSC_VER
       if(ptr_lib == kernel::Lib::cuda_kernels) {
-        auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+        auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
         if (!handle) {
           Error err = failure("Failed to find awkward1[cuda]",
@@ -1620,7 +1641,7 @@ namespace kernel {
                                int64_t value) {
     #ifndef _MSC_VER
       if(ptr_lib == kernel::Lib::cuda_kernels) {
-        auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+        auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
         if (!handle) {
           Error err = failure("Failed to find awkward1[cuda]",
@@ -1654,7 +1675,7 @@ namespace kernel {
 
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
       if (!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -1703,7 +1724,7 @@ namespace kernel {
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
       if (!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
@@ -1752,7 +1773,7 @@ namespace kernel {
     int64_t length) {
 #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = dlopen(lib_callback->awkward_cuda_path().c_str(), RTLD_LAZY);
+      auto handle = dlopen(lib_callback->awkward_library_path(kernel::Lib::cuda_kernels).c_str(), RTLD_LAZY);
 
       if (!handle) {
         Error err = failure("Failed to find awkward1[cuda]",
