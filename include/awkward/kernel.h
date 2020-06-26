@@ -21,17 +21,15 @@ namespace kernel {
     cuda_kernels
   };
 
-  // FIXME-PR293: abstract virtual class; library_path is a pure virtual method
   class LibraryPathCallback {
     public:
     LibraryPathCallback() {}
 
     virtual const std::string library_path() const {
-      return std::string("/");
+      return std::string("/home/trickarcher/gsoc_2020/awkward-1.0/cuda-kernels/build/libawkward-cuda-kernels.so");
     };
   };
 
-  // FIXME-PR293: move the implementations to .cpp
   class LibraryCallback {
     public:
     LibraryCallback();
@@ -48,7 +46,9 @@ namespace kernel {
     std::mutex lib_path_callbacks_mutex;
   };
 
-  extern std::shared_ptr<LibraryCallback> lib_callback;
+  static std::shared_ptr<LibraryCallback> lib_callback = std::make_shared<LibraryCallback>();
+
+  void* acquire_handle(kernel::Lib ptr_lib, std::string path);
 
   /// @class array_deleter
   ///

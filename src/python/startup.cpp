@@ -7,11 +7,6 @@
 
 // namespace ak = awkward;
 
-// FIXME-PR293: implement the subclass of kernel::LibraryPathCallback
-// Its library_path method calls the code below
-
-std::shared_ptr<kernel::LibraryCallback> kernel::lib_callback;
-
 const std::string StartupLibraryPathCallback::library_path() const {
   std::string library_path = ("/");
   try {

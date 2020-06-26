@@ -330,12 +330,13 @@ namespace awkward {
 #ifndef _MSC_VER
         if (ptr_lib == kernel::Lib::cuda_kernels) {
           T *cuda_ptr;
+
           if(ptr_lib_ != kernel::Lib::cuda_kernels) {
             Error err =  kernel::H2D<T>(kernel::Lib::cuda_kernels,
                                         &cuda_ptr,
                                         ptr().get(),
                                         length());
-            util::handle_cuda_error(err);
+            util::handle_error(err);
           }
           else {
             cuda_ptr = ptr_.get();
@@ -357,11 +358,12 @@ namespace awkward {
 #ifndef _MSC_VER
     if (ptr_lib_ == kernel::Lib::cuda_kernels) {
       T* cpu_ptr = new T[length_];
+
       Error err =  kernel::D2H<T>(kernel::Lib::cuda_kernels,
                                   &cpu_ptr,
                                   ptr().get(),
                                   length());
-      util::handle_cuda_error(err);
+      util::handle_error(err);
 
       return IndexOf<T>(std::shared_ptr<T>(cpu_ptr,
                                              kernel::array_deleter<T>()),

@@ -3688,12 +3688,13 @@ namespace awkward {
 
       if (format_.compare("?") == 0) {
         bool *cuda_ptr;
+
         if(ptr_lib_ != kernel::Lib::cuda_kernels) {
           Error err =  kernel::H2D<bool>(kernel::Lib::cuda_kernels,
                                          &cuda_ptr,
                                          reinterpret_cast<bool *>(ptr_.get()),
                                          length);
-          util::handle_cuda_error(err);
+          util::handle_error(err);
         }
         else {
           cuda_ptr = reinterpret_cast<bool *>(ptr_.get());
@@ -3712,17 +3713,17 @@ namespace awkward {
                                             kernel::Lib::cuda_kernels);
       } else if (format_.compare("b") == 0) {
         int8_t *cuda_ptr;
+
         if(ptr_lib_ != kernel::Lib::cuda_kernels) {
           Error err =  kernel::H2D<int8_t>(kernel::Lib::cuda_kernels,
                                            &cuda_ptr,
                                            reinterpret_cast<int8_t *>(ptr_.get()),
                                            length);
-          util::handle_cuda_error(err);
+          util::handle_error(err);
         }
         else {
           cuda_ptr = reinterpret_cast<int8_t*>(ptr_.get());
         }
-
 
         return std::make_shared<NumpyArray>(identities(),
                                             parameters(),
@@ -3737,12 +3738,13 @@ namespace awkward {
                                             kernel::Lib::cuda_kernels);
       } else if (format_.compare("B") == 0) {
         uint8_t *cuda_ptr;
+
         if(ptr_lib_ != kernel::Lib::cuda_kernels) {
           Error err =  kernel::H2D<uint8_t>(kernel::Lib::cuda_kernels,
                                             &cuda_ptr,
                                             reinterpret_cast<uint8_t *>(ptr_.get()),
                                             length);
-          util::handle_cuda_error(err);
+          util::handle_error(err);
         }
         else {
           cuda_ptr = reinterpret_cast<uint8_t*>(ptr_.get());
@@ -3767,7 +3769,7 @@ namespace awkward {
                                             &cuda_ptr,
                                             reinterpret_cast<int16_t *>(ptr_.get()),
                                             length);
-          util::handle_cuda_error(err);
+          util::handle_error(err);
         }
         else {
           cuda_ptr = reinterpret_cast<int16_t* >(ptr_.get());
@@ -3792,7 +3794,7 @@ namespace awkward {
                                              &cuda_ptr,
                                              reinterpret_cast<uint16_t *>(ptr_.get()),
                                              length);
-          util::handle_cuda_error(err);
+          util::handle_error(err);
         }
         else {
           cuda_ptr = reinterpret_cast<uint16_t*>(ptr_.get());
@@ -3817,8 +3819,9 @@ namespace awkward {
                                             &cuda_ptr,
                                             reinterpret_cast<int32_t *>(ptr_.get()),
                                             length);
-          util::handle_cuda_error(err);
-        } else {
+          util::handle_error(err);
+        }
+        else {
           cuda_ptr = reinterpret_cast<int32_t*>(ptr_.get());
         }
 
@@ -3841,7 +3844,7 @@ namespace awkward {
                                              &cuda_ptr,
                                              reinterpret_cast<uint32_t *>(ptr_.get()),
                                              length);
-          util::handle_cuda_error(err);
+          util::handle_error(err);
         }
         else {
           cuda_ptr = reinterpret_cast<uint32_t*>(ptr_.get());
@@ -3866,7 +3869,7 @@ namespace awkward {
                                             &cuda_ptr,
                                             reinterpret_cast<int64_t *>(ptr_.get()),
                                             length);
-          util::handle_cuda_error(err);
+          util::handle_error(err);
         }
         else {
           cuda_ptr = reinterpret_cast<int64_t*>(ptr_.get());
@@ -3891,7 +3894,7 @@ namespace awkward {
                                              &cuda_ptr,
                                              reinterpret_cast<uint64_t *>(ptr_.get()),
                                              length);
-          util::handle_cuda_error(err);
+          util::handle_error(err);
         }
         else {
           cuda_ptr = reinterpret_cast<uint64_t*>(ptr_.get());
@@ -3916,7 +3919,7 @@ namespace awkward {
                                           &cuda_ptr,
                                           reinterpret_cast<float *>(ptr_.get()),
                                           length);
-          util::handle_cuda_error(err);
+          util::handle_error(err);
         }
         else {
           cuda_ptr = reinterpret_cast<float*>(ptr_.get());
@@ -3941,7 +3944,7 @@ namespace awkward {
                                            &cuda_ptr,
                                            reinterpret_cast<double *>(ptr_.get()),
                                            length);
-          util::handle_cuda_error(err);
+          util::handle_error(err);
         }
         else {
           cuda_ptr = reinterpret_cast<double*>(ptr_.get());
@@ -3959,8 +3962,9 @@ namespace awkward {
                                             format(),
                                             kernel::Lib::cuda_kernels);
       } else {
-        Error err = failure("Unknown Numpy dtype", 0, kSliceNone);
-        util::handle_cuda_error(err);
+        Error err = failure("Unknown Numpy dtype", 0, kSliceNone, true);
+        util::handle_error(err);
+
         return std::make_shared<NumpyArray>(identities(),
                                             parameters(),
                                             nullptr,
@@ -3985,13 +3989,11 @@ namespace awkward {
       if (format_.compare("?") == 0) {
         bool* cpu_ptr = new bool[length];
 
-
         Error err =  kernel::D2H<bool>(kernel::Lib::cuda_kernels,
                                        &cpu_ptr,
                                        reinterpret_cast<bool *>(ptr_.get()),
                                        length);
-        util::handle_cuda_error(err);
-        
+        util::handle_error(err);
 
         return std::make_shared<NumpyArray>(identities(),
                                             parameters(),
@@ -4003,17 +4005,15 @@ namespace awkward {
                                             itemsize(),
                                             format(),
                                             kernel::Lib::cpu_kernels);
-      } else if (format_.compare("b") == 0) {
+      }
+      else if (format_.compare("b") == 0) {
         int8_t* cpu_ptr = new int8_t[length];
-
 
         Error err =  kernel::D2H<int8_t>(kernel::Lib::cuda_kernels,
                                          &cpu_ptr,
                                          reinterpret_cast<int8_t *>(ptr_.get()),
                                          length);
-        util::handle_cuda_error(err);
-
-
+        util::handle_error(err);
 
         return std::make_shared<NumpyArray>(identities(),
                                             parameters(),
@@ -4025,15 +4025,15 @@ namespace awkward {
                                             itemsize(),
                                             format(),
                                             kernel::Lib::cpu_kernels);
-      } else if (format_.compare("B") == 0) {
+      }
+      else if (format_.compare("B") == 0) {
         uint8_t* cpu_ptr = new uint8_t[length];
-
 
         Error err =  kernel::D2H<uint8_t>(kernel::Lib::cuda_kernels,
                                           &cpu_ptr,
                                           reinterpret_cast<uint8_t *>(ptr_.get()),
                                           length);
-        util::handle_cuda_error(err);
+        util::handle_error(err);
 
         return std::make_shared<NumpyArray>(identities(),
                                             parameters(),
@@ -4045,16 +4045,15 @@ namespace awkward {
                                             itemsize(),
                                             format(),
                                             kernel::Lib::cpu_kernels);
-      } else if (format_.compare("h") == 0) {
+      }
+      else if (format_.compare("h") == 0) {
         int16_t* cpu_ptr = new int16_t[length];
-
 
         Error err =  kernel::D2H<int16_t>(kernel::Lib::cuda_kernels,
                                           &cpu_ptr,
                                           reinterpret_cast<int16_t *>(ptr_.get()),
                                           length);
-        util::handle_cuda_error(err);
-
+        util::handle_error(err);
 
         return std::make_shared<NumpyArray>(identities(),
                                             parameters(),
@@ -4066,16 +4065,15 @@ namespace awkward {
                                             itemsize(),
                                             format(),
                                             kernel::Lib::cpu_kernels);
-      } else if (format_.compare("H") == 0) {
+      }
+      else if (format_.compare("H") == 0) {
         uint16_t* cpu_ptr = new uint16_t[length];
-
 
         Error err =  kernel::D2H<uint16_t>(kernel::Lib::cuda_kernels,
                                            &cpu_ptr,
                                            reinterpret_cast<uint16_t *>(ptr_.get()),
                                            length);
-        util::handle_cuda_error(err);
-
+        util::handle_error(err);
 
         return std::make_shared<NumpyArray>(identities(),
                                             parameters(),
@@ -4087,14 +4085,15 @@ namespace awkward {
                                             itemsize(),
                                             format(),
                                             kernel::Lib::cpu_kernels);
-      } else if (format_.compare("i") == 0) {
+      }
+      else if (format_.compare("i") == 0) {
         int32_t* cpu_ptr = new int32_t[length];
 
         Error err =  kernel::D2H<int32_t>(kernel::Lib::cuda_kernels,
                                           &cpu_ptr,
                                           reinterpret_cast<int32_t *>(ptr_.get()),
                                           length);
-        util::handle_cuda_error(err);
+        util::handle_error(err);
 
 
         return std::make_shared<NumpyArray>(identities(),
@@ -4107,15 +4106,15 @@ namespace awkward {
                                             itemsize(),
                                             format(),
                                             kernel::Lib::cpu_kernels);
-      } else if (format_.compare("I") == 0) {
+      }
+      else if (format_.compare("I") == 0) {
         uint32_t* cpu_ptr = new uint32_t[length];
-
 
         Error err =  kernel::D2H<uint32_t>(kernel::Lib::cuda_kernels,
                                            &cpu_ptr,
                                            reinterpret_cast<uint32_t *>(ptr_.get()),
                                            length);
-        util::handle_cuda_error(err);
+        util::handle_error(err);
 
         return std::make_shared<NumpyArray>(identities(),
                                             parameters(),
@@ -4127,14 +4126,15 @@ namespace awkward {
                                             itemsize(),
                                             format(),
                                             kernel::Lib::cpu_kernels);
-      } else if (format_.compare("l") == 0) {
+      }
+      else if (format_.compare("l") == 0) {
         int64_t* cpu_ptr = new int64_t[length];
 
         Error err =  kernel::D2H<int64_t>(kernel::Lib::cuda_kernels,
                                           &cpu_ptr,
                                           reinterpret_cast<int64_t *>(ptr_.get()),
                                           length);
-        util::handle_cuda_error(err);
+        util::handle_error(err);
 
         return std::make_shared<NumpyArray>(identities(),
                                             parameters(),
@@ -4146,14 +4146,15 @@ namespace awkward {
                                             itemsize(),
                                             format(),
                                             kernel::Lib::cpu_kernels);
-      } else if (format_.compare("L") == 0) {
+      }
+      else if (format_.compare("L") == 0) {
         uint64_t* cpu_ptr = new uint64_t[length];
 
         Error err =  kernel::D2H<uint64_t>(kernel::Lib::cuda_kernels,
                                            &cpu_ptr,
                                            reinterpret_cast<uint64_t *>(ptr_.get()),
                                            length);
-        util::handle_cuda_error(err);
+        util::handle_error(err);
 
         return std::make_shared<NumpyArray>(identities(),
                                             parameters(),
@@ -4165,15 +4166,15 @@ namespace awkward {
                                             itemsize(),
                                             format(),
                                             kernel::Lib::cpu_kernels);
-      } else if (format_.compare("f") == 0) {
+      }
+      else if (format_.compare("f") == 0) {
         float* cpu_ptr = new float[length];
 
         Error err =  kernel::D2H<float>(kernel::Lib::cuda_kernels,
                                         &cpu_ptr,
                                         reinterpret_cast<float *>(ptr_.get()),
                                         length);
-        util::handle_cuda_error(err);
-
+        util::handle_error(err);
 
         return std::make_shared<NumpyArray>(identities(),
                                             parameters(),
@@ -4185,14 +4186,15 @@ namespace awkward {
                                             itemsize(),
                                             format(),
                                             kernel::Lib::cpu_kernels);
-      } else if (format_.compare("d") == 0) {
+      }
+      else if (format_.compare("d") == 0) {
         double* cpu_ptr = new double[length];
 
         Error err =  kernel::D2H<double>(kernel::Lib::cuda_kernels,
                                          &cpu_ptr,
                                          reinterpret_cast<double *>(ptr_.get()),
                                          length);
-        util::handle_cuda_error(err);
+        util::handle_error(err);
 
         return std::make_shared<NumpyArray>(identities(),
                                             parameters(),
@@ -4204,9 +4206,10 @@ namespace awkward {
                                             itemsize(),
                                             format(),
                                             kernel::Lib::cpu_kernels);
-      } else {
+      }
+      else {
         Error err = failure("Unknown Numpy dtype", 0, kSliceNone);
-        util::handle_cuda_error(err);
+        util::handle_error(err);
         return std::make_shared<NumpyArray>(identities(),
                                             parameters(),
                                             nullptr,

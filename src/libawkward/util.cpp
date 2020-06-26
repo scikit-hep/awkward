@@ -21,34 +21,29 @@ namespace awkward {
     handle_error(const struct Error& err,
                  const std::string& classname,
                  const Identities* identities) {
-      if (err.str != nullptr) {
-        std::stringstream out;
-        out << "in " << classname;
-        if (err.identity != kSliceNone  &&  identities != nullptr) {
-          if (0 <= err.identity  &&  err.identity < identities->length()) {
-            out << " with identity ["
-                << identities->identity_at(err.identity) << "]";
-          }
-          else {
-            out << " with invalid identity";
-          }
-        }
-        if (err.attempt != kSliceNone) {
-          out << " attempting to get " << err.attempt;
-        }
-        out << ", " << err.str;
-        throw std::invalid_argument(out.str());
-      }
-    }
-
-    void
-    handle_cuda_error(const struct Error& err) {
-      if(err.str != nullptr) {
+      if(err.extra == true) {
         throw std::invalid_argument(err.str);
       }
+      else {
+        if (err.str != nullptr) {
+          std::stringstream out;
+          out << "in " << classname;
+          if (err.identity != kSliceNone && identities != nullptr) {
+            if (0 <= err.identity && err.identity < identities->length()) {
+              out << " with identity ["
+                  << identities->identity_at(err.identity) << "]";
+            } else {
+              out << " with invalid identity";
+            }
+          }
+          if (err.attempt != kSliceNone) {
+            out << " attempting to get " << err.attempt;
+          }
+          out << ", " << err.str;
+          throw std::invalid_argument(out.str());
+        }
+      }
     }
-
-
 
     template <typename T>
     IndexOf<T> make_starts(const IndexOf<T>& offsets) {

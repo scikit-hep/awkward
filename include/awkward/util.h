@@ -29,8 +29,8 @@ namespace awkward {
     /// @param id The Identities to include in the error message.
     void
     handle_error(const struct Error &err,
-                 const std::string &classname,
-                 const Identities *id);
+                 const std::string &classname = std::string(""),
+                 const Identities *id = nullptr);
 
     void
     handle_cuda_error(const struct Error &err);

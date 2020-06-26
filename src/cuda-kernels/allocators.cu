@@ -50,8 +50,7 @@ template <typename  T>
 Error awkward_cuda_ptr_dealloc(const T* ptr) {
   cudaError_t  status = cudaFree((void *)ptr);
   if(status != cudaError_t::cudaSuccess) {
-      std::cout << "Reached3" << "\n";
-      return failure(cudaGetErrorString(status), 0, kSliceNone);
+      return failure(cudaGetErrorString(status), 0, kSliceNone, true);
   }
 
   return success();
@@ -98,7 +97,7 @@ ERROR awkward_cuda_H2D(
   cudaError_t malloc_stat = cudaMallocManaged((void**)to_ptr,
                                           sizeof(T) * length);
   if(malloc_stat != cudaError_t::cudaSuccess) {
-      return failure(cudaGetErrorString(malloc_stat), 0,kSliceNone);
+      return failure(cudaGetErrorString(malloc_stat), 0, kSliceNone, true);
   }
   cudaError_t memcpy_stat = cudaMemcpy(*to_ptr,
                                        from_ptr,
@@ -106,7 +105,7 @@ ERROR awkward_cuda_H2D(
                                        cudaMemcpyHostToDevice);
 
   if(memcpy_stat != cudaError_t::cudaSuccess) {
-      return failure(cudaGetErrorString(memcpy_stat), 0, kSliceNone);
+      return failure(cudaGetErrorString(memcpy_stat), 0, kSliceNone, true);
   }
   return success();
 }
@@ -221,7 +220,7 @@ ERROR awkward_cuda_D2H(
                                          cudaMemcpyDeviceToHost);
 
     if(memcpy_stat != cudaError_t::cudaSuccess) {
-        return failure(cudaGetErrorString(memcpy_stat), 0, kSliceNone);
+        return failure(cudaGetErrorString(memcpy_stat), 0, kSliceNone, true);
     }
     return success();
 }

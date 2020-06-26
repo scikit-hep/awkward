@@ -41,7 +41,7 @@ extern "C" {
     const char* str;
     int64_t identity;
     int64_t attempt;
-    int64_t extra;
+    bool extra;
   };
 
   const int8_t   kMaxInt8   =                 127;   // 2**7  - 1
@@ -62,12 +62,12 @@ extern "C" {
     };
 
   inline struct Error
-    failure(const char* str, int64_t identity, int64_t attempt) {
+    failure(const char* str, int64_t identity, int64_t attempt, bool extra = false) {
         struct Error out;
         out.str = str;
         out.identity = identity;
         out.attempt = attempt;
-        out.extra = 0;
+        out.extra = extra;
         return out;
     };
 }

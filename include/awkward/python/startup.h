@@ -8,8 +8,6 @@
 
 namespace py = pybind11;
 
-
-// FIXME-PR293: declare a subclass of kernel::LibraryPathCallback
 class StartupLibraryPathCallback : public kernel::LibraryPathCallback {
   public:
   StartupLibraryPathCallback() = default;
