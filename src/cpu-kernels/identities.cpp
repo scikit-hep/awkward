@@ -2,8 +2,6 @@
 
 #include "awkward/cpu-kernels/identities.h"
 
-/// @param toptr outparam
-/// @param length inparam
 template <typename T>
 ERROR awkward_new_Identities(
   T* toptr,
@@ -28,10 +26,6 @@ ERROR awkward_new_Identities64(
     length);
 }
 
-/// @param toptr outparam
-/// @param fromptr inparam role: inputarray
-/// @param length inparam role: arraylen
-/// @param width inparam role: arraylen
 ERROR awkward_Identities32_to_Identities64(
   int64_t* toptr,
   const int32_t* fromptr,
@@ -804,11 +798,6 @@ ERROR awkward_Identities64_from_UnionArray8_64(
     which);
 }
 
-/// @param toptr outparam
-/// @param fromptr inparam
-/// @param fromoffset inparam dep: fromptr
-/// @param fromlength inparam dep: toptr, fromptr
-/// @param tolength inparam dep: toptr, fromptr
 template <typename ID>
 ERROR awkward_Identities_extend(
   ID* toptr,
@@ -825,11 +814,6 @@ ERROR awkward_Identities_extend(
   }
   return success();
 }
-/// @param toptr outparam
-/// @param fromptr inparam
-/// @param fromoffset inparam dep: fromptr
-/// @param fromlength inparam dep: toptr, fromptr
-/// @param tolength inparam dep: toptr, fromptr
 ERROR awkward_Identities32_extend(
   int32_t* toptr,
   const int32_t* fromptr,

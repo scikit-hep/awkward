@@ -9,6 +9,8 @@ import re
 import black
 import pycparser
 
+from parser_utils import parseheader
+
 
 def preprocess(filename, skip_implementation=False):
     code = ""
@@ -18,8 +20,6 @@ def preprocess(filename, skip_implementation=False):
     templateids = []
     templatecall = False
     tempids = []
-    labels = {}
-    roledoc = {}
     funcer = False
     with open(filename, "r") as f:
         for line in f:
@@ -28,19 +28,6 @@ def preprocess(filename, skip_implementation=False):
             else:
                 line = line.rstrip()
             if line.startswith("#"):
-                continue
-            if "///@param" in line.replace(" ", "") and not func:
-                line = re.sub(" +", " ", line)
-                line = line[line.find("@param") + 7 :]
-                key = line.split()[0]
-                value = line.split()[1]
-                labels[key] = value
-                line = "".join(line.split())
-                roledoc[key] = {}
-                if "dep:" in line:
-                    roledoc[key]["dep"] = [
-                        x.strip() for x in line[line.find("dep:") + 4 :].split(",")
-                    ]
                 continue
             if re.search("//.*\n", line):
                 line = re.sub("//.*\n", "\n", line)
@@ -81,10 +68,6 @@ def preprocess(filename, skip_implementation=False):
                     funcer = True
                 funcname = re.search("\s.*\(", line).group()[1:-1]
                 tokens[funcname] = {}
-                tokens[funcname]["labels"] = labels
-                tokens[funcname]["roles"] = roledoc
-                labels = {}
-                roledoc = {}
                 line = line.replace(line.split(" ")[0], "int")
                 func = True
                 parans = []
@@ -199,8 +182,6 @@ def preprocess(filename, skip_implementation=False):
                         parans.pop()
                 if len(parans) == 0:
                     func = False
-                    labels = {}
-                    roledoc = {}
                     templ = False
                     templateids = []
                     tempids = []
@@ -621,6 +602,14 @@ class Error(ctypes.Structure):
     ]
 
 
+def pytype(cpptype):
+    if re.match("u?int\d{1,2}_t") is not None:
+        return "int"
+    else:
+        return cpptype
+
+
+"""
 def gentests(funcs):
     import kernels
 
@@ -629,10 +618,7 @@ def gentests(funcs):
     with open("testcases.json") as f:
         data = json.load(f)
         for name, vals in funcs.items():
-            funcPy = getattr(kernels, name)
-            funcC = getattr(lib, name)
-            funcC.restype = Error
-            funcC.argtypes = ctypes.POINTER(ctypes.c_int32), ctypes.c_int64
+            
             tests = {}
             for key, types in vals.items():
                 if (
@@ -652,13 +638,17 @@ def gentests(funcs):
                         data[vals[key]][arr]["failure"],
                     ]
 
-
-arg_parser = argparse.ArgumentParser()
-arg_parser.add_argument("filenames", nargs="+")
-args = arg_parser.parse_args()
-filenames = args.filenames
+            funcPy = getattr(kernels, name)
+            funcC = getattr(lib, name)
+            funcC.restype = Error
+            funcC.argtypes = ctypes.POINTER(ctypes.c_int32), ctypes.c_int64
+"""
 
 if __name__ == "__main__":
+    arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument("filenames", nargs="+")
+    args = arg_parser.parse_args()
+    filenames = args.filenames
     doc_awkward_sorting_ranges = """
     def awkward_sorting_ranges(toindex, tolength, parents, parentsoffset, parentslength, outlength):
         j = 0
@@ -771,6 +761,7 @@ outparam = None
 inparam = None
 
 """
+    current_dir = os.path.dirname(os.path.realpath(__file__))
     docdict = {}
     func_callable = {}
     for filename in filenames:
@@ -802,23 +793,33 @@ inparam = None
                             + "\n\n"
                         )
                 if "sorting.cpp" not in filename:
-                    if not tokens[name]["labels"]:
-                        funcgen += (
-                            "def {0}({1})".format(
-                                name, funcs[name]["def"].arrange_args(),
-                            )
-                            + ":\n"
-                        )
+                    if "/" in filename:
+                        hfile = filename[filename.rfind("/") + 1 : -4] + ".h"
                     else:
-                        funcgen += (
-                            "def {0}({1})".format(
-                                name,
-                                funcs[name]["def"].arrange_args(
-                                    labels=tokens[name]["labels"]
-                                ),
-                            )
-                            + ":\n"
+                        hfile = filename[:-4] + ".h"
+                    hfile = os.path.join(
+                        current_dir, "..", "include", "awkward", "cpu-kernels", hfile
+                    )
+                    htokens = parseheader(hfile)
+                    d = {}
+                    if "childfunc" in tokens[name].keys():
+                        for x in htokens.keys():
+                            if x in tokens[name]["childfunc"]:
+                                for key, val in htokens[x].items():
+                                    d[key] = val["check"]
+                    else:
+                        for key, val in htokens[name].items():
+                            d[key] = val["check"]
+                    tokens[name]["labels"] = d
+                    funcgen += (
+                        "def {0}({1})".format(
+                            name,
+                            funcs[name]["def"].arrange_args(
+                                labels=tokens[name]["labels"]
+                            ),
                         )
+                        + ":\n"
+                    )
                     funcgen += remove_return(funcs[name]["body"].code)
                 else:
                     doccode += "*(The following Python code is translated from C++ manually and may not be normative)*\n\n"
@@ -853,11 +854,10 @@ inparam = None
             else:
                 func_callable[name] = tokens[name]
                 func_callable[name]["args"] = funcs[decl.name]["def"].args
-    current_dir = os.path.dirname(os.path.realpath(__file__))
     with open(os.path.join(current_dir, "kernels.py"), "w") as f:
         print("Writing kernels.py")
         f.write(gencode)
-    gentests(func_callable)
+    # gentests(func_callable)
     if os.path.isdir(os.path.join(current_dir, "..", "docs-sphinx", "_auto")):
         with open(
             os.path.join(current_dir, "..", "docs-sphinx", "_auto", "kernels.rst",),

@@ -6,15 +6,23 @@
 #include "awkward/common.h"
 
 extern "C" {
+/// @param toptr outparam
+/// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_new_Identities32(
       int32_t* toptr,
       int64_t length);
+/// @param toptr outparam
+/// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_new_Identities64(
       int64_t* toptr,
       int64_t length);
 
+/// @param toptr outparam
+/// @param fromptr inparam
+/// @param length inparam
+/// @param width inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities32_to_Identities64(
       int64_t* toptr,
@@ -22,6 +30,14 @@ extern "C" {
       int64_t length,
       int64_t width);
 
+/// @param toptr outparam
+/// @param fromptr inparam
+/// @param fromoffsets inparam
+/// @param fromptroffset inparam
+/// @param offsetsoffset inparam
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities32_from_ListOffsetArray32(
       int32_t* toptr,
@@ -32,6 +48,14 @@ extern "C" {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
+/// @param toptr outparam
+/// @param fromptr inparam
+/// @param fromoffsets inparam
+/// @param fromptroffset inparam
+/// @param offsetsoffset inparam
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities32_from_ListOffsetArrayU32(
       int32_t* toptr,
@@ -42,6 +66,14 @@ extern "C" {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
+/// @param toptr outparam
+/// @param fromptr inparam
+/// @param fromoffsets inparam
+/// @param fromptroffset inparam
+/// @param offsetsoffset inparam
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities32_from_ListOffsetArray64(
       int32_t* toptr,
@@ -52,6 +84,14 @@ extern "C" {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
+/// @param toptr outparam
+/// @param fromptr inparam
+/// @param fromoffsets inparam
+/// @param fromptroffset inparam
+/// @param offsetsoffset inparam
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities64_from_ListOffsetArray32(
       int64_t* toptr,
@@ -62,6 +102,14 @@ extern "C" {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
+/// @param toptr outparam
+/// @param fromptr inparam
+/// @param fromoffsets inparam
+/// @param fromptroffset inparam
+/// @param offsetsoffset inparam
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities64_from_ListOffsetArrayU32(
       int64_t* toptr,
@@ -72,6 +120,14 @@ extern "C" {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
+/// @param toptr outparam
+/// @param fromptr inparam
+/// @param fromoffsets inparam
+/// @param fromptroffset inparam
+/// @param offsetsoffset inparam
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities64_from_ListOffsetArray64(
       int64_t* toptr,
@@ -83,6 +139,17 @@ extern "C" {
       int64_t fromlength,
       int64_t fromwidth);
 
+/// @param uniquecontents outparam
+/// @param toptr outparam
+/// @param fromptr inparam
+/// @param fromstarts inparam
+/// @param fromstops inparam
+/// @param fromptroffset inparam
+/// @param startsoffset inparam
+/// @param stopsoffset inparam
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities32_from_ListArray32(
       bool* uniquecontents,
@@ -96,6 +163,17 @@ extern "C" {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
+/// @param uniquecontents outparam
+/// @param toptr outparam
+/// @param fromptr inparam
+/// @param fromstarts inparam
+/// @param fromstops inparam
+/// @param fromptroffset inparam
+/// @param startsoffset inparam
+/// @param stopsoffset inparam
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities32_from_ListArrayU32(
       bool* uniquecontents,
@@ -109,6 +187,17 @@ extern "C" {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
+/// @param uniquecontents outparam
+/// @param toptr outparam
+/// @param fromptr inparam
+/// @param fromstarts inparam
+/// @param fromstops inparam
+/// @param fromptroffset inparam
+/// @param startsoffset inparam
+/// @param stopsoffset inparam
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities32_from_ListArray64(
       bool* uniquecontents,
@@ -122,6 +211,17 @@ extern "C" {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
+/// @param uniquecontents outparam
+/// @param toptr outparam
+/// @param fromptr inparam
+/// @param fromstarts inparam
+/// @param fromstops inparam
+/// @param fromptroffset inparam
+/// @param startsoffset inparam
+/// @param stopsoffset inparam
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities64_from_ListArray32(
       bool* uniquecontents,
@@ -135,6 +235,17 @@ extern "C" {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
+/// @param uniquecontents outparam
+/// @param toptr outparam
+/// @param fromptr inparam
+/// @param fromstarts inparam
+/// @param fromstops inparam
+/// @param fromptroffset inparam
+/// @param startsoffset inparam
+/// @param stopsoffset inparam
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities64_from_ListArrayU32(
       bool* uniquecontents,
@@ -148,6 +259,17 @@ extern "C" {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
+/// @param uniquecontents outparam
+/// @param toptr outparam
+/// @param fromptr inparam
+/// @param fromstarts inparam
+/// @param fromstops inparam
+/// @param fromptroffset inparam
+/// @param startsoffset inparam
+/// @param stopsoffset inparam
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities64_from_ListArray64(
       bool* uniquecontents,
@@ -162,6 +284,13 @@ extern "C" {
       int64_t fromlength,
       int64_t fromwidth);
 
+/// @param toptr outparam
+/// @param fromptr inparam
+/// @param fromptroffset inparam
+/// @param size inparam
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities32_from_RegularArray(
       int32_t* toptr,
@@ -171,6 +300,13 @@ extern "C" {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
+/// @param toptr outparam
+/// @param fromptr inparam
+/// @param fromptroffset inparam
+/// @param size inparam
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities64_from_RegularArray(
       int64_t* toptr,
@@ -181,6 +317,15 @@ extern "C" {
       int64_t fromlength,
       int64_t fromwidth);
 
+/// @param uniquecontents outparam
+/// @param toptr outparam
+/// @param fromptr inparam
+/// @param fromindex inparam
+/// @param fromptroffset inparam
+/// @param indexoffset inparam
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities32_from_IndexedArray32(
       bool* uniquecontents,
@@ -192,6 +337,15 @@ extern "C" {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
+/// @param uniquecontents outparam
+/// @param toptr outparam
+/// @param fromptr inparam
+/// @param fromindex inparam
+/// @param fromptroffset inparam
+/// @param indexoffset inparam
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities32_from_IndexedArrayU32(
       bool* uniquecontents,
@@ -203,6 +357,15 @@ extern "C" {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
+/// @param uniquecontents outparam
+/// @param toptr outparam
+/// @param fromptr inparam
+/// @param fromindex inparam
+/// @param fromptroffset inparam
+/// @param indexoffset inparam
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities32_from_IndexedArray64(
       bool* uniquecontents,
@@ -214,6 +377,15 @@ extern "C" {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
+/// @param uniquecontents outparam
+/// @param toptr outparam
+/// @param fromptr inparam
+/// @param fromindex inparam
+/// @param fromptroffset inparam
+/// @param indexoffset inparam
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities64_from_IndexedArray32(
       bool* uniquecontents,
@@ -225,6 +397,15 @@ extern "C" {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
+/// @param uniquecontents outparam
+/// @param toptr outparam
+/// @param fromptr inparam
+/// @param fromindex inparam
+/// @param fromptroffset inparam
+/// @param indexoffset inparam
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities64_from_IndexedArrayU32(
       bool* uniquecontents,
@@ -236,6 +417,15 @@ extern "C" {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
+/// @param uniquecontents outparam
+/// @param toptr outparam
+/// @param fromptr inparam
+/// @param fromindex inparam
+/// @param fromptroffset inparam
+/// @param indexoffset inparam
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities64_from_IndexedArray64(
       bool* uniquecontents,
@@ -248,6 +438,18 @@ extern "C" {
       int64_t fromlength,
       int64_t fromwidth);
 
+/// @param uniquecontents outparam
+/// @param toptr outparam
+/// @param fromptr inparam
+/// @param fromtags inparam
+/// @param fromindex inparam
+/// @param fromptroffset inparam
+/// @param tagsoffset inparam
+/// @param indexoffset inparam
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
+/// @param which inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities32_from_UnionArray8_32(
       bool* uniquecontents,
@@ -262,6 +464,18 @@ extern "C" {
       int64_t fromlength,
       int64_t fromwidth,
       int64_t which);
+/// @param uniquecontents outparam
+/// @param toptr outparam
+/// @param fromptr inparam
+/// @param fromtags inparam
+/// @param fromindex inparam
+/// @param fromptroffset inparam
+/// @param tagsoffset inparam
+/// @param indexoffset inparam
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
+/// @param which inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities32_from_UnionArray8_U32(
       bool* uniquecontents,
@@ -276,6 +490,18 @@ extern "C" {
       int64_t fromlength,
       int64_t fromwidth,
       int64_t which);
+/// @param uniquecontents outparam
+/// @param toptr outparam
+/// @param fromptr inparam
+/// @param fromtags inparam
+/// @param fromindex inparam
+/// @param fromptroffset inparam
+/// @param tagsoffset inparam
+/// @param indexoffset inparam
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
+/// @param which inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities32_from_UnionArray8_64(
       bool* uniquecontents,
@@ -290,6 +516,18 @@ extern "C" {
       int64_t fromlength,
       int64_t fromwidth,
       int64_t which);
+/// @param uniquecontents outparam
+/// @param toptr outparam
+/// @param fromptr inparam
+/// @param fromtags inparam
+/// @param fromindex inparam
+/// @param fromptroffset inparam
+/// @param tagsoffset inparam
+/// @param indexoffset inparam
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
+/// @param which inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities64_from_UnionArray8_32(
       bool* uniquecontents,
@@ -304,6 +542,18 @@ extern "C" {
       int64_t fromlength,
       int64_t fromwidth,
       int64_t which);
+/// @param uniquecontents outparam
+/// @param toptr outparam
+/// @param fromptr inparam
+/// @param fromtags inparam
+/// @param fromindex inparam
+/// @param fromptroffset inparam
+/// @param tagsoffset inparam
+/// @param indexoffset inparam
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
+/// @param which inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities64_from_UnionArray8_U32(
       bool* uniquecontents,
@@ -318,6 +568,18 @@ extern "C" {
       int64_t fromlength,
       int64_t fromwidth,
       int64_t which);
+/// @param uniquecontents outparam
+/// @param toptr outparam
+/// @param fromptr inparam
+/// @param fromtags inparam
+/// @param fromindex inparam
+/// @param fromptroffset inparam
+/// @param tagsoffset inparam
+/// @param indexoffset inparam
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
+/// @param which inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities64_from_UnionArray8_64(
       bool* uniquecontents,
@@ -333,6 +595,11 @@ extern "C" {
       int64_t fromwidth,
       int64_t which);
 
+/// @param toptr outparam
+/// @param fromptr inparam
+/// @param fromoffset inparam
+/// @param fromlength inparam
+/// @param tolength inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities32_extend(
       int32_t* toptr,
@@ -340,6 +607,11 @@ extern "C" {
       int64_t fromoffset,
       int64_t fromlength,
       int64_t tolength);
+/// @param toptr outparam
+/// @param fromptr inparam
+/// @param fromoffset inparam
+/// @param fromlength inparam
+/// @param tolength inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities64_extend(
       int64_t* toptr,

@@ -16,7 +16,7 @@ func.restype = Error
 func.argtypes = ctypes.POINTER(ctypes.c_int32), ctypes.c_int64
 
 for i in length:
-    outarray = [0]*i
+    outarray = [0]*-5
     outarray = (ctypes.c_int32 * i)(*outarray) #Delete file once this line has been ported
     func(outarray, i)
     print(list(outarray))
