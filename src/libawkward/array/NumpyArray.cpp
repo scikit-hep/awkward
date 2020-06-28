@@ -433,7 +433,8 @@ namespace awkward {
                  std::vector<ssize_t>({ (ssize_t)sizeof(uint8_t) }),
                  0,
                  sizeof(uint8_t),
-                 format) { }
+                 format,
+                 index.ptr_lib()) { }
 
   NumpyArray::NumpyArray(const Index32 index, const std::string& format)
     : NumpyArray(Identities::none(),
@@ -844,6 +845,11 @@ namespace awkward {
     out << "\" at=\"0x";
     out << std::hex << std::setw(12) << std::setfill('0')
         << reinterpret_cast<ssize_t>(ptr_.get());
+    if(ptr_lib() == kernel::Lib::cuda_kernels) {
+      out << "\" on=\"[" << kernel::get_ptr_device_num(ptr_lib(), ptr_.get())
+          << "]" << kernel::get_ptr_device_name(ptr_lib(), ptr_.get())
+          << "\" Lib=\"" << "cuda_kernels";
+    }
     if (identities_.get() == nullptr  &&  parameters_.empty()) {
       out << "\"/>" << post;
     }

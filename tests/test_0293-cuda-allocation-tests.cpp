@@ -8,7 +8,21 @@
 
 namespace ak = awkward;
 
+// The extra steps needed to enable CUDA kernels on pure C++
+class StartupLibraryPathCallback : public kernel::LibraryPathCallback {
+public:
+    StartupLibraryPathCallback() = default;
+
+    const std::string library_path() const override {
+      std::string library_path = ("/home/trickarcher/.local/lib/python3.8/site-packages/awkward1_cuda_kernels/libawkward-cuda-kernels.so");
+      return library_path;
+    };
+};
+
 int main(int, char**) {
+  // Have access to cuda-kernels library on the C++ side
+  kernel::lib_callback->add_library_path_callback(kernel::Lib::cuda_kernels,
+                                                  std::make_shared<StartupLibraryPathCallback>());
 
   int8_t arr8[] = {1,2,3,4,5};
   uint8_t arrU8[] = {1,2,3,4,5};
@@ -17,6 +31,8 @@ int main(int, char**) {
   int64_t arr64[] = {1,2,3,4,5};
   float arrf[] = {1,2,3,4,5};
 
+  // This is wrong practice, we can't have a stack allocated array wrapped with a
+  // shared_ptr.
   std::shared_ptr<int8_t> main_arr8(arr8,
                                       kernel::array_deleter<int8_t>());
   std::shared_ptr<uint8_t> main_arrU8(arrU8,
@@ -35,7 +51,7 @@ int main(int, char**) {
   ak::Index32 index_arr32(main_arr32, 0, 5);
   ak::IndexU32 index_arrU32(main_arrU32, 0, 5);
   ak::Index64 index_arr64(main_arr64, 0, 5);
-//
+
   auto cuda_arr8 = index_arr8.to_gpu(kernel::Lib::cuda_kernels);
   std::cout << cuda_arr8.tostring() << "\n";
   auto cuda_arrU8 = index_arrU8.to_gpu(kernel::Lib::cuda_kernels);
@@ -65,7 +81,7 @@ int main(int, char**) {
   auto cpu_arr8 = numpyArray8.to_cpu();
   std::cout << cpu_arr8->tostring() << "\n";
   auto cpu_arrU8 = numpyArrayU8.to_cpu();
-//  std::cout << cpu_arrU8->tostring() << "\n";
+  std::cout << cpu_arrU8->tostring() << "\n";
   auto cpu_arr32 = numpyArray32.to_cpu();
   std::cout << cpu_arr32->tostring() << "\n";
   auto cpu_arrU32 = numpyArrayU32.to_cpu();

@@ -9,8 +9,6 @@
 #include "awkward/kernel.h"
 namespace ak = awkward;
 
-//std::shared_ptr<kernel::LibraryCallback> kernel::lib_callback;
-
 // The extra steps needed to enable CUDA kernels on pure C++
 class StartupLibraryPathCallback : public kernel::LibraryPathCallback {
 public:
