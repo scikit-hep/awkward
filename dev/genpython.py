@@ -5,11 +5,14 @@ import ctypes
 import json
 import os
 import re
+from collections import OrderedDict
 
 import black
 import pycparser
 
 from parser_utils import parseheader
+
+CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
 def preprocess(filename, skip_implementation=False):
@@ -602,49 +605,95 @@ class Error(ctypes.Structure):
     ]
 
 
-def pytype(cpptype):
-    if re.match("u?int\d{1,2}_t") is not None:
-        return "int"
-    else:
-        return cpptype
-
-
-"""
-def gentests(funcs):
+def gentests(funcs, htokens):
     import kernels
+
+    def pytype(cpptype):
+        if re.match("u?int\d{1,2}_t", cpptype) is not None:
+            return "int"
+        elif cpptype == "double":
+            return "float"
+        else:
+            return cpptype
+
+    def gettokens(ctokens, htokens):
+        tokens = {}
+        for x in htokens.keys():
+            if x == "awkward_new_Identities32":
+                tokens[x] = OrderedDict()
+                for y in htokens[x].keys():
+                    tokens[x][y] = OrderedDict()
+                    for z, val in htokens[x][y].items():
+                        tokens[x][y][z] = val
+                    for i in ctokens[x]["args"]:
+                        if i["name"] == y:
+                            if i["list"] > 0:
+                                tokens[x][y]["array"] = True
+                            else:
+                                tokens[x][y]["array"] = False
+                            tokens[x][y]["type"] = i["type"]
+        return tokens
+
+    tokens = gettokens(funcs, htokens)
 
     lib = ctypes.CDLL("/home/reik/awkward-1.0/localbuild/libawkward-cpu-kernels.so")
 
-    with open("testcases.json") as f:
+    with open(os.path.join(CURRENT_DIR, "testcases.json")) as f:
         data = json.load(f)
-        for name, vals in funcs.items():
-            
-            tests = {}
-            for key, types in vals.items():
-                if (
-                    key != "gen"
-                    and key != "labels"
-                    and key != "roles"
-                    and key != "args"
+        for name, args in tokens.items():
+            checkindex = []
+            testsp = []
+            testsc = []
+            for i in range(len(args.values())):
+                if list(args.values())[i]["array"]:
+                    if list(args.values())[i]["check"] == "inparam":
+                        temparr = data[pytype(list(args.values())[i]["type"])]["array"]
+                        testsp.append(temparr)
+                        if list(args.values())[i]["type"].endswith("_t"):
+                            temptype = list(args.values())[i]["type"][:-2]
+                        else:
+                            temptype = list(args.values())[i]["type"]
+                        testsc.append((eval("ctypes.c_" + temptype) * 10)(*temparr))
+                    elif list(args.values())[i]["check"] == "outparam":
+                        temparr = [0] * 10
+                        checkindex.append(i)
+                        testsp.append(temparr)
+                        if list(args.values())[i]["type"].endswith("_t"):
+                            temptype = list(args.values())[i]["type"][:-2]
+                        else:
+                            temptype = list(args.values())[i]["type"]
+                        testsc.append((eval("ctypes.c_" + temptype) * 10)(*temparr))
+                elif ("role" in list(args.values())[i]) and (
+                    list(args.values())[i]["role"] == "len"
                 ):
-                    for x in vals["args"]:
-                        if x["name"] == key:
-                            if x["list"] == 0:
-                                arr = "array"
-                            else:
-                                arr = "num"
-                    tests[key] = [
-                        data[vals[key]][arr]["success"],
-                        data[vals[key]][arr]["failure"],
-                    ]
-
+                    testsp.append(data[pytype(list(args.values())[i]["type"])]["len"])
+                    testsc.append(data[pytype(list(args.values())[i]["type"])]["len"])
             funcPy = getattr(kernels, name)
             funcC = getattr(lib, name)
             funcC.restype = Error
             funcC.argtypes = ctypes.POINTER(ctypes.c_int32), ctypes.c_int64
-"""
+            funcPy(*testsp)
+            funcC(*testsc)
+            for i in checkindex:
+                if isinstance(testsp[i], list):
+                    for j in range(len(testsp[i])):
+                        assert testsp[i][j] == testsc[i][j]
+                else:
+                    assert testsp[i] == testsc[i]
+
 
 if __name__ == "__main__":
+
+    def getheadername(filename):
+        if "/" in filename:
+            hfile = filename[filename.rfind("/") + 1 : -4] + ".h"
+        else:
+            hfile = filename[:-4] + ".h"
+        hfile = os.path.join(
+            CURRENT_DIR, "..", "include", "awkward", "cpu-kernels", hfile
+        )
+        return hfile
+
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument("filenames", nargs="+")
     args = arg_parser.parse_args()
@@ -752,6 +801,8 @@ if __name__ == "__main__":
             o = o + 1
     """
     blackmode = black.FileMode()  # Initialize black config
+
+    # Preface of generated Python
     gencode = """import copy
 
 kMaxInt64  = 9223372036854775806
@@ -761,7 +812,7 @@ outparam = None
 inparam = None
 
 """
-    current_dir = os.path.dirname(os.path.realpath(__file__))
+
     docdict = {}
     func_callable = {}
     for filename in filenames:
@@ -793,13 +844,7 @@ inparam = None
                             + "\n\n"
                         )
                 if "sorting.cpp" not in filename:
-                    if "/" in filename:
-                        hfile = filename[filename.rfind("/") + 1 : -4] + ".h"
-                    else:
-                        hfile = filename[:-4] + ".h"
-                    hfile = os.path.join(
-                        current_dir, "..", "include", "awkward", "cpu-kernels", hfile
-                    )
+                    hfile = getheadername(filename)
                     htokens = parseheader(hfile)
                     d = {}
                     if "childfunc" in tokens[name].keys():
@@ -853,14 +898,14 @@ inparam = None
                 docdict[name] = doccode
             else:
                 func_callable[name] = tokens[name]
-                func_callable[name]["args"] = funcs[decl.name]["def"].args
-    with open(os.path.join(current_dir, "kernels.py"), "w") as f:
+                func_callable[name]["args"] = funcs[name]["def"].args
+    with open(os.path.join(CURRENT_DIR, "kernels.py"), "w") as f:
         print("Writing kernels.py")
         f.write(gencode)
-    # gentests(func_callable)
-    if os.path.isdir(os.path.join(current_dir, "..", "docs-sphinx", "_auto")):
+    gentests(func_callable, htokens)
+    if os.path.isdir(os.path.join(CURRENT_DIR, "..", "docs-sphinx", "_auto")):
         with open(
-            os.path.join(current_dir, "..", "docs-sphinx", "_auto", "kernels.rst",),
+            os.path.join(CURRENT_DIR, "..", "docs-sphinx", "_auto", "kernels.rst",),
             "w",
         ) as f:
             print("Writing kernels.rst")
@@ -883,10 +928,10 @@ The interface, as well as specifications for each function's behavior through a 
             for name in sorted(docdict.keys()):
                 f.write(docdict[name])
         if os.path.isfile(
-            os.path.join(current_dir, "..", "docs-sphinx", "_auto", "toctree.txt",)
+            os.path.join(CURRENT_DIR, "..", "docs-sphinx", "_auto", "toctree.txt",)
         ):
             with open(
-                os.path.join(current_dir, "..", "docs-sphinx", "_auto", "toctree.txt",),
+                os.path.join(CURRENT_DIR, "..", "docs-sphinx", "_auto", "toctree.txt",),
                 "r+",
             ) as f:
                 if "_auto/kernels.rst" not in f.read():

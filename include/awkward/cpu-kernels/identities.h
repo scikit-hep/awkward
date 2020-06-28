@@ -7,7 +7,7 @@
 
 extern "C" {
 /// @param toptr outparam
-/// @param length inparam
+/// @param length inparam role: len
   EXPORT_SYMBOL struct Error
     awkward_new_Identities32(
       int32_t* toptr,
