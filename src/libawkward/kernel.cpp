@@ -17,24 +17,25 @@ using namespace awkward;
 
 namespace kernel {
 
-  LibraryCallback::LibraryCallback() {
-    lib_path_callbacks[kernel::Lib::cuda_kernels] = std::vector<LibraryPathCallback>();
+  std::shared_ptr<LibraryCallback> lib_callback = std::make_shared<LibraryCallback>();
 
-    add_library_path_callback(kernel::Lib::cuda_kernels, std::make_shared<LibraryPathCallback>());
+  LibraryCallback::LibraryCallback() {
+    lib_path_callbacks[kernel::Lib::cuda_kernels] = std::vector<std::shared_ptr<LibraryPathCallback>>();
   }
 
   void LibraryCallback::add_library_path_callback(
     kernel::Lib ptr_lib,
     const std::shared_ptr<LibraryPathCallback> &callback) {
     std::lock_guard<std::mutex> lock(lib_path_callbacks_mutex);
-    lib_path_callbacks.at(ptr_lib).push_back(*callback);
+    lib_path_callbacks.at(ptr_lib).push_back(callback);
   }
 
   std::string LibraryCallback::awkward_library_path(kernel::Lib ptr_lib) {
     for(auto i : lib_path_callbacks.at(ptr_lib)) {
-      auto handle = dlopen(i.library_path().c_str(), RTLD_NOW);
+      auto handle = dlopen(i->library_path().c_str(), RTLD_LAZY);
+
       if(handle) {
-        return i.library_path();
+        return i->library_path();
       }
     }
     return std::string("/");
@@ -1115,13 +1116,266 @@ namespace kernel {
     return awkward_index64_getitem_at_nowrap(ptr, offset, at);
   }
 
-  template<>
-  void index_setitem_at_nowrap(kernel::Lib ptr_lib,
-                               int8_t* ptr,
-                               int64_t offset,
-                               int64_t at,
-                               int8_t value) {
+  template <>
+  bool numpyarray_getitem_at(kernel::Lib ptr_lib,
+                                 bool* ptr,
+                                 int64_t at) {
 #ifndef _MSC_VER
+    if(ptr_lib == kernel::Lib::cuda_kernels) {
+      auto handle = acquire_handle(kernel::Lib::cuda_kernels,
+                                   kernel::lib_callback->awkward_library_path(kernel::Lib::cuda_kernels));
+
+      typedef bool (func_awkward_cuda_numpyarraybool_getitem_at_t)
+        (const bool *ptr, int64_t at);
+      func_awkward_cuda_numpyarraybool_getitem_at_t
+        *func_awkward_cuda_numpyarraybool_getitem_at =
+        reinterpret_cast<func_awkward_cuda_numpyarraybool_getitem_at_t *>
+        (dlsym(handle, "awkward_cuda_numpyarraybool_getitem_at"));
+
+      return (*func_awkward_cuda_numpyarraybool_getitem_at)(ptr, at);
+    }
+#endif
+    return ptr[at];
+  }
+  template <>
+  int8_t numpyarray_getitem_at(kernel::Lib ptr_lib,
+                               int8_t* ptr,
+                               int64_t at) {
+
+
+#ifndef _MSC_VER
+    if(ptr_lib == kernel::Lib::cuda_kernels) {
+      auto handle = acquire_handle(kernel::Lib::cuda_kernels,
+                                   kernel::lib_callback->awkward_library_path(kernel::Lib::cuda_kernels));
+
+      typedef int8_t (func_awkward_cuda_numpyarray8_getitem_at_t)
+        (const int8_t *ptr, int64_t at);
+      func_awkward_cuda_numpyarray8_getitem_at_t
+        *func_awkward_cuda_numpyarray8_getitem_at =
+        reinterpret_cast<func_awkward_cuda_numpyarray8_getitem_at_t *>
+        (dlsym(handle, "awkward_cuda_numpyarray8_getitem_at"));
+
+      return (*func_awkward_cuda_numpyarray8_getitem_at)(ptr, at);
+    }
+#endif
+    return ptr[at];
+  }
+    template <>
+    uint8_t numpyarray_getitem_at(kernel::Lib ptr_lib,
+                                 uint8_t* ptr,
+                                 int64_t at) {
+
+
+#ifndef _MSC_VER
+      if(ptr_lib == kernel::Lib::cuda_kernels) {
+        auto handle = acquire_handle(kernel::Lib::cuda_kernels,
+                                     kernel::lib_callback->awkward_library_path(kernel::Lib::cuda_kernels));
+
+        typedef uint8_t (func_awkward_cuda_numpyarrayU8_getitem_at_t)
+          (const uint8_t *ptr, int64_t at);
+        func_awkward_cuda_numpyarrayU8_getitem_at_t
+          *func_awkward_cuda_numpyarrayU8_getitem_at =
+          reinterpret_cast<func_awkward_cuda_numpyarrayU8_getitem_at_t *>
+          (dlsym(handle, "awkward_cuda_numpyarrayU8_getitem_at"));
+
+        return (*func_awkward_cuda_numpyarrayU8_getitem_at)(ptr, at);
+      }
+#endif
+      return ptr[at];
+    }
+    template <>
+    int16_t numpyarray_getitem_at(kernel::Lib ptr_lib,
+                                  int16_t* ptr,
+                                  int64_t at) {
+
+
+#ifndef _MSC_VER
+      if(ptr_lib == kernel::Lib::cuda_kernels) {
+        auto handle = acquire_handle(kernel::Lib::cuda_kernels,
+                                     kernel::lib_callback->awkward_library_path(kernel::Lib::cuda_kernels));
+
+        typedef int16_t (func_awkward_cuda_numpyarray16_getitem_at_t)
+          (const int16_t *ptr, int64_t at);
+        func_awkward_cuda_numpyarray16_getitem_at_t
+          *func_awkward_cuda_numpyarray16_getitem_at =
+          reinterpret_cast<func_awkward_cuda_numpyarray16_getitem_at_t *>
+          (dlsym(handle, "awkward_cuda_numpyarray16_getitem_at"));
+
+        return (*func_awkward_cuda_numpyarray16_getitem_at)(ptr, at);
+      }
+#endif
+      return ptr[at];
+    }
+    template <>
+    uint16_t numpyarray_getitem_at(kernel::Lib ptr_lib,
+                                  uint16_t* ptr,
+                                  int64_t at) {
+
+
+#ifndef _MSC_VER
+      if(ptr_lib == kernel::Lib::cuda_kernels) {
+        auto handle = acquire_handle(kernel::Lib::cuda_kernels,
+                                     kernel::lib_callback->awkward_library_path(kernel::Lib::cuda_kernels));
+
+        typedef uint16_t (func_awkward_cuda_numpyarrayU16_getitem_at_t)
+          (const uint16_t *ptr, int64_t at);
+        func_awkward_cuda_numpyarrayU16_getitem_at_t
+          *func_awkward_cuda_numpyarrayU16_getitem_at =
+          reinterpret_cast<func_awkward_cuda_numpyarrayU16_getitem_at_t *>
+          (dlsym(handle, "awkward_cuda_numpyarrayU16_getitem_at"));
+
+        return (*func_awkward_cuda_numpyarrayU16_getitem_at)(ptr, at);
+      }
+#endif
+      return ptr[at];
+    }
+    template <>
+    int32_t numpyarray_getitem_at(kernel::Lib ptr_lib,
+                                   int32_t* ptr,
+                                   int64_t at) {
+
+
+#ifndef _MSC_VER
+      if(ptr_lib == kernel::Lib::cuda_kernels) {
+        auto handle = acquire_handle(kernel::Lib::cuda_kernels,
+                                     kernel::lib_callback->awkward_library_path(kernel::Lib::cuda_kernels));
+
+        typedef int32_t (func_awkward_cuda_numpyarray32_getitem_at_t)
+          (const int32_t *ptr, int64_t at);
+        func_awkward_cuda_numpyarray32_getitem_at_t
+          *func_awkward_cuda_numpyarray32_getitem_at =
+          reinterpret_cast<func_awkward_cuda_numpyarray32_getitem_at_t *>
+          (dlsym(handle, "awkward_cuda_numpyarray32_getitem_at"));
+
+        return (*func_awkward_cuda_numpyarray32_getitem_at)(ptr, at);
+      }
+#endif
+      return ptr[at];
+    }
+    template <>
+    uint32_t numpyarray_getitem_at(kernel::Lib ptr_lib,
+                                   uint32_t* ptr,
+                                   int64_t at) {
+
+
+#ifndef _MSC_VER
+      if(ptr_lib == kernel::Lib::cuda_kernels) {
+        auto handle = acquire_handle(kernel::Lib::cuda_kernels,
+                                     kernel::lib_callback->awkward_library_path(kernel::Lib::cuda_kernels));
+
+        typedef uint32_t (func_awkward_cuda_numpyarrayU32_getitem_at_t)
+          (const uint32_t *ptr, int64_t at);
+        func_awkward_cuda_numpyarrayU32_getitem_at_t
+          *func_awkward_cuda_numpyarrayU32_getitem_at =
+          reinterpret_cast<func_awkward_cuda_numpyarrayU32_getitem_at_t *>
+          (dlsym(handle, "awkward_cuda_numpyarrayU32_getitem_at"));
+
+        return (*func_awkward_cuda_numpyarrayU32_getitem_at)(ptr, at);
+      }
+#endif
+      return ptr[at];
+    }
+    template <>
+    int64_t numpyarray_getitem_at(kernel::Lib ptr_lib,
+                                   int64_t* ptr,
+                                   int64_t at) {
+
+
+#ifndef _MSC_VER
+      if(ptr_lib == kernel::Lib::cuda_kernels) {
+        auto handle = acquire_handle(kernel::Lib::cuda_kernels,
+                                     kernel::lib_callback->awkward_library_path(kernel::Lib::cuda_kernels));
+
+        typedef int64_t (func_awkward_cuda_numpyarray64_getitem_at_t)
+          (const int64_t *ptr, int64_t at);
+        func_awkward_cuda_numpyarray64_getitem_at_t
+          *func_awkward_cuda_numpyarray64_getitem_at =
+          reinterpret_cast<func_awkward_cuda_numpyarray64_getitem_at_t *>
+          (dlsym(handle, "awkward_cuda_numpyarray64_getitem_at"));
+
+        return (*func_awkward_cuda_numpyarray64_getitem_at)(ptr, at);
+      }
+#endif
+      return ptr[at];
+    }
+    template <>
+    uint64_t numpyarray_getitem_at(kernel::Lib ptr_lib,
+                                   uint64_t* ptr,
+                                   int64_t at) {
+
+
+#ifndef _MSC_VER
+      if(ptr_lib == kernel::Lib::cuda_kernels) {
+        auto handle = acquire_handle(kernel::Lib::cuda_kernels,
+                                     kernel::lib_callback->awkward_library_path(kernel::Lib::cuda_kernels));
+
+        typedef uint64_t (func_awkward_cuda_numpyarrayU64_getitem_at_t)
+          (const uint64_t *ptr, int64_t at);
+        func_awkward_cuda_numpyarrayU64_getitem_at_t
+          *func_awkward_cuda_numpyarrayU64_getitem_at =
+          reinterpret_cast<func_awkward_cuda_numpyarrayU64_getitem_at_t *>
+          (dlsym(handle, "awkward_cuda_numpyarrayU64_getitem_at"));
+
+        return (*func_awkward_cuda_numpyarrayU64_getitem_at)(ptr, at);
+      }
+#endif
+      return ptr[at];
+    }
+    template <>
+    float numpyarray_getitem_at(kernel::Lib ptr_lib,
+                                   float* ptr,
+                                   int64_t at) {
+
+
+#ifndef _MSC_VER
+      if(ptr_lib == kernel::Lib::cuda_kernels) {
+        auto handle = acquire_handle(kernel::Lib::cuda_kernels,
+                                     kernel::lib_callback->awkward_library_path(kernel::Lib::cuda_kernels));
+
+        typedef float (func_awkward_cuda_numpyarrayfloat32_getitem_at_t)
+          (const float *ptr, int64_t at);
+        func_awkward_cuda_numpyarrayfloat32_getitem_at_t
+          *func_awkward_cuda_numpyarrayfloat32_getitem_at =
+          reinterpret_cast<func_awkward_cuda_numpyarrayfloat32_getitem_at_t *>
+          (dlsym(handle, "awkward_cuda_numpyarrayfloat32_getitem_at"));
+
+        return (*func_awkward_cuda_numpyarrayfloat32_getitem_at)(ptr, at);
+      }
+#endif
+      return ptr[at];
+    }
+    template <>
+    double numpyarray_getitem_at(kernel::Lib ptr_lib,
+                                double* ptr,
+                                int64_t at) {
+
+
+#ifndef _MSC_VER
+      if(ptr_lib == kernel::Lib::cuda_kernels) {
+        auto handle = acquire_handle(kernel::Lib::cuda_kernels,
+                                     kernel::lib_callback->awkward_library_path(kernel::Lib::cuda_kernels));
+
+        typedef double (func_awkward_cuda_numpyarrayfloat64_getitem_at_t)
+          (const double *ptr, int64_t at);
+        func_awkward_cuda_numpyarrayfloat64_getitem_at_t
+          *func_awkward_cuda_numpyarrayfloat64_getitem_at =
+          reinterpret_cast<func_awkward_cuda_numpyarrayfloat64_getitem_at_t *>
+          (dlsym(handle, "awkward_cuda_numpyarrayfloat64_getitem_at"));
+
+        return (*func_awkward_cuda_numpyarrayfloat64_getitem_at)(ptr, at);
+      }
+#endif
+      return ptr[at];
+    }
+
+
+    template<>
+  void index_setitem_at_nowrap(kernel::Lib ptr_lib,
+                             int8_t* ptr,
+                             int64_t offset,
+                             int64_t at,
+                             int8_t value) {
+  #ifndef _MSC_VER
     if(ptr_lib == kernel::Lib::cuda_kernels) {
       auto handle = acquire_handle(kernel::Lib::cuda_kernels,
                                    kernel::lib_callback->awkward_library_path(kernel::Lib::cuda_kernels));
@@ -1135,7 +1389,7 @@ namespace kernel {
 
       (*func_awkward_cuda_index8_setitem_at_nowrap)(ptr, offset, at, value);
     }
-#endif
+  #endif
     awkward_index8_setitem_at_nowrap(ptr, offset, at, value);
   }
 
@@ -1345,7 +1599,7 @@ namespace kernel {
       func_awkward_cuda_ListArray64_num_64_t
         *func_awkward_cuda_ListArray64_num_64 =
         reinterpret_cast<func_awkward_cuda_ListArray64_num_64_t *>
-        (dlsym(handle, "awkward_cuda_ListArray32_num_64"));
+        (dlsym(handle, "awkward_cuda_ListArray64_num_64"));
 
       return (*func_awkward_cuda_ListArray64_num_64)(
         tonum,

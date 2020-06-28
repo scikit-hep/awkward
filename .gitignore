@@ -69,7 +69,9 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-venv
+cuda-kernels/include
+cuda-kernels/src
+cuda-kernels/VERSION_INFO
 
 # Virtual Environment folder is not needed
 venv

@@ -679,17 +679,17 @@ namespace awkward {
   }
 
   template <typename T>
-  void tostring_as(std::stringstream& out, T* ptr, int64_t length) {
+  void tostring_as(kernel::Lib ptr_lib, std::stringstream& out, T* ptr, int64_t length) {
     if (length <= 10) {
       for (int64_t i = 0;  i < length;  i++) {
         if (i != 0) {
           out << " ";
         }
         if (std::is_same<T, bool>::value) {
-          out << (ptr[i] ? "true" : "false");
+          out << (kernel::numpyarray_getitem_at(ptr_lib, ptr, i) ? "true" : "false");
         }
         else {
-          out << ptr[i];
+          out << kernel::numpyarray_getitem_at(ptr_lib, ptr, i);
         }
       }
     }
@@ -699,10 +699,10 @@ namespace awkward {
           out << " ";
         }
         if (std::is_same<T, bool>::value) {
-          out << (ptr[i] ? "true" : "false");
+          out << (kernel::numpyarray_getitem_at(ptr_lib, ptr, i) ? "true" : "false");
         }
         else {
-          out << ptr[i];
+          out << kernel::numpyarray_getitem_at(ptr_lib, ptr, i);
         }
       }
       out << " ... ";
@@ -711,10 +711,10 @@ namespace awkward {
           out << " ";
         }
         if (std::is_same<T, bool>::value) {
-          out << (ptr[i] ? "true" : "false");
+          out << (kernel::numpyarray_getitem_at(ptr_lib, ptr, i) ? "true" : "false");
         }
         else {
-          out << ptr[i];
+          out << kernel::numpyarray_getitem_at(ptr_lib, ptr, i);
         }
       }
     }
@@ -778,7 +778,8 @@ namespace awkward {
 #else
     if (ndim() == 1  &&  format_.compare("i") == 0) {
 #endif
-      tostring_as<int32_t>(out,
+      tostring_as<int32_t>(ptr_lib(),
+                           out,
                            reinterpret_cast<int32_t*>(byteptr()),
                            length());
     }
@@ -787,22 +788,26 @@ namespace awkward {
 #else
     else if (ndim() == 1  &&  format_.compare("l") == 0) {
 #endif
-      tostring_as<int64_t>(out,
+      tostring_as<int64_t>(ptr_lib(),
+                           out,
                            reinterpret_cast<int64_t*>(byteptr()),
                            length());
     }
     else if (ndim() == 1  &&  format_.compare("f") == 0) {
-      tostring_as<float>(out,
+      tostring_as<float>(ptr_lib(),
+                         out,
                          reinterpret_cast<float*>(byteptr()),
                          length());
     }
     else if (ndim() == 1  &&  format_.compare("d") == 0) {
-      tostring_as<double>(out,
+      tostring_as<double>(ptr_lib(),
+                          out,
                           reinterpret_cast<double*>(byteptr()),
                           length());
     }
     else if (ndim() == 1  &&  format_.compare("?") == 0) {
-      tostring_as<bool>(out,
+      tostring_as<bool>(ptr_lib(),
+                        out,
                         reinterpret_cast<bool*>(byteptr()),
                         length());
     }

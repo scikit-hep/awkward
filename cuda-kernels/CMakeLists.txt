@@ -14,9 +14,9 @@ else()
 endif()
 
 # We can avoid this by introducing this CMakeLists to the top level CMakeLists
-include_directories(../include)
+include_directories(include)
 
-file(GLOB CUDA_KERNEL_SOURCES CONFIGURE_DEPENDS "../src/cuda-kernels/*.cu")
+file(GLOB CUDA_KERNEL_SOURCES CONFIGURE_DEPENDS "src/cuda-kernels/*.cu")
 
 include(CTest)
 

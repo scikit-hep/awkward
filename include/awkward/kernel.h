@@ -26,7 +26,7 @@ namespace kernel {
     LibraryPathCallback() {}
 
     virtual const std::string library_path() const {
-      return std::string("/home/trickarcher/gsoc_2020/awkward-1.0/cuda-kernels/build/libawkward-cuda-kernels.so");
+      return std::string("/");
     };
   };
 
@@ -41,12 +41,12 @@ namespace kernel {
     std::string awkward_library_path(kernel::Lib ptr_lib);
 
     private:
-    std::map<kernel::Lib, std::vector<LibraryPathCallback>> lib_path_callbacks;
+    std::map<kernel::Lib, std::vector<std::shared_ptr<LibraryPathCallback>>> lib_path_callbacks;
 
     std::mutex lib_path_callbacks_mutex;
   };
 
-  static std::shared_ptr<LibraryCallback> lib_callback = std::make_shared<LibraryCallback>();
+  extern std::shared_ptr<LibraryCallback> lib_callback;
 
   void* acquire_handle(kernel::Lib ptr_lib, std::string path);
 
@@ -136,6 +136,12 @@ namespace kernel {
                             T* ptr,
                             int64_t offset,
                             int64_t at);
+
+  template <typename T>
+  T
+    numpyarray_getitem_at(kernel::Lib ptr_lib,
+                          T* ptr,
+                          int64_t at);
 
   template <typename T>
   void

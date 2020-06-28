@@ -10,6 +10,15 @@ import distutils.util
 import setuptools.command.build_ext
 
 from setuptools import setup, Extension
+from pathlib import Path
+import shutil
+
+DIR = Path(__file__).resolve().parent
+
+if not (DIR/"VERSION_INFO").exists():
+    shutil.copytree(DIR.parent/"include", "include")
+    shutil.copytree(DIR.parent/"src", "src")
+    shutil.copy(DIR.parent/"VERSION_INFO", "VERSION_INFO")
 
 if platform.system() == "Windows":
     raise OSError("awkward1-cuda is not supported on Windows")
@@ -63,7 +72,7 @@ setup(name = "awkward1_cuda_kernels",
       data_files = libraries + [
           ("include/awkward",              glob.glob("include/awkward/*.h")),
           ("include/awkward/cuda-kernels", glob.glob("include/awkward/cuda-kernels/*.h"))],
-      version = open("VERSION_INFO").read().strip(),
+      version = open(DIR/"VERSION_INFO").read().strip(),
       author = "Jim Pivarski",
       author_email = "pivarski@princeton.edu",
       maintainer = "Jim Pivarski",

@@ -1,3 +1,3 @@
 include CMakeLists.txt
-recursive-include ../src/include awkward/cuda-kernels/*.h
-recursive-include ../src cuda-kernels/*.cu
+graft include
+graft src/cuda_kernels

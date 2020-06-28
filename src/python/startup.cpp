@@ -31,6 +31,11 @@ make_startup(py::module& m, const std::string& name) {
   m.def(name.c_str(), []() -> void {
     kernel::lib_callback->add_library_path_callback(kernel::Lib::cuda_kernels,
                                                     std::make_shared<StartupLibraryPathCallback>());
-
+    try {
+    py::object awkward1_cuda_kernels = py::module::import("awkward1_cuda_kernels");
+    }
+    catch (...) {
+      // do nothing
+    }
   });
 }
