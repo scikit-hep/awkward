@@ -737,28 +737,27 @@ namespace awkward {
   }
 
   const ContentPtr
-  RecordArray::carry(const Index64& carry, bool must_be_eager) const {
+  RecordArray::carry(const Index64& carry, bool allow_lazy) const {
     IdentitiesPtr identities(nullptr);
     if (identities_.get() != nullptr) {
       identities = identities_.get()->getitem_carry_64(carry);
     }
-    if (must_be_eager) {
+    if (allow_lazy) {
+      return std::make_shared<IndexedArray64>(identities,
+                                              parameters_,
+                                              carry,
+                                              shallow_copy());
+    }
+    else {
       ContentPtrVec contents;
       for (auto content : contents_) {
-        contents.push_back(content.get()->carry(carry, must_be_eager));
+        contents.push_back(content.get()->carry(carry));
       }
       return std::make_shared<RecordArray>(identities,
                                            parameters_,
                                            contents,
                                            recordlookup_,
                                            carry.length());
-
-    }
-    else {
-      return std::make_shared<IndexedArray64>(identities,
-                                              parameters_,
-                                              carry,
-                                              shallow_copy());
     }
   }
 

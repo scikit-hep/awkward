@@ -220,7 +220,7 @@ namespace awkward {
       valid_when_);
     util::handle_error(err2, classname(), identities_.get());
 
-    return content_.get()->carry(nextcarry, true);
+    return content_.get()->carry(nextcarry);
   }
 
   const ContentPtr
@@ -639,7 +639,7 @@ namespace awkward {
   }
 
   const ContentPtr
-  ByteMaskedArray::carry(const Index64& carry, bool must_be_eager) const {
+  ByteMaskedArray::carry(const Index64& carry, bool allow_lazy) const {
     Index8 nextmask(carry.length());
     struct Error err = awkward_bytemaskedarray_getitem_carry_64(
       nextmask.ptr().get(),
@@ -1036,7 +1036,7 @@ namespace awkward {
       Index64 nextcarry = pair.first;
       Index64 outindex = pair.second;
 
-      ContentPtr next = content_.get()->carry(nextcarry, false);
+      ContentPtr next = content_.get()->carry(nextcarry, true);
       ContentPtr out = next.get()->combinations(n,
                                                 replacement,
                                                 recordlookup,

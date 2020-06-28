@@ -479,7 +479,7 @@ namespace awkward {
     /// {@link ListArrayOf ListArray}, only the `starts` and `stops` get
     /// duplicated, not the `content` (and similarly for all other node types).
     virtual const ContentPtr
-      carry(const Index64& carry, bool must_be_eager = false) const = 0;
+      carry(const Index64& carry, bool allow_lazy = false) const = 0;
 
     /// @brief The parameter associated with `key` at the first level
     /// that has a non-null value, descending only as deep as the first

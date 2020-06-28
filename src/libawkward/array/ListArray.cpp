@@ -683,7 +683,7 @@ namespace awkward {
 
   template <typename T>
   const ContentPtr
-  ListArrayOf<T>::carry(const Index64& carry, bool must_be_eager) const {
+  ListArrayOf<T>::carry(const Index64& carry, bool allow_lazy) const {
     int64_t lenstarts = starts_.length();
     if (stops_.length() < lenstarts) {
       util::handle_error(
@@ -1357,7 +1357,7 @@ namespace awkward {
 
       ContentPtrVec contents;
       for (auto ptr : tocarry) {
-        contents.push_back(content_.get()->carry(Index64(ptr, 0, totallen), false));
+        contents.push_back(content_.get()->carry(Index64(ptr, 0, totallen), true));
       }
       ContentPtr recordarray = std::make_shared<RecordArray>(
         Identities::none(),

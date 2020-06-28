@@ -508,10 +508,10 @@ namespace awkward {
   }
 
   const ContentPtr
-  VirtualArray::carry(const Index64& carry, bool must_be_eager) const {
+  VirtualArray::carry(const Index64& carry, bool allow_lazy) const {
     ContentPtr peek = peek_array();
     if (peek.get() != nullptr) {
-      return peek.get()->carry(carry, must_be_eager);
+      return peek.get()->carry(carry, allow_lazy);
     }
 
     Slice slice;

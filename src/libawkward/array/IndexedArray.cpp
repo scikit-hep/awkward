@@ -360,7 +360,7 @@ namespace awkward {
         content_.get()->length());
       util::handle_error(err2, classname(), identities_.get());
 
-      return content_.get()->carry(nextcarry, true);
+      return content_.get()->carry(nextcarry);
     }
     else {
       Index64 nextcarry(length());
@@ -372,7 +372,7 @@ namespace awkward {
         content_.get()->length());
       util::handle_error(err, classname(), identities_.get());
 
-      return content_.get()->carry(nextcarry, true);
+      return content_.get()->carry(nextcarry);
     }
   }
 
@@ -1141,7 +1141,7 @@ namespace awkward {
         Index64 nextcarry = pair.first;
         IndexOf<T> outindex = pair.second;
 
-        ContentPtr next = content_.get()->carry(nextcarry, true);
+        ContentPtr next = content_.get()->carry(nextcarry);
         ContentPtr out = next.get()->getitem_next(head, tail, advanced);
         IndexedArrayOf<T, ISOPTION> out2(identities_,
                                          parameters_,
@@ -1159,7 +1159,7 @@ namespace awkward {
           content_.get()->length());
         util::handle_error(err, classname(), identities_.get());
 
-        ContentPtr next = content_.get()->carry(nextcarry, true);
+        ContentPtr next = content_.get()->carry(nextcarry);
         return next.get()->getitem_next(head, tail, advanced);
       }
     }
@@ -1173,17 +1173,7 @@ namespace awkward {
     }
     else if (SliceField* field =
              dynamic_cast<SliceField*>(head.get())) {
-      if (dynamic_cast<RecordArray*>(content_.get())) {
-        int64_t numnull;
-        std::pair<Index64, IndexOf<T>> pair = nextcarry_outindex(numnull);
-        Index64 nextcarry = pair.first;
-        IndexOf<T> outindex = pair.second;
-
-        ContentPtr next = content_.get()->carry(nextcarry, true);
-        return next.get()->getitem_next(head, tail, advanced);
-      } else {
-        return Content::getitem_next(*field, tail, advanced);
-      }
+      return Content::getitem_next(*field, tail, advanced);
     }
     else if (SliceFields* fields =
              dynamic_cast<SliceFields*>(head.get())) {
@@ -1200,7 +1190,7 @@ namespace awkward {
 
   template <typename T, bool ISOPTION>
   const ContentPtr
-  IndexedArrayOf<T, ISOPTION>::carry(const Index64& carry, bool must_be_eager) const {
+  IndexedArrayOf<T, ISOPTION>::carry(const Index64& carry, bool allow_lazy) const {
     IndexOf<T> nextindex(carry.length());
     struct Error err = util::awkward_indexedarray_getitem_carry_64<T>(
       nextindex.ptr().get(),
@@ -1675,7 +1665,7 @@ namespace awkward {
         content_.get()->length());
       util::handle_error(err2, classname(), identities_.get());
 
-      ContentPtr next = content_.get()->carry(nextcarry, true);
+      ContentPtr next = content_.get()->carry(nextcarry);
 
       SliceItemPtr slicecontent = next.get()->asslice();
       if (SliceArray64* raw =
@@ -1972,7 +1962,7 @@ namespace awkward {
         Index64 nextcarry = pair.first;
         IndexOf<T> outindex = pair.second;
 
-        ContentPtr next = content_.get()->carry(nextcarry, false);
+        ContentPtr next = content_.get()->carry(nextcarry, true);
         ContentPtr out = next.get()->combinations(n,
                                                   replacement,
                                                   recordlookup,
@@ -2292,7 +2282,7 @@ namespace awkward {
       Index64 nextcarry = pair.first;
       IndexOf<T> outindex = pair.second;
 
-      ContentPtr next = content_.get()->carry(nextcarry, true);
+      ContentPtr next = content_.get()->carry(nextcarry);
       ContentPtr out = next.get()->getitem_next_jagged(slicestarts,
                                                        slicestops,
                                                        slicecontent,
@@ -2313,7 +2303,7 @@ namespace awkward {
         content_.get()->length());
       util::handle_error(err, classname(), identities_.get());
 
-      ContentPtr next = content_.get()->carry(nextcarry, true);
+      ContentPtr next = content_.get()->carry(nextcarry);
       return next.get()->getitem_next_jagged(slicestarts,
                                              slicestops,
                                              slicecontent,
