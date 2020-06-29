@@ -66,7 +66,9 @@ namespace kernel {
   }
   
   void *acquire_symbol(void* handle, std::string symbol_name) {
-    void *symbol_ptr = dlsym(handle, symbol_name.c_str());
+    void *symbol_ptr = nullptr;
+#ifndef _MSC_VER
+    symbol_ptr = dlsym(handle, symbol_name.c_str());
 
     if(!symbol_ptr) {
       std::stringstream out;
@@ -74,7 +76,7 @@ namespace kernel {
       out << " not found in .so";
       throw std::runtime_error(out.str());
     }
-
+#endif
     return symbol_ptr;
   }
 
