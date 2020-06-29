@@ -360,7 +360,7 @@ namespace awkward {
         content_.get()->length());
       util::handle_error(err2, classname(), identities_.get());
 
-      return content_.get()->carry(nextcarry);
+      return content_.get()->carry(nextcarry, true);
     }
     else {
       Index64 nextcarry(length());
@@ -1141,7 +1141,7 @@ namespace awkward {
         Index64 nextcarry = pair.first;
         IndexOf<T> outindex = pair.second;
 
-        ContentPtr next = content_.get()->carry(nextcarry);
+        ContentPtr next = content_.get()->carry(nextcarry, true);
         ContentPtr out = next.get()->getitem_next(head, tail, advanced);
         IndexedArrayOf<T, ISOPTION> out2(identities_,
                                          parameters_,
@@ -1159,7 +1159,7 @@ namespace awkward {
           content_.get()->length());
         util::handle_error(err, classname(), identities_.get());
 
-        ContentPtr next = content_.get()->carry(nextcarry);
+        ContentPtr next = content_.get()->carry(nextcarry, true);
         return next.get()->getitem_next(head, tail, advanced);
       }
     }
@@ -1280,7 +1280,7 @@ namespace awkward {
       Index64 nextcarry = pair.first;
       IndexOf<T> outindex = pair.second;
 
-      ContentPtr next = content_.get()->carry(nextcarry);
+      ContentPtr next = content_.get()->carry(nextcarry, true);
       ContentPtr out = next.get()->num(axis, depth);
       IndexedArrayOf<T, ISOPTION> out2(Identities::none(),
                                        util::Parameters(),
@@ -1307,7 +1307,7 @@ namespace awkward {
       Index64 nextcarry = pair.first;
       IndexOf<T> outindex = pair.second;
 
-      ContentPtr next = content_.get()->carry(nextcarry);
+      ContentPtr next = content_.get()->carry(nextcarry, true);
 
       std::pair<Index64, ContentPtr> offsets_flattened =
         next.get()->offsets_and_flattened(axis, depth);
@@ -1665,7 +1665,7 @@ namespace awkward {
         content_.get()->length());
       util::handle_error(err2, classname(), identities_.get());
 
-      ContentPtr next = content_.get()->carry(nextcarry);
+      ContentPtr next = content_.get()->carry(nextcarry, true);
 
       SliceItemPtr slicecontent = next.get()->asslice();
       if (SliceArray64* raw =
@@ -1858,7 +1858,7 @@ namespace awkward {
       index_.length());
     util::handle_error(err2, classname(), identities_.get());
 
-    ContentPtr next = content_.get()->carry(nextcarry);
+    ContentPtr next = content_.get()->carry(nextcarry, true);
     ContentPtr out = next.get()->reduce_next(reducer,
                                              negaxis,
                                              starts,
@@ -1926,7 +1926,7 @@ namespace awkward {
         Index64 nextcarry = pair.first;
         IndexOf<T> outindex = pair.second;
 
-        ContentPtr next = content_.get()->carry(nextcarry);
+        ContentPtr next = content_.get()->carry(nextcarry, true);
         ContentPtr out = next.get()->localindex(axis, depth);
         IndexedArrayOf<T, ISOPTION> out2(identities_,
                                          util::Parameters(),
@@ -2282,7 +2282,7 @@ namespace awkward {
       Index64 nextcarry = pair.first;
       IndexOf<T> outindex = pair.second;
 
-      ContentPtr next = content_.get()->carry(nextcarry);
+      ContentPtr next = content_.get()->carry(nextcarry, true);
       ContentPtr out = next.get()->getitem_next_jagged(slicestarts,
                                                        slicestops,
                                                        slicecontent,
@@ -2303,7 +2303,7 @@ namespace awkward {
         content_.get()->length());
       util::handle_error(err, classname(), identities_.get());
 
-      ContentPtr next = content_.get()->carry(nextcarry);
+      ContentPtr next = content_.get()->carry(nextcarry, true);
       return next.get()->getitem_next_jagged(slicestarts,
                                              slicestops,
                                              slicecontent,

@@ -227,7 +227,7 @@ namespace awkward {
         offsets.offset(),
         offsets.length());
       util::handle_error(err, classname(), identities_.get());
-      ContentPtr nextcontent = content_.get()->carry(nextcarry);
+      ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
       return std::make_shared<ListOffsetArray64>(identities,
                                                  parameters_,
                                                  offsets,
@@ -1200,7 +1200,7 @@ namespace awkward {
         size_);
       util::handle_error(err, classname(), identities_.get());
 
-      ContentPtr nextcontent = content_.get()->carry(nextcarry);
+      ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
 
       return getitem_next_array_wrap(
                nextcontent.get()->getitem_next(nexthead,
@@ -1222,7 +1222,7 @@ namespace awkward {
         size_);
       util::handle_error(err, classname(), identities_.get());
 
-      ContentPtr nextcontent = content_.get()->carry(nextcarry);
+      ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
       return nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced);
     }
   }
