@@ -80,10 +80,9 @@ namespace kernel {
     return symbol_ptr;
   }
 
-#ifndef _MSC_VER
-
   template<>
   void cuda_array_deleter<bool>::operator()(bool const *p) {
+#ifndef _MSC_VER
     auto handle = acquire_handle(kernel::Lib::cuda_kernels);
 
     typedef Error (func_awkward_cuda_ptrbool_dealloc_t)(const bool *ptr);
@@ -92,10 +91,12 @@ namespace kernel {
       (acquire_symbol(handle, "awkward_cuda_ptrbool_dealloc"));
 
     util::handle_error((*func_awkward_cuda_ptrbool_dealloc)(p));
+#endif
   }
 
   template<>
   void cuda_array_deleter<int8_t>::operator()(int8_t const *p) {
+#ifndef _MSC_VER
     auto handle = acquire_handle(kernel::Lib::cuda_kernels);
 
     typedef Error (func_awkward_cuda_ptr8_dealloc_t)(const int8_t *ptr);
@@ -104,10 +105,12 @@ namespace kernel {
       (acquire_symbol(handle, "awkward_cuda_ptr8_dealloc"));
 
     util::handle_error((*func_awkward_cuda_ptr8_dealloc)(p));
+#endif
   }
 
   template<>
   void cuda_array_deleter<uint8_t>::operator()(uint8_t const *p) {
+#ifndef _MSC_VER
     auto handle = acquire_handle(kernel::Lib::cuda_kernels);
 
     typedef Error (func_awkward_cuda_ptrU8_dealloc_t)(const uint8_t *ptr);
@@ -116,10 +119,12 @@ namespace kernel {
       (acquire_symbol(handle, "awkward_cuda_ptrU8_dealloc"));
 
     util::handle_error((*func_awkward_cuda_ptrU8_dealloc)(p));
+#endif
   }
 
   template<>
   void cuda_array_deleter<int16_t>::operator()(int16_t const *p) {
+#ifndef _MSC_VER
     auto handle = acquire_handle(kernel::Lib::cuda_kernels);
 
     typedef Error (func_awkward_cuda_ptr16_dealloc_t)(const int16_t *ptr);
@@ -128,10 +133,12 @@ namespace kernel {
       (acquire_symbol(handle, "awkward_cuda_ptr16_dealloc"));
 
     util::handle_error((*func_awkward_cuda_ptr16_dealloc)(p));
+#endif
   }
 
   template<>
   void cuda_array_deleter<uint16_t>::operator()(uint16_t const *p) {
+#ifndef _MSC_VER
     auto handle = acquire_handle(kernel::Lib::cuda_kernels);
 
     typedef Error (func_awkward_cuda_ptrU16_dealloc_t)(const uint16_t *ptr);
@@ -140,10 +147,12 @@ namespace kernel {
       (acquire_symbol(handle, "awkward_cuda_ptrU16_dealloc"));
 
     util::handle_error((*func_awkward_cuda_ptrU16_dealloc)(p));
+#endif
   }
 
   template<>
   void cuda_array_deleter<int32_t>::operator()(int32_t const *p) {
+#ifndef _MSC_VER
     auto handle = acquire_handle(kernel::Lib::cuda_kernels);
 
     typedef Error (func_awkward_cuda_ptr32_dealloc_t)(const int32_t *ptr);
@@ -152,10 +161,12 @@ namespace kernel {
       (acquire_symbol(handle, "awkward_cuda_ptr32_dealloc"));
 
     util::handle_error((*func_awkward_cuda_ptr32_dealloc)(p));
+#endif
   }
 
   template<>
   void cuda_array_deleter<uint32_t>::operator()(uint32_t const *p) {
+#ifndef _MSC_VER
     auto handle = acquire_handle(kernel::Lib::cuda_kernels);
 
     typedef Error (func_awkward_cuda_ptrU32_dealloc_t)(const uint32_t *ptr);
@@ -164,10 +175,12 @@ namespace kernel {
       (acquire_symbol(handle, "awkward_cuda_ptrU32_dealloc"));
 
     util::handle_error((*func_awkward_cuda_ptrU32_dealloc)(p));
+#endif
   }
 
   template<>
   void cuda_array_deleter<int64_t>::operator()(int64_t const *p) {
+#ifndef _MSC_VER
     auto handle = acquire_handle(kernel::Lib::cuda_kernels);
 
     typedef Error (func_awkward_cuda_ptr64_dealloc_t)(const int64_t *ptr);
@@ -176,10 +189,12 @@ namespace kernel {
       (acquire_symbol(handle, "awkward_cuda_ptr64_dealloc"));
 
     util::handle_error((*func_awkward_cuda_ptr64_dealloc)(p));
+#endif
   }
 
   template<>
   void cuda_array_deleter<uint64_t>::operator()(uint64_t const *p) {
+#ifndef _MSC_VER
     auto handle = acquire_handle(kernel::Lib::cuda_kernels);
 
     typedef Error (func_awkward_cuda_ptrU64_dealloc_t)(const uint64_t *ptr);
@@ -188,11 +203,12 @@ namespace kernel {
       (acquire_symbol(handle, "awkward_cuda_ptrU64_dealloc"));
 
     util::handle_error((*func_awkward_cuda_ptrU64_dealloc)(p));
+#endif
   }
 
   template<>
   void cuda_array_deleter<float>::operator()(float const *p) {
-
+#ifndef _MSC_VER
     auto handle = acquire_handle(kernel::Lib::cuda_kernels);
 
     typedef Error (func_awkward_cuda_ptrfloat32_dealloc_t)(const float *
@@ -203,10 +219,12 @@ namespace kernel {
       (acquire_symbol(handle, "awkward_cuda_ptrfloat32_dealloc"));
 
     util::handle_error((*func_awkward_cuda_ptrfloat32_dealloc)(p));
+#endif
   }
 
   template<>
   void cuda_array_deleter<double>::operator()(double const *p) {
+#ifndef _MSC_VER
     auto handle = acquire_handle(kernel::Lib::cuda_kernels);
 
     typedef Error (func_awkward_cuda_ptrfloat64_dealloc_t)(const double *
@@ -217,10 +235,9 @@ namespace kernel {
       (acquire_symbol(handle, "awkward_cuda_ptrfloat64_dealloc"));
 
     util::handle_error((*func_awkward_cuda_ptrfloat64_dealloc)(p));
-  }
-
 #endif
-
+  }
+  
   template<typename T>
   int get_ptr_device_num(kernel::Lib ptr_lib, T *ptr) {
 #ifndef _MSC_VER
