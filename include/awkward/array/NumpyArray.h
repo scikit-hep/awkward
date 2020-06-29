@@ -510,6 +510,29 @@ namespace awkward {
                   bool keepdims) const override;
 
     const ContentPtr
+      sort_next(int64_t negaxis,
+                const Index64& starts,
+                const Index64& parents,
+                int64_t outlength,
+                bool ascending,
+                bool stable,
+                bool keepdims) const override;
+
+    const ContentPtr
+      sort_asstrings(const Index64& offsets,
+                     bool ascending,
+                     bool stable) const;
+
+    const ContentPtr
+      argsort_next(int64_t negaxis,
+                   const Index64& starts,
+                   const Index64& parents,
+                   int64_t outlength,
+                   bool ascending,
+                   bool stable,
+                   bool keepdims) const override;
+
+    const ContentPtr
       localindex(int64_t axis, int64_t depth) const override;
 
     const ContentPtr
@@ -799,6 +822,37 @@ namespace awkward {
     tojson_string(ToJson& builder, bool include_beginendlist) const;
 
   private:
+
+  /// @brief std::sort uses intro-sort
+  ///        std::stable_sort uses mergesort
+    template<typename T>
+    const std::shared_ptr<void> index_sort(const T* data,
+                                           int64_t length,
+                                           int64_t offset,
+                                           const Index64& starts,
+                                           const Index64& parents,
+                                           int64_t outlength,
+                                           bool ascending,
+                                           bool stable) const;
+
+    template<typename T>
+    const std::shared_ptr<void> array_sort(const T* data,
+                                           int64_t length,
+                                           int64_t offset,
+                                           const Index64& starts,
+                                           const Index64& parents,
+                                           int64_t outlength,
+                                           bool ascending,
+                                           bool stable) const;
+
+   template<typename T>
+   const std::shared_ptr<void> string_sort(const T* data,
+                                          int64_t length,
+                                          const Index64& offsets,
+                                          Index64& outoffsets,
+                                          bool ascending,
+                                          bool stable) const;
+
   /// @brief See #ptr.
   std::shared_ptr<void> ptr_;
   /// @brief See #shape.

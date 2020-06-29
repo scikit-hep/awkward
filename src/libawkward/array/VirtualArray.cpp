@@ -435,7 +435,7 @@ namespace awkward {
 
       int64_t regular_start = start;
       int64_t regular_stop = stop;
-      awkward_regularize_rangeslice(&regular_start, &regular_stop,
+      kernel::regularize_rangeslice(&regular_start, &regular_stop,
         true, start != Slice::none(), stop != Slice::none(),
         generator_.get()->length());
       return getitem_range_nowrap(regular_start, regular_stop);
@@ -629,6 +629,40 @@ namespace awkward {
   }
 
   const ContentPtr
+  VirtualArray::sort_next(int64_t negaxis,
+                          const Index64& starts,
+                          const Index64& parents,
+                          int64_t outlength,
+                          bool ascending,
+                          bool stable,
+                          bool keepdims) const {
+    return array().get()->sort_next(negaxis,
+                                    starts,
+                                    parents,
+                                    outlength,
+                                    ascending,
+                                    stable,
+                                    keepdims);
+  }
+
+  const ContentPtr
+  VirtualArray::argsort_next(int64_t negaxis,
+                             const Index64& starts,
+                             const Index64& parents,
+                             int64_t outlength,
+                             bool ascending,
+                             bool stable,
+                             bool keepdims) const {
+    return array().get()->argsort_next(negaxis,
+                                       starts,
+                                       parents,
+                                       outlength,
+                                       ascending,
+                                       stable,
+                                       keepdims);
+  }
+
+  const ContentPtr
   VirtualArray::localindex(int64_t axis, int64_t depth) const {
     return array().get()->localindex(axis, depth);
   }
@@ -666,7 +700,7 @@ namespace awkward {
         else if (generator_.get()->length() >= 0) {
           int64_t regular_start = range->start();
           int64_t regular_stop = range->stop();
-          awkward_regularize_rangeslice(&regular_start,
+          kernel::regularize_rangeslice(&regular_start,
                                         &regular_stop,
                                         range->step() > 0,
                                         range->start() != Slice::none(),

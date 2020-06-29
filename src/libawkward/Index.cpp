@@ -218,7 +218,7 @@ namespace awkward {
   IndexOf<T>::getitem_range(int64_t start, int64_t stop) const {
     int64_t regular_start = start;
     int64_t regular_stop = stop;
-    awkward_regularize_rangeslice(&regular_start, &regular_stop,
+    kernel::regularize_rangeslice(&regular_start, &regular_stop,
       true, start != Slice::none(), stop != Slice::none(), length_);
     return getitem_range_nowrap(regular_start, regular_stop);
   }
@@ -256,8 +256,8 @@ namespace awkward {
       length_ == 0 ? nullptr : new int64_t[(size_t)length_],
       kernel::array_deleter<int64_t>());
     if (length_ != 0) {
-      awkward_index8_to_index64(ptr.get(), &ptr_.get()[(size_t)offset_],
-                                length_);
+      kernel::Index_to_Index64<int8_t>(ptr.get(), &ptr_.get()[(size_t)offset_],
+                                       length_);
     }
     return IndexOf<int64_t>(ptr, 0, length_);
   }
@@ -268,8 +268,8 @@ namespace awkward {
       length_ == 0 ? nullptr : new int64_t[(size_t)length_],
       kernel::array_deleter<int64_t>());
     if (length_ != 0) {
-      awkward_indexU8_to_index64(ptr.get(), &ptr_.get()[(size_t)offset_],
-                                 length_);
+      kernel::Index_to_Index64<uint8_t>(ptr.get(), &ptr_.get()[(size_t)offset_],
+                                        length_);
     }
     return IndexOf<int64_t>(ptr, 0, length_);
   }
@@ -280,9 +280,8 @@ namespace awkward {
       length_ == 0 ? nullptr : new int64_t[(size_t)length_],
       kernel::array_deleter<int64_t>());
     if (length_ != 0) {
-      awkward_index32_to_index64(ptr.get(),
-                                 &ptr_.get()[(size_t)offset_],
-                                 length_);
+      kernel::Index_to_Index64<int32_t>(ptr.get(),
+                                        &ptr_.get()[(size_t)offset_], length_);
     }
     return IndexOf<int64_t>(ptr, 0, length_);
   }
@@ -293,9 +292,9 @@ namespace awkward {
       length_ == 0 ? nullptr : new int64_t[(size_t)length_],
       kernel::array_deleter<int64_t>());
     if (length_ != 0) {
-      awkward_indexU32_to_index64(ptr.get(),
-                                  &ptr_.get()[(size_t)offset_],
-                                  length_);
+      kernel::Index_to_Index64<uint32_t>(ptr.get(),
+                                         &ptr_.get()[(size_t)offset_],
+                                         length_);
     }
     return IndexOf<int64_t>(ptr, 0, length_);
   }
@@ -328,26 +327,26 @@ namespace awkward {
     const IndexOf<T>
     IndexOf<T>::to_gpu(kernel::Lib ptr_lib) const {
 #ifndef _MSC_VER
-        if (ptr_lib == kernel::Lib::cuda_kernels) {
-          T *cuda_ptr;
+      if (ptr_lib == kernel::Lib::cuda_kernels) {
+        T *cuda_ptr;
 
-          if(ptr_lib_ != kernel::Lib::cuda_kernels) {
-            Error err =  kernel::H2D<T>(kernel::Lib::cuda_kernels,
-                                        &cuda_ptr,
-                                        ptr().get(),
-                                        length());
-            util::handle_error(err);
-          }
-          else {
-            cuda_ptr = ptr_.get();
-          }
-
-          return IndexOf<T>(std::shared_ptr<T>(cuda_ptr,
-                                               kernel::cuda_array_deleter<T>()),
-                            offset(),
-                            length(),
-                           kernel::Lib::cuda_kernels);
+        if(ptr_lib_ != kernel::Lib::cuda_kernels) {
+          Error err =  kernel::H2D<T>(kernel::Lib::cuda_kernels,
+                                      &cuda_ptr,
+                                      ptr().get(),
+                                      length());
+          util::handle_error(err);
         }
+        else {
+          cuda_ptr = ptr_.get();
+        }
+
+        return IndexOf<T>(std::shared_ptr<T>(cuda_ptr,
+                                             kernel::cuda_array_deleter<T>()),
+                          offset(),
+                          length(),
+                         kernel::Lib::cuda_kernels);
+      }
 #endif
       throw std::invalid_argument("Invalid Kernel Library or OS for GPU Transfer");
     }

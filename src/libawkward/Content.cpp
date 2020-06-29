@@ -693,7 +693,7 @@ namespace awkward {
     starts.setitem_at_nowrap(0, 0);
 
     Index64 parents(length());
-    struct Error err = awkward_content_reduce_zeroparents_64(
+    struct Error err = kernel::content_reduce_zeroparents_64(
       parents.ptr().get(),
       length());
     util::handle_error(err, classname(), identities_.get());
@@ -705,6 +705,113 @@ namespace awkward {
                                   1,
                                   mask,
                                   keepdims);
+    return next.get()->getitem_at_nowrap(0);
+  }
+
+  const ContentPtr
+  Content::argsort(int64_t axis, bool ascending, bool stable) const {
+    int64_t negaxis = -axis;
+    std::pair<bool, int64_t> branchdepth = branch_depth();
+    bool branch = branchdepth.first;
+    int64_t depth = branchdepth.second;
+
+    if (branch) {
+      if (negaxis <= 0) {
+        throw std::invalid_argument("cannot use non-negative axis on a nested "
+        "list structure of variable depth (negative axis counts from "
+        "the leaves of the tree; non-negative from the root)");
+      }
+      if (negaxis > depth) {
+        throw std::invalid_argument(std::string("cannot use axis=") +
+        std::to_string(axis) + std::string(" on a nested list structure "
+        "that splits into different depths, the minimum of which is depth=") +
+        std::to_string(depth) + std::string(" from the leaves"));
+      }
+    }
+    else {
+      if (negaxis <= 0) {
+        negaxis += depth;
+      }
+      if (!(0 < negaxis  &&  negaxis <= depth)) {
+        throw std::invalid_argument(std::string("axis=") +
+        std::to_string(axis) + std::string(" exceeds the depth of the nested "
+        "list structure (which is ") + std::to_string(depth) +
+        std::string(")"));
+      }
+    }
+
+    Index64 starts(1);
+    starts.setitem_at_nowrap(0, 0);
+    Index64 parents(length());
+    struct Error err = kernel::content_reduce_zeroparents_64(
+      parents.ptr().get(),
+      length());
+    util::handle_error(err, classname(), identities_.get());
+    ContentPtr next = argsort_next(negaxis,
+                                   starts,
+                                   parents,
+                                   1,
+                                   ascending,
+                                   stable,
+                                   true);
+
+    return next.get()->getitem_at_nowrap(0);
+  }
+
+  const ContentPtr
+  Content::sort(int64_t axis,
+                bool ascending,
+                bool stable) const {
+    int64_t negaxis = -axis;
+    std::pair<bool, int64_t> branchdepth = branch_depth();
+    bool branch = branchdepth.first;
+    int64_t depth = branchdepth.second;
+
+    if (branch) {
+      if (negaxis <= 0) {
+        throw std::invalid_argument(
+          "cannot use non-negative axis on a nested list structure "
+          "of variable depth (negative axis counts from the leaves of the "
+          "tree; non-negative from the root)");
+      }
+      if (negaxis > depth) {
+        throw std::invalid_argument(
+          std::string("cannot use axis=") + std::to_string(axis)
+          + std::string(" on a nested list structure that splits into "
+                        "different depths, the minimum of which is depth=")
+          + std::to_string(depth) + std::string(" from the leaves"));
+      }
+    }
+    else {
+      if (negaxis <= 0) {
+        negaxis += depth;
+      }
+      if (!(0 < negaxis  &&  negaxis <= depth)) {
+        throw std::invalid_argument(
+          std::string("axis=") + std::to_string(axis)
+          + std::string(" exceeds the depth of the nested list structure "
+                        "(which is ")
+          + std::to_string(depth) + std::string(")"));
+      }
+    }
+
+    Index64 starts(1);
+    starts.setitem_at_nowrap(0, 0);
+
+    Index64 parents(length());
+    struct Error err = kernel::content_reduce_zeroparents_64(
+      parents.ptr().get(),
+      length());
+    util::handle_error(err, classname(), identities_.get());
+
+    ContentPtr next = sort_next(negaxis,
+                                starts,
+                                parents,
+                                1,
+                                ascending,
+                                stable,
+                                true);
+
     return next.get()->getitem_at_nowrap(0);
   }
 
@@ -772,25 +879,25 @@ namespace awkward {
 
     ContentPtrVec contents({ shallow_copy(), other });
 
-    struct Error err1 = awkward_unionarray_filltags_to8_const(
+    struct Error err1 = kernel::UnionArray_filltags_to8_const(
       tags.ptr().get(),
       0,
       mylength,
       0);
     util::handle_error(err1, classname(), identities_.get());
-    struct Error err2 = awkward_unionarray_fillindex_to64_count(
+    struct Error err2 = kernel::UnionArray_fillindex_count_64(
       index.ptr().get(),
       0,
       mylength);
     util::handle_error(err2, classname(), identities_.get());
 
-    struct Error err3 = awkward_unionarray_filltags_to8_const(
+    struct Error err3 = kernel::UnionArray_filltags_to8_const(
       tags.ptr().get(),
       mylength,
       theirlength,
       1);
     util::handle_error(err3, classname(), identities_.get());
-    struct Error err4 = awkward_unionarray_fillindex_to64_count(
+    struct Error err4 = kernel::UnionArray_fillindex_count_64(
       index.ptr().get(),
       mylength,
       theirlength);
@@ -809,7 +916,7 @@ namespace awkward {
       return shallow_copy();
     }
     Index64 index(target);
-    struct Error err = awkward_index_rpad_and_clip_axis0_64(
+    struct Error err = kernel::index_rpad_and_clip_axis0_64(
       index.ptr().get(),
       target,
       length());
@@ -825,7 +932,7 @@ namespace awkward {
   const ContentPtr
   Content::localindex_axis0() const {
     Index64 localindex(length());
-    struct Error err = awkward_localindex_64(
+    struct Error err = kernel::localindex_64(
       localindex.ptr().get(),
       length());
     util::handle_error(err, classname(), identities_.get());
@@ -870,7 +977,7 @@ namespace awkward {
     }
     IndexOf<int64_t> toindex(n);
     IndexOf<int64_t> fromindex(n);
-    struct Error err = awkward_regulararray_combinations_64(
+    struct Error err = kernel::RegularArray_combinations_64(
       tocarryraw.data(),
       toindex.ptr().get(),
       fromindex.ptr().get(),
@@ -1063,7 +1170,7 @@ namespace awkward {
     Index64 index(missing.index());
     Index64 outindex(index.length()*length);
 
-    struct Error err = awkward_missing_repeat_64(
+    struct Error err = kernel::missing_repeat_64(
       outindex.ptr().get(),
       index.ptr().get(),
       index.offset(),
@@ -1090,7 +1197,7 @@ namespace awkward {
     }
     Index64 missingindex = missing.index();
     bool same;
-    struct Error err = awkward_slicemissing_check_same(
+    struct Error err = kernel::slicemissing_check_same(
       &same,
       bytemask.ptr().get(),
       bytemask.offset(),

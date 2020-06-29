@@ -437,6 +437,42 @@ namespace awkward {
   }
 
   const ContentPtr
+  Record::sort_next(int64_t negaxis,
+                    const Index64& starts,
+                    const Index64& parents,
+                    int64_t outlength,
+                    bool ascending,
+                    bool stable,
+                    bool keepdims) const {
+    ContentPtr next = array_.get()->getitem_at_nowrap(at_);
+    return next.get()->sort_next(negaxis,
+                                 starts,
+                                 parents,
+                                 outlength,
+                                 ascending,
+                                 stable,
+                                 keepdims);
+  }
+
+  const ContentPtr
+  Record::argsort_next(int64_t negaxis,
+                       const Index64& starts,
+                       const Index64& parents,
+                       int64_t outlength,
+                       bool ascending,
+                       bool stable,
+                       bool keepdims) const {
+    ContentPtr next = array_.get()->getitem_at_nowrap(at_);
+    return next.get()->argsort_next(negaxis,
+                                    starts,
+                                    parents,
+                                    outlength,
+                                    ascending,
+                                    stable,
+                                    keepdims);
+  }
+
+  const ContentPtr
   Record::getitem(const Slice& where) const {
     ContentPtr next = array_.get()->getitem_range_nowrap(at_, at_ + 1);
 

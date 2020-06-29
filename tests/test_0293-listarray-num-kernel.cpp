@@ -15,7 +15,7 @@ public:
     StartupLibraryPathCallback() = default;
 
     const std::string library_path() const override {
-      std::string library_path = ("/home/trickarcher/.local/lib/python3.8/site-packages/awkward1_cuda_kernels/libawkward-cuda-kernels.so");
+      std::string library_path = ("/path/to/python-pip/awkward1_cuda_kernels/libawkward-cuda-kernels.so");
       return library_path;
     };
 };

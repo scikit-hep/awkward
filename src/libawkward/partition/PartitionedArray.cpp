@@ -111,7 +111,7 @@ namespace awkward {
     if (regular_step == Slice::none()) {
       regular_step = 1;
     }
-    awkward_regularize_rangeslice(&regular_start, &regular_stop,
+    kernel::regularize_rangeslice(&regular_start, &regular_stop,
       step > 0, start != Slice::none(), stop != Slice::none(), length());
     return getitem_range_nowrap(regular_start, regular_stop, regular_step);
   }

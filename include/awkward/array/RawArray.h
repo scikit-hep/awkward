@@ -3,20 +3,23 @@
 #ifndef AWKWARD_RAWARRAY_H_
 #define AWKWARD_RAWARRAY_H_
 
+#include <algorithm>
 #include <cstring>
-#include <vector>
-#include <string>
 #include <iomanip>
-#include <sstream>
 #include <memory>
+#include <numeric>
+#include <sstream>
 #include <stdexcept>
+#include <string>
 #include <typeinfo>
+#include <vector>
 
 #include "awkward/common.h"
 #include "awkward/kernel.h"
 #include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/cpu-kernels/operations.h"
+#include "awkward/cpu-kernels/sorting.h"
 #include "awkward/type/PrimitiveType.h"
 #include "awkward/util.h"
 #include "awkward/Slice.h"
@@ -24,6 +27,7 @@
 #include "awkward/array/EmptyArray.h"
 #include "awkward/array/IndexedArray.h"
 #include "awkward/array/NumpyArray.h"
+#include "awkward/array/RegularArray.h"
 #include "awkward/array/ByteMaskedArray.h"
 #include "awkward/array/BitMaskedArray.h"
 #include "awkward/array/UnmaskedArray.h"
@@ -64,7 +68,7 @@ namespace awkward {
 
     const std::string
       purelist_parameter(const std::string& key) const override {
-      parameter(key);
+      return parameter(key);
     }
 
     bool
@@ -119,7 +123,7 @@ namespace awkward {
       equal(const FormPtr& other,
             bool check_identities,
             bool check_parameters,
-            bool compatibility_check) const {
+            bool compatibility_check) const override {
       throw std::runtime_error("FIXME: RawForm::equal");
     }
 
@@ -319,7 +323,7 @@ namespace awkward {
                                          Identities::FieldLoc(), 1, length());
         Identities32* rawidentities =
           reinterpret_cast<Identities32*>(newidentities.get());
-        awkward_new_identities32(rawidentities->ptr().get(), length());
+        kernel::new_Identities<int32_t>(rawidentities->ptr().get(), length());
         setidentities(newidentities);
       }
       else {
@@ -328,7 +332,7 @@ namespace awkward {
                                          Identities::FieldLoc(), 1, length());
         Identities64* rawidentities =
           reinterpret_cast<Identities64*>(newidentities.get());
-        awkward_new_identities64(rawidentities->ptr().get(), length());
+        kernel::new_Identities<int64_t>(rawidentities->ptr().get(), length());
         setidentities(newidentities);
       }
     }
@@ -613,7 +617,7 @@ namespace awkward {
       getitem_range(int64_t start, int64_t stop) const override {
       int64_t regular_start = start;
       int64_t regular_stop = stop;
-      awkward_regularize_rangeslice(&regular_start, &regular_stop, true,
+      kernel::regularize_rangeslice(&regular_start, &regular_stop, true,
         start != Slice::none(), stop != Slice::none(), length_);
       if (identities_.get() != nullptr  &&
           regular_stop > identities_.get()->length()) {
@@ -671,7 +675,8 @@ namespace awkward {
       carry(const Index64& carry) const override {
       std::shared_ptr<T> ptr(new T[(size_t)carry.length()],
                              kernel::array_deleter<T>());
-      struct Error err = awkward_numpyarray_getitem_next_null_64(
+
+      struct Error err = kernel::NumpyArray_getitem_next_null_64(
         reinterpret_cast<uint8_t*>(ptr.get()),
         reinterpret_cast<uint8_t*>(ptr_.get()),
         carry.length(),
@@ -912,7 +917,7 @@ namespace awkward {
         throw std::invalid_argument("axis exceeds the depth of this array");
       }
       Index64 index(target);
-      struct Error err = awkward_index_rpad_and_clip_axis0_64(
+      struct Error err = kernel::index_rpad_and_clip_axis0_64(
         index.ptr().get(),
         target,
         length());
@@ -933,6 +938,89 @@ namespace awkward {
                   bool mask,
                   bool keepdims) const override {
       throw std::runtime_error("FIXME: RawArray:reduce_next");
+    }
+
+    const ContentPtr
+      sort_next(int64_t negaxis,
+                const Index64& starts,
+                const Index64& parents,
+                int64_t outlength,
+                bool ascending,
+                bool stable,
+                bool keepdims) const override {
+      std::shared_ptr<T> ptr(
+                    new T[length_], kernel::array_deleter<T>());
+
+      Index64 offsets(2);
+      offsets.setitem_at_nowrap(0, 0);
+      offsets.setitem_at_nowrap(1, length_);
+
+      struct Error err = kernel::NumpyArray_sort<T>(
+        ptr.get(),
+        ptr_.get(),
+        length_,
+        offsets.ptr().get(),
+        offsets.length(),
+        parents.length(),
+        ascending,
+        stable);
+      util::handle_error(err, classname(), nullptr);
+
+      ContentPtr out = std::make_shared<RawArrayOf<T>>(Identities::none(),
+                                                       util::Parameters(),
+                                                       ptr,
+                                                       offset_,
+                                                       length_,
+                                                       itemsize_);
+
+      out = std::make_shared<RegularArray>(Identities::none(),
+                                           util::Parameters(),
+                                           out,
+                                           length_);
+
+      return out;
+    }
+
+    const ContentPtr
+      argsort_next(int64_t negaxis,
+                   const Index64& starts,
+                   const Index64& parents,
+                   int64_t outlength,
+                   bool ascending,
+                   bool stable,
+                   bool keepdims) const override {
+      std::shared_ptr<int64_t> ptr(
+        new int64_t[length_], kernel::array_deleter<int64_t>());
+
+      int64_t ranges_length = 2;
+      Index64 outranges(ranges_length);
+      outranges.setitem_at_nowrap(0, 0);
+      outranges.setitem_at_nowrap(1, length_);
+
+      struct Error err = kernel::NumpyArray_argsort<T>(
+        ptr.get(),
+        ptr_.get(),
+        length_,
+        outranges.ptr().get(),
+        ranges_length,
+        ascending,
+        stable);
+      util::handle_error(err, classname(), nullptr);
+
+      ssize_t itemsize = 8;
+      ContentPtr out = std::make_shared<RawArrayOf<int64_t>>(Identities::none(),
+                                                       util::Parameters(),
+                                                       ptr,
+                                                       offset_,
+                                                       length_,
+                                                       itemsize);
+
+      out = std::make_shared<RegularArray>(Identities::none(),
+                                           util::Parameters(),
+                                           out,
+                                           length_);
+
+      return out;
     }
 
     const ContentPtr
@@ -989,7 +1077,7 @@ namespace awkward {
         else if (step == 0) {
           throw std::invalid_argument("slice step must not be 0");
         }
-        awkward_regularize_rangeslice(&start, &stop, step > 0,
+        kernel::regularize_rangeslice(&start, &stop, step > 0,
           range.hasstart(), range.hasstop(), length_);
 
         int64_t numer = std::abs(start - stop);
@@ -1020,7 +1108,7 @@ namespace awkward {
         throw std::runtime_error("array.ndim != 1");
       }
       Index64 flathead = array.ravel();
-      struct Error err = awkward_regularize_arrayslice_64(
+      struct Error err = kernel::regularize_arrayslice_64(
         flathead.ptr().get(),
         flathead.length(),
         length_);

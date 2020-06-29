@@ -1,5 +1,6 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#include <algorithm>
 #include <iomanip>
 #include <numeric>
 #include <sstream>
@@ -9,10 +10,12 @@
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/cpu-kernels/operations.h"
 #include "awkward/cpu-kernels/reducers.h"
+#include "awkward/cpu-kernels/sorting.h"
 #include "awkward/type/PrimitiveType.h"
 #include "awkward/type/RegularType.h"
 #include "awkward/type/ArrayType.h"
 #include "awkward/array/RegularArray.h"
+#include "awkward/array/ListOffsetArray.h"
 #include "awkward/array/EmptyArray.h"
 #include "awkward/array/IndexedArray.h"
 #include "awkward/array/UnionArray.h"
@@ -659,8 +662,8 @@ namespace awkward {
                                        length());
       Identities32* rawidentities =
         reinterpret_cast<Identities32*>(newidentities.get());
-      struct Error err = awkward_new_identities32(rawidentities->ptr().get(),
-                                                length());
+      struct Error err = kernel::new_Identities<int32_t>(rawidentities->ptr().get(),
+                                                         length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
     }
@@ -672,8 +675,8 @@ namespace awkward {
                                        length());
       Identities64* rawidentities =
         reinterpret_cast<Identities64*>(newidentities.get());
-      struct Error err = awkward_new_identities64(rawidentities->ptr().get(),
-                                                  length());
+      struct Error err = kernel::new_Identities<int64_t>(rawidentities->ptr().get(),
+                                                         length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
     }
@@ -687,10 +690,10 @@ namespace awkward {
           out << " ";
         }
         if (std::is_same<T, bool>::value) {
-          out << (kernel::numpyarray_getitem_at(ptr_lib, ptr, i) ? "true" : "false");
+          out << (kernel::NumpyArray_getitem_at(ptr_lib, ptr, i) ? "true" : "false");
         }
         else {
-          out << kernel::numpyarray_getitem_at(ptr_lib, ptr, i);
+          out << kernel::NumpyArray_getitem_at(ptr_lib, ptr, i);
         }
       }
     }
@@ -700,10 +703,10 @@ namespace awkward {
           out << " ";
         }
         if (std::is_same<T, bool>::value) {
-          out << (kernel::numpyarray_getitem_at(ptr_lib, ptr, i) ? "true" : "false");
+          out << (kernel::NumpyArray_getitem_at(ptr_lib, ptr, i) ? "true" : "false");
         }
         else {
-          out << kernel::numpyarray_getitem_at(ptr_lib, ptr, i);
+          out << kernel::NumpyArray_getitem_at(ptr_lib, ptr, i);
         }
       }
       out << " ... ";
@@ -712,10 +715,10 @@ namespace awkward {
           out << " ";
         }
         if (std::is_same<T, bool>::value) {
-          out << (kernel::numpyarray_getitem_at(ptr_lib, ptr, i) ? "true" : "false");
+          out << (kernel::NumpyArray_getitem_at(ptr_lib, ptr, i) ? "true" : "false");
         }
         else {
-          out << kernel::numpyarray_getitem_at(ptr_lib, ptr, i);
+          out << kernel::NumpyArray_getitem_at(ptr_lib, ptr, i);
         }
       }
     }
@@ -1073,7 +1076,7 @@ namespace awkward {
   NumpyArray::getitem_range(int64_t start, int64_t stop) const {
     int64_t regular_start = start;
     int64_t regular_stop = stop;
-    awkward_regularize_rangeslice(&regular_start, &regular_stop,
+    kernel::regularize_rangeslice(&regular_start, &regular_stop,
       true, start != Slice::none(), stop != Slice::none(), shape_[0]);
     return getitem_range_nowrap(regular_start, regular_stop);
   }
@@ -1229,7 +1232,7 @@ namespace awkward {
                            const Slice& tail,
                            const Index64& advanced) const {
     Index64 carry(shape_[0]);
-    struct Error err = awkward_carry_arange_64(carry.ptr().get(), shape_[0]);
+    struct Error err = kernel::carry_arange<int64_t>(carry.ptr().get(), shape_[0]);
     util::handle_error(err, classname(), identities_.get());
     return getitem_next(head,
                         tail,
@@ -1244,7 +1247,7 @@ namespace awkward {
   NumpyArray::carry(const Index64& carry) const {
     std::shared_ptr<void> ptr(
       kernel::ptr_alloc<uint8_t>(ptr_lib_, (size_t)(carry.length()*strides_[0])));
-    struct Error err = awkward_numpyarray_getitem_next_null_64(
+    struct Error err = kernel::NumpyArray_getitem_next_null_64(
       reinterpret_cast<uint8_t*>(ptr.get()),
       reinterpret_cast<uint8_t*>(ptr_.get()),
       carry.length(),
@@ -1357,7 +1360,7 @@ namespace awkward {
     }
 
     Index64 tonum(reps);
-    struct Error err = awkward_regulararray_num_64(
+    struct Error err = kernel::RegularArray_num_64(
       tonum.ptr().get(),
       size,
       reps);
@@ -1729,7 +1732,7 @@ namespace awkward {
       struct Error err;
       if (format.compare("d") == 0) {
         if (format_.compare("d") == 0) {
-          err = awkward_numpyarray_fill_todouble_fromdouble(
+          err = kernel::NumpyArray_fill<double, double>(
                   reinterpret_cast<double*>(ptr.get()),
                   0,
                   reinterpret_cast<double*>(contiguous_self.ptr().get()),
@@ -1737,7 +1740,7 @@ namespace awkward {
                   self_flatlength);
         }
         else if (format_.compare("f") == 0) {
-          err = awkward_numpyarray_fill_todouble_fromfloat(
+          err = kernel::NumpyArray_fill<float, double>(
                   reinterpret_cast<double*>(ptr.get()),
                   0,
                   reinterpret_cast<float*>(contiguous_self.ptr().get()),
@@ -1749,7 +1752,7 @@ namespace awkward {
 #else
         else if (format_.compare("l") == 0) {
 #endif
-          err = awkward_numpyarray_fill_todouble_from64(
+          err = kernel::NumpyArray_fill<int64_t, double>(
                   reinterpret_cast<double*>(ptr.get()),
                   0,
                   reinterpret_cast<int64_t*>(contiguous_self.ptr().get()),
@@ -1761,7 +1764,7 @@ namespace awkward {
 #else
           else if (format_.compare("L") == 0) {
 #endif
-          err = awkward_numpyarray_fill_todouble_fromU64(
+          err = kernel::NumpyArray_fill<uint64_t, double>(
                   reinterpret_cast<double*>(ptr.get()),
                   0,
                   reinterpret_cast<uint64_t*>(contiguous_self.ptr().get()),
@@ -1773,7 +1776,7 @@ namespace awkward {
 #else
           else if (format_.compare("i") == 0) {
 #endif
-          err = awkward_numpyarray_fill_todouble_from32(
+          err = kernel::NumpyArray_fill<int32_t , double>(
                   reinterpret_cast<double*>(ptr.get()),
                   0,
                   reinterpret_cast<int32_t*>(contiguous_self.ptr().get()),
@@ -1785,7 +1788,7 @@ namespace awkward {
 #else
           else if (format_.compare("I") == 0) {
 #endif
-          err = awkward_numpyarray_fill_todouble_fromU32(
+          err = kernel::NumpyArray_fill<uint32_t, double>(
                   reinterpret_cast<double*>(ptr.get()),
                   0,
                   reinterpret_cast<uint32_t*>(contiguous_self.ptr().get()),
@@ -1793,7 +1796,7 @@ namespace awkward {
                   self_flatlength);
         }
         else if (format_.compare("h") == 0) {
-          err = awkward_numpyarray_fill_todouble_from16(
+          err = kernel::NumpyArray_fill<int16_t, double>(
                   reinterpret_cast<double*>(ptr.get()),
                   0,
                   reinterpret_cast<int16_t*>(contiguous_self.ptr().get()),
@@ -1801,7 +1804,7 @@ namespace awkward {
                   self_flatlength);
         }
         else if (format_.compare("H") == 0) {
-          err = awkward_numpyarray_fill_todouble_fromU16(
+          err = kernel::NumpyArray_fill<uint16_t, double>(
                   reinterpret_cast<double*>(ptr.get()),
                   0,
                   reinterpret_cast<uint16_t*>(contiguous_self.ptr().get()),
@@ -1809,7 +1812,7 @@ namespace awkward {
                   self_flatlength);
         }
         else if (format_.compare("b") == 0) {
-          err = awkward_numpyarray_fill_todouble_from8(
+          err = kernel::NumpyArray_fill<int8_t, double>(
                   reinterpret_cast<double*>(ptr.get()),
                   0,
                   reinterpret_cast<int8_t*>(contiguous_self.ptr().get()),
@@ -1817,7 +1820,7 @@ namespace awkward {
                   self_flatlength);
         }
         else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
-          err = awkward_numpyarray_fill_todouble_fromU8(
+          err = kernel::NumpyArray_fill<uint8_t, double>(
                   reinterpret_cast<double*>(ptr.get()),
                   0,
                   reinterpret_cast<uint8_t*>(contiguous_self.ptr().get()),
@@ -1825,7 +1828,7 @@ namespace awkward {
                   self_flatlength);
         }
         else if (format_.compare("?") == 0) {
-          err = awkward_numpyarray_fill_todouble_frombool(
+          err = kernel::NumpyArray_fill_frombool<double>(
                   reinterpret_cast<double*>(ptr.get()),
                   0,
                   reinterpret_cast<bool*>(contiguous_self.ptr().get()),
@@ -1840,7 +1843,7 @@ namespace awkward {
         util::handle_error(err, classname(), nullptr);
 
         if (other_format.compare("d") == 0) {
-          err = awkward_numpyarray_fill_todouble_fromdouble(
+          err = kernel::NumpyArray_fill<double, double>(
                   reinterpret_cast<double*>(ptr.get()),
                   self_flatlength,
                   reinterpret_cast<double*>(contiguous_other.ptr().get()),
@@ -1848,7 +1851,7 @@ namespace awkward {
                   other_flatlength);
         }
         else if (other_format.compare("f") == 0) {
-          err = awkward_numpyarray_fill_todouble_fromfloat(
+          err = kernel::NumpyArray_fill<float, double>(
                   reinterpret_cast<double*>(ptr.get()),
                   self_flatlength,
                   reinterpret_cast<float*>(contiguous_other.ptr().get()),
@@ -1860,7 +1863,7 @@ namespace awkward {
 #else
         else if (other_format.compare("l") == 0) {
 #endif
-          err = awkward_numpyarray_fill_todouble_from64(
+          err = kernel::NumpyArray_fill<int64_t, double>(
                   reinterpret_cast<double*>(ptr.get()),
                   self_flatlength,
                   reinterpret_cast<int64_t*>(contiguous_other.ptr().get()),
@@ -1872,7 +1875,7 @@ namespace awkward {
 #else
           else if (other_format.compare("L") == 0) {
 #endif
-          err = awkward_numpyarray_fill_todouble_fromU64(
+          err = kernel::NumpyArray_fill<uint64_t, double>(
                   reinterpret_cast<double*>(ptr.get()),
                   self_flatlength,
                   reinterpret_cast<uint64_t*>(contiguous_other.ptr().get()),
@@ -1884,7 +1887,7 @@ namespace awkward {
 #else
           else if (other_format.compare("i") == 0) {
 #endif
-          err = awkward_numpyarray_fill_todouble_from32(
+          err = kernel::NumpyArray_fill<int32_t , double>(
                   reinterpret_cast<double*>(ptr.get()),
                   self_flatlength,
                   reinterpret_cast<int32_t*>(contiguous_other.ptr().get()),
@@ -1896,7 +1899,7 @@ namespace awkward {
 #else
           else if (other_format.compare("I") == 0) {
 #endif
-          err = awkward_numpyarray_fill_todouble_fromU32(
+          err = kernel::NumpyArray_fill<uint32_t, double>(
                   reinterpret_cast<double*>(ptr.get()),
                   self_flatlength,
                   reinterpret_cast<uint32_t*>(contiguous_other.ptr().get()),
@@ -1904,7 +1907,7 @@ namespace awkward {
                   other_flatlength);
         }
         else if (other_format.compare("h") == 0) {
-          err = awkward_numpyarray_fill_todouble_from16(
+          err = kernel::NumpyArray_fill<int16_t, double>(
                   reinterpret_cast<double*>(ptr.get()),
                   self_flatlength,
                   reinterpret_cast<int16_t*>(contiguous_other.ptr().get()),
@@ -1912,7 +1915,7 @@ namespace awkward {
                   other_flatlength);
         }
         else if (other_format.compare("H") == 0) {
-          err = awkward_numpyarray_fill_todouble_fromU16(
+          err = kernel::NumpyArray_fill<uint16_t, double>(
                   reinterpret_cast<double*>(ptr.get()),
                   self_flatlength,
                   reinterpret_cast<uint16_t*>(contiguous_other.ptr().get()),
@@ -1920,7 +1923,7 @@ namespace awkward {
                   other_flatlength);
         }
         else if (other_format.compare("b") == 0) {
-          err = awkward_numpyarray_fill_todouble_from8(
+          err = kernel::NumpyArray_fill<int8_t, double>(
                   reinterpret_cast<double*>(ptr.get()),
                   self_flatlength,
                   reinterpret_cast<int8_t*>(contiguous_other.ptr().get()),
@@ -1929,7 +1932,7 @@ namespace awkward {
         }
         else if (other_format.compare("B") == 0  ||
                  format_.compare("c") == 0) {
-          err = awkward_numpyarray_fill_todouble_fromU8(
+          err = kernel::NumpyArray_fill<uint8_t, double>(
                   reinterpret_cast<double*>(ptr.get()),
                   self_flatlength,
                   reinterpret_cast<uint8_t*>(contiguous_other.ptr().get()),
@@ -1937,7 +1940,7 @@ namespace awkward {
                   other_flatlength);
         }
         else if (other_format.compare("?") == 0) {
-          err = awkward_numpyarray_fill_todouble_frombool(
+          err = kernel::NumpyArray_fill_frombool<double>(
                   reinterpret_cast<double*>(ptr.get()),
                   self_flatlength,
                   reinterpret_cast<bool*>(contiguous_other.ptr().get()),
@@ -1953,14 +1956,14 @@ namespace awkward {
       }
 
       else if (format.compare("Q") == 0  ||  format.compare("L") == 0) {
-        err = awkward_numpyarray_fill_toU64_fromU64(
+        err = kernel::NumpyArray_fill<uint64_t, uint64_t>(
                 reinterpret_cast<uint64_t*>(ptr.get()),
                 0,
                 reinterpret_cast<uint64_t*>(contiguous_self.ptr().get()),
                 self_offset,
                 self_flatlength);
         util::handle_error(err, classname(), nullptr);
-        err = awkward_numpyarray_fill_toU64_fromU64(
+        err = kernel::NumpyArray_fill<uint64_t, uint64_t>(
                 reinterpret_cast<uint64_t*>(ptr.get()),
                 self_flatlength,
                 reinterpret_cast<uint64_t*>(contiguous_other.ptr().get()),
@@ -1975,7 +1978,7 @@ namespace awkward {
 #else
         if (format_.compare("l") == 0) {
 #endif
-          err = awkward_numpyarray_fill_to64_from64(
+          err = kernel::NumpyArray_fill<int64_t, int64_t>(
                   reinterpret_cast<int64_t*>(ptr.get()),
                   0,
                   reinterpret_cast<int64_t*>(contiguous_self.ptr().get()),
@@ -1987,7 +1990,7 @@ namespace awkward {
 #else
           else if (format_.compare("L") == 0) {
 #endif
-          err = awkward_numpyarray_fill_to64_fromU64(
+          err = kernel::NumpyArray_fill_to64_fromU64(
                   reinterpret_cast<int64_t*>(ptr.get()),
                   0,
                   reinterpret_cast<uint64_t*>(contiguous_self.ptr().get()),
@@ -1999,7 +2002,7 @@ namespace awkward {
 #else
           else if (format_.compare("i") == 0) {
 #endif
-          err = awkward_numpyarray_fill_to64_from32(
+          err = kernel::NumpyArray_fill<int32_t, int64_t>(
                   reinterpret_cast<int64_t*>(ptr.get()),
                   0,
                   reinterpret_cast<int32_t*>(contiguous_self.ptr().get()),
@@ -2011,7 +2014,7 @@ namespace awkward {
 #else
           else if (format_.compare("I") == 0) {
 #endif
-          err = awkward_numpyarray_fill_to64_fromU32(
+          err = kernel::NumpyArray_fill<uint32_t, int64_t>(
                   reinterpret_cast<int64_t*>(ptr.get()),
                   0,
                   reinterpret_cast<uint32_t*>(contiguous_self.ptr().get()),
@@ -2019,7 +2022,7 @@ namespace awkward {
                   self_flatlength);
         }
         else if (format_.compare("h") == 0) {
-          err = awkward_numpyarray_fill_to64_from16(
+          err = kernel::NumpyArray_fill<int16_t, int64_t>(
                   reinterpret_cast<int64_t*>(ptr.get()),
                   0,
                   reinterpret_cast<int16_t*>(contiguous_self.ptr().get()),
@@ -2027,7 +2030,7 @@ namespace awkward {
                   self_flatlength);
         }
         else if (format_.compare("H") == 0) {
-          err = awkward_numpyarray_fill_to64_fromU16(
+          err = kernel::NumpyArray_fill<uint16_t, int64_t>(
                   reinterpret_cast<int64_t*>(ptr.get()),
                   0,
                   reinterpret_cast<uint16_t*>(contiguous_self.ptr().get()),
@@ -2035,7 +2038,7 @@ namespace awkward {
                   self_flatlength);
         }
         else if (format_.compare("b") == 0) {
-          err = awkward_numpyarray_fill_to64_from8(
+          err = kernel::NumpyArray_fill<int8_t, int64_t>(
                   reinterpret_cast<int64_t*>(ptr.get()),
                   0,
                   reinterpret_cast<int8_t*>(contiguous_self.ptr().get()),
@@ -2043,7 +2046,7 @@ namespace awkward {
                   self_flatlength);
         }
         else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
-          err = awkward_numpyarray_fill_to64_fromU8(
+          err = kernel::NumpyArray_fill<uint8_t, int64_t>(
                   reinterpret_cast<int64_t*>(ptr.get()),
                   0,
                   reinterpret_cast<uint8_t*>(contiguous_self.ptr().get()),
@@ -2051,7 +2054,7 @@ namespace awkward {
                   self_flatlength);
         }
         else if (format_.compare("?") == 0) {
-          err = awkward_numpyarray_fill_to64_frombool(
+          err = kernel::NumpyArray_fill_frombool<int64_t>(
                   reinterpret_cast<int64_t*>(ptr.get()),
                   0,
                   reinterpret_cast<bool*>(contiguous_self.ptr().get()),
@@ -2070,7 +2073,7 @@ namespace awkward {
 #else
         if (other_format.compare("l") == 0) {
 #endif
-          err = awkward_numpyarray_fill_to64_from64(
+          err = kernel::NumpyArray_fill<int64_t, int64_t>(
                   reinterpret_cast<int64_t*>(ptr.get()),
                   self_flatlength,
                   reinterpret_cast<int64_t*>(contiguous_other.ptr().get()),
@@ -2082,7 +2085,7 @@ namespace awkward {
 #else
           else if (other_format.compare("L") == 0) {
 #endif
-          err = awkward_numpyarray_fill_to64_fromU64(
+          err = kernel::NumpyArray_fill_to64_fromU64(
                   reinterpret_cast<int64_t*>(ptr.get()),
                   self_flatlength,
                   reinterpret_cast<uint64_t*>(contiguous_other.ptr().get()),
@@ -2094,7 +2097,7 @@ namespace awkward {
 #else
           else if (other_format.compare("i") == 0) {
 #endif
-          err = awkward_numpyarray_fill_to64_from32(
+          err = kernel::NumpyArray_fill<int32_t, int64_t>(
                   reinterpret_cast<int64_t*>(ptr.get()),
                   self_flatlength,
                   reinterpret_cast<int32_t*>(contiguous_other.ptr().get()),
@@ -2106,7 +2109,7 @@ namespace awkward {
 #else
           else if (other_format.compare("I") == 0) {
 #endif
-          err = awkward_numpyarray_fill_to64_fromU32(
+          err = kernel::NumpyArray_fill<uint32_t, int64_t>(
                   reinterpret_cast<int64_t*>(ptr.get()),
                   self_flatlength,
                   reinterpret_cast<uint32_t*>(contiguous_other.ptr().get()),
@@ -2114,7 +2117,7 @@ namespace awkward {
                   other_flatlength);
         }
         else if (other_format.compare("h") == 0) {
-          err = awkward_numpyarray_fill_to64_from16(
+          err = kernel::NumpyArray_fill<int16_t, int64_t>(
                   reinterpret_cast<int64_t*>(ptr.get()),
                   self_flatlength,
                   reinterpret_cast<int16_t*>(contiguous_other.ptr().get()),
@@ -2122,7 +2125,7 @@ namespace awkward {
                   other_flatlength);
         }
         else if (other_format.compare("H") == 0) {
-          err = awkward_numpyarray_fill_to64_fromU16(
+          err = kernel::NumpyArray_fill<uint16_t, int64_t>(
                   reinterpret_cast<int64_t*>(ptr.get()),
                   self_flatlength,
                   reinterpret_cast<uint16_t*>(contiguous_other.ptr().get()),
@@ -2130,7 +2133,7 @@ namespace awkward {
                   other_flatlength);
         }
         else if (other_format.compare("b") == 0) {
-          err = awkward_numpyarray_fill_to64_from8(
+          err = kernel::NumpyArray_fill<int8_t, int64_t>(
                   reinterpret_cast<int64_t*>(ptr.get()),
                   self_flatlength,
                   reinterpret_cast<int8_t*>(contiguous_other.ptr().get()),
@@ -2139,7 +2142,7 @@ namespace awkward {
         }
         else if (other_format.compare("B") == 0  ||
                  format_.compare("c") == 0) {
-          err = awkward_numpyarray_fill_to64_fromU8(
+          err = kernel::NumpyArray_fill<uint8_t, int64_t>(
                   reinterpret_cast<int64_t*>(ptr.get()),
                   self_flatlength,
                   reinterpret_cast<uint8_t*>(contiguous_other.ptr().get()),
@@ -2147,7 +2150,7 @@ namespace awkward {
                   other_flatlength);
         }
         else if (other_format.compare("?") == 0) {
-          err = awkward_numpyarray_fill_to64_frombool(
+          err = kernel::NumpyArray_fill_frombool<int64_t>(
                   reinterpret_cast<int64_t*>(ptr.get()),
                   self_flatlength,
                   reinterpret_cast<bool*>(contiguous_other.ptr().get()),
@@ -2163,14 +2166,14 @@ namespace awkward {
       }
 
       else {
-        err = awkward_numpyarray_fill_tobool_frombool(
+        err = kernel::NumpyArray_fill_frombool<bool>(
                 reinterpret_cast<bool*>(ptr.get()),
                 0,
                 reinterpret_cast<bool*>(contiguous_self.ptr().get()),
                 self_offset,
                 self_flatlength);
         util::handle_error(err, classname(), nullptr);
-        err = awkward_numpyarray_fill_tobool_frombool(
+        err = kernel::NumpyArray_fill_frombool<bool>(
                 reinterpret_cast<bool*>(ptr.get()),
                 self_flatlength,
                 reinterpret_cast<bool*>(contiguous_other.ptr().get()),
@@ -2206,7 +2209,7 @@ namespace awkward {
 
     struct Error err;
 
-    err = awkward_numpyarray_fill_tobyte_frombyte(
+    err = kernel::NumpyArray_fill<int8_t, int8_t>(
             reinterpret_cast<int8_t*>(ptr.get()),
             0,
             reinterpret_cast<int8_t*>(contiguous_self.ptr().get()),
@@ -2214,7 +2217,7 @@ namespace awkward {
             contiguous_self.length());
     util::handle_error(err, classname(), nullptr);
 
-    err = awkward_numpyarray_fill_tobyte_frombyte(
+    err = kernel::NumpyArray_fill<int8_t, int8_t>(
             reinterpret_cast<int8_t*>(ptr.get()),
             length(),
             reinterpret_cast<int8_t*>(contiguous_other.ptr().get()),
@@ -2279,7 +2282,7 @@ namespace awkward {
 #else
       if (format_.compare("L") == 0) {
 #endif
-        err = awkward_numpyarray_fill_to64_fromU64(
+        err = kernel::NumpyArray_fill_to64_fromU64(
                 index.ptr().get(),
                 0,
                 reinterpret_cast<uint64_t*>(contiguous_self.ptr().get()),
@@ -2291,7 +2294,7 @@ namespace awkward {
 #else
       else if (format_.compare("i") == 0) {
 #endif
-        err = awkward_numpyarray_fill_to64_from32(
+        err = kernel::NumpyArray_fill<int32_t, int64_t>(
                 index.ptr().get(),
                 0,
                 reinterpret_cast<int32_t*>(contiguous_self.ptr().get()),
@@ -2303,7 +2306,7 @@ namespace awkward {
 #else
       else if (format_.compare("I") == 0) {
 #endif
-        err = awkward_numpyarray_fill_to64_fromU32(
+        err = kernel::NumpyArray_fill<uint32_t, int64_t>(
                 index.ptr().get(),
                 0,
                 reinterpret_cast<uint32_t*>(contiguous_self.ptr().get()),
@@ -2311,7 +2314,7 @@ namespace awkward {
                 length());
       }
       else if (format_.compare("h") == 0) {
-        err = awkward_numpyarray_fill_to64_from16(
+        err = kernel::NumpyArray_fill<int16_t, int64_t>(
                 index.ptr().get(),
                 0,
                 reinterpret_cast<int16_t*>(contiguous_self.ptr().get()),
@@ -2319,7 +2322,7 @@ namespace awkward {
                 length());
       }
       else if (format_.compare("H") == 0) {
-        err = awkward_numpyarray_fill_to64_fromU16(
+        err = kernel::NumpyArray_fill<uint16_t, int64_t>(
                 index.ptr().get(),
                 0,
                 reinterpret_cast<uint16_t*>(contiguous_self.ptr().get()),
@@ -2327,7 +2330,7 @@ namespace awkward {
                 length());
       }
       else if (format_.compare("b") == 0) {
-        err = awkward_numpyarray_fill_to64_from8(
+        err = kernel::NumpyArray_fill<int8_t, int64_t>(
                 index.ptr().get(),
                 0,
                 reinterpret_cast<int8_t*>(contiguous_self.ptr().get()),
@@ -2335,7 +2338,7 @@ namespace awkward {
                 length());
       }
       else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
-        err = awkward_numpyarray_fill_to64_fromU8(
+        err = kernel::NumpyArray_fill<uint8_t, int64_t>(
                 index.ptr().get(),
                 0,
                 reinterpret_cast<uint8_t*>(contiguous_self.ptr().get()),
@@ -2353,7 +2356,7 @@ namespace awkward {
     }
     else if (format_.compare("?") == 0) {
       int64_t numtrue;
-      struct Error err1 = awkward_numpyarray_getitem_boolean_numtrue(
+      struct Error err1 = kernel::NumpyArray_getitem_boolean_numtrue(
         &numtrue,
         reinterpret_cast<int8_t*>(ptr_.get()),
         (int64_t)byteoffset_,
@@ -2362,7 +2365,7 @@ namespace awkward {
       util::handle_error(err1, classname(), identities_.get());
 
       Index64 index(numtrue);
-      struct Error err2 = awkward_numpyarray_getitem_boolean_nonzero_64(
+      struct Error err2 = kernel::NumpyArray_getitem_boolean_nonzero_64(
         index.ptr().get(),
         reinterpret_cast<int8_t*>(ptr_.get()),
         (int64_t)byteoffset_,
@@ -2558,7 +2561,7 @@ namespace awkward {
 
       if (mask) {
         Index8 mask(outlength);
-        struct Error err = awkward_numpyarray_reduce_mask_bytemaskedarray(
+        struct Error err = kernel::NumpyArray_reduce_mask_ByteMaskedArray_64(
           mask.ptr().get(),
           parents.ptr().get(),
           parents.offset(),
@@ -2625,6 +2628,409 @@ namespace awkward {
                                                   axis,
                                                   depth);
     }
+  }
+
+  const ContentPtr
+  NumpyArray::sort_next(int64_t negaxis,
+                        const Index64& starts,
+                        const Index64& parents,
+                        int64_t outlength,
+                        bool ascending,
+                        bool stable,
+                        bool keepdims) const {
+    if (shape_.empty()) {
+      throw std::runtime_error("attempting to sort a scalar");
+    }
+    else if (shape_.size() != 1  ||  !iscontiguous()) {
+      return toRegularArray().get()->sort_next(negaxis,
+                                               starts,
+                                               parents,
+                                               outlength,
+                                               ascending,
+                                               stable,
+                                               keepdims);
+    }
+    else {
+      std::shared_ptr<Content> out;
+      int64_t offset = byteoffset_ / itemsize_;
+      std::shared_ptr<void> ptr;
+      if (format_.compare("?") == 0) {
+        ptr = array_sort<bool>(reinterpret_cast<bool*>(ptr_.get()),
+                               length(),
+                               offset,
+                               starts,
+                               parents,
+                               outlength,
+                               ascending,
+                               stable);
+      }
+      else if (format_.compare("b") == 0) {
+        ptr = array_sort<int8_t>(reinterpret_cast<int8_t*>(ptr_.get()),
+                                 length(),
+                                 offset,
+                                 starts,
+                                 parents,
+                                 outlength,
+                                 ascending,
+                                 stable);
+      }
+      else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
+        ptr = array_sort<uint8_t>(reinterpret_cast<uint8_t*>(ptr_.get()),
+                                  length(),
+                                  offset,
+                                  starts,
+                                  parents,
+                                  outlength,
+                                  ascending,
+                                  stable);
+      }
+      else if (format_.compare("h") == 0) {
+        ptr = array_sort<int16_t>(reinterpret_cast<int16_t*>(ptr_.get()),
+                                  length(),
+                                  offset,
+                                  starts,
+                                  parents,
+                                  outlength,
+                                  ascending,
+                                  stable);
+      }
+      else if (format_.compare("H") == 0) {
+        ptr = array_sort<uint16_t>(reinterpret_cast<uint16_t*>(ptr_.get()),
+                                   length(),
+                                   offset,
+                                   starts,
+                                   parents,
+                                   outlength,
+                                   ascending,
+                                   stable);
+      }
+#if defined _MSC_VER || defined __i386__
+      else if (format_.compare("l") == 0) {
+#else
+      else if (format_.compare("i") == 0) {
+#endif
+        ptr = array_sort<int32_t>(reinterpret_cast<int32_t*>(ptr_.get()),
+                                  length(),
+                                  offset,
+                                  starts,
+                                  parents,
+                                  outlength,
+                                  ascending,
+                                  stable);
+      }
+#if defined _MSC_VER || defined __i386__
+      else if (format_.compare("L") == 0) {
+#else
+      else if (format_.compare("I") == 0) {
+#endif
+        ptr = array_sort<uint32_t>(reinterpret_cast<uint32_t*>(ptr_.get()),
+                                   length(),
+                                   offset,
+                                   starts,
+                                   parents,
+                                   outlength,
+                                   ascending,
+                                   stable);
+      }
+#if defined _MSC_VER || defined __i386__
+      else if (format_.compare("q") == 0) {
+#else
+      else if (format_.compare("l") == 0) {
+#endif
+        ptr = array_sort<int64_t>(reinterpret_cast<int64_t*>(ptr_.get()),
+                                  length(),
+                                  offset,
+                                  starts,
+                                  parents,
+                                  outlength,
+                                  ascending,
+                                  stable);
+      }
+#if defined _MSC_VER || defined __i386__
+      else if (format_.compare("Q") == 0) {
+#else
+      else if (format_.compare("L") == 0) {
+#endif
+        ptr = array_sort<uint64_t>(reinterpret_cast<uint64_t*>(ptr_.get()),
+                                   length(),
+                                   offset,
+                                   starts,
+                                   parents,
+                                   outlength,
+                                   ascending,
+                                   stable);
+      }
+      else if (format_.compare("f") == 0) {
+        ptr = array_sort<float>(reinterpret_cast<float*>(ptr_.get()),
+                                length(),
+                                offset,
+                                starts,
+                                parents,
+                                outlength,
+                                ascending,
+                                stable);
+      }
+      else if (format_.compare("d") == 0) {
+        ptr = array_sort<double>(reinterpret_cast<double*>(ptr_.get()),
+                                 length(),
+                                 offset,
+                                 starts,
+                                 parents,
+                                 outlength,
+                                 ascending,
+                                 stable);
+      }
+      else {
+        throw std::invalid_argument(
+          std::string("cannot sort NumpyArray with format \"")
+          + format_ + std::string("\""));
+      }
+
+      out = std::make_shared<NumpyArray>(Identities::none(),
+                                         parameters_,
+                                         ptr,
+                                         shape_,
+                                         strides_,
+                                         0,
+                                         itemsize_,
+                                         format_);
+
+      if (keepdims) {
+        out = std::make_shared<RegularArray>(
+          Identities::none(),
+          util::Parameters(),
+          out,
+          parents.length() / starts.length());
+      }
+
+      return out;
+    }
+  }
+
+  const ContentPtr
+  NumpyArray::argsort_next(int64_t negaxis,
+                           const Index64& starts,
+                           const Index64& parents,
+                           int64_t outlength,
+                           bool ascending,
+                           bool stable,
+                           bool keepdims) const {
+    if (shape_.empty()) {
+      throw std::runtime_error("attempting to argsort a scalar");
+    }
+    else if (shape_.size() != 1  ||  !iscontiguous()) {
+      return toRegularArray().get()->argsort_next(negaxis,
+                                                  starts,
+                                                  parents,
+                                                  outlength,
+                                                  ascending,
+                                                  stable,
+                                                  keepdims);
+    }
+    else {
+      std::shared_ptr<Content> out;
+      int64_t offset = byteoffset_ / itemsize_;
+      std::shared_ptr<void> ptr;
+      if (format_.compare("?") == 0) {
+        ptr = index_sort<bool>(reinterpret_cast<bool*>(ptr_.get()),
+                               length(),
+                               offset,
+                               starts,
+                               parents,
+                               outlength,
+                               ascending,
+                               stable);
+      }
+      else if (format_.compare("b") == 0) {
+        ptr = index_sort<int8_t>(reinterpret_cast<int8_t*>(ptr_.get()),
+                                 length(),
+                                 offset,
+                                 starts,
+                                 parents,
+                                 outlength,
+                                 ascending,
+                                 stable);
+      }
+      else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
+        ptr = index_sort<uint8_t>(reinterpret_cast<uint8_t*>(ptr_.get()),
+                                  length(),
+                                  offset,
+                                  starts,
+                                  parents,
+                                  outlength,
+                                  ascending,
+                                  stable);
+      }
+      else if (format_.compare("h") == 0) {
+        ptr = index_sort<int16_t>(reinterpret_cast<int16_t*>(ptr_.get()),
+                                  length(),
+                                  offset,
+                                  starts,
+                                  parents,
+                                  outlength,
+                                  ascending,
+                                  stable);
+      }
+      else if (format_.compare("H") == 0) {
+        ptr = index_sort<uint16_t>(reinterpret_cast<uint16_t*>(ptr_.get()),
+                                   length(),
+                                   offset,
+                                   starts,
+                                   parents,
+                                   outlength,
+                                   ascending,
+                                   stable);
+      }
+#if defined _MSC_VER || defined __i386__
+      else if (format_.compare("l") == 0) {
+#else
+      else if (format_.compare("i") == 0) {
+#endif
+        ptr = index_sort<int32_t>(reinterpret_cast<int32_t*>(ptr_.get()),
+                                  length(),
+                                  offset,
+                                  starts,
+                                  parents,
+                                  outlength,
+                                  ascending,
+                                  stable);
+      }
+#if defined _MSC_VER || defined __i386__
+      else if (format_.compare("L") == 0) {
+#else
+      else if (format_.compare("I") == 0) {
+#endif
+        ptr = index_sort<uint32_t>(reinterpret_cast<uint32_t*>(ptr_.get()),
+                                   length(),
+                                   offset,
+                                   starts,
+                                   parents,
+                                   outlength,
+                                   ascending,
+                                   stable);
+      }
+#if defined _MSC_VER || defined __i386__
+      else if (format_.compare("q") == 0) {
+#else
+      else if (format_.compare("l") == 0) {
+#endif
+        ptr = index_sort<int64_t>(reinterpret_cast<int64_t*>(ptr_.get()),
+                                  length(),
+                                  offset,
+                                  starts,
+                                  parents,
+                                  outlength,
+                                  ascending,
+                                  stable);
+      }
+#if defined _MSC_VER || defined __i386__
+      else if (format_.compare("Q") == 0) {
+#else
+      else if (format_.compare("L") == 0) {
+#endif
+        ptr = index_sort<uint64_t>(reinterpret_cast<uint64_t*>(ptr_.get()),
+                                   length(),
+                                   offset,
+                                   starts,
+                                   parents,
+                                   outlength,
+                                   ascending,
+                                   stable);
+      }
+      else if (format_.compare("f") == 0) {
+        ptr = index_sort<float>(reinterpret_cast<float*>(ptr_.get()),
+                                length(),
+                                offset,
+                                starts,
+                                parents,
+                                outlength,
+                                ascending,
+                                stable);
+      }
+      else if (format_.compare("d") == 0) {
+        ptr = index_sort<double>(reinterpret_cast<double*>(ptr_.get()),
+                                 length(),
+                                 offset,
+                                 starts,
+                                 parents,
+                                 outlength,
+                                 ascending,
+                                 stable);
+      }
+      else {
+        throw std::invalid_argument(
+          std::string("cannot sort NumpyArray with format \"")
+          + format_ + std::string("\""));
+      }
+
+      std::string format;
+#if defined _MSC_VER || defined __i386__
+      format = "q";
+#else
+      format = "l";
+#endif
+
+      ssize_t itemsize = 8;
+      std::vector<ssize_t> shape({ (ssize_t)shape_[0] });
+      std::vector<ssize_t> strides({ itemsize });
+      out = std::make_shared<NumpyArray>(Identities::none(),
+                                         util::Parameters(),
+                                         ptr,
+                                         shape_,
+                                         strides,
+                                         0,
+                                         itemsize,
+                                         format);
+
+      if (keepdims) {
+        out = std::make_shared<RegularArray>(
+          Identities::none(),
+          util::Parameters(),
+          out,
+          parents.length() / starts.length());
+      }
+      return out;
+    }
+  }
+
+  const ContentPtr
+  NumpyArray::sort_asstrings(const Index64& offsets,
+                             bool ascending,
+                             bool stable) const {
+    std::shared_ptr<Content> out;
+    int64_t offset = byteoffset_ / itemsize_;
+    std::shared_ptr<void> ptr;
+
+    Index64 outoffsets(offsets.length());
+
+    if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
+      ptr = string_sort<uint8_t>(reinterpret_cast<uint8_t*>(ptr_.get()),
+                                 length(),
+                                 offsets,
+                                 outoffsets,
+                                 ascending,
+                                 stable);
+    } else {
+      throw std::invalid_argument(
+        std::string("cannot sort NumpyArray as strings with format \"")
+        + format_ + std::string("\""));
+    }
+
+    out = std::make_shared<NumpyArray>(identities_,
+                                       parameters_,
+                                       ptr,
+                                       shape_,
+                                       strides_,
+                                       0,
+                                       itemsize_,
+                                       format_);
+
+   out = std::make_shared<ListOffsetArray64>(Identities::none(),
+                                             util::Parameters(),
+                                             outoffsets,
+                                             out);
+
+   return out;
   }
 
   const ContentPtr
@@ -2764,7 +3170,7 @@ namespace awkward {
     else {
       Index64 bytepos(shape_[0]);
       struct Error err =
-        awkward_numpyarray_contiguous_init_64(bytepos.ptr().get(),
+        kernel::NumpyArray_contiguous_init_64(bytepos.ptr().get(),
                                               shape_[0],
                                               strides_[0]);
       util::handle_error(err, classname(), identities_.get());
@@ -2777,7 +3183,8 @@ namespace awkward {
     if (iscontiguous()) {
       std::shared_ptr<void> ptr(
         kernel::ptr_alloc<uint8_t>(ptr_lib_, (size_t)(bytepos.length()*strides_[0])));
-      struct Error err = awkward_numpyarray_contiguous_copy_64(
+
+      struct Error err = kernel::NumpyArray_contiguous_copy_64(
         reinterpret_cast<uint8_t*>(ptr.get()),
         reinterpret_cast<uint8_t*>(ptr_.get()),
         bytepos.length(),
@@ -2798,7 +3205,7 @@ namespace awkward {
     else if (shape_.size() == 1) {
       std::shared_ptr<void> ptr(
         kernel::ptr_alloc<uint8_t>(ptr_lib_, (size_t)(bytepos.length()*itemsize_)));
-      struct Error err = awkward_numpyarray_contiguous_copy_64(
+      struct Error err = kernel::NumpyArray_contiguous_copy_64(
         reinterpret_cast<uint8_t*>(ptr.get()),
         reinterpret_cast<uint8_t*>(ptr_.get()),
         bytepos.length(),
@@ -2828,7 +3235,7 @@ namespace awkward {
                       format_);
 
       Index64 nextbytepos(bytepos.length()*shape_[1]);
-      struct Error err = awkward_numpyarray_contiguous_next_64(
+      struct Error err = kernel::NumpyArray_contiguous_next_64(
         nextbytepos.ptr().get(),
         bytepos.ptr().get(),
         bytepos.length(),
@@ -2951,7 +3358,7 @@ namespace awkward {
     if (step == Slice::none()) {
       step = 1;
     }
-    awkward_regularize_rangeslice(&start, &stop, step > 0,
+    kernel::regularize_rangeslice(&start, &stop, step > 0,
       range.hasstart(), range.hasstop(), (int64_t)shape_[1]);
 
     int64_t numer = std::abs(start - stop);
@@ -3052,8 +3459,9 @@ namespace awkward {
                            int64_t stride,
                            bool first) const {
     if (head.get() == nullptr) {
-      std::shared_ptr<void> ptr(kernel::ptr_alloc<uint8_t>(ptr_lib_, (size_t)(carry.length()*stride)));
-      struct Error err = awkward_numpyarray_getitem_next_null_64(
+      std::shared_ptr<void> ptr(kernel::ptr_alloc<uint8_t>(ptr_lib_,
+                                                               (size_t)(carry.length()*stride)));
+      struct Error err = kernel::NumpyArray_getitem_next_null_64(
         reinterpret_cast<uint8_t*>(ptr.get()),
         reinterpret_cast<uint8_t*>(ptr_.get()),
         carry.length(),
@@ -3196,7 +3604,7 @@ namespace awkward {
     }
 
     Index64 nextcarry(carry.length());
-    struct Error err = awkward_numpyarray_getitem_next_at_64(
+    struct Error err = kernel::NumpyArray_getitem_next_at_64(
       nextcarry.ptr().get(),
       carry.ptr().get(),
       carry.length(),
@@ -3245,7 +3653,7 @@ namespace awkward {
     if (step == Slice::none()) {
       step = 1;
     }
-    awkward_regularize_rangeslice(&start,
+    kernel::regularize_rangeslice(&start,
                                   &stop,
                                   step > 0,
                                   range.hasstart(),
@@ -3271,7 +3679,7 @@ namespace awkward {
 
     if (advanced.length() == 0) {
       Index64 nextcarry(carry.length()*lenhead);
-      struct Error err = awkward_numpyarray_getitem_next_range_64(
+      struct Error err = kernel::NumpyArray_getitem_next_range_64(
         nextcarry.ptr().get(),
         carry.ptr().get(),
         carry.length(),
@@ -3309,7 +3717,7 @@ namespace awkward {
     else {
       Index64 nextcarry(carry.length()*lenhead);
       Index64 nextadvanced(carry.length()*lenhead);
-      struct Error err = awkward_numpyarray_getitem_next_range_advanced_64(
+      struct Error err = kernel::NumpyArray_getitem_next_range_advanced_64(
         nextcarry.ptr().get(),
         nextadvanced.ptr().get(),
         carry.ptr().get(),
@@ -3450,7 +3858,7 @@ namespace awkward {
     Slice nexttail = tail.tail();
 
     Index64 flathead = array.ravel();
-    struct Error err = awkward_regularize_arrayslice_64(
+    struct Error err = kernel::regularize_arrayslice_64(
       flathead.ptr().get(),
       flathead.length(),
       shape_[1]);
@@ -3459,7 +3867,7 @@ namespace awkward {
     if (advanced.length() == 0) {
       Index64 nextcarry(carry.length()*flathead.length());
       Index64 nextadvanced(carry.length()*flathead.length());
-      struct Error err = awkward_numpyarray_getitem_next_array_64(
+      struct Error err = kernel::NumpyArray_getitem_next_array_64(
         nextcarry.ptr().get(),
         nextadvanced.ptr().get(),
         carry.ptr().get(),
@@ -3504,7 +3912,7 @@ namespace awkward {
 
     else {
       Index64 nextcarry(carry.length());
-      struct Error err = awkward_numpyarray_getitem_next_array_advanced_64(
+      struct Error err = kernel::NumpyArray_getitem_next_array_advanced_64(
         nextcarry.ptr().get(),
         carry.ptr().get(),
         advanced.ptr().get(),
@@ -4232,5 +4640,133 @@ namespace awkward {
                                             kernel::Lib::cpu_kernels);
       }
     }
+  }
+
+  template<typename T>
+  const std::shared_ptr<void>
+  NumpyArray::index_sort(const T* data,
+                         int64_t length,
+                         int64_t offset,
+                         const Index64& starts,
+                         const Index64& parents,
+                         int64_t outlength,
+                         bool ascending,
+                         bool stable) const {
+    std::shared_ptr<int64_t> ptr(
+      new int64_t[length], kernel::array_deleter<int64_t>());
+
+    if (length == 0) {
+      return ptr;
+    }
+
+    int64_t ranges_length = 0;
+    struct Error err1 = kernel::sorting_ranges_length(
+      &ranges_length,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
+    util::handle_error(err1, classname(), nullptr);
+
+    Index64 outranges(ranges_length);
+    struct Error err2 = kernel::sorting_ranges(
+      outranges.ptr().get(),
+      ranges_length,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
+    util::handle_error(err2, classname(), nullptr);
+
+    struct Error err3 = kernel::NumpyArray_argsort<T>(
+      ptr.get(),
+      data,
+      length,
+      outranges.ptr().get(),
+      ranges_length,
+      ascending,
+      stable);
+    util::handle_error(err3, classname(), nullptr);
+
+    return ptr;
+  }
+
+  template<typename T>
+  const std::shared_ptr<void>
+  NumpyArray::array_sort(const T* data,
+                         int64_t length,
+                         int64_t offset,
+                         const Index64& starts,
+                         const Index64& parents,
+                         int64_t outlength,
+                         bool ascending,
+                         bool stable) const {
+    std::shared_ptr<T> ptr(
+      new T[length], kernel::array_deleter<T>());
+
+    if (length == 0) {
+      return ptr;
+    }
+
+    int64_t ranges_length = 0;
+    struct Error err1 = kernel::sorting_ranges_length(
+      &ranges_length,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
+    util::handle_error(err1, classname(), nullptr);
+
+    Index64 outranges(ranges_length);
+    struct Error err2 = kernel::sorting_ranges(
+      outranges.ptr().get(),
+      ranges_length,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
+    util::handle_error(err2, classname(), nullptr);
+
+    struct Error err3 = kernel::NumpyArray_sort<T>(
+      ptr.get(),
+      data,
+      length,
+      outranges.ptr().get(),
+      ranges_length,
+      parents.length(),
+      ascending,
+      stable);
+    util::handle_error(err3, classname(), nullptr);
+
+    return ptr;
+  }
+
+  template<typename T>
+  const std::shared_ptr<void>
+  NumpyArray::string_sort(const T* data,
+                          int64_t length,
+                          const Index64& offsets,
+                          Index64& outoffsets,
+                          bool ascending,
+                          bool stable) const {
+    std::shared_ptr<T> ptr(
+      new T[length], kernel::array_deleter<T>());
+
+    if (length == 0) {
+      return ptr;
+    }
+
+    struct Error err = kernel::NumpyArray_sort_asstrings(
+      ptr.get(),
+      data,
+      length,
+      offsets.ptr().get(),
+      offsets.length(),
+      outoffsets.ptr().get(),
+      ascending,
+      stable);
+    util::handle_error(err, classname(), nullptr);
+
+    return ptr;
   }
 }

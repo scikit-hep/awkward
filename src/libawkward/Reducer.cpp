@@ -108,7 +108,8 @@ namespace awkward {
     // This is the only reducer that completely ignores the data.
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_count_64(
+
+    struct Error err = kernel::reduce_count_64(
       ptr.get(),
       parents.ptr().get(),
       parents.offset(),
@@ -287,7 +288,8 @@ namespace awkward {
                                   int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_countnonzero_bool_64(
+                                 
+    struct Error err = kernel::reduce_countnonzero_64<bool>(
       ptr.get(),
       data,
       offset,
@@ -307,7 +309,8 @@ namespace awkward {
                                   int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_countnonzero_int8_64(
+
+    struct Error err = kernel::reduce_countnonzero_64<int8_t>(
       ptr.get(),
       data,
       offset,
@@ -327,7 +330,7 @@ namespace awkward {
                                    int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_countnonzero_uint8_64(
+    struct Error err = kernel::reduce_countnonzero_64<uint8_t>(
       ptr.get(),
       data,
       offset,
@@ -347,7 +350,7 @@ namespace awkward {
                                    int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_countnonzero_int16_64(
+    struct Error err = kernel::reduce_countnonzero_64<int16_t>(
       ptr.get(),
       data,
       offset,
@@ -367,7 +370,7 @@ namespace awkward {
                                     int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_countnonzero_uint16_64(
+    struct Error err = kernel::reduce_countnonzero_64<uint16_t>(
       ptr.get(),
       data,
       offset,
@@ -387,7 +390,7 @@ namespace awkward {
                                    int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_countnonzero_int32_64(
+    struct Error err = kernel::reduce_countnonzero_64<int32_t>(
       ptr.get(),
       data,
       offset,
@@ -407,7 +410,7 @@ namespace awkward {
                                     int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_countnonzero_uint32_64(
+    struct Error err = kernel::reduce_countnonzero_64<uint32_t>(
       ptr.get(),
       data,
       offset,
@@ -427,7 +430,7 @@ namespace awkward {
                                    int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_countnonzero_int64_64(
+    struct Error err = kernel::reduce_countnonzero_64<int64_t>(
       ptr.get(),
       data,
       offset,
@@ -447,7 +450,7 @@ namespace awkward {
                                     int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_countnonzero_uint64_64(
+    struct Error err = kernel::reduce_countnonzero_64<uint64_t>(
       ptr.get(),
       data,
       offset,
@@ -467,7 +470,7 @@ namespace awkward {
                                      int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_countnonzero_float32_64(
+    struct Error err = kernel::reduce_countnonzero_64<float>(
       ptr.get(),
       data,
       offset,
@@ -487,7 +490,7 @@ namespace awkward {
                                      int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_countnonzero_float64_64(
+    struct Error err = kernel::reduce_countnonzero_64<double>(
       ptr.get(),
       data,
       offset,
@@ -597,7 +600,7 @@ namespace awkward {
 #if defined _MSC_VER || defined __i386__
     std::shared_ptr<int32_t> ptr(new int32_t[(size_t)outlength],
                                  kernel::array_deleter<int32_t>());
-    struct Error err = awkward_reduce_sum_int32_bool_64(
+    struct Error err = kernel::reduce_sum_64<int32_t, bool>(
       ptr.get(),
       data,
       offset,
@@ -608,7 +611,8 @@ namespace awkward {
 #else
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_sum_int64_bool_64(
+                                 
+    struct Error err = kernel::reduce_sum_64<int64_t, bool>(
       ptr.get(),
       data,
       offset,
@@ -630,7 +634,7 @@ namespace awkward {
 #if defined _MSC_VER || defined __i386__
     std::shared_ptr<int32_t> ptr(new int32_t[(size_t)outlength],
                                  kernel::array_deleter<int32_t>());
-    struct Error err = awkward_reduce_sum_int32_int8_64(
+    struct Error err = kernel::reduce_sum_64<int32_t, int8_t>(
       ptr.get(),
       data,
       offset,
@@ -641,7 +645,7 @@ namespace awkward {
 #else
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_sum_int64_int8_64(
+    struct Error err = kernel::reduce_sum_64<int64_t, int8_t>(
       ptr.get(),
       data,
       offset,
@@ -663,7 +667,7 @@ namespace awkward {
 #if defined _MSC_VER || defined __i386__
     std::shared_ptr<uint32_t> ptr(new uint32_t[(size_t)outlength],
                                   kernel::array_deleter<uint32_t>());
-    struct Error err = awkward_reduce_sum_uint32_uint8_64(
+    struct Error err = kernel::reduce_sum_64<uint32_t, uint8_t>(
       ptr.get(),
       data,
       offset,
@@ -674,7 +678,7 @@ namespace awkward {
 #else
     std::shared_ptr<uint64_t> ptr(new uint64_t[(size_t)outlength],
                                   kernel::array_deleter<uint64_t>());
-    struct Error err = awkward_reduce_sum_uint64_uint8_64(
+    struct Error err = kernel::reduce_sum_64<uint64_t, uint8_t>(
       ptr.get(),
       data,
       offset,
@@ -696,7 +700,7 @@ namespace awkward {
 #if defined _MSC_VER || defined __i386__
     std::shared_ptr<int32_t> ptr(new int32_t[(size_t)outlength],
                                  kernel::array_deleter<int32_t>());
-    struct Error err = awkward_reduce_sum_int32_int16_64(
+    struct Error err = kernel::reduce_sum_64<int32_t, int16_t>(
       ptr.get(),
       data,
       offset,
@@ -707,7 +711,7 @@ namespace awkward {
 #else
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_sum_int64_int16_64(
+    struct Error err = kernel::reduce_sum_64<int64_t, int16_t>(
       ptr.get(),
       data,
       offset,
@@ -729,7 +733,7 @@ namespace awkward {
 #if defined _MSC_VER || defined __i386__
     std::shared_ptr<uint32_t> ptr(new uint32_t[(size_t)outlength],
                                   kernel::array_deleter<uint32_t>());
-    struct Error err = awkward_reduce_sum_uint32_uint16_64(
+    struct Error err = kernel::reduce_sum_64<uint32_t, uint16_t>(
       ptr.get(),
       data,
       offset,
@@ -739,8 +743,8 @@ namespace awkward {
       outlength);
 #else
     std::shared_ptr<uint64_t> ptr(new uint64_t[(size_t)outlength],
-                                  kernel::array_deleter<uint64_t>());
-    struct Error err = awkward_reduce_sum_uint64_uint16_64(
+                                  kernel::array_deleter<uint64_t>());                                
+    struct Error err = kernel::reduce_sum_64<uint64_t, uint16_t>(
       ptr.get(),
       data,
       offset,
@@ -761,8 +765,8 @@ namespace awkward {
                           int64_t outlength) const {
 #if defined _MSC_VER || defined __i386__
     std::shared_ptr<int32_t> ptr(new int32_t[(size_t)outlength],
-                                 kernel::array_deleter<int32_t>());
-    struct Error err = awkward_reduce_sum_int32_int32_64(
+                                 kernel::array_deleter<int32_t>());                                 
+    struct Error err = kernel::reduce_sum_64<int32_t, int32_t>(
       ptr.get(),
       data,
       offset,
@@ -772,8 +776,8 @@ namespace awkward {
       outlength);
 #else
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_sum_int64_int32_64(
+                                 kernel::array_deleter<int64_t>());                                 
+    struct Error err = kernel::reduce_sum_64<int64_t, int32_t>(
       ptr.get(),
       data,
       offset,
@@ -795,7 +799,7 @@ namespace awkward {
 #if defined _MSC_VER || defined __i386__
     std::shared_ptr<uint32_t> ptr(new uint32_t[(size_t)outlength],
                                   kernel::array_deleter<uint32_t>());
-    struct Error err = awkward_reduce_sum_uint32_uint32_64(
+    struct Error err = kernel::reduce_sum_64<uint32_t, uint32_t>(
       ptr.get(),
       data,
       offset,
@@ -806,7 +810,7 @@ namespace awkward {
 #else
     std::shared_ptr<uint64_t> ptr(new uint64_t[(size_t)outlength],
                                   kernel::array_deleter<uint64_t>());
-    struct Error err = awkward_reduce_sum_uint64_uint32_64(
+    struct Error err = kernel::reduce_sum_64<uint64_t, uint32_t>(
       ptr.get(),
       data,
       offset,
@@ -827,7 +831,7 @@ namespace awkward {
                           int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_sum_int64_int64_64(
+    struct Error err = kernel::reduce_sum_64<int64_t, int64_t>(
       ptr.get(),
       data,
       offset,
@@ -846,8 +850,8 @@ namespace awkward {
                            const Index64& parents,
                            int64_t outlength) const {
     std::shared_ptr<uint64_t> ptr(new uint64_t[(size_t)outlength],
-                                  kernel::array_deleter<uint64_t>());
-    struct Error err = awkward_reduce_sum_uint64_uint64_64(
+                                  kernel::array_deleter<uint64_t>());                            
+    struct Error err = kernel::reduce_sum_64<uint64_t, uint64_t>(
       ptr.get(),
       data,
       offset,
@@ -867,7 +871,7 @@ namespace awkward {
                             int64_t outlength) const {
     std::shared_ptr<float> ptr(new float[(size_t)outlength],
                                kernel::array_deleter<float>());
-    struct Error err = awkward_reduce_sum_float32_float32_64(
+    struct Error err = kernel::reduce_sum_64<float, float>(
       ptr.get(),
       data,
       offset,
@@ -887,7 +891,7 @@ namespace awkward {
                             int64_t outlength) const {
     std::shared_ptr<double> ptr(new double[(size_t)outlength],
                                 kernel::array_deleter<double>());
-    struct Error err = awkward_reduce_sum_float64_float64_64(
+    struct Error err = kernel::reduce_sum_64<double, double>(
       ptr.get(),
       data,
       offset,
@@ -1001,7 +1005,7 @@ namespace awkward {
 #if defined _MSC_VER || defined __i386__
     std::shared_ptr<int32_t> ptr(new int32_t[(size_t)outlength],
                                  kernel::array_deleter<int32_t>());
-    struct Error err = awkward_reduce_prod_int32_bool_64(
+    struct Error err = kernel::reduce_prod_64<int32_t, bool>(
       ptr.get(),
       data,
       offset,
@@ -1011,8 +1015,8 @@ namespace awkward {
       outlength);
 #else
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_prod_int64_bool_64(
+                                 kernel::array_deleter<int64_t>());        
+    struct Error err = kernel::reduce_prod_64<int64_t, bool>(
       ptr.get(),
       data,
       offset,
@@ -1034,7 +1038,7 @@ namespace awkward {
 #if defined _MSC_VER || defined __i386__
     std::shared_ptr<int32_t> ptr(new int32_t[(size_t)outlength],
                                  kernel::array_deleter<int32_t>());
-    struct Error err = awkward_reduce_prod_int32_int8_64(
+    struct Error err = kernel::reduce_prod_64<int32_t, int8_t>(
       ptr.get(),
       data,
       offset,
@@ -1044,8 +1048,8 @@ namespace awkward {
       outlength);
 #else
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_prod_int64_int8_64(
+                                 kernel::array_deleter<int64_t>());   
+    struct Error err = kernel::reduce_prod_64<int64_t, int8_t>(
       ptr.get(),
       data,
       offset,
@@ -1067,7 +1071,7 @@ namespace awkward {
 #if defined _MSC_VER || defined __i386__
     std::shared_ptr<uint32_t> ptr(new uint32_t[(size_t)outlength],
                                   kernel::array_deleter<uint32_t>());
-    struct Error err = awkward_reduce_prod_uint32_uint8_64(
+    struct Error err = kernel::reduce_prod_64<uint32_t, uint8_t>(
       ptr.get(),
       data,
       offset,
@@ -1078,7 +1082,7 @@ namespace awkward {
 #else
     std::shared_ptr<uint64_t> ptr(new uint64_t[(size_t)outlength],
                                   kernel::array_deleter<uint64_t>());
-    struct Error err = awkward_reduce_prod_uint64_uint8_64(
+    struct Error err = kernel::reduce_prod_64<uint64_t, uint8_t>(
       ptr.get(),
       data,
       offset,
@@ -1099,8 +1103,8 @@ namespace awkward {
                            int64_t outlength) const {
 #if defined _MSC_VER || defined __i386__
     std::shared_ptr<int32_t> ptr(new int32_t[(size_t)outlength],
-                                 kernel::array_deleter<int32_t>());
-    struct Error err = awkward_reduce_prod_int32_int16_64(
+                                 kernel::array_deleter<int32_t>());                
+    struct Error err = kernel::reduce_prod_64<int32_t, int16_t>(
       ptr.get(),
       data,
       offset,
@@ -1110,8 +1114,8 @@ namespace awkward {
       outlength);
 #else
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_prod_int64_int16_64(
+                                 kernel::array_deleter<int64_t>());  
+    struct Error err = kernel::reduce_prod_64<int64_t, int16_t>(
       ptr.get(),
       data,
       offset,
@@ -1132,8 +1136,8 @@ namespace awkward {
                             int64_t outlength) const {
 #if defined _MSC_VER || defined __i386__
     std::shared_ptr<uint32_t> ptr(new uint32_t[(size_t)outlength],
-                                  kernel::array_deleter<uint32_t>());
-    struct Error err = awkward_reduce_prod_uint32_uint16_64(
+                                  kernel::array_deleter<uint32_t>());         
+    struct Error err = kernel::reduce_prod_64<uint32_t, uint16_t>(
       ptr.get(),
       data,
       offset,
@@ -1144,7 +1148,7 @@ namespace awkward {
 #else
     std::shared_ptr<uint64_t> ptr(new uint64_t[(size_t)outlength],
                                   kernel::array_deleter<uint64_t>());
-    struct Error err = awkward_reduce_prod_uint64_uint16_64(
+    struct Error err = kernel::reduce_prod_64<uint64_t, uint16_t>(
       ptr.get(),
       data,
       offset,
@@ -1166,7 +1170,7 @@ namespace awkward {
 #if defined _MSC_VER || defined __i386__
     std::shared_ptr<int32_t> ptr(new int32_t[(size_t)outlength],
                                  kernel::array_deleter<int32_t>());
-    struct Error err = awkward_reduce_prod_int32_int32_64(
+    struct Error err = kernel::reduce_prod_64<int32_t, int32_t>(
       ptr.get(),
       data,
       offset,
@@ -1176,8 +1180,8 @@ namespace awkward {
       outlength);
 #else
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_prod_int64_int32_64(
+                                 kernel::array_deleter<int64_t>());            
+    struct Error err = kernel::reduce_prod_64<int64_t, int32_t>(
       ptr.get(),
       data,
       offset,
@@ -1198,8 +1202,8 @@ namespace awkward {
                             int64_t outlength) const {
 #if defined _MSC_VER || defined __i386__
     std::shared_ptr<uint32_t> ptr(new uint32_t[(size_t)outlength],
-                                  kernel::array_deleter<uint32_t>());
-    struct Error err = awkward_reduce_prod_uint32_uint32_64(
+                                  kernel::array_deleter<uint32_t>());   
+    struct Error err = kernel::reduce_prod_64<uint32_t, uint32_t>(
       ptr.get(),
       data,
       offset,
@@ -1210,7 +1214,7 @@ namespace awkward {
 #else
     std::shared_ptr<uint64_t> ptr(new uint64_t[(size_t)outlength],
                                   kernel::array_deleter<uint64_t>());
-    struct Error err = awkward_reduce_prod_uint64_uint32_64(
+    struct Error err = kernel::reduce_prod_64<uint64_t, uint32_t>(
       ptr.get(),
       data,
       offset,
@@ -1231,7 +1235,7 @@ namespace awkward {
                            int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_prod_int64_int64_64(
+    struct Error err = kernel::reduce_prod_64<int64_t, int64_t>(
       ptr.get(),
       data,
       offset,
@@ -1251,7 +1255,7 @@ namespace awkward {
                             int64_t outlength) const {
     std::shared_ptr<uint64_t> ptr(new uint64_t[(size_t)outlength],
                                   kernel::array_deleter<uint64_t>());
-    struct Error err = awkward_reduce_prod_uint64_uint64_64(
+    struct Error err = kernel::reduce_prod_64<uint64_t, uint64_t>(
       ptr.get(),
       data,
       offset,
@@ -1271,7 +1275,7 @@ namespace awkward {
                              int64_t outlength) const {
     std::shared_ptr<float> ptr(new float[(size_t)outlength],
                                kernel::array_deleter<float>());
-    struct Error err = awkward_reduce_prod_float32_float32_64(
+    struct Error err = kernel::reduce_prod_64<float, float>(
       ptr.get(),
       data,
       offset,
@@ -1291,7 +1295,7 @@ namespace awkward {
                              int64_t outlength) const {
     std::shared_ptr<double> ptr(new double[(size_t)outlength],
                                 kernel::array_deleter<double>());
-    struct Error err = awkward_reduce_prod_float64_float64_64(
+    struct Error err = kernel::reduce_prod_64<double, double>(
       ptr.get(),
       data,
       offset,
@@ -1338,7 +1342,7 @@ namespace awkward {
                          int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
                               kernel::array_deleter<bool>());
-    struct Error err = awkward_reduce_sum_bool_bool_64(
+    struct Error err = kernel::reduce_sum_bool_64<bool>(
       ptr.get(),
       data,
       offset,
@@ -1358,7 +1362,7 @@ namespace awkward {
                          int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
                               kernel::array_deleter<bool>());
-    struct Error err = awkward_reduce_sum_bool_int8_64(
+    struct Error err = kernel::reduce_sum_bool_64<int8_t>(
       ptr.get(),
       data,
       offset,
@@ -1378,7 +1382,7 @@ namespace awkward {
                           int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
                               kernel::array_deleter<bool>());
-    struct Error err = awkward_reduce_sum_bool_uint8_64(
+    struct Error err = kernel::reduce_sum_bool_64<uint8_t>(
       ptr.get(),
       data,
       offset,
@@ -1398,7 +1402,7 @@ namespace awkward {
                           int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
                               kernel::array_deleter<bool>());
-    struct Error err = awkward_reduce_sum_bool_int16_64(
+    struct Error err = kernel::reduce_sum_bool_64<int16_t>(
       ptr.get(),
       data,
       offset,
@@ -1418,7 +1422,7 @@ namespace awkward {
                            int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
                               kernel::array_deleter<bool>());
-    struct Error err = awkward_reduce_sum_bool_uint16_64(
+    struct Error err = kernel::reduce_sum_bool_64<uint16_t>(
       ptr.get(),
       data,
       offset,
@@ -1438,7 +1442,7 @@ namespace awkward {
                           int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
                               kernel::array_deleter<bool>());
-    struct Error err = awkward_reduce_sum_bool_int32_64(
+    struct Error err = kernel::reduce_sum_bool_64<int32_t>(
       ptr.get(),
       data,
       offset,
@@ -1458,7 +1462,7 @@ namespace awkward {
                            int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
                               kernel::array_deleter<bool>());
-    struct Error err = awkward_reduce_sum_bool_uint32_64(
+    struct Error err = kernel::reduce_sum_bool_64<uint32_t>(
       ptr.get(),
       data,
       offset,
@@ -1478,7 +1482,7 @@ namespace awkward {
                           int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
                               kernel::array_deleter<bool>());
-    struct Error err = awkward_reduce_sum_bool_int64_64(
+    struct Error err = kernel::reduce_sum_bool_64<int64_t>(
       ptr.get(),
       data,
       offset,
@@ -1498,7 +1502,7 @@ namespace awkward {
                            int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
                               kernel::array_deleter<bool>());
-    struct Error err = awkward_reduce_sum_bool_uint64_64(
+    struct Error err = kernel::reduce_sum_bool_64<uint64_t>(
       ptr.get(),
       data,
       offset,
@@ -1518,7 +1522,7 @@ namespace awkward {
                             int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
                               kernel::array_deleter<bool>());
-    struct Error err = awkward_reduce_sum_bool_float32_64(
+    struct Error err = kernel::reduce_sum_bool_64<float>(
       ptr.get(),
       data,
       offset,
@@ -1538,7 +1542,7 @@ namespace awkward {
                             int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
                               kernel::array_deleter<bool>());
-    struct Error err = awkward_reduce_sum_bool_float64_64(
+    struct Error err = kernel::reduce_sum_bool_64<double>(
       ptr.get(),
       data,
       offset,
@@ -1585,7 +1589,7 @@ namespace awkward {
                          int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
                               kernel::array_deleter<bool>());
-    struct Error err = awkward_reduce_prod_bool_bool_64(
+    struct Error err = kernel::reduce_prod_bool_64<bool>(
       ptr.get(),
       data,
       offset,
@@ -1605,7 +1609,7 @@ namespace awkward {
                          int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
                               kernel::array_deleter<bool>());
-    struct Error err = awkward_reduce_prod_bool_int8_64(
+    struct Error err = kernel::reduce_prod_bool_64<int8_t>(
       ptr.get(),
       data,
       offset,
@@ -1625,7 +1629,7 @@ namespace awkward {
                           int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
                               kernel::array_deleter<bool>());
-    struct Error err = awkward_reduce_prod_bool_uint8_64(
+    struct Error err = kernel::reduce_prod_bool_64<uint8_t>(
       ptr.get(),
       data,
       offset,
@@ -1645,7 +1649,7 @@ namespace awkward {
                           int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
                               kernel::array_deleter<bool>());
-    struct Error err = awkward_reduce_prod_bool_int16_64(
+    struct Error err = kernel::reduce_prod_bool_64<int16_t>(
       ptr.get(),
       data,
       offset,
@@ -1665,7 +1669,7 @@ namespace awkward {
                            int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
                               kernel::array_deleter<bool>());
-    struct Error err = awkward_reduce_prod_bool_uint16_64(
+    struct Error err = kernel::reduce_prod_bool_64<uint16_t>(
       ptr.get(),
       data,
       offset,
@@ -1685,7 +1689,7 @@ namespace awkward {
                           int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
                               kernel::array_deleter<bool>());
-    struct Error err = awkward_reduce_prod_bool_int32_64(
+    struct Error err = kernel::reduce_prod_bool_64<int32_t>(
       ptr.get(),
       data,
       offset,
@@ -1705,7 +1709,7 @@ namespace awkward {
                            int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
                               kernel::array_deleter<bool>());
-    struct Error err = awkward_reduce_prod_bool_uint32_64(
+    struct Error err = kernel::reduce_prod_bool_64<uint32_t>(
       ptr.get(),
       data,
       offset,
@@ -1725,7 +1729,7 @@ namespace awkward {
                           int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
                               kernel::array_deleter<bool>());
-    struct Error err = awkward_reduce_prod_bool_int64_64(
+    struct Error err = kernel::reduce_prod_bool_64<int64_t>(
       ptr.get(),
       data,
       offset,
@@ -1745,7 +1749,7 @@ namespace awkward {
                            int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
                               kernel::array_deleter<bool>());
-    struct Error err = awkward_reduce_prod_bool_uint64_64(
+    struct Error err = kernel::reduce_prod_bool_64<uint64_t>(
       ptr.get(),
       data,
       offset,
@@ -1765,7 +1769,7 @@ namespace awkward {
                             int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
                               kernel::array_deleter<bool>());
-    struct Error err = awkward_reduce_prod_bool_float32_64(
+    struct Error err = kernel::reduce_prod_bool_64<float>(
       ptr.get(),
       data,
       offset,
@@ -1785,7 +1789,7 @@ namespace awkward {
                             int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
                               kernel::array_deleter<bool>());
-    struct Error err = awkward_reduce_prod_bool_float64_64(
+    struct Error err = kernel::reduce_prod_bool_64<double>(
       ptr.get(),
       data,
       offset,
@@ -1821,8 +1825,8 @@ namespace awkward {
                          const Index64& parents,
                          int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
-                              kernel::array_deleter<bool>());
-    struct Error err = awkward_reduce_prod_bool_bool_64(
+                              kernel::array_deleter<bool>());                           
+    struct Error err = kernel::reduce_prod_bool_64<bool>(
       ptr.get(),
       data,
       offset,
@@ -1842,7 +1846,7 @@ namespace awkward {
                          int64_t outlength) const {
     std::shared_ptr<int8_t> ptr(new int8_t[(size_t)outlength],
                                 kernel::array_deleter<int8_t>());
-    struct Error err = awkward_reduce_min_int8_int8_64(
+    struct Error err = kernel::reduce_min_64<int8_t, int8_t>(
       ptr.get(),
       data,
       offset,
@@ -1863,7 +1867,7 @@ namespace awkward {
                           int64_t outlength) const {
     std::shared_ptr<uint8_t> ptr(new uint8_t[(size_t)outlength],
                                  kernel::array_deleter<uint8_t>());
-    struct Error err = awkward_reduce_min_uint8_uint8_64(
+    struct Error err = kernel::reduce_min_64<uint8_t, uint8_t>(
       ptr.get(),
       data,
       offset,
@@ -1884,7 +1888,7 @@ namespace awkward {
                           int64_t outlength) const {
     std::shared_ptr<int16_t> ptr(new int16_t[(size_t)outlength],
                                  kernel::array_deleter<int16_t>());
-    struct Error err = awkward_reduce_min_int16_int16_64(
+    struct Error err = kernel::reduce_min_64<int16_t, int16_t>(
       ptr.get(),
       data,
       offset,
@@ -1905,7 +1909,7 @@ namespace awkward {
                            int64_t outlength) const {
     std::shared_ptr<uint16_t> ptr(new uint16_t[(size_t)outlength],
                                   kernel::array_deleter<uint16_t>());
-    struct Error err = awkward_reduce_min_uint16_uint16_64(
+    struct Error err = kernel::reduce_min_64<uint16_t, uint16_t>(
       ptr.get(),
       data,
       offset,
@@ -1926,7 +1930,7 @@ namespace awkward {
                           int64_t outlength) const {
     std::shared_ptr<int32_t> ptr(new int32_t[(size_t)outlength],
                                  kernel::array_deleter<int32_t>());
-    struct Error err = awkward_reduce_min_int32_int32_64(
+    struct Error err = kernel::reduce_min_64<int32_t, int32_t>(
       ptr.get(),
       data,
       offset,
@@ -1947,7 +1951,7 @@ namespace awkward {
                            int64_t outlength) const {
     std::shared_ptr<uint32_t> ptr(new uint32_t[(size_t)outlength],
                                   kernel::array_deleter<uint32_t>());
-    struct Error err = awkward_reduce_min_uint32_uint32_64(
+    struct Error err = kernel::reduce_min_64<uint32_t, uint32_t>(
       ptr.get(),
       data,
       offset,
@@ -1968,7 +1972,7 @@ namespace awkward {
                           int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_min_int64_int64_64(
+    struct Error err = kernel::reduce_min_64<int64_t, int64_t>(
       ptr.get(),
       data,
       offset,
@@ -1989,7 +1993,7 @@ namespace awkward {
                            int64_t outlength) const {
     std::shared_ptr<uint64_t> ptr(new uint64_t[(size_t)outlength],
                                   kernel::array_deleter<uint64_t>());
-    struct Error err = awkward_reduce_min_uint64_uint64_64(
+    struct Error err = kernel::reduce_min_64<uint64_t, uint64_t>(
       ptr.get(),
       data,
       offset,
@@ -2010,7 +2014,7 @@ namespace awkward {
                             int64_t outlength) const {
     std::shared_ptr<float> ptr(new float[(size_t)outlength],
                                kernel::array_deleter<float>());
-    struct Error err = awkward_reduce_min_float32_float32_64(
+    struct Error err = kernel::reduce_min_64<float, float>(
       ptr.get(),
       data,
       offset,
@@ -2031,7 +2035,7 @@ namespace awkward {
                             int64_t outlength) const {
     std::shared_ptr<double> ptr(new double[(size_t)outlength],
                                 kernel::array_deleter<double>());
-    struct Error err = awkward_reduce_min_float64_float64_64(
+    struct Error err = kernel::reduce_min_64<double, double>(
       ptr.get(),
       data,
       offset,
@@ -2069,7 +2073,7 @@ namespace awkward {
                          int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
                               kernel::array_deleter<bool>());
-    struct Error err = awkward_reduce_sum_bool_bool_64(
+    struct Error err = kernel::reduce_sum_bool_64<bool>(
       ptr.get(),
       data,
       offset,
@@ -2089,7 +2093,7 @@ namespace awkward {
                          int64_t outlength) const {
     std::shared_ptr<int8_t> ptr(new int8_t[(size_t)outlength],
                                 kernel::array_deleter<int8_t>());
-    struct Error err = awkward_reduce_max_int8_int8_64(
+    struct Error err = kernel::reduce_max_64<int8_t, int8_t>(
       ptr.get(),
       data,
       offset,
@@ -2110,7 +2114,7 @@ namespace awkward {
                           int64_t outlength) const {
     std::shared_ptr<uint8_t> ptr(new uint8_t[(size_t)outlength],
                                  kernel::array_deleter<uint8_t>());
-    struct Error err = awkward_reduce_max_uint8_uint8_64(
+    struct Error err = kernel::reduce_max_64<uint8_t, uint8_t>(
       ptr.get(),
       data,
       offset,
@@ -2131,7 +2135,7 @@ namespace awkward {
                           int64_t outlength) const {
     std::shared_ptr<int16_t> ptr(new int16_t[(size_t)outlength],
                                  kernel::array_deleter<int16_t>());
-    struct Error err = awkward_reduce_max_int16_int16_64(
+    struct Error err = kernel::reduce_max_64<int16_t, int16_t>(
       ptr.get(),
       data,
       offset,
@@ -2152,7 +2156,7 @@ namespace awkward {
                            int64_t outlength) const {
     std::shared_ptr<uint16_t> ptr(new uint16_t[(size_t)outlength],
                                   kernel::array_deleter<uint16_t>());
-    struct Error err = awkward_reduce_max_uint16_uint16_64(
+    struct Error err = kernel::reduce_max_64<uint16_t, uint16_t>(
       ptr.get(),
       data,
       offset,
@@ -2173,7 +2177,7 @@ namespace awkward {
                           int64_t outlength) const {
     std::shared_ptr<int32_t> ptr(new int32_t[(size_t)outlength],
                                  kernel::array_deleter<int32_t>());
-    struct Error err = awkward_reduce_max_int32_int32_64(
+    struct Error err = kernel::reduce_max_64<int32_t, int32_t>(
       ptr.get(),
       data,
       offset,
@@ -2194,7 +2198,7 @@ namespace awkward {
                            int64_t outlength) const {
     std::shared_ptr<uint32_t> ptr(new uint32_t[(size_t)outlength],
                                   kernel::array_deleter<uint32_t>());
-    struct Error err = awkward_reduce_max_uint32_uint32_64(
+    struct Error err = kernel::reduce_max_64<uint32_t, uint32_t>(
       ptr.get(),
       data,
       offset,
@@ -2215,7 +2219,7 @@ namespace awkward {
                           int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_max_int64_int64_64(
+    struct Error err = kernel::reduce_max_64<int64_t, int64_t>(
       ptr.get(),
       data,
       offset,
@@ -2236,7 +2240,7 @@ namespace awkward {
                            int64_t outlength) const {
     std::shared_ptr<uint64_t> ptr(new uint64_t[(size_t)outlength],
                                   kernel::array_deleter<uint64_t>());
-    struct Error err = awkward_reduce_max_uint64_uint64_64(
+    struct Error err = kernel::reduce_max_64<uint64_t, uint64_t>(
       ptr.get(),
       data,
       offset,
@@ -2257,7 +2261,7 @@ namespace awkward {
                             int64_t outlength) const {
     std::shared_ptr<float> ptr(new float[(size_t)outlength],
                                kernel::array_deleter<float>());
-    struct Error err = awkward_reduce_max_float32_float32_64(
+    struct Error err = kernel::reduce_max_64<float, float>(
       ptr.get(),
       data,
       offset,
@@ -2278,7 +2282,7 @@ namespace awkward {
                             int64_t outlength) const {
     std::shared_ptr<double> ptr(new double[(size_t)outlength],
                                 kernel::array_deleter<double>());
-    struct Error err = awkward_reduce_max_float64_float64_64(
+    struct Error err = kernel::reduce_max_64<double, double>(
       ptr.get(),
       data,
       offset,
@@ -2334,7 +2338,7 @@ namespace awkward {
                             int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_argmin_bool_64(
+    struct Error err = kernel::reduce_argmin_64<int64_t, bool>(
       ptr.get(),
       data,
       offset,
@@ -2356,7 +2360,7 @@ namespace awkward {
                             int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_argmin_int8_64(
+    struct Error err = kernel::reduce_argmin_64<int64_t, int8_t>(
       ptr.get(),
       data,
       offset,
@@ -2378,7 +2382,7 @@ namespace awkward {
                              int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_argmin_uint8_64(
+    struct Error err = kernel::reduce_argmin_64<int64_t, uint8_t>(
       ptr.get(),
       data,
       offset,
@@ -2400,7 +2404,7 @@ namespace awkward {
                              int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_argmin_int16_64(
+    struct Error err = kernel::reduce_argmin_64<int64_t, int16_t>(
       ptr.get(),
       data,
       offset,
@@ -2422,7 +2426,7 @@ namespace awkward {
                               int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_argmin_uint16_64(
+    struct Error err = kernel::reduce_argmin_64<int64_t, uint16_t>(
       ptr.get(),
       data,
       offset,
@@ -2444,7 +2448,7 @@ namespace awkward {
                              int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_argmin_int32_64(
+    struct Error err = kernel::reduce_argmin_64<int64_t, int32_t>(
       ptr.get(),
       data,
       offset,
@@ -2466,7 +2470,7 @@ namespace awkward {
                               int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_argmin_uint32_64(
+    struct Error err = kernel::reduce_argmin_64<int64_t, uint32_t>(
       ptr.get(),
       data,
       offset,
@@ -2488,7 +2492,7 @@ namespace awkward {
                              int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_argmin_int64_64(
+    struct Error err = kernel::reduce_argmin_64<int64_t, int64_t>(
       ptr.get(),
       data,
       offset,
@@ -2510,7 +2514,7 @@ namespace awkward {
                               int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_argmin_uint64_64(
+    struct Error err = kernel::reduce_argmin_64<int64_t, uint64_t>(
       ptr.get(),
       data,
       offset,
@@ -2532,7 +2536,7 @@ namespace awkward {
                                int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_argmin_float32_64(
+    struct Error err = kernel::reduce_argmin_64<int64_t, float>(
       ptr.get(),
       data,
       offset,
@@ -2554,7 +2558,7 @@ namespace awkward {
                                int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_argmin_float64_64(
+    struct Error err = kernel::reduce_argmin_64<int64_t, double>(
       ptr.get(),
       data,
       offset,
@@ -2611,7 +2615,7 @@ namespace awkward {
                             int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_argmax_bool_64(
+    struct Error err = kernel::reduce_argmax_64<int64_t, bool>(
       ptr.get(),
       data,
       offset,
@@ -2633,7 +2637,7 @@ namespace awkward {
                             int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_argmax_int8_64(
+    struct Error err = kernel::reduce_argmax_64<int64_t, int8_t>(
       ptr.get(),
       data,
       offset,
@@ -2655,7 +2659,7 @@ namespace awkward {
                              int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_argmax_uint8_64(
+    struct Error err = kernel::reduce_argmax_64<int64_t, uint8_t>(
       ptr.get(),
       data,
       offset,
@@ -2677,7 +2681,7 @@ namespace awkward {
                              int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_argmax_int16_64(
+    struct Error err = kernel::reduce_argmax_64<int64_t, int16_t>(
       ptr.get(),
       data,
       offset,
@@ -2699,7 +2703,7 @@ namespace awkward {
                               int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_argmax_uint16_64(
+    struct Error err = kernel::reduce_argmax_64<int64_t, uint16_t>(
       ptr.get(),
       data,
       offset,
@@ -2721,7 +2725,7 @@ namespace awkward {
                              int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_argmax_int32_64(
+    struct Error err = kernel::reduce_argmax_64<int64_t, int32_t>(
       ptr.get(),
       data,
       offset,
@@ -2743,7 +2747,7 @@ namespace awkward {
                               int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_argmax_uint32_64(
+    struct Error err = kernel::reduce_argmax_64<int64_t, uint32_t>(
       ptr.get(),
       data,
       offset,
@@ -2765,7 +2769,7 @@ namespace awkward {
                              int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_argmax_int64_64(
+    struct Error err = kernel::reduce_argmax_64<int64_t, int64_t>(
       ptr.get(),
       data,
       offset,
@@ -2787,7 +2791,7 @@ namespace awkward {
                               int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_argmax_uint64_64(
+    struct Error err = kernel::reduce_argmax_64<int64_t, uint64_t>(
       ptr.get(),
       data,
       offset,
@@ -2809,7 +2813,7 @@ namespace awkward {
                                int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_argmax_float32_64(
+    struct Error err = kernel::reduce_argmax_64<int64_t, float>(
       ptr.get(),
       data,
       offset,
@@ -2830,9 +2834,8 @@ namespace awkward {
                                const Index64& parents,
                                int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                
                                  kernel::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_argmax_float64_64(
+    struct Error err = kernel::reduce_argmax_64<int64_t, double>(
       ptr.get(),
       data,
       offset,

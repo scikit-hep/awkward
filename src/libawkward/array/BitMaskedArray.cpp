@@ -234,7 +234,7 @@ namespace awkward {
   const Index8
   BitMaskedArray::bytemask() const {
     Index8 bytemask(mask_.length() * 8);
-    struct Error err = awkward_bitmaskedarray_to_bytemaskedarray(
+    struct Error err = kernel::BitMaskedArray_to_ByteMaskedArray(
       bytemask.ptr().get(),
       mask_.ptr().get(),
       mask_.offset(),
@@ -268,7 +268,7 @@ namespace awkward {
   const std::shared_ptr<ByteMaskedArray>
   BitMaskedArray::toByteMaskedArray() const {
     Index8 bytemask(mask_.length() * 8);
-    struct Error err = awkward_bitmaskedarray_to_bytemaskedarray(
+    struct Error err = kernel::BitMaskedArray_to_ByteMaskedArray(
       bytemask.ptr().get(),
       mask_.ptr().get(),
       mask_.offset(),
@@ -287,7 +287,7 @@ namespace awkward {
   const std::shared_ptr<IndexedOptionArray64>
   BitMaskedArray::toIndexedOptionArray64() const {
     Index64 index(mask_.length() * 8);
-    struct Error err = awkward_bitmaskedarray_to_indexedoptionarray_64(
+    struct Error err = kernel::BitMaskedArray_to_IndexedOptionArray64(
       index.ptr().get(),
       mask_.ptr().get(),
       mask_.offset(),
@@ -330,7 +330,7 @@ namespace awkward {
                                          content_.get()->length());
         Identities32* rawsubidentities =
           reinterpret_cast<Identities32*>(subidentities.get());
-        struct Error err = awkward_identities32_extend(
+        struct Error err = kernel::Identities_extend<int32_t>(
           rawsubidentities->ptr().get(),
           rawidentities->ptr().get(),
           rawidentities->offset(),
@@ -348,7 +348,7 @@ namespace awkward {
                                          content_.get()->length());
         Identities64* rawsubidentities =
           reinterpret_cast<Identities64*>(subidentities.get());
-        struct Error err = awkward_identities64_extend(
+        struct Error err = kernel::Identities_extend<int64_t>(
           rawsubidentities->ptr().get(),
           rawidentities->ptr().get(),
           rawidentities->offset(),
@@ -375,7 +375,7 @@ namespace awkward {
       Identities32* rawidentities =
         reinterpret_cast<Identities32*>(newidentities.get());
       struct Error err =
-        awkward_new_identities32(rawidentities->ptr().get(), length());
+        kernel::new_Identities<int32_t>(rawidentities->ptr().get(), length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
     }
@@ -387,8 +387,8 @@ namespace awkward {
                                        length());
       Identities64* rawidentities =
         reinterpret_cast<Identities64*>(newidentities.get());
-      struct Error err = awkward_new_identities64(rawidentities->ptr().get(),
-                                                  length());
+      struct Error err = kernel::new_Identities<int64_t>(rawidentities->ptr().get(),
+                                                         length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
     }
@@ -555,7 +555,7 @@ namespace awkward {
   BitMaskedArray::getitem_range(int64_t start, int64_t stop) const {
     int64_t regular_start = start;
     int64_t regular_stop = stop;
-    awkward_regularize_rangeslice(&regular_start, &regular_stop,
+    kernel::regularize_rangeslice(&regular_start, &regular_stop,
       true, start != Slice::none(), stop != Slice::none(), length());
     if (identities_.get() != nullptr  &&
         regular_stop > identities_.get()->length()) {
@@ -799,6 +799,40 @@ namespace awkward {
                                                    parameters,
                                                    axis,
                                                    depth);
+  }
+
+  const ContentPtr
+  BitMaskedArray::sort_next(int64_t negaxis,
+                            const Index64& starts,
+                            const Index64& parents,
+                            int64_t outlength,
+                            bool ascending,
+                            bool stable,
+                            bool keepdims) const {
+    return toByteMaskedArray().get()->sort_next(negaxis,
+                                                starts,
+                                                parents,
+                                                outlength,
+                                                ascending,
+                                                stable,
+                                                keepdims);
+  }
+
+  const ContentPtr
+  BitMaskedArray::argsort_next(int64_t negaxis,
+                               const Index64& starts,
+                               const Index64& parents,
+                               int64_t outlength,
+                               bool ascending,
+                               bool stable,
+                               bool keepdims) const {
+    return toByteMaskedArray().get()->argsort_next(negaxis,
+                                                   starts,
+                                                   parents,
+                                                   outlength,
+                                                   ascending,
+                                                   stable,
+                                                   keepdims);
   }
 
   const ContentPtr
