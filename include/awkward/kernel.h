@@ -25,13 +25,8 @@ namespace kernel {
 
   class LibraryPathCallback {
   public:
-      LibraryPathCallback() {}
-
-      // @brief This is not a pure virtual function, because that would make this
-      // an abstract class and C++ 11 does let us iterate over abstract classes
-      virtual const std::string library_path() const {
-        return std::string("/");
-      };
+      LibraryPathCallback() = default;
+      virtual const std::string library_path() const = 0;
   };
 
   class LibraryCallback {
