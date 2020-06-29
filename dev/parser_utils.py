@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 import re
+from collections import OrderedDict
 from collections.abc import Iterable
 
 
@@ -13,7 +14,7 @@ def parseheader(filename):
                 else:
                     yield el
 
-        d = {}
+        d = OrderedDict()
         line = line[line.find("@param") + len("@param") + 1 :]
         line = re.sub(" +", " ", line)
         name = line.split()[0]
@@ -48,8 +49,8 @@ def parseheader(filename):
         return {name: d}
 
     with open(filename, "r") as f:
-        tokens = {}
-        funcs = {}
+        tokens = OrderedDict()
+        funcs = OrderedDict()
         for line in f:
             if "///@param" in line.replace(" ", ""):
                 tokens.update(commentparser(line))
@@ -57,7 +58,7 @@ def parseheader(filename):
             elif "awkward_" in line:
                 funcname = line[line.find("awkward_") : line.find("(")].strip()
                 funcs[funcname] = tokens
-                tokens = {}
+                tokens = OrderedDict()
             else:
                 continue
         return funcs

@@ -19,7 +19,7 @@ def preprocess(filename, skip_implementation=False):
     code = ""
     func = False
     templ = False
-    tokens = {}
+    tokens = OrderedDict()
     templateids = []
     templatecall = False
     tempids = []
@@ -70,7 +70,7 @@ def preprocess(filename, skip_implementation=False):
                 if skip_implementation and "{" not in line:
                     funcer = True
                 funcname = re.search("\s.*\(", line).group()[1:-1]
-                tokens[funcname] = {}
+                tokens[funcname] = OrderedDict()
                 line = line.replace(line.split(" ")[0], "int")
                 func = True
                 parans = []
@@ -617,7 +617,7 @@ def gentests(funcs, htokens):
             return cpptype
 
     def gettokens(ctokens, htokens):
-        tokens = {}
+        tokens = OrderedDict()
         for x in htokens.keys():
             if x == "awkward_new_Identities32":
                 tokens[x] = OrderedDict()
@@ -813,18 +813,18 @@ inparam = None
 
 """
 
-    docdict = {}
-    func_callable = {}
+    docdict = OrderedDict()
+    func_callable = OrderedDict()
     for filename in filenames:
         if "sorting.cpp" in filename:
             pfile, tokens = preprocess(filename, skip_implementation=True)
         else:
             pfile, tokens = preprocess(filename)
         ast = pycparser.c_parser.CParser().parse(pfile)
-        funcs = {}
+        funcs = OrderedDict()
         for i in range(len(ast.ext)):
             decl = FuncDecl(ast.ext[i].decl, tokens)
-            funcs[decl.name] = {}
+            funcs[decl.name] = OrderedDict()
             funcs[decl.name]["def"] = decl
             if "sorting.cpp" not in filename:
                 body = FuncBody(ast.ext[i].body)
@@ -846,7 +846,7 @@ inparam = None
                 if "sorting.cpp" not in filename:
                     hfile = getheadername(filename)
                     htokens = parseheader(hfile)
-                    d = {}
+                    d = OrderedDict()
                     if "childfunc" in tokens[name].keys():
                         for x in htokens.keys():
                             if x in tokens[name]["childfunc"]:
