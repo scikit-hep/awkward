@@ -31,6 +31,7 @@ namespace kernel {
   }
 
   std::string LibraryCallback::awkward_library_path(kernel::Lib ptr_lib) {
+#ifndef _MSC_VER
     for (auto i : lib_path_callbacks.at(ptr_lib)) {
       auto handle = dlopen(i->library_path().c_str(), RTLD_LAZY);
 
@@ -38,13 +39,16 @@ namespace kernel {
         return i->library_path();
       }
     }
+#endif
     return std::string("/");
   }
 
   void *acquire_handle(kernel::Lib ptr_lib) {
+    void* handle = nullptr;
+#ifndef _MSC_VER
     std::string path = lib_callback->awkward_library_path(ptr_lib);
 
-    void *handle = dlopen(path.c_str(), RTLD_LAZY);
+    handle = dlopen(path.c_str(), RTLD_LAZY);
     if (ptr_lib == kernel::Lib::cuda_kernels) {
       if (!handle) {
         Error err = failure(
@@ -57,7 +61,7 @@ namespace kernel {
         util::handle_error(err);
       }
     }
-
+#endif
     return handle;
   }
   
