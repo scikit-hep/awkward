@@ -608,6 +608,8 @@ class Error(ctypes.Structure):
 def gentests(funcs, htokens):
     import kernels
 
+    print("Executing tests")
+
     def pytype(cpptype):
         if re.match("u?int\d{1,2}_t", cpptype) is not None:
             return "int"
@@ -618,8 +620,40 @@ def gentests(funcs, htokens):
 
     def gettokens(ctokens, htokens):
         tokens = OrderedDict()
+        allowed = [
+            "awkward_new_Identities32",
+            "awkward_new_Identities64",
+            "awkward_Identities32_from_ListOffsetArray32",
+            "awkward_Identities32_from_ListOffsetArrayU32",
+            "awkward_Identities32_from_ListOffsetArray64",
+            "awkward_Identities64_from_ListOffsetArray32",
+            "awkward_Identities64_from_ListOffsetArrayU32",
+            "awkward_Identities64_from_ListOffsetArray64",
+            "awkward_Identities32_from_ListArray32",
+            "awkward_Identities32_from_ListArrayU32",
+            "awkward_Identities32_from_ListArray64",
+            "awkward_Identities64_from_ListArray32",
+            "awkward_Identities64_from_ListArrayU32",
+            "awkward_Identities64_from_ListArray64",
+            "awkward_Identities32_from_RegularArray",
+            "awkward_Identities64_from_RegularArray",
+            "awkward_Identities32_from_IndexedArray32",
+            "awkward_Identities32_from_IndexedArrayU32",
+            "awkward_Identities32_from_IndexedArray64",
+            "awkward_Identities64_from_IndexedArray32",
+            "awkward_Identities64_from_IndexedArrayU32",
+            "awkward_Identities64_from_IndexedArray64",
+            "awkward_Identities32_from_UnionArray8_32",
+            "awkward_Identities32_from_UnionArray8_U32",
+            "awkward_Identities32_from_UnionArray8_64",
+            "awkward_Identities64_from_UnionArray8_32",
+            "awkward_Identities64_from_UnionArray8_U32",
+            "awkward_Identities64_from_UnionArray8_64",
+            "awkward_Identities32_extend",
+            "awkward_Identities64_extend",
+        ]
         for x in htokens.keys():
-            if x == "awkward_new_Identities32":
+            if x in allowed:
                 tokens[x] = OrderedDict()
                 for y in htokens[x].keys():
                     tokens[x][y] = OrderedDict()
@@ -634,6 +668,20 @@ def gentests(funcs, htokens):
                             tokens[x][y]["type"] = i["type"]
         return tokens
 
+    def getctypelist(typelist):
+        newctypes = []
+        for x in typelist:
+            if isinstance(x, tuple) and x[1] == "array":
+                x = x[0]
+                if x.endswith("_t"):
+                    x = x[:-2]
+                newctypes.append(eval("ctypes.POINTER(ctypes.c_" + x + ")"))
+            else:
+                if x.endswith("_t"):
+                    x = x[:-2]
+                newctypes.append(eval("ctypes.c_" + x))
+        return tuple(newctypes)
+
     tokens = gettokens(funcs, htokens)
 
     lib = ctypes.CDLL("/home/reik/awkward-1.0/localbuild/libawkward-cpu-kernels.so")
@@ -642,36 +690,85 @@ def gentests(funcs, htokens):
         data = json.load(f)
         for name, args in tokens.items():
             checkindex = []
+            typelist = []
             testsp = []
             testsc = []
             for i in range(len(args.values())):
-                if list(args.values())[i]["array"]:
+                if (
+                    "role" in list(args.values())[i]
+                    and list(args.values())[i]["role"] == "offsetarray"
+                ):
+                    typelist.append((list(args.values())[i]["type"], "array"))
+                    temparr = data[pytype(list(args.values())[i]["type"])][
+                        "offsetarray"
+                    ]
+                    testsp.append(temparr)
+                    if list(args.values())[i]["type"].endswith("_t"):
+                        temptype = list(args.values())[i]["type"][:-2]
+                    else:
+                        temptype = list(args.values())[i]["type"]
+                    testsc.append((eval("ctypes.c_" + temptype) * 200)(*temparr))
+                elif (
+                    "role" in list(args.values())[i]
+                    and list(args.values())[i]["role"] == "boolout"
+                ):
+                    typelist.append((list(args.values())[i]["type"], "array"))
+                    checkindex.append(i)
+                    boolout = [False]
+                    testsp.append(boolout)
+                    testsc.append((ctypes.c_bool * 1)(*boolout))
+                elif list(args.values())[i]["array"]:
+                    typelist.append((list(args.values())[i]["type"], "array"))
                     if list(args.values())[i]["check"] == "inparam":
-                        temparr = data[pytype(list(args.values())[i]["type"])]["array"]
+                        if "role" in list(args.values())[i]:
+                            temparr = data[pytype(list(args.values())[i]["type"])][
+                                pytype(list(args.values())[i]["role"])
+                            ]
+                        else:
+                            temparr = data[pytype(list(args.values())[i]["type"])][
+                                "array"
+                            ]
                         testsp.append(temparr)
                         if list(args.values())[i]["type"].endswith("_t"):
                             temptype = list(args.values())[i]["type"][:-2]
                         else:
                             temptype = list(args.values())[i]["type"]
-                        testsc.append((eval("ctypes.c_" + temptype) * 10)(*temparr))
+                        testsc.append((eval("ctypes.c_" + temptype) * 200)(*temparr))
                     elif list(args.values())[i]["check"] == "outparam":
-                        temparr = [0] * 10
+                        temparr = [0] * 200
                         checkindex.append(i)
                         testsp.append(temparr)
                         if list(args.values())[i]["type"].endswith("_t"):
                             temptype = list(args.values())[i]["type"][:-2]
                         else:
                             temptype = list(args.values())[i]["type"]
-                        testsc.append((eval("ctypes.c_" + temptype) * 10)(*temparr))
+                        testsc.append((eval("ctypes.c_" + temptype) * 200)(*temparr))
                 elif ("role" in list(args.values())[i]) and (
                     list(args.values())[i]["role"] == "len"
                 ):
+                    typelist.append(list(args.values())[i]["type"])
                     testsp.append(data[pytype(list(args.values())[i]["type"])]["len"])
                     testsc.append(data[pytype(list(args.values())[i]["type"])]["len"])
+                elif (
+                    "role" in list(args.values())[i]
+                    and list(args.values())[i]["role"] == "offset"
+                ):
+                    typelist.append(list(args.values())[i]["type"])
+                    testsp.append(
+                        data[pytype(list(args.values())[i]["type"])]["offset"]
+                    )
+                    testsc.append(
+                        data[pytype(list(args.values())[i]["type"])]["offset"]
+                    )
+                else:
+                    typelist.append(list(args.values())[i]["type"])
+                    testsp.append(data[pytype(list(args.values())[i]["type"])]["num"])
+                    testsc.append(data[pytype(list(args.values())[i]["type"])]["num"])
+
             funcPy = getattr(kernels, name)
             funcC = getattr(lib, name)
             funcC.restype = Error
-            funcC.argtypes = ctypes.POINTER(ctypes.c_int32), ctypes.c_int64
+            funcC.argtypes = getctypelist(typelist)
             funcPy(*testsp)
             funcC(*testsc)
             for i in checkindex:
@@ -843,6 +940,9 @@ inparam = None
                             )
                             + "\n\n"
                         )
+                else:
+                    func_callable[name] = tokens[name]
+                    func_callable[name]["args"] = funcs[name]["def"].args
                 if "sorting.cpp" not in filename:
                     hfile = getheadername(filename)
                     htokens = parseheader(hfile)
