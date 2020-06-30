@@ -620,52 +620,19 @@ def gentests(funcs, htokens):
 
     def gettokens(ctokens, htokens):
         tokens = OrderedDict()
-        allowed = [
-            "awkward_new_Identities32",
-            "awkward_new_Identities64",
-            "awkward_Identities32_from_ListOffsetArray32",
-            "awkward_Identities32_from_ListOffsetArrayU32",
-            "awkward_Identities32_from_ListOffsetArray64",
-            "awkward_Identities64_from_ListOffsetArray32",
-            "awkward_Identities64_from_ListOffsetArrayU32",
-            "awkward_Identities64_from_ListOffsetArray64",
-            "awkward_Identities32_from_ListArray32",
-            "awkward_Identities32_from_ListArrayU32",
-            "awkward_Identities32_from_ListArray64",
-            "awkward_Identities64_from_ListArray32",
-            "awkward_Identities64_from_ListArrayU32",
-            "awkward_Identities64_from_ListArray64",
-            "awkward_Identities32_from_RegularArray",
-            "awkward_Identities64_from_RegularArray",
-            "awkward_Identities32_from_IndexedArray32",
-            "awkward_Identities32_from_IndexedArrayU32",
-            "awkward_Identities32_from_IndexedArray64",
-            "awkward_Identities64_from_IndexedArray32",
-            "awkward_Identities64_from_IndexedArrayU32",
-            "awkward_Identities64_from_IndexedArray64",
-            "awkward_Identities32_from_UnionArray8_32",
-            "awkward_Identities32_from_UnionArray8_U32",
-            "awkward_Identities32_from_UnionArray8_64",
-            "awkward_Identities64_from_UnionArray8_32",
-            "awkward_Identities64_from_UnionArray8_U32",
-            "awkward_Identities64_from_UnionArray8_64",
-            "awkward_Identities32_extend",
-            "awkward_Identities64_extend",
-        ]
         for x in htokens.keys():
-            if x in allowed:
-                tokens[x] = OrderedDict()
-                for y in htokens[x].keys():
-                    tokens[x][y] = OrderedDict()
-                    for z, val in htokens[x][y].items():
-                        tokens[x][y][z] = val
-                    for i in ctokens[x]["args"]:
-                        if i["name"] == y:
-                            if i["list"] > 0:
-                                tokens[x][y]["array"] = True
-                            else:
-                                tokens[x][y]["array"] = False
-                            tokens[x][y]["type"] = i["type"]
+            tokens[x] = OrderedDict()
+            for y in htokens[x].keys():
+                tokens[x][y] = OrderedDict()
+                for z, val in htokens[x][y].items():
+                    tokens[x][y][z] = val
+                for i in ctokens[x]["args"]:
+                    if i["name"] == y:
+                        if i["list"] > 0:
+                            tokens[x][y]["array"] = True
+                        else:
+                            tokens[x][y]["array"] = False
+                        tokens[x][y]["type"] = i["type"]
         return tokens
 
     def getctypelist(typelist):
@@ -942,6 +909,7 @@ inparam = None
                         )
                 else:
                     func_callable[name] = tokens[name]
+                    funcs[name]["def"].arrange_args(types=True)
                     func_callable[name]["args"] = funcs[name]["def"].args
                 if "sorting.cpp" not in filename:
                     hfile = getheadername(filename)
