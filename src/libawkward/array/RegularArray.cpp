@@ -227,7 +227,7 @@ namespace awkward {
         offsets.offset(),
         offsets.length());
       util::handle_error(err, classname(), identities_.get());
-      ContentPtr nextcontent = content_.get()->carry(nextcarry);
+      ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
       return std::make_shared<ListOffsetArray64>(identities,
                                                  parameters_,
                                                  offsets,
@@ -538,7 +538,7 @@ namespace awkward {
   }
 
   const ContentPtr
-  RegularArray::carry(const Index64& carry) const {
+  RegularArray::carry(const Index64& carry, bool allow_lazy) const {
     Index64 nextcarry(carry.length()*size_);
 
     struct Error err = kernel::RegularArray_getitem_carry_64(
@@ -554,7 +554,7 @@ namespace awkward {
     }
     return std::make_shared<RegularArray>(identities,
                                           parameters_,
-                                          content_.get()->carry(nextcarry),
+                                          content_.get()->carry(nextcarry, allow_lazy),
                                           size_);
   }
 
@@ -980,7 +980,7 @@ namespace awkward {
 
       ContentPtrVec contents;
       for (auto ptr : tocarry) {
-        contents.push_back(content_.get()->carry(Index64(ptr, 0, totallen)));
+        contents.push_back(content_.get()->carry(Index64(ptr, 0, totallen), true));
       }
       ContentPtr recordarray =
         std::make_shared<RecordArray>(Identities::none(),
@@ -1090,7 +1090,7 @@ namespace awkward {
       size_);
     util::handle_error(err, classname(), identities_.get());
 
-    ContentPtr nextcontent = content_.get()->carry(nextcarry);
+    ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
     return nextcontent.get()->getitem_next(nexthead, nexttail, advanced);
   }
 
@@ -1142,7 +1142,7 @@ namespace awkward {
       nextsize);
     util::handle_error(err, classname(), identities_.get());
 
-    ContentPtr nextcontent = content_.get()->carry(nextcarry);
+    ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
 
     if (advanced.length() == 0) {
       return std::make_shared<RegularArray>(
@@ -1200,7 +1200,7 @@ namespace awkward {
         size_);
       util::handle_error(err, classname(), identities_.get());
 
-      ContentPtr nextcontent = content_.get()->carry(nextcarry);
+      ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
 
       return getitem_next_array_wrap(
                nextcontent.get()->getitem_next(nexthead,
@@ -1222,7 +1222,7 @@ namespace awkward {
         size_);
       util::handle_error(err, classname(), identities_.get());
 
-      ContentPtr nextcontent = content_.get()->carry(nextcarry);
+      ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
       return nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced);
     }
   }

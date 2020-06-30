@@ -295,7 +295,7 @@ namespace awkward {
   }
 
   const ContentPtr
-  EmptyArray::carry(const Index64& carry) const {
+  EmptyArray::carry(const Index64& carry, bool allow_lazy) const {
     return shallow_copy();
   }
 

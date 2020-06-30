@@ -428,7 +428,7 @@ namespace awkward {
       index);
     util::handle_error(err, classname(), identities_.get());
     Index64 nextcarry(tmpcarry.ptr(), 0, lenout);
-    return contents_[(size_t)index].get()->carry(nextcarry);
+    return contents_[(size_t)index].get()->carry(nextcarry, false);
   }
 
   template <typename T, typename I>
@@ -658,7 +658,7 @@ namespace awkward {
     }
 
     if (contents.size() == 1) {
-      return contents[0].get()->carry(index);
+      return contents[0].get()->carry(index, true);
     }
     else {
       return std::make_shared<UnionArray8_64>(identities_,
@@ -1131,7 +1131,7 @@ namespace awkward {
 
   template <typename T, typename I>
   const ContentPtr
-  UnionArrayOf<T, I>::carry(const Index64& carry) const {
+  UnionArrayOf<T, I>::carry(const Index64& carry, bool allow_lazy) const {
     int64_t lentags = tags_.length();
     if (index_.length() < lentags) {
       util::handle_error(
