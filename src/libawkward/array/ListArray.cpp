@@ -263,7 +263,7 @@ namespace awkward {
       content_.get()->length());
     util::handle_error(err, classname(), identities_.get());
 
-    ContentPtr nextcontent = content_.get()->carry(nextcarry, false);
+    ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
 
     IdentitiesPtr identities;
     if (identities_.get() != nullptr) {
