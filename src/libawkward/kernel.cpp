@@ -40,17 +40,18 @@ namespace kernel {
       }
     }
 #endif
-    return std::string("/");
+    return std::string("");
   }
 
   void *acquire_handle(kernel::Lib ptr_lib) {
-    void* handle = nullptr;
+    void *handle = nullptr;
 #ifndef _MSC_VER
     std::string path = lib_callback->awkward_library_path(ptr_lib);
-
-    handle = dlopen(path.c_str(), RTLD_LAZY);
-    if (ptr_lib == kernel::Lib::cuda_kernels) {
-      if (!handle) {
+    if (path.compare("") != 0) {
+      handle = dlopen(path.c_str(), RTLD_LAZY);
+    }
+    if (!handle) {
+      if (ptr_lib == kernel::Lib::cuda_kernels) {
         Error err = failure(
           "install the 'awkward1-cuda-kernels' package with:\n"
           "\n"

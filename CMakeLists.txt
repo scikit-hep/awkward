@@ -102,6 +102,8 @@ endif()
 addtest(test0016 tests/test_0016-finish-getitem-for-rawarray.cpp)
 addtest(test0019 tests/test_0019-use-json-library.cpp)
 addtest(test0030 tests/test_0030-recordarray-in-numba.cpp)
+addtest(test0293_cuda_alloc tests/test_0293-cuda-allocation-tests.cpp)
+addtest(test0293_listarray_num tests/test_0293-listarray-num-kernel.cpp)
 addtest(test0074 tests/test_0074-argsort-and-sort-rawarray.cpp)
 
 # Third tier: Python modules.
