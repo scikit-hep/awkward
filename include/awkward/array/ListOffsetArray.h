@@ -258,7 +258,7 @@ namespace awkward {
                           const Slice& tail) const override;
 
     const ContentPtr
-      carry(const Index64& carry, bool must_be_eager) const override;
+      carry(const Index64& carry, bool allow_lazy) const override;
 
     int64_t
       numfields() const override;
