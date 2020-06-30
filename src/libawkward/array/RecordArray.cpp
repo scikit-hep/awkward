@@ -692,8 +692,12 @@ namespace awkward {
 
   const ContentPtr
   RecordArray::getitem_range_nowrap(int64_t start, int64_t stop) const {
+    IdentitiesPtr identities(nullptr);
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->getitem_range_nowrap(start, stop);
+    }
     if (contents_.empty()) {
-      return std::make_shared<RecordArray>(identities_,
+      return std::make_shared<RecordArray>(identities,
                                            parameters_,
                                            contents_,
                                            recordlookup_,
@@ -704,7 +708,7 @@ namespace awkward {
       for (auto content : contents_) {
         contents.push_back(content.get()->getitem_range_nowrap(start, stop));
       }
-      return std::make_shared<RecordArray>(identities_,
+      return std::make_shared<RecordArray>(identities,
                                            parameters_,
                                            contents,
                                            recordlookup_,

@@ -236,25 +236,26 @@ def test_setidentities():
     recordarray2 = awkward1.layout.RecordArray({"outer": awkward1.layout.RegularArray(recordarray, 1)})
     recordarray2.setidentities()
     assert recordarray2["outer"].identities.fieldloc == [(0, "outer")]
-    # assert recordarray2["outer", 0, "one"].identities.fieldloc == [(0, "outer"), (1, "one")]
-    # assert recordarray2["outer", 0, "two"].identities.fieldloc == [(0, "outer"), (1, "two")]
-    # assert recordarray2["outer", "one", 0].identities.fieldloc == [(0, "outer"), (1, "one")]
-    # assert recordarray2["outer", "two", 0].identities.fieldloc == [(0, "outer"), (1, "two")]
-    # assert recordarray2["outer", "one", 1, 0] == 2
-    # assert recordarray2["outer", 1, "one", 0] == 2
-    # assert recordarray2["outer", 1, 0, "one"] == 2
-    # assert recordarray2[1, "outer", "one", 0] == 2
-    # assert recordarray2[1, "outer", 0, "one"] == 2
-    # assert recordarray2[1, 0, "outer", "one"] == 2
 
-    # with pytest.raises(ValueError) as excinfo:
-    #     recordarray2["outer", 2, "two", 0, 99]
-    # assert str(excinfo.value).endswith(' with identity [2, "outer", 0, "two"] attempting to get 99, index out of range')
-    # assert recordarray2.identity == ()
-    # assert recordarray2[2].identity == (2,)
-    # assert recordarray2[2, "outer"].identity == (2, "outer")
-    # assert recordarray2[2, "outer", 0].identity == (2, "outer", 0)
-    # assert recordarray2[2, "outer", 0, "two"].identity == (2, "outer", 0, "two")
+    assert recordarray2["outer", 0, "one"].content.identities.fieldloc == [(0, "outer"), (1, "one")]
+    assert recordarray2["outer", 0, "two"].content.identities.fieldloc == [(0, "outer"), (1, "two")]
+    assert recordarray2["outer", "one", 0].identities.fieldloc == [(0, "outer"), (1, "one")]
+    assert recordarray2["outer", "two", 0].identities.fieldloc == [(0, "outer"), (1, "two")]
+    assert recordarray2["outer", "one", 1, 0] == 2
+    assert recordarray2["outer", 1, "one", 0] == 2
+    assert recordarray2["outer", 1, 0, "one"] == 2
+    assert recordarray2[1, "outer", "one", 0] == 2
+    assert recordarray2[1, "outer", 0, "one"] == 2
+    assert recordarray2[1, 0, "outer", "one"] == 2
+
+    with pytest.raises(ValueError) as excinfo:
+        recordarray2["outer", 2, "two", 0, 99]
+    assert str(excinfo.value).endswith(' with identity [2, "outer", 0, "two"] attempting to get 99, index out of range')
+    assert recordarray2.identity == ()
+    assert recordarray2[2].identity == (2,)
+    assert recordarray2[2, "outer"].identity == (2, "outer")
+    assert recordarray2[2, "outer", 0].identity == (2, "outer", 0)
+    assert recordarray2[2, "outer", 0, "two"].identity == (2, "outer", 0, "two")
 
 def test_identities():
     a = awkward1.from_iter([
@@ -281,7 +282,7 @@ def test_identities():
                                                {u'x': 4, u'y': [1, 2, 3, 4]}]}]
     assert a.identity == ()
     assert a[2].identity == (2,)
-    assert a[2, "outer"].identity == (0, 'outer')
+    assert a[2, "outer"].identity == (2, 'outer')
     assert a[2, "outer", 0].identity == (2, 'outer', 0)
     assert a[2, "outer", 0, "y"].identity == (2, u'outer', 0, u'y')
 
