@@ -558,7 +558,7 @@ ERROR awkward_sort_float64(
     stable);
 }
 
-ERROR awkward_listoffsetarray_local_preparenext_64(
+ERROR awkward_ListOffsetArray_local_preparenext_64(
   int64_t* tocarry,
   const int64_t* fromindex,
   int64_t length) {
@@ -575,7 +575,7 @@ ERROR awkward_listoffsetarray_local_preparenext_64(
   return success();
 }
 
-ERROR awkward_indexedarray_local_preparenext_64(
+ERROR awkward_IndexedArray_local_preparenext_64(
     int64_t* tocarry,
     const int64_t* starts,
     const int64_t* parents,
@@ -601,7 +601,7 @@ ERROR awkward_indexedarray_local_preparenext_64(
 
 // This function relies on std::sort to do the right
 // thing with std::strings
-ERROR awkward_numpyarray_sort_asstrings_uint8(
+ERROR awkward_NumpyArray_sort_asstrings_uint8(
     uint8_t* toptr,
     const uint8_t* fromptr,
     int64_t length,
@@ -619,12 +619,12 @@ ERROR awkward_numpyarray_sort_asstrings_uint8(
     int64_t start = offsets[k];
     int64_t stop = offsets[k + 1];
     int64_t slen = start;
-    std::string str;
+    std::string strvar;
     for (uint8_t i = (uint8_t)start;  slen < stop;  i++) {
       slen++;
-      str += (char)fromptr[i];
+      strvar += (char)fromptr[i];
     }
-    words.emplace_back(str);
+    words.emplace_back(strvar);
   }
 
   // sort the container
@@ -644,8 +644,8 @@ ERROR awkward_numpyarray_sort_asstrings_uint8(
   // convert the strings to an array of characters
   // and fill the outer memory via a pointer
   int64_t k = 0;
-  for (const auto& str : words) {
-    std::vector<char> cstr(str.c_str(), str.c_str() + str.size());
+  for (const auto& strvar : words) {
+    std::vector<char> cstr(strvar.c_str(), strvar.c_str() + strvar.size());
     for (const auto& c : cstr) {
       toptr[k] = (uint8_t)c;
       k++;
