@@ -428,7 +428,7 @@ namespace awkward {
       index);
     util::handle_error(err, classname(), identities_.get());
     Index64 nextcarry(tmpcarry.ptr(), 0, lenout);
-    return contents_[(size_t)index].get()->carry(nextcarry);
+    return contents_[(size_t)index].get()->carry(nextcarry, false);
   }
 
   template <typename T, typename I>

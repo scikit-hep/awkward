@@ -1787,7 +1787,7 @@ namespace awkward {
         nextlen);
       util::handle_error(err4, classname(), identities_.get());
 
-      ContentPtr nextcontent = content_.get()->carry(nextcarry);
+      ContentPtr nextcontent = content_.get()->carry(nextcarry, false);
 
       ContentPtr outcontent = nextcontent.get()->sort_next(
         negaxis - 1, nextstarts, nextparents, nextcontent.get()->length(),
@@ -1801,7 +1801,7 @@ namespace awkward {
         nextlen);
       util::handle_error(err5, classname(), identities_.get());
 
-      outcontent = outcontent.get()->carry(outcarry);
+      outcontent = outcontent.get()->carry(outcarry, false);
 
       ContentPtr out = std::make_shared<ListOffsetArray64>(Identities::none(),
                                                            parameters_,
@@ -1942,7 +1942,7 @@ namespace awkward {
         nextlen);
       util::handle_error(err4, classname(), identities_.get());
 
-      ContentPtr nextcontent = content_.get()->carry(nextcarry);
+      ContentPtr nextcontent = content_.get()->carry(nextcarry, false);
 
       ContentPtr outcontent = nextcontent.get()->argsort_next(
         negaxis - 1, nextstarts, nextparents, maxnextparents + 1,
@@ -1956,7 +1956,7 @@ namespace awkward {
         nextlen);
       util::handle_error(err5, classname(), identities_.get());
 
-      outcontent = outcontent.get()->carry(outcarry);
+      outcontent = outcontent.get()->carry(outcarry, false);
 
       ContentPtr out = std::make_shared<ListOffsetArray64>(Identities::none(),
                                                            util::Parameters(),

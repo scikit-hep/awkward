@@ -372,7 +372,7 @@ namespace awkward {
         content_.get()->length());
       util::handle_error(err, classname(), identities_.get());
 
-      return content_.get()->carry(nextcarry);
+      return content_.get()->carry(nextcarry, false);
     }
   }
 
@@ -2017,7 +2017,7 @@ namespace awkward {
       index_.length());
     util::handle_error(err2, classname(), identities_.get());
 
-    ContentPtr next = content_.get()->carry(nextcarry);
+    ContentPtr next = content_.get()->carry(nextcarry, false);
     ContentPtr out = next.get()->sort_next(negaxis,
                                            starts,
                                            nextparents,
@@ -2120,7 +2120,7 @@ namespace awkward {
       index_.length());
     util::handle_error(err2, classname(), identities_.get());
 
-    ContentPtr next = content_.get()->carry(nextcarry);
+    ContentPtr next = content_.get()->carry(nextcarry, false);
     ContentPtr out = next.get()->argsort_next(negaxis,
                                               starts,
                                               nextparents,
