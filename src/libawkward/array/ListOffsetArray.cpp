@@ -1471,7 +1471,7 @@ namespace awkward {
         nextlen);
       util::handle_error(err4, classname(), identities_.get());
 
-      ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
+      ContentPtr nextcontent = content_.get()->carry(nextcarry, false);
       ContentPtr outcontent = nextcontent.get()->reduce_next(
         reducer, negaxis - 1, nextstarts, nextparents, maxnextparents + 1,
         mask, false);
