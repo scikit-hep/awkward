@@ -1090,7 +1090,7 @@ namespace awkward {
       size_);
     util::handle_error(err, classname(), identities_.get());
 
-    ContentPtr nextcontent = content_.get()->carry(nextcarry, false);
+    ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
     return nextcontent.get()->getitem_next(nexthead, nexttail, advanced);
   }
 
@@ -1142,7 +1142,7 @@ namespace awkward {
       nextsize);
     util::handle_error(err, classname(), identities_.get());
 
-    ContentPtr nextcontent = content_.get()->carry(nextcarry, false);
+    ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
 
     if (advanced.length() == 0) {
       return std::make_shared<RegularArray>(

@@ -1453,7 +1453,8 @@ namespace awkward {
       stops_.offset(),
       at.at());
     util::handle_error(err, classname(), identities_.get());
-    ContentPtr nextcontent = content_.get()->carry(nextcarry, false);
+    ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
+
     return nextcontent.get()->getitem_next(nexthead, nexttail, advanced);
   }
 
@@ -1507,7 +1508,7 @@ namespace awkward {
       stop,
       step);
     util::handle_error(err2, classname(), identities_.get());
-    ContentPtr nextcontent = content_.get()->carry(nextcarry, false);
+    ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
 
     if (advanced.length() == 0) {
       return std::make_shared<ListOffsetArrayOf<T>>(
@@ -1571,7 +1572,7 @@ namespace awkward {
         flathead.length(),
         content_.get()->length());
       util::handle_error(err, classname(), identities_.get());
-      ContentPtr nextcontent = content_.get()->carry(nextcarry, false);
+      ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
       return getitem_next_array_wrap(
         nextcontent.get()->getitem_next(nexthead,
                                         nexttail,
@@ -1595,7 +1596,7 @@ namespace awkward {
         flathead.length(),
         content_.get()->length());
       util::handle_error(err, classname(), identities_.get());
-      ContentPtr nextcontent = content_.get()->carry(nextcarry, false);
+      ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
       return nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced);
     }
   }
@@ -1634,7 +1635,7 @@ namespace awkward {
       len);
     util::handle_error(err, classname(), identities_.get());
 
-    ContentPtr carried = content_.get()->carry(nextcarry, false);
+    ContentPtr carried = content_.get()->carry(nextcarry, true);
     ContentPtr down = carried.get()->getitem_next_jagged(multistarts,
                                                          multistops,
                                                          jagged.content(),
@@ -1697,7 +1698,7 @@ namespace awkward {
       content_.get()->length());
     util::handle_error(err2, classname(), nullptr);
 
-    ContentPtr nextcontent = content_.get()->carry(nextcarry, false);
+    ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
     ContentPtr outcontent = nextcontent.get()->getitem_next(tail.head(),
                                                             tail.tail(),
                                                             Index64(0));
@@ -1755,7 +1756,7 @@ namespace awkward {
 
     ContentPtr out;
     if (dynamic_cast<SliceJagged64*>(slicecontent.content().get())) {
-      ContentPtr nextcontent = content_.get()->carry(nextcarry, false);
+      ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
       ContentPtr next = std::make_shared<ListOffsetArray64>(Identities::none(),
                                                             util::Parameters(),
                                                             smalloffsets,

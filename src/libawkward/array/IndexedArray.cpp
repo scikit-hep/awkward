@@ -1159,7 +1159,8 @@ namespace awkward {
           content_.get()->length());
         util::handle_error(err, classname(), identities_.get());
 
-        ContentPtr next = content_.get()->carry(nextcarry, true);
+        // must be an eager carry (allow_lazy = false) to avoid infinite loop
+        ContentPtr next = content_.get()->carry(nextcarry, false);
         return next.get()->getitem_next(head, tail, advanced);
       }
     }

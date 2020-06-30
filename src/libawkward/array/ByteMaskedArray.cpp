@@ -607,7 +607,7 @@ namespace awkward {
       Index64 nextcarry = pair.first;
       Index64 outindex = pair.second;
 
-      ContentPtr next = content_.get()->carry(nextcarry, false);
+      ContentPtr next = content_.get()->carry(nextcarry, true);
 
       ContentPtr out = next.get()->getitem_next(head, tail, advanced);
       IndexedOptionArray64 out2(identities_, parameters_, outindex, out);
