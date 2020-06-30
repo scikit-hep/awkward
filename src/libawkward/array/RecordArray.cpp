@@ -755,7 +755,7 @@ namespace awkward {
     else {
       ContentPtrVec contents;
       for (auto content : contents_) {
-        contents.push_back(content.get()->carry(carry, false));
+        contents.push_back(content.get()->carry(carry, allow_lazy));
       }
       return std::make_shared<RecordArray>(identities,
                                            parameters_,

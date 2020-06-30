@@ -2283,7 +2283,7 @@ namespace awkward {
       Index64 nextcarry = pair.first;
       IndexOf<T> outindex = pair.second;
 
-      ContentPtr next = content_.get()->carry(nextcarry, false);
+      ContentPtr next = content_.get()->carry(nextcarry, true);
       ContentPtr out = next.get()->getitem_next_jagged(slicestarts,
                                                        slicestops,
                                                        slicecontent,
@@ -2304,6 +2304,7 @@ namespace awkward {
         content_.get()->length());
       util::handle_error(err, classname(), identities_.get());
 
+      // an eager carry (allow_lazy = false) to avoid infinite loop (unproven)
       ContentPtr next = content_.get()->carry(nextcarry, false);
       return next.get()->getitem_next_jagged(slicestarts,
                                              slicestops,

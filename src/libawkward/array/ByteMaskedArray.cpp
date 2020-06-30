@@ -656,7 +656,7 @@ namespace awkward {
     return std::make_shared<ByteMaskedArray>(identities,
                                              parameters_,
                                              nextmask,
-                                             content_.get()->carry(carry, false),
+                                             content_.get()->carry(carry, allow_lazy),
                                              valid_when_);
   }
 
@@ -1297,7 +1297,7 @@ namespace awkward {
       Index64 nextcarry = pair.first;
       Index64 outindex = pair.second;
 
-      ContentPtr next = content_.get()->carry(nextcarry, false);
+      ContentPtr next = content_.get()->carry(nextcarry, true);
       ContentPtr out = next.get()->getitem_next_jagged(slicestarts,
                                                        slicestops,
                                                        slicecontent,
