@@ -1168,65 +1168,34 @@ namespace awkward {
     }
 
     ContentPtr
-      to_gpu(kernel::Lib ptr_lib) const override {
-#ifndef _MSC_VER
-      if(ptr_lib == kernel::Lib::cuda_kernels) {
-        T* cuda_ptr;
-
-        if(ptr_lib_ != kernel::Lib::cuda_kernels) {
-          Error err = kernel::H2D<T>(kernel::Lib::cuda_kernels,
-                                     &cuda_ptr,
-                                     ptr_.get(),
-                                     length_);
-          util::handle_error(err);
-        }
-        else {
-          cuda_ptr = ptr_.get();
+      copy_to(kernel::Lib ptr_lib) const {
+        if(ptr_lib == ptr_lib_) {
+          return std::make_shared<RawArrayOf<T>>(identities(),
+                                                 parameters(),
+                                                 ptr_,
+                                                 offset(),
+                                                 length(),
+                                                 itemsize(),
+                                                 ptr_lib_);
         }
 
-        return std::make_shared<RawArrayOf<T>>(identities(),
-                                               parameters(),
-                                               std::shared_ptr<T>(
-                                                 cuda_ptr,
-                                                 kernel::cuda_array_deleter<T>()),
-                                               offset(),
-                                               length(),
-                                               itemsize(),
-                                               kernel::Lib::cuda_kernels);
-      }
-#endif
-      throw std::invalid_argument("Invalid Kernel Library or OS for GPU Transfer");
-    }
+        std::shared_ptr<T> ptr = kernel::ptr_alloc<T>(ptr_lib, length_);
 
-    ContentPtr
-    to_cpu() {
-#ifndef _MSC_VER
-      if(ptr_lib_ == kernel::Lib::cuda_kernels) {
-        T* cpu_ptr = new T[length_];
-
-        Error err = kernel::H2D<T>(kernel::Lib::cuda_kernels,
-                                   cpu_ptr,
-                                   ptr_.get(),
-                                   length_);
+        Error err = kernel::copy_to(
+           ptr_lib,
+           ptr_lib_,
+           ptr.get(),
+           ptr_.get(),
+           length_);
         util::handle_error(err);
 
         return std::make_shared<RawArrayOf<T>>(identities(),
                                                parameters(),
-                                               std::shared_ptr<T>(cpu_ptr,
-                                                                  kernel::array_deleter<T>()),
+                                               ptr,
                                                offset(),
                                                length(),
                                                itemsize(),
-                                               kernel::Lib::cpu_kernels);
-      }
-#endif
-      return std::make_shared<RawArrayOf<T>>(identities_,
-                                             parameters_,
-                                             ptr_,
-                                             offset_,
-                                             length_,
-                                             itemsize_,
-                                             kernel::Lib::cpu_kernels);
+                                               ptr_lib);
     }
 
   private:

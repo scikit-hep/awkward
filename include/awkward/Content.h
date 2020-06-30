@@ -1191,15 +1191,7 @@ namespace awkward {
     ///
     /// @note This function has not been implemented to handle Multi-GPU setups
     virtual ContentPtr
-      to_gpu(kernel::Lib ptr_lib) const;
-
-    /// @brief Transfer the contents of the array on the GPU to the main memory
-    ///
-    /// Returns a std::shared_ptr<Content> which is, allocated on the main memory
-    ///
-    /// @note This function has not been implemented to handle Multi-GPU setups
-    virtual ContentPtr
-      to_cpu() const;
+      copy_to(kernel::Lib ptr_lib) const;
 
   protected:
     /// @brief Internal function to wrap putative #getitem output with enough

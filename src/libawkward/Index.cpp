@@ -318,63 +318,31 @@ namespace awkward {
     return IndexOf<T>(ptr, 0, length_);
   }
 
-    template<typename T>
-    kernel::Lib IndexOf<T>::ptr_lib() const {
-      return ptr_lib_;
-    }
-
-    template<typename T>
-    const IndexOf<T>
-    IndexOf<T>::to_gpu(kernel::Lib ptr_lib) const {
-#ifndef _MSC_VER
-      if (ptr_lib == kernel::Lib::cuda_kernels) {
-        T *cuda_ptr;
-
-        if(ptr_lib_ != kernel::Lib::cuda_kernels) {
-          Error err =  kernel::H2D<T>(kernel::Lib::cuda_kernels,
-                                      &cuda_ptr,
-                                      ptr().get(),
-                                      length());
-          util::handle_error(err);
-        }
-        else {
-          cuda_ptr = ptr_.get();
-        }
-
-        return IndexOf<T>(std::shared_ptr<T>(cuda_ptr,
-                                             kernel::cuda_array_deleter<T>()),
-                          offset(),
-                          length(),
-                         kernel::Lib::cuda_kernels);
-      }
-#endif
-      throw std::invalid_argument("Invalid Kernel Library or OS for GPU Transfer");
-    }
+  template<typename T>
+  kernel::Lib IndexOf<T>::ptr_lib() const {
+    return ptr_lib_;
+  }
 
   template<typename T>
   const IndexOf<T>
-  IndexOf<T>::to_cpu() const {
-#ifndef _MSC_VER
-    if (ptr_lib_ == kernel::Lib::cuda_kernels) {
-      T* cpu_ptr = new T[length_];
-
-      Error err =  kernel::D2H<T>(kernel::Lib::cuda_kernels,
-                                  &cpu_ptr,
-                                  ptr().get(),
-                                  length());
-      util::handle_error(err);
-
-      return IndexOf<T>(std::shared_ptr<T>(cpu_ptr,
-                                             kernel::array_deleter<T>()),
-                        offset(),
-                        length(),
-                        kernel::Lib::cpu_kernels);
+  IndexOf<T>::copy_to(kernel::Lib ptr_lib) const {
+    if(ptr_lib == ptr_lib_) {
+      return *this;
     }
-#endif
-    return IndexOf<T>(ptr_,
-                      offset_,
-                      length_,
-                      kernel::Lib::cpu_kernels);
+
+    std::shared_ptr<T> ptr = kernel::ptr_alloc<T>(ptr_lib, length());
+
+    Error err =  kernel::copy_to<T>(ptr_lib,
+                                    ptr_lib_,
+                                    ptr.get(),
+                                    ptr_.get(),
+                                    length_);
+    util::handle_error(err);
+
+    return IndexOf<T>(ptr,
+                      offset(),
+                      length(),
+                      ptr_lib);
   }
 
   template class EXPORT_SYMBOL IndexOf<int8_t>;

@@ -1349,12 +1349,7 @@ namespace awkward {
   }
 
   ContentPtr
-  Content::to_gpu(kernel::Lib ptr_lib) const{
-    return nullptr;
-  }
-
-  ContentPtr
-  Content::to_cpu() const{
+  Content::copy_to(kernel::Lib ptr_lib) const{
     return nullptr;
   }
 

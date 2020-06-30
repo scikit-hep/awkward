@@ -15,7 +15,7 @@ public:
     StartupLibraryPathCallback() = default;
 
     const std::string library_path() const override {
-      std::string library_path = ("/path/to/python-pip/awkward1_cuda_kernels/libawkward-cuda-kernels.so");
+      std::string library_path = ("/home/trickarcher/.local/lib/python3.8/site-packages/awkward1_cuda_kernels/libawkward-cuda-kernels.so");
       return library_path;
     };
 };
@@ -58,7 +58,7 @@ int main(int, char**) {
   std::shared_ptr<ak::Content> array = builder.snapshot();
 
   // First test, the transfer to GPU
-  auto cuda_arr =  array->to_gpu(kernel::Lib::cuda_kernels);
+  auto cuda_arr =  array->copy_to(kernel::Lib::cuda_kernels);
   std::cout << cuda_arr->tostring() << "\n";
 
   // Second test, run the ListArray_num kernel on the GPU
@@ -66,7 +66,7 @@ int main(int, char**) {
   std::cout << arr_cuda_ker->tostring() << "\n";
 
   // Third test, transfer the cuda array on to main memory
-  auto cpu_arr = cuda_arr->to_cpu();
+  auto cpu_arr = cuda_arr->copy_to(kernel::Lib::cpu_kernels);
   std::cout << cpu_arr->tostring() << "\n";
 
   // Fourth test, check the answer of ListArray num on the CPU and GPU

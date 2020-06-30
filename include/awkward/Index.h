@@ -204,10 +204,7 @@ namespace awkward {
       deep_copy() const;
 
     const IndexOf<T>
-      to_gpu(kernel::Lib ptr_lib) const;
-
-    const IndexOf<T>
-      to_cpu() const;
+      copy_to(kernel::Lib ptr_lib) const;
 
   private:
     /// @brief See #ptr.

@@ -1455,34 +1455,16 @@ namespace awkward {
   }
 
   ContentPtr
-  RecordArray::to_gpu(kernel::Lib ptr_lib) const {
-    if(ptr_lib == kernel::Lib::cuda_kernels) {
-      ContentPtrVec cuda_content_vec;
-      for(auto i : contents_) {
-        ContentPtr cuda_ptr = i->to_gpu(kernel::Lib::cuda_kernels);
-        cuda_content_vec.emplace_back(cuda_ptr);
-      }
-
-      return std::make_shared<RecordArray>(identities(),
-                                           parameters(),
-                                           cuda_content_vec,
-                                           recordlookup(),
-                                           length());
-    }
-  }
-
-  ContentPtr
-  RecordArray::to_cpu() const{
-
-    ContentPtrVec cpu_content_vec;
+  RecordArray::copy_to(kernel::Lib ptr_lib) const {
+    ContentPtrVec content_vec;
     for(auto i : contents_) {
-      ContentPtr cpu_ptr = i->to_cpu();
-      cpu_content_vec.emplace_back(cpu_ptr);
+      ContentPtr ptr = i->copy_to(ptr_lib);
+      content_vec.emplace_back(ptr);
     }
 
     return std::make_shared<RecordArray>(identities(),
                                          parameters(),
-                                         cpu_content_vec,
+                                         content_vec,
                                          recordlookup(),
                                          length());
 

@@ -403,10 +403,8 @@ namespace awkward {
                           const Slice& tail) const override;
 
     ContentPtr
-      to_gpu(kernel::Lib ptr_lib) const override;
+      copy_to(kernel::Lib ptr_lib) const override;
 
-    ContentPtr
-      to_cpu() const override;
   private:
     /// @brief See #starts.
     const IndexOf<T> starts_;

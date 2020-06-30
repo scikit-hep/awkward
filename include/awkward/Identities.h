@@ -370,22 +370,14 @@ namespace awkward {
     const IdentitiesPtr
       getitem_range(int64_t start, int64_t stop) const;
 
-    /// @brief Transfer the identity ptr of the array on to the GPU.
+    /// @brief Moves the identity ptr buffer of the array between devices
     ///
     /// Returns a std::shared_ptr<IdentitiesOf> which is, by default, allocated
     /// on the first device(device [0])
     ///
     /// @note This function has not been implemented to handle Multi-GPU setups
     IdentitiesPtr
-      to_gpu(kernel::Lib ptr_lib) const;
-
-    // @brief Transfer the identity ptr of the array on the GPU to the main memory
-    ///
-    /// Returns a std::shared_ptr<IdentitiesOf> which is, allocated on the main memory
-    ///
-    /// @note This function has not been implemented to handle Multi-GPU setups
-    IdentitiesPtr
-      to_cpu() const;
+      copy_to(kernel::Lib ptr_lib) const;
 
   private:
     /// @brief See #ptr.

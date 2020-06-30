@@ -2238,27 +2238,13 @@ namespace awkward {
 
   template <typename T>
   ContentPtr
-  ListOffsetArrayOf<T>::to_gpu(kernel::Lib ptr_lib) const {
-    if(ptr_lib == kernel::Lib::cuda_kernels) {
-      IndexOf<T> cuda_offsets = offsets_.to_gpu(kernel::Lib::cuda_kernels);
-      ContentPtr cuda_content = content_->to_gpu(kernel::Lib::cuda_kernels);
-      return std::make_shared<ListOffsetArrayOf<T>>(identities(),
-                                                    parameters(),
-                                                    cuda_offsets,
-                                                    cuda_content);
-    }
-  }
-
-  template <typename T>
-  ContentPtr
-  ListOffsetArrayOf<T>::to_cpu() const {
-    IndexOf<T> cpu_offets = offsets_.to_cpu();
-    ContentPtr cpu_content = content_->to_cpu();
+  ListOffsetArrayOf<T>::copy_to(kernel::Lib ptr_lib) const {
+    IndexOf<T> offsets = offsets_.copy_to(ptr_lib);
+    ContentPtr content = content_->copy_to(ptr_lib);
     return std::make_shared<ListOffsetArrayOf<T>>(identities(),
                                                   parameters(),
-                                                  cpu_offets,
-                                                  cpu_content);
-
+                                                  offsets,
+                                                  content);
   }
 
   template class EXPORT_SYMBOL ListOffsetArrayOf<int32_t>;

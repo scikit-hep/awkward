@@ -34,92 +34,92 @@ extern "C" {
   EXPORT_SYMBOL ERROR awkward_cuda_ptrfloat64_dealloc(const double* ptr);
 
   EXPORT_SYMBOL ERROR awkward_cuda_H2Dbool(
-      bool** to_ptr,
+      bool* to_ptr,
       bool* from_ptr,
       int64_t length);
   EXPORT_SYMBOL ERROR awkward_cuda_H2D8(
-      int8_t** to_ptr,
+      int8_t* to_ptr,
       int8_t* from_ptr,
       int64_t length);
   EXPORT_SYMBOL ERROR awkward_cuda_H2DU8(
-        uint8_t** to_ptr,
+        uint8_t* to_ptr,
         uint8_t* from_ptr,
         int64_t length);
   EXPORT_SYMBOL ERROR awkward_cuda_H2D16(
-        int16_t** to_ptr,
+        int16_t* to_ptr,
         int16_t* from_ptr,
         int64_t length);
   EXPORT_SYMBOL ERROR awkward_cuda_H2DU16(
-        uint16_t** to_ptr,
+        uint16_t* to_ptr,
         uint16_t* from_ptr,
         int64_t length);
   EXPORT_SYMBOL ERROR awkward_cuda_H2D32(
-        int32_t** to_ptr,
+        int32_t* to_ptr,
         int32_t* from_ptr,
         int64_t length);
   EXPORT_SYMBOL ERROR awkward_cuda_H2DU32(
-        uint32_t** to_ptr,
+        uint32_t* to_ptr,
         uint32_t* from_ptr,
         int64_t length);
   EXPORT_SYMBOL ERROR awkward_cuda_H2D64(
-      int64_t** to_ptr,
+      int64_t* to_ptr,
       int64_t* from_ptr,
       int64_t length);
   EXPORT_SYMBOL ERROR awkward_cuda_H2DU64(
-      uint64_t** to_ptr,
+      uint64_t* to_ptr,
       uint64_t* from_ptr,
       int64_t length);
   EXPORT_SYMBOL ERROR awkward_cuda_H2Dfloat32(
-      float** to_ptr,
+      float* to_ptr,
       float* from_ptr,
       int64_t length);
   EXPORT_SYMBOL ERROR awkward_cuda_H2Dfloat64(
-      double** to_ptr,
+      double* to_ptr,
       double* from_ptr,
       int64_t length);
 
   EXPORT_SYMBOL ERROR awkward_cuda_D2Hbool(
-    bool** to_ptr,
+    bool* to_ptr,
     bool* from_ptr,
     int64_t length);
   EXPORT_SYMBOL ERROR awkward_cuda_D2H8(
-    int8_t** to_ptr,
+    int8_t* to_ptr,
     int8_t* from_ptr,
     int64_t length);
   EXPORT_SYMBOL ERROR awkward_cuda_D2HU8(
-    uint8_t** to_ptr,
+    uint8_t* to_ptr,
     uint8_t* from_ptr,
     int64_t length);
   EXPORT_SYMBOL ERROR awkward_cuda_D2H16(
-    int16_t** to_ptr,
+    int16_t* to_ptr,
     int16_t* from_ptr,
     int64_t length);
   EXPORT_SYMBOL ERROR awkward_cuda_D2HU16(
-    uint16_t** to_ptr,
+    uint16_t* to_ptr,
     uint16_t* from_ptr,
     int64_t length);
   EXPORT_SYMBOL ERROR awkward_cuda_D2H32(
-    int32_t** to_ptr,
+    int32_t* to_ptr,
     int32_t* from_ptr,
     int64_t length);
   EXPORT_SYMBOL ERROR awkward_cuda_D2HU32(
-    uint32_t** to_ptr,
+    uint32_t* to_ptr,
     uint32_t* from_ptr,
     int64_t length);
   EXPORT_SYMBOL ERROR awkward_cuda_D2H64(
-    int64_t** to_ptr,
+    int64_t* to_ptr,
     int64_t* from_ptr,
     int64_t length);
   EXPORT_SYMBOL ERROR awkward_cuda_D2HU64(
-    uint64_t** to_ptr,
+    uint64_t* to_ptr,
     uint64_t* from_ptr,
     int64_t length);
   EXPORT_SYMBOL ERROR awkward_cuda_D2Hfloat32(
-    float** to_ptr,
+    float* to_ptr,
     float* from_ptr,
     int64_t length);
   EXPORT_SYMBOL ERROR awkward_cuda_D2Hfloat64(
-    double** to_ptr,
+    double* to_ptr,
     double* from_ptr,
     int64_t length);
 }

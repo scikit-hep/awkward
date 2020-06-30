@@ -1303,24 +1303,11 @@ namespace awkward {
   }
 
   ContentPtr
-  RegularArray::to_gpu(kernel::Lib ptr_lib) const {
-    if(ptr_lib == kernel::Lib::cuda_kernels) {
-      ContentPtr cuda_content = content_->to_gpu(kernel::Lib::cuda_kernels);
-      return std::make_shared<RegularArray>(identities(),
-                                            parameters(),
-                                            cuda_content,
-                                            size());
-    }
-  }
-
-  ContentPtr
-  RegularArray::to_cpu() const {
-    ContentPtr cpu_content = content_->to_cpu();
+  RegularArray::copy_to(kernel::Lib ptr_lib) const {
+    ContentPtr content = content_->copy_to(ptr_lib);
     return std::make_shared<RegularArray>(identities(),
                                           parameters(),
-                                          cpu_content,
+                                          content,
                                           size());
-
   }
-
 }

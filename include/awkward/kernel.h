@@ -139,27 +139,16 @@ namespace kernel {
       void operator()(T const *p) { }
   };
 
-  /// @brief Internal Function to transfer an array buffer contained
-  /// on the main memory to the GPU memory
+  /// @brief Internal Function to transfer an array buffer betweeen
+  /// main memory and the GPU memory
   ///
   /// @note This function has not been implemented to handle Multi-GPU setups
   template<typename T>
-  Error
-  H2D(kernel::Lib ptr_lib,
-      T **to_ptr,
-      T *from_ptr,
-      int64_t length);
-
-  /// @brief Internal Function to transfer an array buffer contained on the
-  /// main memory to the GPU memory
-  ///
-  /// @note This function has not been implemented to handle Multi-GPU setups
-  template<typename T>
-  Error D2H(kernel::Lib ptr_lib,
-            T **to_ptr,
-            T *from_ptr,
-            int64_t length);
-
+  Error copy_to(kernel::Lib TO,
+                kernel::Lib FROM,
+                T *to_ptr,
+                T *from_ptr,
+                int64_t length);
 
   /// @brief Internal Function to allocate an empty array of a given length on
   /// the GPU

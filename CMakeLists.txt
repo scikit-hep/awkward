@@ -81,7 +81,7 @@ if (${CMAKE_CXX_COMPILER_ID} MATCHES "^(|Apple)Clang$")
 endif()
 add_library(awkward-static STATIC $<TARGET_OBJECTS:awkward-objects>)
 set_property(TARGET awkward-static PROPERTY POSITION_INDEPENDENT_CODE ON)
-add_library(awkward        SHARED $<TARGET_OBJECTS:awkward-objects> tests/test_0293-listarray-num-kernel.cpp)
+add_library(awkward        SHARED $<TARGET_OBJECTS:awkward-objects>)
 target_link_libraries(awkward-static PRIVATE awkward-cpu-kernels-static ${CMAKE_DL_LIBS})
 target_link_libraries(awkward        PRIVATE awkward-cpu-kernels-static ${CMAKE_DL_LIBS})
 
@@ -102,8 +102,6 @@ endif()
 addtest(test0016 tests/test_0016-finish-getitem-for-rawarray.cpp)
 addtest(test0019 tests/test_0019-use-json-library.cpp)
 addtest(test0030 tests/test_0030-recordarray-in-numba.cpp)
-addtest(test0293_cuda_alloc tests/test_0293-cuda-allocation-tests.cpp)
-addtest(test0293_listarray_num tests/test_0293-listarray-num-kernel.cpp)
 addtest(test0074 tests/test_0074-argsort-and-sort-rawarray.cpp)
 
 # Third tier: Python modules.
