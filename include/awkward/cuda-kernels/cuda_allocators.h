@@ -22,6 +22,7 @@ extern "C" {
   EXPORT_SYMBOL double *awkward_cuda_ptrfloat64_alloc(int64_t length);
 
   EXPORT_SYMBOL ERROR awkward_cuda_ptrbool_dealloc(const bool* ptr);
+  EXPORT_SYMBOL ERROR awkward_cuda_ptrchar_dealloc(const char* ptr);
   EXPORT_SYMBOL ERROR awkward_cuda_ptr8_dealloc(const int8_t* ptr);
   EXPORT_SYMBOL ERROR awkward_cuda_ptrU8_dealloc(const uint8_t* ptr);
   EXPORT_SYMBOL ERROR awkward_cuda_ptr16_dealloc(const int16_t* ptr);

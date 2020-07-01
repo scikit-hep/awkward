@@ -58,6 +58,9 @@ Error awkward_cuda_ptr_dealloc(const T* ptr) {
 ERROR awkward_cuda_ptrbool_dealloc(const bool *ptr) {
   return awkward_cuda_ptr_dealloc<bool>(ptr);
 }
+ERROR awkward_cuda_ptrchar_dealloc(const char *ptr) {
+  return awkward_cuda_ptr_dealloc<char>(ptr);
+}
 ERROR awkward_cuda_ptr8_dealloc(const int8_t *ptr) {
   return awkward_cuda_ptr_dealloc<int8_t>(ptr);
 }

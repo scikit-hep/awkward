@@ -5,18 +5,32 @@
 
 #include <cstdint>
 #include <stdlib.h>
+#include "awkward/common.h"
 
 extern "C" {
-  int8_t *awkward_cpu_ptr8_alloc(int64_t length);
-  uint8_t *awkward_cpu_ptrU8_alloc(int64_t length);
-  int16_t *awkward_cpu_ptr16_alloc(int64_t length);
-  uint16_t *awkward_cpu_ptrU16_alloc(int64_t length);
-  int32_t *awkward_cpu_ptr32_alloc(int64_t length);
-  uint32_t *awkward_cpu_ptrU32_alloc(int64_t length);
-  int64_t *awkward_cpu_ptr64_alloc(int64_t length);
-  uint64_t *awkward_cpu_ptrU64_alloc(int64_t length);
-  float *awkward_cpu_ptrfloat32_alloc(int64_t length);
-  double *awkward_cpu_ptrfloat64_alloc(int64_t length);
-  bool *awkward_cpu_ptrbool_alloc(int64_t length);
+  EXPORT_SYMBOL int8_t *awkward_ptr8_alloc(int64_t length);
+  EXPORT_SYMBOL uint8_t *awkward_ptrU8_alloc(int64_t length);
+  EXPORT_SYMBOL int16_t *awkward_ptr16_alloc(int64_t length);
+  EXPORT_SYMBOL uint16_t *awkward_ptrU16_alloc(int64_t length);
+  EXPORT_SYMBOL int32_t *awkward_ptr32_alloc(int64_t length);
+  EXPORT_SYMBOL uint32_t *awkward_ptrU32_alloc(int64_t length);
+  EXPORT_SYMBOL int64_t *awkward_ptr64_alloc(int64_t length);
+  EXPORT_SYMBOL uint64_t *awkward_ptrU64_alloc(int64_t length);
+  EXPORT_SYMBOL float *awkward_ptrfloat32_alloc(int64_t length);
+  EXPORT_SYMBOL double *awkward_ptrfloat64_alloc(int64_t length);
+  EXPORT_SYMBOL bool *awkward_ptrbool_alloc(int64_t length);
+
+  EXPORT_SYMBOL ERROR awkward_ptrbool_dealloc(const bool* ptr);
+  EXPORT_SYMBOL ERROR awkward_ptrchar_dealloc(const char* ptr);
+  EXPORT_SYMBOL ERROR awkward_ptr8_dealloc(const int8_t* ptr);
+  EXPORT_SYMBOL ERROR awkward_ptrU8_dealloc(const uint8_t* ptr);
+  EXPORT_SYMBOL ERROR awkward_ptr16_dealloc(const int16_t* ptr);
+  EXPORT_SYMBOL ERROR awkward_ptrU16_dealloc(const uint16_t* ptr);
+  EXPORT_SYMBOL ERROR awkward_ptr32_dealloc(const int32_t* ptr);
+  EXPORT_SYMBOL ERROR awkward_ptrU32_dealloc(const uint32_t* ptr);
+  EXPORT_SYMBOL ERROR awkward_ptr64_dealloc(const int64_t* ptr);
+  EXPORT_SYMBOL ERROR awkward_ptrU64_dealloc(const uint64_t* ptr);
+  EXPORT_SYMBOL ERROR awkward_ptrfloat32_dealloc(const float* ptr);
+  EXPORT_SYMBOL ERROR awkward_ptrfloat64_dealloc(const double* ptr);
 };
 #endif //AWKWARD_ALLOCATORS_H_

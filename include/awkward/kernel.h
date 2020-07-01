@@ -76,9 +76,7 @@ namespace kernel {
   public:
       /// @brief Called by `std::shared_ptr` when its reference count reaches
       /// zero.
-      void operator()(T const *p) {
-        delete[] p;
-      }
+      void operator()(T const *p);
   };
 
   /// @class cuda_array_deleter
