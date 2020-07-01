@@ -20,7 +20,8 @@ using namespace awkward;
 namespace kernel {
   enum Lib {
       cpu_kernels,
-      cuda_kernels
+      cuda_kernels,
+      num_libs
   };
 
   class LibraryPathCallback {

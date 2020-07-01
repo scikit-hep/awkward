@@ -1,7 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
-#ifndef AWKWARD_GETITEM_CUH_
-#define AWKWARD_GETITEM_CUH_
+#ifndef AWKWARD_GETITEM_H
+#define AWKWARD_GETITEM_H
 
 #include <stdint.h>
 
@@ -54,4 +54,4 @@ extern "C" {
   void awkward_cuda_Index64_setitem_at_nowrap(const int64_t* ptr, int64_t offset, int64_t at, int64_t value);
 };
 
-#endif //AWKWARD_GETITEM_CUH_
+#endif //AWKWARD_GETITEM_H

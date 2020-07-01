@@ -1,7 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
-#ifndef AWKWARD_CUDA_KERNELS_OPERATIONS_CUH
-#define AWKWARD_CUDA_KERNELS_OPERATIONS_CUH
+#ifndef AWKWARD_CUDA_KERNELS_OPERATIONS_H
+#define AWKWARD_CUDA_KERNELS_OPERATIONS_H
 
 #include <stdint.h>
 #include "awkward/common.h"
@@ -33,4 +33,4 @@ extern "C" {
     int64_t length);
 }
 
-#endif //AWKWARD_CUDA_KERNELS_OPERATIONS_CUH
+#endif //AWKWARD_CUDA_KERNELS_OPERATIONS_H

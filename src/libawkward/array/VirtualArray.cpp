@@ -236,20 +236,24 @@ namespace awkward {
                              const util::Parameters& parameters,
                              const ArrayGeneratorPtr& generator,
                              const ArrayCachePtr& cache,
-                             const std::string& cache_key)
+                             const std::string& cache_key,
+                             const kernel::Lib ptr_lib)
       : Content(identities, parameters)
       , generator_(generator)
       , cache_(cache)
-      , cache_key_(cache_key) { }
+      , cache_key_(cache_key)
+      , ptr_lib_(ptr_lib) { }
 
   VirtualArray::VirtualArray(const IdentitiesPtr& identities,
                              const util::Parameters& parameters,
                              const ArrayGeneratorPtr& generator,
-                             const ArrayCachePtr& cache)
+                             const ArrayCachePtr& cache,
+                             const kernel::Lib ptr_lib)
       : Content(identities, parameters)
       , generator_(generator)
       , cache_(cache)
-      , cache_key_(ArrayCache::newkey()) { }
+      , cache_key_(ArrayCache::newkey())
+      , ptr_lib_(ptr_lib) { }
 
   const ArrayGeneratorPtr
   VirtualArray::generator() const {
@@ -260,6 +264,11 @@ namespace awkward {
   VirtualArray::cache() const {
     return cache_;
   }
+
+    const kernel::Lib
+    VirtualArray::ptr_lib() const {
+      return ptr_lib_;
+    }
 
   const ContentPtr
   VirtualArray::peek_array() const {
@@ -863,4 +872,8 @@ namespace awkward {
             "undefined operation: VirtualArray::getitem_next_jagged(jagged)");
   }
 
+  ContentPtr
+  VirtualArray::copy_to(kernel::Lib ptr_lib) const {
+      auto out = generator_.get()->generate_and_check()->copy_to(ptr_lib);
+  }
 }
