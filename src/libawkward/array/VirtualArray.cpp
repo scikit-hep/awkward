@@ -282,13 +282,30 @@ namespace awkward {
   VirtualArray::array() const {
     ContentPtr out(nullptr);
     if (cache_.get() != nullptr) {
+      if(ptr_lib_ == kernel::Lib::cuda_kernels) {
+        if(cache_key().find(":cuda") != std::string::npos) {
+          out = cache_.get()->get(cache_key());
+        }
+        else {
+          out = copy_to(kernel::Lib::cuda_kernels);
+        }
+      }
       out = cache_.get()->get(cache_key());
     }
     if (out.get() == nullptr) {
-      out = generator_.get()->generate_and_check();
+      if(ptr_lib_ == kernel::Lib::cpu_kernels)
+        out = generator_.get()->generate_and_check();
+      else {
+        out = copy_to(ptr_lib_);
+      }
     }
     if (cache_.get() != nullptr) {
-      cache_.get()->set(cache_key(), out);
+      if(ptr_lib_ == kernel::Lib::cpu_kernels) {
+        cache_.get()->set(cache_key(), out);
+      }
+      else if(ptr_lib_ == kernel::Lib::cuda_kernels){
+        cache_.get()->set(cache_key() + ":cuda", out);
+      }
     }
     return out;
   }
@@ -874,6 +891,6 @@ namespace awkward {
 
   ContentPtr
   VirtualArray::copy_to(kernel::Lib ptr_lib) const {
-      auto out = generator_.get()->generate_and_check()->copy_to(ptr_lib);
+      return generator_.get()->generate_and_check()->copy_to(ptr_lib);
   }
 }

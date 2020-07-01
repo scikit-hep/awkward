@@ -1348,11 +1348,6 @@ namespace awkward {
     return out;
   }
 
-  ContentPtr
-  Content::copy_to(kernel::Lib ptr_lib) const{
-    return nullptr;
-  }
-
   const std::string
   Content::parameters_tostring(const std::string& indent,
                                const std::string& pre,
