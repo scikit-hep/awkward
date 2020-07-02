@@ -418,6 +418,24 @@ def indent_code(code, indent):
     return finalcode
 
 
+def gettokens(ctokens, htokens):
+    tokens = OrderedDict()
+    for x in htokens.keys():
+        tokens[x] = OrderedDict()
+        for y in htokens[x].keys():
+            tokens[x][y] = OrderedDict()
+            for z, val in htokens[x][y].items():
+                tokens[x][y][z] = val
+            for i in ctokens[x]["args"]:
+                if i["name"] == y:
+                    if i["list"] > 0:
+                        tokens[x][y]["array"] = True
+                    else:
+                        tokens[x][y]["array"] = False
+                    tokens[x][y]["type"] = i["type"]
+    return tokens
+
+
 class Error(ctypes.Structure):
     _fields_ = [
         ("str", ctypes.POINTER(ctypes.c_char)),
@@ -439,23 +457,6 @@ def gentests(funcs, htokens):
             return "float"
         else:
             return cpptype
-
-    def gettokens(ctokens, htokens):
-        tokens = OrderedDict()
-        for x in htokens.keys():
-            tokens[x] = OrderedDict()
-            for y in htokens[x].keys():
-                tokens[x][y] = OrderedDict()
-                for z, val in htokens[x][y].items():
-                    tokens[x][y][z] = val
-                for i in ctokens[x]["args"]:
-                    if i["name"] == y:
-                        if i["list"] > 0:
-                            tokens[x][y]["array"] = True
-                        else:
-                            tokens[x][y]["array"] = False
-                        tokens[x][y]["type"] = i["type"]
-        return tokens
 
     def getctypelist(typelist):
         newctypes = []
@@ -715,14 +716,16 @@ inparam = None
             if "sorting.cpp" not in filename:
                 body = FuncBody(ast.ext[i].body)
                 funcs[decl.name]["body"] = body
+        hfile = getheadername(filename)
+        htokens = parseheader(hfile)
         for name in funcs.keys():
             if "gen" not in tokens[name].keys():
-                doccode = name + "\n"
-                doccode += "=================================================================\n"
-                funcgen = ""
+                docdict[name] = {}
+                docprefix = name + "\n"
+                docprefix += "=================================================================\n"
                 if "childfunc" in tokens[name].keys():
                     for childfunc in tokens[name]["childfunc"]:
-                        doccode += (
+                        docprefix += (
                             ".. py:function:: {0}({1})".format(
                                 funcs[childfunc]["def"].name,
                                 funcs[childfunc]["def"].arrange_args(types=True),
@@ -734,8 +737,6 @@ inparam = None
                     funcs[name]["def"].arrange_args(types=True)
                     func_callable[name]["args"] = funcs[name]["def"].args
                 if "sorting.cpp" not in filename:
-                    hfile = getheadername(filename)
-                    htokens = parseheader(hfile)
                     d = OrderedDict()
                     if "childfunc" in tokens[name].keys():
                         for x in htokens.keys():
@@ -746,7 +747,7 @@ inparam = None
                         for key, val in htokens[name].items():
                             d[key] = val["check"]
                     tokens[name]["labels"] = d
-                    funcgen += (
+                    funcdef = (
                         "def {0}({1})".format(
                             name,
                             funcs[name]["def"].arrange_args(
@@ -755,12 +756,9 @@ inparam = None
                         )
                         + ":\n"
                     )
-                    funcgen += remove_return(funcs[name]["body"].code)
+                    funcbody = remove_return(funcs[name]["body"].code)
                 else:
-                    doccode += "*(The following Python code is translated from C++ manually and may not be normative)*\n\n"
-                    funcgen += (
-                        black.format_str(eval("doc_" + name), mode=blackmode) + "\n\n"
-                    )
+                    docprefix += "*(The following Python code is translated from C++ manually and may not be normative)*\n\n"
                 funcgentemp = ""
                 if "childfunc" in tokens[name].keys():
                     for childfunc in tokens[name]["childfunc"]:
@@ -769,29 +767,44 @@ inparam = None
                         funcgentemp += "{0} = {1}\n".format(
                             funcs[childfunc]["def"].name, name
                         )
-                doccode += ".. code-block:: python\n\n"
-                '''
-                if tokens[name]["roles"] != "":
-                    doccode += indent_code(
-                        '"""\n' + tokens[name]["roles"] + '"""\n\n', 4
-                    )
-                '''
+                docprefix += ".. code-block:: python\n\n"
+                docdict[name]["prefix"] = docprefix
                 if "sorting.cpp" not in filename:
-                    funcgen = funcgen + funcgentemp
-                    doccode += (
-                        indent_code(black.format_str(funcgen, mode=blackmode), 4) + "\n"
-                    )
-                    gencode += black.format_str(funcgen, mode=blackmode) + "\n"
+                    funcbody = funcbody + funcgentemp
+                    docdict[name]["def"] = indent_code(funcdef, 4) + "\n"
+                    docdict[name]["body"] = funcbody + "\n\n"
+                    gencode += funcdef + funcbody + "\n"
                 else:
-                    doccode += indent_code(funcgen, 4) + funcgentemp + "\n"
+                    funcgen = (
+                        black.format_str(eval("doc_" + name), mode=blackmode) + "\n\n"
+                    )
+                    docdict[name]["def"] = ""
+                    docdict[name]["body"] = indent_code(funcgen, 4) + funcgentemp + "\n"
                     gencode += funcgen + funcgentemp + "\n"
-                docdict[name] = doccode
             else:
                 func_callable[name] = tokens[name]
                 func_callable[name]["args"] = funcs[name]["def"].args
+        # Put roles as Python definition docstrings
+        temptokens = gettokens(func_callable, htokens)
+        if "sorting.cpp" not in filename:
+            for name in funcs.keys():
+                rolestring = ""
+                if "gen" not in tokens[name].keys():
+                    if "childfunc" in tokens[name].keys():
+                        roletokens = temptokens[list(tokens[name]["childfunc"])[0]]
+                    else:
+                        roletokens = temptokens[name]
+                    for key, val in roletokens.items():
+                        if val["array"] or val["check"] == "outparam":
+                            rolestring += "# " + key + " - " + val["check"]
+                            if "role" in val.keys():
+                                rolestring += " role: " + val["role"]
+                            rolestring += "\n"
+                    docdict[name]["def"] += rolestring
     with open(os.path.join(CURRENT_DIR, "kernels.py"), "w") as f:
         print("Writing kernels.py")
         f.write(gencode)
+        f.write(black.format_str(gencode, mode=blackmode) + "\n\n")
     gentests(func_callable, htokens)
     if os.path.isdir(os.path.join(CURRENT_DIR, "..", "docs-sphinx", "_auto")):
         with open(
@@ -816,7 +829,16 @@ The interface, as well as specifications for each function's behavior through a 
 """
             )
             for name in sorted(docdict.keys()):
-                f.write(docdict[name])
+                f.write(docdict[name]["prefix"])
+                f.write(
+                    indent_code(
+                        black.format_str(
+                            docdict[name]["def"] + docdict[name]["body"], mode=blackmode
+                        ),
+                        4,
+                    )
+                    + "\n\n"
+                )
         if os.path.isfile(
             os.path.join(CURRENT_DIR, "..", "docs-sphinx", "_auto", "toctree.txt",)
         ):
