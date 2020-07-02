@@ -156,8 +156,8 @@ namespace awkward {
     else {
       out << "]\" offset=\"" << offset_ << "\" length=\"" << length_
           << "\" at=\"0x" << std::hex << std::setw(12) << std::setfill('0')
-          << reinterpret_cast<ssize_t>(ptr_.get()) << "\">" << post;
-      out << kernellib_asstring(indent + std::string("\n    "), "", "\n");
+          << reinterpret_cast<ssize_t>(ptr_.get()) << "\">";
+      out << kernellib_asstring("\n" + indent + std::string("    "), "", "\n");
       out << indent << "</" << classname() << ">" << post;
     }
     return out.str();
