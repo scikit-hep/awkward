@@ -933,6 +933,15 @@ namespace kernel {
                                    kernel::array_deleter<double>());
   }
 
+  const std::string
+  fully_qualified_cache_key(const std::string& cache_key, kernel::Lib ptr_lib) {
+    switch (ptr_lib) {
+      case kernel::Lib::cuda_kernels:
+        return cache_key + std::string(":cuda");
+      default:
+        return cache_key;
+    }
+  }
 
 /////////////////////////////////// awkward/cpu-kernels/getitem.h
 

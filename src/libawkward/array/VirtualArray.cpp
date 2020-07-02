@@ -278,34 +278,41 @@ namespace awkward {
     return ContentPtr(nullptr);
   }
 
+  kernel::Lib check_key(const std::string& cache_key) {
+    auto fully_qualified_index = cache_key.find_last_of(':');
+
+    if(fully_qualified_index != std::string::npos) {
+      if (cache_key.substr(fully_qualified_index + 1, cache_key.length()) == "cuda") {
+        return kernel::Lib::cuda_kernels;
+      }
+    }
+
+    return kernel::Lib::cpu_kernels;
+  }
+
   const ContentPtr
   VirtualArray::array() const {
     ContentPtr out(nullptr);
+    kernel::Lib src_ptrlib = check_key(cache_key_);
     if (cache_.get() != nullptr) {
-      if(ptr_lib_ == kernel::Lib::cuda_kernels) {
-        if(cache_key().find(":cuda") != std::string::npos) {
-          out = cache_.get()->get(cache_key());
-        }
-        else {
-          out = copy_to(kernel::Lib::cuda_kernels);
-        }
+      if(src_ptrlib != ptr_lib_) {
+        out = cache_.get()->get(cache_key())->copy_to(ptr_lib_);
       }
-      out = cache_.get()->get(cache_key());
+      else {
+        out = cache_.get()->get(cache_key());
+      }
     }
     if (out.get() == nullptr) {
-      if(ptr_lib_ == kernel::Lib::cpu_kernels)
-        out = generator_.get()->generate_and_check();
+      if(src_ptrlib != ptr_lib_) {
+        out = generator_.get()->generate_and_check()->copy_to(src_ptrlib);
+      }
       else {
-        out = copy_to(ptr_lib_);
+        out = generator_.get()->generate_and_check();
       }
     }
     if (cache_.get() != nullptr) {
-      if(ptr_lib_ == kernel::Lib::cpu_kernels) {
-        cache_.get()->set(cache_key(), out);
-      }
-      else if(ptr_lib_ == kernel::Lib::cuda_kernels){
-        cache_.get()->set(cache_key() + ":cuda", out);
-      }
+      cache_.get()->set(kernel::fully_qualified_cache_key(cache_key(), ptr_lib_),
+                        out);
     }
     return out;
   }
@@ -891,6 +898,11 @@ namespace awkward {
 
   ContentPtr
   VirtualArray::copy_to(kernel::Lib ptr_lib) const {
-      return generator_.get()->generate_and_check()->copy_to(ptr_lib);
+      return std::make_shared<VirtualArray>(identities(),
+                                            parameters(),
+                                            generator(),
+                                            cache(),
+                                            cache_key(),
+                                            ptr_lib);
   }
 }

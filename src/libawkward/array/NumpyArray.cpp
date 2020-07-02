@@ -849,15 +849,9 @@ namespace awkward {
     out << std::hex << std::setw(12) << std::setfill('0')
         << reinterpret_cast<ssize_t>(ptr_.get());
     if(ptr_lib() == kernel::Lib::cuda_kernels) {
-      out << "\" on=\"[" << kernel::get_ptr_device_num(ptr_lib(), ptr_.get())
-          << "]" << kernel::get_ptr_device_name(ptr_lib(), ptr_.get())
-          << "\" Lib=\"" << "cuda_kernels";
-    }
-    if (identities_.get() == nullptr  &&  parameters_.empty()) {
-      out << "\"/>" << post;
-    }
-    else {
       out << "\">\n";
+      out << kernellib_asstring(indent + std::string("    "), "", "\n");
+
       if (identities_.get() != nullptr) {
         out << identities_.get()->tostring_part(
           indent + std::string("    "), "", "\n");
@@ -865,9 +859,43 @@ namespace awkward {
       if (!parameters_.empty()) {
         out << parameters_tostring(indent + std::string("    "), "", "\n");
       }
-      out << indent << "</" << classname() << ">" << post;
+        out << indent << "</" << classname() << ">" << post;
+    }
+    else {
+      if (identities_.get() == nullptr  &&  parameters_.empty()) {
+        out << "\"/>" << post;
+      }
+      else {
+        out << "\">\n";
+        if (identities_.get() != nullptr) {
+          out << identities_.get()->tostring_part(
+            indent + std::string("    "), "", "\n");
+        }
+        if (!parameters_.empty()) {
+          out << parameters_tostring(indent + std::string("    "), "", "\n");
+        }
+        out << indent << "</" << classname() << ">" << post;
+      }
     }
     return out.str();
+  }
+
+  const std::string
+  NumpyArray::kernellib_asstring(const std::string &indent,
+                                 const std::string &pre,
+                                 const std::string &post) const {
+    if(ptr_lib_ == kernel::Lib::cpu_kernels) {
+      return "";
+    }
+    else {
+      std::stringstream out;
+      out << indent << pre << "<Lib name=\"";
+      if(ptr_lib_ == kernel::Lib::cuda_kernels) {
+        out << "cuda\" " << "device=\"" << "[" << kernel::get_ptr_device_num(ptr_lib(), ptr_.get()) << "]" << kernel::get_ptr_device_name(ptr_lib(), ptr_.get()) << "\"";
+      }
+      out << "/>" << post;
+      return out.str();
+    }
   }
 
   void

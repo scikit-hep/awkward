@@ -134,33 +134,52 @@ namespace awkward {
       }
     }
     else {
-      for (int64_t i = 0;  i < 5;  i++) {
+      for (int64_t i = 0; i < 5; i++) {
         if (i != 0) {
           out << " ";
         }
-        out << (int64_t)getitem_at_nowrap(i);
+        out << (int64_t) getitem_at_nowrap(i);
       }
       out << " ... ";
-      for (int64_t i = length_ - 5;  i < length_;  i++) {
+      for (int64_t i = length_ - 5; i < length_; i++) {
         if (i != length_ - 5) {
           out << " ";
         }
-        out << (int64_t)getitem_at_nowrap(i);
+        out << (int64_t) getitem_at_nowrap(i);
       }
     }
-    if(ptr_lib_ == kernel::Lib::cuda_kernels) {
+    if(ptr_lib_ == kernel::Lib::cpu_kernels) {
       out << "]\" offset=\"" << offset_ << "\" length=\"" << length_
           << "\" at=\"0x" << std::hex << std::setw(12) << std::setfill('0')
-          << reinterpret_cast<ssize_t>(ptr_.get())
-          << "\" on=\"[" << kernel::get_ptr_device_num(ptr_lib(), ptr_.get())
-          << "]" << kernel::get_ptr_device_name(ptr_lib(), ptr_.get())
-          << "\" Lib=\"" << "cuda_kernels" << "\"/>" << post;
+          << reinterpret_cast<ssize_t>(ptr_.get()) << "\"/>" << post;
+    }
+    else {
+      out << "]\" offset=\"" << offset_ << "\" length=\"" << length_
+          << "\" at=\"0x" << std::hex << std::setw(12) << std::setfill('0')
+          << reinterpret_cast<ssize_t>(ptr_.get()) << "\">" << post;
+      out << kernellib_asstring(indent + std::string("\n    "), "", "\n");
+      out << indent << "</" << classname() << ">" << post;
+    }
+    return out.str();
+  }
+
+  template <typename T>
+  const std::string
+  IndexOf<T>::kernellib_asstring(const std::string &indent,
+                                 const std::string &pre,
+                                 const std::string &post) const {
+    if(ptr_lib_ == kernel::Lib::cpu_kernels) {
+      return "";
+    }
+    else {
+      std::stringstream out;
+      out << indent << pre << "<Lib name=\"";
+      if(ptr_lib_ == kernel::Lib::cuda_kernels) {
+        out << "cuda\" " << "device=\"" << "[" << kernel::get_ptr_device_num(ptr_lib(), ptr_.get()) << "]" << kernel::get_ptr_device_name(ptr_lib(), ptr_.get()) << "\"";
+      }
+      out << "/>" << post;
       return out.str();
     }
-    out << "]\" offset=\"" << offset_ << "\" length=\"" << length_
-        << "\" at=\"0x" << std::hex << std::setw(12) << std::setfill('0')
-        << reinterpret_cast<ssize_t>(ptr_.get()) << "\"/>" << post;
-    return out.str();
   }
 
   template <typename T>

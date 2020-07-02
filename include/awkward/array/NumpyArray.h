@@ -397,6 +397,11 @@ namespace awkward {
                     const std::string& pre,
                     const std::string& post) const override;
 
+    const std::string
+    kernellib_asstring(const std::string& indent,
+                       const std::string& pre,
+                       const std::string& post) const;
+
     void
       tojson_part(ToJson& builder, bool include_beginendlist) const override;
 

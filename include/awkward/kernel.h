@@ -117,6 +117,9 @@ namespace kernel {
   std::string
   get_ptr_device_name(kernel::Lib ptr_lib, T* ptr);
 
+  const std::string
+  fully_qualified_cache_key(const std::string& cache_key, kernel::Lib ptr_lib);
+
   /// @class no_deleter
   ///
   /// @brief Used as a `std::shared_ptr` deleter (second argument) to
