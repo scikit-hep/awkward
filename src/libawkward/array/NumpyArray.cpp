@@ -891,7 +891,8 @@ namespace awkward {
       std::stringstream out;
       out << indent << pre << "<Lib name=\"";
       if(ptr_lib_ == kernel::Lib::cuda_kernels) {
-        out << "cuda\" " << "device=\"" << "[" << kernel::get_ptr_device_num(ptr_lib(), ptr_.get()) << "]" << kernel::get_ptr_device_name(ptr_lib(), ptr_.get()) << "\"";
+        out << "cuda\" " << "device_number=\"" << kernel::get_ptr_device_num(ptr_lib(), ptr_.get())
+        << "\" device_name=\"" << kernel::get_ptr_device_name(ptr_lib(), ptr_.get()) << "\"";
       }
       out << "/>" << post;
       return out.str();
