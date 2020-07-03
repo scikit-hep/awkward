@@ -100,7 +100,11 @@ namespace awkward {
   ///
   /// See #ListArrayOf for the meaning of each parameter.
   template <typename T>
-  class EXPORT_SYMBOL ListArrayOf: public Content {
+  class
+#ifdef AWKWARD_LISTARRAY_NO_EXTERN_TEMPLATE
+  EXPORT_SYMBOL
+#endif
+  ListArrayOf: public Content {
   public:
     /// @brief Creates a ListArray from a full set of parameters.
     ///
@@ -422,7 +426,7 @@ namespace awkward {
     const ContentPtr content_;
   };
 
-#if !defined AWKWARD_LISTARRAY_NO_EXTERN_TEMPLATE && !defined _MSC_VER
+#ifndef AWKWARD_LISTARRAY_NO_EXTERN_TEMPLATE
   extern template class ListArrayOf<int32_t>;
   extern template class ListArrayOf<uint32_t>;
   extern template class ListArrayOf<int64_t>;

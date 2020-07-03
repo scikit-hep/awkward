@@ -204,7 +204,11 @@ namespace awkward {
   ///
   /// Currently, the only type specialization is `T = int64_t`.
   template <typename T>
-  class EXPORT_SYMBOL SliceArrayOf: public SliceItem {
+  class
+#ifdef AWKWARD_SLICE_NO_EXTERN_TEMPLATE
+  EXPORT_SYMBOL
+#endif
+  SliceArrayOf: public SliceItem {
   public:
     /// @brief Creates a SliceArrayOf from a full set of parameters.
     ///
@@ -302,7 +306,7 @@ namespace awkward {
     bool frombool_;
   };
 
-#if !defined AWKWARD_SLICE_NO_EXTERN_TEMPLATE && !defined _MSC_VER
+#ifndef AWKWARD_SLICE_NO_EXTERN_TEMPLATE
   extern template class SliceArrayOf<int64_t>;
 #endif
 
@@ -397,7 +401,11 @@ namespace awkward {
   ///
   /// Currently, the only type specialization is `T = int64_t`.
   template <typename T>
-  class EXPORT_SYMBOL SliceMissingOf: public SliceItem {
+  class
+#ifdef AWKWARD_SLICE_NO_EXTERN_TEMPLATE
+  EXPORT_SYMBOL
+#endif
+  SliceMissingOf: public SliceItem {
   public:
     /// @brief Creates a SliceMissingOf with a full set of parameters.
     ///
@@ -456,7 +464,7 @@ namespace awkward {
     const SliceItemPtr content_;
   };
 
-#if !defined AWKWARD_SLICE_NO_EXTERN_TEMPLATE && !defined _MSC_VER
+#ifndef AWKWARD_SLICE_NO_EXTERN_TEMPLATE
   extern template class SliceMissingOf<int64_t>;
 #endif
 
@@ -470,7 +478,11 @@ namespace awkward {
   ///
   /// Currently, the only type specialization is `T = int64_t`.
   template <typename T>
-  class EXPORT_SYMBOL SliceJaggedOf: public SliceItem {
+  class
+#ifdef AWKWARD_SLICE_NO_EXTERN_TEMPLATE
+  EXPORT_SYMBOL
+#endif
+  SliceJaggedOf: public SliceItem {
   public:
     /// @brief Creates a SliceJaggedOf with a full set of parameters.
     ///
@@ -527,7 +539,7 @@ namespace awkward {
     const SliceItemPtr content_;
   };
 
-#if !defined AWKWARD_SLICE_NO_EXTERN_TEMPLATE && !defined _MSC_VER
+#ifndef AWKWARD_SLICE_NO_EXTERN_TEMPLATE
   extern template class SliceJaggedOf<int64_t>;
 #endif
 
