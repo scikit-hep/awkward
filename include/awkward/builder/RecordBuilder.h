@@ -15,7 +15,7 @@ namespace awkward {
   /// @class RecordBuilder
   ///
   /// @brief Builder node for accumulated records.
-  class EXPORT_SYMBOL RecordBuilder: public Builder {
+  class LIBAWKWARD_EXPORT_SYMBOL RecordBuilder: public Builder {
   public:
     /// @brief Create an empty RecordBuilder.
     /// @param options Configuration options for building an array;

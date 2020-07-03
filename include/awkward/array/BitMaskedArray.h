@@ -21,7 +21,7 @@ namespace awkward {
   /// @class BitMaskedForm
   ///
   /// @brief Form describing BitMaskedArray.
-  class EXPORT_SYMBOL BitMaskedForm: public Form {
+  class LIBAWKWARD_EXPORT_SYMBOL BitMaskedForm: public Form {
   public:
     /// @brief Creates a BitMaskedForm. See BitMaskedArray for documentation.
     BitMaskedForm(bool has_identities,
@@ -106,7 +106,7 @@ namespace awkward {
   /// over its #content.
   ///
   /// See #BitMaskedArray for the meaning of each parameter.
-  class EXPORT_SYMBOL BitMaskedArray: public Content {
+  class LIBAWKWARD_EXPORT_SYMBOL BitMaskedArray: public Content {
   public:
     /// @brief Creates an BitMaskedArray from a full set of parameters.
     ///

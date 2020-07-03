@@ -15,7 +15,7 @@ namespace awkward {
   /// @class RecordForm
   ///
   /// @brief Form describing RecordArray (not a Record).
-  class EXPORT_SYMBOL RecordForm: public Form {
+  class LIBAWKWARD_EXPORT_SYMBOL RecordForm: public Form {
   public:
     /// @brief Creates a RecordForm. See RecordArray (not Record) for
     /// documentation.
@@ -110,7 +110,7 @@ namespace awkward {
   /// with each field.
   ///
   /// Fields are always ordered, whether tuples or records.
-  class EXPORT_SYMBOL RecordArray:
+  class LIBAWKWARD_EXPORT_SYMBOL RecordArray:
     public Content,
     public std::enable_shared_from_this<RecordArray> {
   public:

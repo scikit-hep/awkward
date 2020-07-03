@@ -54,7 +54,7 @@ namespace awkward {
   ///
   ///    - {@link IdentitiesOf Identities32}, which is `IdentitiesOf<int32_t>`
   ///    - {@link IdentitiesOf Identities64}, which is `IdentitiesOf<int64_t>`
-  class EXPORT_SYMBOL Identities {
+  class LIBAWKWARD_EXPORT_SYMBOL Identities {
   public:
     /// @brief Identities reference type (64-bit integer).
     using Ref = int64_t;
@@ -279,7 +279,7 @@ namespace awkward {
   template <typename T>
   class
 #ifdef AWKWARD_IDENTITIES_NO_EXTERN_TEMPLATE
-  EXPORT_SYMBOL
+  LIBAWKWARD_EXPORT_SYMBOL
 #endif
   IdentitiesOf: public Identities {
   public:

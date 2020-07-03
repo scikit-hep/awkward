@@ -18,7 +18,7 @@ namespace awkward {
   /// @class NumpyForm
   ///
   /// @brief Form describing NumpyArray.
-  class EXPORT_SYMBOL NumpyForm: public Form {
+  class LIBAWKWARD_EXPORT_SYMBOL NumpyForm: public Form {
   public:
     /// @brief Creates a NumpyForm. See NumpyArray for documentation.
     NumpyForm(bool has_identities,
@@ -126,7 +126,7 @@ namespace awkward {
   ///  - 8-bit booleans
   ///
   ///(native endian only).
-  class EXPORT_SYMBOL NumpyArray: public Content {
+  class LIBAWKWARD_EXPORT_SYMBOL NumpyArray: public Content {
   public:
 
     /// @brief Creates a NumpyArray from a full set of parameters.

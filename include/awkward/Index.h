@@ -28,7 +28,7 @@ namespace awkward {
   ///    - {@link IndexOf Index32}, which is `IndexOf<int32_t>`
   ///    - {@link IndexOf IndexU32}, which is `IndexOf<uint32_t>`
   ///    - {@link IndexOf Index64}, which is `IndexOf<int64_t>`
-  class EXPORT_SYMBOL Index {
+  class LIBAWKWARD_EXPORT_SYMBOL Index {
   public:
     /// @brief Integer type of an Index, used by ListForm, IndexedForm, etc.
     enum class Form {i8, u8, i32, u32, i64, kNumIndexForm};
@@ -73,7 +73,7 @@ namespace awkward {
   template <typename T>
   class
 #ifdef AWKWARD_INDEX_NO_EXTERN_TEMPLATE
-  EXPORT_SYMBOL
+  LIBAWKWARD_EXPORT_SYMBOL
 #endif
   IndexOf: public Index {
   public:

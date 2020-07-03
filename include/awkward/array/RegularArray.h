@@ -15,7 +15,7 @@ namespace awkward {
   /// @class RegularForm
   ///
   /// @brief Form describing RegularArray.
-  class EXPORT_SYMBOL RegularForm: public Form {
+  class LIBAWKWARD_EXPORT_SYMBOL RegularForm: public Form {
   public:
     /// @brief Creates a RegularForm. See RegularArray for documentation.
     RegularForm(bool has_identities,
@@ -93,7 +93,7 @@ namespace awkward {
   /// it must also start at zero.
   ///
   /// See #RegularArray for the meaning of each parameter.
-  class EXPORT_SYMBOL RegularArray: public Content {
+  class LIBAWKWARD_EXPORT_SYMBOL RegularArray: public Content {
   public:
     /// @brief Creates a RegularArray from a full set of parameters.
     ///

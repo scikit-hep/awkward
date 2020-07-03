@@ -17,7 +17,7 @@ namespace awkward {
   /// @class UnionForm
   ///
   /// @brief Form describing UnionArray.
-  class EXPORT_SYMBOL UnionForm: public Form {
+  class LIBAWKWARD_EXPORT_SYMBOL UnionForm: public Form {
   public:
     /// @brief Creates a UnionForm. See {@link UnionArrayOf UnionArray} for
     /// documentation.
@@ -112,7 +112,7 @@ namespace awkward {
   template <typename T, typename I>
   class
 #ifdef AWKWARD_UNIONARRAY_NO_EXTERN_TEMPLATE
-  EXPORT_SYMBOL
+  LIBAWKWARD_EXPORT_SYMBOL
 #endif
   UnionArrayOf: public Content {
   public:

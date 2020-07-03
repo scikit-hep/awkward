@@ -15,7 +15,7 @@ namespace awkward {
   /// @class ListForm
   ///
   /// @brief Form describing ListArray.
-  class EXPORT_SYMBOL ListForm: public Form {
+  class LIBAWKWARD_EXPORT_SYMBOL ListForm: public Form {
   public:
     /// @brief Creates a ListForm. See {@link ListArrayOf LinkArray} for
     /// documentation.
@@ -102,7 +102,7 @@ namespace awkward {
   template <typename T>
   class
 #ifdef AWKWARD_LISTARRAY_NO_EXTERN_TEMPLATE
-  EXPORT_SYMBOL
+  LIBAWKWARD_EXPORT_SYMBOL
 #endif
   ListArrayOf: public Content {
   public:

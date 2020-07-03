@@ -15,7 +15,7 @@ namespace awkward {
   /// @class ListOffsetForm
   ///
   /// @brief Form describing ListOffsetArray.
-  class EXPORT_SYMBOL ListOffsetForm: public Form {
+  class LIBAWKWARD_EXPORT_SYMBOL ListOffsetForm: public Form {
   public:
     /// @brief Creates a ListOffsetForm. See
     /// {@link ListOffsetArrayOf ListOffsetArray} for documentation.
@@ -99,7 +99,7 @@ namespace awkward {
   template <typename T>
   class
 #ifdef AWKWARD_LISTOFFSETARRAY_NO_EXTERN_TEMPLATE
-  EXPORT_SYMBOL
+  LIBAWKWARD_EXPORT_SYMBOL
 #endif
   ListOffsetArrayOf: public Content {
   public:

@@ -17,7 +17,7 @@ namespace awkward {
   /// @class VirtualForm
   ///
   /// @brief Form describing VirtualArray.
-  class EXPORT_SYMBOL VirtualForm: public Form {
+  class LIBAWKWARD_EXPORT_SYMBOL VirtualForm: public Form {
   public:
     /// @brief Creates a VirtualForm. See VirtualArray for documentation.
     VirtualForm(bool has_identities,
@@ -94,7 +94,7 @@ namespace awkward {
   /// @brief Represents an array that can be generated on demand.
   ///
   /// See #VirtualArray for the meaning of each parameter.
-  class EXPORT_SYMBOL VirtualArray: public Content {
+  class LIBAWKWARD_EXPORT_SYMBOL VirtualArray: public Content {
   public:
     /// @brief Creates a VirtualArray from a full set of parameters.
     ///

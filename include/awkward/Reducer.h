@@ -15,7 +15,7 @@ namespace awkward {
   /// Reducers have no parameters or state. They are classes for convenience,
   /// to separate {@link Content#reduce_next Content::reduce_next}, determining
   /// which values to combine, from the choice of reducer algorithm.
-  class EXPORT_SYMBOL Reducer {
+  class LIBAWKWARD_EXPORT_SYMBOL Reducer {
   public:
     /// @brief Name of the reducer algorithm.
     virtual const std::string
@@ -213,7 +213,7 @@ namespace awkward {
   /// Reducers have no parameters or state. They are classes for convenience,
   /// to separate {@link Content#reduce_next Content::reduce_next}, determining
   /// which values to combine, from the choice of reducer algorithm.
-  class EXPORT_SYMBOL ReducerCount: public Reducer {
+  class LIBAWKWARD_EXPORT_SYMBOL ReducerCount: public Reducer {
   public:
     /// @brief Name of the reducer algorithm: `"count"`.
     const std::string
@@ -305,7 +305,7 @@ namespace awkward {
   /// Reducers have no parameters or state. They are classes for convenience,
   /// to separate {@link Content#reduce_next Content::reduce_next}, determining
   /// which values to combine, from the choice of reducer algorithm.
-  class EXPORT_SYMBOL ReducerCountNonzero: public Reducer {
+  class LIBAWKWARD_EXPORT_SYMBOL ReducerCountNonzero: public Reducer {
   public:
     /// @brief Name of the reducer algorithm: `"count_nonzero"`.
     const std::string
@@ -397,7 +397,7 @@ namespace awkward {
   /// Reducers have no parameters or state. They are classes for convenience,
   /// to separate {@link Content#reduce_next Content::reduce_next}, determining
   /// which values to combine, from the choice of reducer algorithm.
-  class EXPORT_SYMBOL ReducerSum: public Reducer {
+  class LIBAWKWARD_EXPORT_SYMBOL ReducerSum: public Reducer {
   public:
     /// @brief Name of the reducer algorithm: `"sum"`.
     const std::string
@@ -490,7 +490,7 @@ namespace awkward {
   /// Reducers have no parameters or state. They are classes for convenience,
   /// to separate {@link Content#reduce_next Content::reduce_next}, determining
   /// which values to combine, from the choice of reducer algorithm.
-  class EXPORT_SYMBOL ReducerProd: public Reducer {
+  class LIBAWKWARD_EXPORT_SYMBOL ReducerProd: public Reducer {
   public:
     /// @brief Name of the reducer algorithm: `"prod"`.
     const std::string
@@ -584,7 +584,7 @@ namespace awkward {
   /// Reducers have no parameters or state. They are classes for convenience,
   /// to separate {@link Content#reduce_next Content::reduce_next}, determining
   /// which values to combine, from the choice of reducer algorithm.
-  class EXPORT_SYMBOL ReducerAny: public Reducer {
+  class LIBAWKWARD_EXPORT_SYMBOL ReducerAny: public Reducer {
   public:
     /// @brief Name of the reducer algorithm: `"any"`.
     const std::string
@@ -677,7 +677,7 @@ namespace awkward {
   /// Reducers have no parameters or state. They are classes for convenience,
   /// to separate {@link Content#reduce_next Content::reduce_next}, determining
   /// which values to combine, from the choice of reducer algorithm.
-  class EXPORT_SYMBOL ReducerAll: public Reducer {
+  class LIBAWKWARD_EXPORT_SYMBOL ReducerAll: public Reducer {
   public:
     /// @brief Name of the reducer algorithm: `"all"`.
     const std::string
@@ -770,7 +770,7 @@ namespace awkward {
   /// Reducers have no parameters or state. They are classes for convenience,
   /// to separate {@link Content#reduce_next Content::reduce_next}, determining
   /// which values to combine, from the choice of reducer algorithm.
-  class EXPORT_SYMBOL ReducerMin: public Reducer {
+  class LIBAWKWARD_EXPORT_SYMBOL ReducerMin: public Reducer {
   public:
     /// @brief Name of the reducer algorithm: `"min"`.
     const std::string
@@ -857,7 +857,7 @@ namespace awkward {
   /// Reducers have no parameters or state. They are classes for convenience,
   /// to separate {@link Content#reduce_next Content::reduce_next}, determining
   /// which values to combine, from the choice of reducer algorithm.
-  class EXPORT_SYMBOL ReducerMax: public Reducer {
+  class LIBAWKWARD_EXPORT_SYMBOL ReducerMax: public Reducer {
   public:
     /// @brief Name of the reducer algorithm: `"max"`.
     const std::string
@@ -944,7 +944,7 @@ namespace awkward {
   /// Reducers have no parameters or state. They are classes for convenience,
   /// to separate {@link Content#reduce_next Content::reduce_next}, determining
   /// which values to combine, from the choice of reducer algorithm.
-  class EXPORT_SYMBOL ReducerArgmin: public Reducer {
+  class LIBAWKWARD_EXPORT_SYMBOL ReducerArgmin: public Reducer {
   public:
     /// @brief Name of the reducer algorithm: `"argmin"`.
     const std::string
@@ -1037,7 +1037,7 @@ namespace awkward {
   /// Reducers have no parameters or state. They are classes for convenience,
   /// to separate {@link Content#reduce_next Content::reduce_next}, determining
   /// which values to combine, from the choice of reducer algorithm.
-  class EXPORT_SYMBOL ReducerArgmax: public Reducer {
+  class LIBAWKWARD_EXPORT_SYMBOL ReducerArgmax: public Reducer {
   public:
     /// @brief Name of the reducer algorithm: `"argmax"`.
     const std::string

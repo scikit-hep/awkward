@@ -17,7 +17,7 @@ namespace awkward {
   /// @class IndexedForm
   ///
   /// @brief Form describing IndexedArray (with `OPTION = false`).
-  class EXPORT_SYMBOL IndexedForm: public Form {
+  class LIBAWKWARD_EXPORT_SYMBOL IndexedForm: public Form {
   public:
     /// @brief Creates a IndexedForm. See {@link IndexedArrayOf IndexedArray}
     /// for documentation.
@@ -90,7 +90,7 @@ namespace awkward {
   /// @class IndexedOptionForm
   ///
   /// @brief Form describing IndexedOptionArray.
-  class EXPORT_SYMBOL IndexedOptionForm: public Form {
+  class LIBAWKWARD_EXPORT_SYMBOL IndexedOptionForm: public Form {
   public:
     /// @brief Creates a IndexedOptionForm. See IndexedArray for documentation.
     IndexedOptionForm(bool has_identities,
@@ -170,7 +170,7 @@ namespace awkward {
   template <typename T, bool ISOPTION>
   class
 #ifdef AWKWARD_INDEXEDARRAY_NO_EXTERN_TEMPLATE
-  EXPORT_SYMBOL
+  LIBAWKWARD_EXPORT_SYMBOL
 #endif
   IndexedArrayOf: public Content {
   public:
