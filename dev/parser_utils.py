@@ -238,14 +238,8 @@ def parseheader(filename):
             for i in range(len(line)):
                 if i % 2 == 0:
                     key = line[i]
-                    if (
-                        (key != "role")
-                        and (key != "instance")
-                        and (key != "upperlimit")
-                    ):
-                        raise AssertionError(
-                            "Only role, instance and upperlimit allowed"
-                        )
+                    if (key != "role") and (key != "instance"):
+                        raise AssertionError("Only role and instance allowed")
                 else:
                     val = line[i]
                     d[key] = val

@@ -2683,7 +2683,7 @@ ERROR awkward_ListArray64_min_range(
 
 template <typename C>
 ERROR awkward_ListArray_rpad_and_clip_length_axis1(
-  int64_t* tolength,
+  int64_t* tomin,
   const C* fromstarts,
   const C* fromstops,
   int64_t target,
@@ -2695,7 +2695,7 @@ ERROR awkward_ListArray_rpad_and_clip_length_axis1(
     int64_t rangeval = fromstops[stopsoffset + i] - fromstarts[startsoffset + i];
     length += (target > rangeval) ? target : rangeval;
   }
-  *tolength = length;
+  *tomin = length;
   return success();
 }
 ERROR awkward_ListArray32_rpad_and_clip_length_axis1(
