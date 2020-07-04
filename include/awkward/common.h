@@ -34,6 +34,13 @@
 #define FILENAME_FOR_EXCEPTIONS_C(filename, line) ("\n\n(https://github.com/scikit-hep/awkward-1.0/blob/" VERSION_INFO "/" filename "#L" #line ")")
 #define FILENAME_FOR_EXCEPTIONS_CUDA(filename, line) ("\n\n(https://github.com/scikit-hep/awkward-1.0/blob/" QUOTE(VERSION_INFO) "/" filename "#L" #line ")")
 
+#ifdef __GNUC__
+// Silence a gcc warning: type attributes ignored after type is already defined
+  #define EXPORT_TEMPLATE_INST
+#else
+  #define EXPORT_TEMPLATE_INST EXPORT_SYMBOL
+#endif
+
 #ifndef LIBAWKWARD_EXPORT_SYMBOL
   #define LIBAWKWARD_EXPORT_SYMBOL
 #endif

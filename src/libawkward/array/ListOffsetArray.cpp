@@ -2261,7 +2261,7 @@ namespace awkward {
                                                   content);
   }
 
-  template class EXPORT_SYMBOL ListOffsetArrayOf<int32_t>;
-  template class EXPORT_SYMBOL ListOffsetArrayOf<uint32_t>;
-  template class EXPORT_SYMBOL ListOffsetArrayOf<int64_t>;
+  template class EXPORT_TEMPLATE_INST ListOffsetArrayOf<int32_t>;
+  template class EXPORT_TEMPLATE_INST ListOffsetArrayOf<uint32_t>;
+  template class EXPORT_TEMPLATE_INST ListOffsetArrayOf<int64_t>;
 }
