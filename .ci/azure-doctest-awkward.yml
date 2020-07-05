@@ -1,0 +1,53 @@
+trigger:
+  batch: true
+  branches:
+    include:
+      - "*"
+  paths:
+    exclude:
+      - README.md
+      - VERSION_INFO
+      - .ci/azure-deploy-awkward.yml
+      - .ci/linux-build.sh
+      - .readthedocs.yml
+      - docs-src/*
+      - docs-img/*
+      - docs-jupyter/*
+      - docs-doxygen/*
+      - docs-sphinx/*
+      - docs/*
+      - studies/*
+
+jobs:
+  - job: Linux
+
+    pool:
+      vmImage: "ubuntu-16.04"
+
+    strategy:
+      matrix:
+        "py38-np*":
+          python.version: "3.8"
+          python.architecture: "x64"
+
+    steps:
+      - checkout: self
+        submodules: recursive
+
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '$(python.version)'
+          architecture: '$(python.architecture)'
+        displayName: 'Python $(python.version)'
+
+      - script: |
+          python -m pip install --upgrade pip
+        displayName: "Install Pip"
+
+      - script: |
+          python -m pip install numpy
+        displayName: "Install NumPy"
+
+      - script: |
+          python localbuild.py --pytest tests
+        displayName: "Build"
