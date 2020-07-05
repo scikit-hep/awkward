@@ -45,9 +45,11 @@ jobs:
         displayName: "Install Pip"
 
       - script: |
-          python -m pip install numpy
-        displayName: "Install NumPy"
+          python -m pip install -r docs-sphinx/requirements.txt
+          python -m pip install sphinx_rtd_theme
+          sudo apt-get install -y doxygen
+        displayName: "Install requirements"
 
       - script: |
-          python localbuild.py --pytest tests
-        displayName: "Build"
+          sphinx-build docs-sphinx/ docs-sphinx/_build/
+        displayName: "Generate documentation"
