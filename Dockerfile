@@ -1,12 +1,23 @@
-FROM nvidia/cuda:10.2-devel
-FROM python:3
+FROM nvidia/cuda:10.2-cudnn7-devel-ubuntu18.04
 
 WORKDIR /awkward
 
-COPY . ./
-
-RUN nvcc
-
-RUN cd cuda-kernels && rm -rf include src VERSION_INFO dist awkward1_cuda_kernels.egg-info
-RUN cd cuda-kernels && python setup.py sdist
-RUN cd cuda-kernels && pip install -v .
+RUN apt-get update && apt-get install -y \
+    software-properties-common
+RUN add-apt-repository universe
+RUN apt-get update && apt-get install -y \
+	    curl \
+	    git \
+	    cmake \	
+	    python \
+	    python-pip \
+	    python3-distutils
+RUN nvcc --version
+COPY . .
+RUN ls
+RUN pip install setuptools
+RUN pip install -r requirements.txt
+RUN pip install -r requirements-test.txt
+RUN python localbuild.py --pytest tests
+RUN mkdir  cuda-kernels/build
+RUN cd cuda-kernels/build && cmake ..
