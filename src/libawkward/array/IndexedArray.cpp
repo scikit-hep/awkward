@@ -2281,9 +2281,29 @@ namespace awkward {
       Index64 nextcarry = pair.first;
       IndexOf<T> outindex = pair.second;
 
+      if ( slicestarts.length() != length() or slicestops.length() != length() ) {
+        throw std::runtime_error("Slices look weird");
+      }
+      Index64 carrystarts(slicestarts.length() - numnull);
+      Index64 carrystops(slicestops.length() - numnull);
+      int64_t k=0;
+      for(int64_t i=0; i < length(); ++i) {
+        int64_t from = outindex.getitem_at_nowrap(i);
+        // here we could OR this with starts[i]==stops[i] to pass singletons
+        // as if they were nulls. We would have to hack a bit on nextcarry and outindex though
+        if ( from >= 0 ) {
+          carrystarts.setitem_at_nowrap(k, slicestarts.getitem_at_nowrap(i));
+          carrystops.setitem_at_nowrap(k, slicestops.getitem_at_nowrap(i));
+          k++;
+        }
+      }
+      if ( k != carrystarts.length() ) {
+        throw std::runtime_error("failed to carry starts and stops properly");
+      }
+
       ContentPtr next = content_.get()->carry(nextcarry);
-      ContentPtr out = next.get()->getitem_next_jagged(slicestarts,
-                                                       slicestops,
+      ContentPtr out = next.get()->getitem_next_jagged(carrystarts,
+                                                       carrystops,
                                                        slicecontent,
                                                        tail);
       IndexedArrayOf<T, ISOPTION> out2(identities_,
@@ -2303,6 +2323,7 @@ namespace awkward {
       util::handle_error(err, classname(), identities_.get());
 
       ContentPtr next = content_.get()->carry(nextcarry);
+      // shouldn't we carry starts and stops here as well?
       return next.get()->getitem_next_jagged(slicestarts,
                                              slicestops,
                                              slicecontent,

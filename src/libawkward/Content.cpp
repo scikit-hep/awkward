@@ -1189,6 +1189,37 @@ namespace awkward {
                                           index.length());
   }
 
+  const ContentPtr getitem_next_missing_jagged(const SliceMissing64& missing,
+                                               const Slice& tail,
+                                               const Index64& advanced,
+                                               const ContentPtr& that) {
+    const SliceJagged64* jagged = dynamic_cast<SliceJagged64*>(missing.content().get());
+    const Index64 index = missing.index();
+    ContentPtr content = that.get()->getitem_at_nowrap(0);
+    if ( content.get()->length() != index.length() ) {
+      throw std::invalid_argument("Contents length does not match length of masked jagged slice");
+    }
+    Index64 outputmask(index.length());
+    Index64 starts(index.length());
+    Index64 stops(index.length());
+    int64_t k=0;
+    for(int64_t i=0; i < index.length(); ++i) {
+      int64_t start = jagged->offsets().getitem_at_nowrap(k);
+      starts.setitem_at_nowrap(i, start);
+      if ( index.getitem_at_nowrap(i) < 0 ) {
+        outputmask.setitem_at_nowrap(i, -1);
+        stops.setitem_at_nowrap(i, start);
+      } else {
+        outputmask.setitem_at_nowrap(i, i);
+        int64_t stop = jagged->offsets().getitem_at_nowrap(++k);
+        stops.setitem_at_nowrap(i, stop);
+      }
+    }
+    ContentPtr tmp = content.get()->getitem_next_jagged(starts, stops, jagged->content(), tail);
+    IndexedOptionArray64 out(Identities::none(), util::Parameters(), outputmask, tmp);
+    return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), out.simplify_optiontype(), index.length());
+  }
+
   bool check_missing_jagged_same(const ContentPtr& that,
                                  const Index8& bytemask,
                                  const SliceMissing64& missing) {
@@ -1273,6 +1304,11 @@ namespace awkward {
     if (advanced.length() != 0) {
       throw std::invalid_argument("cannot mix missing values in slice "
                                   "with NumPy-style advanced indexing");
+    }
+
+    // would length ever not be 1 when the content is jagged?
+    if ( length() == 1 && dynamic_cast<SliceJagged64*>(missing.content().get())) {
+      return getitem_next_missing_jagged(missing, tail, advanced, shallow_copy());
     }
 
     ContentPtr tmp = check_missing_jagged(shallow_copy(), missing);

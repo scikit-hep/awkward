@@ -171,7 +171,7 @@ def test_double_jagged():
 
 def test_masked_jagged():
     array = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]], check_valid=True)
-    assert awkward1.to_list(array[awkward1.Array([[-1, -2], None, [], None, [-2, 0], [], [1]], check_valid=True)]) == [[3.3, 2.2], None, [], None, [4.4, 4.4], [], [8.8]]
+    assert awkward1.to_list(array[awkward1.Array([[-1, -2], None, [], None, [-2, 0]], check_valid=True)]) == [[3.3, 2.2], None, [], None, [8.8, 7.7]]
 
 def test_jagged_masked():
     array = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]], check_valid=True)
@@ -203,8 +203,8 @@ def test_emptyarray():
 
     assert awkward1.to_list(listoffsetarray[awkward1.Array([[], [], [], []], check_valid=True)]) == [[], [], [], []]
     assert awkward1.to_list(listoffsetarray[awkward1.Array([[], [None], [], []], check_valid=True)]) == [[], [None], [], []]
-    assert awkward1.to_list(listoffsetarray[awkward1.Array([[], [], None, [], []], check_valid=True)]) == [[], [], None, [], []]
-    assert awkward1.to_list(listoffsetarray[awkward1.Array([[], [None], None, [], []], check_valid=True)]) == [[], [None], None, [], []]
+    assert awkward1.to_list(listoffsetarray[awkward1.Array([[], [], None, []], check_valid=True)]) == [[], [], None, []]
+    assert awkward1.to_list(listoffsetarray[awkward1.Array([[], [None], None, []], check_valid=True)]) == [[], [None], None, []]
 
     with pytest.raises(ValueError):
         listoffsetarray[awkward1.Array([[], [0], [], []], check_valid=True)]
@@ -218,8 +218,7 @@ def test_record():
     array = awkward1.Array([{"x": [0, 1, 2], "y": [0.0, 1.1, 2.2, 3.3]}, {"x": [3, 4, 5, 6], "y": [4.4, 5.5]}, {"x": [7, 8], "y": [6.6, 7.7, 8.8, 9.9]}], check_valid=True)
     assert awkward1.to_list(array[awkward1.Array([[-1, 1], [0, 0, 1], [-1, -2]], check_valid=True)]) == [{"x": [2, 1], "y": [3.3, 1.1]}, {"x": [3, 3, 4], "y": [4.4, 4.4, 5.5]}, {"x": [8, 7], "y": [9.9, 8.8]}]
     assert awkward1.to_list(array[awkward1.Array([[-1, 1], [0, 0, None, 1], [-1, -2]], check_valid=True)]) == [{"x": [2, 1], "y": [3.3, 1.1]}, {"x": [3, 3, None, 4], "y": [4.4, 4.4, None, 5.5]}, {"x": [8, 7], "y": [9.9, 8.8]}]
-    assert awkward1.to_list(array[awkward1.Array([[-1, 1], None, [0, 0, 1], [-1, -2]], check_valid=True)]) == [{"x": [2, 1], "y": [3.3, 1.1]}, None, {"x": [3, 3, 4], "y": [4.4, 4.4, 5.5]}, {"x": [8, 7], "y": [9.9, 8.8]}]
-    assert awkward1.to_list(array[awkward1.Array([[-1, 1], None, [0, 0, None, 1], [-1, -2]], check_valid=True)]) == [{"x": [2, 1], "y": [3.3, 1.1]}, None, {"x": [3, 3, None, 4], "y": [4.4, 4.4, None, 5.5]}, {"x": [8, 7], "y": [9.9, 8.8]}]
+    assert awkward1.to_list(array[awkward1.Array([[-1, 1], None, [-1, -2]], check_valid=True)]) == [{"x": [2, 1], "y": [3.3, 1.1]}, None, {"x": [8, 7], "y": [9.9, 8.8]}]
 
 def test_indexedarray():
     array = awkward1.from_iter([[0.0, 1.1, 2.2], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False)
@@ -229,8 +228,8 @@ def test_indexedarray():
 
     assert awkward1.to_list(indexedarray[awkward1.Array([[0, -1], [0], [], [1, 1]], check_valid=True)]) == [[6.6, 9.9], [5.5], [], [1.1, 1.1]]
     assert awkward1.to_list(indexedarray[awkward1.Array([[0, -1], [0], [None], [1, None, 1]], check_valid=True)]) == [[6.6, 9.9], [5.5], [None], [1.1, None, 1.1]]
-    assert awkward1.to_list(indexedarray[awkward1.Array([[0, -1], [0], None, [], [1, 1]], check_valid=True)]) == [[6.6, 9.9], [5.5], None, [], [1.1, 1.1]]
-    assert awkward1.to_list(indexedarray[awkward1.Array([[0, -1], [0], None, [None], [1, None, 1]], check_valid=True)]) == [[6.6, 9.9], [5.5], None, [None], [1.1, None, 1.1]]
+    assert awkward1.to_list(indexedarray[awkward1.Array([[0, -1], [0], None, [1, 1]], check_valid=True)]) == [[6.6, 9.9], [5.5], None, [1.1, 1.1]]
+    assert awkward1.to_list(indexedarray[awkward1.Array([[0, -1], [0], None, [None]], check_valid=True)]) == [[6.6, 9.9], [5.5], None, [None]]
 
     index = awkward1.layout.Index64(numpy.array([3, 2, 1, 0], dtype=numpy.int64))
     indexedarray = awkward1.layout.IndexedOptionArray64(index, array)
@@ -238,8 +237,8 @@ def test_indexedarray():
 
     assert awkward1.to_list(indexedarray[awkward1.Array([[0, -1], [0], [], [1, 1]], check_valid=True)]) == [[6.6, 9.9], [5.5], [], [1.1, 1.1]]
     assert awkward1.to_list(indexedarray[awkward1.Array([[0, -1], [0], [None], [1, None, 1]], check_valid=True)]) == [[6.6, 9.9], [5.5], [None], [1.1, None, 1.1]]
-    assert awkward1.to_list(indexedarray[awkward1.Array([[0, -1], [0], None, [], [1, 1]], check_valid=True)]) == [[6.6, 9.9], [5.5], None, [], [1.1, 1.1]]
-    assert awkward1.to_list(indexedarray[awkward1.Array([[0, -1], [0], None, [None], [1, None, 1]], check_valid=True)]) == [[6.6, 9.9], [5.5], None, [None], [1.1, None, 1.1]]
+    assert awkward1.to_list(indexedarray[awkward1.Array([[0, -1], [0], None, []], check_valid=True)]) == [[6.6, 9.9], [5.5], None, []]
+    assert awkward1.to_list(indexedarray[awkward1.Array([[0, -1], [0], None, [1, None, 1]], check_valid=True)]) == [[6.6, 9.9], [5.5], None, [1.1, None, 1.1]]
 
 def test_indexedarray2():
     array = awkward1.from_iter([[0.0, 1.1, 2.2], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False)
@@ -283,8 +282,9 @@ def test_indexedarray3():
 
     assert (awkward1.to_list(array[awkward1.Array([[2, 1, 1, 0], [1], None, [0]])])) == [[2.2, 1.1, 1.1, 0.0], [4.4], None, [5.5]]
 
+    assert awkward1.to_list(array[awkward1.Array([[2, 1, 1, 0], None, [1], [0]])]) == [[2.2, 1.1, 1.1, 0], None, None, [5.5]]
     with pytest.raises(ValueError):
-        array[awkward1.Array([[2, 1, 1, 0], None, [1], [0]])]
+        array[awkward1.Array([[2, 1, 1, 0], None, [1], [0], None])]
 
 def test_sequential():
     array = awkward1.Array(numpy.arange(2*3*5).reshape(2, 3, 5).tolist(), check_valid=True)
