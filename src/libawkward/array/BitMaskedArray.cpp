@@ -626,8 +626,8 @@ namespace awkward {
   }
 
   const ContentPtr
-  BitMaskedArray::carry(const Index64& carry) const {
-    return toByteMaskedArray().get()->carry(carry);
+  BitMaskedArray::carry(const Index64& carry, bool allow_lazy) const {
+    return toByteMaskedArray().get()->carry(carry, allow_lazy);
   }
 
   int64_t

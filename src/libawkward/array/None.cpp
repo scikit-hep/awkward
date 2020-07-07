@@ -131,7 +131,7 @@ namespace awkward {
   }
 
   const ContentPtr
-  None::carry(const Index64& carry) const {
+  None::carry(const Index64& carry, bool allow_lazy) const {
     throw std::runtime_error("undefined operation: None::carry");
   }
 
