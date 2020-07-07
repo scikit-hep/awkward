@@ -1220,83 +1220,6 @@ namespace awkward {
     return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), out.simplify_optiontype(), index.length());
   }
 
-  bool check_missing_jagged_same(const ContentPtr& that,
-                                 const Index8& bytemask,
-                                 const SliceMissing64& missing) {
-    if (bytemask.length() != missing.length()) {
-      return false;
-    }
-    Index64 missingindex = missing.index();
-    bool same;
-    struct Error err = kernel::slicemissing_check_same(
-      &same,
-      bytemask.ptr().get(),
-      bytemask.offset(),
-      missingindex.ptr().get(),
-      missingindex.offset(),
-      bytemask.length());
-    util::handle_error(err,
-                       that.get()->classname(),
-                       that.get()->identities().get());
-    return same;
-  }
-
-  const ContentPtr check_missing_jagged(const ContentPtr& that,
-                                        const SliceMissing64& missing) {
-    // FIXME: This function is insufficiently general. While working on
-    // something else, I noticed that it wasn't possible to slice option-type
-    // data with a jagged array. This handles the case where that happens at
-    // top-level; the most likely case for physics analysis, but it should be
-    // more deeply considered in general.
-
-    // Note that it only replaces the Content that would be passed to
-    // getitem_next(missing.content()) in getitem_next(SliceMissing64) in a
-    // particular scenario; it can probably be generalized by handling more
-    // general scenarios.
-
-    if (that.get()->length() == 1  &&
-        dynamic_cast<SliceJagged64*>(missing.content().get())) {
-      ContentPtr tmp1 = that.get()->getitem_at_nowrap(0);
-      ContentPtr tmp2(nullptr);
-      if (IndexedOptionArray32* rawtmp1 =
-          dynamic_cast<IndexedOptionArray32*>(tmp1.get())) {
-        tmp2 = rawtmp1->project();
-        if (!check_missing_jagged_same(that, rawtmp1->bytemask(), missing)) {
-          return that;
-        }
-      }
-      else if (IndexedOptionArray64* rawtmp1 =
-               dynamic_cast<IndexedOptionArray64*>(tmp1.get())) {
-        tmp2 = rawtmp1->project();
-        if (!check_missing_jagged_same(that, rawtmp1->bytemask(), missing)) {
-          return that;
-        }
-      }
-      else if (ByteMaskedArray* rawtmp1 =
-               dynamic_cast<ByteMaskedArray*>(tmp1.get())) {
-        tmp2 = rawtmp1->project();
-        if (!check_missing_jagged_same(that, rawtmp1->bytemask(), missing)) {
-          return that;
-        }
-      }
-      else if (BitMaskedArray* rawtmp1 =
-               dynamic_cast<BitMaskedArray*>(tmp1.get())) {
-        tmp2 = rawtmp1->project();
-        if (!check_missing_jagged_same(that, rawtmp1->bytemask(), missing)) {
-          return that;
-        }
-      }
-
-      if (tmp2.get() != nullptr) {
-        return std::make_shared<RegularArray>(Identities::none(),
-                                              that.get()->parameters(),
-                                              tmp2,
-                                              tmp2.get()->length());
-      }
-    }
-    return that;
-  }
-
   const ContentPtr
   Content::getitem_next(const SliceMissing64& missing,
                         const Slice& tail,
@@ -1306,15 +1229,14 @@ namespace awkward {
                                   "with NumPy-style advanced indexing");
     }
 
-    // would length ever not be 1 when the content is jagged?
-    if ( length() == 1 && dynamic_cast<SliceJagged64*>(missing.content().get())) {
+    if ( dynamic_cast<SliceJagged64*>(missing.content().get()) ) {
+      if ( length() != 1 ) {
+        throw std::runtime_error("Reached a not-well-considered code path, why am I here?");
+      }
       return getitem_next_missing_jagged(missing, tail, advanced, shallow_copy());
     }
 
-    ContentPtr tmp = check_missing_jagged(shallow_copy(), missing);
-    ContentPtr next = tmp.get()->getitem_next(missing.content(),
-                                              tail,
-                                              advanced);
+    ContentPtr next = getitem_next(missing.content(), tail, advanced);
 
     if (RegularArray* raw = dynamic_cast<RegularArray*>(next.get())) {
       return getitem_next_regular_missing(missing,
