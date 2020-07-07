@@ -672,7 +672,7 @@ namespace awkward {
     }
 
     const ContentPtr
-      carry(const Index64& carry) const override {
+      carry(const Index64& carry, bool allow_lazy) const override {
       std::shared_ptr<T> ptr(new T[(size_t)carry.length()],
                              kernel::array_deleter<T>());
 
@@ -1092,7 +1092,7 @@ namespace awkward {
           nextcarryptr[i] = start + step*i;
         }
 
-        return carry(nextcarry);
+        return carry(nextcarry, false);
       }
     }
 
@@ -1113,7 +1113,7 @@ namespace awkward {
         flathead.length(),
         length_);
       util::handle_error(err, classname(), identities_.get());
-      return carry(flathead);
+      return carry(flathead, false);
     }
 
     const ContentPtr

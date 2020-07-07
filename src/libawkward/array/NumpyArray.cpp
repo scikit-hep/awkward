@@ -1273,7 +1273,7 @@ namespace awkward {
   }
 
   const ContentPtr
-  NumpyArray::carry(const Index64& carry) const {
+  NumpyArray::carry(const Index64& carry, bool allow_lazy) const {
     std::shared_ptr<void> ptr(
       kernel::ptr_alloc<uint8_t>(ptr_lib_, (size_t)(carry.length()*strides_[0])));
     struct Error err = kernel::NumpyArray_getitem_next_null_64(
