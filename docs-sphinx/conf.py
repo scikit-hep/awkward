@@ -68,8 +68,11 @@ reducers = os.path.join(current_dir, "..", "src", "cpu-kernels", "reducers.cpp",
 getitem = os.path.join(current_dir, "..", "src", "cpu-kernels", "getitem.cpp",)
 
 sorting = os.path.join(current_dir, "..", "src", "cpu-kernels", "sorting.cpp")
+'''
 subprocess.check_call(
     [sys.executable, pythongen, identities, operations, reducers, getitem, sorting]
 )
+'''
+subprocess.check_call([sys.executable, pythongen, operations])
 
 exec(open("make_changelog.py").read(), dict(globals()))
