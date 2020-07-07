@@ -1189,32 +1189,45 @@ namespace awkward {
                                           index.length());
   }
 
+  void Content_getitem_next_missing_jagged_getmaskstartstop(int64_t* index_in, int64_t* offsets_in, int64_t* mask_out, int64_t* starts_out, int64_t* stops_out, int64_t length) {
+    int64_t k=0;
+    for(int64_t i=0; i < length; ++i) {
+      starts_out[i] = offsets_in[k];
+      if ( index_in[i] < 0 ) {
+        mask_out[i] = -1;
+        stops_out[i] = offsets_in[k];
+      } else {
+        mask_out[i] = i;
+        stops_out[i] = offsets_in[++k];
+      }
+    }
+  }
+
   const ContentPtr getitem_next_missing_jagged(const SliceMissing64& missing,
                                                const Slice& tail,
                                                const Index64& advanced,
                                                const ContentPtr& that) {
     const SliceJagged64* jagged = dynamic_cast<SliceJagged64*>(missing.content().get());
+    if ( jagged == nullptr ) {
+      throw std::runtime_error("Logic error: calling getitem_next_missing_jagged with bad slice type");
+    }
     const Index64 index = missing.index();
     ContentPtr content = that.get()->getitem_at_nowrap(0);
     if ( content.get()->length() != index.length() ) {
-      throw std::invalid_argument("Contents length does not match length of masked jagged slice");
+      throw std::invalid_argument(
+        std::string("cannot fit masked jagged slice with length ")
+        + std::to_string(index.length()) + std::string(" into ")
+        + that.get()->classname() + std::string(" of size ") + std::to_string(content.get()->length()));
     }
     Index64 outputmask(index.length());
     Index64 starts(index.length());
     Index64 stops(index.length());
-    int64_t k=0;
-    for(int64_t i=0; i < index.length(); ++i) {
-      int64_t start = jagged->offsets().getitem_at_nowrap(k);
-      starts.setitem_at_nowrap(i, start);
-      if ( index.getitem_at_nowrap(i) < 0 ) {
-        outputmask.setitem_at_nowrap(i, -1);
-        stops.setitem_at_nowrap(i, start);
-      } else {
-        outputmask.setitem_at_nowrap(i, i);
-        int64_t stop = jagged->offsets().getitem_at_nowrap(++k);
-        stops.setitem_at_nowrap(i, stop);
-      }
-    }
+    Content_getitem_next_missing_jagged_getmaskstartstop(index.ptr().get() + index.offset(),
+                                                         jagged->offsets().ptr().get() + jagged->offsets().offset(),
+                                                         outputmask.ptr().get(),
+                                                         starts.ptr().get(),
+                                                         stops.ptr().get(),
+                                                         index.length());
     ContentPtr tmp = content.get()->getitem_next_jagged(starts, stops, jagged->content(), tail);
     IndexedOptionArray64 out(Identities::none(), util::Parameters(), outputmask, tmp);
     return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), out.simplify_optiontype(), index.length());

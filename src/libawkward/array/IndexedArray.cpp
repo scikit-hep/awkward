@@ -2269,6 +2269,19 @@ namespace awkward {
                                                       tail);
   }
 
+  template <typename T>
+  void
+  MaskedArray_getitem_next_jagged_project(T* index, int64_t* starts_in, int64_t* stops_in, int64_t* starts_out, int64_t* stops_out, int64_t length) {
+    int64_t k=0;
+    for (int64_t i=0; i < length; ++i) {
+      if ( index[i] >= 0 ) {
+        starts_out[k] = starts_in[i];
+        stops_out[k] = stops_in[i];
+        k++;
+      }
+    }
+  }
+
   template <typename T, bool ISOPTION>
   template <typename S>
   const ContentPtr
@@ -2283,29 +2296,18 @@ namespace awkward {
       Index64 nextcarry = pair.first;
       IndexOf<T> outindex = pair.second;
 
-      if ( slicestarts.length() != length() or slicestops.length() != length() ) {
-        throw std::runtime_error("Slices look weird");
-      }
-      Index64 carrystarts(slicestarts.length() - numnull);
-      Index64 carrystops(slicestops.length() - numnull);
-      int64_t k=0;
-      for(int64_t i=0; i < length(); ++i) {
-        int64_t from = outindex.getitem_at_nowrap(i);
-        // here we could OR this with starts[i]==stops[i] to pass singletons
-        // as if they were nulls. We would have to hack a bit on nextcarry and outindex though
-        if ( from >= 0 ) {
-          carrystarts.setitem_at_nowrap(k, slicestarts.getitem_at_nowrap(i));
-          carrystops.setitem_at_nowrap(k, slicestops.getitem_at_nowrap(i));
-          k++;
-        }
-      }
-      if ( k != carrystarts.length() ) {
-        throw std::runtime_error("failed to carry starts and stops properly");
-      }
+      Index64 reducedstarts(length() - numnull);
+      Index64 reducedstops(length() - numnull);
+      MaskedArray_getitem_next_jagged_project<T>(outindex.ptr().get() + outindex.offset(),
+                                                 slicestarts.ptr().get() + slicestarts.offset(),
+                                                 slicestops.ptr().get() + slicestops.offset(),
+                                                 reducedstarts.ptr().get(),
+                                                 reducedstops.ptr().get(),
+                                                 length());
 
       ContentPtr next = content_.get()->carry(nextcarry, true);
-      ContentPtr out = next.get()->getitem_next_jagged(carrystarts,
-                                                       carrystops,
+      ContentPtr out = next.get()->getitem_next_jagged(reducedstarts,
+                                                       reducedstops,
                                                        slicecontent,
                                                        tail);
       IndexedArrayOf<T, ISOPTION> out2(identities_,
@@ -2324,7 +2326,6 @@ namespace awkward {
         content_.get()->length());
       util::handle_error(err, classname(), identities_.get());
 
-      // shouldn't we carry starts and stops here as well?
       // an eager carry (allow_lazy = false) to avoid infinite loop (unproven)
       ContentPtr next = content_.get()->carry(nextcarry, false);
       return next.get()->getitem_next_jagged(slicestarts,
