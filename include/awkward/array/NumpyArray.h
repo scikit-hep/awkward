@@ -397,6 +397,11 @@ namespace awkward {
                     const std::string& pre,
                     const std::string& post) const override;
 
+    const std::string
+    kernellib_asstring(const std::string& indent,
+                       const std::string& pre,
+                       const std::string& post) const;
+
     void
       tojson_part(ToJson& builder, bool include_beginendlist) const override;
 
@@ -447,7 +452,7 @@ namespace awkward {
                    const Index64& advanced) const override;
 
     const ContentPtr
-      carry(const Index64& carry) const override;
+      carry(const Index64& carry, bool allow_lazy) const override;
 
     int64_t
       numfields() const override;
@@ -619,13 +624,7 @@ namespace awkward {
     /// @brief An utility function to create a new instance of NumpyArray on the
     /// GPU identical to this one.
     ContentPtr
-      to_gpu(kernel::Lib ptr_lib) const override;
-
-    /// @brief An utility function to create a new instance of NumpyArray on the
-    /// CPU identical to the one on the GPU. Acts as a passthrough if already
-    // on CPU
-    ContentPtr
-    to_cpu() const override;
+      copy_to(kernel::Lib ptr_lib) const;
 
   protected:
     /// @brief Internal function to merge two byte arrays without promoting

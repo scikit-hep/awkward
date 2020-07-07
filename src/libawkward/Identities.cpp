@@ -339,66 +339,32 @@ namespace awkward {
 
   template <typename T>
   IdentitiesPtr
-  IdentitiesOf<T>::to_gpu(kernel::Lib ptr_lib) const {
-#ifndef _MSC_VER
-    if(ptr_lib == kernel::Lib::cuda_kernels) {
-      T *cuda_ptr;
+  IdentitiesOf<T>::copy_to(kernel::Lib ptr_lib) const {
+    if(ptr_lib == ptr_lib_) {
+      return std::make_shared<IdentitiesOf<T>>(ref(),
+                                               fieldloc(),
+                                               offset(),
+                                               width(),
+                                               length(),
+                                               ptr_,
+                                               ptr_lib_);
+    }
+    std::shared_ptr<T> ptr = kernel::ptr_alloc<T>(ptr_lib, width_ * length_);
 
-      if(ptr_lib_ != kernel::Lib::cuda_kernels) {
-        Error err =  kernel::H2D<T>(kernel::Lib::cuda_kernels,
-                                    &cuda_ptr,
+    Error err =  kernel::copy_to<T>(ptr_lib,
+                                    ptr_lib_,
+                                    ptr.get(),
                                     ptr_.get(),
                                     width_ * length_);
-        util::handle_error(err);
-      }
-      else {
-        cuda_ptr = ptr_.get();
-      }
+    util::handle_error(err);
 
-      return std::make_shared<IdentitiesOf<T>>(ref(),
-                                               fieldloc(),
-                                               offset(),
-                                               width(),
-                                               length(),
-                                               std::shared_ptr<T>(
-                                                 cuda_ptr,
-                                                 kernel::cuda_array_deleter<T>()),
-                                               kernel::Lib::cuda_kernels);
-    }
-#endif
-    throw std::invalid_argument("Invalid Kernel Library or OS for GPU Transfer");
-  }
-
-  template <typename T>
-  IdentitiesPtr
-  IdentitiesOf<T>::to_cpu() const {
-#ifndef _MSC_VER
-    if(ptr_lib_ ==kernel::Lib::cuda_kernels) {
-      T* cpu_ptr = new T[width_ * length_];
-
-      Error err =  kernel::D2H<T>(kernel::Lib::cuda_kernels,
-                                  &cpu_ptr,
-                                  ptr_.get(),
-                                  width_ * length_);
-      util::handle_error(err);
-
-      return std::make_shared<IdentitiesOf<T>>(ref(),
-                                               fieldloc(),
-                                               offset(),
-                                               width(),
-                                               length(),
-                                               std::shared_ptr<T>(cpu_ptr,
-                                                                     kernel::array_deleter<T>()),
-                                               kernel::Lib::cpu_kernels);
-    }
-#endif
-    return std::make_shared<IdentitiesOf<T>>(ref_,
-                                             fieldloc_,
-                                             offset_,
-                                             width_,
-                                             length_,
-                                             ptr_,
-                                             kernel::Lib::cpu_kernels);
+    return std::make_shared<IdentitiesOf<T>>(ref(),
+                                             fieldloc(),
+                                             offset(),
+                                             width(),
+                                             length(),
+                                             ptr,
+                                             kernel::Lib::cuda_kernels);
   }
 
   template class EXPORT_SYMBOL IdentitiesOf<int32_t>;

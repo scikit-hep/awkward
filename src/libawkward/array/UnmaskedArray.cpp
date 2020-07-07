@@ -501,14 +501,14 @@ namespace awkward {
   }
 
   const ContentPtr
-  UnmaskedArray::carry(const Index64& carry) const {
+  UnmaskedArray::carry(const Index64& carry, bool allow_lazy) const {
     IdentitiesPtr identities(nullptr);
     if (identities_.get() != nullptr) {
       identities = identities_.get()->getitem_carry_64(carry);
     }
     return std::make_shared<UnmaskedArray>(identities,
                                            parameters_,
-                                           content_.get()->carry(carry));
+                                           content_.get()->carry(carry, allow_lazy));
   }
 
   int64_t
@@ -884,23 +884,11 @@ namespace awkward {
   }
 
   ContentPtr
-  UnmaskedArray::to_gpu(kernel::Lib ptr_lib) const {
-    if(ptr_lib == kernel::Lib::cuda_kernels) {
-      ContentPtr cuda_content = content_->to_gpu(kernel::Lib::cuda_kernels);
-      return std::make_shared<UnmaskedArray>(identities(),
-                                             parameters(),
-                                             cuda_content);
-    }
-  }
-
-  ContentPtr
-  UnmaskedArray::to_cpu() const {
-
-    ContentPtr cpu_content = content_->to_cpu();
+  UnmaskedArray::copy_to(kernel::Lib ptr_lib) const {
+    ContentPtr content = content_->copy_to(ptr_lib);
     return std::make_shared<UnmaskedArray>(identities(),
                                            parameters(),
-                                           cpu_content);
-
+                                           content);
   }
 
   template <typename S>

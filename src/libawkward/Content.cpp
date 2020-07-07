@@ -1348,16 +1348,6 @@ namespace awkward {
     return out;
   }
 
-  ContentPtr
-  Content::to_gpu(kernel::Lib ptr_lib) const{
-    return nullptr;
-  }
-
-  ContentPtr
-  Content::to_cpu() const{
-    return nullptr;
-  }
-
   const std::string
   Content::parameters_tostring(const std::string& indent,
                                const std::string& pre,

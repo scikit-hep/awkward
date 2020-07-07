@@ -697,7 +697,7 @@ namespace awkward {
         if (shape.empty()) {
           shape = array->shape();
         }
-        else if (shape.size() != array->ndim()) {
+        else if (shape.size() != (size_t)array->ndim()) {
           throw std::invalid_argument("cannot broadcast arrays in slice");
         }
         else {
@@ -787,10 +787,10 @@ namespace awkward {
           "a slice can have no more than one ellipsis ('...')");
       }
 
-      size_t numadvanced = std::count(types.begin(), types.end(), 'A');
+      size_t numadvanced = (size_t)std::count(types.begin(), types.end(), 'A');
       if (numadvanced != 0) {
-        types = types.substr(0, types.find_last_of("A") + 1)
-                     .substr(types.find_first_of("A"));
+        types = types.substr(0, types.find_last_of('A') + 1)
+                     .substr(types.find_first_of('A'));
         if (numadvanced != types.size()) {
           throw std::invalid_argument(
             "advanced indexes separated by basic indexes is not permitted "

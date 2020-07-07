@@ -45,6 +45,7 @@ make_IndexOf(const py::handle& m, const std::string& name) {
       .def("__len__", &ak::IndexOf<T>::length)
       .def("__getitem__", &ak::IndexOf<T>::getitem_at)
       .def("__getitem__", &ak::IndexOf<T>::getitem_range)
+      .def("copy_to", &ak::IndexOf<T>::copy_to)
 
   );
 }

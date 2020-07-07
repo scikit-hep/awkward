@@ -236,20 +236,24 @@ namespace awkward {
                              const util::Parameters& parameters,
                              const ArrayGeneratorPtr& generator,
                              const ArrayCachePtr& cache,
-                             const std::string& cache_key)
+                             const std::string& cache_key,
+                             const kernel::Lib ptr_lib)
       : Content(identities, parameters)
       , generator_(generator)
       , cache_(cache)
-      , cache_key_(cache_key) { }
+      , cache_key_(cache_key)
+      , ptr_lib_(ptr_lib) { }
 
   VirtualArray::VirtualArray(const IdentitiesPtr& identities,
                              const util::Parameters& parameters,
                              const ArrayGeneratorPtr& generator,
-                             const ArrayCachePtr& cache)
+                             const ArrayCachePtr& cache,
+                             const kernel::Lib ptr_lib)
       : Content(identities, parameters)
       , generator_(generator)
       , cache_(cache)
-      , cache_key_(ArrayCache::newkey()) { }
+      , cache_key_(ArrayCache::newkey())
+      , ptr_lib_(ptr_lib) { }
 
   const ArrayGeneratorPtr
   VirtualArray::generator() const {
@@ -261,6 +265,11 @@ namespace awkward {
     return cache_;
   }
 
+    const kernel::Lib
+    VirtualArray::ptr_lib() const {
+      return ptr_lib_;
+    }
+
   const ContentPtr
   VirtualArray::peek_array() const {
     if (cache_.get() != nullptr) {
@@ -269,17 +278,41 @@ namespace awkward {
     return ContentPtr(nullptr);
   }
 
+  kernel::Lib check_key(const std::string& cache_key) {
+    auto fully_qualified_index = cache_key.find_last_of(':');
+
+    if(fully_qualified_index != std::string::npos) {
+      if (cache_key.substr(fully_qualified_index + 1, cache_key.length()) == "cuda") {
+        return kernel::Lib::cuda_kernels;
+      }
+    }
+
+    return kernel::Lib::cpu_kernels;
+  }
+
   const ContentPtr
   VirtualArray::array() const {
     ContentPtr out(nullptr);
+    kernel::Lib src_ptrlib = check_key(cache_key_);
     if (cache_.get() != nullptr) {
-      out = cache_.get()->get(cache_key());
+      if(src_ptrlib != ptr_lib_) {
+        out = cache_.get()->get(cache_key())->copy_to(ptr_lib_);
+      }
+      else {
+        out = cache_.get()->get(cache_key());
+      }
     }
     if (out.get() == nullptr) {
-      out = generator_.get()->generate_and_check();
+      if(src_ptrlib != ptr_lib_) {
+        out = generator_.get()->generate_and_check()->copy_to(src_ptrlib);
+      }
+      else {
+        out = generator_.get()->generate_and_check();
+      }
     }
     if (cache_.get() != nullptr) {
-      cache_.get()->set(cache_key(), out);
+      cache_.get()->set(kernel::fully_qualified_cache_key(cache_key(), ptr_lib_),
+                        out);
     }
     return out;
   }
@@ -508,10 +541,10 @@ namespace awkward {
   }
 
   const ContentPtr
-  VirtualArray::carry(const Index64& carry) const {
+  VirtualArray::carry(const Index64& carry, bool allow_lazy) const {
     ContentPtr peek = peek_array();
     if (peek.get() != nullptr) {
-      return peek.get()->carry(carry);
+      return peek.get()->carry(carry, allow_lazy);
     }
 
     Slice slice;
@@ -863,4 +896,13 @@ namespace awkward {
             "undefined operation: VirtualArray::getitem_next_jagged(jagged)");
   }
 
+  ContentPtr
+  VirtualArray::copy_to(kernel::Lib ptr_lib) const {
+      return std::make_shared<VirtualArray>(identities(),
+                                            parameters(),
+                                            generator(),
+                                            cache(),
+                                            cache_key(),
+                                            ptr_lib);
+  }
 }

@@ -849,15 +849,9 @@ namespace awkward {
     out << std::hex << std::setw(12) << std::setfill('0')
         << reinterpret_cast<ssize_t>(ptr_.get());
     if(ptr_lib() == kernel::Lib::cuda_kernels) {
-      out << "\" on=\"[" << kernel::get_ptr_device_num(ptr_lib(), ptr_.get())
-          << "]" << kernel::get_ptr_device_name(ptr_lib(), ptr_.get())
-          << "\" Lib=\"" << "cuda_kernels";
-    }
-    if (identities_.get() == nullptr  &&  parameters_.empty()) {
-      out << "\"/>" << post;
-    }
-    else {
       out << "\">\n";
+      out << kernellib_asstring(indent + std::string("    "), "", "\n");
+
       if (identities_.get() != nullptr) {
         out << identities_.get()->tostring_part(
           indent + std::string("    "), "", "\n");
@@ -865,9 +859,44 @@ namespace awkward {
       if (!parameters_.empty()) {
         out << parameters_tostring(indent + std::string("    "), "", "\n");
       }
-      out << indent << "</" << classname() << ">" << post;
+        out << indent << "</" << classname() << ">" << post;
+    }
+    else {
+      if (identities_.get() == nullptr  &&  parameters_.empty()) {
+        out << "\"/>" << post;
+      }
+      else {
+        out << "\">\n";
+        if (identities_.get() != nullptr) {
+          out << identities_.get()->tostring_part(
+            indent + std::string("    "), "", "\n");
+        }
+        if (!parameters_.empty()) {
+          out << parameters_tostring(indent + std::string("    "), "", "\n");
+        }
+        out << indent << "</" << classname() << ">" << post;
+      }
     }
     return out.str();
+  }
+
+  const std::string
+  NumpyArray::kernellib_asstring(const std::string &indent,
+                                 const std::string &pre,
+                                 const std::string &post) const {
+    if(ptr_lib_ == kernel::Lib::cpu_kernels) {
+      return "";
+    }
+    else {
+      std::stringstream out;
+      out << indent << pre << "<Lib name=\"";
+      if(ptr_lib_ == kernel::Lib::cuda_kernels) {
+        out << "cuda\" " << "device_number=\"" << kernel::get_ptr_device_num(ptr_lib(), ptr_.get())
+        << "\" device_name=\"" << kernel::get_ptr_device_name(ptr_lib(), ptr_.get()) << "\"";
+      }
+      out << "/>" << post;
+      return out.str();
+    }
   }
 
   void
@@ -1244,7 +1273,7 @@ namespace awkward {
   }
 
   const ContentPtr
-  NumpyArray::carry(const Index64& carry) const {
+  NumpyArray::carry(const Index64& carry, bool allow_lazy) const {
     std::shared_ptr<void> ptr(
       kernel::ptr_alloc<uint8_t>(ptr_lib_, (size_t)(carry.length()*strides_[0])));
     struct Error err = kernel::NumpyArray_getitem_next_null_64(
@@ -4098,548 +4127,163 @@ namespace awkward {
   }
 
   ContentPtr
-  NumpyArray::to_gpu(kernel::Lib ptr_lib) const {
-    if (ptr_lib == kernel::Lib::cuda_kernels) {
-      ssize_t length = 1;
-      for (auto i : shape_) {
-        length = length * i;
-      }
-
-      if (format_.compare("?") == 0) {
-        bool *cuda_ptr;
-
-        if(ptr_lib_ != kernel::Lib::cuda_kernels) {
-          Error err =  kernel::H2D<bool>(kernel::Lib::cuda_kernels,
-                                         &cuda_ptr,
-                                         reinterpret_cast<bool *>(ptr_.get()),
-                                         length);
-          util::handle_error(err);
-        }
-        else {
-          cuda_ptr = reinterpret_cast<bool *>(ptr_.get());
-        }
-
-        return std::make_shared<NumpyArray>(identities(),
-                                            parameters(),
-                                            std::shared_ptr<void>(
-                                              cuda_ptr,
-                                              kernel::cuda_array_deleter<bool>()),
-                                            shape(),
-                                            strides(),
-                                            byteoffset(),
-                                            itemsize(),
-                                            format(),
-                                            kernel::Lib::cuda_kernels);
-      } else if (format_.compare("b") == 0) {
-        int8_t *cuda_ptr;
-
-        if(ptr_lib_ != kernel::Lib::cuda_kernels) {
-          Error err =  kernel::H2D<int8_t>(kernel::Lib::cuda_kernels,
-                                           &cuda_ptr,
-                                           reinterpret_cast<int8_t *>(ptr_.get()),
-                                           length);
-          util::handle_error(err);
-        }
-        else {
-          cuda_ptr = reinterpret_cast<int8_t*>(ptr_.get());
-        }
-
-        return std::make_shared<NumpyArray>(identities(),
-                                            parameters(),
-                                            std::shared_ptr<int8_t>(
-                                              cuda_ptr,
-                                              kernel::cuda_array_deleter<int8_t>()),
-                                            shape(),
-                                            strides(),
-                                            byteoffset(),
-                                            itemsize(),
-                                            format(),
-                                            kernel::Lib::cuda_kernels);
-      } else if (format_.compare("B") == 0) {
-        uint8_t *cuda_ptr;
-
-        if(ptr_lib_ != kernel::Lib::cuda_kernels) {
-          Error err =  kernel::H2D<uint8_t>(kernel::Lib::cuda_kernels,
-                                            &cuda_ptr,
-                                            reinterpret_cast<uint8_t *>(ptr_.get()),
-                                            length);
-          util::handle_error(err);
-        }
-        else {
-          cuda_ptr = reinterpret_cast<uint8_t*>(ptr_.get());
-        }
-
-        return std::make_shared<NumpyArray>(identities(),
-                                            parameters(),
-                                            std::shared_ptr<void>(
-                                              cuda_ptr,
-                                              kernel::cuda_array_deleter<uint8_t>()),
-                                            shape(),
-                                            strides(),
-                                            byteoffset(),
-                                            itemsize(),
-                                            format(),
-                                            kernel::Lib::cuda_kernels);
-      } else if (format_.compare("h") == 0) {
-        int16_t *cuda_ptr;
-
-        if(ptr_lib_ != kernel::Lib::cuda_kernels) {
-          Error err =  kernel::H2D<int16_t>(kernel::Lib::cuda_kernels,
-                                            &cuda_ptr,
-                                            reinterpret_cast<int16_t *>(ptr_.get()),
-                                            length);
-          util::handle_error(err);
-        }
-        else {
-          cuda_ptr = reinterpret_cast<int16_t* >(ptr_.get());
-        }
-
-        return std::make_shared<NumpyArray>(identities(),
-                                            parameters(),
-                                            std::shared_ptr<void>(
-                                              cuda_ptr,
-                                              kernel::cuda_array_deleter<int16_t>()),
-                                            shape(),
-                                            strides(),
-                                            byteoffset(),
-                                            itemsize(),
-                                            format(),
-                                            kernel::Lib::cuda_kernels);
-      } else if (format_.compare("H") == 0) {
-        uint16_t *cuda_ptr;
-
-        if(ptr_lib_ != kernel::Lib::cuda_kernels) {
-          Error err =  kernel::H2D<uint16_t>(kernel::Lib::cuda_kernels,
-                                             &cuda_ptr,
-                                             reinterpret_cast<uint16_t *>(ptr_.get()),
-                                             length);
-          util::handle_error(err);
-        }
-        else {
-          cuda_ptr = reinterpret_cast<uint16_t*>(ptr_.get());
-        }
-
-        return std::make_shared<NumpyArray>(identities(),
-                                            parameters(),
-                                            std::shared_ptr<void>(
-                                              cuda_ptr,
-                                              kernel::cuda_array_deleter<uint16_t>()),
-                                            shape(),
-                                            strides(),
-                                            byteoffset(),
-                                            itemsize(),
-                                            format(),
-                                            kernel::Lib::cuda_kernels);
-      } else if (format_.compare("i") == 0) {
-        int32_t *cuda_ptr;
-
-        if(ptr_lib_ != kernel::Lib::cuda_kernels) {
-          Error err =  kernel::H2D<int32_t>(kernel::Lib::cuda_kernels,
-                                            &cuda_ptr,
-                                            reinterpret_cast<int32_t *>(ptr_.get()),
-                                            length);
-          util::handle_error(err);
-        }
-        else {
-          cuda_ptr = reinterpret_cast<int32_t*>(ptr_.get());
-        }
-
-        return std::make_shared<NumpyArray>(identities(),
-                                            parameters(),
-                                            std::shared_ptr<void>(
-                                              cuda_ptr,
-                                              kernel::cuda_array_deleter<int32_t>()),
-                                            shape(),
-                                            strides(),
-                                            byteoffset(),
-                                            itemsize(),
-                                            format(),
-                                            kernel::Lib::cuda_kernels);
-      } else if (format_.compare("I") == 0) {
-        uint32_t *cuda_ptr;
-
-        if(ptr_lib_ != kernel::Lib::cuda_kernels) {
-          Error err =  kernel::H2D<uint32_t>(kernel::Lib::cuda_kernels,
-                                             &cuda_ptr,
-                                             reinterpret_cast<uint32_t *>(ptr_.get()),
-                                             length);
-          util::handle_error(err);
-        }
-        else {
-          cuda_ptr = reinterpret_cast<uint32_t*>(ptr_.get());
-        }
-
-        return std::make_shared<NumpyArray>(identities(),
-                                            parameters(),
-                                            std::shared_ptr<void>(
-                                              cuda_ptr,
-                                              kernel::cuda_array_deleter<uint32_t>()),
-                                            shape(),
-                                            strides(),
-                                            byteoffset(),
-                                            itemsize(),
-                                            format(),
-                                            kernel::Lib::cuda_kernels);
-      } else if (format_.compare("l") == 0) {
-        int64_t *cuda_ptr;
-
-        if(ptr_lib_ != kernel::Lib::cuda_kernels) {
-          Error err =  kernel::H2D<int64_t>(kernel::Lib::cuda_kernels,
-                                            &cuda_ptr,
-                                            reinterpret_cast<int64_t *>(ptr_.get()),
-                                            length);
-          util::handle_error(err);
-        }
-        else {
-          cuda_ptr = reinterpret_cast<int64_t*>(ptr_.get());
-        }
-
-        return std::make_shared<NumpyArray>(identities(),
-                                            parameters(),
-                                            std::shared_ptr<void>(
-                                              cuda_ptr,
-                                              kernel::cuda_array_deleter<int64_t>()),
-                                            shape(),
-                                            strides(),
-                                            byteoffset(),
-                                            itemsize(),
-                                            format(),
-                                            kernel::Lib::cuda_kernels);
-      } else if (format_.compare("L") == 0) {
-        uint64_t *cuda_ptr;
-
-        if(ptr_lib_ != kernel::Lib::cuda_kernels) {
-          Error err =  kernel::H2D<uint64_t>(kernel::Lib::cuda_kernels,
-                                             &cuda_ptr,
-                                             reinterpret_cast<uint64_t *>(ptr_.get()),
-                                             length);
-          util::handle_error(err);
-        }
-        else {
-          cuda_ptr = reinterpret_cast<uint64_t*>(ptr_.get());
-        }
-
-        return std::make_shared<NumpyArray>(identities(),
-                                            parameters(),
-                                            std::shared_ptr<void>(
-                                              cuda_ptr,
-                                              kernel::cuda_array_deleter<uint64_t>()),
-                                            shape(),
-                                            strides(),
-                                            byteoffset(),
-                                            itemsize(),
-                                            format(),
-                                            kernel::Lib::cuda_kernels);
-      } else if (format_.compare("f") == 0) {
-        float *cuda_ptr;
-
-        if(ptr_lib_ != kernel::Lib::cuda_kernels) {
-          Error err =  kernel::H2D<float>(kernel::Lib::cuda_kernels,
-                                          &cuda_ptr,
-                                          reinterpret_cast<float *>(ptr_.get()),
-                                          length);
-          util::handle_error(err);
-        }
-        else {
-          cuda_ptr = reinterpret_cast<float*>(ptr_.get());
-        }
-
-        return std::make_shared<NumpyArray>(identities(),
-                                            parameters(),
-                                            std::shared_ptr<void>(
-                                              cuda_ptr,
-                                              kernel::cuda_array_deleter<float>()),
-                                            shape(),
-                                            strides(),
-                                            byteoffset(),
-                                            itemsize(),
-                                            format(),
-                                            kernel::Lib::cuda_kernels);
-      } else if (format_.compare("d") == 0) {
-        double *cuda_ptr;
-
-        if(ptr_lib_ != kernel::Lib::cuda_kernels) {
-          Error err =  kernel::H2D<double>(kernel::Lib::cuda_kernels,
-                                           &cuda_ptr,
-                                           reinterpret_cast<double *>(ptr_.get()),
-                                           length);
-          util::handle_error(err);
-        }
-        else {
-          cuda_ptr = reinterpret_cast<double*>(ptr_.get());
-        }
-
-        return std::make_shared<NumpyArray>(identities(),
-                                            parameters(),
-                                            std::shared_ptr<void>(
-                                              cuda_ptr,
-                                              kernel::cuda_array_deleter<double>()),
-                                            shape(),
-                                            strides(),
-                                            byteoffset(),
-                                            itemsize(),
-                                            format(),
-                                            kernel::Lib::cuda_kernels);
-      } else {
-        Error err = failure("Unknown Numpy dtype", 0, kSliceNone, true);
-        util::handle_error(err);
-
-        return std::make_shared<NumpyArray>(identities(),
-                                            parameters(),
-                                            nullptr,
-                                            shape(),
-                                            strides(),
-                                            byteoffset(),
-                                            itemsize(),
-                                            format(),
-                                            kernel::Lib::cuda_kernels);
-      }
+  NumpyArray::copy_to(kernel::Lib ptr_lib) const {
+    if(ptr_lib_ == ptr_lib) {
+      return std::make_shared<NumpyArray>(identities(),
+                                          parameters(),
+                                          ptr_,
+                                          shape(),
+                                          strides(),
+                                          byteoffset(),
+                                          itemsize(),
+                                          format(),
+                                          ptr_lib_);
     }
-  }
 
-  ContentPtr
-  NumpyArray::to_cpu() const {
-    if (ptr_lib_ == kernel::Lib::cuda_kernels) {
-      ssize_t length = 1;
-      for (auto i : shape_) {
-        length = length * i;
-      }
-
-      if (format_.compare("?") == 0) {
-        bool* cpu_ptr = new bool[length];
-
-        Error err =  kernel::D2H<bool>(kernel::Lib::cuda_kernels,
-                                       &cpu_ptr,
-                                       reinterpret_cast<bool *>(ptr_.get()),
-                                       length);
-        util::handle_error(err);
-
-        return std::make_shared<NumpyArray>(identities(),
-                                            parameters(),
-                                            std::shared_ptr<void>(cpu_ptr,
-                                                                  kernel::array_deleter<bool>()),
-                                            shape(),
-                                            strides(),
-                                            byteoffset(),
-                                            itemsize(),
-                                            format(),
-                                            kernel::Lib::cpu_kernels);
-      }
-      else if (format_.compare("b") == 0) {
-        int8_t* cpu_ptr = new int8_t[length];
-
-        Error err =  kernel::D2H<int8_t>(kernel::Lib::cuda_kernels,
-                                         &cpu_ptr,
-                                         reinterpret_cast<int8_t *>(ptr_.get()),
-                                         length);
-        util::handle_error(err);
-
-        return std::make_shared<NumpyArray>(identities(),
-                                            parameters(),
-                                            std::shared_ptr<void>(cpu_ptr,
-                                                                  kernel::array_deleter<int8_t>()),
-                                            shape(),
-                                            strides(),
-                                            byteoffset(),
-                                            itemsize(),
-                                            format(),
-                                            kernel::Lib::cpu_kernels);
-      }
-      else if (format_.compare("B") == 0) {
-        uint8_t* cpu_ptr = new uint8_t[length];
-
-        Error err =  kernel::D2H<uint8_t>(kernel::Lib::cuda_kernels,
-                                          &cpu_ptr,
-                                          reinterpret_cast<uint8_t *>(ptr_.get()),
-                                          length);
-        util::handle_error(err);
-
-        return std::make_shared<NumpyArray>(identities(),
-                                            parameters(),
-                                            std::shared_ptr<void>(cpu_ptr,
-                                                                  kernel::array_deleter<uint8_t>()),
-                                            shape(),
-                                            strides(),
-                                            byteoffset(),
-                                            itemsize(),
-                                            format(),
-                                            kernel::Lib::cpu_kernels);
-      }
-      else if (format_.compare("h") == 0) {
-        int16_t* cpu_ptr = new int16_t[length];
-
-        Error err =  kernel::D2H<int16_t>(kernel::Lib::cuda_kernels,
-                                          &cpu_ptr,
-                                          reinterpret_cast<int16_t *>(ptr_.get()),
-                                          length);
-        util::handle_error(err);
-
-        return std::make_shared<NumpyArray>(identities(),
-                                            parameters(),
-                                            std::shared_ptr<void>(cpu_ptr,
-                                                                  kernel::array_deleter<int16_t>()),
-                                            shape(),
-                                            strides(),
-                                            byteoffset(),
-                                            itemsize(),
-                                            format(),
-                                            kernel::Lib::cpu_kernels);
-      }
-      else if (format_.compare("H") == 0) {
-        uint16_t* cpu_ptr = new uint16_t[length];
-
-        Error err =  kernel::D2H<uint16_t>(kernel::Lib::cuda_kernels,
-                                           &cpu_ptr,
-                                           reinterpret_cast<uint16_t *>(ptr_.get()),
-                                           length);
-        util::handle_error(err);
-
-        return std::make_shared<NumpyArray>(identities(),
-                                            parameters(),
-                                            std::shared_ptr<void>(cpu_ptr,
-                                                                  kernel::array_deleter<uint16_t>()),
-                                            shape(),
-                                            strides(),
-                                            byteoffset(),
-                                            itemsize(),
-                                            format(),
-                                            kernel::Lib::cpu_kernels);
-      }
-      else if (format_.compare("i") == 0) {
-        int32_t* cpu_ptr = new int32_t[length];
-
-        Error err =  kernel::D2H<int32_t>(kernel::Lib::cuda_kernels,
-                                          &cpu_ptr,
-                                          reinterpret_cast<int32_t *>(ptr_.get()),
-                                          length);
-        util::handle_error(err);
-
-
-        return std::make_shared<NumpyArray>(identities(),
-                                            parameters(),
-                                            std::shared_ptr<void>(cpu_ptr,
-                                                                  kernel::array_deleter<int32_t>()),
-                                            shape(),
-                                            strides(),
-                                            byteoffset(),
-                                            itemsize(),
-                                            format(),
-                                            kernel::Lib::cpu_kernels);
-      }
-      else if (format_.compare("I") == 0) {
-        uint32_t* cpu_ptr = new uint32_t[length];
-
-        Error err =  kernel::D2H<uint32_t>(kernel::Lib::cuda_kernels,
-                                           &cpu_ptr,
-                                           reinterpret_cast<uint32_t *>(ptr_.get()),
-                                           length);
-        util::handle_error(err);
-
-        return std::make_shared<NumpyArray>(identities(),
-                                            parameters(),
-                                            std::shared_ptr<void>(cpu_ptr,
-                                                                  kernel::array_deleter<uint32_t>()),
-                                            shape(),
-                                            strides(),
-                                            byteoffset(),
-                                            itemsize(),
-                                            format(),
-                                            kernel::Lib::cpu_kernels);
-      }
-      else if (format_.compare("l") == 0) {
-        int64_t* cpu_ptr = new int64_t[length];
-
-        Error err =  kernel::D2H<int64_t>(kernel::Lib::cuda_kernels,
-                                          &cpu_ptr,
-                                          reinterpret_cast<int64_t *>(ptr_.get()),
-                                          length);
-        util::handle_error(err);
-
-        return std::make_shared<NumpyArray>(identities(),
-                                            parameters(),
-                                            std::shared_ptr<void>(cpu_ptr,
-                                                                  kernel::array_deleter<int64_t>()),
-                                            shape(),
-                                            strides(),
-                                            byteoffset(),
-                                            itemsize(),
-                                            format(),
-                                            kernel::Lib::cpu_kernels);
-      }
-      else if (format_.compare("L") == 0) {
-        uint64_t* cpu_ptr = new uint64_t[length];
-
-        Error err =  kernel::D2H<uint64_t>(kernel::Lib::cuda_kernels,
-                                           &cpu_ptr,
-                                           reinterpret_cast<uint64_t *>(ptr_.get()),
-                                           length);
-        util::handle_error(err);
-
-        return std::make_shared<NumpyArray>(identities(),
-                                            parameters(),
-                                            std::shared_ptr<void>(cpu_ptr,
-                                                                  kernel::array_deleter<uint64_t>()),
-                                            shape(),
-                                            strides(),
-                                            byteoffset(),
-                                            itemsize(),
-                                            format(),
-                                            kernel::Lib::cpu_kernels);
-      }
-      else if (format_.compare("f") == 0) {
-        float* cpu_ptr = new float[length];
-
-        Error err =  kernel::D2H<float>(kernel::Lib::cuda_kernels,
-                                        &cpu_ptr,
-                                        reinterpret_cast<float *>(ptr_.get()),
-                                        length);
-        util::handle_error(err);
-
-        return std::make_shared<NumpyArray>(identities(),
-                                            parameters(),
-                                            std::shared_ptr<void>(cpu_ptr,
-                                                                  kernel::array_deleter<float>()),
-                                            shape(),
-                                            strides(),
-                                            byteoffset(),
-                                            itemsize(),
-                                            format(),
-                                            kernel::Lib::cpu_kernels);
-      }
-      else if (format_.compare("d") == 0) {
-        double* cpu_ptr = new double[length];
-
-        Error err =  kernel::D2H<double>(kernel::Lib::cuda_kernels,
-                                         &cpu_ptr,
-                                         reinterpret_cast<double *>(ptr_.get()),
-                                         length);
-        util::handle_error(err);
-
-        return std::make_shared<NumpyArray>(identities(),
-                                            parameters(),
-                                            std::shared_ptr<void>(cpu_ptr,
-                                                                  kernel::array_deleter<double>()),
-                                            shape(),
-                                            strides(),
-                                            byteoffset(),
-                                            itemsize(),
-                                            format(),
-                                            kernel::Lib::cpu_kernels);
-      }
-      else {
-        Error err = failure("Unknown Numpy dtype", 0, kSliceNone);
-        util::handle_error(err);
-        return std::make_shared<NumpyArray>(identities(),
-                                            parameters(),
-                                            nullptr,
-                                            shape(),
-                                            strides(),
-                                            byteoffset(),
-                                            itemsize(),
-                                            format(),
-                                            kernel::Lib::cpu_kernels);
-      }
+    ssize_t length = 1;
+    for (auto i : shape_) {
+      length = length * i;
     }
+
+    std::shared_ptr<void> ptr;
+    if (format_.compare("?") == 0) {
+      ptr = kernel::ptr_alloc<bool>(ptr_lib, length);
+
+      Error err = kernel::copy_to<bool>(
+        ptr_lib,
+        ptr_lib_,
+        reinterpret_cast<bool *>(ptr.get()),
+        reinterpret_cast<bool *>(ptr_.get()),
+        length);
+      util::handle_error(err);
+    }
+    else if (format_.compare("b") == 0) {
+      ptr = kernel::ptr_alloc<int8_t>(ptr_lib, length);
+
+      Error err = kernel::copy_to<int8_t>(
+        ptr_lib,
+        ptr_lib_,
+        reinterpret_cast<int8_t *>(ptr.get()),
+        reinterpret_cast<int8_t *>(ptr_.get()),
+        length);
+      util::handle_error(err);
+    }
+    else if (format_.compare("B") == 0) {
+      ptr = kernel::ptr_alloc<uint8_t>(ptr_lib, length);
+
+      Error err = kernel::copy_to<uint8_t>(
+        ptr_lib,
+        ptr_lib_,
+        reinterpret_cast<uint8_t *>(ptr.get()),
+        reinterpret_cast<uint8_t *>(ptr_.get()),
+        length);
+      util::handle_error(err);
+    }
+    else if (format_.compare("h") == 0) {
+      ptr = kernel::ptr_alloc<int16_t>(ptr_lib, length);
+
+      Error err = kernel::copy_to<int16_t>(
+        ptr_lib,
+        ptr_lib_,
+        reinterpret_cast<int16_t *>(ptr.get()),
+        reinterpret_cast<int16_t *>(ptr_.get()),
+        length);
+      util::handle_error(err);
+    }
+    else if (format_.compare("H") == 0) {
+      ptr = kernel::ptr_alloc<uint16_t>(ptr_lib, length);
+
+      Error err = kernel::copy_to<uint16_t>(
+        ptr_lib,
+        ptr_lib_,
+        reinterpret_cast<uint16_t *>(ptr.get()),
+        reinterpret_cast<uint16_t *>(ptr_.get()),
+        length);
+      util::handle_error(err);
+    }
+    else if (format_.compare("i") == 0) {
+      ptr = kernel::ptr_alloc<int32_t>(ptr_lib, length);
+
+      Error err = kernel::copy_to<int32_t>(
+        ptr_lib,
+        ptr_lib_,
+        reinterpret_cast<int32_t *>(ptr.get()),
+        reinterpret_cast<int32_t *>(ptr_.get()),
+        length);
+      util::handle_error(err);
+    }
+    else if (format_.compare("I") == 0) {
+      ptr = kernel::ptr_alloc<uint32_t>(ptr_lib, length);
+
+      Error err = kernel::copy_to<uint32_t>(
+        ptr_lib,
+        ptr_lib_,
+        reinterpret_cast<uint32_t *>(ptr.get()),
+        reinterpret_cast<uint32_t *>(ptr_.get()),
+        length);
+      util::handle_error(err);
+    }
+    else if (format_.compare("l") == 0) {
+      ptr = kernel::ptr_alloc<int64_t>(ptr_lib, length);
+
+      Error err = kernel::copy_to<int64_t>(
+        ptr_lib,
+        ptr_lib_,
+        reinterpret_cast<int64_t *>(ptr.get()),
+        reinterpret_cast<int64_t *>(ptr_.get()),
+        length);
+      util::handle_error(err);
+    }
+    else if (format_.compare("L") == 0) {
+      ptr = kernel::ptr_alloc<uint64_t>(ptr_lib, length);
+
+      Error err = kernel::copy_to<uint64_t>(
+        ptr_lib,
+        ptr_lib_,
+        reinterpret_cast<uint64_t *>(ptr.get()),
+        reinterpret_cast<uint64_t *>(ptr_.get()),
+        length);
+      util::handle_error(err);
+    }
+    else if (format_.compare("f") == 0) {
+      ptr = kernel::ptr_alloc<float>(ptr_lib, length);
+
+      Error err = kernel::copy_to<float>(
+        ptr_lib,
+        ptr_lib_,
+        reinterpret_cast<float *>(ptr.get()),
+        reinterpret_cast<float *>(ptr_.get()),
+        length);
+      util::handle_error(err);
+    }
+    else if (format_.compare("d") == 0) {
+      ptr = kernel::ptr_alloc<double>(ptr_lib, length);
+
+      Error err = kernel::copy_to<double>(
+        ptr_lib,
+        ptr_lib_,
+        reinterpret_cast<double *>(ptr.get()),
+        reinterpret_cast<double *>(ptr_.get()),
+        length);
+      util::handle_error(err);
+    }
+    else {
+      Error err = failure("Unknown Numpy dtype for transfer",
+                          0,
+                          kSliceNone,
+                          true);
+      util::handle_error(err);
+    }
+
+    return std::make_shared<NumpyArray>(identities(),
+                                        parameters(),
+                                        ptr,
+                                        shape(),
+                                        strides(),
+                                        byteoffset(),
+                                        itemsize(),
+                                        format(),
+                                        ptr_lib);
   }
 
   template<typename T>

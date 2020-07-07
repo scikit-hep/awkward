@@ -107,14 +107,16 @@ namespace awkward {
                  const util::Parameters& parameters,
                  const ArrayGeneratorPtr& generator,
                  const ArrayCachePtr& cache,
-                 const std::string& cache_key);
+                 const std::string& cache_key,
+                 const kernel::Lib ptr_lib = kernel::Lib::cpu_kernels);
 
     /// @brief Creates a VirtualArray with an automatically assigned #cache_key
     /// (unique per process).
     VirtualArray(const IdentitiesPtr& identities,
                  const util::Parameters& parameters,
                  const ArrayGeneratorPtr& generator,
-                 const ArrayCachePtr& cache);
+                 const ArrayCachePtr& cache,
+                 const kernel::Lib ptr_lib = kernel::Lib::cpu_kernels);
 
     /// @brief Function that materializes the array and possibly
     /// checks it against an expected Form.
@@ -125,6 +127,9 @@ namespace awkward {
     /// the #generator more than necessary. May be `nullptr`.
     const ArrayCachePtr
       cache() const;
+
+    const kernel::Lib
+      ptr_lib() const;
 
     /// @brief Returns the array if it exists in the #cache; `nullptr`
     /// otherwise.
@@ -216,7 +221,7 @@ namespace awkward {
       getitem_fields(const std::vector<std::string>& keys) const override;
 
     const ContentPtr
-      carry(const Index64& carry) const override;
+      carry(const Index64& carry, bool allow_lazy) const override;
 
     const std::string
       purelist_parameter(const std::string& key) const override;
@@ -359,6 +364,9 @@ namespace awkward {
                           const SliceJagged64& slicecontent,
                           const Slice& tail) const override;
 
+    ContentPtr
+      copy_to(kernel::Lib ptr_lib) const;
+
   private:
     /// @brief See #generator.
     const ArrayGeneratorPtr generator_;
@@ -366,6 +374,8 @@ namespace awkward {
     const ArrayCachePtr cache_;
     /// @brief See #cache_key.
     const std::string cache_key_;
+    /// @brief See#ptr_lib
+    const kernel::Lib ptr_lib_;
   };
 
 }

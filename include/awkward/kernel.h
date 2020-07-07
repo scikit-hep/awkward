@@ -20,7 +20,8 @@ using namespace awkward;
 namespace kernel {
   enum Lib {
       cpu_kernels,
-      cuda_kernels
+      cuda_kernels,
+      num_libs
   };
 
   class LibraryPathCallback {
@@ -75,9 +76,7 @@ namespace kernel {
   public:
       /// @brief Called by `std::shared_ptr` when its reference count reaches
       /// zero.
-      void operator()(T const *p) {
-        delete[] p;
-      }
+      void operator()(T const *p);
   };
 
   /// @class cuda_array_deleter
@@ -118,6 +117,9 @@ namespace kernel {
   std::string
   get_ptr_device_name(kernel::Lib ptr_lib, T* ptr);
 
+  const std::string
+  fully_qualified_cache_key(const std::string& cache_key, kernel::Lib ptr_lib);
+
   /// @class no_deleter
   ///
   /// @brief Used as a `std::shared_ptr` deleter (second argument) to
@@ -139,27 +141,16 @@ namespace kernel {
       void operator()(T const *p) { }
   };
 
-  /// @brief Internal Function to transfer an array buffer contained
-  /// on the main memory to the GPU memory
+  /// @brief Internal Function to transfer an array buffer betweeen
+  /// main memory and the GPU memory
   ///
   /// @note This function has not been implemented to handle Multi-GPU setups
   template<typename T>
-  Error
-  H2D(kernel::Lib ptr_lib,
-      T **to_ptr,
-      T *from_ptr,
-      int64_t length);
-
-  /// @brief Internal Function to transfer an array buffer contained on the
-  /// main memory to the GPU memory
-  ///
-  /// @note This function has not been implemented to handle Multi-GPU setups
-  template<typename T>
-  Error D2H(kernel::Lib ptr_lib,
-            T **to_ptr,
-            T *from_ptr,
-            int64_t length);
-
+  Error copy_to(kernel::Lib TO,
+                kernel::Lib FROM,
+                T *to_ptr,
+                T *from_ptr,
+                int64_t length);
 
   /// @brief Internal Function to allocate an empty array of a given length on
   /// the GPU

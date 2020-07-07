@@ -479,7 +479,7 @@ namespace awkward {
     /// {@link ListArrayOf ListArray}, only the `starts` and `stops` get
     /// duplicated, not the `content` (and similarly for all other node types).
     virtual const ContentPtr
-      carry(const Index64& carry) const = 0;
+      carry(const Index64& carry, bool allow_lazy) const = 0;
 
     /// @brief The parameter associated with `key` at the first level
     /// that has a non-null value, descending only as deep as the first
@@ -1184,22 +1184,14 @@ namespace awkward {
     static int64_t
       axis_wrap_if_negative(int64_t axis);
 
-    /// @brief Transfer the entire contents of the array on to the GPU.
+    /// @brief Transfer the entire contents of the array between GPU and main memory.
     ///
     /// Returns a std::shared_ptr<Content> which is, by default, allocated on the
     /// first device(device [0])
     ///
     /// @note This function has not been implemented to handle Multi-GPU setups
     virtual ContentPtr
-      to_gpu(kernel::Lib ptr_lib) const;
-
-    /// @brief Transfer the contents of the array on the GPU to the main memory
-    ///
-    /// Returns a std::shared_ptr<Content> which is, allocated on the main memory
-    ///
-    /// @note This function has not been implemented to handle Multi-GPU setups
-    virtual ContentPtr
-      to_cpu() const;
+      copy_to(kernel::Lib ptr_lib) const = 0;
 
   protected:
     /// @brief Internal function to wrap putative #getitem output with enough

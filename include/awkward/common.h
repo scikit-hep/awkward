@@ -41,7 +41,7 @@ extern "C" {
     const char* str;
     int64_t identity;
     int64_t attempt;
-    bool extra;
+    bool pass_through;
   };
 
   const int8_t   kMaxInt8   =                 127;   // 2**7  - 1
@@ -57,17 +57,17 @@ extern "C" {
         out.str = nullptr;
         out.identity = kSliceNone;
         out.attempt = kSliceNone;
-        out.extra = 0;
+        out.pass_through = false;
         return out;
     };
 
   inline struct Error
-    failure(const char* str, int64_t identity, int64_t attempt, bool extra = false) {
+    failure(const char* str, int64_t identity, int64_t attempt, bool pass_through = false) {
         struct Error out;
         out.str = str;
         out.identity = identity;
         out.attempt = attempt;
-        out.extra = extra;
+        out.pass_through = pass_through;
         return out;
     };
 }

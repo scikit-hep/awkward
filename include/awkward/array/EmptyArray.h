@@ -161,7 +161,7 @@ namespace awkward {
       getitem_fields(const std::vector<std::string>& keys) const override;
 
     const ContentPtr
-      carry(const Index64& carry) const override;
+      carry(const Index64& carry, bool allow_lazy) const override;
 
     int64_t
       numfields() const override;
@@ -301,10 +301,7 @@ namespace awkward {
                           const Slice& tail) const override;
 
     ContentPtr
-      to_gpu(kernel::Lib ptr_lib) const override;
-
-    ContentPtr
-      to_cpu() const override;
+      copy_to(kernel::Lib ptr_lib) const override;
   };
 
 }

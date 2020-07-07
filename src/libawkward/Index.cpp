@@ -134,33 +134,53 @@ namespace awkward {
       }
     }
     else {
-      for (int64_t i = 0;  i < 5;  i++) {
+      for (int64_t i = 0; i < 5; i++) {
         if (i != 0) {
           out << " ";
         }
-        out << (int64_t)getitem_at_nowrap(i);
+        out << (int64_t) getitem_at_nowrap(i);
       }
       out << " ... ";
-      for (int64_t i = length_ - 5;  i < length_;  i++) {
+      for (int64_t i = length_ - 5; i < length_; i++) {
         if (i != length_ - 5) {
           out << " ";
         }
-        out << (int64_t)getitem_at_nowrap(i);
+        out << (int64_t) getitem_at_nowrap(i);
       }
     }
-    if(ptr_lib_ == kernel::Lib::cuda_kernels) {
+    if(ptr_lib_ == kernel::Lib::cpu_kernels) {
       out << "]\" offset=\"" << offset_ << "\" length=\"" << length_
           << "\" at=\"0x" << std::hex << std::setw(12) << std::setfill('0')
-          << reinterpret_cast<ssize_t>(ptr_.get())
-          << "\" on=\"[" << kernel::get_ptr_device_num(ptr_lib(), ptr_.get())
-          << "]" << kernel::get_ptr_device_name(ptr_lib(), ptr_.get())
-          << "\" Lib=\"" << "cuda_kernels" << "\"/>" << post;
+          << reinterpret_cast<ssize_t>(ptr_.get()) << "\"/>" << post;
+    }
+    else {
+      out << "]\" offset=\"" << offset_ << "\" length=\"" << length_
+          << "\" at=\"0x" << std::hex << std::setw(12) << std::setfill('0')
+          << reinterpret_cast<ssize_t>(ptr_.get()) << "\">";
+      out << kernellib_asstring("\n" + indent + std::string("    "), "", "\n");
+      out << indent << "</" << classname() << ">" << post;
+    }
+    return out.str();
+  }
+
+  template <typename T>
+  const std::string
+  IndexOf<T>::kernellib_asstring(const std::string &indent,
+                                 const std::string &pre,
+                                 const std::string &post) const {
+    if(ptr_lib_ == kernel::Lib::cpu_kernels) {
+      return "";
+    }
+    else {
+      std::stringstream out;
+      out << indent << pre << "<Lib name=\"";
+      if(ptr_lib_ == kernel::Lib::cuda_kernels) {
+        out << "cuda\" " << "device_number=\"" << kernel::get_ptr_device_num(ptr_lib(), ptr_.get())
+        << "\" device_name=\"" << kernel::get_ptr_device_name(ptr_lib(), ptr_.get()) << "\"";
+      }
+      out << "/>" << post;
       return out.str();
     }
-    out << "]\" offset=\"" << offset_ << "\" length=\"" << length_
-        << "\" at=\"0x" << std::hex << std::setw(12) << std::setfill('0')
-        << reinterpret_cast<ssize_t>(ptr_.get()) << "\"/>" << post;
-    return out.str();
   }
 
   template <typename T>
@@ -239,8 +259,8 @@ namespace awkward {
   IndexOf<T>::nbytes_part(std::map<size_t, int64_t>& largest) const {
     size_t x = (size_t)ptr_.get();
     auto it = largest.find(x);
-    if (it == largest.end()  ||  it->second < (int64_t)(sizeof(T)*length_)) {
-      largest[x] = (int64_t)(sizeof(T)*length_);
+    if (it == largest.end()  ||  it->second < (int64_t)(sizeof(T))*length_) {
+      largest[x] = (int64_t)(sizeof(T))*length_;
     }
   }
 
@@ -318,63 +338,31 @@ namespace awkward {
     return IndexOf<T>(ptr, 0, length_);
   }
 
-    template<typename T>
-    kernel::Lib IndexOf<T>::ptr_lib() const {
-      return ptr_lib_;
-    }
-
-    template<typename T>
-    const IndexOf<T>
-    IndexOf<T>::to_gpu(kernel::Lib ptr_lib) const {
-#ifndef _MSC_VER
-      if (ptr_lib == kernel::Lib::cuda_kernels) {
-        T *cuda_ptr;
-
-        if(ptr_lib_ != kernel::Lib::cuda_kernels) {
-          Error err =  kernel::H2D<T>(kernel::Lib::cuda_kernels,
-                                      &cuda_ptr,
-                                      ptr().get(),
-                                      length());
-          util::handle_error(err);
-        }
-        else {
-          cuda_ptr = ptr_.get();
-        }
-
-        return IndexOf<T>(std::shared_ptr<T>(cuda_ptr,
-                                             kernel::cuda_array_deleter<T>()),
-                          offset(),
-                          length(),
-                         kernel::Lib::cuda_kernels);
-      }
-#endif
-      throw std::invalid_argument("Invalid Kernel Library or OS for GPU Transfer");
-    }
+  template<typename T>
+  kernel::Lib IndexOf<T>::ptr_lib() const {
+    return ptr_lib_;
+  }
 
   template<typename T>
   const IndexOf<T>
-  IndexOf<T>::to_cpu() const {
-#ifndef _MSC_VER
-    if (ptr_lib_ == kernel::Lib::cuda_kernels) {
-      T* cpu_ptr = new T[length_];
-
-      Error err =  kernel::D2H<T>(kernel::Lib::cuda_kernels,
-                                  &cpu_ptr,
-                                  ptr().get(),
-                                  length());
-      util::handle_error(err);
-
-      return IndexOf<T>(std::shared_ptr<T>(cpu_ptr,
-                                             kernel::array_deleter<T>()),
-                        offset(),
-                        length(),
-                        kernel::Lib::cpu_kernels);
+  IndexOf<T>::copy_to(kernel::Lib ptr_lib) const {
+    if(ptr_lib == ptr_lib_) {
+      return *this;
     }
-#endif
-    return IndexOf<T>(ptr_,
-                      offset_,
-                      length_,
-                      kernel::Lib::cpu_kernels);
+
+    std::shared_ptr<T> ptr = kernel::ptr_alloc<T>(ptr_lib, length());
+
+    Error err =  kernel::copy_to<T>(ptr_lib,
+                                    ptr_lib_,
+                                    ptr.get(),
+                                    ptr_.get(),
+                                    length_);
+    util::handle_error(err);
+
+    return IndexOf<T>(ptr,
+                      offset(),
+                      length(),
+                      ptr_lib);
   }
 
   template class EXPORT_SYMBOL IndexOf<int8_t>;

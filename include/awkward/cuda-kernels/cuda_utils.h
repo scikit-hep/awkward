@@ -1,7 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
-#ifndef AWKWARD_CUDA_UTILS_H_
-#define AWKWARD_CUDA_UTILS_H_
+#ifndef AWKWARD_CUDA_UTILS_H
+#define AWKWARD_CUDA_UTILS_H
 
 #include "awkward/common.h"
 
@@ -13,4 +13,4 @@ extern "C" {
                                                    void* ptr);
 }
 
-#endif //AWKWARD_CUDA_UTILS_H_
+#endif //AWKWARD_CUDA_UTILS_H

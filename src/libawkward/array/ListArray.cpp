@@ -264,7 +264,7 @@ namespace awkward {
       content_.get()->length());
     util::handle_error(err, classname(), identities_.get());
 
-    ContentPtr nextcontent = content_.get()->carry(nextcarry);
+    ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
 
     IdentitiesPtr identities;
     if (identities_.get() != nullptr) {
@@ -684,7 +684,7 @@ namespace awkward {
 
   template <typename T>
   const ContentPtr
-  ListArrayOf<T>::carry(const Index64& carry) const {
+  ListArrayOf<T>::carry(const Index64& carry, bool allow_lazy) const {
     int64_t lenstarts = starts_.length();
     if (stops_.length() < lenstarts) {
       util::handle_error(
@@ -1359,7 +1359,7 @@ namespace awkward {
 
       ContentPtrVec contents;
       for (auto ptr : tocarry) {
-        contents.push_back(content_.get()->carry(Index64(ptr, 0, totallen)));
+        contents.push_back(content_.get()->carry(Index64(ptr, 0, totallen), true));
       }
       ContentPtr recordarray = std::make_shared<RecordArray>(
         Identities::none(),
@@ -1455,7 +1455,8 @@ namespace awkward {
       stops_.offset(),
       at.at());
     util::handle_error(err, classname(), identities_.get());
-    ContentPtr nextcontent = content_.get()->carry(nextcarry);
+    ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
+
     return nextcontent.get()->getitem_next(nexthead, nexttail, advanced);
   }
 
@@ -1509,7 +1510,7 @@ namespace awkward {
       stop,
       step);
     util::handle_error(err2, classname(), identities_.get());
-    ContentPtr nextcontent = content_.get()->carry(nextcarry);
+    ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
 
     if (advanced.length() == 0) {
       return std::make_shared<ListOffsetArrayOf<T>>(
@@ -1573,7 +1574,7 @@ namespace awkward {
         flathead.length(),
         content_.get()->length());
       util::handle_error(err, classname(), identities_.get());
-      ContentPtr nextcontent = content_.get()->carry(nextcarry);
+      ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
       return getitem_next_array_wrap(
         nextcontent.get()->getitem_next(nexthead,
                                         nexttail,
@@ -1597,7 +1598,7 @@ namespace awkward {
         flathead.length(),
         content_.get()->length());
       util::handle_error(err, classname(), identities_.get());
-      ContentPtr nextcontent = content_.get()->carry(nextcarry);
+      ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
       return nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced);
     }
   }
@@ -1636,7 +1637,7 @@ namespace awkward {
       len);
     util::handle_error(err, classname(), identities_.get());
 
-    ContentPtr carried = content_.get()->carry(nextcarry);
+    ContentPtr carried = content_.get()->carry(nextcarry, true);
     ContentPtr down = carried.get()->getitem_next_jagged(multistarts,
                                                          multistops,
                                                          jagged.content(),
@@ -1699,7 +1700,7 @@ namespace awkward {
       content_.get()->length());
     util::handle_error(err2, classname(), nullptr);
 
-    ContentPtr nextcontent = content_.get()->carry(nextcarry);
+    ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
     ContentPtr outcontent = nextcontent.get()->getitem_next(tail.head(),
                                                             tail.tail(),
                                                             Index64(0));
@@ -1757,7 +1758,7 @@ namespace awkward {
 
     ContentPtr out;
     if (dynamic_cast<SliceJagged64*>(slicecontent.content().get())) {
-      ContentPtr nextcontent = content_.get()->carry(nextcarry);
+      ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
       ContentPtr next = std::make_shared<ListOffsetArray64>(Identities::none(),
                                                             util::Parameters(),
                                                             smalloffsets,
@@ -1838,34 +1839,16 @@ namespace awkward {
 
   template <typename T>
   ContentPtr
-  ListArrayOf<T>::to_gpu(kernel::Lib ptr_lib) const {
-    if(ptr_lib == kernel::Lib::cuda_kernels) {
-      IndexOf<T> cuda_starts = starts_.to_gpu(kernel::Lib::cuda_kernels);
-      IndexOf<T> cuda_stops = stops_.to_gpu(kernel::Lib::cuda_kernels);
-      ContentPtr cuda_content= content_->to_gpu(kernel::Lib::cuda_kernels);
-
-      return std::make_shared<ListArrayOf<T>>(identities(),
-                                              parameters(),
-                                              cuda_starts,
-                                              cuda_stops,
-                                              cuda_content);
-    }
-  }
-
-  template <typename T>
-  ContentPtr
-  ListArrayOf<T>::to_cpu() const {
-
-    IndexOf<T> cpu_starts = starts_.to_cpu();
-    IndexOf<T> cpu_stops = stops_.to_cpu();
-    ContentPtr cpu_content = content_->to_cpu();
+  ListArrayOf<T>::copy_to(kernel::Lib ptr_lib) const {
+    IndexOf<T> starts = starts_.copy_to(ptr_lib);
+    IndexOf<T> stops = stops_.copy_to(ptr_lib);
+    ContentPtr content= content_->copy_to(ptr_lib);
 
     return std::make_shared<ListArrayOf<T>>(identities(),
                                             parameters(),
-                                            cpu_starts,
-                                            cpu_stops,
-                                            cpu_content);
-
+                                            starts,
+                                            stops,
+                                            content);
   }
 
   template class EXPORT_SYMBOL ListArrayOf<int32_t>;

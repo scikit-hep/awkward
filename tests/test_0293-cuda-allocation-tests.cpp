@@ -8,13 +8,28 @@
 
 namespace ak = awkward;
 
+std::string exec(const char* cmd) {
+  std::array<char, 128> buffer;
+  std::string result;
+  std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose);
+  if (!pipe) {
+    throw std::runtime_error("popen() failed!");
+  }
+  while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+    result += buffer.data();
+  }
+  return result;
+}
+
 // The extra steps needed to enable CUDA kernels on pure C++
 class StartupLibraryPathCallback : public kernel::LibraryPathCallback {
 public:
     StartupLibraryPathCallback() = default;
 
     const std::string library_path() const override {
-      std::string library_path = ("/path/to/python-pip/awkward1_cuda_kernels/libawkward-cuda-kernels.so");
+      std::string cmd_string = exec("python -c 'import awkward1_cuda_kernels; print(awkward1_cuda_kernels.shared_library_path)'");
+
+      std::string library_path = (cmd_string.substr(0, cmd_string.length() - 1));
       return library_path;
     };
 };
@@ -52,15 +67,15 @@ int main(int, char**) {
   ak::IndexU32 index_arrU32(main_arrU32, 0, 5);
   ak::Index64 index_arr64(main_arr64, 0, 5);
 
-  auto cuda_arr8 = index_arr8.to_gpu(kernel::Lib::cuda_kernels);
+  auto cuda_arr8 = index_arr8.copy_to(kernel::Lib::cuda_kernels);
   std::cout << cuda_arr8.tostring() << "\n";
-  auto cuda_arrU8 = index_arrU8.to_gpu(kernel::Lib::cuda_kernels);
+  auto cuda_arrU8 = index_arrU8.copy_to(kernel::Lib::cuda_kernels);
   std::cout << cuda_arrU8.tostring() << "\n";
-  auto cuda_arr32 = index_arr32.to_gpu(kernel::Lib::cuda_kernels);
+  auto cuda_arr32 = index_arr32.copy_to(kernel::Lib::cuda_kernels);
   std::cout << cuda_arr32.tostring() << "\n";
-  auto cuda_arrU32 = index_arrU32.to_gpu(kernel::Lib::cuda_kernels);
+  auto cuda_arrU32 = index_arrU32.copy_to(kernel::Lib::cuda_kernels);
   std::cout << cuda_arrU32.tostring() << "\n";
-  auto cuda_arr64 = index_arr64.to_gpu(kernel::Lib::cuda_kernels);
+  auto cuda_arr64 = index_arr64.copy_to(kernel::Lib::cuda_kernels);
   std::cout << cuda_arr64.tostring() << "\n";
 
   std::cout << "\n";
@@ -78,15 +93,15 @@ int main(int, char**) {
 
   std::cout << "\n";
 
-  auto cpu_arr8 = numpyArray8.to_cpu();
+  auto cpu_arr8 = numpyArray8.copy_to(kernel::Lib::cpu_kernels);
   std::cout << cpu_arr8->tostring() << "\n";
-  auto cpu_arrU8 = numpyArrayU8.to_cpu();
+  auto cpu_arrU8 = numpyArrayU8.copy_to(kernel::Lib::cpu_kernels);
   std::cout << cpu_arrU8->tostring() << "\n";
-  auto cpu_arr32 = numpyArray32.to_cpu();
+  auto cpu_arr32 = numpyArray32.copy_to(kernel::Lib::cpu_kernels);
   std::cout << cpu_arr32->tostring() << "\n";
-  auto cpu_arrU32 = numpyArrayU32.to_cpu();
+  auto cpu_arrU32 = numpyArrayU32.copy_to(kernel::Lib::cpu_kernels);
   std::cout << cpu_arrU32->tostring() << "\n";
-  auto cpu_arr64 = numpyArray64.to_cpu();
+  auto cpu_arr64 = numpyArray64.copy_to(kernel::Lib::cpu_kernels);
   std::cout << cpu_arr64->tostring() << "\n";
 
 }

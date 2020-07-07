@@ -692,8 +692,12 @@ namespace awkward {
 
   const ContentPtr
   RecordArray::getitem_range_nowrap(int64_t start, int64_t stop) const {
+    IdentitiesPtr identities(nullptr);
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->getitem_range_nowrap(start, stop);
+    }
     if (contents_.empty()) {
-      return std::make_shared<RecordArray>(identities_,
+      return std::make_shared<RecordArray>(identities,
                                            parameters_,
                                            contents_,
                                            recordlookup_,
@@ -704,7 +708,7 @@ namespace awkward {
       for (auto content : contents_) {
         contents.push_back(content.get()->getitem_range_nowrap(start, stop));
       }
-      return std::make_shared<RecordArray>(identities_,
+      return std::make_shared<RecordArray>(identities,
                                            parameters_,
                                            contents,
                                            recordlookup_,
@@ -737,20 +741,28 @@ namespace awkward {
   }
 
   const ContentPtr
-  RecordArray::carry(const Index64& carry) const {
-    ContentPtrVec contents;
-    for (auto content : contents_) {
-      contents.push_back(content.get()->carry(carry));
-    }
+  RecordArray::carry(const Index64& carry, bool allow_lazy) const {
     IdentitiesPtr identities(nullptr);
     if (identities_.get() != nullptr) {
       identities = identities_.get()->getitem_carry_64(carry);
     }
-    return std::make_shared<RecordArray>(identities,
-                                         parameters_,
-                                         contents,
-                                         recordlookup_,
-                                         carry.length());
+    if (allow_lazy) {
+      return std::make_shared<IndexedArray64>(identities,
+                                              parameters_,
+                                              carry,
+                                              shallow_copy());
+    }
+    else {
+      ContentPtrVec contents;
+      for (auto content : contents_) {
+        contents.push_back(content.get()->carry(carry, allow_lazy));
+      }
+      return std::make_shared<RecordArray>(identities,
+                                           parameters_,
+                                           contents,
+                                           recordlookup_,
+                                           carry.length());
+    }
   }
 
   int64_t
@@ -1455,34 +1467,16 @@ namespace awkward {
   }
 
   ContentPtr
-  RecordArray::to_gpu(kernel::Lib ptr_lib) const {
-    if(ptr_lib == kernel::Lib::cuda_kernels) {
-      ContentPtrVec cuda_content_vec;
-      for(auto i : contents_) {
-        ContentPtr cuda_ptr = i->to_gpu(kernel::Lib::cuda_kernels);
-        cuda_content_vec.emplace_back(cuda_ptr);
-      }
-
-      return std::make_shared<RecordArray>(identities(),
-                                           parameters(),
-                                           cuda_content_vec,
-                                           recordlookup(),
-                                           length());
-    }
-  }
-
-  ContentPtr
-  RecordArray::to_cpu() const{
-
-    ContentPtrVec cpu_content_vec;
+  RecordArray::copy_to(kernel::Lib ptr_lib) const {
+    ContentPtrVec content_vec;
     for(auto i : contents_) {
-      ContentPtr cpu_ptr = i->to_cpu();
-      cpu_content_vec.emplace_back(cpu_ptr);
+      ContentPtr ptr = i->copy_to(ptr_lib);
+      content_vec.emplace_back(ptr);
     }
 
     return std::make_shared<RecordArray>(identities(),
                                          parameters(),
-                                         cpu_content_vec,
+                                         content_vec,
                                          recordlookup(),
                                          length());
 

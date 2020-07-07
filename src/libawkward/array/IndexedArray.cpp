@@ -21,6 +21,7 @@
 #include "awkward/array/BitMaskedArray.h"
 #include "awkward/array/UnmaskedArray.h"
 #include "awkward/array/RegularArray.h"
+#include "awkward/array/RecordArray.h"
 #include "awkward/array/ListOffsetArray.h"
 #include "awkward/array/VirtualArray.h"
 
@@ -359,7 +360,7 @@ namespace awkward {
         content_.get()->length());
       util::handle_error(err2, classname(), identities_.get());
 
-      return content_.get()->carry(nextcarry);
+      return content_.get()->carry(nextcarry, false);
     }
     else {
       Index64 nextcarry(length());
@@ -371,7 +372,7 @@ namespace awkward {
         content_.get()->length());
       util::handle_error(err, classname(), identities_.get());
 
-      return content_.get()->carry(nextcarry);
+      return content_.get()->carry(nextcarry, false);
     }
   }
 
@@ -1140,7 +1141,7 @@ namespace awkward {
         Index64 nextcarry = pair.first;
         IndexOf<T> outindex = pair.second;
 
-        ContentPtr next = content_.get()->carry(nextcarry);
+        ContentPtr next = content_.get()->carry(nextcarry, true);
         ContentPtr out = next.get()->getitem_next(head, tail, advanced);
         IndexedArrayOf<T, ISOPTION> out2(identities_,
                                          parameters_,
@@ -1158,7 +1159,8 @@ namespace awkward {
           content_.get()->length());
         util::handle_error(err, classname(), identities_.get());
 
-        ContentPtr next = content_.get()->carry(nextcarry);
+        // must be an eager carry (allow_lazy = false) to avoid infinite loop
+        ContentPtr next = content_.get()->carry(nextcarry, false);
         return next.get()->getitem_next(head, tail, advanced);
       }
     }
@@ -1189,7 +1191,7 @@ namespace awkward {
 
   template <typename T, bool ISOPTION>
   const ContentPtr
-  IndexedArrayOf<T, ISOPTION>::carry(const Index64& carry) const {
+  IndexedArrayOf<T, ISOPTION>::carry(const Index64& carry, bool allow_lazy) const {
     IndexOf<T> nextindex(carry.length());
     struct Error err = kernel::IndexedArray_getitem_carry_64<T>(
       nextindex.ptr().get(),
@@ -1279,7 +1281,7 @@ namespace awkward {
       Index64 nextcarry = pair.first;
       IndexOf<T> outindex = pair.second;
 
-      ContentPtr next = content_.get()->carry(nextcarry);
+      ContentPtr next = content_.get()->carry(nextcarry, false);
       ContentPtr out = next.get()->num(axis, depth);
       IndexedArrayOf<T, ISOPTION> out2(Identities::none(),
                                        util::Parameters(),
@@ -1306,7 +1308,7 @@ namespace awkward {
       Index64 nextcarry = pair.first;
       IndexOf<T> outindex = pair.second;
 
-      ContentPtr next = content_.get()->carry(nextcarry);
+      ContentPtr next = content_.get()->carry(nextcarry, false);
 
       std::pair<Index64, ContentPtr> offsets_flattened =
         next.get()->offsets_and_flattened(axis, depth);
@@ -1664,7 +1666,7 @@ namespace awkward {
         content_.get()->length());
       util::handle_error(err2, classname(), identities_.get());
 
-      ContentPtr next = content_.get()->carry(nextcarry);
+      ContentPtr next = content_.get()->carry(nextcarry, false);
 
       SliceItemPtr slicecontent = next.get()->asslice();
       if (SliceArray64* raw =
@@ -1857,7 +1859,7 @@ namespace awkward {
       index_.length());
     util::handle_error(err2, classname(), identities_.get());
 
-    ContentPtr next = content_.get()->carry(nextcarry);
+    ContentPtr next = content_.get()->carry(nextcarry, false);
     ContentPtr out = next.get()->reduce_next(reducer,
                                              negaxis,
                                              starts,
@@ -1881,7 +1883,7 @@ namespace awkward {
         if (starts.length() > 0  &&  starts.getitem_at_nowrap(0) != 0) {
           throw std::runtime_error(
             std::string("reduce_next with unbranching depth > negaxis expects a "
-            "ListOffsetArray64 whose offsets start at zero ") + std::to_string(starts.ptr_lib()));
+            "ListOffsetArray64 whose offsets start at zero "));
         }
         struct Error err3 = kernel::IndexedArray_reduce_next_fix_offsets_64(
           outoffsets.ptr().get(),
@@ -1925,7 +1927,7 @@ namespace awkward {
         Index64 nextcarry = pair.first;
         IndexOf<T> outindex = pair.second;
 
-        ContentPtr next = content_.get()->carry(nextcarry);
+        ContentPtr next = content_.get()->carry(nextcarry, false);
         ContentPtr out = next.get()->localindex(axis, depth);
         IndexedArrayOf<T, ISOPTION> out2(identities_,
                                          util::Parameters(),
@@ -1961,7 +1963,7 @@ namespace awkward {
         Index64 nextcarry = pair.first;
         IndexOf<T> outindex = pair.second;
 
-        ContentPtr next = content_.get()->carry(nextcarry);
+        ContentPtr next = content_.get()->carry(nextcarry, true);
         ContentPtr out = next.get()->combinations(n,
                                                   replacement,
                                                   recordlookup,
@@ -2016,7 +2018,7 @@ namespace awkward {
       index_.length());
     util::handle_error(err2, classname(), identities_.get());
 
-    ContentPtr next = content_.get()->carry(nextcarry);
+    ContentPtr next = content_.get()->carry(nextcarry, false);
     ContentPtr out = next.get()->sort_next(negaxis,
                                            starts,
                                            nextparents,
@@ -2119,7 +2121,7 @@ namespace awkward {
       index_.length());
     util::handle_error(err2, classname(), identities_.get());
 
-    ContentPtr next = content_.get()->carry(nextcarry);
+    ContentPtr next = content_.get()->carry(nextcarry, false);
     ContentPtr out = next.get()->argsort_next(negaxis,
                                               starts,
                                               nextparents,
@@ -2269,26 +2271,13 @@ namespace awkward {
 
   template <typename T, bool ISOPTION>
   ContentPtr
-  IndexedArrayOf<T, ISOPTION>::to_gpu(kernel::Lib ptr_lib) const {
-    if(ptr_lib == kernel::Lib::cuda_kernels) {
-      IndexOf<T> cuda_index = index_.to_gpu(kernel::Lib::cuda_kernels);
-      ContentPtr cuda_content = content_->to_gpu(kernel::Lib::cuda_kernels);
-      return std::make_shared<IndexedArrayOf<T, ISOPTION>>(identities_,
-                                                           parameters(),
-                                                           cuda_index,
-                                                           cuda_content);
-    }
-  }
-
-  template <typename T, bool ISOPTION>
-  ContentPtr
-  IndexedArrayOf<T, ISOPTION>::to_cpu() const {
-      IndexOf<T> cpu_index = index_.to_cpu();
-      ContentPtr cpu_content = content_->to_cpu();
-      return std::make_shared<IndexedArrayOf<T, ISOPTION>>(identities_,
-                                                           parameters(),
-                                                           cpu_index,
-                                                           cpu_content);
+  IndexedArrayOf<T, ISOPTION>::copy_to(kernel::Lib ptr_lib) const {
+    IndexOf<T> index = index_.copy_to(ptr_lib);
+    ContentPtr content = content_->copy_to(ptr_lib);
+    return std::make_shared<IndexedArrayOf<T, ISOPTION>>(identities_,
+                                                         parameters(),
+                                                         index,
+                                                         content);
 
   }
 
@@ -2306,7 +2295,7 @@ namespace awkward {
       Index64 nextcarry = pair.first;
       IndexOf<T> outindex = pair.second;
 
-      ContentPtr next = content_.get()->carry(nextcarry);
+      ContentPtr next = content_.get()->carry(nextcarry, true);
       ContentPtr out = next.get()->getitem_next_jagged(slicestarts,
                                                        slicestops,
                                                        slicecontent,
@@ -2327,7 +2316,8 @@ namespace awkward {
         content_.get()->length());
       util::handle_error(err, classname(), identities_.get());
 
-      ContentPtr next = content_.get()->carry(nextcarry);
+      // an eager carry (allow_lazy = false) to avoid infinite loop (unproven)
+      ContentPtr next = content_.get()->carry(nextcarry, false);
       return next.get()->getitem_next_jagged(slicestarts,
                                              slicestops,
                                              slicecontent,

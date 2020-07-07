@@ -131,7 +131,7 @@ namespace awkward {
   }
 
   const ContentPtr
-  None::carry(const Index64& carry) const {
+  None::carry(const Index64& carry, bool allow_lazy) const {
     throw std::runtime_error("undefined operation: None::carry");
   }
 
@@ -331,17 +331,10 @@ namespace awkward {
   }
 
   ContentPtr
-  None::to_gpu(kernel::Lib ptr_lib) const {
+  None::copy_to(kernel::Lib ptr_lib) const {
     throw std::runtime_error(
-      "undefined operation: None::to_gpu(ptr_lib)");
+      "undefined operation: None::copy_to(ptr_lib)");
   }
-
-  ContentPtr
-  None::to_cpu() const {
-    throw std::runtime_error(
-      "undefined operation: None::to_cpu()");
-  }
-
 
   const ContentPtr none = std::make_shared<None>();
 }

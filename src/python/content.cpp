@@ -1289,9 +1289,12 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
                   bool stable) -> py::object {
                return box(self.argsort(axis, ascending, false));
           })
-
-  ;
-}
+          .def("copy_to",
+               [](const T&self,
+                  kernel::Lib ptr_lib) -> py::object {
+                   return box(self.copy_to(ptr_lib));
+               });
+  }
 
 ////////// EmptyArray
 

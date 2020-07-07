@@ -428,7 +428,7 @@ namespace awkward {
       index);
     util::handle_error(err, classname(), identities_.get());
     Index64 nextcarry(tmpcarry.ptr(), 0, lenout);
-    return contents_[(size_t)index].get()->carry(nextcarry);
+    return contents_[(size_t)index].get()->carry(nextcarry, false);
   }
 
   template <typename T, typename I>
@@ -658,7 +658,7 @@ namespace awkward {
     }
 
     if (contents.size() == 1) {
-      return contents[0].get()->carry(index);
+      return contents[0].get()->carry(index, true);
     }
     else {
       return std::make_shared<UnionArray8_64>(identities_,
@@ -1131,7 +1131,7 @@ namespace awkward {
 
   template <typename T, typename I>
   const ContentPtr
-  UnionArrayOf<T, I>::carry(const Index64& carry) const {
+  UnionArrayOf<T, I>::carry(const Index64& carry, bool allow_lazy) const {
     int64_t lentags = tags_.length();
     if (index_.length() < lentags) {
       util::handle_error(
@@ -1931,43 +1931,21 @@ namespace awkward {
 
   template <typename T, typename I>
   ContentPtr
-  UnionArrayOf<T, I>::to_gpu(kernel::Lib ptr_lib) const {
-    if(ptr_lib ==kernel::Lib::cuda_kernels) {
-      IndexOf<T> cuda_tags = tags_.to_gpu(kernel::Lib::cuda_kernels);
-      IndexOf<I> cuda_index = index_.to_gpu(kernel::Lib::cuda_kernels);
+  UnionArrayOf<T, I>::copy_to(kernel::Lib ptr_lib) const {
+    IndexOf<T> tags = tags_.copy_to(ptr_lib);
+    IndexOf<I> index = index_.copy_to(ptr_lib);
 
-      ContentPtrVec cuda_content_vec;
-      for(auto const i : contents_) {
-        ContentPtr cuda_ptr = i->to_gpu(kernel::Lib::cuda_kernels);
-        cuda_content_vec.emplace_back(cuda_ptr);
-      }
-
-      return std::make_shared<UnionArrayOf<T, I>>(identities(),
-                                                  parameters(),
-                                                  cuda_tags,
-                                                  cuda_index,
-                                                  cuda_content_vec);
-    }
-  }
-
-  template <typename T, typename I>
-  ContentPtr
-  UnionArrayOf<T, I>::to_cpu() const {
-
-    IndexOf<T> cpu_tags = tags_.to_cpu();
-    IndexOf<I> cpu_index = index_.to_cpu();
-
-    ContentPtrVec cpu_content_vec;
+    ContentPtrVec content_vec;
     for(auto const i : contents_) {
-      ContentPtr cpu_ptr = i->to_cpu();
-      cpu_content_vec.emplace_back(cpu_ptr);
+      ContentPtr ptr = i->copy_to(ptr_lib);
+      content_vec.emplace_back(ptr);
     }
 
     return std::make_shared<UnionArrayOf<T, I>>(identities(),
                                                 parameters(),
-                                                cpu_tags,
-                                                cpu_index,
-                                                cpu_content_vec);
+                                                tags,
+                                                index,
+                                                content_vec);
   }
 
   template <typename T, typename I>

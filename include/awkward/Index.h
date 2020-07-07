@@ -132,6 +132,11 @@ namespace awkward {
                     const std::string& pre,
                     const std::string& post) const;
 
+    const std::string
+      kernellib_asstring(const std::string& indent,
+                         const std::string& pre,
+                         const std::string& post) const;
+
     /// @brief Returns the enum describing this Index's integer specialization.
     Form
       form() const;
@@ -204,10 +209,7 @@ namespace awkward {
       deep_copy() const;
 
     const IndexOf<T>
-      to_gpu(kernel::Lib ptr_lib) const;
-
-    const IndexOf<T>
-      to_cpu() const;
+      copy_to(kernel::Lib ptr_lib) const;
 
   private:
     /// @brief See #ptr.

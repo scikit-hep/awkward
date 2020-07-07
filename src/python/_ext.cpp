@@ -26,6 +26,10 @@ PYBIND11_MODULE(_ext, m) {
 
   make_startup(m, "startup");
 
+  ////////// kernel_utils.h
+
+  make_Libenum(m, "kernelLib");
+
   ////////// index.h
 
   make_IndexOf<int8_t>(m,   "Index8");

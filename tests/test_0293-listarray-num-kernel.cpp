@@ -9,13 +9,28 @@
 #include "awkward/kernel.h"
 namespace ak = awkward;
 
+std::string exec(const char* cmd) {
+  std::array<char, 128> buffer;
+  std::string result;
+  std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose);
+  if (!pipe) {
+    throw std::runtime_error("popen() failed!");
+  }
+  while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+    result += buffer.data();
+  }
+  return result;
+}
+
 // The extra steps needed to enable CUDA kernels on pure C++
 class StartupLibraryPathCallback : public kernel::LibraryPathCallback {
 public:
     StartupLibraryPathCallback() = default;
 
     const std::string library_path() const override {
-      std::string library_path = ("/path/to/python-pip/awkward1_cuda_kernels/libawkward-cuda-kernels.so");
+      std::string cmd_string = exec("python -c 'import awkward1_cuda_kernels; print(awkward1_cuda_kernels.shared_library_path)'");
+
+      std::string library_path = (cmd_string.substr(0, cmd_string.length() - 1));
       return library_path;
     };
 };
@@ -58,7 +73,7 @@ int main(int, char**) {
   std::shared_ptr<ak::Content> array = builder.snapshot();
 
   // First test, the transfer to GPU
-  auto cuda_arr =  array->to_gpu(kernel::Lib::cuda_kernels);
+  auto cuda_arr =  array->copy_to(kernel::Lib::cuda_kernels);
   std::cout << cuda_arr->tostring() << "\n";
 
   // Second test, run the ListArray_num kernel on the GPU
@@ -66,7 +81,7 @@ int main(int, char**) {
   std::cout << arr_cuda_ker->tostring() << "\n";
 
   // Third test, transfer the cuda array on to main memory
-  auto cpu_arr = cuda_arr->to_cpu();
+  auto cpu_arr = cuda_arr->copy_to(kernel::Lib::cpu_kernels);
   std::cout << cpu_arr->tostring() << "\n";
 
   // Fourth test, check the answer of ListArray num on the CPU and GPU
