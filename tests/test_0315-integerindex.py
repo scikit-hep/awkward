@@ -51,6 +51,20 @@ def test_integerindex_null_more():
     assert awkward1.to_list(f[g2]) == [[], None, None, []]
     assert awkward1.to_list(f[g3]) == [[], None, [], []]
 
+    a = awkward1.Array([[0, 1, 2, None], None])
+    b = awkward1.Array([[2, 1, None, 3], None])
+    assert awkward1.to_list(a[b]) == [[2, 1, None, None], None]
+    b = awkward1.Array([[2, 1, None, 3], []])
+    assert awkward1.to_list(a[b]) == [[2, 1, None, None], None]
+    b = awkward1.Array([[2, 1, None, 3], [0, 1]])
+    assert awkward1.to_list(a[b]) == [[2, 1, None, None], None]
+
+    a = awkward1.Array([[[0, 1, 2, None], None], [[3, 4], [5]], None, [[6]]])
+    b = awkward1.Array([[[2, 1, None, 3], [0, 1]], [[0], None], None, [None]])
+    c = awkward1.Array([[[False, True, None, False], [False, True]], [[True, False], None], None, [None]])
+    assert awkward1.to_list(a[b]) == [[[2, 1, None, None], None], [[3], None], None, [None]]
+    assert awkward1.to_list(a[c]) == [[[1, None], None], [[4], None], None, [None]]
+
 def test_silly_stuff():
     a = awkward1.Array([[0, 1, 2], 3])
     b = [[2], [0]]
