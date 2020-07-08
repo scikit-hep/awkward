@@ -269,7 +269,7 @@ namespace awkward {
       builder.endrecord();
     }
     else {
-      builder.string(p.c_str(), p.length());
+      builder.string(p.c_str(), (int64_t)p.length());
     }
   }
 
@@ -1390,7 +1390,7 @@ namespace awkward {
       if (indx > std::begin(shape)) {
         out.insert(std::end(out), std::begin(shape), indx);
       }
-      out.emplace_back(shape[offset]*shape[offset + 1]);
+      out.emplace_back((ssize_t)shape[(size_t)offset]*shape[(size_t)offset + 1]);
       out.insert(std::end(out), indx + 2, std::end(shape));
       return out;
     }
@@ -1420,7 +1420,7 @@ namespace awkward {
       throw std::invalid_argument("axis=0 not allowed for flatten");
     }
     else if (shape_.size() != 1  ||  !iscontiguous()) {
-      return toRegularArray().get()->offsets_and_flattened(axis, depth);
+      return toRegularArray().get()->offsets_and_flattened(toaxis, depth);
     }
     else {
       throw std::invalid_argument("axis out of range for flatten");
@@ -2570,14 +2570,14 @@ namespace awkward {
   const ContentPtr
   NumpyArray::localindex(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
-    if (axis == depth) {
+    if (toaxis == depth) {
       return localindex_axis0();
     }
     else if (shape_.size() <= 1) {
       throw std::invalid_argument("'axis' out of range for localindex");
     }
     else {
-      return toRegularArray().get()->localindex(axis, depth);
+      return toRegularArray().get()->localindex(toaxis, depth);
     }
   }
 
@@ -2606,7 +2606,7 @@ namespace awkward {
                                                   replacement,
                                                   recordlookup,
                                                   parameters,
-                                                  axis,
+                                                  toaxis,
                                                   depth);
     }
   }
@@ -2979,7 +2979,6 @@ namespace awkward {
                              bool ascending,
                              bool stable) const {
     std::shared_ptr<Content> out;
-    int64_t offset = byteoffset_ / itemsize_;
     std::shared_ptr<void> ptr;
 
     Index64 outoffsets(offsets.length());
@@ -3130,8 +3129,8 @@ namespace awkward {
   NumpyArray::iscontiguous() const {
     ssize_t x = itemsize_;
     for (ssize_t i = ndim() - 1;  i >= 0;  i--) {
-      if (x != strides_[i]) return false;
-      x *= shape_[i];
+      if (x != strides_[(size_t)i]) return false;
+      x *= shape_[(size_t)i];
     }
     return true;  // true for isscalar(), too
   }
@@ -3972,16 +3971,16 @@ namespace awkward {
                              bool include_beginendlist) const {
     if (ndim() == 0) {
       T* array = reinterpret_cast<T*>(byteptr());
-      builder.integer(array[0]);
+      builder.integer((int64_t)array[0]);
     }
     else if (ndim() == 1) {
       T* array = reinterpret_cast<T*>(byteptr());
-      int64_t stride = (int64_t)(strides_[0] / sizeof(T));
+      int64_t stride = strides_[0] / (int64_t)(sizeof(T));
       if (include_beginendlist) {
         builder.beginlist();
       }
       for (int64_t i = 0;  i < length();  i++) {
-        builder.integer(array[i*stride]);
+        builder.integer((int64_t)array[i*stride]);
       }
       if (include_beginendlist) {
         builder.endlist();
@@ -4017,7 +4016,7 @@ namespace awkward {
     }
     else if (ndim() == 1) {
       T* array = reinterpret_cast<T*>(byteptr());
-      int64_t stride = (int64_t)(strides_[0] / sizeof(T));
+      int64_t stride = strides_[0] / (int64_t)(sizeof(T));
       if (include_beginendlist) {
         builder.beginlist();
       }

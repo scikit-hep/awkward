@@ -1325,6 +1325,7 @@ namespace awkward {
 
   const int64_t
   Content::axis_wrap_if_negative(int64_t axis) const {
+    
     std::pair<int64_t, int64_t> minmax = minmax_depth();
     int64_t mindepth = minmax.first;
     int64_t maxdepth = minmax.second;

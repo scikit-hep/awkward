@@ -17,7 +17,7 @@ namespace awkward {
                              const NumpyArray& rawdata,
                              int64_t whichlevel,
                              int64_t itemsize) {
-    if (whichlevel == levels.size()) {
+    if (whichlevel == (int64_t)levels.size()) {
       bytepos_tocopy.append(bytepos);
       bytepos += itemsize;
     }

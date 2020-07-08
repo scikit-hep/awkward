@@ -1280,7 +1280,7 @@ namespace awkward {
       IndexOf<T> outindex = pair.second;
 
       ContentPtr next = content_.get()->carry(nextcarry);
-      ContentPtr out = next.get()->num(axis, depth);
+      ContentPtr out = next.get()->num(toaxis, depth);
       IndexedArrayOf<T, ISOPTION> out2(Identities::none(),
                                        util::Parameters(),
                                        outindex,
@@ -1288,7 +1288,7 @@ namespace awkward {
       return out2.simplify_optiontype();
     }
     else {
-      return project().get()->num(axis, depth);
+      return project().get()->num(toaxis, depth);
     }
   }
 
@@ -1309,7 +1309,7 @@ namespace awkward {
       ContentPtr next = content_.get()->carry(nextcarry);
 
       std::pair<Index64, ContentPtr> offsets_flattened =
-        next.get()->offsets_and_flattened(axis, depth);
+        next.get()->offsets_and_flattened(toaxis, depth);
       Index64 offsets = offsets_flattened.first;
       ContentPtr flattened = offsets_flattened.second;
 
@@ -1336,7 +1336,7 @@ namespace awkward {
       }
     }
     else {
-      return project().get()->offsets_and_flattened(axis, depth);
+      return project().get()->offsets_and_flattened(toaxis, depth);
     }
   }
 
@@ -1915,7 +1915,7 @@ namespace awkward {
   const ContentPtr
   IndexedArrayOf<T, ISOPTION>::localindex(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
-    if (axis == depth) {
+    if (toaxis == depth) {
       return localindex_axis0();
     }
     else {
@@ -1926,14 +1926,14 @@ namespace awkward {
         IndexOf<T> outindex = pair.second;
 
         ContentPtr next = content_.get()->carry(nextcarry);
-        ContentPtr out = next.get()->localindex(axis, depth);
+        ContentPtr out = next.get()->localindex(toaxis, depth);
         IndexedArrayOf<T, ISOPTION> out2(identities_,
                                          util::Parameters(),
                                          outindex, out);
         return out2.simplify_optiontype();
       }
       else {
-        return project().get()->localindex(axis, depth);
+        return project().get()->localindex(toaxis, depth);
       }
     }
   }
@@ -1951,7 +1951,7 @@ namespace awkward {
       throw std::invalid_argument("in combinations, 'n' must be at least 1");
     }
     int64_t toaxis = axis_wrap_if_negative(axis);
-    if (axis == depth) {
+    if (toaxis == depth) {
       return combinations_axis0(n, replacement, recordlookup, parameters);
     }
     else {
@@ -1966,7 +1966,7 @@ namespace awkward {
                                                   replacement,
                                                   recordlookup,
                                                   parameters,
-                                                  axis,
+                                                  toaxis,
                                                   depth);
         IndexedArrayOf<T, ISOPTION> out2(identities_,
                                          util::Parameters(),
@@ -1979,7 +1979,7 @@ namespace awkward {
                                              replacement,
                                              recordlookup,
                                              parameters,
-                                             axis,
+                                             toaxis,
                                              depth);
       }
     }

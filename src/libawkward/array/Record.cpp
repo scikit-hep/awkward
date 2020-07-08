@@ -282,7 +282,7 @@ namespace awkward {
     }
     else {
       ContentPtr singleton = array_.get()->getitem_range_nowrap(at_, at_ + 1);
-      return singleton.get()->num(axis, depth).get()->getitem_at_nowrap(0);
+      return singleton.get()->num(toaxis, depth).get()->getitem_at_nowrap(0);
     }
   }
 
@@ -357,7 +357,7 @@ namespace awkward {
     else {
       ContentPtr singleton = array_.get()->getitem_range_nowrap(at_, at_ + 1);
       return singleton.get()
-             ->localindex(axis, depth).get()
+             ->localindex(toaxis, depth).get()
              ->getitem_at_nowrap(0);
     }
   }
@@ -383,7 +383,7 @@ namespace awkward {
                                            replacement,
                                            recordlookup,
                                            parameters,
-                                           axis,
+                                           toaxis,
                                            depth).get()->getitem_at_nowrap(0);
     }
   }

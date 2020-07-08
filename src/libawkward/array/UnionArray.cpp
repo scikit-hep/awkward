@@ -240,7 +240,7 @@ namespace awkward {
           }
         }
         if (!found) {
-          out.erase(out.begin() + (size_t)j);
+          out.erase(out.begin() + j);
         }
       }
     }
@@ -1220,7 +1220,7 @@ namespace awkward {
           }
         }
         if (!found) {
-          out.erase(out.begin() + (size_t)j);
+          out.erase(out.begin() + j);
         }
       }
     }
@@ -1275,7 +1275,7 @@ namespace awkward {
     else {
       ContentPtrVec contents;
       for (auto content : contents_) {
-        contents.push_back(content.get()->num(axis, depth));
+        contents.push_back(content.get()->num(toaxis, depth));
       }
       UnionArrayOf<T, I> out(Identities::none(),
                              util::Parameters(),
@@ -1302,7 +1302,7 @@ namespace awkward {
       ContentPtrVec contents;
       for (auto content : contents_) {
         std::pair<Index64, ContentPtr> pair =
-          content.get()->offsets_and_flattened(axis, depth);
+          content.get()->offsets_and_flattened(toaxis, depth);
         Index64 offsets = pair.first;
         offsetsptrs.push_back(offsets.ptr());
         offsetsraws.push_back(offsets.ptr().get());
@@ -1694,7 +1694,7 @@ namespace awkward {
     else {
       ContentPtrVec contents;
       for (auto content : contents_) {
-        contents.emplace_back(content.get()->rpad(target, axis, depth));
+        contents.emplace_back(content.get()->rpad(target, toaxis, depth));
       }
       UnionArrayOf<T, I> out(identities_,
                              parameters_,
@@ -1718,7 +1718,7 @@ namespace awkward {
       ContentPtrVec contents;
       for (auto content : contents_) {
         contents.emplace_back(
-          content.get()->rpad_and_clip(target, axis, depth));
+          content.get()->rpad_and_clip(target, toaxis, depth));
       }
       UnionArrayOf<T, I> out(identities_,
                              parameters_,
@@ -1759,13 +1759,13 @@ namespace awkward {
   const ContentPtr
   UnionArrayOf<T, I>::localindex(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
-    if (axis == depth) {
+    if (toaxis == depth) {
       return localindex_axis0();
     }
     else {
       ContentPtrVec contents;
       for (auto content : contents_) {
-        contents.push_back(content.get()->localindex(axis, depth));
+        contents.push_back(content.get()->localindex(toaxis, depth));
       }
       return std::make_shared<UnionArrayOf<T, I>>(identities_,
                                                   util::Parameters(),
@@ -1787,7 +1787,7 @@ namespace awkward {
       throw std::invalid_argument("in combinations, 'n' must be at least 1");
     }
     int64_t toaxis = axis_wrap_if_negative(axis);
-    if (axis == depth) {
+    if (toaxis == depth) {
       return combinations_axis0(n, replacement, recordlookup, parameters);
     }
     else {
@@ -1797,7 +1797,7 @@ namespace awkward {
                                                        replacement,
                                                        recordlookup,
                                                        parameters,
-                                                       axis,
+                                                       toaxis,
                                                        depth));
       }
       return std::make_shared<UnionArrayOf<T, I>>(identities_,

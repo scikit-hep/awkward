@@ -557,7 +557,7 @@ namespace awkward {
     else {
       return std::make_shared<UnmaskedArray>(Identities::none(),
                                              util::Parameters(),
-                                             content_.get()->num(axis, depth));
+                                             content_.get()->num(toaxis, depth));
     }
   }
 
@@ -569,7 +569,7 @@ namespace awkward {
     }
     else {
       std::pair<Index64, ContentPtr> offsets_flattened =
-        content_.get()->offsets_and_flattened(axis, depth);
+        content_.get()->offsets_and_flattened(toaxis, depth);
       Index64 offsets = offsets_flattened.first;
       ContentPtr flattened = offsets_flattened.second;
       if (offsets.length() == 0) {
@@ -669,13 +669,13 @@ namespace awkward {
       return rpad_axis0(target, false);
     }
     else if (toaxis == depth + 1) {
-      return content_.get()->rpad(target, axis, depth);
+      return content_.get()->rpad(target, toaxis, depth);
     }
     else {
       return std::make_shared<UnmaskedArray>(
         Identities::none(),
         parameters_,
-        content_.get()->rpad(target, axis, depth));
+        content_.get()->rpad(target, toaxis, depth));
     }
   }
 
@@ -688,13 +688,13 @@ namespace awkward {
       return rpad_axis0(target, false);
     }
     else if (toaxis == depth + 1) {
-      return content_.get()->rpad_and_clip(target, axis, depth);
+      return content_.get()->rpad_and_clip(target, toaxis, depth);
     }
     else {
       return std::make_shared<UnmaskedArray>(
         Identities::none(),
         parameters_,
-        content_.get()->rpad_and_clip(target, axis, depth));
+        content_.get()->rpad_and_clip(target, toaxis, depth));
     }
   }
 
@@ -718,14 +718,14 @@ namespace awkward {
   const ContentPtr
   UnmaskedArray::localindex(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
-    if (axis == depth) {
+    if (toaxis == depth) {
       return localindex_axis0();
     }
     else {
       return std::make_shared<UnmaskedArray>(
         identities_,
         util::Parameters(),
-        content_.get()->localindex(axis, depth));
+        content_.get()->localindex(toaxis, depth));
     }
   }
 
@@ -740,7 +740,7 @@ namespace awkward {
       throw std::invalid_argument("in combinations, 'n' must be at least 1");
     }
     int64_t toaxis = axis_wrap_if_negative(axis);
-    if (axis == depth) {
+    if (toaxis == depth) {
       return combinations_axis0(n, replacement, recordlookup, parameters);
     }
     else {
@@ -751,7 +751,7 @@ namespace awkward {
                                      replacement,
                                      recordlookup,
                                      parameters,
-                                     axis,
+                                     toaxis,
                                      depth));
     }
   }

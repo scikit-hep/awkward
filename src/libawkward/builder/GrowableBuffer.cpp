@@ -102,7 +102,7 @@ namespace awkward {
     if (minreserved > reserved_) {
       std::shared_ptr<T> ptr(new T[(size_t)minreserved],
                              util::array_deleter<T>());
-      memcpy(ptr.get(), ptr_.get(), (size_t)(length_ * sizeof(T)));
+      memcpy(ptr.get(), ptr_.get(), (size_t)length_ * sizeof(T));
       ptr_ = ptr;
       reserved_ = minreserved;
     }

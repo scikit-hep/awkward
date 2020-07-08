@@ -793,7 +793,7 @@ namespace awkward {
       return std::make_shared<NumpyArray>(tonum);
     }
     else {
-      return toListOffsetArray64(true).get()->num(axis, depth);
+      return toListOffsetArray64(true).get()->num(toaxis, depth);
     }
   }
 
@@ -1270,10 +1270,10 @@ namespace awkward {
   const ContentPtr
   ListArrayOf<T>::localindex(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
-    if (axis == depth) {
+    if (toaxis == depth) {
       return localindex_axis0();
     }
-    else if (axis == depth + 1) {
+    else if (toaxis == depth + 1) {
       Index64 offsets = compact_offsets64(true);
       int64_t innerlength =
         offsets.getitem_at_nowrap(offsets.length() - 1);
@@ -1296,7 +1296,7 @@ namespace awkward {
         util::Parameters(),
         starts_,
         stops_,
-        content_.get()->localindex(axis, depth + 1));
+        content_.get()->localindex(toaxis, depth + 1));
     }
   }
 
@@ -1379,7 +1379,7 @@ namespace awkward {
                                                                   replacement,
                                                                   recordlookup,
                                                                   parameters,
-                                                                  axis,
+                                                                  toaxis,
                                                                   depth + 1);
       return std::make_shared<ListOffsetArray64>(identities_,
                                                  util::Parameters(),

@@ -804,7 +804,7 @@ namespace awkward {
       return std::make_shared<NumpyArray>(tonum);
     }
     else {
-      ContentPtr next = content_.get()->num(axis, depth + 1);
+      ContentPtr next = content_.get()->num(toaxis, depth + 1);
       Index64 offsets = compact_offsets64(true);
       return std::make_shared<ListOffsetArray64>(Identities::none(),
                                                  util::Parameters(),
@@ -829,7 +829,7 @@ namespace awkward {
     }
     else {
       std::pair<Index64, ContentPtr> pair =
-        content_.get()->offsets_and_flattened(axis, depth + 1);
+        content_.get()->offsets_and_flattened(toaxis, depth + 1);
       Index64 inneroffsets = pair.first;
       if (inneroffsets.length() == 0) {
         return std::pair<Index64, ContentPtr>(
@@ -1573,10 +1573,10 @@ namespace awkward {
   const ContentPtr
   ListOffsetArrayOf<T>::localindex(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
-    if (axis == depth) {
+    if (toaxis == depth) {
       return localindex_axis0();
     }
-    else if (axis == depth + 1) {
+    else if (toaxis == depth + 1) {
       Index64 offsets = compact_offsets64(true);
       int64_t innerlength = offsets.getitem_at_nowrap(offsets.length() - 1);
       Index64 localindex(innerlength);
@@ -1597,7 +1597,7 @@ namespace awkward {
         identities_,
         util::Parameters(),
         offsets_,
-        content_.get()->localindex(axis, depth + 1));
+        content_.get()->localindex(toaxis, depth + 1));
     }
   }
 
@@ -1680,7 +1680,7 @@ namespace awkward {
                                                                   replacement,
                                                                   recordlookup,
                                                                   parameters,
-                                                                  axis,
+                                                                  toaxis,
                                                                   depth + 1);
       return std::make_shared<ListOffsetArray64>(identities_,
                                                  util::Parameters(),

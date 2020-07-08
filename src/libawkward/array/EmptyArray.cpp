@@ -397,7 +397,7 @@ namespace awkward {
       throw std::invalid_argument("axis exceeds the depth of this array");
     }
     else {
-      return rpad_and_clip(target, axis, depth);
+      return rpad_and_clip(target, toaxis, depth);
     }
   }
 

@@ -22,7 +22,7 @@ namespace awkward {
 
   void
   ToJson::string(const std::string& x) {
-    string(x.c_str(), x.length());
+    string(x.c_str(), (int64_t)x.length());
   }
 
   void
@@ -42,14 +42,14 @@ namespace awkward {
       writer.Int64(value.GetInt());
     }
     else if (value.IsDouble()) {
-      writer.Int64(value.GetDouble());
+      writer.Int64((int64_t)value.GetDouble());
     }
     else if (value.IsString()) {
       writer.String(value.GetString());
     }
     else if (value.IsArray()) {
       writer.StartArray();
-      for (size_t i = 0;  i < value.Size();  i++) {
+      for (rapidjson::SizeType i = 0;  i < value.Size();  i++) {
         copyjson(value[i], writer);
       }
       writer.EndArray();

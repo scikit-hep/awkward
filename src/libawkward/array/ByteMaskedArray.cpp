@@ -711,7 +711,7 @@ namespace awkward {
 
       ContentPtr next = content_.get()->carry(nextcarry);
 
-      ContentPtr out = next.get()->num(axis, depth);
+      ContentPtr out = next.get()->num(toaxis, depth);
       IndexedOptionArray64 out2(Identities::none(),
                                 util::Parameters(),
                                 outindex,
@@ -735,7 +735,7 @@ namespace awkward {
       ContentPtr next = content_.get()->carry(nextcarry);
 
       std::pair<Index64, ContentPtr> offsets_flattened =
-        next.get()->offsets_and_flattened(axis, depth);
+        next.get()->offsets_and_flattened(toaxis, depth);
       Index64 offsets = offsets_flattened.first;
       ContentPtr flattened = offsets_flattened.second;
 
@@ -1007,7 +1007,7 @@ namespace awkward {
       Index64 outindex = pair.second;
 
       ContentPtr next = content_.get()->carry(nextcarry);
-      ContentPtr out = next.get()->localindex(axis, depth);
+      ContentPtr out = next.get()->localindex(toaxis, depth);
       IndexedOptionArray64 out2(Identities::none(),
                                 util::Parameters(),
                                 outindex,
@@ -1027,7 +1027,7 @@ namespace awkward {
       throw std::invalid_argument("in combinations, 'n' must be at least 1");
     }
     int64_t toaxis = axis_wrap_if_negative(axis);
-    if (axis == depth) {
+    if (toaxis == depth) {
       return combinations_axis0(n, replacement, recordlookup, parameters);
     }
     else {
@@ -1041,7 +1041,7 @@ namespace awkward {
                                                 replacement,
                                                 recordlookup,
                                                 parameters,
-                                                axis,
+                                                toaxis,
                                                 depth);
       IndexedOptionArray64 out2(Identities::none(),
                                 util::Parameters(),

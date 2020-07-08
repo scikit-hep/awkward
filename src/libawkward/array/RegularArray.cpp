@@ -611,7 +611,7 @@ namespace awkward {
       return std::make_shared<NumpyArray>(tonum);
     }
     else {
-      ContentPtr next = content_.get()->num(axis, depth + 1);
+      ContentPtr next = content_.get()->num(toaxis, depth + 1);
       return std::make_shared<RegularArray>(Identities::none(),
                                             util::Parameters(),
                                             next,
@@ -830,7 +830,7 @@ namespace awkward {
       return std::make_shared<RegularArray>(
         Identities::none(),
         parameters_,
-        content_.get()->rpad(target, axis, depth + 1),
+        content_.get()->rpad(target, toaxis, depth + 1),
         size_);
     }
   }
@@ -891,10 +891,10 @@ namespace awkward {
   const ContentPtr
   RegularArray::localindex(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
-    if (axis == depth) {
+    if (toaxis == depth) {
       return localindex_axis0();
     }
-    else if (axis == depth + 1) {
+    else if (toaxis == depth + 1) {
       Index64 localindex(length()*size_);
       struct Error err = kernel::RegularArray_localindex_64(
         localindex.ptr().get(),
@@ -911,7 +911,7 @@ namespace awkward {
       return std::make_shared<RegularArray>(
         identities_,
         util::Parameters(),
-        content_.get()->localindex(axis, depth + 1),
+        content_.get()->localindex(toaxis, depth + 1),
         size_);
     }
   }
@@ -1001,7 +1001,7 @@ namespace awkward {
                                        replacement,
                                        recordlookup,
                                        parameters,
-                                       axis,
+                                       toaxis,
                                        depth + 1);
       return std::make_shared<RegularArray>(identities_,
                                             util::Parameters(),

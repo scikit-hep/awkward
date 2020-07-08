@@ -249,14 +249,14 @@ namespace awkward {
         if (one.get()->size() != two.get()->size()) {
           return false;
         }
-        for (int64_t i = 0;  i < one.get()->size();  i++) {
+        for (int64_t i = 0;  i < (int64_t)one.get()->size();  i++) {
           int64_t j = 0;
-          for (;  j < one.get()->size();  j++) {
-            if (one.get()->at(i) == two.get()->at(j)) {
+          for (;  j < (int64_t)one.get()->size();  j++) {
+            if (one.get()->at((uint64_t)i) == two.get()->at((uint64_t)j)) {
               break;
             }
           }
-          if (j == one.get()->size()) {
+          if (j == (int64_t)one.get()->size()) {
             return false;
           }
           if (!content(i).get()->equal(t->content(j),
@@ -823,7 +823,7 @@ namespace awkward {
     else {
       ContentPtrVec contents;
       for (auto content : contents_) {
-        contents.push_back(content.get()->num(axis, depth));
+        contents.push_back(content.get()->num(toaxis, depth));
       }
       return std::make_shared<RecordArray>(Identities::none(),
                                            util::Parameters(),
@@ -849,7 +849,7 @@ namespace awkward {
       for (auto content : contents_) {
         ContentPtr trimmed = content.get()->getitem_range(0, length());
         std::pair<Index64, ContentPtr> pair =
-          trimmed.get()->offsets_and_flattened(axis, depth);
+          trimmed.get()->offsets_and_flattened(toaxis, depth);
         if (pair.first.length() != 0) {
           throw std::runtime_error(
             "RecordArray content with axis > depth + 1 returned a non-empty "
@@ -1171,13 +1171,13 @@ namespace awkward {
   const ContentPtr
   RecordArray::localindex(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
-    if (axis == depth) {
+    if (toaxis == depth) {
       return localindex_axis0();
     }
     else {
       ContentPtrVec contents;
       for (auto content : contents_) {
-        contents.push_back(content.get()->localindex(axis, depth));
+        contents.push_back(content.get()->localindex(toaxis, depth));
       }
       return std::make_shared<RecordArray>(identities_,
                                            util::Parameters(),
@@ -1198,7 +1198,7 @@ namespace awkward {
       throw std::invalid_argument("in combinations, 'n' must be at least 1");
     }
     int64_t toaxis = axis_wrap_if_negative(axis);
-    if (axis == depth) {
+    if (toaxis == depth) {
       return combinations_axis0(n, replacement, recordlookup, parameters);
     }
     else {
@@ -1208,7 +1208,7 @@ namespace awkward {
                                                        replacement,
                                                        recordlookup,
                                                        parameters,
-                                                       axis,
+                                                       toaxis,
                                                        depth));
       }
       return std::make_shared<RecordArray>(identities_,
