@@ -1199,7 +1199,7 @@ namespace awkward {
     }
     const Index64 index = missing.index();
     ContentPtr content = that.get()->getitem_at_nowrap(0);
-    if ( content.get()->length() != index.length() ) {
+    if ( content.get()->length() < index.length() ) {
       throw std::invalid_argument(
         std::string("cannot fit masked jagged slice with length ")
         + std::to_string(index.length()) + std::string(" into ")
