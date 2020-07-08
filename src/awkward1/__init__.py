@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 
 import distutils.version
+import enum
 
 # NumPy 1.13.1 introduced NEP13, without which Awkward ufuncs won't work, which
 # would be worse than lacking a feature: it would cause unexpected output.
@@ -64,6 +65,9 @@ __version__ = awkward1._ext.__version__
 
 # call C++ startup function
 awkward1._ext.startup()
+
+# KernelsLib Dictionary
+KernelsLib = {"cpu": awkward1._ext.kernelLib.cpu, "cuda": awkward1._ext.kernelLib.cuda}
 
 __all__ = [
     x

@@ -1919,6 +1919,13 @@ def from_arrow(array, highlevel=True, behavior=None):
     else:
         return recurse(array)
 
+def copy_to(array, ptr_lib, highlevel=True, behavior=None):
+    arr = to_layout(array)
+    if highlevel:
+        return awkward1._util.wrap(arr.copy_to(ptr_lib), behavior)
+    else:
+        return arr.copy_to(ptr_lib) 
+
 
 __all__ = [
     x

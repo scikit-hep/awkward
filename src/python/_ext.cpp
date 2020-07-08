@@ -5,6 +5,7 @@
 #include <pybind11/pybind11.h>
 
 #include "awkward/python/startup.h"
+#include "awkward/python/kernel_utils.h"
 #include "awkward/python/index.h"
 #include "awkward/python/identities.h"
 #include "awkward/python/content.h"
