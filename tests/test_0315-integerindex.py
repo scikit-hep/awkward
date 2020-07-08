@@ -70,3 +70,11 @@ def test_silly_stuff():
     b = [[2], [0]]
     with pytest.raises(ValueError):
         a[b]
+
+    a = awkward1.Array([[0, 1, 2], [3, 4], [5, 6], [7]])
+    b = awkward1.Array([[0, 2], None])
+    assert awkward1.to_list(a[b]) == [[0, 2], None]
+    b = awkward1.Array([[0, 2], None, None, None, None, None])
+    with pytest.raises(ValueError):
+        a[b]
+
