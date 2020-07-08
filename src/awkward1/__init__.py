@@ -66,9 +66,6 @@ __version__ = awkward1._ext.__version__
 # call C++ startup function
 awkward1._ext.startup()
 
-# KernelsLib Dictionary
-KernelsLib = {"cpu": awkward1._ext.kernelLib.cpu, "cuda": awkward1._ext.kernelLib.cuda}
-
 __all__ = [
     x
     for x in list(globals())
