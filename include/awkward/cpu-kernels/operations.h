@@ -32,22 +32,6 @@ extern "C" {
       int64_t length);
 
   EXPORT_SYMBOL struct Error
-    awkward_ListOffsetArray32_count_64(
-      int64_t* tocount,
-      const int32_t* fromoffsets,
-      int64_t lenoffsets);
-  EXPORT_SYMBOL struct Error
-    awkward_ListOffsetArrayU32_count_64(
-      int64_t* tocount,
-      const uint32_t* fromoffsets,
-      int64_t lenoffsets);
-  EXPORT_SYMBOL struct Error
-    awkward_ListOffsetArray64_count_64(
-      int64_t* tocount,
-      const int64_t* fromoffsets,
-      int64_t lenoffsets);
-
-  EXPORT_SYMBOL struct Error
     awkward_RegularArray_num_64(
       int64_t* tonum,
       int64_t size,

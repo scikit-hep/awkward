@@ -340,7 +340,7 @@ def test_single_level():
     d.clear()
 
     a = virtualarray[::2, 1]
-    assert isinstance(a, awkward1.layout.RecordArray)
+    assert isinstance(a, (awkward1.layout.RecordArray, awkward1.layout.IndexedArray64))
     assert len(d) == 1
     assert awkward1.to_list(a) == [{"x": 1.1, "y": [1]}, {"x": 4.4, "y": [4, 4, 4, 4]}]
     d.clear()
