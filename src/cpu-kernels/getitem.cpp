@@ -3055,3 +3055,42 @@ ERROR awkward_ByteMaskedArray_toIndexedOptionArray64(
     length,
     validwhen);
 }
+
+ERROR awkward_Content_getitem_next_missing_jagged_getmaskstartstop(int64_t* index_in, int64_t index_in_offset, int64_t* offsets_in, int64_t offsets_in_offset, int64_t* mask_out, int64_t* starts_out, int64_t* stops_out, int64_t length) {
+  int64_t k=0;
+  for(int64_t i=0; i < length; ++i) {
+    starts_out[i] = offsets_in[k + offsets_in_offset];
+    if ( index_in[i + index_in_offset] < 0 ) {
+      mask_out[i] = -1;
+      stops_out[i] = offsets_in[k + offsets_in_offset];
+    } else {
+      mask_out[i] = i;
+      stops_out[i] = offsets_in[++k + offsets_in_offset];
+    }
+  }
+  return success();
+}
+
+template<typename T>
+ERROR
+awkward_MaskedArray_getitem_next_jagged_project(T* index, int64_t index_offset, int64_t* starts_in, int64_t starts_offset, int64_t* stops_in, int64_t stops_offset, int64_t* starts_out, int64_t* stops_out, int64_t length) {
+  int64_t k=0;
+  for (int64_t i=0; i < length; ++i) {
+    if ( index[i + index_offset] >= 0 ) {
+      starts_out[k] = starts_in[i + starts_offset];
+      stops_out[k] = stops_in[i + stops_offset];
+      k++;
+    }
+  }
+  return success();
+}
+
+ERROR awkward_MaskedArray32_getitem_next_jagged_project(int32_t* index, int64_t index_offset, int64_t* starts_in, int64_t starts_offset, int64_t* stops_in, int64_t stops_offset, int64_t* starts_out, int64_t* stops_out, int64_t length) {
+  return awkward_MaskedArray_getitem_next_jagged_project<int32_t>(index, index_offset, starts_in, starts_offset, stops_in, stops_offset, starts_out, stops_out, length);
+}
+ERROR awkward_MaskedArrayU32_getitem_next_jagged_project(uint32_t* index, int64_t index_offset, int64_t* starts_in, int64_t starts_offset, int64_t* stops_in, int64_t stops_offset, int64_t* starts_out, int64_t* stops_out, int64_t length) {
+  return awkward_MaskedArray_getitem_next_jagged_project<uint32_t>(index, index_offset, starts_in, starts_offset, stops_in, stops_offset, starts_out, stops_out, length);
+}
+ERROR awkward_MaskedArray64_getitem_next_jagged_project(int64_t* index, int64_t index_offset, int64_t* starts_in, int64_t starts_offset, int64_t* stops_in, int64_t stops_offset, int64_t* starts_out, int64_t* stops_out, int64_t length) {
+  return awkward_MaskedArray_getitem_next_jagged_project<int64_t>(index, index_offset, starts_in, starts_offset, stops_in, stops_offset, starts_out, stops_out, length);
+}

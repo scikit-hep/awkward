@@ -1044,6 +1044,15 @@ extern "C" {
       int64_t length,
       bool validwhen);
 
+  EXPORT_SYMBOL struct Error
+    awkward_Content_getitem_next_missing_jagged_getmaskstartstop(int64_t* index_in, int64_t index_in_offset, int64_t* offsets_in, int64_t offsets_in_offset, int64_t* mask_out, int64_t* starts_out, int64_t* stops_out, int64_t length);
+
+  EXPORT_SYMBOL struct Error
+    awkward_MaskedArray32_getitem_next_jagged_project(int32_t* index, int64_t index_offset, int64_t* starts_in, int64_t starts_offset, int64_t* stops_in, int64_t stops_offset, int64_t* starts_out, int64_t* stops_out, int64_t length);
+  EXPORT_SYMBOL struct Error
+    awkward_MaskedArrayU32_getitem_next_jagged_project(uint32_t* index, int64_t index_offset, int64_t* starts_in, int64_t starts_offset, int64_t* stops_in, int64_t stops_offset, int64_t* starts_out, int64_t* stops_out, int64_t length);
+  EXPORT_SYMBOL struct Error
+    awkward_MaskedArray64_getitem_next_jagged_project(int64_t* index, int64_t index_offset, int64_t* starts_in, int64_t starts_offset, int64_t* stops_in, int64_t stops_offset, int64_t* starts_out, int64_t* stops_out, int64_t length);
 }
 
 #endif // AWKWARDCPU_GETITEM_H_

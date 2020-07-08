@@ -2269,19 +2269,6 @@ namespace awkward {
                                                       tail);
   }
 
-  template <typename T>
-  void
-  MaskedArray_getitem_next_jagged_project(T* index, int64_t* starts_in, int64_t* stops_in, int64_t* starts_out, int64_t* stops_out, int64_t length) {
-    int64_t k=0;
-    for (int64_t i=0; i < length; ++i) {
-      if ( index[i] >= 0 ) {
-        starts_out[k] = starts_in[i];
-        stops_out[k] = stops_in[i];
-        k++;
-      }
-    }
-  }
-
   template <typename T, bool ISOPTION>
   template <typename S>
   const ContentPtr
@@ -2298,12 +2285,16 @@ namespace awkward {
 
       Index64 reducedstarts(length() - numnull);
       Index64 reducedstops(length() - numnull);
-      MaskedArray_getitem_next_jagged_project<T>(outindex.ptr().get() + outindex.offset(),
-                                                 slicestarts.ptr().get() + slicestarts.offset(),
-                                                 slicestops.ptr().get() + slicestops.offset(),
+      struct Error err = kernel::MaskedArray_getitem_next_jagged_project<T>(outindex.ptr().get(),
+                                                 outindex.offset(),
+                                                 slicestarts.ptr().get(),
+                                                 slicestarts.offset(),
+                                                 slicestops.ptr().get(),
+                                                 slicestops.offset(),
                                                  reducedstarts.ptr().get(),
                                                  reducedstops.ptr().get(),
                                                  length());
+      util::handle_error(err, classname(), identities_.get());
 
       ContentPtr next = content_.get()->carry(nextcarry, true);
       ContentPtr out = next.get()->getitem_next_jagged(reducedstarts,
