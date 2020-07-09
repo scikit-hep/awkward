@@ -1193,33 +1193,36 @@ namespace awkward {
                                                const Slice& tail,
                                                const Index64& advanced,
                                                const ContentPtr& that) {
-    const SliceJagged64* jagged = dynamic_cast<SliceJagged64*>(missing.content().get());
-    if ( jagged == nullptr ) {
-      throw std::runtime_error("Logic error: calling getitem_next_missing_jagged with bad slice type");
+    const SliceJagged64* jagged =
+        dynamic_cast<SliceJagged64*>(missing.content().get());
+    if (jagged == nullptr) {
+      throw std::runtime_error(
+          "Logic error: calling getitem_next_missing_jagged with bad slice type");
     }
     const Index64 index = missing.index();
     ContentPtr content = that.get()->getitem_at_nowrap(0);
-    if ( content.get()->length() < index.length() ) {
+    if (content.get()->length() < index.length()) {
       throw std::invalid_argument(
-        std::string("cannot fit masked jagged slice with length ")
-        + std::to_string(index.length()) + std::string(" into ")
-        + that.get()->classname() + std::string(" of size ") + std::to_string(content.get()->length()));
+          std::string("cannot fit masked jagged slice with length ") +
+          std::to_string(index.length()) + std::string(" into ") +
+          that.get()->classname() + std::string(" of size ") +
+          std::to_string(content.get()->length()));
     }
     Index64 outputmask(index.length());
     Index64 starts(index.length());
     Index64 stops(index.length());
-    struct Error err = kernel::Content_getitem_next_missing_jagged_getmaskstartstop(index.ptr().get(),
-                                                         index.offset(),
-                                                         jagged->offsets().ptr().get(),
-                                                         jagged->offsets().offset(),
-                                                         outputmask.ptr().get(),
-                                                         starts.ptr().get(),
-                                                         stops.ptr().get(),
-                                                         index.length());
+    struct Error err =
+        kernel::Content_getitem_next_missing_jagged_getmaskstartstop(
+            index.ptr().get(), index.offset(), jagged->offsets().ptr().get(),
+            jagged->offsets().offset(), outputmask.ptr().get(),
+            starts.ptr().get(), stops.ptr().get(), index.length());
     util::handle_error(err, that.get()->classname(), nullptr);
-    ContentPtr tmp = content.get()->getitem_next_jagged(starts, stops, jagged->content(), tail);
+    ContentPtr tmp = content.get()->getitem_next_jagged(
+        starts, stops, jagged->content(), tail);
     IndexedOptionArray64 out(Identities::none(), util::Parameters(), outputmask, tmp);
-    return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), out.simplify_optiontype(), index.length());
+    return std::make_shared<RegularArray>(
+        Identities::none(), util::Parameters(), out.simplify_optiontype(),
+        index.length());
   }
 
   const ContentPtr
@@ -1231,11 +1234,12 @@ namespace awkward {
                                   "with NumPy-style advanced indexing");
     }
 
-    if ( dynamic_cast<SliceJagged64*>(missing.content().get()) ) {
-      if ( length() != 1 ) {
-        throw std::runtime_error("Reached a not-well-considered code path, why am I here?");
+    if (dynamic_cast<SliceJagged64*>(missing.content().get())) {
+      if (length() != 1) {
+        throw std::runtime_error("Reached a not-well-considered code path");
       }
-      return getitem_next_missing_jagged(missing, tail, advanced, shallow_copy());
+      return getitem_next_missing_jagged(missing, tail, advanced,
+                                         shallow_copy());
     }
 
     ContentPtr next = getitem_next(missing.content(), tail, advanced);

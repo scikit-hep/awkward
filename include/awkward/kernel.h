@@ -734,10 +734,16 @@ namespace kernel {
     int64_t length,
     bool validwhen);
 
-  ERROR Content_getitem_next_missing_jagged_getmaskstartstop(int64_t* index_in, int64_t index_in_offset, int64_t* offsets_in, int64_t offsets_in_offset, int64_t* mask_out, int64_t* starts_out, int64_t* stops_out, int64_t length);
+  ERROR Content_getitem_next_missing_jagged_getmaskstartstop(
+      int64_t* index_in, int64_t index_in_offset, int64_t* offsets_in,
+      int64_t offsets_in_offset, int64_t* mask_out, int64_t* starts_out,
+      int64_t* stops_out, int64_t length);
 
   template <typename T>
-  ERROR MaskedArray_getitem_next_jagged_project(T* index, int64_t index_offset, int64_t* starts_in, int64_t starts_offset, int64_t* stops_in, int64_t stops_offset, int64_t* starts_out, int64_t* stops_out, int64_t length);
+  ERROR MaskedArray_getitem_next_jagged_project(
+      T* index, int64_t index_offset, int64_t* starts_in, int64_t starts_offset,
+      int64_t* stops_in, int64_t stops_offset, int64_t* starts_out,
+      int64_t* stops_out, int64_t length);
 
   /////////////////////////////////// awkward/cpu-kernels/identities.h
 
