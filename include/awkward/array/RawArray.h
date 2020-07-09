@@ -234,7 +234,7 @@ namespace awkward {
                   const kernel::Lib ptr_lib = kernel::Lib::cpu_kernels)
         : Content(identities, parameters)
         , ptr_lib_(ptr_lib)
-        , ptr_(kernel::ptr_alloc<T>(ptr_lib_, (size_t)length))
+        , ptr_(kernel::ptr_alloc<T>(ptr_lib_, length))
         , offset_(0)
         , length_(length)
         , itemsize_(sizeof(T)) { }

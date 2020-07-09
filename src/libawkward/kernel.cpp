@@ -70,7 +70,7 @@ namespace kernel {
 #endif
     return handle;
   }
-  
+
   void *acquire_symbol(void* handle, std::string symbol_name) {
     void *symbol_ptr = nullptr;
 #ifndef _MSC_VER
@@ -242,7 +242,7 @@ namespace kernel {
 
     util::handle_error((*awkward_cuda_ptrfloat64_dealloc_t)(p));
   }
-  
+
   template<typename T>
   int get_ptr_device_num(kernel::Lib ptr_lib, T *ptr) {
     if (ptr_lib == kernel::Lib::cuda_kernels) {
@@ -393,7 +393,7 @@ namespace kernel {
       auto handle = acquire_handle(kernel::Lib::cuda_kernels);
 
       typedef Error (func_awkward_cuda_H2D8_t)
-        (int8_t *to_ptr, int8_t *from_ptr, int8_t length);
+        (int8_t *to_ptr, int8_t *from_ptr, int64_t length);
       func_awkward_cuda_H2D8_t
         *func_awkward_cuda_H2D8 =
         reinterpret_cast<func_awkward_cuda_H2D8_t *>
@@ -407,7 +407,7 @@ namespace kernel {
       auto handle = acquire_handle(kernel::Lib::cuda_kernels);
 
       typedef Error (func_awkward_cuda_D2H8_t)
-        (int8_t *to_ptr, int8_t *from_ptr, int8_t length);
+        (int8_t *to_ptr, int8_t *from_ptr, int64_t length);
       func_awkward_cuda_D2H8_t
         *func_awkward_cuda_D2H8 =
         reinterpret_cast<func_awkward_cuda_D2H8_t *>
