@@ -1298,23 +1298,27 @@ namespace awkward {
   }
 
   template <typename S>
-  const ContentPtr
-  ByteMaskedArray::getitem_next_jagged_generic(const Index64& slicestarts,
-                                               const Index64& slicestops,
-                                               const S& slicecontent,
-                                               const Slice& tail) const {
-      int64_t numnull;
-      std::pair<Index64, Index64> pair = nextcarry_outindex(numnull);
-      Index64 nextcarry = pair.first;
-      Index64 outindex = pair.second;
+  const ContentPtr ByteMaskedArray::getitem_next_jagged_generic(
+      const Index64& slicestarts, const Index64& slicestops,
+      const S& slicecontent, const Slice& tail) const {
+    int64_t numnull;
+    std::pair<Index64, Index64> pair = nextcarry_outindex(numnull);
+    Index64 nextcarry = pair.first;
+    Index64 outindex = pair.second;
 
-      ContentPtr next = content_.get()->carry(nextcarry, true);
-      ContentPtr out = next.get()->getitem_next_jagged(slicestarts,
-                                                       slicestops,
-                                                       slicecontent,
-                                                       tail);
-      IndexedOptionArray64 out2(identities_, parameters_, outindex, out);
-      return out2.simplify_optiontype();
+    Index64 reducedstarts(length() - numnull);
+    Index64 reducedstops(length() - numnull);
+    struct Error err = kernel::MaskedArray_getitem_next_jagged_project<int64_t>(
+        outindex.ptr().get(), outindex.offset(), slicestarts.ptr().get(),
+        slicestarts.offset(), slicestops.ptr().get(), slicestops.offset(),
+        reducedstarts.ptr().get(), reducedstops.ptr().get(), length());
+    util::handle_error(err, classname(), identities_.get());
+
+    ContentPtr next = content_.get()->carry(nextcarry, true);
+    ContentPtr out = next.get()->getitem_next_jagged(
+        reducedstarts, reducedstops, slicecontent, tail);
+    IndexedOptionArray64 out2(identities_, parameters_, outindex, out);
+    return out2.simplify_optiontype();
   }
 
   const std::pair<Index64, Index64>

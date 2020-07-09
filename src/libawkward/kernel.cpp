@@ -3202,6 +3202,42 @@ namespace kernel {
       validwhen);
   }
 
+  ERROR Content_getitem_next_missing_jagged_getmaskstartstop(
+      int64_t *index_in, int64_t index_in_offset, int64_t *offsets_in,
+      int64_t offsets_in_offset, int64_t *mask_out, int64_t *starts_out,
+      int64_t *stops_out, int64_t length) {
+    return awkward_Content_getitem_next_missing_jagged_getmaskstartstop(
+        index_in, index_in_offset, offsets_in, offsets_in_offset, mask_out,
+        starts_out, stops_out, length);
+  }
+
+  template <>
+  ERROR MaskedArray_getitem_next_jagged_project(
+      int32_t *index, int64_t index_offset, int64_t *starts_in,
+      int64_t starts_offset, int64_t *stops_in, int64_t stops_offset,
+      int64_t *starts_out, int64_t *stops_out, int64_t length) {
+    return awkward_MaskedArray32_getitem_next_jagged_project(
+        index, index_offset, starts_in, starts_offset, stops_in, stops_offset,
+        starts_out, stops_out, length);
+  }
+  template <>
+  ERROR MaskedArray_getitem_next_jagged_project(
+      uint32_t *index, int64_t index_offset, int64_t *starts_in,
+      int64_t starts_offset, int64_t *stops_in, int64_t stops_offset,
+      int64_t *starts_out, int64_t *stops_out, int64_t length) {
+    return awkward_MaskedArrayU32_getitem_next_jagged_project(
+        index, index_offset, starts_in, starts_offset, stops_in, stops_offset,
+        starts_out, stops_out, length);
+  }
+  template <>
+  ERROR MaskedArray_getitem_next_jagged_project(
+      int64_t *index, int64_t index_offset, int64_t *starts_in,
+      int64_t starts_offset, int64_t *stops_in, int64_t stops_offset,
+      int64_t *starts_out, int64_t *stops_out, int64_t length) {
+    return awkward_MaskedArray64_getitem_next_jagged_project(
+        index, index_offset, starts_in, starts_offset, stops_in, stops_offset,
+        starts_out, stops_out, length);
+  }
   /////////////////////////////////// awkward/cpu-kernels/identities.h
 
   template<>
