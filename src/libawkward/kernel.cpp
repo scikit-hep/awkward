@@ -347,8 +347,8 @@ namespace kernel {
     bool *to_ptr,
     bool *from_ptr,
     int64_t length) {
-    if(TO == kernel::Lib::cuda_kernels) {
 #ifndef _MSC_VER
+    if(TO == kernel::Lib::cuda_kernels) {
       auto handle = acquire_handle(kernel::Lib::cuda_kernels);
 
       typedef Error (func_awkward_cuda_H2Dbool_t)
@@ -359,10 +359,8 @@ namespace kernel {
         (acquire_symbol(handle, "awkward_cuda_H2Dbool"));
 
       return (*func_awkward_cuda_H2Dbool)(to_ptr, from_ptr, length);
-#endif
     }
     else if(TO == kernel::Lib::cpu_kernels && FROM == kernel::Lib::cuda_kernels) {
-#ifndef _MSC_VER
       auto handle = acquire_handle(kernel::Lib::cuda_kernels);
 
       typedef Error (func_awkward_cuda_D2Hbool_t)
@@ -373,12 +371,9 @@ namespace kernel {
         (acquire_symbol(handle, "awkward_cuda_D2Hbool"));
 
       return (*func_awkward_cuda_D2Hbool)(to_ptr, from_ptr, length);
+    }
 #endif
-    }
-    else {
-      throw std::runtime_error(
-        "Unexpected Kernel Encountered or OS not supported");
-    }
+    throw std::runtime_error("Unexpected Kernel Encountered or OS not supported");
   }
 
   template<>
@@ -388,8 +383,8 @@ namespace kernel {
     int8_t *to_ptr,
     int8_t *from_ptr,
     int64_t length) {
-    if(TO == kernel::Lib::cuda_kernels) {
 #ifndef _MSC_VER
+    if(TO == kernel::Lib::cuda_kernels) {
       auto handle = acquire_handle(kernel::Lib::cuda_kernels);
 
       typedef Error (func_awkward_cuda_H2D8_t)
@@ -400,10 +395,8 @@ namespace kernel {
         (acquire_symbol(handle, "awkward_cuda_H2D8"));
 
       return (*func_awkward_cuda_H2D8)(to_ptr, from_ptr, length);
-#endif
     }
     else if(TO == kernel::Lib::cpu_kernels && FROM == kernel::Lib::cuda_kernels) {
-#ifndef _MSC_VER
       auto handle = acquire_handle(kernel::Lib::cuda_kernels);
 
       typedef Error (func_awkward_cuda_D2H8_t)
@@ -414,12 +407,9 @@ namespace kernel {
         (acquire_symbol(handle, "awkward_cuda_D2H8"));
 
       return (*func_awkward_cuda_D2H8)(to_ptr, from_ptr, length);
+    }
 #endif
-    }
-    else {
-      throw std::runtime_error(
-        "Unexpected Kernel Encountered or OS not supported");
-    }
+    throw std::runtime_error("Unexpected Kernel Encountered or OS not supported");
   }
 
   template<>
@@ -429,8 +419,8 @@ namespace kernel {
     uint8_t *to_ptr,
     uint8_t *from_ptr,
     int64_t length) {
-    if(TO == kernel::Lib::cuda_kernels) {
 #ifndef _MSC_VER
+    if(TO == kernel::Lib::cuda_kernels) {
       auto handle = acquire_handle(kernel::Lib::cuda_kernels);
 
       typedef Error (func_awkward_cuda_H2DU8_t)
@@ -441,10 +431,8 @@ namespace kernel {
         (acquire_symbol(handle, "awkward_cuda_H2DU8"));
 
       return (*func_awkward_cuda_H2DU8)(to_ptr, from_ptr, length);
-#endif
     }
     else if(TO == kernel::Lib::cpu_kernels && FROM == kernel::Lib::cuda_kernels) {
-#ifndef _MSC_VER
       auto handle = acquire_handle(kernel::Lib::cuda_kernels);
 
       typedef Error (func_awkward_cuda_D2HU8_t)
@@ -455,12 +443,9 @@ namespace kernel {
         (acquire_symbol(handle, "awkward_cuda_D2HU8"));
 
       return (*func_awkward_cuda_D2HU8)(to_ptr, from_ptr, length);
+    }
 #endif
-    }
-    else {
-      throw std::runtime_error(
-        "Unexpected Kernel Encountered or OS not supported");
-    }
+    throw std::runtime_error("Unexpected Kernel Encountered or OS not supported");
   }
 
   template<>
@@ -470,8 +455,8 @@ namespace kernel {
     int16_t *to_ptr,
     int16_t *from_ptr,
     int64_t length) {
-    if(TO == kernel::Lib::cuda_kernels) {
 #ifndef _MSC_VER
+    if(TO == kernel::Lib::cuda_kernels) {
       auto handle = acquire_handle(kernel::Lib::cuda_kernels);
 
       typedef Error (func_awkward_cuda_H2D16_t)
@@ -482,10 +467,8 @@ namespace kernel {
         (acquire_symbol(handle, "awkward_cuda_H2D16"));
 
       return (*func_awkward_cuda_H2D16)(to_ptr, from_ptr, length);
-#endif
     }
     else if(TO == kernel::Lib::cpu_kernels && FROM == kernel::Lib::cuda_kernels) {
-#ifndef _MSC_VER
       auto handle = acquire_handle(kernel::Lib::cuda_kernels);
 
       typedef Error (func_awkward_cuda_D2H16_t)
@@ -496,12 +479,9 @@ namespace kernel {
         (acquire_symbol(handle, "awkward_cuda_D2H16"));
 
       return (*func_awkward_cuda_D2H16)(to_ptr, from_ptr, length);
+    }
 #endif
-    }
-    else {
-      throw std::runtime_error(
-        "Unexpected Kernel Encountered or OS not supported");
-    }
+    throw std::runtime_error("Unexpected Kernel Encountered or OS not supported");
   }
 
   template<>
@@ -511,8 +491,8 @@ namespace kernel {
     uint16_t *to_ptr,
     uint16_t *from_ptr,
     int64_t length) {
-    if(TO == kernel::Lib::cuda_kernels) {
 #ifndef _MSC_VER
+    if(TO == kernel::Lib::cuda_kernels) {
       auto handle = acquire_handle(kernel::Lib::cuda_kernels);
 
       typedef Error (func_awkward_cuda_H2DU16_t)
@@ -523,10 +503,8 @@ namespace kernel {
         (acquire_symbol(handle, "awkward_cuda_H2DU16"));
 
       return (*func_awkward_cuda_H2DU16)(to_ptr, from_ptr, length);
-#endif
     }
     else if(TO == kernel::Lib::cpu_kernels && FROM == kernel::Lib::cuda_kernels) {
-#ifndef _MSC_VER
       auto handle = acquire_handle(kernel::Lib::cuda_kernels);
 
       typedef Error (func_awkward_cuda_D2HU16_t)
@@ -537,12 +515,9 @@ namespace kernel {
         (acquire_symbol(handle, "awkward_cuda_D2HU16"));
 
       return (*func_awkward_cuda_D2HU16)(to_ptr, from_ptr, length);
+    }
 #endif
-    }
-    else {
-      throw std::runtime_error(
-        "Unexpected Kernel Encountered or OS not supported");
-    }
+    throw std::runtime_error("Unexpected Kernel Encountered or OS not supported");
   }
 
   template<>
@@ -552,8 +527,8 @@ namespace kernel {
     int32_t *to_ptr,
     int32_t *from_ptr,
     int64_t length) {
-    if(TO == kernel::Lib::cuda_kernels) {
 #ifndef _MSC_VER
+    if(TO == kernel::Lib::cuda_kernels) {
       auto handle = acquire_handle(kernel::Lib::cuda_kernels);
 
       typedef Error (func_awkward_cuda_H2D32_t)
@@ -564,10 +539,8 @@ namespace kernel {
         (acquire_symbol(handle, "awkward_cuda_H2D32"));
 
       return (*func_awkward_cuda_H2D32)(to_ptr, from_ptr, length);
-#endif
     }
     else if(TO == kernel::Lib::cpu_kernels && FROM == kernel::Lib::cuda_kernels) {
-#ifndef _MSC_VER
       auto handle = acquire_handle(kernel::Lib::cuda_kernels);
 
       typedef Error (func_awkward_cuda_D2H32_t)
@@ -578,12 +551,9 @@ namespace kernel {
         (acquire_symbol(handle, "awkward_cuda_D2H32"));
 
       return (*func_awkward_cuda_D2H32)(to_ptr, from_ptr, length);
+    }
 #endif
-    }
-    else {
-      throw std::runtime_error(
-        "Unexpected Kernel Encountered or OS not supported");
-    }
+    throw std::runtime_error("Unexpected Kernel Encountered or OS not supported");
   }
 
   template<>
@@ -593,8 +563,8 @@ namespace kernel {
     uint32_t *to_ptr,
     uint32_t *from_ptr,
     int64_t length) {
-    if(TO == kernel::Lib::cuda_kernels) {
 #ifndef _MSC_VER
+    if(TO == kernel::Lib::cuda_kernels) {
       auto handle = acquire_handle(kernel::Lib::cuda_kernels);
 
       typedef Error (func_awkward_cuda_H2DU32_t)
@@ -605,10 +575,8 @@ namespace kernel {
         (acquire_symbol(handle, "awkward_cuda_H2DU32"));
 
       return (*func_awkward_cuda_H2DU32)(to_ptr, from_ptr, length);
-#endif
     }
     else if(TO == kernel::Lib::cpu_kernels && FROM == kernel::Lib::cuda_kernels) {
-#ifndef _MSC_VER
       auto handle = acquire_handle(kernel::Lib::cuda_kernels);
 
       typedef Error (func_awkward_cuda_D2HU32_t)
@@ -619,12 +587,9 @@ namespace kernel {
         (acquire_symbol(handle, "awkward_cuda_D2HU32"));
 
       return (*func_awkward_cuda_D2HU32)(to_ptr, from_ptr, length);
+    }
 #endif
-    }
-    else {
-      throw std::runtime_error(
-        "Unexpected Kernel Encountered or OS not supported");
-    }
+    throw std::runtime_error("Unexpected Kernel Encountered or OS not supported");
   }
 
   template<>
@@ -634,8 +599,8 @@ namespace kernel {
     int64_t *to_ptr,
     int64_t *from_ptr,
     int64_t length) {
-    if(TO == kernel::Lib::cuda_kernels) {
 #ifndef _MSC_VER
+    if(TO == kernel::Lib::cuda_kernels) {
       auto handle = acquire_handle(kernel::Lib::cuda_kernels);
 
       typedef Error (func_awkward_cuda_H2D64_t)
@@ -646,10 +611,8 @@ namespace kernel {
         (acquire_symbol(handle, "awkward_cuda_H2D64"));
 
       return (*func_awkward_cuda_H2D64)(to_ptr, from_ptr, length);
-#endif
     }
     else if(TO == kernel::Lib::cpu_kernels && FROM == kernel::Lib::cuda_kernels) {
-#ifndef _MSC_VER
       auto handle = acquire_handle(kernel::Lib::cuda_kernels);
 
       typedef Error (func_awkward_cuda_D2H64_t)
@@ -660,12 +623,9 @@ namespace kernel {
         (acquire_symbol(handle, "awkward_cuda_D2H64"));
 
       return (*func_awkward_cuda_D2H64)(to_ptr, from_ptr, length);
+    }
 #endif
-    }
-    else {
-      throw std::runtime_error(
-        "Unexpected Kernel Encountered or OS not supported");
-    }
+    throw std::runtime_error("Unexpected Kernel Encountered or OS not supported");
   }
 
   template<>
@@ -675,8 +635,8 @@ namespace kernel {
     uint64_t *to_ptr,
     uint64_t *from_ptr,
     int64_t length) {
-    if(TO == kernel::Lib::cuda_kernels) {
 #ifndef _MSC_VER
+    if(TO == kernel::Lib::cuda_kernels) {
       auto handle = acquire_handle(kernel::Lib::cuda_kernels);
 
       typedef Error (func_awkward_cuda_H2DU64_t)
@@ -687,10 +647,8 @@ namespace kernel {
         (acquire_symbol(handle, "awkward_cuda_H2DU64"));
 
       return (*func_awkward_cuda_H2DU64)(to_ptr, from_ptr, length);
-#endif
     }
     else if(TO == kernel::Lib::cpu_kernels && FROM == kernel::Lib::cuda_kernels) {
-#ifndef _MSC_VER
       auto handle = acquire_handle(kernel::Lib::cuda_kernels);
 
       typedef Error (func_awkward_cuda_D2HU64_t)
@@ -701,12 +659,9 @@ namespace kernel {
         (acquire_symbol(handle, "awkward_cuda_D2HU64"));
 
       return (*func_awkward_cuda_D2HU64)(to_ptr, from_ptr, length);
+    }
 #endif
-    }
-    else {
-      throw std::runtime_error(
-        "Unexpected Kernel Encountered or OS not supported");
-    }
+    throw std::runtime_error("Unexpected Kernel Encountered or OS not supported");
   }
 
   template<>
@@ -716,8 +671,8 @@ namespace kernel {
     float *to_ptr,
     float *from_ptr,
     int64_t length) {
-    if(TO == kernel::Lib::cuda_kernels) {
 #ifndef _MSC_VER
+    if(TO == kernel::Lib::cuda_kernels) {
       auto handle = acquire_handle(kernel::Lib::cuda_kernels);
 
       typedef Error (func_awkward_cuda_H2Dfloat32_t)
@@ -728,10 +683,8 @@ namespace kernel {
         (acquire_symbol(handle, "awkward_cuda_H2Dfloat32"));
 
       return (*func_awkward_cuda_H2Dfloat32)(to_ptr, from_ptr, length);
-#endif
     }
     else if(TO == kernel::Lib::cpu_kernels && FROM == kernel::Lib::cuda_kernels) {
-#ifndef _MSC_VER
       auto handle = acquire_handle(kernel::Lib::cuda_kernels);
 
       typedef Error (func_awkward_cuda_D2Hfloat32_t)
@@ -742,12 +695,9 @@ namespace kernel {
         (acquire_symbol(handle, "awkward_cuda_D2Hfloat32"));
 
       return (*func_awkward_cuda_D2Hfloat32)(to_ptr, from_ptr, length);
+    }
 #endif
-    }
-    else {
-      throw std::runtime_error(
-        "Unexpected Kernel Encountered or OS not supported");
-    }
+    throw std::runtime_error("Unexpected Kernel Encountered or OS not supported");
   }
 
   template<>
@@ -757,8 +707,8 @@ namespace kernel {
     double *to_ptr,
     double *from_ptr,
     int64_t length) {
-    if(TO == kernel::Lib::cuda_kernels) {
 #ifndef _MSC_VER
+    if(TO == kernel::Lib::cuda_kernels) {
       auto handle = acquire_handle(kernel::Lib::cuda_kernels);
       typedef Error (func_awkward_cuda_H2Dfloat64_t)
         (double *to_ptr, double *from_ptr, int64_t length);
@@ -768,10 +718,8 @@ namespace kernel {
         (acquire_symbol(handle, "awkward_cuda_H2Dfloat64"));
 
       return (*func_awkward_cuda_H2Dfloat64)(to_ptr, from_ptr, length);
-#endif
     }
     else if(TO == kernel::Lib::cpu_kernels && FROM == kernel::Lib::cuda_kernels) {
-#ifndef _MSC_VER
       auto handle = acquire_handle(kernel::Lib::cuda_kernels);
 
       typedef Error (func_awkward_cuda_D2Hfloat64_t)
@@ -782,12 +730,9 @@ namespace kernel {
         (acquire_symbol(handle, "awkward_cuda_D2Hfloat64"));
 
       return (*func_awkward_cuda_D2Hfloat64)(to_ptr, from_ptr, length);
+    }
 #endif
-    }
-    else {
-      throw std::runtime_error(
-        "Unexpected Kernel Encountered or OS not supported");
-    }
+    throw std::runtime_error("Unexpected Kernel Encountered or OS not supported");
   }
 
   template<>
