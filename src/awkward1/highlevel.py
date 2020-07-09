@@ -581,7 +581,8 @@ class Array(
            * **An Array of nested lists**, ultimately containing booleans or
              integers and having the same lengths of lists at each level as
              the Array to which they're applied, selects by boolean or by
-             integer at the deeply nested level. See <<nested indexing>> below.
+             integer at the deeply nested level. Missing items at any level
+             above the deepest level must broadcast. See <<nested indexing>> below.
 
         A tuple of the above applies each slice item to a dimension of the
         data, which can be very expressive. More than one flat boolean/integer
@@ -840,6 +841,18 @@ class Array(
         Here, the `np.argmax` returns the integer position of the maximum
         element or None for empty arrays. It's a nice example of
         <<option indexing>> with <<nested indexing>>.
+
+        When applying a nested index with missing (None) entries at levels
+        higher than the last level, the indexer must have the same dimension
+        as the array being indexed, and the resulting output will have missing
+        entries at the corresponding locations, e.g. for
+
+            >>> print(array[ [[[0, None, 2, None, None], None, [1]], None, [[0]]] ])
+            [[[0, None, 2.2, None, None], None, [4.4]], None, [[5.5]]]
+
+        the sub-list at entry 0,0 is extended as the masked entries are
+        acting at the last level, while the higher levels of the indexer all
+        have the same dimension as the array being indexed.
         """
         return awkward1._util.wrap(self._layout[where], self._behavior)
 

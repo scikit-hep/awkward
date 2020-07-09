@@ -1777,10 +1777,10 @@ namespace awkward {
 
     if (ListOffsetArray64* raw = dynamic_cast<ListOffsetArray64*>(out.get())) {
       ContentPtr content = raw->content();
-      IndexedOptionArray64 indexedoptionarray(Identities::none(),
-                                              util::Parameters(),
-                                              missing,
-                                              content);
+      Index64 missing_trim =
+          missing.getitem_range_nowrap(0, largeoffsets.getitem_at(-1));
+      IndexedOptionArray64 indexedoptionarray(
+          Identities::none(), util::Parameters(), missing_trim, content);
       return std::make_shared<ListOffsetArray64>(
         Identities::none(),
         util::Parameters(),
