@@ -265,10 +265,10 @@ namespace awkward {
     return cache_;
   }
 
-    const kernel::Lib
-    VirtualArray::ptr_lib() const {
-      return ptr_lib_;
-    }
+  const kernel::Lib
+  VirtualArray::ptr_lib() const {
+    return ptr_lib_;
+  }
 
   const ContentPtr
   VirtualArray::peek_array() const {

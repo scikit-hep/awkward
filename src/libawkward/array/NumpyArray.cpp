@@ -387,13 +387,13 @@ namespace awkward {
                          const std::string format,
                          const kernel::Lib ptr_lib)
       : Content(identities, parameters)
+      , ptr_lib_(ptr_lib)
       , ptr_(ptr)
       , shape_(shape)
       , strides_(strides)
       , byteoffset_(byteoffset)
       , itemsize_(itemsize)
-      , format_(format)
-      , ptr_lib_(ptr_lib){
+      , format_(format) {
     if (shape.size() != strides.size()) {
       throw std::invalid_argument(
         std::string("len(shape), which is ") + std::to_string(shape.size())
