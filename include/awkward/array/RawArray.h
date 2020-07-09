@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "awkward/common.h"
+#include "awkward/kernel.h"
 #include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/cpu-kernels/operations.h"
@@ -187,17 +188,20 @@ namespace awkward {
     /// buffer.
     /// @param length Number of elements in the array.
     /// @param itemsize Number of bytes per item; should agree with the format.
+    /// @param Choose the Kernel Library for this array, default:= cpu_kernels
     RawArrayOf<T>(const IdentitiesPtr& identities,
                   const util::Parameters& parameters,
                   const std::shared_ptr<T>& ptr,
                   const int64_t offset,
                   const int64_t length,
-                  const int64_t itemsize)
+                  const int64_t itemsize,
+                  const kernel::Lib ptr_lib = kernel::Lib::cpu_kernels)
         : Content(identities, parameters)
         , ptr_(ptr)
         , offset_(offset)
         , length_(length)
-        , itemsize_(itemsize) {
+        , itemsize_(itemsize)
+        , ptr_lib_(ptr_lib) {
       if (sizeof(T) != itemsize) {
         throw std::invalid_argument("sizeof(T) != itemsize");
       }
@@ -209,12 +213,14 @@ namespace awkward {
     RawArrayOf<T>(const IdentitiesPtr& identities,
                   const util::Parameters& parameters,
                   const std::shared_ptr<T>& ptr,
-                  const int64_t length)
+                  const int64_t length,
+                  const kernel::Lib ptr_lib = kernel::Lib::cpu_kernels)
         : Content(identities, parameters)
         , ptr_(ptr)
         , offset_(0)
         , length_(length)
-        , itemsize_(sizeof(T)) { }
+        , itemsize_(sizeof(T))
+        , ptr_lib_(ptr_lib) { }
 
     /// @brief Creates a RawArray without providing a #ptr to data and without
     /// having to specify #itemsize.
@@ -224,13 +230,14 @@ namespace awkward {
     /// The #itemsize is computed as `sizeof(T)`.
     RawArrayOf<T>(const IdentitiesPtr& identities,
                   const util::Parameters& parameters,
-                  const int64_t length)
+                  const int64_t length,
+                  const kernel::Lib ptr_lib = kernel::Lib::cpu_kernels)
         : Content(identities, parameters)
-        , ptr_(std::shared_ptr<T>(new T[(size_t)length],
-                                  util::array_deleter<T>()))
+        , ptr_(kernel::ptr_alloc<T>(ptr_lib_, (size_t)length))
         , offset_(0)
         , length_(length)
-        , itemsize_(sizeof(T)) { }
+        , itemsize_(sizeof(T))
+        , ptr_lib_(ptr_lib) { }
 
     /// @brief Reference-counted pointer to the array buffer.
     const std::shared_ptr<T>
@@ -255,6 +262,12 @@ namespace awkward {
       return itemsize_;
     }
 
+    const kernel::Lib
+    ptr_lib() const {
+      return ptr_lib_;
+    }
+
+
     /// @brief Location of item zero in the buffer, relative to
     /// `ptr`, measured in bytes, rather than number of elements; see #offset.
     ssize_t
@@ -274,6 +287,7 @@ namespace awkward {
       bytelength() const {
       return (ssize_t)itemsize_*(ssize_t)length_;
     }
+
 
     /// @brief Dereferences a selected item as a `uint8_t`.
     uint8_t
@@ -549,7 +563,7 @@ namespace awkward {
       int64_t offset = offset_;
       if (copyarrays) {
         ptr = std::shared_ptr<T>(new T[(size_t)length_],
-                                 util::array_deleter<T>());
+                                 kernel::array_deleter<T>());
         memcpy(ptr.get(), &ptr_.get()[(size_t)offset_],
                sizeof(T)*((size_t)length_));
         offset = 0;
@@ -660,7 +674,8 @@ namespace awkward {
     const ContentPtr
       carry(const Index64& carry, bool allow_lazy) const override {
       std::shared_ptr<T> ptr(new T[(size_t)carry.length()],
-                             util::array_deleter<T>());
+                             kernel::array_deleter<T>());
+
       struct Error err = kernel::NumpyArray_getitem_next_null_64(
         reinterpret_cast<uint8_t*>(ptr.get()),
         reinterpret_cast<uint8_t*>(ptr_.get()),
@@ -849,7 +864,7 @@ namespace awkward {
           dynamic_cast<RawArrayOf<T>*>(other.get())) {
         std::shared_ptr<T> ptr =
           std::shared_ptr<T>(new T[(size_t)(length_ + rawother->length())],
-                             util::array_deleter<T>());
+                             kernel::array_deleter<T>());
         memcpy(ptr.get(),
                &ptr_.get()[(size_t)offset_],
                sizeof(T)*((size_t)length_));
@@ -934,7 +949,7 @@ namespace awkward {
                 bool stable,
                 bool keepdims) const override {
       std::shared_ptr<T> ptr(
-                    new T[length_], util::array_deleter<T>());
+                    new T[length_], kernel::array_deleter<T>());
 
       Index64 offsets(2);
       offsets.setitem_at_nowrap(0, 0);
@@ -975,7 +990,7 @@ namespace awkward {
                    bool stable,
                    bool keepdims) const override {
       std::shared_ptr<int64_t> ptr(
-        new int64_t[length_], util::array_deleter<int64_t>());
+        new int64_t[length_], kernel::array_deleter<int64_t>());
 
       int64_t ranges_length = 2;
       Index64 outranges(ranges_length);
@@ -1152,11 +1167,43 @@ namespace awkward {
         "undefined operation: RawArray::getitem_next_jagged(jagged)");
     }
 
+    ContentPtr
+      copy_to(kernel::Lib ptr_lib) const {
+        if(ptr_lib == ptr_lib_) {
+          return std::make_shared<RawArrayOf<T>>(identities(),
+                                                 parameters(),
+                                                 ptr_,
+                                                 offset(),
+                                                 length(),
+                                                 itemsize(),
+                                                 ptr_lib_);
+        }
+
+        std::shared_ptr<T> ptr = kernel::ptr_alloc<T>(ptr_lib, length_);
+
+        Error err = kernel::copy_to(
+           ptr_lib,
+           ptr_lib_,
+           ptr.get(),
+           ptr_.get(),
+           length_);
+        util::handle_error(err);
+
+        return std::make_shared<RawArrayOf<T>>(identities(),
+                                               parameters(),
+                                               ptr,
+                                               offset(),
+                                               length(),
+                                               itemsize(),
+                                               ptr_lib);
+    }
+
   private:
     const std::shared_ptr<T> ptr_;
     const int64_t offset_;
     const int64_t length_;
     const int64_t itemsize_;
+    const kernel::Lib ptr_lib_;
   };
 }
 

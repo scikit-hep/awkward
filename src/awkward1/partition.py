@@ -408,32 +408,34 @@ class PartitionedArray(object):
                     [x[(slice(None),) + tail] for x in partitions]
                 )
 
-            elif (
-                (head is Ellipsis)
-                or (
-                    isinstance(where, str)
-                    or (
-                        awkward1._util.py27
-                        and isinstance(where, awkward1._util.unicode)
-                    )
-                )
-                or (
-                    isinstance(head, Iterable)
-                    and all(
-                        (
-                            isinstance(x, str)
-                            or (
-                                awkward1._util.py27
-                                and isinstance(x, awkward1._util.unicode)
-                            )
-                        )
-                        for x in head
-                    )
-                )
-            ):
+            elif head is Ellipsis:
                 return IrregularlyPartitionedArray(
                     [x[(head,) + tail] for x in self.partitions]
                 )
+
+            elif isinstance(head, str) or (
+                awkward1._util.py27 and isinstance(head, awkward1._util.unicode)
+            ):
+                y = IrregularlyPartitionedArray([x[head] for x in self.partitions])
+                if len(tail) == 0:
+                    return y
+                else:
+                    return y[tail]
+
+            elif isinstance(head, Iterable) and all(
+                (
+                    isinstance(x, str)
+                    or (awkward1._util.py27 and isinstance(x, awkward1._util.unicode))
+                )
+                for x in head
+            ):
+                y = IrregularlyPartitionedArray(
+                    [x[list(head)] for x in self.partitions]
+                )
+                if len(tail) == 0:
+                    return y
+                else:
+                    return y[tail]
 
             elif head is numpy.newaxis:
                 return self.toContent()[(head,) + tail]

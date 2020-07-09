@@ -17,6 +17,8 @@ trigger:
       - docs-sphinx/*
       - docs/*
       - studies/*
+      - src/cuda-kernels
+      - cuda-kernels
 
 pr:
   branches:

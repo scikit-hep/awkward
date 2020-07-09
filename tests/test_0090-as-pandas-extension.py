@@ -219,7 +219,8 @@ def as_array(request):
 class TestConstructors(pandas_tests_extension_base.BaseConstructorsTests):
     # old version of the test
     def test_from_dtype(self, data):
-        dtype = data.dtype
+        dtype = awkward1._connect._pandas.register()
+        dtype = awkward1._connect._pandas.AwkwardDtype()
 
         expected = pandas.Series(data)
         result = pandas.Series(list(data), dtype=dtype)

@@ -1286,6 +1286,17 @@ namespace awkward {
                                                       tail);
   }
 
+  ContentPtr
+  ByteMaskedArray::copy_to(kernel::Lib ptr_lib) const {
+    Index8 mask = mask_.copy_to(ptr_lib);
+    ContentPtr content = content_->copy_to(ptr_lib);
+    return std::make_shared<ByteMaskedArray>(identities(),
+                                             parameters(),
+                                             mask,
+                                             content,
+                                             valid_when());
+  }
+
   template <typename S>
   const ContentPtr
   ByteMaskedArray::getitem_next_jagged_generic(const Index64& slicestarts,

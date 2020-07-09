@@ -62,6 +62,9 @@ from awkward1.operations.reducers import *
 # version
 __version__ = awkward1._ext.__version__
 
+# call C++ startup function
+awkward1._ext.startup()
+
 __all__ = [
     x
     for x in list(globals())

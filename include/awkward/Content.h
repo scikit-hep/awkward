@@ -1184,6 +1184,15 @@ namespace awkward {
     static int64_t
       axis_wrap_if_negative(int64_t axis);
 
+    /// @brief Transfer the entire contents of the array between GPU and main memory.
+    ///
+    /// Returns a std::shared_ptr<Content> which is, by default, allocated on the
+    /// first device(device [0])
+    ///
+    /// @note This function has not been implemented to handle Multi-GPU setups
+    virtual ContentPtr
+      copy_to(kernel::Lib ptr_lib) const = 0;
+
   protected:
     /// @brief Internal function to wrap putative #getitem output with enough
     /// RegularArray nodes to satisfy a given `shape`.

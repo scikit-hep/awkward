@@ -973,6 +973,51 @@ extern "C" {
       int64_t offset,
       int64_t at);
 
+  EXPORT_SYMBOL bool
+    awkward_NumpyArraybool_getitem_at(
+      const bool* ptr,
+      int64_t at);
+  EXPORT_SYMBOL int8_t
+    awkward_NumpyArray8_getitem_at(
+      const int8_t* ptr,
+      int64_t at);
+  EXPORT_SYMBOL uint8_t
+    awkward_NumpyArrayU8_getitem_at(
+      const uint8_t* ptr,
+      int64_t at);
+  EXPORT_SYMBOL int16_t
+    awkward_NumpyArray16_getitem_at(
+      const int16_t* ptr,
+      int64_t at);
+  EXPORT_SYMBOL uint16_t
+    awkward_NumpyArrayU16_getitem_at(
+      const uint16_t* ptr,
+      int64_t at);
+  EXPORT_SYMBOL int32_t
+    awkward_NumpyArray32_getitem_at(
+      const int32_t* ptr,
+      int64_t at);
+  EXPORT_SYMBOL uint32_t
+    awkward_NumpyArrayU32_getitem_at(
+      const uint32_t* ptr,
+      int64_t at);
+  EXPORT_SYMBOL int64_t
+    awkward_NumpyArray64_getitem_at(
+      const int64_t* ptr,
+      int64_t at);
+  EXPORT_SYMBOL uint64_t
+    awkward_NumpyArrayU64_getitem_at(
+      const uint64_t* ptr,
+      int64_t at);
+  EXPORT_SYMBOL float
+    awkward_NumpyArrayfloat32_getitem_at(
+      const float* ptr,
+      int64_t at);
+  EXPORT_SYMBOL double
+    awkward_NumpyArrayfloat64_getitem_at(
+      const double* ptr,
+      int64_t at);
+
   EXPORT_SYMBOL void
     awkward_Index8_setitem_at_nowrap(
       int8_t* ptr,
