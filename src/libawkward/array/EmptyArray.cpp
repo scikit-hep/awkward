@@ -126,7 +126,7 @@ namespace awkward {
 
   const std::shared_ptr<NumpyArray>
   EmptyArray::toNumpyArray(const std::string& format, ssize_t itemsize) const {
-    std::shared_ptr<void> ptr(new uint8_t[0], util::array_deleter<uint8_t>());
+    std::shared_ptr<void> ptr(new uint8_t[0], kernel::array_deleter<uint8_t>());
     std::vector<ssize_t> shape({ 0 });
     std::vector<ssize_t> strides({ itemsize });
     return std::make_shared<NumpyArray>(identities_,
@@ -576,5 +576,12 @@ namespace awkward {
     throw std::runtime_error(
       "undefined operation: EmptyArray::getitem_next_jagged(jagged)");
   }
+
+  ContentPtr
+  EmptyArray::copy_to(kernel::Lib ptr_lib) const {
+    return std::make_shared<EmptyArray>(identities(),
+                                        parameters());
+  }
+
 
 }

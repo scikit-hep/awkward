@@ -22,7 +22,7 @@ namespace awkward {
     ListForm(bool has_identities,
              const util::Parameters& parameters,
              Index::Form starts,
-             Index::Form stpos,
+             Index::Form stops,
              const FormPtr& content);
 
     Index::Form
@@ -401,6 +401,9 @@ namespace awkward {
                           const Index64& slicestops,
                           const SliceJagged64& slicecontent,
                           const Slice& tail) const override;
+
+    ContentPtr
+      copy_to(kernel::Lib ptr_lib) const override;
 
   private:
     /// @brief See #starts.

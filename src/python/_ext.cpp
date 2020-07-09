@@ -4,6 +4,7 @@
 
 #include <pybind11/pybind11.h>
 
+#include "awkward/python/startup.h"
 #include "awkward/python/index.h"
 #include "awkward/python/identities.h"
 #include "awkward/python/content.h"
@@ -20,6 +21,10 @@ PYBIND11_MODULE(_ext, m) {
 #else
   m.attr("__version__") = "dev";
 #endif
+
+  ////////// startup.h
+
+  make_startup(m, "startup");
 
   ////////// index.h
 

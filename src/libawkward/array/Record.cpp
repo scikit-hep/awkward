@@ -565,4 +565,22 @@ namespace awkward {
       "undefined operation: Record::getitem_next_jagged(jagged)");
   }
 
+  ContentPtr
+  Record::copy_to(kernel::Lib ptr_lib) const{
+    ContentPtrVec content_vec;
+    for(auto i : array_->contents()) {
+      ContentPtr ptr = i->copy_to(ptr_lib);
+      content_vec.emplace_back(ptr);
+    }
+
+    std::shared_ptr<const RecordArray> record_arr  =
+      std::make_shared<const RecordArray>(array_->identities(),
+                                          array_->parameters(),
+                                          content_vec,
+                                          array_->recordlookup(),
+                                          array_->length());
+
+    return std::make_shared<Record>(record_arr,
+                                    at());
+  }
 }

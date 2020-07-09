@@ -19,25 +19,30 @@ namespace rj = rapidjson;
 namespace awkward {
   namespace util {
     void
-    handle_error(const struct Error &err,
-                 const std::string &classname,
-                 const Identities *identities) {
-      if (err.str != nullptr) {
-        std::stringstream out;
-        out << "in " << classname;
-        if (err.identity != kSliceNone && identities != nullptr) {
-          if (0 <= err.identity && err.identity < identities->length()) {
-            out << " with identity ["
-                << identities->identity_at(err.identity) << "]";
-          } else {
-            out << " with invalid identity";
+    handle_error(const struct Error& err,
+                 const std::string& classname,
+                 const Identities* identities) {
+      if(err.pass_through == true) {
+        throw std::invalid_argument(err.str);
+      }
+      else {
+        if (err.str != nullptr) {
+          std::stringstream out;
+          out << "in " << classname;
+          if (err.identity != kSliceNone && identities != nullptr) {
+            if (0 <= err.identity && err.identity < identities->length()) {
+              out << " with identity ["
+                  << identities->identity_at(err.identity) << "]";
+            } else {
+              out << " with invalid identity";
+            }
           }
+          if (err.attempt != kSliceNone) {
+            out << " attempting to get " << err.attempt;
+          }
+          out << ", " << err.str;
+          throw std::invalid_argument(out.str());
         }
-        if (err.attempt != kSliceNone) {
-          out << " attempting to get " << err.attempt;
-        }
-        out << ", " << err.str;
-        throw std::invalid_argument(out.str());
       }
     }
 
@@ -45,14 +50,16 @@ namespace awkward {
     IndexOf<T> make_starts(const IndexOf<T> &offsets) {
       return IndexOf<T>(offsets.ptr(),
                         offsets.offset(),
-                        offsets.length() - 1);
+                        offsets.length() - 1,
+                        offsets.ptr_lib());
     }
 
     template<typename T>
     IndexOf<T> make_stops(const IndexOf<T> &offsets) {
       return IndexOf<T>(offsets.ptr(),
                         offsets.offset() + 1,
-                        offsets.length() - 1);
+                        offsets.length() - 1,
+                        offsets.ptr_lib());
     }
 
     template IndexOf<int32_t> make_starts(const IndexOf<int32_t> &offsets);

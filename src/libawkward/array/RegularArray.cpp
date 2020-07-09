@@ -962,7 +962,7 @@ namespace awkward {
       std::vector<int64_t*> tocarryraw;
       for (int64_t j = 0;  j < n;  j++) {
         std::shared_ptr<int64_t> ptr(new int64_t[(size_t)totallen],
-                                     util::array_deleter<int64_t>());
+                                     kernel::array_deleter<int64_t>());
         tocarry.push_back(ptr);
         tocarryraw.push_back(ptr.get());
       }
@@ -1302,4 +1302,12 @@ namespace awkward {
                                            tail);
   }
 
+  ContentPtr
+  RegularArray::copy_to(kernel::Lib ptr_lib) const {
+    ContentPtr content = content_->copy_to(ptr_lib);
+    return std::make_shared<RegularArray>(identities(),
+                                          parameters(),
+                                          content,
+                                          size());
+  }
 }

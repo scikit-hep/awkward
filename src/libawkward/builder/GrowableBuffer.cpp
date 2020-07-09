@@ -18,7 +18,7 @@ namespace awkward {
     if (actual < (size_t)minreserve) {
       actual = (size_t)minreserve;
     }
-    std::shared_ptr<T> ptr(new T[actual], util::array_deleter<T>());
+    std::shared_ptr<T> ptr(new T[actual], kernel::array_deleter<T>());
     return GrowableBuffer(options, ptr, 0, (int64_t)actual);
   }
 
@@ -44,7 +44,7 @@ namespace awkward {
       actual = (size_t)length;
     }
     T* rawptr = new T[(size_t)actual];
-    std::shared_ptr<T> ptr(rawptr, util::array_deleter<T>());
+    std::shared_ptr<T> ptr(rawptr, kernel::array_deleter<T>());
     for (int64_t i = 0;  i < length;  i++) {
       rawptr[i] = (T)i;
     }
@@ -65,7 +65,7 @@ namespace awkward {
   GrowableBuffer<T>::GrowableBuffer(const ArrayBuilderOptions& options)
       : GrowableBuffer(options,
                        std::shared_ptr<T>(new T[(size_t)options.initial()],
-                                          util::array_deleter<T>()),
+                                          kernel::array_deleter<T>()),
                        0,
                        options.initial()) { }
 
@@ -101,7 +101,7 @@ namespace awkward {
   GrowableBuffer<T>::set_reserved(int64_t minreserved) {
     if (minreserved > reserved_) {
       std::shared_ptr<T> ptr(new T[(size_t)minreserved],
-                             util::array_deleter<T>());
+                             kernel::array_deleter<T>());
       memcpy(ptr.get(), ptr_.get(), (size_t)(length_ * sizeof(T)));
       ptr_ = ptr;
       reserved_ = minreserved;
@@ -114,7 +114,7 @@ namespace awkward {
     length_ = 0;
     reserved_ = options_.initial();
     ptr_ = std::shared_ptr<T>(new T[(size_t)options_.initial()],
-                              util::array_deleter<T>());
+                              kernel::array_deleter<T>());
   }
 
   template <typename T>
