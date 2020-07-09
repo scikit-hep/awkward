@@ -156,7 +156,8 @@ namespace awkward {
                const std::vector<ssize_t>& strides,
                ssize_t byteoffset,
                ssize_t itemsize,
-               const std::string format);
+               const std::string format,
+               const kernel::Lib ptr_lib =kernel::Lib::cpu_kernels);
 
     /// @brief Creates a NumpyArray from an {@link IndexOf Index8}.
     NumpyArray(const Index8 index);
@@ -187,6 +188,9 @@ namespace awkward {
     /// @brief Reference-counted pointer to the array buffer.
     const std::shared_ptr<void>
       ptr() const;
+
+    kernel::Lib
+      ptr_lib() const;
 
     /// @brief Number of elements in each dimension. A one-dimensional
     /// array has a shape of length one.
@@ -392,6 +396,11 @@ namespace awkward {
       tostring_part(const std::string& indent,
                     const std::string& pre,
                     const std::string& post) const override;
+
+    const std::string
+    kernellib_asstring(const std::string& indent,
+                       const std::string& pre,
+                       const std::string& post) const;
 
     void
       tojson_part(ToJson& builder, bool include_beginendlist) const override;
@@ -611,6 +620,11 @@ namespace awkward {
       getitem_next(const SliceJagged64& jagged,
                    const Slice& tail,
                    const Index64& advanced) const override;
+
+    /// @brief An utility function to create a new instance of NumpyArray on the
+    /// GPU identical to this one.
+    ContentPtr
+      copy_to(kernel::Lib ptr_lib) const;
 
   protected:
     /// @brief Internal function to merge two byte arrays without promoting
@@ -850,10 +864,13 @@ namespace awkward {
   const ssize_t itemsize_;
   /// @brief See #format.
   const std::string format_;
+  /// @brief See #ptr_lib
+  const kernel::Lib ptr_lib_;
 
   /// @brief Mapping from (platform dependent) `std::type_index` to pybind11
   /// format string (see #format).
   static const std::unordered_map<std::type_index, std::string> format_map;
+
   };
 }
 

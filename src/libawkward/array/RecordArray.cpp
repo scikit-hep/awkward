@@ -1466,6 +1466,22 @@ namespace awkward {
                                                       tail);
   }
 
+  ContentPtr
+  RecordArray::copy_to(kernel::Lib ptr_lib) const {
+    ContentPtrVec content_vec;
+    for(auto i : contents_) {
+      ContentPtr ptr = i->copy_to(ptr_lib);
+      content_vec.emplace_back(ptr);
+    }
+
+    return std::make_shared<RecordArray>(identities(),
+                                         parameters(),
+                                         content_vec,
+                                         recordlookup(),
+                                         length());
+
+  }
+
   template <typename S>
   const ContentPtr
   RecordArray::getitem_next_jagged_generic(const Index64& slicestarts,

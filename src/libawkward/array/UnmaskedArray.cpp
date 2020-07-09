@@ -883,6 +883,14 @@ namespace awkward {
                                                       tail);
   }
 
+  ContentPtr
+  UnmaskedArray::copy_to(kernel::Lib ptr_lib) const {
+    ContentPtr content = content_->copy_to(ptr_lib);
+    return std::make_shared<UnmaskedArray>(identities(),
+                                           parameters(),
+                                           content);
+  }
+
   template <typename S>
   const ContentPtr
   UnmaskedArray::getitem_next_jagged_generic(const Index64& slicestarts,

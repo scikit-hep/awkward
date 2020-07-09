@@ -1882,8 +1882,8 @@ namespace awkward {
         Index64 outoffsets(starts.length() + 1);
         if (starts.length() > 0  &&  starts.getitem_at_nowrap(0) != 0) {
           throw std::runtime_error(
-            "reduce_next with unbranching depth > negaxis expects a "
-            "ListOffsetArray64 whose offsets start at zero");
+            std::string("reduce_next with unbranching depth > negaxis expects a "
+            "ListOffsetArray64 whose offsets start at zero "));
         }
         struct Error err3 = kernel::IndexedArray_reduce_next_fix_offsets_64(
           outoffsets.ptr().get(),
@@ -2267,6 +2267,18 @@ namespace awkward {
                                                       slicestops,
                                                       slicecontent,
                                                       tail);
+  }
+
+  template <typename T, bool ISOPTION>
+  ContentPtr
+  IndexedArrayOf<T, ISOPTION>::copy_to(kernel::Lib ptr_lib) const {
+    IndexOf<T> index = index_.copy_to(ptr_lib);
+    ContentPtr content = content_->copy_to(ptr_lib);
+    return std::make_shared<IndexedArrayOf<T, ISOPTION>>(identities_,
+                                                         parameters(),
+                                                         index,
+                                                         content);
+
   }
 
   template <typename T, bool ISOPTION>

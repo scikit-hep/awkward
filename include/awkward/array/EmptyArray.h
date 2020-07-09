@@ -299,6 +299,9 @@ namespace awkward {
                           const Index64& slicestops,
                           const SliceJagged64& slicecontent,
                           const Slice& tail) const override;
+
+    ContentPtr
+      copy_to(kernel::Lib ptr_lib) const override;
   };
 
 }

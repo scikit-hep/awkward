@@ -453,7 +453,7 @@ def with_field(base, what, where=None, highlevel=True):
             base,
             with_field(base[where[0]], what, where=where[1:], highlevel=highlevel),
             where=where[0],
-            highlevel=highlevel
+            highlevel=highlevel,
         )
     else:
         if not (isinstance(where, str) or where is None):
@@ -474,9 +474,7 @@ def with_field(base, what, where=None, highlevel=True):
             base, what = inputs
             if isinstance(base, awkward1.layout.RecordArray):
                 if not isinstance(what, awkward1.layout.Content):
-                    what = awkward1.layout.NumpyArray(
-                        numpy.repeat(what, len(base))
-                    )
+                    what = awkward1.layout.NumpyArray(numpy.repeat(what, len(base)))
                 return lambda: (base.setitem_field(where, what),)
             else:
                 return None
@@ -489,7 +487,9 @@ def with_field(base, what, where=None, highlevel=True):
             out = (awkward1.layout.RecordArray([what], [where]),)
         else:
             base = base[keys]
-            out = awkward1._util.broadcast_and_apply([base, what], getfunction, behavior)
+            out = awkward1._util.broadcast_and_apply(
+                [base, what], getfunction, behavior
+            )
         assert isinstance(out, tuple) and len(out) == 1
 
         if highlevel:

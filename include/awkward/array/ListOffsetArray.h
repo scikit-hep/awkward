@@ -389,6 +389,9 @@ namespace awkward {
                           const SliceJagged64& slicecontent,
                           const Slice& tail) const override;
 
+    ContentPtr
+      copy_to(kernel::Lib ptr_lib) const override;
+
   private:
     /// @brief See #offsets.
     const IndexOf<T> offsets_;

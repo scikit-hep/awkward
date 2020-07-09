@@ -792,8 +792,9 @@ namespace awkward {
     else if (toaxis == depth + 1) {
       IndexOf<T> starts = util::make_starts(offsets_);
       IndexOf<T> stops = util::make_stops(offsets_);
-      Index64 tonum(length());
+      Index64 tonum(length(), offsets_.ptr_lib());
       struct Error err = kernel::ListArray_num_64<T>(
+        tonum.ptr_lib(),
         tonum.ptr().get(),
         starts.ptr().get(),
         starts.offset(),
@@ -1640,7 +1641,7 @@ namespace awkward {
       std::vector<int64_t*> tocarryraw;
       for (int64_t j = 0;  j < n;  j++) {
         std::shared_ptr<int64_t> ptr(new int64_t[(size_t)totallen],
-                                     util::array_deleter<int64_t>());
+                                     kernel::array_deleter<int64_t>());
         tocarry.push_back(ptr);
         tocarryraw.push_back(ptr.get());
       }
@@ -2233,6 +2234,17 @@ namespace awkward {
                                          slicestops,
                                          slicecontent,
                                          tail);
+  }
+
+  template <typename T>
+  ContentPtr
+  ListOffsetArrayOf<T>::copy_to(kernel::Lib ptr_lib) const {
+    IndexOf<T> offsets = offsets_.copy_to(ptr_lib);
+    ContentPtr content = content_->copy_to(ptr_lib);
+    return std::make_shared<ListOffsetArrayOf<T>>(identities(),
+                                                  parameters(),
+                                                  offsets,
+                                                  content);
   }
 
   template class EXPORT_SYMBOL ListOffsetArrayOf<int32_t>;

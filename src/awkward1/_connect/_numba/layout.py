@@ -893,7 +893,9 @@ class IndexedArrayType(ContentType):
         return self.contenttype.hasfield(key)
 
     def getitem_at(self, viewtype):
-        viewtype = awkward1._connect._numba.arrayview.wrap(self.contenttype, viewtype, None)
+        viewtype = awkward1._connect._numba.arrayview.wrap(
+            self.contenttype, viewtype, None
+        )
         return self.contenttype.getitem_at_check(viewtype)
 
     def lower_getitem_at(
@@ -1045,7 +1047,9 @@ class IndexedOptionArrayType(ContentType):
         return self.contenttype.hasfield(key)
 
     def getitem_at(self, viewtype):
-        viewtype = awkward1._connect._numba.arrayview.wrap(self.contenttype, viewtype, None)
+        viewtype = awkward1._connect._numba.arrayview.wrap(
+            self.contenttype, viewtype, None
+        )
         return numba.types.optional(self.contenttype.getitem_at_check(viewtype))
 
     def lower_getitem_at(
@@ -1208,7 +1212,9 @@ class ByteMaskedArrayType(ContentType):
         return self.contenttype.hasfield(key)
 
     def getitem_at(self, viewtype):
-        viewtype = awkward1._connect._numba.arrayview.wrap(self.contenttype, viewtype, None)
+        viewtype = awkward1._connect._numba.arrayview.wrap(
+            self.contenttype, viewtype, None
+        )
         return numba.types.optional(self.contenttype.getitem_at_check(viewtype))
 
     def lower_getitem_at(
@@ -1378,7 +1384,9 @@ class BitMaskedArrayType(ContentType):
         return self.contenttype.hasfield(key)
 
     def getitem_at(self, viewtype):
-        viewtype = awkward1._connect._numba.arrayview.wrap(self.contenttype, viewtype, None)
+        viewtype = awkward1._connect._numba.arrayview.wrap(
+            self.contenttype, viewtype, None
+        )
         return numba.types.optional(self.contenttype.getitem_at_check(viewtype))
 
     def lower_getitem_at(
@@ -1533,7 +1541,9 @@ class UnmaskedArrayType(ContentType):
         return self.contenttype.hasfield(key)
 
     def getitem_at(self, viewtype):
-        viewtype = awkward1._connect._numba.arrayview.wrap(self.contenttype, viewtype, None)
+        viewtype = awkward1._connect._numba.arrayview.wrap(
+            self.contenttype, viewtype, None
+        )
         return numba.types.optional(self.contenttype.getitem_at_check(viewtype))
 
     def lower_getitem_at(

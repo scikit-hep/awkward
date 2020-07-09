@@ -1928,6 +1928,26 @@ namespace awkward {
                                                       tail);
   }
 
+
+  template <typename T, typename I>
+  ContentPtr
+  UnionArrayOf<T, I>::copy_to(kernel::Lib ptr_lib) const {
+    IndexOf<T> tags = tags_.copy_to(ptr_lib);
+    IndexOf<I> index = index_.copy_to(ptr_lib);
+
+    ContentPtrVec content_vec;
+    for(auto const i : contents_) {
+      ContentPtr ptr = i->copy_to(ptr_lib);
+      content_vec.emplace_back(ptr);
+    }
+
+    return std::make_shared<UnionArrayOf<T, I>>(identities(),
+                                                parameters(),
+                                                tags,
+                                                index,
+                                                content_vec);
+  }
+
   template <typename T, typename I>
   template <typename S>
   const ContentPtr
