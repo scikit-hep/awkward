@@ -146,7 +146,9 @@ class PandasMixin(PandasNotImportedYet):
     @property
     def dtype(self):
         # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray.dtype.html
-        if awkward1._util.called_by_module("pandas"):
+        if awkward1._util.called_by_module(
+            "pandas"
+        ) and not awkward1._util.called_by_module("dask"):
             register()
             if isinstance(self.layout, awkward1.partition.PartitionedArray):
                 raise ValueError(
