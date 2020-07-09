@@ -387,13 +387,13 @@ namespace awkward {
                          const std::string format,
                          const kernel::Lib ptr_lib)
       : Content(identities, parameters)
+      , ptr_lib_(ptr_lib)
       , ptr_(ptr)
       , shape_(shape)
       , strides_(strides)
       , byteoffset_(byteoffset)
       , itemsize_(itemsize)
-      , format_(format)
-      , ptr_lib_(ptr_lib){
+      , format_(format) {
     if (shape.size() != strides.size()) {
       throw std::invalid_argument(
         std::string("len(shape), which is ") + std::to_string(shape.size())
@@ -1275,7 +1275,7 @@ namespace awkward {
   const ContentPtr
   NumpyArray::carry(const Index64& carry, bool allow_lazy) const {
     std::shared_ptr<void> ptr(
-      kernel::ptr_alloc<uint8_t>(ptr_lib_, (size_t)(carry.length()*strides_[0])));
+      kernel::ptr_alloc<uint8_t>(ptr_lib_, carry.length()*((int64_t)strides_[0])));
     struct Error err = kernel::NumpyArray_getitem_next_null_64(
       reinterpret_cast<uint8_t*>(ptr.get()),
       reinterpret_cast<uint8_t*>(ptr_.get()),
@@ -1749,7 +1749,7 @@ namespace awkward {
       }
 
       std::shared_ptr<void> ptr(
-        kernel::ptr_alloc<uint8_t>(ptr_lib_, (size_t)(itemsize*(self_flatlength + other_flatlength))));
+        kernel::ptr_alloc<uint8_t>(ptr_lib_, ((int64_t)itemsize)*(self_flatlength + other_flatlength)));
 
       NumpyArray contiguous_other = rawother->contiguous();
 
@@ -2234,7 +2234,7 @@ namespace awkward {
     NumpyArray contiguous_other = other.get()->contiguous();
 
     std::shared_ptr<void> ptr(
-      kernel::ptr_alloc<uint8_t>(ptr_lib_, (size_t)(length() + other.get()->length())));
+      kernel::ptr_alloc<uint8_t>(ptr_lib_, length() + other.get()->length()));
 
     struct Error err;
 
@@ -3211,7 +3211,7 @@ namespace awkward {
   NumpyArray::contiguous_next(const Index64& bytepos) const {
     if (iscontiguous()) {
       std::shared_ptr<void> ptr(
-        kernel::ptr_alloc<uint8_t>(ptr_lib_, (size_t)(bytepos.length()*strides_[0])));
+        kernel::ptr_alloc<uint8_t>(ptr_lib_, bytepos.length()*strides_[0]));
 
       struct Error err = kernel::NumpyArray_contiguous_copy_64(
         reinterpret_cast<uint8_t*>(ptr.get()),
@@ -3233,7 +3233,7 @@ namespace awkward {
 
     else if (shape_.size() == 1) {
       std::shared_ptr<void> ptr(
-        kernel::ptr_alloc<uint8_t>(ptr_lib_, (size_t)(bytepos.length()*itemsize_)));
+        kernel::ptr_alloc<uint8_t>(ptr_lib_, bytepos.length()*((int64_t)itemsize_)));
       struct Error err = kernel::NumpyArray_contiguous_copy_64(
         reinterpret_cast<uint8_t*>(ptr.get()),
         reinterpret_cast<uint8_t*>(ptr_.get()),
@@ -3489,7 +3489,7 @@ namespace awkward {
                            bool first) const {
     if (head.get() == nullptr) {
       std::shared_ptr<void> ptr(kernel::ptr_alloc<uint8_t>(ptr_lib_,
-                                                               (size_t)(carry.length()*stride)));
+                                                carry.length()*stride));
       struct Error err = kernel::NumpyArray_getitem_next_null_64(
         reinterpret_cast<uint8_t*>(ptr.get()),
         reinterpret_cast<uint8_t*>(ptr_.get()),
@@ -4126,7 +4126,7 @@ namespace awkward {
     }
   }
 
-  ContentPtr
+  const ContentPtr
   NumpyArray::copy_to(kernel::Lib ptr_lib) const {
     if(ptr_lib_ == ptr_lib) {
       return std::make_shared<NumpyArray>(identities(),
@@ -4147,7 +4147,7 @@ namespace awkward {
 
     std::shared_ptr<void> ptr;
     if (format_.compare("?") == 0) {
-      ptr = kernel::ptr_alloc<bool>(ptr_lib, length);
+      ptr = kernel::ptr_alloc<bool>(ptr_lib, (int64_t)length);
 
       Error err = kernel::copy_to<bool>(
         ptr_lib,
@@ -4158,7 +4158,7 @@ namespace awkward {
       util::handle_error(err);
     }
     else if (format_.compare("b") == 0) {
-      ptr = kernel::ptr_alloc<int8_t>(ptr_lib, length);
+      ptr = kernel::ptr_alloc<int8_t>(ptr_lib, (int64_t)length);
 
       Error err = kernel::copy_to<int8_t>(
         ptr_lib,
@@ -4169,7 +4169,7 @@ namespace awkward {
       util::handle_error(err);
     }
     else if (format_.compare("B") == 0) {
-      ptr = kernel::ptr_alloc<uint8_t>(ptr_lib, length);
+      ptr = kernel::ptr_alloc<uint8_t>(ptr_lib, (int64_t)length);
 
       Error err = kernel::copy_to<uint8_t>(
         ptr_lib,
@@ -4180,7 +4180,7 @@ namespace awkward {
       util::handle_error(err);
     }
     else if (format_.compare("h") == 0) {
-      ptr = kernel::ptr_alloc<int16_t>(ptr_lib, length);
+      ptr = kernel::ptr_alloc<int16_t>(ptr_lib, (int64_t)length);
 
       Error err = kernel::copy_to<int16_t>(
         ptr_lib,
@@ -4191,7 +4191,7 @@ namespace awkward {
       util::handle_error(err);
     }
     else if (format_.compare("H") == 0) {
-      ptr = kernel::ptr_alloc<uint16_t>(ptr_lib, length);
+      ptr = kernel::ptr_alloc<uint16_t>(ptr_lib, (int64_t)length);
 
       Error err = kernel::copy_to<uint16_t>(
         ptr_lib,
@@ -4202,7 +4202,7 @@ namespace awkward {
       util::handle_error(err);
     }
     else if (format_.compare("i") == 0) {
-      ptr = kernel::ptr_alloc<int32_t>(ptr_lib, length);
+      ptr = kernel::ptr_alloc<int32_t>(ptr_lib, (int64_t)length);
 
       Error err = kernel::copy_to<int32_t>(
         ptr_lib,
@@ -4213,7 +4213,7 @@ namespace awkward {
       util::handle_error(err);
     }
     else if (format_.compare("I") == 0) {
-      ptr = kernel::ptr_alloc<uint32_t>(ptr_lib, length);
+      ptr = kernel::ptr_alloc<uint32_t>(ptr_lib, (int64_t)length);
 
       Error err = kernel::copy_to<uint32_t>(
         ptr_lib,
@@ -4224,7 +4224,7 @@ namespace awkward {
       util::handle_error(err);
     }
     else if (format_.compare("l") == 0) {
-      ptr = kernel::ptr_alloc<int64_t>(ptr_lib, length);
+      ptr = kernel::ptr_alloc<int64_t>(ptr_lib, (int64_t)length);
 
       Error err = kernel::copy_to<int64_t>(
         ptr_lib,
@@ -4235,7 +4235,7 @@ namespace awkward {
       util::handle_error(err);
     }
     else if (format_.compare("L") == 0) {
-      ptr = kernel::ptr_alloc<uint64_t>(ptr_lib, length);
+      ptr = kernel::ptr_alloc<uint64_t>(ptr_lib, (int64_t)length);
 
       Error err = kernel::copy_to<uint64_t>(
         ptr_lib,
@@ -4246,7 +4246,7 @@ namespace awkward {
       util::handle_error(err);
     }
     else if (format_.compare("f") == 0) {
-      ptr = kernel::ptr_alloc<float>(ptr_lib, length);
+      ptr = kernel::ptr_alloc<float>(ptr_lib, (int64_t)length);
 
       Error err = kernel::copy_to<float>(
         ptr_lib,
@@ -4257,7 +4257,7 @@ namespace awkward {
       util::handle_error(err);
     }
     else if (format_.compare("d") == 0) {
-      ptr = kernel::ptr_alloc<double>(ptr_lib, length);
+      ptr = kernel::ptr_alloc<double>(ptr_lib, (int64_t)length);
 
       Error err = kernel::copy_to<double>(
         ptr_lib,

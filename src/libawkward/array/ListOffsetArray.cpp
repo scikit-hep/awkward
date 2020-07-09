@@ -2237,7 +2237,7 @@ namespace awkward {
   }
 
   template <typename T>
-  ContentPtr
+  const ContentPtr
   ListOffsetArrayOf<T>::copy_to(kernel::Lib ptr_lib) const {
     IndexOf<T> offsets = offsets_.copy_to(ptr_lib);
     ContentPtr content = content_->copy_to(ptr_lib);

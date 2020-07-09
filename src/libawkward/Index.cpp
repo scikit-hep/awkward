@@ -66,10 +66,10 @@ namespace awkward {
                       int64_t offset,
                       int64_t length,
                       kernel::Lib ptr_lib)
-      : ptr_(ptr)
+      : ptr_lib_(ptr_lib)
+      , ptr_(ptr)
       , offset_(offset)
-      , length_(length)
-      , ptr_lib_(ptr_lib) { }
+      , length_(length) { }
 
   template <typename T>
   const std::shared_ptr<T>

@@ -1930,14 +1930,14 @@ namespace awkward {
 
 
   template <typename T, typename I>
-  ContentPtr
+  const ContentPtr
   UnionArrayOf<T, I>::copy_to(kernel::Lib ptr_lib) const {
     IndexOf<T> tags = tags_.copy_to(ptr_lib);
     IndexOf<I> index = index_.copy_to(ptr_lib);
 
     ContentPtrVec content_vec;
-    for(auto const i : contents_) {
-      ContentPtr ptr = i->copy_to(ptr_lib);
+    for(auto x : contents_) {
+      ContentPtr ptr = x->copy_to(ptr_lib);
       content_vec.emplace_back(ptr);
     }
 

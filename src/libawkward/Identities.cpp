@@ -71,8 +71,8 @@ namespace awkward {
                                 int64_t length,
                                 kernel::Lib ptr_lib)
       : Identities(ref, fieldloc, 0, width, length)
-      , ptr_(kernel::ptr_alloc<T>(ptr_lib, (ssize_t)width*length))
-      , ptr_lib_(ptr_lib) { }
+      , ptr_lib_(ptr_lib)
+      , ptr_(kernel::ptr_alloc<T>(ptr_lib, width*length)) { }
 
   template <typename T>
   IdentitiesOf<T>::IdentitiesOf(const Ref ref,
@@ -83,8 +83,8 @@ namespace awkward {
                                 const std::shared_ptr<T> ptr,
                                 kernel::Lib ptr_lib)
       : Identities(ref, fieldloc, offset, width, length)
-      , ptr_(ptr)
-      , ptr_lib_(ptr_lib) { }
+      , ptr_lib_(ptr_lib)
+      , ptr_(ptr) { }
 
   template <typename T>
   const std::shared_ptr<T>
@@ -338,7 +338,7 @@ namespace awkward {
   }
 
   template <typename T>
-  IdentitiesPtr
+  const IdentitiesPtr
   IdentitiesOf<T>::copy_to(kernel::Lib ptr_lib) const {
     if(ptr_lib == ptr_lib_) {
       return std::make_shared<IdentitiesOf<T>>(ref(),
@@ -349,7 +349,7 @@ namespace awkward {
                                                ptr_,
                                                ptr_lib_);
     }
-    std::shared_ptr<T> ptr = kernel::ptr_alloc<T>(ptr_lib, width_ * length_);
+    std::shared_ptr<T> ptr = kernel::ptr_alloc<T>(ptr_lib, width_*length_);
 
     Error err =  kernel::copy_to<T>(ptr_lib,
                                     ptr_lib_,

@@ -197,11 +197,11 @@ namespace awkward {
                   const int64_t itemsize,
                   const kernel::Lib ptr_lib = kernel::Lib::cpu_kernels)
         : Content(identities, parameters)
+        , ptr_lib_(ptr_lib)
         , ptr_(ptr)
         , offset_(offset)
         , length_(length)
-        , itemsize_(itemsize)
-        , ptr_lib_(ptr_lib) {
+        , itemsize_(itemsize) {
       if (sizeof(T) != itemsize) {
         throw std::invalid_argument("sizeof(T) != itemsize");
       }
@@ -216,11 +216,11 @@ namespace awkward {
                   const int64_t length,
                   const kernel::Lib ptr_lib = kernel::Lib::cpu_kernels)
         : Content(identities, parameters)
+        , ptr_lib_(ptr_lib)
         , ptr_(ptr)
         , offset_(0)
         , length_(length)
-        , itemsize_(sizeof(T))
-        , ptr_lib_(ptr_lib) { }
+        , itemsize_(sizeof(T)) { }
 
     /// @brief Creates a RawArray without providing a #ptr to data and without
     /// having to specify #itemsize.
@@ -233,11 +233,11 @@ namespace awkward {
                   const int64_t length,
                   const kernel::Lib ptr_lib = kernel::Lib::cpu_kernels)
         : Content(identities, parameters)
-        , ptr_(kernel::ptr_alloc<T>(ptr_lib_, (size_t)length))
+        , ptr_lib_(ptr_lib)
+        , ptr_(kernel::ptr_alloc<T>(ptr_lib_, length))
         , offset_(0)
         , length_(length)
-        , itemsize_(sizeof(T))
-        , ptr_lib_(ptr_lib) { }
+        , itemsize_(sizeof(T)) { }
 
     /// @brief Reference-counted pointer to the array buffer.
     const std::shared_ptr<T>
@@ -1167,8 +1167,8 @@ namespace awkward {
         "undefined operation: RawArray::getitem_next_jagged(jagged)");
     }
 
-    ContentPtr
-      copy_to(kernel::Lib ptr_lib) const {
+    const ContentPtr
+      copy_to(kernel::Lib ptr_lib) const override {
         if(ptr_lib == ptr_lib_) {
           return std::make_shared<RawArrayOf<T>>(identities(),
                                                  parameters(),
@@ -1199,11 +1199,11 @@ namespace awkward {
     }
 
   private:
+    const kernel::Lib ptr_lib_;
     const std::shared_ptr<T> ptr_;
     const int64_t offset_;
     const int64_t length_;
     const int64_t itemsize_;
-    const kernel::Lib ptr_lib_;
   };
 }
 
