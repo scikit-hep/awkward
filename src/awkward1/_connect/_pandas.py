@@ -146,17 +146,18 @@ class PandasMixin(PandasNotImportedYet):
     @property
     def dtype(self):
         # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray.dtype.html
-        register()
+        if awkward1._util.called_by_module("pandas"):
+            register()
+            if isinstance(self.layout, awkward1.partition.PartitionedArray):
+                raise ValueError(
+                    "partitioned arrays cannot be Pandas columns; "
+                    "try ak.repartition(array, None)"
+                )
+            else:
+                return AwkwardDtype()
 
-        if awkward1._util.called_by_module("pandas") and isinstance(
-            self.layout, awkward1.partition.PartitionedArray
-        ):
-            raise ValueError(
-                "partitioned arrays cannot be Pandas columns; "
-                "try ak.repartition(array, None)"
-            )
         else:
-            return AwkwardDtype()
+            return numpy.dtype(numpy.object)
 
     @property
     def nbytes(self):
