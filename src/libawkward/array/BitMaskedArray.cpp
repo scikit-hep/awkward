@@ -900,7 +900,7 @@ namespace awkward {
                                                           tail);
   }
 
-  ContentPtr
+  const ContentPtr
   BitMaskedArray::copy_to(kernel::Lib ptr_lib) const {
     IndexU8 mask = mask_.copy_to(ptr_lib);
     ContentPtr  content = content_->copy_to(ptr_lib);

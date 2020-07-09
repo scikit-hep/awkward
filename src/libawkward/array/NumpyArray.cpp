@@ -4126,7 +4126,7 @@ namespace awkward {
     }
   }
 
-  ContentPtr
+  const ContentPtr
   NumpyArray::copy_to(kernel::Lib ptr_lib) const {
     if(ptr_lib_ == ptr_lib) {
       return std::make_shared<NumpyArray>(identities(),

@@ -565,7 +565,7 @@ namespace awkward {
       "undefined operation: Record::getitem_next_jagged(jagged)");
   }
 
-  ContentPtr
+  const ContentPtr
   Record::copy_to(kernel::Lib ptr_lib) const{
     ContentPtrVec content_vec;
     for(auto i : array_->contents()) {

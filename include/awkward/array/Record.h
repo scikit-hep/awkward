@@ -326,7 +326,7 @@ namespace awkward {
                           const SliceJagged64& slicecontent,
                           const Slice& tail) const override;
 
-    ContentPtr
+    const ContentPtr
       copy_to(kernel::Lib ptr_lib) const override;
 
   private:

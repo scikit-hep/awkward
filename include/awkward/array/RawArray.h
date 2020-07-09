@@ -1167,8 +1167,8 @@ namespace awkward {
         "undefined operation: RawArray::getitem_next_jagged(jagged)");
     }
 
-    ContentPtr
-      copy_to(kernel::Lib ptr_lib) const {
+    const ContentPtr
+      copy_to(kernel::Lib ptr_lib) const override {
         if(ptr_lib == ptr_lib_) {
           return std::make_shared<RawArrayOf<T>>(identities(),
                                                  parameters(),

@@ -330,7 +330,7 @@ namespace awkward {
       "undefined operation: None::getitem_next_jagged(jagged)");
   }
 
-  ContentPtr
+  const ContentPtr
   None::copy_to(kernel::Lib ptr_lib) const {
     throw std::runtime_error(
       "undefined operation: None::copy_to(ptr_lib)");

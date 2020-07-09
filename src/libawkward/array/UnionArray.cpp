@@ -1930,7 +1930,7 @@ namespace awkward {
 
 
   template <typename T, typename I>
-  ContentPtr
+  const ContentPtr
   UnionArrayOf<T, I>::copy_to(kernel::Lib ptr_lib) const {
     IndexOf<T> tags = tags_.copy_to(ptr_lib);
     IndexOf<I> index = index_.copy_to(ptr_lib);

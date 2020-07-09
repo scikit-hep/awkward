@@ -896,7 +896,7 @@ namespace awkward {
             "undefined operation: VirtualArray::getitem_next_jagged(jagged)");
   }
 
-  ContentPtr
+  const ContentPtr
   VirtualArray::copy_to(kernel::Lib ptr_lib) const {
       return std::make_shared<VirtualArray>(identities(),
                                             parameters(),

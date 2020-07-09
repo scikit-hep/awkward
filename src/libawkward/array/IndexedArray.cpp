@@ -2270,7 +2270,7 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  ContentPtr
+  const ContentPtr
   IndexedArrayOf<T, ISOPTION>::copy_to(kernel::Lib ptr_lib) const {
     IndexOf<T> index = index_.copy_to(ptr_lib);
     ContentPtr content = content_->copy_to(ptr_lib);

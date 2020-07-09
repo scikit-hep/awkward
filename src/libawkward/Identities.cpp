@@ -338,7 +338,7 @@ namespace awkward {
   }
 
   template <typename T>
-  IdentitiesPtr
+  const IdentitiesPtr
   IdentitiesOf<T>::copy_to(kernel::Lib ptr_lib) const {
     if(ptr_lib == ptr_lib_) {
       return std::make_shared<IdentitiesOf<T>>(ref(),

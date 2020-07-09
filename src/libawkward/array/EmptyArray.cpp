@@ -577,7 +577,7 @@ namespace awkward {
       "undefined operation: EmptyArray::getitem_next_jagged(jagged)");
   }
 
-  ContentPtr
+  const ContentPtr
   EmptyArray::copy_to(kernel::Lib ptr_lib) const {
     return std::make_shared<EmptyArray>(identities(),
                                         parameters());
