@@ -132,8 +132,9 @@ def preprocess(filename, skip_implementation=False):
                     .replace(",", "")
                     .replace(") {", "")
                 ] = re.search("u?int\d{1,2}_t", line).group()
-            if func is True and re.search("u?int\d{1,2}_t\*?", line) is not None:
-                line = line.replace(re.search("u?int\d{1,2}_t", line).group(), "int")
+            if func is True:
+                while re.search("u?int\d{1,2}_t\*?", line) is not None:
+                    line = line.replace(re.search("u?int\d{1,2}_t", line).group(), "int")
             if func is True and " ERROR " in line:
                 line = line.replace("ERROR", "int", 1)
             if func is True and "(size_t)" in line:
@@ -243,11 +244,25 @@ class FuncBody(object):
             else:
                 self.code += stmt
         elif item.__class__.__name__ == "Assignment":
-            stmt = " " * indent + "{0} {1} {2}".format(
-                self.traverse(item.lvalue, 0, called=True),
-                item.op,
-                self.traverse(item.rvalue, 0, called=True),
-            )
+            if (
+                item.rvalue.__class__.__name__ == "ArrayRef"
+                and item.rvalue.subscript.__class__.__name__ == "BinaryOp"
+                and item.rvalue.subscript.left.__class__.__name__ == "UnaryOp"
+                and item.rvalue.subscript.left.op == "++"
+            ):
+                stmt = " " * indent + "{0} += 1; {1} = {2}[{0} {3} {4}]".format(
+                    self.traverse(item.rvalue.subscript.left.expr, 0, called=True),
+                    self.traverse(item.lvalue, 0, called=True),
+                    self.traverse(item.rvalue.name, 0, called=True),
+                    item.rvalue.subscript.op,
+                    self.traverse(item.rvalue.subscript.right, 0, called=True),
+                )
+            else:
+                stmt = " " * indent + "{0} {1} {2}".format(
+                    self.traverse(item.lvalue, 0, called=True),
+                    item.op,
+                    self.traverse(item.rvalue, 0, called=True),
+                )
             if called:
                 return stmt
             else:
@@ -372,7 +387,7 @@ class FuncBody(object):
             else:
                 self.code += stmt
         elif item.__class__.__name__ == "UnaryOp":
-            if item.op[1:] == "++":
+            if item.op[1:] == "++" or item.op == "++":
                 stmt = " " * indent + "{0} = {0} + 1".format(
                     self.traverse(item.expr, 0, called=True)
                 )
