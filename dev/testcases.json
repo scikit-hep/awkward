@@ -1,25 +1,77 @@
 {
-    "success": {
-        "ListArray": [
-            {"ListArray-starts": [0, 3, 3, 5],
-            "ListArray-stops":  [3, 3, 5, 10],
-            "ListArray-starts-offset": 0,
-            "ListArray-stops-offset": 0},
-            {"ListArray-starts": [99, 99, 99, 0, 3, 3, 5],
-            "ListArray-stops":  [99, 99, 99, 3, 3, 5, 10],
-            "ListArray-starts-offset": 3,
-            "ListArray-stops-offset": 3}
+    "int": {
+        "success": {
+            "ListArray": [
+                {"ListArray-starts": [2, 0, 2, 1, 3],
+                "ListArray-stops":  [3, 0, 3, 2, 3],
+                "ListArray-starts-offset": 0,
+                "ListArray-stops-offset": 0,
+                "ListArray-diff": [0, 1, 1, 2, 3, 3],
+                "ListArray-diff-offset": 0},
+                {"ListArray-starts": [99, 99, 99, 0, 3, 3, 5],
+                "ListArray-stops":  [99, 99, 99, 3, 3, 5, 10],
+                "ListArray-starts-offset": 3,
+                "ListArray-stops-offset": 3}
+                ],
+            "NumpyArray": [],
+            "RegularArray": [
+                {"RegularArray-size": 3,
+                "RegularArray-diff": [0, 3, 6, 9, 12, 15],
+                "RegularArray-diff-offset": 0}
             ],
-        "NumpyArray": [],
-        "RegularArray": [],
-        "ListOffsetArray": [],
-        "IndexedArray": [],
-        "IndexedOptionArray": [],
-        "ByteMaskedArray": [],
-        "BitMaskedArray": [],
-        "UnionArray": []
+            "ListOffsetArray": [
+                {"ListOffsetArray-offsets": [6, 8, 18, 7, 9, 2, 11, 20, 6, 10, 5],
+                "ListOffsetArray-offsets-offset": 1,
+                "ListOffsetArray-incr": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+                "ListOffsetArray-incr-offset": 0},
+                {"ListOffsetArray-offsets": [48, 50, 51, 55, 55, 55, 58, 66, 81, 92, 92, 97, 101, 113, 116, 126, 148, 153, 172, 194, 201, 204, 214, 231, 233, 248, 252, 253, 253, 263, 289, 301, 325],
+                "ListOffsetArray-offsets-offset": 0}
+            ],
+            "IndexedArray": [
+                {"IndexedArray-index": [1, 0, 0, 1, 1, 1, 0],
+                "IndexedArray-index-offset": 1,
+                "IndexedArray-mask": [1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
+                "IndexedArray-mask-unsigned": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                "IndexedArray-mask-offset": 1},
+                {"IndexedArray-index": [14, 1, 27, 25, 3, 27, 7, 33, 18, 13],
+                "IndexedArray-index-offset": 0}
+            ],
+            "IndexedOptionArray": [],
+            "ByteMaskedArray": [
+                {"ByteMaskedArray-mask": [true, true, true, true, true],
+                "ByteMaskedArray-mask-offset": 0,
+                "ByteMaskedArray-valid_when": 1}
+            ],
+            "BitMaskedArray": [],
+            "UnionArray": [
+                {"UnionArray-tags": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                "UnionArray-tags-offset": 1,
+                "UnionArray-index": [1, 2, 6, 6, 3, 7, 3, 8, 3, 8, 8],
+                "UnionArray-index-offset": 0,
+                "UnionArray-offsets-raw": [[1, 2, 1, 2, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4]],
+                "UnionArray-offsets-offsets": 0}
+            ]
+        },
+        "failure": {},
+        "arr": [1, 2, 3, 4, 5],
+        "num": 3
     },
-    "failure": {},
-    "arr": [1, 2, 3, 4, 5],
-    "num": 1
+    "bool": {
+        "success": {
+            "IndexedArray": [
+                {"IndexedArray-index": [1, 0, 0, 1, 1, 1, 0],
+                "IndexedArray-index-offset": 1,
+                "IndexedArray-mask": [1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
+                "IndexedArray-mask-unsigned": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                "IndexedArray-mask-offset": 1},
+                {"IndexedArray-index": [14, 1, 27, 25, 3, 27, 7, 33, 18, 13],
+                "IndexedArray-index-offset": 0}
+            ],
+            "ByteMaskedArray": [
+                {"ByteMaskedArray-mask": [true, true, true, true, true],
+                "ByteMaskedArray-mask-offset": 0,
+                "ByteMaskedArray-valid_when": 1}
+            ]
+        }
+    }
 }

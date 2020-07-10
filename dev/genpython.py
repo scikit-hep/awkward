@@ -443,9 +443,9 @@ def gettokens(ctokens, htokens):
             for i in ctokens[x]["args"]:
                 if i["name"] == y:
                     if i["list"] > 0:
-                        tokens[x][y]["array"] = True
+                        tokens[x][y]["array"] = i["list"]
                     else:
-                        tokens[x][y]["array"] = False
+                        tokens[x][y]["array"] = 0
                     tokens[x][y]["type"] = i["type"]
     return tokens
 
@@ -475,11 +475,19 @@ def gentests(funcs, htokens):
     def getctypelist(typelist):
         newctypes = []
         for x in typelist:
-            if isinstance(x, tuple) and x[1] == "array":
-                x = x[0]
-                if x.endswith("_t"):
-                    x = x[:-2]
-                newctypes.append(eval("ctypes.POINTER(ctypes.c_" + x + ")"))
+            if isinstance(x, tuple) and len(x) == 2:
+                mid = x[0]
+                if mid.endswith("_t"):
+                    mid = mid[:-2]
+                start = ""
+                end = ")"
+                for i in range(x[1]):
+                    if i > 0:
+                        start += "("
+                        end += ")"
+                    start += "ctypes.POINTER"
+                start += "(ctypes.c_"
+                newctypes.append(eval(start + mid + end))
             else:
                 if x.endswith("_t"):
                     x = x[:-2]
@@ -492,95 +500,142 @@ def gentests(funcs, htokens):
 
     with open(os.path.join(CURRENT_DIR, "testcases.json")) as f:
         data = json.load(f)
+        allowed = [
+            "awkward_ListArray32_num_64",
+            "awkward_ListArrayU32_num_64",
+            "awkward_ListArray64_num_64",
+            "awkward_RegularArray_num_64",
+            "awkward_ListOffsetArray32_flatten_offsets_64",
+            "awkward_ListOffsetArrayU32_flatten_offsets_64",
+            "awkward_ListOffsetArray64_flatten_offsets_64",
+            "awkward_IndexedArray32_flatten_none2empty_64",
+            "awkward_IndexedArrayU32_flatten_none2empty_64",
+            "awkward_IndexedArray64_flatten_none2empty_64",
+            "awkward_IndexedArray32_flatten_nextcarry_64",
+            "awkward_IndexedArrayU32_flatten_nextcarry_64",
+            "awkward_IndexedArray64_flatten_nextcarry_64",
+            "awkward_IndexedArray32_overlay_mask8_to64",
+            "awkward_IndexedArrayU32_overlay_mask8_to64",
+            "awkward_IndexedArray64_overlay_mask8_to64",
+            "awkward_IndexedArray32_mask8",
+            "awkward_IndexedArrayU32_mask8",
+            "awkward_IndexedArray64_mask8",
+            "awkward_ByteMaskedArray_mask8",
+            "awkward_zero_mask8",
+            "awkward_IndexedArray32_simplify32_to64",
+            "awkward_IndexedArray32_simplifyU32_to64",
+            "awkward_IndexedArray32_simplify64_to64",
+            "awkward_IndexedArrayU32_simplify32_to64",
+            "awkward_IndexedArrayU32_simplifyU32_to64",
+            "awkward_IndexedArrayU32_simplify64_to64",
+            "awkward_IndexedArray64_simplify32_to64",
+            "awkward_IndexedArray64_simplifyU32_to64",
+            "awkward_IndexedArray64_simplify64_to64",
+            "awkward_RegularArray_compact_offsets64",
+            "awkward_ListArray32_compact_offsets_64",
+            "awkward_ListArrayU32_compact_offsets_64",
+            "awkward_ListArray64_compact_offsets_64",
+            "awkward_ListOffsetArray32_compact_offsets_64",
+            "awkward_ListOffsetArrayU32_compact_offsets_64",
+            "awkward_ListOffsetArray64_compact_offsets_64",
+            "awkward_ListArray32_broadcast_tooffsets_64",
+            "awkward_ListArrayU32_broadcast_tooffsets_64",
+            "awkward_ListArray64_broadcast_tooffsets_64",
+            "awkward_RegularArray_broadcast_tooffsets_64",
+            "awkward_RegularArray_broadcast_tooffsets_size1_64",
+            "awkward_ListOffsetArray32_toRegularArray",
+            "awkward_ListOffsetArrayU32_toRegularArray",
+            "awkward_ListOffsetArray64_toRegularArray",
+            "awkward_ListArray_fill_to64_from32",
+            "awkward_ListArray_fill_to64_fromU32",
+            "awkward_ListArray_fill_to64_from64",
+            "awkward_ListArray32_min_range",
+            "awkward_ListArrayU32_min_range",
+            "awkward_ListArray64_min_range",
+            "awkward_ListArray32_rpad_and_clip_length_axis1",
+            "awkward_ListArrayU32_rpad_and_clip_length_axis1",
+            "awkward_ListArray64_rpad_and_clip_length_axis1",
+            "awkward_ListArray32_rpad_axis1_64",
+            "awkward_ListArrayU32_rpad_axis1_64",
+            "awkward_ListArray64_rpad_axis1_64",
+            "awkward_ListArray32_validity",
+            "awkward_ListArrayU32_validity",
+            "awkward_ListArray64_validity"
+        ]
         for name, args in tokens.items():
             checkindex = []
             typelist = []
             testsp = []
             testsc = []
-            for i in range(len(args.values())):
-                if (
-                    "role" in list(args.values())[i]
-                    and list(args.values())[i]["role"] == "offsetarray"
-                ):
-                    typelist.append((list(args.values())[i]["type"], "array"))
-                    temparr = data[pytype(list(args.values())[i]["type"])][
-                        "offsetarray"
-                    ]
-                    testsp.append(temparr)
+            if name in allowed:
+                for i in range(len(args.values())):
                     if list(args.values())[i]["type"].endswith("_t"):
                         temptype = list(args.values())[i]["type"][:-2]
                     else:
                         temptype = list(args.values())[i]["type"]
-                    testsc.append((eval("ctypes.c_" + temptype) * 200)(*temparr))
-                elif (
-                    "role" in list(args.values())[i]
-                    and list(args.values())[i]["role"] == "boolout"
-                ):
-                    typelist.append((list(args.values())[i]["type"], "array"))
-                    checkindex.append(i)
-                    boolout = [False]
-                    testsp.append(boolout)
-                    testsc.append((ctypes.c_bool * 1)(*boolout))
-                elif list(args.values())[i]["array"]:
-                    typelist.append((list(args.values())[i]["type"], "array"))
-                    if list(args.values())[i]["check"] == "inparam":
-                        if "role" in list(args.values())[i]:
-                            temparr = data[pytype(list(args.values())[i]["type"])][
-                                pytype(list(args.values())[i]["role"])
-                            ]
-                        else:
-                            temparr = data[pytype(list(args.values())[i]["type"])][
-                                "array"
-                            ]
-                        testsp.append(temparr)
-                        if list(args.values())[i]["type"].endswith("_t"):
-                            temptype = list(args.values())[i]["type"][:-2]
-                        else:
-                            temptype = list(args.values())[i]["type"]
-                        testsc.append((eval("ctypes.c_" + temptype) * 200)(*temparr))
-                    elif list(args.values())[i]["check"] == "outparam":
-                        temparr = [0] * 200
+                    if list(args.values())[i]["check"] == "outparam":
+                        typelist.append((list(args.values())[i]["type"], list(args.values())[i]["array"]))
+                        temparr = [0] * (data[pytype(list(args.values())[i]["type"])]["num"] + 10)
                         checkindex.append(i)
                         testsp.append(temparr)
-                        if list(args.values())[i]["type"].endswith("_t"):
-                            temptype = list(args.values())[i]["type"][:-2]
+                        testsc.append(
+                            (eval("ctypes.c_" + temptype) * len(temparr))(*temparr)
+                        )
+                    elif "role" in list(args.values())[i]:
+                        if "instance" in list(args.values())[i]:
+                            tempval = data[pytype(list(args.values())[i]["type"])][
+                                "success"
+                            ][
+                                list(args.values())[i]["role"][
+                                    : list(args.values())[i]["role"].find("-")
+                                ]
+                            ][
+                                int(list(args.values())[i]["instance"])
+                            ][
+                                list(args.values())[i]["role"]
+                            ]
                         else:
-                            temptype = list(args.values())[i]["type"]
-                        testsc.append((eval("ctypes.c_" + temptype) * 200)(*temparr))
-                elif ("role" in list(args.values())[i]) and (
-                    list(args.values())[i]["role"] == "len"
-                ):
-                    typelist.append(list(args.values())[i]["type"])
-                    testsp.append(data[pytype(list(args.values())[i]["type"])]["len"])
-                    testsc.append(data[pytype(list(args.values())[i]["type"])]["len"])
-                elif (
-                    "role" in list(args.values())[i]
-                    and list(args.values())[i]["role"] == "offset"
-                ):
-                    typelist.append(list(args.values())[i]["type"])
-                    testsp.append(
-                        data[pytype(list(args.values())[i]["type"])]["offset"]
-                    )
-                    testsc.append(
-                        data[pytype(list(args.values())[i]["type"])]["offset"]
-                    )
-                else:
-                    typelist.append(list(args.values())[i]["type"])
-                    testsp.append(data[pytype(list(args.values())[i]["type"])]["num"])
-                    testsc.append(data[pytype(list(args.values())[i]["type"])]["num"])
+                            tempval = data[pytype(list(args.values())[i]["type"])][
+                                "success"
+                            ][
+                                list(args.values())[i]["role"][
+                                    : list(args.values())[i]["role"].find("-")
+                                ]
+                            ][
+                                0
+                            ][
+                                list(args.values())[i]["role"]
+                            ]
+                        testsp.append(tempval)
+                        if not isinstance(tempval, list):
+                            typelist.append((list(args.values())[i]["type"]))
+                            testsc.append(tempval)
+                        else:
+                            typelist.append((list(args.values())[i]["type"], list(args.values())[i]["array"]))
+                            testsc.append(
+                                (eval("ctypes.c_" + temptype) * len(tempval))(*tempval)
+                            )
+                    else:
+                        typelist.append(list(args.values())[i]["type"])
+                        testsp.append(
+                            data[pytype(list(args.values())[i]["type"])]["num"]
+                        )
+                        testsc.append(
+                            data[pytype(list(args.values())[i]["type"])]["num"]
+                        )
 
-            funcPy = getattr(kernels, name)
-            funcC = getattr(lib, name)
-            funcC.restype = Error
-            funcC.argtypes = getctypelist(typelist)
-            funcPy(*testsp)
-            funcC(*testsc)
-            for i in checkindex:
-                if isinstance(testsp[i], list):
-                    for j in range(len(testsp[i])):
-                        assert testsp[i][j] == testsc[i][j]
-                else:
-                    assert testsp[i] == testsc[i]
+                funcPy = getattr(kernels, name)
+                funcC = getattr(lib, name)
+                funcC.restype = Error
+                funcC.argtypes = getctypelist(typelist)
+                funcPy(*testsp)
+                funcC(*testsc)
+                for i in checkindex:
+                    if isinstance(testsp[i], list):
+                        for j in range(len(testsp[i])):
+                            assert testsp[i][j] == testsc[i][j]
+                    else:
+                        assert testsp[i] == testsc[i]
 
 
 if __name__ == "__main__":

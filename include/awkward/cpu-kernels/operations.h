@@ -51,7 +51,7 @@ extern "C" {
 
   /// @param tonum outparam
   /// @param size inparam role: RegularArray-size
-  /// @param size inparam
+  /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_RegularArray_num_64(
       int64_t* tonum,
@@ -108,11 +108,11 @@ extern "C" {
       int64_t inneroffsetslen);
 
   /// @param outoffsets outparam
-  /// @param outindex inparam role: IndexedArray-index
-  /// @param outindexoffset inparam role: IndexedArray-index-offset
+  /// @param outindex inparam role: IndexedArray-index instance: 0
+  /// @param outindexoffset inparam role: IndexedArray-index-offset instance: 0
   /// @param outindexlength inparam
-  /// @param offsets inparam role: IndexedArray-index
-  /// @param offsetsoffset inparam role: IndexedArray-index-offset
+  /// @param offsets inparam role: IndexedArray-index instance: 1
+  /// @param offsetsoffset inparam role: IndexedArray-index-offset instance: 1
   /// @param offsetslength inparam
   EXPORT_SYMBOL struct Error
     awkward_IndexedArray32_flatten_none2empty_64(
@@ -124,11 +124,11 @@ extern "C" {
       int64_t offsetsoffset,
       int64_t offsetslength);
   /// @param outoffsets outparam
-  /// @param outindex inparam role: IndexedArray-index
-  /// @param outindexoffset inparam role: IndexedArray-index-offset
+  /// @param outindex inparam role: IndexedArray-index instance: 0
+  /// @param outindexoffset inparam role: IndexedArray-index-offset instance: 0
   /// @param outindexlength inparam
-  /// @param offsets inparam role: IndexedArray-index
-  /// @param offsetsoffset inparam role: IndexedArray-index-offset
+  /// @param offsets inparam role: IndexedArray-index instance: 1
+  /// @param offsetsoffset inparam role: IndexedArray-index-offset instance: 1
   /// @param offsetslength inparam
   EXPORT_SYMBOL struct Error
     awkward_IndexedArrayU32_flatten_none2empty_64(
@@ -162,8 +162,8 @@ extern "C" {
   /// @param fromindex inparam role: UnionArray-index
   /// @param fromindexoffset inparam role: UnionArray-index-offset
   /// @param length inparam
-  /// @param offsetsraws inparam
-  /// @param offsetsoffsets inparam
+  /// @param offsetsraws inparam role: UnionArray-offsets-raw
+  /// @param offsetsoffsets inparam role: UnionArray-offsets-offsets
   EXPORT_SYMBOL struct Error
     awkward_UnionArray32_flatten_length_64(
       int64_t* total_length,
@@ -316,8 +316,8 @@ extern "C" {
       int64_t lencontent);
 
   /// @param toindex outparam
-  /// @param mask inparam
-  /// @param maskoffset inparam
+  /// @param mask inparam role: IndexedArray-mask
+  /// @param maskoffset inparam role: IndexedArray-mask-offset
   /// @param fromindex inparam role: IndexedArray-index
   /// @param indexoffset inparam role: IndexedArray-index-offset
   /// @param length inparam
@@ -330,8 +330,8 @@ extern "C" {
       int64_t indexoffset,
       int64_t length);
   /// @param toindex outparam
-  /// @param mask inparam
-  /// @param maskoffset inparam
+  /// @param mask inparam role: IndexedArray-mask-unsigned
+  /// @param maskoffset inparam role: IndexedArray-mask-offset
   /// @param fromindex inparam role: IndexedArray-index
   /// @param indexoffset inparam role: IndexedArray-index-offset
   /// @param length inparam
@@ -344,8 +344,8 @@ extern "C" {
       int64_t indexoffset,
       int64_t length);
   /// @param toindex outparam
-  /// @param mask inparam
-  /// @param maskoffset inparam
+  /// @param mask inparam role: IndexedArray-mask
+  /// @param maskoffset inparam role: IndexedArray-mask-offset
   /// @param fromindex inparam role: IndexedArray-index
   /// @param indexoffset inparam role: IndexedArray-index-offset
   /// @param length inparam
@@ -556,7 +556,7 @@ extern "C" {
 
   /// @param tooffsets outparam
   /// @param length inparam
-  /// @param size inparam
+  /// @param size inparam role: RegularArray-size
   EXPORT_SYMBOL struct Error
     awkward_RegularArray_compact_offsets64(
       int64_t* tooffsets,
@@ -638,8 +638,8 @@ extern "C" {
       int64_t length);
 
   /// @param tocarry outparam
-  /// @param fromoffsets inparam
-  /// @param offsetsoffset inparam
+  /// @param fromoffsets inparam role: ListArray-diff
+  /// @param offsetsoffset inparam role: ListArray-diff-offset
   /// @param offsetslength inparam
   /// @param fromstarts inparam role: ListArray-starts
   /// @param startsoffset inparam role: ListArray-starts-offset
@@ -658,8 +658,8 @@ extern "C" {
       int64_t stopsoffset,
       int64_t lencontent);
   /// @param tocarry outparam
-  /// @param fromoffsets inparam
-  /// @param offsetsoffset inparam
+  /// @param fromoffsets inparam role: ListArray-diff
+  /// @param offsetsoffset inparam role: ListArray-diff-offset
   /// @param offsetslength inparam
   /// @param fromstarts inparam role: ListArray-starts
   /// @param startsoffset inparam role: ListArray-starts-offset
@@ -678,8 +678,8 @@ extern "C" {
       int64_t stopsoffset,
       int64_t lencontent);
   /// @param tocarry outparam
-  /// @param fromoffsets inparam
-  /// @param offsetsoffset inparam
+  /// @param fromoffsets inparam role: ListArray-diff
+  /// @param offsetsoffset inparam role: ListArray-diff-offset
   /// @param offsetslength inparam
   /// @param fromstarts inparam role: ListArray-starts
   /// @param startsoffset inparam role: ListArray-starts-offset
@@ -698,10 +698,10 @@ extern "C" {
       int64_t stopsoffset,
       int64_t lencontent);
 
-  /// @param fromoffsets outparam
-  /// @param offsetsoffset inparam
+  /// @param fromoffsets inparam role: RegularArray-diff
+  /// @param offsetsoffset inparam role: RegularArray-diff-offset
   /// @param offsetslength inparam
-  /// @param size inparam
+  /// @param size inparam role: RegularArray-size
   EXPORT_SYMBOL struct Error
     awkward_RegularArray_broadcast_tooffsets_64(
       const int64_t* fromoffsets,
@@ -710,8 +710,8 @@ extern "C" {
       int64_t size);
 
   /// @param tocarry outparam
-  /// @param fromoffsets inparam
-  /// @param offsetsoffset inparam
+  /// @param fromoffsets inparam role: RegularArray-diff
+  /// @param offsetsoffset inparam role: RegularArray-diff-offset
   /// @param offsetslength inparam
   EXPORT_SYMBOL struct Error
     awkward_RegularArray_broadcast_tooffsets_size1_64(
@@ -721,8 +721,8 @@ extern "C" {
       int64_t offsetslength);
 
   /// @param size outparam
-  /// @param fromoffsets inparam role: ListOffsetArray-offsets
-  /// @param offsetsoffset inparam role: ListOffsetArray-offsets-offset
+  /// @param fromoffsets inparam role: ListOffsetArray-incr
+  /// @param offsetsoffset inparam role: ListOffsetArray-incr-offset
   /// @param offsetslength inparam
   EXPORT_SYMBOL struct Error
     awkward_ListOffsetArray32_toRegularArray(
@@ -731,8 +731,8 @@ extern "C" {
       int64_t offsetsoffset,
       int64_t offsetslength);
   /// @param size outparam
-  /// @param fromoffsets inparam role: ListOffsetArray-offsets
-  /// @param offsetsoffset inparam role: ListOffsetArray-offsets-offset
+  /// @param fromoffsets inparam role: ListOffsetArray-incr
+  /// @param offsetsoffset inparam role: ListOffsetArray-incr-offset
   /// @param offsetslength inparam
   EXPORT_SYMBOL struct Error
     awkward_ListOffsetArrayU32_toRegularArray(
@@ -741,8 +741,8 @@ extern "C" {
       int64_t offsetsoffset,
       int64_t offsetslength);
   /// @param size outparam
-  /// @param fromoffsets inparam role: ListOffsetArray-offsets
-  /// @param offsetsoffset inparam role: ListOffsetArray-offsets-offset
+  /// @param fromoffsets inparam role: ListOffsetArray-incr
+  /// @param offsetsoffset inparam role: ListOffsetArray-incr-offset
   /// @param offsetslength inparam
   EXPORT_SYMBOL struct Error
     awkward_ListOffsetArray64_toRegularArray(
