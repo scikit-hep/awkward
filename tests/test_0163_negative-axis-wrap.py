@@ -35,3 +35,45 @@ def test_array_3d():
     with pytest.raises(ValueError) as err:
         assert awkward1.num(array, axis=-4)
     assert str(err.value) == "'axis' out of range for 'num'"
+
+def test_list_array():
+    array = awkward1.Array(numpy.arange(3*5*2).reshape(3, 5, 2).tolist())
+    assert str(awkward1.type(array)) == '3 * var * var * int64'
+    assert awkward1.num(array, axis=0) == 3
+    assert awkward1.num(array, axis=1) == [5, 5, 5]
+    assert str(awkward1.type(awkward1.num(array, axis=1))) =='3 * int64'
+    assert awkward1.num(array, axis=2) == [[2, 2, 2, 2, 2],
+                                           [2, 2, 2, 2, 2],
+                                           [2, 2, 2, 2, 2]]
+    assert str(awkward1.type(awkward1.num(array, axis=2))) =='3 * var * int64'
+
+    with pytest.raises(ValueError) as err:
+        assert awkward1.num(array, axis=3)
+    assert str(err.value) == "'axis' out of range for 'num'"
+
+    assert awkward1.num(array, axis=-1) == [5, 5, 5]
+    assert awkward1.num(array, axis=-2) == [[2, 2, 2, 2, 2],
+                                           [2, 2, 2, 2, 2],
+                                           [2, 2, 2, 2, 2]]
+    assert awkward1.num(array, axis=-3) == 3
+    with pytest.raises(ValueError) as err:
+        assert awkward1.num(array, axis=-4)
+    assert str(err.value) == "'axis' out of range for 'num'"
+
+def test_record_array():
+    array = awkward1.Array([
+            {"x": [1], "y": [[], [1]]},
+            {"x": [1, 2], "y": [[], [1], [1, 2]]},
+            {"x": [1, 2, 3], "y": [[], [1], [1, 2], [1, 2, 3]]}])
+
+    assert awkward1.num(array, axis=0).tolist() == {'x': 3, 'y': 3}
+    assert awkward1.num(array, axis=1).tolist() == [{'x': 1, 'y': 2},
+                                                    {'x': 2, 'y': 3},
+                                                    {'x': 3, 'y': 4}]
+    with pytest.raises(ValueError) as err:
+        assert awkward1.num(array, axis=2)
+    assert str(err.value) == "'axis' out of range for 'num'"
+
+    assert awkward1.num(array, axis=-1).tolist() == [{'x': 1, 'y': [0, 1]},
+                                                     {'x': 2, 'y': [0, 1, 2]},
+                                                     {'x': 3, 'y': [0, 1, 2, 3]}]
