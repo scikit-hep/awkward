@@ -184,7 +184,7 @@ namespace awkward {
     /// The output has the same length as the `carry` index, not the `array`
     /// that is being manipulated. For each item `i` in `carry`, the output
     /// is `array[index[i]]`.
-    /// 
+    ///
     /// This operation is called
     /// [take](https://docs.scipy.org/doc/numpy/reference/generated/numpy.take.html)
     /// in NumPy and Arrow, although this carry is a low-level function that
@@ -271,7 +271,7 @@ namespace awkward {
   class EXPORT_SYMBOL IdentitiesOf: public Identities {
   public:
     /// @brief Creates an IdentitiesOf from a full set of parameters.
-    /// 
+    ///
     /// @param ref A globally unique reference to this set of identities.
     /// @param fieldloc A list of integer-string pairs indicating the positions
     /// of all tuple/record field indicators within the identity tuple.
@@ -376,14 +376,14 @@ namespace awkward {
     /// on the first device(device [0])
     ///
     /// @note This function has not been implemented to handle Multi-GPU setups
-    IdentitiesPtr
+    const IdentitiesPtr
       copy_to(kernel::Lib ptr_lib) const;
 
   private:
-    /// @brief See #ptr.
-    const std::shared_ptr<T> ptr_;
     /// @brief See #ptr_lib.
     const kernel::Lib ptr_lib_;
+    /// @brief See #ptr.
+    const std::shared_ptr<T> ptr_;
   };
 
 #if !defined AWKWARD_IDENTITIES_NO_EXTERN_TEMPLATE && !defined _MSC_VER

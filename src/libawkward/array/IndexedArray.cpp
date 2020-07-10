@@ -2270,7 +2270,7 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  ContentPtr
+  const ContentPtr
   IndexedArrayOf<T, ISOPTION>::copy_to(kernel::Lib ptr_lib) const {
     IndexOf<T> index = index_.copy_to(ptr_lib);
     ContentPtr content = content_->copy_to(ptr_lib);
@@ -2295,15 +2295,18 @@ namespace awkward {
       Index64 nextcarry = pair.first;
       IndexOf<T> outindex = pair.second;
 
+      Index64 reducedstarts(length() - numnull);
+      Index64 reducedstops(length() - numnull);
+      struct Error err = kernel::MaskedArray_getitem_next_jagged_project<T>(
+          outindex.ptr().get(), outindex.offset(), slicestarts.ptr().get(),
+          slicestarts.offset(), slicestops.ptr().get(), slicestops.offset(),
+          reducedstarts.ptr().get(), reducedstops.ptr().get(), length());
+      util::handle_error(err, classname(), identities_.get());
+
       ContentPtr next = content_.get()->carry(nextcarry, true);
-      ContentPtr out = next.get()->getitem_next_jagged(slicestarts,
-                                                       slicestops,
-                                                       slicecontent,
-                                                       tail);
-      IndexedArrayOf<T, ISOPTION> out2(identities_,
-                                       parameters_,
-                                       outindex,
-                                       out);
+      ContentPtr out = next.get()->getitem_next_jagged(
+          reducedstarts, reducedstops, slicecontent, tail);
+      IndexedArrayOf<T, ISOPTION> out2(identities_, parameters_, outindex, out);
       return out2.simplify_optiontype();
     }
     else {

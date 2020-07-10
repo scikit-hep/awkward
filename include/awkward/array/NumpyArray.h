@@ -623,7 +623,7 @@ namespace awkward {
 
     /// @brief An utility function to create a new instance of NumpyArray on the
     /// GPU identical to this one.
-    ContentPtr
+    const ContentPtr
       copy_to(kernel::Lib ptr_lib) const override;
 
   protected:
@@ -852,6 +852,8 @@ namespace awkward {
                                           bool ascending,
                                           bool stable) const;
 
+  /// @brief See #ptr_lib
+  const kernel::Lib ptr_lib_;
   /// @brief See #ptr.
   std::shared_ptr<void> ptr_;
   /// @brief See #shape.
@@ -864,8 +866,6 @@ namespace awkward {
   const ssize_t itemsize_;
   /// @brief See #format.
   const std::string format_;
-  /// @brief See #ptr_lib
-  const kernel::Lib ptr_lib_;
 
   /// @brief Mapping from (platform dependent) `std::type_index` to pybind11
   /// format string (see #format).

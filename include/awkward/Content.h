@@ -1188,7 +1188,7 @@ namespace awkward {
     /// first device(device [0])
     ///
     /// @note This function has not been implemented to handle Multi-GPU setups
-    virtual ContentPtr
+    virtual const ContentPtr
       copy_to(kernel::Lib ptr_lib) const = 0;
 
   protected:
