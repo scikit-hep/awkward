@@ -744,8 +744,9 @@ inparam = None
                                 for key, val in htokens[x].items():
                                     d[key] = val["check"]
                     else:
-                        for key, val in htokens[name].items():
-                            d[key] = val["check"]
+                        if name in htokens.keys():
+                            for key, val in htokens[name].items():
+                                d[key] = val["check"]
                     tokens[name]["labels"] = d
                     funcdef = (
                         "def {0}({1})".format(
