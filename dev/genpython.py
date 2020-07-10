@@ -808,7 +808,8 @@ inparam = None
                     if "childfunc" in tokens[name].keys():
                         roletokens = temptokens[list(tokens[name]["childfunc"])[0]]
                     else:
-                        roletokens = temptokens[name]
+                        if name in htokens.keys():
+                            roletokens = temptokens[name]
                     for key, val in roletokens.items():
                         if val["array"] or val["check"] == "outparam":
                             rolestring += "# " + key + " - " + val["check"]
