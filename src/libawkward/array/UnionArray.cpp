@@ -1936,7 +1936,7 @@ namespace awkward {
     IndexOf<I> index = index_.copy_to(ptr_lib);
 
     ContentPtrVec content_vec;
-    for(auto const i : contents_) {
+    for(auto const & i : contents_) {
       ContentPtr ptr = i->copy_to(ptr_lib);
       content_vec.emplace_back(ptr);
     }

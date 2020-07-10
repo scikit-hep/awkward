@@ -624,7 +624,7 @@ namespace awkward {
     /// @brief An utility function to create a new instance of NumpyArray on the
     /// GPU identical to this one.
     ContentPtr
-      copy_to(kernel::Lib ptr_lib) const;
+      copy_to(kernel::Lib ptr_lib) const override;
 
   protected:
     /// @brief Internal function to merge two byte arrays without promoting

@@ -1377,7 +1377,7 @@ namespace awkward {
       i++;
       depth++;
     }
-    if (toaxis > depth) {
+    if (toaxis > depth || toaxis < 0) {
       throw std::invalid_argument("'axis' out of range for 'num'");
     }
 

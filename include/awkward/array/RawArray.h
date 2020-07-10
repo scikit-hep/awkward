@@ -1168,7 +1168,7 @@ namespace awkward {
     }
 
     ContentPtr
-      copy_to(kernel::Lib ptr_lib) const {
+      copy_to(kernel::Lib ptr_lib) const override {
         if(ptr_lib == ptr_lib_) {
           return std::make_shared<RawArrayOf<T>>(identities(),
                                                  parameters(),
