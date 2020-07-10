@@ -220,7 +220,7 @@ namespace awkward {
       valid_when_);
     util::handle_error(err2, classname(), identities_.get());
 
-    return content_.get()->carry(nextcarry);
+    return content_.get()->carry(nextcarry, false);
   }
 
   const ContentPtr
@@ -607,7 +607,7 @@ namespace awkward {
       Index64 nextcarry = pair.first;
       Index64 outindex = pair.second;
 
-      ContentPtr next = content_.get()->carry(nextcarry);
+      ContentPtr next = content_.get()->carry(nextcarry, true);
 
       ContentPtr out = next.get()->getitem_next(head, tail, advanced);
       IndexedOptionArray64 out2(identities_, parameters_, outindex, out);
@@ -639,7 +639,7 @@ namespace awkward {
   }
 
   const ContentPtr
-  ByteMaskedArray::carry(const Index64& carry) const {
+  ByteMaskedArray::carry(const Index64& carry, bool allow_lazy) const {
     Index8 nextmask(carry.length());
     struct Error err = kernel::ByteMaskedArray_getitem_carry_64(
       nextmask.ptr().get(),
@@ -656,7 +656,7 @@ namespace awkward {
     return std::make_shared<ByteMaskedArray>(identities,
                                              parameters_,
                                              nextmask,
-                                             content_.get()->carry(carry),
+                                             content_.get()->carry(carry, allow_lazy),
                                              valid_when_);
   }
 
@@ -709,7 +709,7 @@ namespace awkward {
       Index64 nextcarry = pair.first;
       Index64 outindex = pair.second;
 
-      ContentPtr next = content_.get()->carry(nextcarry);
+      ContentPtr next = content_.get()->carry(nextcarry, false);
 
       ContentPtr out = next.get()->num(axis, depth);
       IndexedOptionArray64 out2(Identities::none(),
@@ -732,7 +732,7 @@ namespace awkward {
       Index64 nextcarry = pair.first;
       Index64 outindex = pair.second;
 
-      ContentPtr next = content_.get()->carry(nextcarry);
+      ContentPtr next = content_.get()->carry(nextcarry, false);
 
       std::pair<Index64, ContentPtr> offsets_flattened =
         next.get()->offsets_and_flattened(axis, depth);
@@ -941,7 +941,7 @@ namespace awkward {
       valid_when_);
     util::handle_error(err2, classname(), identities_.get());
 
-    ContentPtr next = content_.get()->carry(nextcarry);
+    ContentPtr next = content_.get()->carry(nextcarry, false);
     ContentPtr out = next.get()->reduce_next(reducer,
                                              negaxis,
                                              starts,
@@ -1006,7 +1006,7 @@ namespace awkward {
       Index64 nextcarry = pair.first;
       Index64 outindex = pair.second;
 
-      ContentPtr next = content_.get()->carry(nextcarry);
+      ContentPtr next = content_.get()->carry(nextcarry, false);
       ContentPtr out = next.get()->localindex(axis, depth);
       IndexedOptionArray64 out2(Identities::none(),
                                 util::Parameters(),
@@ -1036,7 +1036,7 @@ namespace awkward {
       Index64 nextcarry = pair.first;
       Index64 outindex = pair.second;
 
-      ContentPtr next = content_.get()->carry(nextcarry);
+      ContentPtr next = content_.get()->carry(nextcarry, true);
       ContentPtr out = next.get()->combinations(n,
                                                 replacement,
                                                 recordlookup,
@@ -1083,7 +1083,7 @@ namespace awkward {
       valid_when_);
     util::handle_error(err2, classname(), identities_.get());
 
-    ContentPtr next = content_.get()->carry(nextcarry);
+    ContentPtr next = content_.get()->carry(nextcarry, false);
     ContentPtr out = next.get()->sort_next(negaxis,
                                            starts,
                                            nextparents,
@@ -1168,7 +1168,7 @@ namespace awkward {
       valid_when_);
     util::handle_error(err2, classname(), identities_.get());
 
-    ContentPtr next = content_.get()->carry(nextcarry);
+    ContentPtr next = content_.get()->carry(nextcarry, false);
     ContentPtr out = next.get()->argsort_next(negaxis,
                                               starts,
                                               nextparents,
@@ -1286,24 +1286,39 @@ namespace awkward {
                                                       tail);
   }
 
-  template <typename S>
   const ContentPtr
-  ByteMaskedArray::getitem_next_jagged_generic(const Index64& slicestarts,
-                                               const Index64& slicestops,
-                                               const S& slicecontent,
-                                               const Slice& tail) const {
-      int64_t numnull;
-      std::pair<Index64, Index64> pair = nextcarry_outindex(numnull);
-      Index64 nextcarry = pair.first;
-      Index64 outindex = pair.second;
+  ByteMaskedArray::copy_to(kernel::Lib ptr_lib) const {
+    Index8 mask = mask_.copy_to(ptr_lib);
+    ContentPtr content = content_->copy_to(ptr_lib);
+    return std::make_shared<ByteMaskedArray>(identities(),
+                                             parameters(),
+                                             mask,
+                                             content,
+                                             valid_when());
+  }
 
-      ContentPtr next = content_.get()->carry(nextcarry);
-      ContentPtr out = next.get()->getitem_next_jagged(slicestarts,
-                                                       slicestops,
-                                                       slicecontent,
-                                                       tail);
-      IndexedOptionArray64 out2(identities_, parameters_, outindex, out);
-      return out2.simplify_optiontype();
+  template <typename S>
+  const ContentPtr ByteMaskedArray::getitem_next_jagged_generic(
+      const Index64& slicestarts, const Index64& slicestops,
+      const S& slicecontent, const Slice& tail) const {
+    int64_t numnull;
+    std::pair<Index64, Index64> pair = nextcarry_outindex(numnull);
+    Index64 nextcarry = pair.first;
+    Index64 outindex = pair.second;
+
+    Index64 reducedstarts(length() - numnull);
+    Index64 reducedstops(length() - numnull);
+    struct Error err = kernel::MaskedArray_getitem_next_jagged_project<int64_t>(
+        outindex.ptr().get(), outindex.offset(), slicestarts.ptr().get(),
+        slicestarts.offset(), slicestops.ptr().get(), slicestops.offset(),
+        reducedstarts.ptr().get(), reducedstops.ptr().get(), length());
+    util::handle_error(err, classname(), identities_.get());
+
+    ContentPtr next = content_.get()->carry(nextcarry, true);
+    ContentPtr out = next.get()->getitem_next_jagged(
+        reducedstarts, reducedstops, slicecontent, tail);
+    IndexedOptionArray64 out2(identities_, parameters_, outindex, out);
+    return out2.simplify_optiontype();
   }
 
   const std::pair<Index64, Index64>

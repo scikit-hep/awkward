@@ -236,8 +236,9 @@ def test_setidentities():
     recordarray2 = awkward1.layout.RecordArray({"outer": awkward1.layout.RegularArray(recordarray, 1)})
     recordarray2.setidentities()
     assert recordarray2["outer"].identities.fieldloc == [(0, "outer")]
-    assert recordarray2["outer", 0, "one"].identities.fieldloc == [(0, "outer"), (1, "one")]
-    assert recordarray2["outer", 0, "two"].identities.fieldloc == [(0, "outer"), (1, "two")]
+
+    assert recordarray2["outer", 0, "one"].content.identities.fieldloc == [(0, "outer"), (1, "one")]
+    assert recordarray2["outer", 0, "two"].content.identities.fieldloc == [(0, "outer"), (1, "two")]
     assert recordarray2["outer", "one", 0].identities.fieldloc == [(0, "outer"), (1, "one")]
     assert recordarray2["outer", "two", 0].identities.fieldloc == [(0, "outer"), (1, "two")]
     assert recordarray2["outer", "one", 1, 0] == 2
@@ -255,6 +256,50 @@ def test_setidentities():
     assert recordarray2[2, "outer"].identity == (2, "outer")
     assert recordarray2[2, "outer", 0].identity == (2, "outer", 0)
     assert recordarray2[2, "outer", 0, "two"].identity == (2, "outer", 0, "two")
+
+def test_identities():
+    a = awkward1.from_iter([
+        {"outer": [{"x": 0, "y": []}, {"x": 1, "y": [1]}, {"x": 2, "y": [1, 2]}]},
+        {"outer": []},
+        {"outer": [{"x": 3, "y": [1, 2, 3]}, {"x": 4, "y": [1, 2, 3, 4]}]}
+        ], highlevel=False)
+    a.setidentities()
+
+    b = awkward1.from_iter([
+        {"outer": {"x": 0, "y": []}},
+        {"outer": {"x": 1, "y": [1]}},
+        {"outer": {"x": 2, "y": [1, 2]}},
+        {"outer": {"x": 3, "y": [1, 2, 3]}},
+        {"outer": {"x": 4, "y": [1, 2, 3, 4]}}
+    ], highlevel=False)
+    b.setidentities()
+
+    assert awkward1.to_list(a) == [{u'outer': [{u'x': 0, u'y': []},
+                                               {u'x': 1, u'y': [1]},
+                                               {u'x': 2, u'y': [1, 2]}]},
+                                   {u'outer': []},
+                                   {u'outer': [{u'x': 3, u'y': [1, 2, 3]},
+                                               {u'x': 4, u'y': [1, 2, 3, 4]}]}]
+    assert a.identity == ()
+    assert a[2].identity == (2,)
+    assert a[2, "outer"].identity == (2, 'outer')
+    assert a[2, "outer", 0].identity == (2, 'outer', 0)
+    assert a[2, "outer", 0, "y"].identity == (2, u'outer', 0, u'y')
+
+    assert awkward1.to_list(b) == [{u'outer': {u'x': 0, u'y': []}},
+                                   {u'outer': {u'x': 1, u'y': [1]}},
+                                   {u'outer': {u'x': 2, u'y': [1, 2]}},
+                                   {u'outer': {u'x': 3, u'y': [1, 2, 3]}},
+                                   {u'outer': {u'x': 4, u'y': [1, 2, 3, 4]}}]
+    assert b.identity == ()
+    assert b[2].identity == (2,)
+    assert b[2, "outer"].identity == (2, u'outer')
+    with pytest.raises(ValueError) as err:
+        b[2, "outer", 0].identity
+    assert str(err.value) == "in NumpyArray, too many dimensions in slice"
+    with pytest.raises(ValueError) as err:
+        b[2, "outer", 0, "y"].identity
+    assert str(err.value) == "in NumpyArray, too many dimensions in slice"
 
 def test_builder_tuple():
     typestrs = {}

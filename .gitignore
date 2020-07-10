@@ -69,6 +69,12 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+cuda-kernels/include
+cuda-kernels/src
+cuda-kernels/VERSION_INFO
+
+# Virtual Environment folder is not needed
+venv
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

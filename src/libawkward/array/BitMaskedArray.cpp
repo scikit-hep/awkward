@@ -626,8 +626,8 @@ namespace awkward {
   }
 
   const ContentPtr
-  BitMaskedArray::carry(const Index64& carry) const {
-    return toByteMaskedArray().get()->carry(carry);
+  BitMaskedArray::carry(const Index64& carry, bool allow_lazy) const {
+    return toByteMaskedArray().get()->carry(carry, allow_lazy);
   }
 
   int64_t
@@ -900,4 +900,16 @@ namespace awkward {
                                                           tail);
   }
 
+  const ContentPtr
+  BitMaskedArray::copy_to(kernel::Lib ptr_lib) const {
+    IndexU8 mask = mask_.copy_to(ptr_lib);
+    ContentPtr  content = content_->copy_to(ptr_lib);
+    return std::make_shared<BitMaskedArray>(identities(),
+                                            parameters(),
+                                            mask,
+                                            content,
+                                            valid_when(),
+                                            length(),
+                                            lsb_order());
+  }
 }

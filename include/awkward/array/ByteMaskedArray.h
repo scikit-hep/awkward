@@ -249,7 +249,7 @@ namespace awkward {
                    const Index64& advanced) const override;
 
     const ContentPtr
-      carry(const Index64& carry) const override;
+      carry(const Index64& carry, bool allow_lazy) const override;
 
     int64_t
       numfields() const override;
@@ -380,6 +380,9 @@ namespace awkward {
                           const Index64& slicestops,
                           const SliceJagged64& slicecontent,
                           const Slice& tail) const override;
+
+    const ContentPtr
+      copy_to(kernel::Lib ptr_lib) const override;
 
   protected:
     template <typename S>

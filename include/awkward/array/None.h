@@ -112,7 +112,7 @@ namespace awkward {
 
     /// @exception std::runtime_error is always thrown
     const ContentPtr
-      carry(const Index64& carry) const override;
+      carry(const Index64& carry, bool allow_lazy) const override;
 
     /// @exception std::runtime_error is always thrown
     int64_t
@@ -276,6 +276,10 @@ namespace awkward {
                           const Index64& slicestops,
                           const SliceJagged64& slicecontent,
                           const Slice& tail) const override;
+
+    const ContentPtr
+      copy_to(kernel::Lib ptr_lib) const override;
+
   };
 
   /// A constant value with type None.

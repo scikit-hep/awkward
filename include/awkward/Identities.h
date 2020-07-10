@@ -184,7 +184,7 @@ namespace awkward {
     /// The output has the same length as the `carry` index, not the `array`
     /// that is being manipulated. For each item `i` in `carry`, the output
     /// is `array[index[i]]`.
-    /// 
+    ///
     /// This operation is called
     /// [take](https://docs.scipy.org/doc/numpy/reference/generated/numpy.take.html)
     /// in NumPy and Arrow, although this carry is a low-level function that
@@ -271,7 +271,7 @@ namespace awkward {
   class EXPORT_SYMBOL IdentitiesOf: public Identities {
   public:
     /// @brief Creates an IdentitiesOf from a full set of parameters.
-    /// 
+    ///
     /// @param ref A globally unique reference to this set of identities.
     /// @param fieldloc A list of integer-string pairs indicating the positions
     /// of all tuple/record field indicators within the identity tuple.
@@ -283,23 +283,30 @@ namespace awkward {
     /// @param width The number of integers in each identity tuple.
     /// @param length The number of identities in the array.
     /// @param ptr Reference-counted pointer to the array buffer.
+    /// @param Choose the Kernel Library for this array, default:= cpu_kernels.
     IdentitiesOf<T>(const Ref ref,
                     const FieldLoc& fieldloc,
                     int64_t offset,
                     int64_t width,
                     int64_t length,
-                    const std::shared_ptr<T> ptr);
+                    const std::shared_ptr<T> ptr,
+                    kernel::Lib ptr_lib =kernel::Lib::cpu_kernels);
 
     /// @brief Allocates a new array buffer with a given #ref, #fieldloc,
     /// #length and #width.
     IdentitiesOf<T>(const Ref ref,
                     const FieldLoc& fieldloc,
                     int64_t width,
-                    int64_t length);
+                    int64_t length,
+                    kernel::Lib ptr_lib =kernel::Lib::cpu_kernels);
 
     /// @brief Reference-counted pointer to the array buffer.
     const std::shared_ptr<T>
       ptr() const;
+
+    /// @brief The Kernel Library that ptr uses.
+    kernel::Lib
+      ptr_lib() const;
 
     const std::string
       classname() const override;
@@ -363,7 +370,18 @@ namespace awkward {
     const IdentitiesPtr
       getitem_range(int64_t start, int64_t stop) const;
 
+    /// @brief Moves the identity ptr buffer of the array between devices
+    ///
+    /// Returns a std::shared_ptr<IdentitiesOf> which is, by default, allocated
+    /// on the first device(device [0])
+    ///
+    /// @note This function has not been implemented to handle Multi-GPU setups
+    const IdentitiesPtr
+      copy_to(kernel::Lib ptr_lib) const;
+
   private:
+    /// @brief See #ptr_lib.
+    const kernel::Lib ptr_lib_;
     /// @brief See #ptr.
     const std::shared_ptr<T> ptr_;
   };

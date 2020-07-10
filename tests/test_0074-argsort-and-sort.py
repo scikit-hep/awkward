@@ -174,7 +174,7 @@ def test_IndexedOffsetArray():
         [-4.4, -5.5, -6.6]]
 
     array5 = array4.sort(0, True, False)
-    assert awkward1.to_list(array5.sort(0, True, False)) == [
+    assert awkward1.to_list(array5) == [
         [-4.4, -5.5, -6.6],
         [2.2, 1.1, 3.3],
         [4.4, 5.5, None],

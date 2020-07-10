@@ -61,7 +61,7 @@ def preprocess(filename, skip_implementation=False):
                     funcer = True
                 funcname = re.search("\s.*\(", line).group()[1:-1]
                 tokens[funcname] = OrderedDict()
-                line = line.replace(line.split(" ")[0], "int")
+                line = line.replace(line.split(" ")[0], "int", 1)
                 func = True
                 parans = []
                 code += line
@@ -128,8 +128,9 @@ def preprocess(filename, skip_implementation=False):
                     .replace(",", "")
                     .replace(") {", "")
                 ] = re.search("u?int\d{1,2}_t", line).group()
-            if func is True and re.search("u?int\d{1,2}_t\*?", line) is not None:
-                line = line.replace(re.search("u?int\d{1,2}_t", line).group(), "int")
+            if func is True:
+                while re.search("u?int\d{1,2}_t\*?", line) is not None:
+                    line = line.replace(re.search("u?int\d{1,2}_t", line).group(), "int")
             if func is True and " ERROR " in line:
                 line = line.replace("ERROR", "int", 1)
             if func is True and "(size_t)" in line:

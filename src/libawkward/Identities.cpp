@@ -68,11 +68,11 @@ namespace awkward {
   IdentitiesOf<T>::IdentitiesOf(const Ref ref,
                                 const FieldLoc& fieldloc,
                                 int64_t width,
-                                int64_t length)
+                                int64_t length,
+                                kernel::Lib ptr_lib)
       : Identities(ref, fieldloc, 0, width, length)
-      , ptr_(std::shared_ptr<T>(
-          length*width == 0 ? nullptr : new T[(size_t)(length*width)],
-          util::array_deleter<T>())) { }
+      , ptr_lib_(ptr_lib)
+      , ptr_(kernel::ptr_alloc<T>(ptr_lib, width*length)) { }
 
   template <typename T>
   IdentitiesOf<T>::IdentitiesOf(const Ref ref,
@@ -80,8 +80,10 @@ namespace awkward {
                                 int64_t offset,
                                 int64_t width,
                                 int64_t length,
-                                const std::shared_ptr<T> ptr)
+                                const std::shared_ptr<T> ptr,
+                                kernel::Lib ptr_lib)
       : Identities(ref, fieldloc, offset, width, length)
+      , ptr_lib_(ptr_lib)
       , ptr_(ptr) { }
 
   template <typename T>
@@ -174,7 +176,7 @@ namespace awkward {
 
   template <typename T>
   const IdentitiesPtr
-  IdentitiesOf<T>::getitem_range_nowrap(int64_t start, int64_t stop) const {
+  IdentitiesOf<T>:: getitem_range_nowrap(int64_t start, int64_t stop) const {
     if (!(0 <= start  &&  start < length_  &&  0 <= stop  &&  stop <= length_)
         &&  start != stop) {
       throw std::runtime_error(
@@ -216,7 +218,7 @@ namespace awkward {
   const IdentitiesPtr
   IdentitiesOf<T>::deep_copy() const {
     std::shared_ptr<T> ptr(length_ == 0 ? nullptr : new T[(size_t)length_],
-                           util::array_deleter<T>());
+                           kernel::array_deleter<T>());
     if (length_ != 0) {
       memcpy(ptr.get(),
              &ptr_.get()[(size_t)offset_],
@@ -328,6 +330,41 @@ namespace awkward {
     kernel::regularize_rangeslice(&regular_start, &regular_stop,
       true, start != Slice::none(), stop != Slice::none(), length_);
     return getitem_range_nowrap(regular_start, regular_stop);
+  }
+
+  template<typename T>
+  kernel::Lib IdentitiesOf<T>::ptr_lib() const {
+    return ptr_lib_;
+  }
+
+  template <typename T>
+  const IdentitiesPtr
+  IdentitiesOf<T>::copy_to(kernel::Lib ptr_lib) const {
+    if(ptr_lib == ptr_lib_) {
+      return std::make_shared<IdentitiesOf<T>>(ref(),
+                                               fieldloc(),
+                                               offset(),
+                                               width(),
+                                               length(),
+                                               ptr_,
+                                               ptr_lib_);
+    }
+    std::shared_ptr<T> ptr = kernel::ptr_alloc<T>(ptr_lib, width_*length_);
+
+    Error err =  kernel::copy_to<T>(ptr_lib,
+                                    ptr_lib_,
+                                    ptr.get(),
+                                    ptr_.get(),
+                                    width_ * length_);
+    util::handle_error(err);
+
+    return std::make_shared<IdentitiesOf<T>>(ref(),
+                                             fieldloc(),
+                                             offset(),
+                                             width(),
+                                             length(),
+                                             ptr,
+                                             kernel::Lib::cuda_kernels);
   }
 
   template class EXPORT_SYMBOL IdentitiesOf<int32_t>;

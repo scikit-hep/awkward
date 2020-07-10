@@ -131,7 +131,7 @@ namespace awkward {
   }
 
   const ContentPtr
-  None::carry(const Index64& carry) const {
+  None::carry(const Index64& carry, bool allow_lazy) const {
     throw std::runtime_error("undefined operation: None::carry");
   }
 
@@ -328,6 +328,12 @@ namespace awkward {
                             const Slice& tail) const {
     throw std::runtime_error(
       "undefined operation: None::getitem_next_jagged(jagged)");
+  }
+
+  const ContentPtr
+  None::copy_to(kernel::Lib ptr_lib) const {
+    throw std::runtime_error(
+      "undefined operation: None::copy_to(ptr_lib)");
   }
 
   const ContentPtr none = std::make_shared<None>();
