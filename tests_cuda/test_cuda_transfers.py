@@ -18,7 +18,7 @@ def test_tocuda():
     copyback_array = awkward1.copy_to(cuda_array, awkward1.KernelsLib["cpu"])
     assert awkward1.to_list(cuda_array) == awkward1.to_list(array)
     assert awkward1.to_list(copyback_array) == awkward1.to_list(array)
-
+    print(cuda_array)
     bytemask = awkward1.layout.Index8(
     numpy.array([False, True, False], dtype=numpy.bool))
     array = awkward1.layout.ByteMaskedArray(bytemask, content, True)
@@ -184,4 +184,4 @@ def test_tocuda():
     copyback_ioa = awkward1.copy_to(cuda_ioa, awkward1.KernelsLib["cpu"])
     assert awkward1.to_list(cuda_ioa) == awkward1.to_list(ioa)
     assert awkward1.to_list(copyback_ioa) == awkward1.to_list(ioa)
-    
+test_tocuda()
