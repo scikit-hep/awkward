@@ -1,4 +1,4 @@
-FROM nvidia/cuda:10.2-cudnn7-devel-ubuntu18.04
+FROM nvidia/cuda:10.2-devel-ubuntu18.04
 
 WORKDIR /awkward
 
@@ -9,15 +9,21 @@ RUN apt-get update && apt-get install -y \
 	    curl \
 	    git \
 	    cmake \	
-	    python \
-	    python-pip \
+	    python3-pip \
 	    python3-distutils
 RUN nvcc --version
 COPY . .
-RUN ls
-RUN pip install setuptools
-RUN pip install -r requirements.txt
-RUN pip install -r requirements-test.txt
-RUN python localbuild.py --pytest tests
-RUN mkdir  cuda-kernels/build
-RUN cd cuda-kernels/build && cmake ..
+
+
+RUN ln -s /usr/bin/python3 /usr/bin/python && \
+ln -s /usr/bin/pip3 /usr/bin/pip && \
+pip install --upgrade pip && \
+pip install setuptools && \
+pip install -r requirements.txt -r requirements-test.txt && \
+pip install -v .  && \
+cd cuda-kernels && \
+python setup.py sdist && \
+pip install -v . && \
+cd .. && \
+pytest tests_cuda
+
