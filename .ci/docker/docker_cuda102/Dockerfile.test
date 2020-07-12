@@ -1,0 +1,8 @@
+FROM awkward1_cuda:10.2
+
+WORKDIR /awkward
+
+RUN pip install pytest
+
+
+CMD pytest tests_cuda
