@@ -34,7 +34,7 @@ namespace awkward {
     /// @brief Data type to prefer, as a NumPy dtype, if the array has
     /// UnknownType.
     virtual util::dtype
-      preferred_npdtype() const = 0;
+      preferred_dtype() const = 0;
 
     /// @brief Return type for a `given_type` as a pybind11 format string.
     virtual const std::string
@@ -46,7 +46,7 @@ namespace awkward {
 
     /// @brief Return type for a `given_type` as a NumPy dtype.
     virtual util::dtype
-      return_npdtype(const std::string& given_type) const;
+      return_dtype(const std::string& given_type) const;
 
     /// @brief Apply the reducer algorithm to an array of boolean values.
     ///
@@ -271,11 +271,11 @@ namespace awkward {
     ssize_t
       preferred_typesize() const override;
 
-    /// @copydoc Reducer::preferred_npdtype()
+    /// @copydoc Reducer::preferred_dtype()
     ///
     /// The preferred type for ReducerCount is `double`.
     util::dtype
-      preferred_npdtype() const override;
+      preferred_dtype() const override;
 
     /// @copydoc Reducer::return_type()
     ///
@@ -291,11 +291,11 @@ namespace awkward {
     ssize_t
       return_typesize(const std::string& given_type) const override;
 
-    /// @copydoc Reducer::return_npdtype()
+    /// @copydoc Reducer::return_dtype()
     ///
     /// The return type for ReducerCount is `int64`.
     util::dtype
-      return_npdtype(const std::string& given_type) const override;
+      return_dtype(const std::string& given_type) const override;
 
     const std::shared_ptr<void>
       apply_bool(const bool* data,
@@ -406,7 +406,7 @@ namespace awkward {
     ///
     /// The preferred type for ReducerCountNonzero is `double`.
     util::dtype
-      preferred_npdtype() const override;
+      preferred_dtype() const override;
 
     /// @copydoc Reducer::return_type()
     ///
@@ -422,11 +422,11 @@ namespace awkward {
     ssize_t
       return_typesize(const std::string& given_type) const override;
 
-    /// @copydoc Reducer::return_npdtype()
+    /// @copydoc Reducer::return_dtype()
     ///
     /// The return type for ReducerCountNonzero is `int64`.
     util::dtype
-      return_npdtype(const std::string& given_type) const override;
+      return_dtype(const std::string& given_type) const override;
 
     const std::shared_ptr<void>
       apply_bool(const bool* data,
@@ -531,11 +531,11 @@ namespace awkward {
     ssize_t
       preferred_typesize() const override;
 
-    /// @copydoc Reducer::preferred_npdtype()
+    /// @copydoc Reducer::preferred_dtype()
     ///
     /// The preferred type for ReducerSum is `double`.
     util::dtype
-      preferred_npdtype() const override;
+      preferred_dtype() const override;
 
     /// @copydoc Reducer::return_type()
     ///
@@ -551,12 +551,12 @@ namespace awkward {
     ssize_t
       return_typesize(const std::string& given_type) const override;
 
-    /// @copydoc Reducer::return_npdtype()
+    /// @copydoc Reducer::return_dtype()
     ///
     /// The return type for ReducerSum promotes integers and booleans to
     /// 64-bit but leaves floating-point number types as they are.
     util::dtype
-      return_npdtype(const std::string& given_type) const override;
+      return_dtype(const std::string& given_type) const override;
 
     const std::shared_ptr<void>
       apply_bool(const bool* data,
@@ -663,11 +663,11 @@ namespace awkward {
     ssize_t
       preferred_typesize() const override;
 
-    /// @copydoc Reducer::preferred_npdtype()
+    /// @copydoc Reducer::preferred_dtype()
     ///
     /// The preferred type for ReducerProd is `int64`.
     util::dtype
-      preferred_npdtype() const override;
+      preferred_dtype() const override;
 
     /// @copydoc Reducer::return_type()
     ///
@@ -683,12 +683,12 @@ namespace awkward {
     ssize_t
       return_typesize(const std::string& given_type) const override;
 
-    /// @copydoc Reducer::return_npdtype()
+    /// @copydoc Reducer::return_dtype()
     ///
     /// The return type for ReducerProd promotes integers and booleans to
     /// 64-bit but leaves floating-point number types as they are.
     util::dtype
-      return_npdtype(const std::string& given_type) const override;
+      return_dtype(const std::string& given_type) const override;
 
     const std::shared_ptr<void>
       apply_bool(const bool* data,
@@ -794,11 +794,11 @@ namespace awkward {
     ssize_t
       preferred_typesize() const override;
 
-    /// @copydoc Reducer::preferred_npdtype()
+    /// @copydoc Reducer::preferred_dtype()
     ///
     /// The preferred type for ReducerAny is `boolean`.
     util::dtype
-      preferred_npdtype() const override;
+      preferred_dtype() const override;
 
     /// @copydoc Reducer::return_type()
     ///
@@ -812,11 +812,11 @@ namespace awkward {
     ssize_t
       return_typesize(const std::string& given_type) const override;
 
-    /// @copydoc Reducer::return_npdtype()
+    /// @copydoc Reducer::return_dtype()
     ///
     /// The return type for ReducerAny is `boolean`.
     util::dtype
-      return_npdtype(const std::string& given_type) const override;
+      return_dtype(const std::string& given_type) const override;
 
     const std::shared_ptr<void>
       apply_bool(const bool* data,
@@ -922,11 +922,11 @@ namespace awkward {
     ssize_t
       preferred_typesize() const override;
 
-    /// @copydoc Reducer::preferred_npdtype()
+    /// @copydoc Reducer::preferred_dtype()
     ///
     /// The preferred type for ReducerAll is `boolean`.
     util::dtype
-      preferred_npdtype() const override;
+      preferred_dtype() const override;
 
     /// @copydoc Reducer::return_type()
     ///
@@ -940,11 +940,11 @@ namespace awkward {
     ssize_t
       return_typesize(const std::string& given_type) const override;
 
-    /// @copydoc Reducer::return_npdtype()
+    /// @copydoc Reducer::return_dtype()
     ///
     /// The return type for ReducerAll is `boolean`.
     util::dtype
-      return_npdtype(const std::string& given_type) const override;
+      return_dtype(const std::string& given_type) const override;
 
     const std::shared_ptr<void>
       apply_bool(const bool* data,
@@ -1050,11 +1050,11 @@ namespace awkward {
     ssize_t
       preferred_typesize() const override;
 
-    /// @copydoc Reducer::preferred_npdtype()
+    /// @copydoc Reducer::preferred_dtype()
     ///
     /// The preferred type for ReducerMin is `double`.
     util::dtype
-      preferred_npdtype() const override;
+      preferred_dtype() const override;
 
     const std::shared_ptr<void>
       apply_bool(const bool* data,
@@ -1160,11 +1160,11 @@ namespace awkward {
     ssize_t
       preferred_typesize() const override;
 
-    /// @copydoc Reducer::preferred_npdtype()
+    /// @copydoc Reducer::preferred_dtype()
     ///
     /// The preferred type for ReducerMax is `double`.
     util::dtype
-      preferred_npdtype() const override;
+      preferred_dtype() const override;
 
     const std::shared_ptr<void>
       apply_bool(const bool* data,
@@ -1272,11 +1272,11 @@ namespace awkward {
     ssize_t
       preferred_typesize() const override;
 
-    /// @copydoc Reducer::preferred_npdtype()
+    /// @copydoc Reducer::preferred_dtype()
     ///
     /// The preferred type for ReducerArgmin is `int64`.
     util::dtype
-      preferred_npdtype() const override;
+      preferred_dtype() const override;
 
     /// @copydoc Reducer::return_type()
     ///
@@ -1292,11 +1292,11 @@ namespace awkward {
     ssize_t
       return_typesize(const std::string& given_type) const override;
 
-    /// @copydoc Reducer::return_npdtype()
+    /// @copydoc Reducer::return_dtype()
     ///
     /// The return type for ReducerArgmin is `int64`.
     util::dtype
-      return_npdtype(const std::string& given_type) const override;
+      return_dtype(const std::string& given_type) const override;
 
     const std::shared_ptr<void>
       apply_bool(const bool* data,
@@ -1404,11 +1404,11 @@ namespace awkward {
     ssize_t
       preferred_typesize() const override;
 
-    /// @copydoc Reducer::preferred_npdtype()
+    /// @copydoc Reducer::preferred_dtype()
     ///
     /// The preferred type for ReducerArgmax is `int64`.
     util::dtype
-      preferred_npdtype() const override;
+      preferred_dtype() const override;
 
     /// @copydoc Reducer::return_type()
     ///
@@ -1424,11 +1424,11 @@ namespace awkward {
     ssize_t
       return_typesize(const std::string& given_type) const override;
 
-    /// @copydoc Reducer::return_npdtype()
+    /// @copydoc Reducer::return_dtype()
     ///
     /// The return type for ReducerArgmax is `int64`.
     util::dtype
-      return_npdtype(const std::string& given_type) const override;
+      return_dtype(const std::string& given_type) const override;
 
     const std::shared_ptr<void>
       apply_bool(const bool* data,

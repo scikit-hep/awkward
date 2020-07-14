@@ -124,19 +124,19 @@ namespace awkward {
       if (cls == std::string("NumpyArray")) {
         std::string format;
         int64_t itemsize;
-        util::dtype npdtype;
+        util::dtype dtype;
         if (json.HasMember("primitive")  &&  json["primitive"].IsString()) {
           FormPtr tmp = fromjson_part(json["primitive"]);
           NumpyForm* raw = dynamic_cast<NumpyForm*>(tmp.get());
           format = raw->format();
           itemsize = raw->itemsize();
-          npdtype = util::format_to_dtype(format, itemsize);
+          dtype = util::format_to_dtype(format, itemsize);
         }
         else if (json.HasMember("format")  &&  json["format"].IsString()  &&
                  json.HasMember("itemsize")  &&  json["itemsize"].IsInt()) {
           format = json["format"].GetString();
           itemsize = json["itemsize"].GetInt64();
-          npdtype = util::format_to_dtype(format, itemsize);
+          dtype = util::format_to_dtype(format, itemsize);
         }
         else {
           throw std::invalid_argument("NumpyForm must have a 'primitive' "
@@ -154,7 +154,7 @@ namespace awkward {
             }
           }
         }
-        return std::make_shared<NumpyForm>(h, p, s, itemsize, format, npdtype);
+        return std::make_shared<NumpyForm>(h, p, s, itemsize, format, dtype);
       }
 
       if (cls == std::string("RecordArray")) {

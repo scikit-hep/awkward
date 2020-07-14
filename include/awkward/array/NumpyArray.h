@@ -26,7 +26,7 @@ namespace awkward {
               const std::vector<int64_t>& inner_shape,
               int64_t itemsize,
               const std::string& format,
-              util::dtype npdtype);
+              util::dtype dtype);
 
     const std::vector<int64_t>
       inner_shape() const;
@@ -38,7 +38,7 @@ namespace awkward {
       format() const;
 
     util::dtype
-      npdtype() const;
+      dtype() const;
 
     const std::string
       primitive() const;
@@ -101,7 +101,7 @@ namespace awkward {
     const std::vector<int64_t> inner_shape_;
     int64_t itemsize_;
     const std::string format_;
-    const util::dtype npdtype_;
+    const util::dtype dtype_;
   };
 
   /// @class NumpyArray
@@ -152,7 +152,7 @@ namespace awkward {
     /// pybind11). Note that 32-bit systems and Windows use "`q/Q`" for
     /// signed/unsigned 64-bit and "`l/L`" for 32-bit, while all other systems
     /// use "`l/L`" for 64-bit and "`i/I`" for 32-bit.
-    /// @param npdtype Enumeration for the type without the platform-dependence
+    /// @param dtype Enumeration for the type without the platform-dependence
     /// that `format` has.
     /// @param ptr_lib Indicates the kernel libraries to use for this `ptr`.
     ///
@@ -166,7 +166,7 @@ namespace awkward {
                ssize_t byteoffset,
                ssize_t itemsize,
                const std::string format,
-               util::dtype npdtype,
+               util::dtype dtype,
                const kernel::Lib ptr_lib = kernel::Lib::cpu_kernels);
 
     /// @brief Creates a NumpyArray from an {@link IndexOf Index8}.
@@ -244,10 +244,10 @@ namespace awkward {
     const std::string
       format() const;
 
-    /// @param npdtype Enumeration for the type without the platform-dependence
+    /// @param dtype Enumeration for the type without the platform-dependence
     /// that `format` has.
     util::dtype
-      npdtype() const;
+      dtype() const;
 
     /// @brief The number of dimensions, which is `shape.size()`.
     ///
@@ -867,8 +867,8 @@ namespace awkward {
   const ssize_t itemsize_;
   /// @brief See #format.
   const std::string format_;
-  /// @brief See #npdtype.
-  const util::dtype npdtype_;
+  /// @brief See #dtype.
+  const util::dtype dtype_;
 
   };
 }

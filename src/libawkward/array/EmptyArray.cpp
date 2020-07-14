@@ -127,7 +127,7 @@ namespace awkward {
   const std::shared_ptr<NumpyArray>
   EmptyArray::toNumpyArray(const std::string& format,
                            ssize_t itemsize,
-                           util::dtype npdtype) const {
+                           util::dtype dtype) const {
     std::shared_ptr<void> ptr(new uint8_t[0], kernel::array_deleter<uint8_t>());
     std::vector<ssize_t> shape({ 0 });
     std::vector<ssize_t> strides({ itemsize });
@@ -139,7 +139,7 @@ namespace awkward {
                                         0,
                                         itemsize,
                                         format,
-                                        npdtype);
+                                        dtype);
   }
 
   const std::string
@@ -425,9 +425,10 @@ namespace awkward {
                           int64_t outlength,
                           bool mask,
                           bool keepdims) const {
-    ContentPtr asnumpy = toNumpyArray(reducer.preferred_type(),
-                                      reducer.preferred_typesize(),
-                                      reducer.preferred_npdtype());
+    util::dtype dtype = reducer.preferred_dtype();
+    std::string format = util::dtype_to_format(dtype);
+    int64_t itemsize = util::dtype_to_itemsize(dtype);
+    ContentPtr asnumpy = toNumpyArray(format, itemsize, dtype);
     return asnumpy.get()->reduce_next(reducer,
                                       negaxis,
                                       starts,

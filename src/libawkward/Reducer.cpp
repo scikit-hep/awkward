@@ -69,7 +69,7 @@ namespace awkward {
   }
 
   util::dtype
-  Reducer::return_npdtype(const std::string& given_type) const {
+  Reducer::return_dtype(const std::string& given_type) const {
     return util::format_to_dtype(return_type(given_type),
                                  (int64_t)return_typesize(given_type));
   }
@@ -92,7 +92,7 @@ namespace awkward {
   }
 
   util::dtype
-  ReducerCount::preferred_npdtype() const {
+  ReducerCount::preferred_dtype() const {
     return util::format_to_dtype(preferred_type(), (int64_t)preferred_typesize());
   }
 
@@ -111,7 +111,7 @@ namespace awkward {
   }
 
   util::dtype
-  ReducerCount::return_npdtype(const std::string& given_type) const {
+  ReducerCount::return_dtype(const std::string& given_type) const {
     return util::format_to_dtype(return_type(given_type),
                                  (int64_t)return_typesize(given_type));
   }
@@ -284,7 +284,7 @@ namespace awkward {
   }
 
   util::dtype
-  ReducerCountNonzero::preferred_npdtype() const {
+  ReducerCountNonzero::preferred_dtype() const {
     return util::format_to_dtype(preferred_type(), (int64_t)preferred_typesize());
   }
 
@@ -303,7 +303,7 @@ namespace awkward {
   }
 
   util::dtype
-  ReducerCountNonzero::return_npdtype(const std::string& given_type) const {
+  ReducerCountNonzero::return_dtype(const std::string& given_type) const {
     return util::format_to_dtype(return_type(given_type),
                                  (int64_t)return_typesize(given_type));
   }
@@ -547,7 +547,7 @@ namespace awkward {
   }
 
   util::dtype
-  ReducerSum::preferred_npdtype() const {
+  ReducerSum::preferred_dtype() const {
     return util::format_to_dtype(preferred_type(), (int64_t)preferred_typesize());
   }
 
@@ -624,7 +624,7 @@ namespace awkward {
   }
 
   util::dtype
-  ReducerSum::return_npdtype(const std::string& given_type) const {
+  ReducerSum::return_dtype(const std::string& given_type) const {
     return util::format_to_dtype(return_type(given_type),
                                  (int64_t)return_typesize(given_type));
   }
@@ -962,7 +962,7 @@ namespace awkward {
   }
 
   util::dtype
-  ReducerProd::preferred_npdtype() const {
+  ReducerProd::preferred_dtype() const {
     return util::format_to_dtype(preferred_type(), (int64_t)preferred_typesize());
   }
 
@@ -1039,7 +1039,7 @@ namespace awkward {
   }
 
   util::dtype
-  ReducerProd::return_npdtype(const std::string& given_type) const {
+  ReducerProd::return_dtype(const std::string& given_type) const {
     return util::format_to_dtype(return_type(given_type),
                                  (int64_t)return_typesize(given_type));
   }
@@ -1373,7 +1373,7 @@ namespace awkward {
   }
 
   util::dtype
-  ReducerAny::preferred_npdtype() const {
+  ReducerAny::preferred_dtype() const {
     return util::format_to_dtype(preferred_type(), (int64_t)preferred_typesize());
   }
 
@@ -1388,7 +1388,7 @@ namespace awkward {
   }
 
   util::dtype
-  ReducerAny::return_npdtype(const std::string& given_type) const {
+  ReducerAny::return_dtype(const std::string& given_type) const {
     return util::format_to_dtype(return_type(given_type),
                                  (int64_t)return_typesize(given_type));
   }
@@ -1631,7 +1631,7 @@ namespace awkward {
   }
 
   util::dtype
-  ReducerAll::preferred_npdtype() const {
+  ReducerAll::preferred_dtype() const {
     return util::format_to_dtype(preferred_type(), (int64_t)preferred_typesize());
   }
 
@@ -1646,7 +1646,7 @@ namespace awkward {
   }
 
   util::dtype
-  ReducerAll::return_npdtype(const std::string& given_type) const {
+  ReducerAll::return_dtype(const std::string& given_type) const {
     return util::format_to_dtype(return_type(given_type),
                                  (int64_t)return_typesize(given_type));
   }
@@ -1889,7 +1889,7 @@ namespace awkward {
   }
 
   util::dtype
-  ReducerMin::preferred_npdtype() const {
+  ReducerMin::preferred_dtype() const {
     return util::format_to_dtype(preferred_type(), (int64_t)preferred_typesize());
   }
 
@@ -2141,7 +2141,7 @@ namespace awkward {
   }
 
   util::dtype
-  ReducerMax::preferred_npdtype() const {
+  ReducerMax::preferred_dtype() const {
     return util::format_to_dtype(preferred_type(), (int64_t)preferred_typesize());
   }
 
@@ -2397,7 +2397,7 @@ namespace awkward {
   }
 
   util::dtype
-  ReducerArgmin::preferred_npdtype() const {
+  ReducerArgmin::preferred_dtype() const {
     return util::format_to_dtype(preferred_type(), (int64_t)preferred_typesize());
   }
 
@@ -2416,7 +2416,7 @@ namespace awkward {
   }
 
   util::dtype
-  ReducerArgmin::return_npdtype(const std::string& given_type) const {
+  ReducerArgmin::return_dtype(const std::string& given_type) const {
     return util::format_to_dtype(return_type(given_type),
                                  (int64_t)return_typesize(given_type));
   }
@@ -2685,7 +2685,7 @@ namespace awkward {
   }
 
   util::dtype
-  ReducerArgmax::preferred_npdtype() const {
+  ReducerArgmax::preferred_dtype() const {
     return util::format_to_dtype(preferred_type(), (int64_t)preferred_typesize());
   }
 
@@ -2704,7 +2704,7 @@ namespace awkward {
   }
 
   util::dtype
-  ReducerArgmax::return_npdtype(const std::string& given_type) const {
+  ReducerArgmax::return_dtype(const std::string& given_type) const {
     return util::format_to_dtype(return_type(given_type),
                                  (int64_t)return_typesize(given_type));
   }
