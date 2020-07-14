@@ -86,8 +86,15 @@ jobs:
           python -m pip install -v .[test,dev]
         displayName: "Build"
       - script: |
-          python -m pytest -vv -rs tests
+          python -m pytest -s tests
         displayName: "Test"
+
+
+
+# python -m pytest -vv -rs tests
+
+
+
 
   - job: MacOS
 
@@ -138,7 +145,7 @@ jobs:
           python -m pip install -v .[test,dev]
         displayName: "Build"
       - script: |
-          python -m pytest -vv -rs tests
+          python -m pytest -s tests
         displayName: "Test"
 
       # - script: |
@@ -146,70 +153,77 @@ jobs:
       #   workingDirectory: dependent-project
       #   displayName: "Test dependent project"
 
-  - job: Linux
 
-    pool:
-      vmImage: "ubuntu-16.04"
 
-    strategy:
-      matrix:
-        "py27-np13":
-          python.version: "2.7"
-          python.architecture: "x64"
-          numpy.version: "1.13.1"
-        "py27-np16":
-          python.version: "2.7"
-          python.architecture: "x64"
-          numpy.version: "1.16.5"
-        "py35-np13":
-          python.version: "3.5"
-          python.architecture: "x64"
-          numpy.version: "1.13.1"
-        "py36-np*":
-          python.version: "3.6"
-          python.architecture: "x64"
-          numpy.version: "latest"
-        "py37-np*":
-          python.version: "3.7"
-          python.architecture: "x64"
-          numpy.version: "latest"
-        "py38-np*":
-          python.version: "3.8"
-          python.architecture: "x64"
-          numpy.version: "latest"
+#   python -m pytest -vv -rs tests
 
-    steps:
-      - checkout: self
-        submodules: recursive
 
-      - task: UsePythonVersion@0
-        inputs:
-          versionSpec: '$(python.version)'
-          architecture: '$(python.architecture)'
-        displayName: 'Python $(python.version)'
 
-      - script: |
-          python -m pip install --upgrade pip
-        displayName: "Install Pip"
-      - script: |
-          if [ $(numpy.version) = "latest" ]; then
-            python -m pip install numpy;
-          else
-            python -m pip install numpy==$(numpy.version);
-          fi
-        displayName: "Install NumPy"
-      - script: |
-          python -m pip list
-        displayName: "Print versions"
 
-      - script: |
-          python -m pip install -v .[test,dev]
-        displayName: "Build"
-      - script: |
-          python -m pytest -vv -rs tests
-        displayName: "Test"
+  # - job: Linux
 
-      # - script: |
-      #     cmake -S . -B build  &&  cmake --build build  &&  python -m pytest -vv tests.py
-      #   workingDirectory: dependent-project
-      #   displayName: "Test dependent project"
+  #   pool:
+  #     vmImage: "ubuntu-16.04"
+
+  #   strategy:
+  #     matrix:
+  #       "py27-np13":
+  #         python.version: "2.7"
+  #         python.architecture: "x64"
+  #         numpy.version: "1.13.1"
+  #       "py27-np16":
+  #         python.version: "2.7"
+  #         python.architecture: "x64"
+  #         numpy.version: "1.16.5"
+  #       "py35-np13":
+  #         python.version: "3.5"
+  #         python.architecture: "x64"
+  #         numpy.version: "1.13.1"
+  #       "py36-np*":
+  #         python.version: "3.6"
+  #         python.architecture: "x64"
+  #         numpy.version: "latest"
+  #       "py37-np*":
+  #         python.version: "3.7"
+  #         python.architecture: "x64"
+  #         numpy.version: "latest"
+  #       "py38-np*":
+  #         python.version: "3.8"
+  #         python.architecture: "x64"
+  #         numpy.version: "latest"
+
+  #   steps:
+  #     - checkout: self
+  #       submodules: recursive
+
+  #     - task: UsePythonVersion@0
+  #       inputs:
+  #         versionSpec: '$(python.version)'
+  #         architecture: '$(python.architecture)'
+  #       displayName: 'Python $(python.version)'
+
+  #     - script: |
+  #         python -m pip install --upgrade pip
+  #       displayName: "Install Pip"
+  #     - script: |
+  #         if [ $(numpy.version) = "latest" ]; then
+  #           python -m pip install numpy;
+  #         else
+  #           python -m pip install numpy==$(numpy.version);
+  #         fi
+  #       displayName: "Install NumPy"
+  #     - script: |
+  #         python -m pip list
+  #       displayName: "Print versions"
+
+  #     - script: |
+  #         python -m pip install -v .[test,dev]
+  #       displayName: "Build"
+  #     - script: |
+  #         python -m pytest -vv -rs tests
+  #       displayName: "Test"
+
+  #     # - script: |
+  #     #     cmake -S . -B build  &&  cmake --build build  &&  python -m pytest -vv tests.py
+  #     #   workingDirectory: dependent-project
+  #     #   displayName: "Test dependent project"
