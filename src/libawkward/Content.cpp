@@ -1293,9 +1293,15 @@ namespace awkward {
     int64_t mindepth = minmax.first;
     int64_t maxdepth = minmax.second;
     int64_t depth = purelist_depth();
-    if (axis < 0  &&  mindepth == depth  &&  maxdepth == depth
-      && (depth + axis) >= 0) {
-      return (depth + axis);
+    if (axis < 0  &&  mindepth == depth  &&  maxdepth == depth) {
+      int64_t posaxis = depth + axis;
+      if (posaxis < 0 ) {
+        throw std::invalid_argument(
+          std::string("axis == ") + std::to_string(axis)
+                      + std::string(" exceeds the depth == ") + std::to_string(depth)
+                      + std::string(" of this array"));
+      }
+      return posaxis;
     }
     return axis;
   }
