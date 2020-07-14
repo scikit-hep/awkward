@@ -64,56 +64,44 @@ namespace awkward {
 
   const std::string
   NumpyForm::primitive() const {
-    if (format_.compare("d") == 0) {
-      return "float64";
-    }
-    else if (format_.compare("f") == 0) {
-      return "float32";
-    }
-#if defined _MSC_VER || defined __i386__
-    else if (format_.compare("q") == 0) {
-#else
-    else if (format_.compare("l") == 0) {
-#endif
-      return "int64";
-    }
-#if defined _MSC_VER || defined __i386__
-    else if (format_.compare("Q") == 0) {
-#else
-    else if (format_.compare("L") == 0) {
-#endif
-      return "uint64";
-    }
-#if defined _MSC_VER || defined __i386__
-    else if (format_.compare("l") == 0) {
-#else
-    else if (format_.compare("i") == 0) {
-#endif
-      return "int32";
-    }
-#if defined _MSC_VER || defined __i386__
-    else if (format_.compare("L") == 0) {
-#else
-    else if (format_.compare("I") == 0) {
-#endif
-      return "uint32";
-    }
-    else if (format_.compare("h") == 0) {
-      return "int16";
-    }
-    else if (format_.compare("H") == 0) {
-      return "uint16";
-    }
-    else if (format_.compare("b") == 0) {
-      return "int8";
-    }
-    else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
-      return "uint8";
-    }
-    else if (format_.compare("?") == 0) {
+    switch (npdtype_) {
+    case util::dtype::boolean:
       return "bool";
-    }
-    else {
+    case util::dtype::int8:
+      return "int8";
+    case util::dtype::int16:
+      return "int16";
+    case util::dtype::int32:
+      return "int32";
+    case util::dtype::int64:
+      return "int64";
+    case util::dtype::uint8:
+      return "uint8";
+    case util::dtype::uint16:
+      return "uint16";
+    case util::dtype::uint32:
+      return "uint32";
+    case util::dtype::uint64:
+      return "uint64";
+    case util::dtype::float16:
+      return "float16";
+    case util::dtype::float32:
+      return "float32";
+    case util::dtype::float64:
+      return "float64";
+    case util::dtype::float128:
+      return "float128";
+    case util::dtype::complex64:
+      return "complex64";
+    case util::dtype::complex128:
+      return "complex128";
+    case util::dtype::complex256:
+      return "complex256";
+    // case datetime64:
+    //   return "datetime64";
+    // case timedelta64:
+    //   return "timedelta64";
+    default:
       return "unknown";
     }
   }
