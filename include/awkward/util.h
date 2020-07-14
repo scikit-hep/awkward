@@ -47,8 +47,12 @@ namespace awkward {
     };
 
     /// @brief Returns the name associated with a given dtype.
+    dtype
+    name_to_dtype(const std::string& name);
+
+    /// @brief Returns the name associated with a given dtype.
     const std::string
-    dtype_name(dtype dt);
+    dtype_to_name(dtype dt);
 
     /// @brief Convert a NumPy format string and itemsize into a dtype enum.
     dtype

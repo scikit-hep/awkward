@@ -64,7 +64,7 @@ namespace awkward {
 
   const std::string
   NumpyForm::primitive() const {
-    return util::dtype_name(npdtype_);
+    return util::dtype_to_name(npdtype_);
   }
 
   const TypePtr
@@ -74,13 +74,13 @@ namespace awkward {
       out = std::make_shared<PrimitiveType>(
                 parameters_,
                 util::gettypestr(parameters_, typestrs),
-                PrimitiveType::float64);
+                util::dtype::float64);
     }
     else if (format_.compare("f") == 0) {
       out = std::make_shared<PrimitiveType>(
                 parameters_,
                 util::gettypestr(parameters_, typestrs),
-                PrimitiveType::float32);
+                util::dtype::float32);
     }
 #if defined _MSC_VER || defined __i386__
     else if (format_.compare("q") == 0) {
@@ -90,7 +90,7 @@ namespace awkward {
       out = std::make_shared<PrimitiveType>(
                 parameters_,
                 util::gettypestr(parameters_, typestrs),
-                PrimitiveType::int64);
+                util::dtype::int64);
     }
 #if defined _MSC_VER || defined __i386__
     else if (format_.compare("Q") == 0) {
@@ -100,7 +100,7 @@ namespace awkward {
       out = std::make_shared<PrimitiveType>(
                 parameters_,
                 util::gettypestr(parameters_, typestrs),
-                PrimitiveType::uint64);
+                util::dtype::uint64);
     }
 #if defined _MSC_VER || defined __i386__
     else if (format_.compare("l") == 0) {
@@ -110,7 +110,7 @@ namespace awkward {
       out = std::make_shared<PrimitiveType>(
                 parameters_,
                 util::gettypestr(parameters_, typestrs),
-                PrimitiveType::int32);
+                util::dtype::int32);
     }
 #if defined _MSC_VER || defined __i386__
     else if (format_.compare("L") == 0) {
@@ -120,37 +120,37 @@ namespace awkward {
       out = std::make_shared<PrimitiveType>(
                 parameters_,
                 util::gettypestr(parameters_, typestrs),
-                PrimitiveType::uint32);
+                util::dtype::uint32);
     }
     else if (format_.compare("h") == 0) {
       out = std::make_shared<PrimitiveType>(
                 parameters_,
                 util::gettypestr(parameters_, typestrs),
-                PrimitiveType::int16);
+                util::dtype::int16);
     }
     else if (format_.compare("H") == 0) {
       out = std::make_shared<PrimitiveType>(
                 parameters_,
                 util::gettypestr(parameters_, typestrs),
-                PrimitiveType::uint16);
+                util::dtype::uint16);
     }
     else if (format_.compare("b") == 0) {
       out = std::make_shared<PrimitiveType>(
                 parameters_,
                 util::gettypestr(parameters_, typestrs),
-                PrimitiveType::int8);
+                util::dtype::int8);
     }
     else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
       out = std::make_shared<PrimitiveType>(
                 parameters_,
                 util::gettypestr(parameters_, typestrs),
-                PrimitiveType::uint8);
+                util::dtype::uint8);
     }
     else if (format_.compare("?") == 0) {
       out = std::make_shared<PrimitiveType>(
                 parameters_,
                 util::gettypestr(parameters_, typestrs),
-                PrimitiveType::boolean);
+                util::dtype::boolean);
     }
     else {
       throw std::invalid_argument(

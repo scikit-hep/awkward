@@ -18,8 +18,63 @@ namespace rj = rapidjson;
 
 namespace awkward {
   namespace util {
+    dtype
+    name_to_dtype(const std::string& name) {
+      if (name == "bool") {
+        return util::dtype::boolean;
+      }
+      else if (name == "int8") {
+        return util::dtype::int8;
+      }
+      else if (name == "int16") {
+        return util::dtype::int16;
+      }
+      else if (name == "int32") {
+        return util::dtype::int32;
+      }
+      else if (name == "int64") {
+        return util::dtype::int64;
+      }
+      else if (name == "uint8") {
+        return util::dtype::uint8;
+      }
+      else if (name == "uint16") {
+        return util::dtype::uint16;
+      }
+      else if (name == "uint32") {
+        return util::dtype::uint32;
+      }
+      else if (name == "uint64") {
+        return util::dtype::uint64;
+      }
+      else if (name == "float16") {
+        return util::dtype::float16;
+      }
+      else if (name == "float32") {
+        return util::dtype::float32;
+      }
+      else if (name == "float64") {
+        return util::dtype::float64;
+      }
+      else if (name == "float128") {
+        return util::dtype::float128;
+      }
+      else if (name == "complex64") {
+        return util::dtype::complex64;
+      }
+      else if (name == "complex128") {
+        return util::dtype::complex128;
+      }
+      else if (name == "complex256") {
+        return util::dtype::complex256;
+      }
+      else {
+        return util::dtype::NOT_PRIMITIVE;
+      }
+    }
+
     const std::string
-    dtype_name(dtype dt) {
+    dtype_to_name(dtype dt) {
       switch (dt) {
       case util::dtype::boolean:
         return "bool";

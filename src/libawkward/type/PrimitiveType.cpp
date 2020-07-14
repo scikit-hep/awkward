@@ -11,7 +11,7 @@
 namespace awkward {
   PrimitiveType::PrimitiveType(const util::Parameters& parameters,
                                const std::string& typestr,
-                               PrimitiveType::DType dtype)
+                               util::dtype dtype)
       : Type(parameters, typestr)
       , dtype_(dtype) { }
 
@@ -25,21 +25,7 @@ namespace awkward {
     }
 
     std::stringstream out;
-    std::string s;
-    switch (dtype_) {
-      case boolean: s = "bool"; break;
-      case int8:    s = "int8"; break;
-      case int16:   s = "int16"; break;
-      case int32:   s = "int32"; break;
-      case int64:   s = "int64"; break;
-      case uint8:   s = "uint8"; break;
-      case uint16:  s = "uint16"; break;
-      case uint32:  s = "uint32"; break;
-      case uint64:  s = "uint64"; break;
-      case float32: s = "float32"; break;
-      case float64: s = "float64"; break;
-      default:      s = "unknown"; break;
-    }
+    std::string s = util::dtype_to_name(dtype_);
     if (parameters_.empty()) {
       out << indent << pre << s << post;
     }
@@ -97,30 +83,10 @@ namespace awkward {
     std::shared_ptr<void> ptr(new uint8_t[0], kernel::array_deleter<uint8_t>());
     std::vector<ssize_t> shape({ 0 });
     std::vector<ssize_t> strides({ 0 });
-    ssize_t itemsize;
-    std::string format;
-    util::dtype npdtype;
-    switch (dtype_) {
-      case boolean: itemsize = 1; format = "?"; npdtype = util::dtype::boolean; break;
-      case int8:    itemsize = 1; format = "b"; npdtype = util::dtype::int8; break;
-      case uint8:   itemsize = 1; format = "B"; npdtype = util::dtype::uint8; break;
-      case int16:   itemsize = 2; format = "h"; npdtype = util::dtype::int16; break;
-      case uint16:  itemsize = 2; format = "H"; npdtype = util::dtype::uint16; break;
-#if defined _MSC_VER || defined __i386__
-      case int32:   itemsize = 4; format = "l"; npdtype = util::dtype::int32; break;
-      case uint32:  itemsize = 4; format = "L"; npdtype = util::dtype::uint32; break;
-      case int64:   itemsize = 8; format = "q"; npdtype = util::dtype::int64; break;
-      case uint64:  itemsize = 8; format = "Q"; npdtype = util::dtype::uint64; break;
-#else
-      case int32:   itemsize = 4; format = "i"; npdtype = util::dtype::int32; break;
-      case uint32:  itemsize = 4; format = "I"; npdtype = util::dtype::uint32; break;
-      case int64:   itemsize = 8; format = "l"; npdtype = util::dtype::int64; break;
-      case uint64:  itemsize = 8; format = "L"; npdtype = util::dtype::uint64; break;
-#endif
-      case float32: itemsize = 4; format = "f"; npdtype = util::dtype::float32; break;
-      case float64: itemsize = 8; format = "d"; npdtype = util::dtype::float64; break;
-      default: throw std::runtime_error(
-                 std::string("unexpected dtype: ") + std::to_string(dtype_));
+    std::string format = util::dtype_to_format(dtype_);
+    if (format.length() == 0) {
+      throw std::invalid_argument(
+          "cannot create an empty array of unknown PrimitiveType");
     }
     return std::make_shared<NumpyArray>(Identities::none(),
                                         parameters_,
@@ -128,12 +94,12 @@ namespace awkward {
                                         shape,
                                         strides,
                                         0,
-                                        itemsize,
+                                        util::dtype_to_itemsize(dtype_),
                                         format,
-                                        npdtype);
+                                        dtype_);
   }
 
-  const PrimitiveType::DType
+  util::dtype
   PrimitiveType::dtype() const {
     return dtype_;
   }
