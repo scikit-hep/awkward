@@ -18,6 +18,50 @@ namespace rj = rapidjson;
 
 namespace awkward {
   namespace util {
+    const std::string
+    dtype_name(dtype dt) {
+      switch (dt) {
+      case util::dtype::boolean:
+        return "bool";
+      case util::dtype::int8:
+        return "int8";
+      case util::dtype::int16:
+        return "int16";
+      case util::dtype::int32:
+        return "int32";
+      case util::dtype::int64:
+        return "int64";
+      case util::dtype::uint8:
+        return "uint8";
+      case util::dtype::uint16:
+        return "uint16";
+      case util::dtype::uint32:
+        return "uint32";
+      case util::dtype::uint64:
+        return "uint64";
+      case util::dtype::float16:
+        return "float16";
+      case util::dtype::float32:
+        return "float32";
+      case util::dtype::float64:
+        return "float64";
+      case util::dtype::float128:
+        return "float128";
+      case util::dtype::complex64:
+        return "complex64";
+      case util::dtype::complex128:
+        return "complex128";
+      case util::dtype::complex256:
+        return "complex256";
+        // case datetime64:
+        //   return "datetime64";
+        // case timedelta64:
+        //   return "timedelta64";
+      default:
+        return "unknown";
+      }
+    }
+
     dtype
     format_to_dtype(const std::string& format, int64_t itemsize) {
       int32_t test = 1;
