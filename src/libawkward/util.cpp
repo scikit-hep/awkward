@@ -18,6 +18,206 @@ namespace rj = rapidjson;
 
 namespace awkward {
   namespace util {
+    dtype
+    format_to_dtype(const std::string& format, int64_t itemsize) {
+      int32_t test = 1;
+      bool little_endian = (*(int8_t*)&test == 1);
+
+      std::string fmt = format;
+      if (format.length() > 1) {
+        std::string endianness = format.substr(0, 1);
+        if ((endianness == ">"  &&  !little_endian)  ||
+            (endianness == "<"  &&  little_endian)  ||
+            (endianness == "=")) {
+          fmt = format.substr(1, format.length() - 1);
+        }
+        else if ((endianness == ">"  &&  little_endian)  ||
+                 (endianness == "<"  &&  !little_endian)) {
+          return dtype::NOT_PRIMITIVE;
+        }
+      }
+
+      if (fmt == std::string("?")) {
+        return dtype::boolean;
+      }
+      else if (fmt == std::string("b")  ||
+               fmt == std::string("h")  ||
+               fmt == std::string("i")  ||
+               fmt == std::string("l")  ||
+               fmt == std::string("q")) {
+        if (itemsize == 1) {
+          return dtype::int8;
+        }
+        else if (itemsize == 2) {
+          return dtype::int16;
+        }
+        else if (itemsize == 4) {
+          return dtype::int32;
+        }
+        else if (itemsize == 8) {
+          return dtype::int64;
+        }
+        else {
+          return dtype::NOT_PRIMITIVE;
+        }
+      }
+      else if (fmt == std::string("B")  ||
+               fmt == std::string("H")  ||
+               fmt == std::string("I")  ||
+               fmt == std::string("L")  ||
+               fmt == std::string("Q")) {
+        if (itemsize == 1) {
+          return dtype::uint8;
+        }
+        else if (itemsize == 2) {
+          return dtype::uint16;
+        }
+        else if (itemsize == 4) {
+          return dtype::uint32;
+        }
+        else if (itemsize == 8) {
+          return dtype::uint64;
+        }
+        else {
+          return dtype::NOT_PRIMITIVE;
+        }
+      }
+      else if (fmt == std::string("e")) {
+        return dtype::float16;
+      }
+      else if (fmt == std::string("f")) {
+        return dtype::float32;
+      }
+      else if (fmt == std::string("d")) {
+        return dtype::float64;
+      }
+      else if (fmt == std::string("g")) {
+        return dtype::float128;
+      }
+      else if (fmt == std::string("Zf")) {
+        return dtype::complex64;
+      }
+      else if (fmt == std::string("Zd")) {
+        return dtype::complex128;
+      }
+      else if (fmt == std::string("Zg")) {
+        return dtype::complex256;
+      }
+      // else if (fmt == std::string("M")) {
+      //   return dtype::datetime64;
+      // }
+      // else if (fmt == std::string("m")) {
+      //   return dtype::timedelta64;
+      // }
+      else {
+        return dtype::NOT_PRIMITIVE;
+      }
+    }
+
+    const std::string
+    dtype_to_format(dtype dt) {
+      switch (dt) {
+      case dtype::boolean:
+        return "?";
+      case dtype::int8:
+        return "b";
+      case dtype::int16:
+        return "h";
+      case dtype::int32:
+#if defined _MSC_VER || defined __i386__
+        return "l";
+#else
+        return "i";
+#endif
+      case dtype::int64:
+#if defined _MSC_VER || defined __i386__
+        return "q";
+#else
+        return "l";
+#endif
+      case dtype::uint8:
+        return "B";
+      case dtype::uint16:
+        return "H";
+      case dtype::uint32:
+#if defined _MSC_VER || defined __i386__
+        return "L";
+#else
+        return "I";
+#endif
+      case dtype::uint64:
+#if defined _MSC_VER || defined __i386__
+        return "Q";
+#else
+        return "L";
+#endif
+      case dtype::float16:
+        return "e";
+      case dtype::float32:
+        return "f";
+      case dtype::float64:
+        return "d";
+      case dtype::float128:
+        return "g";
+      case dtype::complex64:
+        return "Zf";
+      case dtype::complex128:
+        return "Zd";
+      case dtype::complex256:
+        return "Zg";
+      // case dtype::datetime64:
+      //   return "M";
+      // case dtype::timedelta64:
+      //   return "m";
+      default:
+        return "";
+      }
+    }
+
+    int64_t
+    dtype_to_itemsize(dtype dt) {
+      switch (dt) {
+      case dtype::boolean:
+        return 1;
+      case dtype::int8:
+        return 1;
+      case dtype::int16:
+        return 2;
+      case dtype::int32:
+        return 4;
+      case dtype::int64:
+        return 8;
+      case dtype::uint8:
+        return 1;
+      case dtype::uint16:
+        return 2;
+      case dtype::uint32:
+        return 4;
+      case dtype::uint64:
+        return 8;
+      case dtype::float16:
+        return 2;
+      case dtype::float32:
+        return 4;
+      case dtype::float64:
+        return 8;
+      case dtype::float128:
+        return 16;
+      case dtype::complex64:
+        return 8;
+      case dtype::complex128:
+        return 16;
+      case dtype::complex256:
+        return 32;
+      // case dtype::datetime64:
+      //   return 8;
+      // case dtype::timedelta64:
+      //   return 8;
+      default:
+        return 0;
+      }
+    }
+
     void
     handle_error(const struct Error& err,
                  const std::string& classname,

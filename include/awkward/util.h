@@ -20,6 +20,44 @@ namespace awkward {
   class IndexOf;
 
   namespace util {
+    /// @brief NumPy dtypes that can be interpreted within Awkward C++
+    /// (only the primitive, fixed-width types). Non-native-endian types
+    /// are considered NOT_PRIMITIVE.
+    enum class dtype {
+        NOT_PRIMITIVE,
+        boolean,
+        int8,
+        int16,
+        int32,
+        int64,
+        uint8,
+        uint16,
+        uint32,
+        uint64,
+        float16,
+        float32,
+        float64,
+        float128,
+        complex64,
+        complex128,
+        complex256,
+        // datetime64,
+        // timedelta64,
+        num_dtype
+    };
+
+    /// @brief Convert a NumPy format string and itemsize into a dtype enum.
+    dtype
+    format_to_dtype(const std::string& format, int64_t itemsize);
+
+    /// @brief Convert a dtype enum into a NumPy format string.
+    const std::string
+    dtype_to_format(dtype dt);
+
+    /// @brief Convert a dtype enum into an itemsize
+    int64_t
+    dtype_to_itemsize(dtype dt);
+
     /// @brief If the Error struct contains an error message (from a
     /// cpu-kernel through the C interface), raise that error as a C++
     /// exception.
