@@ -56,7 +56,8 @@ namespace awkward {
                                         strides,
                                         0,
                                         sizeof(int64_t),
-                                        "q");
+                                        "q",
+                                        util::dtype::int64);
 #else
     return std::make_shared<NumpyArray>(Identities::none(),
                                         util::Parameters(),
@@ -65,7 +66,8 @@ namespace awkward {
                                         strides,
                                         0,
                                         sizeof(int64_t),
-                                        "l");
+                                        "l",
+                                        util::dtype::int64);
 #endif
   }
 

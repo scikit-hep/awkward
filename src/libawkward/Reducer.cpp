@@ -68,6 +68,12 @@ namespace awkward {
     }
   }
 
+  util::dtype
+  Reducer::return_npdtype(const std::string& given_type) const {
+    return util::format_to_dtype(return_type(given_type),
+                                 (int64_t)return_typesize(given_type));
+  }
+
   ////////// count
 
   const std::string
@@ -85,6 +91,11 @@ namespace awkward {
     return 8;
   }
 
+  util::dtype
+  ReducerCount::preferred_npdtype() const {
+    return util::format_to_dtype(preferred_type(), (int64_t)preferred_typesize());
+  }
+
   const std::string
   ReducerCount::return_type(const std::string& given_type) const {
 #if defined _MSC_VER || defined __i386__
@@ -97,6 +108,12 @@ namespace awkward {
   ssize_t
   ReducerCount::return_typesize(const std::string& given_type) const {
     return 8;
+  }
+
+  util::dtype
+  ReducerCount::return_npdtype(const std::string& given_type) const {
+    return util::format_to_dtype(return_type(given_type),
+                                 (int64_t)return_typesize(given_type));
   }
 
   const std::shared_ptr<void>
@@ -266,6 +283,11 @@ namespace awkward {
     return 8;
   }
 
+  util::dtype
+  ReducerCountNonzero::preferred_npdtype() const {
+    return util::format_to_dtype(preferred_type(), (int64_t)preferred_typesize());
+  }
+
   const std::string
   ReducerCountNonzero::return_type(const std::string& given_type) const {
 #if defined _MSC_VER || defined __i386__
@@ -280,6 +302,12 @@ namespace awkward {
     return 8;
   }
 
+  util::dtype
+  ReducerCountNonzero::return_npdtype(const std::string& given_type) const {
+    return util::format_to_dtype(return_type(given_type),
+                                 (int64_t)return_typesize(given_type));
+  }
+
   const std::shared_ptr<void>
   ReducerCountNonzero::apply_bool(const bool* data,
                                   int64_t offset,
@@ -288,7 +316,6 @@ namespace awkward {
                                   int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-                                 
     struct Error err = kernel::reduce_countnonzero_64<bool>(
       ptr.get(),
       data,
@@ -519,6 +546,11 @@ namespace awkward {
     return 8;
   }
 
+  util::dtype
+  ReducerSum::preferred_npdtype() const {
+    return util::format_to_dtype(preferred_type(), (int64_t)preferred_typesize());
+  }
+
   const std::string
   ReducerSum::return_type(const std::string& given_type) const {
 #if defined _MSC_VER || defined __i386__
@@ -591,6 +623,12 @@ namespace awkward {
     }
   }
 
+  util::dtype
+  ReducerSum::return_npdtype(const std::string& given_type) const {
+    return util::format_to_dtype(return_type(given_type),
+                                 (int64_t)return_typesize(given_type));
+  }
+
   const std::shared_ptr<void>
   ReducerSum::apply_bool(const bool* data,
                          int64_t offset,
@@ -611,7 +649,6 @@ namespace awkward {
 #else
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-                                 
     struct Error err = kernel::reduce_sum_64<int64_t, bool>(
       ptr.get(),
       data,
@@ -743,7 +780,7 @@ namespace awkward {
       outlength);
 #else
     std::shared_ptr<uint64_t> ptr(new uint64_t[(size_t)outlength],
-                                  kernel::array_deleter<uint64_t>());                                
+                                  kernel::array_deleter<uint64_t>());
     struct Error err = kernel::reduce_sum_64<uint64_t, uint16_t>(
       ptr.get(),
       data,
@@ -765,7 +802,7 @@ namespace awkward {
                           int64_t outlength) const {
 #if defined _MSC_VER || defined __i386__
     std::shared_ptr<int32_t> ptr(new int32_t[(size_t)outlength],
-                                 kernel::array_deleter<int32_t>());                                 
+                                 kernel::array_deleter<int32_t>());
     struct Error err = kernel::reduce_sum_64<int32_t, int32_t>(
       ptr.get(),
       data,
@@ -776,7 +813,7 @@ namespace awkward {
       outlength);
 #else
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());                                 
+                                 kernel::array_deleter<int64_t>());
     struct Error err = kernel::reduce_sum_64<int64_t, int32_t>(
       ptr.get(),
       data,
@@ -850,7 +887,7 @@ namespace awkward {
                            const Index64& parents,
                            int64_t outlength) const {
     std::shared_ptr<uint64_t> ptr(new uint64_t[(size_t)outlength],
-                                  kernel::array_deleter<uint64_t>());                            
+                                  kernel::array_deleter<uint64_t>());
     struct Error err = kernel::reduce_sum_64<uint64_t, uint64_t>(
       ptr.get(),
       data,
@@ -922,6 +959,11 @@ namespace awkward {
   ssize_t
   ReducerProd::preferred_typesize() const {
     return 8;
+  }
+
+  util::dtype
+  ReducerProd::preferred_npdtype() const {
+    return util::format_to_dtype(preferred_type(), (int64_t)preferred_typesize());
   }
 
   const std::string
@@ -996,6 +1038,12 @@ namespace awkward {
     }
   }
 
+  util::dtype
+  ReducerProd::return_npdtype(const std::string& given_type) const {
+    return util::format_to_dtype(return_type(given_type),
+                                 (int64_t)return_typesize(given_type));
+  }
+
   const std::shared_ptr<void>
   ReducerProd::apply_bool(const bool* data,
                           int64_t offset,
@@ -1015,7 +1063,7 @@ namespace awkward {
       outlength);
 #else
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());        
+                                 kernel::array_deleter<int64_t>());
     struct Error err = kernel::reduce_prod_64<int64_t, bool>(
       ptr.get(),
       data,
@@ -1048,7 +1096,7 @@ namespace awkward {
       outlength);
 #else
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());   
+                                 kernel::array_deleter<int64_t>());
     struct Error err = kernel::reduce_prod_64<int64_t, int8_t>(
       ptr.get(),
       data,
@@ -1103,7 +1151,7 @@ namespace awkward {
                            int64_t outlength) const {
 #if defined _MSC_VER || defined __i386__
     std::shared_ptr<int32_t> ptr(new int32_t[(size_t)outlength],
-                                 kernel::array_deleter<int32_t>());                
+                                 kernel::array_deleter<int32_t>());
     struct Error err = kernel::reduce_prod_64<int32_t, int16_t>(
       ptr.get(),
       data,
@@ -1114,7 +1162,7 @@ namespace awkward {
       outlength);
 #else
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());  
+                                 kernel::array_deleter<int64_t>());
     struct Error err = kernel::reduce_prod_64<int64_t, int16_t>(
       ptr.get(),
       data,
@@ -1136,7 +1184,7 @@ namespace awkward {
                             int64_t outlength) const {
 #if defined _MSC_VER || defined __i386__
     std::shared_ptr<uint32_t> ptr(new uint32_t[(size_t)outlength],
-                                  kernel::array_deleter<uint32_t>());         
+                                  kernel::array_deleter<uint32_t>());
     struct Error err = kernel::reduce_prod_64<uint32_t, uint16_t>(
       ptr.get(),
       data,
@@ -1180,7 +1228,7 @@ namespace awkward {
       outlength);
 #else
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());            
+                                 kernel::array_deleter<int64_t>());
     struct Error err = kernel::reduce_prod_64<int64_t, int32_t>(
       ptr.get(),
       data,
@@ -1202,7 +1250,7 @@ namespace awkward {
                             int64_t outlength) const {
 #if defined _MSC_VER || defined __i386__
     std::shared_ptr<uint32_t> ptr(new uint32_t[(size_t)outlength],
-                                  kernel::array_deleter<uint32_t>());   
+                                  kernel::array_deleter<uint32_t>());
     struct Error err = kernel::reduce_prod_64<uint32_t, uint32_t>(
       ptr.get(),
       data,
@@ -1324,6 +1372,11 @@ namespace awkward {
     return 1;
   }
 
+  util::dtype
+  ReducerAny::preferred_npdtype() const {
+    return util::format_to_dtype(preferred_type(), (int64_t)preferred_typesize());
+  }
+
   const std::string
   ReducerAny::return_type(const std::string& given_type) const {
     return "?";
@@ -1332,6 +1385,12 @@ namespace awkward {
   ssize_t
   ReducerAny::return_typesize(const std::string& given_type) const {
     return 1;
+  }
+
+  util::dtype
+  ReducerAny::return_npdtype(const std::string& given_type) const {
+    return util::format_to_dtype(return_type(given_type),
+                                 (int64_t)return_typesize(given_type));
   }
 
   const std::shared_ptr<void>
@@ -1571,6 +1630,11 @@ namespace awkward {
     return 1;
   }
 
+  util::dtype
+  ReducerAll::preferred_npdtype() const {
+    return util::format_to_dtype(preferred_type(), (int64_t)preferred_typesize());
+  }
+
   const std::string
   ReducerAll::return_type(const std::string& given_type) const {
     return "?";
@@ -1579,6 +1643,12 @@ namespace awkward {
   ssize_t
   ReducerAll::return_typesize(const std::string& given_type) const {
     return 1;
+  }
+
+  util::dtype
+  ReducerAll::return_npdtype(const std::string& given_type) const {
+    return util::format_to_dtype(return_type(given_type),
+                                 (int64_t)return_typesize(given_type));
   }
 
   const std::shared_ptr<void>
@@ -1818,6 +1888,11 @@ namespace awkward {
     return 8;
   }
 
+  util::dtype
+  ReducerMin::preferred_npdtype() const {
+    return util::format_to_dtype(preferred_type(), (int64_t)preferred_typesize());
+  }
+
   const std::shared_ptr<void>
   ReducerMin::apply_bool(const bool* data,
                          int64_t offset,
@@ -1825,7 +1900,7 @@ namespace awkward {
                          const Index64& parents,
                          int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
-                              kernel::array_deleter<bool>());                           
+                              kernel::array_deleter<bool>());
     struct Error err = kernel::reduce_prod_bool_64<bool>(
       ptr.get(),
       data,
@@ -2063,6 +2138,11 @@ namespace awkward {
   ssize_t
   ReducerMax::preferred_typesize() const {
     return 8;
+  }
+
+  util::dtype
+  ReducerMax::preferred_npdtype() const {
+    return util::format_to_dtype(preferred_type(), (int64_t)preferred_typesize());
   }
 
   const std::shared_ptr<void>
@@ -2316,6 +2396,11 @@ namespace awkward {
     return 8;
   }
 
+  util::dtype
+  ReducerArgmin::preferred_npdtype() const {
+    return util::format_to_dtype(preferred_type(), (int64_t)preferred_typesize());
+  }
+
   const std::string
   ReducerArgmin::return_type(const std::string& given_type) const {
 #if defined _MSC_VER || defined __i386__
@@ -2328,6 +2413,12 @@ namespace awkward {
   ssize_t
   ReducerArgmin::return_typesize(const std::string& given_type) const {
     return 8;
+  }
+
+  util::dtype
+  ReducerArgmin::return_npdtype(const std::string& given_type) const {
+    return util::format_to_dtype(return_type(given_type),
+                                 (int64_t)return_typesize(given_type));
   }
 
   const std::shared_ptr<void>
@@ -2593,6 +2684,11 @@ namespace awkward {
     return 8;
   }
 
+  util::dtype
+  ReducerArgmax::preferred_npdtype() const {
+    return util::format_to_dtype(preferred_type(), (int64_t)preferred_typesize());
+  }
+
   const std::string
   ReducerArgmax::return_type(const std::string& given_type) const {
 #if defined _MSC_VER || defined __i386__
@@ -2605,6 +2701,12 @@ namespace awkward {
   ssize_t
   ReducerArgmax::return_typesize(const std::string& given_type) const {
     return 8;
+  }
+
+  util::dtype
+  ReducerArgmax::return_npdtype(const std::string& given_type) const {
+    return util::format_to_dtype(return_type(given_type),
+                                 (int64_t)return_typesize(given_type));
   }
 
   const std::shared_ptr<void>

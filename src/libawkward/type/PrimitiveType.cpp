@@ -99,25 +99,26 @@ namespace awkward {
     std::vector<ssize_t> strides({ 0 });
     ssize_t itemsize;
     std::string format;
+    util::dtype npdtype;
     switch (dtype_) {
-      case boolean: itemsize = 1; format = "?"; break;
-      case int8:    itemsize = 1; format = "b"; break;
-      case uint8:   itemsize = 1; format = "B"; break;
-      case int16:   itemsize = 2; format = "h"; break;
-      case uint16:  itemsize = 2; format = "H"; break;
+      case boolean: itemsize = 1; format = "?"; npdtype = util::dtype::boolean; break;
+      case int8:    itemsize = 1; format = "b"; npdtype = util::dtype::int8; break;
+      case uint8:   itemsize = 1; format = "B"; npdtype = util::dtype::uint8; break;
+      case int16:   itemsize = 2; format = "h"; npdtype = util::dtype::int16; break;
+      case uint16:  itemsize = 2; format = "H"; npdtype = util::dtype::uint16; break;
 #if defined _MSC_VER || defined __i386__
-      case int32:   itemsize = 4; format = "l"; break;
-      case uint32:  itemsize = 4; format = "L"; break;
-      case int64:   itemsize = 8; format = "q"; break;
-      case uint64:  itemsize = 8; format = "Q"; break;
+      case int32:   itemsize = 4; format = "l"; npdtype = util::dtype::int32; break;
+      case uint32:  itemsize = 4; format = "L"; npdtype = util::dtype::uint32; break;
+      case int64:   itemsize = 8; format = "q"; npdtype = util::dtype::int64; break;
+      case uint64:  itemsize = 8; format = "Q"; npdtype = util::dtype::uint64; break;
 #else
-      case int32:   itemsize = 4; format = "i"; break;
-      case uint32:  itemsize = 4; format = "I"; break;
-      case int64:   itemsize = 8; format = "l"; break;
-      case uint64:  itemsize = 8; format = "L"; break;
+      case int32:   itemsize = 4; format = "i"; npdtype = util::dtype::int32; break;
+      case uint32:  itemsize = 4; format = "I"; npdtype = util::dtype::uint32; break;
+      case int64:   itemsize = 8; format = "l"; npdtype = util::dtype::int64; break;
+      case uint64:  itemsize = 8; format = "L"; npdtype = util::dtype::uint64; break;
 #endif
-      case float32: itemsize = 4; format = "f"; break;
-      case float64: itemsize = 8; format = "d"; break;
+      case float32: itemsize = 4; format = "f"; npdtype = util::dtype::float32; break;
+      case float64: itemsize = 8; format = "d"; npdtype = util::dtype::float64; break;
       default: throw std::runtime_error(
                  std::string("unexpected dtype: ") + std::to_string(dtype_));
     }
@@ -128,7 +129,8 @@ namespace awkward {
                                         strides,
                                         0,
                                         itemsize,
-                                        format);
+                                        format,
+                                        npdtype);
   }
 
   const PrimitiveType::DType

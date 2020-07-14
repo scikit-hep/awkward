@@ -97,6 +97,8 @@ namespace awkward {
                   (size_t)itemsize);
     }
 
+    util::dtype npdtype = util::format_to_dtype(format, itemsize);
+
     std::vector<ssize_t> shape = { (ssize_t)bytepos_tocopy.length() };
     std::vector<ssize_t> strides = { (ssize_t)itemsize };
     ContentPtr out = std::make_shared<NumpyArray>(Identities::none(),
@@ -106,7 +108,8 @@ namespace awkward {
                                                   strides,
                                                   0,
                                                   (ssize_t)itemsize,
-                                                  format);
+                                                  format,
+                                                  npdtype);
 
     for (int64_t i = depth - 1;  i >= 0;  i--) {
       Index64 index(levels[(size_t)i].ptr(), 0, levels[(size_t)i].length());

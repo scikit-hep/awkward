@@ -61,7 +61,8 @@ namespace awkward {
           return dtype::NOT_PRIMITIVE;
         }
       }
-      else if (fmt == std::string("B")  ||
+      else if (fmt == std::string("c")  ||
+               fmt == std::string("B")  ||
                fmt == std::string("H")  ||
                fmt == std::string("I")  ||
                fmt == std::string("L")  ||

@@ -34,11 +34,13 @@ namespace awkward {
                        const util::Parameters& parameters,
                        const std::vector<int64_t>& inner_shape,
                        int64_t itemsize,
-                       const std::string& format)
+                       const std::string& format,
+                       util::dtype npdtype)
       : Form(has_identities, parameters)
       , inner_shape_(inner_shape)
       , itemsize_(itemsize)
-      , format_(format) { }
+      , format_(format)
+      , npdtype_(npdtype) { }
 
   const std::vector<int64_t>
   NumpyForm::inner_shape() const {
@@ -53,6 +55,11 @@ namespace awkward {
   const std::string
   NumpyForm::format() const {
     return format_;
+  }
+
+  util::dtype
+  NumpyForm::npdtype() const {
+    return npdtype_;
   }
 
   const std::string
@@ -279,7 +286,8 @@ namespace awkward {
                                        parameters_,
                                        inner_shape_,
                                        itemsize_,
-                                       format_);
+                                       format_,
+                                       npdtype_);
   }
 
   const std::string
@@ -362,21 +370,6 @@ namespace awkward {
 
   ////////// NumpyArray
 
-  const std::unordered_map<std::type_index, std::string>
-  NumpyArray::format_map = {
-    { typeid(int8_t), "b"},
-    { typeid(uint8_t), "B"},
-#if defined _MSC_VER || defined __i386__
-    { typeid(int32_t), "l"},
-    { typeid(uint32_t), "L"},
-    { typeid(int64_t), "q"}
-#else
-    { typeid(int32_t), "i"},
-    { typeid(uint32_t), "I"},
-    { typeid(int64_t), "l"}
-#endif
- };
-
   NumpyArray::NumpyArray(const IdentitiesPtr& identities,
                          const util::Parameters& parameters,
                          const std::shared_ptr<void>& ptr,
@@ -385,6 +378,7 @@ namespace awkward {
                          ssize_t byteoffset,
                          ssize_t itemsize,
                          const std::string format,
+                         util::dtype npdtype,
                          const kernel::Lib ptr_lib)
       : Content(identities, parameters)
       , ptr_lib_(ptr_lib)
@@ -393,7 +387,8 @@ namespace awkward {
       , strides_(strides)
       , byteoffset_(byteoffset)
       , itemsize_(itemsize)
-      , format_(format) {
+      , format_(format)
+      , npdtype_(npdtype) {
     if (shape.size() != strides.size()) {
       throw std::invalid_argument(
         std::string("len(shape), which is ") + std::to_string(shape.size())
@@ -403,73 +398,63 @@ namespace awkward {
   }
 
   NumpyArray::NumpyArray(const Index8 index)
-    : NumpyArray(index, format_map.at(std::type_index(typeid(int8_t)))) { }
-
-  NumpyArray::NumpyArray(const IndexU8 index)
-    : NumpyArray(index, format_map.at(std::type_index(typeid(uint8_t)))) { }
-
-  NumpyArray::NumpyArray(const Index32 index)
-    : NumpyArray(index, format_map.at(std::type_index(typeid(int32_t)))) { }
-
-  NumpyArray::NumpyArray(const IndexU32 index)
-    : NumpyArray(index, format_map.at(std::type_index(typeid(uint32_t)))) { }
-
-  NumpyArray::NumpyArray(const Index64 index)
-    : NumpyArray(index, format_map.at(std::type_index(typeid(int64_t)))) { }
-
-  NumpyArray::NumpyArray(const Index8 index, const std::string& format)
     : NumpyArray(Identities::none(),
                  util::Parameters(),
                  index.ptr(),
                  std::vector<ssize_t>({ (ssize_t)index.length() }),
                  std::vector<ssize_t>({ (ssize_t)sizeof(int8_t) }),
-                 0,
+                 index.offset() * sizeof(int8_t),
                  sizeof(int8_t),
-                 format,
+                 util::dtype_to_format(util::dtype::int8),
+                 util::dtype::int8,
                  index.ptr_lib()) { }
 
-  NumpyArray::NumpyArray(const IndexU8 index, const std::string& format)
+  NumpyArray::NumpyArray(const IndexU8 index)
     : NumpyArray(Identities::none(),
                  util::Parameters(),
                  index.ptr(),
                  std::vector<ssize_t>({ (ssize_t)index.length() }),
                  std::vector<ssize_t>({ (ssize_t)sizeof(uint8_t) }),
-                 0,
+                 index.offset() * sizeof(uint8_t),
                  sizeof(uint8_t),
-                 format,
+                 util::dtype_to_format(util::dtype::uint8),
+                 util::dtype::uint8,
                  index.ptr_lib()) { }
 
-  NumpyArray::NumpyArray(const Index32 index, const std::string& format)
+  NumpyArray::NumpyArray(const Index32 index)
     : NumpyArray(Identities::none(),
                  util::Parameters(),
                  index.ptr(),
                  std::vector<ssize_t>({ (ssize_t)index.length() }),
                  std::vector<ssize_t>({ (ssize_t)sizeof(int32_t) }),
-                 0,
+                 index.offset() * sizeof(int32_t),
                  sizeof(int32_t),
-                 format,
+                 util::dtype_to_format(util::dtype::int32),
+                 util::dtype::int32,
                  index.ptr_lib()) { }
 
-  NumpyArray::NumpyArray(const IndexU32 index, const std::string& format)
+  NumpyArray::NumpyArray(const IndexU32 index)
     : NumpyArray(Identities::none(),
                  util::Parameters(),
                  index.ptr(),
                  std::vector<ssize_t>({ (ssize_t)index.length() }),
                  std::vector<ssize_t>({ (ssize_t)sizeof(uint32_t) }),
-                 0,
+                 index.offset() * sizeof(uint32_t),
                  sizeof(uint32_t),
-                 format,
+                 util::dtype_to_format(util::dtype::uint32),
+                 util::dtype::uint32,
                  index.ptr_lib()) { }
 
-  NumpyArray::NumpyArray(const Index64 index, const std::string& format)
+  NumpyArray::NumpyArray(const Index64 index)
     : NumpyArray(Identities::none(),
                  util::Parameters(),
                  index.ptr(),
                  std::vector<ssize_t>({ (ssize_t)index.length() }),
                  std::vector<ssize_t>({ (ssize_t)sizeof(int64_t) }),
-                 0,
+                 index.offset() * sizeof(int64_t),
                  sizeof(int64_t),
-                 format,
+                 util::dtype_to_format(util::dtype::int64),
+                 util::dtype::int64,
                  index.ptr_lib()) { }
 
   const std::shared_ptr<void>
@@ -500,6 +485,11 @@ namespace awkward {
   const std::string
   NumpyArray::format() const {
     return format_;
+  }
+
+  util::dtype
+  NumpyArray::npdtype() const {
+    return npdtype_;
   }
 
   ssize_t
@@ -618,7 +608,8 @@ namespace awkward {
       flatstrides,
       contiguous_self.byteoffset(),
       contiguous_self.itemsize(),
-      contiguous_self.format());
+      contiguous_self.format(),
+      contiguous_self.npdtype());
     for (int64_t i = (int64_t)shape_.size() - 1;  i > 0;  i--) {
       out = std::make_shared<RegularArray>(Identities::none(),
                                            util::Parameters(),
@@ -739,7 +730,8 @@ namespace awkward {
                                        parameters_,
                                        inner_shape,
                                        (int64_t)itemsize_,
-                                       format_);
+                                       format_,
+                                       npdtype_);
   }
 
   bool
@@ -1000,7 +992,8 @@ namespace awkward {
                                         strides_,
                                         byteoffset_,
                                         itemsize_,
-                                        format_);
+                                        format_,
+                                        npdtype_);
   }
 
   const ContentPtr
@@ -1029,7 +1022,8 @@ namespace awkward {
                                         strides,
                                         byteoffset,
                                         itemsize_,
-                                        format_);
+                                        format_,
+                                        npdtype_);
   }
 
   void
@@ -1058,7 +1052,8 @@ namespace awkward {
                                         strides,
                                         byteoffset_,
                                         itemsize_,
-                                        format_);
+                                        format_,
+                                        npdtype_);
   }
 
   const ContentPtr
@@ -1098,7 +1093,8 @@ namespace awkward {
                                         strides,
                                         byteoffset,
                                         itemsize_,
-                                        format_);
+                                        format_,
+                                        npdtype_);
   }
 
   const ContentPtr
@@ -1133,7 +1129,8 @@ namespace awkward {
                                         strides_,
                                         byteoffset,
                                         itemsize_,
-                                        format_);
+                                        format_,
+                                        npdtype_);
   }
 
   const ContentPtr
@@ -1190,7 +1187,8 @@ namespace awkward {
                       nextstrides,
                       byteoffset_,
                       itemsize_,
-                      format_);
+                      format_,
+                      npdtype_);
 
       SliceItemPtr nexthead = where.head();
       Slice nexttail = where.tail();
@@ -1206,7 +1204,8 @@ namespace awkward {
                                           outstrides,
                                           out.byteoffset_,
                                           itemsize_,
-                                          format_);
+                                          format_,
+                                          npdtype_);
     }
 
     else {
@@ -1227,7 +1226,8 @@ namespace awkward {
                       nextstrides,
                       safe.byteoffset_,
                       itemsize_,
-                      format_);
+                      format_,
+                      npdtype_);
 
       SliceItemPtr nexthead = where.head();
       Slice nexttail = where.tail();
@@ -1252,7 +1252,8 @@ namespace awkward {
                                           outstrides,
                                           out.byteoffset_,
                                           itemsize_,
-                                          format_);
+                                          format_,
+                                          npdtype_);
     }
   }
 
@@ -1299,7 +1300,8 @@ namespace awkward {
                                         strides_,
                                         0,
                                         itemsize_,
-                                        format_);
+                                        format_,
+                                        npdtype_);
   }
 
   int64_t
@@ -1403,7 +1405,8 @@ namespace awkward {
       strides,
       0,
       sizeof(int64_t),
-      format_map.at(std::type_index(typeid(int64_t))));
+      util::dtype_to_format(util::dtype::int64),
+      util::dtype::int64);
   }
 
   const std::vector<ssize_t>
@@ -1674,12 +1677,14 @@ namespace awkward {
 
       ssize_t itemsize;
       std::string format;
+      util::dtype npdtype;
       if (format_.compare("d") == 0  ||
           format_.compare("f") == 0  ||
           other_format.compare("d") == 0  ||
           other_format.compare("f") == 0) {
         itemsize = 8;
         format = "d";
+        npdtype = util::dtype::float64;
       }
 #if defined _MSC_VER || defined __i386__
       else if (format_.compare("Q") == 0  &&  other_format.compare("Q") == 0) {
@@ -1690,6 +1695,7 @@ namespace awkward {
         itemsize = 8;
         format = "L";
 #endif
+        npdtype = util::dtype::int64;
       }
       else if (format_.compare("q") == 0  ||
                format_.compare("Q") == 0  ||
@@ -1719,10 +1725,12 @@ namespace awkward {
 #else
         format = "l";
 #endif
+        npdtype = util::dtype::int64;
       }
       else if (format_.compare("?") == 0  &&  other_format.compare("?") == 0) {
         itemsize = 1;
         format = "?";
+        npdtype = util::dtype::boolean;
       }
       else {
         throw std::invalid_argument(
@@ -2218,7 +2226,8 @@ namespace awkward {
                                           strides,
                                           0,
                                           itemsize,
-                                          format);
+                                          format,
+                                          npdtype);
     }
 
     else {
@@ -2263,7 +2272,8 @@ namespace awkward {
                                         strides,
                                         0,
                                         1,
-                                        format_);
+                                        format_,
+                                        npdtype_);
   }
 
   const SliceItemPtr
@@ -2577,6 +2587,7 @@ namespace awkward {
 
       std::string format = reducer.return_type(format_);
       ssize_t itemsize = reducer.return_typesize(format_);
+      util::dtype npdtype = reducer.return_npdtype(format_);
       std::vector<ssize_t> shape({ (ssize_t)outlength });
       std::vector<ssize_t> strides({ itemsize });
       ContentPtr out = std::make_shared<NumpyArray>(Identities::none(),
@@ -2586,7 +2597,8 @@ namespace awkward {
                                                     strides,
                                                     0,
                                                     itemsize,
-                                                    format);
+                                                    format,
+                                                    npdtype);
 
       if (mask) {
         Index8 mask(outlength);
@@ -2822,7 +2834,8 @@ namespace awkward {
                                          strides_,
                                          0,
                                          itemsize_,
-                                         format_);
+                                         format_,
+                                         npdtype_);
 
       if (keepdims) {
         out = std::make_shared<RegularArray>(
@@ -2998,8 +3011,8 @@ namespace awkward {
 #else
       format = "l";
 #endif
-
       ssize_t itemsize = 8;
+      util::dtype npdtype = util::dtype::int64;
       std::vector<ssize_t> shape({ (ssize_t)shape_[0] });
       std::vector<ssize_t> strides({ itemsize });
       out = std::make_shared<NumpyArray>(Identities::none(),
@@ -3009,7 +3022,8 @@ namespace awkward {
                                          strides,
                                          0,
                                          itemsize,
-                                         format);
+                                         format,
+                                         npdtype);
 
       if (keepdims) {
         out = std::make_shared<RegularArray>(
@@ -3052,7 +3066,8 @@ namespace awkward {
                                        strides_,
                                        0,
                                        itemsize_,
-                                       format_);
+                                       format_,
+                                       npdtype_);
 
    out = std::make_shared<ListOffsetArray64>(Identities::none(),
                                              util::Parameters(),
@@ -3194,7 +3209,8 @@ namespace awkward {
                         strides_,
                         byteoffset_,
                         itemsize_,
-                        format_);
+                        format_,
+                        npdtype_);
     }
     else {
       Index64 bytepos(shape_[0]);
@@ -3228,7 +3244,8 @@ namespace awkward {
                         strides_,
                         0,
                         itemsize_,
-                        format_);
+                        format_,
+                        npdtype_);
     }
 
     else if (shape_.size() == 1) {
@@ -3250,7 +3267,8 @@ namespace awkward {
                         strides,
                         0,
                         itemsize_,
-                        format_);
+                        format_,
+                        npdtype_);
     }
 
     else {
@@ -3261,7 +3279,8 @@ namespace awkward {
                       flatten_strides(strides_),
                       byteoffset_,
                       itemsize_,
-                      format_);
+                      format_,
+                      npdtype_);
 
       Index64 nextbytepos(bytepos.length()*shape_[1]);
       struct Error err = kernel::NumpyArray_contiguous_next_64(
@@ -3284,7 +3303,8 @@ namespace awkward {
                         outstrides,
                         out.byteoffset_,
                         itemsize_,
-                        format_);
+                        format_,
+                        npdtype_);
     }
   }
 
@@ -3300,7 +3320,8 @@ namespace awkward {
                         strides_,
                         byteoffset_,
                         itemsize_,
-                        format_);
+                        format_,
+                        npdtype_);
     }
     else if (SliceAt* at =
              dynamic_cast<SliceAt*>(head.get())) {
@@ -3352,7 +3373,8 @@ namespace awkward {
                     flatten_strides(strides_),
                     nextbyteoffset,
                     itemsize_,
-                    format_);
+                    format_,
+                    npdtype_);
 
     SliceItemPtr nexthead = tail.head();
     Slice nexttail = tail.tail();
@@ -3367,7 +3389,8 @@ namespace awkward {
                       out.strides_,
                       out.byteoffset_,
                       itemsize_,
-                      format_);
+                      format_,
+                      npdtype_);
   }
 
   const NumpyArray
@@ -3404,7 +3427,8 @@ namespace awkward {
                     flatten_strides(strides_),
                     nextbyteoffset,
                     itemsize_,
-                    format_);
+                    format_,
+                    npdtype_);
 
     SliceItemPtr nexthead = tail.head();
     Slice nexttail = tail.tail();
@@ -3427,7 +3451,8 @@ namespace awkward {
                       outstrides,
                       out.byteoffset_,
                       itemsize_,
-                      format_);
+                      format_,
+                      npdtype_);
   }
 
   const NumpyArray
@@ -3476,7 +3501,8 @@ namespace awkward {
                       outstrides,
                       out.byteoffset_,
                       itemsize_,
-                      format_);
+                      format_,
+                      npdtype_);
   }
 
   const NumpyArray
@@ -3515,7 +3541,8 @@ namespace awkward {
                         strides,
                         0,
                         itemsize_,
-                        format_);
+                        format_,
+                        npdtype_);
     }
 
     else if (SliceAt* at =
@@ -3617,7 +3644,8 @@ namespace awkward {
                     flatten_strides(strides_),
                     byteoffset_,
                     itemsize_,
-                    format_);
+                    format_,
+                    npdtype_);
     SliceItemPtr nexthead = tail.head();
     Slice nexttail = tail.tail();
 
@@ -3658,7 +3686,8 @@ namespace awkward {
                       out.strides_,
                       out.byteoffset_,
                       itemsize_,
-                      format_);
+                      format_,
+                      npdtype_);
   }
 
   const NumpyArray
@@ -3702,7 +3731,8 @@ namespace awkward {
                     flatten_strides(strides_),
                     byteoffset_,
                     itemsize_,
-                    format_);
+                    format_,
+                    npdtype_);
     SliceItemPtr nexthead = tail.head();
     Slice nexttail = tail.tail();
 
@@ -3740,7 +3770,8 @@ namespace awkward {
                         outstrides,
                         out.byteoffset_,
                         itemsize_,
-                        format_);
+                        format_,
+                        npdtype_);
     }
 
     else {
@@ -3780,7 +3811,8 @@ namespace awkward {
                         outstrides,
                         out.byteoffset_,
                         itemsize_,
-                        format_);
+                        format_,
+                        npdtype_);
     }
   }
 
@@ -3857,7 +3889,8 @@ namespace awkward {
                       outstrides,
                       out.byteoffset_,
                       itemsize_,
-                      format_);
+                      format_,
+                      npdtype_);
   }
 
   const NumpyArray
@@ -3882,7 +3915,8 @@ namespace awkward {
                     flatten_strides(strides_),
                     byteoffset_,
                     itemsize_,
-                    format_);
+                    format_,
+                    npdtype_);
     SliceItemPtr nexthead = tail.head();
     Slice nexttail = tail.tail();
 
@@ -3936,7 +3970,8 @@ namespace awkward {
                         outstrides,
                         out.byteoffset_,
                         itemsize_,
-                        format_);
+                        format_,
+                        npdtype_);
     }
 
     else {
@@ -3969,7 +4004,8 @@ namespace awkward {
                         out.strides_,
                         out.byteoffset_,
                         itemsize_,
-                        format_);
+                        format_,
+                        npdtype_);
     }
   }
 
@@ -4006,7 +4042,8 @@ namespace awkward {
                          strides,
                          byteoffset,
                          itemsize_,
-                         format_);
+                         format_,
+                         npdtype_);
         numpy.tojson_boolean(builder, true);
       }
       builder.endlist();
@@ -4047,7 +4084,8 @@ namespace awkward {
                          strides,
                          byteoffset,
                          itemsize_,
-                         format_);
+                         format_,
+                         npdtype_);
         numpy.tojson_integer<T>(builder, true);
       }
       builder.endlist();
@@ -4088,7 +4126,8 @@ namespace awkward {
                          strides,
                          byteoffset,
                          itemsize_,
-                         format_);
+                         format_,
+                         npdtype_);
         numpy.tojson_real<T>(builder, true);
       }
       builder.endlist();
@@ -4119,7 +4158,8 @@ namespace awkward {
                          strides,
                          byteoffset,
                          itemsize_,
-                         format_);
+                         format_,
+                         npdtype_);
         numpy.tojson_string(builder, true);
       }
       builder.endlist();
@@ -4128,15 +4168,16 @@ namespace awkward {
 
   const ContentPtr
   NumpyArray::copy_to(kernel::Lib ptr_lib) const {
-    if(ptr_lib_ == ptr_lib) {
-      return std::make_shared<NumpyArray>(identities(),
-                                          parameters(),
+    if (ptr_lib_ == ptr_lib) {
+      return std::make_shared<NumpyArray>(identities_,
+                                          parameters_,
                                           ptr_,
-                                          shape(),
-                                          strides(),
-                                          byteoffset(),
-                                          itemsize(),
-                                          format(),
+                                          shape_,
+                                          strides_,
+                                          byteoffset_,
+                                          itemsize_,
+                                          format_,
+                                          npdtype_,
                                           ptr_lib_);
     }
 
@@ -4275,14 +4316,15 @@ namespace awkward {
       util::handle_error(err);
     }
 
-    return std::make_shared<NumpyArray>(identities(),
-                                        parameters(),
+    return std::make_shared<NumpyArray>(identities_,
+                                        parameters_,
                                         ptr,
-                                        shape(),
-                                        strides(),
-                                        byteoffset(),
-                                        itemsize(),
-                                        format(),
+                                        shape_,
+                                        strides_,
+                                        byteoffset_,
+                                        itemsize_,
+                                        format_,
+                                        npdtype_,
                                         ptr_lib);
   }
 

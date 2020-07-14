@@ -1307,7 +1307,7 @@ make_EmptyArray(const py::handle& m, const std::string& name) {
       }), py::arg("identities") = py::none(),
          py::arg("parameters") = py::none())
       .def("toNumpyArray", [](const ak::EmptyArray& self) -> py::object {
-        return box(self.toNumpyArray("d", sizeof(double)));
+        return box(self.toNumpyArray("d", sizeof(double), ak::util::dtype::float64));
       })
       .def("simplify", [](const ak::EmptyArray& self) {
         return box(self.shallow_simplify());
@@ -1664,6 +1664,7 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
           throw std::invalid_argument(
             "NumpyArray len(shape) != ndim or len(strides) != ndim");
         }
+
         return ak::NumpyArray(
           unbox_identities_none(identities),
           dict2parameters(parameters),
@@ -1673,7 +1674,8 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
           info.strides,
           0,
           info.itemsize,
-          info.format);
+          info.format,
+          ak::util::format_to_dtype(info.format, (int64_t)info.itemsize));
       }), py::arg("array"),
           py::arg("identities") = py::none(),
           py::arg("parameters") = py::none())

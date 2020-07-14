@@ -38,53 +38,53 @@ namespace awkward {
       std::vector<int64_t> s;
 
       if (std::string("float64") == json.GetString()) {
-        return std::make_shared<NumpyForm>(false, p, s, 8, "d");
+        return std::make_shared<NumpyForm>(false, p, s, 8, "d", util::dtype::float64);
       }
       if (std::string("float32") == json.GetString()) {
-        return std::make_shared<NumpyForm>(false, p, s, 4, "f");
+        return std::make_shared<NumpyForm>(false, p, s, 4, "f", util::dtype::float32);
       }
       if (std::string("int64") == json.GetString()) {
 #if defined _MSC_VER || defined __i386__
-        return std::make_shared<NumpyForm>(false, p, s, 8, "q");
+        return std::make_shared<NumpyForm>(false, p, s, 8, "q", util::dtype::int64);
 #else
-        return std::make_shared<NumpyForm>(false, p, s, 8, "l");
+        return std::make_shared<NumpyForm>(false, p, s, 8, "l", util::dtype::int64);
 #endif
       }
       if (std::string("uint64") == json.GetString()) {
 #if defined _MSC_VER || defined __i386__
-        return std::make_shared<NumpyForm>(false, p, s, 8, "Q");
+        return std::make_shared<NumpyForm>(false, p, s, 8, "Q", util::dtype::uint64);
 #else
-        return std::make_shared<NumpyForm>(false, p, s, 8, "L");
+        return std::make_shared<NumpyForm>(false, p, s, 8, "L", util::dtype::uint64);
 #endif
       }
       if (std::string("int32") == json.GetString()) {
 #if defined _MSC_VER || defined __i386__
-        return std::make_shared<NumpyForm>(false, p, s, 4, "l");
+        return std::make_shared<NumpyForm>(false, p, s, 4, "l", util::dtype::int32);
 #else
-        return std::make_shared<NumpyForm>(false, p, s, 4, "i");
+        return std::make_shared<NumpyForm>(false, p, s, 4, "i", util::dtype::int32);
 #endif
       }
       if (std::string("uint32") == json.GetString()) {
 #if defined _MSC_VER || defined __i386__
-        return std::make_shared<NumpyForm>(false, p, s, 4, "L");
+        return std::make_shared<NumpyForm>(false, p, s, 4, "L", util::dtype::uint32);
 #else
-        return std::make_shared<NumpyForm>(false, p, s, 4, "I");
+        return std::make_shared<NumpyForm>(false, p, s, 4, "I", util::dtype::uint32);
 #endif
       }
       if (std::string("int16") == json.GetString()) {
-        return std::make_shared<NumpyForm>(false, p, s, 2, "h");
+        return std::make_shared<NumpyForm>(false, p, s, 2, "h", util::dtype::int16);
       }
       if (std::string("uint16") == json.GetString()) {
-        return std::make_shared<NumpyForm>(false, p, s, 2, "H");
+        return std::make_shared<NumpyForm>(false, p, s, 2, "H", util::dtype::uint16);
       }
       if (std::string("int8") == json.GetString()) {
-        return std::make_shared<NumpyForm>(false, p, s, 1, "b");
+        return std::make_shared<NumpyForm>(false, p, s, 1, "b", util::dtype::int8);
       }
       if (std::string("uint8") == json.GetString()) {
-        return std::make_shared<NumpyForm>(false, p, s, 1, "B");
+        return std::make_shared<NumpyForm>(false, p, s, 1, "B", util::dtype::uint8);
       }
       if (std::string("bool") == json.GetString()) {
-        return std::make_shared<NumpyForm>(false, p, s, 1, "?");
+        return std::make_shared<NumpyForm>(false, p, s, 1, "?", util::dtype::boolean);
       }
     }
 
@@ -124,16 +124,19 @@ namespace awkward {
       if (cls == std::string("NumpyArray")) {
         std::string format;
         int64_t itemsize;
+        util::dtype npdtype;
         if (json.HasMember("primitive")  &&  json["primitive"].IsString()) {
           FormPtr tmp = fromjson_part(json["primitive"]);
           NumpyForm* raw = dynamic_cast<NumpyForm*>(tmp.get());
           format = raw->format();
           itemsize = raw->itemsize();
+          npdtype = util::format_to_dtype(format, itemsize);
         }
         else if (json.HasMember("format")  &&  json["format"].IsString()  &&
                  json.HasMember("itemsize")  &&  json["itemsize"].IsInt()) {
           format = json["format"].GetString();
           itemsize = json["itemsize"].GetInt64();
+          npdtype = util::format_to_dtype(format, itemsize);
         }
         else {
           throw std::invalid_argument("NumpyForm must have a 'primitive' "
@@ -151,7 +154,7 @@ namespace awkward {
             }
           }
         }
-        return std::make_shared<NumpyForm>(h, p, s, itemsize, format);
+        return std::make_shared<NumpyForm>(h, p, s, itemsize, format, npdtype);
       }
 
       if (cls == std::string("RecordArray")) {

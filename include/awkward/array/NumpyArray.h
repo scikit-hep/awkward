@@ -25,7 +25,8 @@ namespace awkward {
               const util::Parameters& parameters,
               const std::vector<int64_t>& inner_shape,
               int64_t itemsize,
-              const std::string& format);
+              const std::string& format,
+              util::dtype npdtype);
 
     const std::vector<int64_t>
       inner_shape() const;
@@ -33,7 +34,11 @@ namespace awkward {
     int64_t
       itemsize() const;
 
-    const std::string format() const;
+    const std::string
+      format() const;
+
+    util::dtype
+      npdtype() const;
 
     const std::string
       primitive() const;
@@ -96,6 +101,7 @@ namespace awkward {
     const std::vector<int64_t> inner_shape_;
     int64_t itemsize_;
     const std::string format_;
+    const util::dtype npdtype_;
   };
 
   /// @class NumpyArray
@@ -146,6 +152,9 @@ namespace awkward {
     /// pybind11). Note that 32-bit systems and Windows use "`q/Q`" for
     /// signed/unsigned 64-bit and "`l/L`" for 32-bit, while all other systems
     /// use "`l/L`" for 64-bit and "`i/I`" for 32-bit.
+    /// @param npdtype Enumeration for the type without the platform-dependence
+    /// that `format` has.
+    /// @param ptr_lib Indicates the kernel libraries to use for this `ptr`.
     ///
     /// Note that the integer type for all of these parameters is `ssize_t`,
     /// for consistency with pybind11. Most integers in Awkward are `int64_t`.
@@ -157,7 +166,8 @@ namespace awkward {
                ssize_t byteoffset,
                ssize_t itemsize,
                const std::string format,
-               const kernel::Lib ptr_lib =kernel::Lib::cpu_kernels);
+               util::dtype npdtype,
+               const kernel::Lib ptr_lib = kernel::Lib::cpu_kernels);
 
     /// @brief Creates a NumpyArray from an {@link IndexOf Index8}.
     NumpyArray(const Index8 index);
@@ -169,26 +179,12 @@ namespace awkward {
     NumpyArray(const IndexU32 index);
     /// @brief Creates a NumpyArray from an {@link IndexOf Index64}.
     NumpyArray(const Index64 index);
-    /// @brief Creates a NumpyArray from an {@link IndexOf Index8}.
-    /// The format may be specified explicitly.
-    NumpyArray(const Index8 index, const std::string& format);
-    /// @brief Creates a NumpyArray from an {@link IndexOf IndexU8}.
-    /// The format may be specified explicitly.
-    NumpyArray(const IndexU8 index, const std::string& format);
-    /// @brief Creates a NumpyArray from an {@link IndexOf Index32}.
-    /// The format may be specified explicitly.
-    NumpyArray(const Index32 index, const std::string& format);
-    /// @brief Creates a NumpyArray from an {@link IndexOf IndexU32}.
-    /// The format may be specified explicitly.
-    NumpyArray(const IndexU32 index, const std::string& format);
-    /// @brief Creates a NumpyArray from an {@link IndexOf Index64}.
-    /// The format may be specified explicitly.
-    NumpyArray(const Index64 index, const std::string& format);
 
     /// @brief Reference-counted pointer to the array buffer.
     const std::shared_ptr<void>
       ptr() const;
 
+    /// @param ptr_lib Indicates the kernel libraries to use for this `ptr`.
     kernel::Lib
       ptr_lib() const;
 
@@ -247,6 +243,11 @@ namespace awkward {
     /// use "`l/L`" for 64-bit and "`i/I`" for 32-bit.
     const std::string
       format() const;
+
+    /// @param npdtype Enumeration for the type without the platform-dependence
+    /// that `format` has.
+    util::dtype
+      npdtype() const;
 
     /// @brief The number of dimensions, which is `shape.size()`.
     ///
@@ -866,10 +867,8 @@ namespace awkward {
   const ssize_t itemsize_;
   /// @brief See #format.
   const std::string format_;
-
-  /// @brief Mapping from (platform dependent) `std::type_index` to pybind11
-  /// format string (see #format).
-  static const std::unordered_map<std::type_index, std::string> format_map;
+  /// @brief See #npdtype.
+  const util::dtype npdtype_;
 
   };
 }
