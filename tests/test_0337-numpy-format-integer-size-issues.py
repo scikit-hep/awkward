@@ -9,5 +9,9 @@ import numpy
 
 import awkward1
 
-def test():
-    pass
+def test_index_slice():
+    index = awkward1.layout.Index64(numpy.array(
+        [0, 100, 200, 300, 400, 500, 600, 700, 800, 900],
+        numpy.int64))
+    assert index[4] == 400
+    assert numpy.asarray(index[3:7]).tolist() == [300, 400, 500, 600]
