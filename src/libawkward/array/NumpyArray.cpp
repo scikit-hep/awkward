@@ -3512,12 +3512,6 @@ namespace awkward {
           + format_ + std::string("\""));
       }
 
-      std::string format;
-#if defined _MSC_VER || defined __i386__
-      format = "q";
-#else
-      format = "l";
-#endif
       ssize_t itemsize = 8;
       util::dtype dtype = util::dtype::int64;
       std::vector<ssize_t> shape({ (ssize_t)shape_[0] });
@@ -3529,7 +3523,7 @@ namespace awkward {
                                          strides,
                                          0,
                                          itemsize,
-                                         format,
+                                         util::dtype_to_format(dtype),
                                          dtype);
 
       if (keepdims) {
@@ -4694,134 +4688,124 @@ namespace awkward {
     }
 
     std::shared_ptr<void> ptr;
-    if (format_.compare("?") == 0) {
+    Error err;
+
+    switch (dtype_) {
+    case util::dtype::boolean:
       ptr = kernel::ptr_alloc<bool>(ptr_lib, (int64_t)length);
-
-      Error err = kernel::copy_to<bool>(
+      err = kernel::copy_to<bool>(
         ptr_lib,
         ptr_lib_,
-        reinterpret_cast<bool *>(ptr.get()),
-        reinterpret_cast<bool *>(ptr_.get()),
+        reinterpret_cast<bool*>(ptr.get()),
+        reinterpret_cast<bool*>(ptr_.get()),
         length);
-      util::handle_error(err);
-    }
-    else if (format_.compare("b") == 0) {
+      break;
+    case util::dtype::int8:
       ptr = kernel::ptr_alloc<int8_t>(ptr_lib, (int64_t)length);
-
-      Error err = kernel::copy_to<int8_t>(
+      err = kernel::copy_to<int8_t>(
         ptr_lib,
         ptr_lib_,
-        reinterpret_cast<int8_t *>(ptr.get()),
-        reinterpret_cast<int8_t *>(ptr_.get()),
+        reinterpret_cast<int8_t*>(ptr.get()),
+        reinterpret_cast<int8_t*>(ptr_.get()),
         length);
-      util::handle_error(err);
-    }
-    else if (format_.compare("B") == 0) {
-      ptr = kernel::ptr_alloc<uint8_t>(ptr_lib, (int64_t)length);
-
-      Error err = kernel::copy_to<uint8_t>(
-        ptr_lib,
-        ptr_lib_,
-        reinterpret_cast<uint8_t *>(ptr.get()),
-        reinterpret_cast<uint8_t *>(ptr_.get()),
-        length);
-      util::handle_error(err);
-    }
-    else if (format_.compare("h") == 0) {
+      break;
+    case util::dtype::int16:
       ptr = kernel::ptr_alloc<int16_t>(ptr_lib, (int64_t)length);
-
-      Error err = kernel::copy_to<int16_t>(
+      err = kernel::copy_to<int16_t>(
         ptr_lib,
         ptr_lib_,
-        reinterpret_cast<int16_t *>(ptr.get()),
-        reinterpret_cast<int16_t *>(ptr_.get()),
+        reinterpret_cast<int16_t*>(ptr.get()),
+        reinterpret_cast<int16_t*>(ptr_.get()),
         length);
-      util::handle_error(err);
-    }
-    else if (format_.compare("H") == 0) {
-      ptr = kernel::ptr_alloc<uint16_t>(ptr_lib, (int64_t)length);
-
-      Error err = kernel::copy_to<uint16_t>(
-        ptr_lib,
-        ptr_lib_,
-        reinterpret_cast<uint16_t *>(ptr.get()),
-        reinterpret_cast<uint16_t *>(ptr_.get()),
-        length);
-      util::handle_error(err);
-    }
-    else if (format_.compare("i") == 0) {
+      break;
+    case util::dtype::int32:
       ptr = kernel::ptr_alloc<int32_t>(ptr_lib, (int64_t)length);
-
-      Error err = kernel::copy_to<int32_t>(
+      err = kernel::copy_to<int32_t>(
         ptr_lib,
         ptr_lib_,
-        reinterpret_cast<int32_t *>(ptr.get()),
-        reinterpret_cast<int32_t *>(ptr_.get()),
+        reinterpret_cast<int32_t*>(ptr.get()),
+        reinterpret_cast<int32_t*>(ptr_.get()),
         length);
-      util::handle_error(err);
-    }
-    else if (format_.compare("I") == 0) {
-      ptr = kernel::ptr_alloc<uint32_t>(ptr_lib, (int64_t)length);
-
-      Error err = kernel::copy_to<uint32_t>(
-        ptr_lib,
-        ptr_lib_,
-        reinterpret_cast<uint32_t *>(ptr.get()),
-        reinterpret_cast<uint32_t *>(ptr_.get()),
-        length);
-      util::handle_error(err);
-    }
-    else if (format_.compare("l") == 0) {
+      break;
+    case util::dtype::int64:
       ptr = kernel::ptr_alloc<int64_t>(ptr_lib, (int64_t)length);
-
-      Error err = kernel::copy_to<int64_t>(
+      err = kernel::copy_to<int64_t>(
         ptr_lib,
         ptr_lib_,
-        reinterpret_cast<int64_t *>(ptr.get()),
-        reinterpret_cast<int64_t *>(ptr_.get()),
+        reinterpret_cast<int64_t*>(ptr.get()),
+        reinterpret_cast<int64_t*>(ptr_.get()),
         length);
-      util::handle_error(err);
-    }
-    else if (format_.compare("L") == 0) {
+      break;
+    case util::dtype::uint8:
+      ptr = kernel::ptr_alloc<uint8_t>(ptr_lib, (int64_t)length);
+      err = kernel::copy_to<uint8_t>(
+        ptr_lib,
+        ptr_lib_,
+        reinterpret_cast<uint8_t*>(ptr.get()),
+        reinterpret_cast<uint8_t*>(ptr_.get()),
+        length);
+      break;
+    case util::dtype::uint16:
+      ptr = kernel::ptr_alloc<uint16_t>(ptr_lib, (int64_t)length);
+      err = kernel::copy_to<uint16_t>(
+        ptr_lib,
+        ptr_lib_,
+        reinterpret_cast<uint16_t*>(ptr.get()),
+        reinterpret_cast<uint16_t*>(ptr_.get()),
+        length);
+      break;
+    case util::dtype::uint32:
+      ptr = kernel::ptr_alloc<uint32_t>(ptr_lib, (int64_t)length);
+      err = kernel::copy_to<uint32_t>(
+        ptr_lib,
+        ptr_lib_,
+        reinterpret_cast<uint32_t*>(ptr.get()),
+        reinterpret_cast<uint32_t*>(ptr_.get()),
+        length);
+      break;
+    case util::dtype::uint64:
       ptr = kernel::ptr_alloc<uint64_t>(ptr_lib, (int64_t)length);
-
-      Error err = kernel::copy_to<uint64_t>(
+      err = kernel::copy_to<uint64_t>(
         ptr_lib,
         ptr_lib_,
-        reinterpret_cast<uint64_t *>(ptr.get()),
-        reinterpret_cast<uint64_t *>(ptr_.get()),
+        reinterpret_cast<uint64_t*>(ptr.get()),
+        reinterpret_cast<uint64_t*>(ptr_.get()),
         length);
-      util::handle_error(err);
-    }
-    else if (format_.compare("f") == 0) {
+      break;
+    case util::dtype::float16:
+      throw std::runtime_error("FIXME: copy_to of float16 not implemented");
+    case util::dtype::float32:
       ptr = kernel::ptr_alloc<float>(ptr_lib, (int64_t)length);
-
-      Error err = kernel::copy_to<float>(
+      err = kernel::copy_to<float>(
         ptr_lib,
         ptr_lib_,
-        reinterpret_cast<float *>(ptr.get()),
-        reinterpret_cast<float *>(ptr_.get()),
+        reinterpret_cast<float*>(ptr.get()),
+        reinterpret_cast<float*>(ptr_.get()),
         length);
-      util::handle_error(err);
-    }
-    else if (format_.compare("d") == 0) {
+      break;
+    case util::dtype::float64:
       ptr = kernel::ptr_alloc<double>(ptr_lib, (int64_t)length);
-
-      Error err = kernel::copy_to<double>(
+      err = kernel::copy_to<double>(
         ptr_lib,
         ptr_lib_,
-        reinterpret_cast<double *>(ptr.get()),
-        reinterpret_cast<double *>(ptr_.get()),
+        reinterpret_cast<double*>(ptr.get()),
+        reinterpret_cast<double*>(ptr_.get()),
         length);
-      util::handle_error(err);
+      break;
+    case util::dtype::float128:
+      throw std::runtime_error("FIXME: copy_to of float128 not implemented");
+    case util::dtype::complex64:
+      throw std::runtime_error("FIXME: copy_to of complex64 not implemented");
+    case util::dtype::complex128:
+      throw std::runtime_error("FIXME: copy_to of complex128 not implemented");
+    case util::dtype::complex256:
+      throw std::runtime_error("FIXME: copy_to of complex256 not implemented");
+    default:
+      throw std::invalid_argument(
+        std::string("cannot copy format '") + format_ +
+        std::string(" to a device (e.g. GPU)"));
     }
-    else {
-      Error err = failure("Unknown Numpy dtype for transfer",
-                          0,
-                          kSliceNone,
-                          true);
-      util::handle_error(err);
-    }
+    util::handle_error(err);
 
     return std::make_shared<NumpyArray>(identities_,
                                         parameters_,
