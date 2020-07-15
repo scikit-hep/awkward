@@ -48,27 +48,16 @@ namespace awkward {
   Int64Builder::snapshot() const {
     std::vector<ssize_t> shape = { (ssize_t)buffer_.length() };
     std::vector<ssize_t> strides = { (ssize_t)sizeof(int64_t) };
-#if defined _MSC_VER || defined __i386__
-    return std::make_shared<NumpyArray>(Identities::none(),
-                                        util::Parameters(),
-                                        buffer_.ptr(),
-                                        shape,
-                                        strides,
-                                        0,
-                                        sizeof(int64_t),
-                                        "q",
-                                        util::dtype::int64);
-#else
-    return std::make_shared<NumpyArray>(Identities::none(),
-                                        util::Parameters(),
-                                        buffer_.ptr(),
-                                        shape,
-                                        strides,
-                                        0,
-                                        sizeof(int64_t),
-                                        "l",
-                                        util::dtype::int64);
-#endif
+    return std::make_shared<NumpyArray>(
+             Identities::none(),
+             util::Parameters(),
+             buffer_.ptr(),
+             shape,
+             strides,
+             0,
+             sizeof(int64_t),
+             util::dtype_to_format(util::dtype::int64),
+             util::dtype::int64);
   }
 
   bool

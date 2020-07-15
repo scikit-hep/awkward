@@ -528,20 +528,11 @@ toslice_part(ak::Slice& slice, py::object obj) {
           std::string format(info.format);
           format.erase(0, format.find_first_not_of("@=<>!"));
           if (py::isinstance<py::array>(obj) &&
-              format.compare("c") != 0       &&
-              format.compare("b") != 0       &&
-              format.compare("B") != 0       &&
-              format.compare("h") != 0       &&
-              format.compare("H") != 0       &&
-              format.compare("i") != 0       &&
-              format.compare("I") != 0       &&
-              format.compare("l") != 0       &&
-              format.compare("L") != 0       &&
-              format.compare("q") != 0       &&
-              format.compare("Q") != 0       &&
+              !ak::util::is_integer(
+                ak::util::format_to_dtype(format, (int64_t)info.itemsize))  &&
               flatlen != 0) {
             throw std::invalid_argument(
-              "arrays used as an index must be integer or boolean");
+              "arrays used as an index must be a (native-endian) integer or boolean");
           }
 
           py::object intarray_object =
