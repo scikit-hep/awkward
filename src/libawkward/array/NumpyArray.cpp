@@ -802,59 +802,56 @@ namespace awkward {
     else if (parameter_equals("__array__", "\"char\"")) {
       tojson_string(builder, include_beginendlist);
     }
-    else if (format_.compare("d") == 0) {
-      tojson_real<double>(builder, include_beginendlist);
-    }
-    else if (format_.compare("f") == 0) {
-      tojson_real<float>(builder, include_beginendlist);
-    }
-#if defined _MSC_VER || defined __i386__
-    else if (format_.compare("q") == 0) {
-#else
-    else if (format_.compare("l") == 0) {
-#endif
-      tojson_integer<int64_t>(builder, include_beginendlist);
-    }
-#if defined _MSC_VER || defined __i386__
-    else if (format_.compare("Q") == 0) {
-#else
-    else if (format_.compare("L") == 0) {
-#endif
-      tojson_integer<uint64_t>(builder, include_beginendlist);
-    }
-#if defined _MSC_VER || defined __i386__
-      else if (format_.compare("l") == 0) {
-#else
-      else if (format_.compare("i") == 0) {
-#endif
-      tojson_integer<int32_t>(builder, include_beginendlist);
-    }
-#if defined _MSC_VER || defined __i386__
-    else if (format_.compare("L") == 0) {
-#else
-    else if (format_.compare("I") == 0) {
-#endif
-      tojson_integer<uint32_t>(builder, include_beginendlist);
-    }
-    else if (format_.compare("h") == 0) {
-      tojson_integer<int16_t>(builder, include_beginendlist);
-    }
-    else if (format_.compare("H") == 0) {
-      tojson_integer<uint16_t>(builder, include_beginendlist);
-    }
-    else if (format_.compare("b") == 0) {
-      tojson_integer<int8_t>(builder, include_beginendlist);
-    }
-    else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
-      tojson_integer<uint8_t>(builder, include_beginendlist);
-    }
-    else if (format_.compare("?") == 0) {
-      tojson_boolean(builder, include_beginendlist);
-    }
     else {
-      throw std::invalid_argument(
-        std::string("cannot convert Numpy format \"") + format_
-        + std::string("\" into JSON"));
+      switch (dtype_) {
+        case util::dtype::boolean:
+          tojson_boolean(builder, include_beginendlist);
+          break;
+        case util::dtype::int8:
+          tojson_integer<int8_t>(builder, include_beginendlist);
+          break;
+        case util::dtype::int16:
+          tojson_integer<int16_t>(builder, include_beginendlist);
+          break;
+        case util::dtype::int32:
+          tojson_integer<int32_t>(builder, include_beginendlist);
+          break;
+        case util::dtype::int64:
+          tojson_integer<int64_t>(builder, include_beginendlist);
+          break;
+        case util::dtype::uint8:
+          tojson_integer<uint8_t>(builder, include_beginendlist);
+          break;
+        case util::dtype::uint16:
+          tojson_integer<uint16_t>(builder, include_beginendlist);
+          break;
+        case util::dtype::uint32:
+          tojson_integer<uint32_t>(builder, include_beginendlist);
+          break;
+        case util::dtype::uint64:
+          tojson_integer<uint64_t>(builder, include_beginendlist);
+          break;
+        case util::dtype::float16:
+          throw std::runtime_error("FIXME: float16 to JSON");
+        case util::dtype::float32:
+          tojson_real<float>(builder, include_beginendlist);
+          break;
+        case util::dtype::float64:
+          tojson_real<double>(builder, include_beginendlist);
+          break;
+        case util::dtype::float128:
+          throw std::runtime_error("FIXME: float128 to JSON");
+        case util::dtype::complex64:
+          throw std::runtime_error("FIXME: complex64 to JSON");
+        case util::dtype::complex128:
+          throw std::runtime_error("FIXME: complex128 to JSON");
+        case util::dtype::complex256:
+          throw std::runtime_error("FIXME: complex256 to JSON");
+        default:
+          throw std::invalid_argument(
+            std::string("cannot convert Numpy format \"") + format_
+            + std::string("\" into JSON"));
+      }
     }
   }
 
