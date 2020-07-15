@@ -3210,7 +3210,9 @@ namespace awkward {
       std::shared_ptr<Content> out;
       int64_t offset = byteoffset_ / itemsize_;
       std::shared_ptr<void> ptr;
-      if (format_.compare("?") == 0) {
+
+      switch (dtype_) {
+      case util::dtype::boolean:
         ptr = array_sort<bool>(reinterpret_cast<bool*>(ptr_.get()),
                                length(),
                                offset,
@@ -3219,8 +3221,8 @@ namespace awkward {
                                outlength,
                                ascending,
                                stable);
-      }
-      else if (format_.compare("b") == 0) {
+        break;
+      case util::dtype::int8:
         ptr = array_sort<int8_t>(reinterpret_cast<int8_t*>(ptr_.get()),
                                  length(),
                                  offset,
@@ -3229,18 +3231,8 @@ namespace awkward {
                                  outlength,
                                  ascending,
                                  stable);
-      }
-      else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
-        ptr = array_sort<uint8_t>(reinterpret_cast<uint8_t*>(ptr_.get()),
-                                  length(),
-                                  offset,
-                                  starts,
-                                  parents,
-                                  outlength,
-                                  ascending,
-                                  stable);
-      }
-      else if (format_.compare("h") == 0) {
+        break;
+      case util::dtype::int16:
         ptr = array_sort<int16_t>(reinterpret_cast<int16_t*>(ptr_.get()),
                                   length(),
                                   offset,
@@ -3249,22 +3241,8 @@ namespace awkward {
                                   outlength,
                                   ascending,
                                   stable);
-      }
-      else if (format_.compare("H") == 0) {
-        ptr = array_sort<uint16_t>(reinterpret_cast<uint16_t*>(ptr_.get()),
-                                   length(),
-                                   offset,
-                                   starts,
-                                   parents,
-                                   outlength,
-                                   ascending,
-                                   stable);
-      }
-#if defined _MSC_VER || defined __i386__
-      else if (format_.compare("l") == 0) {
-#else
-      else if (format_.compare("i") == 0) {
-#endif
+        break;
+      case util::dtype::int32:
         ptr = array_sort<int32_t>(reinterpret_cast<int32_t*>(ptr_.get()),
                                   length(),
                                   offset,
@@ -3273,26 +3251,8 @@ namespace awkward {
                                   outlength,
                                   ascending,
                                   stable);
-      }
-#if defined _MSC_VER || defined __i386__
-      else if (format_.compare("L") == 0) {
-#else
-      else if (format_.compare("I") == 0) {
-#endif
-        ptr = array_sort<uint32_t>(reinterpret_cast<uint32_t*>(ptr_.get()),
-                                   length(),
-                                   offset,
-                                   starts,
-                                   parents,
-                                   outlength,
-                                   ascending,
-                                   stable);
-      }
-#if defined _MSC_VER || defined __i386__
-      else if (format_.compare("q") == 0) {
-#else
-      else if (format_.compare("l") == 0) {
-#endif
+        break;
+      case util::dtype::int64:
         ptr = array_sort<int64_t>(reinterpret_cast<int64_t*>(ptr_.get()),
                                   length(),
                                   offset,
@@ -3301,12 +3261,38 @@ namespace awkward {
                                   outlength,
                                   ascending,
                                   stable);
-      }
-#if defined _MSC_VER || defined __i386__
-      else if (format_.compare("Q") == 0) {
-#else
-      else if (format_.compare("L") == 0) {
-#endif
+        break;
+      case util::dtype::uint8:
+        ptr = array_sort<uint8_t>(reinterpret_cast<uint8_t*>(ptr_.get()),
+                                  length(),
+                                  offset,
+                                  starts,
+                                  parents,
+                                  outlength,
+                                  ascending,
+                                  stable);
+        break;
+      case util::dtype::uint16:
+        ptr = array_sort<uint16_t>(reinterpret_cast<uint16_t*>(ptr_.get()),
+                                   length(),
+                                   offset,
+                                   starts,
+                                   parents,
+                                   outlength,
+                                   ascending,
+                                   stable);
+        break;
+      case util::dtype::uint32:
+        ptr = array_sort<uint32_t>(reinterpret_cast<uint32_t*>(ptr_.get()),
+                                   length(),
+                                   offset,
+                                   starts,
+                                   parents,
+                                   outlength,
+                                   ascending,
+                                   stable);
+        break;
+      case util::dtype::uint64:
         ptr = array_sort<uint64_t>(reinterpret_cast<uint64_t*>(ptr_.get()),
                                    length(),
                                    offset,
@@ -3315,8 +3301,10 @@ namespace awkward {
                                    outlength,
                                    ascending,
                                    stable);
-      }
-      else if (format_.compare("f") == 0) {
+        break;
+      case util::dtype::float16:
+        throw std::runtime_error("FIXME: sort for float16 not implemented");
+      case util::dtype::float32:
         ptr = array_sort<float>(reinterpret_cast<float*>(ptr_.get()),
                                 length(),
                                 offset,
@@ -3325,8 +3313,8 @@ namespace awkward {
                                 outlength,
                                 ascending,
                                 stable);
-      }
-      else if (format_.compare("d") == 0) {
+        break;
+      case util::dtype::float64:
         ptr = array_sort<double>(reinterpret_cast<double*>(ptr_.get()),
                                  length(),
                                  offset,
@@ -3335,8 +3323,16 @@ namespace awkward {
                                  outlength,
                                  ascending,
                                  stable);
-      }
-      else {
+        break;
+      case util::dtype::float128:
+        throw std::runtime_error("FIXME: sort for float128 not implemented");
+      case util::dtype::complex64:
+        throw std::runtime_error("FIXME: sort for complex64 not implemented");
+      case util::dtype::complex128:
+        throw std::runtime_error("FIXME: sort for complex128 not implemented");
+      case util::dtype::complex256:
+        throw std::runtime_error("FIXME: sort for complex256 not implemented");
+      default:
         throw std::invalid_argument(
           std::string("cannot sort NumpyArray with format \"")
           + format_ + std::string("\""));
@@ -3388,7 +3384,9 @@ namespace awkward {
       std::shared_ptr<Content> out;
       int64_t offset = byteoffset_ / itemsize_;
       std::shared_ptr<void> ptr;
-      if (format_.compare("?") == 0) {
+
+      switch (dtype_) {
+      case util::dtype::boolean:
         ptr = index_sort<bool>(reinterpret_cast<bool*>(ptr_.get()),
                                length(),
                                offset,
@@ -3397,8 +3395,8 @@ namespace awkward {
                                outlength,
                                ascending,
                                stable);
-      }
-      else if (format_.compare("b") == 0) {
+        break;
+      case util::dtype::int8:
         ptr = index_sort<int8_t>(reinterpret_cast<int8_t*>(ptr_.get()),
                                  length(),
                                  offset,
@@ -3407,18 +3405,8 @@ namespace awkward {
                                  outlength,
                                  ascending,
                                  stable);
-      }
-      else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
-        ptr = index_sort<uint8_t>(reinterpret_cast<uint8_t*>(ptr_.get()),
-                                  length(),
-                                  offset,
-                                  starts,
-                                  parents,
-                                  outlength,
-                                  ascending,
-                                  stable);
-      }
-      else if (format_.compare("h") == 0) {
+        break;
+      case util::dtype::int16:
         ptr = index_sort<int16_t>(reinterpret_cast<int16_t*>(ptr_.get()),
                                   length(),
                                   offset,
@@ -3427,22 +3415,8 @@ namespace awkward {
                                   outlength,
                                   ascending,
                                   stable);
-      }
-      else if (format_.compare("H") == 0) {
-        ptr = index_sort<uint16_t>(reinterpret_cast<uint16_t*>(ptr_.get()),
-                                   length(),
-                                   offset,
-                                   starts,
-                                   parents,
-                                   outlength,
-                                   ascending,
-                                   stable);
-      }
-#if defined _MSC_VER || defined __i386__
-      else if (format_.compare("l") == 0) {
-#else
-      else if (format_.compare("i") == 0) {
-#endif
+        break;
+      case util::dtype::int32:
         ptr = index_sort<int32_t>(reinterpret_cast<int32_t*>(ptr_.get()),
                                   length(),
                                   offset,
@@ -3451,26 +3425,8 @@ namespace awkward {
                                   outlength,
                                   ascending,
                                   stable);
-      }
-#if defined _MSC_VER || defined __i386__
-      else if (format_.compare("L") == 0) {
-#else
-      else if (format_.compare("I") == 0) {
-#endif
-        ptr = index_sort<uint32_t>(reinterpret_cast<uint32_t*>(ptr_.get()),
-                                   length(),
-                                   offset,
-                                   starts,
-                                   parents,
-                                   outlength,
-                                   ascending,
-                                   stable);
-      }
-#if defined _MSC_VER || defined __i386__
-      else if (format_.compare("q") == 0) {
-#else
-      else if (format_.compare("l") == 0) {
-#endif
+        break;
+      case util::dtype::int64:
         ptr = index_sort<int64_t>(reinterpret_cast<int64_t*>(ptr_.get()),
                                   length(),
                                   offset,
@@ -3479,12 +3435,38 @@ namespace awkward {
                                   outlength,
                                   ascending,
                                   stable);
-      }
-#if defined _MSC_VER || defined __i386__
-      else if (format_.compare("Q") == 0) {
-#else
-      else if (format_.compare("L") == 0) {
-#endif
+        break;
+      case util::dtype::uint8:
+        ptr = index_sort<uint8_t>(reinterpret_cast<uint8_t*>(ptr_.get()),
+                                  length(),
+                                  offset,
+                                  starts,
+                                  parents,
+                                  outlength,
+                                  ascending,
+                                  stable);
+        break;
+      case util::dtype::uint16:
+        ptr = index_sort<uint16_t>(reinterpret_cast<uint16_t*>(ptr_.get()),
+                                   length(),
+                                   offset,
+                                   starts,
+                                   parents,
+                                   outlength,
+                                   ascending,
+                                   stable);
+        break;
+      case util::dtype::uint32:
+        ptr = index_sort<uint32_t>(reinterpret_cast<uint32_t*>(ptr_.get()),
+                                   length(),
+                                   offset,
+                                   starts,
+                                   parents,
+                                   outlength,
+                                   ascending,
+                                   stable);
+        break;
+      case util::dtype::uint64:
         ptr = index_sort<uint64_t>(reinterpret_cast<uint64_t*>(ptr_.get()),
                                    length(),
                                    offset,
@@ -3493,8 +3475,10 @@ namespace awkward {
                                    outlength,
                                    ascending,
                                    stable);
-      }
-      else if (format_.compare("f") == 0) {
+        break;
+      case util::dtype::float16:
+        throw std::runtime_error("FIXME: argsort for float16 not implemented");
+      case util::dtype::float32:
         ptr = index_sort<float>(reinterpret_cast<float*>(ptr_.get()),
                                 length(),
                                 offset,
@@ -3503,8 +3487,8 @@ namespace awkward {
                                 outlength,
                                 ascending,
                                 stable);
-      }
-      else if (format_.compare("d") == 0) {
+        break;
+      case util::dtype::float64:
         ptr = index_sort<double>(reinterpret_cast<double*>(ptr_.get()),
                                  length(),
                                  offset,
@@ -3513,8 +3497,16 @@ namespace awkward {
                                  outlength,
                                  ascending,
                                  stable);
-      }
-      else {
+        break;
+      case util::dtype::float128:
+        throw std::runtime_error("FIXME: argsort for float128 not implemented");
+      case util::dtype::complex64:
+        throw std::runtime_error("FIXME: argsort for complex64 not implemented");
+      case util::dtype::complex128:
+        throw std::runtime_error("FIXME: argsort for complex128 not implemented");
+      case util::dtype::complex256:
+        throw std::runtime_error("FIXME: argsort for complex256 not implemented");
+      default:
         throw std::invalid_argument(
           std::string("cannot sort NumpyArray with format \"")
           + format_ + std::string("\""));
@@ -3561,7 +3553,7 @@ namespace awkward {
 
     Index64 outoffsets(offsets.length());
 
-    if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
+    if (dtype_ == util::dtype::uint8) {
       ptr = string_sort<uint8_t>(reinterpret_cast<uint8_t*>(ptr_.get()),
                                  length(),
                                  offsets,
