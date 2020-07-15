@@ -232,9 +232,7 @@ namespace awkward {
       return false;
     }
     if (NumpyForm* t = dynamic_cast<NumpyForm*>(other.get())) {
-      return (inner_shape_ == t->inner_shape()  &&
-              itemsize_ == t->itemsize()  &&
-              format_ == t->format());
+      return (inner_shape_ == t->inner_shape()  &&  format_ == t->format());
     }
     else {
       return false;
@@ -1436,42 +1434,44 @@ namespace awkward {
         return false;
       }
 
-      std::string other_format = rawother->format();
-
       if (!mergebool  &&
-          ((format_.compare("?") == 0  &&  other_format.compare("?") != 0)  ||
-           (format_.compare("?") != 0  &&  other_format.compare("?") == 0))) {
+          dtype_ != rawother->dtype()  &&
+          (dtype_ == util::dtype::boolean  ||  rawother->dtype() == util::dtype::boolean)) {
         return false;
       }
 
-      if (!(format_.compare("d") == 0  ||
-            format_.compare("f") == 0  ||
-            format_.compare("q") == 0  ||
-            format_.compare("Q") == 0  ||
-            format_.compare("l") == 0  ||
-            format_.compare("L") == 0  ||
-            format_.compare("i") == 0  ||
-            format_.compare("I") == 0  ||
-            format_.compare("h") == 0  ||
-            format_.compare("H") == 0  ||
-            format_.compare("b") == 0  ||
-            format_.compare("B") == 0  ||
-            format_.compare("c") == 0  ||
-            format_.compare("?") == 0  ||
-            other_format.compare("d") == 0  ||
-            other_format.compare("f") == 0  ||
-            other_format.compare("q") == 0  ||
-            other_format.compare("Q") == 0  ||
-            other_format.compare("l") == 0  ||
-            other_format.compare("L") == 0  ||
-            other_format.compare("i") == 0  ||
-            other_format.compare("I") == 0  ||
-            other_format.compare("h") == 0  ||
-            other_format.compare("H") == 0  ||
-            other_format.compare("b") == 0  ||
-            other_format.compare("B") == 0  ||
-            other_format.compare("c") == 0  ||
-            other_format.compare("?") == 0)) {
+      if (!(dtype_ == util::dtype::boolean  ||
+            dtype_ == util::dtype::int8  ||
+            dtype_ == util::dtype::int16  ||
+            dtype_ == util::dtype::int32  ||
+            dtype_ == util::dtype::int64  ||
+            dtype_ == util::dtype::uint8  ||
+            dtype_ == util::dtype::uint16  ||
+            dtype_ == util::dtype::uint32  ||
+            dtype_ == util::dtype::uint64  ||
+            dtype_ == util::dtype::float16  ||
+            dtype_ == util::dtype::float32  ||
+            dtype_ == util::dtype::float64  ||
+            dtype_ == util::dtype::float128  ||
+            dtype_ == util::dtype::complex64  ||
+            dtype_ == util::dtype::complex128  ||
+            dtype_ == util::dtype::complex256  ||
+            dtype_ == util::dtype::boolean  ||
+            rawother->dtype() == util::dtype::int8  ||
+            rawother->dtype() == util::dtype::int16  ||
+            rawother->dtype() == util::dtype::int32  ||
+            rawother->dtype() == util::dtype::int64  ||
+            rawother->dtype() == util::dtype::uint8  ||
+            rawother->dtype() == util::dtype::uint16  ||
+            rawother->dtype() == util::dtype::uint32  ||
+            rawother->dtype() == util::dtype::uint64  ||
+            rawother->dtype() == util::dtype::float16  ||
+            rawother->dtype() == util::dtype::float32  ||
+            rawother->dtype() == util::dtype::float64  ||
+            rawother->dtype() == util::dtype::float128  ||
+            rawother->dtype() == util::dtype::complex64  ||
+            rawother->dtype() == util::dtype::complex128  ||
+            rawother->dtype() == util::dtype::complex256)) {
         return false;
       }
 
