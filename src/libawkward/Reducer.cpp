@@ -436,11 +436,17 @@ namespace awkward {
     case util::dtype::int8:
     case util::dtype::int16:
     case util::dtype::int32:
+#if defined _MSC_VER || defined __i386__
+      return util::dtype::int32;
+#endif
     case util::dtype::int64:
       return util::dtype::int64;
     case util::dtype::uint8:
     case util::dtype::uint16:
     case util::dtype::uint32:
+#if defined _MSC_VER || defined __i386__
+      return util::dtype::uint32;
+#endif
     case util::dtype::uint64:
       return util::dtype::uint64;
     default:
@@ -778,11 +784,17 @@ namespace awkward {
     case util::dtype::int8:
     case util::dtype::int16:
     case util::dtype::int32:
+#if defined _MSC_VER || defined __i386__
+      return util::dtype::int32;
+#endif
     case util::dtype::int64:
       return util::dtype::int64;
     case util::dtype::uint8:
     case util::dtype::uint16:
     case util::dtype::uint32:
+#if defined _MSC_VER || defined __i386__
+      return util::dtype::uint32;
+#endif
     case util::dtype::uint64:
       return util::dtype::uint64;
     default:
