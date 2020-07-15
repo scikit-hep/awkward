@@ -465,7 +465,7 @@ def gentests(funcs, htokens):
     print("Executing tests")
 
     def pytype(cpptype):
-        if re.match("u?int\d{1,2}_t", cpptype) is not None:
+        if re.match("u?int\d{1,2}(_t)?", cpptype) is not None:
             return "int"
         elif cpptype == "double":
             return "float"
@@ -511,6 +511,12 @@ def gentests(funcs, htokens):
             "awkward_IndexedArray32_flatten_none2empty_64",
             "awkward_IndexedArrayU32_flatten_none2empty_64",
             "awkward_IndexedArray64_flatten_none2empty_64",
+            "awkward_UnionArray32_flatten_length_64",
+            "awkward_UnionArrayU32_flatten_length_64",
+            "awkward_UnionArray64_flatten_length_64",
+            "awkward_UnionArray32_flatten_combine_64",
+            "awkward_UnionArrayU32_flatten_combine_64",
+            "awkward_UnionArray64_flatten_combine_64",
             "awkward_IndexedArray32_flatten_nextcarry_64",
             "awkward_IndexedArrayU32_flatten_nextcarry_64",
             "awkward_IndexedArray64_flatten_nextcarry_64",
@@ -546,9 +552,46 @@ def gentests(funcs, htokens):
             "awkward_ListOffsetArray32_toRegularArray",
             "awkward_ListOffsetArrayU32_toRegularArray",
             "awkward_ListOffsetArray64_toRegularArray",
+            "awkward_NumpyArray_fill_toU64_fromU64",
+            "awkward_NumpyArray_fill_to64_fromU64",
+            "awkward_NumpyArray_fill_to64_from32",
+            "awkward_NumpyArray_fill_to64_fromU32",
+            "awkward_NumpyArray_fill_to64_from16",
+            "awkward_NumpyArray_fill_to64_fromU16",
+            "awkward_NumpyArray_fill_to64_from8",
+            "awkward_NumpyArray_fill_to64_fromU8",
+            "awkward_NumpyArray_fill_to64_frombool",
+            "awkward_NumpyArray_fill_tobool_frombool",
+            "awkward_NumpyArray_fill_tobyte_frombyte",
             "awkward_ListArray_fill_to64_from32",
             "awkward_ListArray_fill_to64_fromU32",
             "awkward_ListArray_fill_to64_from64",
+            "awkward_IndexedArray_fill_to64_from32",
+            "awkward_IndexedArray_fill_to64_fromU32",
+            "awkward_IndexedArray_fill_to64_from64",
+            "awkward_IndexedArray_fill_to64_count",
+            "awkward_UnionArray_filltags_to8_from8",
+            "awkward_UnionArray_fillindex_to64_from32",
+            "awkward_UnionArray_fillindex_to64_fromU32",
+            "awkward_UnionArray_fillindex_to64_from64",
+            "awkward_UnionArray_filltags_to8_const",
+            "awkward_UnionArray_fillindex_to64_count",
+            "awkward_UnionArray_fillna_from32_to64",
+            "awkward_UnionArray_fillna_fromU32_to64",
+            "awkward_UnionArray_fillna_from64_to64",
+            "awkward_UnionArray8_32_simplify8_32_to8_64",
+            "awkward_UnionArray8_32_simplify8_U32_to8_64",
+            "awkward_UnionArray8_32_simplify8_64_to8_64",
+            "awkward_UnionArray8_U32_simplify8_32_to8_64",
+            "awkward_UnionArray8_U32_simplify8_U32_to8_64",
+            "awkward_UnionArray8_U32_simplify8_64_to8_64",
+            "awkward_UnionArray8_64_simplify8_32_to8_64",
+            "awkward_UnionArray8_64_simplify8_U32_to8_64",
+            "awkward_UnionArray8_64_simplify8_64_to8_64",
+            "awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_64",
+            "awkward_index_rpad_and_clip_axis0_64",
+            "awkward_index_rpad_and_clip_axis1_64",
+            "awkward_RegularArray_rpad_and_clip_axis1_64",
             "awkward_ListArray32_min_range",
             "awkward_ListArrayU32_min_range",
             "awkward_ListArray64_min_range",
@@ -558,12 +601,44 @@ def gentests(funcs, htokens):
             "awkward_ListArray32_rpad_axis1_64",
             "awkward_ListArrayU32_rpad_axis1_64",
             "awkward_ListArray64_rpad_axis1_64",
+            # "awkward_ListOffsetArray32_rpad_and_clip_axis1_64",
+            # "awkward_ListOffsetArrayU32_rpad_and_clip_axis1_64",
+            # "awkward_ListOffsetArray64_rpad_and_clip_axis1_64",
+            "awkward_ListOffsetArray32_rpad_length_axis1",
+            # "awkward_ListOffsetArrayU32_rpad_length_axis1",
+            "awkward_ListOffsetArray64_rpad_length_axis1",
+            "awkward_ListOffsetArray32_rpad_axis1_64",
+            # "awkward_ListOffsetArrayU32_rpad_axis1_64",
+            "awkward_ListOffsetArray64_rpad_axis1_64",
             "awkward_ListArray32_validity",
             "awkward_ListArrayU32_validity",
-            "awkward_ListArray64_validity"
+            "awkward_ListArray64_validity",
+            # "awkward_IndexedArray32_validity",
+            # "awkward_IndexedArrayU32_validity",
+            # "awkward_IndexedArray64_validity",
+            "awkward_UnionArray8_32_validity",
+            "awkward_UnionArray8_U32_validity",
+            "awkward_UnionArray8_64_validity",
+            "awkward_localindex_64",
+            "awkward_ListArray32_localindex_64",
+            "awkward_ListArrayU32_localindex_64",
+            "awkward_ListArray64_localindex_64",
+            "awkward_RegularArray_localindex_64",
+            "awkward_ListArray32_combinations_length_64",
+            "awkward_ListArrayU32_combinations_length_64",
+            "awkward_ListArray64_combinations_length_64",
+            # "awkward_ListArray32_combinations_64",
+            # "awkward_ListArrayU32_combinations_64",
+            # "awkward_ListArray64_combinations_64",
+            # "awkward_RegularArray_combinations_64",
+            "awkward_ByteMaskedArray_overlay_mask8",
+            "awkward_BitMaskedArray_to_ByteMaskedArray",
+            "awkward_BitMaskedArray_to_IndexedOptionArray64",
         ]
         for name, args in tokens.items():
             checkindex = []
+            pindex = []
+            pval = []
             typelist = []
             testsp = []
             testsc = []
@@ -571,58 +646,77 @@ def gentests(funcs, htokens):
                 for i in range(len(args.values())):
                     if list(args.values())[i]["type"].endswith("_t"):
                         temptype = list(args.values())[i]["type"][:-2]
+                    elif list(args.values())[i]["type"] == "int":
+                        temptype = "int64"
                     else:
                         temptype = list(args.values())[i]["type"]
                     if list(args.values())[i]["check"] == "outparam":
-                        typelist.append((list(args.values())[i]["type"], list(args.values())[i]["array"]))
-                        temparr = [0] * (data[pytype(list(args.values())[i]["type"])]["num"] + 10)
-                        checkindex.append(i)
+                        typelist.append((temptype, list(args.values())[i]["array"],))
+                        temparr = [0] * (data["success"]["num"] + 50)
                         testsp.append(temparr)
-                        testsc.append(
-                            (eval("ctypes.c_" + temptype) * len(temparr))(*temparr)
-                        )
+                        if (
+                            "role" in list(args.values())[i]
+                            and list(args.values())[i]["role"] == "pointer"
+                        ):
+                            pval.append(eval("ctypes.c_" + temptype + "(0)"))
+                            testsc.append(ctypes.byref(pval[-1]))
+                            pindex.append(i)
+                        else:
+                            testsc.append(
+                                (eval("ctypes.c_" + temptype) * len(temparr))(*temparr)
+                            )
+                            checkindex.append(i)
                     elif "role" in list(args.values())[i]:
                         if "instance" in list(args.values())[i]:
-                            tempval = data[pytype(list(args.values())[i]["type"])][
-                                "success"
-                            ][
+                            tempval = data["success"][
                                 list(args.values())[i]["role"][
                                     : list(args.values())[i]["role"].find("-")
                                 ]
-                            ][
+                            ][list(args.values())[i]["role"]][
                                 int(list(args.values())[i]["instance"])
                             ][
-                                list(args.values())[i]["role"]
+                                pytype(temptype)
                             ]
                         else:
-                            tempval = data[pytype(list(args.values())[i]["type"])][
-                                "success"
-                            ][
+                            tempval = data["success"][
                                 list(args.values())[i]["role"][
                                     : list(args.values())[i]["role"].find("-")
                                 ]
-                            ][
-                                0
-                            ][
-                                list(args.values())[i]["role"]
-                            ]
+                            ][list(args.values())[i]["role"]][0][pytype(temptype)]
                         testsp.append(tempval)
                         if not isinstance(tempval, list):
-                            typelist.append((list(args.values())[i]["type"]))
+                            typelist.append((temptype))
                             testsc.append(tempval)
                         else:
-                            typelist.append((list(args.values())[i]["type"], list(args.values())[i]["array"]))
-                            testsc.append(
-                                (eval("ctypes.c_" + temptype) * len(tempval))(*tempval)
+                            typelist.append(
+                                (temptype, list(args.values())[i]["array"],)
                             )
+                            if list(args.values())[i]["array"] == 2:
+                                testsc.append(
+                                    (
+                                        eval(
+                                            "ctypes.pointer(ctypes.cast((ctypes.c_"
+                                            + temptype
+                                            + "*"
+                                            + str(len(tempval[0]))
+                                            + ")(*"
+                                            + str(tempval[0])
+                                            + "),ctypes.POINTER(ctypes.c_"
+                                            + temptype
+                                            + ")))"
+                                        )
+                                    )
+                                )
+                            elif list(args.values())[i]["array"] == 1:
+                                testsc.append(
+                                    (eval("ctypes.c_" + temptype) * len(tempval))(
+                                        *tempval
+                                    )
+                                )
                     else:
-                        typelist.append(list(args.values())[i]["type"])
-                        testsp.append(
-                            data[pytype(list(args.values())[i]["type"])]["num"]
-                        )
-                        testsc.append(
-                            data[pytype(list(args.values())[i]["type"])]["num"]
-                        )
+                        typelist.append(temptype)
+                        testsp.append(data["success"]["num"])
+                        testsc.append(data["success"]["num"])
 
                 funcPy = getattr(kernels, name)
                 funcC = getattr(lib, name)
@@ -636,6 +730,8 @@ def gentests(funcs, htokens):
                             assert testsp[i][j] == testsc[i][j]
                     else:
                         assert testsp[i] == testsc[i]
+                for i in pindex:
+                    assert testsp[i][0] == pval[i].value
 
 
 if __name__ == "__main__":

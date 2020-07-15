@@ -2979,10 +2979,12 @@ ERROR awkward_ListOffsetArray_rpad_axis1(
     int64_t rangeval =
       (T)(fromoffsets[offsetsoffset + i + 1] - fromoffsets[offsetsoffset + i]);
     for (int64_t j = 0; j < rangeval; j++) {
-      toindex[count++] = (T)fromoffsets[offsetsoffset + i] + j;
+      toindex[count] = (T)fromoffsets[offsetsoffset + i] + j;
+      count++;
     }
     for (int64_t j = rangeval; j < target; j++) {
-      toindex[count++] = -1;
+      toindex[count] = -1;
+      count++;
     }
   }
   return success();

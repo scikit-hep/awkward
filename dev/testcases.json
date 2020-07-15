@@ -1,77 +1,160 @@
 {
-    "int": {
-        "success": {
-            "ListArray": [
-                {"ListArray-starts": [2, 0, 2, 1, 3],
-                "ListArray-stops":  [3, 0, 3, 2, 3],
-                "ListArray-starts-offset": 0,
-                "ListArray-stops-offset": 0,
-                "ListArray-diff": [0, 1, 1, 2, 3, 3],
-                "ListArray-diff-offset": 0},
-                {"ListArray-starts": [99, 99, 99, 0, 3, 3, 5],
-                "ListArray-stops":  [99, 99, 99, 3, 3, 5, 10],
-                "ListArray-starts-offset": 3,
-                "ListArray-stops-offset": 3}
-                ],
-            "NumpyArray": [],
-            "RegularArray": [
-                {"RegularArray-size": 3,
-                "RegularArray-diff": [0, 3, 6, 9, 12, 15],
-                "RegularArray-diff-offset": 0}
+    "success": {
+        "ListArray": {
+            "ListArray-starts": [
+                {"int": [2, 0, 2, 1, 3]},
+                {"int": [99, 99, 99, 0, 3, 3, 5]}
             ],
-            "ListOffsetArray": [
-                {"ListOffsetArray-offsets": [6, 8, 18, 7, 9, 2, 11, 20, 6, 10, 5],
-                "ListOffsetArray-offsets-offset": 1,
-                "ListOffsetArray-incr": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
-                "ListOffsetArray-incr-offset": 0},
-                {"ListOffsetArray-offsets": [48, 50, 51, 55, 55, 55, 58, 66, 81, 92, 92, 97, 101, 113, 116, 126, 148, 153, 172, 194, 201, 204, 214, 231, 233, 248, 252, 253, 253, 263, 289, 301, 325],
-                "ListOffsetArray-offsets-offset": 0}
+            "ListArray-stops": [
+                {"int": [3, 0, 3, 2, 3]},
+                {"int": [99, 99, 99, 3, 3, 5, 10]}
             ],
-            "IndexedArray": [
-                {"IndexedArray-index": [1, 0, 0, 1, 1, 1, 0],
-                "IndexedArray-index-offset": 1,
-                "IndexedArray-mask": [1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
-                "IndexedArray-mask-unsigned": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                "IndexedArray-mask-offset": 1},
-                {"IndexedArray-index": [14, 1, 27, 25, 3, 27, 7, 33, 18, 13],
-                "IndexedArray-index-offset": 0}
+            "ListArray-starts-offset": [
+                {"int": 0},
+                {"int": 3}
             ],
-            "IndexedOptionArray": [],
-            "ByteMaskedArray": [
-                {"ByteMaskedArray-mask": [true, true, true, true, true],
-                "ByteMaskedArray-mask-offset": 0,
-                "ByteMaskedArray-valid_when": 1}
+            "ListArray-stops-offset": [
+                {"int": 0},
+                {"int": 3}
             ],
-            "BitMaskedArray": [],
-            "UnionArray": [
-                {"UnionArray-tags": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                "UnionArray-tags-offset": 1,
-                "UnionArray-index": [1, 2, 6, 6, 3, 7, 3, 8, 3, 8, 8],
-                "UnionArray-index-offset": 0,
-                "UnionArray-offsets-raw": [[1, 2, 1, 2, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4]],
-                "UnionArray-offsets-offsets": 0}
+            "ListArray-diff": [
+                {"int": [0, 1, 1, 2, 3, 3]}
+            ],
+            "ListArray-diff-offset": [
+                {"int": 0}
+            ],
+            "ListArray-replacement": [
+                {"bool": true}
             ]
         },
-        "failure": {},
-        "arr": [1, 2, 3, 4, 5],
+        "NumpyArray": {
+            "NumpyArray-ptr": [
+                {"int": [5, 8, 7, 0, 8, 6, 12, 7, 4, 6, 8, 7, 8, 4, 4, 4, 9, 10, 6, 5, 3, 5, 7, 5, 3],
+                 "bool": [true, false, true, true, false, true, true, true, true, false, true, true, false, false, false, true, true, false, true, false, true]}
+            ],
+            "NumpyArray-out-offset": [
+                {"int": 0}
+            ],
+            "NumpyArray-ptr-offset": [
+                {"int": 0}
+            ]
+        },
+        "RegularArray": {
+            "RegularArray-size": [
+                {"int": 3}
+            ],
+            "RegularArray-diff": [
+                {"int": [0, 3, 6, 9, 12, 15]}
+            ],
+            "RegularArray-diff-offset": [
+                {"int": 0}
+            ]
+        },
+        "ListOffsetArray": {
+            "ListOffsetArray-offsets": [
+                {"int": [6, 8, 18, 7, 9, 2, 11, 20, 6, 10, 5]},
+                {"int": [48, 50, 51, 55, 55, 55, 58, 66, 81, 92, 92, 97, 101, 113, 116, 126, 148, 153, 172, 194, 201, 204, 214, 231, 233, 248, 252, 253, 253, 263, 289, 301, 325]}
+            ],
+            "ListOffsetArray-offsets-offset": [
+                {"int": 1},
+                {"int": 0}
+            ],
+            "ListOffsetArray-incr": [
+                {"int": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]}
+            ],
+            "ListOffsetArray-incr-offset": [
+                {"int": 0}
+            ]
+        },
+        "IndexedArray": {
+            "IndexedArray-index": [
+                {"int": [1, 0, 0, 1, 1, 1, 0]},
+                {"int": [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]}
+            ],
+            "IndexedArray-index-offset": [
+                {"int": 1},
+                {"int": 0}
+            ],
+            "IndexedArray-mask": [
+                {"int": [1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0]}
+            ],
+            "IndexedArray-mask-unsigned": [
+                {"int": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}
+            ],
+            "IndexedArray-mask-offset": [
+                {"int": 1}
+            ],
+            "IndexedArray-isoption": [
+                {"bool": true}
+            ],
+            "IndexedArray-lencontent": [
+                {"int": -1}
+            ]
+        },
+        "ByteMaskedArray": {
+            "ByteMaskedArray-mask": [
+                {"int": [true, true, true, true, true]},
+                {"int": [true, false, true, true, true]}
+            ],
+            "ByteMaskedArray-mask-offset": [
+                {"int": 0},
+                {"int": 0}
+            ],
+            "ByteMaskedArray-valid_when": [
+                {"bool": 1},
+                {"bool": 0}
+            ]
+        },
+        "UnionArray": {
+            "UnionArray-tags": [
+                {"int": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
+                {"int": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]}
+            ],
+            "UnionArray-tags-offset": [
+                {"int": 1},
+                {"int": 0}
+            ],
+            "UnionArray-index": [
+                {"int": [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]},
+                {"int": [3, 4, 7, 7, 4, 1, 3, 8, 3, 8, 8]}
+            ],
+            "UnionArray-index-offset": [
+                {"int": 0},
+                {"int": 1}
+            ],
+            "UnionArray-offsets-raw": [
+                {"int": [[1, 2, 1, 2, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4]]}
+            ],
+            "UnionArray-offsets-offsets": [
+                {"int": [0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1]}
+            ],
+            "UnionArray-lencontents": [
+                {"int": [7, 8, 9, 10, 11, 12]}
+            ],
+            "UnionArray-innerwhich": [
+                {"int": 1}
+            ],
+            "UnionArray-outerwhich": [
+                {"int": 0}
+            ]
+        },
+        "BitMaskedArray": {
+            "BitMaskedArray-mask": [
+                {"int": [244, 251, 64, 0, 133]}
+            ],
+            "BitMaskedArray-mask-offset": [
+                {"int": 1}
+            ],
+            "BitMaskedArray-valid_when": [
+                {"bool": true}
+            ],
+            "BitMaskedArray-lsb_order": [
+                {"int": 0}
+            ]
+        },
         "num": 3
     },
-    "bool": {
-        "success": {
-            "IndexedArray": [
-                {"IndexedArray-index": [1, 0, 0, 1, 1, 1, 0],
-                "IndexedArray-index-offset": 1,
-                "IndexedArray-mask": [1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
-                "IndexedArray-mask-unsigned": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                "IndexedArray-mask-offset": 1},
-                {"IndexedArray-index": [14, 1, 27, 25, 3, 27, 7, 33, 18, 13],
-                "IndexedArray-index-offset": 0}
-            ],
-            "ByteMaskedArray": [
-                {"ByteMaskedArray-mask": [true, true, true, true, true],
-                "ByteMaskedArray-mask-offset": 0,
-                "ByteMaskedArray-valid_when": 1}
-            ]
-        }
+    "failure": {
+
     }
 }
