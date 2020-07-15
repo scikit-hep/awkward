@@ -1440,6 +1440,16 @@ namespace awkward {
         return false;
       }
 
+      // if (dtype_ != rawother->dtype()  &&
+      //     (dtype_ == util::dtype::datetime64  ||  rawother->dtype() == util::dtype::datetime64)) {
+      //   return false;
+      // }
+
+      // if (dtype_ != rawother->dtype()  &&
+      //     (dtype_ == util::dtype::timediff64  ||  rawother->dtype() == util::dtype::timediff64)) {
+      //   return false;
+      // }
+
       if (!(dtype_ == util::dtype::boolean  ||
             dtype_ == util::dtype::int8  ||
             dtype_ == util::dtype::int16  ||
@@ -1566,81 +1576,96 @@ namespace awkward {
 
     NumpyArray contiguous_self = contiguous();
     if (NumpyArray* rawother = dynamic_cast<NumpyArray*>(other.get())) {
+      util::dtype dtype = util::dtype::NOT_PRIMITIVE;
+
       if (ndim() != rawother->ndim()) {
         throw std::invalid_argument(
           "cannot merge arrays with different shapes");
       }
 
-      std::string other_format = rawother->format();
-
-      ssize_t itemsize;
-      std::string format;
-      util::dtype dtype;
-      if (format_.compare("d") == 0  ||
-          format_.compare("f") == 0  ||
-          other_format.compare("d") == 0  ||
-          other_format.compare("f") == 0) {
-        itemsize = 8;
-        format = "d";
+      if (dtype_ == util::dtype::complex256  ||
+          rawother->dtype() == util::dtype::complex256) {
+        dtype = util::dtype::complex256;
+      }
+      else if (dtype_ == util::dtype::complex64  ||
+               dtype_ == util::dtype::complex128  ||
+               rawother->dtype() == util::dtype::complex64  ||
+               rawother->dtype() == util::dtype::complex128) {
+        dtype = util::dtype::complex128;
+      }
+      else if (dtype_ == util::dtype::float128  ||
+               rawother->dtype() == util::dtype::float128) {
+        dtype = util::dtype::float128;
+      }
+      else if (dtype_ == util::dtype::float16  ||
+               dtype_ == util::dtype::float32  ||
+               dtype_ == util::dtype::float64  ||
+               rawother->dtype() == util::dtype::float16  ||
+               rawother->dtype() == util::dtype::float32  ||
+               rawother->dtype() == util::dtype::float64) {
         dtype = util::dtype::float64;
       }
-#if defined _MSC_VER || defined __i386__
-      else if (format_.compare("Q") == 0  &&  other_format.compare("Q") == 0) {
-        itemsize = 8;
-        format = "Q";
-#else
-      else if (format_.compare("L") == 0  &&  other_format.compare("L") == 0) {
-        itemsize = 8;
-        format = "L";
-#endif
+      else if (dtype_ == util::dtype::uint64  &&
+               rawother->dtype() == util::dtype::uint64) {
+        dtype = util::dtype::uint64;
+      }
+      else if ((dtype_ == util::dtype::uint64  &&
+                (rawother->dtype() == util::dtype::int8  ||
+                 rawother->dtype() == util::dtype::int16  ||
+                 rawother->dtype() == util::dtype::int32  ||
+                 rawother->dtype() == util::dtype::int64))  ||
+               (rawother->dtype() == util::dtype::uint64  &&
+                (dtype_ == util::dtype::int8  ||
+                 dtype_ == util::dtype::int16  ||
+                 dtype_ == util::dtype::int32  ||
+                 dtype_ == util::dtype::int64))) {
+        dtype = util::dtype::float64;
+      }
+      else if (dtype == util::dtype::uint64  ||
+               rawother->dtype() == util::dtype::uint64) {
+        dtype = util::dtype::uint64;
+      }
+      else if (dtype_ == util::dtype::int8  ||
+               dtype_ == util::dtype::int16  ||
+               dtype_ == util::dtype::int32  ||
+               dtype_ == util::dtype::int64  ||
+               dtype_ == util::dtype::uint8  ||
+               dtype_ == util::dtype::uint16  ||
+               dtype_ == util::dtype::uint32  ||
+               rawother->dtype() == util::dtype::int8  ||
+               rawother->dtype() == util::dtype::int16  ||
+               rawother->dtype() == util::dtype::int32  ||
+               rawother->dtype() == util::dtype::int64  ||
+               rawother->dtype() == util::dtype::uint8  ||
+               rawother->dtype() == util::dtype::uint16  ||
+               rawother->dtype() == util::dtype::uint32) {
         dtype = util::dtype::int64;
       }
-      else if (format_.compare("q") == 0  ||
-               format_.compare("Q") == 0  ||
-               format_.compare("l") == 0  ||
-               format_.compare("L") == 0  ||
-               format_.compare("i") == 0  ||
-               format_.compare("I") == 0  ||
-               format_.compare("h") == 0  ||
-               format_.compare("H") == 0  ||
-               format_.compare("b") == 0  ||
-               format_.compare("B") == 0  ||
-               format_.compare("c") == 0  ||
-               other_format.compare("q") == 0  ||
-               other_format.compare("Q") == 0  ||
-               other_format.compare("l") == 0  ||
-               other_format.compare("L") == 0  ||
-               other_format.compare("i") == 0  ||
-               other_format.compare("I") == 0  ||
-               other_format.compare("h") == 0  ||
-               other_format.compare("H") == 0  ||
-               other_format.compare("b") == 0  ||
-               other_format.compare("B") == 0  ||
-               other_format.compare("c") == 0) {
-        itemsize = 8;
-#if defined _MSC_VER || defined __i386__
-        format = "q";
-#else
-        format = "l";
-#endif
-        dtype = util::dtype::int64;
-      }
-      else if (format_.compare("?") == 0  &&  other_format.compare("?") == 0) {
-        itemsize = 1;
-        format = "?";
+      else if (dtype_ == util::dtype::boolean  &&
+               rawother->dtype() == util::dtype::boolean) {
         dtype = util::dtype::boolean;
       }
+      // else if (dtype_ == util::dtype::datetime64  &&
+      //          rawother->dtype() == util::dtype::datetime64) {
+      //   dtype = util::dtype::datetime64;
+      // }
+      // else if (dtype_ == util::dtype::timedelta64  &&
+      //          rawother->dtype() == util::dtype::timedelta64) {
+      //   dtype = util::dtype::timedelta64;
+      // }
       else {
         throw std::invalid_argument(
           std::string("cannot merge Numpy format \"") + format_
-          + std::string("\" with \"") + other_format + std::string("\""));
+          + std::string("\" with \"") + rawother->format() + std::string("\""));
       }
+
+      int64_t itemsize = util::dtype_to_itemsize(dtype);
 
       std::vector<ssize_t> other_shape = rawother->shape();
       std::vector<ssize_t> shape;
       std::vector<ssize_t> strides;
       shape.push_back(shape_[0] + other_shape[0]);
-      strides.push_back(itemsize);
+      strides.push_back((ssize_t)itemsize);
       int64_t self_flatlength = shape_[0];
       int64_t other_flatlength = other_shape[0];
       for (int64_t i = ((int64_t)shape_.size()) - 1;  i > 0;  i--) {
@@ -1654,8 +1679,9 @@ namespace awkward {
         other_flatlength *= (int64_t)shape_[(size_t)i];
       }
 
-      std::shared_ptr<void> ptr(
-        kernel::ptr_alloc<uint8_t>(ptr_lib_, ((int64_t)itemsize)*(self_flatlength + other_flatlength)));
+      std::shared_ptr<void> ptr(kernel::ptr_alloc<uint8_t>(
+          ptr_lib_,
+          itemsize*(self_flatlength + other_flatlength)));
 
       NumpyArray contiguous_other = rawother->contiguous();
 
@@ -1665,442 +1691,369 @@ namespace awkward {
                               contiguous_other.itemsize());
 
       struct Error err;
-      if (format.compare("d") == 0) {
-        if (format_.compare("d") == 0) {
-          err = kernel::NumpyArray_fill<double, double>(
+
+      if (dtype == util::dtype::complex256) {
+        throw std::runtime_error("FIXME: merge to complex256 not implemented");
+      }
+      else if (dtype == util::dtype::complex128) {
+        throw std::runtime_error("FIXME: merge to complex128 not implemented");
+      }
+      else if (dtype == util::dtype::float128) {
+        throw std::runtime_error("FIXME: merge to float128 not implemented");
+      }
+      else if (dtype == util::dtype::float64) {
+        switch (dtype_) {
+        case util::dtype::boolean:
+          err = kernel::NumpyArray_fill_frombool<double>(
                   reinterpret_cast<double*>(ptr.get()),
                   0,
-                  reinterpret_cast<double*>(contiguous_self.ptr().get()),
+                  reinterpret_cast<bool*>(contiguous_self.ptr().get()),
                   self_offset,
                   self_flatlength);
-        }
-        else if (format_.compare("f") == 0) {
+          break;
+        case util::dtype::int8:
+          err = kernel::NumpyArray_fill<int8_t, double>(
+                  reinterpret_cast<double*>(ptr.get()),
+                  0,
+                  reinterpret_cast<int8_t*>(contiguous_self.ptr().get()),
+                  self_offset,
+                  self_flatlength);
+          break;
+        case util::dtype::int16:
+          err = kernel::NumpyArray_fill<int16_t, double>(
+                  reinterpret_cast<double*>(ptr.get()),
+                  0,
+                  reinterpret_cast<int16_t*>(contiguous_self.ptr().get()),
+                  self_offset,
+                  self_flatlength);
+          break;
+        case util::dtype::int32:
+          err = kernel::NumpyArray_fill<int32_t, double>(
+                  reinterpret_cast<double*>(ptr.get()),
+                  0,
+                  reinterpret_cast<int32_t*>(contiguous_self.ptr().get()),
+                  self_offset,
+                  self_flatlength);
+          break;
+        case util::dtype::int64:
+          err = kernel::NumpyArray_fill<int64_t, double>(
+                  reinterpret_cast<double*>(ptr.get()),
+                  0,
+                  reinterpret_cast<int64_t*>(contiguous_self.ptr().get()),
+                  self_offset,
+                  self_flatlength);
+          break;
+        case util::dtype::uint8:
+          err = kernel::NumpyArray_fill<uint8_t, double>(
+                  reinterpret_cast<double*>(ptr.get()),
+                  0,
+                  reinterpret_cast<uint8_t*>(contiguous_self.ptr().get()),
+                  self_offset,
+                  self_flatlength);
+          break;
+        case util::dtype::uint16:
+          err = kernel::NumpyArray_fill<uint16_t, double>(
+                  reinterpret_cast<double*>(ptr.get()),
+                  0,
+                  reinterpret_cast<uint16_t*>(contiguous_self.ptr().get()),
+                  self_offset,
+                  self_flatlength);
+          break;
+        case util::dtype::uint32:
+          err = kernel::NumpyArray_fill<uint32_t, double>(
+                  reinterpret_cast<double*>(ptr.get()),
+                  0,
+                  reinterpret_cast<uint32_t*>(contiguous_self.ptr().get()),
+                  self_offset,
+                  self_flatlength);
+          break;
+        case util::dtype::uint64:
+          err = kernel::NumpyArray_fill<uint64_t, double>(
+                  reinterpret_cast<double*>(ptr.get()),
+                  0,
+                  reinterpret_cast<uint64_t*>(contiguous_self.ptr().get()),
+                  self_offset,
+                  self_flatlength);
+          break;
+        case util::dtype::float16:
+          throw std::runtime_error("FIXME: merge NumpyArray from float16 not implemented");
+        case util::dtype::float32:
           err = kernel::NumpyArray_fill<float, double>(
                   reinterpret_cast<double*>(ptr.get()),
                   0,
                   reinterpret_cast<float*>(contiguous_self.ptr().get()),
                   self_offset,
                   self_flatlength);
-        }
-#if defined _MSC_VER || defined __i386__
-        else if (format_.compare("q") == 0) {
-#else
-        else if (format_.compare("l") == 0) {
-#endif
-          err = kernel::NumpyArray_fill<int64_t, double>(
+          break;
+        case util::dtype::float64:
+          err = kernel::NumpyArray_fill<double, double>(
                   reinterpret_cast<double*>(ptr.get()),
                   0,
-                  reinterpret_cast<int64_t*>(contiguous_self.ptr().get()),
+                  reinterpret_cast<double*>(contiguous_self.ptr().get()),
                   self_offset,
                   self_flatlength);
-        }
-#if defined _MSC_VER || defined __i386__
-          else if (format_.compare("Q") == 0) {
-#else
-          else if (format_.compare("L") == 0) {
-#endif
-          err = kernel::NumpyArray_fill<uint64_t, double>(
-                  reinterpret_cast<double*>(ptr.get()),
-                  0,
-                  reinterpret_cast<uint64_t*>(contiguous_self.ptr().get()),
-                  self_offset,
-                  self_flatlength);
-        }
-#if defined _MSC_VER || defined __i386__
-          else if (format_.compare("l") == 0) {
-#else
-          else if (format_.compare("i") == 0) {
-#endif
-          err = kernel::NumpyArray_fill<int32_t , double>(
-                  reinterpret_cast<double*>(ptr.get()),
-                  0,
-                  reinterpret_cast<int32_t*>(contiguous_self.ptr().get()),
-                  self_offset,
-                  self_flatlength);
-        }
-#if defined _MSC_VER || defined __i386__
-          else if (format_.compare("L") == 0) {
-#else
-          else if (format_.compare("I") == 0) {
-#endif
-          err = kernel::NumpyArray_fill<uint32_t, double>(
-                  reinterpret_cast<double*>(ptr.get()),
-                  0,
-                  reinterpret_cast<uint32_t*>(contiguous_self.ptr().get()),
-                  self_offset,
-                  self_flatlength);
-        }
-        else if (format_.compare("h") == 0) {
-          err = kernel::NumpyArray_fill<int16_t, double>(
-                  reinterpret_cast<double*>(ptr.get()),
-                  0,
-                  reinterpret_cast<int16_t*>(contiguous_self.ptr().get()),
-                  self_offset,
-                  self_flatlength);
-        }
-        else if (format_.compare("H") == 0) {
-          err = kernel::NumpyArray_fill<uint16_t, double>(
-                  reinterpret_cast<double*>(ptr.get()),
-                  0,
-                  reinterpret_cast<uint16_t*>(contiguous_self.ptr().get()),
-                  self_offset,
-                  self_flatlength);
-        }
-        else if (format_.compare("b") == 0) {
-          err = kernel::NumpyArray_fill<int8_t, double>(
-                  reinterpret_cast<double*>(ptr.get()),
-                  0,
-                  reinterpret_cast<int8_t*>(contiguous_self.ptr().get()),
-                  self_offset,
-                  self_flatlength);
-        }
-        else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
-          err = kernel::NumpyArray_fill<uint8_t, double>(
-                  reinterpret_cast<double*>(ptr.get()),
-                  0,
-                  reinterpret_cast<uint8_t*>(contiguous_self.ptr().get()),
-                  self_offset,
-                  self_flatlength);
-        }
-        else if (format_.compare("?") == 0) {
-          err = kernel::NumpyArray_fill_frombool<double>(
-                  reinterpret_cast<double*>(ptr.get()),
-                  0,
-                  reinterpret_cast<bool*>(contiguous_self.ptr().get()),
-                  self_offset,
-                  self_flatlength);
-        }
-        else {
-          throw std::invalid_argument(
-            std::string("cannot merge Numpy format \"") + format_
-            + std::string("\" with \"") + other_format + std::string("\""));
+          break;
+        default:
+          throw std::runtime_error(
+            std::string("unhandled merge case: LHS from ") +
+            util::dtype_to_name(dtype_) + std::string(" to ") +
+            util::dtype_to_name(dtype));
         }
         util::handle_error(err, classname(), nullptr);
 
-        if (other_format.compare("d") == 0) {
-          err = kernel::NumpyArray_fill<double, double>(
+        switch (rawother->dtype()) {
+        case util::dtype::boolean:
+          err = kernel::NumpyArray_fill_frombool<double>(
                   reinterpret_cast<double*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<double*>(contiguous_other.ptr().get()),
+                  reinterpret_cast<bool*>(contiguous_other.ptr().get()),
                   other_offset,
                   other_flatlength);
-        }
-        else if (other_format.compare("f") == 0) {
+          break;
+        case util::dtype::int8:
+          err = kernel::NumpyArray_fill<int8_t, double>(
+                  reinterpret_cast<double*>(ptr.get()),
+                  self_flatlength,
+                  reinterpret_cast<int8_t*>(contiguous_other.ptr().get()),
+                  other_offset,
+                  other_flatlength);
+          break;
+        case util::dtype::int16:
+          err = kernel::NumpyArray_fill<int16_t, double>(
+                  reinterpret_cast<double*>(ptr.get()),
+                  self_flatlength,
+                  reinterpret_cast<int16_t*>(contiguous_other.ptr().get()),
+                  other_offset,
+                  other_flatlength);
+          break;
+        case util::dtype::int32:
+          err = kernel::NumpyArray_fill<int32_t , double>(
+                  reinterpret_cast<double*>(ptr.get()),
+                  self_flatlength,
+                  reinterpret_cast<int32_t*>(contiguous_other.ptr().get()),
+                  other_offset,
+                  other_flatlength);
+          break;
+        case util::dtype::int64:
+          err = kernel::NumpyArray_fill<int64_t, double>(
+                  reinterpret_cast<double*>(ptr.get()),
+                  self_flatlength,
+                  reinterpret_cast<int64_t*>(contiguous_other.ptr().get()),
+                  other_offset,
+                  other_flatlength);
+          break;
+        case util::dtype::uint8:
+          err = kernel::NumpyArray_fill<uint8_t, double>(
+                  reinterpret_cast<double*>(ptr.get()),
+                  self_flatlength,
+                  reinterpret_cast<uint8_t*>(contiguous_other.ptr().get()),
+                  other_offset,
+                  other_flatlength);
+          break;
+        case util::dtype::uint16:
+          err = kernel::NumpyArray_fill<uint16_t, double>(
+                  reinterpret_cast<double*>(ptr.get()),
+                  self_flatlength,
+                  reinterpret_cast<uint16_t*>(contiguous_other.ptr().get()),
+                  other_offset,
+                  other_flatlength);
+          break;
+        case util::dtype::uint32:
+          err = kernel::NumpyArray_fill<uint32_t, double>(
+                  reinterpret_cast<double*>(ptr.get()),
+                  self_flatlength,
+                  reinterpret_cast<uint32_t*>(contiguous_other.ptr().get()),
+                  other_offset,
+                  other_flatlength);
+          break;
+        case util::dtype::uint64:
+          err = kernel::NumpyArray_fill<uint64_t, double>(
+                  reinterpret_cast<double*>(ptr.get()),
+                  self_flatlength,
+                  reinterpret_cast<uint64_t*>(contiguous_other.ptr().get()),
+                  other_offset,
+                  other_flatlength);
+          break;
+        case util::dtype::float16:
+          throw std::runtime_error("FIXME: merge NumpyArray from float16 not implemented");
+        case util::dtype::float32:
           err = kernel::NumpyArray_fill<float, double>(
                   reinterpret_cast<double*>(ptr.get()),
                   self_flatlength,
                   reinterpret_cast<float*>(contiguous_other.ptr().get()),
                   other_offset,
                   other_flatlength);
-        }
-#if defined _MSC_VER || defined __i386__
-        else if (other_format.compare("q") == 0) {
-#else
-        else if (other_format.compare("l") == 0) {
-#endif
-          err = kernel::NumpyArray_fill<int64_t, double>(
+          break;
+        case util::dtype::float64:
+          err = kernel::NumpyArray_fill<double, double>(
                   reinterpret_cast<double*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<int64_t*>(contiguous_other.ptr().get()),
+                  reinterpret_cast<double*>(contiguous_other.ptr().get()),
                   other_offset,
                   other_flatlength);
-        }
-#if defined _MSC_VER || defined __i386__
-          else if (other_format.compare("Q") == 0) {
-#else
-          else if (other_format.compare("L") == 0) {
-#endif
-          err = kernel::NumpyArray_fill<uint64_t, double>(
-                  reinterpret_cast<double*>(ptr.get()),
-                  self_flatlength,
-                  reinterpret_cast<uint64_t*>(contiguous_other.ptr().get()),
-                  other_offset,
-                  other_flatlength);
-        }
-#if defined _MSC_VER || defined __i386__
-          else if (other_format.compare("l") == 0) {
-#else
-          else if (other_format.compare("i") == 0) {
-#endif
-          err = kernel::NumpyArray_fill<int32_t , double>(
-                  reinterpret_cast<double*>(ptr.get()),
-                  self_flatlength,
-                  reinterpret_cast<int32_t*>(contiguous_other.ptr().get()),
-                  other_offset,
-                  other_flatlength);
-        }
-#if defined _MSC_VER || defined __i386__
-          else if (other_format.compare("L") == 0) {
-#else
-          else if (other_format.compare("I") == 0) {
-#endif
-          err = kernel::NumpyArray_fill<uint32_t, double>(
-                  reinterpret_cast<double*>(ptr.get()),
-                  self_flatlength,
-                  reinterpret_cast<uint32_t*>(contiguous_other.ptr().get()),
-                  other_offset,
-                  other_flatlength);
-        }
-        else if (other_format.compare("h") == 0) {
-          err = kernel::NumpyArray_fill<int16_t, double>(
-                  reinterpret_cast<double*>(ptr.get()),
-                  self_flatlength,
-                  reinterpret_cast<int16_t*>(contiguous_other.ptr().get()),
-                  other_offset,
-                  other_flatlength);
-        }
-        else if (other_format.compare("H") == 0) {
-          err = kernel::NumpyArray_fill<uint16_t, double>(
-                  reinterpret_cast<double*>(ptr.get()),
-                  self_flatlength,
-                  reinterpret_cast<uint16_t*>(contiguous_other.ptr().get()),
-                  other_offset,
-                  other_flatlength);
-        }
-        else if (other_format.compare("b") == 0) {
-          err = kernel::NumpyArray_fill<int8_t, double>(
-                  reinterpret_cast<double*>(ptr.get()),
-                  self_flatlength,
-                  reinterpret_cast<int8_t*>(contiguous_other.ptr().get()),
-                  other_offset,
-                  other_flatlength);
-        }
-        else if (other_format.compare("B") == 0  ||
-                 format_.compare("c") == 0) {
-          err = kernel::NumpyArray_fill<uint8_t, double>(
-                  reinterpret_cast<double*>(ptr.get()),
-                  self_flatlength,
-                  reinterpret_cast<uint8_t*>(contiguous_other.ptr().get()),
-                  other_offset,
-                  other_flatlength);
-        }
-        else if (other_format.compare("?") == 0) {
-          err = kernel::NumpyArray_fill_frombool<double>(
-                  reinterpret_cast<double*>(ptr.get()),
-                  self_flatlength,
-                  reinterpret_cast<bool*>(contiguous_other.ptr().get()),
-                  other_offset,
-                  other_flatlength);
-        }
-        else {
-          throw std::invalid_argument(
-            std::string("cannot merge Numpy format \"") + format_
-            + std::string("\" with \"") + other_format + std::string("\""));
+          break;
+        default:
+          throw std::runtime_error(
+            std::string("unhandled merge case: RHS from ") +
+            util::dtype_to_name(rawother->dtype()) + std::string(" to ") +
+            util::dtype_to_name(dtype));
         }
         util::handle_error(err, classname(), nullptr);
       }
 
-      else if (format.compare("Q") == 0  ||  format.compare("L") == 0) {
-        err = kernel::NumpyArray_fill<uint64_t, uint64_t>(
-                reinterpret_cast<uint64_t*>(ptr.get()),
-                0,
-                reinterpret_cast<uint64_t*>(contiguous_self.ptr().get()),
-                self_offset,
-                self_flatlength);
-        util::handle_error(err, classname(), nullptr);
-        err = kernel::NumpyArray_fill<uint64_t, uint64_t>(
-                reinterpret_cast<uint64_t*>(ptr.get()),
-                self_flatlength,
-                reinterpret_cast<uint64_t*>(contiguous_other.ptr().get()),
-                other_offset,
-                other_flatlength);
-        util::handle_error(err, classname(), nullptr);
+      else if (dtype == util::dtype::uint64) {
+        throw std::runtime_error("FIXME: merge to uint64 not implemented");
       }
 
-      else if (itemsize == 8) {
-#if defined _MSC_VER || defined __i386__
-        if (format_.compare("q") == 0) {
-#else
-        if (format_.compare("l") == 0) {
-#endif
-          err = kernel::NumpyArray_fill<int64_t, int64_t>(
-                  reinterpret_cast<int64_t*>(ptr.get()),
-                  0,
-                  reinterpret_cast<int64_t*>(contiguous_self.ptr().get()),
-                  self_offset,
-                  self_flatlength);
-        }
-#if defined _MSC_VER || defined __i386__
-          else if (format_.compare("Q") == 0) {
-#else
-          else if (format_.compare("L") == 0) {
-#endif
-          err = kernel::NumpyArray_fill_to64_fromU64(
-                  reinterpret_cast<int64_t*>(ptr.get()),
-                  0,
-                  reinterpret_cast<uint64_t*>(contiguous_self.ptr().get()),
-                  self_offset,
-                  self_flatlength);
-        }
-#if defined _MSC_VER || defined __i386__
-          else if (format_.compare("l") == 0) {
-#else
-          else if (format_.compare("i") == 0) {
-#endif
-          err = kernel::NumpyArray_fill<int32_t, int64_t>(
-                  reinterpret_cast<int64_t*>(ptr.get()),
-                  0,
-                  reinterpret_cast<int32_t*>(contiguous_self.ptr().get()),
-                  self_offset,
-                  self_flatlength);
-        }
-#if defined _MSC_VER || defined __i386__
-          else if (format_.compare("L") == 0) {
-#else
-          else if (format_.compare("I") == 0) {
-#endif
-          err = kernel::NumpyArray_fill<uint32_t, int64_t>(
-                  reinterpret_cast<int64_t*>(ptr.get()),
-                  0,
-                  reinterpret_cast<uint32_t*>(contiguous_self.ptr().get()),
-                  self_offset,
-                  self_flatlength);
-        }
-        else if (format_.compare("h") == 0) {
-          err = kernel::NumpyArray_fill<int16_t, int64_t>(
-                  reinterpret_cast<int64_t*>(ptr.get()),
-                  0,
-                  reinterpret_cast<int16_t*>(contiguous_self.ptr().get()),
-                  self_offset,
-                  self_flatlength);
-        }
-        else if (format_.compare("H") == 0) {
-          err = kernel::NumpyArray_fill<uint16_t, int64_t>(
-                  reinterpret_cast<int64_t*>(ptr.get()),
-                  0,
-                  reinterpret_cast<uint16_t*>(contiguous_self.ptr().get()),
-                  self_offset,
-                  self_flatlength);
-        }
-        else if (format_.compare("b") == 0) {
-          err = kernel::NumpyArray_fill<int8_t, int64_t>(
-                  reinterpret_cast<int64_t*>(ptr.get()),
-                  0,
-                  reinterpret_cast<int8_t*>(contiguous_self.ptr().get()),
-                  self_offset,
-                  self_flatlength);
-        }
-        else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
-          err = kernel::NumpyArray_fill<uint8_t, int64_t>(
-                  reinterpret_cast<int64_t*>(ptr.get()),
-                  0,
-                  reinterpret_cast<uint8_t*>(contiguous_self.ptr().get()),
-                  self_offset,
-                  self_flatlength);
-        }
-        else if (format_.compare("?") == 0) {
+      else if (dtype == util::dtype::int64) {
+        switch (dtype_) {
+        case util::dtype::boolean:
           err = kernel::NumpyArray_fill_frombool<int64_t>(
                   reinterpret_cast<int64_t*>(ptr.get()),
                   0,
                   reinterpret_cast<bool*>(contiguous_self.ptr().get()),
                   self_offset,
                   self_flatlength);
-        }
-        else {
-          throw std::invalid_argument(
-            std::string("cannot merge Numpy format \"") + format_
-            + std::string("\" with \"") + other_format + std::string("\""));
+          break;
+        case util::dtype::int8:
+          err = kernel::NumpyArray_fill<int8_t, int64_t>(
+                  reinterpret_cast<int64_t*>(ptr.get()),
+                  0,
+                  reinterpret_cast<int8_t*>(contiguous_self.ptr().get()),
+                  self_offset,
+                  self_flatlength);
+          break;
+        case util::dtype::int16:
+          err = kernel::NumpyArray_fill<int16_t, int64_t>(
+                  reinterpret_cast<int64_t*>(ptr.get()),
+                  0,
+                  reinterpret_cast<int16_t*>(contiguous_self.ptr().get()),
+                  self_offset,
+                  self_flatlength);
+          break;
+        case util::dtype::int32:
+          err = kernel::NumpyArray_fill<int32_t, int64_t>(
+                  reinterpret_cast<int64_t*>(ptr.get()),
+                  0,
+                  reinterpret_cast<int32_t*>(contiguous_self.ptr().get()),
+                  self_offset,
+                  self_flatlength);
+          break;
+        case util::dtype::int64:
+          err = kernel::NumpyArray_fill<int64_t, int64_t>(
+                  reinterpret_cast<int64_t*>(ptr.get()),
+                  0,
+                  reinterpret_cast<int64_t*>(contiguous_self.ptr().get()),
+                  self_offset,
+                  self_flatlength);
+          break;
+        case util::dtype::uint8:
+          err = kernel::NumpyArray_fill<uint8_t, int64_t>(
+                  reinterpret_cast<int64_t*>(ptr.get()),
+                  0,
+                  reinterpret_cast<uint8_t*>(contiguous_self.ptr().get()),
+                  self_offset,
+                  self_flatlength);
+          break;
+        case util::dtype::uint16:
+          err = kernel::NumpyArray_fill<uint16_t, int64_t>(
+                  reinterpret_cast<int64_t*>(ptr.get()),
+                  0,
+                  reinterpret_cast<uint16_t*>(contiguous_self.ptr().get()),
+                  self_offset,
+                  self_flatlength);
+          break;
+        case util::dtype::uint32:
+          err = kernel::NumpyArray_fill<uint32_t, int64_t>(
+                  reinterpret_cast<int64_t*>(ptr.get()),
+                  0,
+                  reinterpret_cast<uint32_t*>(contiguous_self.ptr().get()),
+                  self_offset,
+                  self_flatlength);
+          break;
+        default:
+          throw std::runtime_error(
+            std::string("unhandled merge case: LHS from ") +
+            util::dtype_to_name(dtype_) + std::string(" to ") +
+            util::dtype_to_name(dtype));
         }
         util::handle_error(err, classname(), nullptr);
 
-#if defined _MSC_VER || defined __i386__
-        if (other_format.compare("q") == 0) {
-#else
-        if (other_format.compare("l") == 0) {
-#endif
-          err = kernel::NumpyArray_fill<int64_t, int64_t>(
-                  reinterpret_cast<int64_t*>(ptr.get()),
-                  self_flatlength,
-                  reinterpret_cast<int64_t*>(contiguous_other.ptr().get()),
-                  other_offset,
-                  other_flatlength);
-        }
-#if defined _MSC_VER || defined __i386__
-          else if (other_format.compare("Q") == 0) {
-#else
-          else if (other_format.compare("L") == 0) {
-#endif
-          err = kernel::NumpyArray_fill_to64_fromU64(
-                  reinterpret_cast<int64_t*>(ptr.get()),
-                  self_flatlength,
-                  reinterpret_cast<uint64_t*>(contiguous_other.ptr().get()),
-                  other_offset,
-                  other_flatlength);
-        }
-#if defined _MSC_VER || defined __i386__
-          else if (other_format.compare("l") == 0) {
-#else
-          else if (other_format.compare("i") == 0) {
-#endif
-          err = kernel::NumpyArray_fill<int32_t, int64_t>(
-                  reinterpret_cast<int64_t*>(ptr.get()),
-                  self_flatlength,
-                  reinterpret_cast<int32_t*>(contiguous_other.ptr().get()),
-                  other_offset,
-                  other_flatlength);
-        }
-#if defined _MSC_VER || defined __i386__
-          else if (other_format.compare("L") == 0) {
-#else
-          else if (other_format.compare("I") == 0) {
-#endif
-          err = kernel::NumpyArray_fill<uint32_t, int64_t>(
-                  reinterpret_cast<int64_t*>(ptr.get()),
-                  self_flatlength,
-                  reinterpret_cast<uint32_t*>(contiguous_other.ptr().get()),
-                  other_offset,
-                  other_flatlength);
-        }
-        else if (other_format.compare("h") == 0) {
-          err = kernel::NumpyArray_fill<int16_t, int64_t>(
-                  reinterpret_cast<int64_t*>(ptr.get()),
-                  self_flatlength,
-                  reinterpret_cast<int16_t*>(contiguous_other.ptr().get()),
-                  other_offset,
-                  other_flatlength);
-        }
-        else if (other_format.compare("H") == 0) {
-          err = kernel::NumpyArray_fill<uint16_t, int64_t>(
-                  reinterpret_cast<int64_t*>(ptr.get()),
-                  self_flatlength,
-                  reinterpret_cast<uint16_t*>(contiguous_other.ptr().get()),
-                  other_offset,
-                  other_flatlength);
-        }
-        else if (other_format.compare("b") == 0) {
-          err = kernel::NumpyArray_fill<int8_t, int64_t>(
-                  reinterpret_cast<int64_t*>(ptr.get()),
-                  self_flatlength,
-                  reinterpret_cast<int8_t*>(contiguous_other.ptr().get()),
-                  other_offset,
-                  other_flatlength);
-        }
-        else if (other_format.compare("B") == 0  ||
-                 format_.compare("c") == 0) {
-          err = kernel::NumpyArray_fill<uint8_t, int64_t>(
-                  reinterpret_cast<int64_t*>(ptr.get()),
-                  self_flatlength,
-                  reinterpret_cast<uint8_t*>(contiguous_other.ptr().get()),
-                  other_offset,
-                  other_flatlength);
-        }
-        else if (other_format.compare("?") == 0) {
+        switch (rawother->dtype()) {
+        case util::dtype::boolean:
           err = kernel::NumpyArray_fill_frombool<int64_t>(
                   reinterpret_cast<int64_t*>(ptr.get()),
                   self_flatlength,
                   reinterpret_cast<bool*>(contiguous_other.ptr().get()),
                   other_offset,
                   other_flatlength);
-        }
-        else {
-          throw std::invalid_argument(
-            std::string("cannot merge Numpy format \"") + format_
-            + std::string("\" with \"") + other_format + std::string("\""));
+          break;
+        case util::dtype::int8:
+          err = kernel::NumpyArray_fill<int8_t, int64_t>(
+                  reinterpret_cast<int64_t*>(ptr.get()),
+                  self_flatlength,
+                  reinterpret_cast<int8_t*>(contiguous_other.ptr().get()),
+                  other_offset,
+                  other_flatlength);
+          break;
+        case util::dtype::int16:
+          err = kernel::NumpyArray_fill<int16_t, int64_t>(
+                  reinterpret_cast<int64_t*>(ptr.get()),
+                  self_flatlength,
+                  reinterpret_cast<int16_t*>(contiguous_other.ptr().get()),
+                  other_offset,
+                  other_flatlength);
+          break;
+        case util::dtype::int32:
+          err = kernel::NumpyArray_fill<int32_t, int64_t>(
+                  reinterpret_cast<int64_t*>(ptr.get()),
+                  self_flatlength,
+                  reinterpret_cast<int32_t*>(contiguous_other.ptr().get()),
+                  other_offset,
+                  other_flatlength);
+          break;
+        case util::dtype::int64:
+          err = kernel::NumpyArray_fill<int64_t, int64_t>(
+                  reinterpret_cast<int64_t*>(ptr.get()),
+                  self_flatlength,
+                  reinterpret_cast<int64_t*>(contiguous_other.ptr().get()),
+                  other_offset,
+                  other_flatlength);
+          break;
+        case util::dtype::uint8:
+          err = kernel::NumpyArray_fill<uint8_t, int64_t>(
+                  reinterpret_cast<int64_t*>(ptr.get()),
+                  self_flatlength,
+                  reinterpret_cast<uint8_t*>(contiguous_other.ptr().get()),
+                  other_offset,
+                  other_flatlength);
+          break;
+        case util::dtype::uint16:
+          err = kernel::NumpyArray_fill<uint16_t, int64_t>(
+                  reinterpret_cast<int64_t*>(ptr.get()),
+                  self_flatlength,
+                  reinterpret_cast<uint16_t*>(contiguous_other.ptr().get()),
+                  other_offset,
+                  other_flatlength);
+          break;
+        case util::dtype::uint32:
+          err = kernel::NumpyArray_fill<uint32_t, int64_t>(
+                  reinterpret_cast<int64_t*>(ptr.get()),
+                  self_flatlength,
+                  reinterpret_cast<uint32_t*>(contiguous_other.ptr().get()),
+                  other_offset,
+                  other_flatlength);
+          break;
+        default:
+          throw std::runtime_error(
+            std::string("unhandled merge case: RHS from ") +
+            util::dtype_to_name(rawother->dtype()) + std::string(" to ") +
+            util::dtype_to_name(dtype));
         }
         util::handle_error(err, classname(), nullptr);
       }
 
-      else {
+      else if (dtype == util::dtype::boolean) {
         err = kernel::NumpyArray_fill_frombool<bool>(
                 reinterpret_cast<bool*>(ptr.get()),
                 0,
@@ -2117,14 +2070,19 @@ namespace awkward {
         util::handle_error(err, classname(), nullptr);
       }
 
+      else {
+        throw std::runtime_error(
+          std::string("unhandled merge case: to ") + util::dtype_to_name(dtype));
+      }
+
       return std::make_shared<NumpyArray>(Identities::none(),
                                           parameters_,
                                           ptr,
                                           shape,
                                           strides,
                                           0,
-                                          itemsize,
-                                          format,
+                                          (ssize_t)itemsize,
+                                          util::dtype_to_format(dtype),
                                           dtype);
     }
 
