@@ -62,9 +62,29 @@ namespace awkward {
     const std::string
     dtype_to_format(dtype dt);
 
-    /// @brief Convert a dtype enum into an itemsize
+    /// @brief Convert a dtype enum into an itemsize.
     int64_t
     dtype_to_itemsize(dtype dt);
+
+    /// @brief True if the dtype is a non-boolean integer (signed or unsigned).
+    bool
+    is_integer(dtype dt);
+
+    /// @brief True if the dtype is a signed integer.
+    bool
+    is_signed(dtype dt);
+
+    /// @brief True if the dtype is an unsigned integer.
+    bool
+    is_unsigned(dtype dt);
+
+    /// @brief True if the dtype is a non-complex floating point number.
+    bool
+    is_real(dtype dt);
+
+    /// @brief True if the dtype is a complex number.
+    bool
+    is_complex(dtype dt);
 
     /// @brief If the Error struct contains an error message (from a
     /// cpu-kernel through the C interface), raise that error as a C++

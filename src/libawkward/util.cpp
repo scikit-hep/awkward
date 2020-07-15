@@ -318,6 +318,74 @@ namespace awkward {
       }
     }
 
+    bool
+    is_integer(dtype dt) {
+      switch (dt) {
+      case dtype::int8:
+      case dtype::int16:
+      case dtype::int32:
+      case dtype::int64:
+      case dtype::uint8:
+      case dtype::uint16:
+      case dtype::uint32:
+      case dtype::uint64:
+        return true;
+      default:
+        return false;
+      }
+    }
+
+    bool
+    is_signed(dtype dt) {
+      switch (dt) {
+      case dtype::int8:
+      case dtype::int16:
+      case dtype::int32:
+      case dtype::int64:
+        return true;
+      default:
+        return false;
+      }
+    }
+
+    bool
+    is_unsigned(dtype dt) {
+      switch (dt) {
+      case dtype::uint8:
+      case dtype::uint16:
+      case dtype::uint32:
+      case dtype::uint64:
+        return true;
+      default:
+        return false;
+      }
+    }
+
+    bool
+    is_real(dtype dt) {
+      switch (dt) {
+      case dtype::float16:
+      case dtype::float32:
+      case dtype::float64:
+      case dtype::float128:
+        return true;
+      default:
+        return false;
+      }
+    }
+
+    bool
+    is_complex(dtype dt) {
+      switch (dt) {
+      case dtype::complex64:
+      case dtype::complex128:
+      case dtype::complex256:
+        return true;
+      default:
+        return false;
+      }
+    }
+
     void
     handle_error(const struct Error& err,
                  const std::string& classname,

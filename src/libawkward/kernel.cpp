@@ -4806,321 +4806,7 @@ namespace kernel {
   }
 
   template<>
-  ERROR NumpyArray_fill(
-    double *toptr,
-    int64_t tooffset,
-    const double *fromptr,
-    int64_t fromoffset,
-    int64_t length) {
-    return awkward_NumpyArray_fill_todouble_fromdouble(
-      toptr,
-      tooffset,
-      fromptr,
-      fromoffset,
-      length);
-  }
-
-  template<>
-  ERROR NumpyArray_fill(
-    double *toptr,
-    int64_t tooffset,
-    const float *fromptr,
-    int64_t fromoffset,
-    int64_t length) {
-    return awkward_NumpyArray_fill_todouble_fromfloat(
-      toptr,
-      tooffset,
-      fromptr,
-      fromoffset,
-      length);
-  }
-
-  template<>
-  ERROR NumpyArray_fill(
-    double *toptr,
-    int64_t tooffset,
-    const int64_t *fromptr,
-    int64_t fromoffset,
-    int64_t length) {
-    return awkward_NumpyArray_fill_todouble_from64(
-      toptr,
-      tooffset,
-      fromptr,
-      fromoffset,
-      length);
-  }
-
-  template<>
-  ERROR NumpyArray_fill(
-    double *toptr,
-    int64_t tooffset,
-    const uint64_t *fromptr,
-    int64_t fromoffset,
-    int64_t length) {
-    return awkward_NumpyArray_fill_todouble_fromU64(
-      toptr,
-      tooffset,
-      fromptr,
-      fromoffset,
-      length);
-  }
-
-  template<>
-  ERROR NumpyArray_fill(
-    double *toptr,
-    int64_t tooffset,
-    const int32_t *fromptr,
-    int64_t fromoffset,
-    int64_t length) {
-    return awkward_NumpyArray_fill_todouble_from32(
-      toptr,
-      tooffset,
-      fromptr,
-      fromoffset,
-      length);
-  }
-
-  template<>
-  ERROR NumpyArray_fill(
-    double *toptr,
-    int64_t tooffset,
-    const uint32_t *fromptr,
-    int64_t fromoffset,
-    int64_t length) {
-    return awkward_NumpyArray_fill_todouble_fromU32(
-      toptr,
-      tooffset,
-      fromptr,
-      fromoffset,
-      length);
-  }
-
-  template<>
-  ERROR NumpyArray_fill(
-    double *toptr,
-    int64_t tooffset,
-    const int16_t *fromptr,
-    int64_t fromoffset,
-    int64_t length) {
-    return awkward_NumpyArray_fill_todouble_from16(
-      toptr,
-      tooffset,
-      fromptr,
-      fromoffset,
-      length);
-  }
-
-  template<>
-  ERROR NumpyArray_fill(
-    double *toptr,
-    int64_t tooffset,
-    const uint16_t *fromptr,
-    int64_t fromoffset,
-    int64_t length) {
-    return awkward_NumpyArray_fill_todouble_fromU16(
-      toptr,
-      tooffset,
-      fromptr,
-      fromoffset,
-      length);
-  }
-
-  template<>
-  ERROR NumpyArray_fill(
-    double *toptr,
-    int64_t tooffset,
-    const int8_t *fromptr,
-    int64_t fromoffset,
-    int64_t length) {
-    return awkward_NumpyArray_fill_todouble_from8(
-      toptr,
-      tooffset,
-      fromptr,
-      fromoffset,
-      length);
-  }
-
-  template<>
-  ERROR NumpyArray_fill(
-    double *toptr,
-    int64_t tooffset,
-    const uint8_t *fromptr,
-    int64_t fromoffset,
-    int64_t length) {
-    return awkward_NumpyArray_fill_todouble_fromU8(
-      toptr,
-      tooffset,
-      fromptr,
-      fromoffset,
-      length);
-  }
-
-  template<>
-  ERROR NumpyArray_fill_frombool(
-    double *toptr,
-    int64_t tooffset,
-    const bool *fromptr,
-    int64_t fromoffset,
-    int64_t length) {
-    return awkward_NumpyArray_fill_todouble_frombool(
-      toptr,
-      tooffset,
-      fromptr,
-      fromoffset,
-      length);
-  }
-
-  template<>
-  ERROR NumpyArray_fill(
-    uint64_t *toptr,
-    int64_t tooffset,
-    const uint64_t *fromptr,
-    int64_t fromoffset,
-    int64_t length) {
-    return awkward_NumpyArray_fill_toU64_fromU64(
-      toptr,
-      tooffset,
-      fromptr,
-      fromoffset,
-      length);
-  }
-
-  template<>
-  ERROR NumpyArray_fill(
-    int64_t *toptr,
-    int64_t tooffset,
-    const int64_t *fromptr,
-    int64_t fromoffset,
-    int64_t length) {
-    return awkward_NumpyArray_fill_to64_from64(
-      toptr,
-      tooffset,
-      fromptr,
-      fromoffset,
-      length);
-  }
-
-  ERROR NumpyArray_fill_to64_fromU64(
-    int64_t *toptr,
-    int64_t tooffset,
-    const uint64_t *fromptr,
-    int64_t fromoffset,
-    int64_t length) {
-    return awkward_NumpyArray_fill_to64_fromU64(
-      toptr,
-      tooffset,
-      fromptr,
-      fromoffset,
-      length);
-  }
-
-  template<>
-  ERROR NumpyArray_fill(
-    int64_t *toptr,
-    int64_t tooffset,
-    const int32_t *fromptr,
-    int64_t fromoffset,
-    int64_t length) {
-    return awkward_NumpyArray_fill_to64_from32(
-      toptr,
-      tooffset,
-      fromptr,
-      fromoffset,
-      length);
-  }
-
-  template<>
-  ERROR NumpyArray_fill(
-    int64_t *toptr,
-    int64_t tooffset,
-    const uint32_t *fromptr,
-    int64_t fromoffset,
-    int64_t length) {
-    return awkward_NumpyArray_fill_to64_fromU32(
-      toptr,
-      tooffset,
-      fromptr,
-      fromoffset,
-      length);
-  }
-
-  template<>
-  ERROR NumpyArray_fill(
-    int64_t *toptr,
-    int64_t tooffset,
-    const int16_t *fromptr,
-    int64_t fromoffset,
-    int64_t length) {
-    return awkward_NumpyArray_fill_to64_from16(
-      toptr,
-      tooffset,
-      fromptr,
-      fromoffset,
-      length);
-  }
-
-  template<>
-  ERROR NumpyArray_fill(
-    int64_t *toptr,
-    int64_t tooffset,
-    const uint16_t *fromptr,
-    int64_t fromoffset,
-    int64_t length) {
-    return awkward_NumpyArray_fill_to64_fromU16(
-      toptr,
-      tooffset,
-      fromptr,
-      fromoffset,
-      length);
-  }
-
-  template<>
-  ERROR NumpyArray_fill(
-    int64_t *toptr,
-    int64_t tooffset,
-    const int8_t *fromptr,
-    int64_t fromoffset,
-    int64_t length) {
-    return awkward_NumpyArray_fill_to64_from8(
-      toptr,
-      tooffset,
-      fromptr,
-      fromoffset,
-      length);
-  }
-
-  template<>
-  ERROR NumpyArray_fill(
-    int64_t *toptr,
-    int64_t tooffset,
-    const uint8_t *fromptr,
-    int64_t fromoffset,
-    int64_t length) {
-    return awkward_NumpyArray_fill_to64_fromU8(
-      toptr,
-      tooffset,
-      fromptr,
-      fromoffset,
-      length);
-  }
-
-  template<>
-  ERROR NumpyArray_fill_frombool(
-    int64_t *toptr,
-    int64_t tooffset,
-    const bool *fromptr,
-    int64_t fromoffset,
-    int64_t length) {
-    return awkward_NumpyArray_fill_to64_frombool(
-      toptr,
-      tooffset,
-      fromptr,
-      fromoffset,
-      length);
-  }
-
-  template<>
-  ERROR NumpyArray_fill_frombool(
+  ERROR NumpyArray_fill_frombool<bool>(
     bool *toptr,
     int64_t tooffset,
     const bool *fromptr,
@@ -5135,13 +4821,838 @@ namespace kernel {
   }
 
   template<>
-  ERROR NumpyArray_fill(
+  ERROR NumpyArray_fill_frombool<int8_t>(
+    int8_t *toptr,
+    int64_t tooffset,
+    const bool *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_toint8_frombool(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill_frombool<int16_t>(
+    int16_t *toptr,
+    int64_t tooffset,
+    const bool *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_toint16_frombool(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill_frombool<int32_t>(
+    int32_t *toptr,
+    int64_t tooffset,
+    const bool *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_toint32_frombool(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill_frombool<int64_t>(
+    int64_t *toptr,
+    int64_t tooffset,
+    const bool *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_toint64_frombool(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill_frombool<uint8_t>(
+    uint8_t *toptr,
+    int64_t tooffset,
+    const bool *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_touint8_frombool(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill_frombool<uint16_t>(
+    uint16_t *toptr,
+    int64_t tooffset,
+    const bool *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_touint16_frombool(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill_frombool<uint32_t>(
+    uint32_t *toptr,
+    int64_t tooffset,
+    const bool *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_touint32_frombool(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill_frombool<uint64_t>(
+    uint64_t *toptr,
+    int64_t tooffset,
+    const bool *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_touint64_frombool(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill_frombool<float>(
+    float *toptr,
+    int64_t tooffset,
+    const bool *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_tofloat32_frombool(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill_frombool<double>(
+    double *toptr,
+    int64_t tooffset,
+    const bool *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_tofloat64_frombool(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<int8_t, int8_t>(
     int8_t *toptr,
     int64_t tooffset,
     const int8_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    return awkward_NumpyArray_fill_tobyte_frombyte(
+    return awkward_NumpyArray_fill_toint8_fromint8(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<int8_t, int16_t>(
+    int16_t *toptr,
+    int64_t tooffset,
+    const int8_t *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_toint16_fromint8(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<int8_t, int32_t>(
+    int32_t *toptr,
+    int64_t tooffset,
+    const int8_t *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_toint32_fromint8(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<int8_t, int64_t>(
+    int64_t *toptr,
+    int64_t tooffset,
+    const int8_t *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_toint64_fromint8(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<int8_t, float>(
+    float *toptr,
+    int64_t tooffset,
+    const int8_t *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_tofloat32_fromint8(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<int8_t, double>(
+    double *toptr,
+    int64_t tooffset,
+    const int8_t *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_tofloat64_fromint8(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<int16_t, int16_t>(
+    int16_t *toptr,
+    int64_t tooffset,
+    const int16_t *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_toint16_fromint16(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<int16_t, int32_t>(
+    int32_t *toptr,
+    int64_t tooffset,
+    const int16_t *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_toint32_fromint16(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<int16_t, int64_t>(
+    int64_t *toptr,
+    int64_t tooffset,
+    const int16_t *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_toint64_fromint16(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<int16_t, float>(
+    float *toptr,
+    int64_t tooffset,
+    const int16_t *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_tofloat32_fromint16(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<int16_t, double>(
+    double *toptr,
+    int64_t tooffset,
+    const int16_t *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_tofloat64_fromint16(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<int32_t, int32_t>(
+    int32_t *toptr,
+    int64_t tooffset,
+    const int32_t *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_toint32_fromint32(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<int32_t, int64_t>(
+    int64_t *toptr,
+    int64_t tooffset,
+    const int32_t *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_toint64_fromint32(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<int32_t, float>(
+    float *toptr,
+    int64_t tooffset,
+    const int32_t *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_tofloat32_fromint32(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<int32_t, double>(
+    double *toptr,
+    int64_t tooffset,
+    const int32_t *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_tofloat64_fromint32(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<int64_t, int64_t>(
+    int64_t *toptr,
+    int64_t tooffset,
+    const int64_t *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_toint64_fromint64(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<int64_t, float>(
+    float *toptr,
+    int64_t tooffset,
+    const int64_t *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_tofloat32_fromint64(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<int64_t, double>(
+    double *toptr,
+    int64_t tooffset,
+    const int64_t *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_tofloat64_fromint64(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<uint8_t, int16_t>(
+    int16_t *toptr,
+    int64_t tooffset,
+    const uint8_t *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_toint16_fromuint8(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<uint8_t, int32_t>(
+    int32_t *toptr,
+    int64_t tooffset,
+    const uint8_t *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_toint32_fromuint8(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<uint8_t, int64_t>(
+    int64_t *toptr,
+    int64_t tooffset,
+    const uint8_t *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_toint64_fromuint8(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<uint8_t, uint8_t>(
+    uint8_t *toptr,
+    int64_t tooffset,
+    const uint8_t *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_touint8_fromuint8(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<uint8_t, uint16_t>(
+    uint16_t *toptr,
+    int64_t tooffset,
+    const uint8_t *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_touint16_fromuint8(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<uint8_t, uint32_t>(
+    uint32_t *toptr,
+    int64_t tooffset,
+    const uint8_t *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_touint32_fromuint8(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<uint8_t, uint64_t>(
+    uint64_t *toptr,
+    int64_t tooffset,
+    const uint8_t *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_touint64_fromuint8(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<uint8_t, float>(
+    float *toptr,
+    int64_t tooffset,
+    const uint8_t *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_tofloat32_fromuint8(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<uint8_t, double>(
+    double *toptr,
+    int64_t tooffset,
+    const uint8_t *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_tofloat64_fromuint8(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<uint16_t, int32_t>(
+    int32_t *toptr,
+    int64_t tooffset,
+    const uint16_t *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_toint32_fromuint16(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<uint16_t, int64_t>(
+    int64_t *toptr,
+    int64_t tooffset,
+    const uint16_t *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_toint64_fromuint16(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<uint16_t, uint16_t>(
+    uint16_t *toptr,
+    int64_t tooffset,
+    const uint16_t *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_touint16_fromuint16(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<uint16_t, uint32_t>(
+    uint32_t *toptr,
+    int64_t tooffset,
+    const uint16_t *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_touint32_fromuint16(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<uint16_t, uint64_t>(
+    uint64_t *toptr,
+    int64_t tooffset,
+    const uint16_t *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_touint64_fromuint16(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<uint16_t, float>(
+    float *toptr,
+    int64_t tooffset,
+    const uint16_t *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_tofloat32_fromuint16(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<uint16_t, double>(
+    double *toptr,
+    int64_t tooffset,
+    const uint16_t *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_tofloat64_fromuint16(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<uint32_t, int64_t>(
+    int64_t *toptr,
+    int64_t tooffset,
+    const uint32_t *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_toint64_fromuint32(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<uint32_t, uint32_t>(
+    uint32_t *toptr,
+    int64_t tooffset,
+    const uint32_t *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_touint32_fromuint32(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<uint32_t, uint64_t>(
+    uint64_t *toptr,
+    int64_t tooffset,
+    const uint32_t *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_touint64_fromuint32(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<uint32_t, float>(
+    float *toptr,
+    int64_t tooffset,
+    const uint32_t *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_tofloat32_fromuint32(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<uint32_t, double>(
+    double *toptr,
+    int64_t tooffset,
+    const uint32_t *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_tofloat64_fromuint32(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<uint64_t, uint64_t>(
+    uint64_t *toptr,
+    int64_t tooffset,
+    const uint64_t *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_touint64_fromuint64(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<uint64_t, int64_t>(
+    int64_t *toptr,
+    int64_t tooffset,
+    const uint64_t *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_toint64_fromuint64(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<uint64_t, float>(
+    float *toptr,
+    int64_t tooffset,
+    const uint64_t *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_tofloat32_fromuint64(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<uint64_t, double>(
+    double *toptr,
+    int64_t tooffset,
+    const uint64_t *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_tofloat64_fromuint64(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<float, float>(
+    float *toptr,
+    int64_t tooffset,
+    const float *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_tofloat32_fromfloat32(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<float, double>(
+    double *toptr,
+    int64_t tooffset,
+    const float *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_tofloat64_fromfloat32(
+      toptr,
+      tooffset,
+      fromptr,
+      fromoffset,
+      length);
+  }
+
+  template<>
+  ERROR NumpyArray_fill<double, double>(
+    double *toptr,
+    int64_t tooffset,
+    const double *fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+    return awkward_NumpyArray_fill_tofloat64_fromfloat64(
       toptr,
       tooffset,
       fromptr,
