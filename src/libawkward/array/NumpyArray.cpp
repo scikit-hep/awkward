@@ -70,92 +70,16 @@ namespace awkward {
   const TypePtr
   NumpyForm::type(const util::TypeStrs& typestrs) const {
     TypePtr out;
-    if (format_.compare("d") == 0) {
-      out = std::make_shared<PrimitiveType>(
-                parameters_,
-                util::gettypestr(parameters_, typestrs),
-                util::dtype::float64);
-    }
-    else if (format_.compare("f") == 0) {
-      out = std::make_shared<PrimitiveType>(
-                parameters_,
-                util::gettypestr(parameters_, typestrs),
-                util::dtype::float32);
-    }
-#if defined _MSC_VER || defined __i386__
-    else if (format_.compare("q") == 0) {
-#else
-    else if (format_.compare("l") == 0) {
-#endif
-      out = std::make_shared<PrimitiveType>(
-                parameters_,
-                util::gettypestr(parameters_, typestrs),
-                util::dtype::int64);
-    }
-#if defined _MSC_VER || defined __i386__
-    else if (format_.compare("Q") == 0) {
-#else
-    else if (format_.compare("L") == 0) {
-#endif
-      out = std::make_shared<PrimitiveType>(
-                parameters_,
-                util::gettypestr(parameters_, typestrs),
-                util::dtype::uint64);
-    }
-#if defined _MSC_VER || defined __i386__
-    else if (format_.compare("l") == 0) {
-#else
-    else if (format_.compare("i") == 0) {
-#endif
-      out = std::make_shared<PrimitiveType>(
-                parameters_,
-                util::gettypestr(parameters_, typestrs),
-                util::dtype::int32);
-    }
-#if defined _MSC_VER || defined __i386__
-    else if (format_.compare("L") == 0) {
-#else
-    else if (format_.compare("I") == 0) {
-#endif
-      out = std::make_shared<PrimitiveType>(
-                parameters_,
-                util::gettypestr(parameters_, typestrs),
-                util::dtype::uint32);
-    }
-    else if (format_.compare("h") == 0) {
-      out = std::make_shared<PrimitiveType>(
-                parameters_,
-                util::gettypestr(parameters_, typestrs),
-                util::dtype::int16);
-    }
-    else if (format_.compare("H") == 0) {
-      out = std::make_shared<PrimitiveType>(
-                parameters_,
-                util::gettypestr(parameters_, typestrs),
-                util::dtype::uint16);
-    }
-    else if (format_.compare("b") == 0) {
-      out = std::make_shared<PrimitiveType>(
-                parameters_,
-                util::gettypestr(parameters_, typestrs),
-                util::dtype::int8);
-    }
-    else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
-      out = std::make_shared<PrimitiveType>(
-                parameters_,
-                util::gettypestr(parameters_, typestrs),
-                util::dtype::uint8);
-    }
-    else if (format_.compare("?") == 0) {
-      out = std::make_shared<PrimitiveType>(
-                parameters_,
-                util::gettypestr(parameters_, typestrs),
-                util::dtype::boolean);
-    }
-    else {
+    if (dtype_ == util::dtype::NOT_PRIMITIVE) {
       throw std::invalid_argument(
         std::string("Numpy format \"") + format_
         + std::string("\" cannot be expressed as a PrimitiveType"));
+    }
+    else {
+      out = std::make_shared<PrimitiveType>(
+                 parameters_,
+                 util::gettypestr(parameters_, typestrs),
+                 dtype_);
     }
     for (int64_t i = ((int64_t)inner_shape_.size()) - 1;  i >= 0;  i--) {
       out = std::make_shared<RegularType>(
@@ -718,43 +642,71 @@ namespace awkward {
       out << "\" ";
     }
     out << "data=\"";
-#if defined _MSC_VER || defined __i386__
-    if (ndim() == 1  &&  format_.compare("l") == 0) {
-#else
-    if (ndim() == 1  &&  format_.compare("i") == 0) {
-#endif
+    if (ndim() == 1  &&  dtype_ == util::dtype::boolean) {
+      tostring_as<bool>(ptr_lib(),
+                        out,
+                        reinterpret_cast<bool*>(byteptr()),
+                        length());
+    }
+    else if (ndim() == 1  &&  dtype_ == util::dtype::int8) {
+      tostring_as<int8_t>(ptr_lib(),
+                          out,
+                          reinterpret_cast<int8_t*>(byteptr()),
+                          length());
+    }
+    else if (ndim() == 1  &&  dtype_ == util::dtype::int16) {
+      tostring_as<int16_t>(ptr_lib(),
+                           out,
+                           reinterpret_cast<int16_t*>(byteptr()),
+                           length());
+    }
+    else if (ndim() == 1  &&  dtype_ == util::dtype::int32) {
       tostring_as<int32_t>(ptr_lib(),
                            out,
                            reinterpret_cast<int32_t*>(byteptr()),
                            length());
     }
-#if defined _MSC_VER || defined __i386__
-    else if (ndim() == 1  &&  format_.compare("q") == 0) {
-#else
-    else if (ndim() == 1  &&  format_.compare("l") == 0) {
-#endif
+    else if (ndim() == 1  &&  dtype_ == util::dtype::int64) {
       tostring_as<int64_t>(ptr_lib(),
                            out,
                            reinterpret_cast<int64_t*>(byteptr()),
                            length());
     }
-    else if (ndim() == 1  &&  format_.compare("f") == 0) {
+    else if (ndim() == 1  &&  dtype_ == util::dtype::uint8) {
+      tostring_as<uint8_t>(ptr_lib(),
+                           out,
+                           reinterpret_cast<uint8_t*>(byteptr()),
+                           length());
+    }
+    else if (ndim() == 1  &&  dtype_ == util::dtype::uint16) {
+      tostring_as<uint16_t>(ptr_lib(),
+                            out,
+                            reinterpret_cast<uint16_t*>(byteptr()),
+                            length());
+    }
+    else if (ndim() == 1  &&  dtype_ == util::dtype::uint32) {
+      tostring_as<uint32_t>(ptr_lib(),
+                            out,
+                            reinterpret_cast<uint32_t*>(byteptr()),
+                            length());
+    }
+    else if (ndim() == 1  &&  dtype_ == util::dtype::uint64) {
+      tostring_as<uint64_t>(ptr_lib(),
+                            out,
+                            reinterpret_cast<uint64_t*>(byteptr()),
+                            length());
+    }
+    else if (ndim() == 1  &&  dtype_ == util::dtype::float32) {
       tostring_as<float>(ptr_lib(),
                          out,
                          reinterpret_cast<float*>(byteptr()),
                          length());
     }
-    else if (ndim() == 1  &&  format_.compare("d") == 0) {
+    else if (ndim() == 1  &&  dtype_ == util::dtype::float64) {
       tostring_as<double>(ptr_lib(),
                           out,
                           reinterpret_cast<double*>(byteptr()),
                           length());
-    }
-    else if (ndim() == 1  &&  format_.compare("?") == 0) {
-      tostring_as<bool>(ptr_lib(),
-                        out,
-                        reinterpret_cast<bool*>(byteptr()),
-                        length());
     }
     else {
       out << "0x ";
