@@ -2435,106 +2435,105 @@ namespace awkward {
     }
     else {
       std::shared_ptr<void> ptr;
-      if (format_.compare("?") == 0) {
+      switch (dtype_) {
+      case util::dtype::boolean:
         ptr = reducer.apply_bool(reinterpret_cast<bool*>(ptr_.get()),
                                  byteoffset_ / itemsize_,
                                  starts,
                                  parents,
                                  outlength);
-      }
-      else if (format_.compare("b") == 0) {
+        break;
+      case util::dtype::int8:
         ptr = reducer.apply_int8(reinterpret_cast<int8_t*>(ptr_.get()),
                                  byteoffset_ / itemsize_,
                                  starts,
                                  parents,
                                  outlength);
-      }
-      else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
-        ptr = reducer.apply_uint8(reinterpret_cast<uint8_t*>(ptr_.get()),
-                                  byteoffset_ / itemsize_,
-                                  starts,
-                                  parents,
-                                  outlength);
-      }
-      else if (format_.compare("h") == 0) {
+        break;
+      case util::dtype::int16:
         ptr = reducer.apply_int16(reinterpret_cast<int16_t*>(ptr_.get()),
                                   byteoffset_ / itemsize_,
                                   starts,
                                   parents,
                                   outlength);
-      }
-      else if (format_.compare("H") == 0) {
-        ptr = reducer.apply_uint16(reinterpret_cast<uint16_t*>(ptr_.get()),
-                                   byteoffset_ / itemsize_,
-                                   starts,
-                                   parents,
-                                   outlength);
-      }
-#if defined _MSC_VER || defined __i386__
-      else if (format_.compare("l") == 0) {
-#else
-      else if (format_.compare("i") == 0) {
-#endif
+        break;
+      case util::dtype::int32:
         ptr = reducer.apply_int32(reinterpret_cast<int32_t*>(ptr_.get()),
                                   byteoffset_ / itemsize_,
                                   starts,
                                   parents,
                                   outlength);
-      }
-#if defined _MSC_VER || defined __i386__
-      else if (format_.compare("L") == 0) {
-#else
-      else if (format_.compare("I") == 0) {
-#endif
-        ptr = reducer.apply_uint32(reinterpret_cast<uint32_t*>(ptr_.get()),
-                                   byteoffset_ / itemsize_,
-                                   starts,
-                                   parents,
-                                   outlength);
-      }
-#if defined _MSC_VER || defined __i386__
-      else if (format_.compare("q") == 0) {
-#else
-      else if (format_.compare("l") == 0) {
-#endif
+        break;
+      case util::dtype::int64:
         ptr = reducer.apply_int64(reinterpret_cast<int64_t*>(ptr_.get()),
                                   byteoffset_ / itemsize_,
                                   starts,
                                   parents,
                                   outlength);
-      }
-#if defined _MSC_VER || defined __i386__
-      else if (format_.compare("Q") == 0) {
-#else
-      else if (format_.compare("L") == 0) {
-#endif
+        break;
+      case util::dtype::uint8:
+        ptr = reducer.apply_uint8(reinterpret_cast<uint8_t*>(ptr_.get()),
+                                  byteoffset_ / itemsize_,
+                                  starts,
+                                  parents,
+                                  outlength);
+        break;
+      case util::dtype::uint16:
+        ptr = reducer.apply_uint16(reinterpret_cast<uint16_t*>(ptr_.get()),
+                                   byteoffset_ / itemsize_,
+                                   starts,
+                                   parents,
+                                   outlength);
+        break;
+      case util::dtype::uint32:
+        ptr = reducer.apply_uint32(reinterpret_cast<uint32_t*>(ptr_.get()),
+                                   byteoffset_ / itemsize_,
+                                   starts,
+                                   parents,
+                                   outlength);
+        break;
+      case util::dtype::uint64:
         ptr = reducer.apply_uint64(reinterpret_cast<uint64_t*>(ptr_.get()),
                                    byteoffset_ / itemsize_,
                                    starts,
                                    parents,
                                    outlength);
-      }
-      else if (format_.compare("f") == 0) {
+        break;
+      case util::dtype::float16:
+        throw std::runtime_error("FIXME: reducers on float16");
+      case util::dtype::float32:
         ptr = reducer.apply_float32(reinterpret_cast<float*>(ptr_.get()),
                                     byteoffset_ / itemsize_,
                                     starts,
                                     parents,
                                     outlength);
-      }
-      else if (format_.compare("d") == 0) {
+        break;
+      case util::dtype::float64:
         ptr = reducer.apply_float64(reinterpret_cast<double*>(ptr_.get()),
                                     byteoffset_ / itemsize_,
                                     starts,
                                     parents,
                                     outlength);
-      }
-      else {
+        break;
+      case util::dtype::float128:
+        throw std::runtime_error("FIXME: reducers on float128");
+      case util::dtype::complex64:
+        throw std::runtime_error("FIXME: reducers on complex64");
+      case util::dtype::complex128:
+        throw std::runtime_error("FIXME: reducers on complex128");
+      case util::dtype::complex256:
+        throw std::runtime_error("FIXME: reducers on complex256");
+      // case util::dtype::datetime64:
+      //   throw std::runtime_error("FIXME: reducers on datetime64");
+      // case util::dtype:::timedelta64:
+      //   throw std::runtime_error("FIXME: reducers on timedelta64");
+      default:
         throw std::invalid_argument(
           std::string("cannot apply reducers to NumpyArray with format \"")
           + format_ + std::string("\""));
       }
 
-      util::dtype dtype = reducer.return_dtype(format_);
+      util::dtype dtype = reducer.return_dtype(dtype_);
       std::string format = util::dtype_to_format(dtype);
       ssize_t itemsize = util::dtype_to_itemsize(dtype);
 
