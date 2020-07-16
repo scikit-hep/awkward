@@ -68,6 +68,12 @@ namespace awkward {
       else if (name == "complex256") {
         return util::dtype::complex256;
       }
+      // else if (name == "datetime64") {
+      //   return util::dtype::datetime64;
+      // }
+      // else if (name == "timedelta64") {
+      //   return util::dtype::timedelta64;
+      // }
       else {
         return util::dtype::NOT_PRIMITIVE;
       }

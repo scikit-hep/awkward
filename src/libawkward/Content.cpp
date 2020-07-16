@@ -30,61 +30,200 @@ namespace rj = rapidjson;
 namespace awkward {
   ////////// Form
 
+  FormPtr
+  Form::fromnumpy(char kind,
+                  int64_t itemsize,
+                  const std::vector<int64_t>& inner_shape) {
+    switch (kind) {
+    case 'b':
+      if (itemsize == 1) {
+        return std::make_shared<NumpyForm>(
+                 false,
+                 util::Parameters(),
+                 inner_shape,
+                 1,
+                 util::dtype_to_format(util::dtype::boolean),
+                 util::dtype::boolean);
+      }
+      else {
+        throw std::invalid_argument(
+          std::string("cannot convert NumPy bool dtype with itemsize ") +
+          std::to_string(itemsize) + std::string(" into a NumpyForm"));
+      }
+    case 'i':
+      switch (itemsize) {
+      case 1:
+        return std::make_shared<NumpyForm>(
+                 false,
+                 util::Parameters(),
+                 inner_shape,
+                 1,
+                 util::dtype_to_format(util::dtype::int8),
+                 util::dtype::int8);
+      case 2:
+        return std::make_shared<NumpyForm>(
+                 false,
+                 util::Parameters(),
+                 inner_shape,
+                 2,
+                 util::dtype_to_format(util::dtype::int16),
+                 util::dtype::int16);
+      case 4:
+        return std::make_shared<NumpyForm>(
+                 false,
+                 util::Parameters(),
+                 inner_shape,
+                 4,
+                 util::dtype_to_format(util::dtype::int32),
+                 util::dtype::int32);
+      case 8:
+        return std::make_shared<NumpyForm>(
+                 false,
+                 util::Parameters(),
+                 inner_shape,
+                 8,
+                 util::dtype_to_format(util::dtype::int64),
+                 util::dtype::int64);
+      default:
+        throw std::invalid_argument(
+          std::string("cannot convert NumPy int dtype with itemsize ") +
+          std::to_string(itemsize) + std::string(" into a NumpyForm"));
+      }
+    case 'u':
+      switch (itemsize) {
+      case 1:
+        return std::make_shared<NumpyForm>(
+                 false,
+                 util::Parameters(),
+                 inner_shape,
+                 1,
+                 util::dtype_to_format(util::dtype::uint8),
+                 util::dtype::uint8);
+      case 2:
+        return std::make_shared<NumpyForm>(
+                 false,
+                 util::Parameters(),
+                 inner_shape,
+                 2,
+                 util::dtype_to_format(util::dtype::uint16),
+                 util::dtype::uint16);
+      case 4:
+        return std::make_shared<NumpyForm>(
+                 false,
+                 util::Parameters(),
+                 inner_shape,
+                 4,
+                 util::dtype_to_format(util::dtype::uint32),
+                 util::dtype::uint32);
+      case 8:
+        return std::make_shared<NumpyForm>(
+                 false,
+                 util::Parameters(),
+                 inner_shape,
+                 8,
+                 util::dtype_to_format(util::dtype::uint64),
+                 util::dtype::uint64);
+      default:
+        throw std::invalid_argument(
+          std::string("cannot convert NumPy int dtype with itemsize ") +
+          std::to_string(itemsize) + std::string(" into a NumpyForm"));
+      }
+    case 'f':
+      switch (itemsize) {
+      case 2:
+        return std::make_shared<NumpyForm>(
+                 false,
+                 util::Parameters(),
+                 inner_shape,
+                 2,
+                 util::dtype_to_format(util::dtype::float16),
+                 util::dtype::float16);
+      case 4:
+        return std::make_shared<NumpyForm>(
+                 false,
+                 util::Parameters(),
+                 inner_shape,
+                 4,
+                 util::dtype_to_format(util::dtype::float32),
+                 util::dtype::float32);
+      case 8:
+        return std::make_shared<NumpyForm>(
+                 false,
+                 util::Parameters(),
+                 inner_shape,
+                 8,
+                 util::dtype_to_format(util::dtype::float64),
+                 util::dtype::float64);
+      case 16:
+        return std::make_shared<NumpyForm>(
+                 false,
+                 util::Parameters(),
+                 inner_shape,
+                 16,
+                 util::dtype_to_format(util::dtype::float128),
+                 util::dtype::float128);
+      default:
+        throw std::invalid_argument(
+          std::string("cannot convert NumPy floating-point dtype with itemsize ") +
+          std::to_string(itemsize) + std::string(" into a NumpyForm"));
+      }
+
+    case 'c':
+      switch (itemsize) {
+      case 8:
+        return std::make_shared<NumpyForm>(
+                 false,
+                 util::Parameters(),
+                 inner_shape,
+                 8,
+                 util::dtype_to_format(util::dtype::complex64),
+                 util::dtype::complex64);
+      case 16:
+        return std::make_shared<NumpyForm>(
+                 false,
+                 util::Parameters(),
+                 inner_shape,
+                 16,
+                 util::dtype_to_format(util::dtype::complex128),
+                 util::dtype::complex128);
+      case 32:
+        return std::make_shared<NumpyForm>(
+                 false,
+                 util::Parameters(),
+                 inner_shape,
+                 32,
+                 util::dtype_to_format(util::dtype::complex256),
+                 util::dtype::complex256);
+      default:
+        throw std::invalid_argument(
+          std::string("cannot convert NumPy complex dtype with itemsize ") +
+          std::to_string(itemsize) + std::string(" into a NumpyForm"));
+      }
+
+    // case 'M': handle datetime64
+    // case 'm': handle timedelta64
+
+    default:
+      throw std::invalid_argument(
+        std::string("cannot convert NumPy dtype with kind ") +
+        std::string(1, kind) + std::string(" into a NumpyForm"));
+    }
+  }
+
   template <typename JSON>
   FormPtr
   fromjson_part(const JSON& json) {
     if (json.IsString()) {
-      util::Parameters p;
-      std::vector<int64_t> s;
-
-      if (std::string("float64") == json.GetString()) {
-        return std::make_shared<NumpyForm>(false, p, s, 8, "d", util::dtype::float64);
-      }
-      if (std::string("float32") == json.GetString()) {
-        return std::make_shared<NumpyForm>(false, p, s, 4, "f", util::dtype::float32);
-      }
-      if (std::string("int64") == json.GetString()) {
-#if defined _MSC_VER || defined __i386__
-        return std::make_shared<NumpyForm>(false, p, s, 8, "q", util::dtype::int64);
-#else
-        return std::make_shared<NumpyForm>(false, p, s, 8, "l", util::dtype::int64);
-#endif
-      }
-      if (std::string("uint64") == json.GetString()) {
-#if defined _MSC_VER || defined __i386__
-        return std::make_shared<NumpyForm>(false, p, s, 8, "Q", util::dtype::uint64);
-#else
-        return std::make_shared<NumpyForm>(false, p, s, 8, "L", util::dtype::uint64);
-#endif
-      }
-      if (std::string("int32") == json.GetString()) {
-#if defined _MSC_VER || defined __i386__
-        return std::make_shared<NumpyForm>(false, p, s, 4, "l", util::dtype::int32);
-#else
-        return std::make_shared<NumpyForm>(false, p, s, 4, "i", util::dtype::int32);
-#endif
-      }
-      if (std::string("uint32") == json.GetString()) {
-#if defined _MSC_VER || defined __i386__
-        return std::make_shared<NumpyForm>(false, p, s, 4, "L", util::dtype::uint32);
-#else
-        return std::make_shared<NumpyForm>(false, p, s, 4, "I", util::dtype::uint32);
-#endif
-      }
-      if (std::string("int16") == json.GetString()) {
-        return std::make_shared<NumpyForm>(false, p, s, 2, "h", util::dtype::int16);
-      }
-      if (std::string("uint16") == json.GetString()) {
-        return std::make_shared<NumpyForm>(false, p, s, 2, "H", util::dtype::uint16);
-      }
-      if (std::string("int8") == json.GetString()) {
-        return std::make_shared<NumpyForm>(false, p, s, 1, "b", util::dtype::int8);
-      }
-      if (std::string("uint8") == json.GetString()) {
-        return std::make_shared<NumpyForm>(false, p, s, 1, "B", util::dtype::uint8);
-      }
-      if (std::string("bool") == json.GetString()) {
-        return std::make_shared<NumpyForm>(false, p, s, 1, "?", util::dtype::boolean);
+      util::dtype dtype = util::name_to_dtype(json.GetString());
+      int64_t itemsize = util::dtype_to_itemsize(dtype);
+      std::string format = util::dtype_to_format(dtype);
+      if (dtype != util::dtype::NOT_PRIMITIVE) {
+        return std::make_shared<NumpyForm>(false,
+                                           util::Parameters(),
+                                           std::vector<int64_t>(),
+                                           itemsize,
+                                           format,
+                                           dtype);
       }
     }
 
