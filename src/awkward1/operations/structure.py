@@ -1014,6 +1014,7 @@ def flatten(array, axis=1, highlevel=True):
         return out
 
 
+@awkward1._connect._numpy.implements(numpy.sort)
 def sort(array, axis=-1, ascending=True, stable=True, highlevel=True):
     """
     Args:
@@ -1047,6 +1048,7 @@ def sort(array, axis=-1, ascending=True, stable=True, highlevel=True):
         return out
 
 
+@awkward1._connect._numpy.implements(numpy.argsort)
 def argsort(array, axis=-1, ascending=True, stable=True, highlevel=True):
     """
     Args:
