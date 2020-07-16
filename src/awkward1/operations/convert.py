@@ -1326,6 +1326,16 @@ def to_arrow(array):
             layout,
             (awkward1.layout.ListOffsetArray64, awkward1.layout.ListOffsetArrayU32),
         ):
+            offsets = numpy.asarray(layout.offsets)
+
+            if len(offsets) == 0 or numpy.max(offsets) <= numpy.iinfo(numpy.int32).max:
+                small_layout = awkward1.layout.ListOffsetArray32(
+                    awkward1.layout.Index32(offsets.astype(numpy.int32)),
+                    layout.content,
+                    parameters=layout.parameters,
+                )
+                return recurse(small_layout, mask=mask)
+
             offsets = numpy.asarray(layout.offsets, dtype=numpy.int64)
 
             if layout.parameter("__array__") == "bytestring":
