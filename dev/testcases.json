@@ -53,7 +53,7 @@
         },
         "ListOffsetArray": {
             "ListOffsetArray-offsets": [
-                {"int": [6, 8, 18, 7, 9, 2, 11, 20, 6, 10, 5]},
+                {"int": [1, 1, 2, 3, 5, 8, 11, 11, 11, 11, 20]},
                 {"int": [48, 50, 51, 55, 55, 55, 58, 66, 81, 92, 92, 97, 101, 113, 116, 126, 148, 153, 172, 194, 201, 204, 214, 231, 233, 248, 252, 253, 253, 263, 289, 301, 325]}
             ],
             "ListOffsetArray-offsets-offset": [
@@ -89,7 +89,7 @@
                 {"bool": true}
             ],
             "IndexedArray-lencontent": [
-                {"int": -1}
+                {"int": 9}
             ]
         },
         "ByteMaskedArray": {
