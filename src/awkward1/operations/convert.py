@@ -528,13 +528,13 @@ def to_json(array, destination=None, pretty=False, maxdecimals=None, buffersize=
 
 
 def from_awkward0(
-    array, keeplayout=False, regulararray=False, highlevel=True, behavior=None
+    array, keep_layout=False, regulararray=False, highlevel=True, behavior=None
 ):
     """
     Args:
         array (Awkward 0.x or Awkward 1.x array): Data to convert to Awkward
             1.x.
-        keeplayout (bool): If True, stay true to the Awkward 0.x layout,
+        keep_layout (bool): If True, stay true to the Awkward 0.x layout,
             ensuring zero-copy; otherwise, allow transformations that copy
             data for more flexibility.
         regulararray (bool): If True and the array is multidimensional,
@@ -793,10 +793,10 @@ def from_awkward0(
 
         elif isinstance(array, awkward0.SparseArray):
             # length, index, content, default
-            if keeplayout:
+            if keep_layout:
                 raise ValueError(
                     "awkward1.SparseArray hasn't been written (if at all); "
-                    "try keeplayout=False"
+                    "try keep_layout=False"
                 )
             return recurse(array.dense, level + 1)
 
@@ -817,10 +817,10 @@ def from_awkward0(
 
         elif isinstance(array, awkward0.ObjectArray):
             # content, generator, args, kwargs
-            if keeplayout:
+            if keep_layout:
                 raise ValueError(
                     "there isn't (and won't ever be) an awkward1 equivalent "
-                    "of awkward0.ObjectArray; try keeplayout=False"
+                    "of awkward0.ObjectArray; try keep_layout=False"
                 )
             out = recurse(array.content, level + 1)
             out.setparameter(
@@ -835,11 +835,11 @@ def from_awkward0(
 
         if isinstance(array, awkward0.ChunkedArray):
             # chunks, chunksizes
-            if keeplayout and level != 0:
+            if keep_layout and level != 0:
                 raise ValueError(
                     "awkward1 PartitionedArrays are only allowed "
                     "at the root of a data structure, unlike "
-                    "awkward0.ChunkedArray; try keeplayout=False"
+                    "awkward0.ChunkedArray; try keep_layout=False"
                 )
             elif level == 0:
                 return awkward1.partition.IrregularlyPartitionedArray(
@@ -860,7 +860,7 @@ def from_awkward0(
 
         elif isinstance(array, awkward0.VirtualArray):
             # generator, args, kwargs, cache, persistentkey, type, nbytes, persistvirtual
-            if keeplayout:
+            if keep_layout:
                 raise NotImplementedError("FIXME")
             else:
                 return recurse(array.array, level + 1)
@@ -881,11 +881,11 @@ from_awkward0.uint32max = numpy.iinfo(numpy.uint32).max
 from_awkward0.int64max = numpy.iinfo(numpy.int64).max
 
 
-def to_awkward0(array, keeplayout=False):
+def to_awkward0(array, keep_layout=False):
     """
     Args:
         array: Data to convert into an Awkward 0.x array.
-        keeplayout (bool): If True, stay true to the Awkward 1.x layout,
+        keep_layout (bool): If True, stay true to the Awkward 1.x layout,
             ensuring zero-copy; otherwise, allow transformations that copy
             data for more flexibility.
 
@@ -910,10 +910,10 @@ def to_awkward0(array, keeplayout=False):
 
         elif isinstance(layout, awkward1.layout.RegularArray):
             # content, size
-            if keeplayout:
+            if keep_layout:
                 raise ValueError(
                     "awkward0 has no equivalent of RegularArray; "
-                    "try keeplayout=False"
+                    "try keep_layout=False"
                 )
             offsets = numpy.arange(0, (len(layout) + 1) * layout.size, layout.size)
             return awkward0.JaggedArray.fromoffsets(offsets, recurse(layout.content))
