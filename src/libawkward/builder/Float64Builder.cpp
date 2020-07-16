@@ -65,7 +65,8 @@ namespace awkward {
                                         strides,
                                         0,
                                         sizeof(double),
-                                        "d");
+                                        "d",
+                                        util::dtype::float64);
   }
 
   bool

@@ -125,7 +125,9 @@ namespace awkward {
       : Content(identities, parameters) { }
 
   const std::shared_ptr<NumpyArray>
-  EmptyArray::toNumpyArray(const std::string& format, ssize_t itemsize) const {
+  EmptyArray::toNumpyArray(const std::string& format,
+                           ssize_t itemsize,
+                           util::dtype dtype) const {
     std::shared_ptr<void> ptr(new uint8_t[0], kernel::array_deleter<uint8_t>());
     std::vector<ssize_t> shape({ 0 });
     std::vector<ssize_t> strides({ itemsize });
@@ -136,7 +138,8 @@ namespace awkward {
                                         strides,
                                         0,
                                         itemsize,
-                                        format);
+                                        format,
+                                        dtype);
   }
 
   const std::string
@@ -422,8 +425,10 @@ namespace awkward {
                           int64_t outlength,
                           bool mask,
                           bool keepdims) const {
-    ContentPtr asnumpy = toNumpyArray(reducer.preferred_type(),
-                                      reducer.preferred_typesize());
+    util::dtype dtype = reducer.preferred_dtype();
+    std::string format = util::dtype_to_format(dtype);
+    int64_t itemsize = util::dtype_to_itemsize(dtype);
+    ContentPtr asnumpy = toNumpyArray(format, itemsize, dtype);
     return asnumpy.get()->reduce_next(reducer,
                                       negaxis,
                                       starts,
@@ -459,7 +464,7 @@ namespace awkward {
                         bool ascending,
                         bool stable,
                         bool keepdims) const {
-    ContentPtr asnumpy = toNumpyArray("d", 8);
+    ContentPtr asnumpy = toNumpyArray("d", 8, util::dtype::float64);
     return asnumpy.get()->sort_next(negaxis,
                                     starts,
                                     parents,
@@ -477,7 +482,7 @@ namespace awkward {
                            bool ascending,
                            bool stable,
                            bool keepdims) const {
-    ContentPtr asnumpy = toNumpyArray("d", 8);
+    ContentPtr asnumpy = toNumpyArray("d", 8, util::dtype::float64);
     ContentPtr out = asnumpy.get()->argsort_next(negaxis,
                                                  starts,
                                                  parents,

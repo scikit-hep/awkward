@@ -286,87 +286,20 @@ make_PrimitiveType(const py::handle& m, const std::string& name) {
       .def(py::init([](const std::string& dtype,
                        const py::object& parameters,
                        const py::object& typestr) -> ak::PrimitiveType {
-        if (dtype == std::string("bool")) {
-          return ak::PrimitiveType(dict2parameters(parameters),
-                                   typestr2str(typestr),
-                                   ak::PrimitiveType::boolean);
-        }
-        else if (dtype == std::string("int8")) {
-          return ak::PrimitiveType(dict2parameters(parameters),
-                                   typestr2str(typestr),
-                                   ak::PrimitiveType::int8);
-        }
-        else if (dtype == std::string("int16")) {
-          return ak::PrimitiveType(dict2parameters(parameters),
-                                   typestr2str(typestr),
-                                   ak::PrimitiveType::int16);
-        }
-        else if (dtype == std::string("int32")) {
-          return ak::PrimitiveType(dict2parameters(parameters),
-                                   typestr2str(typestr),
-                                   ak::PrimitiveType::int32);
-        }
-        else if (dtype == std::string("int64")) {
-          return ak::PrimitiveType(dict2parameters(parameters),
-                                   typestr2str(typestr),
-                                   ak::PrimitiveType::int64);
-        }
-        else if (dtype == std::string("uint8")) {
-          return ak::PrimitiveType(dict2parameters(parameters),
-                                   typestr2str(typestr),
-                                   ak::PrimitiveType::uint8);
-        }
-        else if (dtype == std::string("uint16")) {
-          return ak::PrimitiveType(dict2parameters(parameters),
-                                   typestr2str(typestr),
-                                   ak::PrimitiveType::uint16);
-        }
-        else if (dtype == std::string("uint32")) {
-          return ak::PrimitiveType(dict2parameters(parameters),
-                                   typestr2str(typestr),
-                                   ak::PrimitiveType::uint32);
-        }
-        else if (dtype == std::string("uint64")) {
-          return ak::PrimitiveType(dict2parameters(parameters),
-                                   typestr2str(typestr),
-                                   ak::PrimitiveType::uint64);
-        }
-        else if (dtype == std::string("float32")) {
-          return ak::PrimitiveType(dict2parameters(parameters),
-                                   typestr2str(typestr),
-                                   ak::PrimitiveType::float32);
-        }
-        else if (dtype == std::string("float64")) {
-          return ak::PrimitiveType(dict2parameters(parameters),
-                                   typestr2str(typestr),
-                                   ak::PrimitiveType::float64);
-        }
-        else {
+        ak::util::dtype dt = util::name_to_dtype(dtype);
+        if (dt == ak::util::dtype::NOT_PRIMITIVE) {
           throw std::invalid_argument(
             std::string("unrecognized primitive type: ") + dtype);
         }
+        return ak::PrimitiveType(dict2parameters(parameters),
+                                 typestr2str(typestr),
+                                 dt);
       }), py::arg("dtype"),
-           py::arg("parameters") = py::none(),
-           py::arg("typestr") = py::none())
+          py::arg("parameters") = py::none(),
+          py::arg("typestr") = py::none())
       .def_property_readonly("dtype",
                              [](const ak::PrimitiveType& self) -> std::string {
-        switch (self.dtype()) {
-          case ak::PrimitiveType::boolean: return std::string("bool");
-          case ak::PrimitiveType::int8: return std::string("int8");
-          case ak::PrimitiveType::int16: return std::string("int16");
-          case ak::PrimitiveType::int32: return std::string("int32");
-          case ak::PrimitiveType::int64: return std::string("int64");
-          case ak::PrimitiveType::uint8: return std::string("uint8");
-          case ak::PrimitiveType::uint16: return std::string("uint16");
-          case ak::PrimitiveType::uint32: return std::string("uint32");
-          case ak::PrimitiveType::uint64: return std::string("uint64");
-          case ak::PrimitiveType::float32: return std::string("float32");
-          case ak::PrimitiveType::float64: return std::string("float64");
-          default:
-          throw std::invalid_argument(
-            std::string("unrecognized primitive type: ")
-            + std::to_string(self.dtype()));
-        }
+        return util::dtype_to_name(self.dtype());
       })
       .def(py::pickle([](const ak::PrimitiveType& self) {
         return py::make_tuple(parameters2dict(self.parameters()),
@@ -376,7 +309,7 @@ make_PrimitiveType(const py::handle& m, const std::string& name) {
         return ak::PrimitiveType(
           dict2parameters(state[0]),
           typestr2str(state[1]),
-          (ak::PrimitiveType::DType)state[2].cast<int64_t>());
+          (ak::util::dtype)state[2].cast<int64_t>());
       }))
   );
 }

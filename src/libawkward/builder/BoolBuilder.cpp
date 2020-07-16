@@ -49,7 +49,8 @@ namespace awkward {
                                         strides,
                                         0,
                                         sizeof(bool),
-                                        "?");
+                                        "?",
+                                        util::dtype::boolean);
   }
 
   bool

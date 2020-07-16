@@ -85,7 +85,8 @@ namespace awkward {
                                            strides,
                                            0,
                                            sizeof(uint8_t),
-                                           "B");
+                                           "B",
+                                           util::dtype::uint8);
     return std::make_shared<ListOffsetArray64>(Identities::none(),
                                                string_parameters,
                                                offsets,
