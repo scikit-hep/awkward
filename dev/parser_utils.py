@@ -149,7 +149,10 @@ def preprocess(filename, skip_implementation=False):
                         ):
                             if x.endswith("*"):
                                 x = x[:-1]
-                            line = line.replace(x, "int")
+                            if ("(" + x + ")") in line:
+                                line = line.replace(x, "float")
+                            else:
+                                line = line.replace(x, "int")
             if func is True and line.find("bool") != -1:
                 if line.find("bool*") != -1:
                     typename = "bool*"

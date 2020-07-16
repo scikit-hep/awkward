@@ -30,6 +30,7 @@
         "NumpyArray": {
             "NumpyArray-ptr": [
                 {"int": [5, 8, 7, 0, 8, 6, 12, 7, 4, 6, 8, 7, 8, 4, 4, 4, 9, 10, 6, 5, 3, 5, 7, 5, 3],
+                 "float": [5.2, 8.1, 7.0, 0, 8.1, 6.2, 12.3, 7.4, 4.4, 6.5, 8.6, 8.1, 8.9, 5.0, 1.1, 2.3, 4.3, 6.5],
                  "bool": [true, false, true, true, false, true, true, true, true, false, true, true, false, false, false, true, true, false, true, false, true]}
             ],
             "NumpyArray-out-offset": [

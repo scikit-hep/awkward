@@ -3,6 +3,7 @@
 import argparse
 import ctypes
 import json
+import math
 import os
 import re
 from collections import OrderedDict
@@ -172,18 +173,21 @@ class FuncBody(object):
             ):
                 if item.init.decls[0].init.__class__.__name__ == "Constant":
                     if item.init.decls[0].init.value == "0":
-                        stmt = " " * indent + "for {0} in range({1}):\n".format(
+                        stmt = " " * indent + "for {0} in range(int({1})):\n".format(
                             item.init.decls[0].name,
                             self.traverse(item.cond.right, 0, called=True),
                         )
                     else:
-                        stmt = " " * indent + "for {0} in range({1}, {2}):\n".format(
-                            item.init.decls[0].name,
-                            item.init.decls[0].init.value,
-                            self.traverse(item.cond.right, 0, called=True),
+                        stmt = (
+                            " " * indent
+                            + "for {0} in range(int({1}), {2}):\n".format(
+                                item.init.decls[0].name,
+                                item.init.decls[0].init.value,
+                                self.traverse(item.cond.right, 0, called=True),
+                            )
                         )
                 else:
-                    stmt = " " * indent + "for {0} in range({1}, {2}):\n".format(
+                    stmt = " " * indent + "for {0} in range(int({1}), {2}):\n".format(
                         item.init.decls[0].name,
                         item.init.decls[0].init.name,
                         self.traverse(item.cond.right, 0, called=True),
@@ -552,7 +556,19 @@ def gentests(funcs, htokens):
             "awkward_ListOffsetArray32_toRegularArray",
             "awkward_ListOffsetArrayU32_toRegularArray",
             "awkward_ListOffsetArray64_toRegularArray",
+            "awkward_NumpyArray_fill_todouble_fromdouble",
+            "awkward_NumpyArray_fill_todouble_fromfloat",
+            "awkward_NumpyArray_fill_todouble_from64",
+            "awkward_NumpyArray_fill_todouble_fromU64",
+            "awkward_NumpyArray_fill_todouble_from32",
+            "awkward_NumpyArray_fill_todouble_fromU32",
+            "awkward_NumpyArray_fill_todouble_from16",
+            "awkward_NumpyArray_fill_todouble_fromU16",
+            "awkward_NumpyArray_fill_todouble_from8",
+            "awkward_NumpyArray_fill_todouble_fromU8",
+            "awkward_NumpyArray_fill_todouble_frombool",
             "awkward_NumpyArray_fill_toU64_fromU64",
+            "awkward_NumpyArray_fill_to64_from64",
             "awkward_NumpyArray_fill_to64_fromU64",
             "awkward_NumpyArray_fill_to64_from32",
             "awkward_NumpyArray_fill_to64_fromU32",
@@ -727,7 +743,9 @@ def gentests(funcs, htokens):
                 for i in checkindex:
                     if isinstance(testsp[i], list):
                         for j in range(len(testsp[i])):
-                            assert testsp[i][j] == testsc[i][j]
+                            assert math.isclose(
+                                testsp[i][j], testsc[i][j], rel_tol=0.0001
+                            )
                     else:
                         assert testsp[i] == testsc[i]
                 for i in pindex:

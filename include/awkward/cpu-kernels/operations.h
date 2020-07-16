@@ -764,9 +764,9 @@ extern "C" {
       int64_t fromoffset,
       int64_t length);
   /// @param toptr outparam
-  /// @param tooffset inparam
-  /// @param fromptr inparam
-  /// @param fromoffset inparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
   /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_todouble_fromfloat(
@@ -776,9 +776,9 @@ extern "C" {
       int64_t fromoffset,
       int64_t length);
   /// @param toptr outparam
-  /// @param tooffset inparam
-  /// @param fromptr inparam
-  /// @param fromoffset inparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
   /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_todouble_from64(
@@ -788,9 +788,9 @@ extern "C" {
       int64_t fromoffset,
       int64_t length);
   /// @param toptr outparam
-  /// @param tooffset inparam
-  /// @param fromptr inparam
-  /// @param fromoffset inparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
   /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_todouble_fromU64(
@@ -800,9 +800,9 @@ extern "C" {
       int64_t fromoffset,
       int64_t length);
   /// @param toptr outparam
-  /// @param tooffset inparam
-  /// @param fromptr inparam
-  /// @param fromoffset inparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
   /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_todouble_from32(
@@ -812,9 +812,9 @@ extern "C" {
       int64_t fromoffset,
       int64_t length);
   /// @param toptr outparam
-  /// @param tooffset inparam
-  /// @param fromptr inparam
-  /// @param fromoffset inparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
   /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_todouble_fromU32(
@@ -824,9 +824,9 @@ extern "C" {
       int64_t fromoffset,
       int64_t length);
   /// @param toptr outparam
-  /// @param tooffset inparam
-  /// @param fromptr inparam
-  /// @param fromoffset inparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
   /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_todouble_from16(
@@ -836,9 +836,9 @@ extern "C" {
       int64_t fromoffset,
       int64_t length);
   /// @param toptr outparam
-  /// @param tooffset inparam
-  /// @param fromptr inparam
-  /// @param fromoffset inparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
   /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_todouble_fromU16(
@@ -848,9 +848,9 @@ extern "C" {
       int64_t fromoffset,
       int64_t length);
   /// @param toptr outparam
-  /// @param tooffset inparam
-  /// @param fromptr inparam
-  /// @param fromoffset inparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
   /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_todouble_from8(
@@ -860,9 +860,9 @@ extern "C" {
       int64_t fromoffset,
       int64_t length);
   /// @param toptr outparam
-  /// @param tooffset inparam
-  /// @param fromptr inparam
-  /// @param fromoffset inparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
   /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_todouble_fromU8(
@@ -872,9 +872,9 @@ extern "C" {
       int64_t fromoffset,
       int64_t length);
   /// @param toptr outparam
-  /// @param tooffset inparam
-  /// @param fromptr inparam
-  /// @param fromoffset inparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
   /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_todouble_frombool(
@@ -896,9 +896,9 @@ extern "C" {
       int64_t fromoffset,
       int64_t length);
   /// @param toptr outparam
-  /// @param tooffset inparam
-  /// @param fromptr inparam
-  /// @param fromoffset inparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
   /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_to64_from64(
