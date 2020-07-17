@@ -1170,9 +1170,12 @@ def minimally_touching_string(limit_length, layout, behavior):
                 sp = ""
                 for k in x.keys():
                     if _is_identifier.match(k) is None:
-                        key = sp + repr(k) + ": "
+                        kk = repr(k)
+                        if kk.startswith("u"):
+                            kk = kk[1:]
                     else:
-                        key = sp + k + ": "
+                        kk = k
+                    key = sp + kk + ": "
                     for token in forward(x[k], ""):
                         yield key + token
                         key = ""
@@ -1237,11 +1240,13 @@ def minimally_touching_string(limit_length, layout, behavior):
                             yield last
                         last = token
                     if _is_identifier.match(keys[i]) is None:
-                        key = repr(keys[i]) + ": "
+                        key = repr(keys[i])
+                        if key.startswith("u"):
+                            key = k[1:]
                     else:
-                        key = keys[i] + ": "
+                        key = keys[i]
                     if last is not None:
-                        yield key + last
+                        yield key + ": " + last
                     if i != 0:
                         yield ", "
                 yield "{"
