@@ -63,6 +63,45 @@ def test_write_read(tmp_path):
     ) == awkward1.to_list(array4)
 
 
+def test_explode(tmp_path):
+    array3 = awkward1.Array(
+        [
+            [{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}],
+            [],
+            [{"x": 4, "y": 4.4}, {"x": 5, "y": 5.5}],
+            [],
+            [],
+            [
+                {"x": 6, "y": 6.6},
+                {"x": 7, "y": 7.7},
+                {"x": 8, "y": 8.8},
+                {"x": 9, "y": 9.9},
+            ],
+        ]
+    )
+    array4 = awkward1.repartition(array3, 2)
+
+    awkward1.to_parquet(array3, "array3.parquet", explode_records=True)
+    awkward1.to_parquet(array4, "array4.parquet", explode_records=True)
+
+    assert awkward1.from_parquet("array3.parquet") == [
+        {"x": [1, 2, 3], "y": [1.1, 2.2, 3.3]},
+        {"x": [], "y": []},
+        {"x": [4, 5], "y": [4.4, 5.5]},
+        {"x": [], "y": []},
+        {"x": [], "y": []},
+        {"x": [6, 7, 8, 9], "y": [6.6, 7.7, 8.8, 9.9]},
+    ]
+    assert awkward1.from_parquet("array4.parquet") == [
+        {"x": [1, 2, 3], "y": [1.1, 2.2, 3.3]},
+        {"x": [], "y": []},
+        {"x": [4, 5], "y": [4.4, 5.5]},
+        {"x": [], "y": []},
+        {"x": [], "y": []},
+        {"x": [6, 7, 8, 9], "y": [6.6, 7.7, 8.8, 9.9]},
+    ]
+
+
 def test_oamap_samples():
     assert awkward1.to_list(
         awkward1.from_parquet("tests/samples/list-depths-simple.parquet")

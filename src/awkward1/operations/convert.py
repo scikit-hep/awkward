@@ -1931,18 +1931,25 @@ def from_arrow(array, highlevel=True, behavior=None):
         return recurse(array)
 
 
-def to_parquet(array, where, **options):
+def to_parquet(array, where, explode_records=False, **options):
     """
     Args:
         array: Data to write to a Parquet file.
         where (str, Path, file-like object): Where to write the Parquet file.
+        explode_records (bool): If True, lists of records are written as
+            records of lists, so that nested keys become top-level fields
+            (which can be zipped when read back).
         options: All other options are passed to pyarrow.parquet.ParquetWriter.
             In particular, if no `schema` is given, a schema is derived from
             the array type.
 
     Writes an Awkward Array to a Parquet file (through pyarrow).
 
+        >>> array1 = ak.Array([[1, 2, 3], [], [4, 5], [], [], [6, 7, 8, 9]])
+        >>> awkward1.to_parquet(array1, "array1.parquet")
+
     See also #ak.to_arrow, which is used as an intermediate step.
+    See also #ak.from_parquet.
     """
 
     import pyarrow
@@ -1959,6 +1966,12 @@ def to_parquet(array, where, **options):
             names = layout.keys()
             fields = [to_arrow(layout[name]) for name in names]
             yield pyarrow.RecordBatch.from_arrays(fields, names)
+        elif explode_records:
+            names = layout.keys()
+            fields = [layout[name] for name in names]
+            layout = awkward1.layout.RecordArray(fields, names, len(layout))
+            for x in batch_iterator(layout):
+                yield x
         else:
             yield pyarrow.RecordBatch.from_arrays([to_arrow(layout)], [""])
 
@@ -2058,9 +2071,13 @@ def from_parquet(
             high-level.
         options: All other options are passed to pyarrow.parquet.ParquetFile.
 
-    Converts an Apache Arrow array into an Awkward Array.
+    Reads a Parquet file into an Awkward Array (through pyarrow).
 
-    See also #ak.to_arrow.
+        >>> ak.from_parquet("array1.parquet")
+        <Array [[1, 2, 3], [], ... [], [6, 7, 8, 9]] type='6 * var * ?int64'>
+
+    See also #ak.from_arrow, which is used as an intermediate step.
+    See also #ak.to_parquet.
     """
 
     import pyarrow
