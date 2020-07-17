@@ -6,6 +6,7 @@ import numbers
 import json
 import collections
 import math
+import threading
 
 try:
     from collections.abc import Iterable
@@ -1223,7 +1224,7 @@ def to_arrow(array):
 
     import pyarrow
 
-    layout = to_layout(array)
+    layout = to_layout(array, allow_record=False, allow_other=False)
 
     def recurse(layout, mask=None):
         if isinstance(layout, awkward1.layout.NumpyArray):
@@ -1928,6 +1929,225 @@ def from_arrow(array, highlevel=True, behavior=None):
         return awkward1._util.wrap(recurse(array), behavior)
     else:
         return recurse(array)
+
+
+def to_parquet(array, where, **options):
+    """
+    Args:
+        array: Data to write to a Parquet file.
+        where (str, Path, file-like object): Where to write the Parquet file.
+        options: All other options are passed to pyarrow.parquet.ParquetWriter.
+            In particular, if no `schema` is given, a schema is derived from
+            the array type.
+
+    Writes an Awkward Array to a Parquet file (through pyarrow).
+
+    See also #ak.to_arrow, which is used as an intermediate step.
+    """
+
+    import pyarrow
+    import pyarrow.parquet
+
+    options["where"] = where
+
+    def batch_iterator(layout):
+        if isinstance(layout, awkward1.partition.PartitionedArray):
+            for partition in layout.partitions:
+                for x in batch_iterator(partition):
+                    yield x
+        elif isinstance(layout, awkward1.layout.RecordArray):
+            names = layout.keys()
+            fields = [to_arrow(layout[name]) for name in names]
+            yield pyarrow.RecordBatch.from_arrays(fields, names)
+        else:
+            yield pyarrow.RecordBatch.from_arrays([to_arrow(layout)], [""])
+
+    layout = to_layout(array, allow_record=False, allow_other=False)
+    iterator = batch_iterator(layout)
+    first = next(iterator)
+
+    if "schema" not in options:
+        options["schema"] = first.schema
+
+    writer = pyarrow.parquet.ParquetWriter(**options)
+    writer.write_table(pyarrow.Table.from_batches([first]))
+
+    try:
+        while True:
+            try:
+                record_batch = next(iterator)
+            except StopIteration:
+                break
+            else:
+                writer.write_table(pyarrow.Table.from_batches([record_batch]))
+    finally:
+        writer.close()
+
+
+class _ParquetState(object):
+    def __init__(self, file, use_threads, source, options):
+        self.file = file
+        self.use_threads = use_threads
+        self.source = source
+        self.options = options
+
+    def __call__(self, row_group, column):
+        as_arrow = self.file.read_row_group(row_group, [column], self.use_threads)
+        return from_arrow(as_arrow, highlevel=False)[column]
+
+    def __getstate__(self):
+        return {
+            "use_threads": self.use_threads,
+            "source": self.source,
+            "options": self.options
+        }
+
+    def __setstate__(self, state):
+        self.use_threads = state["use_threads"]
+        self.source = state["source"]
+        self.options = state["options"]
+        self.file = pyarrow.parquet.ParquetFile(self.source, **self.options)
+
+
+_from_parquet_key_number = 0
+_from_parquet_key_lock = threading.Lock()
+
+
+def _from_parquet_key():
+    global _from_parquet_key_number
+    with _from_parquet_key_lock:
+        out = _from_parquet_key_number
+        _from_parquet_key_number += 1
+    return out
+
+
+def from_parquet(
+    source,
+    columns=None,
+    row_groups=None,
+    use_threads=True,
+    lazy=False,
+    lazy_cache="metadata",
+    lazy_cache_key=None,
+    highlevel=True,
+    behavior=None,
+    **options):
+    """
+    Args:
+        source (str, Path, file-like object, pyarrow.NativeFile): Where to
+            get the Parquet file.
+        columns (None or list of str): If None, read all columns; otherwise,
+            read a specified set of columns.
+        row_groups (None, int, or list of int): If None, read all row groups;
+            otherwise, read a single or list of row groups.
+        use_threads (bool): Passed to the pyarrow.parquet.ParquetFile.read
+            functions; if True, do multithreaded reading.
+        lazy (bool): If True, read columns in row groups on demand (as
+            VirtualArrays, in PartitionedArrays if the file has more than one
+            row group); if False, read all requested data immediately.
+        lazy_cache (None, "metadata", or MutableMapping): If lazy, pass this
+            cache to the VirtualArrays. If "metadata", a new dict is created
+            and attached to the output array's metadata as "cache" (only
+            highlevel arrays have metadata).
+        lazy_cache_key (None or str): If lazy, pass this cache_key to the
+            VirtualArrays. If None, a process-unique string is constructed.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+        behavior (bool): Custom #ak.behavior for the output array, if
+            high-level.
+        options: All other options are passed to pyarrow.parquet.ParquetFile.
+
+    Converts an Apache Arrow array into an Awkward Array.
+
+    See also #ak.to_arrow.
+    """
+
+    import pyarrow
+    import pyarrow.parquet
+
+    file = pyarrow.parquet.ParquetFile(source, **options)
+    schema = file.schema.to_arrow_schema()
+    all_columns = schema.names
+
+    if columns is None:
+        columns = all_columns
+    for x in columns:
+        if x not in all_columns:
+            raise ValueError(
+                "column {0} does not exist in file {1}".format(repr(x), repr(source))
+            )
+
+    if file.num_row_groups == 0:
+        out = awkward1.layout.RecordArray(
+            [awkward1.layout.EmptyArray() for x in columns], columns, 0
+        )
+        if highlevel:
+            return awkward1._util.wrap(out, behavior)
+        else:
+            return out
+
+    if lazy:
+        state = _ParquetState(file, use_threads, source, options)
+
+        if lazy_cache is "metadata":
+            lazy_cache = {}
+            metadata = {"cache": lazy_cache}
+        else:
+            metadata = None
+
+        if lazy_cache is None:
+            cache = None
+        else:
+            cache = awkward1.layout.ArrayCache(lazy_cache)
+
+        if lazy_cache_key is None:
+            lazy_cache_key = "ak.from_parquet_{0}".format(_from_parquet_key())
+
+        partitions = []
+        offsets = [0]
+        for row_group in range(file.num_row_groups):
+            length = file.metadata.row_group(row_group).num_rows
+            offsets.append(offsets[-1] + length)
+
+            fields = []
+            for column in columns:
+                generator = awkward1.layout.ArrayGenerator(
+                    state,
+                    (row_group, column),
+                    # form=???      # FIXME: need Arrow schema -> Awkward Forms
+                    length=length,
+                )
+                if all_columns == [""]:
+                    cache_key = "{0}[{1}]".format(lazy_cache_key, row_group)
+                else:
+                    cache_key = "{0}.{1}[{2}]".format(lazy_cache_key, column, row_group)
+                fields.append(awkward1.layout.VirtualArray(generator, cache, cache_key))
+
+            if all_columns == [""]:
+                partitions.append(fields[0])
+            else:
+                record = awkward1.layout.RecordArray(fields, columns, length)
+                partitions.append(record)
+
+        if len(partitions) == 1:
+            out = partitions[0]
+        else:
+            out = awkward1.partition.IrregularlyPartitionedArray(partitions, offsets[1:])
+        if highlevel:
+            return awkward1._util.wrap(out, behavior, metadata=metadata)
+        else:
+            return out
+
+    else:
+        out = from_arrow(
+            file.read(columns, use_threads=use_threads),
+            highlevel=highlevel,
+            behavior=behavior,
+        )
+        if all_columns == [""]:
+            return out[""]
+        else:
+            return out
 
 
 __all__ = [

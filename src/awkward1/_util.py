@@ -334,16 +334,16 @@ def behaviorof(*arrays):
     return behavior
 
 
-def wrap(content, behavior):
+def wrap(content, behavior, metadata=None):
     import awkward1.highlevel
 
     if isinstance(
         content, (awkward1.layout.Content, awkward1.partition.PartitionedArray)
     ):
-        return awkward1.highlevel.Array(content, behavior=behavior)
+        return awkward1.highlevel.Array(content, behavior=behavior, metadata=metadata)
 
     elif isinstance(content, awkward1.layout.Record):
-        return awkward1.highlevel.Record(content, behavior=behavior)
+        return awkward1.highlevel.Record(content, behavior=behavior, metadata=metadata)
 
     else:
         return content
