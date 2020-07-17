@@ -10,6 +10,7 @@ import numpy
 import awkward1
 
 
+@pytest.mark.skipif(awkward1._util.py27 and awkward1._util.win, reason="Windows Python 2.7 inserts 'L' after numbers in repr")
 def test():
     assert str(awkward1.Array([
         {"a": 1, "a b": 2}, {"a": 1, "a b": 2}, {"a": 1, "a b": 2}, {"a": 1, "a b": 2}
