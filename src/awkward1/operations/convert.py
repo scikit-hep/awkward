@@ -1999,7 +1999,7 @@ class _ParquetState(object):
         return {
             "use_threads": self.use_threads,
             "source": self.source,
-            "options": self.options
+            "options": self.options,
         }
 
     def __setstate__(self, state):
@@ -2031,7 +2031,8 @@ def from_parquet(
     lazy_cache_key=None,
     highlevel=True,
     behavior=None,
-    **options):
+    **options
+):
     """
     Args:
         source (str, Path, file-like object, pyarrow.NativeFile): Where to
@@ -2132,7 +2133,9 @@ def from_parquet(
         if len(partitions) == 1:
             out = partitions[0]
         else:
-            out = awkward1.partition.IrregularlyPartitionedArray(partitions, offsets[1:])
+            out = awkward1.partition.IrregularlyPartitionedArray(
+                partitions, offsets[1:]
+            )
         if highlevel:
             return awkward1._util.wrap(out, behavior, metadata=metadata)
         else:

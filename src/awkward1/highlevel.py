@@ -206,7 +206,9 @@ class Array(
     derivatives elementwise on each numeric value in an ak.Array.
     """
 
-    def __init__(self, data, behavior=None, with_name=None, check_valid=False, metadata=None):
+    def __init__(
+        self, data, behavior=None, with_name=None, check_valid=False, metadata=None
+    ):
         if isinstance(
             data, (awkward1.layout.Content, awkward1.partition.PartitionedArray)
         ):
@@ -875,7 +877,9 @@ class Array(
         acting at the last level, while the higher levels of the indexer all
         have the same dimension as the array being indexed.
         """
-        return awkward1._util.wrap(self._layout[where], self._behavior, metadata=self._metadata)
+        return awkward1._util.wrap(
+            self._layout[where], self._behavior, metadata=self._metadata
+        )
 
     def __setitem__(self, where, what):
         """
@@ -1368,7 +1372,9 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
     See also #ak.Array and #ak.behavior.
     """
 
-    def __init__(self, data, behavior=None, with_name=None, check_valid=False, metadata=None):
+    def __init__(
+        self, data, behavior=None, with_name=None, check_valid=False, metadata=None
+    ):
         if isinstance(data, awkward1.layout.Record):
             layout = data
         elif isinstance(data, Record):
@@ -1596,7 +1602,9 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
             >>> record["y", 1]
             2
         """
-        return awkward1._util.wrap(self._layout[where], self._behavior, metadata=self._metadata)
+        return awkward1._util.wrap(
+            self._layout[where], self._behavior, metadata=self._metadata
+        )
 
     def __setitem__(self, where, what):
         """
