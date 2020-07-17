@@ -286,3 +286,21 @@ def parseheader(filename):
             else:
                 continue
         return funcs
+
+
+def gettokens(ctokens, htokens):
+    tokens = OrderedDict()
+    for x in htokens.keys():
+        tokens[x] = OrderedDict()
+        for y in htokens[x].keys():
+            tokens[x][y] = OrderedDict()
+            for z, val in htokens[x][y].items():
+                tokens[x][y][z] = val
+            for i in ctokens[x]["args"]:
+                if i["name"] == y:
+                    if i["list"] > 0:
+                        tokens[x][y]["array"] = i["list"]
+                    else:
+                        tokens[x][y]["array"] = 0
+                    tokens[x][y]["type"] = i["type"]
+    return tokens
