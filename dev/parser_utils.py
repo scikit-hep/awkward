@@ -192,6 +192,8 @@ def preprocess(filename, skip_implementation=False):
 def check_fail_func(filename):
     pfile, _ = preprocess(filename)
     func = False
+    funcfails = []
+    allfails = []
     fail = []
     for line in pfile.splitlines():
         if func is False and re.search("\s.*\(", line):
@@ -205,12 +207,31 @@ def check_fail_func(filename):
             for _ in range(line.count("{")):
                 parans.append("{")
         if func and "return failure" in line:
-            fail.append(funcname)
+            allfails.append(funcname)
+            funcfails.append(funcname)
+        elif func and "return awkward" in line:
+            if re.search("return .*<", line) is not None:
+                x = line[
+                    re.search("return .*<", line).span()[0]
+                    + 6 : re.search("return .*<", line).span()[1]
+                    - 1
+                ].strip()
+            else:
+                x = line[
+                    re.search("return .*\(", line).span()[0]
+                    + 6 : re.search("return .*\(", line).span()[1]
+                    - 1
+                ].strip()
+            if x in allfails:
+                fail.append(funcname)
+            if x in funcfails:
+                funcfails.remove(x)
         if func and line.count("}") > 0:
             for _ in range(line.count("}")):
                 parans.pop()
             if len(parans) == 0:
                 func = False
+    fail.extend(funcfails)
     return fail
 
 
