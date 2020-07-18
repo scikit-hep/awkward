@@ -212,8 +212,6 @@ namespace awkward {
       copy_to(kernel::Lib ptr_lib) const;
 
   private:
-    /// @brief See #ptr_lib
-    const kernel::Lib ptr_lib_;
     /// @brief See #ptr.
     const std::shared_ptr<T> ptr_;
     /// @brief See #offset.
