@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 
 import distutils.version
+import enum
 
 # NumPy 1.13.1 introduced NEP13, without which Awkward ufuncs won't work, which
 # would be worse than lacking a feature: it would cause unexpected output.

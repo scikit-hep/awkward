@@ -220,6 +220,8 @@ namespace awkward {
     const int64_t offset_;
     /// @brief See #length.
     const int64_t length_;
+    /// @brief See #ptr_lib
+    const kernel::Lib ptr_lib_;
   };
 
 #if !defined AWKWARD_INDEX_NO_EXTERN_TEMPLATE && !defined _MSC_VER
