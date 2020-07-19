@@ -58,6 +58,7 @@ from awkward1.operations.convert import *
 from awkward1.operations.describe import *
 from awkward1.operations.structure import *
 from awkward1.operations.reducers import *
+from awkward1.operations.transfers import *
 
 # version
 __version__ = awkward1._ext.__version__

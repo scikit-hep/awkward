@@ -1930,21 +1930,6 @@ def from_arrow(array, highlevel=True, behavior=None):
     else:
         return recurse(array)
 
-def copy_to(array, ptr_lib, highlevel=True, behavior=None):
-    if(ptr_lib == "cuda"):
-        ptr_lib = awkward1.layout.kernels_lib["cuda"]
-    elif(ptr_lib == "cpu"):
-        ptr_lib = awkward1.layout.kernels_lib["cpu"]
-    else:
-        raise ValueError("Invalid kernel specified, select between cpu or cuda")
-
-    arr = to_layout(array)
-    if highlevel:
-        return awkward1._util.wrap(arr.copy_to(ptr_lib), behavior)
-    else:
-        return arr.copy_to(ptr_lib) 
-
-
 def to_parquet(array, where, explode_records=False, **options):
     """
     Args:
