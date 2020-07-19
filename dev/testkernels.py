@@ -9,6 +9,11 @@ import re
 from parser_utils import gettokens
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
+for root, _, files in os.walk(CURRENT_DIR[:-3]):
+    for filename in files:
+        if filename.endswith("libawkward-cpu-kernels.so"):
+            CPU_KERNEL_SO = os.path.join(root, filename)
+            break
 
 
 class Error(ctypes.Structure):
@@ -57,7 +62,7 @@ def gentests(funcs, htokens, failfuncs):
 
     tokens = gettokens(funcs, htokens)
 
-    lib = ctypes.CDLL("/home/reik/awkward-1.0/localbuild/libawkward-cpu-kernels.so")
+    lib = ctypes.CDLL(CPU_KERNEL_SO)
 
     with open(os.path.join(CURRENT_DIR, "testcases.json")) as f:
         data = json.load(f)
