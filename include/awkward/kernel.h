@@ -27,7 +27,7 @@ namespace kernel {
   class LibraryPathCallback {
   public:
       LibraryPathCallback() = default;
-      virtual const std::string library_path() const = 0;
+      virtual std::string library_path() = 0;
   };
 
   class LibraryCallback {

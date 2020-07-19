@@ -7,20 +7,33 @@
 
 // namespace ak = awkward;
 
-const std::string StartupLibraryPathCallback::library_path() const {
-  std::string library_path = ("/");
+std::string StartupLibraryPathCallback::library_path() {
+  // Fetches Path Eagerly
+  std::string eager_path;
+
   try {
-    py::object awkward1_cuda_kernels = py::module::import("awkward1_cuda_kernels");
+    py::object awkward1_cuda_kernels = py::module::import(
+      "awkward1_cuda_kernels");
 
     if (py::hasattr(awkward1_cuda_kernels, "shared_library_path")) {
-      py::object library_path_pyobj = py::getattr(awkward1_cuda_kernels, "shared_library_path");
-      library_path = library_path_pyobj.cast<std::string>();
+      py::object library_path_pyobj = py::getattr(awkward1_cuda_kernels,
+                                                  "shared_library_path");
+      eager_path = library_path_pyobj.cast<std::string>();
     }
   }
   catch (...) {
-    // do nothing
+    // If the Python Extension fails to import the module, fall back to the
+    // previous fetched path
+    eager_path = library_path_;
   }
-  return library_path;
+
+  // Keep the Library Patch as a cache, this will fetch paths even when the shared
+  // library path is changed but in case of a failure it will revert to the last
+  // successful library fetch. In case the shared Library ceases to exist, it will
+  // be handled by the dlopen and dlsym in the C++ layer.
+  library_path_ = eager_path;
+
+  return library_path_;
 }
 
 void

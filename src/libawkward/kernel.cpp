@@ -37,7 +37,7 @@ namespace kernel {
 
   std::string LibraryCallback::awkward_library_path(kernel::Lib ptr_lib) {
 #ifndef _MSC_VER
-    for (auto i : lib_path_callbacks.at(ptr_lib)) {
+    for (const auto& i : lib_path_callbacks.at(ptr_lib)) {
       auto handle = dlopen(i->library_path().c_str(), RTLD_LAZY);
 
       if (handle) {
@@ -52,7 +52,7 @@ namespace kernel {
     void *handle = nullptr;
 #ifndef _MSC_VER
     std::string path = lib_callback->awkward_library_path(ptr_lib);
-    if (path.compare("") != 0) {
+    if (!path.empty()) {
       handle = dlopen(path.c_str(), RTLD_LAZY);
     }
     if (!handle) {

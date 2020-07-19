@@ -74,7 +74,7 @@ make_IndexOf(const py::handle& m, const std::string& name) {
             "Index can only be sliced by an integer or start:stop slice");
         }
       })
-
+      .def("copy_to", &ak::IndexOf<T>::copy_to)
   );
 }
 

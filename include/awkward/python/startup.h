@@ -9,10 +9,12 @@
 namespace py = pybind11;
 
 class StartupLibraryPathCallback : public kernel::LibraryPathCallback {
-  public:
+public:
   StartupLibraryPathCallback() = default;
 
-  const std::string library_path() const override;
+  std::string library_path() override;
+private:
+    std::string library_path_;
 };
 
 void
