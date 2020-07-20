@@ -17,7 +17,7 @@ namespace awkward {
                              const NumpyArray& rawdata,
                              int64_t whichlevel,
                              int64_t itemsize) {
-    if (whichlevel == levels.size()) {
+    if (whichlevel == (int64_t)levels.size()) {
       bytepos_tocopy.append(bytepos);
       bytepos += itemsize;
     }
@@ -97,6 +97,8 @@ namespace awkward {
                   (size_t)itemsize);
     }
 
+    util::dtype dtype = util::format_to_dtype(format, itemsize);
+
     std::vector<ssize_t> shape = { (ssize_t)bytepos_tocopy.length() };
     std::vector<ssize_t> strides = { (ssize_t)itemsize };
     ContentPtr out = std::make_shared<NumpyArray>(Identities::none(),
@@ -106,7 +108,8 @@ namespace awkward {
                                                   strides,
                                                   0,
                                                   (ssize_t)itemsize,
-                                                  format);
+                                                  format,
+                                                  dtype);
 
     for (int64_t i = depth - 1;  i >= 0;  i--) {
       Index64 index(levels[(size_t)i].ptr(), 0, levels[(size_t)i].length());

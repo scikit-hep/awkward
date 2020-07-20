@@ -31,7 +31,12 @@ namespace awkward {
   /// type. There is a one-to-many relationship from Type to Form.
   class EXPORT_SYMBOL Form {
   public:
-    static FormPtr fromjson(const std::string& data);
+    static FormPtr
+      fromnumpy(char kind,
+                int64_t itemsize,
+                const std::vector<int64_t>& inner_shape);
+    static FormPtr
+      fromjson(const std::string& data);
 
     /// @brief Called by subclass constructors; assigns #has_identities
     /// and #parameters upon construction.
@@ -1179,10 +1184,8 @@ namespace awkward {
     /// different depths to accept `axis = -1` as the last axis, regardless
     /// of how deep that is in different record fields or union possibilities.
     ///
-    /// @note This function has not been implemented:
-    /// [scikit-hep/awkward-1.0#163](https://github.com/scikit-hep/awkward-1.0/issues/163).
-    static int64_t
-      axis_wrap_if_negative(int64_t axis);
+    const int64_t
+      axis_wrap_if_negative(int64_t axis) const;
 
     /// @brief Transfer the entire contents of the array between GPU and main memory.
     ///

@@ -20,6 +20,72 @@ namespace awkward {
   class IndexOf;
 
   namespace util {
+    /// @brief NumPy dtypes that can be interpreted within Awkward C++
+    /// (only the primitive, fixed-width types). Non-native-endian types
+    /// are considered NOT_PRIMITIVE.
+    enum class dtype {
+        NOT_PRIMITIVE,
+        boolean,
+        int8,
+        int16,
+        int32,
+        int64,
+        uint8,
+        uint16,
+        uint32,
+        uint64,
+        float16,
+        float32,
+        float64,
+        float128,
+        complex64,
+        complex128,
+        complex256,
+        // datetime64,
+        // timedelta64,
+        num_dtype
+    };
+
+    /// @brief Returns the name associated with a given dtype.
+    dtype
+    name_to_dtype(const std::string& name);
+
+    /// @brief Returns the name associated with a given dtype.
+    const std::string
+    dtype_to_name(dtype dt);
+
+    /// @brief Convert a NumPy format string and itemsize into a dtype enum.
+    dtype
+    format_to_dtype(const std::string& format, int64_t itemsize);
+
+    /// @brief Convert a dtype enum into a NumPy format string.
+    const std::string
+    dtype_to_format(dtype dt);
+
+    /// @brief Convert a dtype enum into an itemsize.
+    int64_t
+    dtype_to_itemsize(dtype dt);
+
+    /// @brief True if the dtype is a non-boolean integer (signed or unsigned).
+    bool
+    is_integer(dtype dt);
+
+    /// @brief True if the dtype is a signed integer.
+    bool
+    is_signed(dtype dt);
+
+    /// @brief True if the dtype is an unsigned integer.
+    bool
+    is_unsigned(dtype dt);
+
+    /// @brief True if the dtype is a non-complex floating point number.
+    bool
+    is_real(dtype dt);
+
+    /// @brief True if the dtype is a complex number.
+    bool
+    is_complex(dtype dt);
+
     /// @brief If the Error struct contains an error message (from a
     /// cpu-kernel through the C interface), raise that error as a C++
     /// exception.

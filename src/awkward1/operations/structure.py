@@ -947,7 +947,7 @@ def flatten(array, axis=1, highlevel=True):
         else:
             out = awkward1.layout.NumpyArray(numpy.concatenate(out))
 
-    elif awkward1.layout.Content.axis_wrap_if_negative(axis) == 0:
+    elif axis == 0:
 
         def apply(layout):
             if isinstance(layout, awkward1._util.virtualtypes):
@@ -1008,6 +1008,85 @@ def flatten(array, axis=1, highlevel=True):
     else:
         out = layout.flatten(axis)
 
+    if highlevel:
+        return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
+    else:
+        return out
+
+
+@awkward1._connect._numpy.implements(numpy.sort)
+def sort(array, axis=-1, ascending=True, stable=True, highlevel=True):
+    """
+    Args:
+        array: Data to sort, possibly within nested lists.
+        axis (int): The dimension at which this operation is applied. The
+            outermost dimension is `0`, followed by `1`, etc., and negative
+            values count backward from the innermost: `-1` is the innermost
+            dimension, `-2` is the next level up, etc.
+        ascending (bool): If True, the first value in each sorted group
+            will be smallest, the last value largest; if False, the order
+            is from largest to smallest.
+        stable (bool): If True, use a stable sorting algorithm (introsort:
+            a hybrid of quicksort, heapsort, and insertion sort); if False,
+            use a sorting algorithm that is not guaranteed to be stable
+            (heapsort).
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+
+    For example,
+
+        >>> ak.sort(ak.Array([[7, 5, 7], [], [2], [8, 2]]))
+        <Array [[5, 7, 7], [], [2], [2, 8]] type='4 * var * int64'>
+    """
+    layout = awkward1.operations.convert.to_layout(
+        array, allow_record=False, allow_other=False
+    )
+    out = layout.sort(axis, ascending, stable)
+    if highlevel:
+        return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
+    else:
+        return out
+
+
+@awkward1._connect._numpy.implements(numpy.argsort)
+def argsort(array, axis=-1, ascending=True, stable=True, highlevel=True):
+    """
+    Args:
+        array: Data for which to get a sorting index, possibly within nested
+            lists.
+        axis (int): The dimension at which this operation is applied. The
+            outermost dimension is `0`, followed by `1`, etc., and negative
+            values count backward from the innermost: `-1` is the innermost
+            dimension, `-2` is the next level up, etc.
+        ascending (bool): If True, the first value in each sorted group
+            will be smallest, the last value largest; if False, the order
+            is from largest to smallest.
+        stable (bool): If True, use a stable sorting algorithm (introsort:
+            a hybrid of quicksort, heapsort, and insertion sort); if False,
+            use a sorting algorithm that is not guaranteed to be stable
+            (heapsort).
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+
+    For example,
+
+        >>> ak.argsort(ak.Array([[7.7, 5.5, 7.7], [], [2.2], [8.8, 2.2]]))
+        <Array [[1, 0, 2], [], [0], [1, 0]] type='4 * var * int64'>
+
+    The result of this function can be used to index other arrays with the
+    same shape:
+
+        >>> data = ak.Array([[7, 5, 7], [], [2], [8, 2]])
+        >>> index = ak.argsort(index)
+        >>> index
+        <Array [[1, 0, 2], [], [0], [1, 0]] type='4 * var * int64'>
+        >>> data[index]
+        <Array [[5, 7, 7], [], [2], [2, 8]] type='4 * var * int64'>
+    """
+    layout = awkward1.operations.convert.to_layout(
+        array, allow_record=False, allow_other=False
+    )
+    out = layout.argsort(axis, ascending, stable)
     if highlevel:
         return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
     else:
@@ -1574,7 +1653,7 @@ def cartesian(
     if axis < 0:
         raise ValueError("the 'axis' of cartesian must be non-negative")
 
-    elif awkward1.layout.Content.axis_wrap_if_negative(axis) == 0:
+    elif axis == 0:
         if nested is None or nested is False:
             nested = []
 

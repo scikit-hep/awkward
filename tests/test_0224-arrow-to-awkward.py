@@ -45,7 +45,7 @@ def test_toarrow():
         numpy.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
     offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 9]))
     array = awkward1.layout.ListOffsetArray64(offsets, content)
-    assert isinstance(awkward1.to_arrow(array), (pyarrow.LargeListArray))
+    assert isinstance(awkward1.to_arrow(array), (pyarrow.ListArray))
     assert awkward1.to_arrow(array).to_pylist() == [[1.1, 2.2, 3.3], [], [
         4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]
 
@@ -53,7 +53,7 @@ def test_toarrow():
         numpy.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
     offsets = awkward1.layout.IndexU32(numpy.array([0, 3, 3, 5, 6, 9]))
     array = awkward1.layout.ListOffsetArrayU32(offsets, content)
-    assert isinstance(awkward1.to_arrow(array), (pyarrow.LargeListArray))
+    assert isinstance(awkward1.to_arrow(array), (pyarrow.ListArray))
     assert awkward1.to_arrow(array).to_pylist() == [[1.1, 2.2, 3.3], [], [
         4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]
 
@@ -74,12 +74,11 @@ def test_toarrow():
     stops = awkward1.layout.Index64(numpy.array([2, 3]))
     listarray = awkward1.layout.ListArray64(starts, stops, regulararray)
 
-    assert isinstance(awkward1.to_arrow(listarray), (pyarrow.LargeListArray))
+    assert isinstance(awkward1.to_arrow(listarray), (pyarrow.ListArray))
     assert awkward1.to_arrow(listarray).to_pylist() == [[[[0.0, 1.1, 2.2], []], [
         [3.3, 4.4], [5.5]]], [[[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]]]
 
-    assert isinstance(awkward1.to_arrow(regulararray),
-                      (pyarrow.LargeListArray))
+    assert isinstance(awkward1.to_arrow(regulararray), (pyarrow.ListArray))
     assert awkward1.to_arrow(regulararray).to_pylist() == [[[0.0, 1.1, 2.2], []], [
         [3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]]
 

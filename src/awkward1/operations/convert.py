@@ -6,6 +6,7 @@ import numbers
 import json
 import collections
 import math
+import threading
 
 try:
     from collections.abc import Iterable
@@ -528,13 +529,13 @@ def to_json(array, destination=None, pretty=False, maxdecimals=None, buffersize=
 
 
 def from_awkward0(
-    array, keeplayout=False, regulararray=False, highlevel=True, behavior=None
+    array, keep_layout=False, regulararray=False, highlevel=True, behavior=None
 ):
     """
     Args:
         array (Awkward 0.x or Awkward 1.x array): Data to convert to Awkward
             1.x.
-        keeplayout (bool): If True, stay true to the Awkward 0.x layout,
+        keep_layout (bool): If True, stay true to the Awkward 0.x layout,
             ensuring zero-copy; otherwise, allow transformations that copy
             data for more flexibility.
         regulararray (bool): If True and the array is multidimensional,
@@ -793,10 +794,10 @@ def from_awkward0(
 
         elif isinstance(array, awkward0.SparseArray):
             # length, index, content, default
-            if keeplayout:
+            if keep_layout:
                 raise ValueError(
                     "awkward1.SparseArray hasn't been written (if at all); "
-                    "try keeplayout=False"
+                    "try keep_layout=False"
                 )
             return recurse(array.dense, level + 1)
 
@@ -817,10 +818,10 @@ def from_awkward0(
 
         elif isinstance(array, awkward0.ObjectArray):
             # content, generator, args, kwargs
-            if keeplayout:
+            if keep_layout:
                 raise ValueError(
                     "there isn't (and won't ever be) an awkward1 equivalent "
-                    "of awkward0.ObjectArray; try keeplayout=False"
+                    "of awkward0.ObjectArray; try keep_layout=False"
                 )
             out = recurse(array.content, level + 1)
             out.setparameter(
@@ -835,11 +836,11 @@ def from_awkward0(
 
         if isinstance(array, awkward0.ChunkedArray):
             # chunks, chunksizes
-            if keeplayout and level != 0:
+            if keep_layout and level != 0:
                 raise ValueError(
                     "awkward1 PartitionedArrays are only allowed "
                     "at the root of a data structure, unlike "
-                    "awkward0.ChunkedArray; try keeplayout=False"
+                    "awkward0.ChunkedArray; try keep_layout=False"
                 )
             elif level == 0:
                 return awkward1.partition.IrregularlyPartitionedArray(
@@ -860,7 +861,7 @@ def from_awkward0(
 
         elif isinstance(array, awkward0.VirtualArray):
             # generator, args, kwargs, cache, persistentkey, type, nbytes, persistvirtual
-            if keeplayout:
+            if keep_layout:
                 raise NotImplementedError("FIXME")
             else:
                 return recurse(array.array, level + 1)
@@ -881,11 +882,11 @@ from_awkward0.uint32max = numpy.iinfo(numpy.uint32).max
 from_awkward0.int64max = numpy.iinfo(numpy.int64).max
 
 
-def to_awkward0(array, keeplayout=False):
+def to_awkward0(array, keep_layout=False):
     """
     Args:
         array: Data to convert into an Awkward 0.x array.
-        keeplayout (bool): If True, stay true to the Awkward 1.x layout,
+        keep_layout (bool): If True, stay true to the Awkward 1.x layout,
             ensuring zero-copy; otherwise, allow transformations that copy
             data for more flexibility.
 
@@ -910,10 +911,10 @@ def to_awkward0(array, keeplayout=False):
 
         elif isinstance(layout, awkward1.layout.RegularArray):
             # content, size
-            if keeplayout:
+            if keep_layout:
                 raise ValueError(
                     "awkward0 has no equivalent of RegularArray; "
-                    "try keeplayout=False"
+                    "try keep_layout=False"
                 )
             offsets = numpy.arange(0, (len(layout) + 1) * layout.size, layout.size)
             return awkward0.JaggedArray.fromoffsets(offsets, recurse(layout.content))
@@ -1223,7 +1224,7 @@ def to_arrow(array):
 
     import pyarrow
 
-    layout = to_layout(array)
+    layout = to_layout(array, allow_record=False, allow_other=False)
 
     def recurse(layout, mask=None):
         if isinstance(layout, awkward1.layout.NumpyArray):
@@ -1326,6 +1327,16 @@ def to_arrow(array):
             layout,
             (awkward1.layout.ListOffsetArray64, awkward1.layout.ListOffsetArrayU32),
         ):
+            offsets = numpy.asarray(layout.offsets)
+
+            if len(offsets) == 0 or numpy.max(offsets) <= numpy.iinfo(numpy.int32).max:
+                small_layout = awkward1.layout.ListOffsetArray32(
+                    awkward1.layout.Index32(offsets.astype(numpy.int32)),
+                    layout.content,
+                    parameters=layout.parameters,
+                )
+                return recurse(small_layout, mask=mask)
+
             offsets = numpy.asarray(layout.offsets, dtype=numpy.int64)
 
             if layout.parameter("__array__") == "bytestring":
@@ -1918,6 +1929,245 @@ def from_arrow(array, highlevel=True, behavior=None):
         return awkward1._util.wrap(recurse(array), behavior)
     else:
         return recurse(array)
+
+
+def to_parquet(array, where, explode_records=False, **options):
+    """
+    Args:
+        array: Data to write to a Parquet file.
+        where (str, Path, file-like object): Where to write the Parquet file.
+        explode_records (bool): If True, lists of records are written as
+            records of lists, so that nested keys become top-level fields
+            (which can be zipped when read back).
+        options: All other options are passed to pyarrow.parquet.ParquetWriter.
+            In particular, if no `schema` is given, a schema is derived from
+            the array type.
+
+    Writes an Awkward Array to a Parquet file (through pyarrow).
+
+        >>> array1 = ak.Array([[1, 2, 3], [], [4, 5], [], [], [6, 7, 8, 9]])
+        >>> awkward1.to_parquet(array1, "array1.parquet")
+
+    See also #ak.to_arrow, which is used as an intermediate step.
+    See also #ak.from_parquet.
+    """
+
+    import pyarrow
+    import pyarrow.parquet
+
+    options["where"] = where
+
+    def batch_iterator(layout):
+        if isinstance(layout, awkward1.partition.PartitionedArray):
+            for partition in layout.partitions:
+                for x in batch_iterator(partition):
+                    yield x
+        elif isinstance(layout, awkward1.layout.RecordArray):
+            names = layout.keys()
+            fields = [to_arrow(layout[name]) for name in names]
+            yield pyarrow.RecordBatch.from_arrays(fields, names)
+        elif explode_records:
+            names = layout.keys()
+            fields = [layout[name] for name in names]
+            layout = awkward1.layout.RecordArray(fields, names, len(layout))
+            for x in batch_iterator(layout):
+                yield x
+        else:
+            yield pyarrow.RecordBatch.from_arrays([to_arrow(layout)], [""])
+
+    layout = to_layout(array, allow_record=False, allow_other=False)
+    iterator = batch_iterator(layout)
+    first = next(iterator)
+
+    if "schema" not in options:
+        options["schema"] = first.schema
+
+    writer = pyarrow.parquet.ParquetWriter(**options)
+    writer.write_table(pyarrow.Table.from_batches([first]))
+
+    try:
+        while True:
+            try:
+                record_batch = next(iterator)
+            except StopIteration:
+                break
+            else:
+                writer.write_table(pyarrow.Table.from_batches([record_batch]))
+    finally:
+        writer.close()
+
+
+class _ParquetState(object):
+    def __init__(self, file, use_threads, source, options):
+        self.file = file
+        self.use_threads = use_threads
+        self.source = source
+        self.options = options
+
+    def __call__(self, row_group, column):
+        as_arrow = self.file.read_row_group(row_group, [column], self.use_threads)
+        return from_arrow(as_arrow, highlevel=False)[column]
+
+    def __getstate__(self):
+        return {
+            "use_threads": self.use_threads,
+            "source": self.source,
+            "options": self.options,
+        }
+
+    def __setstate__(self, state):
+        self.use_threads = state["use_threads"]
+        self.source = state["source"]
+        self.options = state["options"]
+        self.file = pyarrow.parquet.ParquetFile(self.source, **self.options)
+
+
+_from_parquet_key_number = 0
+_from_parquet_key_lock = threading.Lock()
+
+
+def _from_parquet_key():
+    global _from_parquet_key_number
+    with _from_parquet_key_lock:
+        out = _from_parquet_key_number
+        _from_parquet_key_number += 1
+    return out
+
+
+def from_parquet(
+    source,
+    columns=None,
+    row_groups=None,
+    use_threads=True,
+    lazy=False,
+    lazy_cache="metadata",
+    lazy_cache_key=None,
+    highlevel=True,
+    behavior=None,
+    **options
+):
+    """
+    Args:
+        source (str, Path, file-like object, pyarrow.NativeFile): Where to
+            get the Parquet file.
+        columns (None or list of str): If None, read all columns; otherwise,
+            read a specified set of columns.
+        row_groups (None, int, or list of int): If None, read all row groups;
+            otherwise, read a single or list of row groups.
+        use_threads (bool): Passed to the pyarrow.parquet.ParquetFile.read
+            functions; if True, do multithreaded reading.
+        lazy (bool): If True, read columns in row groups on demand (as
+            VirtualArrays, in PartitionedArrays if the file has more than one
+            row group); if False, read all requested data immediately.
+        lazy_cache (None, "metadata", or MutableMapping): If lazy, pass this
+            cache to the VirtualArrays. If "metadata", a new dict is created
+            and attached to the output array's metadata as "cache" (only
+            highlevel arrays have metadata).
+        lazy_cache_key (None or str): If lazy, pass this cache_key to the
+            VirtualArrays. If None, a process-unique string is constructed.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+        behavior (bool): Custom #ak.behavior for the output array, if
+            high-level.
+        options: All other options are passed to pyarrow.parquet.ParquetFile.
+
+    Reads a Parquet file into an Awkward Array (through pyarrow).
+
+        >>> ak.from_parquet("array1.parquet")
+        <Array [[1, 2, 3], [], ... [], [6, 7, 8, 9]] type='6 * var * ?int64'>
+
+    See also #ak.from_arrow, which is used as an intermediate step.
+    See also #ak.to_parquet.
+    """
+
+    import pyarrow
+    import pyarrow.parquet
+
+    file = pyarrow.parquet.ParquetFile(source, **options)
+    schema = file.schema.to_arrow_schema()
+    all_columns = schema.names
+
+    if columns is None:
+        columns = all_columns
+    for x in columns:
+        if x not in all_columns:
+            raise ValueError(
+                "column {0} does not exist in file {1}".format(repr(x), repr(source))
+            )
+
+    if file.num_row_groups == 0:
+        out = awkward1.layout.RecordArray(
+            [awkward1.layout.EmptyArray() for x in columns], columns, 0
+        )
+        if highlevel:
+            return awkward1._util.wrap(out, behavior)
+        else:
+            return out
+
+    if lazy:
+        state = _ParquetState(file, use_threads, source, options)
+
+        if lazy_cache is "metadata":
+            lazy_cache = {}
+            metadata = {"cache": lazy_cache}
+        else:
+            metadata = None
+
+        if lazy_cache is None:
+            cache = None
+        else:
+            cache = awkward1.layout.ArrayCache(lazy_cache)
+
+        if lazy_cache_key is None:
+            lazy_cache_key = "ak.from_parquet_{0}".format(_from_parquet_key())
+
+        partitions = []
+        offsets = [0]
+        for row_group in range(file.num_row_groups):
+            length = file.metadata.row_group(row_group).num_rows
+            offsets.append(offsets[-1] + length)
+
+            fields = []
+            for column in columns:
+                generator = awkward1.layout.ArrayGenerator(
+                    state,
+                    (row_group, column),
+                    # form=???      # FIXME: need Arrow schema -> Awkward Forms
+                    length=length,
+                )
+                if all_columns == [""]:
+                    cache_key = "{0}[{1}]".format(lazy_cache_key, row_group)
+                else:
+                    cache_key = "{0}.{1}[{2}]".format(lazy_cache_key, column, row_group)
+                fields.append(awkward1.layout.VirtualArray(generator, cache, cache_key))
+
+            if all_columns == [""]:
+                partitions.append(fields[0])
+            else:
+                record = awkward1.layout.RecordArray(fields, columns, length)
+                partitions.append(record)
+
+        if len(partitions) == 1:
+            out = partitions[0]
+        else:
+            out = awkward1.partition.IrregularlyPartitionedArray(
+                partitions, offsets[1:]
+            )
+        if highlevel:
+            return awkward1._util.wrap(out, behavior, metadata=metadata)
+        else:
+            return out
+
+    else:
+        out = from_arrow(
+            file.read(columns, use_threads=use_threads),
+            highlevel=highlevel,
+            behavior=behavior,
+        )
+        if all_columns == [""]:
+            return out[""]
+        else:
+            return out
 
 
 __all__ = [

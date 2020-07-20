@@ -90,7 +90,8 @@ namespace awkward {
     /// {NumpyArray#format format}.
     const std::shared_ptr<NumpyArray>
       toNumpyArray(const std::string& format,
-                   ssize_t itemsize) const;
+                   ssize_t itemsize,
+                   util::dtype npdtype) const;
 
     /// @brief User-friendly name of this class: `"EmptyArray"`.
     const std::string

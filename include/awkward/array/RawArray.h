@@ -351,47 +351,47 @@ namespace awkward {
       type(const util::TypeStrs& typestrs) const override {
       if (std::is_same<T, double>::value) {
         return std::make_shared<PrimitiveType>(parameters_,
-          util::gettypestr(parameters_, typestrs), PrimitiveType::float64);
+          util::gettypestr(parameters_, typestrs), util::dtype::float64);
       }
       else if (std::is_same<T, float>::value) {
         return std::make_shared<PrimitiveType>(parameters_,
-          util::gettypestr(parameters_, typestrs), PrimitiveType::float32);
+          util::gettypestr(parameters_, typestrs), util::dtype::float32);
       }
       else if (std::is_same<T, int64_t>::value) {
         return std::make_shared<PrimitiveType>(parameters_,
-          util::gettypestr(parameters_, typestrs), PrimitiveType::int64);
+          util::gettypestr(parameters_, typestrs), util::dtype::int64);
       }
       else if (std::is_same<T, uint64_t>::value) {
         return std::make_shared<PrimitiveType>(parameters_,
-          util::gettypestr(parameters_, typestrs), PrimitiveType::uint64);
+          util::gettypestr(parameters_, typestrs), util::dtype::uint64);
       }
       else if (std::is_same<T, int32_t>::value) {
         return std::make_shared<PrimitiveType>(parameters_,
-          util::gettypestr(parameters_, typestrs), PrimitiveType::int32);
+          util::gettypestr(parameters_, typestrs), util::dtype::int32);
       }
       else if (std::is_same<T, uint32_t>::value) {
         return std::make_shared<PrimitiveType>(parameters_,
-          util::gettypestr(parameters_, typestrs), PrimitiveType::uint32);
+          util::gettypestr(parameters_, typestrs), util::dtype::uint32);
       }
       else if (std::is_same<T, int16_t>::value) {
         return std::make_shared<PrimitiveType>(parameters_,
-          util::gettypestr(parameters_, typestrs), PrimitiveType::int16);
+          util::gettypestr(parameters_, typestrs), util::dtype::int16);
       }
       else if (std::is_same<T, uint16_t>::value) {
         return std::make_shared<PrimitiveType>(parameters_,
-          util::gettypestr(parameters_, typestrs), PrimitiveType::uint16);
+          util::gettypestr(parameters_, typestrs), util::dtype::uint16);
       }
       else if (std::is_same<T, int8_t>::value) {
         return std::make_shared<PrimitiveType>(parameters_,
-          util::gettypestr(parameters_, typestrs), PrimitiveType::int8);
+          util::gettypestr(parameters_, typestrs), util::dtype::int8);
       }
       else if (std::is_same<T, uint8_t>::value) {
         return std::make_shared<PrimitiveType>(parameters_,
-          util::gettypestr(parameters_, typestrs), PrimitiveType::uint8);
+          util::gettypestr(parameters_, typestrs), util::dtype::uint8);
       }
       else if (std::is_same<T, bool>::value) {
         return std::make_shared<PrimitiveType>(parameters_,
-          util::gettypestr(parameters_, typestrs), PrimitiveType::boolean);
+          util::gettypestr(parameters_, typestrs), util::dtype::boolean);
       }
       else {
         throw std::invalid_argument(std::string("RawArrayOf<") +

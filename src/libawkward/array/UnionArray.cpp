@@ -240,7 +240,7 @@ namespace awkward {
           }
         }
         if (!found) {
-          out.erase(out.begin() + (size_t)j);
+          out.erase(std::next(out.begin(), j));
         }
       }
     }
@@ -1220,7 +1220,7 @@ namespace awkward {
           }
         }
         if (!found) {
-          out.erase(out.begin() + (size_t)j);
+          out.erase(std::next(out.begin(), j));
         }
       }
     }
@@ -1266,8 +1266,8 @@ namespace awkward {
   template <typename T, typename I>
   const ContentPtr
   UnionArrayOf<T, I>::num(int64_t axis, int64_t depth) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       Index64 out(1);
       out.setitem_at_nowrap(0, length());
       return NumpyArray(out).getitem_at_nowrap(0);
@@ -1275,7 +1275,7 @@ namespace awkward {
     else {
       ContentPtrVec contents;
       for (auto content : contents_) {
-        contents.push_back(content.get()->num(axis, depth));
+        contents.push_back(content.get()->num(posaxis, depth));
       }
       UnionArrayOf<T, I> out(Identities::none(),
                              util::Parameters(),
@@ -1290,8 +1290,8 @@ namespace awkward {
   const std::pair<Index64, ContentPtr>
   UnionArrayOf<T, I>::offsets_and_flattened(int64_t axis,
                                             int64_t depth) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       throw std::invalid_argument("axis=0 not allowed for flatten");
     }
     else {
@@ -1302,7 +1302,7 @@ namespace awkward {
       ContentPtrVec contents;
       for (auto content : contents_) {
         std::pair<Index64, ContentPtr> pair =
-          content.get()->offsets_and_flattened(axis, depth);
+          content.get()->offsets_and_flattened(posaxis, depth);
         Index64 offsets = pair.first;
         offsetsptrs.push_back(offsets.ptr());
         offsetsraws.push_back(offsets.ptr().get());
@@ -1687,14 +1687,14 @@ namespace awkward {
   template <typename T, typename I>
   const ContentPtr
   UnionArrayOf<T, I>::rpad(int64_t target, int64_t axis, int64_t depth) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       return rpad_axis0(target, false);
     }
     else {
       ContentPtrVec contents;
       for (auto content : contents_) {
-        contents.emplace_back(content.get()->rpad(target, axis, depth));
+        contents.emplace_back(content.get()->rpad(target, posaxis, depth));
       }
       UnionArrayOf<T, I> out(identities_,
                              parameters_,
@@ -1710,15 +1710,15 @@ namespace awkward {
   UnionArrayOf<T, I>::rpad_and_clip(int64_t target,
                                     int64_t axis,
                                     int64_t depth) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       return rpad_axis0(target, true);
     }
     else {
       ContentPtrVec contents;
       for (auto content : contents_) {
         contents.emplace_back(
-          content.get()->rpad_and_clip(target, axis, depth));
+          content.get()->rpad_and_clip(target, posaxis, depth));
       }
       UnionArrayOf<T, I> out(identities_,
                              parameters_,
@@ -1758,14 +1758,14 @@ namespace awkward {
   template <typename T, typename I>
   const ContentPtr
   UnionArrayOf<T, I>::localindex(int64_t axis, int64_t depth) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (axis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       return localindex_axis0();
     }
     else {
       ContentPtrVec contents;
       for (auto content : contents_) {
-        contents.push_back(content.get()->localindex(axis, depth));
+        contents.push_back(content.get()->localindex(posaxis, depth));
       }
       return std::make_shared<UnionArrayOf<T, I>>(identities_,
                                                   util::Parameters(),
@@ -1786,8 +1786,8 @@ namespace awkward {
     if (n < 1) {
       throw std::invalid_argument("in combinations, 'n' must be at least 1");
     }
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (axis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       return combinations_axis0(n, replacement, recordlookup, parameters);
     }
     else {
@@ -1797,7 +1797,7 @@ namespace awkward {
                                                        replacement,
                                                        recordlookup,
                                                        parameters,
-                                                       axis,
+                                                       posaxis,
                                                        depth));
       }
       return std::make_shared<UnionArrayOf<T, I>>(identities_,

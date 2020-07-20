@@ -334,16 +334,16 @@ def behaviorof(*arrays):
     return behavior
 
 
-def wrap(content, behavior):
+def wrap(content, behavior, metadata=None):
     import awkward1.highlevel
 
     if isinstance(
         content, (awkward1.layout.Content, awkward1.partition.PartitionedArray)
     ):
-        return awkward1.highlevel.Array(content, behavior=behavior)
+        return awkward1.highlevel.Array(content, behavior=behavior, metadata=metadata)
 
     elif isinstance(content, awkward1.layout.Record):
-        return awkward1.highlevel.Record(content, behavior=behavior)
+        return awkward1.highlevel.Record(content, behavior=behavior, metadata=metadata)
 
     else:
         return content
@@ -1112,6 +1112,9 @@ def highlevel_type(layout, behavior, isarray):
         return layout.type(typestrs(behavior))
 
 
+_is_identifier = re.compile(r"^[A-Za-z_][A-Za-z_0-9]*$")
+
+
 def minimally_touching_string(limit_length, layout, behavior):
     import awkward1.layout
 
@@ -1166,7 +1169,13 @@ def minimally_touching_string(limit_length, layout, behavior):
                 yield space + "{"
                 sp = ""
                 for k in x.keys():
-                    key = sp + k + ": "
+                    if _is_identifier.match(k) is None:
+                        kk = repr(k)
+                        if kk.startswith("u"):
+                            kk = kk[1:]
+                    else:
+                        kk = k
+                    key = sp + kk + ": "
                     for token in forward(x[k], ""):
                         yield key + token
                         key = ""
@@ -1230,8 +1239,14 @@ def minimally_touching_string(limit_length, layout, behavior):
                         if last is not None:
                             yield last
                         last = token
+                    if _is_identifier.match(keys[i]) is None:
+                        kk = repr(keys[i])
+                        if kk.startswith("u"):
+                            kk = kk[1:]
+                    else:
+                        kk = keys[i]
                     if last is not None:
-                        yield keys[i] + ": " + last
+                        yield kk + ": " + last
                     if i != 0:
                         yield ", "
                 yield "{"

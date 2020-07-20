@@ -528,20 +528,11 @@ toslice_part(ak::Slice& slice, py::object obj) {
           std::string format(info.format);
           format.erase(0, format.find_first_not_of("@=<>!"));
           if (py::isinstance<py::array>(obj) &&
-              format.compare("c") != 0       &&
-              format.compare("b") != 0       &&
-              format.compare("B") != 0       &&
-              format.compare("h") != 0       &&
-              format.compare("H") != 0       &&
-              format.compare("i") != 0       &&
-              format.compare("I") != 0       &&
-              format.compare("l") != 0       &&
-              format.compare("L") != 0       &&
-              format.compare("q") != 0       &&
-              format.compare("Q") != 0       &&
+              !ak::util::is_integer(
+                ak::util::format_to_dtype(format, (int64_t)info.itemsize))  &&
               flatlen != 0) {
             throw std::invalid_argument(
-              "arrays used as an index must be integer or boolean");
+              "arrays used as an index must be a (native-endian) integer or boolean");
           }
 
           py::object intarray_object =
@@ -889,9 +880,9 @@ py::class_<ak::Content, std::shared_ptr<ak::Content>>
 make_Content(const py::handle& m, const std::string& name) {
   return py::class_<ak::Content, std::shared_ptr<ak::Content>>(m,
                                                                name.c_str())
-          .def_static("axis_wrap_if_negative",
-                      &ak::Content::axis_wrap_if_negative)
-
+             .def("axis_wrap_if_negative",
+               &ak::Content::axis_wrap_if_negative,
+               py::arg("axis"))
   ;
 }
 
@@ -1289,7 +1280,6 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
                   bool stable) -> py::object {
                return box(self.argsort(axis, ascending, false));
           })
-
   ;
 }
 
@@ -1307,7 +1297,7 @@ make_EmptyArray(const py::handle& m, const std::string& name) {
       }), py::arg("identities") = py::none(),
          py::arg("parameters") = py::none())
       .def("toNumpyArray", [](const ak::EmptyArray& self) -> py::object {
-        return box(self.toNumpyArray("d", sizeof(double)));
+        return box(self.toNumpyArray("d", sizeof(double), ak::util::dtype::float64));
       })
       .def("simplify", [](const ak::EmptyArray& self) {
         return box(self.shallow_simplify());
@@ -1664,6 +1654,7 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
           throw std::invalid_argument(
             "NumpyArray len(shape) != ndim or len(strides) != ndim");
         }
+
         return ak::NumpyArray(
           unbox_identities_none(identities),
           dict2parameters(parameters),
@@ -1673,7 +1664,8 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
           info.strides,
           0,
           info.itemsize,
-          info.format);
+          info.format,
+          ak::util::format_to_dtype(info.format, (int64_t)info.itemsize));
       }), py::arg("array"),
           py::arg("identities") = py::none(),
           py::arg("parameters") = py::none())

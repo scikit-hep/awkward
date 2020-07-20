@@ -548,8 +548,8 @@ namespace awkward {
 
   const ContentPtr
   UnmaskedArray::num(int64_t axis, int64_t depth) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       Index64 out(1);
       out.setitem_at_nowrap(0, length());
       return NumpyArray(out).getitem_at_nowrap(0);
@@ -557,19 +557,19 @@ namespace awkward {
     else {
       return std::make_shared<UnmaskedArray>(Identities::none(),
                                              util::Parameters(),
-                                             content_.get()->num(axis, depth));
+                                             content_.get()->num(posaxis, depth));
     }
   }
 
   const std::pair<Index64, ContentPtr>
   UnmaskedArray::offsets_and_flattened(int64_t axis, int64_t depth) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       throw std::invalid_argument("axis=0 not allowed for flatten");
     }
     else {
       std::pair<Index64, ContentPtr> offsets_flattened =
-        content_.get()->offsets_and_flattened(axis, depth);
+        content_.get()->offsets_and_flattened(posaxis, depth);
       Index64 offsets = offsets_flattened.first;
       ContentPtr flattened = offsets_flattened.second;
       if (offsets.length() == 0) {
@@ -664,18 +664,18 @@ namespace awkward {
 
   const ContentPtr
   UnmaskedArray::rpad(int64_t target, int64_t axis, int64_t depth) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       return rpad_axis0(target, false);
     }
-    else if (toaxis == depth + 1) {
-      return content_.get()->rpad(target, axis, depth);
+    else if (posaxis == depth + 1) {
+      return content_.get()->rpad(target, posaxis, depth);
     }
     else {
       return std::make_shared<UnmaskedArray>(
         Identities::none(),
         parameters_,
-        content_.get()->rpad(target, axis, depth));
+        content_.get()->rpad(target, posaxis, depth));
     }
   }
 
@@ -683,18 +683,18 @@ namespace awkward {
   UnmaskedArray::rpad_and_clip(int64_t target,
                                int64_t axis,
                                int64_t depth) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       return rpad_axis0(target, false);
     }
-    else if (toaxis == depth + 1) {
-      return content_.get()->rpad_and_clip(target, axis, depth);
+    else if (posaxis == depth + 1) {
+      return content_.get()->rpad_and_clip(target, posaxis, depth);
     }
     else {
       return std::make_shared<UnmaskedArray>(
         Identities::none(),
         parameters_,
-        content_.get()->rpad_and_clip(target, axis, depth));
+        content_.get()->rpad_and_clip(target, posaxis, depth));
     }
   }
 
@@ -717,15 +717,15 @@ namespace awkward {
 
   const ContentPtr
   UnmaskedArray::localindex(int64_t axis, int64_t depth) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (axis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       return localindex_axis0();
     }
     else {
       return std::make_shared<UnmaskedArray>(
         identities_,
         util::Parameters(),
-        content_.get()->localindex(axis, depth));
+        content_.get()->localindex(posaxis, depth));
     }
   }
 
@@ -739,8 +739,8 @@ namespace awkward {
     if (n < 1) {
       throw std::invalid_argument("in combinations, 'n' must be at least 1");
     }
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (axis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       return combinations_axis0(n, replacement, recordlookup, parameters);
     }
     else {
@@ -751,7 +751,7 @@ namespace awkward {
                                      replacement,
                                      recordlookup,
                                      parameters,
-                                     axis,
+                                     posaxis,
                                      depth));
     }
   }

@@ -43,8 +43,37 @@ make_IndexOf(const py::handle& m, const std::string& name) {
 
       .def("__repr__", &ak::IndexOf<T>::tostring)
       .def("__len__", &ak::IndexOf<T>::length)
-      .def("__getitem__", &ak::IndexOf<T>::getitem_at)
-      .def("__getitem__", &ak::IndexOf<T>::getitem_range)
+      .def("__getitem__", [](const ak::IndexOf<T>& self, py::object& obj) {
+        if (py::isinstance<py::int_>(obj)) {
+          T out = self.getitem_at(obj.cast<int64_t>());
+          return py::cast(out);
+        }
+        else if (py::isinstance<py::slice>(obj)) {
+          py::object pystep = obj.attr("step");
+          if ((py::isinstance<py::int_>(pystep)  &&  pystep.cast<int64_t>() == 1)  ||
+              pystep.is(py::none())) {
+            int64_t start = ak::Slice::none();
+            int64_t stop = ak::Slice::none();
+            py::object pystart = obj.attr("start");
+            py::object pystop = obj.attr("stop");
+            if (!pystart.is(py::none())) {
+              start = pystart.cast<int64_t>();
+            }
+            if (!pystop.is(py::none())) {
+              stop = pystop.cast<int64_t>();
+            }
+            ak::IndexOf<T> out = self.getitem_range(start, stop);
+            return py::cast(out);
+          }
+          else {
+            throw std::invalid_argument("Index slices cannot contain step != 1");
+          }
+        }
+        else {
+          throw std::invalid_argument(
+            "Index can only be sliced by an integer or start:stop slice");
+        }
+      })
 
   );
 }

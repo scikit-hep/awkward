@@ -125,7 +125,9 @@ namespace awkward {
       : Content(identities, parameters) { }
 
   const std::shared_ptr<NumpyArray>
-  EmptyArray::toNumpyArray(const std::string& format, ssize_t itemsize) const {
+  EmptyArray::toNumpyArray(const std::string& format,
+                           ssize_t itemsize,
+                           util::dtype dtype) const {
     std::shared_ptr<void> ptr(new uint8_t[0], kernel::array_deleter<uint8_t>());
     std::vector<ssize_t> shape({ 0 });
     std::vector<ssize_t> strides({ itemsize });
@@ -136,7 +138,8 @@ namespace awkward {
                                         strides,
                                         0,
                                         itemsize,
-                                        format);
+                                        format,
+                                        dtype);
   }
 
   const std::string
@@ -340,8 +343,8 @@ namespace awkward {
 
   const ContentPtr
   EmptyArray::num(int64_t axis, int64_t depth) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       Index64 out(1);
       out.setitem_at_nowrap(0, length());
       return NumpyArray(out).getitem_at_nowrap(0);
@@ -353,8 +356,8 @@ namespace awkward {
 
   const std::pair<Index64, ContentPtr>
   EmptyArray::offsets_and_flattened(int64_t axis, int64_t depth) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       throw std::invalid_argument("axis=0 not allowed for flatten");
     }
     else {
@@ -392,12 +395,12 @@ namespace awkward {
 
   const ContentPtr
   EmptyArray::rpad(int64_t target, int64_t axis, int64_t depth) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis != depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis != depth) {
       throw std::invalid_argument("axis exceeds the depth of this array");
     }
     else {
-      return rpad_and_clip(target, axis, depth);
+      return rpad_and_clip(target, posaxis, depth);
     }
   }
 
@@ -405,8 +408,8 @@ namespace awkward {
   EmptyArray::rpad_and_clip(int64_t target,
                             int64_t axis,
                             int64_t depth) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis != depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis != depth) {
       throw std::invalid_argument("axis exceeds the depth of this array");
     }
     else {
@@ -422,8 +425,10 @@ namespace awkward {
                           int64_t outlength,
                           bool mask,
                           bool keepdims) const {
-    ContentPtr asnumpy = toNumpyArray(reducer.preferred_type(),
-                                      reducer.preferred_typesize());
+    util::dtype dtype = reducer.preferred_dtype();
+    std::string format = util::dtype_to_format(dtype);
+    int64_t itemsize = util::dtype_to_itemsize(dtype);
+    ContentPtr asnumpy = toNumpyArray(format, itemsize, dtype);
     return asnumpy.get()->reduce_next(reducer,
                                       negaxis,
                                       starts,
@@ -459,7 +464,7 @@ namespace awkward {
                         bool ascending,
                         bool stable,
                         bool keepdims) const {
-    ContentPtr asnumpy = toNumpyArray("d", 8);
+    ContentPtr asnumpy = toNumpyArray("d", 8, util::dtype::float64);
     return asnumpy.get()->sort_next(negaxis,
                                     starts,
                                     parents,
@@ -477,7 +482,7 @@ namespace awkward {
                            bool ascending,
                            bool stable,
                            bool keepdims) const {
-    ContentPtr asnumpy = toNumpyArray("d", 8);
+    ContentPtr asnumpy = toNumpyArray("d", 8, util::dtype::float64);
     ContentPtr out = asnumpy.get()->argsort_next(negaxis,
                                                  starts,
                                                  parents,
