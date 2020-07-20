@@ -816,8 +816,8 @@ namespace awkward {
 
   const ContentPtr
   RecordArray::num(int64_t axis, int64_t depth) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       Index64 single(1);
       single.setitem_at_nowrap(0, length_);
       ContentPtr singleton = std::make_shared<NumpyArray>(single);
@@ -835,7 +835,7 @@ namespace awkward {
     else {
       ContentPtrVec contents;
       for (auto content : contents_) {
-        contents.push_back(content.get()->num(toaxis, depth));
+        contents.push_back(content.get()->num(posaxis, depth));
       }
       return std::make_shared<RecordArray>(Identities::none(),
                                            util::Parameters(),
@@ -847,11 +847,11 @@ namespace awkward {
 
   const std::pair<Index64, ContentPtr>
   RecordArray::offsets_and_flattened(int64_t axis, int64_t depth) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       throw std::invalid_argument("axis=0 not allowed for flatten");
     }
-    else if (toaxis == depth + 1) {
+    else if (posaxis == depth + 1) {
       throw std::invalid_argument(
         "arrays of records cannot be flattened (but their contents can be; "
         "try a different 'axis')");
@@ -861,7 +861,7 @@ namespace awkward {
       for (auto content : contents_) {
         ContentPtr trimmed = content.get()->getitem_range(0, length());
         std::pair<Index64, ContentPtr> pair =
-          trimmed.get()->offsets_and_flattened(toaxis, depth);
+          trimmed.get()->offsets_and_flattened(posaxis, depth);
         if (pair.first.length() != 0) {
           throw std::runtime_error(
             "RecordArray content with axis > depth + 1 returned a non-empty "
@@ -1098,14 +1098,14 @@ namespace awkward {
 
   const ContentPtr
   RecordArray::rpad(int64_t target, int64_t axis, int64_t depth) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       return rpad_axis0(target, false);
     }
     else {
       ContentPtrVec contents;
       for (auto content : contents_) {
-        contents.push_back(content.get()->rpad(target, toaxis, depth));
+        contents.push_back(content.get()->rpad(target, posaxis, depth));
       }
       if (contents.empty()) {
         return std::make_shared<RecordArray>(identities_,
@@ -1127,15 +1127,15 @@ namespace awkward {
   RecordArray::rpad_and_clip(int64_t target,
                              int64_t axis,
                              int64_t depth) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       return rpad_axis0(target, true);
     }
     else {
       ContentPtrVec contents;
       for (auto content : contents_) {
         contents.push_back(
-          content.get()->rpad_and_clip(target, toaxis, depth));
+          content.get()->rpad_and_clip(target, posaxis, depth));
       }
       if (contents.empty()) {
         return std::make_shared<RecordArray>(identities_,
@@ -1182,14 +1182,14 @@ namespace awkward {
 
   const ContentPtr
   RecordArray::localindex(int64_t axis, int64_t depth) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       return localindex_axis0();
     }
     else {
       ContentPtrVec contents;
       for (auto content : contents_) {
-        contents.push_back(content.get()->localindex(toaxis, depth));
+        contents.push_back(content.get()->localindex(posaxis, depth));
       }
       return std::make_shared<RecordArray>(identities_,
                                            util::Parameters(),
@@ -1209,8 +1209,8 @@ namespace awkward {
     if (n < 1) {
       throw std::invalid_argument("in combinations, 'n' must be at least 1");
     }
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       return combinations_axis0(n, replacement, recordlookup, parameters);
     }
     else {
@@ -1220,7 +1220,7 @@ namespace awkward {
                                                        replacement,
                                                        recordlookup,
                                                        parameters,
-                                                       toaxis,
+                                                       posaxis,
                                                        depth));
       }
       return std::make_shared<RecordArray>(identities_,

@@ -1269,8 +1269,8 @@ namespace awkward {
   template <typename T, bool ISOPTION>
   const ContentPtr
   IndexedArrayOf<T, ISOPTION>::num(int64_t axis, int64_t depth) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       Index64 out(1);
       out.setitem_at_nowrap(0, length());
       return NumpyArray(out).getitem_at_nowrap(0);
@@ -1282,7 +1282,7 @@ namespace awkward {
       IndexOf<T> outindex = pair.second;
 
       ContentPtr next = content_.get()->carry(nextcarry, false);
-      ContentPtr out = next.get()->num(axis, depth);
+      ContentPtr out = next.get()->num(posaxis, depth);
       IndexedArrayOf<T, ISOPTION> out2(Identities::none(),
                                        util::Parameters(),
                                        outindex,
@@ -1290,7 +1290,7 @@ namespace awkward {
       return out2.simplify_optiontype();
     }
     else {
-      return project().get()->num(toaxis, depth);
+      return project().get()->num(posaxis, depth);
     }
   }
 
@@ -1298,8 +1298,8 @@ namespace awkward {
   const std::pair<Index64, ContentPtr>
   IndexedArrayOf<T, ISOPTION>::offsets_and_flattened(int64_t axis,
                                                      int64_t depth) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       throw std::invalid_argument("axis=0 not allowed for flatten");
     }
     else if (ISOPTION) {
@@ -1311,7 +1311,7 @@ namespace awkward {
       ContentPtr next = content_.get()->carry(nextcarry, false);
 
       std::pair<Index64, ContentPtr> offsets_flattened =
-        next.get()->offsets_and_flattened(toaxis, depth);
+        next.get()->offsets_and_flattened(posaxis, depth);
       Index64 offsets = offsets_flattened.first;
       ContentPtr flattened = offsets_flattened.second;
 
@@ -1338,7 +1338,7 @@ namespace awkward {
       }
     }
     else {
-      return project().get()->offsets_and_flattened(toaxis, depth);
+      return project().get()->offsets_and_flattened(posaxis, depth);
     }
   }
 
@@ -1752,11 +1752,11 @@ namespace awkward {
   IndexedArrayOf<T, ISOPTION>::rpad(int64_t target,
                                     int64_t axis,
                                     int64_t depth) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       return rpad_axis0(target, false);
     }
-    else if (toaxis == depth + 1) {
+    else if (posaxis == depth + 1) {
       if (ISOPTION) {
         Index8 mask = bytemask();
         Index64 index(mask.length());
@@ -1767,7 +1767,7 @@ namespace awkward {
           mask.length());
         util::handle_error(err, classname(), identities_.get());
 
-        ContentPtr next = project().get()->rpad(target, toaxis, depth);
+        ContentPtr next = project().get()->rpad(target, posaxis, depth);
         return std::make_shared<IndexedOptionArray64>(
           Identities::none(),
           util::Parameters(),
@@ -1775,7 +1775,7 @@ namespace awkward {
           next).get()->simplify_optiontype();
       }
       else {
-        return project().get()->rpad(target, toaxis, depth);
+        return project().get()->rpad(target, posaxis, depth);
       }
     }
     else {
@@ -1783,7 +1783,7 @@ namespace awkward {
         Identities::none(),
         parameters_,
         index_,
-        content_.get()->rpad(target, toaxis, depth));
+        content_.get()->rpad(target, posaxis, depth));
     }
   }
 
@@ -1792,11 +1792,11 @@ namespace awkward {
   IndexedArrayOf<T, ISOPTION>::rpad_and_clip(int64_t target,
                                              int64_t axis,
                                              int64_t depth) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       return rpad_axis0(target, true);
     }
-    else if (toaxis == depth + 1) {
+    else if (posaxis == depth + 1) {
       if (ISOPTION) {
         Index8 mask = bytemask();
         Index64 index(mask.length());
@@ -1808,7 +1808,7 @@ namespace awkward {
         util::handle_error(err, classname(), identities_.get());
 
         ContentPtr next =
-          project().get()->rpad_and_clip(target, toaxis, depth);
+          project().get()->rpad_and_clip(target, posaxis, depth);
         return std::make_shared<IndexedOptionArray64>(
           Identities::none(),
           util::Parameters(),
@@ -1816,7 +1816,7 @@ namespace awkward {
           next).get()->simplify_optiontype();
       }
       else {
-        return project().get()->rpad_and_clip(target, toaxis, depth);
+        return project().get()->rpad_and_clip(target, posaxis, depth);
       }
     }
     else {
@@ -1824,7 +1824,7 @@ namespace awkward {
         Identities::none(),
         parameters_,
         index_,
-        content_.get()->rpad_and_clip(target, toaxis, depth));
+        content_.get()->rpad_and_clip(target, posaxis, depth));
     }
   }
 
@@ -1916,8 +1916,8 @@ namespace awkward {
   template <typename T, bool ISOPTION>
   const ContentPtr
   IndexedArrayOf<T, ISOPTION>::localindex(int64_t axis, int64_t depth) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       return localindex_axis0();
     }
     else {
@@ -1928,14 +1928,14 @@ namespace awkward {
         IndexOf<T> outindex = pair.second;
 
         ContentPtr next = content_.get()->carry(nextcarry, false);
-        ContentPtr out = next.get()->localindex(axis, depth);
+        ContentPtr out = next.get()->localindex(posaxis, depth);
         IndexedArrayOf<T, ISOPTION> out2(identities_,
                                          util::Parameters(),
                                          outindex, out);
         return out2.simplify_optiontype();
       }
       else {
-        return project().get()->localindex(toaxis, depth);
+        return project().get()->localindex(posaxis, depth);
       }
     }
   }
@@ -1952,8 +1952,8 @@ namespace awkward {
     if (n < 1) {
       throw std::invalid_argument("in combinations, 'n' must be at least 1");
     }
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       return combinations_axis0(n, replacement, recordlookup, parameters);
     }
     else {
@@ -1968,7 +1968,7 @@ namespace awkward {
                                                   replacement,
                                                   recordlookup,
                                                   parameters,
-                                                  toaxis,
+                                                  posaxis,
                                                   depth);
         IndexedArrayOf<T, ISOPTION> out2(identities_,
                                          util::Parameters(),
@@ -1981,7 +1981,7 @@ namespace awkward {
                                              replacement,
                                              recordlookup,
                                              parameters,
-                                             toaxis,
+                                             posaxis,
                                              depth);
       }
     }

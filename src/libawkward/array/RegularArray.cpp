@@ -595,13 +595,13 @@ namespace awkward {
 
   const ContentPtr
   RegularArray::num(int64_t axis, int64_t depth) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       Index64 out(1);
       out.setitem_at_nowrap(0, length());
       return NumpyArray(out).getitem_at_nowrap(0);
     }
-    else if (toaxis == depth + 1) {
+    else if (posaxis == depth + 1) {
       Index64 tonum(length());
       struct Error err = kernel::RegularArray_num_64(
         tonum.ptr().get(),
@@ -611,7 +611,7 @@ namespace awkward {
       return std::make_shared<NumpyArray>(tonum);
     }
     else {
-      ContentPtr next = content_.get()->num(toaxis, depth + 1);
+      ContentPtr next = content_.get()->num(posaxis, depth + 1);
       return std::make_shared<RegularArray>(Identities::none(),
                                             util::Parameters(),
                                             next,
@@ -814,23 +814,23 @@ namespace awkward {
 
   const ContentPtr
   RegularArray::rpad(int64_t target, int64_t axis, int64_t depth) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       return rpad_axis0(target, false);
     }
-    else if (toaxis == depth + 1) {
+    else if (posaxis == depth + 1) {
       if (target < size_) {
         return shallow_copy();
       }
       else {
-        return rpad_and_clip(target, toaxis, depth);
+        return rpad_and_clip(target, posaxis, depth);
       }
     }
     else {
       return std::make_shared<RegularArray>(
         Identities::none(),
         parameters_,
-        content_.get()->rpad(target, toaxis, depth + 1),
+        content_.get()->rpad(target, posaxis, depth + 1),
         size_);
     }
   }
@@ -839,11 +839,11 @@ namespace awkward {
   RegularArray::rpad_and_clip(int64_t target,
                               int64_t axis,
                               int64_t depth) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       return rpad_axis0(target, true);
     }
-    else if (toaxis == depth + 1) {
+    else if (posaxis == depth + 1) {
       Index64 index(length() * target);
       struct Error err = kernel::RegularArray_rpad_and_clip_axis1_64(
         index.ptr().get(),
@@ -866,7 +866,7 @@ namespace awkward {
       return std::make_shared<RegularArray>(
         Identities::none(),
         parameters_,
-        content_.get()->rpad_and_clip(target, toaxis, depth + 1),
+        content_.get()->rpad_and_clip(target, posaxis, depth + 1),
         size_);
     }
   }
@@ -890,11 +890,11 @@ namespace awkward {
 
   const ContentPtr
   RegularArray::localindex(int64_t axis, int64_t depth) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       return localindex_axis0();
     }
-    else if (toaxis == depth + 1) {
+    else if (posaxis == depth + 1) {
       Index64 localindex(length()*size_);
       struct Error err = kernel::RegularArray_localindex_64(
         localindex.ptr().get(),
@@ -911,7 +911,7 @@ namespace awkward {
       return std::make_shared<RegularArray>(
         identities_,
         util::Parameters(),
-        content_.get()->localindex(toaxis, depth + 1),
+        content_.get()->localindex(posaxis, depth + 1),
         size_);
     }
   }
@@ -927,12 +927,12 @@ namespace awkward {
       throw std::invalid_argument("in combinations, 'n' must be at least 1");
     }
 
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       return combinations_axis0(n, replacement, recordlookup, parameters);
     }
 
-    else if (toaxis == depth + 1) {
+    else if (posaxis == depth + 1) {
       int64_t size = size_;
       if (replacement) {
         size += (n - 1);
@@ -1001,7 +1001,7 @@ namespace awkward {
                                        replacement,
                                        recordlookup,
                                        parameters,
-                                       toaxis,
+                                       posaxis,
                                        depth + 1);
       return std::make_shared<RegularArray>(identities_,
                                             util::Parameters(),

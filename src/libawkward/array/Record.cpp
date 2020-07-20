@@ -275,14 +275,14 @@ namespace awkward {
 
   const ContentPtr
   Record::num(int64_t axis, int64_t depth) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       throw std::invalid_argument(
         "cannot call 'num' with an 'axis' of 0 on a Record");
     }
     else {
       ContentPtr singleton = array_.get()->getitem_range_nowrap(at_, at_ + 1);
-      return singleton.get()->num(toaxis, depth).get()->getitem_at_nowrap(0);
+      return singleton.get()->num(posaxis, depth).get()->getitem_at_nowrap(0);
     }
   }
 
@@ -349,15 +349,15 @@ namespace awkward {
 
   const ContentPtr
   Record::localindex(int64_t axis, int64_t depth) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       throw std::invalid_argument(
         "cannot call 'localindex' with an 'axis' of 0 on a Record");
     }
     else {
       ContentPtr singleton = array_.get()->getitem_range_nowrap(at_, at_ + 1);
       return singleton.get()
-             ->localindex(toaxis, depth).get()
+             ->localindex(posaxis, depth).get()
              ->getitem_at_nowrap(0);
     }
   }
@@ -372,8 +372,8 @@ namespace awkward {
     if (n < 1) {
       throw std::invalid_argument("in combinations, 'n' must be at least 1");
     }
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       throw std::invalid_argument(
         "cannot call 'combinations' with an 'axis' of 0 on a Record");
     }
@@ -383,7 +383,7 @@ namespace awkward {
                                            replacement,
                                            recordlookup,
                                            parameters,
-                                           toaxis,
+                                           posaxis,
                                            depth).get()->getitem_at_nowrap(0);
     }
   }

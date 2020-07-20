@@ -783,13 +783,13 @@ namespace awkward {
   template <typename T>
   const ContentPtr
   ListOffsetArrayOf<T>::num(int64_t axis, int64_t depth) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       Index64 out(1);
       out.setitem_at_nowrap(0, length());
       return NumpyArray(out).getitem_at_nowrap(0);
     }
-    else if (toaxis == depth + 1) {
+    else if (posaxis == depth + 1) {
       IndexOf<T> starts = util::make_starts(offsets_);
       IndexOf<T> stops = util::make_stops(offsets_);
       Index64 tonum(length(), offsets_.ptr_lib());
@@ -805,7 +805,7 @@ namespace awkward {
       return std::make_shared<NumpyArray>(tonum);
     }
     else {
-      ContentPtr next = content_.get()->num(toaxis, depth + 1);
+      ContentPtr next = content_.get()->num(posaxis, depth + 1);
       Index64 offsets = compact_offsets64(true);
       return std::make_shared<ListOffsetArray64>(Identities::none(),
                                                  util::Parameters(),
@@ -818,11 +818,11 @@ namespace awkward {
   const std::pair<Index64, ContentPtr>
   ListOffsetArrayOf<T>::offsets_and_flattened(int64_t axis,
                                               int64_t depth) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       throw std::invalid_argument("axis=0 not allowed for flatten");
     }
-    else if (toaxis == depth + 1) {
+    else if (posaxis == depth + 1) {
       ContentPtr listoffsetarray = toListOffsetArray64(true);
       ListOffsetArray64* raw =
         dynamic_cast<ListOffsetArray64*>(listoffsetarray.get());
@@ -830,7 +830,7 @@ namespace awkward {
     }
     else {
       std::pair<Index64, ContentPtr> pair =
-        content_.get()->offsets_and_flattened(toaxis, depth + 1);
+        content_.get()->offsets_and_flattened(posaxis, depth + 1);
       Index64 inneroffsets = pair.first;
       if (inneroffsets.length() == 0) {
         return std::pair<Index64, ContentPtr>(
@@ -1319,11 +1319,11 @@ namespace awkward {
   ListOffsetArrayOf<T>::rpad(int64_t target,
                              int64_t axis,
                              int64_t depth) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       return rpad_axis0(target, false);
     }
-    if (toaxis == depth + 1) {
+    if (posaxis == depth + 1) {
       int64_t tolength = 0;
       IndexOf<T> offsets(offsets_.length());
       struct Error err1 = kernel::ListOffsetArray_rpad_length_axis1<T>(
@@ -1355,7 +1355,7 @@ namespace awkward {
     else {
       return std::make_shared<ListOffsetArrayOf<T>>(
         Identities::none(), parameters_, offsets_,
-        content_.get()->rpad(target, toaxis, depth + 1));
+        content_.get()->rpad(target, posaxis, depth + 1));
     }
   }
 
@@ -1364,11 +1364,11 @@ namespace awkward {
   ListOffsetArrayOf<T>::rpad_and_clip(int64_t target,
                                       int64_t axis,
                                       int64_t depth) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       return rpad_axis0(target, true);
     }
-    else if (toaxis == depth + 1) {
+    else if (posaxis == depth + 1) {
       Index64 starts(offsets_.length() - 1);
       Index64 stops(offsets_.length() - 1);
 
@@ -1402,7 +1402,7 @@ namespace awkward {
     else {
       return std::make_shared<ListOffsetArrayOf<T>>(
         Identities::none(), parameters_, offsets_,
-        content_.get()->rpad_and_clip(target, toaxis, depth + 1));
+        content_.get()->rpad_and_clip(target, posaxis, depth + 1));
     }
   }
 
@@ -1573,11 +1573,11 @@ namespace awkward {
   template <typename T>
   const ContentPtr
   ListOffsetArrayOf<T>::localindex(int64_t axis, int64_t depth) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       return localindex_axis0();
     }
-    else if (toaxis == depth + 1) {
+    else if (posaxis == depth + 1) {
       Index64 offsets = compact_offsets64(true);
       int64_t innerlength = offsets.getitem_at_nowrap(offsets.length() - 1);
       Index64 localindex(innerlength);
@@ -1598,7 +1598,7 @@ namespace awkward {
         identities_,
         util::Parameters(),
         offsets_,
-        content_.get()->localindex(toaxis, depth + 1));
+        content_.get()->localindex(posaxis, depth + 1));
     }
   }
 
@@ -1614,12 +1614,12 @@ namespace awkward {
       throw std::invalid_argument("in combinations, 'n' must be at least 1");
     }
 
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       return combinations_axis0(n, replacement, recordlookup, parameters);
     }
 
-    else if (toaxis == depth + 1) {
+    else if (posaxis == depth + 1) {
       IndexOf<T> starts = util::make_starts(offsets_);
       IndexOf<T> stops = util::make_stops(offsets_);
 
@@ -1681,7 +1681,7 @@ namespace awkward {
                                                                   replacement,
                                                                   recordlookup,
                                                                   parameters,
-                                                                  toaxis,
+                                                                  posaxis,
                                                                   depth + 1);
       return std::make_shared<ListOffsetArray64>(identities_,
                                                  util::Parameters(),
