@@ -1129,8 +1129,8 @@ ERROR awkward_ListArray_getitem_next_array(
     if (fromstops[stopsoffset + i] < fromstarts[startsoffset + i]) {
       return failure("stops[i] < starts[i]", i, kSliceNone);
     }
-    if (fromstarts[startsoffset + i] != fromstops[stopsoffset + i]  &&
-        fromstops[stopsoffset + i] > lencontent) {
+    if ((fromstarts[startsoffset + i] != fromstops[stopsoffset + i])  &&
+        (fromstops[stopsoffset + i] > lencontent)) {
       return failure("stops[i] > len(content)", i, kSliceNone);
     }
     int64_t length = fromstops[stopsoffset + i] - fromstarts[startsoffset + i];
@@ -1235,8 +1235,8 @@ ERROR awkward_ListArray_getitem_next_array_advanced(
     if (fromstops[stopsoffset + i] < fromstarts[startsoffset + i]) {
       return failure("stops[i] < starts[i]", i, kSliceNone);
     }
-    if (fromstarts[startsoffset + i] != fromstops[stopsoffset + i]  &&
-        fromstops[stopsoffset + i] > lencontent) {
+    if ((fromstarts[startsoffset + i] != fromstops[stopsoffset + i])  &&
+        (fromstops[stopsoffset + i] > lencontent)) {
       return failure("stops[i] > len(content)", i, kSliceNone);
     }
     int64_t length = fromstops[stopsoffset + i] - fromstarts[startsoffset + i];

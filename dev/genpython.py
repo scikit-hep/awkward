@@ -232,7 +232,7 @@ class FuncBody(object):
                     self.traverse(item.expr, 0, called=True)
                 )
             elif item.op == "!":
-                stmt = " " * indent + "not {0}".format(
+                stmt = " " * indent + "not ({0})".format(
                     self.traverse(item.expr, 0, called=True)
                 )
             elif item.op == "&":

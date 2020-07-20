@@ -1980,8 +1980,8 @@ ERROR awkward_reduce_argmax(
     int64_t parent = parents[parentsoffset + i];
     int64_t start = starts[startsoffset + parent];
     if (toptr[parent] == -1  ||
-        fromptr[fromptroffset + i] >
-          fromptr[fromptroffset + toptr[parent] + start]) {
+        (fromptr[fromptroffset + i] >
+          (fromptr[fromptroffset + toptr[parent] + start]))) {
       toptr[parent] = i - start;
     }
   }
