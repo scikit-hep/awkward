@@ -54,6 +54,57 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
   </tr>
 </table>
 
+# Basic example
+
+Given an array of objects with `x`, `y` fields and variable-length nested lists like
+
+```python
+array = ak.Array([
+    [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}, {"x": 3.3, "y": [1, 2, 3]}],
+    [],
+    [{"x": 4.4, "y": {1, 2, 3, 4]}, {"x": 5.5, "y": [1, 2, 3, 4, 5]}]
+])
+```
+
+the following slices out the `y` values, drops the first element from each list, and runs NumPy's `np.square` function on everything that is left:
+
+```python
+output = np.square(array["y", ..., 1:])
+```
+
+The result is
+
+```python
+[
+    [[], [4], [4, 9]],
+    [],
+    [[4, 9, 16], [4, 9, 16, 25]]
+]
+```
+
+The equivalent pure Python is
+
+```python
+output = []
+for sublist in array:
+    tmp1 = []
+    for record in sublist:
+        tmp2 = []
+        for number in record["y"][1:]:
+            tmp2.append(np.square(number))
+        tmp1.append(tmp2)
+    output.append(tmp1)
+```
+
+Not only is the expression using Awkward Arrays more concise, using idioms familiar from NumPy, but it's much faster and uses less memory.
+
+For a similar problem 10 million times larger than the one above (on a single-threaded 2.2 GHz processor),
+
+   * the Awkward Array expression takes **4.6 seconds** to run and uses **2.1 GB** of memory,
+   * the pure Python expression (using builtin Python lists and dicts) takes **138 seconds** to run and uses **22 GB** of memory.
+
+Speed and memory factors in the double digits are common because we're replacing Python's dynamically typed, pointer-chasing virtual machine with type-specialized, precompiled routines on contiguous data. (In other words, for the same reasons as NumPy.) Even higher speedups are possible when Awkward Array is paired with [Numba](https://numba.pydata.org/).
+
 # Installation
 
 Awkward Array can be installed [from PyPI](https://pypi.org/project/awkward1/) using pip:
@@ -161,4 +212,4 @@ Thanks especially to the gracious help of awkward-array contributors (including 
 <!-- prettier-ignore-end -->
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
-💻: code, 📖: documentation, 🚇: infrastructure, 🚧: maintainance, ⚠: tests that drive development, 🤔: foundational ideas.
+💻: code, 📖: documentation, 🚇: infrastructure, 🚧: maintainance, ⚠: tests and feedback, 🤔: foundational ideas.
