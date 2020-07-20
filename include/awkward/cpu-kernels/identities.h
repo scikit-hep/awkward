@@ -7,22 +7,22 @@
 
 extern "C" {
 /// @param toptr outparam
-/// @param length inparam role: len
+/// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_new_Identities32(
       int32_t* toptr,
       int64_t length);
 /// @param toptr outparam
-/// @param length inparam role: len
+/// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_new_Identities64(
       int64_t* toptr,
       int64_t length);
 
 /// @param toptr outparam
-/// @param fromptr inparam
-/// @param length inparam role: len
-/// @param width inparam role: len
+/// @param fromptr inparam role: Identities-array
+/// @param length inparam
+/// @param width inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities32_to_Identities64(
       int64_t* toptr,
@@ -31,13 +31,13 @@ extern "C" {
       int64_t width);
 
 /// @param toptr outparam
-/// @param fromptr inparam
-/// @param fromoffsets inparam role: offsetarray
-/// @param fromptroffset inparam role: offset
-/// @param offsetsoffset inparam role: offset
-/// @param tolength inparam role: len
-/// @param fromlength inparam role: len
-/// @param fromwidth inparam role: len
+/// @param fromptr inparam role: Identities-array instance: 0
+/// @param fromoffsets inparam role: Identities-array instance: 1
+/// @param fromptroffset inparam role: Identities-array-offset instance: 0
+/// @param offsetsoffset inparam role: Identities-array-offset instance: 1
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities32_from_ListOffsetArray32(
       int32_t* toptr,
@@ -49,13 +49,13 @@ extern "C" {
       int64_t fromlength,
       int64_t fromwidth);
 /// @param toptr outparam
-/// @param fromptr inparam
-/// @param fromoffsets inparam role: offsetarray
-/// @param fromptroffset inparam role: offset
-/// @param offsetsoffset inparam role: offset
-/// @param tolength inparam role: len
-/// @param fromlength inparam role: len
-/// @param fromwidth inparam role: len
+/// @param fromptr inparam role: Identities-array instance: 0
+/// @param fromoffsets inparam role: Identities-array instance: 1
+/// @param fromptroffset inparam role: Identities-array-offset instance: 0
+/// @param offsetsoffset inparam role: Identities-array-offset instance: 1
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities32_from_ListOffsetArrayU32(
       int32_t* toptr,
@@ -67,13 +67,13 @@ extern "C" {
       int64_t fromlength,
       int64_t fromwidth);
 /// @param toptr outparam
-/// @param fromptr inparam
-/// @param fromoffsets inparam role: offsetarray
-/// @param fromptroffset inparam role: offset
-/// @param offsetsoffset inparam role: offset
-/// @param tolength inparam role: len
-/// @param fromlength inparam role: len
-/// @param fromwidth inparam role: len
+/// @param fromptr inparam role: Identities-array instance: 0
+/// @param fromoffsets inparam role: Identities-array instance: 1
+/// @param fromptroffset inparam role: Identities-array-offset instance: 0
+/// @param offsetsoffset inparam role: Identities-array-offset instance: 1
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities32_from_ListOffsetArray64(
       int32_t* toptr,
@@ -85,13 +85,13 @@ extern "C" {
       int64_t fromlength,
       int64_t fromwidth);
 /// @param toptr outparam
-/// @param fromptr inparam
-/// @param fromoffsets inparam role: offsetarray
-/// @param fromptroffset inparam role: offset
-/// @param offsetsoffset inparam role: offset
-/// @param tolength inparam role: len
-/// @param fromlength inparam role: len
-/// @param fromwidth inparam role: len
+/// @param fromptr inparam role: Identities-array instance: 0
+/// @param fromoffsets inparam role: Identities-array instance: 1
+/// @param fromptroffset inparam role: Identities-array-offset instance: 0
+/// @param offsetsoffset inparam role: Identities-array-offset instance: 1
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities64_from_ListOffsetArray32(
       int64_t* toptr,
@@ -103,13 +103,13 @@ extern "C" {
       int64_t fromlength,
       int64_t fromwidth);
 /// @param toptr outparam
-/// @param fromptr inparam
-/// @param fromoffsets inparam role: offsetarray
-/// @param fromptroffset inparam role: offset
-/// @param offsetsoffset inparam role: offset
-/// @param tolength inparam role: len
-/// @param fromlength inparam role: len
-/// @param fromwidth inparam role: len
+/// @param fromptr inparam role: Identities-array instance: 0
+/// @param fromoffsets inparam role: Identities-array instance: 1
+/// @param fromptroffset inparam role: Identities-array-offset instance: 0
+/// @param offsetsoffset inparam role: Identities-array-offset instance: 1
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities64_from_ListOffsetArrayU32(
       int64_t* toptr,
@@ -121,13 +121,13 @@ extern "C" {
       int64_t fromlength,
       int64_t fromwidth);
 /// @param toptr outparam
-/// @param fromptr inparam
-/// @param fromoffsets inparam role: offsetarray
-/// @param fromptroffset inparam role: offset
-/// @param offsetsoffset inparam role: offset
-/// @param tolength inparam role: len
-/// @param fromlength inparam role: len
-/// @param fromwidth inparam role: len
+/// @param fromptr inparam role: Identities-array instance: 0
+/// @param fromoffsets inparam role: Identities-array instance: 1
+/// @param fromptroffset inparam role: Identities-array-offset instance: 0
+/// @param offsetsoffset inparam role: Identities-array-offset instance: 1
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities64_from_ListOffsetArray64(
       int64_t* toptr,
@@ -139,17 +139,17 @@ extern "C" {
       int64_t fromlength,
       int64_t fromwidth);
 
-/// @param uniquecontents outparam role: boolout
+/// @param uniquecontents outparam role: pointer
 /// @param toptr outparam
-/// @param fromptr inparam
-/// @param fromstarts inparam role: startsarray
-/// @param fromstops inparam role: stopsarray
-/// @param fromptroffset inparam role: offset
-/// @param startsoffset inparam role: offset
-/// @param stopsoffset inparam role: offset
-/// @param tolength inparam role: len
-/// @param fromlength inparam role: len
-/// @param fromwidth inparam role: len
+/// @param fromptr inparam role: Identities-array
+/// @param fromstarts inparam role: ListArray-starts
+/// @param fromstops inparam role: ListArray-stops
+/// @param fromptroffset inparam role: Identities-array-offset
+/// @param startsoffset inparam role: ListArray-starts-offset
+/// @param stopsoffset inparam role: ListArray-stops-offset
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities32_from_ListArray32(
       bool* uniquecontents,
@@ -163,17 +163,17 @@ extern "C" {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
-/// @param uniquecontents outparam role: boolout
+/// @param uniquecontents outparam role: pointer
 /// @param toptr outparam
-/// @param fromptr inparam
-/// @param fromstarts inparam role: startsarray
-/// @param fromstops inparam role: stopsarray
-/// @param fromptroffset inparam role: offset
-/// @param startsoffset inparam role: offset
-/// @param stopsoffset inparam role: offset
-/// @param tolength inparam role: len
-/// @param fromlength inparam role: len
-/// @param fromwidth inparam role: len
+/// @param fromptr inparam role: Identities-array
+/// @param fromstarts inparam role: ListArray-starts
+/// @param fromstops inparam role: ListArray-stops
+/// @param fromptroffset inparam role: Identities-array-offset
+/// @param startsoffset inparam role: ListArray-starts-offset
+/// @param stopsoffset inparam role: ListArray-stops-offset
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities32_from_ListArrayU32(
       bool* uniquecontents,
@@ -187,17 +187,17 @@ extern "C" {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
-/// @param uniquecontents outparam role: boolout
+/// @param uniquecontents outparam role: pointer
 /// @param toptr outparam
-/// @param fromptr inparam
-/// @param fromstarts inparam role: startsarray
-/// @param fromstops inparam role: stopsarray
-/// @param fromptroffset inparam role: offset
-/// @param startsoffset inparam role: offset
-/// @param stopsoffset inparam role: offset
-/// @param tolength inparam role: len
-/// @param fromlength inparam role: len
-/// @param fromwidth inparam role: len
+/// @param fromptr inparam role: Identities-array
+/// @param fromstarts inparam role: ListArray-starts
+/// @param fromstops inparam role: ListArray-stops
+/// @param fromptroffset inparam role: Identities-array-offset
+/// @param startsoffset inparam role: ListArray-starts-offset
+/// @param stopsoffset inparam role: ListArray-stops-offset
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities32_from_ListArray64(
       bool* uniquecontents,
@@ -211,17 +211,17 @@ extern "C" {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
-/// @param uniquecontents outparam role: boolout
+/// @param uniquecontents outparam role: pointer
 /// @param toptr outparam
-/// @param fromptr inparam
-/// @param fromstarts inparam role: startsarray
-/// @param fromstops inparam role: stopsarray
-/// @param fromptroffset inparam role: offset
-/// @param startsoffset inparam role: offset
-/// @param stopsoffset inparam role: offset
-/// @param tolength inparam role: len
-/// @param fromlength inparam role: len
-/// @param fromwidth inparam role: len
+/// @param fromptr inparam role: Identities-array
+/// @param fromstarts inparam role: ListArray-starts
+/// @param fromstops inparam role: ListArray-stops
+/// @param fromptroffset inparam role: Identities-array-offset
+/// @param startsoffset inparam role: ListArray-starts-offset
+/// @param stopsoffset inparam role: ListArray-stops-offset
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities64_from_ListArray32(
       bool* uniquecontents,
@@ -235,17 +235,17 @@ extern "C" {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
-/// @param uniquecontents outparam role: boolout
+/// @param uniquecontents outparam role: pointer
 /// @param toptr outparam
-/// @param fromptr inparam
-/// @param fromstarts inparam role: startsarray
-/// @param fromstops inparam role: stopsarray
-/// @param fromptroffset inparam role: offset
-/// @param startsoffset inparam role: offset
-/// @param stopsoffset inparam role: offset
-/// @param tolength inparam role: len
-/// @param fromlength inparam role: len
-/// @param fromwidth inparam role: len
+/// @param fromptr inparam role: Identities-array
+/// @param fromstarts inparam role: ListArray-starts
+/// @param fromstops inparam role: ListArray-stops
+/// @param fromptroffset inparam role: Identities-array-offset
+/// @param startsoffset inparam role: ListArray-starts-offset
+/// @param stopsoffset inparam role: ListArray-stops-offset
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities64_from_ListArrayU32(
       bool* uniquecontents,
@@ -259,17 +259,17 @@ extern "C" {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
-/// @param uniquecontents outparam role: boolout
+/// @param uniquecontents outparam role: pointer
 /// @param toptr outparam
-/// @param fromptr inparam
-/// @param fromstarts inparam role: startsarray
-/// @param fromstops inparam role: stopsarray
-/// @param fromptroffset inparam role: offset
-/// @param startsoffset inparam role: offset
-/// @param stopsoffset inparam role: offset
-/// @param tolength inparam role: len
-/// @param fromlength inparam role: len
-/// @param fromwidth inparam role: len
+/// @param fromptr inparam role: Identities-array
+/// @param fromstarts inparam role: ListArray-starts
+/// @param fromstops inparam role: ListArray-stops
+/// @param fromptroffset inparam role: Identities-array-offset
+/// @param startsoffset inparam role: ListArray-starts-offset
+/// @param stopsoffset inparam role: ListArray-stops-offset
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities64_from_ListArray64(
       bool* uniquecontents,
@@ -285,12 +285,12 @@ extern "C" {
       int64_t fromwidth);
 
 /// @param toptr outparam
-/// @param fromptr inparam
-/// @param fromptroffset inparam role: offset
-/// @param size inparam role: len
-/// @param tolength inparam role: len
-/// @param fromlength inparam role: len
-/// @param fromwidth inparam role: len
+/// @param fromptr inparam role: Identities-array
+/// @param fromptroffset inparam role: Identities-array-offset
+/// @param size inparam role: RegularArray-size
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities32_from_RegularArray(
       int32_t* toptr,
@@ -301,12 +301,12 @@ extern "C" {
       int64_t fromlength,
       int64_t fromwidth);
 /// @param toptr outparam
-/// @param fromptr inparam
-/// @param fromptroffset inparam role: offset
-/// @param size inparam role: len
-/// @param tolength inparam role: len
-/// @param fromlength inparam role: len
-/// @param fromwidth inparam role: len
+/// @param fromptr inparam role: Identities-array
+/// @param fromptroffset inparam role: Identities-array-offset
+/// @param size inparam role: RegularArray-size
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities64_from_RegularArray(
       int64_t* toptr,
@@ -317,15 +317,15 @@ extern "C" {
       int64_t fromlength,
       int64_t fromwidth);
 
-/// @param uniquecontents outparam role: boolout
+/// @param uniquecontents outparam role: pointer
 /// @param toptr outparam
-/// @param fromptr inparam
-/// @param fromindex inparam role: startsarray
-/// @param fromptroffset inparam role: offset
-/// @param indexoffset inparam role: offset
-/// @param tolength inparam role: len
-/// @param fromlength inparam role: len
-/// @param fromwidth inparam role: len
+/// @param fromptr inparam role: Identities-array
+/// @param fromindex inparam role: IndexedArray-index
+/// @param fromptroffset inparam role: Identities-array-offset
+/// @param indexoffset inparam role: IndexedArray-index-offset
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities32_from_IndexedArray32(
       bool* uniquecontents,
@@ -337,15 +337,15 @@ extern "C" {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
-/// @param uniquecontents outparam role: boolout
+/// @param uniquecontents outparam role: pointer
 /// @param toptr outparam
-/// @param fromptr inparam
-/// @param fromindex inparam role: startsarray
-/// @param fromptroffset inparam role: offset
-/// @param indexoffset inparam role: offset
-/// @param tolength inparam role: len
-/// @param fromlength inparam role: len
-/// @param fromwidth inparam role: len
+/// @param fromptr inparam role: Identities-array
+/// @param fromindex inparam role: IndexedArray-index
+/// @param fromptroffset inparam role: Identities-array-offset
+/// @param indexoffset inparam role: IndexedArray-index-offset
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities32_from_IndexedArrayU32(
       bool* uniquecontents,
@@ -357,15 +357,15 @@ extern "C" {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
-/// @param uniquecontents outparam role: boolout
+/// @param uniquecontents outparam role: pointer
 /// @param toptr outparam
-/// @param fromptr inparam
-/// @param fromindex inparam role: startsarray
-/// @param fromptroffset inparam role: offset
-/// @param indexoffset inparam role: offset
-/// @param tolength inparam role: len
-/// @param fromlength inparam role: len
-/// @param fromwidth inparam role: len
+/// @param fromptr inparam role: Identities-array
+/// @param fromindex inparam role: IndexedArray-index
+/// @param fromptroffset inparam role: Identities-array-offset
+/// @param indexoffset inparam role: IndexedArray-index-offset
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities32_from_IndexedArray64(
       bool* uniquecontents,
@@ -377,15 +377,15 @@ extern "C" {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
-/// @param uniquecontents outparam role: boolout
+/// @param uniquecontents outparam role: pointer
 /// @param toptr outparam
-/// @param fromptr inparam
-/// @param fromindex inparam role: startsarray
-/// @param fromptroffset inparam role: offset
-/// @param indexoffset inparam role: offset
-/// @param tolength inparam role: len
-/// @param fromlength inparam role: len
-/// @param fromwidth inparam role: len
+/// @param fromptr inparam role: Identities-array
+/// @param fromindex inparam role: IndexedArray-index
+/// @param fromptroffset inparam role: Identities-array-offset
+/// @param indexoffset inparam role: IndexedArray-index-offset
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities64_from_IndexedArray32(
       bool* uniquecontents,
@@ -397,15 +397,15 @@ extern "C" {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
-/// @param uniquecontents outparam role: boolout
+/// @param uniquecontents outparam role: pointer
 /// @param toptr outparam
-/// @param fromptr inparam
-/// @param fromindex inparam role: startsarray
-/// @param fromptroffset inparam role: offset
-/// @param indexoffset inparam role: offset
-/// @param tolength inparam role: len
-/// @param fromlength inparam role: len
-/// @param fromwidth inparam role: len
+/// @param fromptr inparam role: Identities-array
+/// @param fromindex inparam role: IndexedArray-index
+/// @param fromptroffset inparam role: Identities-array-offset
+/// @param indexoffset inparam role: IndexedArray-index-offset
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities64_from_IndexedArrayU32(
       bool* uniquecontents,
@@ -417,15 +417,15 @@ extern "C" {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
-/// @param uniquecontents outparam role: boolout
+/// @param uniquecontents outparam role: pointer
 /// @param toptr outparam
-/// @param fromptr inparam
-/// @param fromindex inparam role: startsarray
-/// @param fromptroffset inparam role: offset
-/// @param indexoffset inparam role: offset
-/// @param tolength inparam role: len
-/// @param fromlength inparam role: len
-/// @param fromwidth inparam role: len
+/// @param fromptr inparam role: Identities-array
+/// @param fromindex inparam role: IndexedArray-index
+/// @param fromptroffset inparam role: Identities-array-offset
+/// @param indexoffset inparam role: IndexedArray-index-offset
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities64_from_IndexedArray64(
       bool* uniquecontents,
@@ -438,18 +438,18 @@ extern "C" {
       int64_t fromlength,
       int64_t fromwidth);
 
-/// @param uniquecontents outparam role: boolout
+/// @param uniquecontents outparam role: pointer
 /// @param toptr outparam
-/// @param fromptr inparam
-/// @param fromtags inparam
-/// @param fromindex inparam role: startsarray
-/// @param fromptroffset inparam role: offset
-/// @param tagsoffset inparam role: offset
-/// @param indexoffset inparam role: offset
-/// @param tolength inparam role: len
-/// @param fromlength inparam role: len
-/// @param fromwidth inparam role: len
-/// @param which inparam
+/// @param fromptr inparam role: Identities-array
+/// @param fromtags inparam role: UnionArray-tags
+/// @param fromindex inparam role: IndexedArray-index
+/// @param fromptroffset inparam role: Identities-array-offset
+/// @param tagsoffset inparam role: UnionArray-tags-offset
+/// @param indexoffset inparam role: IndexedArray-index-offset
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
+/// @param which inparam role: UnionArray-outerwhich
   EXPORT_SYMBOL struct Error
     awkward_Identities32_from_UnionArray8_32(
       bool* uniquecontents,
@@ -464,18 +464,18 @@ extern "C" {
       int64_t fromlength,
       int64_t fromwidth,
       int64_t which);
-/// @param uniquecontents outparam role: boolout
+/// @param uniquecontents outparam role: pointer
 /// @param toptr outparam
-/// @param fromptr inparam
-/// @param fromtags inparam
-/// @param fromindex inparam role: startsarray
-/// @param fromptroffset inparam role: offset
-/// @param tagsoffset inparam role: offset
-/// @param indexoffset inparam role: offset
-/// @param tolength inparam role: len
-/// @param fromlength inparam role: len
-/// @param fromwidth inparam role: len
-/// @param which inparam
+/// @param fromptr inparam role: Identities-array
+/// @param fromtags inparam role: UnionArray-tags
+/// @param fromindex inparam role: IndexedArray-index
+/// @param fromptroffset inparam role: Identities-array-offset
+/// @param tagsoffset inparam role: UnionArray-tags-offset
+/// @param indexoffset inparam role: IndexedArray-index-offset
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
+/// @param which inparam role: UnionArray-outerwhich
   EXPORT_SYMBOL struct Error
     awkward_Identities32_from_UnionArray8_U32(
       bool* uniquecontents,
@@ -490,18 +490,18 @@ extern "C" {
       int64_t fromlength,
       int64_t fromwidth,
       int64_t which);
-/// @param uniquecontents outparam role: boolout
+/// @param uniquecontents outparam role: pointer
 /// @param toptr outparam
-/// @param fromptr inparam
-/// @param fromtags inparam
-/// @param fromindex inparam role: startsarray
-/// @param fromptroffset inparam role: offset
-/// @param tagsoffset inparam role: offset
-/// @param indexoffset inparam role: offset
-/// @param tolength inparam role: len
-/// @param fromlength inparam role: len
-/// @param fromwidth inparam role: len
-/// @param which inparam
+/// @param fromptr inparam role: Identities-array
+/// @param fromtags inparam role: UnionArray-tags
+/// @param fromindex inparam role: IndexedArray-index
+/// @param fromptroffset inparam role: Identities-array-offset
+/// @param tagsoffset inparam role: UnionArray-tags-offset
+/// @param indexoffset inparam role: IndexedArray-index-offset
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
+/// @param which inparam role: UnionArray-outerwhich
   EXPORT_SYMBOL struct Error
     awkward_Identities32_from_UnionArray8_64(
       bool* uniquecontents,
@@ -516,18 +516,18 @@ extern "C" {
       int64_t fromlength,
       int64_t fromwidth,
       int64_t which);
-/// @param uniquecontents outparam role: boolout
+/// @param uniquecontents outparam role: pointer
 /// @param toptr outparam
-/// @param fromptr inparam
-/// @param fromtags inparam
-/// @param fromindex inparam role: startsarray
-/// @param fromptroffset inparam role: offset
-/// @param tagsoffset inparam role: offset
-/// @param indexoffset inparam role: offset
-/// @param tolength inparam role: len
-/// @param fromlength inparam role: len
-/// @param fromwidth inparam role: len
-/// @param which inparam
+/// @param fromptr inparam role: Identities-array
+/// @param fromtags inparam role: UnionArray-tags
+/// @param fromindex inparam role: IndexedArray-index
+/// @param fromptroffset inparam role: Identities-array-offset
+/// @param tagsoffset inparam role: UnionArray-tags-offset
+/// @param indexoffset inparam role: IndexedArray-index-offset
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
+/// @param which inparam role: UnionArray-outerwhich
   EXPORT_SYMBOL struct Error
     awkward_Identities64_from_UnionArray8_32(
       bool* uniquecontents,
@@ -542,18 +542,18 @@ extern "C" {
       int64_t fromlength,
       int64_t fromwidth,
       int64_t which);
-/// @param uniquecontents outparam role: boolout
+/// @param uniquecontents outparam role: pointer
 /// @param toptr outparam
-/// @param fromptr inparam
-/// @param fromtags inparam
-/// @param fromindex inparam role: startsarray
-/// @param fromptroffset inparam role: offset
-/// @param tagsoffset inparam role: offset
-/// @param indexoffset inparam role: offset
-/// @param tolength inparam role: len
-/// @param fromlength inparam role: len
-/// @param fromwidth inparam role: len
-/// @param which inparam
+/// @param fromptr inparam role: Identities-array
+/// @param fromtags inparam role: UnionArray-tags
+/// @param fromindex inparam role: IndexedArray-index
+/// @param fromptroffset inparam role: Identities-array-offset
+/// @param tagsoffset inparam role: UnionArray-tags-offset
+/// @param indexoffset inparam role: IndexedArray-index-offset
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
+/// @param which inparam role: UnionArray-outerwhich
   EXPORT_SYMBOL struct Error
     awkward_Identities64_from_UnionArray8_U32(
       bool* uniquecontents,
@@ -568,18 +568,18 @@ extern "C" {
       int64_t fromlength,
       int64_t fromwidth,
       int64_t which);
-/// @param uniquecontents outparam role: boolout
+/// @param uniquecontents outparam role: pointer
 /// @param toptr outparam
-/// @param fromptr inparam
-/// @param fromtags inparam
-/// @param fromindex inparam role: startsarray
-/// @param fromptroffset inparam role: offset
-/// @param tagsoffset inparam role: offset
-/// @param indexoffset inparam role: offset
-/// @param tolength inparam role: len
-/// @param fromlength inparam role: len
-/// @param fromwidth inparam role: len
-/// @param which inparam
+/// @param fromptr inparam role: Identities-array
+/// @param fromtags inparam role: UnionArray-tags
+/// @param fromindex inparam role: IndexedArray-index
+/// @param fromptroffset inparam role: Identities-array-offset
+/// @param tagsoffset inparam role: UnionArray-tags-offset
+/// @param indexoffset inparam role: IndexedArray-index-offset
+/// @param tolength inparam
+/// @param fromlength inparam
+/// @param fromwidth inparam
+/// @param which inparam role: UnionArray-outerwhich
   EXPORT_SYMBOL struct Error
     awkward_Identities64_from_UnionArray8_64(
       bool* uniquecontents,
@@ -596,10 +596,10 @@ extern "C" {
       int64_t which);
 
 /// @param toptr outparam
-/// @param fromptr inparam role: array
-/// @param fromoffset inparam role: offset
-/// @param fromlength inparam role: len
-/// @param tolength inparam role: len
+/// @param fromptr inparam role: Identities-array
+/// @param fromoffset inparam role: Identities-array-offset
+/// @param fromlength inparam
+/// @param tolength inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities32_extend(
       int32_t* toptr,
@@ -608,10 +608,10 @@ extern "C" {
       int64_t fromlength,
       int64_t tolength);
 /// @param toptr outparam
-/// @param fromptr inparam role: array
-/// @param fromoffset inparam role: offset
-/// @param fromlength inparam role: len
-/// @param tolength inparam role: len
+/// @param fromptr inparam role: Identities-array
+/// @param fromoffset inparam role: Identities-array-offset
+/// @param fromlength inparam
+/// @param tolength inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities64_extend(
       int64_t* toptr,
