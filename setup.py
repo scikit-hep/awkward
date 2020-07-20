@@ -264,6 +264,8 @@ For a similar problem 10 million times larger than the one above (on a single-th
    * the equivalent using Python lists and dicts takes **138 seconds** to run and uses **22 GB** of memory.
 
 Speed and memory factors in the double digits are common because we're replacing Python's dynamically typed, pointer-chasing virtual machine with type-specialized, precompiled routines on contiguous data. (In other words, for the same reasons as NumPy.) Even higher speedups are possible when Awkward Array is paired with [Numba](https://numba.pydata.org/).
+
+Our [presentation at SciPy 2020](https://youtu.be/WlnUF3LRBj4) provides a good introduction, showing how to use these arrays in a real analysis.
 """,
       long_description_content_type = "text/markdown",
       url = "https://github.com/scikit-hep/awkward-1.0",
