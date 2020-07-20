@@ -54,7 +54,7 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
   </tr>
 </table>
 
-# Basic example
+# Motivating example
 
 Given an array of objects with `x`, `y` fields and variable-length nested lists like
 
@@ -66,7 +66,7 @@ array = ak.Array([
 ])
 ```
 
-the following slices out the `y` values, drops the first element from each list, and runs NumPy's `np.square` function on everything that is left:
+the following slices out the `y` values, drops the first element from each inner list, and runs NumPy's `np.square` function on everything that is left:
 
 ```python
 output = np.square(array["y", ..., 1:])
@@ -82,7 +82,7 @@ The result is
 ]
 ```
 
-The equivalent pure Python is
+The equivalent using only Python is
 
 ```python
 output = []
@@ -100,8 +100,8 @@ Not only is the expression using Awkward Arrays more concise, using idioms famil
 
 For a similar problem 10 million times larger than the one above (on a single-threaded 2.2 GHz processor),
 
-   * the Awkward Array expression takes **4.6 seconds** to run and uses **2.1 GB** of memory,
-   * the pure Python expression (using builtin Python lists and dicts) takes **138 seconds** to run and uses **22 GB** of memory.
+   * the Awkward Array one-liner takes **4.6 seconds** to run and uses **2.1 GB** of memory,
+   * the equivalent using Python lists and dicts takes **138 seconds** to run and uses **22 GB** of memory.
 
 Speed and memory factors in the double digits are common because we're replacing Python's dynamically typed, pointer-chasing virtual machine with type-specialized, precompiled routines on contiguous data. (In other words, for the same reasons as NumPy.) Even higher speedups are possible when Awkward Array is paired with [Numba](https://numba.pydata.org/).
 
