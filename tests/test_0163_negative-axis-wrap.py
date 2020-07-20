@@ -76,18 +76,9 @@ def test_record_array_axis_out_of_range():
             {"x": [1, 2], "y": [[], [1], [1, 2]]},
             {"x": [1, 2, 3], "y": [[], [1], [1, 2], [1, 2, 3]]}])
 
-    # FIXME: this should throw
-    a = awkward1.num(array, axis=-2)
-    # <RecordArray>
-    # <field index="0" key="x">
-    #     <NumpyArray format="l" shape="" data="0x 03000000 00000000" at="0x7fd818c06c60"/>
-    # </field>
-    # <field index="1" key="y">
-    #     <NumpyArray format="l" shape="3" data="2 3 4" at="0x7fd818c6af40"/>
-    # </field>
-    # </RecordArray>
-    assert awkward1.to_list(a["y"]) == [2, 3, 4]
-    # FIXME: assert awkward1.to_list(a["x"]) == []
+    with pytest.raises(ValueError) as err:
+        assert awkward1.num(array, axis=-2)
+    assert str(err.value) == "axis == -2 exceeds the min depth == 2 of this array"
 
     with pytest.raises(ValueError) as err:
         assert awkward1.num(array, axis=-3)

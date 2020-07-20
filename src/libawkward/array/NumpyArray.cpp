@@ -1079,8 +1079,8 @@ namespace awkward {
   const ContentPtr
   NumpyArray::getitem_at_nowrap(int64_t at) const {
     ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)at);
-    const std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
-    const std::vector<ssize_t> strides(strides_.begin() + 1, strides_.end());
+    const std::vector<ssize_t> shape(std::next(shape_.begin(), 1), shape_.end());
+    const std::vector<ssize_t> strides(std::next(strides_.begin(), 1), strides_.end());
     IdentitiesPtr identities;
     if (identities_.get() != nullptr) {
       if (at >= identities_.get()->length()) {
