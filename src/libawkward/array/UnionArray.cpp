@@ -240,7 +240,7 @@ namespace awkward {
           }
         }
         if (!found) {
-          out.erase(out.begin() + j);
+          out.erase(std::next(out.begin(), j));
         }
       }
     }
@@ -1220,7 +1220,7 @@ namespace awkward {
           }
         }
         if (!found) {
-          out.erase(out.begin() + j);
+          out.erase(std::next(out.begin(), j));
         }
       }
     }
