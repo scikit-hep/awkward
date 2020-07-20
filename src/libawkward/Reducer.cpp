@@ -7,65 +7,9 @@
 #include "awkward/Reducer.h"
 
 namespace awkward {
-  const std::string
-  Reducer::return_type(const std::string& given_type) const {
-    return given_type;
-  }
-
-  ssize_t
-  Reducer::return_typesize(const std::string& given_type) const {
-    if (given_type.compare("?") == 0) {
-      return 1;
-    }
-    else if (given_type.compare("b") == 0) {
-      return 1;
-    }
-    else if (given_type.compare("B") == 0  ||  given_type.compare("c") == 0) {
-      return 1;
-    }
-    else if (given_type.compare("h") == 0) {
-      return 2;
-    }
-    else if (given_type.compare("H") == 0) {
-      return 2;
-    }
-#if defined _MSC_VER || defined __i386__
-    else if (given_type.compare("l") == 0) {
-#else
-    else if (given_type.compare("i") == 0) {
-#endif
-      return 4;
-    }
-#if defined _MSC_VER || defined __i386__
-      else if (given_type.compare("L") == 0) {
-#else
-    else if (given_type.compare("I") == 0) {
-#endif
-      return 4;
-    }
-#if defined _MSC_VER || defined __i386__
-    else if (given_type.compare("q") == 0) {
-#else
-    else if (given_type.compare("l") == 0) {
-#endif
-      return 8;
-    }
-#if defined _MSC_VER || defined __i386__
-    else if (given_type.compare("Q") == 0) {
-#else
-    else if (given_type.compare("L") == 0) {
-#endif
-      return 8;
-    }
-    else if (given_type.compare("f") == 0) {
-      return 4;
-    }
-    else if (given_type.compare("d") == 0) {
-      return 8;
-    }
-    else {
-      throw std::runtime_error("this should be handled in NumpyArray");
-    }
+  util::dtype
+  Reducer::return_dtype(util::dtype given_dtype) const {
+    return given_dtype;
   }
 
   ////////// count
@@ -75,28 +19,14 @@ namespace awkward {
     return "count";
   }
 
-  const std::string
-  ReducerCount::preferred_type() const {
-    return "d";
+  util::dtype
+  ReducerCount::preferred_dtype() const {
+    return util::dtype::float64;
   }
 
-  ssize_t
-  ReducerCount::preferred_typesize() const {
-    return 8;
-  }
-
-  const std::string
-  ReducerCount::return_type(const std::string& given_type) const {
-#if defined _MSC_VER || defined __i386__
-    return "q";
-#else
-    return "l";
-#endif
-  }
-
-  ssize_t
-  ReducerCount::return_typesize(const std::string& given_type) const {
-    return 8;
+  util::dtype
+  ReducerCount::return_dtype(util::dtype given_dtype) const {
+    return util::dtype::int64;
   }
 
   const std::shared_ptr<void>
@@ -256,28 +186,14 @@ namespace awkward {
     return "count_nonzero";
   }
 
-  const std::string
-  ReducerCountNonzero::preferred_type() const {
-    return "d";
+  util::dtype
+  ReducerCountNonzero::preferred_dtype() const {
+    return util::dtype::float64;
   }
 
-  ssize_t
-  ReducerCountNonzero::preferred_typesize() const {
-    return 8;
-  }
-
-  const std::string
-  ReducerCountNonzero::return_type(const std::string& given_type) const {
-#if defined _MSC_VER || defined __i386__
-    return "q";
-#else
-    return "l";
-#endif
-  }
-
-  ssize_t
-  ReducerCountNonzero::return_typesize(const std::string& given_type) const {
-    return 8;
+  util::dtype
+  ReducerCountNonzero::return_dtype(util::dtype given_dtype) const {
+    return util::dtype::int64;
   }
 
   const std::shared_ptr<void>
@@ -288,7 +204,6 @@ namespace awkward {
                                   int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-                                 
     struct Error err = kernel::reduce_countnonzero_64<bool>(
       ptr.get(),
       data,
@@ -509,85 +424,33 @@ namespace awkward {
     return "sum";
   }
 
-  const std::string
-  ReducerSum::preferred_type() const {
-    return "d";
+  util::dtype
+  ReducerSum::preferred_dtype() const {
+    return util::dtype::float64;
   }
 
-  ssize_t
-  ReducerSum::preferred_typesize() const {
-    return 8;
-  }
-
-  const std::string
-  ReducerSum::return_type(const std::string& given_type) const {
+  util::dtype
+  ReducerSum::return_dtype(util::dtype given_dtype) const {
+    switch (given_dtype) {
+    case util::dtype::boolean:
+    case util::dtype::int8:
+    case util::dtype::int16:
+    case util::dtype::int32:
 #if defined _MSC_VER || defined __i386__
-    // if the array is 64-bit, even Windows and 32-bit platforms return 64-bit
-    if (given_type.compare("q") == 0) {
-      return "q";
-    }
-    if (given_type.compare("Q") == 0) {
-      return "Q";
-    }
+      return util::dtype::int32;
 #endif
-    if (given_type.compare("?") == 0  ||
-        given_type.compare("b") == 0  ||
-        given_type.compare("h") == 0  ||
-        given_type.compare("i") == 0  ||
-        given_type.compare("l") == 0  ||
-        given_type.compare("q") == 0) {
-      // for _MSC_VER or __i386__, "l" means 32-bit
-      // for MacOS/Linux 64-bit,   "l" means 64-bit
-      return "l";
-    }
-    else if (
-        given_type.compare("B") == 0  ||
-        given_type.compare("H") == 0  ||
-        given_type.compare("I") == 0  ||
-        given_type.compare("L") == 0  ||
-        given_type.compare("Q") == 0) {
-      // for _MSC_VER or __i386__, "L" means unsigned 32-bit
-      // for MacOS/Linux 64-bit,   "L" means unsigned 64-bit
-      return "L";
-    }
-    else {
-      return given_type;
-    }
-  }
-
-  ssize_t
-  ReducerSum::return_typesize(const std::string& given_type) const {
+    case util::dtype::int64:
+      return util::dtype::int64;
+    case util::dtype::uint8:
+    case util::dtype::uint16:
+    case util::dtype::uint32:
 #if defined _MSC_VER || defined __i386__
-    if (given_type.compare("q") == 0  ||
-        given_type.compare("Q") == 0) {
-      return 8;
-    }
+      return util::dtype::uint32;
 #endif
-    if (given_type.compare("?") == 0  ||
-        given_type.compare("b") == 0  ||
-        given_type.compare("h") == 0  ||
-        given_type.compare("i") == 0  ||
-        given_type.compare("l") == 0  ||
-        given_type.compare("q") == 0  ||
-        given_type.compare("B") == 0  ||
-        given_type.compare("H") == 0  ||
-        given_type.compare("I") == 0  ||
-        given_type.compare("L") == 0  ||
-        given_type.compare("Q") == 0) {
-#if defined _MSC_VER || defined __i386__
-      return 4;
-#else
-      return 8;
-#endif
-    }
-    else if (given_type.compare("f") == 0) {
-      return 4;
-    }
-    else if (given_type.compare("d") == 0) {
-      return 8;
-    }
-    else {
-      throw std::runtime_error("this should be handled in NumpyArray");
+    case util::dtype::uint64:
+      return util::dtype::uint64;
+    default:
+      return given_dtype;
     }
   }
 
@@ -611,7 +474,6 @@ namespace awkward {
 #else
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
-                                 
     struct Error err = kernel::reduce_sum_64<int64_t, bool>(
       ptr.get(),
       data,
@@ -743,7 +605,7 @@ namespace awkward {
       outlength);
 #else
     std::shared_ptr<uint64_t> ptr(new uint64_t[(size_t)outlength],
-                                  kernel::array_deleter<uint64_t>());                                
+                                  kernel::array_deleter<uint64_t>());
     struct Error err = kernel::reduce_sum_64<uint64_t, uint16_t>(
       ptr.get(),
       data,
@@ -765,7 +627,7 @@ namespace awkward {
                           int64_t outlength) const {
 #if defined _MSC_VER || defined __i386__
     std::shared_ptr<int32_t> ptr(new int32_t[(size_t)outlength],
-                                 kernel::array_deleter<int32_t>());                                 
+                                 kernel::array_deleter<int32_t>());
     struct Error err = kernel::reduce_sum_64<int32_t, int32_t>(
       ptr.get(),
       data,
@@ -776,7 +638,7 @@ namespace awkward {
       outlength);
 #else
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());                                 
+                                 kernel::array_deleter<int64_t>());
     struct Error err = kernel::reduce_sum_64<int64_t, int32_t>(
       ptr.get(),
       data,
@@ -850,7 +712,7 @@ namespace awkward {
                            const Index64& parents,
                            int64_t outlength) const {
     std::shared_ptr<uint64_t> ptr(new uint64_t[(size_t)outlength],
-                                  kernel::array_deleter<uint64_t>());                            
+                                  kernel::array_deleter<uint64_t>());
     struct Error err = kernel::reduce_sum_64<uint64_t, uint64_t>(
       ptr.get(),
       data,
@@ -910,89 +772,33 @@ namespace awkward {
     return "prod";
   }
 
-  const std::string
-  ReducerProd::preferred_type() const {
-#if defined _MSC_VER || defined __i386__
-    return "q";
-#else
-    return "l";
-#endif
+  util::dtype
+  ReducerProd::preferred_dtype() const {
+    return util::dtype::int64;
   }
 
-  ssize_t
-  ReducerProd::preferred_typesize() const {
-    return 8;
-  }
-
-  const std::string
-  ReducerProd::return_type(const std::string& given_type) const {
+  util::dtype
+  ReducerProd::return_dtype(util::dtype given_dtype) const {
+    switch (given_dtype) {
+    case util::dtype::boolean:
+    case util::dtype::int8:
+    case util::dtype::int16:
+    case util::dtype::int32:
 #if defined _MSC_VER || defined __i386__
-    // if the array is 64-bit, even Windows and 32-bit platforms return 64-bit
-    if (given_type.compare("q") == 0) {
-      return "q";
-    }
-    if (given_type.compare("Q") == 0) {
-      return "Q";
-    }
+      return util::dtype::int32;
 #endif
-    if (given_type.compare("?") == 0  ||
-        given_type.compare("b") == 0  ||
-        given_type.compare("h") == 0  ||
-        given_type.compare("i") == 0  ||
-        given_type.compare("l") == 0  ||
-        given_type.compare("q") == 0) {
-      // for _MSC_VER or __i386__, "l" means 32-bit
-      // for MacOS/Linux 64-bit,   "l" means 64-bit
-      return "l";
-    }
-    else if (
-        given_type.compare("B") == 0  ||
-        given_type.compare("H") == 0  ||
-        given_type.compare("I") == 0  ||
-        given_type.compare("L") == 0  ||
-        given_type.compare("Q") == 0) {
-      // for _MSC_VER or __i386__, "L" means unsigned 32-bit
-      // for MacOS/Linux 64-bit,   "L" means unsigned 64-bit
-      return "L";
-    }
-    else {
-      return given_type;
-    }
-  }
-
-  ssize_t
-  ReducerProd::return_typesize(const std::string& given_type) const {
+    case util::dtype::int64:
+      return util::dtype::int64;
+    case util::dtype::uint8:
+    case util::dtype::uint16:
+    case util::dtype::uint32:
 #if defined _MSC_VER || defined __i386__
-    if (given_type.compare("q") == 0  ||
-        given_type.compare("Q") == 0) {
-      return 8;
-    }
+      return util::dtype::uint32;
 #endif
-    if (given_type.compare("?") == 0  ||
-        given_type.compare("b") == 0  ||
-        given_type.compare("h") == 0  ||
-        given_type.compare("i") == 0  ||
-        given_type.compare("l") == 0  ||
-        given_type.compare("q") == 0  ||
-        given_type.compare("B") == 0  ||
-        given_type.compare("H") == 0  ||
-        given_type.compare("I") == 0  ||
-        given_type.compare("L") == 0  ||
-        given_type.compare("Q") == 0) {
-#if defined _MSC_VER || defined __i386__
-      return 4;
-#else
-      return 8;
-#endif
-    }
-    else if (given_type.compare("f") == 0) {
-      return 4;
-    }
-    else if (given_type.compare("d") == 0) {
-      return 8;
-    }
-    else {
-      throw std::runtime_error("this should be handled in NumpyArray");
+    case util::dtype::uint64:
+      return util::dtype::uint64;
+    default:
+      return given_dtype;
     }
   }
 
@@ -1015,7 +821,7 @@ namespace awkward {
       outlength);
 #else
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());        
+                                 kernel::array_deleter<int64_t>());
     struct Error err = kernel::reduce_prod_64<int64_t, bool>(
       ptr.get(),
       data,
@@ -1048,7 +854,7 @@ namespace awkward {
       outlength);
 #else
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());   
+                                 kernel::array_deleter<int64_t>());
     struct Error err = kernel::reduce_prod_64<int64_t, int8_t>(
       ptr.get(),
       data,
@@ -1103,7 +909,7 @@ namespace awkward {
                            int64_t outlength) const {
 #if defined _MSC_VER || defined __i386__
     std::shared_ptr<int32_t> ptr(new int32_t[(size_t)outlength],
-                                 kernel::array_deleter<int32_t>());                
+                                 kernel::array_deleter<int32_t>());
     struct Error err = kernel::reduce_prod_64<int32_t, int16_t>(
       ptr.get(),
       data,
@@ -1114,7 +920,7 @@ namespace awkward {
       outlength);
 #else
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());  
+                                 kernel::array_deleter<int64_t>());
     struct Error err = kernel::reduce_prod_64<int64_t, int16_t>(
       ptr.get(),
       data,
@@ -1136,7 +942,7 @@ namespace awkward {
                             int64_t outlength) const {
 #if defined _MSC_VER || defined __i386__
     std::shared_ptr<uint32_t> ptr(new uint32_t[(size_t)outlength],
-                                  kernel::array_deleter<uint32_t>());         
+                                  kernel::array_deleter<uint32_t>());
     struct Error err = kernel::reduce_prod_64<uint32_t, uint16_t>(
       ptr.get(),
       data,
@@ -1180,7 +986,7 @@ namespace awkward {
       outlength);
 #else
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());            
+                                 kernel::array_deleter<int64_t>());
     struct Error err = kernel::reduce_prod_64<int64_t, int32_t>(
       ptr.get(),
       data,
@@ -1202,7 +1008,7 @@ namespace awkward {
                             int64_t outlength) const {
 #if defined _MSC_VER || defined __i386__
     std::shared_ptr<uint32_t> ptr(new uint32_t[(size_t)outlength],
-                                  kernel::array_deleter<uint32_t>());   
+                                  kernel::array_deleter<uint32_t>());
     struct Error err = kernel::reduce_prod_64<uint32_t, uint32_t>(
       ptr.get(),
       data,
@@ -1314,24 +1120,14 @@ namespace awkward {
     return "any";
   }
 
-  const std::string
-  ReducerAny::preferred_type() const {
-    return "?";
+  util::dtype
+  ReducerAny::preferred_dtype() const {
+    return util::dtype::boolean;
   }
 
-  ssize_t
-  ReducerAny::preferred_typesize() const {
-    return 1;
-  }
-
-  const std::string
-  ReducerAny::return_type(const std::string& given_type) const {
-    return "?";
-  }
-
-  ssize_t
-  ReducerAny::return_typesize(const std::string& given_type) const {
-    return 1;
+  util::dtype
+  ReducerAny::return_dtype(util::dtype given_dtype) const {
+    return util::dtype::boolean;
   }
 
   const std::shared_ptr<void>
@@ -1561,24 +1357,14 @@ namespace awkward {
     return "all";
   }
 
-  const std::string
-  ReducerAll::preferred_type() const {
-    return "?";
+  util::dtype
+  ReducerAll::preferred_dtype() const {
+    return util::dtype::boolean;
   }
 
-  ssize_t
-  ReducerAll::preferred_typesize() const {
-    return 1;
-  }
-
-  const std::string
-  ReducerAll::return_type(const std::string& given_type) const {
-    return "?";
-  }
-
-  ssize_t
-  ReducerAll::return_typesize(const std::string& given_type) const {
-    return 1;
+  util::dtype
+  ReducerAll::return_dtype(util::dtype given_dtype) const {
+    return util::dtype::boolean;
   }
 
   const std::shared_ptr<void>
@@ -1808,14 +1594,9 @@ namespace awkward {
     return "min";
   }
 
-  const std::string
-  ReducerMin::preferred_type() const {
-    return "d";
-  }
-
-  ssize_t
-  ReducerMin::preferred_typesize() const {
-    return 8;
+  util::dtype
+  ReducerMin::preferred_dtype() const {
+    return util::dtype::float64;
   }
 
   const std::shared_ptr<void>
@@ -1825,7 +1606,7 @@ namespace awkward {
                          const Index64& parents,
                          int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
-                              kernel::array_deleter<bool>());                           
+                              kernel::array_deleter<bool>());
     struct Error err = kernel::reduce_prod_bool_64<bool>(
       ptr.get(),
       data,
@@ -2055,14 +1836,9 @@ namespace awkward {
     return "max";
   }
 
-  const std::string
-  ReducerMax::preferred_type() const {
-    return "d";
-  }
-
-  ssize_t
-  ReducerMax::preferred_typesize() const {
-    return 8;
+  util::dtype
+  ReducerMax::preferred_dtype() const {
+    return util::dtype::float64;
   }
 
   const std::shared_ptr<void>
@@ -2302,32 +2078,14 @@ namespace awkward {
     return "argmin";
   }
 
-  const std::string
-  ReducerArgmin::preferred_type() const {
-#if defined _MSC_VER || defined __i386__
-    return "q";
-#else
-    return "l";
-#endif
+  util::dtype
+  ReducerArgmin::preferred_dtype() const {
+    return util::dtype::int64;
   }
 
-  ssize_t
-  ReducerArgmin::preferred_typesize() const {
-    return 8;
-  }
-
-  const std::string
-  ReducerArgmin::return_type(const std::string& given_type) const {
-#if defined _MSC_VER || defined __i386__
-    return "q";
-#else
-    return "l";
-#endif
-  }
-
-  ssize_t
-  ReducerArgmin::return_typesize(const std::string& given_type) const {
-    return 8;
+  util::dtype
+  ReducerArgmin::return_dtype(util::dtype given_dtype) const {
+    return util::dtype::int64;
   }
 
   const std::shared_ptr<void>
@@ -2579,32 +2337,14 @@ namespace awkward {
     return "argmax";
   }
 
-  const std::string
-  ReducerArgmax::preferred_type() const {
-#if defined _MSC_VER || defined __i386__
-    return "q";
-#else
-    return "l";
-#endif
+  util::dtype
+  ReducerArgmax::preferred_dtype() const {
+    return util::dtype::int64;
   }
 
-  ssize_t
-  ReducerArgmax::preferred_typesize() const {
-    return 8;
-  }
-
-  const std::string
-  ReducerArgmax::return_type(const std::string& given_type) const {
-#if defined _MSC_VER || defined __i386__
-    return "q";
-#else
-    return "l";
-#endif
-  }
-
-  ssize_t
-  ReducerArgmax::return_typesize(const std::string& given_type) const {
-    return 8;
+  util::dtype
+  ReducerArgmax::return_dtype(util::dtype given_dtype) const {
+    return util::dtype::int64;
   }
 
   const std::shared_ptr<void>

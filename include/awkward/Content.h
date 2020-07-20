@@ -31,7 +31,12 @@ namespace awkward {
   /// type. There is a one-to-many relationship from Type to Form.
   class EXPORT_SYMBOL Form {
   public:
-    static FormPtr fromjson(const std::string& data);
+    static FormPtr
+      fromnumpy(char kind,
+                int64_t itemsize,
+                const std::vector<int64_t>& inner_shape);
+    static FormPtr
+      fromjson(const std::string& data);
 
     /// @brief Called by subclass constructors; assigns #has_identities
     /// and #parameters upon construction.

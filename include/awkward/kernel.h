@@ -1051,13 +1051,6 @@ namespace kernel {
     int64_t fromoffset,
     int64_t length);
 
-  ERROR NumpyArray_fill_to64_fromU64(
-    int64_t* toptr,
-    int64_t tooffset,
-    const uint64_t* fromptr,
-    int64_t fromoffset,
-    int64_t length);
-
   template <typename FROM, typename TO>
   ERROR ListArray_fill(
     TO* tostarts,

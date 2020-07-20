@@ -19,6 +19,27 @@ make_Form(const py::handle& m, const std::string& name) {
         return !self.get()->equal(other, true, true, false);
       })
       .def_static("fromjson", &ak::Form::fromjson)
+      .def_static("from_numpy", [](const py::object& dtype) {
+        if (!py::isinstance(dtype, py::module::import("numpy").attr("dtype"))) {
+          throw std::invalid_argument("Form.from_numpy requires a numpy.dtype");
+        }
+        std::vector<int64_t> inner_shape;
+        for (auto x : dtype.attr("shape")) {
+          inner_shape.push_back(x.cast<int64_t>());
+        }
+        char kind;
+        int64_t itemsize;
+        if (inner_shape.empty()) {
+          kind = dtype.attr("kind").cast<char>();
+          itemsize = dtype.attr("itemsize").cast<int64_t>();
+        }
+        else {
+          py::object subdtype = dtype.attr("subdtype").cast<py::tuple>()[0];
+          kind = subdtype.attr("kind").cast<char>();
+          itemsize = subdtype.attr("itemsize").cast<int64_t>();
+        }
+        return ak::Form::fromnumpy(kind, itemsize, inner_shape);
+      })
   );
 }
 
@@ -351,7 +372,8 @@ make_NumpyForm(const py::handle& m, const std::string& name) {
                              dict2parameters(parameters),
                              inner_shape,
                              itemsize,
-                             format);
+                             format,
+                             ak::util::format_to_dtype(format, itemsize));
       }), py::arg("inner_shape"),
           py::arg("itemsize"),
           py::arg("format"),
@@ -369,12 +391,15 @@ make_NumpyForm(const py::handle& m, const std::string& name) {
                    py::cast(self.itemsize()),
                    py::cast(self.format()));
       }, [](const py::tuple& state) {
+        int64_t itemsize = state[3].cast<int64_t>();
+        std::string format = state[4].cast<std::string>();
         return ak::NumpyForm(
                    state[0].cast<bool>(),
                    dict2parameters(state[1]),
                    state[2].cast<std::vector<int64_t>>(),
-                   state[3].cast<int64_t>(),
-                   state[4].cast<std::string>());
+                   itemsize,
+                   format,
+                   ak::util::format_to_dtype(format, itemsize));
       }))
   );
 }

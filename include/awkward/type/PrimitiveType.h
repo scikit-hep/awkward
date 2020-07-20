@@ -14,25 +14,6 @@ namespace awkward {
   /// NumpyArray and {@link RawArrayOf RawArray} nodes have this type.
   class EXPORT_SYMBOL PrimitiveType: public Type {
   public:
-    /// @brief Types that can be described by a PrimitiveType.
-    ///
-    /// Note that NumpyArray and {@link RawArrayOf RawArray} can hold types
-    /// of data that cannot be described by a PrimitiveType.
-    enum DType {
-      boolean,
-      int8,
-      int16,
-      int32,
-      int64,
-      uint8,
-      uint16,
-      uint32,
-      uint64,
-      float32,
-      float64,
-      numtypes
-    };
-
     /// Constructs a PrimitiveType with a full set of parameters.
     ///
     /// @param parameters Custom parameters inherited from the Content that
@@ -41,10 +22,10 @@ namespace awkward {
     /// representation (missing if empty).
     /// @param dtype The tag that defines this PrimitiveType.
     PrimitiveType(const util::Parameters& parameters,
-                  const std::string& typestr, DType dtype);
+                  const std::string& typestr, util::dtype dtype);
 
     /// @brief The tag that defines this PrimitiveType.
-    const DType
+    util::dtype
       dtype() const;
 
     std::string
@@ -78,7 +59,7 @@ namespace awkward {
 
   private:
     /// @brief See #dtype.
-    const DType dtype_;
+    const util::dtype dtype_;
   };
 
 }

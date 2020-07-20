@@ -7,8 +7,10 @@ import keyword
 
 try:
     from collections.abc import Iterable
+    from collections.abc import MutableMapping
 except ImportError:
     from collections import Iterable
+    from collections import MutableMapping
 
 import numpy
 
@@ -38,6 +40,9 @@ class Array(
         with_name (None or str): Gives tuples and records a name that can be
             used to override their behavior (see below).
         check_valid (bool): If True, verify that the #layout is valid.
+        metadata (None or MutableMapping): Optional metadata, attached to this
+            array, which persists through `__getitem__` but not any other
+            operations.
 
     High-level array that can contain data of any type.
 
@@ -201,7 +206,9 @@ class Array(
     derivatives elementwise on each numeric value in an ak.Array.
     """
 
-    def __init__(self, data, behavior=None, with_name=None, check_valid=False):
+    def __init__(
+        self, data, behavior=None, with_name=None, check_valid=False, metadata=None
+    ):
         if isinstance(
             data, (awkward1.layout.Content, awkward1.partition.PartitionedArray)
         ):
@@ -234,8 +241,13 @@ class Array(
 
         self.layout = layout
         self.behavior = behavior
+        docstr = self.layout.purelist_parameter("__doc__")
+        if isinstance(docstr, str):
+            self.__doc__ = docstr
         if check_valid:
             awkward1.operations.describe.validity_error(self, exception=True)
+
+        self.metadata = metadata
 
     @property
     def layout(self):
@@ -316,6 +328,17 @@ class Array(
             self._behavior = behavior
         else:
             raise TypeError("behavior must be None or a dict")
+
+    @property
+    def metadata(self):
+        return self._metadata
+
+    @metadata.setter
+    def metadata(self, value):
+        if value is None or isinstance(value, MutableMapping):
+            self._metadata = value
+        else:
+            raise TypeError("metadata must be None or a MutableMapping")
 
     class Mask(object):
         def __init__(self, array, valid_when):
@@ -854,7 +877,9 @@ class Array(
         acting at the last level, while the higher levels of the indexer all
         have the same dimension as the array being indexed.
         """
-        return awkward1._util.wrap(self._layout[where], self._behavior)
+        return awkward1._util.wrap(
+            self._layout[where], self._behavior, metadata=self._metadata
+        )
 
     def __setitem__(self, where, what):
         """
@@ -1329,6 +1354,9 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         with_name (None or str): Gives the record type a name that can be
             used to override its behavior (see below).
         check_valid (bool): If True, verify that the #layout is valid.
+        metadata (None or MutableMapping): Optional metadata, attached to this
+            array, which persists through `__getitem__` but not any other
+            operations.
 
     High-level record that can contain fields of any type.
 
@@ -1344,7 +1372,9 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
     See also #ak.Array and #ak.behavior.
     """
 
-    def __init__(self, data, behavior=None, with_name=None, check_valid=False):
+    def __init__(
+        self, data, behavior=None, with_name=None, check_valid=False, metadata=None
+    ):
         if isinstance(data, awkward1.layout.Record):
             layout = data
         elif isinstance(data, Record):
@@ -1375,6 +1405,8 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         self.behavior = behavior
         if check_valid:
             awkward1.operations.describe.validity_error(self, exception=True)
+
+        self.metadata = metadata
 
     @property
     def layout(self):
@@ -1449,6 +1481,17 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
             self._behavior = behavior
         else:
             raise TypeError("behavior must be None or a dict")
+
+    @property
+    def metadata(self):
+        return self._metadata
+
+    @metadata.setter
+    def metadata(self, value):
+        if value is None or isinstance(value, MutableMapping):
+            self._metadata = value
+        else:
+            raise TypeError("metadata must be None or a MutableMapping")
 
     def tolist(self):
         """
@@ -1559,7 +1602,9 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
             >>> record["y", 1]
             2
         """
-        return awkward1._util.wrap(self._layout[where], self._behavior)
+        return awkward1._util.wrap(
+            self._layout[where], self._behavior, metadata=self._metadata
+        )
 
     def __setitem__(self, where, what):
         """
