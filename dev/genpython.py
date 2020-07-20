@@ -561,6 +561,7 @@ kSliceNone = kMaxInt64 + 1
 
 outparam = None
 inparam = None
+inoutparam = None
 
 """
     failfuncs = []

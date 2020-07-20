@@ -71,8 +71,40 @@ def gentests(funcs, htokens, failfuncs):
             "awkward_ListArrayU32_combinations_64",
             "awkward_ListArray64_combinations_64",
             "awkward_RegularArray_combinations_64",
+            "awkward_slicearray_ravel_64",
+            "awkward_ListArray32_getitem_next_range_carrylength",
+            "awkward_Index8_getitem_at_nowrap",
+            "awkward_IndexU8_getitem_at_nowrap",
+            "awkward_Index32_getitem_at_nowrap",
+            "awkward_IndexU32_getitem_at_nowrap",
+            "awkward_Index64_getitem_at_nowrap",
+            "awkward_NumpyArraybool_getitem_at",
+            "awkward_NumpyArray8_getitem_at",
+            "awkward_NumpyArrayU8_getitem_at",
+            "awkward_NumpyArray16_getitem_at",
+            "awkward_NumpyArrayU16_getitem_at",
+            "awkward_NumpyArray32_getitem_at",
+            "awkward_NumpyArrayU32_getitem_at",
+            "awkward_NumpyArray64_getitem_at",
+            "awkward_NumpyArrayU64_getitem_at",
+            "awkward_NumpyArrayfloat32_getitem_at",
+            "awkward_NumpyArrayfloat64_getitem_at",
+            "awkward_Index8_setitem_at_nowrap",
+            "awkward_IndexU8_setitem_at_nowrap",
+            "awkward_Index32_setitem_at_nowrap",
+            "awkward_IndexU32_setitem_at_nowrap",
+            "awkward_Index64_setitem_at_nowrap",
+            "awkward_ListArray32_getitem_next_range_carrylength",
+            "awkward_ListArrayU32_getitem_next_range_carrylength",
+            "awkward_ListArray64_getitem_next_range_carrylength",
+            "awkward_ListArray32_getitem_next_range_64",
+            "awkward_ListArrayU32_getitem_next_range_64",
+            "awkward_ListArray64_getitem_next_range_64",
         ]
-        success_blacklist = ["awkward_combinations_64"]
+        success_blacklist = [
+            "awkward_combinations_64",
+            "awkward_regularize_arrayslice_64",
+        ]
         failure_blacklist = ["awkward_NumpyArray_fill_to64_fromU64"]
         for name, args in tokens.items():
             checkindex = []
@@ -107,6 +139,21 @@ def gentests(funcs, htokens, failfuncs):
                                 (eval("ctypes.c_" + temptype) * len(temparr))(*temparr)
                             )
                             checkindex.append(i)
+                    elif list(args.values())[i]["check"] == "inoutparam":
+                        typelist.append((temptype, list(args.values())[i]["array"],))
+                        if "role" in list(args.values())[i]:
+                            temparr = data["success"][
+                                list(args.values())[i]["role"][
+                                    : list(args.values())[i]["role"].find("-")
+                                ]
+                            ][list(args.values())[i]["role"]][0][pytype(temptype)]
+                        else:
+                            temparr = [0] * (data["success"]["num"] + 50)
+                        testsp.append(temparr)
+                        testsc.append(
+                            (eval("ctypes.c_" + temptype) * len(temparr))(*temparr)
+                        )
+                        checkindex.append(i)
                     elif "role" in list(args.values())[i]:
                         if "instance" in list(args.values())[i]:
                             tempval = data["success"][
@@ -160,6 +207,7 @@ def gentests(funcs, htokens, failfuncs):
                         testsc.append(data["success"]["num"])
 
                 # Initialize test functions
+                print()
                 print("Testing ", name)
                 print("----------------------------")
                 funcPy = getattr(kernels, name)

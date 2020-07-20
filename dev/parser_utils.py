@@ -249,9 +249,9 @@ def parseheader(filename):
         line = re.sub(" +", " ", line)
         name = line.split()[0]
         check = line.split()[1]
-        if re.match("(in|out)param", check) is None:
+        if re.match("(in|out|inout)param", check) is None:
             raise AssertionError(
-                "Only inparam or outparam allowed. Not {0}".format(check)
+                "Only inparam. outparam or inoutparam allowed. Not {0}".format(check)
             )
         d["check"] = check
         line = line[line.find(check) + len(check) + 1 :]
