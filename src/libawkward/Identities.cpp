@@ -198,8 +198,8 @@ namespace awkward {
     size_t x = (size_t)ptr_.get();
     auto it = largest.find(x);
     if (it == largest.end()  ||
-        it->second < (int64_t)(sizeof(T)*length_*width_)) {
-      largest[x] = (int64_t)(sizeof(T)*length_*width_);
+        it->second < (int64_t)sizeof(T)*length_*width_) {
+      largest[x] = (int64_t)sizeof(T)*length_*width_;
     }
   }
 
