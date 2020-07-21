@@ -233,9 +233,12 @@ def gentests(funcs, htokens, failfuncs):
                         if isinstance(testsp[i], list):
                             for j in range(len(testsp[i])):
                                 print(testsp[i][j], " \t", testsc[i][j])
-                                assert math.isclose(
-                                    testsp[i][j], testsc[i][j], rel_tol=0.0001
-                                )
+                                if isinstance(testsp[i][j], str):
+                                    assert testsp[i][j] == str(testsc[i][j])
+                                else:
+                                    assert math.isclose(
+                                        testsp[i][j], testsc[i][j], rel_tol=0.0001
+                                    )
                         else:
                             print(testsp[i], " \t", testsc[i])
                             assert testsp[i] == testsc[i]

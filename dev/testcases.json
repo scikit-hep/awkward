@@ -32,7 +32,8 @@
                 {"int": 0}
             ],
             "ListArray-replacement": [
-                {"bool": true}
+                {"bool": true},
+                {"bool": false}
             ],
             "ListArray-at": [
                 {"int": 0}
