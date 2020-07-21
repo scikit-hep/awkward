@@ -274,7 +274,7 @@ namespace awkward {
                  index.ptr(),
                  std::vector<ssize_t>({ (ssize_t)index.length() }),
                  std::vector<ssize_t>({ (ssize_t)sizeof(int8_t) }),
-                 index.offset() * sizeof(int8_t),
+                 index.offset() * (ssize_t)sizeof(int8_t),
                  sizeof(int8_t),
                  util::dtype_to_format(util::dtype::int8),
                  util::dtype::int8,
@@ -286,7 +286,7 @@ namespace awkward {
                  index.ptr(),
                  std::vector<ssize_t>({ (ssize_t)index.length() }),
                  std::vector<ssize_t>({ (ssize_t)sizeof(uint8_t) }),
-                 index.offset() * sizeof(uint8_t),
+                 index.offset() * (ssize_t)sizeof(uint8_t),
                  sizeof(uint8_t),
                  util::dtype_to_format(util::dtype::uint8),
                  util::dtype::uint8,
@@ -298,7 +298,7 @@ namespace awkward {
                  index.ptr(),
                  std::vector<ssize_t>({ (ssize_t)index.length() }),
                  std::vector<ssize_t>({ (ssize_t)sizeof(int32_t) }),
-                 index.offset() * sizeof(int32_t),
+                 index.offset() * (ssize_t)sizeof(int32_t),
                  sizeof(int32_t),
                  util::dtype_to_format(util::dtype::int32),
                  util::dtype::int32,
@@ -310,7 +310,7 @@ namespace awkward {
                  index.ptr(),
                  std::vector<ssize_t>({ (ssize_t)index.length() }),
                  std::vector<ssize_t>({ (ssize_t)sizeof(uint32_t) }),
-                 index.offset() * sizeof(uint32_t),
+                 index.offset() * (ssize_t)sizeof(uint32_t),
                  sizeof(uint32_t),
                  util::dtype_to_format(util::dtype::uint32),
                  util::dtype::uint32,
@@ -322,7 +322,7 @@ namespace awkward {
                  index.ptr(),
                  std::vector<ssize_t>({ (ssize_t)index.length() }),
                  std::vector<ssize_t>({ (ssize_t)sizeof(int64_t) }),
-                 index.offset() * sizeof(int64_t),
+                 index.offset() * (ssize_t)sizeof(int64_t),
                  sizeof(int64_t),
                  util::dtype_to_format(util::dtype::int64),
                  util::dtype::int64,
@@ -1780,6 +1780,10 @@ namespace awkward {
                   self_offset,
                   self_flatlength);
             break;
+          default:
+            // FIXME: 16 enumeration values not handled in switch
+            throw std::invalid_argument("enumeration value cannot be handled");
+            break;
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -1798,6 +1802,10 @@ namespace awkward {
                   reinterpret_cast<int8_t*>(contiguous_other.ptr().get()),
                   other_offset,
                   other_flatlength);
+            break;
+          default:
+            // FIXME: 16 enumeration values not handled in switch
+            throw std::invalid_argument("enumeration value cannot be handled");
             break;
         }
         util::handle_error(err, classname(), nullptr);
@@ -1838,6 +1846,10 @@ namespace awkward {
                   self_offset,
                   self_flatlength);
             break;
+          default:
+            // FIXME: 14 enumeration values not handled in switch
+            throw std::invalid_argument("enumeration value cannot be handled");
+            break;
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -1872,6 +1884,10 @@ namespace awkward {
                   reinterpret_cast<uint8_t*>(contiguous_other.ptr().get()),
                   other_offset,
                   other_flatlength);
+            break;
+          default:
+            // FIXME: 14 enumeration values not handled in switch
+            throw std::invalid_argument("enumeration value cannot be handled");
             break;
         }
         util::handle_error(err, classname(), nullptr);
@@ -1928,6 +1944,10 @@ namespace awkward {
                   self_offset,
                   self_flatlength);
             break;
+          default:
+            // FIXME: 12 enumeration values not handled in switch
+            throw std::invalid_argument("enumeration value cannot be handled");
+            break;
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -1978,6 +1998,10 @@ namespace awkward {
                   reinterpret_cast<uint16_t*>(contiguous_other.ptr().get()),
                   other_offset,
                   other_flatlength);
+            break;
+          default:
+            // FIXME: 12 enumeration values not handled in switch
+            throw std::invalid_argument("enumeration value cannot be handled");
             break;
         }
         util::handle_error(err, classname(), nullptr);
@@ -2050,6 +2074,10 @@ namespace awkward {
                   self_offset,
                   self_flatlength);
             break;
+          default:
+            // FIXME: 10 enumeration values not handled in switch
+            throw std::invalid_argument("enumeration value cannot be handled");
+            break;
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -2117,6 +2145,10 @@ namespace awkward {
                   other_offset,
                   other_flatlength);
             break;
+          default:
+            // FIXME: 10 enumeration values not handled in switch
+            throw std::invalid_argument("enumeration value cannot be handled");
+            break;
         }
         util::handle_error(err, classname(), nullptr);
         break;
@@ -2140,6 +2172,10 @@ namespace awkward {
                   self_offset,
                   self_flatlength);
             break;
+          default:
+            // FIXME: 16 enumeration values not handled in switch
+            throw std::invalid_argument("enumeration value cannot be handled");
+            break;
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -2158,6 +2194,10 @@ namespace awkward {
                   reinterpret_cast<uint8_t*>(contiguous_other.ptr().get()),
                   other_offset,
                   other_flatlength);
+            break;
+          default:
+            // FIXME: 16 enumeration values not handled in switch
+            throw std::invalid_argument("enumeration value cannot be handled");
             break;
         }
         util::handle_error(err, classname(), nullptr);
@@ -2190,6 +2230,10 @@ namespace awkward {
                   self_offset,
                   self_flatlength);
             break;
+          default:
+            // FIXME: 15 enumeration values not handled in switch
+            throw std::invalid_argument("enumeration value cannot be handled");
+            break;
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -2216,6 +2260,10 @@ namespace awkward {
                   reinterpret_cast<uint16_t*>(contiguous_other.ptr().get()),
                   other_offset,
                   other_flatlength);
+            break;
+          default:
+            // FIXME: 15 enumeration values not handled in switch
+            throw std::invalid_argument("enumeration value cannot be handled");
             break;
         }
         util::handle_error(err, classname(), nullptr);
@@ -2256,6 +2304,10 @@ namespace awkward {
                   self_offset,
                   self_flatlength);
             break;
+          default:
+            // FIXME: 14 enumeration values not handled in switch
+            throw std::invalid_argument("enumeration value cannot be handled");
+            break;
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -2291,7 +2343,11 @@ namespace awkward {
                   other_offset,
                   other_flatlength);
             break;
-        }
+          default:
+            // FIXME: 14 enumeration values not handled in switch
+            throw std::invalid_argument("enumeration value cannot be handled");
+            break;
+      }
         util::handle_error(err, classname(), nullptr);
         break;
 
@@ -2338,6 +2394,10 @@ namespace awkward {
                   self_offset,
                   self_flatlength);
             break;
+          default:
+            // FIXME: 13 enumeration values not handled in switch
+            throw std::invalid_argument("enumeration value cannot be handled");
+            break;
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -2381,7 +2441,11 @@ namespace awkward {
                   other_offset,
                   other_flatlength);
             break;
-        }
+          default:
+            // FIXME: 13 enumeration values not handled in switch
+            throw std::invalid_argument("enumeration value cannot be handled");
+            break;
+      }
         util::handle_error(err, classname(), nullptr);
         break;
 
@@ -2443,6 +2507,10 @@ namespace awkward {
                   self_offset,
                   self_flatlength);
             break;
+          default:
+            // FIXME: 11 enumeration values not handled in switch
+            throw std::invalid_argument("enumeration value cannot be handled");
+            break;
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -2495,6 +2563,10 @@ namespace awkward {
                   reinterpret_cast<float*>(contiguous_other.ptr().get()),
                   other_offset,
                   other_flatlength);
+            break;
+          default:
+            // FIXME: 11 enumeration values not handled in switch
+            throw std::invalid_argument("enumeration value cannot be handled");
             break;
         }
         util::handle_error(err, classname(), nullptr);
@@ -2593,6 +2665,10 @@ namespace awkward {
                   self_offset,
                   self_flatlength);
             break;
+          default:
+            // FIXME: 6 enumeration values not handled in switch
+            throw std::invalid_argument("enumeration value cannot be handled");
+            break;
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -2685,6 +2761,10 @@ namespace awkward {
                   reinterpret_cast<double*>(contiguous_other.ptr().get()),
                   other_offset,
                   other_flatlength);
+            break;
+          default:
+            // FIXME: 6 enumeration values not handled in switch
+            throw std::invalid_argument("enumeration value cannot be handled");
             break;
         }
         util::handle_error(err, classname(), nullptr);
