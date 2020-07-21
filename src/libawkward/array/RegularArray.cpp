@@ -1310,4 +1310,10 @@ namespace awkward {
                                           content,
                                           size());
   }
+
+  const ContentPtr
+  RegularArray::withleaftype(const util::dtype totype) const {
+    throw std::runtime_error("FIXME: RegularArray::withleaftype is not implemented.");
+  }
+
 }

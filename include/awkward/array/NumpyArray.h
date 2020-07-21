@@ -627,6 +627,9 @@ namespace awkward {
     const ContentPtr
       copy_to(kernel::Lib ptr_lib) const override;
 
+    const ContentPtr
+      withleaftype(const util::dtype totype) const override;
+
   protected:
     /// @brief Internal function to merge two byte arrays without promoting
     /// the types to int64.

@@ -4860,6 +4860,11 @@ namespace awkward {
                                         ptr_lib);
   }
 
+  const ContentPtr
+  NumpyArray::withleaftype(const util::dtype totype) const {
+    throw std::runtime_error("FIXME: NumpyArray::withleaftype is not implemented.");
+  }
+
   template<typename T>
   const std::shared_ptr<void>
   NumpyArray::index_sort(const T* data,

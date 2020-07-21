@@ -2247,6 +2247,12 @@ namespace awkward {
                                                   content);
   }
 
+  template <typename T>
+  const ContentPtr
+  ListOffsetArrayOf<T>::withleaftype(const util::dtype totype) const {
+    throw std::runtime_error("FIXME: ListOffsetArrayOf<T>::withleaftype is not implemented.");
+  }
+
   template class EXPORT_SYMBOL ListOffsetArrayOf<int32_t>;
   template class EXPORT_SYMBOL ListOffsetArrayOf<uint32_t>;
   template class EXPORT_SYMBOL ListOffsetArrayOf<int64_t>;

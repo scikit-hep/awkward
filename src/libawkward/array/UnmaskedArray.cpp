@@ -891,6 +891,11 @@ namespace awkward {
                                            content);
   }
 
+  const ContentPtr
+  UnmaskedArray::withleaftype(const util::dtype totype) const {
+    throw std::runtime_error("FIXME: UnmaskedArray::withleaftype is not implemented.");
+  }
+
   template <typename S>
   const ContentPtr
   UnmaskedArray::getitem_next_jagged_generic(const Index64& slicestarts,

@@ -1297,6 +1297,11 @@ namespace awkward {
                                              valid_when());
   }
 
+  const ContentPtr
+  ByteMaskedArray::withleaftype(const util::dtype totype) const {
+    throw std::runtime_error("FIXME: ByteMaskedArray::withleaftype is not implemented.");
+  }
+
   template <typename S>
   const ContentPtr ByteMaskedArray::getitem_next_jagged_generic(
       const Index64& slicestarts, const Index64& slicestops,

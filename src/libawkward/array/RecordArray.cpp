@@ -1482,6 +1482,11 @@ namespace awkward {
 
   }
 
+  const ContentPtr
+  RecordArray::withleaftype(const util::dtype totype) const {
+    throw std::runtime_error("FIXME: RecordArray::withleaftype is not implemented.");
+  }
+
   template <typename S>
   const ContentPtr
   RecordArray::getitem_next_jagged_generic(const Index64& slicestarts,

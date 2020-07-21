@@ -414,6 +414,9 @@ namespace awkward {
     const ContentPtr
       copy_to(kernel::Lib ptr_lib) const override;
 
+    const ContentPtr
+      withleaftype(const util::dtype totype) const override;
+
   private:
     /// @brief See #mask.
     const IndexU8 mask_;

@@ -1198,6 +1198,12 @@ namespace awkward {
                                                ptr_lib);
     }
 
+  const ContentPtr
+    withleaftype(const util::dtype totype) const override {
+      throw std::runtime_error(
+        "FIXME: unimplemented operation: RawArray::withleaftype");
+    }
+
   private:
     const kernel::Lib ptr_lib_;
     const std::shared_ptr<T> ptr_;

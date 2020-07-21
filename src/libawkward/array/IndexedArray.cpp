@@ -2282,6 +2282,12 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
+  const ContentPtr
+  IndexedArrayOf<T, ISOPTION>::withleaftype(const util::dtype totype) const {
+    throw std::runtime_error("FIXME: IndexedArrayOf<T, ISOPTION>::withleaftype is not implemented.");
+  }
+
+  template <typename T, bool ISOPTION>
   template <typename S>
   const ContentPtr
   IndexedArrayOf<T, ISOPTION>::getitem_next_jagged_generic(

@@ -1851,6 +1851,12 @@ namespace awkward {
                                             content);
   }
 
+  template <typename T>
+  const ContentPtr
+  ListArrayOf<T>::withleaftype(const util::dtype totype) const {
+    throw std::runtime_error("FIXME: ListArrayOf<T>::withleaftype is not implemented.");
+  }
+
   template class EXPORT_SYMBOL ListArrayOf<int32_t>;
   template class EXPORT_SYMBOL ListArrayOf<uint32_t>;
   template class EXPORT_SYMBOL ListArrayOf<int64_t>;

@@ -336,5 +336,10 @@ namespace awkward {
       "undefined operation: None::copy_to(ptr_lib)");
   }
 
+  const ContentPtr
+  None::withleaftype(const util::dtype totype) const {
+    throw std::runtime_error("FIXME: None::withleaftype is not implemented.");
+  }
+
   const ContentPtr none = std::make_shared<None>();
 }

@@ -905,4 +905,10 @@ namespace awkward {
                                             cache_key(),
                                             ptr_lib);
   }
+
+  const ContentPtr
+  VirtualArray::withleaftype(const util::dtype totype) const {
+    throw std::runtime_error("FIXME: VirtualArray::withleaftype is not implemented.");
+  }
+
 }

@@ -583,4 +583,10 @@ namespace awkward {
     return std::make_shared<Record>(record_arr,
                                     at());
   }
+
+  const ContentPtr
+  Record::withleaftype(const util::dtype totype) const {
+    throw std::runtime_error("FIXME: Record::withleaftype is not implemented.");
+  }
+
 }

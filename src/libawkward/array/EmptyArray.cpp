@@ -588,5 +588,9 @@ namespace awkward {
                                         parameters());
   }
 
+  const ContentPtr
+  EmptyArray::withleaftype(const util::dtype totype) const {
+    throw std::runtime_error("FIXME: EmptyArray::withleaftype is not implemented.");
+  }
 
 }

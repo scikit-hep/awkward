@@ -912,4 +912,10 @@ namespace awkward {
                                             length(),
                                             lsb_order());
   }
+
+  const ContentPtr
+  BitMaskedArray::withleaftype(const util::dtype totype) const {
+    throw std::runtime_error("FIXME: BitMaskedArray::withleaftype is not implemented.");
+  }
+
 }

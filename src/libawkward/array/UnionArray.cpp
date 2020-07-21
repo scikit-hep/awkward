@@ -1949,6 +1949,12 @@ namespace awkward {
   }
 
   template <typename T, typename I>
+  const ContentPtr
+  UnionArrayOf<T, I>::withleaftype(const util::dtype totype) const {
+    throw std::runtime_error("FIXME: UnionArrayOf<T, I>::withleaftype is not implemented.");
+  }
+
+  template <typename T, typename I>
   template <typename S>
   const ContentPtr
   UnionArrayOf<T, I>::getitem_next_jagged_generic(const Index64& slicestarts,
