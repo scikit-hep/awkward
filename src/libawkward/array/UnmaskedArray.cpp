@@ -892,8 +892,8 @@ namespace awkward {
   }
 
   const ContentPtr
-  UnmaskedArray::to_numeric_type(const util::dtype totype) const {
-    throw std::runtime_error("FIXME: UnmaskedArray::to_numeric_type is not implemented.");
+  UnmaskedArray::numbers_to_type(const util::dtype totype) const {
+    throw std::runtime_error("FIXME: UnmaskedArray::numbers_to_type is not implemented.");
   }
 
   template <typename S>

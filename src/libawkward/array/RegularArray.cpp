@@ -1312,8 +1312,8 @@ namespace awkward {
   }
 
   const ContentPtr
-  RegularArray::to_numeric_type(const util::dtype totype) const {
-    throw std::runtime_error("FIXME: RegularArray::to_numeric_type is not implemented.");
+  RegularArray::numbers_to_type(const util::dtype totype) const {
+    throw std::runtime_error("FIXME: RegularArray::numbers_to_type is not implemented.");
   }
 
 }

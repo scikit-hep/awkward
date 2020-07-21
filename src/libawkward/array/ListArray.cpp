@@ -1853,8 +1853,8 @@ namespace awkward {
 
   template <typename T>
   const ContentPtr
-  ListArrayOf<T>::to_numeric_type(const util::dtype totype) const {
-    throw std::runtime_error("FIXME: ListArrayOf<T>::to_numeric_type is not implemented.");
+  ListArrayOf<T>::numbers_to_type(const util::dtype totype) const {
+    throw std::runtime_error("FIXME: ListArrayOf<T>::numbers_to_type is not implemented.");
   }
 
   template class EXPORT_SYMBOL ListArrayOf<int32_t>;

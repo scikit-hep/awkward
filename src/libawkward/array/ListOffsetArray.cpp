@@ -2249,8 +2249,8 @@ namespace awkward {
 
   template <typename T>
   const ContentPtr
-  ListOffsetArrayOf<T>::to_numeric_type(const util::dtype totype) const {
-    throw std::runtime_error("FIXME: ListOffsetArrayOf<T>::to_numeric_type is not implemented.");
+  ListOffsetArrayOf<T>::numbers_to_type(const util::dtype totype) const {
+    throw std::runtime_error("FIXME: ListOffsetArrayOf<T>::numbers_to_type is not implemented.");
   }
 
   template class EXPORT_SYMBOL ListOffsetArrayOf<int32_t>;

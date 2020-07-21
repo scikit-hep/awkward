@@ -337,8 +337,8 @@ namespace awkward {
   }
 
   const ContentPtr
-  None::to_numeric_type(const util::dtype totype) const {
-    throw std::runtime_error("FIXME: None::to_numeric_type is not implemented.");
+  None::numbers_to_type(const util::dtype totype) const {
+    throw std::runtime_error("FIXME: None::numbers_to_type is not implemented.");
   }
 
   const ContentPtr none = std::make_shared<None>();

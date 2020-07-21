@@ -907,8 +907,8 @@ namespace awkward {
   }
 
   const ContentPtr
-  VirtualArray::to_numeric_type(const util::dtype totype) const {
-    throw std::runtime_error("FIXME: VirtualArray::to_numeric_type is not implemented.");
+  VirtualArray::numbers_to_type(const util::dtype totype) const {
+    throw std::runtime_error("FIXME: VirtualArray::numbers_to_type is not implemented.");
   }
 
 }

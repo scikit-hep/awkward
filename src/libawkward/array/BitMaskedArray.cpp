@@ -914,8 +914,8 @@ namespace awkward {
   }
 
   const ContentPtr
-  BitMaskedArray::to_numeric_type(const util::dtype totype) const {
-    throw std::runtime_error("FIXME: BitMaskedArray::to_numeric_type is not implemented.");
+  BitMaskedArray::numbers_to_type(const util::dtype totype) const {
+    throw std::runtime_error("FIXME: BitMaskedArray::numbers_to_type is not implemented.");
   }
 
 }

@@ -1950,8 +1950,8 @@ namespace awkward {
 
   template <typename T, typename I>
   const ContentPtr
-  UnionArrayOf<T, I>::to_numeric_type(const util::dtype totype) const {
-    throw std::runtime_error("FIXME: UnionArrayOf<T, I>::to_numeric_type is not implemented.");
+  UnionArrayOf<T, I>::numbers_to_type(const util::dtype totype) const {
+    throw std::runtime_error("FIXME: UnionArrayOf<T, I>::numbers_to_type is not implemented.");
   }
 
   template <typename T, typename I>

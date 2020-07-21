@@ -589,8 +589,8 @@ namespace awkward {
   }
 
   const ContentPtr
-  EmptyArray::to_numeric_type(const util::dtype totype) const {
-    throw std::runtime_error("FIXME: EmptyArray::to_numeric_type is not implemented.");
+  EmptyArray::numbers_to_type(const util::dtype totype) const {
+    throw std::runtime_error("FIXME: EmptyArray::numbers_to_type is not implemented.");
   }
 
 }

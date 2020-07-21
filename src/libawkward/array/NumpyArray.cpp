@@ -4861,8 +4861,8 @@ namespace awkward {
   }
 
   const ContentPtr
-  NumpyArray::to_numeric_type(const util::dtype totype) const {
-    throw std::runtime_error("FIXME: NumpyArray::to_numeric_type is not implemented.");
+  NumpyArray::numbers_to_type(const util::dtype totype) const {
+    throw std::runtime_error("FIXME: NumpyArray::numbers_to_type is not implemented.");
   }
 
   template<typename T>
