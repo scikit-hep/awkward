@@ -914,8 +914,8 @@ namespace awkward {
   }
 
   const ContentPtr
-  BitMaskedArray::withleaftype(const util::dtype totype) const {
-    throw std::runtime_error("FIXME: BitMaskedArray::withleaftype is not implemented.");
+  BitMaskedArray::to_numeric_type(const util::dtype totype) const {
+    throw std::runtime_error("FIXME: BitMaskedArray::to_numeric_type is not implemented.");
   }
 
 }

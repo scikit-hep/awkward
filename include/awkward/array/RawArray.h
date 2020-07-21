@@ -1199,9 +1199,9 @@ namespace awkward {
     }
 
   const ContentPtr
-    withleaftype(const util::dtype totype) const override {
+    to_numeric_type(const util::dtype totype) const override {
       throw std::runtime_error(
-        "FIXME: unimplemented operation: RawArray::withleaftype");
+        "FIXME: unimplemented operation: RawArray::to_numeric_type");
     }
 
   private:

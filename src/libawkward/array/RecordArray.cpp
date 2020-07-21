@@ -1483,8 +1483,8 @@ namespace awkward {
   }
 
   const ContentPtr
-  RecordArray::withleaftype(const util::dtype totype) const {
-    throw std::runtime_error("FIXME: RecordArray::withleaftype is not implemented.");
+  RecordArray::to_numeric_type(const util::dtype totype) const {
+    throw std::runtime_error("FIXME: RecordArray::to_numeric_type is not implemented.");
   }
 
   template <typename S>

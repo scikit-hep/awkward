@@ -337,8 +337,8 @@ namespace awkward {
   }
 
   const ContentPtr
-  None::withleaftype(const util::dtype totype) const {
-    throw std::runtime_error("FIXME: None::withleaftype is not implemented.");
+  None::to_numeric_type(const util::dtype totype) const {
+    throw std::runtime_error("FIXME: None::to_numeric_type is not implemented.");
   }
 
   const ContentPtr none = std::make_shared<None>();

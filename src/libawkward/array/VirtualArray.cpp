@@ -907,8 +907,8 @@ namespace awkward {
   }
 
   const ContentPtr
-  VirtualArray::withleaftype(const util::dtype totype) const {
-    throw std::runtime_error("FIXME: VirtualArray::withleaftype is not implemented.");
+  VirtualArray::to_numeric_type(const util::dtype totype) const {
+    throw std::runtime_error("FIXME: VirtualArray::to_numeric_type is not implemented.");
   }
 
 }

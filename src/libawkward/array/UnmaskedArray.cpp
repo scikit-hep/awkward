@@ -892,8 +892,8 @@ namespace awkward {
   }
 
   const ContentPtr
-  UnmaskedArray::withleaftype(const util::dtype totype) const {
-    throw std::runtime_error("FIXME: UnmaskedArray::withleaftype is not implemented.");
+  UnmaskedArray::to_numeric_type(const util::dtype totype) const {
+    throw std::runtime_error("FIXME: UnmaskedArray::to_numeric_type is not implemented.");
   }
 
   template <typename S>

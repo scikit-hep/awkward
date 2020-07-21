@@ -585,8 +585,8 @@ namespace awkward {
   }
 
   const ContentPtr
-  Record::withleaftype(const util::dtype totype) const {
-    throw std::runtime_error("FIXME: Record::withleaftype is not implemented.");
+  Record::to_numeric_type(const util::dtype totype) const {
+    throw std::runtime_error("FIXME: Record::to_numeric_type is not implemented.");
   }
 
 }

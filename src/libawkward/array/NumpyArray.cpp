@@ -4861,8 +4861,8 @@ namespace awkward {
   }
 
   const ContentPtr
-  NumpyArray::withleaftype(const util::dtype totype) const {
-    throw std::runtime_error("FIXME: NumpyArray::withleaftype is not implemented.");
+  NumpyArray::to_numeric_type(const util::dtype totype) const {
+    throw std::runtime_error("FIXME: NumpyArray::to_numeric_type is not implemented.");
   }
 
   template<typename T>

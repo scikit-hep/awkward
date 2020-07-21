@@ -2283,8 +2283,8 @@ namespace awkward {
 
   template <typename T, bool ISOPTION>
   const ContentPtr
-  IndexedArrayOf<T, ISOPTION>::withleaftype(const util::dtype totype) const {
-    throw std::runtime_error("FIXME: IndexedArrayOf<T, ISOPTION>::withleaftype is not implemented.");
+  IndexedArrayOf<T, ISOPTION>::to_numeric_type(const util::dtype totype) const {
+    throw std::runtime_error("FIXME: IndexedArrayOf<T, ISOPTION>::to_numeric_type is not implemented.");
   }
 
   template <typename T, bool ISOPTION>

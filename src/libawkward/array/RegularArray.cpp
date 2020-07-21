@@ -1312,8 +1312,8 @@ namespace awkward {
   }
 
   const ContentPtr
-  RegularArray::withleaftype(const util::dtype totype) const {
-    throw std::runtime_error("FIXME: RegularArray::withleaftype is not implemented.");
+  RegularArray::to_numeric_type(const util::dtype totype) const {
+    throw std::runtime_error("FIXME: RegularArray::to_numeric_type is not implemented.");
   }
 
 }

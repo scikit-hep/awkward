@@ -1198,7 +1198,7 @@ namespace awkward {
 
     /// @brief Change the leaf types to 'totype'.
     virtual const ContentPtr
-      withleaftype(const util::dtype totype) const = 0;
+      to_numeric_type(const util::dtype totype) const = 0;
 
   protected:
     /// @brief Internal function to wrap putative #getitem output with enough

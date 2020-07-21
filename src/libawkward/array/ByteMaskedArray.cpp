@@ -1298,8 +1298,8 @@ namespace awkward {
   }
 
   const ContentPtr
-  ByteMaskedArray::withleaftype(const util::dtype totype) const {
-    throw std::runtime_error("FIXME: ByteMaskedArray::withleaftype is not implemented.");
+  ByteMaskedArray::to_numeric_type(const util::dtype totype) const {
+    throw std::runtime_error("FIXME: ByteMaskedArray::to_numeric_type is not implemented.");
   }
 
   template <typename S>
