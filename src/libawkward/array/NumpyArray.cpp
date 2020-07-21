@@ -1781,9 +1781,9 @@ namespace awkward {
                   self_flatlength);
             break;
           default:
-            // FIXME: 16 enumeration values not handled in switch
-            throw std::invalid_argument("enumeration value cannot be handled");
-            break;
+            throw std::runtime_error(std::string("enumeration value ")
+              + util::dtype_to_name(dtype_)
+              + std::string(" cannot be handled in case 'util::dtype::int8'"));
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -1804,9 +1804,9 @@ namespace awkward {
                   other_flatlength);
             break;
           default:
-            // FIXME: 16 enumeration values not handled in switch
-            throw std::invalid_argument("enumeration value cannot be handled");
-            break;
+            throw std::runtime_error(std::string("enumeration value ")
+              + util::dtype_to_name(rawother->dtype())
+              + std::string(" cannot be handled in case 'util::dtype::int8'"));
         }
         util::handle_error(err, classname(), nullptr);
         break;
@@ -1847,9 +1847,9 @@ namespace awkward {
                   self_flatlength);
             break;
           default:
-            // FIXME: 14 enumeration values not handled in switch
-            throw std::invalid_argument("enumeration value cannot be handled");
-            break;
+            throw std::runtime_error(std::string("enumeration value ")
+              + util::dtype_to_name(dtype_)
+              + std::string(" cannot be handled in case 'util::dtype::int16'"));
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -1886,9 +1886,9 @@ namespace awkward {
                   other_flatlength);
             break;
           default:
-            // FIXME: 14 enumeration values not handled in switch
-            throw std::invalid_argument("enumeration value cannot be handled");
-            break;
+            throw std::runtime_error(std::string("enumeration value ")
+              + util::dtype_to_name(rawother->dtype())
+              + std::string(" cannot be handled in case 'util::dtype::int16'"));
         }
         util::handle_error(err, classname(), nullptr);
         break;
@@ -1945,9 +1945,9 @@ namespace awkward {
                   self_flatlength);
             break;
           default:
-            // FIXME: 12 enumeration values not handled in switch
-            throw std::invalid_argument("enumeration value cannot be handled");
-            break;
+            throw std::runtime_error(std::string("enumeration value ")
+              + util::dtype_to_name(dtype_)
+              + std::string(" cannot be handled in case 'util::dtype::int32'"));
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -2000,9 +2000,9 @@ namespace awkward {
                   other_flatlength);
             break;
           default:
-            // FIXME: 12 enumeration values not handled in switch
-            throw std::invalid_argument("enumeration value cannot be handled");
-            break;
+            throw std::runtime_error(std::string("enumeration value ")
+              + util::dtype_to_name(rawother->dtype())
+              + std::string(" cannot be handled in case 'util::dtype::int32'"));
         }
         util::handle_error(err, classname(), nullptr);
         break;
@@ -2075,9 +2075,9 @@ namespace awkward {
                   self_flatlength);
             break;
           default:
-            // FIXME: 10 enumeration values not handled in switch
-            throw std::invalid_argument("enumeration value cannot be handled");
-            break;
+            throw std::runtime_error(std::string("enumeration value ")
+              + util::dtype_to_name(dtype_)
+              + std::string(" cannot be handled in case 'util::dtype::int64'"));
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -2146,9 +2146,9 @@ namespace awkward {
                   other_flatlength);
             break;
           default:
-            // FIXME: 10 enumeration values not handled in switch
-            throw std::invalid_argument("enumeration value cannot be handled");
-            break;
+            throw std::runtime_error(std::string("enumeration value ")
+              + util::dtype_to_name(rawother->dtype())
+              + std::string(" cannot be handled in case 'util::dtype::int64'"));
         }
         util::handle_error(err, classname(), nullptr);
         break;
@@ -2173,9 +2173,9 @@ namespace awkward {
                   self_flatlength);
             break;
           default:
-            // FIXME: 16 enumeration values not handled in switch
-            throw std::invalid_argument("enumeration value cannot be handled");
-            break;
+            throw std::runtime_error(std::string("enumeration value ")
+              + util::dtype_to_name(dtype_)
+              + std::string(" cannot be handled in case 'util::dtype::uint8'"));
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -2196,9 +2196,9 @@ namespace awkward {
                   other_flatlength);
             break;
           default:
-            // FIXME: 16 enumeration values not handled in switch
-            throw std::invalid_argument("enumeration value cannot be handled");
-            break;
+            throw std::runtime_error(std::string("enumeration value ")
+              + util::dtype_to_name(rawother->dtype())
+              + std::string(" cannot be handled in case 'util::dtype::uint8'"));
         }
         util::handle_error(err, classname(), nullptr);
         break;
@@ -2231,9 +2231,9 @@ namespace awkward {
                   self_flatlength);
             break;
           default:
-            // FIXME: 15 enumeration values not handled in switch
-            throw std::invalid_argument("enumeration value cannot be handled");
-            break;
+            throw std::runtime_error(std::string("enumeration value ")
+              + util::dtype_to_name(dtype_)
+              + std::string(" cannot be handled in case 'util::dtype::uint16'"));
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -2262,9 +2262,9 @@ namespace awkward {
                   other_flatlength);
             break;
           default:
-            // FIXME: 15 enumeration values not handled in switch
-            throw std::invalid_argument("enumeration value cannot be handled");
-            break;
+            throw std::runtime_error(std::string("enumeration value ")
+              + util::dtype_to_name(rawother->dtype())
+              + std::string(" cannot be handled in case 'util::dtype::uint16'"));
         }
         util::handle_error(err, classname(), nullptr);
         break;
@@ -2305,9 +2305,9 @@ namespace awkward {
                   self_flatlength);
             break;
           default:
-            // FIXME: 14 enumeration values not handled in switch
-            throw std::invalid_argument("enumeration value cannot be handled");
-            break;
+            throw std::runtime_error(std::string("enumeration value ")
+              + util::dtype_to_name(dtype_)
+              + std::string(" cannot be handled in case 'util::dtype::uint32'"));
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -2344,9 +2344,9 @@ namespace awkward {
                   other_flatlength);
             break;
           default:
-            // FIXME: 14 enumeration values not handled in switch
-            throw std::invalid_argument("enumeration value cannot be handled");
-            break;
+            throw std::runtime_error(std::string("enumeration value ")
+              + util::dtype_to_name(rawother->dtype())
+              + std::string(" cannot be handled in case 'util::dtype::uint32'"));
       }
         util::handle_error(err, classname(), nullptr);
         break;
@@ -2395,9 +2395,9 @@ namespace awkward {
                   self_flatlength);
             break;
           default:
-            // FIXME: 13 enumeration values not handled in switch
-            throw std::invalid_argument("enumeration value cannot be handled");
-            break;
+            throw std::runtime_error(std::string("enumeration value ")
+              + util::dtype_to_name(dtype_)
+              + std::string(" cannot be handled in case 'util::dtype::uint64'"));
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -2442,9 +2442,9 @@ namespace awkward {
                   other_flatlength);
             break;
           default:
-            // FIXME: 13 enumeration values not handled in switch
-            throw std::invalid_argument("enumeration value cannot be handled");
-            break;
+            throw std::runtime_error(std::string("enumeration value ")
+              + util::dtype_to_name(rawother->dtype())
+              + std::string(" cannot be handled in case 'util::dtype::uint64'"));
       }
         util::handle_error(err, classname(), nullptr);
         break;
@@ -2508,9 +2508,9 @@ namespace awkward {
                   self_flatlength);
             break;
           default:
-            // FIXME: 11 enumeration values not handled in switch
-            throw std::invalid_argument("enumeration value cannot be handled");
-            break;
+            throw std::runtime_error(std::string("enumeration value ")
+              + util::dtype_to_name(dtype_)
+              + std::string(" cannot be handled in case 'util::dtype::float32'"));
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -2565,9 +2565,9 @@ namespace awkward {
                   other_flatlength);
             break;
           default:
-            // FIXME: 11 enumeration values not handled in switch
-            throw std::invalid_argument("enumeration value cannot be handled");
-            break;
+            throw std::runtime_error(std::string("enumeration value ")
+              + util::dtype_to_name(rawother->dtype())
+              + std::string(" cannot be handled in case 'util::dtype::float32'"));
         }
         util::handle_error(err, classname(), nullptr);
         break;
@@ -2666,9 +2666,9 @@ namespace awkward {
                   self_flatlength);
             break;
           default:
-            // FIXME: 6 enumeration values not handled in switch
-            throw std::invalid_argument("enumeration value cannot be handled");
-            break;
+            throw std::runtime_error(std::string("enumeration value ")
+              + util::dtype_to_name(dtype_)
+              + std::string(" cannot be handled in case 'util::dtype::float64'"));
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -2763,9 +2763,9 @@ namespace awkward {
                   other_flatlength);
             break;
           default:
-            // FIXME: 6 enumeration values not handled in switch
-            throw std::invalid_argument("enumeration value cannot be handled");
-            break;
+            throw std::runtime_error(std::string("enumeration value ")
+              + util::dtype_to_name(rawother->dtype())
+              + std::string(" cannot be handled in case 'util::dtype::float64'"));
         }
         util::handle_error(err, classname(), nullptr);
         break;
