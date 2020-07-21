@@ -450,7 +450,7 @@ if __name__ == "__main__":
     args = arg_parser.parse_args()
     filenames = args.filenames
     doc_awkward_sorting_ranges = """
-    def awkward_sorting_ranges(toindex, tolength, parents, parentsoffset, parentslength, outlength):
+    def awkward_sorting_ranges(toindex, tolength, parents,  parentslength):
         j = 0
         k = 0
         toindex[0] = k
@@ -464,7 +464,7 @@ if __name__ == "__main__":
         toindex[tolength - 1] = parentslength
     """
     doc_awkward_sorting_ranges_length = """
-    def awkward_sorting_ranges_length(tolength, parents, parentsoffset, parentslength, outlength):
+    def awkward_sorting_ranges_length(tolength, parents, parentslength):
         length = 2
         for i in range(1, parentslength):
             if parents[i-1] != parents[i]:
@@ -522,7 +522,7 @@ if __name__ == "__main__":
                 tocarry[i] = -1
     """
     doc_awkward_NumpyArray_sort_asstrings_uint8 = """
-    def awkward_NumpyArray_sort_asstrings_uint8(toptr, fromptr, length, offsets, offsetslength, outoffsets, ascending, stable):
+    def awkward_NumpyArray_sort_asstrings_uint8(toptr, fromptr, offsets, offsetslength, outoffsets, ascending, stable):
         words = []
         for k in range(offsetslength - 1):
             start = offsets[k]

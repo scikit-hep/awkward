@@ -4801,9 +4801,7 @@ namespace awkward {
     struct Error err1 = kernel::sorting_ranges_length(
       &ranges_length,
       parents.ptr().get(),
-      parents.offset(),
-      parents.length(),
-      outlength);
+      parents.length());
     util::handle_error(err1, classname(), nullptr);
 
     Index64 outranges(ranges_length);
@@ -4811,9 +4809,7 @@ namespace awkward {
       outranges.ptr().get(),
       ranges_length,
       parents.ptr().get(),
-      parents.offset(),
-      parents.length(),
-      outlength);
+      parents.length());
     util::handle_error(err2, classname(), nullptr);
 
     struct Error err3 = kernel::NumpyArray_argsort<T>(
@@ -4850,9 +4846,7 @@ namespace awkward {
     struct Error err1 = kernel::sorting_ranges_length(
       &ranges_length,
       parents.ptr().get(),
-      parents.offset(),
-      parents.length(),
-      outlength);
+      parents.length());
     util::handle_error(err1, classname(), nullptr);
 
     Index64 outranges(ranges_length);
@@ -4860,9 +4854,7 @@ namespace awkward {
       outranges.ptr().get(),
       ranges_length,
       parents.ptr().get(),
-      parents.offset(),
-      parents.length(),
-      outlength);
+      parents.length());
     util::handle_error(err2, classname(), nullptr);
 
     struct Error err3 = kernel::NumpyArray_sort<T>(
@@ -4897,7 +4889,6 @@ namespace awkward {
     struct Error err = kernel::NumpyArray_sort_asstrings(
       ptr.get(),
       data,
-      length,
       offsets.ptr().get(),
       offsets.length(),
       outoffsets.ptr().get(),
