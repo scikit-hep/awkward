@@ -99,7 +99,7 @@ def gentests(funcs, htokens, failfuncs):
             "awkward_ListArray64_getitem_next_range_carrylength",
             "awkward_ListArray32_getitem_next_range_64",
             "awkward_ListArrayU32_getitem_next_range_64",
-            "awkward_ListArray64_getitem_next_range_64",
+            "awkward_ListArray64_getitem_next_range_64"
         ]
         success_blacklist = [
             "awkward_combinations_64",
@@ -237,11 +237,11 @@ def gentests(funcs, htokens, failfuncs):
                         else:
                             print(testsp[i], " \t", testsc[i])
                             assert testsp[i] == testsc[i]
-                    for i in pindex:
-                        print("Param name: ", argnames[i])
+                    for i in range(len(pindex)):
+                        print("Param name: ", argnames[pindex[i]])
                         print("Python \t C")
-                        print(testsp[i][0], " \t", pval[i].value)
-                        assert testsp[i][0] == pval[i].value
+                        print(testsp[pindex[i]][0], " \t", pval[i].value)
+                        assert testsp[pindex[i]][0] == pval[i].value
                     assert not ret_pass.str
                     print()
 
