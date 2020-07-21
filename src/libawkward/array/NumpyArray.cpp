@@ -1286,8 +1286,10 @@ namespace awkward {
       x *= shape[(size_t)(j - 1)];
     }
 
-    Index64 tonum(reps);
+    Index64 tonum(reps, ptr_lib());
+
     struct Error err = kernel::RegularArray_num_64(
+      ptr_lib(),
       tonum.ptr().get(),
       size,
       reps);
@@ -1302,7 +1304,8 @@ namespace awkward {
       0,
       sizeof(int64_t),
       util::dtype_to_format(util::dtype::int64),
-      util::dtype::int64);
+      util::dtype::int64,
+      ptr_lib());
   }
 
   const std::vector<ssize_t>

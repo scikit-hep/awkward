@@ -848,6 +848,7 @@ namespace kernel {
     int64_t length);
 
   ERROR RegularArray_num_64(
+    kernel::Lib ptr_lib,
     int64_t* tonum,
     int64_t size,
     int64_t length);

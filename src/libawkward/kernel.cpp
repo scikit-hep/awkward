@@ -3980,9 +3980,20 @@ namespace kernel {
   }
 
   ERROR RegularArray_num_64(
+    kernel::Lib ptr_lib,
     int64_t *tonum,
     int64_t size,
     int64_t length) {
+    if (ptr_lib == kernel::Lib::cuda_kernels) {
+      FORM_KERNEL(awkward_RegularArray_num_64,
+                  awkward_cuda_RegularArray_num_64,
+                  ptr_lib)
+
+      return (*awkward_cuda_RegularArray_num_64_t)(
+        tonum,
+        size,
+        length);
+    }
     return awkward_RegularArray_num_64(
       tonum,
       size,
