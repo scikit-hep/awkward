@@ -33,7 +33,7 @@ namespace awkward {
           + std::to_string(out.get()->length()));
     }
     if (form_.get() != nullptr  &&
-        !form_.get()->equal(out.get()->form(true), true, true, true)) {
+        !form_.get()->equal(out.get()->form(true), true, true, true, true)) {
       throw std::invalid_argument(
           std::string("generated array does not conform to expected form:\n\n")
           + form_.get()->tostring() + std::string("\n\nbut generated:\n\n")

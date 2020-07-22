@@ -26,11 +26,12 @@ namespace awkward {
 
   BitMaskedForm::BitMaskedForm(bool has_identities,
                                const util::Parameters& parameters,
+                               const FormKey& form_key,
                                Index::Form mask,
                                const FormPtr& content,
                                bool valid_when,
                                bool lsb_order)
-      : Form(has_identities, parameters)
+      : Form(has_identities, parameters, form_key)
       , mask_(mask)
       , content_(content)
       , valid_when_(valid_when)
@@ -79,6 +80,7 @@ namespace awkward {
     builder.boolean(lsb_order_);
     identities_tojson(builder, verbose);
     parameters_tojson(builder, verbose);
+    form_key_tojson(builder, verbose);
     builder.endrecord();
   }
 
@@ -86,6 +88,7 @@ namespace awkward {
   BitMaskedForm::shallow_copy() const {
     return std::make_shared<BitMaskedForm>(has_identities_,
                                            parameters_,
+                                           form_key_,
                                            mask_,
                                            content_,
                                            valid_when_,
@@ -152,6 +155,7 @@ namespace awkward {
   BitMaskedForm::equal(const FormPtr& other,
                        bool check_identities,
                        bool check_parameters,
+                       bool check_form_key,
                        bool compatibility_check) const {
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
@@ -161,11 +165,16 @@ namespace awkward {
         !util::parameters_equal(parameters_, other.get()->parameters())) {
       return false;
     }
+    if (check_form_key  &&
+        !form_key_equals(other.get()->form_key())) {
+      return false;
+    }
     if (BitMaskedForm* t = dynamic_cast<BitMaskedForm*>(other.get())) {
       return (mask_ == t->mask()  &&
               content_.get()->equal(t->content(),
                                     check_identities,
                                     check_parameters,
+                                    check_form_key,
                                     compatibility_check)  &&
               valid_when_ == t->valid_when()  &&
               lsb_order_ == t->lsb_order());
@@ -403,6 +412,7 @@ namespace awkward {
   BitMaskedArray::form(bool materialize) const {
     return std::make_shared<BitMaskedForm>(identities_.get() != nullptr,
                                            parameters_,
+                                           FormKey(nullptr),
                                            mask_.form(),
                                            content_.get()->form(materialize),
                                            valid_when_,

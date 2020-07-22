@@ -12,11 +12,11 @@ make_Form(const py::handle& m, const std::string& name) {
   return (py::class_<ak::Form, std::shared_ptr<ak::Form>>(m, name.c_str())
       .def("__eq__", [](const std::shared_ptr<ak::Form>& self,
                         const std::shared_ptr<ak::Form>& other) -> bool {
-        return self.get()->equal(other, true, true, false);
+        return self.get()->equal(other, true, true, true, false);
       })
       .def("__ne__", [](const std::shared_ptr<ak::Form>& self,
                         const std::shared_ptr<ak::Form>& other) -> bool {
-        return !self.get()->equal(other, true, true, false);
+        return !self.get()->equal(other, true, true, true, false);
       })
       .def_static("fromjson", &ak::Form::fromjson)
       .def_static("from_numpy", [](const py::object& dtype) {
@@ -59,6 +59,26 @@ parameter(const T& self, const std::string& key) {
   return py::module::import("json").attr("loads")(pyvalue);
 }
 
+const ak::FormKey
+obj2form_key(const py::object& form_key) {
+  if (form_key.is(py::none())) {
+    return ak::FormKey(nullptr);
+  }
+  else {
+    return std::make_shared<std::string>(form_key.cast<std::string>());
+  }
+}
+
+py::object
+form_key2obj(const FormKey& form_key) {
+  if (form_key.get() == nullptr) {
+    return py::none();
+  }
+  else {
+    return py::cast(*form_key.get());
+  }
+}
+
 template <typename T>
 py::class_<T, ak::Form>
 form_methods(py::class_<T, std::shared_ptr<T>, ak::Form>& x) {
@@ -66,6 +86,10 @@ form_methods(py::class_<T, std::shared_ptr<T>, ak::Form>& x) {
           .def_property_readonly("has_identities", &T::has_identities)
           .def_property_readonly("parameters", &getparameters<T>)
           .def("parameter", &parameter<T>)
+          .def("form_key", [](const std::shared_ptr<ak::Form>& self)
+                           -> py::object {
+            return form_key2obj(self.get()->form_key());
+          })
           .def("type",
                [](const T& self,
                   const std::map<std::string, std::string>& typestrs)
@@ -88,9 +112,11 @@ make_BitMaskedForm(const py::handle& m, const std::string& name) {
                        bool valid_when,
                        bool lsb_order,
                        bool has_identities,
-                       const py::object& parameters) -> ak::BitMaskedForm {
+                       const py::object& parameters,
+                       const py::object& form_key) -> ak::BitMaskedForm {
         return ak::BitMaskedForm(has_identities,
                                  dict2parameters(parameters),
+                                 obj2form_key(form_key),
                                  ak::Index::str2form(mask),
                                  content,
                                  valid_when,
@@ -100,7 +126,8 @@ make_BitMaskedForm(const py::handle& m, const std::string& name) {
           py::arg("valid_when"),
           py::arg("lsb_order"),
           py::arg("has_identities") = false,
-          py::arg("parameters") = py::none())
+          py::arg("parameters") = py::none(),
+          py::arg("form_key") = py::none())
       .def_property_readonly("mask", [](const ak::BitMaskedForm& self)
                                      -> std::string {
         return ak::Index::form2str(self.mask());
@@ -112,6 +139,7 @@ make_BitMaskedForm(const py::handle& m, const std::string& name) {
         return py::make_tuple(
                    py::cast(self.has_identities()),
                    parameters2dict(self.parameters()),
+                   form_key2obj(self.form_key()),
                    py::cast(ak::Index::form2str(self.mask())),
                    py::cast(self.content()),
                    py::cast(self.valid_when()),
@@ -120,10 +148,11 @@ make_BitMaskedForm(const py::handle& m, const std::string& name) {
         return ak::BitMaskedForm(
                    state[0].cast<bool>(),
                    dict2parameters(state[1]),
-                   ak::Index::str2form(state[2].cast<std::string>()),
-                   state[3].cast<std::shared_ptr<ak::Form>>(),
-                   state[4].cast<bool>(),
-                   state[5].cast<bool>());
+                   obj2form_key(state[2]),
+                   ak::Index::str2form(state[3].cast<std::string>()),
+                   state[4].cast<std::shared_ptr<ak::Form>>(),
+                   state[5].cast<bool>(),
+                   state[6].cast<bool>());
       }))
   );
 }
@@ -137,9 +166,11 @@ make_ByteMaskedForm(const py::handle& m, const std::string& name) {
                        const std::shared_ptr<ak::Form>& content,
                        bool valid_when,
                        bool has_identities,
-                       const py::object& parameters) -> ak::ByteMaskedForm {
+                       const py::object& parameters,
+                       const py::object& form_key) -> ak::ByteMaskedForm {
         return ak::ByteMaskedForm(has_identities,
                                  dict2parameters(parameters),
+                                 obj2form_key(form_key),
                                  ak::Index::str2form(mask),
                                  content,
                                  valid_when);
@@ -147,7 +178,8 @@ make_ByteMaskedForm(const py::handle& m, const std::string& name) {
           py::arg("content"),
           py::arg("valid_when"),
           py::arg("has_identities") = false,
-          py::arg("parameters") = py::none())
+          py::arg("parameters") = py::none(),
+          py::arg("form_key") = py::none())
       .def_property_readonly("mask", [](const ak::ByteMaskedForm& self)
                                      -> std::string {
         return ak::Index::form2str(self.mask());
@@ -158,6 +190,7 @@ make_ByteMaskedForm(const py::handle& m, const std::string& name) {
         return py::make_tuple(
                    py::cast(self.has_identities()),
                    parameters2dict(self.parameters()),
+                   form_key2obj(self.form_key()),
                    py::cast(ak::Index::form2str(self.mask())),
                    py::cast(self.content()),
                    py::cast(self.valid_when()));
@@ -165,9 +198,10 @@ make_ByteMaskedForm(const py::handle& m, const std::string& name) {
         return ak::ByteMaskedForm(
                    state[0].cast<bool>(),
                    dict2parameters(state[1]),
-                   ak::Index::str2form(state[2].cast<std::string>()),
-                   state[3].cast<std::shared_ptr<ak::Form>>(),
-                   state[4].cast<bool>());
+                   obj2form_key(state[2]),
+                   ak::Index::str2form(state[3].cast<std::string>()),
+                   state[4].cast<std::shared_ptr<ak::Form>>(),
+                   state[5].cast<bool>());
       }))
   );
 }
@@ -178,19 +212,24 @@ make_EmptyForm(const py::handle& m, const std::string& name) {
                       std::shared_ptr<ak::EmptyForm>,
                       ak::Form>(m, name.c_str())
       .def(py::init([](bool has_identities,
-                       const py::object& parameters) -> ak::EmptyForm {
+                       const py::object& parameters,
+                       const py::object& form_key) -> ak::EmptyForm {
         return ak::EmptyForm(has_identities,
-                             dict2parameters(parameters));
+                             dict2parameters(parameters),
+                             obj2form_key(form_key));
       }), py::arg("has_identities") = false,
-          py::arg("parameters") = py::none())
+          py::arg("parameters") = py::none(),
+          py::arg("form_key") = py::none())
       .def(py::pickle([](const ak::EmptyForm& self) {
         return py::make_tuple(
                    py::cast(self.has_identities()),
-                   parameters2dict(self.parameters()));
+                   parameters2dict(self.parameters()),
+                   form_key2obj(self.form_key()));
       }, [](const py::tuple& state) {
         return ak::EmptyForm(
                    state[0].cast<bool>(),
-                   dict2parameters(state[1]));
+                   dict2parameters(state[1]),
+                   obj2form_key(state[2]));
       }))
   );
 }
@@ -203,15 +242,18 @@ make_IndexedForm(const py::handle& m, const std::string& name) {
       .def(py::init([](const std::string& index,
                        const std::shared_ptr<ak::Form>& content,
                        bool has_identities,
-                       const py::object& parameters) -> ak::IndexedForm {
+                       const py::object& parameters,
+                       const py::object& form_key) -> ak::IndexedForm {
         return ak::IndexedForm(has_identities,
                                dict2parameters(parameters),
+                               obj2form_key(form_key),
                                ak::Index::str2form(index),
                                content);
       }), py::arg("index"),
           py::arg("content"),
           py::arg("has_identities") = false,
-          py::arg("parameters") = py::none())
+          py::arg("parameters") = py::none(),
+          py::arg("form_key") = py::none())
       .def_property_readonly("index", [](const ak::IndexedForm& self)
                                      -> std::string {
         return ak::Index::form2str(self.index());
@@ -221,14 +263,16 @@ make_IndexedForm(const py::handle& m, const std::string& name) {
         return py::make_tuple(
                    py::cast(self.has_identities()),
                    parameters2dict(self.parameters()),
+                   form_key2obj(self.form_key()),
                    py::cast(ak::Index::form2str(self.index())),
                    py::cast(self.content()));
       }, [](const py::tuple& state) {
         return ak::IndexedForm(
                    state[0].cast<bool>(),
                    dict2parameters(state[1]),
-                   ak::Index::str2form(state[2].cast<std::string>()),
-                   state[3].cast<std::shared_ptr<ak::Form>>());
+                   obj2form_key(state[2]),
+                   ak::Index::str2form(state[3].cast<std::string>()),
+                   state[4].cast<std::shared_ptr<ak::Form>>());
       }))
   );
 }
@@ -243,15 +287,18 @@ make_IndexedOptionForm(const py::handle& m, const std::string& name) {
       .def(py::init([](const std::string& index,
                        const std::shared_ptr<ak::Form>& content,
                        bool has_identities,
-                       const py::object& parameters) -> ak::IndexedOptionForm {
+                       const py::object& parameters,
+                       const py::object& form_key) -> ak::IndexedOptionForm {
         return ak::IndexedOptionForm(has_identities,
                                      dict2parameters(parameters),
+                                     obj2form_key(form_key),
                                      ak::Index::str2form(index),
                                      content);
       }), py::arg("index"),
           py::arg("content"),
           py::arg("has_identities") = false,
-          py::arg("parameters") = py::none())
+          py::arg("parameters") = py::none(),
+          py::arg("form_key") = py::none())
       .def_property_readonly("index", [](const ak::IndexedOptionForm& self)
                                      -> std::string {
         return ak::Index::form2str(self.index());
@@ -261,14 +308,16 @@ make_IndexedOptionForm(const py::handle& m, const std::string& name) {
         return py::make_tuple(
                    py::cast(self.has_identities()),
                    parameters2dict(self.parameters()),
+                   form_key2obj(self.form_key()),
                    py::cast(ak::Index::form2str(self.index())),
                    py::cast(self.content()));
       }, [](const py::tuple& state) {
         return ak::IndexedOptionForm(
                    state[0].cast<bool>(),
                    dict2parameters(state[1]),
-                   ak::Index::str2form(state[2].cast<std::string>()),
-                   state[3].cast<std::shared_ptr<ak::Form>>());
+                   obj2form_key(state[2]),
+                   ak::Index::str2form(state[3].cast<std::string>()),
+                   state[4].cast<std::shared_ptr<ak::Form>>());
       }))
   );
 }
@@ -282,9 +331,11 @@ make_ListForm(const py::handle& m, const std::string& name) {
                        const std::string& stops,
                        const std::shared_ptr<ak::Form>& content,
                        bool has_identities,
-                       const py::object& parameters) -> ak::ListForm {
+                       const py::object& parameters,
+                       const py::object& form_key) -> ak::ListForm {
         return ak::ListForm(has_identities,
                             dict2parameters(parameters),
+                            obj2form_key(form_key),
                             ak::Index::str2form(starts),
                             ak::Index::str2form(stops),
                             content);
@@ -292,7 +343,8 @@ make_ListForm(const py::handle& m, const std::string& name) {
           py::arg("stops"),
           py::arg("content"),
           py::arg("has_identities") = false,
-          py::arg("parameters") = py::none())
+          py::arg("parameters") = py::none(),
+          py::arg("form_key") = py::none())
       .def_property_readonly("starts", [](const ak::ListForm& self)
                                      -> std::string {
         return ak::Index::form2str(self.starts());
@@ -306,6 +358,7 @@ make_ListForm(const py::handle& m, const std::string& name) {
         return py::make_tuple(
                    py::cast(self.has_identities()),
                    parameters2dict(self.parameters()),
+                   form_key2obj(self.form_key()),
                    py::cast(ak::Index::form2str(self.starts())),
                    py::cast(ak::Index::form2str(self.stops())),
                    py::cast(self.content()));
@@ -313,9 +366,10 @@ make_ListForm(const py::handle& m, const std::string& name) {
         return ak::ListForm(
                    state[0].cast<bool>(),
                    dict2parameters(state[1]),
-                   ak::Index::str2form(state[2].cast<std::string>()),
+                   obj2form_key(state[2]),
                    ak::Index::str2form(state[3].cast<std::string>()),
-                   state[4].cast<std::shared_ptr<ak::Form>>());
+                   ak::Index::str2form(state[4].cast<std::string>()),
+                   state[5].cast<std::shared_ptr<ak::Form>>());
       }))
   );
 }
@@ -328,15 +382,18 @@ make_ListOffsetForm(const py::handle& m, const std::string& name) {
       .def(py::init([](const std::string& offsets,
                        const std::shared_ptr<ak::Form>& content,
                        bool has_identities,
-                       const py::object& parameters) -> ak::ListOffsetForm {
+                       const py::object& parameters,
+                       const py::object& form_key) -> ak::ListOffsetForm {
         return ak::ListOffsetForm(has_identities,
                                   dict2parameters(parameters),
+                                  obj2form_key(form_key),
                                   ak::Index::str2form(offsets),
                                   content);
       }), py::arg("offsets"),
           py::arg("content"),
           py::arg("has_identities") = false,
-          py::arg("parameters") = py::none())
+          py::arg("parameters") = py::none(),
+          py::arg("form_key") = py::none())
       .def_property_readonly("offsets", [](const ak::ListOffsetForm& self)
                                      -> std::string {
         return ak::Index::form2str(self.offsets());
@@ -346,14 +403,16 @@ make_ListOffsetForm(const py::handle& m, const std::string& name) {
         return py::make_tuple(
                    py::cast(self.has_identities()),
                    parameters2dict(self.parameters()),
+                   form_key2obj(self.form_key()),
                    py::cast(ak::Index::form2str(self.offsets())),
                    py::cast(self.content()));
       }, [](const py::tuple& state) {
         return ak::ListOffsetForm(
                    state[0].cast<bool>(),
                    dict2parameters(state[1]),
-                   ak::Index::str2form(state[2].cast<std::string>()),
-                   state[3].cast<std::shared_ptr<ak::Form>>());
+                   obj2form_key(state[2]),
+                   ak::Index::str2form(state[3].cast<std::string>()),
+                   state[4].cast<std::shared_ptr<ak::Form>>());
       }))
   );
 }
@@ -367,9 +426,11 @@ make_NumpyForm(const py::handle& m, const std::string& name) {
                        int64_t itemsize,
                        const std::string& format,
                        bool has_identities,
-                       const py::object& parameters) -> ak::NumpyForm {
+                       const py::object& parameters,
+                       const py::object& form_key) -> ak::NumpyForm {
         return ak::NumpyForm(has_identities,
                              dict2parameters(parameters),
+                             obj2form_key(form_key),
                              inner_shape,
                              itemsize,
                              format,
@@ -378,7 +439,8 @@ make_NumpyForm(const py::handle& m, const std::string& name) {
           py::arg("itemsize"),
           py::arg("format"),
           py::arg("has_identities") = false,
-          py::arg("parameters") = py::none())
+          py::arg("parameters") = py::none(),
+          py::arg("form_key") = py::none())
       .def_property_readonly("inner_shape", &ak::NumpyForm::inner_shape)
       .def_property_readonly("itemsize", &ak::NumpyForm::itemsize)
       .def_property_readonly("format", &ak::NumpyForm::format)
@@ -387,16 +449,18 @@ make_NumpyForm(const py::handle& m, const std::string& name) {
         return py::make_tuple(
                    py::cast(self.has_identities()),
                    parameters2dict(self.parameters()),
+                   form_key2obj(self.form_key()),
                    py::cast(self.inner_shape()),
                    py::cast(self.itemsize()),
                    py::cast(self.format()));
       }, [](const py::tuple& state) {
-        int64_t itemsize = state[3].cast<int64_t>();
-        std::string format = state[4].cast<std::string>();
+        int64_t itemsize = state[4].cast<int64_t>();
+        std::string format = state[5].cast<std::string>();
         return ak::NumpyForm(
                    state[0].cast<bool>(),
                    dict2parameters(state[1]),
-                   state[2].cast<std::vector<int64_t>>(),
+                   obj2form_key(state[2]),
+                   state[3].cast<std::vector<int64_t>>(),
                    itemsize,
                    format,
                    ak::util::format_to_dtype(format, itemsize));
@@ -411,19 +475,23 @@ make_RecordForm(const py::handle& m, const std::string& name) {
                       ak::Form>(m, name.c_str())
       .def(py::init([](const std::vector<std::shared_ptr<ak::Form>>& contents,
                        bool has_identities,
-                       const py::object& parameters) -> ak::RecordForm {
+                       const py::object& parameters,
+                       const py::object& form_key) -> ak::RecordForm {
         ak::util::RecordLookupPtr recordlookup(nullptr);
         return ak::RecordForm(has_identities,
                               dict2parameters(parameters),
+                              obj2form_key(form_key),
                               recordlookup,
                               contents);
       }), py::arg("contents"),
           py::arg("has_identities") = false,
-          py::arg("parameters") = py::none())
+          py::arg("parameters") = py::none(),
+          py::arg("form_key") = py::none())
       .def(py::init([](const std::map<std::string,
                                       std::shared_ptr<ak::Form>>& contents,
                        bool has_identities,
-                       const py::object& parameters) -> ak::RecordForm {
+                       const py::object& parameters,
+                       const py::object& form_key) -> ak::RecordForm {
         std::shared_ptr<ak::util::RecordLookup> recordlookup =
           std::make_shared<ak::util::RecordLookup>();
         std::vector<std::shared_ptr<ak::Form>> contentvec;
@@ -433,11 +501,13 @@ make_RecordForm(const py::handle& m, const std::string& name) {
         }
         return ak::RecordForm(has_identities,
                               dict2parameters(parameters),
+                              obj2form_key(form_key),
                               recordlookup,
                               contentvec);
       }), py::arg("contents"),
           py::arg("has_identities") = false,
-          py::arg("parameters") = py::none())
+          py::arg("parameters") = py::none(),
+          py::arg("form_key") = py::none())
       .def_property_readonly("contents", [](const ak::RecordForm& self)
            -> std::map<std::string, std::shared_ptr<ak::Form>> {
         std::map<std::string, std::shared_ptr<ak::Form>> out;
@@ -479,27 +549,29 @@ make_RecordForm(const py::handle& m, const std::string& name) {
         return py::make_tuple(
                    py::cast(self.has_identities()),
                    parameters2dict(self.parameters()),
+                   form_key2obj(self.form_key()),
                    recordlookup,
                    contents);
       }, [](const py::tuple& state) {
         std::shared_ptr<ak::util::RecordLookup> recordlookup(nullptr);
-        py::object state2 = state[2];
-        if (!state2.is(py::none())) {
-          py::tuple st2 = state2;
+        py::object state3 = state[3];
+        if (!state3.is(py::none())) {
+          py::tuple st2 = state3;
           recordlookup = std::make_shared<ak::util::RecordLookup>();
           for (int64_t i = 0;  i < (int64_t)py::len(st2);  i++) {
             recordlookup.get()->push_back(st2[(size_t)i].cast<std::string>());
           }
         }
         std::vector<std::shared_ptr<ak::Form>> contents;
-        py::object state3 = state[3];
-        py::tuple st3 = state3;
+        py::object state4 = state[4];
+        py::tuple st3 = state4;
         for (int64_t i = 0;  i < (int64_t)py::len(st3);  i++) {
           contents.push_back(st3[(size_t)i].cast<std::shared_ptr<ak::Form>>());
         }
         return ak::RecordForm(
                    state[0].cast<bool>(),
                    dict2parameters(state[1]),
+                   obj2form_key(state[2]),
                    recordlookup,
                    contents);
       }))
@@ -514,29 +586,34 @@ make_RegularForm(const py::handle& m, const std::string& name) {
       .def(py::init([](const std::shared_ptr<ak::Form>& content,
                        int64_t size,
                        bool has_identities,
-                       const py::object& parameters) -> ak::RegularForm {
+                       const py::object& parameters,
+                       const py::object& form_key) -> ak::RegularForm {
         return ak::RegularForm(has_identities,
                                dict2parameters(parameters),
+                               obj2form_key(form_key),
                                content,
                                size);
       }), py::arg("content"),
           py::arg("size"),
           py::arg("has_identities") = false,
-          py::arg("parameters") = py::none())
+          py::arg("parameters") = py::none(),
+          py::arg("form_key") = py::none())
       .def_property_readonly("content", &ak::RegularForm::content)
       .def_property_readonly("size", &ak::RegularForm::size)
       .def(py::pickle([](const ak::RegularForm& self) {
         return py::make_tuple(
                    py::cast(self.has_identities()),
                    parameters2dict(self.parameters()),
+                   form_key2obj(self.form_key()),
                    py::cast(self.content()),
                    py::cast(self.size()));
       }, [](const py::tuple& state) {
         return ak::RegularForm(
                    state[0].cast<bool>(),
                    dict2parameters(state[1]),
-                   state[2].cast<std::shared_ptr<ak::Form>>(),
-                   state[3].cast<int64_t>());
+                   obj2form_key(state[2]),
+                   state[3].cast<std::shared_ptr<ak::Form>>(),
+                   state[4].cast<int64_t>());
       }))
   );
 }
@@ -550,9 +627,11 @@ make_UnionForm(const py::handle& m, const std::string& name) {
                        const std::string& index,
                        const std::vector<std::shared_ptr<ak::Form>>& contents,
                        bool has_identities,
-                       const py::object& parameters) -> ak::UnionForm {
+                       const py::object& parameters,
+                       const py::object& form_key) -> ak::UnionForm {
         return ak::UnionForm(has_identities,
                              dict2parameters(parameters),
+                             obj2form_key(form_key),
                              ak::Index::str2form(tags),
                              ak::Index::str2form(index),
                              contents);
@@ -560,7 +639,8 @@ make_UnionForm(const py::handle& m, const std::string& name) {
           py::arg("index"),
           py::arg("contents"),
           py::arg("has_identities") = false,
-          py::arg("parameters") = py::none())
+          py::arg("parameters") = py::none(),
+          py::arg("form_key") = py::none())
       .def_property_readonly("tags", [](const ak::UnionForm& self)
                                      -> std::string {
         return ak::Index::form2str(self.tags());
@@ -580,21 +660,23 @@ make_UnionForm(const py::handle& m, const std::string& name) {
         return py::make_tuple(
                    py::cast(self.has_identities()),
                    parameters2dict(self.parameters()),
+                   form_key2obj(self.form_key()),
                    py::cast(ak::Index::form2str(self.tags())),
                    py::cast(ak::Index::form2str(self.index())),
                    contents);
       }, [](const py::tuple& state) {
         std::vector<std::shared_ptr<ak::Form>> contents;
-        py::object state4 = state[4];
-        py::tuple st4 = state4;
+        py::object state5 = state[5];
+        py::tuple st4 = state5;
         for (int64_t i = 0;  i < (int64_t)py::len(st4);  i++) {
           contents.push_back(st4[(size_t)i].cast<std::shared_ptr<ak::Form>>());
         }
         return ak::UnionForm(
                    state[0].cast<bool>(),
                    dict2parameters(state[1]),
-                   ak::Index::str2form(state[2].cast<std::string>()),
+                   obj2form_key(state[2]),
                    ak::Index::str2form(state[3].cast<std::string>()),
+                   ak::Index::str2form(state[4].cast<std::string>()),
                    contents);
       }))
   );
@@ -607,24 +689,29 @@ make_UnmaskedForm(const py::handle& m, const std::string& name) {
                       ak::Form>(m, name.c_str())
       .def(py::init([](const std::shared_ptr<ak::Form>& content,
                        bool has_identities,
-                       const py::object& parameters) -> ak::UnmaskedForm {
+                       const py::object& parameters,
+                       const py::object& form_key) -> ak::UnmaskedForm {
         return ak::UnmaskedForm(has_identities,
                                 dict2parameters(parameters),
+                                obj2form_key(form_key),
                                 content);
       }), py::arg("content"),
           py::arg("has_identities") = false,
-          py::arg("parameters") = py::none())
+          py::arg("parameters") = py::none(),
+          py::arg("form_key") = py::none())
       .def_property_readonly("content", &ak::UnmaskedForm::content)
       .def(py::pickle([](const ak::UnmaskedForm& self) {
         return py::make_tuple(
                    py::cast(self.has_identities()),
                    parameters2dict(self.parameters()),
+                   form_key2obj(self.form_key()),
                    py::cast(self.content()));
       }, [](const py::tuple& state) {
         return ak::UnmaskedForm(
                    state[0].cast<bool>(),
                    dict2parameters(state[1]),
-                   state[2].cast<std::shared_ptr<ak::Form>>());
+                   obj2form_key(state[2]),
+                   state[3].cast<std::shared_ptr<ak::Form>>());
       }))
   );
 }
@@ -637,15 +724,18 @@ make_VirtualForm(const py::handle& m, const std::string& name) {
       .def(py::init([](const std::shared_ptr<ak::Form>& form,
                        bool has_length,
                        bool has_identities,
-                       const py::object& parameters) -> ak::VirtualForm {
+                       const py::object& parameters,
+                       const py::object& form_key) -> ak::VirtualForm {
         return ak::VirtualForm(has_identities,
                                dict2parameters(parameters),
+                               obj2form_key(form_key),
                                form,
                                has_length);
       }), py::arg("form"),
           py::arg("has_length"),
           py::arg("has_identities") = false,
-          py::arg("parameters") = py::none())
+          py::arg("parameters") = py::none(),
+          py::arg("form_key") = py::none())
       .def_property_readonly("form", &ak::VirtualForm::form)
       .def_property_readonly("has_length", &ak::VirtualForm::has_length)
       .def(py::pickle([](const ak::VirtualForm& self) {
@@ -656,10 +746,11 @@ make_VirtualForm(const py::handle& m, const std::string& name) {
         return py::make_tuple(
                    py::cast(self.has_identities()),
                    parameters2dict(self.parameters()),
+                   form_key2obj(self.form_key()),
                    form,
                    py::cast(self.has_length()));
       }, [](const py::tuple& state) {
-        py::object pyform = state[2];
+        py::object pyform = state[3];
         std::shared_ptr<ak::Form> form(nullptr);
         if (!pyform.is(py::none())) {
           form = pyform.cast<std::shared_ptr<ak::Form>>();
@@ -667,8 +758,9 @@ make_VirtualForm(const py::handle& m, const std::string& name) {
         return ak::VirtualForm(
                    state[0].cast<bool>(),
                    dict2parameters(state[1]),
+                   obj2form_key(state[2]),
                    form,
-                   state[3].cast<bool>());
+                   state[4].cast<bool>());
       }))
   );
 }

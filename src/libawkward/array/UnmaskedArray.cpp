@@ -27,8 +27,9 @@ namespace awkward {
 
   UnmaskedForm::UnmaskedForm(bool has_identities,
                              const util::Parameters& parameters,
+                             const FormKey& form_key,
                              const FormPtr& content)
-      : Form(has_identities, parameters)
+      : Form(has_identities, parameters, form_key)
       , content_(content) { }
 
   const FormPtr
@@ -53,6 +54,7 @@ namespace awkward {
     content_.get()->tojson_part(builder, verbose);
     identities_tojson(builder, verbose);
     parameters_tojson(builder, verbose);
+    form_key_tojson(builder, verbose);
     builder.endrecord();
   }
 
@@ -60,6 +62,7 @@ namespace awkward {
   UnmaskedForm::shallow_copy() const {
     return std::make_shared<UnmaskedForm>(has_identities_,
                                           parameters_,
+                                          form_key_,
                                           content_);
   }
 
@@ -123,6 +126,7 @@ namespace awkward {
   UnmaskedForm::equal(const FormPtr& other,
                       bool check_identities,
                       bool check_parameters,
+                      bool check_form_key,
                       bool compatibility_check) const {
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
@@ -132,10 +136,15 @@ namespace awkward {
         !util::parameters_equal(parameters_, other.get()->parameters())) {
       return false;
     }
+    if (check_form_key  &&
+        !form_key_equals(other.get()->form_key())) {
+      return false;
+    }
     if (UnmaskedForm* t = dynamic_cast<UnmaskedForm*>(other.get())) {
       return (content_.get()->equal(t->content(),
                                     check_identities,
                                     check_parameters,
+                                    check_form_key,
                                     compatibility_check));
     }
     else {
@@ -312,6 +321,7 @@ namespace awkward {
   UnmaskedArray::form(bool materialize) const {
     return std::make_shared<UnmaskedForm>(identities_.get() != nullptr,
                                           parameters_,
+                                          FormKey(nullptr),
                                           content_.get()->form(materialize));
   }
 

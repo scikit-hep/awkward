@@ -42,8 +42,9 @@ namespace awkward {
     /// @brief Creates a RawForm. See RawArray for documentation.
     RawForm(bool has_identities,
             const util::Parameters& parameters,
+            const FormKey& form_key,
             const std::string& T)
-        : Form(has_identities, parameters)
+        : Form(has_identities, parameters, form_key)
         , T_(T) { }
 
     const std::string
@@ -63,6 +64,7 @@ namespace awkward {
       shallow_copy() const override {
       return std::make_shared<RawForm>(has_identities_,
                                        parameters_,
+                                       form_key_,
                                        T_);
     }
 
@@ -123,6 +125,7 @@ namespace awkward {
       equal(const FormPtr& other,
             bool check_identities,
             bool check_parameters,
+            bool check_form_key,
             bool compatibility_check) const override {
       throw std::runtime_error("FIXME: RawForm::equal");
     }
@@ -403,6 +406,7 @@ namespace awkward {
       form(bool materialize) const override {
       return std::make_shared<RawForm>(identities_.get() != nullptr,
                                        parameters_,
+                                       FormKey(nullptr),
                                        typeid(T).name());
     }
 
