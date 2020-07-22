@@ -2415,6 +2415,9 @@ def to_arrayset(
 
     num_form_keys = [0]
 
+    def little_endian(array):
+        return array.astype(array.dtype.newbyteorder("<"), copy=False)
+
     def fill(layout, part):
         has_identities = layout.identities is not None
         parameters = layout.parameters
@@ -2428,7 +2431,7 @@ def to_arrayset(
 
         if isinstance(layout, awkward1.layout.EmptyArray):
             array = numpy.asarray(layout)
-            container[key(key_index, None, part)] = array
+            container[key(key_index, None, part)] = little_endian(array)
             return awkward1.forms.EmptyForm(
                 has_identities, parameters, node_format(key_index)
             )
@@ -2438,7 +2441,9 @@ def to_arrayset(
             awkward1.layout.IndexedArrayU32,
             awkward1.layout.IndexedArray64
         )):
-            container[key(key_index, "index", part)] = numpy.asarray(layout.index)
+            container[key(key_index, "index", part)] = little_endian(
+                numpy.asarray(layout.index)
+            )
             return awkward1.forms.IndexedForm(
                 index_form(layout.index),
                 fill(layout.content, part),
@@ -2451,7 +2456,9 @@ def to_arrayset(
             awkward1.layout.IndexedOptionArray32,
             awkward1.layout.IndexedOptionArray64
         )):
-            container[key(key_index, "index", part)] = numpy.asarray(layout.index)
+            container[key(key_index, "index", part)] = little_endian(
+                numpy.asarray(layout.index)
+            )
             return awkward1.forms.IndexedOptionForm(
                 index_form(layout.index),
                 fill(layout.content, part),
@@ -2461,7 +2468,9 @@ def to_arrayset(
             )
 
         elif isinstance(layout, awkward1.layout.ByteMaskedArray):
-            container[key(key_index, "mask", part)] = numpy.asarray(layout.mask)
+            container[key(key_index, "mask", part)] = little_endian(
+                numpy.asarray(layout.mask)
+            )
             return awkward1.forms.ByteMaskedForm(
                 index_form(layout.mask),
                 fill(layout.content, part),
@@ -2472,7 +2481,9 @@ def to_arrayset(
             )
 
         elif isinstance(layout, awkward1.layout.BitMaskedArray):
-            container[key(key_index, "mask", part)] = numpy.asarray(layout.mask)
+            container[key(key_index, "mask", part)] = little_endian(
+                numpy.asarray(layout.mask)
+            )
             return awkward1.forms.BitMaskedForm(
                 index_form(layout.mask),
                 fill(layout.content, part),
@@ -2496,8 +2507,12 @@ def to_arrayset(
             awkward1.layout.ListArrayU32,
             awkward1.layout.ListArray64
         )):
-            container[key(key_index, "starts", part)] = numpy.asarray(layout.starts)
-            container[key(key_index, "stops", part)] = numpy.asarray(layout.stops)
+            container[key(key_index, "starts", part)] = little_endian(
+                numpy.asarray(layout.starts)
+            )
+            container[key(key_index, "stops", part)] = little_endian(
+                numpy.asarray(layout.stops)
+            )
             return awkward1.forms.ListForm(
                 index_form(layout.starts),
                 index_form(layout.stops),
@@ -2512,7 +2527,9 @@ def to_arrayset(
             awkward1.layout.ListOffsetArrayU32,
             awkward1.layout.ListOffsetArray64
         )):
-            container[key(key_index, "offsets", part)] = numpy.asarray(layout.offsets)
+            container[key(key_index, "offsets", part)] = little_endian(
+                numpy.asarray(layout.offsets)
+            )
             return awkward1.forms.ListOffsetForm(
                 index_form(layout.offsets),
                 fill(layout.content, part),
@@ -2523,7 +2540,7 @@ def to_arrayset(
 
         elif isinstance(layout, awkward1.layout.NumpyArray):
             array = numpy.asarray(layout)
-            container[key(key_index, None, part)] = array
+            container[key(key_index, None, part)] = little_endian(array)
             form = awkward1.forms.Form.from_numpy(array.dtype)
             return awkward1.forms.NumpyForm(
                 layout.shape[1:],
@@ -2570,8 +2587,12 @@ def to_arrayset(
             forms = []
             for x in layout.contents:
                 forms.append(fill(x, part))
-            container[key(key_index, "tags", part)] = numpy.asarray(layout.tags)
-            container[key(key_index, "index", part)] = numpy.asarray(layout.index)
+            container[key(key_index, "tags", part)] = little_endian(
+                numpy.asarray(layout.tags)
+            )
+            container[key(key_index, "index", part)] = little_endian(
+                numpy.asarray(layout.index)
+            )
             return awkward1.forms.UnionForm(
                 index_form(layout.tags),
                 index_form(layout.index),
@@ -2639,11 +2660,11 @@ def _form_to_layout(
 
     if _index_form_to_dtype is None:
         _index_form_to_dtype = {
-            "i8": numpy.dtype("i1"),
-            "u8": numpy.dtype("u1"),
-            "i32": numpy.dtype("i4"),
-            "u32": numpy.dtype("u4"),
-            "i64": numpy.dtype("i8"),
+            "i8": numpy.dtype("<i1"),
+            "u8": numpy.dtype("<u1"),
+            "i32": numpy.dtype("<i4"),
+            "u32": numpy.dtype("<u4"),
+            "i64": numpy.dtype("<i8"),
         }
 
         _index_form_to_index = {
