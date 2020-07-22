@@ -6,8 +6,8 @@
 #include "awkward/common.h"
 
 extern "C" {
-  /// @param start inoutparam
-  /// @param stop inoutparam
+  /// @param start inoutparam role: pointer
+  /// @param stop inoutparam role: pointer
   /// @param posstep inparam role: ListArray-replacement
   /// @param hasstart inparam role: ListArray-replacement
   /// @param hasstop inparam role: ListArray-replacement
@@ -750,7 +750,7 @@ extern "C" {
   /// @param tostops outparam
   /// @param fromstarts inparam role: ListArray-starts
   /// @param fromstops inparam role: ListArray-stops
-  /// @param fromcarry inparam role: ListArray-diff
+  /// @param fromcarry inparam role: ListArray-at-array
   /// @param startsoffset inparam role: ListArray-starts-offset
   /// @param stopsoffset inparam role: ListArray-stops-offset
   /// @param lenstarts inparam
@@ -770,7 +770,7 @@ extern "C" {
   /// @param tostops outparam
   /// @param fromstarts inparam role: ListArray-starts
   /// @param fromstops inparam role: ListArray-stops
-  /// @param fromcarry inparam role: ListArray-diff
+  /// @param fromcarry inparam role: ListArray-at-array
   /// @param startsoffset inparam role: ListArray-starts-offset
   /// @param stopsoffset inparam role: ListArray-stops-offset
   /// @param lenstarts inparam
@@ -790,7 +790,7 @@ extern "C" {
   /// @param tostops outparam
   /// @param fromstarts inparam role: ListArray-starts
   /// @param fromstops inparam role: ListArray-stops
-  /// @param fromcarry inparam role: ListArray-diff
+  /// @param fromcarry inparam role: ListArray-at-array
   /// @param startsoffset inparam role: ListArray-starts-offset
   /// @param stopsoffset inparam role: ListArray-stops-offset
   /// @param lenstarts inparam
@@ -1125,7 +1125,7 @@ extern "C" {
 
   /// @param toindex outparam
   /// @param fromindex inparam role: IndexedArray-index instance: 0
-  /// @param fromcarry inparam role: ListArray-diff
+  /// @param fromcarry inparam role: ListArray-at-array
   /// @param indexoffset inparam role: IndexedArray-index-offset instance: 0
   /// @param lenindex inparam
   /// @param lencarry inparam
@@ -1139,7 +1139,7 @@ extern "C" {
       int64_t lencarry);
   /// @param toindex outparam
   /// @param fromindex inparam role: IndexedArray-index instance: 0
-  /// @param fromcarry inparam role: ListArray-diff
+  /// @param fromcarry inparam role: ListArray-at-array
   /// @param indexoffset inparam role: IndexedArray-index-offset instance: 0
   /// @param lenindex inparam
   /// @param lencarry inparam
@@ -1153,7 +1153,7 @@ extern "C" {
       int64_t lencarry);
   /// @param toindex outparam
   /// @param fromindex inparam role: IndexedArray-index instance: 0
-  /// @param fromcarry inparam role: ListArray-diff
+  /// @param fromcarry inparam role: ListArray-at-array
   /// @param indexoffset inparam role: IndexedArray-index-offset instance: 0
   /// @param lenindex inparam
   /// @param lencarry inparam

@@ -907,6 +907,11 @@ extern "C" {
       const int8_t* fromptr,
       int64_t fromoffset,
       int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
+  /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_toint32_fromint8(
       int32_t* toptr,
@@ -926,6 +931,11 @@ extern "C" {
       const int8_t* fromptr,
       int64_t fromoffset,
       int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
+  /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_tofloat32_fromint8(
       float* toptr,
@@ -945,6 +955,11 @@ extern "C" {
       const int8_t* fromptr,
       int64_t fromoffset,
       int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
+  /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_toint16_fromint16(
       int16_t* toptr,
@@ -952,6 +967,11 @@ extern "C" {
       const int16_t* fromptr,
       int64_t fromoffset,
       int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
+  /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_toint32_fromint16(
       int32_t* toptr,
@@ -959,6 +979,11 @@ extern "C" {
       const int16_t* fromptr,
       int64_t fromoffset,
       int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
+  /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_toint64_fromint16(
       int64_t* toptr,
@@ -966,6 +991,11 @@ extern "C" {
       const int16_t* fromptr,
       int64_t fromoffset,
       int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
+  /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_tofloat32_fromint16(
       float* toptr,
@@ -973,6 +1003,11 @@ extern "C" {
       const int16_t* fromptr,
       int64_t fromoffset,
       int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
+  /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_tofloat64_fromint16(
       double* toptr,
@@ -980,6 +1015,11 @@ extern "C" {
       const int16_t* fromptr,
       int64_t fromoffset,
       int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
+  /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_toint32_fromint32(
       int32_t* toptr,
@@ -999,6 +1039,11 @@ extern "C" {
       const int32_t* fromptr,
       int64_t fromoffset,
       int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
+  /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_tofloat32_fromint32(
       float* toptr,
@@ -1018,6 +1063,11 @@ extern "C" {
       const int32_t* fromptr,
       int64_t fromoffset,
       int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
+  /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_toint64_fromint64(
       int64_t* toptr,
@@ -1025,6 +1075,11 @@ extern "C" {
       const int64_t* fromptr,
       int64_t fromoffset,
       int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
+  /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_tofloat32_fromint64(
       float* toptr,
@@ -1032,6 +1087,11 @@ extern "C" {
       const int64_t* fromptr,
       int64_t fromoffset,
       int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
+  /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_tofloat64_fromint64(
       double* toptr,
@@ -1051,6 +1111,11 @@ extern "C" {
       const uint8_t* fromptr,
       int64_t fromoffset,
       int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
+  /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_toint32_fromuint8(
       int32_t* toptr,
@@ -1058,6 +1123,11 @@ extern "C" {
       const uint8_t* fromptr,
       int64_t fromoffset,
       int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
+  /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_toint64_fromuint8(
       int64_t* toptr,
@@ -1065,6 +1135,11 @@ extern "C" {
       const uint8_t* fromptr,
       int64_t fromoffset,
       int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
+  /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_touint8_fromuint8(
       uint8_t* toptr,
@@ -1072,6 +1147,11 @@ extern "C" {
       const uint8_t* fromptr,
       int64_t fromoffset,
       int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
+  /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_touint16_fromuint8(
       uint16_t* toptr,
@@ -1079,6 +1159,11 @@ extern "C" {
       const uint8_t* fromptr,
       int64_t fromoffset,
       int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
+  /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_touint32_fromuint8(
       uint32_t* toptr,
@@ -1086,6 +1171,11 @@ extern "C" {
       const uint8_t* fromptr,
       int64_t fromoffset,
       int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
+  /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_touint64_fromuint8(
       uint64_t* toptr,
@@ -1093,6 +1183,11 @@ extern "C" {
       const uint8_t* fromptr,
       int64_t fromoffset,
       int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
+  /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_tofloat32_fromuint8(
       float* toptr,
@@ -1100,6 +1195,11 @@ extern "C" {
       const uint8_t* fromptr,
       int64_t fromoffset,
       int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
+  /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_tofloat64_fromuint8(
       double* toptr,
@@ -1107,6 +1207,11 @@ extern "C" {
       const uint8_t* fromptr,
       int64_t fromoffset,
       int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
+  /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_toint32_fromuint16(
       int32_t* toptr,
@@ -1126,6 +1231,11 @@ extern "C" {
       const uint16_t* fromptr,
       int64_t fromoffset,
       int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
+  /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_touint16_fromuint16(
       uint16_t* toptr,
@@ -1133,6 +1243,11 @@ extern "C" {
       const uint16_t* fromptr,
       int64_t fromoffset,
       int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
+  /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_touint32_fromuint16(
       uint32_t* toptr,
@@ -1140,6 +1255,11 @@ extern "C" {
       const uint16_t* fromptr,
       int64_t fromoffset,
       int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
+  /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_touint64_fromuint16(
       uint64_t* toptr,
@@ -1147,6 +1267,11 @@ extern "C" {
       const uint16_t* fromptr,
       int64_t fromoffset,
       int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
+  /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_tofloat32_fromuint16(
       float* toptr,
@@ -1154,6 +1279,11 @@ extern "C" {
       const uint16_t* fromptr,
       int64_t fromoffset,
       int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
+  /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_tofloat64_fromuint16(
       double* toptr,
@@ -1173,6 +1303,11 @@ extern "C" {
       const uint32_t* fromptr,
       int64_t fromoffset,
       int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
+  /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_touint32_fromuint32(
       uint32_t* toptr,
@@ -1192,6 +1327,11 @@ extern "C" {
       const uint32_t* fromptr,
       int64_t fromoffset,
       int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
+  /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_tofloat32_fromuint32(
       float* toptr,
@@ -1199,6 +1339,11 @@ extern "C" {
       const uint32_t* fromptr,
       int64_t fromoffset,
       int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
+  /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_tofloat64_fromuint32(
       double* toptr,
@@ -1206,6 +1351,11 @@ extern "C" {
       const uint32_t* fromptr,
       int64_t fromoffset,
       int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
+  /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_touint64_fromuint64(
       uint64_t* toptr,
@@ -1213,6 +1363,11 @@ extern "C" {
       const uint64_t* fromptr,
       int64_t fromoffset,
       int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
+  /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_toint64_fromuint64(
       int64_t* toptr,
@@ -1244,6 +1399,11 @@ extern "C" {
       const uint64_t* fromptr,
       int64_t fromoffset,
       int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
+  /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_tofloat32_fromfloat32(
       float* toptr,
@@ -1251,6 +1411,11 @@ extern "C" {
       const float* fromptr,
       int64_t fromoffset,
       int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
+  /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_tofloat64_fromfloat32(
       double* toptr,
@@ -1258,6 +1423,11 @@ extern "C" {
       const float* fromptr,
       int64_t fromoffset,
       int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: NumpyArray-out-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param fromoffset inparam role: NumpyArray-ptr-offset
+  /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_tofloat64_fromfloat64(
       double* toptr,

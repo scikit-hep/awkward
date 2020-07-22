@@ -567,6 +567,7 @@ inoutparam = None
     failfuncs = []
     docdict = OrderedDict()
     func_callable = OrderedDict()
+    allhtokens = {}
     for filename in filenames:
         if "sorting.cpp" in filename:
             pfile, tokens = preprocess(filename, skip_implementation=True)
@@ -584,6 +585,7 @@ inoutparam = None
                 funcs[decl.name]["body"] = body
         hfile = getheadername(filename)
         htokens = parseheader(hfile)
+        allhtokens.update(htokens)
         for name in funcs.keys():
             if "gen" not in tokens[name].keys():
                 docdict[name] = {}
@@ -673,7 +675,7 @@ inoutparam = None
         print("Writing kernels.py")
         f.write(gencode)
         f.write(black.format_str(gencode, mode=blackmode) + "\n\n")
-    gentests(func_callable, htokens, failfuncs)
+    gentests(func_callable, allhtokens, failfuncs)
     if os.path.isdir(os.path.join(CURRENT_DIR, "..", "docs-sphinx", "_auto")):
         with open(
             os.path.join(CURRENT_DIR, "..", "docs-sphinx", "_auto", "kernels.rst",),

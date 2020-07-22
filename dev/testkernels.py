@@ -99,7 +99,8 @@ def gentests(funcs, htokens, failfuncs):
             "awkward_ListArray64_getitem_next_range_carrylength",
             "awkward_ListArray32_getitem_next_range_64",
             "awkward_ListArrayU32_getitem_next_range_64",
-            "awkward_ListArray64_getitem_next_range_64"
+            "awkward_ListArray64_getitem_next_range_64",
+            "awkward_regularize_rangeslice"
         ]
         success_blacklist = [
             "awkward_combinations_64",
@@ -141,19 +142,20 @@ def gentests(funcs, htokens, failfuncs):
                             checkindex.append(i)
                     elif list(args.values())[i]["check"] == "inoutparam":
                         typelist.append((temptype, list(args.values())[i]["array"],))
-                        if "role" in list(args.values())[i]:
-                            temparr = data["success"][
-                                list(args.values())[i]["role"][
-                                    : list(args.values())[i]["role"].find("-")
-                                ]
-                            ][list(args.values())[i]["role"]][0][pytype(temptype)]
-                        else:
-                            temparr = [0] * (data["success"]["num"] + 50)
+                        temparr = [0] * (data["success"]["num"] + 50)
                         testsp.append(temparr)
-                        testsc.append(
-                            (eval("ctypes.c_" + temptype) * len(temparr))(*temparr)
-                        )
-                        checkindex.append(i)
+                        if (
+                            "role" in list(args.values())[i]
+                            and list(args.values())[i]["role"] == "pointer"
+                        ):
+                            pval.append(eval("ctypes.c_" + temptype + "(0)"))
+                            testsc.append(ctypes.byref(pval[-1]))
+                            pindex.append(i)
+                        else:
+                            testsc.append(
+                                (eval("ctypes.c_" + temptype) * len(temparr))(*temparr)
+                            )
+                            checkindex.append(i)
                     elif "role" in list(args.values())[i]:
                         if "instance" in list(args.values())[i]:
                             tempval = data["success"][
