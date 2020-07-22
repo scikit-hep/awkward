@@ -2221,9 +2221,7 @@ def to_arrayset(
     partition_first=False,
 ):
     if container is None:
-        tofill = {}
-    else:
-        tofill = container
+        container = {}
 
     def index_form(index):
         if isinstance(index, awkward1.layout.Index64):
@@ -2279,7 +2277,7 @@ def to_arrayset(
             awkward1.layout.IndexedArrayU32,
             awkward1.layout.IndexedArray64
         )):
-            tofill[key(key_index, "index", part)] = numpy.asarray(layout.index)
+            container[key(key_index, "index", part)] = numpy.asarray(layout.index)
             return awkward1.forms.IndexedForm(
                 index_form(layout.index),
                 fill(layout.content, part),
@@ -2292,7 +2290,7 @@ def to_arrayset(
             awkward1.layout.IndexedOptionArray32,
             awkward1.layout.IndexedOptionArray64
         )):
-            tofill[key(key_index, "index", part)] = numpy.asarray(layout.index)
+            container[key(key_index, "index", part)] = numpy.asarray(layout.index)
             return awkward1.forms.IndexedOptionForm(
                 index_form(layout.index),
                 fill(layout.content, part),
@@ -2302,7 +2300,7 @@ def to_arrayset(
             )
 
         elif isinstance(layout, awkward1.layout.ByteMaskedArray):
-            tofill[key(key_index, "mask", part)] = numpy.asarray(layout.mask)
+            container[key(key_index, "mask", part)] = numpy.asarray(layout.mask)
             return awkward1.forms.ByteMaskedForm(
                 index_form(layout.mask),
                 fill(layout.content, part),
@@ -2313,7 +2311,7 @@ def to_arrayset(
             )
 
         elif isinstance(layout, awkward1.layout.BitMaskedArray):
-            tofill[key(key_index, "mask", part)] = numpy.asarray(layout.mask)
+            container[key(key_index, "mask", part)] = numpy.asarray(layout.mask)
             return awkward1.forms.BitMaskedForm(
                 index_form(layout.mask),
                 fill(layout.content, part),
@@ -2337,8 +2335,8 @@ def to_arrayset(
             awkward1.layout.ListArrayU32,
             awkward1.layout.ListArray64
         )):
-            tofill[key(key_index, "starts", part)] = numpy.asarray(layout.starts)
-            tofill[key(key_index, "stops", part)] = numpy.asarray(layout.stops)
+            container[key(key_index, "starts", part)] = numpy.asarray(layout.starts)
+            container[key(key_index, "stops", part)] = numpy.asarray(layout.stops)
             return awkward1.forms.ListForm(
                 index_form(layout.starts),
                 index_form(layout.stops),
@@ -2353,7 +2351,7 @@ def to_arrayset(
             awkward1.layout.ListOffsetArrayU32,
             awkward1.layout.ListOffsetArray64
         )):
-            tofill[key(key_index, "offsets", part)] = numpy.asarray(layout.offsets)
+            container[key(key_index, "offsets", part)] = numpy.asarray(layout.offsets)
             return awkward1.forms.ListOffsetForm(
                 index_form(layout.offsets),
                 fill(layout.content, part),
@@ -2364,7 +2362,7 @@ def to_arrayset(
 
         elif isinstance(layout, awkward1.layout.NumpyArray):
             array = numpy.asarray(layout)
-            tofill[key(key_index, None, part)] = array
+            container[key(key_index, None, part)] = array
             form = awkward1.forms.Form.from_numpy(array.dtype)
             return awkward1.forms.NumpyForm(
                 layout.shape[1:],
@@ -2411,8 +2409,8 @@ def to_arrayset(
             forms = []
             for x in layout.contents:
                 forms.append(fill(x, part))
-            tofill[key(key_index, "tags", part)] = numpy.asarray(layout.tags)
-            tofill[key(key_index, "index", part)] = numpy.asarray(layout.index)
+            container[key(key_index, "tags", part)] = numpy.asarray(layout.tags)
+            container[key(key_index, "index", part)] = numpy.asarray(layout.index)
             return awkward1.forms.UnionForm(
                 index_form(layout.tags),
                 index_form(layout.index),
@@ -2439,27 +2437,30 @@ def to_arrayset(
             )
         form = None
         for part, content in enumerate(layout.partitions):
+            num_form_keys[0] = 0
+
             f = fill(content, part)
+
             if form is None:
                 form = f
             elif form != f:
                 raise ValueError(
-                    """partition {0} has a different Form:
+                    """the Form of partition {0}:
 
     {1}
 
-than the first Form:
+differs from the first Form:
 
     {2}""".format(part, f.tojson(True, False), form.tojson(True, False))
                 )
 
+        num_partitions = len(layout.partitions)
+
     else:
         form = fill(layout, partition)
+        num_partitions = None
 
-    if container is None:
-        return form, tofill
-    else:
-        return form
+    return form, container, num_partitions
 
 
 _index_form_to_dtype = _index_form_to_index = _form_to_layout_class = None
@@ -2861,10 +2862,10 @@ def _from_arrayset_key():
 def from_arrayset(
     form,
     container,
+    num_partitions=None,
     prefix=None,
     partition_prefix="part",
     sep="-",
-    num_partitions=None,
     partition_first=False,
     lazy=False,
     lazy_cache="metadata",
@@ -2955,8 +2956,10 @@ def from_arrayset(
                     length=lazy_lengths[part],
                 )
 
+                cache_key = "{0}[{1}]".format(lazy_cache_key, part)
+
                 partitions.append(awkward1.layout.VirtualArray(
-                    generator, cache, lazy_cache_key
+                    generator, cache, cache_key
                 ))
                 offsets.append(offsets[-1] + lazy_lengths[part])
 

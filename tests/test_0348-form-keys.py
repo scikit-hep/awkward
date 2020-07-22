@@ -74,3 +74,38 @@ def test_unmaskedarray():
     content = awkward1.Array([1, 2, 3, 4, 5]).layout
     unmaskedarray = awkward1.layout.UnmaskedArray(content)
     assert awkward1.from_arrayset(*awkward1.to_arrayset(unmaskedarray)).tolist() == [1, 2, 3, 4, 5]
+
+
+def test_partitioned():
+    array = awkward1.repartition(awkward1.Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), 3)
+
+    form, container, num_partitions = awkward1.to_arrayset(array, partition_first=True)
+    assert awkward1.from_arrayset(form, container, num_partitions, partition_first=True).tolist() == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+    form, container, num_partitions = awkward1.to_arrayset(array, partition_first=False)
+    assert awkward1.from_arrayset(form, container, num_partitions, partition_first=False).tolist() == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+    one = awkward1.Array([1, 2, 3, 4, 5])
+    two = awkward1.Array([6, 7, 8, 9, 10])
+    container = {}
+    form1, _, _ = awkward1.to_arrayset(one, container, 0)
+    form2, _, _ = awkward1.to_arrayset(two, container, 1)
+    assert form1 == form2
+
+    assert awkward1.from_arrayset(form1, container, 2).tolist() == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+
+def test_lazy():
+    array = awkward1.Array([1, 2, 3, 4, 5])
+
+    form, container, num_partitions = awkward1.to_arrayset(array)
+
+    assert awkward1.from_arrayset(form, container, num_partitions, lazy=True, lazy_lengths=5).tolist() == [1, 2, 3, 4, 5]
+
+
+def test_lazy_partitioned():
+    array = awkward1.repartition(awkward1.Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), 3)
+    form, container, num_partitions = awkward1.to_arrayset(array)
+    assert num_partitions == 4
+
+    assert awkward1.from_arrayset(form, container, num_partitions, lazy=True, lazy_lengths=[3, 3, 3, 1]).tolist() == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
