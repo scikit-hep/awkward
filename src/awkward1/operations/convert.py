@@ -2461,7 +2461,10 @@ than the first Form:
     else:
         return form
 
-    
+
+_index_form_to_dtype = _index_form_to_index = _form_to_layout_class = None
+
+
 def _form_to_layout(
     form,
     container,
@@ -2470,37 +2473,255 @@ def _form_to_layout(
     sep,
     partition_first,
 ):
+    global _index_form_to_dtype, _index_form_to_index, _form_to_layout_class
+
+    if _index_form_to_dtype is None:
+        _index_form_to_dtype = {
+            "i8": numpy.dtype("i1"),
+            "u8": numpy.dtype("u1"),
+            "i32": numpy.dtype("i4"),
+            "u32": numpy.dtype("u4"),
+            "i64": numpy.dtype("i8"),
+        }
+
+        _index_form_to_index = {
+            "i8": awkward1.layout.Index8,
+            "u8": awkward1.layout.IndexU8,
+            "i32": awkward1.layout.Index32,
+            "u32": awkward1.layout.IndexU32,
+            "i64": awkward1.layout.Index64,
+        }
+
+        _form_to_layout_class = {
+            (awkward1.forms.IndexedForm, "i32"):
+                awkward1.layout.IndexedArray32,
+            (awkward1.forms.IndexedForm, "u32"):
+                awkward1.layout.IndexedArrayU32,
+            (awkward1.forms.IndexedForm, "i64"):
+                awkward1.layout.IndexedArray64,
+
+            (awkward1.forms.IndexedOptionForm, "i32"):
+                awkward1.layout.IndexedOptionArray32,
+            (awkward1.forms.IndexedOptionForm, "i64"):
+                awkward1.layout.IndexedOptionArray64,
+
+            (awkward1.forms.ListForm, "i32"):
+                awkward1.layout.ListArray32,
+            (awkward1.forms.ListForm, "u32"):
+                awkward1.layout.ListArrayU32,
+            (awkward1.forms.ListForm, "i64"):
+                awkward1.layout.ListArray64,
+
+            (awkward1.forms.ListOffsetForm, "i32"):
+                awkward1.layout.ListOffsetArray32,
+            (awkward1.forms.ListOffsetForm, "u32"):
+                awkward1.layout.ListOffsetArrayU32,
+            (awkward1.forms.ListOffsetForm, "i64"):
+                awkward1.layout.ListOffsetArray64,
+
+            (awkward1.forms.UnionForm, "i32"):
+                awkward1.layout.UnionArray8_32,
+            (awkward1.forms.UnionForm, "u32"):
+                awkward1.layout.UnionArray8_U32,
+            (awkward1.forms.UnionForm, "i64"):
+                awkward1.layout.UnionArray8_64,
+        }
+
+
+    if form.has_identities:
+        raise NotImplementedError(
+            "ak.from_arrayset for an array with Identities"
+        )
+    else:
+        identities = None
+
+    parameters = form.parameters
+
     if isinstance(form, awkward1.forms.BitMaskedForm):
-        HERE
+        raw_mask = container[_arrayset_key(
+            form.form_key,
+            "mask",
+            partition,
+            prefix,
+            sep,
+            partition_first,
+        )].reshape(-1).view("u1")
+        mask = _index_form_to_index[form.mask](
+            raw_mask.view(_index_form_to_dtype[form.mask])
+        )
+
+        content = _form_to_layout(
+            form.content,
+            container,
+            partition,
+            prefix,
+            sep,
+            partition_first,
+        )
+
+        return awkward1.layout.BitMaskedArray(
+            mask,
+            content,
+            form.valid_when,
+            len(content),
+            form.lsb_order,
+            identities,
+            parameters,
+        )
 
     elif isinstance(form, awkward1.forms.ByteMaskedForm):
-        HERE
+        raw_mask = container[_arrayset_key(
+            form.form_key,
+            "mask",
+            partition,
+            prefix,
+            sep,
+            partition_first,
+        )].reshape(-1).view("u1")
+        mask = _index_form_to_index[form.mask](
+            raw_mask.view(_index_form_to_dtype[form.mask])
+        )
+
+        content = _form_to_layout(
+            form.content,
+            container,
+            partition,
+            prefix,
+            sep,
+            partition_first,
+        )
+
+        return awkward1.layout.ByteMaskedArray(
+            mask, content, form.valid_when, identities, parameters
+        )
 
     elif isinstance(form, awkward1.forms.EmptyForm):
-        HERE
+        return awkward1.layout.EmptyArray(identities, parameters)
 
     elif isinstance(form, awkward1.forms.IndexedForm):
-        HERE
+        raw_index = container[_arrayset_key(
+            form.form_key,
+            "index",
+            partition,
+            prefix,
+            sep,
+            partition_first,
+        )].reshape(-1).view("u1")
+        index = _index_form_to_index[form.index](
+            raw_index.view(_index_form_to_dtype[form.index])
+        )
+
+        content = _form_to_layout(
+            form.content,
+            container,
+            partition,
+            prefix,
+            sep,
+            partition_first,
+        )
+
+        return _form_to_layout_class[type(form), form.index](
+            index, content, identities, parameters
+        )
 
     elif isinstance(form, awkward1.forms.IndexedOptionForm):
-        HERE
+        raw_index = container[_arrayset_key(
+            form.form_key,
+            "index",
+            partition,
+            prefix,
+            sep,
+            partition_first,
+        )].reshape(-1).view("u1")
+        index = _index_form_to_index[form.index](
+            raw_index.view(_index_form_to_dtype[form.index])
+        )
+
+        content = _form_to_layout(
+            form.content,
+            container,
+            partition,
+            prefix,
+            sep,
+            partition_first,
+        )
+
+        return _form_to_layout_class[type(form), form.index](
+            index, content, identities, parameters
+        )
 
     elif isinstance(form, awkward1.forms.ListForm):
-        HERE
+        raw_starts = container[_arrayset_key(
+            form.form_key,
+            "starts",
+            partition,
+            prefix,
+            sep,
+            partition_first,
+        )].reshape(-1).view("u1")
+        starts = _index_form_to_index[form.starts](
+            raw_starts.view(_index_form_to_dtype[form.starts])
+        )
+        raw_stops = container[_arrayset_key(
+            form.form_key,
+            "stops",
+            partition,
+            prefix,
+            sep,
+            partition_first,
+        )].reshape(-1).view("u1")
+        stops = _index_form_to_index[form.stops](
+            raw_stops.view(_index_form_to_dtype[form.stops])
+        )
+
+        content = _form_to_layout(
+            form.content,
+            container,
+            partition,
+            prefix,
+            sep,
+            partition_first,
+        )
+
+        return _form_to_layout_class[type(form), form.starts](
+            starts, stops, content, identities, parameters
+        )
 
     elif isinstance(form, awkward1.forms.ListOffsetForm):
-        HERE
+        raw_offsets = container[_arrayset_key(
+            form.form_key,
+            "offsets",
+            partition,
+            prefix,
+            sep,
+            partition_first,
+        )].reshape(-1).view("u1")
+        offsets = _index_form_to_index[form.offsets](
+            raw_offsets.view(_index_form_to_dtype[form.offsets])
+        )
+
+        content = _form_to_layout(
+            form.content,
+            container,
+            partition,
+            prefix,
+            sep,
+            partition_first,
+        )
+
+        return _form_to_layout_class[type(form), form.offsets](
+            offsets, content, identities, parameters
+        )
 
     elif isinstance(form, awkward1.forms.NumpyForm):
-        source_array = container[_arrayset_key(
+        raw_array = container[_arrayset_key(
             form.form_key,
             None,
             partition,
             prefix,
             sep,
             partition_first,
-        )]
-        raw_array = source_array.reshape(-1).view("u1")
+        )].reshape(-1).view("u1")
 
         dtype_inner_shape = form.to_numpy()
         if dtype_inner_shape.subdtype is None:
@@ -2511,19 +2732,115 @@ def _form_to_layout(
 
         array = raw_array.view(dtype).reshape(shape)
 
-        return awkward1.layout.NumpyArray(array)
+        return awkward1.layout.NumpyArray(array, identities, parameters)
 
     elif isinstance(form, awkward1.forms.RecordForm):
-        HERE
+        contents = []
+        length = None
+        if form.istuple:
+            keys = None
+            for x in form.contents:
+                contents.append(_form_to_layout(
+                    x,
+                    container,
+                    partition,
+                    prefix,
+                    sep,
+                    partition_first,
+                ))
+                if length is None:
+                    length = len(contents[-1])
+                else:
+                    length = min(length, len(contents[-1]))
+        else:
+            keys = []
+            for k, x in form.contents.items():
+                keys.append(k)
+                contents.append(_form_to_layout(
+                    x,
+                    container,
+                    partition,
+                    prefix,
+                    sep,
+                    partition_first,
+                ))
+                if length is None:
+                    length = len(contents[-1])
+                else:
+                    length = min(length, len(contents[-1]))
+
+        return awkward1.layout.RecordArray(
+            contents,
+            keys,
+            length,
+            identities,
+            parameters,
+        )
 
     elif isinstance(form, awkward1.forms.RegularForm):
-        HERE
+        content = _form_to_layout(
+            form.content,
+            container,
+            partition,
+            prefix,
+            sep,
+            partition_first,
+        )
+
+        return awkward1.layout.RegularArray(
+            content, form.size, identities, parameters
+        )
 
     elif isinstance(form, awkward1.forms.UnionForm):
-        HERE
+        raw_tags = container[_arrayset_key(
+            form.form_key,
+            "tags",
+            partition,
+            prefix,
+            sep,
+            partition_first,
+        )].reshape(-1).view("u1")
+        tags = _index_form_to_index[form.tags](
+            raw_tags.view(_index_form_to_dtype[form.tags])
+        )
+        raw_index = container[_arrayset_key(
+            form.form_key,
+            "index",
+            partition,
+            prefix,
+            sep,
+            partition_first,
+        )].reshape(-1).view("u1")
+        index = _index_form_to_index[form.index](
+            raw_index.view(_index_form_to_dtype[form.index])
+        )
 
+        contents = []
+        for x in form.contents:
+            contents.append(_form_to_layout(
+                x,
+                container,
+                partition,
+                prefix,
+                sep,
+                partition_first,
+            ))
+
+        return _form_to_layout_class[type(form), form.index](
+            tags, index, contents, identities, parameters
+        )
+        
     elif isinstance(form, awkward1.forms.UnmaskedForm):
-        HERE
+        content = _form_to_layout(
+            form.content,
+            container,
+            partition,
+            prefix,
+            sep,
+            partition_first,
+        )
+
+        return awkward1.layout.UnmaskedArray(content, identities, parameters)
 
     else:
         raise AssertionError("unexpected form node type: " + str(type(form)))
