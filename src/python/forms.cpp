@@ -445,6 +445,71 @@ make_NumpyForm(const py::handle& m, const std::string& name) {
       .def_property_readonly("itemsize", &ak::NumpyForm::itemsize)
       .def_property_readonly("format", &ak::NumpyForm::format)
       .def_property_readonly("primitive", &ak::NumpyForm::primitive)
+      .def("to_numpy", [](const ak::NumpyForm& self) -> py::object {
+        std::string dt;
+        switch (self.dtype()) {
+        case ak::util::dtype::boolean:
+          dt = "bool";
+          break;
+        case ak::util::dtype::int8:
+          dt = "i1";
+          break;
+        case ak::util::dtype::int16:
+          dt = "i2";
+          break;
+        case ak::util::dtype::int32:
+          dt = "i4";
+          break;
+        case ak::util::dtype::int64:
+          dt = "i8";
+          break;
+        case ak::util::dtype::uint8:
+          dt = "u1";
+          break;
+        case ak::util::dtype::uint16:
+          dt = "u2";
+          break;
+        case ak::util::dtype::uint32:
+          dt = "u4";
+          break;
+        case ak::util::dtype::uint64:
+          dt = "u8";
+          break;
+        case ak::util::dtype::float16:
+          dt = "f2";
+          break;
+        case ak::util::dtype::float32:
+          dt = "f4";
+          break;
+        case ak::util::dtype::float64:
+          dt = "f8";
+          break;
+        case ak::util::dtype::float128:
+          dt = "f16";
+          break;
+        case ak::util::dtype::complex64:
+          dt = "c8";
+          break;
+        case ak::util::dtype::complex128:
+          dt = "c16";
+          break;
+        case ak::util::dtype::complex256:
+          dt = "c32";
+          break;
+        // case ak::util::dtype::datetime64:
+        //   dt = "?";
+        //   break;
+        // case ak::util::dtype::timedelta64:
+        //   dt = "?";
+        //   break;
+        default:
+          // FIXME: record arrays; need to parse 'format'
+          dt = "O";
+        }
+        py::tuple inner_shape = py::cast(self.inner_shape());
+        py::object py_dt = py::make_tuple(py::cast(dt), inner_shape);
+        return py::module::import("numpy").attr("dtype")(py_dt);
+      })
       .def(py::pickle([](const ak::NumpyForm& self) {
         return py::make_tuple(
                    py::cast(self.has_identities()),

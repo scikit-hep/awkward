@@ -2170,6 +2170,46 @@ def from_parquet(
             return out
 
 
+def _arrayset_key(
+    form_key,
+    attribute,
+    partition,
+    prefix,
+    sep,
+    partition_first,
+):
+    if form_key is None:
+        raise ValueError(
+            "cannot read from arrayset using Forms without form_keys"
+        )
+    if attribute is None:
+        attribute = ""
+    else:
+        attribute = sep + attribute
+    if partition is None:
+        return "{0}{1}{2}".format(
+            prefix,
+            form_key,
+            attribute,
+        )
+    elif partition_first:
+        return "{0}{1}{2}{3}{4}".format(
+            prefix,
+            partition,
+            sep,
+            form_key,
+            attribute,
+        )
+    else:
+        return "{0}{1}{2}{3}{4}".format(
+            prefix,
+            form_key,
+            attribute,
+            sep,
+            partition,
+        )
+
+
 def to_arrayset(
     array,
     container=None,
@@ -2205,37 +2245,16 @@ def to_arrayset(
         prefix = prefix + sep
 
     def key(key_index, attribute, partition):
-        if attribute is None:
-            attribute = ""
-        else:
-            attribute = sep + attribute
-        if partition is None:
-            return "{0}{1}{2}{3}".format(
-                prefix,
-                node_prefix,
-                key_index,
-                attribute,
-            )
-        elif partition_first:
-            return "{0}{1}{2}{3}{4}{5}{6}".format(
-                prefix,
-                partition_prefix,
-                partition,
-                sep,
-                node_prefix,
-                key_index,
-                attribute,
-            )
-        else:
-            return "{0}{1}{2}{3}{4}{5}{6}".format(
-                prefix,
-                node_prefix,
-                key_index,
-                attribute,
-                sep,
-                partition_prefix,
-                partition,
-            )
+        if partition is not None:
+            partition = partition_prefix + str(partition)
+        return _arrayset_key(
+            node_prefix + str(key_index),
+            attribute,
+            partition,
+            prefix,
+            sep,
+            partition_first,
+        )
 
     num_form_keys = [0]
 
@@ -2244,6 +2263,11 @@ def to_arrayset(
         parameters = layout.parameters
         key_index = num_form_keys[0]
         num_form_keys[0] += 1
+
+        if has_identities:
+            raise NotImplementedError(
+                "ak.to_arrayset for an array with Identities"
+            )
 
         if isinstance(layout, awkward1.layout.EmptyArray):
             return awkward1.forms.EmptyForm(
@@ -2403,7 +2427,7 @@ def to_arrayset(
 
         else:
             raise AssertionError("unrecognized layout node type: "
-                                 + repr(layout))
+                                 + str(type(layout)))
 
     layout = to_layout(array, allow_record=False, allow_other=False)
 
@@ -2437,7 +2461,116 @@ than the first Form:
     else:
         return form
 
+    
+def _form_to_layout(
+    form,
+    container,
+    partition,
+    prefix,
+    sep,
+    partition_first,
+):
+    if isinstance(form, awkward1.forms.BitMaskedForm):
+        HERE
 
+    elif isinstance(form, awkward1.forms.ByteMaskedForm):
+        HERE
+
+    elif isinstance(form, awkward1.forms.EmptyForm):
+        HERE
+
+    elif isinstance(form, awkward1.forms.IndexedForm):
+        HERE
+
+    elif isinstance(form, awkward1.forms.IndexedOptionForm):
+        HERE
+
+    elif isinstance(form, awkward1.forms.ListForm):
+        HERE
+
+    elif isinstance(form, awkward1.forms.ListOffsetForm):
+        HERE
+
+    elif isinstance(form, awkward1.forms.NumpyForm):
+        source_array = container[_arrayset_key(
+            form.form_key,
+            None,
+            partition,
+            prefix,
+            sep,
+            partition_first,
+        )]
+        raw_array = source_array.reshape(-1).view("u1")
+
+        dtype_inner_shape = form.to_numpy()
+        if dtype_inner_shape.subdtype is None:
+            dtype, inner_shape = dtype_inner_shape, ()
+        else:
+            dtype, inner_shape = dtype_inner_shape.subdtype
+        shape = (-1,) + inner_shape
+
+        array = raw_array.view(dtype).reshape(shape)
+
+        return awkward1.layout.NumpyArray(array)
+
+    elif isinstance(form, awkward1.forms.RecordForm):
+        HERE
+
+    elif isinstance(form, awkward1.forms.RegularForm):
+        HERE
+
+    elif isinstance(form, awkward1.forms.UnionForm):
+        HERE
+
+    elif isinstance(form, awkward1.forms.UnmaskedForm):
+        HERE
+
+    else:
+        raise AssertionError("unexpected form node type: " + str(type(form)))
+
+
+def from_arrayset(
+    form,
+    container,
+    prefix=None,
+    partition_prefix="part",
+    sep="-",
+    partition_first=None,
+    lazy=False,
+    lazy_cache="metadata",
+    lazy_cache_key=None,
+    highlevel=True,
+    behavior=None,
+):
+    if isinstance(form, str) or (
+        awkward1._util.py27 and isinstance(form, awkward1._util.unicode)
+    ):
+        form = awkward1.forms.Form.fromjson(form)
+    elif isinstance(form, dict):
+        form = awkward1.forms.Form.fromjson(json.dumps(form))
+
+    if prefix is None:
+        prefix = ""
+    else:
+        prefix = prefix + sep
+
+    if partition_first is None:
+        out = _form_to_layout(
+            form,
+            container,
+            None,
+            prefix,
+            sep,
+            partition_first,
+        )
+        metadata = None
+
+    if highlevel:
+        return awkward1._util.wrap(out, behavior, metadata=metadata)
+    else:
+        return out
+
+    
 __all__ = [
     x
     for x in list(globals())
