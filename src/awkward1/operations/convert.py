@@ -2739,7 +2739,7 @@ def _form_to_layout(
         length = None
         if form.istuple:
             keys = None
-            for x in form.contents:
+            for x in form.contents.values():
                 contents.append(_form_to_layout(
                     x,
                     container,
