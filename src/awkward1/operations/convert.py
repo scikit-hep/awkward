@@ -2272,7 +2272,10 @@ def to_arrayset(
         >>> reconstituted = ak.from_arrayset(*ak.to_arrayset(original))
 
     The `container` argument lets you specify your own MutableMapping, which
-    might be an interface to some storage format or device (e.g. h5py).
+    might be an interface to some storage format or device (e.g. h5py). It's
+    okay if the `container` drops NumPy's `dtype` and `shape` information,
+    leaving raw bytes, since `dtype` and `shape` can be reconstituted from
+    the #ak.forms.NumpyForm.
 
     The `partition` argument lets you fill the `container` one partition at a
     time using unpartitioned arrays.
@@ -3090,7 +3093,10 @@ def from_arrayset(
         >>> reconstituted = ak.from_arrayset(*ak.to_arrayset(original))
 
     The `container` argument lets you specify your own Mapping, which might be
-    an interface to some storage format or device (e.g. h5py).
+    an interface to some storage format or device (e.g. h5py). It's okay if
+    the `container` dropped NumPy's `dtype` and `shape` information, leaving
+    raw bytes, since `dtype` and `shape` can be reconstituted from the
+    #ak.forms.NumpyForm.
 
     The `num_partitions` argument is required for partitioned data, to know how
     many partitions to look for in the `container`.

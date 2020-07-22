@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 
 import sys
+import pickle
 
 import pytest
 import numpy
@@ -12,22 +13,26 @@ import awkward1
 
 def test_numpyarray():
     assert awkward1.from_arrayset(*awkward1.to_arrayset([1, 2, 3, 4, 5])).tolist() == [1, 2, 3, 4, 5]
+    assert pickle.loads(pickle.dumps(awkward1.Array([1, 2, 3, 4, 5]))).tolist() == [1, 2, 3, 4, 5]
 
 
 def test_listoffsetarray():
     assert awkward1.from_arrayset(*awkward1.to_arrayset([[1, 2, 3], [], [4, 5]])).tolist() == [[1, 2, 3], [], [4, 5]]
     assert awkward1.from_arrayset(*awkward1.to_arrayset(["one", "two", "three", "four", "five"])).tolist() == ["one", "two", "three", "four", "five"]
     assert awkward1.from_arrayset(*awkward1.to_arrayset([["one", "two", "three"], [], ["four", "five"]])).tolist() == [["one", "two", "three"], [], ["four", "five"]]
+    assert pickle.loads(pickle.dumps(awkward1.Array([[1, 2, 3], [], [4, 5]]))).tolist() == [[1, 2, 3], [], [4, 5]]
 
 
 def test_listarray():
     listoffsetarray = awkward1.Array([[1, 2, 3], [], [4, 5]]).layout
     listarray = awkward1.layout.ListArray64(listoffsetarray.starts, listoffsetarray.stops, listoffsetarray.content)
     assert awkward1.from_arrayset(*awkward1.to_arrayset(listarray)).tolist() == [[1, 2, 3], [], [4, 5]]
+    assert pickle.loads(pickle.dumps(awkward1.Array(listarray))).tolist() == [[1, 2, 3], [], [4, 5]]
 
 
 def test_indexedoptionarray():
     assert awkward1.from_arrayset(*awkward1.to_arrayset([1, 2, 3, None, None, 5])).tolist() == [1, 2, 3, None, None, 5]
+    assert pickle.loads(pickle.dumps(awkward1.Array([1, 2, 3, None, None, 5]))).tolist() == [1, 2, 3, None, None, 5]
 
 
 def test_indexedarray():
@@ -35,11 +40,15 @@ def test_indexedarray():
     index = awkward1.layout.Index64(numpy.array([3, 1, 1, 4, 2], dtype=numpy.int64))
     indexedarray = awkward1.layout.IndexedArray64(index, content)
     assert awkward1.from_arrayset(*awkward1.to_arrayset(indexedarray)).tolist() == [3.3, 1.1, 1.1, 4.4, 2.2]
+    assert pickle.loads(pickle.dumps(awkward1.Array(indexedarray))).tolist() == [3.3, 1.1, 1.1, 4.4, 2.2]
 
 
 def test_emptyarray():
     assert awkward1.from_arrayset(*awkward1.to_arrayset([])).tolist() == []
     assert awkward1.from_arrayset(*awkward1.to_arrayset([[], [], []])).tolist() == [[], [], []]
+
+    assert pickle.loads(pickle.dumps(awkward1.Array([]))).tolist() == []
+    assert pickle.loads(pickle.dumps(awkward1.Array([[], [], []]))).tolist() == [[], [], []]
 
 
 def test_bytemaskedarray():
@@ -47,6 +56,7 @@ def test_bytemaskedarray():
     mask = awkward1.layout.Index8(numpy.array([False, True, True, False, False], dtype=numpy.int8))
     bytemaskedarray = awkward1.layout.ByteMaskedArray(mask, content, True)
     assert awkward1.from_arrayset(*awkward1.to_arrayset(bytemaskedarray)).tolist() == [None, 1.1, 2.2, None, None]
+    assert pickle.loads(pickle.dumps(awkward1.Array(bytemaskedarray))).tolist() == [None, 1.1, 2.2, None, None]
 
 
 def test_bitmaskedarray():
@@ -54,6 +64,7 @@ def test_bitmaskedarray():
     mask = awkward1.layout.IndexU8(numpy.packbits(numpy.array([False, True, True, False, False], dtype=numpy.int8)))
     bitmaskedarray = awkward1.layout.BitMaskedArray(mask, content, True, 5, False)
     assert awkward1.from_arrayset(*awkward1.to_arrayset(bitmaskedarray)).tolist() == [None, 1.1, 2.2, None, None]
+    assert pickle.loads(pickle.dumps(awkward1.Array(bitmaskedarray))).tolist() == [None, 1.1, 2.2, None, None]
 
 def test_recordarray():
     assert awkward1.from_arrayset(*awkward1.to_arrayset([(1.1, [1]), (2.2, [1, 2]), (3.3, [1, 2, 3])])) == [(1.1, [1]), (2.2, [1, 2]), (3.3, [1, 2, 3])]
