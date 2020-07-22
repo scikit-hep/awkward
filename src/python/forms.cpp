@@ -86,8 +86,8 @@ form_methods(py::class_<T, std::shared_ptr<T>, ak::Form>& x) {
           .def_property_readonly("has_identities", &T::has_identities)
           .def_property_readonly("parameters", &getparameters<T>)
           .def("parameter", &parameter<T>)
-          .def("form_key", [](const std::shared_ptr<ak::Form>& self)
-                           -> py::object {
+          .def_property_readonly("form_key", [](
+                const std::shared_ptr<ak::Form>& self) -> py::object {
             return form_key2obj(self.get()->form_key());
           })
           .def("type",
