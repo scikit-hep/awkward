@@ -2119,7 +2119,7 @@ def from_parquet(
             cache = awkward1.layout.ArrayCache(lazy_cache)
 
         if lazy_cache_key is None:
-            lazy_cache_key = "ak.from_parquet_{0}".format(_from_parquet_key())
+            lazy_cache_key = "ak.from_parquet:{0}".format(_from_parquet_key())
 
         partitions = []
         offsets = [0]
@@ -2846,16 +2846,30 @@ def _form_to_layout(
         raise AssertionError("unexpected form node type: " + str(type(form)))
 
 
+_from_arrayset_key_number = 0
+_from_arrayset_key_lock = threading.Lock()
+
+
+def _from_arrayset_key():
+    global _from_arrayset_key_number
+    with _from_arrayset_key_lock:
+        out = _from_arrayset_key_number
+        _from_arrayset_key_number += 1
+    return out
+
+
 def from_arrayset(
     form,
     container,
     prefix=None,
     partition_prefix="part",
     sep="-",
-    partition_first=None,
+    num_partitions=None,
+    partition_first=False,
     lazy=False,
     lazy_cache="metadata",
     lazy_cache_key=None,
+    lazy_lengths=None,
     highlevel=True,
     behavior=None,
 ):
@@ -2871,16 +2885,88 @@ def from_arrayset(
     else:
         prefix = prefix + sep
 
-    if partition_first is None:
-        out = _form_to_layout(
-            form,
-            container,
-            None,
-            prefix,
-            sep,
-            partition_first,
-        )
+    if lazy:
+        if lazy_cache is "metadata":
+            lazy_cache = {}
+            metadata = {"cache": lazy_cache}
+        else:
+            metadata = None
+
+        if lazy_cache is None:
+            cache = None
+        else:
+            cache = awkward1.layout.ArrayCache(lazy_cache)
+
+        if lazy_cache_key is None:
+            lazy_cache_key = "ak.from_arrayset:{0}".format(_from_arrayset_key())
+
+    else:
         metadata = None
+
+    if num_partitions is None:
+        args = (form, container, None, prefix, sep, partition_first)
+
+        if lazy:
+            if not isinstance(lazy_lengths, numbers.Integral):
+                raise TypeError(
+                    "for lazy=True and num_partitions=None, lazy_lengths "
+                    "must be an integer, not " + repr(lazy_lengths)
+                )
+
+            generator = awkward1.layout.ArrayGenerator(
+                _form_to_layout,
+                args,
+                form=form,
+                length=lazy_lengths,
+            )
+
+            out = awkward1.layout.VirtualArray(generator, cache, lazy_cache_key)
+
+        else:
+            out = _form_to_layout(*args)
+
+    else:
+        if lazy:
+            if isinstance(lazy_lengths, numbers.Integral):
+                lazy_lengths = [lazy_lengths] * num_partitions
+            elif len(lazy_lengths) == num_partitions and all(
+                isinstance(x, numbers.Integral) for x in lazy_lengths
+            ):
+                pass
+            else:
+                raise TypeError(
+                    "for lazy=True, lazy_lengths must be an integer or "
+                    "iterable of 'num_partitions' integers, not "
+                    + repr(lazy_lengths)
+                )
+
+        partitions = []
+        offsets = [0]
+
+        for part in range(num_partitions):
+            p = partition_prefix + str(part)
+            args = (form, container, p, prefix, sep, partition_first)
+
+            if lazy:
+                generator = awkward1.layout.ArrayGenerator(
+                    _form_to_layout,
+                    args,
+                    form=form,
+                    length=lazy_lengths[part],
+                )
+
+                partitions.append(awkward1.layout.VirtualArray(
+                    generator, cache, lazy_cache_key
+                ))
+                offsets.append(offsets[-1] + lazy_lengths[part])
+
+            else:
+                partitions.append(_form_to_layout(*args))
+                offsets.append(offsets[-1] + len(partitions[-1]))
+
+        out = awkward1.partition.IrregularlyPartitionedArray(
+            partitions, offsets[1:]
+        )
 
     if highlevel:
         return awkward1._util.wrap(out, behavior, metadata=metadata)
