@@ -2170,6 +2170,274 @@ def from_parquet(
             return out
 
 
+def to_arrayset(
+    array,
+    container=None,
+    partition=None,
+    prefix=None,
+    node_prefix="node",
+    partition_prefix="part",
+    sep="-",
+    partition_first=False,
+):
+    if container is None:
+        tofill = {}
+    else:
+        tofill = container
+
+    def index_form(index):
+        if isinstance(index, awkward1.layout.Index64):
+            return "i64"
+        elif isinstance(index, awkward1.layout.Index32):
+            return "i32"
+        elif isinstance(index, awkward1.layout.IndexU32):
+            return "u32"
+        elif isinstance(index, awkward1.layout.Index8):
+            return "i8"
+        elif isinstance(index, awkward1.layout.IndexU8):
+            return "u8"
+        else:
+            raise AssertionError("unrecognized index: " + repr(index))
+
+    if prefix is None:
+        prefix = ""
+    else:
+        prefix = prefix + sep
+
+    def key(key_index, attribute, partition):
+        if attribute is None:
+            attribute = ""
+        else:
+            attribute = sep + attribute
+        if partition is None:
+            return "{0}{1}{2}{3}".format(
+                prefix,
+                node_prefix,
+                key_index,
+                attribute,
+            )
+        elif partition_first:
+            return "{0}{1}{2}{3}{4}{5}{6}".format(
+                prefix,
+                partition_prefix,
+                partition,
+                sep,
+                node_prefix,
+                key_index,
+                attribute,
+            )
+        else:
+            return "{0}{1}{2}{3}{4}{5}{6}".format(
+                prefix,
+                node_prefix,
+                key_index,
+                attribute,
+                sep,
+                partition_prefix,
+                partition,
+            )
+
+    num_form_keys = [0]
+
+    def fill(layout, part):
+        has_identities = layout.identities is not None
+        parameters = layout.parameters
+        key_index = num_form_keys[0]
+        num_form_keys[0] += 1
+
+        if isinstance(layout, awkward1.layout.EmptyArray):
+            return awkward1.forms.EmptyForm(
+                has_identities, parameters, node_prefix + str(key_index)
+            )
+
+        elif isinstance(layout, (
+            awkward1.layout.IndexedArray32,
+            awkward1.layout.IndexedArrayU32,
+            awkward1.layout.IndexedArray64
+        )):
+            tofill[key(key_index, "index", part)] = numpy.asarray(layout.index)
+            return awkward1.forms.IndexedForm(
+                index_form(layout.index),
+                fill(layout.content, part),
+                has_identities,
+                parameters,
+                node_prefix + str(key_index),
+            )
+
+        elif isinstance(layout, (
+            awkward1.layout.IndexedOptionArray32,
+            awkward1.layout.IndexedOptionArray64
+        )):
+            tofill[key(key_index, "index", part)] = numpy.asarray(layout.index)
+            return awkward1.forms.IndexedOptionForm(
+                index_form(layout.index),
+                fill(layout.content, part),
+                has_identities,
+                parameters,
+                node_prefix + str(key_index),
+            )
+
+        elif isinstance(layout, awkward1.layout.ByteMaskedArray):
+            tofill[key(key_index, "mask", part)] = numpy.asarray(layout.mask)
+            return awkward1.forms.ByteMaskedForm(
+                index_form(layout.mask),
+                fill(layout.content, part),
+                layout.valid_when,
+                has_identities,
+                parameters,
+                node_prefix + str(key_index),
+            )
+
+        elif isinstance(layout, awkward1.layout.BitMaskedArray):
+            tofill[key(key_index, "mask", part)] = numpy.asarray(layout.mask)
+            return awkward1.forms.BitMaskedForm(
+                index_form(layout.mask),
+                fill(layout.content, part),
+                layout.valid_when,
+                layout.lsb_order,
+                has_identities,
+                parameters,
+                node_prefix + str(key_index),
+            )
+
+        elif isinstance(layout, awkward1.layout.UnmaskedArray):
+            return awkward1.forms.UnmaskedForm(
+                fill(layout.content, part),
+                has_identities,
+                parameters,
+                node_prefix + str(key_index),
+            )
+
+        elif isinstance(layout, (
+            awkward1.layout.ListArray32,
+            awkward1.layout.ListArrayU32,
+            awkward1.layout.ListArray64
+        )):
+            tofill[key(key_index, "starts", part)] = numpy.asarray(layout.starts)
+            tofill[key(key_index, "stops", part)] = numpy.asarray(layout.stops)
+            return awkward1.forms.ListForm(
+                index_form(layout.starts),
+                index_form(layout.stops),
+                fill(layout.content, part),
+                has_identities,
+                parameters,
+                node_prefix + str(key_index),
+            )
+
+        elif isinstance(layout, (
+            awkward1.layout.ListOffsetArray32,
+            awkward1.layout.ListOffsetArrayU32,
+            awkward1.layout.ListOffsetArray64
+        )):
+            tofill[key(key_index, "offsets", part)] = numpy.asarray(layout.offsets)
+            return awkward1.forms.ListOffsetForm(
+                index_form(layout.offsets),
+                fill(layout.content, part),
+                has_identities,
+                parameters,
+                node_prefix + str(key_index),
+            )
+
+        elif isinstance(layout, awkward1.layout.NumpyArray):
+            array = numpy.asarray(layout)
+            tofill[key(key_index, None, part)] = array
+            form = awkward1.forms.Form.from_numpy(array.dtype)
+            return awkward1.forms.NumpyForm(
+                layout.shape[1:],
+                form.itemsize,
+                form.format,
+                has_identities,
+                parameters,
+                node_prefix + str(key_index),
+            )
+
+        elif isinstance(layout, awkward1.layout.RecordArray):
+            forms = []
+            for x in layout.contents:
+                forms.append(fill(x, part))
+            if layout.istuple:
+                return awkward1.forms.RecordForm(
+                    forms,
+                    has_identities,
+                    parameters,
+                    node_prefix + str(key_index),
+                )
+            else:
+                return awkward1.forms.RecordForm(
+                    dict(zip(layout.keys(), forms)),
+                    has_identities,
+                    parameters,
+                    node_prefix + str(key_index),
+                )
+
+        elif isinstance(layout, awkward1.layout.RegularArray):
+            return awkward1.forms.RegularForm(
+                fill(layout.content, part),
+                layout.size,
+                has_identities,
+                parameters,
+                node_prefix + str(key_index),
+            )
+
+        elif isinstance(layout, (
+            awkward1.layout.UnionArray8_32,
+            awkward1.layout.UnionArray8_U32,
+            awkward1.layout.UnionArray8_64
+        )):
+            forms = []
+            for x in layout.contents:
+                forms.append(fill(x, part))
+            tofill[key(key_index, "tags", part)] = numpy.asarray(layout.tags)
+            tofill[key(key_index, "index", part)] = numpy.asarray(layout.index)
+            return awkward1.forms.UnionForm(
+                index_form(layout.tags),
+                index_form(layout.index),
+                forms,
+                has_identities,
+                parameters,
+                node_prefix + str(key_index),
+            )
+
+        elif isinstance(layout, awkward1.layout.VirtualArray):
+            return fill(layout.array, part)
+
+        else:
+            raise AssertionError("unrecognized layout node type: "
+                                 + repr(layout))
+
+    layout = to_layout(array, allow_record=False, allow_other=False)
+
+    if isinstance(layout, awkward1.partition.PartitionedArray):
+        if partition is not None:
+            raise ValueError(
+                "array is partitioned; an explicit 'partition' should not be "
+                "assigned"
+            )
+        form = None
+        for part, content in enumerate(layout.partitions):
+            f = fill(content, part)
+            if form is None:
+                form = f
+            elif form != f:
+                raise ValueError(
+                    """partition {0} has a different Form:
+
+    {1}
+
+than the first Form:
+
+    {2}""".format(part, f.tojson(True, False), form.tojson(True, False))
+                )
+
+    else:
+        form = fill(layout, partition)
+
+    if container is None:
+        return form, tofill
+    else:
+        return form
+
+
 __all__ = [
     x
     for x in list(globals())
