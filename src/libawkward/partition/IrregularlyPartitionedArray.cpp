@@ -76,10 +76,10 @@ namespace awkward {
     int64_t partitionid = 0;
     int64_t index = 0;
     ContentPtrVec partitions;
-    for (int64_t i = 0;  i < (int64_t)stops.size();  i++) {
+    for (uint64_t i = 0;  i < (uint64_t)stops.size();  i++) {
       ContentPtr dst(nullptr);
-      int64_t length = (i == 0 ? stops[(int64_t)i]
-                               : stops[(int64_t)i] - stops[(int64_t)(i - 1)]);
+      int64_t length = (i == 0 ? stops[i]
+                               : stops[i] - stops[i - 1]);
 
       while (dst.get() == nullptr  ||  dst.get()->length() < length) {
         ContentPtr piece(nullptr);

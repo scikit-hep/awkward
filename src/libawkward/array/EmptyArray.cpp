@@ -343,8 +343,8 @@ namespace awkward {
 
   const ContentPtr
   EmptyArray::num(int64_t axis, int64_t depth) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       Index64 out(1);
       out.setitem_at_nowrap(0, length());
       return NumpyArray(out).getitem_at_nowrap(0);
@@ -356,8 +356,8 @@ namespace awkward {
 
   const std::pair<Index64, ContentPtr>
   EmptyArray::offsets_and_flattened(int64_t axis, int64_t depth) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       throw std::invalid_argument("axis=0 not allowed for flatten");
     }
     else {
@@ -395,12 +395,12 @@ namespace awkward {
 
   const ContentPtr
   EmptyArray::rpad(int64_t target, int64_t axis, int64_t depth) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis != depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis != depth) {
       throw std::invalid_argument("axis exceeds the depth of this array");
     }
     else {
-      return rpad_and_clip(target, axis, depth);
+      return rpad_and_clip(target, posaxis, depth);
     }
   }
 
@@ -408,8 +408,8 @@ namespace awkward {
   EmptyArray::rpad_and_clip(int64_t target,
                             int64_t axis,
                             int64_t depth) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis != depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis != depth) {
       throw std::invalid_argument("axis exceeds the depth of this array");
     }
     else {

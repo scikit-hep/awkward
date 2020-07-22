@@ -947,7 +947,7 @@ def flatten(array, axis=1, highlevel=True):
         else:
             out = awkward1.layout.NumpyArray(numpy.concatenate(out))
 
-    elif awkward1.layout.Content.axis_wrap_if_negative(axis) == 0:
+    elif axis == 0:
 
         def apply(layout):
             if isinstance(layout, awkward1._util.virtualtypes):
@@ -1653,7 +1653,7 @@ def cartesian(
     if axis < 0:
         raise ValueError("the 'axis' of cartesian must be non-negative")
 
-    elif awkward1.layout.Content.axis_wrap_if_negative(axis) == 0:
+    elif axis == 0:
         if nested is None or nested is False:
             nested = []
 

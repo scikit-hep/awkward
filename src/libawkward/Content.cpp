@@ -1429,10 +1429,26 @@ namespace awkward {
     }
   }
 
-  int64_t
-  Content::axis_wrap_if_negative(int64_t axis) {
-    if (axis < 0) {
-      throw std::runtime_error("FIXME: negative axis not implemented yet");
+  const int64_t
+  Content::axis_wrap_if_negative(int64_t axis) const {
+    std::pair<int64_t, int64_t> minmax = minmax_depth();
+    int64_t mindepth = minmax.first;
+    int64_t maxdepth = minmax.second;
+    int64_t depth = purelist_depth();
+    if (axis < 0  &&  mindepth == depth  &&  maxdepth == depth) {
+      int64_t posaxis = depth + axis;
+      if (posaxis < 0) {
+        throw std::invalid_argument(
+          std::string("axis == ") + std::to_string(axis)
+                      + std::string(" exceeds the depth == ") + std::to_string(depth)
+                      + std::string(" of this array"));
+      }
+      return posaxis;
+    } else if (axis < 0  &&  mindepth + axis == 0) {
+      throw std::invalid_argument(
+        std::string("axis == ") + std::to_string(axis)
+                    + std::string(" exceeds the min depth == ") + std::to_string(mindepth)
+                    + std::string(" of this array"));
     }
     return axis;
   }

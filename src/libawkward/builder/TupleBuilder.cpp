@@ -34,7 +34,7 @@ namespace awkward {
       , contents_(contents)
       , length_(length)
       , begun_(begun)
-      , nextindex_(nextindex) { }
+      , nextindex_((int64_t)nextindex) { }
 
   int64_t
   TupleBuilder::numfields() const {
@@ -289,7 +289,7 @@ namespace awkward {
              !contents_[(size_t)nextindex_].get()->active()) {
       for (size_t i = 0;  i < contents_.size();  i++) {
         if (contents_[i].get()->length() == length_) {
-          maybeupdate(i, contents_[i].get()->null());
+          maybeupdate((int64_t)i, contents_[i].get()->null());
         }
         if (contents_[i].get()->length() != length_ + 1) {
           throw std::invalid_argument(

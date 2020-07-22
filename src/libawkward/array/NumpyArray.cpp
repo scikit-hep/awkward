@@ -149,7 +149,7 @@ namespace awkward {
       builder.endrecord();
     }
     else {
-      builder.string(p.c_str(), p.length());
+      builder.string(p.c_str(), (int64_t)p.length());
     }
   }
 
@@ -593,10 +593,7 @@ namespace awkward {
 
   const FormPtr
   NumpyArray::form(bool materialize) const {
-    std::vector<int64_t> inner_shape;
-    for (size_t i = 1;  i < shape_.size();  i++) {
-      inner_shape.push_back((int64_t)shape_[i]);
-    }
+    std::vector<int64_t> inner_shape(std::next(shape_.begin()), shape_.end());
     return std::make_shared<NumpyForm>(identities_.get() != nullptr,
                                        parameters_,
                                        inner_shape,
@@ -970,8 +967,8 @@ namespace awkward {
   const ContentPtr
   NumpyArray::getitem_at_nowrap(int64_t at) const {
     ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)at);
-    const std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
-    const std::vector<ssize_t> strides(strides_.begin() + 1, strides_.end());
+    const std::vector<ssize_t> shape(std::next(shape_.begin()), shape_.end());
+    const std::vector<ssize_t> strides(std::next(strides_.begin()), strides_.end());
     IdentitiesPtr identities;
     if (identities_.get() != nullptr) {
       if (at >= identities_.get()->length()) {
@@ -1006,8 +1003,8 @@ namespace awkward {
   NumpyArray::getitem_range_nowrap(int64_t start, int64_t stop) const {
     ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)start);
     std::vector<ssize_t> shape;
-    shape.push_back((ssize_t)(stop - start));
-    shape.insert(shape.end(), shape_.begin() + 1, shape_.end());
+    shape.emplace_back((ssize_t)(stop - start));
+    shape.insert(shape.end(), std::next(shape_.begin()), shape_.end());
     IdentitiesPtr identities;
     if (identities_.get() != nullptr) {
       if (stop > identities_.get()->length()) {
@@ -1090,8 +1087,8 @@ namespace awkward {
       Slice nexttail = where.tail();
       NumpyArray out = next.getitem_bystrides(nexthead, nexttail, 1);
 
-      std::vector<ssize_t> outshape(out.shape_.begin() + 1, out.shape_.end());
-      std::vector<ssize_t> outstrides(out.strides_.begin() + 1,
+      std::vector<ssize_t> outshape(std::next(out.shape_.begin()), out.shape_.end());
+      std::vector<ssize_t> outstrides(std::next(out.strides_.begin()),
                                       out.strides_.end());
       return std::make_shared<NumpyArray>(out.identities_,
                                           out.parameters_,
@@ -1138,8 +1135,8 @@ namespace awkward {
                                          next.strides_[0],
                                          true);
 
-      std::vector<ssize_t> outshape(out.shape_.begin() + 1, out.shape_.end());
-      std::vector<ssize_t> outstrides(out.strides_.begin() + 1,
+      std::vector<ssize_t> outshape(std::next(out.shape_.begin()), out.shape_.end());
+      std::vector<ssize_t> outstrides(std::next(out.strides_.begin()),
                                       out.strides_.end());
       return std::make_shared<NumpyArray>(out.identities_,
                                           out.parameters_,
@@ -1188,7 +1185,7 @@ namespace awkward {
     }
 
     std::vector<ssize_t> shape = { (ssize_t)carry.length() };
-    shape.insert(shape.end(), shape_.begin() + 1, shape_.end());
+    shape.insert(shape.end(), std::next(shape_.begin()), shape_.end());
     return std::make_shared<NumpyArray>(identities,
                                         parameters_,
                                         ptr,
@@ -1258,8 +1255,8 @@ namespace awkward {
 
   const ContentPtr
   NumpyArray::num(int64_t axis, int64_t depth) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       Index64 out(1);
       out.setitem_at_nowrap(0, length());
       return NumpyArray(out).getitem_at_nowrap(0);
@@ -1268,14 +1265,14 @@ namespace awkward {
     int64_t reps = 1;
     int64_t size = length();
     int64_t i = 0;
-    while (i < ndim() - 1  &&  depth < toaxis) {
-      shape.push_back(shape_[(size_t)i]);
+    while (i < ndim() - 1  &&  depth < posaxis) {
+      shape.emplace_back(shape_[(size_t)i]);
       reps *= shape_[(size_t)i];
       size = shape_[(size_t)i + 1];
       i++;
       depth++;
     }
-    if (toaxis > depth) {
+    if (posaxis > depth) {
       throw std::invalid_argument("'axis' out of range for 'num'");
     }
 
@@ -1315,7 +1312,7 @@ namespace awkward {
     }
     else {
       std::vector<ssize_t> out = { shape[0]*shape[1] };
-      out.insert(out.end(), shape.begin() + 2, shape.end());
+      out.insert(out.end(), std::next(shape.begin(), 2), shape.end());
       return out;
     }
   }
@@ -1326,53 +1323,18 @@ namespace awkward {
       return std::vector<ssize_t>();
     }
     else {
-      return std::vector<ssize_t>(strides.begin() + 1, strides.end());
-    }
-  }
-
-  const std::vector<ssize_t>
-  flatten_shape(const std::vector<ssize_t>& shape, int64_t axis) {
-    if (shape.size() == 1) {
-      return std::vector<ssize_t>();
-    }
-    else {
-      ssize_t offset = (ssize_t)axis;
-      std::vector<ssize_t> out;
-      const auto& indx = std::begin(shape) + offset;
-      if (indx > std::begin(shape)) {
-        out.insert(std::end(out), std::begin(shape), indx);
-      }
-      out.emplace_back(shape[offset]*shape[offset + 1]);
-      out.insert(std::end(out), indx + 2, std::end(shape));
-      return out;
-    }
-  }
-
-  const std::vector<ssize_t>
-  flatten_strides(const std::vector<ssize_t>& strides, int64_t axis) {
-    if (strides.size() == 1) {
-      return std::vector<ssize_t>();
-    }
-    else {
-      ssize_t offset = (ssize_t)axis;
-      std::vector<ssize_t> out;
-      const auto& indx = std::begin(strides) + offset;
-      if (indx > std::begin(strides)) {
-        out.insert(std::end(out), std::begin(strides), indx);
-      }
-      out.insert(std::end(out), indx + 1, std::end(strides));
-      return out;
+      return std::vector<ssize_t>(std::next(strides.begin()), strides.end());
     }
   }
 
   const std::pair<Index64, ContentPtr>
   NumpyArray::offsets_and_flattened(int64_t axis, int64_t depth) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       throw std::invalid_argument("axis=0 not allowed for flatten");
     }
     else if (shape_.size() != 1  ||  !iscontiguous()) {
-      return toRegularArray().get()->offsets_and_flattened(axis, depth);
+      return toRegularArray().get()->offsets_and_flattened(posaxis, depth);
     }
     else {
       throw std::invalid_argument("axis out of range for flatten");
@@ -1745,8 +1707,8 @@ namespace awkward {
       std::vector<ssize_t> other_shape = rawother->shape();
       std::vector<ssize_t> shape;
       std::vector<ssize_t> strides;
-      shape.push_back(shape_[0] + other_shape[0]);
-      strides.push_back((ssize_t)itemsize);
+      shape.emplace_back(shape_[0] + other_shape[0]);
+      strides.emplace_back(itemsize);
       int64_t self_flatlength = shape_[0];
       int64_t other_flatlength = other_shape[0];
       for (int64_t i = ((int64_t)shape_.size()) - 1;  i > 0;  i--) {
@@ -1754,7 +1716,7 @@ namespace awkward {
           throw std::invalid_argument(
             "cannot merge arrays with different shapes");
         }
-        shape.insert(shape.begin() + 1, shape_[(size_t)i]);
+        shape.insert(std::next(shape.begin()), shape_[(size_t)i]);
         strides.insert(strides.begin(), strides[0]*shape_[(size_t)i]);
         self_flatlength *= (int64_t)shape_[(size_t)i];
         other_flatlength *= (int64_t)shape_[(size_t)i];
@@ -2953,15 +2915,15 @@ namespace awkward {
     else if (ndim() > 1  ||  !iscontiguous()) {
       return toRegularArray().get()->rpad(target, axis, depth);
     }
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis != depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis != depth) {
       throw std::invalid_argument("axis exceeds the depth of this array");
     }
     if (target < length()) {
       return shallow_copy();
     }
     else {
-      return rpad_and_clip(target, toaxis, depth);
+      return rpad_and_clip(target, posaxis, depth);
     }
   }
 
@@ -2975,8 +2937,8 @@ namespace awkward {
     else if (ndim() > 1  ||  !iscontiguous()) {
       return toRegularArray().get()->rpad_and_clip(target, axis, depth);
     }
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis != depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis != depth) {
       throw std::invalid_argument("axis exceeds the depth of this array");
     }
     return rpad_axis0(target, true);
@@ -3147,15 +3109,15 @@ namespace awkward {
 
   const ContentPtr
   NumpyArray::localindex(int64_t axis, int64_t depth) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (axis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       return localindex_axis0();
     }
     else if (shape_.size() <= 1) {
       throw std::invalid_argument("'axis' out of range for localindex");
     }
     else {
-      return toRegularArray().get()->localindex(axis, depth);
+      return toRegularArray().get()->localindex(posaxis, depth);
     }
   }
 
@@ -3170,8 +3132,8 @@ namespace awkward {
       throw std::invalid_argument("in combinations, 'n' must be at least 1");
     }
 
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == depth) {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
       return combinations_axis0(n, replacement, recordlookup, parameters);
     }
 
@@ -3184,7 +3146,7 @@ namespace awkward {
                                                   replacement,
                                                   recordlookup,
                                                   parameters,
-                                                  axis,
+                                                  posaxis,
                                                   depth);
     }
   }
@@ -3545,7 +3507,6 @@ namespace awkward {
                              bool ascending,
                              bool stable) const {
     std::shared_ptr<Content> out;
-    int64_t offset = byteoffset_ / itemsize_;
     std::shared_ptr<void> ptr;
 
     Index64 outoffsets(offsets.length());
@@ -3697,8 +3658,8 @@ namespace awkward {
   NumpyArray::iscontiguous() const {
     ssize_t x = itemsize_;
     for (ssize_t i = ndim() - 1;  i >= 0;  i--) {
-      if (x != strides_[i]) return false;
-      x *= shape_[i];
+      if (x != strides_[(size_t)i]) return false;
+      x *= shape_[(size_t)i];
     }
     return true;  // true for isscalar(), too
   }
@@ -3885,7 +3846,7 @@ namespace awkward {
     NumpyArray out = next.getitem_bystrides(nexthead, nexttail, length);
 
     std::vector<ssize_t> outshape = { (ssize_t)length };
-    outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
+    outshape.insert(outshape.end(), std::next(out.shape_.begin()), out.shape_.end());
     return NumpyArray(out.identities_,
                       out.parameters_,
                       out.ptr_,
@@ -3942,11 +3903,11 @@ namespace awkward {
 
     std::vector<ssize_t> outshape = { (ssize_t)length,
                                       (ssize_t)lenhead };
-    outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
+    outshape.insert(outshape.end(), std::next(out.shape_.begin()), out.shape_.end());
     std::vector<ssize_t> outstrides = { strides_[0],
                                         strides_[1]*((ssize_t)step) };
     outstrides.insert(outstrides.end(),
-                      out.strides_.begin() + 1,
+                      std::next(out.strides_.begin()),
                       out.strides_.end());
     return NumpyArray(out.identities_,
                       out.parameters_,
@@ -3993,7 +3954,7 @@ namespace awkward {
     NumpyArray out = getitem_bystrides(nexthead, nexttail, length);
 
     std::vector<ssize_t> outshape = { (ssize_t)length, 1 };
-    outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
+    outshape.insert(outshape.end(), std::next(out.shape_.begin()), out.shape_.end());
     std::vector<ssize_t> outstrides = { out.strides_[0] };
     outstrides.insert(outstrides.end(),
                       out.strides_.begin(),
@@ -4035,9 +3996,9 @@ namespace awkward {
       }
 
       std::vector<ssize_t> shape = { (ssize_t)carry.length() };
-      shape.insert(shape.end(), shape_.begin() + 1, shape_.end());
+      shape.insert(shape.end(), std::next(shape_.begin()), shape_.end());
       std::vector<ssize_t> strides = { (ssize_t)stride };
-      strides.insert(strides.end(), strides_.begin() + 1, strides_.end());
+      strides.insert(strides.end(), std::next(strides_.begin()), strides_.end());
       return NumpyArray(identities,
                         parameters_,
                         ptr,
@@ -4182,7 +4143,7 @@ namespace awkward {
                                        false);
 
     std::vector<ssize_t> outshape = { (ssize_t)length };
-    outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
+    outshape.insert(outshape.end(), std::next(out.shape_.begin()), out.shape_.end());
     return NumpyArray(out.identities_,
                       out.parameters_,
                       out.ptr_,
@@ -4261,7 +4222,7 @@ namespace awkward {
                                          false);
       std::vector<ssize_t> outshape = { (ssize_t)length, (ssize_t)lenhead };
       outshape.insert(outshape.end(),
-                      out.shape_.begin() + 1,
+                      std::next(out.shape_.begin()),
                       out.shape_.end());
       std::vector<ssize_t> outstrides = { (ssize_t)lenhead*out.strides_[0] };
       outstrides.insert(outstrides.end(),
@@ -4302,7 +4263,7 @@ namespace awkward {
                                          false);
       std::vector<ssize_t> outshape = { (ssize_t)length, (ssize_t)lenhead };
       outshape.insert(outshape.end(),
-                      out.shape_.begin() + 1,
+                      std::next(out.shape_.begin()),
                       out.shape_.end());
       std::vector<ssize_t> outstrides = { (ssize_t)lenhead*out.strides_[0] };
       outstrides.insert(outstrides.end(),
@@ -4380,7 +4341,7 @@ namespace awkward {
 
     std::vector<ssize_t> outshape = { (ssize_t)length, 1 };
     outshape.insert(outshape.end(),
-                    out.shape_.begin() + 1,
+                    std::next(out.shape_.begin()),
                     out.shape_.end());
     std::vector<ssize_t> outstrides = { out.strides_[0] };
     outstrides.insert(outstrides.end(),
@@ -4454,11 +4415,11 @@ namespace awkward {
 
       std::vector<ssize_t> outshape = { (ssize_t)length };
       std::vector<int64_t> arrayshape = array.shape();
-      for (auto x = arrayshape.begin();  x != arrayshape.end();  ++x) {
-        outshape.push_back((ssize_t)(*x));
+      for (auto x : arrayshape) {
+        outshape.emplace_back((ssize_t)x);
       }
       outshape.insert(outshape.end(),
-                      out.shape_.begin() + 1,
+                      std::next(out.shape_.begin()),
                       out.shape_.end());
 
       std::vector<ssize_t> outstrides(out.strides_.begin(),
@@ -4499,7 +4460,7 @@ namespace awkward {
 
       std::vector<ssize_t> outshape = { (ssize_t)length };
       outshape.insert(outshape.end(),
-                      out.shape_.begin() + 1,
+                      std::next(out.shape_.begin()),
                       out.shape_.end());
       return NumpyArray(out.identities_,
                         out.parameters_,
@@ -4534,8 +4495,8 @@ namespace awkward {
       }
     }
     else {
-      const std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
-      const std::vector<ssize_t> strides(strides_.begin() + 1, strides_.end());
+      const std::vector<ssize_t> shape(std::next(shape_.begin()), shape_.end());
+      const std::vector<ssize_t> strides(std::next(strides_.begin()), strides_.end());
       builder.beginlist();
       for (int64_t i = 0;  i < length();  i++) {
         ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)i);
@@ -4560,24 +4521,24 @@ namespace awkward {
                              bool include_beginendlist) const {
     if (ndim() == 0) {
       T* array = reinterpret_cast<T*>(byteptr());
-      builder.integer(array[0]);
+      builder.integer((int64_t)array[0]);
     }
     else if (ndim() == 1) {
       T* array = reinterpret_cast<T*>(byteptr());
-      int64_t stride = (int64_t)(strides_[0] / sizeof(T));
+      int64_t stride = strides_[0] / (int64_t)(sizeof(T));
       if (include_beginendlist) {
         builder.beginlist();
       }
       for (int64_t i = 0;  i < length();  i++) {
-        builder.integer(array[i*stride]);
+        builder.integer((int64_t)array[i*stride]);
       }
       if (include_beginendlist) {
         builder.endlist();
       }
     }
     else {
-      const std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
-      const std::vector<ssize_t> strides(strides_.begin() + 1, strides_.end());
+      const std::vector<ssize_t> shape(std::next(shape_.begin()), shape_.end());
+      const std::vector<ssize_t> strides(std::next(strides_.begin()), strides_.end());
       builder.beginlist();
       for (int64_t i = 0;  i < length();  i++) {
         ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)i);
@@ -4606,7 +4567,7 @@ namespace awkward {
     }
     else if (ndim() == 1) {
       T* array = reinterpret_cast<T*>(byteptr());
-      int64_t stride = (int64_t)(strides_[0] / sizeof(T));
+      int64_t stride = strides_[0] / (int64_t)(sizeof(T));
       if (include_beginendlist) {
         builder.beginlist();
       }
@@ -4618,8 +4579,8 @@ namespace awkward {
       }
     }
     else {
-      const std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
-      const std::vector<ssize_t> strides(strides_.begin() + 1, strides_.end());
+      const std::vector<ssize_t> shape(std::next(shape_.begin()), shape_.end());
+      const std::vector<ssize_t> strides(std::next(strides_.begin()), strides_.end());
       builder.beginlist();
       for (int64_t i = 0;  i < length();  i++) {
         ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)i);
@@ -4650,8 +4611,8 @@ namespace awkward {
       builder.string(array, length());
     }
     else {
-      const std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
-      const std::vector<ssize_t> strides(strides_.begin() + 1, strides_.end());
+      const std::vector<ssize_t> shape(std::next(shape_.begin()), shape_.end());
+      const std::vector<ssize_t> strides(std::next(strides_.begin()), strides_.end());
       builder.beginlist();
       for (int64_t i = 0;  i < length();  i++) {
         ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)i);

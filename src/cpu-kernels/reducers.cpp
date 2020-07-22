@@ -2285,8 +2285,6 @@ ERROR awkward_ListOffsetArray_reduce_nonlocal_preparenext_64(
     int64_t j = 0;
     for (int64_t i = 0;  i < length;  i++) {
       if (offsetscopy[i] < offsets[offsetsoffset + i + 1]) {
-        int64_t count = (offsets[offsetsoffset + i + 1] -
-                         offsets[offsetsoffset + i]);
         int64_t diff = offsetscopy[i] - offsets[offsetsoffset + i];
         int64_t parent = parents[parentsoffset + i];
 
