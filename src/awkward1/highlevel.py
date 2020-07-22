@@ -1906,8 +1906,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         return numba.typeof(self._numbaview)
 
     def __getstate__(self):
-        array = self._layout.array[[self._layout.at]]
-        form, container, num_partitions = awkward1.to_arrayset(array)
+        form, container, num_partitions = awkward1.to_arrayset(self._layout.array)
         if self._behavior is awkward1.behavior:
             behavior = None
         else:
@@ -1916,14 +1915,14 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
             metadata = None
         else:
             metadata = dict(self._metadata)
-        return form, container, num_partitions, behavior, metadata
+        return form, container, num_partitions, behavior, metadata, self._layout.at
 
     def __setstate__(self, state):
-        form, container, num_partitions, behavior, metadata = state
+        form, container, num_partitions, behavior, metadata, at = state
         array = awkward1.from_arrayset(
             form, container, num_partitions, highlevel=False
         )
-        layout = awkward1.layout.Record(array, 0)
+        layout = awkward1.layout.Record(array, at)
         if self.__class__ is Record:
             self.__class__ = awkward1._util.recordclass(layout, behavior)
         self.layout = layout
