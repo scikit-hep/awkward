@@ -2057,8 +2057,9 @@ def from_parquet(
         use_threads (bool): Passed to the pyarrow.parquet.ParquetFile.read
             functions; if True, do multithreaded reading.
         lazy (bool): If True, read columns in row groups on demand (as
-            VirtualArrays, in PartitionedArrays if the file has more than one
-            row group); if False, read all requested data immediately.
+            #ak.layout.VirtualArray, possibly in #ak.partition.PartitionedArray
+            if the file has more than one row group); if False, read all
+            requested data immediately.
         lazy_cache (None, "metadata", or MutableMapping): If lazy, pass this
             cache to the VirtualArrays. If "metadata", a new dict is created
             and attached to the output array's metadata as "cache" (only
@@ -2215,11 +2216,153 @@ def to_arrayset(
     container=None,
     partition=None,
     prefix=None,
-    node_prefix="node",
-    partition_prefix="part",
+    node_format="node{0}",
+    partition_format="part{0}",
     sep="-",
     partition_first=False,
 ):
+    u"""
+    Args:
+        array: Data to decompose into an arrayset.
+        container (None or MutableMapping): The str \u2192 NumPy arrays (or
+            Python buffers) that represent the decomposed Awkward Array. This
+            `container` is only assumed to have a `__setitem__` method that
+            accepts strings as keys.
+        partition (None or non-negative int): If None and `array` is not
+            partitioned, keys written to the container have no reference to
+            partitioning; if an integer and `array` is not partitioned, keys
+            use this as their partition number; if `array` is partitioned, the
+            `partition` argument must be None and keys are written with the
+            array's own internal partition numbers.
+        prefix (None or str): If None, keys only contain node and partition
+            information; if a string, keys are all prepended by `prefix + sep`.
+        node_format (str or callable): Python format string or function
+            (returning str) of the node part of keys written to the container
+            and the `form_key` values in the output Form. Its only argument
+            (`{0}` in the format string) is the node number, unique within the
+            `array`.
+        partition_format (str or callable): Python format string or function
+            (returning str) of the partition part of keys written to the
+            container (if any). Its only argument (`{0}` in the format string)
+            is the partition number.
+        sep (str): Separates the prefix, node part, array attribute (e.g.
+            `"starts"`, `"stops"`, `"mask"`), and partition part of the
+            keys written to the container.
+        partition_first (bool): If True, the partition part appears immediately
+            after the prefix (if any); if False, the partition part appears
+            at the end of the keys. This can be relevant if the `container`
+            is sorted or lookup performance depends on alphabetical order.
+
+    Decomposes an Awkward Array into a Form and a collection of arrays, so
+    that data can be losslessly written to file formats and storage devices
+    that only understand named arrays (or binary blobs).
+
+    This function returns a 3-tuple:
+
+        (form, container, num_partitions)
+
+    where the `form` is a #ak.forms.Form (which can be converted to JSON
+    with `tojson`), the `container` is either the MutableMapping you passed in
+    or a new dict containing the NumPy arrays, and `num_partitions` is None
+    if `array` was not partitioned or the number of partitions if it was.
+
+    These are also the first three arguments of #ak.from_arrayset, so a full
+    round-trip is
+
+        >>> reconstituted = ak.from_arrayset(*ak.to_arrayset(original))
+
+    The `container` argument lets you specify your own MutableMapping, which
+    might be an interface to some storage format or device (e.g. h5py).
+
+    The `partition` argument lets you fill the `container` one partition at a
+    time using unpartitioned arrays.
+
+    The rest of the arguments determine the format of the keys written to the
+    `container` (which might be restrictive if it represents a storage device).
+
+    Here is a simple example:
+
+        >>> original = ak.Array([[1, 2, 3], [], [4, 5]])
+        >>> form, container, num_partitions = ak.to_arrayset(original)
+        >>> form
+        {
+            "class": "ListOffsetArray64",
+            "offsets": "i64",
+            "content": {
+                "class": "NumpyArray",
+                "itemsize": 8,
+                "format": "l",
+                "primitive": "int64",
+                "form_key": "node1"
+            },
+            "form_key": "node0"
+        }
+        >>> container
+        {'node0-offsets': array([0, 3, 3, 5], dtype=int64),
+         'node1': array([1, 2, 3, 4, 5])}
+        >>> print(num_partitions)
+        None
+
+    which may be read back with
+
+        >>> ak.from_arrayset(form, container)
+        <Array [[1, 2, 3], [], [4, 5]] type='3 * var * int64'>
+
+    (the third argument of #ak.from_arrayset defaults to None).
+
+    Here is an example of building up a partitioned array:
+
+        >>> container = {}
+        >>> form, _, _ = ak.to_arrayset(ak.Array([[1, 2, 3], [], [4, 5]]), container, 0)
+        >>> form, _, _ = ak.to_arrayset(ak.Array([[6, 7, 8, 9]]), container, 1)
+        >>> form, _, _ = ak.to_arrayset(ak.Array([[], [], []]), container, 2)
+        >>> form, _, _ = ak.to_arrayset(ak.Array([[10]]), container, 3)
+        >>> form
+        {
+            "class": "ListOffsetArray64",
+            "offsets": "i64",
+            "content": {
+                "class": "NumpyArray",
+                "itemsize": 8,
+                "format": "l",
+                "primitive": "int64",
+                "form_key": "node1"
+            },
+            "form_key": "node0"
+        }
+        >>> container
+        {'node0-offsets-part0': array([0, 3, 3, 5], dtype=int64),
+         'node1-part0': array([1, 2, 3, 4, 5]),
+         'node0-offsets-part1': array([0, 4], dtype=int64),
+         'node1-part1': array([6, 7, 8, 9]),
+         'node0-offsets-part2': array([0, 0, 0, 0], dtype=int64),
+         'node1-part2': array([], dtype=float64),
+         'node0-offsets-part3': array([0, 1], dtype=int64),
+         'node1-part3': array([10])}
+
+    The object returned by #ak.from_arrayset is now a partitioned array:
+
+        >>> ak.from_arrayset(form, container, 4)
+        <Array [[1, 2, 3], [], [4, ... [], [], [10]] type='8 * var * int64'>
+        >>> ak.partitions(ak.from_arrayset(form, container, 4))
+        [3, 1, 3, 1]
+
+    Which can also lazily load partitions as they are observed:
+
+        >>> lazy = ak.from_arrayset(form, container, 4, lazy=True, lazy_lengths=[3, 1, 3, 1])
+        >>> lazy.metadata["cache"]
+        {}
+        >>> lazy
+        <Array [[1, 2, 3], [], [4, ... [], [], [10]] type='8 * var * int64'>
+        >>> len(lazy.metadata["cache"])
+        3
+        >>> lazy + 100
+        <Array [[101, 102, 103], [], ... [], [], [110]] type='8 * var * int64'>
+        >>> len(lazy.metadata["cache"])
+        4
+
+    See also #ak.from_arrayset.
+    """
     if container is None:
         container = {}
 
@@ -2242,11 +2385,24 @@ def to_arrayset(
     else:
         prefix = prefix + sep
 
+    if isinstance(node_format, str) or (
+        awkward1._util.py27 and isinstance(node_format, awkward1._util.unicode)
+    ):
+        tmp1 = node_format
+        node_format = lambda x: tmp1.format(x)
+    if isinstance(partition_format, str) or (
+        awkward1._util.py27 and isinstance(
+            partition_format, awkward1._util.unicode
+        )
+    ):
+        tmp2 = partition_format
+        partition_format = lambda x: tmp2.format(x)
+
     def key(key_index, attribute, partition):
         if partition is not None:
-            partition = partition_prefix + str(partition)
+            partition = partition_format(partition)
         return _arrayset_key(
-            node_prefix + str(key_index),
+            node_format(key_index),
             attribute,
             partition,
             prefix,
@@ -2268,8 +2424,10 @@ def to_arrayset(
             )
 
         if isinstance(layout, awkward1.layout.EmptyArray):
+            array = numpy.asarray(layout)
+            container[key(key_index, None, part)] = array
             return awkward1.forms.EmptyForm(
-                has_identities, parameters, node_prefix + str(key_index)
+                has_identities, parameters, node_format(key_index)
             )
 
         elif isinstance(layout, (
@@ -2283,7 +2441,7 @@ def to_arrayset(
                 fill(layout.content, part),
                 has_identities,
                 parameters,
-                node_prefix + str(key_index),
+                node_format(key_index),
             )
 
         elif isinstance(layout, (
@@ -2296,7 +2454,7 @@ def to_arrayset(
                 fill(layout.content, part),
                 has_identities,
                 parameters,
-                node_prefix + str(key_index),
+                node_format(key_index),
             )
 
         elif isinstance(layout, awkward1.layout.ByteMaskedArray):
@@ -2307,7 +2465,7 @@ def to_arrayset(
                 layout.valid_when,
                 has_identities,
                 parameters,
-                node_prefix + str(key_index),
+                node_format(key_index),
             )
 
         elif isinstance(layout, awkward1.layout.BitMaskedArray):
@@ -2319,7 +2477,7 @@ def to_arrayset(
                 layout.lsb_order,
                 has_identities,
                 parameters,
-                node_prefix + str(key_index),
+                node_format(key_index),
             )
 
         elif isinstance(layout, awkward1.layout.UnmaskedArray):
@@ -2327,7 +2485,7 @@ def to_arrayset(
                 fill(layout.content, part),
                 has_identities,
                 parameters,
-                node_prefix + str(key_index),
+                node_format(key_index),
             )
 
         elif isinstance(layout, (
@@ -2343,7 +2501,7 @@ def to_arrayset(
                 fill(layout.content, part),
                 has_identities,
                 parameters,
-                node_prefix + str(key_index),
+                node_format(key_index),
             )
 
         elif isinstance(layout, (
@@ -2357,7 +2515,7 @@ def to_arrayset(
                 fill(layout.content, part),
                 has_identities,
                 parameters,
-                node_prefix + str(key_index),
+                node_format(key_index),
             )
 
         elif isinstance(layout, awkward1.layout.NumpyArray):
@@ -2370,7 +2528,7 @@ def to_arrayset(
                 form.format,
                 has_identities,
                 parameters,
-                node_prefix + str(key_index),
+                node_format(key_index),
             )
 
         elif isinstance(layout, awkward1.layout.RecordArray):
@@ -2382,14 +2540,14 @@ def to_arrayset(
                     forms,
                     has_identities,
                     parameters,
-                    node_prefix + str(key_index),
+                    node_format(key_index),
                 )
             else:
                 return awkward1.forms.RecordForm(
                     dict(zip(layout.keys(), forms)),
                     has_identities,
                     parameters,
-                    node_prefix + str(key_index),
+                    node_format(key_index),
                 )
 
         elif isinstance(layout, awkward1.layout.RegularArray):
@@ -2398,7 +2556,7 @@ def to_arrayset(
                 layout.size,
                 has_identities,
                 parameters,
-                node_prefix + str(key_index),
+                node_format(key_index),
             )
 
         elif isinstance(layout, (
@@ -2417,7 +2575,7 @@ def to_arrayset(
                 forms,
                 has_identities,
                 parameters,
-                node_prefix + str(key_index),
+                node_format(key_index),
             )
 
         elif isinstance(layout, awkward1.layout.VirtualArray):
@@ -2864,7 +3022,7 @@ def from_arrayset(
     container,
     num_partitions=None,
     prefix=None,
-    partition_prefix="part",
+    partition_format="part{0}",
     sep="-",
     partition_first=False,
     lazy=False,
@@ -2874,6 +3032,82 @@ def from_arrayset(
     highlevel=True,
     behavior=None,
 ):
+    u"""
+    Args:
+        form (#ak.forms.Form or str/dict equivalent): The form of the Awkward
+            Array to reconstitute from a set of NumPy arrays (or binary blobs).
+        container (Mapping, such as dict): The str \u2192 NumPy arrays (or Python
+            buffers) that represent the decomposed Awkward Array. This `container`
+            is only assumed to have a `__getitem__` method that accepts strings
+            as keys.
+        num_partitions (None or int): If None, keys are assumed to not describe
+            partitions and the return value is an unpartitioned array; if an int,
+            this is the number of partitions to look for in the `container`.
+        prefix (None or str): If None, keys are assumed to only contain node and
+            partition information; if a string, keys are assumed to be prepended
+            by `prefix + sep`.
+        partition_format (str or callable): Python format string or function
+            (returning str) of the partition part of keys in the container (if
+            any). Its only argument (`{0}` in the format string) is the
+            partition number.
+        sep (str): Separates the prefix, node part, array attribute (e.g.
+            `"starts"`, `"stops"`, `"mask"`), and partition part of the
+            keys expected in the container.
+        partition_first (bool): If True, the partition part is assumed to appear
+            immediately after the prefix (if any); if False, the partition part
+            is assumed to appear at the end of the keys. This can be relevant
+            if the `container` is sorted or lookup performance depends on
+            alphabetical order.
+        lazy (bool): If True, read the array or its partitions on demand (as
+            #ak.layout.VirtualArray, possibly in #ak.partition.PartitionedArray
+            if `num_partitions` is not None); if False, read all requested data
+            immediately.
+        lazy_cache (None, "metadata", or MutableMapping): If lazy, pass this
+            cache to the VirtualArrays. If "metadata", a new dict is created
+            and attached to the output array's metadata as "cache" (only
+            highlevel arrays have metadata).
+        lazy_cache_key (None or str): If lazy, pass this cache_key to the
+            VirtualArrays. If None, a process-unique string is constructed.
+        lazy_lengths (None, int, or iterable of ints): If lazy and
+            `num_partitions` is None, `lazy_lengths` must be an integer
+            specifying the length of the Awkward Array output; if lazy and
+            `num_partitions` is an integer, `lazy_lengths` must be an integer
+            or iterable of integers specifying the lengths of all partitions.
+            This additional input is needed to avoid immediately reading the
+            array just to determine its length.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+        behavior (bool): Custom #ak.behavior for the output array, if
+            high-level.
+
+    Reconstructs an Awkward Array from a Form and a collection of arrays, so
+    that data can be losslessly read from file formats and storage devices that
+    only understand named arrays (or binary blobs).
+
+    The first three arguments of this function are the return values of
+    #ak.to_arrayset, so a full round-trip is
+
+        >>> reconstituted = ak.from_arrayset(*ak.to_arrayset(original))
+
+    The `container` argument lets you specify your own Mapping, which might be
+    an interface to some storage format or device (e.g. h5py).
+
+    The `num_partitions` argument is required for partitioned data, to know how
+    many partitions to look for in the `container`.
+
+    The `prefix`, `partition_format`, `sep`, and `partition_first` arguments
+    only specify the formatting of the keys, and they have the same meanings as
+    in #ak.to_arrayset.
+
+    The arguments that begin with `lazy_` are only needed if `lazy` is True.
+    The `lazy_cache` and `lazy_cache_key` determine how the array or its
+    partitions are cached after being read from the `container` (in a no-eviction
+    dict attached to the output #ak.Array's `metadata` if not specified). The
+    `lazy_lengths` argument is required.
+
+    See #ak.to_arrayset for examples.
+    """
+
     if isinstance(form, str) or (
         awkward1._util.py27 and isinstance(form, awkward1._util.unicode)
     ):
@@ -2885,6 +3119,14 @@ def from_arrayset(
         prefix = ""
     else:
         prefix = prefix + sep
+
+    if isinstance(partition_format, str) or (
+        awkward1._util.py27 and isinstance(
+            partition_format, awkward1._util.unicode
+        )
+    ):
+        tmp2 = partition_format
+        partition_format = lambda x: tmp2.format(x)
 
     if lazy:
         if lazy_cache is "metadata":
@@ -2930,8 +3172,10 @@ def from_arrayset(
         if lazy:
             if isinstance(lazy_lengths, numbers.Integral):
                 lazy_lengths = [lazy_lengths] * num_partitions
-            elif len(lazy_lengths) == num_partitions and all(
-                isinstance(x, numbers.Integral) for x in lazy_lengths
+            elif (
+                isinstance(lazy_lengths, Iterable) and
+                len(lazy_lengths) == num_partitions and
+                all(isinstance(x, numbers.Integral) for x in lazy_lengths)
             ):
                 pass
             else:
@@ -2945,7 +3189,7 @@ def from_arrayset(
         offsets = [0]
 
         for part in range(num_partitions):
-            p = partition_prefix + str(part)
+            p = partition_format(part)
             args = (form, container, p, prefix, sep, partition_first)
 
             if lazy:
