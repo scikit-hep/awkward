@@ -1930,7 +1930,6 @@ def from_arrow(array, highlevel=True, behavior=None):
     else:
         return recurse(array)
 
-
 def to_parquet(array, where, explode_records=False, **options):
     """
     Args:

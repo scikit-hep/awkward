@@ -13,6 +13,8 @@ else()
   message(FATAL_ERROR "NO CUDA COMPILER FOUND! PLEASE CHECK YOUR CUDA PATH, CMake will now exit")
 endif()
 
+SET(CMAKE_CXX_STANDARD 11)
+ 
 # We can avoid this by introducing this CMakeLists to the top level CMakeLists
 include_directories(include)
 

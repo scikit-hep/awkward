@@ -27,7 +27,7 @@ namespace kernel {
   class LibraryPathCallback {
   public:
       LibraryPathCallback() = default;
-      virtual const std::string library_path() const = 0;
+      virtual std::string library_path() = 0;
   };
 
   class LibraryCallback {
@@ -848,6 +848,7 @@ namespace kernel {
     int64_t length);
 
   ERROR RegularArray_num_64(
+    kernel::Lib ptr_lib,
     int64_t* tonum,
     int64_t size,
     int64_t length);

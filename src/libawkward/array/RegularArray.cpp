@@ -614,6 +614,7 @@ namespace awkward {
     else if (posaxis == depth + 1) {
       Index64 tonum(length());
       struct Error err = kernel::RegularArray_num_64(
+        tonum.ptr_lib(),
         tonum.ptr().get(),
         size_,
         length());
