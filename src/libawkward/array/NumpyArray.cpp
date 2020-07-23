@@ -32,11 +32,12 @@ namespace awkward {
 
   NumpyForm::NumpyForm(bool has_identities,
                        const util::Parameters& parameters,
+                       const FormKey& form_key,
                        const std::vector<int64_t>& inner_shape,
                        int64_t itemsize,
                        const std::string& format,
                        util::dtype dtype)
-      : Form(has_identities, parameters)
+      : Form(has_identities, parameters, form_key)
       , inner_shape_(inner_shape)
       , itemsize_(itemsize)
       , format_(format)
@@ -120,7 +121,13 @@ namespace awkward {
   void
   NumpyForm::tojson_part(ToJson& builder, bool verbose, bool toplevel) const {
     std::string p = primitive();
-    if (verbose  ||  toplevel  ||  p.empty()  ||  !inner_shape_.empty()) {
+    if (verbose  ||
+        toplevel  ||
+        p.empty()  ||
+        !inner_shape_.empty() ||
+        has_identities_  ||
+        !parameters_.empty()  ||
+        form_key_.get() != nullptr) {
       builder.beginrecord();
       builder.field("class");
       builder.string("NumpyArray");
@@ -146,6 +153,7 @@ namespace awkward {
       }
       identities_tojson(builder, verbose);
       parameters_tojson(builder, verbose);
+      form_key_tojson(builder, verbose);
       builder.endrecord();
     }
     else {
@@ -157,6 +165,7 @@ namespace awkward {
   NumpyForm::shallow_copy() const {
     return std::make_shared<NumpyForm>(has_identities_,
                                        parameters_,
+                                       form_key_,
                                        inner_shape_,
                                        itemsize_,
                                        format_,
@@ -222,6 +231,7 @@ namespace awkward {
   NumpyForm::equal(const FormPtr& other,
                    bool check_identities,
                    bool check_parameters,
+                   bool check_form_key,
                    bool compatibility_check) const {
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
@@ -229,6 +239,10 @@ namespace awkward {
     }
     if (check_parameters  &&
         !util::parameters_equal(parameters_, other.get()->parameters())) {
+      return false;
+    }
+    if (check_form_key  &&
+        !form_key_equals(other.get()->form_key())) {
       return false;
     }
     if (NumpyForm* t = dynamic_cast<NumpyForm*>(other.get())) {
@@ -596,6 +610,7 @@ namespace awkward {
     std::vector<int64_t> inner_shape(std::next(shape_.begin()), shape_.end());
     return std::make_shared<NumpyForm>(identities_.get() != nullptr,
                                        parameters_,
+                                       FormKey(nullptr),
                                        inner_shape,
                                        (int64_t)itemsize_,
                                        format_,
@@ -1283,8 +1298,10 @@ namespace awkward {
       x *= shape[(size_t)(j - 1)];
     }
 
-    Index64 tonum(reps);
+    Index64 tonum(reps, ptr_lib());
+
     struct Error err = kernel::RegularArray_num_64(
+      ptr_lib(),
       tonum.ptr().get(),
       size,
       reps);
@@ -1299,7 +1316,8 @@ namespace awkward {
       0,
       sizeof(int64_t),
       util::dtype_to_format(util::dtype::int64),
-      util::dtype::int64);
+      util::dtype::int64,
+      ptr_lib());
   }
 
   const std::vector<ssize_t>

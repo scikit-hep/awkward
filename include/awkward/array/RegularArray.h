@@ -20,6 +20,7 @@ namespace awkward {
     /// @brief Creates a RegularForm. See RegularArray for documentation.
     RegularForm(bool has_identities,
                 const util::Parameters& parameters,
+                const FormKey& form_key,
                 const FormPtr& content,
                 int64_t size);
 
@@ -72,6 +73,7 @@ namespace awkward {
       equal(const FormPtr& other,
             bool check_identities,
             bool check_parameters,
+            bool check_form_key,
             bool compatibility_check) const override;
 
   private:

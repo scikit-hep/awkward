@@ -31,6 +31,11 @@ extern "C" {
     const int64_t* fromstops,
     int64_t stopsoffset,
     int64_t length);
+  EXPORT_SYMBOL Error
+  awkward_cuda_RegularArray_num_64(
+    int64_t* tonum,
+    int64_t size,
+    int64_t length);
 }
 
 #endif //AWKWARD_CUDA_KERNELS_OPERATIONS_H

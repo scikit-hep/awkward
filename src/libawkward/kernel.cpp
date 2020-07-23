@@ -37,7 +37,7 @@ namespace kernel {
 
   std::string LibraryCallback::awkward_library_path(kernel::Lib ptr_lib) {
 #ifndef _MSC_VER
-    for (auto i : lib_path_callbacks.at(ptr_lib)) {
+    for (const auto& i : lib_path_callbacks.at(ptr_lib)) {
       auto handle = dlopen(i->library_path().c_str(), RTLD_LAZY);
 
       if (handle) {
@@ -52,7 +52,7 @@ namespace kernel {
     void *handle = nullptr;
 #ifndef _MSC_VER
     std::string path = lib_callback->awkward_library_path(ptr_lib);
-    if (path.compare("") != 0) {
+    if (!path.empty()) {
       handle = dlopen(path.c_str(), RTLD_LAZY);
     }
     if (!handle) {
@@ -3980,9 +3980,20 @@ namespace kernel {
   }
 
   ERROR RegularArray_num_64(
+    kernel::Lib ptr_lib,
     int64_t *tonum,
     int64_t size,
     int64_t length) {
+    if (ptr_lib == kernel::Lib::cuda_kernels) {
+      FORM_KERNEL(awkward_RegularArray_num_64,
+                  awkward_cuda_RegularArray_num_64,
+                  ptr_lib)
+
+      return (*awkward_cuda_RegularArray_num_64_t)(
+        tonum,
+        size,
+        length);
+    }
     return awkward_RegularArray_num_64(
       tonum,
       size,

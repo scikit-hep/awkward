@@ -54,3 +54,4 @@ from awkward1._ext import SliceGenerator
 from awkward1._ext import ArrayCache
 
 from awkward1._ext import _slice_tostring
+from awkward1._ext import kernelLib

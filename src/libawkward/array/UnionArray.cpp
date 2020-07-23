@@ -24,10 +24,11 @@ namespace awkward {
 
   UnionForm::UnionForm(bool has_identities,
                        const util::Parameters& parameters,
+                       const FormKey& form_key,
                        Index::Form tags,
                        Index::Form index,
                        const std::vector<FormPtr>& contents)
-      : Form(has_identities, parameters)
+      : Form(has_identities, parameters, form_key)
       , tags_(tags)
       , index_(index)
       , contents_(contents) { }
@@ -97,6 +98,7 @@ namespace awkward {
     builder.endlist();
     identities_tojson(builder, verbose);
     parameters_tojson(builder, verbose);
+    form_key_tojson(builder, verbose);
     builder.endrecord();
   }
 
@@ -104,6 +106,7 @@ namespace awkward {
   UnionForm::shallow_copy() const {
     return std::make_shared<UnionForm>(has_identities_,
                                        parameters_,
+                                       form_key_,
                                        tags_,
                                        index_,
                                        contents_);
@@ -251,6 +254,7 @@ namespace awkward {
   UnionForm::equal(const FormPtr& other,
                    bool check_identities,
                    bool check_parameters,
+                   bool check_form_key,
                    bool compatibility_check) const {
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
@@ -258,6 +262,10 @@ namespace awkward {
     }
     if (check_parameters  &&
         !util::parameters_equal(parameters_, other.get()->parameters())) {
+      return false;
+    }
+    if (check_form_key  &&
+        !form_key_equals(other.get()->form_key())) {
       return false;
     }
     if (UnionForm* t = dynamic_cast<UnionForm*>(other.get())) {
@@ -271,6 +279,7 @@ namespace awkward {
         if (!content(i).get()->equal(t->content(i),
                                      check_identities,
                                      check_parameters,
+                                     check_form_key,
                                      compatibility_check)) {
           return false;
         }
@@ -832,6 +841,7 @@ namespace awkward {
     }
     return std::make_shared<UnionForm>(identities_.get() != nullptr,
                                        parameters_,
+                                       FormKey(nullptr),
                                        tags_.form(),
                                        index_.form(),
                                        contents);

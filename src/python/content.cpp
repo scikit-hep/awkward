@@ -1280,8 +1280,20 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
                   bool stable) -> py::object {
                return box(self.argsort(axis, ascending, false));
           })
-  ;
-}
+          .def("copy_to",
+               [](const T&self,
+                      std::string ptr_lib) -> py::object {
+               if(ptr_lib == "cuda") {
+                 return box(self.copy_to(kernel::Lib::cuda_kernels));
+               }
+               else if(ptr_lib == "cpu") {
+                 return box(self.copy_to(kernel::Lib::cpu_kernels));
+               }
+               else {
+                 throw std::invalid_argument("Invalid kernel specified, valid kernels are cpu and cuda");
+               }
+          });
+  }
 
 ////////// EmptyArray
 

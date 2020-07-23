@@ -5,6 +5,7 @@
 #include <pybind11/pybind11.h>
 
 #include "awkward/python/startup.h"
+#include "awkward/python/kernel_utils.h"
 #include "awkward/python/index.h"
 #include "awkward/python/identities.h"
 #include "awkward/python/content.h"
@@ -25,6 +26,10 @@ PYBIND11_MODULE(_ext, m) {
   ////////// startup.h
 
   make_startup(m, "startup");
+
+  ////////// kernel_utils.h
+
+  make_Libenum(m, "kernelLib");
 
   ////////// index.h
 

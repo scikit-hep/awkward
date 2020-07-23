@@ -21,6 +21,7 @@ namespace awkward {
     /// {@link ListOffsetArrayOf ListOffsetArray} for documentation.
     ListOffsetForm(bool has_identities,
                    const util::Parameters& parameters,
+                   const FormKey& form_key,
                    Index::Form offsets,
                    const FormPtr& content);
 
@@ -73,6 +74,7 @@ namespace awkward {
       equal(const FormPtr& other,
             bool check_identities,
             bool check_parameters,
+            bool check_form_key,
             bool compatibility_check) const override;
 
   private:
