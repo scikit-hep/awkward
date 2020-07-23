@@ -514,7 +514,7 @@ if __name__ == "__main__":
         for i in range(parentslength):
             parent = parents[i] + parentsoffset
             start = starts[parent]
-            nextparent = nextparents[i] + nextparentsoffset
+            nextparent = nextparents[j] + nextparentsoffset
             if parent == nextparent:
                 tocarry[i] = j
                 j = j + 1
@@ -631,8 +631,6 @@ inoutparam = None
                 funcgentemp = ""
                 if "childfunc" in tokens[name].keys():
                     for childfunc in tokens[name]["childfunc"]:
-                        if "sorting.cpp" in filename:
-                            funcgentemp += " " * 4
                         funcgentemp += "{0} = {1}\n".format(
                             funcs[childfunc]["def"].name, name
                         )
