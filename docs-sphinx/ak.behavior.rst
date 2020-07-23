@@ -5,6 +5,7 @@ ak.behavior
    * `Parameters and behaviors <#parameters-and-behaviors>`__
    * `Adding behavior to records <#adding-behavior-to-records>`__
    * `Overriding NumPy ufuncs and binary operators <#overriding-numpy-ufuncs-and-binary-operators>`__
+   * `Mixin decorators <#mixin-decorators>`__
    * `Adding behavior to arrays <#adding-behavior-to-arrays>`__
    * `Custom type names <#custom-type-names>`__
    * `Custom broadcasting <#custom-broadcasting>`__
@@ -313,14 +314,13 @@ Mixin decorators
 ================
 The pattern of adding additional properties and function overrides to records
 and arrays of records is quite common, and can be nicely described by the "mixin"
-idiom: a class with no constructor that is mixed with both the `Array` and `Record`
-class as to create new derived classes. In `awkward1.util` there are python decorators
-to assist with some of the boilerplate. Consider the ``Point`` class from above; we
-can implement all the functionality so far described as follows:
+idiom: a class with no constructor that is mixed with both the :doc:`_auto/ak.Array` and :doc:`_auto/ak.Record`
+class as to create new derived classes. The :doc:`_auto/ak.mixin_class` and :doc:`_auto/ak.mixin_class_method`
+python decorators assist with some of this boilerplate. Consider the ``Point`` class
+from above; we can implement all the functionality so far described as follows:
 
 .. code-block:: python
-
-    from awkward1.util import mixin_class, mixin_class_method
+    from awkward1 import mixin_class, mixin_class_method
 
     @mixin_class(ak.behavior)
     class Point:
@@ -350,7 +350,7 @@ to be added by overriding the ``np.add`` ufunc (appending to our class definitio
                 {"x": self.x + other.x, "y": self.y + other.y}, with_name="Point",
             )
 
-The real power of using mixin classes comes from the ability to inheirit behaviors.
+The real power of using mixin classes comes from the ability to inherit behaviors.
 Consider a ``Point``-like record that also has a ``weight`` field. Suppose that we want
 these ``WeightedPoint`` types to have the same distance and magnitude functionality, but
 only be considered equal when they have the same weight. Also, suppose we want the addition

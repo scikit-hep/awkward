@@ -10,11 +10,12 @@ def mixin_class(registry):
     Args:
         registry (dict):
             The destination behavior mapping registry. Typically, this would
-            be the global registry ``awkward1.behavior``, but one may wish
+            be the global registry #ak.behavior, but one may wish
             to register methods in an alternative way.
 
     This decorator can be used to register a behavior mixin class.
-    Any inheirited behaviors will automatically be made available to the decorated class.
+    Any inherited behaviors will automatically be made available to the decorated class.
+    See the "Mixin decorators" section of #ak.behavior for further details
     """
 
     def register(cls):
@@ -46,15 +47,15 @@ def mixin_class_method(ufunc, rhs=None, transpose=True):
             A universal function (or NEP18 callable) that is hooked in awkward1,
             i.e. it can be the first argument of a behavior
         rhs (Set[type] or None):
-            Set of right-hand side argument types (leave None if unary function)
-            The left-hand side is expected to always be ``self`` of the parent class
+            Set of right-hand side argument types, optional if wrapping a unary function.
+            The left-hand side is expected to always be `self` of the parent class.
             If the function is not unary or binary, call for help :)
         transpose (bool):
             If true, autmatically create a transpose signature (only makes sense for binary ufuncs)
 
     This decorator can be used to register a mixin class method.
     Using this decorator ensures that derived classes that are declared
-    with the `mixin_class` decorator will also have the behaviors that this class has.
+    with the #ak.mixin_class decorator will also have the behaviors that this class has.
     """
 
     def register(method):
