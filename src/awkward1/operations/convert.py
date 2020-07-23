@@ -2107,7 +2107,7 @@ def from_parquet(
     if lazy:
         state = _ParquetState(file, use_threads, source, options)
 
-        if lazy_cache is "metadata":
+        if lazy_cache == "metadata":
             lazy_cache = {}
             metadata = {"cache": lazy_cache}
         else:
@@ -3155,7 +3155,7 @@ def from_arrayset(
         partition_format = lambda x: tmp2.format(x)
 
     if lazy:
-        if lazy_cache is "metadata":
+        if lazy_cache == "metadata":
             lazy_cache = {}
             metadata = {"cache": lazy_cache}
         else:
