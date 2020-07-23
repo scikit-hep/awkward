@@ -309,6 +309,77 @@ Similarly for overriding ``abs``
 
 and all other ufuncs.
 
+Mixin decorators
+================
+The pattern of adding additional properties and function overrides to records
+and arrays of records is quite common, and can be nicely described by the "mixin"
+idiom: a class with no constructor that is mixed with both the `Array` and `Record`
+class as to create new derived classes. In `awkward1.util` there are python decorators
+to assist with some of the boilerplate. Consider the ``Point`` class from above; we
+can implement all the functionality so far described as follows:
+
+.. code-block:: python
+
+    from awkward1.util import mixin_class, mixin_class_method
+
+    @mixin_class(ak.behavior)
+    class Point:
+        def distance(self, other):
+            return np.sqrt((self.x - other.x) ** 2 + (self.y - other.y) ** 2)
+
+        @mixin_class_method(np.equal, {"Point"})
+        def point_equal(self, other):
+            return np.logical_and(self.x == other.x, self.y == other.y)
+
+        @mixin_class_method(np.abs)
+        def point_abs(self):
+            return np.sqrt(self.x ** 2 + self.y ** 2)
+
+The behavior name is taken as the mixin class name, e.g. here it is ``Point`` (as opposed
+to lowercase ``point`` previously). We can extend our implementation to allow ``Point`` types
+to be added by overriding the ``np.add`` ufunc (appending to our class definition):
+
+.. code-block:: python
+
+    class Point:
+        # ...
+
+        @mixin_class_method(np.add, {"Point"})
+        def point_add(self, other):
+            return ak.zip(
+                {"x": self.x + other.x, "y": self.y + other.y}, with_name="Point",
+            )
+
+The real power of using mixin classes comes from the ability to inheirit behaviors.
+Consider a ``Point``-like record that also has a ``weight`` field. Suppose that we want
+these ``WeightedPoint`` types to have the same distance and magnitude functionality, but
+only be considered equal when they have the same weight. Also, suppose we want the addition
+of two weighted points to give their weighted mean rather than a sum. We could implement
+such a class as follows:
+
+.. code-block:: python
+
+    @mixin_class(ak.behavior)
+    class WeightedPoint:
+        @mixin_class_method(np.equal, {"WeightedPoint"})
+        def weighted_equal(self, other):
+            return np.logical_and(self.point_equal(other), self.weight == other.weight)
+
+        @mixin_class_method(np.add, {"WeightedPoint"})
+        def weighted_add(self, other):
+            sumw = self.weight + other.weight
+            return ak.zip(
+                {
+                    "x": (self.x * self.weight + other.x * other.weight) / sumw,
+                    "y": (self.y * self.weight + other.y * other.weight) / sumw,
+                    "weight": sumw,
+                },
+                with_name="WeightedPoint",
+            )
+
+A footnote: in this implementation, adding a WeightedPoint and a Point returns a Point.
+One may wish to disable this by type-checking, since the functionalities are rather different.
+
 Adding behavior to arrays
 =========================
 

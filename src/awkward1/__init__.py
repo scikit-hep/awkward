@@ -60,6 +60,9 @@ from awkward1.operations.structure import *
 from awkward1.operations.reducers import *
 from awkward1.operations.transfers import *
 
+# public utilities
+from awkward1.util import *
+
 # version
 __version__ = awkward1._ext.__version__
 
