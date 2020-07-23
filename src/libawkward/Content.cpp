@@ -40,6 +40,7 @@ namespace awkward {
         return std::make_shared<NumpyForm>(
                  false,
                  util::Parameters(),
+                 FormKey(nullptr),
                  inner_shape,
                  1,
                  util::dtype_to_format(util::dtype::boolean),
@@ -56,6 +57,7 @@ namespace awkward {
         return std::make_shared<NumpyForm>(
                  false,
                  util::Parameters(),
+                 FormKey(nullptr),
                  inner_shape,
                  1,
                  util::dtype_to_format(util::dtype::int8),
@@ -64,6 +66,7 @@ namespace awkward {
         return std::make_shared<NumpyForm>(
                  false,
                  util::Parameters(),
+                 FormKey(nullptr),
                  inner_shape,
                  2,
                  util::dtype_to_format(util::dtype::int16),
@@ -72,6 +75,7 @@ namespace awkward {
         return std::make_shared<NumpyForm>(
                  false,
                  util::Parameters(),
+                 FormKey(nullptr),
                  inner_shape,
                  4,
                  util::dtype_to_format(util::dtype::int32),
@@ -80,6 +84,7 @@ namespace awkward {
         return std::make_shared<NumpyForm>(
                  false,
                  util::Parameters(),
+                 FormKey(nullptr),
                  inner_shape,
                  8,
                  util::dtype_to_format(util::dtype::int64),
@@ -95,6 +100,7 @@ namespace awkward {
         return std::make_shared<NumpyForm>(
                  false,
                  util::Parameters(),
+                 FormKey(nullptr),
                  inner_shape,
                  1,
                  util::dtype_to_format(util::dtype::uint8),
@@ -103,6 +109,7 @@ namespace awkward {
         return std::make_shared<NumpyForm>(
                  false,
                  util::Parameters(),
+                 FormKey(nullptr),
                  inner_shape,
                  2,
                  util::dtype_to_format(util::dtype::uint16),
@@ -111,6 +118,7 @@ namespace awkward {
         return std::make_shared<NumpyForm>(
                  false,
                  util::Parameters(),
+                 FormKey(nullptr),
                  inner_shape,
                  4,
                  util::dtype_to_format(util::dtype::uint32),
@@ -119,6 +127,7 @@ namespace awkward {
         return std::make_shared<NumpyForm>(
                  false,
                  util::Parameters(),
+                 FormKey(nullptr),
                  inner_shape,
                  8,
                  util::dtype_to_format(util::dtype::uint64),
@@ -134,6 +143,7 @@ namespace awkward {
         return std::make_shared<NumpyForm>(
                  false,
                  util::Parameters(),
+                 FormKey(nullptr),
                  inner_shape,
                  2,
                  util::dtype_to_format(util::dtype::float16),
@@ -142,6 +152,7 @@ namespace awkward {
         return std::make_shared<NumpyForm>(
                  false,
                  util::Parameters(),
+                 FormKey(nullptr),
                  inner_shape,
                  4,
                  util::dtype_to_format(util::dtype::float32),
@@ -150,6 +161,7 @@ namespace awkward {
         return std::make_shared<NumpyForm>(
                  false,
                  util::Parameters(),
+                 FormKey(nullptr),
                  inner_shape,
                  8,
                  util::dtype_to_format(util::dtype::float64),
@@ -158,6 +170,7 @@ namespace awkward {
         return std::make_shared<NumpyForm>(
                  false,
                  util::Parameters(),
+                 FormKey(nullptr),
                  inner_shape,
                  16,
                  util::dtype_to_format(util::dtype::float128),
@@ -174,6 +187,7 @@ namespace awkward {
         return std::make_shared<NumpyForm>(
                  false,
                  util::Parameters(),
+                 FormKey(nullptr),
                  inner_shape,
                  8,
                  util::dtype_to_format(util::dtype::complex64),
@@ -182,6 +196,7 @@ namespace awkward {
         return std::make_shared<NumpyForm>(
                  false,
                  util::Parameters(),
+                 FormKey(nullptr),
                  inner_shape,
                  16,
                  util::dtype_to_format(util::dtype::complex128),
@@ -190,6 +205,7 @@ namespace awkward {
         return std::make_shared<NumpyForm>(
                  false,
                  util::Parameters(),
+                 FormKey(nullptr),
                  inner_shape,
                  32,
                  util::dtype_to_format(util::dtype::complex256),
@@ -220,6 +236,7 @@ namespace awkward {
       if (dtype != util::dtype::NOT_PRIMITIVE) {
         return std::make_shared<NumpyForm>(false,
                                            util::Parameters(),
+                                           FormKey(nullptr),
                                            std::vector<int64_t>(),
                                            itemsize,
                                            format,
@@ -230,6 +247,17 @@ namespace awkward {
     if (json.IsObject()  &&
         json.HasMember("class")  &&
         json["class"].IsString()) {
+
+      bool h = false;
+      if (json.HasMember("has_identities")) {
+        if (json["has_identities"].IsBool()) {
+          h = json["has_identities"].GetBool();
+        }
+        else {
+          throw std::invalid_argument("'has_identities' must be boolean");
+        }
+      }
+
       util::Parameters p;
       if (json.HasMember("parameters")) {
         if (json["parameters"].IsObject()) {
@@ -244,13 +272,15 @@ namespace awkward {
           throw std::invalid_argument("'parameters' must be a JSON object");
         }
       }
-      bool h = false;
-      if (json.HasMember("has_identities")) {
-        if (json["has_identities"].IsBool()) {
-          h = json["has_identities"].GetBool();
+
+      FormKey f(nullptr);
+      if (json.HasMember("form_key")) {
+        if (json["form_key"].IsNull()) { }
+        else if (json["form_key"].IsString()) {
+          f = std::make_shared<std::string>(json["form_key"].GetString());
         }
         else {
-          throw std::invalid_argument("'has_identities' must be boolean");
+          throw std::invalid_argument("'form_key' must be null or a string");
         }
       }
 
@@ -293,7 +323,7 @@ namespace awkward {
             }
           }
         }
-        return std::make_shared<NumpyForm>(h, p, s, itemsize, format, dtype);
+        return std::make_shared<NumpyForm>(h, p, f, s, itemsize, format, dtype);
       }
 
       if (cls == std::string("RecordArray")) {
@@ -315,7 +345,7 @@ namespace awkward {
           throw std::invalid_argument("RecordArray 'contents' must be a JSON "
                                       "list or a JSON object");
         }
-        return std::make_shared<RecordForm>(h, p, recordlookup, contents);
+        return std::make_shared<RecordForm>(h, p, f, recordlookup, contents);
       }
 
       if ((isgen = (cls == std::string("ListOffsetArray")))  ||
@@ -344,7 +374,7 @@ namespace awkward {
                   cls + std::string(" is missing its 'content'"));
         }
         FormPtr content = fromjson_part(json["content"]);
-        return std::make_shared<ListOffsetForm>(h, p, offsets, content);
+        return std::make_shared<ListOffsetForm>(h, p, f, offsets, content);
       }
 
       if ((isgen = (cls == std::string("ListArray")))  ||
@@ -390,7 +420,7 @@ namespace awkward {
                   cls + std::string(" is missing its 'content'"));
         }
         FormPtr content = fromjson_part(json["content"]);
-        return std::make_shared<ListForm>(h, p, starts, stops, content);
+        return std::make_shared<ListForm>(h, p, f, starts, stops, content);
       }
 
       if (cls == std::string("RegularArray")) {
@@ -404,7 +434,7 @@ namespace awkward {
                   cls + std::string(" is missing its 'size'"));
         }
         int64_t size = json["size"].GetInt64();
-        return std::make_shared<RegularForm>(h, p, content, size);
+        return std::make_shared<RegularForm>(h, p, f, content, size);
       }
 
       if ((isgen = (cls == std::string("IndexedOptionArray")))  ||
@@ -431,7 +461,7 @@ namespace awkward {
                   cls + std::string(" is missing its 'content'"));
         }
         FormPtr content = fromjson_part(json["content"]);
-        return std::make_shared<IndexedOptionForm>(h, p, index, content);
+        return std::make_shared<IndexedOptionForm>(h, p, f, index, content);
       }
 
       if ((isgen = (cls == std::string("IndexedArray")))  ||
@@ -460,7 +490,7 @@ namespace awkward {
                   cls + std::string(" is missing its 'content'"));
         }
         FormPtr content = fromjson_part(json["content"]);
-        return std::make_shared<IndexedForm>(h, p, index, content);
+        return std::make_shared<IndexedForm>(h, p, f, index, content);
       }
 
       if (cls == std::string("ByteMaskedArray")) {
@@ -491,7 +521,7 @@ namespace awkward {
                   cls + std::string(" is missing its 'valid_when'"));
         }
         bool valid_when = json["valid_when"].GetBool();
-        return std::make_shared<ByteMaskedForm>(h, p, mask, content,
+        return std::make_shared<ByteMaskedForm>(h, p, f, mask, content,
                                                 valid_when);
       }
 
@@ -528,7 +558,7 @@ namespace awkward {
                   cls + std::string(" is missing its 'lsb_order'"));
         }
         bool lsb_order = json["lsb_order"].GetBool();
-        return std::make_shared<BitMaskedForm>(h, p, mask, content,
+        return std::make_shared<BitMaskedForm>(h, p, f, mask, content,
                                                valid_when, lsb_order);
       }
 
@@ -538,7 +568,7 @@ namespace awkward {
                   cls + std::string(" is missing its 'content'"));
         }
         FormPtr content = fromjson_part(json["content"]);
-        return std::make_shared<UnmaskedForm>(h, p, content);
+        return std::make_shared<UnmaskedForm>(h, p, f, content);
       }
 
       if ((isgen = (cls == std::string("UnionArray")))  ||
@@ -589,11 +619,11 @@ namespace awkward {
           throw std::invalid_argument(
                   cls + std::string(" 'contents' must be a JSON list"));
         }
-        return std::make_shared<UnionForm>(h, p, tags, index, contents);
+        return std::make_shared<UnionForm>(h, p, f, tags, index, contents);
       }
 
       if (cls == std::string("EmptyArray")) {
-        return std::make_shared<EmptyForm>(h, p);
+        return std::make_shared<EmptyForm>(h, p, f);
       }
 
       if (cls == std::string("VirtualArray")) {
@@ -610,7 +640,7 @@ namespace awkward {
                   cls + std::string(" is missing its 'has_length'"));
         }
         bool has_length = json["has_length"].GetBool();
-        return std::make_shared<VirtualForm>(h, p, form, has_length);
+        return std::make_shared<VirtualForm>(h, p, f, form, has_length);
       }
 
     }
@@ -630,9 +660,12 @@ namespace awkward {
     return fromjson_part(doc);
   }
 
-  Form::Form(bool has_identities, const util::Parameters& parameters)
+  Form::Form(bool has_identities,
+             const util::Parameters& parameters,
+             const FormKey& form_key)
       : has_identities_(has_identities)
-      , parameters_(parameters) { }
+      , parameters_(parameters)
+      , form_key_(form_key) { }
 
   const std::string
   Form::tostring() const {
@@ -678,6 +711,26 @@ namespace awkward {
     return util::parameter_equals(parameters_, key, value);
   }
 
+  const FormKey
+  Form::form_key() const {
+    return form_key_;
+  }
+
+  bool
+  Form::form_key_equals(const FormKey& other_form_key) const {
+    if (form_key_.get() == nullptr  &&  other_form_key.get() == nullptr) {
+      return true;
+    }
+    else if (form_key_.get() != nullptr  &&
+             other_form_key.get() != nullptr  &&
+             *form_key_.get() == *(other_form_key.get())) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
   void
   Form::identities_tojson(ToJson& builder, bool verbose) const {
     if (verbose  ||  has_identities_) {
@@ -696,6 +749,18 @@ namespace awkward {
         builder.json(pair.second.c_str());
       }
       builder.endrecord();
+    }
+  }
+
+  void
+  Form::form_key_tojson(ToJson& builder, bool verbose) const {
+    if (form_key_.get() != nullptr) {
+      builder.field("form_key");
+      builder.string(*form_key_.get());
+    }
+    else if (verbose) {
+      builder.field("form_key");
+      builder.null();
     }
   }
 

@@ -23,6 +23,7 @@ namespace awkward {
     /// @brief Creates a NumpyForm. See NumpyArray for documentation.
     NumpyForm(bool has_identities,
               const util::Parameters& parameters,
+              const FormKey& form_key,
               const std::vector<int64_t>& inner_shape,
               int64_t itemsize,
               const std::string& format,
@@ -95,6 +96,7 @@ namespace awkward {
       equal(const FormPtr& other,
             bool check_identities,
             bool check_parameters,
+            bool check_form_key,
             bool compatibility_check) const override;
 
   private:

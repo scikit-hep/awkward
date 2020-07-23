@@ -34,9 +34,10 @@ namespace awkward {
 
   ListOffsetForm::ListOffsetForm(bool has_identities,
                                  const util::Parameters& parameters,
+                                 const FormKey& form_key,
                                  Index::Form offsets,
                                  const FormPtr& content)
-      : Form(has_identities, parameters)
+      : Form(has_identities, parameters, form_key)
       , offsets_(offsets)
       , content_(content) { }
 
@@ -80,6 +81,7 @@ namespace awkward {
     content_.get()->tojson_part(builder, verbose);
     identities_tojson(builder, verbose);
     parameters_tojson(builder, verbose);
+    form_key_tojson(builder, verbose);
     builder.endrecord();
   }
 
@@ -87,6 +89,7 @@ namespace awkward {
   ListOffsetForm::shallow_copy() const {
     return std::make_shared<ListOffsetForm>(has_identities_,
                                             parameters_,
+                                            form_key_,
                                             offsets_,
                                             content_);
   }
@@ -155,6 +158,7 @@ namespace awkward {
   ListOffsetForm::equal(const FormPtr& other,
                         bool check_identities,
                         bool check_parameters,
+                        bool check_form_key,
                         bool compatibility_check) const {
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
@@ -164,11 +168,16 @@ namespace awkward {
         !util::parameters_equal(parameters_, other.get()->parameters())) {
       return false;
     }
+    if (check_form_key  &&
+        !form_key_equals(other.get()->form_key())) {
+      return false;
+    }
     if (ListOffsetForm* t = dynamic_cast<ListOffsetForm*>(other.get())) {
       return (offsets_ == t->offsets()  &&
               content_.get()->equal(t->content(),
                                     check_identities,
                                     check_parameters,
+                                    check_form_key,
                                     compatibility_check));
     }
     else {
@@ -458,6 +467,7 @@ namespace awkward {
   ListOffsetArrayOf<T>::form(bool materialize) const {
     return std::make_shared<ListOffsetForm>(identities_.get() != nullptr,
                                             parameters_,
+                                            FormKey(nullptr),
                                             offsets_.form(),
                                             content_.get()->form(materialize));
   }

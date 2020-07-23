@@ -1341,6 +1341,29 @@ class Array(
 
         return numba.typeof(self._numbaview)
 
+    def __getstate__(self):
+        form, container, num_partitions = awkward1.to_arrayset(self)
+        if self._behavior is awkward1.behavior:
+            behavior = None
+        else:
+            behavior = self._behavior
+        if self._metadata is None:
+            metadata = None
+        else:
+            metadata = dict(self._metadata)
+        return form, container, num_partitions, behavior, metadata
+
+    def __setstate__(self, state):
+        form, container, num_partitions, behavior, metadata = state
+        layout = awkward1.from_arrayset(
+            form, container, num_partitions, highlevel=False
+        )
+        if self.__class__ is Array:
+            self.__class__ = awkward1._util.arrayclass(layout, behavior)
+        self.layout = layout
+        self.behavior = behavior
+        self.metadata = metadata
+
 
 class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
     """
@@ -1881,6 +1904,30 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         import numba
 
         return numba.typeof(self._numbaview)
+
+    def __getstate__(self):
+        form, container, num_partitions = awkward1.to_arrayset(self._layout.array)
+        if self._behavior is awkward1.behavior:
+            behavior = None
+        else:
+            behavior = self._behavior
+        if self._metadata is None:
+            metadata = None
+        else:
+            metadata = dict(self._metadata)
+        return form, container, num_partitions, behavior, metadata, self._layout.at
+
+    def __setstate__(self, state):
+        form, container, num_partitions, behavior, metadata, at = state
+        array = awkward1.from_arrayset(
+            form, container, num_partitions, highlevel=False
+        )
+        layout = awkward1.layout.Record(array, at)
+        if self.__class__ is Record:
+            self.__class__ = awkward1._util.recordclass(layout, behavior)
+        self.layout = layout
+        self.behavior = behavior
+        self.metadata = metadata
 
 
 class ArrayBuilder(object):
