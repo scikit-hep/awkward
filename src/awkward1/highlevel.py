@@ -1422,6 +1422,9 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
 
         self.layout = layout
         self.behavior = behavior
+        docstr = self.layout.purelist_parameter("__doc__")
+        if isinstance(docstr, str):
+            self.__doc__ = docstr
         if check_valid:
             awkward1.operations.describe.validity_error(self, exception=True)
 
