@@ -7,6 +7,23 @@
 #include "awkward/python/index.h"
 
 template <typename T>
+std::vector<T> pytuples_to_vector(py::object tuple) {
+  std::vector<T> c_tuple;
+  for(auto i : tuple) {
+    try {
+      int64_t element = py::cast<T>(i);
+      c_tuple.push_back(element);
+    }
+    catch (...) {
+      throw std::runtime_error(std::string(
+        "Error occured while processing tuple!"));
+    }
+  }
+
+  return c_tuple;
+}
+
+template <typename T>
 py::class_<ak::IndexOf<T>>
 make_IndexOf(const py::handle& m, const std::string& name) {
   return (py::class_<ak::IndexOf<T>>(m, name.c_str(), py::buffer_protocol())
@@ -39,6 +56,34 @@ make_IndexOf(const py::handle& m, const std::string& name) {
                              pyobject_deleter<T>(array.ptr())),
           0,
           (int64_t)info.shape[0]);
+      }))
+      .def(py::init([name](py::object array) -> ak::IndexOf<T> {
+        if(py::isinstance(array, py::module::import("cupy").attr("ndarray"))) {
+          if (py::cast<int64_t>(array.attr("ndim")) != 1) {
+            throw std::invalid_argument(name + std::string(
+              " must be built from a one-dimensional array; try array.ravel()"));
+          }
+          auto strides = pytuples_to_vector<int64_t>(array.attr("strides"));
+
+          if (strides[0] != sizeof(T)) {
+            throw std::invalid_argument(name + std::string(
+              " must be built from a contiguous array (array.strides == "
+              "(array.itemsize,)); try array.copy()"));
+          }
+
+          void* ptr = reinterpret_cast<void*>(py::cast<ssize_t>(array.attr("data").attr("ptr")));
+          std::vector<int64_t> shape = pytuples_to_vector<int64_t>(array.attr("shape"));
+
+          return ak::IndexOf<T>(std::shared_ptr<T>(reinterpret_cast<T*>(ptr),
+                                                  kernel::cuda_array_deleter<T>()),
+                                0,
+                                (int64_t)shape[0],
+                                kernel::Lib::cuda_kernels);
+        }
+        else {
+          throw std::invalid_argument(name + std::string(
+            " can only accept CuPy Arrays!"));
+        }
       }))
 
       .def("__repr__", &ak::IndexOf<T>::tostring)
@@ -74,13 +119,25 @@ make_IndexOf(const py::handle& m, const std::string& name) {
             "Index can only be sliced by an integer or start:stop slice");
         }
       })
-      .def("copy_to", [](const ak::IndexOf<T>& self, std::string& ptr_lib) {
+      .def("copy_to", [name](const ak::IndexOf<T>& self, std::string& ptr_lib) {
         if(ptr_lib == "cuda") {
-          return self.copy_to(kernel::Lib::cuda_kernels);
+          auto cuda_index = self.copy_to(kernel::Lib::cuda_kernels);
+
+          auto cupy_unowned_mem = py::module::import("cupy").attr("cuda").attr("UnownedMemory")(
+            reinterpret_cast<ssize_t>(cuda_index.ptr().get()),
+            cuda_index.length() * sizeof(T),
+            cuda_index);
+
+          auto cupy_memoryptr = py::module::import("cupy").attr("cuda").attr("MemoryPointer")(
+            cupy_unowned_mem,
+            0);
+
+          return py::module::import("awkward1").attr("layout").attr(name.c_str())(py::module::import("cupy").attr("ndarray")(
+            cupy_memoryptr));
         }
-        else if(ptr_lib == "cpu") {
-          return self.copy_to(kernel::Lib::cpu_kernels);
-        }
+//        else if(ptr_lib == "cpu") {
+//          return self.copy_to(kernel::Lib::cpu_kernels);
+//        }
         else {
           throw std::invalid_argument("Invalid kernel specified, valid kernels are cpu and cuda");
         }
