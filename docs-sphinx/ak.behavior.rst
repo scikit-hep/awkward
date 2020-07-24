@@ -315,7 +315,7 @@ Mixin decorators
 The pattern of adding additional properties and function overrides to records
 and arrays of records is quite common, and can be nicely described by the "mixin"
 idiom: a class with no constructor that is mixed with both the :doc:`_auto/ak.Array` and :doc:`_auto/ak.Record`
-class as to create new derived classes. The :doc:`_auto/ak.mixin_class` and :doc:`_auto/ak.mixin_class_method`
+class as to create new derived classes. The :doc:`_auto/ak.behaviors.mixins.mixin_class` and :doc:`_auto/ak.behaviors.mixins.mixin_class_method`
 python decorators assist with some of this boilerplate. Consider the ``Point`` class
 from above; we can implement all the functionality so far described as follows:
 
@@ -360,7 +360,7 @@ such a class as follows:
 .. code-block:: python
 
     @mixin_class(ak.behavior)
-    class WeightedPoint:
+    class WeightedPoint(Point):
         @mixin_class_method(np.equal, {"WeightedPoint"})
         def weighted_equal(self, other):
             return np.logical_and(self.point_equal(other), self.weight == other.weight)
