@@ -22,7 +22,7 @@ def mixin_class(registry):
         name = cls.__name__
         registry[name] = type(name + "Record", (cls, awkward1.highlevel.Record), {})
         registry["*", name] = type(name + "Array", (cls, awkward1.highlevel.Array), {})
-        for basecls in cls.__mro__:
+        for basecls in cls.mro():
             for method in basecls.__dict__.values():
                 if hasattr(method, "_awkward_mixin"):
                     ufunc, rhs, transpose = method._awkward_mixin
