@@ -186,20 +186,21 @@ def test_toarrow_ByteMaskedArray_5():
     bytemaskedarray = awkward1.layout.ByteMaskedArray(awkward1.layout.Index8(numpy.array([True, False, False], dtype=numpy.int8)), indexedarray, True)
     assert awkward1.to_arrow(bytemaskedarray).to_pylist() == awkward1.to_list(bytemaskedarray)
 
-# def test_toarrow_ByteMaskedArray_6():
-#     content0 = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
-#     content1 = awkward1.layout.NumpyArray(numpy.array([1, 2, 3, 4, 5]))
-#     tags = awkward1.layout.Index8(
-#         numpy.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=numpy.int8))
-#     index = awkward1.layout.Index32(
-#         numpy.array([0, 1, 0, 1, 2, 2, 4, 3], dtype=numpy.int32))
-#     unionarray = awkward1.layout.UnionArray8_32(
-#         tags, index, [content0, content1])
+@pytest.mark.skip(reason="https://issues.apache.org/jira/browse/ARROW-9556")
+def test_toarrow_ByteMaskedArray_broken_unions():
+    content0 = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
+    content1 = awkward1.layout.NumpyArray(numpy.array([1, 2, 3, 4, 5]))
+    tags = awkward1.layout.Index8(
+        numpy.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=numpy.int8))
+    index = awkward1.layout.Index32(
+        numpy.array([0, 1, 0, 1, 2, 2, 4, 3], dtype=numpy.int32))
+    unionarray = awkward1.layout.UnionArray8_32(
+        tags, index, [content0, content1])
 
-#     bytemaskedarray = awkward1.layout.ByteMaskedArray(awkward1.layout.Index8(
-#         numpy.array([True, False, False], dtype=numpy.int8)), unionarray, True)
-#     assert awkward1.to_arrow(bytemaskedarray).to_pylist(
-#     ) == awkward1.to_list(bytemaskedarray)
+    bytemaskedarray = awkward1.layout.ByteMaskedArray(awkward1.layout.Index8(
+        numpy.array([True, False, False], dtype=numpy.int8)), unionarray, True)
+    assert awkward1.to_arrow(bytemaskedarray).to_pylist(
+    ) == awkward1.to_list(bytemaskedarray)
 
 def test_toarrow_IndexedOptionArray():
     ioa = awkward1.layout.IndexedOptionArray32(
@@ -583,34 +584,37 @@ def test_arrow_coverage100():
     assert awkward1.to_arrow(a).to_pylist() == [[1, 2, 3], [], [4, 5], 999, 123]
     assert awkward1.to_list(awkward1.from_arrow(awkward1.to_arrow(a))) == [[1, 2, 3], [], [4, 5], 999, 123]
 
-    # b = awkward1.layout.ByteMaskedArray(awkward1.layout.Index8(numpy.array([True, True, False, False, True])), a, valid_when=True)
-    # assert awkward1.to_arrow(b).to_pylist() == [[1, 2, 3], [], None, None, 123]
-    # assert awkward1.to_list(awkward1.from_arrow(awkward1.to_arrow(b))) == [[1, 2, 3], [], None, None, 123]
+@pytest.mark.skip(reason="https://issues.apache.org/jira/browse/ARROW-9556")
+def test_arrow_coverage100_broken_unions():
+    a = awkward1.from_iter([[1, 2, 3], [], [4, 5], 999, 123], highlevel=False)
+    b = awkward1.layout.ByteMaskedArray(awkward1.layout.Index8(numpy.array([True, True, False, False, True])), a, valid_when=True)
+    assert awkward1.to_arrow(b).to_pylist() == [[1, 2, 3], [], None, None, 123]
+    assert awkward1.to_list(awkward1.from_arrow(awkward1.to_arrow(b))) == [[1, 2, 3], [], None, None, 123]
 
-    # content1 = awkward1.from_iter([1.1, 2.2, 3.3, 4.4, 5.5], highlevel=False)
-    # content2 = awkward1.layout.NumpyArray(numpy.array([], dtype=numpy.int32))
-    # a = awkward1.layout.UnionArray8_32(awkward1.layout.Index8(numpy.array([0, 0, 0, 0, 0], "i1")), awkward1.layout.Index32(numpy.array([0, 1, 2, 3, 4], "i4")), [content1, content2])
-    # assert awkward1.to_list(a) == [1.1, 2.2, 3.3, 4.4, 5.5]
-    # assert awkward1.to_arrow(a).to_pylist() == [1.1, 2.2, 3.3, 4.4, 5.5]
-    # assert awkward1.to_list(awkward1.from_arrow(awkward1.to_arrow(a))) == [1.1, 2.2, 3.3, 4.4, 5.5]
+    content1 = awkward1.from_iter([1.1, 2.2, 3.3, 4.4, 5.5], highlevel=False)
+    content2 = awkward1.layout.NumpyArray(numpy.array([], dtype=numpy.int32))
+    a = awkward1.layout.UnionArray8_32(awkward1.layout.Index8(numpy.array([0, 0, 0, 0, 0], "i1")), awkward1.layout.Index32(numpy.array([0, 1, 2, 3, 4], "i4")), [content1, content2])
+    assert awkward1.to_list(a) == [1.1, 2.2, 3.3, 4.4, 5.5]
+    assert awkward1.to_arrow(a).to_pylist() == [1.1, 2.2, 3.3, 4.4, 5.5]
+    assert awkward1.to_list(awkward1.from_arrow(awkward1.to_arrow(a))) == [1.1, 2.2, 3.3, 4.4, 5.5]
 
-    # a = pyarrow.UnionArray.from_sparse(pyarrow.array([0, 0, 0, 0, 0], type=pyarrow.int8()), [pyarrow.array([0.0, 1.1, None, 3.3, 4.4]), pyarrow.array([True, None, False, True, False])])
-    # assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == [0.0, 1.1, None, 3.3, 4.4]
+    a = pyarrow.UnionArray.from_sparse(pyarrow.array([0, 0, 0, 0, 0], type=pyarrow.int8()), [pyarrow.array([0.0, 1.1, None, 3.3, 4.4]), pyarrow.array([True, None, False, True, False])])
+    assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == [0.0, 1.1, None, 3.3, 4.4]
 
-    # uniontype = pyarrow.union([pyarrow.field("0", pyarrow.list_(pyarrow.float64())),
-    #                            pyarrow.field("1", pyarrow.float64())],
-    #                           "sparse",
-    #                           [0, 1])
-    # a = pyarrow.Array.from_buffers(
-    #         uniontype,
-    #         5,
-    #         [pyarrow.py_buffer(numpy.array([3], "u1")),
-    #          pyarrow.py_buffer(numpy.array([0, 1, 0, 1, 1], "i1")),
-    #          None],
-    #         children=[pyarrow.array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]),
-    #                   pyarrow.array([0.0, 1.1, 2.2, 3.3, 4.4])])
-    # assert a.to_pylist() == [[0.0, 1.1, 2.2], 1.1, None, None, None]
-    # assert awkward1.to_list(awkward1.from_arrow(a)) == [[0.0, 1.1, 2.2], 1.1, None, None, None]
+    uniontype = pyarrow.union([pyarrow.field("0", pyarrow.list_(pyarrow.float64())),
+                               pyarrow.field("1", pyarrow.float64())],
+                              "sparse",
+                              [0, 1])
+    a = pyarrow.Array.from_buffers(
+            uniontype,
+            5,
+            [pyarrow.py_buffer(numpy.array([3], "u1")),
+             pyarrow.py_buffer(numpy.array([0, 1, 0, 1, 1], "i1")),
+             None],
+            children=[pyarrow.array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]),
+                      pyarrow.array([0.0, 1.1, 2.2, 3.3, 4.4])])
+    assert a.to_pylist() == [[0.0, 1.1, 2.2], 1.1, None, None, None]
+    assert awkward1.to_list(awkward1.from_arrow(a)) == [[0.0, 1.1, 2.2], 1.1, None, None, None]
 
-    # a = pyarrow.chunked_array([pyarrow.array([1.1, 2.2, 3.3, 4.4, 5.5])])
-    # assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == [1.1, 2.2, 3.3, 4.4, 5.5]
+    a = pyarrow.chunked_array([pyarrow.array([1.1, 2.2, 3.3, 4.4, 5.5])])
+    assert awkward1.to_list(awkward1.from_arrow(a, highlevel=False)) == [1.1, 2.2, 3.3, 4.4, 5.5]
