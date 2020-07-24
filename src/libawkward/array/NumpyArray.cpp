@@ -559,42 +559,71 @@ namespace awkward {
   }
 
   template <typename T>
-  void tostring_as(kernel::Lib ptr_lib, std::stringstream& out, T* ptr, int64_t length) {
+  void tostring_as(kernel::Lib ptr_lib,
+                   std::stringstream& out,
+                   T* ptr,
+                   ssize_t byteoffset,
+                   ssize_t stride,
+                   int64_t length) {
     if (length <= 10) {
       for (int64_t i = 0;  i < length;  i++) {
+        T* ptr2 = reinterpret_cast<T*>(
+            reinterpret_cast<size_t>(ptr) + stride*((ssize_t)i));
         if (i != 0) {
           out << " ";
         }
         if (std::is_same<T, bool>::value) {
-          out << (kernel::NumpyArray_getitem_at(ptr_lib, ptr, i) ? "true" : "false");
+          out << (kernel::NumpyArray_getitem_at(ptr_lib, ptr2, 0) ? "true" : "false");
+        }
+        else if (std::is_same<T, char>::value) {
+          out << (int)kernel::NumpyArray_getitem_at(ptr_lib, ptr2, 0);
+        }
+        else if (std::is_same<T, unsigned char>::value) {
+          out << (unsigned int)kernel::NumpyArray_getitem_at(ptr_lib, ptr2, 0);
         }
         else {
-          out << kernel::NumpyArray_getitem_at(ptr_lib, ptr, i);
+          out << kernel::NumpyArray_getitem_at(ptr_lib, ptr2, 0);
         }
       }
     }
     else {
       for (int64_t i = 0;  i < 5;  i++) {
+        T* ptr2 = reinterpret_cast<T*>(
+            reinterpret_cast<size_t>(ptr) + stride*((ssize_t)i));
         if (i != 0) {
           out << " ";
         }
         if (std::is_same<T, bool>::value) {
-          out << (kernel::NumpyArray_getitem_at(ptr_lib, ptr, i) ? "true" : "false");
+          out << (kernel::NumpyArray_getitem_at(ptr_lib, ptr2, 0) ? "true" : "false");
+        }
+        else if (std::is_same<T, char>::value) {
+          out << (int)kernel::NumpyArray_getitem_at(ptr_lib, ptr2, 0);
+        }
+        else if (std::is_same<T, unsigned char>::value) {
+          out << (unsigned int)kernel::NumpyArray_getitem_at(ptr_lib, ptr2, 0);
         }
         else {
-          out << kernel::NumpyArray_getitem_at(ptr_lib, ptr, i);
+          out << kernel::NumpyArray_getitem_at(ptr_lib, ptr2, 0);
         }
       }
       out << " ... ";
       for (int64_t i = length - 5;  i < length;  i++) {
+        T* ptr2 = reinterpret_cast<T*>(
+            reinterpret_cast<size_t>(ptr) + stride*((ssize_t)i));
         if (i != length - 5) {
           out << " ";
         }
         if (std::is_same<T, bool>::value) {
-          out << (kernel::NumpyArray_getitem_at(ptr_lib, ptr, i) ? "true" : "false");
+          out << (kernel::NumpyArray_getitem_at(ptr_lib, ptr2, 0) ? "true" : "false");
+        }
+        else if (std::is_same<T, char>::value) {
+          out << (int)kernel::NumpyArray_getitem_at(ptr_lib, ptr2, 0);
+        }
+        else if (std::is_same<T, unsigned char>::value) {
+          out << (unsigned int)kernel::NumpyArray_getitem_at(ptr_lib, ptr2, 0);
         }
         else {
-          out << kernel::NumpyArray_getitem_at(ptr_lib, ptr, i);
+          out << kernel::NumpyArray_getitem_at(ptr_lib, ptr2, 0);
         }
       }
     }
@@ -656,66 +685,88 @@ namespace awkward {
       tostring_as<bool>(ptr_lib(),
                         out,
                         reinterpret_cast<bool*>(byteptr()),
+                        byteoffset_,
+                        strides_[0],
                         length());
     }
     else if (ndim() == 1  &&  dtype_ == util::dtype::int8) {
       tostring_as<int8_t>(ptr_lib(),
                           out,
                           reinterpret_cast<int8_t*>(byteptr()),
+                          byteoffset_,
+                          strides_[0],
                           length());
     }
     else if (ndim() == 1  &&  dtype_ == util::dtype::int16) {
       tostring_as<int16_t>(ptr_lib(),
                            out,
                            reinterpret_cast<int16_t*>(byteptr()),
+                           byteoffset_,
+                           strides_[0],
                            length());
     }
     else if (ndim() == 1  &&  dtype_ == util::dtype::int32) {
       tostring_as<int32_t>(ptr_lib(),
                            out,
                            reinterpret_cast<int32_t*>(byteptr()),
+                           byteoffset_,
+                           strides_[0],
                            length());
     }
     else if (ndim() == 1  &&  dtype_ == util::dtype::int64) {
       tostring_as<int64_t>(ptr_lib(),
                            out,
                            reinterpret_cast<int64_t*>(byteptr()),
+                           byteoffset_,
+                           strides_[0],
                            length());
     }
     else if (ndim() == 1  &&  dtype_ == util::dtype::uint8) {
       tostring_as<uint8_t>(ptr_lib(),
                            out,
                            reinterpret_cast<uint8_t*>(byteptr()),
+                           byteoffset_,
+                           strides_[0],
                            length());
     }
     else if (ndim() == 1  &&  dtype_ == util::dtype::uint16) {
       tostring_as<uint16_t>(ptr_lib(),
                             out,
                             reinterpret_cast<uint16_t*>(byteptr()),
+                            byteoffset_,
+                            strides_[0],
                             length());
     }
     else if (ndim() == 1  &&  dtype_ == util::dtype::uint32) {
       tostring_as<uint32_t>(ptr_lib(),
                             out,
                             reinterpret_cast<uint32_t*>(byteptr()),
+                            byteoffset_,
+                            strides_[0],
                             length());
     }
     else if (ndim() == 1  &&  dtype_ == util::dtype::uint64) {
       tostring_as<uint64_t>(ptr_lib(),
                             out,
                             reinterpret_cast<uint64_t*>(byteptr()),
+                            byteoffset_,
+                            strides_[0],
                             length());
     }
     else if (ndim() == 1  &&  dtype_ == util::dtype::float32) {
       tostring_as<float>(ptr_lib(),
                          out,
                          reinterpret_cast<float*>(byteptr()),
+                         byteoffset_,
+                         strides_[0],
                          length());
     }
     else if (ndim() == 1  &&  dtype_ == util::dtype::float64) {
       tostring_as<double>(ptr_lib(),
                           out,
                           reinterpret_cast<double*>(byteptr()),
+                          byteoffset_,
+                          strides_[0],
                           length());
     }
     else {

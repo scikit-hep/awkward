@@ -1626,7 +1626,7 @@ def from_arrow(array, highlevel=True, behavior=None):
             mask = buffers.pop(0)
             child_arrays = []
             keys = []
-            for i in range(tpe.num_children):
+            for i in range(tpe.num_fields):
                 child_arrays.append(
                     popbuffers(
                         None if array is None else array.field(tpe[i].name),
@@ -1691,14 +1691,13 @@ def from_arrow(array, highlevel=True, behavior=None):
                 return out
 
         elif isinstance(tpe, pyarrow.lib.UnionType) and tpe.mode == "sparse":
-            assert tpe.num_buffers == 3
+            assert tpe.num_buffers == 2
             mask = buffers.pop(0)
             tags = numpy.frombuffer(buffers.pop(0), dtype=numpy.int8)[:length]
-            assert buffers.pop(0) is None
             index = numpy.arange(len(tags), dtype=numpy.int32)
 
             contents = []
-            for i in range(tpe.num_children):
+            for i in range(tpe.num_fields):
                 try:
                     sublength = index[tags == i][-1] + 1
                 except IndexError:
@@ -1730,7 +1729,7 @@ def from_arrow(array, highlevel=True, behavior=None):
             index = numpy.frombuffer(buffers.pop(0), dtype=numpy.int32)[:length]
 
             contents = []
-            for i in range(tpe.num_children):
+            for i in range(tpe.num_fields):
                 try:
                     sublength = index[tags == i].max() + 1
                 except ValueError:
@@ -1860,7 +1859,7 @@ def from_arrow(array, highlevel=True, behavior=None):
             data = buffers.pop(0)
             out = numpy.frombuffer(data, dtype=numpy.uint8)
             out = numpy.unpackbits(out).reshape(-1, 8)[:, ::-1].reshape(-1)
-            out = awkward1.layout.NumpyArray(out[:length])
+            out = awkward1.layout.NumpyArray(out[:length].view(numpy.bool_))
             if mask is not None:
                 awk_mask = awkward1.layout.IndexU8(
                     numpy.frombuffer(mask, dtype=numpy.uint8)
