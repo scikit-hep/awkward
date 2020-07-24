@@ -4,6 +4,12 @@ import re
 from collections import OrderedDict
 from collections.abc import Iterable
 
+def indent_code(code, indent):
+    finalcode = ""
+    for line in code.splitlines():
+        finalcode += " " * indent + line + "\n"
+    return finalcode
+
 
 def preprocess(filename, skip_implementation=False):
     code = ""
