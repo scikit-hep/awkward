@@ -1,3 +1,2 @@
 sphinx>=2.4.4
-pycparser
-black
+PyYAML
