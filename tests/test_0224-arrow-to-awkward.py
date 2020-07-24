@@ -11,18 +11,22 @@ import awkward1
 
 pyarrow = pytest.importorskip("pyarrow")
 
-def test_toarrow():
+def test_toarrow_BitMaskedArray():
     content = awkward1.Array(
         ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]).layout
     bitmask = awkward1.layout.IndexU8(numpy.array([40, 34], dtype=numpy.uint8))
     array = awkward1.layout.BitMaskedArray(bitmask, content, False, 9, False)
     assert awkward1.to_arrow(array).to_pylist() == awkward1.to_list(array)
 
+def test_toarrow_ByteMaskedArray_1():
+    content = awkward1.Array(
+        ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]).layout
     bytemask = awkward1.layout.Index8(
         numpy.array([False, True, False], dtype=numpy.bool))
     array = awkward1.layout.ByteMaskedArray(bytemask, content, True)
     assert awkward1.to_arrow(array).to_pylist() == awkward1.to_list(array)
 
+def test_toarrow_NumpyArray_1():
     array = awkward1.layout.NumpyArray(
         numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5]))
     assert isinstance(awkward1.to_arrow(array),
@@ -30,6 +34,7 @@ def test_toarrow():
     assert awkward1.to_arrow(array).to_pylist() == [
         0.0, 1.1, 2.2, 3.3, 4.4, 5.5]
 
+def test_toarrow_NumpyArray_2():
     array = awkward1.layout.NumpyArray(
         numpy.array([[0.0, 1.1], [2.2, 3.3], [4.4, 5.5]]))
     assert isinstance(awkward1.to_arrow(array),
@@ -37,10 +42,12 @@ def test_toarrow():
     assert awkward1.to_arrow(array) == pyarrow.Tensor.from_numpy(
         numpy.array([[0.0, 1.1], [2.2, 3.3], [4.4, 5.5]]))
 
+def test_toarrow_EmptyArray():
     array = awkward1.layout.EmptyArray()
     assert isinstance(awkward1.to_arrow(array), (pyarrow.lib.Array))
     assert awkward1.to_arrow(array).to_pylist() == []
 
+def test_toarrow_ListOffsetArray64():
     content = awkward1.layout.NumpyArray(
         numpy.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
     offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 9]))
@@ -49,6 +56,7 @@ def test_toarrow():
     assert awkward1.to_arrow(array).to_pylist() == [[1.1, 2.2, 3.3], [], [
         4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]
 
+def test_toarrow_ListOffsetArrayU32():
     content = awkward1.layout.NumpyArray(
         numpy.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
     offsets = awkward1.layout.IndexU32(numpy.array([0, 3, 3, 5, 6, 9]))
@@ -57,6 +65,7 @@ def test_toarrow():
     assert awkward1.to_arrow(array).to_pylist() == [[1.1, 2.2, 3.3], [], [
         4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]
 
+def test_toarrow_ListArray_RegularArray():
     # Testing parameters
     content = awkward1.Array(
         ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]).layout
@@ -82,6 +91,11 @@ def test_toarrow():
     assert awkward1.to_arrow(regulararray).to_pylist() == [[[0.0, 1.1, 2.2], []], [
         [3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]]
 
+def test_toarrow_RecordArray():
+    content = awkward1.layout.NumpyArray(
+        numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10]))
+    offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 10, 10]))
+    listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content)
     content1 = awkward1.layout.NumpyArray(numpy.array([1, 2, 3, 4, 5]))
     content2 = awkward1.layout.NumpyArray(
         numpy.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
@@ -94,9 +108,9 @@ def test_toarrow():
     assert awkward1.to_arrow(recordarray).to_pylist() == [{'one': 1, 'two': [0.0, 1.1, 2.2], '2': 1.1, 'wonky': 1}, {'one': 2, 'two': [], '2': 2.2, 'wonky': 2}, {
         'one': 3, 'two': [3.3, 4.4], '2': 3.3, 'wonky': 3}, {'one': 4, 'two': [5.5], '2': 4.4, 'wonky': 4}, {'one': 5, 'two': [6.6, 7.7, 8.8, 9.9], '2': 5.5, 'wonky': 5}]
 
+def test_toarrow_UnionArray():
     content0 = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
-    content = awkward1.Array(
-        ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]).layout
+    content1 = awkward1.layout.NumpyArray(numpy.array([1, 2, 3, 4, 5]))
     tags = awkward1.layout.Index8(
         numpy.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=numpy.int8))
     index = awkward1.layout.Index32(
@@ -108,6 +122,7 @@ def test_toarrow():
     assert awkward1.to_arrow(unionarray).to_pylist() == [
         1, 2, [1.1, 2.2, 3.3], [], 3, [4.4, 5.5], 5, 4]
 
+def test_toarrow_IndexedArray():
     content = awkward1.layout.NumpyArray(
         numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
     index = awkward1.layout.Index32(
@@ -119,50 +134,112 @@ def test_toarrow():
     assert awkward1.to_arrow(indexedarray).to_pylist() == [
         0.0, 2.2, 4.4, 6.6, 8.8, 9.9, 7.7, 5.5]
 
+def test_toarrow_ByteMaskedArray_2():
+    content = awkward1.layout.NumpyArray(
+        numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10]))
+    offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 10, 10]))
+    listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content)
     bytemaskedarray = awkward1.layout.ByteMaskedArray(awkward1.layout.Index8(numpy.array(
         [True, True, False, False, False], dtype=numpy.int8)), listoffsetarray, True)
 
     assert awkward1.to_arrow(bytemaskedarray).to_pylist() == [
         [0.0, 1.1, 2.2], [], None, None, None]
 
+def test_toarrow_ByteMaskedArray_3():
+    content = awkward1.layout.NumpyArray(
+        numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10]))
+    offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 10, 10]))
+    listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content)
+    regulararray = awkward1.layout.RegularArray(listoffsetarray, 2)
+    starts = awkward1.layout.Index64(numpy.array([0, 1]))
+    stops = awkward1.layout.Index64(numpy.array([2, 3]))
+    listarray = awkward1.layout.ListArray64(starts, stops, regulararray)
+
     bytemaskedarray = awkward1.layout.ByteMaskedArray(awkward1.layout.Index8(
         numpy.array([True, False], dtype=numpy.int8)), listarray, True)
     assert awkward1.to_arrow(bytemaskedarray).to_pylist(
     ) == awkward1.to_list(bytemaskedarray)
+
+def test_toarrow_ByteMaskedArray_4():
+    content1 = awkward1.layout.NumpyArray(numpy.array([1, 2, 3, 4, 5]))
+    content2 = awkward1.layout.NumpyArray(
+        numpy.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
+    content = awkward1.layout.NumpyArray(
+        numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10]))
+    offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 10, 10]))
+    listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content)
+    recordarray = awkward1.layout.RecordArray(
+        [content1, listoffsetarray, content2, content1], keys=["one", "two", "2", "wonky"])
 
     bytemaskedarray = awkward1.layout.ByteMaskedArray(awkward1.layout.Index8(
         numpy.array([True, False], dtype=numpy.int8)), recordarray, True)
     assert awkward1.to_arrow(bytemaskedarray).to_pylist(
     ) == awkward1.to_list(bytemaskedarray)
 
+def test_toarrow_ByteMaskedArray_5():
+    content = awkward1.layout.NumpyArray(
+        numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
+    index = awkward1.layout.Index32(
+        numpy.array([0, 2, 4, 6, 8, 9, 7, 5], dtype=numpy.int64))
+    indexedarray = awkward1.layout.IndexedArray32(index, content)
+
     bytemaskedarray = awkward1.layout.ByteMaskedArray(awkward1.layout.Index8(numpy.array([True, False, False], dtype=numpy.int8)), indexedarray, True)
     assert awkward1.to_arrow(bytemaskedarray).to_pylist() == awkward1.to_list(bytemaskedarray)
+
+def test_toarrow_ByteMaskedArray_6():
+    content0 = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
+    content1 = awkward1.layout.NumpyArray(numpy.array([1, 2, 3, 4, 5]))
+    tags = awkward1.layout.Index8(
+        numpy.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=numpy.int8))
+    index = awkward1.layout.Index32(
+        numpy.array([0, 1, 0, 1, 2, 2, 4, 3], dtype=numpy.int32))
+    unionarray = awkward1.layout.UnionArray8_32(
+        tags, index, [content0, content1])
 
     bytemaskedarray = awkward1.layout.ByteMaskedArray(awkward1.layout.Index8(
         numpy.array([True, False, False], dtype=numpy.int8)), unionarray, True)
     assert awkward1.to_arrow(bytemaskedarray).to_pylist(
     ) == awkward1.to_list(bytemaskedarray)
 
-    ioa = awkward1.layout.IndexedOptionArray32(awkward1.layout.Index32([-30, 19, 6, 7, -3, 21, 13, 22, 17, 9, -12, 16]), awkward1.layout.NumpyArray(numpy.array([5.2, 1.7, 6.7, -0.4, 4.0, 7.8, 3.8, 6.8, 4.2, 0.3, 4.6, 6.2,
-                                                                                                                                                                 6.9, -0.7, 3.9, 1.6, 8.7, -0.7, 3.2, 4.3, 4.0, 5.8, 4.2, 7.0,
-                                                                                                                                                                 5.6, 3.8])))
+def test_toarrow_IndexedOptionArray():
+    ioa = awkward1.layout.IndexedOptionArray32(
+        awkward1.layout.Index32([-30, 19, 6, 7, -3, 21, 13, 22, 17, 9, -12, 16]),
+        awkward1.layout.NumpyArray(numpy.array(
+            [5.2, 1.7, 6.7, -0.4, 4.0, 7.8, 3.8, 6.8, 4.2, 0.3, 4.6, 6.2,
+             6.9, -0.7, 3.9, 1.6, 8.7, -0.7, 3.2, 4.3, 4.0, 5.8, 4.2, 7.0,
+             5.6, 3.8])))
     assert awkward1.to_arrow(ioa).to_pylist() == awkward1.to_list(ioa)
 
-def test_fromarrow():
+def test_fromarrow_NumpyArray_1():
     boolarray = awkward1.layout.NumpyArray(numpy.array([True, True, True, False, False, True, False, True, False, True]))
     assert awkward1.to_list(awkward1.from_arrow(awkward1.to_arrow(boolarray), highlevel=False)) == awkward1.to_list(boolarray)
 
+def test_fromarrow_NumpyArray_2():
     content = awkward1.layout.NumpyArray(
         numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10]))
     assert awkward1.to_list(awkward1.from_arrow(awkward1.to_arrow(content), highlevel=False)) == awkward1.to_list(content)
 
+def test_fromarrow_ListOffsetArray():
+    content = awkward1.layout.NumpyArray(
+        numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10]))
     offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 10, 10]))
-
     listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content)
     assert awkward1.to_list(awkward1.from_arrow(awkward1.to_arrow(listoffsetarray), highlevel=False)) == awkward1.to_list(listoffsetarray)
 
+def test_fromarrow_RegularArray():
+    content = awkward1.layout.NumpyArray(
+        numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10]))
+    offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 10, 10]))
+    listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content)
+
     regulararray = awkward1.layout.RegularArray(listoffsetarray, 2)
     assert awkward1.to_list(awkward1.from_arrow(awkward1.to_arrow(regulararray), highlevel=False)) == awkward1.to_list(regulararray)
+
+def test_fromarrow_RecordArray():
+    content = awkward1.layout.NumpyArray(
+        numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10]))
+    offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 10, 10]))
+    listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content)
 
     content1 = awkward1.layout.NumpyArray(numpy.array([1, 2, 3, 4, 5]))
     content2 = awkward1.layout.NumpyArray(
@@ -172,6 +249,7 @@ def test_fromarrow():
         [content1, listoffsetarray, content2, content1], keys=["one", "chonks", "2", "wonky"])
     assert awkward1.to_list(awkward1.from_arrow(awkward1.to_arrow(recordarray), highlevel=False)) == awkward1.to_list(recordarray)
 
+def test_fromarrow_UnionArray():
     content0 = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
     content = awkward1.Array(
         ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]).layout
