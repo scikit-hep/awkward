@@ -320,18 +320,16 @@ python decorators assist with some of this boilerplate. Consider the ``Point`` c
 from above; we can implement all the functionality so far described as follows:
 
 .. code-block:: python
-    from awkward1 import mixin_class, mixin_class_method
-
-    @mixin_class(ak.behavior)
+    @ak.mixin_class(ak.behavior)
     class Point:
         def distance(self, other):
             return np.sqrt((self.x - other.x) ** 2 + (self.y - other.y) ** 2)
 
-        @mixin_class_method(np.equal, {"Point"})
+        @ak.mixin_class_method(np.equal, {"Point"})
         def point_equal(self, other):
             return np.logical_and(self.x == other.x, self.y == other.y)
 
-        @mixin_class_method(np.abs)
+        @ak.mixin_class_method(np.abs)
         def point_abs(self):
             return np.sqrt(self.x ** 2 + self.y ** 2)
 
@@ -344,7 +342,7 @@ to be added by overriding the ``np.add`` ufunc (appending to our class definitio
     class Point:
         # ...
 
-        @mixin_class_method(np.add, {"Point"})
+        @ak.mixin_class_method(np.add, {"Point"})
         def point_add(self, other):
             return ak.zip(
                 {"x": self.x + other.x, "y": self.y + other.y}, with_name="Point",
@@ -359,13 +357,13 @@ such a class as follows:
 
 .. code-block:: python
 
-    @mixin_class(ak.behavior)
+    @ak.mixin_class(ak.behavior)
     class WeightedPoint(Point):
-        @mixin_class_method(np.equal, {"WeightedPoint"})
+        @ak.mixin_class_method(np.equal, {"WeightedPoint"})
         def weighted_equal(self, other):
             return np.logical_and(self.point_equal(other), self.weight == other.weight)
 
-        @mixin_class_method(np.add, {"WeightedPoint"})
+        @ak.mixin_class_method(np.add, {"WeightedPoint"})
         def weighted_add(self, other):
             sumw = self.weight + other.weight
             return ak.zip(
