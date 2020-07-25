@@ -1,6 +1,5 @@
 import os
 
-import black
 import yaml
 
 from parser_utils import indent_code
@@ -9,7 +8,6 @@ CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
 def genkerneldocs():
-    blackmode = black.FileMode()  # Initialize black config
     prefix = """Kernel interface and specification
 ----------------------------------
 
@@ -58,12 +56,7 @@ The interface, as well as specifications for each function's behavior through a 
                 outfile.write(".. code-block:: python\n\n")
                 # Remove conditional at the end of dev
                 if "def" in func["specification"]:
-                    outfile.write(
-                        indent_code(
-                            black.format_str(func["specification"], mode=blackmode), 4,
-                        )
-                        + "\n\n"
-                    )
+                    outfile.write(indent_code(func["specification"], 4,) + "\n\n")
         if os.path.isfile(
             os.path.join(CURRENT_DIR, "..", "docs-sphinx", "_auto", "toctree.txt",)
         ):

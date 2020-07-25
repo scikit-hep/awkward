@@ -5,6 +5,7 @@ import os
 import re
 from collections import OrderedDict
 
+import black
 import pycparser
 
 from parser_utils import indent_code
@@ -647,15 +648,16 @@ def genpython(pfile):
             code = code[:k] + code[k + 6 :]
         return code
 
+    blackmode = black.FileMode()  # Initialize black config
     ast = pycparser.c_parser.CParser().parse(pfile)
     funcs = {}
     for i in range(len(ast.ext)):
         decl = FuncDecl(ast.ext[i].decl)
-        funcs[decl.name] = (
+        funcs[decl.name] = black.format_str((
             "def {0}({1})".format(decl.name, decl.arrange_args(),)
             + ":\n"
             + remove_return(FuncBody(ast.ext[i].body).code)
-        )
+        ), mode=blackmode)
     return funcs
 
 
