@@ -405,13 +405,10 @@ class FuncBody(object):
                             self.traverse(item.cond.right, 0, called=True),
                         )
                     else:
-                        stmt = (
-                            " " * indent
-                            + "for {0} in range({1}, {2}):\n".format(
-                                item.init.decls[0].name,
-                                item.init.decls[0].init.value,
-                                self.traverse(item.cond.right, 0, called=True),
-                            )
+                        stmt = " " * indent + "for {0} in range({1}, {2}):\n".format(
+                            item.init.decls[0].name,
+                            item.init.decls[0].init.value,
+                            self.traverse(item.cond.right, 0, called=True),
                         )
                 else:
                     stmt = " " * indent + "for {0} in range({1}, {2}):\n".format(
@@ -653,11 +650,14 @@ def genpython(pfile):
     funcs = {}
     for i in range(len(ast.ext)):
         decl = FuncDecl(ast.ext[i].decl)
-        funcs[decl.name] = black.format_str((
-            "def {0}({1})".format(decl.name, decl.arrange_args(),)
-            + ":\n"
-            + remove_return(FuncBody(ast.ext[i].body).code)
-        ), mode=blackmode)
+        funcs[decl.name] = black.format_str(
+            (
+                "def {0}({1})".format(decl.name, decl.arrange_args(),)
+                + ":\n"
+                + remove_return(FuncBody(ast.ext[i].body).code)
+            ),
+            mode=blackmode,
+        )
     return funcs
 
 
