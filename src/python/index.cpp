@@ -57,35 +57,6 @@ make_IndexOf(const py::handle& m, const std::string& name) {
           0,
           (int64_t)info.shape[0]);
       }))
-      .def(py::init([name](py::object array) -> ak::IndexOf<T> {
-        if(py::isinstance(array, py::module::import("cupy").attr("ndarray"))) {
-          if (py::cast<int64_t>(array.attr("ndim")) != 1) {
-            throw std::invalid_argument(name + std::string(
-              " must be built from a one-dimensional array; try array.ravel()"));
-          }
-          auto strides = pytuples_to_vector<int64_t>(array.attr("strides"));
-
-          if (strides[0] != sizeof(T)) {
-            throw std::invalid_argument(name + std::string(
-              " must be built from a contiguous array (array.strides == "
-              "(array.itemsize,)); try array.copy()"));
-          }
-
-          void* ptr = reinterpret_cast<void*>(py::cast<ssize_t>(array.attr("data").attr("ptr")));
-          std::vector<int64_t> shape = pytuples_to_vector<int64_t>(array.attr("shape"));
-
-          return ak::IndexOf<T>(std::shared_ptr<T>(reinterpret_cast<T*>(ptr),
-                                                  kernel::cuda_array_deleter<T>()),
-                                0,
-                                (int64_t)shape[0],
-                                kernel::Lib::cuda_kernels);
-        }
-        else {
-          throw std::invalid_argument(name + std::string(
-            " can only accept CuPy Arrays!"));
-        }
-      }))
-
       .def("__repr__", &ak::IndexOf<T>::tostring)
       .def("__len__", &ak::IndexOf<T>::length)
       .def("__getitem__", [](const ak::IndexOf<T>& self, py::object& obj) {
@@ -118,6 +89,34 @@ make_IndexOf(const py::handle& m, const std::string& name) {
           throw std::invalid_argument(
             "Index can only be sliced by an integer or start:stop slice");
         }
+      })
+      .def_static("from_cupy", [name](py::object array) -> ak::IndexOf<T> {
+          if(py::isinstance(array, py::module::import("cupy").attr("ndarray"))) {
+            if (py::cast<int64_t>(array.attr("ndim")) != 1) {
+              throw std::invalid_argument(name + std::string(
+                " must be built from a one-dimensional array; try array.ravel()"));
+            }
+            auto strides = pytuples_to_vector<int64_t>(array.attr("strides"));
+
+            if (strides[0] != sizeof(T)) {
+              throw std::invalid_argument(name + std::string(
+                " must be built from a contiguous array (array.strides == "
+                "(array.itemsize,)); try array.copy()"));
+            }
+
+            void* ptr = reinterpret_cast<void*>(py::cast<ssize_t>(array.attr("data").attr("ptr")));
+            std::vector<int64_t> shape = pytuples_to_vector<int64_t>(array.attr("shape"));
+
+            return ak::IndexOf<T>(std::shared_ptr<T>(reinterpret_cast<T*>(ptr),
+                                                     kernel::cuda_array_deleter<T>()),
+                                  0,
+                                  (int64_t)shape[0],
+                                  kernel::Lib::cuda_kernels);
+          }
+          else {
+            throw std::invalid_argument(name + std::string(
+              " can only accept CuPy Arrays!"));
+          }
       })
       .def("copy_to", [name](const ak::IndexOf<T>& self, std::string& ptr_lib) {
         if(ptr_lib == "cuda") {
