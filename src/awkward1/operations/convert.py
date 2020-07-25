@@ -1626,7 +1626,7 @@ def from_arrow(array, highlevel=True, behavior=None):
             mask = buffers.pop(0)
             child_arrays = []
             keys = []
-            for i in range(tpe.num_children):
+            for i in range(tpe.num_fields):
                 child_arrays.append(
                     popbuffers(
                         None if array is None else array.field(tpe[i].name),
@@ -1691,14 +1691,13 @@ def from_arrow(array, highlevel=True, behavior=None):
                 return out
 
         elif isinstance(tpe, pyarrow.lib.UnionType) and tpe.mode == "sparse":
-            assert tpe.num_buffers == 3
+            assert tpe.num_buffers == 2
             mask = buffers.pop(0)
             tags = numpy.frombuffer(buffers.pop(0), dtype=numpy.int8)[:length]
-            assert buffers.pop(0) is None
             index = numpy.arange(len(tags), dtype=numpy.int32)
 
             contents = []
-            for i in range(tpe.num_children):
+            for i in range(tpe.num_fields):
                 try:
                     sublength = index[tags == i][-1] + 1
                 except IndexError:
@@ -1730,7 +1729,7 @@ def from_arrow(array, highlevel=True, behavior=None):
             index = numpy.frombuffer(buffers.pop(0), dtype=numpy.int32)[:length]
 
             contents = []
-            for i in range(tpe.num_children):
+            for i in range(tpe.num_fields):
                 try:
                     sublength = index[tags == i].max() + 1
                 except ValueError:
@@ -1860,7 +1859,7 @@ def from_arrow(array, highlevel=True, behavior=None):
             data = buffers.pop(0)
             out = numpy.frombuffer(data, dtype=numpy.uint8)
             out = numpy.unpackbits(out).reshape(-1, 8)[:, ::-1].reshape(-1)
-            out = awkward1.layout.NumpyArray(out[:length])
+            out = awkward1.layout.NumpyArray(out[:length].view(numpy.bool_))
             if mask is not None:
                 awk_mask = awkward1.layout.IndexU8(
                     numpy.frombuffer(mask, dtype=numpy.uint8)
@@ -2039,7 +2038,7 @@ def from_parquet(
     row_groups=None,
     use_threads=True,
     lazy=False,
-    lazy_cache="metadata",
+    lazy_cache="attach",
     lazy_cache_key=None,
     highlevel=True,
     behavior=None,
@@ -2059,10 +2058,10 @@ def from_parquet(
             #ak.layout.VirtualArray, possibly in #ak.partition.PartitionedArray
             if the file has more than one row group); if False, read all
             requested data immediately.
-        lazy_cache (None, "metadata", or MutableMapping): If lazy, pass this
-            cache to the VirtualArrays. If "metadata", a new dict is created
-            and attached to the output array's metadata as "cache" (only
-            highlevel arrays have metadata).
+        lazy_cache (None, "attach", or MutableMapping): If lazy, pass this
+            cache to the VirtualArrays. If "attach", a new dict is created
+            and attached to the output array as a "cache" parameter on
+            #ak.Array.
         lazy_cache_key (None or str): If lazy, pass this cache_key to the
             VirtualArrays. If None, a process-unique string is constructed.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
@@ -2107,11 +2106,11 @@ def from_parquet(
     if lazy:
         state = _ParquetState(file, use_threads, source, options)
 
-        if lazy_cache == "metadata":
+        if lazy_cache == "attach":
             lazy_cache = {}
-            metadata = {"cache": lazy_cache}
+            toattach = lazy_cache
         else:
-            metadata = None
+            toattach = None
 
         if lazy_cache is None:
             cache = None
@@ -2154,7 +2153,7 @@ def from_parquet(
                 partitions, offsets[1:]
             )
         if highlevel:
-            return awkward1._util.wrap(out, behavior, metadata=metadata)
+            return awkward1._util.wrap(out, behavior, cache=toattach)
         else:
             return out
 
@@ -2352,15 +2351,15 @@ def to_arrayset(
     Which can also lazily load partitions as they are observed:
 
         >>> lazy = ak.from_arrayset(form, container, 4, lazy=True, lazy_lengths=[3, 1, 3, 1])
-        >>> lazy.metadata["cache"]
+        >>> lazy.cache
         {}
         >>> lazy
         <Array [[1, 2, 3], [], [4, ... [], [], [10]] type='8 * var * int64'>
-        >>> len(lazy.metadata["cache"])
+        >>> len(lazy.cache)
         3
         >>> lazy + 100
         <Array [[101, 102, 103], [], ... [], [], [110]] type='8 * var * int64'>
-        >>> len(lazy.metadata["cache"])
+        >>> len(lazy.cache)
         4
 
     See also #ak.from_arrayset.
@@ -3011,7 +3010,7 @@ def _form_to_layout(
         return _form_to_layout_class[type(form), form.index](
             tags, index, contents, identities, parameters
         )
-        
+
     elif isinstance(form, awkward1.forms.UnmaskedForm):
         content = _form_to_layout(
             form.content,
@@ -3049,7 +3048,7 @@ def from_arrayset(
     sep="-",
     partition_first=False,
     lazy=False,
-    lazy_cache="metadata",
+    lazy_cache="attach",
     lazy_cache_key=None,
     lazy_lengths=None,
     highlevel=True,
@@ -3085,10 +3084,10 @@ def from_arrayset(
             #ak.layout.VirtualArray, possibly in #ak.partition.PartitionedArray
             if `num_partitions` is not None); if False, read all requested data
             immediately.
-        lazy_cache (None, "metadata", or MutableMapping): If lazy, pass this
-            cache to the VirtualArrays. If "metadata", a new dict is created
-            and attached to the output array's metadata as "cache" (only
-            highlevel arrays have metadata).
+        lazy_cache (None, "attach", or MutableMapping): If lazy, pass this
+            cache to the VirtualArrays. If "attach", a new dict is created
+            and attached to the output array as a "cache" parameter on
+            #ak.Array.
         lazy_cache_key (None or str): If lazy, pass this cache_key to the
             VirtualArrays. If None, a process-unique string is constructed.
         lazy_lengths (None, int, or iterable of ints): If lazy and
@@ -3128,7 +3127,7 @@ def from_arrayset(
     The arguments that begin with `lazy_` are only needed if `lazy` is True.
     The `lazy_cache` and `lazy_cache_key` determine how the array or its
     partitions are cached after being read from the `container` (in a no-eviction
-    dict attached to the output #ak.Array's `metadata` if not specified). The
+    dict attached to the output #ak.Array as `cache` if not specified). The
     `lazy_lengths` argument is required.
 
     See #ak.to_arrayset for examples.
@@ -3155,11 +3154,11 @@ def from_arrayset(
         partition_format = lambda x: tmp2.format(x)
 
     if lazy:
-        if lazy_cache == "metadata":
+        if lazy_cache == "attach":
             lazy_cache = {}
-            metadata = {"cache": lazy_cache}
+            toattach = lazy_cache
         else:
-            metadata = None
+            toattach = None
 
         if lazy_cache is None:
             cache = None
@@ -3170,7 +3169,7 @@ def from_arrayset(
             lazy_cache_key = "ak.from_arrayset:{0}".format(_from_arrayset_key())
 
     else:
-        metadata = None
+        toattach = None
 
     if num_partitions is None:
         args = (form, container, None, prefix, sep, partition_first)
@@ -3242,11 +3241,11 @@ def from_arrayset(
         )
 
     if highlevel:
-        return awkward1._util.wrap(out, behavior, metadata=metadata)
+        return awkward1._util.wrap(out, behavior, cache=toattach)
     else:
         return out
 
-    
+
 __all__ = [
     x
     for x in list(globals())
