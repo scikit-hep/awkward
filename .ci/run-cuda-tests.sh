@@ -9,6 +9,7 @@ python --version
 git checkout $1
 git pull
 git status
+git submodule update --init
 
 cp -a include src VERSION_INFO cuda-kernels
 
