@@ -400,21 +400,21 @@ class FuncBody(object):
             ):
                 if item.init.decls[0].init.__class__.__name__ == "Constant":
                     if item.init.decls[0].init.value == "0":
-                        stmt = " " * indent + "for {0} in range(int({1})):\n".format(
+                        stmt = " " * indent + "for {0} in range({1}):\n".format(
                             item.init.decls[0].name,
                             self.traverse(item.cond.right, 0, called=True),
                         )
                     else:
                         stmt = (
                             " " * indent
-                            + "for {0} in range(int({1}), {2}):\n".format(
+                            + "for {0} in range({1}, {2}):\n".format(
                                 item.init.decls[0].name,
                                 item.init.decls[0].init.value,
                                 self.traverse(item.cond.right, 0, called=True),
                             )
                         )
                 else:
-                    stmt = " " * indent + "for {0} in range(int({1}), {2}):\n".format(
+                    stmt = " " * indent + "for {0} in range({1}, {2}):\n".format(
                         item.init.decls[0].name,
                         item.init.decls[0].init.name,
                         self.traverse(item.cond.right, 0, called=True),
