@@ -13,7 +13,29 @@ from parser_utils import arrayconv, getheadername, indent_code
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
-BLACK_LIST = ["awkward_ListArray_combinations_step"]
+SPEC_BLACKLIST = [
+    "awkward_ListArray_combinations_step",
+    "awkward_Index8_getitem_at_nowrap",
+    "awkward_IndexU8_getitem_at_nowrap",
+    "awkward_Index32_getitem_at_nowrap",
+    "awkward_IndexU32_getitem_at_nowrap",
+    "awkward_Index64_getitem_at_nowrap",
+    "awkward_NumpyArraybool_getitem_at",
+    "awkward_NumpyArray8_getitem_at",
+    "awkward_NumpyArrayU8_getitem_at",
+    "awkward_NumpyArray16_getitem_at",
+    "awkward_NumpyArray32_getitem_at",
+    "awkward_NumpyArrayU32_getitem_at",
+    "awkward_NumpyArray64_getitem_at",
+    "awkward_NumpyArrayU64_getitem_at",
+    "awkward_NumpyArrayfloat32_getitem_at",
+    "awkward_NumpyArrayfloat64_getitem_at",
+    "awkward_Index8_setitem_at_nowrap",
+    "awkward_IndexU8_setitem_at_nowrap",
+    "awkward_Index32_setitem_at_nowrap",
+    "awkward_IndexU32_setitem_at_nowrap",
+    "awkward_Index64_setitem_at_nowrap",
+]
 
 
 def preprocess(filename, skip_implementation=False):
@@ -646,7 +668,7 @@ def genpython(pfile):
     funcs = {}
     for i in range(len(ast.ext)):
         decl = FuncDecl(ast.ext[i].decl)
-        if decl.name not in BLACK_LIST:
+        if decl.name not in SPEC_BLACKLIST:
             funcs[decl.name] = black.format_str(
                 (
                     "def {0}({1})".format(decl.name, decl.arrange_args(),)
@@ -746,7 +768,10 @@ if __name__ == "__main__":
     if kernelname is None:
         print("Kernels:")
         for funcname in alltokens.keys():
-            if "gen" not in alltokens[funcname].keys() and funcname not in BLACK_LIST:
+            if (
+                "gen" not in alltokens[funcname].keys()
+                and funcname not in SPEC_BLACKLIST
+            ):
                 print(" " * 2 + "- name: " + funcname)
                 if "childfunc" in alltokens[funcname].keys():
                     print(" " * 4 + "specializations:")
@@ -782,7 +807,7 @@ if __name__ == "__main__":
                     print(" " * 6 + "Insert Python specification here")
                 print()
     else:
-        if kernelname in alltokens.keys() and kernelname not in BLACK_LIST:
+        if kernelname in alltokens.keys() and kernelname not in SPEC_BLACKLIST:
             print("name: ", kernelname)
             if "childfunc" in alltokens[kernelname].keys():
                 print("specializations:")
