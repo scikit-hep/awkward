@@ -31,41 +31,11 @@ Kernels:
 
   - name: awkward_Identities_from_ListOffsetArray
     specializations:
-    - name: awkward_Identities32_from_ListOffsetArrayU32
-      args:
-        - toptr: List[int32_t]
-        - fromptr: List[int32_t]
-        - fromoffsets: List[uint32_t]
-        - fromptroffset: int64_t
-        - offsetsoffset: int64_t
-        - tolength: int64_t
-        - fromlength: int64_t
-        - fromwidth: int64_t
-    - name: awkward_Identities64_from_ListOffsetArray64
-      args:
-        - toptr: List[int64_t]
-        - fromptr: List[int64_t]
-        - fromoffsets: List[int64_t]
-        - fromptroffset: int64_t
-        - offsetsoffset: int64_t
-        - tolength: int64_t
-        - fromlength: int64_t
-        - fromwidth: int64_t
     - name: awkward_Identities64_from_ListOffsetArray32
       args:
         - toptr: List[int64_t]
         - fromptr: List[int64_t]
         - fromoffsets: List[int32_t]
-        - fromptroffset: int64_t
-        - offsetsoffset: int64_t
-        - tolength: int64_t
-        - fromlength: int64_t
-        - fromwidth: int64_t
-    - name: awkward_Identities32_from_ListOffsetArray64
-      args:
-        - toptr: List[int32_t]
-        - fromptr: List[int32_t]
-        - fromoffsets: List[int64_t]
         - fromptroffset: int64_t
         - offsetsoffset: int64_t
         - tolength: int64_t
@@ -86,6 +56,36 @@ Kernels:
         - toptr: List[int64_t]
         - fromptr: List[int64_t]
         - fromoffsets: List[uint32_t]
+        - fromptroffset: int64_t
+        - offsetsoffset: int64_t
+        - tolength: int64_t
+        - fromlength: int64_t
+        - fromwidth: int64_t
+    - name: awkward_Identities32_from_ListOffsetArrayU32
+      args:
+        - toptr: List[int32_t]
+        - fromptr: List[int32_t]
+        - fromoffsets: List[uint32_t]
+        - fromptroffset: int64_t
+        - offsetsoffset: int64_t
+        - tolength: int64_t
+        - fromlength: int64_t
+        - fromwidth: int64_t
+    - name: awkward_Identities64_from_ListOffsetArray64
+      args:
+        - toptr: List[int64_t]
+        - fromptr: List[int64_t]
+        - fromoffsets: List[int64_t]
+        - fromptroffset: int64_t
+        - offsetsoffset: int64_t
+        - tolength: int64_t
+        - fromlength: int64_t
+        - fromwidth: int64_t
+    - name: awkward_Identities32_from_ListOffsetArray64
+      args:
+        - toptr: List[int32_t]
+        - fromptr: List[int32_t]
+        - fromoffsets: List[int64_t]
         - fromptroffset: int64_t
         - offsetsoffset: int64_t
         - tolength: int64_t
@@ -126,13 +126,13 @@ Kernels:
 
   - name: awkward_Identities_from_ListArray
     specializations:
-    - name: awkward_Identities64_from_ListArrayU32
+    - name: awkward_Identities64_from_ListArray64
       args:
         - uniquecontents: List[bool]
         - toptr: List[int64_t]
         - fromptr: List[int64_t]
-        - fromstarts: List[uint32_t]
-        - fromstops: List[uint32_t]
+        - fromstarts: List[int64_t]
+        - fromstops: List[int64_t]
         - fromptroffset: int64_t
         - startsoffset: int64_t
         - stopsoffset: int64_t
@@ -165,19 +165,6 @@ Kernels:
         - tolength: int64_t
         - fromlength: int64_t
         - fromwidth: int64_t
-    - name: awkward_Identities32_from_ListArray32
-      args:
-        - uniquecontents: List[bool]
-        - toptr: List[int32_t]
-        - fromptr: List[int32_t]
-        - fromstarts: List[int32_t]
-        - fromstops: List[int32_t]
-        - fromptroffset: int64_t
-        - startsoffset: int64_t
-        - stopsoffset: int64_t
-        - tolength: int64_t
-        - fromlength: int64_t
-        - fromwidth: int64_t
     - name: awkward_Identities64_from_ListArray32
       args:
         - uniquecontents: List[bool]
@@ -191,13 +178,26 @@ Kernels:
         - tolength: int64_t
         - fromlength: int64_t
         - fromwidth: int64_t
-    - name: awkward_Identities64_from_ListArray64
+    - name: awkward_Identities64_from_ListArrayU32
       args:
         - uniquecontents: List[bool]
         - toptr: List[int64_t]
         - fromptr: List[int64_t]
-        - fromstarts: List[int64_t]
-        - fromstops: List[int64_t]
+        - fromstarts: List[uint32_t]
+        - fromstops: List[uint32_t]
+        - fromptroffset: int64_t
+        - startsoffset: int64_t
+        - stopsoffset: int64_t
+        - tolength: int64_t
+        - fromlength: int64_t
+        - fromwidth: int64_t
+    - name: awkward_Identities32_from_ListArray32
+      args:
+        - uniquecontents: List[bool]
+        - toptr: List[int32_t]
+        - fromptr: List[int32_t]
+        - fromstarts: List[int32_t]
+        - fromstops: List[int32_t]
         - fromptroffset: int64_t
         - startsoffset: int64_t
         - stopsoffset: int64_t
@@ -300,28 +300,6 @@ Kernels:
         - tolength: int64_t
         - fromlength: int64_t
         - fromwidth: int64_t
-    - name: awkward_Identities32_from_IndexedArrayU32
-      args:
-        - uniquecontents: List[bool]
-        - toptr: List[int32_t]
-        - fromptr: List[int32_t]
-        - fromindex: List[uint32_t]
-        - fromptroffset: int64_t
-        - indexoffset: int64_t
-        - tolength: int64_t
-        - fromlength: int64_t
-        - fromwidth: int64_t
-    - name: awkward_Identities64_from_IndexedArrayU32
-      args:
-        - uniquecontents: List[bool]
-        - toptr: List[int64_t]
-        - fromptr: List[int64_t]
-        - fromindex: List[uint32_t]
-        - fromptroffset: int64_t
-        - indexoffset: int64_t
-        - tolength: int64_t
-        - fromlength: int64_t
-        - fromwidth: int64_t
     - name: awkward_Identities64_from_IndexedArray32
       args:
         - uniquecontents: List[bool]
@@ -339,6 +317,28 @@ Kernels:
         - toptr: List[int64_t]
         - fromptr: List[int64_t]
         - fromindex: List[int64_t]
+        - fromptroffset: int64_t
+        - indexoffset: int64_t
+        - tolength: int64_t
+        - fromlength: int64_t
+        - fromwidth: int64_t
+    - name: awkward_Identities32_from_IndexedArrayU32
+      args:
+        - uniquecontents: List[bool]
+        - toptr: List[int32_t]
+        - fromptr: List[int32_t]
+        - fromindex: List[uint32_t]
+        - fromptroffset: int64_t
+        - indexoffset: int64_t
+        - tolength: int64_t
+        - fromlength: int64_t
+        - fromwidth: int64_t
+    - name: awkward_Identities64_from_IndexedArrayU32
+      args:
+        - uniquecontents: List[bool]
+        - toptr: List[int64_t]
+        - fromptr: List[int64_t]
+        - fromindex: List[uint32_t]
         - fromptroffset: int64_t
         - indexoffset: int64_t
         - tolength: int64_t
@@ -377,27 +377,13 @@ Kernels:
 
   - name: awkward_Identities_from_UnionArray
     specializations:
-    - name: awkward_Identities64_from_UnionArray8_32
-      args:
-        - uniquecontents: List[bool]
-        - toptr: List[int64_t]
-        - fromptr: List[int64_t]
-        - fromtags: List[int8_t]
-        - fromindex: List[int32_t]
-        - fromptroffset: int64_t
-        - tagsoffset: int64_t
-        - indexoffset: int64_t
-        - tolength: int64_t
-        - fromlength: int64_t
-        - fromwidth: int64_t
-        - which: int64_t
-    - name: awkward_Identities32_from_UnionArray8_64
+    - name: awkward_Identities32_from_UnionArray8_U32
       args:
         - uniquecontents: List[bool]
         - toptr: List[int32_t]
         - fromptr: List[int32_t]
         - fromtags: List[int8_t]
-        - fromindex: List[int64_t]
+        - fromindex: List[uint32_t]
         - fromptroffset: int64_t
         - tagsoffset: int64_t
         - indexoffset: int64_t
@@ -412,6 +398,20 @@ Kernels:
         - fromptr: List[int64_t]
         - fromtags: List[int8_t]
         - fromindex: List[uint32_t]
+        - fromptroffset: int64_t
+        - tagsoffset: int64_t
+        - indexoffset: int64_t
+        - tolength: int64_t
+        - fromlength: int64_t
+        - fromwidth: int64_t
+        - which: int64_t
+    - name: awkward_Identities32_from_UnionArray8_64
+      args:
+        - uniquecontents: List[bool]
+        - toptr: List[int32_t]
+        - fromptr: List[int32_t]
+        - fromtags: List[int8_t]
+        - fromindex: List[int64_t]
         - fromptroffset: int64_t
         - tagsoffset: int64_t
         - indexoffset: int64_t
@@ -447,13 +447,13 @@ Kernels:
         - fromlength: int64_t
         - fromwidth: int64_t
         - which: int64_t
-    - name: awkward_Identities32_from_UnionArray8_U32
+    - name: awkward_Identities64_from_UnionArray8_32
       args:
         - uniquecontents: List[bool]
-        - toptr: List[int32_t]
-        - fromptr: List[int32_t]
+        - toptr: List[int64_t]
+        - fromptr: List[int64_t]
         - fromtags: List[int8_t]
-        - fromindex: List[uint32_t]
+        - fromindex: List[int32_t]
         - fromptroffset: int64_t
         - tagsoffset: int64_t
         - indexoffset: int64_t
@@ -500,17 +500,17 @@ Kernels:
 
   - name: awkward_Identities_extend
     specializations:
-    - name: awkward_Identities64_extend
-      args:
-        - toptr: List[int64_t]
-        - fromptr: List[int64_t]
-        - fromoffset: int64_t
-        - fromlength: int64_t
-        - tolength: int64_t
     - name: awkward_Identities32_extend
       args:
         - toptr: List[int32_t]
         - fromptr: List[int32_t]
+        - fromoffset: int64_t
+        - fromlength: int64_t
+        - tolength: int64_t
+    - name: awkward_Identities64_extend
+      args:
+        - toptr: List[int64_t]
+        - fromptr: List[int64_t]
         - fromoffset: int64_t
         - fromlength: int64_t
         - tolength: int64_t
@@ -588,19 +588,19 @@ Kernels:
         - inneroffsets: List[int64_t]
         - inneroffsetsoffset: int64_t
         - inneroffsetslen: int64_t
-    - name: awkward_ListOffsetArrayU32_flatten_offsets_64
+    - name: awkward_ListOffsetArray64_flatten_offsets_64
       args:
         - tooffsets: List[int64_t]
-        - outeroffsets: List[uint32_t]
+        - outeroffsets: List[int64_t]
         - outeroffsetsoffset: int64_t
         - outeroffsetslen: int64_t
         - inneroffsets: List[int64_t]
         - inneroffsetsoffset: int64_t
         - inneroffsetslen: int64_t
-    - name: awkward_ListOffsetArray64_flatten_offsets_64
+    - name: awkward_ListOffsetArrayU32_flatten_offsets_64
       args:
         - tooffsets: List[int64_t]
-        - outeroffsets: List[int64_t]
+        - outeroffsets: List[uint32_t]
         - outeroffsetsoffset: int64_t
         - outeroffsetslen: int64_t
         - inneroffsets: List[int64_t]
@@ -625,19 +625,19 @@ Kernels:
 
   - name: awkward_IndexedArray_flatten_none2empty
     specializations:
-    - name: awkward_IndexedArray32_flatten_none2empty_64
+    - name: awkward_IndexedArrayU32_flatten_none2empty_64
       args:
         - outoffsets: List[int64_t]
-        - outindex: List[int32_t]
+        - outindex: List[uint32_t]
         - outindexoffset: int64_t
         - outindexlength: int64_t
         - offsets: List[int64_t]
         - offsetsoffset: int64_t
         - offsetslength: int64_t
-    - name: awkward_IndexedArrayU32_flatten_none2empty_64
+    - name: awkward_IndexedArray32_flatten_none2empty_64
       args:
         - outoffsets: List[int64_t]
-        - outindex: List[uint32_t]
+        - outindex: List[int32_t]
         - outindexoffset: int64_t
         - outindexlength: int64_t
         - offsets: List[int64_t]
@@ -683,15 +683,15 @@ Kernels:
 
   - name: awkward_UnionArray_flatten_length
     specializations:
-    - name: awkward_UnionArray32_flatten_length_64
+    - name: awkward_UnionArrayU32_flatten_length_64
       args:
         - total_length: List[int64_t]
         - fromtags: List[int8_t]
         - fromtagsoffset: int64_t
-        - fromindex: List[int32_t]
+        - fromindex: List[uint32_t]
         - fromindexoffset: int64_t
         - length: int64_t
-        - offsetsraws: List[List[int]]
+        - offsetsraws: List[List[int64_t]]
         - offsetsoffsets: List[int64_t]
     - name: awkward_UnionArray64_flatten_length_64
       args:
@@ -701,17 +701,17 @@ Kernels:
         - fromindex: List[int64_t]
         - fromindexoffset: int64_t
         - length: int64_t
-        - offsetsraws: List[List[int]]
+        - offsetsraws: List[List[int64_t]]
         - offsetsoffsets: List[int64_t]
-    - name: awkward_UnionArrayU32_flatten_length_64
+    - name: awkward_UnionArray32_flatten_length_64
       args:
         - total_length: List[int64_t]
         - fromtags: List[int8_t]
         - fromtagsoffset: int64_t
-        - fromindex: List[uint32_t]
+        - fromindex: List[int32_t]
         - fromindexoffset: int64_t
         - length: int64_t
-        - offsetsraws: List[List[int]]
+        - offsetsraws: List[List[int64_t]]
         - offsetsoffsets: List[int64_t]
     fail: False
     specification: |
@@ -746,7 +746,7 @@ Kernels:
         - fromindex: List[uint32_t]
         - fromindexoffset: int64_t
         - length: int64_t
-        - offsetsraws: List[List[int]]
+        - offsetsraws: List[List[int64_t]]
         - offsetsoffsets: List[int64_t]
     - name: awkward_UnionArray64_flatten_combine_64
       args:
@@ -758,7 +758,7 @@ Kernels:
         - fromindex: List[int64_t]
         - fromindexoffset: int64_t
         - length: int64_t
-        - offsetsraws: List[List[int]]
+        - offsetsraws: List[List[int64_t]]
         - offsetsoffsets: List[int64_t]
     - name: awkward_UnionArray32_flatten_combine_64
       args:
@@ -770,7 +770,7 @@ Kernels:
         - fromindex: List[int32_t]
         - fromindexoffset: int64_t
         - length: int64_t
-        - offsetsraws: List[List[int]]
+        - offsetsraws: List[List[int64_t]]
         - offsetsoffsets: List[int64_t]
     fail: False
     specification: |
@@ -802,17 +802,17 @@ Kernels:
 
   - name: awkward_IndexedArray_flatten_nextcarry
     specializations:
-    - name: awkward_IndexedArray64_flatten_nextcarry_64
-      args:
-        - tocarry: List[int64_t]
-        - fromindex: List[int64_t]
-        - indexoffset: int64_t
-        - lenindex: int64_t
-        - lencontent: int64_t
     - name: awkward_IndexedArrayU32_flatten_nextcarry_64
       args:
         - tocarry: List[int64_t]
         - fromindex: List[uint32_t]
+        - indexoffset: int64_t
+        - lenindex: int64_t
+        - lencontent: int64_t
+    - name: awkward_IndexedArray64_flatten_nextcarry_64
+      args:
+        - tocarry: List[int64_t]
+        - fromindex: List[int64_t]
         - indexoffset: int64_t
         - lenindex: int64_t
         - lencontent: int64_t
@@ -841,14 +841,6 @@ Kernels:
 
   - name: awkward_IndexedArray_overlay_mask
     specializations:
-    - name: awkward_IndexedArray64_overlay_mask8_to64
-      args:
-        - toindex: List[int64_t]
-        - mask: List[int8_t]
-        - maskoffset: int64_t
-        - fromindex: List[int64_t]
-        - indexoffset: int64_t
-        - length: int64_t
     - name: awkward_IndexedArrayU32_overlay_mask8_to64
       args:
         - toindex: List[int64_t]
@@ -865,6 +857,14 @@ Kernels:
         - fromindex: List[int32_t]
         - indexoffset: int64_t
         - length: int64_t
+    - name: awkward_IndexedArray64_overlay_mask8_to64
+      args:
+        - toindex: List[int64_t]
+        - mask: List[int8_t]
+        - maskoffset: int64_t
+        - fromindex: List[int64_t]
+        - indexoffset: int64_t
+        - length: int64_t
     fail: False
     specification: |
       def awkward_IndexedArray_overlay_mask(
@@ -877,12 +877,6 @@ Kernels:
 
   - name: awkward_IndexedArray_mask
     specializations:
-    - name: awkward_IndexedArray64_mask8
-      args:
-        - tomask: List[int8_t]
-        - fromindex: List[int64_t]
-        - indexoffset: int64_t
-        - length: int64_t
     - name: awkward_IndexedArrayU32_mask8
       args:
         - tomask: List[int8_t]
@@ -893,6 +887,12 @@ Kernels:
       args:
         - tomask: List[int8_t]
         - fromindex: List[int32_t]
+        - indexoffset: int64_t
+        - length: int64_t
+    - name: awkward_IndexedArray64_mask8
+      args:
+        - tomask: List[int8_t]
+        - fromindex: List[int64_t]
         - indexoffset: int64_t
         - length: int64_t
     fail: False
@@ -933,13 +933,22 @@ Kernels:
 
   - name: awkward_IndexedArray_simplify
     specializations:
-    - name: awkward_IndexedArrayU32_simplify32_to64
+    - name: awkward_IndexedArray32_simplifyU32_to64
       args:
         - toindex: List[int64_t]
-        - outerindex: List[uint32_t]
+        - outerindex: List[int32_t]
         - outeroffset: int64_t
         - outerlength: int64_t
-        - innerindex: List[int32_t]
+        - innerindex: List[uint32_t]
+        - inneroffset: int64_t
+        - innerlength: int64_t
+    - name: awkward_IndexedArray32_simplify64_to64
+      args:
+        - toindex: List[int64_t]
+        - outerindex: List[int32_t]
+        - outeroffset: int64_t
+        - outerlength: int64_t
+        - innerindex: List[int64_t]
         - inneroffset: int64_t
         - innerlength: int64_t
     - name: awkward_IndexedArrayU32_simplify64_to64
@@ -960,46 +969,10 @@ Kernels:
         - innerindex: List[int32_t]
         - inneroffset: int64_t
         - innerlength: int64_t
-    - name: awkward_IndexedArray32_simplifyU32_to64
-      args:
-        - toindex: List[int64_t]
-        - outerindex: List[int32_t]
-        - outeroffset: int64_t
-        - outerlength: int64_t
-        - innerindex: List[uint32_t]
-        - inneroffset: int64_t
-        - innerlength: int64_t
     - name: awkward_IndexedArray64_simplifyU32_to64
       args:
         - toindex: List[int64_t]
         - outerindex: List[int64_t]
-        - outeroffset: int64_t
-        - outerlength: int64_t
-        - innerindex: List[uint32_t]
-        - inneroffset: int64_t
-        - innerlength: int64_t
-    - name: awkward_IndexedArray64_simplify64_to64
-      args:
-        - toindex: List[int64_t]
-        - outerindex: List[int64_t]
-        - outeroffset: int64_t
-        - outerlength: int64_t
-        - innerindex: List[int64_t]
-        - inneroffset: int64_t
-        - innerlength: int64_t
-    - name: awkward_IndexedArray32_simplify64_to64
-      args:
-        - toindex: List[int64_t]
-        - outerindex: List[int32_t]
-        - outeroffset: int64_t
-        - outerlength: int64_t
-        - innerindex: List[int64_t]
-        - inneroffset: int64_t
-        - innerlength: int64_t
-    - name: awkward_IndexedArrayU32_simplifyU32_to64
-      args:
-        - toindex: List[int64_t]
-        - outerindex: List[uint32_t]
         - outeroffset: int64_t
         - outerlength: int64_t
         - innerindex: List[uint32_t]
@@ -1012,6 +985,33 @@ Kernels:
         - outeroffset: int64_t
         - outerlength: int64_t
         - innerindex: List[int32_t]
+        - inneroffset: int64_t
+        - innerlength: int64_t
+    - name: awkward_IndexedArrayU32_simplify32_to64
+      args:
+        - toindex: List[int64_t]
+        - outerindex: List[uint32_t]
+        - outeroffset: int64_t
+        - outerlength: int64_t
+        - innerindex: List[int32_t]
+        - inneroffset: int64_t
+        - innerlength: int64_t
+    - name: awkward_IndexedArrayU32_simplifyU32_to64
+      args:
+        - toindex: List[int64_t]
+        - outerindex: List[uint32_t]
+        - outeroffset: int64_t
+        - outerlength: int64_t
+        - innerindex: List[uint32_t]
+        - inneroffset: int64_t
+        - innerlength: int64_t
+    - name: awkward_IndexedArray64_simplify64_to64
+      args:
+        - toindex: List[int64_t]
+        - outerindex: List[int64_t]
+        - outeroffset: int64_t
+        - outerlength: int64_t
+        - innerindex: List[int64_t]
         - inneroffset: int64_t
         - innerlength: int64_t
     fail: False
@@ -1047,14 +1047,6 @@ Kernels:
 
   - name: awkward_ListArray_compact_offsets
     specializations:
-    - name: awkward_ListArray64_compact_offsets_64
-      args:
-        - tooffsets: List[int64_t]
-        - fromstarts: List[int64_t]
-        - fromstops: List[int64_t]
-        - startsoffset: int64_t
-        - stopsoffset: int64_t
-        - length: int64_t
     - name: awkward_ListArray32_compact_offsets_64
       args:
         - tooffsets: List[int64_t]
@@ -1068,6 +1060,14 @@ Kernels:
         - tooffsets: List[int64_t]
         - fromstarts: List[uint32_t]
         - fromstops: List[uint32_t]
+        - startsoffset: int64_t
+        - stopsoffset: int64_t
+        - length: int64_t
+    - name: awkward_ListArray64_compact_offsets_64
+      args:
+        - tooffsets: List[int64_t]
+        - fromstarts: List[int64_t]
+        - fromstops: List[int64_t]
         - startsoffset: int64_t
         - stopsoffset: int64_t
         - length: int64_t
@@ -1087,12 +1087,6 @@ Kernels:
 
   - name: awkward_ListOffsetArray_compact_offsets
     specializations:
-    - name: awkward_ListOffsetArrayU32_compact_offsets_64
-      args:
-        - tooffsets: List[int64_t]
-        - fromoffsets: List[uint32_t]
-        - offsetsoffset: int64_t
-        - length: int64_t
     - name: awkward_ListOffsetArray32_compact_offsets_64
       args:
         - tooffsets: List[int64_t]
@@ -1103,6 +1097,12 @@ Kernels:
       args:
         - tooffsets: List[int64_t]
         - fromoffsets: List[int64_t]
+        - offsetsoffset: int64_t
+        - length: int64_t
+    - name: awkward_ListOffsetArrayU32_compact_offsets_64
+      args:
+        - tooffsets: List[int64_t]
+        - fromoffsets: List[uint32_t]
         - offsetsoffset: int64_t
         - length: int64_t
     fail: False
@@ -1118,6 +1118,17 @@ Kernels:
 
   - name: awkward_ListArray_broadcast_tooffsets
     specializations:
+    - name: awkward_ListArray32_broadcast_tooffsets_64
+      args:
+        - tocarry: List[int64_t]
+        - fromoffsets: List[int64_t]
+        - offsetsoffset: int64_t
+        - offsetslength: int64_t
+        - fromstarts: List[int32_t]
+        - startsoffset: int64_t
+        - fromstops: List[int32_t]
+        - stopsoffset: int64_t
+        - lencontent: int64_t
     - name: awkward_ListArrayU32_broadcast_tooffsets_64
       args:
         - tocarry: List[int64_t]
@@ -1138,17 +1149,6 @@ Kernels:
         - fromstarts: List[int64_t]
         - startsoffset: int64_t
         - fromstops: List[int64_t]
-        - stopsoffset: int64_t
-        - lencontent: int64_t
-    - name: awkward_ListArray32_broadcast_tooffsets_64
-      args:
-        - tocarry: List[int64_t]
-        - fromoffsets: List[int64_t]
-        - offsetsoffset: int64_t
-        - offsetslength: int64_t
-        - fromstarts: List[int32_t]
-        - startsoffset: int64_t
-        - fromstops: List[int32_t]
         - stopsoffset: int64_t
         - lencontent: int64_t
     fail: False
@@ -1238,16 +1238,16 @@ Kernels:
         - fromoffsets: List[int32_t]
         - offsetsoffset: int64_t
         - offsetslength: int64_t
-    - name: awkward_ListOffsetArray64_toRegularArray
-      args:
-        - size: List[int64_t]
-        - fromoffsets: List[int64_t]
-        - offsetsoffset: int64_t
-        - offsetslength: int64_t
     - name: awkward_ListOffsetArrayU32_toRegularArray
       args:
         - size: List[int64_t]
         - fromoffsets: List[uint32_t]
+        - offsetsoffset: int64_t
+        - offsetslength: int64_t
+    - name: awkward_ListOffsetArray64_toRegularArray
+      args:
+        - size: List[int64_t]
+        - fromoffsets: List[int64_t]
         - offsetsoffset: int64_t
         - offsetslength: int64_t
     fail: False
@@ -1275,30 +1275,9 @@ Kernels:
 
   - name: awkward_NumpyArray_fill_frombool
     specializations:
-    - name: awkward_NumpyArray_fill_touint8_frombool
+    - name: awkward_NumpyArray_fill_toint16_frombool
       args:
-        - toptr: List[uint8_t]
-        - tooffset: int64_t
-        - fromptr: List[bool]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_tofloat64_frombool
-      args:
-        - toptr: List[double]
-        - tooffset: int64_t
-        - fromptr: List[bool]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_toint32_frombool
-      args:
-        - toptr: List[int32_t]
-        - tooffset: int64_t
-        - fromptr: List[bool]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_tobool_frombool
-      args:
-        - toptr: List[bool]
+        - toptr: List[int16_t]
         - tooffset: int64_t
         - fromptr: List[bool]
         - fromoffset: int64_t
@@ -1310,9 +1289,44 @@ Kernels:
         - fromptr: List[bool]
         - fromoffset: int64_t
         - length: int64_t
-    - name: awkward_NumpyArray_fill_toint8_frombool
+    - name: awkward_NumpyArray_fill_tofloat64_frombool
       args:
-        - toptr: List[int8_t]
+        - toptr: List[double]
+        - tooffset: int64_t
+        - fromptr: List[bool]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_touint8_frombool
+      args:
+        - toptr: List[uint8_t]
+        - tooffset: int64_t
+        - fromptr: List[bool]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_touint16_frombool
+      args:
+        - toptr: List[uint16_t]
+        - tooffset: int64_t
+        - fromptr: List[bool]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_tobool_frombool
+      args:
+        - toptr: List[bool]
+        - tooffset: int64_t
+        - fromptr: List[bool]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_toint32_frombool
+      args:
+        - toptr: List[int32_t]
+        - tooffset: int64_t
+        - fromptr: List[bool]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_touint64_frombool
+      args:
+        - toptr: List[uint64_t]
         - tooffset: int64_t
         - fromptr: List[bool]
         - fromoffset: int64_t
@@ -1331,23 +1345,9 @@ Kernels:
         - fromptr: List[bool]
         - fromoffset: int64_t
         - length: int64_t
-    - name: awkward_NumpyArray_fill_touint64_frombool
+    - name: awkward_NumpyArray_fill_toint8_frombool
       args:
-        - toptr: List[uint64_t]
-        - tooffset: int64_t
-        - fromptr: List[bool]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_toint16_frombool
-      args:
-        - toptr: List[int16_t]
-        - tooffset: int64_t
-        - fromptr: List[bool]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_touint16_frombool
-      args:
-        - toptr: List[uint16_t]
+        - toptr: List[int8_t]
         - tooffset: int64_t
         - fromptr: List[bool]
         - fromoffset: int64_t
@@ -1361,174 +1361,6 @@ Kernels:
 
   - name: awkward_NumpyArray_fill
     specializations:
-    - name: awkward_NumpyArray_fill_tofloat64_fromfloat32
-      args:
-        - toptr: List[double]
-        - tooffset: int64_t
-        - fromptr: List[float]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_toint16_fromint16
-      args:
-        - toptr: List[int16_t]
-        - tooffset: int64_t
-        - fromptr: List[int16_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_tofloat32_fromint32
-      args:
-        - toptr: List[float]
-        - tooffset: int64_t
-        - fromptr: List[int32_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_tofloat32_fromuint64
-      args:
-        - toptr: List[float]
-        - tooffset: int64_t
-        - fromptr: List[uint64_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_toint32_fromuint8
-      args:
-        - toptr: List[int32_t]
-        - tooffset: int64_t
-        - fromptr: List[uint8_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_tofloat32_fromuint32
-      args:
-        - toptr: List[float]
-        - tooffset: int64_t
-        - fromptr: List[uint32_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_toint64_fromint8
-      args:
-        - toptr: List[int64_t]
-        - tooffset: int64_t
-        - fromptr: List[int8_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_toint16_fromuint8
-      args:
-        - toptr: List[int16_t]
-        - tooffset: int64_t
-        - fromptr: List[uint8_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_toint32_fromuint16
-      args:
-        - toptr: List[int32_t]
-        - tooffset: int64_t
-        - fromptr: List[uint16_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_toint64_fromint64
-      args:
-        - toptr: List[int64_t]
-        - tooffset: int64_t
-        - fromptr: List[int64_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_touint8_fromuint8
-      args:
-        - toptr: List[uint8_t]
-        - tooffset: int64_t
-        - fromptr: List[uint8_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_tofloat64_fromint16
-      args:
-        - toptr: List[double]
-        - tooffset: int64_t
-        - fromptr: List[int16_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_touint32_fromuint16
-      args:
-        - toptr: List[uint32_t]
-        - tooffset: int64_t
-        - fromptr: List[uint16_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_toint32_fromint16
-      args:
-        - toptr: List[int32_t]
-        - tooffset: int64_t
-        - fromptr: List[int16_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_tofloat64_fromuint16
-      args:
-        - toptr: List[double]
-        - tooffset: int64_t
-        - fromptr: List[uint16_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_touint64_fromuint64
-      args:
-        - toptr: List[uint64_t]
-        - tooffset: int64_t
-        - fromptr: List[uint64_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_toint64_fromuint16
-      args:
-        - toptr: List[int64_t]
-        - tooffset: int64_t
-        - fromptr: List[uint16_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_tofloat64_fromuint64
-      args:
-        - toptr: List[double]
-        - tooffset: int64_t
-        - fromptr: List[uint64_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_tofloat32_fromuint8
-      args:
-        - toptr: List[float]
-        - tooffset: int64_t
-        - fromptr: List[uint8_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_touint16_fromuint16
-      args:
-        - toptr: List[uint16_t]
-        - tooffset: int64_t
-        - fromptr: List[uint16_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_tofloat32_fromfloat32
-      args:
-        - toptr: List[float]
-        - tooffset: int64_t
-        - fromptr: List[float]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_toint16_fromint8
-      args:
-        - toptr: List[int16_t]
-        - tooffset: int64_t
-        - fromptr: List[int8_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_tofloat32_fromint64
-      args:
-        - toptr: List[float]
-        - tooffset: int64_t
-        - fromptr: List[int64_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_toint64_fromint32
-      args:
-        - toptr: List[int64_t]
-        - tooffset: int64_t
-        - fromptr: List[int32_t]
-        - fromoffset: int64_t
-        - length: int64_t
     - name: awkward_NumpyArray_fill_tofloat32_fromuint16
       args:
         - toptr: List[float]
@@ -1543,102 +1375,11 @@ Kernels:
         - fromptr: List[uint32_t]
         - fromoffset: int64_t
         - length: int64_t
-    - name: awkward_NumpyArray_fill_tofloat64_fromint64
-      args:
-        - toptr: List[double]
-        - tooffset: int64_t
-        - fromptr: List[int64_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_toint64_fromuint64
-      args:
-        - toptr: List[int64_t]
-        - tooffset: int64_t
-        - fromptr: List[uint64_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_toint32_fromint32
-      args:
-        - toptr: List[int32_t]
-        - tooffset: int64_t
-        - fromptr: List[int32_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_toint32_fromint8
-      args:
-        - toptr: List[int32_t]
-        - tooffset: int64_t
-        - fromptr: List[int8_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_tofloat32_fromint8
+    - name: awkward_NumpyArray_fill_tofloat32_fromfloat32
       args:
         - toptr: List[float]
         - tooffset: int64_t
-        - fromptr: List[int8_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_tofloat64_fromfloat64
-      args:
-        - toptr: List[double]
-        - tooffset: int64_t
-        - fromptr: List[double]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_tofloat64_fromint8
-      args:
-        - toptr: List[double]
-        - tooffset: int64_t
-        - fromptr: List[int8_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_tofloat32_fromint16
-      args:
-        - toptr: List[float]
-        - tooffset: int64_t
-        - fromptr: List[int16_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_touint64_fromuint32
-      args:
-        - toptr: List[uint64_t]
-        - tooffset: int64_t
-        - fromptr: List[uint32_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_toint64_fromuint8
-      args:
-        - toptr: List[int64_t]
-        - tooffset: int64_t
-        - fromptr: List[uint8_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_touint32_fromuint32
-      args:
-        - toptr: List[uint32_t]
-        - tooffset: int64_t
-        - fromptr: List[uint32_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_touint64_fromuint8
-      args:
-        - toptr: List[uint64_t]
-        - tooffset: int64_t
-        - fromptr: List[uint8_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_tofloat64_fromuint8
-      args:
-        - toptr: List[double]
-        - tooffset: int64_t
-        - fromptr: List[uint8_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_toint8_fromint8
-      args:
-        - toptr: List[int8_t]
-        - tooffset: int64_t
-        - fromptr: List[int8_t]
+        - fromptr: List[float]
         - fromoffset: int64_t
         - length: int64_t
     - name: awkward_NumpyArray_fill_toint64_fromint16
@@ -1655,6 +1396,174 @@ Kernels:
         - fromptr: List[uint32_t]
         - fromoffset: int64_t
         - length: int64_t
+    - name: awkward_NumpyArray_fill_tofloat64_fromuint64
+      args:
+        - toptr: List[double]
+        - tooffset: int64_t
+        - fromptr: List[uint64_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_tofloat64_fromuint8
+      args:
+        - toptr: List[double]
+        - tooffset: int64_t
+        - fromptr: List[uint8_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_touint64_fromuint64
+      args:
+        - toptr: List[uint64_t]
+        - tooffset: int64_t
+        - fromptr: List[uint64_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_tofloat64_fromint32
+      args:
+        - toptr: List[double]
+        - tooffset: int64_t
+        - fromptr: List[int32_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_tofloat64_fromint64
+      args:
+        - toptr: List[double]
+        - tooffset: int64_t
+        - fromptr: List[int64_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_toint32_fromuint16
+      args:
+        - toptr: List[int32_t]
+        - tooffset: int64_t
+        - fromptr: List[uint16_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_touint64_fromuint32
+      args:
+        - toptr: List[uint64_t]
+        - tooffset: int64_t
+        - fromptr: List[uint32_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_tofloat64_fromfloat64
+      args:
+        - toptr: List[double]
+        - tooffset: int64_t
+        - fromptr: List[double]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_touint32_fromuint16
+      args:
+        - toptr: List[uint32_t]
+        - tooffset: int64_t
+        - fromptr: List[uint16_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_tofloat32_fromint32
+      args:
+        - toptr: List[float]
+        - tooffset: int64_t
+        - fromptr: List[int32_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_touint16_fromuint8
+      args:
+        - toptr: List[uint16_t]
+        - tooffset: int64_t
+        - fromptr: List[uint8_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_tofloat32_fromint64
+      args:
+        - toptr: List[float]
+        - tooffset: int64_t
+        - fromptr: List[int64_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_touint16_fromuint16
+      args:
+        - toptr: List[uint16_t]
+        - tooffset: int64_t
+        - fromptr: List[uint16_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_toint64_fromuint64
+      args:
+        - toptr: List[int64_t]
+        - tooffset: int64_t
+        - fromptr: List[uint64_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_tofloat32_fromint8
+      args:
+        - toptr: List[float]
+        - tooffset: int64_t
+        - fromptr: List[int8_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_toint64_fromint8
+      args:
+        - toptr: List[int64_t]
+        - tooffset: int64_t
+        - fromptr: List[int8_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_toint16_fromuint8
+      args:
+        - toptr: List[int16_t]
+        - tooffset: int64_t
+        - fromptr: List[uint8_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_toint32_fromint16
+      args:
+        - toptr: List[int32_t]
+        - tooffset: int64_t
+        - fromptr: List[int16_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_toint32_fromuint8
+      args:
+        - toptr: List[int32_t]
+        - tooffset: int64_t
+        - fromptr: List[uint8_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_touint64_fromuint8
+      args:
+        - toptr: List[uint64_t]
+        - tooffset: int64_t
+        - fromptr: List[uint8_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_toint64_fromint32
+      args:
+        - toptr: List[int64_t]
+        - tooffset: int64_t
+        - fromptr: List[int32_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_tofloat64_fromuint16
+      args:
+        - toptr: List[double]
+        - tooffset: int64_t
+        - fromptr: List[uint16_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_toint8_fromint8
+      args:
+        - toptr: List[int8_t]
+        - tooffset: int64_t
+        - fromptr: List[int8_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_tofloat64_fromfloat32
+      args:
+        - toptr: List[double]
+        - tooffset: int64_t
+        - fromptr: List[float]
+        - fromoffset: int64_t
+        - length: int64_t
     - name: awkward_NumpyArray_fill_touint64_fromuint16
       args:
         - toptr: List[uint64_t]
@@ -1662,9 +1571,16 @@ Kernels:
         - fromptr: List[uint16_t]
         - fromoffset: int64_t
         - length: int64_t
-    - name: awkward_NumpyArray_fill_touint16_fromuint8
+    - name: awkward_NumpyArray_fill_tofloat64_fromint16
       args:
-        - toptr: List[uint16_t]
+        - toptr: List[double]
+        - tooffset: int64_t
+        - fromptr: List[int16_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_toint64_fromuint8
+      args:
+        - toptr: List[int64_t]
         - tooffset: int64_t
         - fromptr: List[uint8_t]
         - fromoffset: int64_t
@@ -1676,11 +1592,95 @@ Kernels:
         - fromptr: List[uint8_t]
         - fromoffset: int64_t
         - length: int64_t
-    - name: awkward_NumpyArray_fill_tofloat64_fromint32
+    - name: awkward_NumpyArray_fill_toint64_fromint64
+      args:
+        - toptr: List[int64_t]
+        - tooffset: int64_t
+        - fromptr: List[int64_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_tofloat32_fromint16
+      args:
+        - toptr: List[float]
+        - tooffset: int64_t
+        - fromptr: List[int16_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_toint16_fromint8
+      args:
+        - toptr: List[int16_t]
+        - tooffset: int64_t
+        - fromptr: List[int8_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_tofloat64_fromint8
       args:
         - toptr: List[double]
         - tooffset: int64_t
+        - fromptr: List[int8_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_tofloat32_fromuint8
+      args:
+        - toptr: List[float]
+        - tooffset: int64_t
+        - fromptr: List[uint8_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_toint16_fromint16
+      args:
+        - toptr: List[int16_t]
+        - tooffset: int64_t
+        - fromptr: List[int16_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_toint32_fromint32
+      args:
+        - toptr: List[int32_t]
+        - tooffset: int64_t
         - fromptr: List[int32_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_touint32_fromuint32
+      args:
+        - toptr: List[uint32_t]
+        - tooffset: int64_t
+        - fromptr: List[uint32_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_toint64_fromuint16
+      args:
+        - toptr: List[int64_t]
+        - tooffset: int64_t
+        - fromptr: List[uint16_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_tofloat32_fromuint64
+      args:
+        - toptr: List[float]
+        - tooffset: int64_t
+        - fromptr: List[uint64_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_toint32_fromint8
+      args:
+        - toptr: List[int32_t]
+        - tooffset: int64_t
+        - fromptr: List[int8_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_touint8_fromuint8
+      args:
+        - toptr: List[uint8_t]
+        - tooffset: int64_t
+        - fromptr: List[uint8_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_tofloat32_fromuint32
+      args:
+        - toptr: List[float]
+        - tooffset: int64_t
+        - fromptr: List[uint32_t]
         - fromoffset: int64_t
         - length: int64_t
     fail: False
@@ -1692,15 +1692,15 @@ Kernels:
 
   - name: awkward_ListArray_fill
     specializations:
-    - name: awkward_ListArray_fill_to64_from64
+    - name: awkward_ListArray_fill_to64_from32
       args:
         - tostarts: List[int64_t]
         - tostartsoffset: int64_t
         - tostops: List[int64_t]
         - tostopsoffset: int64_t
-        - fromstarts: List[int64_t]
+        - fromstarts: List[int32_t]
         - fromstartsoffset: int64_t
-        - fromstops: List[int64_t]
+        - fromstops: List[int32_t]
         - fromstopsoffset: int64_t
         - length: int64_t
         - base: int64_t
@@ -1716,15 +1716,15 @@ Kernels:
         - fromstopsoffset: int64_t
         - length: int64_t
         - base: int64_t
-    - name: awkward_ListArray_fill_to64_from32
+    - name: awkward_ListArray_fill_to64_from64
       args:
         - tostarts: List[int64_t]
         - tostartsoffset: int64_t
         - tostops: List[int64_t]
         - tostopsoffset: int64_t
-        - fromstarts: List[int32_t]
+        - fromstarts: List[int64_t]
         - fromstartsoffset: int64_t
-        - fromstops: List[int32_t]
+        - fromstops: List[int64_t]
         - fromstopsoffset: int64_t
         - length: int64_t
         - base: int64_t
@@ -1749,6 +1749,14 @@ Kernels:
 
   - name: awkward_IndexedArray_fill
     specializations:
+    - name: awkward_IndexedArray_fill_to64_from32
+      args:
+        - toindex: List[int64_t]
+        - toindexoffset: int64_t
+        - fromindex: List[int32_t]
+        - fromindexoffset: int64_t
+        - length: int64_t
+        - base: int64_t
     - name: awkward_IndexedArray_fill_to64_fromU32
       args:
         - toindex: List[int64_t]
@@ -1762,14 +1770,6 @@ Kernels:
         - toindex: List[int64_t]
         - toindexoffset: int64_t
         - fromindex: List[int64_t]
-        - fromindexoffset: int64_t
-        - length: int64_t
-        - base: int64_t
-    - name: awkward_IndexedArray_fill_to64_from32
-      args:
-        - toindex: List[int64_t]
-        - toindexoffset: int64_t
-        - fromindex: List[int32_t]
         - fromindexoffset: int64_t
         - length: int64_t
         - base: int64_t
@@ -1826,18 +1826,18 @@ Kernels:
         - fromindex: List[int32_t]
         - fromindexoffset: int64_t
         - length: int64_t
-    - name: awkward_UnionArray_fillindex_to64_from64
-      args:
-        - toindex: List[int64_t]
-        - toindexoffset: int64_t
-        - fromindex: List[int64_t]
-        - fromindexoffset: int64_t
-        - length: int64_t
     - name: awkward_UnionArray_fillindex_to64_fromU32
       args:
         - toindex: List[int64_t]
         - toindexoffset: int64_t
         - fromindex: List[uint32_t]
+        - fromindexoffset: int64_t
+        - length: int64_t
+    - name: awkward_UnionArray_fillindex_to64_from64
+      args:
+        - toindex: List[int64_t]
+        - toindexoffset: int64_t
+        - fromindex: List[int64_t]
         - fromindexoffset: int64_t
         - length: int64_t
     fail: False
@@ -1880,23 +1880,6 @@ Kernels:
 
   - name: awkward_UnionArray_simplify
     specializations:
-    - name: awkward_UnionArray8_64_simplify8_32_to8_64
-      args:
-        - totags: List[int8_t]
-        - toindex: List[int64_t]
-        - outertags: List[int8_t]
-        - outertagsoffset: int64_t
-        - outerindex: List[int64_t]
-        - outerindexoffset: int64_t
-        - innertags: List[int8_t]
-        - innertagsoffset: int64_t
-        - innerindex: List[int32_t]
-        - innerindexoffset: int64_t
-        - towhich: int64_t
-        - innerwhich: int64_t
-        - outerwhich: int64_t
-        - length: int64_t
-        - base: int64_t
     - name: awkward_UnionArray8_U32_simplify8_64_to8_64
       args:
         - totags: List[int8_t]
@@ -1914,17 +1897,34 @@ Kernels:
         - outerwhich: int64_t
         - length: int64_t
         - base: int64_t
-    - name: awkward_UnionArray8_64_simplify8_64_to8_64
+    - name: awkward_UnionArray8_32_simplify8_U32_to8_64
       args:
         - totags: List[int8_t]
         - toindex: List[int64_t]
         - outertags: List[int8_t]
         - outertagsoffset: int64_t
-        - outerindex: List[int64_t]
+        - outerindex: List[int32_t]
         - outerindexoffset: int64_t
         - innertags: List[int8_t]
         - innertagsoffset: int64_t
-        - innerindex: List[int64_t]
+        - innerindex: List[uint32_t]
+        - innerindexoffset: int64_t
+        - towhich: int64_t
+        - innerwhich: int64_t
+        - outerwhich: int64_t
+        - length: int64_t
+        - base: int64_t
+    - name: awkward_UnionArray8_U32_simplify8_U32_to8_64
+      args:
+        - totags: List[int8_t]
+        - toindex: List[int64_t]
+        - outertags: List[int8_t]
+        - outertagsoffset: int64_t
+        - outerindex: List[uint32_t]
+        - outerindexoffset: int64_t
+        - innertags: List[int8_t]
+        - innertagsoffset: int64_t
+        - innerindex: List[uint32_t]
         - innerindexoffset: int64_t
         - towhich: int64_t
         - innerwhich: int64_t
@@ -1965,23 +1965,6 @@ Kernels:
         - outerwhich: int64_t
         - length: int64_t
         - base: int64_t
-    - name: awkward_UnionArray8_32_simplify8_U32_to8_64
-      args:
-        - totags: List[int8_t]
-        - toindex: List[int64_t]
-        - outertags: List[int8_t]
-        - outertagsoffset: int64_t
-        - outerindex: List[int32_t]
-        - outerindexoffset: int64_t
-        - innertags: List[int8_t]
-        - innertagsoffset: int64_t
-        - innerindex: List[uint32_t]
-        - innerindexoffset: int64_t
-        - towhich: int64_t
-        - innerwhich: int64_t
-        - outerwhich: int64_t
-        - length: int64_t
-        - base: int64_t
     - name: awkward_UnionArray8_U32_simplify8_32_to8_64
       args:
         - totags: List[int8_t]
@@ -1999,6 +1982,40 @@ Kernels:
         - outerwhich: int64_t
         - length: int64_t
         - base: int64_t
+    - name: awkward_UnionArray8_64_simplify8_32_to8_64
+      args:
+        - totags: List[int8_t]
+        - toindex: List[int64_t]
+        - outertags: List[int8_t]
+        - outertagsoffset: int64_t
+        - outerindex: List[int64_t]
+        - outerindexoffset: int64_t
+        - innertags: List[int8_t]
+        - innertagsoffset: int64_t
+        - innerindex: List[int32_t]
+        - innerindexoffset: int64_t
+        - towhich: int64_t
+        - innerwhich: int64_t
+        - outerwhich: int64_t
+        - length: int64_t
+        - base: int64_t
+    - name: awkward_UnionArray8_64_simplify8_64_to8_64
+      args:
+        - totags: List[int8_t]
+        - toindex: List[int64_t]
+        - outertags: List[int8_t]
+        - outertagsoffset: int64_t
+        - outerindex: List[int64_t]
+        - outerindexoffset: int64_t
+        - innertags: List[int8_t]
+        - innertagsoffset: int64_t
+        - innerindex: List[int64_t]
+        - innerindexoffset: int64_t
+        - towhich: int64_t
+        - innerwhich: int64_t
+        - outerwhich: int64_t
+        - length: int64_t
+        - base: int64_t
     - name: awkward_UnionArray8_32_simplify8_32_to8_64
       args:
         - totags: List[int8_t]
@@ -2010,23 +2027,6 @@ Kernels:
         - innertags: List[int8_t]
         - innertagsoffset: int64_t
         - innerindex: List[int32_t]
-        - innerindexoffset: int64_t
-        - towhich: int64_t
-        - innerwhich: int64_t
-        - outerwhich: int64_t
-        - length: int64_t
-        - base: int64_t
-    - name: awkward_UnionArray8_U32_simplify8_U32_to8_64
-      args:
-        - totags: List[int8_t]
-        - toindex: List[int64_t]
-        - outertags: List[int8_t]
-        - outertagsoffset: int64_t
-        - outerindex: List[uint32_t]
-        - outerindexoffset: int64_t
-        - innertags: List[int8_t]
-        - innertagsoffset: int64_t
-        - innerindex: List[uint32_t]
         - innerindexoffset: int64_t
         - towhich: int64_t
         - innerwhich: int64_t
@@ -2074,18 +2074,6 @@ Kernels:
         - fromwhich: int64_t
         - length: int64_t
         - base: int64_t
-    - name: awkward_UnionArray8_U32_simplify_one_to8_64
-      args:
-        - totags: List[int8_t]
-        - toindex: List[int64_t]
-        - fromtags: List[int8_t]
-        - fromtagsoffset: int64_t
-        - fromindex: List[uint32_t]
-        - fromindexoffset: int64_t
-        - towhich: int64_t
-        - fromwhich: int64_t
-        - length: int64_t
-        - base: int64_t
     - name: awkward_UnionArray8_32_simplify_one_to8_64
       args:
         - totags: List[int8_t]
@@ -2093,6 +2081,18 @@ Kernels:
         - fromtags: List[int8_t]
         - fromtagsoffset: int64_t
         - fromindex: List[int32_t]
+        - fromindexoffset: int64_t
+        - towhich: int64_t
+        - fromwhich: int64_t
+        - length: int64_t
+        - base: int64_t
+    - name: awkward_UnionArray8_U32_simplify_one_to8_64
+      args:
+        - totags: List[int8_t]
+        - toindex: List[int64_t]
+        - fromtags: List[int8_t]
+        - fromtagsoffset: int64_t
+        - fromindex: List[uint32_t]
         - fromindexoffset: int64_t
         - towhich: int64_t
         - fromwhich: int64_t
@@ -2198,15 +2198,6 @@ Kernels:
 
   - name: awkward_UnionArray_validity
     specializations:
-    - name: awkward_UnionArray8_64_validity
-      args:
-        - tags: List[int8_t]
-        - tagsoffset: int64_t
-        - index: List[int64_t]
-        - indexoffset: int64_t
-        - length: int64_t
-        - numcontents: int64_t
-        - lencontents: List[int64_t]
     - name: awkward_UnionArray8_32_validity
       args:
         - tags: List[int8_t]
@@ -2221,6 +2212,15 @@ Kernels:
         - tags: List[int8_t]
         - tagsoffset: int64_t
         - index: List[uint32_t]
+        - indexoffset: int64_t
+        - length: int64_t
+        - numcontents: int64_t
+        - lencontents: List[int64_t]
+    - name: awkward_UnionArray8_64_validity
+      args:
+        - tags: List[int8_t]
+        - tagsoffset: int64_t
+        - index: List[int64_t]
         - indexoffset: int64_t
         - length: int64_t
         - numcontents: int64_t
@@ -2246,6 +2246,12 @@ Kernels:
 
   - name: awkward_UnionArray_fillna
     specializations:
+    - name: awkward_UnionArray_fillna_fromU32_to64
+      args:
+        - toindex: List[int64_t]
+        - fromindex: List[uint32_t]
+        - offset: int64_t
+        - length: int64_t
     - name: awkward_UnionArray_fillna_from64_to64
       args:
         - toindex: List[int64_t]
@@ -2256,12 +2262,6 @@ Kernels:
       args:
         - toindex: List[int64_t]
         - fromindex: List[int32_t]
-        - offset: int64_t
-        - length: int64_t
-    - name: awkward_UnionArray_fillna_fromU32_to64
-      args:
-        - toindex: List[int64_t]
-        - fromindex: List[uint32_t]
         - offset: int64_t
         - length: int64_t
     fail: False
@@ -2345,6 +2345,14 @@ Kernels:
 
   - name: awkward_ListArray_min_range
     specializations:
+    - name: awkward_ListArray32_min_range
+      args:
+        - tomin: List[int64_t]
+        - fromstarts: List[int32_t]
+        - fromstops: List[int32_t]
+        - lenstarts: int64_t
+        - startsoffset: int64_t
+        - stopsoffset: int64_t
     - name: awkward_ListArray64_min_range
       args:
         - tomin: List[int64_t]
@@ -2358,14 +2366,6 @@ Kernels:
         - tomin: List[int64_t]
         - fromstarts: List[uint32_t]
         - fromstops: List[uint32_t]
-        - lenstarts: int64_t
-        - startsoffset: int64_t
-        - stopsoffset: int64_t
-    - name: awkward_ListArray32_min_range
-      args:
-        - tomin: List[int64_t]
-        - fromstarts: List[int32_t]
-        - fromstops: List[int32_t]
         - lenstarts: int64_t
         - startsoffset: int64_t
         - stopsoffset: int64_t
@@ -2424,6 +2424,17 @@ Kernels:
 
   - name: awkward_ListArray_rpad_axis1
     specializations:
+    - name: awkward_ListArray64_rpad_axis1_64
+      args:
+        - toindex: List[int64_t]
+        - fromstarts: List[int64_t]
+        - fromstops: List[int64_t]
+        - tostarts: List[int64_t]
+        - tostops: List[int64_t]
+        - target: int64_t
+        - length: int64_t
+        - startsoffset: int64_t
+        - stopsoffset: int64_t
     - name: awkward_ListArray32_rpad_axis1_64
       args:
         - toindex: List[int64_t]
@@ -2442,17 +2453,6 @@ Kernels:
         - fromstops: List[uint32_t]
         - tostarts: List[uint32_t]
         - tostops: List[uint32_t]
-        - target: int64_t
-        - length: int64_t
-        - startsoffset: int64_t
-        - stopsoffset: int64_t
-    - name: awkward_ListArray64_rpad_axis1_64
-      args:
-        - toindex: List[int64_t]
-        - fromstarts: List[int64_t]
-        - fromstops: List[int64_t]
-        - tostarts: List[int64_t]
-        - tostops: List[int64_t]
         - target: int64_t
         - length: int64_t
         - startsoffset: int64_t
@@ -2484,13 +2484,6 @@ Kernels:
 
   - name: awkward_ListOffsetArray_rpad_and_clip_axis1
     specializations:
-    - name: awkward_ListOffsetArray32_rpad_and_clip_axis1_64
-      args:
-        - toindex: List[int64_t]
-        - fromoffsets: List[int32_t]
-        - offsetsoffset: int64_t
-        - length: int64_t
-        - target: int64_t
     - name: awkward_ListOffsetArrayU32_rpad_and_clip_axis1_64
       args:
         - toindex: List[int64_t]
@@ -2502,6 +2495,13 @@ Kernels:
       args:
         - toindex: List[int64_t]
         - fromoffsets: List[int64_t]
+        - offsetsoffset: int64_t
+        - length: int64_t
+        - target: int64_t
+    - name: awkward_ListOffsetArray32_rpad_and_clip_axis1_64
+      args:
+        - toindex: List[int64_t]
+        - fromoffsets: List[int32_t]
         - offsetsoffset: int64_t
         - length: int64_t
         - target: int64_t
@@ -2523,14 +2523,6 @@ Kernels:
 
   - name: awkward_ListOffsetArray_rpad_length_axis1
     specializations:
-    - name: awkward_ListOffsetArray32_rpad_length_axis1
-      args:
-        - tooffsets: List[int32_t]
-        - fromoffsets: List[int32_t]
-        - offsetsoffset: int64_t
-        - fromlength: int64_t
-        - target: int64_t
-        - tolength: List[int64_t]
     - name: awkward_ListOffsetArrayU32_rpad_length_axis1
       args:
         - tooffsets: List[uint32_t]
@@ -2543,6 +2535,14 @@ Kernels:
       args:
         - tooffsets: List[int64_t]
         - fromoffsets: List[int64_t]
+        - offsetsoffset: int64_t
+        - fromlength: int64_t
+        - target: int64_t
+        - tolength: List[int64_t]
+    - name: awkward_ListOffsetArray32_rpad_length_axis1
+      args:
+        - tooffsets: List[int32_t]
+        - fromoffsets: List[int32_t]
         - offsetsoffset: int64_t
         - fromlength: int64_t
         - target: int64_t
@@ -2564,6 +2564,13 @@ Kernels:
 
   - name: awkward_ListOffsetArray_rpad_axis1
     specializations:
+    - name: awkward_ListOffsetArrayU32_rpad_axis1_64
+      args:
+        - toindex: List[int64_t]
+        - fromoffsets: List[uint32_t]
+        - offsetsoffset: int64_t
+        - fromlength: int64_t
+        - target: int64_t
     - name: awkward_ListOffsetArray64_rpad_axis1_64
       args:
         - toindex: List[int64_t]
@@ -2575,13 +2582,6 @@ Kernels:
       args:
         - toindex: List[int64_t]
         - fromoffsets: List[int32_t]
-        - offsetsoffset: int64_t
-        - fromlength: int64_t
-        - target: int64_t
-    - name: awkward_ListOffsetArrayU32_rpad_axis1_64
-      args:
-        - toindex: List[int64_t]
-        - fromoffsets: List[uint32_t]
         - offsetsoffset: int64_t
         - fromlength: int64_t
         - target: int64_t
@@ -2749,47 +2749,11 @@ Kernels:
               tooffsets[i + 1] = tooffsets[i] + combinationslen
 
 
-  - name: awkward_ListArray_combinations_step
-    args:
-      - tocarry: List[List[int]]
-      - toindex: List[int64_t]
-      - fromindex: List[int64_t]
-      - j: int64_t
-      - stop: int64_t
-      - n: int64_t
-      - replacement: bool
-    fail: False
-    specification: |
-      def awkward_ListArray_combinations_step(
-          tocarry, toindex, fromindex, j, stop, n, replacement
-      ):
-          while fromindex[j] < stop:
-              if replacement:
-                  k = j + 1
-                  while k < n:
-                      fromindex[k] = fromindex[j]
-                      k = k + 1
-              else:
-                  k = j + 1
-                  while k < n:
-                      fromindex[k] = fromindex[j] + (k - j)
-                      k = k + 1
-              if (j + 1) == n:
-                  for k in range(n):
-                      tocarry[k][toindex[k]] = fromindex[k]
-                      toindex[k] = toindex[k] + 1
-              else:
-                  awkward_ListArray_combinations_step(
-                      tocarry, toindex, fromindex, j + 1, stop, n, replacement
-                  )
-              fromindex[j] = fromindex[j] + 1
-
-
   - name: awkward_ListArray_combinations
     specializations:
     - name: awkward_ListArrayU32_combinations_64
       args:
-        - tocarry: List[List[int]]
+        - tocarry: List[List[int64_t]]
         - toindex: List[int64_t]
         - fromindex: List[int64_t]
         - n: int64_t
@@ -2801,7 +2765,7 @@ Kernels:
         - length: int64_t
     - name: awkward_ListArray32_combinations_64
       args:
-        - tocarry: List[List[int]]
+        - tocarry: List[List[int64_t]]
         - toindex: List[int64_t]
         - fromindex: List[int64_t]
         - n: int64_t
@@ -2813,7 +2777,7 @@ Kernels:
         - length: int64_t
     - name: awkward_ListArray64_combinations_64
       args:
-        - tocarry: List[List[int]]
+        - tocarry: List[List[int64_t]]
         - toindex: List[int64_t]
         - fromindex: List[int64_t]
         - n: int64_t
@@ -2852,7 +2816,7 @@ Kernels:
     specializations:
     - name: awkward_RegularArray_combinations_64
       args:
-        - tocarry: List[List[int]]
+        - tocarry: List[List[int64_t]]
         - toindex: List[int64_t]
         - fromindex: List[int64_t]
         - n: int64_t
@@ -2904,7 +2868,7 @@ Kernels:
       - bitmaskoffset: int64_t
       - bitmasklength: int64_t
       - validwhen: bool
-      - lsb_order: int
+      - lsb_order: bool
     fail: False
     specification: |
       def awkward_BitMaskedArray_to_ByteMaskedArray(
@@ -2957,7 +2921,7 @@ Kernels:
         - bitmaskoffset: int64_t
         - bitmasklength: int64_t
         - validwhen: bool
-        - lsb_order: int
+        - lsb_order: bool
     fail: False
     specification: |
       def awkward_BitMaskedArray_to_IndexedOptionArray(
@@ -3067,19 +3031,19 @@ Kernels:
 
   - name: awkward_reduce_countnonzero
     specializations:
-    - name: awkward_reduce_countnonzero_float64_64
+    - name: awkward_reduce_countnonzero_uint64_64
       args:
         - toptr: List[int64_t]
-        - fromptr: List[double]
+        - fromptr: List[uint64_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_countnonzero_uint16_64
+    - name: awkward_reduce_countnonzero_float64_64
       args:
         - toptr: List[int64_t]
-        - fromptr: List[uint16_t]
+        - fromptr: List[double]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
@@ -3094,19 +3058,10 @@ Kernels:
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_countnonzero_int32_64
+    - name: awkward_reduce_countnonzero_int64_64
       args:
         - toptr: List[int64_t]
-        - fromptr: List[int32_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_countnonzero_uint32_64
-      args:
-        - toptr: List[int64_t]
-        - fromptr: List[uint32_t]
+        - fromptr: List[int64_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
@@ -3121,19 +3076,19 @@ Kernels:
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_countnonzero_int64_64
+    - name: awkward_reduce_countnonzero_uint32_64
       args:
         - toptr: List[int64_t]
-        - fromptr: List[int64_t]
+        - fromptr: List[uint32_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_countnonzero_int16_64
+    - name: awkward_reduce_countnonzero_uint16_64
       args:
         - toptr: List[int64_t]
-        - fromptr: List[int16_t]
+        - fromptr: List[uint16_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
@@ -3148,6 +3103,15 @@ Kernels:
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
+    - name: awkward_reduce_countnonzero_int32_64
+      args:
+        - toptr: List[int64_t]
+        - fromptr: List[int32_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
     - name: awkward_reduce_countnonzero_uint8_64
       args:
         - toptr: List[int64_t]
@@ -3157,10 +3121,10 @@ Kernels:
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_countnonzero_uint64_64
+    - name: awkward_reduce_countnonzero_int16_64
       args:
         - toptr: List[int64_t]
-        - fromptr: List[uint64_t]
+        - fromptr: List[int16_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
@@ -3179,64 +3143,19 @@ Kernels:
 
   - name: awkward_reduce_sum
     specializations:
-    - name: awkward_reduce_sum_float64_float64_64
-      args:
-        - toptr: List[double]
-        - fromptr: List[double]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_sum_uint32_uint32_64
-      args:
-        - toptr: List[uint32_t]
-        - fromptr: List[uint32_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_sum_uint64_uint8_64
-      args:
-        - toptr: List[uint64_t]
-        - fromptr: List[uint8_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_sum_uint64_uint64_64
-      args:
-        - toptr: List[uint64_t]
-        - fromptr: List[uint64_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_sum_uint64_uint32_64
-      args:
-        - toptr: List[uint64_t]
-        - fromptr: List[uint32_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_sum_float32_float32_64
-      args:
-        - toptr: List[float]
-        - fromptr: List[float]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_sum_int32_int16_64
+    - name: awkward_reduce_sum_int32_int8_64
       args:
         - toptr: List[int32_t]
-        - fromptr: List[int16_t]
+        - fromptr: List[int8_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_sum_uint64_uint16_64
+      args:
+        - toptr: List[uint64_t]
+        - fromptr: List[uint16_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
@@ -3251,10 +3170,19 @@ Kernels:
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_sum_int64_int32_64
+    - name: awkward_reduce_sum_uint32_uint32_64
       args:
-        - toptr: List[int64_t]
-        - fromptr: List[int32_t]
+        - toptr: List[uint32_t]
+        - fromptr: List[uint32_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_sum_uint32_uint16_64
+      args:
+        - toptr: List[uint32_t]
+        - fromptr: List[uint16_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
@@ -3263,6 +3191,15 @@ Kernels:
     - name: awkward_reduce_sum_int32_int32_64
       args:
         - toptr: List[int32_t]
+        - fromptr: List[int32_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_sum_int64_int32_64
+      args:
+        - toptr: List[int64_t]
         - fromptr: List[int32_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
@@ -3278,10 +3215,28 @@ Kernels:
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_sum_int32_int8_64
+    - name: awkward_reduce_sum_float32_float32_64
       args:
-        - toptr: List[int32_t]
-        - fromptr: List[int8_t]
+        - toptr: List[float]
+        - fromptr: List[float]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_sum_uint64_uint8_64
+      args:
+        - toptr: List[uint64_t]
+        - fromptr: List[uint8_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_sum_float64_float64_64
+      args:
+        - toptr: List[double]
+        - fromptr: List[double]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
@@ -3296,19 +3251,10 @@ Kernels:
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_sum_uint64_uint16_64
+    - name: awkward_reduce_sum_int32_int16_64
       args:
-        - toptr: List[uint64_t]
-        - fromptr: List[uint16_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_sum_uint32_uint16_64
-      args:
-        - toptr: List[uint32_t]
-        - fromptr: List[uint16_t]
+        - toptr: List[int32_t]
+        - fromptr: List[int16_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
@@ -3318,6 +3264,24 @@ Kernels:
       args:
         - toptr: List[int64_t]
         - fromptr: List[int16_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_sum_uint64_uint32_64
+      args:
+        - toptr: List[uint64_t]
+        - fromptr: List[uint32_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_sum_uint64_uint64_64
+      args:
+        - toptr: List[uint64_t]
+        - fromptr: List[uint64_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
@@ -3376,28 +3340,19 @@ Kernels:
 
   - name: awkward_reduce_sum_bool
     specializations:
-    - name: awkward_reduce_sum_bool_float32_64
+    - name: awkward_reduce_sum_bool_int64_64
       args:
         - toptr: List[bool]
-        - fromptr: List[float]
+        - fromptr: List[int64_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_sum_bool_int8_64
+    - name: awkward_reduce_sum_bool_uint8_64
       args:
         - toptr: List[bool]
-        - fromptr: List[int8_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_sum_bool_int32_64
-      args:
-        - toptr: List[bool]
-        - fromptr: List[int32_t]
+        - fromptr: List[uint8_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
@@ -3412,10 +3367,19 @@ Kernels:
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_sum_bool_uint64_64
+    - name: awkward_reduce_sum_bool_float32_64
       args:
         - toptr: List[bool]
-        - fromptr: List[uint64_t]
+        - fromptr: List[float]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_sum_bool_int32_64
+      args:
+        - toptr: List[bool]
+        - fromptr: List[int32_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
@@ -3439,10 +3403,10 @@ Kernels:
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_sum_bool_uint16_64
+    - name: awkward_reduce_sum_bool_uint64_64
       args:
         - toptr: List[bool]
-        - fromptr: List[uint16_t]
+        - fromptr: List[uint64_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
@@ -3457,19 +3421,19 @@ Kernels:
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_sum_bool_int64_64
+    - name: awkward_reduce_sum_bool_int8_64
       args:
         - toptr: List[bool]
-        - fromptr: List[int64_t]
+        - fromptr: List[int8_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_sum_bool_uint8_64
+    - name: awkward_reduce_sum_bool_uint16_64
       args:
         - toptr: List[bool]
-        - fromptr: List[uint8_t]
+        - fromptr: List[uint16_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
@@ -3488,55 +3452,19 @@ Kernels:
 
   - name: awkward_reduce_prod
     specializations:
-    - name: awkward_reduce_prod_int64_int16_64
+    - name: awkward_reduce_prod_uint32_uint32_64
       args:
-        - toptr: List[int64_t]
-        - fromptr: List[int16_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_prod_uint64_uint8_64
-      args:
-        - toptr: List[uint64_t]
-        - fromptr: List[uint8_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_prod_int64_int8_64
-      args:
-        - toptr: List[int64_t]
-        - fromptr: List[int8_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_prod_uint64_uint32_64
-      args:
-        - toptr: List[uint64_t]
+        - toptr: List[uint32_t]
         - fromptr: List[uint32_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_prod_float64_float64_64
+    - name: awkward_reduce_prod_int64_int16_64
       args:
-        - toptr: List[double]
-        - fromptr: List[double]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_prod_int32_int8_64
-      args:
-        - toptr: List[int32_t]
-        - fromptr: List[int8_t]
+        - toptr: List[int64_t]
+        - fromptr: List[int16_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
@@ -3551,6 +3479,15 @@ Kernels:
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
+    - name: awkward_reduce_prod_int32_int32_64
+      args:
+        - toptr: List[int32_t]
+        - fromptr: List[int32_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
     - name: awkward_reduce_prod_uint32_uint8_64
       args:
         - toptr: List[uint32_t]
@@ -3560,19 +3497,46 @@ Kernels:
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_prod_uint32_uint16_64
+    - name: awkward_reduce_prod_int32_int8_64
       args:
-        - toptr: List[uint32_t]
+        - toptr: List[int32_t]
+        - fromptr: List[int8_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_prod_float64_float64_64
+      args:
+        - toptr: List[double]
+        - fromptr: List[double]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_prod_uint64_uint32_64
+      args:
+        - toptr: List[uint64_t]
+        - fromptr: List[uint32_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_prod_uint64_uint16_64
+      args:
+        - toptr: List[uint64_t]
         - fromptr: List[uint16_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_prod_uint32_uint32_64
+    - name: awkward_reduce_prod_uint64_uint8_64
       args:
-        - toptr: List[uint32_t]
-        - fromptr: List[uint32_t]
+        - toptr: List[uint64_t]
+        - fromptr: List[uint8_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
@@ -3596,19 +3560,19 @@ Kernels:
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_prod_int32_int32_64
+    - name: awkward_reduce_prod_int32_int16_64
       args:
         - toptr: List[int32_t]
-        - fromptr: List[int32_t]
+        - fromptr: List[int16_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_prod_int32_int16_64
+    - name: awkward_reduce_prod_int64_int8_64
       args:
-        - toptr: List[int32_t]
-        - fromptr: List[int16_t]
+        - toptr: List[int64_t]
+        - fromptr: List[int8_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
@@ -3623,9 +3587,9 @@ Kernels:
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_prod_uint64_uint16_64
+    - name: awkward_reduce_prod_uint32_uint16_64
       args:
-        - toptr: List[uint64_t]
+        - toptr: List[uint32_t]
         - fromptr: List[uint16_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
@@ -3685,10 +3649,37 @@ Kernels:
 
   - name: awkward_reduce_prod_bool
     specializations:
-    - name: awkward_reduce_prod_bool_bool_64
+    - name: awkward_reduce_prod_bool_uint64_64
       args:
         - toptr: List[bool]
-        - fromptr: List[bool]
+        - fromptr: List[uint64_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_prod_bool_int32_64
+      args:
+        - toptr: List[bool]
+        - fromptr: List[int32_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_prod_bool_float32_64
+      args:
+        - toptr: List[bool]
+        - fromptr: List[float]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_prod_bool_uint16_64
+      args:
+        - toptr: List[bool]
+        - fromptr: List[uint16_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
@@ -3712,46 +3703,19 @@ Kernels:
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_prod_bool_uint16_64
+    - name: awkward_reduce_prod_bool_bool_64
       args:
         - toptr: List[bool]
-        - fromptr: List[uint16_t]
+        - fromptr: List[bool]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_prod_bool_float32_64
+    - name: awkward_reduce_prod_bool_uint8_64
       args:
         - toptr: List[bool]
-        - fromptr: List[float]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_prod_bool_int32_64
-      args:
-        - toptr: List[bool]
-        - fromptr: List[int32_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_prod_bool_uint32_64
-      args:
-        - toptr: List[bool]
-        - fromptr: List[uint32_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_prod_bool_uint64_64
-      args:
-        - toptr: List[bool]
-        - fromptr: List[uint64_t]
+        - fromptr: List[uint8_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
@@ -3766,10 +3730,10 @@ Kernels:
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_prod_bool_uint8_64
+    - name: awkward_reduce_prod_bool_uint32_64
       args:
         - toptr: List[bool]
-        - fromptr: List[uint8_t]
+        - fromptr: List[uint32_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
@@ -3797,36 +3761,6 @@ Kernels:
 
   - name: awkward_reduce_min
     specializations:
-    - name: awkward_reduce_min_uint64_uint64_64
-      args:
-        - toptr: List[uint64_t]
-        - fromptr: List[uint64_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-        - identity: uint64_t
-    - name: awkward_reduce_min_uint32_uint32_64
-      args:
-        - toptr: List[uint32_t]
-        - fromptr: List[uint32_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-        - identity: uint32_t
-    - name: awkward_reduce_min_int8_int8_64
-      args:
-        - toptr: List[int8_t]
-        - fromptr: List[int8_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-        - identity: int8_t
     - name: awkward_reduce_min_uint8_uint8_64
       args:
         - toptr: List[uint8_t]
@@ -3847,16 +3781,6 @@ Kernels:
         - lenparents: int64_t
         - outlength: int64_t
         - identity: int64_t
-    - name: awkward_reduce_min_int16_int16_64
-      args:
-        - toptr: List[int16_t]
-        - fromptr: List[int16_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-        - identity: int16_t
     - name: awkward_reduce_min_float64_float64_64
       args:
         - toptr: List[double]
@@ -3867,6 +3791,56 @@ Kernels:
         - lenparents: int64_t
         - outlength: int64_t
         - identity: double
+    - name: awkward_reduce_min_int8_int8_64
+      args:
+        - toptr: List[int8_t]
+        - fromptr: List[int8_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+        - identity: int8_t
+    - name: awkward_reduce_min_uint32_uint32_64
+      args:
+        - toptr: List[uint32_t]
+        - fromptr: List[uint32_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+        - identity: uint32_t
+    - name: awkward_reduce_min_int16_int16_64
+      args:
+        - toptr: List[int16_t]
+        - fromptr: List[int16_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+        - identity: int16_t
+    - name: awkward_reduce_min_uint64_uint64_64
+      args:
+        - toptr: List[uint64_t]
+        - fromptr: List[uint64_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+        - identity: uint64_t
+    - name: awkward_reduce_min_uint16_uint16_64
+      args:
+        - toptr: List[uint16_t]
+        - fromptr: List[uint16_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+        - identity: uint16_t
     - name: awkward_reduce_min_float32_float32_64
       args:
         - toptr: List[float]
@@ -3887,16 +3861,6 @@ Kernels:
         - lenparents: int64_t
         - outlength: int64_t
         - identity: int32_t
-    - name: awkward_reduce_min_uint16_uint16_64
-      args:
-        - toptr: List[uint16_t]
-        - fromptr: List[uint16_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-        - identity: uint16_t
     fail: False
     specification: |
       def awkward_reduce_min(
@@ -3922,36 +3886,6 @@ Kernels:
 
   - name: awkward_reduce_max
     specializations:
-    - name: awkward_reduce_max_int32_int32_64
-      args:
-        - toptr: List[int32_t]
-        - fromptr: List[int32_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-        - identity: int32_t
-    - name: awkward_reduce_max_int64_int64_64
-      args:
-        - toptr: List[int64_t]
-        - fromptr: List[int64_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-        - identity: int64_t
-    - name: awkward_reduce_max_int16_int16_64
-      args:
-        - toptr: List[int16_t]
-        - fromptr: List[int16_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-        - identity: int16_t
     - name: awkward_reduce_max_uint16_uint16_64
       args:
         - toptr: List[uint16_t]
@@ -3962,16 +3896,6 @@ Kernels:
         - lenparents: int64_t
         - outlength: int64_t
         - identity: uint16_t
-    - name: awkward_reduce_max_int8_int8_64
-      args:
-        - toptr: List[int8_t]
-        - fromptr: List[int8_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-        - identity: int8_t
     - name: awkward_reduce_max_uint32_uint32_64
       args:
         - toptr: List[uint32_t]
@@ -3992,6 +3916,56 @@ Kernels:
         - lenparents: int64_t
         - outlength: int64_t
         - identity: double
+    - name: awkward_reduce_max_int64_int64_64
+      args:
+        - toptr: List[int64_t]
+        - fromptr: List[int64_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+        - identity: int64_t
+    - name: awkward_reduce_max_int16_int16_64
+      args:
+        - toptr: List[int16_t]
+        - fromptr: List[int16_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+        - identity: int16_t
+    - name: awkward_reduce_max_int32_int32_64
+      args:
+        - toptr: List[int32_t]
+        - fromptr: List[int32_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+        - identity: int32_t
+    - name: awkward_reduce_max_int8_int8_64
+      args:
+        - toptr: List[int8_t]
+        - fromptr: List[int8_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+        - identity: int8_t
+    - name: awkward_reduce_max_uint64_uint64_64
+      args:
+        - toptr: List[uint64_t]
+        - fromptr: List[uint64_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+        - identity: uint64_t
     - name: awkward_reduce_max_uint8_uint8_64
       args:
         - toptr: List[uint8_t]
@@ -4012,16 +3986,6 @@ Kernels:
         - lenparents: int64_t
         - outlength: int64_t
         - identity: float
-    - name: awkward_reduce_max_uint64_uint64_64
-      args:
-        - toptr: List[uint64_t]
-        - fromptr: List[uint64_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-        - identity: uint64_t
     fail: False
     specification: |
       def awkward_reduce_max(
@@ -4047,10 +4011,21 @@ Kernels:
 
   - name: awkward_reduce_argmin
     specializations:
-    - name: awkward_reduce_argmin_uint64_64
+    - name: awkward_reduce_argmin_float32_64
       args:
         - toptr: List[int64_t]
-        - fromptr: List[uint64_t]
+        - fromptr: List[float]
+        - fromptroffset: int64_t
+        - starts: List[int64_t]
+        - startsoffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_argmin_int16_64
+      args:
+        - toptr: List[int64_t]
+        - fromptr: List[int16_t]
         - fromptroffset: int64_t
         - starts: List[int64_t]
         - startsoffset: int64_t
@@ -4091,10 +4066,10 @@ Kernels:
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_argmin_int8_64
+    - name: awkward_reduce_argmin_uint32_64
       args:
         - toptr: List[int64_t]
-        - fromptr: List[int8_t]
+        - fromptr: List[uint32_t]
         - fromptroffset: int64_t
         - starts: List[int64_t]
         - startsoffset: int64_t
@@ -4124,10 +4099,10 @@ Kernels:
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_argmin_int16_64
+    - name: awkward_reduce_argmin_uint64_64
       args:
         - toptr: List[int64_t]
-        - fromptr: List[int16_t]
+        - fromptr: List[uint64_t]
         - fromptroffset: int64_t
         - starts: List[int64_t]
         - startsoffset: int64_t
@@ -4135,21 +4110,10 @@ Kernels:
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_argmin_float32_64
+    - name: awkward_reduce_argmin_int8_64
       args:
         - toptr: List[int64_t]
-        - fromptr: List[float]
-        - fromptroffset: int64_t
-        - starts: List[int64_t]
-        - startsoffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_argmin_uint32_64
-      args:
-        - toptr: List[int64_t]
-        - fromptr: List[uint32_t]
+        - fromptr: List[int8_t]
         - fromptroffset: int64_t
         - starts: List[int64_t]
         - startsoffset: int64_t
@@ -4220,21 +4184,10 @@ Kernels:
 
   - name: awkward_reduce_argmax
     specializations:
-    - name: awkward_reduce_argmax_int16_64
+    - name: awkward_reduce_argmax_uint32_64
       args:
         - toptr: List[int64_t]
-        - fromptr: List[int16_t]
-        - fromptroffset: int64_t
-        - starts: List[int64_t]
-        - startsoffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_argmax_uint64_64
-      args:
-        - toptr: List[int64_t]
-        - fromptr: List[uint64_t]
+        - fromptr: List[uint32_t]
         - fromptroffset: int64_t
         - starts: List[int64_t]
         - startsoffset: int64_t
@@ -4253,43 +4206,10 @@ Kernels:
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_argmax_float64_64
+    - name: awkward_reduce_argmax_uint8_64
       args:
         - toptr: List[int64_t]
-        - fromptr: List[double]
-        - fromptroffset: int64_t
-        - starts: List[int64_t]
-        - startsoffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_argmax_uint16_64
-      args:
-        - toptr: List[int64_t]
-        - fromptr: List[uint16_t]
-        - fromptroffset: int64_t
-        - starts: List[int64_t]
-        - startsoffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_argmax_uint32_64
-      args:
-        - toptr: List[int64_t]
-        - fromptr: List[uint32_t]
-        - fromptroffset: int64_t
-        - starts: List[int64_t]
-        - startsoffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_argmax_int8_64
-      args:
-        - toptr: List[int64_t]
-        - fromptr: List[int8_t]
+        - fromptr: List[uint8_t]
         - fromptroffset: int64_t
         - starts: List[int64_t]
         - startsoffset: int64_t
@@ -4308,10 +4228,10 @@ Kernels:
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_argmax_int32_64
+    - name: awkward_reduce_argmax_float64_64
       args:
         - toptr: List[int64_t]
-        - fromptr: List[int32_t]
+        - fromptr: List[double]
         - fromptroffset: int64_t
         - starts: List[int64_t]
         - startsoffset: int64_t
@@ -4319,10 +4239,54 @@ Kernels:
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_argmax_uint8_64
+    - name: awkward_reduce_argmax_int8_64
       args:
         - toptr: List[int64_t]
-        - fromptr: List[uint8_t]
+        - fromptr: List[int8_t]
+        - fromptroffset: int64_t
+        - starts: List[int64_t]
+        - startsoffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_argmax_int16_64
+      args:
+        - toptr: List[int64_t]
+        - fromptr: List[int16_t]
+        - fromptroffset: int64_t
+        - starts: List[int64_t]
+        - startsoffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_argmax_uint16_64
+      args:
+        - toptr: List[int64_t]
+        - fromptr: List[uint16_t]
+        - fromptroffset: int64_t
+        - starts: List[int64_t]
+        - startsoffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_argmax_uint64_64
+      args:
+        - toptr: List[int64_t]
+        - fromptr: List[uint64_t]
+        - fromptroffset: int64_t
+        - starts: List[int64_t]
+        - startsoffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_argmax_int32_64
+      args:
+        - toptr: List[int64_t]
+        - fromptr: List[int32_t]
         - fromptroffset: int64_t
         - starts: List[int64_t]
         - startsoffset: int64_t
@@ -4608,6 +4572,16 @@ Kernels:
 
   - name: awkward_IndexedArray_reduce_next_64
     specializations:
+    - name: awkward_IndexedArray32_reduce_next_64
+      args:
+        - nextcarry: List[int64_t]
+        - nextparents: List[int64_t]
+        - outindex: List[int64_t]
+        - index: List[int32_t]
+        - indexoffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - length: int64_t
     - name: awkward_IndexedArray64_reduce_next_64
       args:
         - nextcarry: List[int64_t]
@@ -4624,16 +4598,6 @@ Kernels:
         - nextparents: List[int64_t]
         - outindex: List[int64_t]
         - index: List[uint32_t]
-        - indexoffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - length: int64_t
-    - name: awkward_IndexedArray32_reduce_next_64
-      args:
-        - nextcarry: List[int64_t]
-        - nextparents: List[int64_t]
-        - outindex: List[int64_t]
-        - index: List[int32_t]
         - indexoffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
@@ -4847,26 +4811,10 @@ Kernels:
 
   - name: awkward_index_carry
     specializations:
-    - name: awkward_Index64_carry_64
-      args:
-        - toindex: List[int64_t]
-        - fromindex: List[int64_t]
-        - carry: List[int64_t]
-        - fromindexoffset: int64_t
-        - lenfromindex: int64_t
-        - length: int64_t
     - name: awkward_IndexU8_carry_64
       args:
         - toindex: List[uint8_t]
         - fromindex: List[uint8_t]
-        - carry: List[int64_t]
-        - fromindexoffset: int64_t
-        - lenfromindex: int64_t
-        - length: int64_t
-    - name: awkward_Index32_carry_64
-      args:
-        - toindex: List[int32_t]
-        - fromindex: List[int32_t]
         - carry: List[int64_t]
         - fromindexoffset: int64_t
         - lenfromindex: int64_t
@@ -4883,6 +4831,22 @@ Kernels:
       args:
         - toindex: List[uint32_t]
         - fromindex: List[uint32_t]
+        - carry: List[int64_t]
+        - fromindexoffset: int64_t
+        - lenfromindex: int64_t
+        - length: int64_t
+    - name: awkward_Index32_carry_64
+      args:
+        - toindex: List[int32_t]
+        - fromindex: List[int32_t]
+        - carry: List[int64_t]
+        - fromindexoffset: int64_t
+        - lenfromindex: int64_t
+        - length: int64_t
+    - name: awkward_Index64_carry_64
+      args:
+        - toindex: List[int64_t]
+        - fromindex: List[int64_t]
         - carry: List[int64_t]
         - fromindexoffset: int64_t
         - lenfromindex: int64_t
@@ -4908,6 +4872,20 @@ Kernels:
         - carry: List[int64_t]
         - fromindexoffset: int64_t
         - length: int64_t
+    - name: awkward_Index64_carry_nocheck_64
+      args:
+        - toindex: List[int64_t]
+        - fromindex: List[int64_t]
+        - carry: List[int64_t]
+        - fromindexoffset: int64_t
+        - length: int64_t
+    - name: awkward_Index8_carry_nocheck_64
+      args:
+        - toindex: List[int8_t]
+        - fromindex: List[int8_t]
+        - carry: List[int64_t]
+        - fromindexoffset: int64_t
+        - length: int64_t
     - name: awkward_IndexU8_carry_nocheck_64
       args:
         - toindex: List[uint8_t]
@@ -4919,20 +4897,6 @@ Kernels:
       args:
         - toindex: List[int32_t]
         - fromindex: List[int32_t]
-        - carry: List[int64_t]
-        - fromindexoffset: int64_t
-        - length: int64_t
-    - name: awkward_Index8_carry_nocheck_64
-      args:
-        - toindex: List[int8_t]
-        - fromindex: List[int8_t]
-        - carry: List[int64_t]
-        - fromindexoffset: int64_t
-        - length: int64_t
-    - name: awkward_Index64_carry_nocheck_64
-      args:
-        - toindex: List[int64_t]
-        - fromindex: List[int64_t]
         - carry: List[int64_t]
         - fromindexoffset: int64_t
         - length: int64_t
@@ -5284,20 +5248,20 @@ Kernels:
         - startsoffset: int64_t
         - stopsoffset: int64_t
         - at: int64_t
-    - name: awkward_ListArrayU32_getitem_next_at_64
-      args:
-        - tocarry: List[int64_t]
-        - fromstarts: List[uint32_t]
-        - fromstops: List[uint32_t]
-        - lenstarts: int64_t
-        - startsoffset: int64_t
-        - stopsoffset: int64_t
-        - at: int64_t
     - name: awkward_ListArray32_getitem_next_at_64
       args:
         - tocarry: List[int64_t]
         - fromstarts: List[int32_t]
         - fromstops: List[int32_t]
+        - lenstarts: int64_t
+        - startsoffset: int64_t
+        - stopsoffset: int64_t
+        - at: int64_t
+    - name: awkward_ListArrayU32_getitem_next_at_64
+      args:
+        - tocarry: List[int64_t]
+        - fromstarts: List[uint32_t]
+        - fromstops: List[uint32_t]
         - lenstarts: int64_t
         - startsoffset: int64_t
         - stopsoffset: int64_t
@@ -5319,6 +5283,17 @@ Kernels:
 
   - name: awkward_ListArray_getitem_next_range_carrylength
     specializations:
+    - name: awkward_ListArray32_getitem_next_range_carrylength
+      args:
+        - carrylength: List[int64_t]
+        - fromstarts: List[int32_t]
+        - fromstops: List[int32_t]
+        - lenstarts: int64_t
+        - startsoffset: int64_t
+        - stopsoffset: int64_t
+        - start: int64_t
+        - stop: int64_t
+        - step: int64_t
     - name: awkward_ListArrayU32_getitem_next_range_carrylength
       args:
         - carrylength: List[int64_t]
@@ -5335,17 +5310,6 @@ Kernels:
         - carrylength: List[int64_t]
         - fromstarts: List[int64_t]
         - fromstops: List[int64_t]
-        - lenstarts: int64_t
-        - startsoffset: int64_t
-        - stopsoffset: int64_t
-        - start: int64_t
-        - stop: int64_t
-        - step: int64_t
-    - name: awkward_ListArray32_getitem_next_range_carrylength
-      args:
-        - carrylength: List[int64_t]
-        - fromstarts: List[int32_t]
-        - fromstops: List[int32_t]
         - lenstarts: int64_t
         - startsoffset: int64_t
         - stopsoffset: int64_t
@@ -5392,12 +5356,12 @@ Kernels:
 
   - name: awkward_ListArray_getitem_next_range
     specializations:
-    - name: awkward_ListArray32_getitem_next_range_64
+    - name: awkward_ListArrayU32_getitem_next_range_64
       args:
-        - tooffsets: List[int32_t]
+        - tooffsets: List[uint32_t]
         - tocarry: List[int64_t]
-        - fromstarts: List[int32_t]
-        - fromstops: List[int32_t]
+        - fromstarts: List[uint32_t]
+        - fromstops: List[uint32_t]
         - lenstarts: int64_t
         - startsoffset: int64_t
         - stopsoffset: int64_t
@@ -5416,12 +5380,12 @@ Kernels:
         - start: int64_t
         - stop: int64_t
         - step: int64_t
-    - name: awkward_ListArrayU32_getitem_next_range_64
+    - name: awkward_ListArray32_getitem_next_range_64
       args:
-        - tooffsets: List[uint32_t]
+        - tooffsets: List[int32_t]
         - tocarry: List[int64_t]
-        - fromstarts: List[uint32_t]
-        - fromstops: List[uint32_t]
+        - fromstarts: List[int32_t]
+        - fromstops: List[int32_t]
         - lenstarts: int64_t
         - startsoffset: int64_t
         - stopsoffset: int64_t
@@ -5486,15 +5450,15 @@ Kernels:
 
   - name: awkward_ListArray_getitem_next_range_counts
     specializations:
-    - name: awkward_ListArray32_getitem_next_range_counts_64
-      args:
-        - total: List[int64_t]
-        - fromoffsets: List[int32_t]
-        - lenstarts: int64_t
     - name: awkward_ListArray64_getitem_next_range_counts_64
       args:
         - total: List[int64_t]
         - fromoffsets: List[int64_t]
+        - lenstarts: int64_t
+    - name: awkward_ListArray32_getitem_next_range_counts_64
+      args:
+        - total: List[int64_t]
+        - fromoffsets: List[int32_t]
         - lenstarts: int64_t
     - name: awkward_ListArrayU32_getitem_next_range_counts_64
       args:
@@ -5517,17 +5481,17 @@ Kernels:
         - fromadvanced: List[int64_t]
         - fromoffsets: List[uint32_t]
         - lenstarts: int64_t
-    - name: awkward_ListArray32_getitem_next_range_spreadadvanced_64
-      args:
-        - toadvanced: List[int64_t]
-        - fromadvanced: List[int64_t]
-        - fromoffsets: List[int32_t]
-        - lenstarts: int64_t
     - name: awkward_ListArray64_getitem_next_range_spreadadvanced_64
       args:
         - toadvanced: List[int64_t]
         - fromadvanced: List[int64_t]
         - fromoffsets: List[int64_t]
+        - lenstarts: int64_t
+    - name: awkward_ListArray32_getitem_next_range_spreadadvanced_64
+      args:
+        - toadvanced: List[int64_t]
+        - fromadvanced: List[int64_t]
+        - fromoffsets: List[int32_t]
         - lenstarts: int64_t
     fail: False
     specification: |
@@ -5542,18 +5506,6 @@ Kernels:
 
   - name: awkward_ListArray_getitem_next_array
     specializations:
-    - name: awkward_ListArray64_getitem_next_array_64
-      args:
-        - tocarry: List[int64_t]
-        - toadvanced: List[int64_t]
-        - fromstarts: List[int64_t]
-        - fromstops: List[int64_t]
-        - fromarray: List[int64_t]
-        - startsoffset: int64_t
-        - stopsoffset: int64_t
-        - lenstarts: int64_t
-        - lenarray: int64_t
-        - lencontent: int64_t
     - name: awkward_ListArray32_getitem_next_array_64
       args:
         - tocarry: List[int64_t]
@@ -5572,6 +5524,18 @@ Kernels:
         - toadvanced: List[int64_t]
         - fromstarts: List[uint32_t]
         - fromstops: List[uint32_t]
+        - fromarray: List[int64_t]
+        - startsoffset: int64_t
+        - stopsoffset: int64_t
+        - lenstarts: int64_t
+        - lenarray: int64_t
+        - lencontent: int64_t
+    - name: awkward_ListArray64_getitem_next_array_64
+      args:
+        - tocarry: List[int64_t]
+        - toadvanced: List[int64_t]
+        - fromstarts: List[int64_t]
+        - fromstops: List[int64_t]
         - fromarray: List[int64_t]
         - startsoffset: int64_t
         - stopsoffset: int64_t
@@ -5612,12 +5576,12 @@ Kernels:
 
   - name: awkward_ListArray_getitem_next_array_advanced
     specializations:
-    - name: awkward_ListArray32_getitem_next_array_advanced_64
+    - name: awkward_ListArray64_getitem_next_array_advanced_64
       args:
         - tocarry: List[int64_t]
         - toadvanced: List[int64_t]
-        - fromstarts: List[int32_t]
-        - fromstops: List[int32_t]
+        - fromstarts: List[int64_t]
+        - fromstops: List[int64_t]
         - fromarray: List[int64_t]
         - fromadvanced: List[int64_t]
         - startsoffset: int64_t
@@ -5625,12 +5589,12 @@ Kernels:
         - lenstarts: int64_t
         - lenarray: int64_t
         - lencontent: int64_t
-    - name: awkward_ListArray64_getitem_next_array_advanced_64
+    - name: awkward_ListArray32_getitem_next_array_advanced_64
       args:
         - tocarry: List[int64_t]
         - toadvanced: List[int64_t]
-        - fromstarts: List[int64_t]
-        - fromstops: List[int64_t]
+        - fromstarts: List[int32_t]
+        - fromstops: List[int32_t]
         - fromarray: List[int64_t]
         - fromadvanced: List[int64_t]
         - startsoffset: int64_t
@@ -5696,23 +5660,23 @@ Kernels:
         - stopsoffset: int64_t
         - lenstarts: int64_t
         - lencarry: int64_t
-    - name: awkward_ListArrayU32_getitem_carry_64
-      args:
-        - tostarts: List[uint32_t]
-        - tostops: List[uint32_t]
-        - fromstarts: List[uint32_t]
-        - fromstops: List[uint32_t]
-        - fromcarry: List[int64_t]
-        - startsoffset: int64_t
-        - stopsoffset: int64_t
-        - lenstarts: int64_t
-        - lencarry: int64_t
     - name: awkward_ListArray32_getitem_carry_64
       args:
         - tostarts: List[int32_t]
         - tostops: List[int32_t]
         - fromstarts: List[int32_t]
         - fromstops: List[int32_t]
+        - fromcarry: List[int64_t]
+        - startsoffset: int64_t
+        - stopsoffset: int64_t
+        - lenstarts: int64_t
+        - lencarry: int64_t
+    - name: awkward_ListArrayU32_getitem_carry_64
+      args:
+        - tostarts: List[uint32_t]
+        - tostops: List[uint32_t]
+        - fromstarts: List[uint32_t]
+        - fromstops: List[uint32_t]
         - fromcarry: List[int64_t]
         - startsoffset: int64_t
         - stopsoffset: int64_t
@@ -5877,10 +5841,10 @@ Kernels:
 
   - name: awkward_IndexedArray_numnull
     specializations:
-    - name: awkward_IndexedArray32_numnull
+    - name: awkward_IndexedArray64_numnull
       args:
         - numnull: List[int64_t]
-        - fromindex: List[int32_t]
+        - fromindex: List[int64_t]
         - indexoffset: int64_t
         - lenindex: int64_t
     - name: awkward_IndexedArrayU32_numnull
@@ -5889,10 +5853,10 @@ Kernels:
         - fromindex: List[uint32_t]
         - indexoffset: int64_t
         - lenindex: int64_t
-    - name: awkward_IndexedArray64_numnull
+    - name: awkward_IndexedArray32_numnull
       args:
         - numnull: List[int64_t]
-        - fromindex: List[int64_t]
+        - fromindex: List[int32_t]
         - indexoffset: int64_t
         - lenindex: int64_t
     fail: False
@@ -5914,19 +5878,19 @@ Kernels:
         - indexoffset: int64_t
         - lenindex: int64_t
         - lencontent: int64_t
-    - name: awkward_IndexedArray64_getitem_nextcarry_outindex_64
-      args:
-        - tocarry: List[int64_t]
-        - toindex: List[int64_t]
-        - fromindex: List[int64_t]
-        - indexoffset: int64_t
-        - lenindex: int64_t
-        - lencontent: int64_t
     - name: awkward_IndexedArray32_getitem_nextcarry_outindex_64
       args:
         - tocarry: List[int64_t]
         - toindex: List[int32_t]
         - fromindex: List[int32_t]
+        - indexoffset: int64_t
+        - lenindex: int64_t
+        - lencontent: int64_t
+    - name: awkward_IndexedArray64_getitem_nextcarry_outindex_64
+      args:
+        - tocarry: List[int64_t]
+        - toindex: List[int64_t]
+        - fromindex: List[int64_t]
         - indexoffset: int64_t
         - lenindex: int64_t
         - lencontent: int64_t
@@ -5951,11 +5915,11 @@ Kernels:
 
   - name: awkward_IndexedArray_getitem_nextcarry_outindex_mask
     specializations:
-    - name: awkward_IndexedArrayU32_getitem_nextcarry_outindex_mask_64
+    - name: awkward_IndexedArray32_getitem_nextcarry_outindex_mask_64
       args:
         - tocarry: List[int64_t]
         - toindex: List[int64_t]
-        - fromindex: List[uint32_t]
+        - fromindex: List[int32_t]
         - indexoffset: int64_t
         - lenindex: int64_t
         - lencontent: int64_t
@@ -5967,11 +5931,11 @@ Kernels:
         - indexoffset: int64_t
         - lenindex: int64_t
         - lencontent: int64_t
-    - name: awkward_IndexedArray32_getitem_nextcarry_outindex_mask_64
+    - name: awkward_IndexedArrayU32_getitem_nextcarry_outindex_mask_64
       args:
         - tocarry: List[int64_t]
         - toindex: List[int64_t]
-        - fromindex: List[int32_t]
+        - fromindex: List[uint32_t]
         - indexoffset: int64_t
         - lenindex: int64_t
         - lencontent: int64_t
@@ -6143,13 +6107,6 @@ Kernels:
 
   - name: awkward_IndexedArray_getitem_nextcarry
     specializations:
-    - name: awkward_IndexedArrayU32_getitem_nextcarry_64
-      args:
-        - tocarry: List[int64_t]
-        - fromindex: List[uint32_t]
-        - indexoffset: int64_t
-        - lenindex: int64_t
-        - lencontent: int64_t
     - name: awkward_IndexedArray64_getitem_nextcarry_64
       args:
         - tocarry: List[int64_t]
@@ -6161,6 +6118,13 @@ Kernels:
       args:
         - tocarry: List[int64_t]
         - fromindex: List[int32_t]
+        - indexoffset: int64_t
+        - lenindex: int64_t
+        - lencontent: int64_t
+    - name: awkward_IndexedArrayU32_getitem_nextcarry_64
+      args:
+        - tocarry: List[int64_t]
+        - fromindex: List[uint32_t]
         - indexoffset: int64_t
         - lenindex: int64_t
         - lencontent: int64_t
@@ -6181,6 +6145,14 @@ Kernels:
 
   - name: awkward_IndexedArray_getitem_carry
     specializations:
+    - name: awkward_IndexedArray32_getitem_carry_64
+      args:
+        - toindex: List[int32_t]
+        - fromindex: List[int32_t]
+        - fromcarry: List[int64_t]
+        - indexoffset: int64_t
+        - lenindex: int64_t
+        - lencarry: int64_t
     - name: awkward_IndexedArrayU32_getitem_carry_64
       args:
         - toindex: List[uint32_t]
@@ -6193,14 +6165,6 @@ Kernels:
       args:
         - toindex: List[int64_t]
         - fromindex: List[int64_t]
-        - fromcarry: List[int64_t]
-        - indexoffset: int64_t
-        - lenindex: int64_t
-        - lencarry: int64_t
-    - name: awkward_IndexedArray32_getitem_carry_64
-      args:
-        - toindex: List[int32_t]
-        - fromindex: List[int32_t]
         - fromcarry: List[int64_t]
         - indexoffset: int64_t
         - lenindex: int64_t
@@ -6237,14 +6201,6 @@ Kernels:
 
   - name: awkward_UnionArray_regular_index
     specializations:
-    - name: awkward_UnionArray8_32_regular_index
-      args:
-        - toindex: List[int32_t]
-        - current: List[int32_t]
-        - size: int64_t
-        - fromtags: List[int8_t]
-        - tagsoffset: int64_t
-        - length: int64_t
     - name: awkward_UnionArray8_U32_regular_index
       args:
         - toindex: List[uint32_t]
@@ -6257,6 +6213,14 @@ Kernels:
       args:
         - toindex: List[int64_t]
         - current: List[int64_t]
+        - size: int64_t
+        - fromtags: List[int8_t]
+        - tagsoffset: int64_t
+        - length: int64_t
+    - name: awkward_UnionArray8_32_regular_index
+      args:
+        - toindex: List[int32_t]
+        - current: List[int32_t]
         - size: int64_t
         - fromtags: List[int8_t]
         - tagsoffset: int64_t
@@ -6277,16 +6241,6 @@ Kernels:
 
   - name: awkward_UnionArray_project
     specializations:
-    - name: awkward_UnionArray8_64_project_64
-      args:
-        - lenout: List[int64_t]
-        - tocarry: List[int64_t]
-        - fromtags: List[int8_t]
-        - tagsoffset: int64_t
-        - fromindex: List[int64_t]
-        - indexoffset: int64_t
-        - length: int64_t
-        - which: int64_t
     - name: awkward_UnionArray8_U32_project_64
       args:
         - lenout: List[int64_t]
@@ -6304,6 +6258,16 @@ Kernels:
         - fromtags: List[int8_t]
         - tagsoffset: int64_t
         - fromindex: List[int32_t]
+        - indexoffset: int64_t
+        - length: int64_t
+        - which: int64_t
+    - name: awkward_UnionArray8_64_project_64
+      args:
+        - lenout: List[int64_t]
+        - tocarry: List[int64_t]
+        - fromtags: List[int8_t]
+        - tagsoffset: int64_t
+        - fromindex: List[int64_t]
         - indexoffset: int64_t
         - length: int64_t
         - which: int64_t
@@ -6362,15 +6326,15 @@ Kernels:
 
   - name: awkward_ListArray_getitem_jagged_expand
     specializations:
-    - name: awkward_ListArray64_getitem_jagged_expand_64
+    - name: awkward_ListArrayU32_getitem_jagged_expand_64
       args:
         - multistarts: List[int64_t]
         - multistops: List[int64_t]
         - singleoffsets: List[int64_t]
         - tocarry: List[int64_t]
-        - fromstarts: List[int64_t]
+        - fromstarts: List[uint32_t]
         - fromstartsoffset: int64_t
-        - fromstops: List[int64_t]
+        - fromstops: List[uint32_t]
         - fromstopsoffset: int64_t
         - jaggedsize: int64_t
         - length: int64_t
@@ -6386,15 +6350,15 @@ Kernels:
         - fromstopsoffset: int64_t
         - jaggedsize: int64_t
         - length: int64_t
-    - name: awkward_ListArrayU32_getitem_jagged_expand_64
+    - name: awkward_ListArray64_getitem_jagged_expand_64
       args:
         - multistarts: List[int64_t]
         - multistops: List[int64_t]
         - singleoffsets: List[int64_t]
         - tocarry: List[int64_t]
-        - fromstarts: List[uint32_t]
+        - fromstarts: List[int64_t]
         - fromstartsoffset: int64_t
-        - fromstops: List[uint32_t]
+        - fromstops: List[int64_t]
         - fromstopsoffset: int64_t
         - jaggedsize: int64_t
         - length: int64_t
@@ -6471,23 +6435,6 @@ Kernels:
         - fromstops: List[int32_t]
         - fromstopsoffset: int64_t
         - contentlen: int64_t
-    - name: awkward_ListArray64_getitem_jagged_apply_64
-      args:
-        - tooffsets: List[int64_t]
-        - tocarry: List[int64_t]
-        - slicestarts: List[int64_t]
-        - slicestartsoffset: int64_t
-        - slicestops: List[int64_t]
-        - slicestopsoffset: int64_t
-        - sliceouterlen: int64_t
-        - sliceindex: List[int64_t]
-        - sliceindexoffset: int64_t
-        - sliceinnerlen: int64_t
-        - fromstarts: List[int64_t]
-        - fromstartsoffset: int64_t
-        - fromstops: List[int64_t]
-        - fromstopsoffset: int64_t
-        - contentlen: int64_t
     - name: awkward_ListArrayU32_getitem_jagged_apply_64
       args:
         - tooffsets: List[int64_t]
@@ -6503,6 +6450,23 @@ Kernels:
         - fromstarts: List[uint32_t]
         - fromstartsoffset: int64_t
         - fromstops: List[uint32_t]
+        - fromstopsoffset: int64_t
+        - contentlen: int64_t
+    - name: awkward_ListArray64_getitem_jagged_apply_64
+      args:
+        - tooffsets: List[int64_t]
+        - tocarry: List[int64_t]
+        - slicestarts: List[int64_t]
+        - slicestartsoffset: int64_t
+        - slicestops: List[int64_t]
+        - slicestopsoffset: int64_t
+        - sliceouterlen: int64_t
+        - sliceindex: List[int64_t]
+        - sliceindexoffset: int64_t
+        - sliceinnerlen: int64_t
+        - fromstarts: List[int64_t]
+        - fromstartsoffset: int64_t
+        - fromstops: List[int64_t]
         - fromstopsoffset: int64_t
         - contentlen: int64_t
     fail: True
@@ -6644,7 +6608,7 @@ Kernels:
 
   - name: awkward_ListArray_getitem_jagged_descend
     specializations:
-    - name: awkward_ListArrayU32_getitem_jagged_descend_64
+    - name: awkward_ListArray64_getitem_jagged_descend_64
       args:
         - tooffsets: List[int64_t]
         - slicestarts: List[int64_t]
@@ -6652,9 +6616,9 @@ Kernels:
         - slicestops: List[int64_t]
         - slicestopsoffset: int64_t
         - sliceouterlen: int64_t
-        - fromstarts: List[uint32_t]
+        - fromstarts: List[int64_t]
         - fromstartsoffset: int64_t
-        - fromstops: List[uint32_t]
+        - fromstops: List[int64_t]
         - fromstopsoffset: int64_t
     - name: awkward_ListArray32_getitem_jagged_descend_64
       args:
@@ -6668,7 +6632,7 @@ Kernels:
         - fromstartsoffset: int64_t
         - fromstops: List[int32_t]
         - fromstopsoffset: int64_t
-    - name: awkward_ListArray64_getitem_jagged_descend_64
+    - name: awkward_ListArrayU32_getitem_jagged_descend_64
       args:
         - tooffsets: List[int64_t]
         - slicestarts: List[int64_t]
@@ -6676,9 +6640,9 @@ Kernels:
         - slicestops: List[int64_t]
         - slicestopsoffset: int64_t
         - sliceouterlen: int64_t
-        - fromstarts: List[int64_t]
+        - fromstarts: List[uint32_t]
         - fromstartsoffset: int64_t
-        - fromstops: List[int64_t]
+        - fromstops: List[uint32_t]
         - fromstopsoffset: int64_t
     fail: False
     specification: |
@@ -6998,7 +6962,7 @@ Kernels:
     - name: awkward_ByteMaskedArray_getitem_nextcarry_outindex_64
       args:
         - tocarry: List[int64_t]
-        - toindex: List[int64_t]
+        - outindex: List[int64_t]
         - mask: List[int8_t]
         - maskoffset: int64_t
         - length: int64_t
@@ -7038,14 +7002,14 @@ Kernels:
 
   - name: awkward_Content_getitem_next_missing_jagged_getmaskstartstop
     args:
-      - index_in: List[int]
-      - index_in_offset: int
-      - offsets_in: List[int]
-      - offsets_in_offset: int
-      - mask_out: List[int]
-      - starts_out: List[int]
-      - stops_out: List[int]
-      - length: int
+      - index_in: List[int64_t]
+      - index_in_offset: int64_t
+      - offsets_in: List[int64_t]
+      - offsets_in_offset: int64_t
+      - mask_out: List[int64_t]
+      - starts_out: List[int64_t]
+      - stops_out: List[int64_t]
+      - length: int64_t
     fail: False
     specification: |
       def awkward_Content_getitem_next_missing_jagged_getmaskstartstop(
@@ -7074,39 +7038,39 @@ Kernels:
 
   - name: awkward_MaskedArray_getitem_next_jagged_project
     specializations:
-    - name: awkward_MaskedArray64_getitem_next_jagged_project
-      args:
-        - index: List[int]
-        - index_offset: int
-        - starts_in: List[int]
-        - starts_offset: int
-        - stops_in: List[int]
-        - stops_offset: int
-        - starts_out: List[int]
-        - stops_out: List[int]
-        - length: int
     - name: awkward_MaskedArrayU32_getitem_next_jagged_project
       args:
-        - index: List[int]
-        - index_offset: int
-        - starts_in: List[int]
-        - starts_offset: int
-        - stops_in: List[int]
-        - stops_offset: int
-        - starts_out: List[int]
-        - stops_out: List[int]
-        - length: int
+        - index: List[uint32_t]
+        - index_offset: int64_t
+        - starts_in: List[int64_t]
+        - starts_offset: int64_t
+        - stops_in: List[int64_t]
+        - stops_offset: int64_t
+        - starts_out: List[int64_t]
+        - stops_out: List[int64_t]
+        - length: int64_t
     - name: awkward_MaskedArray32_getitem_next_jagged_project
       args:
-        - index: List[int]
-        - index_offset: int
-        - starts_in: List[int]
-        - starts_offset: int
-        - stops_in: List[int]
-        - stops_offset: int
-        - starts_out: List[int]
-        - stops_out: List[int]
-        - length: int
+        - index: List[int32_t]
+        - index_offset: int64_t
+        - starts_in: List[int64_t]
+        - starts_offset: int64_t
+        - stops_in: List[int64_t]
+        - stops_offset: int64_t
+        - starts_out: List[int64_t]
+        - stops_out: List[int64_t]
+        - length: int64_t
+    - name: awkward_MaskedArray64_getitem_next_jagged_project
+      args:
+        - index: List[int64_t]
+        - index_offset: int64_t
+        - starts_in: List[int64_t]
+        - starts_offset: int64_t
+        - stops_in: List[int64_t]
+        - stops_offset: int64_t
+        - starts_out: List[int64_t]
+        - stops_out: List[int64_t]
+        - length: int64_t
     fail: False
     specification: |
       def awkward_MaskedArray_getitem_next_jagged_project(
@@ -7151,10 +7115,19 @@ Kernels:
 
   - name: awkward_argsort
     specializations:
-    - name: awkward_argsort_uint32
+    - name: awkward_argsort_float32
       args:
         - toptr: List[int64_t]
-        - fromptr: List[uint32_t]
+        - fromptr: List[float]
+        - length: int64_t
+        - offsets: List[int64_t]
+        - offsetslength: int64_t
+        - ascending: bool
+        - stable: bool
+    - name: awkward_argsort_uint64
+      args:
+        - toptr: List[int64_t]
+        - fromptr: List[uint64_t]
         - length: int64_t
         - offsets: List[int64_t]
         - offsetslength: int64_t
@@ -7169,10 +7142,10 @@ Kernels:
         - offsetslength: int64_t
         - ascending: bool
         - stable: bool
-    - name: awkward_argsort_int32
+    - name: awkward_argsort_uint16
       args:
         - toptr: List[int64_t]
-        - fromptr: List[int32_t]
+        - fromptr: List[uint16_t]
         - length: int64_t
         - offsets: List[int64_t]
         - offsetslength: int64_t
@@ -7182,15 +7155,6 @@ Kernels:
       args:
         - toptr: List[int64_t]
         - fromptr: List[int64_t]
-        - length: int64_t
-        - offsets: List[int64_t]
-        - offsetslength: int64_t
-        - ascending: bool
-        - stable: bool
-    - name: awkward_argsort_uint64
-      args:
-        - toptr: List[int64_t]
-        - fromptr: List[uint64_t]
         - length: int64_t
         - offsets: List[int64_t]
         - offsetslength: int64_t
@@ -7214,15 +7178,6 @@ Kernels:
         - offsetslength: int64_t
         - ascending: bool
         - stable: bool
-    - name: awkward_argsort_bool
-      args:
-        - toptr: List[int64_t]
-        - fromptr: List[bool]
-        - length: int64_t
-        - offsets: List[int64_t]
-        - offsetslength: int64_t
-        - ascending: bool
-        - stable: bool
     - name: awkward_argsort_int16
       args:
         - toptr: List[int64_t]
@@ -7232,19 +7187,28 @@ Kernels:
         - offsetslength: int64_t
         - ascending: bool
         - stable: bool
-    - name: awkward_argsort_uint16
+    - name: awkward_argsort_int32
       args:
         - toptr: List[int64_t]
-        - fromptr: List[uint16_t]
+        - fromptr: List[int32_t]
         - length: int64_t
         - offsets: List[int64_t]
         - offsetslength: int64_t
         - ascending: bool
         - stable: bool
-    - name: awkward_argsort_float32
+    - name: awkward_argsort_bool
       args:
         - toptr: List[int64_t]
-        - fromptr: List[float]
+        - fromptr: List[bool]
+        - length: int64_t
+        - offsets: List[int64_t]
+        - offsetslength: int64_t
+        - ascending: bool
+        - stable: bool
+    - name: awkward_argsort_uint32
+      args:
+        - toptr: List[int64_t]
+        - fromptr: List[uint32_t]
         - length: int64_t
         - offsets: List[int64_t]
         - offsetslength: int64_t
@@ -7256,20 +7220,10 @@ Kernels:
 
   - name: awkward_sort
     specializations:
-    - name: awkward_sort_int64
+    - name: awkward_sort_int32
       args:
-        - toptr: List[int64_t]
-        - fromptr: List[int64_t]
-        - length: int64_t
-        - offsets: List[int64_t]
-        - offsetslength: int64_t
-        - parentslength: int64_t
-        - ascending: bool
-        - stable: bool
-    - name: awkward_sort_float64
-      args:
-        - toptr: List[double]
-        - fromptr: List[double]
+        - toptr: List[int32_t]
+        - fromptr: List[int32_t]
         - length: int64_t
         - offsets: List[int64_t]
         - offsetslength: int64_t
@@ -7296,16 +7250,6 @@ Kernels:
         - parentslength: int64_t
         - ascending: bool
         - stable: bool
-    - name: awkward_sort_int16
-      args:
-        - toptr: List[int16_t]
-        - fromptr: List[int16_t]
-        - length: int64_t
-        - offsets: List[int64_t]
-        - offsetslength: int64_t
-        - parentslength: int64_t
-        - ascending: bool
-        - stable: bool
     - name: awkward_sort_bool
       args:
         - toptr: List[bool]
@@ -7316,30 +7260,20 @@ Kernels:
         - parentslength: int64_t
         - ascending: bool
         - stable: bool
-    - name: awkward_sort_float32
+    - name: awkward_sort_float64
       args:
-        - toptr: List[float]
-        - fromptr: List[float]
+        - toptr: List[double]
+        - fromptr: List[double]
         - length: int64_t
         - offsets: List[int64_t]
         - offsetslength: int64_t
         - parentslength: int64_t
         - ascending: bool
         - stable: bool
-    - name: awkward_sort_int32
+    - name: awkward_sort_int16
       args:
-        - toptr: List[int32_t]
-        - fromptr: List[int32_t]
-        - length: int64_t
-        - offsets: List[int64_t]
-        - offsetslength: int64_t
-        - parentslength: int64_t
-        - ascending: bool
-        - stable: bool
-    - name: awkward_sort_uint8
-      args:
-        - toptr: List[uint8_t]
-        - fromptr: List[uint8_t]
+        - toptr: List[int16_t]
+        - fromptr: List[int16_t]
         - length: int64_t
         - offsets: List[int64_t]
         - offsetslength: int64_t
@@ -7356,10 +7290,40 @@ Kernels:
         - parentslength: int64_t
         - ascending: bool
         - stable: bool
+    - name: awkward_sort_int64
+      args:
+        - toptr: List[int64_t]
+        - fromptr: List[int64_t]
+        - length: int64_t
+        - offsets: List[int64_t]
+        - offsetslength: int64_t
+        - parentslength: int64_t
+        - ascending: bool
+        - stable: bool
     - name: awkward_sort_uint64
       args:
         - toptr: List[uint64_t]
         - fromptr: List[uint64_t]
+        - length: int64_t
+        - offsets: List[int64_t]
+        - offsetslength: int64_t
+        - parentslength: int64_t
+        - ascending: bool
+        - stable: bool
+    - name: awkward_sort_float32
+      args:
+        - toptr: List[float]
+        - fromptr: List[float]
+        - length: int64_t
+        - offsets: List[int64_t]
+        - offsetslength: int64_t
+        - parentslength: int64_t
+        - ascending: bool
+        - stable: bool
+    - name: awkward_sort_uint8
+      args:
+        - toptr: List[uint8_t]
+        - fromptr: List[uint8_t]
         - length: int64_t
         - offsets: List[int64_t]
         - offsetslength: int64_t
