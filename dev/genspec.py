@@ -1,9 +1,12 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 import argparse
+import copy
+import json
 import os
 import re
 from collections import OrderedDict
+from collections.abc import Iterable
 
 import black
 import pycparser
@@ -35,6 +38,62 @@ SPEC_BLACKLIST = [
     "awkward_Index32_setitem_at_nowrap",
     "awkward_IndexU32_setitem_at_nowrap",
     "awkward_Index64_setitem_at_nowrap",
+    "awkward_regularize_rangeslice",
+    "awkward_NumpyArrayU16_getitem_at",
+    "awkward_ListArray_combinations",
+    "awkward_RegularArray_combinations",
+    "awkward_ListOffsetArray_reduce_nonlocal_preparenext_64",
+]
+
+TEST_BLACKLIST = SPEC_BLACKLIST + [
+    "awkward_ListArray_combinations",
+    "awkward_RegularArray_combinations",
+    "awkward_slicearray_ravel",
+    "awkward_ListArray_getitem_next_range_carrylength",
+    "awkward_ListArray_getitem_next_range",
+    "awkward_regularize_rangeslice",
+    "awkward_ListOffsetArray_rpad_and_clip_axis1",
+    "awkward_ListOffsetArray_rpad_axis1",
+]
+
+SUCCESS_TEST_BLACKLIST = ["awkward_combinations", "awkward_regularize_arrayslice"]
+
+FAIL_TEST_BLACKLIST = ["awkward_NumpyArray_fill_to64_fromU64"]
+
+PYGEN_BLACKLIST = SPEC_BLACKLIST + [
+    "awkward_sorting_ranges",
+    "awkward_sorting_ranges_length",
+    "awkward_argsort",
+    "awkward_argsort_bool",
+    "awkward_argsort_int8",
+    "awkward_argsort_uint8",
+    "awkward_argsort_int16",
+    "awkward_argsort_uint16",
+    "awkward_argsort_int32",
+    "awkward_argsort_uint32",
+    "awkward_argsort_int64",
+    "awkward_argsort_uint64",
+    "awkward_argsort_float32",
+    "awkward_argsort_float64",
+    "awkward_sort",
+    "awkward_sort_bool",
+    "awkward_sort_int8",
+    "awkward_sort_uint8",
+    "awkward_sort_int16",
+    "awkward_sort_uint16",
+    "awkward_sort_int32",
+    "awkward_sort_uint32",
+    "awkward_sort_int64",
+    "awkward_sort_uint64",
+    "awkward_sort_float32",
+    "awkward_sort_float64",
+    "awkward_ListOffsetArray_local_preparenext_64",
+    "awkward_IndexedArray_local_preparenext_64",
+    "awkward_NumpyArray_sort_asstrings_uint8",
+    "awkward_NumpyArray_contiguous_copy",
+    "awkward_NumpyArray_contiguous_copy_64",
+    "awkward_NumpyArray_getitem_next_null",
+    "awkward_NumpyArray_getitem_next_null_64",
 ]
 
 
@@ -688,11 +747,12 @@ def getargs(filename):
         elif tree.data == "file":
             traverse(tree.children, funcdict)
         elif tree.data == "def":
-            funcdict[tree.children[1]] = OrderedDict()
-            assert tree.children[2].data == "args"
-            for arg in tree.children[2].children:
-                assert arg.data == "pair"
-                funcdict[tree.children[1]][arg.children[1]] = arg.children[0]
+            if tree.children[0] == "struct Error":
+                funcdict[tree.children[1]] = OrderedDict()
+                assert tree.children[2].data == "args"
+                for arg in tree.children[2].children:
+                    assert arg.data == "pair"
+                    funcdict[tree.children[1]][arg.children[1]] = arg.children[0]
 
     pydef_parser = Lark(
         r"""
@@ -734,6 +794,233 @@ def getargs(filename):
     return funcs
 
 
+def parseheader(filename):
+    def commentparser(line):
+        def flatten(l):
+            for el in l:
+                if isinstance(el, Iterable) and not isinstance(el, (str, bytes)):
+                    yield from flatten(el)
+                else:
+                    yield el
+
+        d = OrderedDict()
+        line = line[line.find("@param") + len("@param") + 1 :]
+        line = re.sub(" +", " ", line)
+        name = line.split()[0]
+        check = line.split()[1]
+        if re.match("(in|out|inout)param", check) is None:
+            raise AssertionError(
+                "Only inparam. outparam or inoutparam allowed. Not {0}".format(check)
+            )
+        d["check"] = check
+        line = line[line.find(check) + len(check) + 1 :]
+        if line.strip() != "":
+            line = [x.strip() for x in line.split(":")]
+            for i in range(len(line)):
+                line[i] = line[i].split(" ")
+            line = list(flatten(line))
+            if len(line) % 2 != 0:
+                raise AssertionError("Un-paired labels not allowed")
+            for i in range(len(line)):
+                if i % 2 == 0:
+                    key = line[i]
+                    if (key != "role") and (key != "instance"):
+                        raise AssertionError("Only role and instance allowed")
+                else:
+                    val = line[i]
+                    d[key] = val
+        return {name: d}
+
+    with open(filename, "r") as f:
+        tokens = OrderedDict()
+        funcs = OrderedDict()
+        for line in f:
+            if "///@param" in line.replace(" ", ""):
+                tokens.update(commentparser(line))
+                continue
+            elif "awkward_" in line:
+                funcname = line[line.find("awkward_") : line.find("(")].strip()
+                funcs[funcname] = tokens
+                tokens = OrderedDict()
+            else:
+                continue
+        return funcs
+
+
+def get_tests(allpykernels, allfuncargs, alltokens, allfuncroles, failfuncs):
+    def pytype(cpptype):
+        cpptype = cpptype.replace("*", "")
+        if re.match("u?int\d{1,2}(_t)?", cpptype) is not None:
+            return "int"
+        elif cpptype == "double":
+            return "float"
+        else:
+            return cpptype
+
+    def writepykernels():
+        prefix = """
+import copy
+
+kMaxInt64  = 9223372036854775806
+kSliceNone = kMaxInt64 + 1
+
+"""
+        with open(os.path.join(CURRENT_DIR, "kernels.py"), "w") as f:
+            f.write(prefix)
+            for func in alltokens.keys():
+                if (
+                    "gen" not in alltokens[func].keys()
+                    and func not in TEST_BLACKLIST
+                    and func not in PYGEN_BLACKLIST
+                ):
+                    f.write(allpykernels[func] + "\n")
+                    if "childfunc" in alltokens[func].keys():
+                        for childfunc in alltokens[func]["childfunc"]:
+                            f.write(childfunc + " = " + func + "\n")
+                        f.write("\n")
+
+    writepykernels()
+    import kernels
+
+    funcs = {}
+    for funcname in alltokens.keys():
+        if (
+            "gen" not in alltokens[funcname].keys()
+            and funcname not in TEST_BLACKLIST
+            and funcname not in PYGEN_BLACKLIST
+        ):
+            # Success Tests
+            tests = []
+            intests = OrderedDict()
+            outtests = OrderedDict()
+            checkindex = []
+            if "childfunc" in alltokens[funcname].keys():
+                keyfunc = next(iter(alltokens[funcname]["childfunc"]))
+            else:
+                keyfunc = funcname
+            for i in range(len(allfuncargs[keyfunc].keys())):
+                arg = list(allfuncargs[keyfunc].keys())[i]
+                argpytype = pytype(allfuncargs[keyfunc][arg])
+                with open(os.path.join(CURRENT_DIR, "testcases.json")) as testjson:
+                    data = json.load(testjson)
+                    if allfuncroles[keyfunc][arg]["check"] == "inparam":
+                        if "role" in allfuncroles[keyfunc][arg].keys():
+                            if "instance" in allfuncroles[keyfunc][arg].keys():
+                                tempval = data["success"][
+                                    allfuncroles[keyfunc][arg]["role"][
+                                        : allfuncroles[keyfunc][arg]["role"].find("-")
+                                    ]
+                                ][allfuncroles[keyfunc][arg]["role"]][
+                                    int(allfuncroles[keyfunc][arg]["instance"])
+                                ][
+                                    argpytype
+                                ]
+                            else:
+                                tempval = data["success"][
+                                    allfuncroles[keyfunc][arg]["role"][
+                                        : allfuncroles[keyfunc][arg]["role"].find("-")
+                                    ]
+                                ][allfuncroles[keyfunc][arg]["role"]][0][argpytype]
+                        else:
+                            tempval = data["success"]["num"]
+                        tests.append(tempval)
+                        intests[arg] = tempval
+                    elif allfuncroles[keyfunc][arg]["check"] == "outparam":
+                        tests.append({})
+                        intests[arg] = [0] * 50
+                        checkindex.append(i)
+                    else:
+                        raise AssertionError(
+                            "Function argument must have inparam/outparam role"
+                        )
+
+            funcs[funcname] = {}
+            if funcname not in SUCCESS_TEST_BLACKLIST:
+                funcPy = getattr(kernels, funcname)
+                funcPy(*tests)
+                for i in checkindex:
+                    count = 0
+                    outtests[list(allfuncargs[keyfunc].keys())[i]] = []
+                    for num in sorted(tests[i]):
+                        if num != count:
+                            while num != count:
+                                outtests[list(allfuncargs[keyfunc].keys())[i]].append(0)
+                                count = count + 1
+                        outtests[list(allfuncargs[keyfunc].keys())[i]].append(
+                            tests[i][num]
+                        )
+                        count = count + 1
+                funcs[funcname]["success"] = {}
+                funcs[funcname]["success"]["input"] = copy.copy(intests)
+                funcs[funcname]["success"]["output"] = copy.copy(outtests)
+
+            # Failure Tests
+            tests = []
+            intests = OrderedDict()
+            if funcname not in FAIL_TEST_BLACKLIST and funcname in failfuncs:
+                for i in range(len(allfuncargs[keyfunc].keys())):
+                    arg = list(allfuncargs[keyfunc].keys())[i]
+                    argpytype = pytype(allfuncargs[keyfunc][arg])
+                    with open(os.path.join(CURRENT_DIR, "testcases.json")) as testjson:
+                        data = json.load(testjson)
+                        if allfuncroles[keyfunc][arg]["check"] == "inparam":
+                            if "role" in allfuncroles[keyfunc][arg].keys():
+                                if "instance" in allfuncroles[keyfunc][arg].keys():
+                                    tempval = data["failure"][
+                                        allfuncroles[keyfunc][arg]["role"][
+                                            : allfuncroles[keyfunc][arg]["role"].find(
+                                                "-"
+                                            )
+                                        ]
+                                    ][allfuncroles[keyfunc][arg]["role"]][
+                                        int(allfuncroles[keyfunc][arg]["instance"])
+                                    ][
+                                        argpytype
+                                    ]
+                                else:
+                                    tempval = data["failure"][
+                                        allfuncroles[keyfunc][arg]["role"][
+                                            : allfuncroles[keyfunc][arg]["role"].find(
+                                                "-"
+                                            )
+                                        ]
+                                    ][allfuncroles[keyfunc][arg]["role"]][0][argpytype]
+                            else:
+                                tempval = data["failure"]["num"]
+                            tests.append(tempval)
+                            intests[arg] = tempval
+                        elif allfuncroles[keyfunc][arg]["check"] == "outparam":
+                            tests.append({})
+                            intests[arg] = [0] * 50
+                        else:
+                            raise AssertionError(
+                                "Function argument must have inparam/outparam role"
+                            )
+                try:
+                    funcPy(*tests)
+                    raise AssertionError("Tests should fail")
+                except:
+                    pass
+                funcs[funcname]["failure"] = {}
+                funcs[funcname]["failure"]["input"] = copy.copy(intests)
+
+    return funcs
+
+
+def get_paramcheck(funcroles, alltokens, allfuncargs):
+    funcs = {}
+    for funcname in alltokens.keys():
+        if "gen" not in alltokens[funcname].keys() and funcname not in SPEC_BLACKLIST:
+            if "childfunc" in alltokens[funcname].keys():
+                keyfunc = next(iter(alltokens[funcname]["childfunc"]))
+            else:
+                keyfunc = funcname
+            funcs[funcname] = {}
+            for arg in allfuncargs[keyfunc].keys():
+                funcs[funcname][arg] = funcroles[keyfunc][arg]["check"]
+    return funcs
+
+
 if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument("kernelname", nargs="?")
@@ -752,6 +1039,7 @@ if __name__ == "__main__":
     alltokens = {}
     allpyfuncs = {}
     allfuncargs = {}
+    allfuncroles = {}
 
     for filename in kernelfiles:
         if "sorting.cpp" in filename:
@@ -761,12 +1049,17 @@ if __name__ == "__main__":
             pyfuncs = genpython(pfile)
             allpyfuncs.update(pyfuncs)
 
-        allfuncargs.update(getargs(getheadername(filename)))
+        hfile = getheadername(filename)
+        allfuncroles.update(parseheader(hfile))
+        allfuncargs.update(getargs(hfile))
         failfuncs.extend(check_fail_func(filename))
         alltokens.update(tokens)
 
+    tests = get_tests(allpyfuncs, allfuncargs, alltokens, allfuncroles, failfuncs)
+    paramchecks = get_paramcheck(allfuncroles, alltokens, allfuncargs)
+
     if kernelname is None:
-        print("Kernels:")
+        print("kernels:")
         for funcname in alltokens.keys():
             if (
                 "gen" not in alltokens[funcname].keys()
@@ -796,16 +1089,52 @@ if __name__ == "__main__":
                             + ": "
                             + arrayconv(allfuncargs[funcname][arg])
                         )
-                if funcname in failfuncs:
-                    print(" " * 4 + "fail: True")
+                inparams = []
+                outparams = []
+                for arg in paramchecks[funcname].keys():
+                    if (
+                        paramchecks[funcname][arg] == "inparam"
+                        or paramchecks[funcname][arg] == "inoutparam"
+                    ):
+                        inparams.append(str(arg))
+                    if (
+                        paramchecks[funcname][arg] == "outparam"
+                        or paramchecks[funcname][arg] == "inoutparam"
+                    ):
+                        outparams.append(str(arg))
+                print(" " * 4 + "inparams: ", inparams)
+                print(" " * 4 + "outparams: ", outparams)
+                print(" " * 4 + "definition: |")
+                if funcname in PYGEN_BLACKLIST:
+                    print(" " * 6 + "Insert Python definition here")
                 else:
-                    print(" " * 4 + "fail: False")
-                print(" " * 4 + "specification: |")
-                if funcname in allpyfuncs.keys():
-                    print(indent_code(allpyfuncs[funcname], 6))
-                else:
-                    print(" " * 6 + "Insert Python specification here")
-                print()
+                    print(indent_code(allpyfuncs[funcname], 6).rstrip())
+                if funcname in tests.keys():
+                    print(" " * 4 + "tests:")
+                    for i in range(len(tests[funcname].keys())):
+                        if list(tests[funcname].keys())[i] == "success":
+                            print(" " * 6 + "- args:")
+                            for arg in tests[funcname]["success"]["input"].keys():
+                                print(
+                                    " " * 10 + arg + ": ",
+                                    tests[funcname]["success"]["input"][arg],
+                                )
+                            print(" " * 8 + "successful: true")
+                            print(" " * 8 + "results:")
+                            for arg in tests[funcname]["success"]["output"].keys():
+                                print(
+                                    " " * 10 + arg + ": ",
+                                    tests[funcname]["success"]["output"][arg],
+                                )
+                        elif list(tests[funcname].keys())[i] == "failure":
+                            print(" " * 6 + "- args:")
+                            for arg in tests[funcname]["failure"]["input"].keys():
+                                print(
+                                    " " * 10 + arg + ": ",
+                                    tests[funcname]["failure"]["input"][arg],
+                                )
+                            print(" " * 8 + "successful: false")
+                    print()
     else:
         if kernelname in alltokens.keys() and kernelname not in SPEC_BLACKLIST:
             print("name: ", kernelname)
@@ -831,14 +1160,51 @@ if __name__ == "__main__":
                         + ": "
                         + arrayconv(allfuncargs[kernelname][arg])
                     )
-            if kernelname in failfuncs:
-                print("fail: True")
+            inparams = []
+            outparams = []
+            for arg in paramchecks[kernelname].keys():
+                if (
+                    paramchecks[kernelname][arg] == "inparam"
+                    or paramchecks[kernelname][arg] == "inoutparam"
+                ):
+                    inparams.append(str(arg))
+                if (
+                    paramchecks[kernelname][arg] == "outparam"
+                    or paramchecks[kernelname][arg] == "inoutparam"
+                ):
+                    outparams.append(str(arg))
+            print(" " * 4 + "inparams: ", inparams)
+            print(" " * 4 + "outparams: ", outparams)
+            print(" " * 4 + "definition: |")
+            if kernelname in PYGEN_BLACKLIST:
+                print(" " * 6 + "Insert Python definition here")
             else:
-                print("fail: False")
-            print("specification: |")
-            if kernelname in allpyfuncs.keys():
-                print(indent_code(allpyfuncs[kernelname], 2))
-            else:
-                print("  Insert Python specification here")
+                print(indent_code(allpyfuncs[kernelname], 6).rstrip())
+            if kernelname in tests.keys():
+                print(" " * 4 + "tests:")
+                for i in range(len(tests[kernelname].keys())):
+                    if list(tests[kernelname].keys())[i] == "success":
+                        print(" " * 6 + "- args:")
+                        for arg in tests[kernelname]["success"]["input"].keys():
+                            print(
+                                " " * 10 + arg + ": ",
+                                tests[kernelname]["success"]["input"][arg],
+                            )
+                        print(" " * 8 + "successful: true")
+                        print(" " * 8 + "results:")
+                        for arg in tests[kernelname]["success"]["output"].keys():
+                            print(
+                                " " * 10 + arg + ": ",
+                                tests[kernelname]["success"]["output"][arg],
+                            )
+                    elif list(tests[kernelname].keys())[i] == "failure":
+                        print(" " * 6 + "- args:")
+                        for arg in tests[kernelname]["failure"]["input"].keys():
+                            print(
+                                " " * 10 + arg + ": ",
+                                tests[kernelname]["failure"]["input"][arg],
+                            )
+                        print(" " * 8 + "successful: false")
+                print()
         else:
             raise ValueError("Function {0} not present".format(kernelname))

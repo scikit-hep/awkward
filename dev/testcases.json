@@ -116,6 +116,12 @@
             ],
             "IndexedArray-lencontent": [
                 {"int": 9}
+            ],
+            "IndexedArray-lenparents": [
+                {"int": 3}
+            ],
+            "IndexedArray-outlength": [
+                {"int": 30}
             ]
         },
         "ByteMaskedArray": {
@@ -176,7 +182,8 @@
                 {"bool": true}
             ],
             "BitMaskedArray-lsb_order": [
-                {"int": 0}
+                {"int": 0,
+                "bool": false}
             ]
         },
         "Identities": {

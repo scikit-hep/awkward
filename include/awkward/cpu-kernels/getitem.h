@@ -195,6 +195,11 @@ extern "C" {
       int64_t fromindexoffset,
       int64_t length);
 
+  /// @param toptr outparam
+  /// @param fromptr inparam
+  /// @param ndim inparam
+  /// @param shape inparam
+  /// @param strides inparam
   EXPORT_SYMBOL struct Error
     awkward_slicearray_ravel_64(
       int64_t* toptr,
@@ -479,6 +484,15 @@ extern "C" {
       int64_t stopsoffset,
       int64_t at);
 
+  /// @param carrylength outparam
+  /// @param fromstarts inparam
+  /// @param fromstops inparam
+  /// @param lenstarts inparam
+  /// @param startsoffset inparam
+  /// @param stopsoffset inparam
+  /// @param start inparam
+  /// @param stop inparam
+  /// @param step inparam
   EXPORT_SYMBOL struct Error
     awkward_ListArray32_getitem_next_range_carrylength(
       int64_t* carrylength,
@@ -490,6 +504,15 @@ extern "C" {
       int64_t start,
       int64_t stop,
       int64_t step);
+  /// @param carrylength outparam
+  /// @param fromstarts inparam
+  /// @param fromstops inparam
+  /// @param lenstarts inparam
+  /// @param startsoffset inparam
+  /// @param stopsoffset inparam
+  /// @param start inparam
+  /// @param stop inparam
+  /// @param step inparam
   EXPORT_SYMBOL struct Error
     awkward_ListArrayU32_getitem_next_range_carrylength(
       int64_t* carrylength,
@@ -501,6 +524,15 @@ extern "C" {
       int64_t start,
       int64_t stop,
       int64_t step);
+  /// @param carrylength outparam
+  /// @param fromstarts inparam
+  /// @param fromstops inparam
+  /// @param lenstarts inparam
+  /// @param startsoffset inparam
+  /// @param stopsoffset inparam
+  /// @param start inparam
+  /// @param stop inparam
+  /// @param step inparam
   EXPORT_SYMBOL struct Error
     awkward_ListArray64_getitem_next_range_carrylength(
       int64_t* carrylength,
@@ -513,6 +545,16 @@ extern "C" {
       int64_t stop,
       int64_t step);
 
+  /// @param tooffsets outparam
+  /// @param tocarry outparam
+  /// @param fromstarts inparam
+  /// @param fromstops inparam
+  /// @param lenstarts inparam
+  /// @param startsoffset inparam
+  /// @param stopsoffset inparam
+  /// @param start inparam
+  /// @param stop inparam
+  /// @param step inparam
   EXPORT_SYMBOL struct Error
     awkward_ListArray32_getitem_next_range_64(
       int32_t* tooffsets,
@@ -525,6 +567,16 @@ extern "C" {
       int64_t start,
       int64_t stop,
       int64_t step);
+  /// @param tooffsets outparam
+  /// @param tocarry outparam
+  /// @param fromstarts inparam
+  /// @param fromstops inparam
+  /// @param lenstarts inparam
+  /// @param startsoffset inparam
+  /// @param stopsoffset inparam
+  /// @param start inparam
+  /// @param stop inparam
+  /// @param step inparam
   EXPORT_SYMBOL struct Error
     awkward_ListArrayU32_getitem_next_range_64(
       uint32_t* tooffsets,
@@ -537,6 +589,16 @@ extern "C" {
       int64_t start,
       int64_t stop,
       int64_t step);
+  /// @param tooffsets outparam
+  /// @param tocarry outparam
+  /// @param fromstarts inparam
+  /// @param fromstops inparam
+  /// @param lenstarts inparam
+  /// @param startsoffset inparam
+  /// @param stopsoffset inparam
+  /// @param start inparam
+  /// @param stop inparam
+  /// @param step inparam
   EXPORT_SYMBOL struct Error
     awkward_ListArray64_getitem_next_range_64(
       int64_t* tooffsets,
@@ -1735,7 +1797,7 @@ extern "C" {
       int64_t length,
       bool validwhen);
   /// @param tocarry outparam
-  /// @param toindex outparam
+  /// @param outindex outparam
   /// @param mask inparam role: ByteMaskedArray-mask
   /// @param maskoffset inparam role: ByteMaskedArray-mask-offset
   /// @param length inparam

@@ -24,8 +24,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_countnonzero_bool_64(
       int64_t* toptr,
@@ -40,8 +40,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_countnonzero_int8_64(
       int64_t* toptr,
@@ -56,8 +56,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_countnonzero_uint8_64(
       int64_t* toptr,
@@ -72,8 +72,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_countnonzero_int16_64(
       int64_t* toptr,
@@ -88,8 +88,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_countnonzero_uint16_64(
       int64_t* toptr,
@@ -104,8 +104,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_countnonzero_int32_64(
       int64_t* toptr,
@@ -120,8 +120,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_countnonzero_uint32_64(
       int64_t* toptr,
@@ -136,8 +136,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_countnonzero_int64_64(
       int64_t* toptr,
@@ -152,8 +152,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_countnonzero_uint64_64(
       int64_t* toptr,
@@ -168,8 +168,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_countnonzero_float32_64(
       int64_t* toptr,
@@ -184,8 +184,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_countnonzero_float64_64(
       int64_t* toptr,
@@ -201,8 +201,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_sum_int64_bool_64(
       int64_t* toptr,
@@ -217,8 +217,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_sum_int64_int8_64(
       int64_t* toptr,
@@ -233,8 +233,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_sum_uint64_uint8_64(
       uint64_t* toptr,
@@ -249,8 +249,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_sum_int64_int16_64(
       int64_t* toptr,
@@ -265,8 +265,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_sum_uint64_uint16_64(
       uint64_t* toptr,
@@ -281,8 +281,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_sum_int64_int32_64(
       int64_t* toptr,
@@ -297,8 +297,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_sum_uint64_uint32_64(
       uint64_t* toptr,
@@ -313,8 +313,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_sum_int64_int64_64(
       int64_t* toptr,
@@ -329,8 +329,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_sum_uint64_uint64_64(
       uint64_t* toptr,
@@ -345,8 +345,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_sum_float32_float32_64(
       float* toptr,
@@ -361,8 +361,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_sum_float64_float64_64(
       double* toptr,
@@ -377,8 +377,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_sum_int32_bool_64(
       int32_t* toptr,
@@ -393,8 +393,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_sum_int32_int8_64(
       int32_t* toptr,
@@ -409,8 +409,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_sum_uint32_uint8_64(
       uint32_t* toptr,
@@ -425,8 +425,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_sum_int32_int16_64(
       int32_t* toptr,
@@ -441,8 +441,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_sum_uint32_uint16_64(
       uint32_t* toptr,
@@ -457,8 +457,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_sum_int32_int32_64(
       int32_t* toptr,
@@ -473,8 +473,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_sum_uint32_uint32_64(
       uint32_t* toptr,
@@ -490,8 +490,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_sum_bool_bool_64(
       bool* toptr,
@@ -506,8 +506,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_sum_bool_int8_64(
       bool* toptr,
@@ -522,8 +522,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_sum_bool_uint8_64(
       bool* toptr,
@@ -538,8 +538,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_sum_bool_int16_64(
       bool* toptr,
@@ -554,8 +554,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_sum_bool_uint16_64(
       bool* toptr,
@@ -570,8 +570,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_sum_bool_int32_64(
       bool* toptr,
@@ -586,8 +586,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_sum_bool_uint32_64(
       bool* toptr,
@@ -602,8 +602,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_sum_bool_int64_64(
       bool* toptr,
@@ -618,8 +618,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_sum_bool_uint64_64(
       bool* toptr,
@@ -634,8 +634,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_sum_bool_float32_64(
       bool* toptr,
@@ -650,8 +650,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_sum_bool_float64_64(
       bool* toptr,
@@ -667,8 +667,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_prod_int64_bool_64(
       int64_t* toptr,
@@ -683,8 +683,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_prod_int64_int8_64(
       int64_t* toptr,
@@ -699,8 +699,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_prod_uint64_uint8_64(
       uint64_t* toptr,
@@ -715,8 +715,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_prod_int64_int16_64(
       int64_t* toptr,
@@ -731,8 +731,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_prod_uint64_uint16_64(
       uint64_t* toptr,
@@ -747,8 +747,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_prod_int64_int32_64(
       int64_t* toptr,
@@ -763,8 +763,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_prod_uint64_uint32_64(
       uint64_t* toptr,
@@ -779,8 +779,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_prod_int64_int64_64(
       int64_t* toptr,
@@ -795,8 +795,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_prod_uint64_uint64_64(
       uint64_t* toptr,
@@ -811,8 +811,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_prod_float32_float32_64(
       float* toptr,
@@ -827,8 +827,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_prod_float64_float64_64(
       double* toptr,
@@ -843,8 +843,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_prod_int32_bool_64(
       int32_t* toptr,
@@ -859,8 +859,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_prod_int32_int8_64(
       int32_t* toptr,
@@ -875,8 +875,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_prod_uint32_uint8_64(
       uint32_t* toptr,
@@ -891,8 +891,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_prod_int32_int16_64(
       int32_t* toptr,
@@ -907,8 +907,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_prod_uint32_uint16_64(
       uint32_t* toptr,
@@ -923,8 +923,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_prod_int32_int32_64(
       int32_t* toptr,
@@ -939,8 +939,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_prod_uint32_uint32_64(
       uint32_t* toptr,
@@ -956,8 +956,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_prod_bool_bool_64(
       bool* toptr,
@@ -972,8 +972,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_prod_bool_int8_64(
       bool* toptr,
@@ -988,8 +988,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_prod_bool_uint8_64(
       bool* toptr,
@@ -1004,8 +1004,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_prod_bool_int16_64(
       bool* toptr,
@@ -1020,8 +1020,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_prod_bool_uint16_64(
       bool* toptr,
@@ -1036,8 +1036,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_prod_bool_int32_64(
       bool* toptr,
@@ -1052,8 +1052,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_prod_bool_uint32_64(
       bool* toptr,
@@ -1068,8 +1068,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_prod_bool_int64_64(
       bool* toptr,
@@ -1084,8 +1084,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_prod_bool_uint64_64(
       bool* toptr,
@@ -1100,8 +1100,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_prod_bool_float32_64(
       bool* toptr,
@@ -1116,8 +1116,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_prod_bool_float64_64(
       bool* toptr,
@@ -1133,8 +1133,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   /// @param identity inparam
   EXPORT_SYMBOL struct Error
     awkward_reduce_min_int8_int8_64(
@@ -1151,8 +1151,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   /// @param identity inparam
   EXPORT_SYMBOL struct Error
     awkward_reduce_min_uint8_uint8_64(
@@ -1169,8 +1169,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   /// @param identity inparam
   EXPORT_SYMBOL struct Error
     awkward_reduce_min_int16_int16_64(
@@ -1187,8 +1187,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   /// @param identity inparam
   EXPORT_SYMBOL struct Error
     awkward_reduce_min_uint16_uint16_64(
@@ -1205,8 +1205,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   /// @param identity inparam
   EXPORT_SYMBOL struct Error
     awkward_reduce_min_int32_int32_64(
@@ -1223,8 +1223,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   /// @param identity inparam
   EXPORT_SYMBOL struct Error
     awkward_reduce_min_uint32_uint32_64(
@@ -1241,8 +1241,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   /// @param identity inparam
   EXPORT_SYMBOL struct Error
     awkward_reduce_min_int64_int64_64(
@@ -1259,8 +1259,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   /// @param identity inparam
   EXPORT_SYMBOL struct Error
     awkward_reduce_min_uint64_uint64_64(
@@ -1277,8 +1277,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   /// @param identity inparam
   EXPORT_SYMBOL struct Error
     awkward_reduce_min_float32_float32_64(
@@ -1295,8 +1295,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   /// @param identity inparam
   EXPORT_SYMBOL struct Error
     awkward_reduce_min_float64_float64_64(
@@ -1314,8 +1314,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   /// @param identity inparam
   EXPORT_SYMBOL struct Error
     awkward_reduce_max_int8_int8_64(
@@ -1332,8 +1332,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   /// @param identity inparam
   EXPORT_SYMBOL struct Error
     awkward_reduce_max_uint8_uint8_64(
@@ -1350,8 +1350,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   /// @param identity inparam
   EXPORT_SYMBOL struct Error
     awkward_reduce_max_int16_int16_64(
@@ -1368,8 +1368,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   /// @param identity inparam
   EXPORT_SYMBOL struct Error
     awkward_reduce_max_uint16_uint16_64(
@@ -1386,8 +1386,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   /// @param identity inparam
   EXPORT_SYMBOL struct Error
     awkward_reduce_max_int32_int32_64(
@@ -1404,8 +1404,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   /// @param identity inparam
   EXPORT_SYMBOL struct Error
     awkward_reduce_max_uint32_uint32_64(
@@ -1422,8 +1422,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   /// @param identity inparam
   EXPORT_SYMBOL struct Error
     awkward_reduce_max_int64_int64_64(
@@ -1440,8 +1440,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   /// @param identity inparam
   EXPORT_SYMBOL struct Error
     awkward_reduce_max_uint64_uint64_64(
@@ -1458,8 +1458,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   /// @param identity inparam
   EXPORT_SYMBOL struct Error
     awkward_reduce_max_float32_float32_64(
@@ -1476,8 +1476,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset instance: 0
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   /// @param identity inparam
   EXPORT_SYMBOL struct Error
     awkward_reduce_max_float64_float64_64(
@@ -1497,8 +1497,8 @@ extern "C" {
   /// @param startsoffset inparam role: ListArray-starts-offset
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_argmin_bool_64(
       int64_t* toptr,
@@ -1517,8 +1517,8 @@ extern "C" {
   /// @param startsoffset inparam role: ListArray-starts-offset
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_argmin_int8_64(
       int64_t* toptr,
@@ -1537,8 +1537,8 @@ extern "C" {
   /// @param startsoffset inparam role: ListArray-starts-offset
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_argmin_uint8_64(
       int64_t* toptr,
@@ -1557,8 +1557,8 @@ extern "C" {
   /// @param startsoffset inparam role: ListArray-starts-offset
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_argmin_int16_64(
       int64_t* toptr,
@@ -1577,8 +1577,8 @@ extern "C" {
   /// @param startsoffset inparam role: ListArray-starts-offset
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_argmin_uint16_64(
       int64_t* toptr,
@@ -1597,8 +1597,8 @@ extern "C" {
   /// @param startsoffset inparam role: ListArray-starts-offset
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_argmin_int32_64(
       int64_t* toptr,
@@ -1617,8 +1617,8 @@ extern "C" {
   /// @param startsoffset inparam role: ListArray-starts-offset
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_argmin_uint32_64(
       int64_t* toptr,
@@ -1637,8 +1637,8 @@ extern "C" {
   /// @param startsoffset inparam role: ListArray-starts-offset
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_argmin_int64_64(
       int64_t* toptr,
@@ -1657,8 +1657,8 @@ extern "C" {
   /// @param startsoffset inparam role: ListArray-starts-offset
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_argmin_uint64_64(
       int64_t* toptr,
@@ -1677,8 +1677,8 @@ extern "C" {
   /// @param startsoffset inparam role: ListArray-starts-offset
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_argmin_float32_64(
       int64_t* toptr,
@@ -1697,8 +1697,8 @@ extern "C" {
   /// @param startsoffset inparam role: ListArray-starts-offset
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_argmin_float64_64(
       int64_t* toptr,
@@ -1718,8 +1718,8 @@ extern "C" {
   /// @param startsoffset inparam role: ListArray-starts-offset
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_argmax_bool_64(
       int64_t* toptr,
@@ -1738,8 +1738,8 @@ extern "C" {
   /// @param startsoffset inparam role: ListArray-starts-offset
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_argmax_int8_64(
       int64_t* toptr,
@@ -1758,8 +1758,8 @@ extern "C" {
   /// @param startsoffset inparam role: ListArray-starts-offset
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_argmax_uint8_64(
       int64_t* toptr,
@@ -1778,8 +1778,8 @@ extern "C" {
   /// @param startsoffset inparam role: ListArray-starts-offset
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_argmax_int16_64(
       int64_t* toptr,
@@ -1798,8 +1798,8 @@ extern "C" {
   /// @param startsoffset inparam role: ListArray-starts-offset
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_argmax_uint16_64(
       int64_t* toptr,
@@ -1818,8 +1818,8 @@ extern "C" {
   /// @param startsoffset inparam role: ListArray-starts-offset
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_argmax_int32_64(
       int64_t* toptr,
@@ -1838,8 +1838,8 @@ extern "C" {
   /// @param startsoffset inparam role: ListArray-starts-offset
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_argmax_uint32_64(
       int64_t* toptr,
@@ -1858,8 +1858,8 @@ extern "C" {
   /// @param startsoffset inparam role: ListArray-starts-offset
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_argmax_int64_64(
       int64_t* toptr,
@@ -1878,8 +1878,8 @@ extern "C" {
   /// @param startsoffset inparam role: ListArray-starts-offset
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_argmax_uint64_64(
       int64_t* toptr,
@@ -1898,8 +1898,8 @@ extern "C" {
   /// @param startsoffset inparam role: ListArray-starts-offset
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_argmax_float32_64(
       int64_t* toptr,
@@ -1918,8 +1918,8 @@ extern "C" {
   /// @param startsoffset inparam role: ListArray-starts-offset
   /// @param parents inparam role: IndexedArray-index instance: 1
   /// @param parentsoffset inparam role: IndexedArray-index-offset instance: 1
-  /// @param lenparents inparam
-  /// @param outlength inparam
+  /// @param lenparents inparam role: IndexedArray-lenparents
+  /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
     awkward_reduce_argmax_float64_64(
       int64_t* toptr,

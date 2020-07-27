@@ -23,7 +23,7 @@ The interface, as well as specifications for each function's behavior through a 
 
 """
     with open(os.path.join(CURRENT_DIR, "spec.yaml")) as infile:
-        spec = yaml.safe_load(infile)["Kernels"]
+        spec = yaml.safe_load(infile)["kernels"]
         spec.sort(key=lambda x: x["name"])
         with open(
             os.path.join(CURRENT_DIR, "..", "docs-sphinx", "_auto", "kernels.rst",), "w"
@@ -55,8 +55,8 @@ The interface, as well as specifications for each function's behavior through a 
                         outfile.write(")\n")
                 outfile.write(".. code-block:: python\n\n")
                 # Remove conditional at the end of dev
-                if "def" in func["specification"]:
-                    outfile.write(indent_code(func["specification"], 4,) + "\n\n")
+                if "def" in func["definition"]:
+                    outfile.write(indent_code(func["definition"], 4,) + "\n\n")
         if os.path.isfile(
             os.path.join(CURRENT_DIR, "..", "docs-sphinx", "_auto", "toctree.txt",)
         ):
