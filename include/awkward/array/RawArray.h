@@ -1199,7 +1199,7 @@ namespace awkward {
     }
 
   const ContentPtr
-    numbers_to_type(const util::dtype totype) const override {
+    numbers_to_type(const std::string& name) const override {
       throw std::runtime_error(
         "FIXME: unimplemented operation: RawArray::numbers_to_type");
     }

@@ -2,9 +2,11 @@
 
 #include <algorithm>
 #include <iomanip>
+#include <limits>
 #include <numeric>
 #include <sstream>
 #include <stdexcept>
+#include <type_traits>
 
 #include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
@@ -4861,8 +4863,118 @@ namespace awkward {
   }
 
   const ContentPtr
-  NumpyArray::numbers_to_type(const util::dtype totype) const {
-    throw std::runtime_error("FIXME: NumpyArray::numbers_to_type is not implemented.");
+  NumpyArray::numbers_to_type(const std::string& name) const {
+    util::dtype dtype = util::name_to_dtype(name);
+    NumpyArray contiguous_self = contiguous();
+    int64_t self_offset = (contiguous_self.byteoffset() /
+                           contiguous_self.itemsize());
+
+    ssize_t byteoffset = contiguous_self.byteoffset();
+    ssize_t itemsize = util::dtype_to_itemsize(dtype);
+    std::vector<ssize_t> shape = contiguous_self.shape();
+    std::vector<ssize_t> strides;
+    for (int64_t j = (int64_t)shape.size();  j > 0;  j--) {
+      strides.insert(strides.begin(), itemsize);
+      itemsize *= shape[(size_t)(j - 1)];
+    }
+
+    IdentitiesPtr identities = contiguous_self.identities();
+    if (contiguous_self.identities().get() != nullptr) {
+      identities = contiguous_self.identities().get()->deep_copy();
+    }
+    std::shared_ptr<void> ptr;
+    switch (dtype_) {
+    case util::dtype::boolean:
+      ptr = as_type<bool>(reinterpret_cast<bool*>(contiguous_self.ptr().get()),
+                          self_offset,
+                          contiguous_self.length(),
+                          dtype);
+      break;
+    case util::dtype::int8:
+      ptr = as_type<int8_t>(reinterpret_cast<int8_t*>(contiguous_self.ptr().get()),
+                            self_offset,
+                            contiguous_self.length(),
+                            dtype);
+      break;
+    case util::dtype::int16:
+      ptr = as_type<int16_t>(reinterpret_cast<int16_t*>(contiguous_self.ptr().get()),
+                             self_offset,
+                             contiguous_self.length(),
+                             dtype);
+      break;
+    case util::dtype::int32:
+      ptr = as_type<int32_t>(reinterpret_cast<int32_t*>(contiguous_self.ptr().get()),
+                             self_offset,
+                             contiguous_self.length(),
+                             dtype);
+      break;
+    case util::dtype::int64:
+      ptr = as_type<int64_t>(reinterpret_cast<int64_t*>(contiguous_self.ptr().get()),
+                             self_offset,
+                             contiguous_self.length(),
+                             dtype);
+      break;
+    case util::dtype::uint8:
+      ptr = as_type<uint8_t>(reinterpret_cast<uint8_t*>(contiguous_self.ptr().get()),
+                             self_offset,
+                             contiguous_self.length(),
+                             dtype);
+      break;
+    case util::dtype::uint16:
+      ptr = as_type<uint16_t>(reinterpret_cast<uint16_t*>(contiguous_self.ptr().get()),
+                              self_offset,
+                              contiguous_self.length(),
+                              dtype);
+      break;
+    case util::dtype::uint32:
+      ptr = as_type<uint32_t>(reinterpret_cast<uint32_t*>(contiguous_self.ptr().get()),
+                              self_offset,
+                              contiguous_self.length(),
+                              dtype);
+      break;
+    case util::dtype::uint64:
+      ptr = as_type<uint64_t>(reinterpret_cast<uint64_t*>(contiguous_self.ptr().get()),
+                              self_offset,
+                              contiguous_self.length(),
+                              dtype);
+      break;
+    case util::dtype::float16:
+      throw std::runtime_error("FIXME: numbers_to_type for float16 not implemented");
+    case util::dtype::float32:
+      ptr = as_type<float>(reinterpret_cast<float*>(contiguous_self.ptr().get()),
+                           self_offset,
+                           contiguous_self.length(),
+                           dtype);
+      break;
+    case util::dtype::float64:
+      ptr = as_type<double>(reinterpret_cast<double*>(contiguous_self.ptr().get()),
+                            self_offset,
+                            contiguous_self.length(),
+                            dtype);
+      break;
+    case util::dtype::float128:
+      throw std::runtime_error("FIXME: numbers_to_type for float128 not implemented");
+    case util::dtype::complex64:
+      throw std::runtime_error("FIXME: numbers_to_type for complex64 not implemented");
+    case util::dtype::complex128:
+      throw std::runtime_error("FIXME: numbers_to_type for complex128 not implemented");
+    case util::dtype::complex256:
+      throw std::runtime_error("FIXME: numbers_to_type for complex256 not implemented");
+    default:
+      throw std::invalid_argument(
+        std::string("cannot recast NumpyArray with format \"")
+        + format_ + std::string("\""));
+    }
+
+    return std::make_shared<NumpyArray>(identities,
+                                        contiguous_self.parameters(),
+                                        ptr,
+                                        shape,
+                                        strides,
+                                        byteoffset,
+                                        itemsize,
+                                        util::dtype_to_format(dtype),
+                                        dtype);
   }
 
   template<typename T>
@@ -4991,5 +5103,81 @@ namespace awkward {
     util::handle_error(err, classname(), nullptr);
 
     return ptr;
+  }
+
+  template<typename T>
+  const std::shared_ptr<void>
+  NumpyArray::as_type(const T* data,
+                      int64_t offset,
+                      int64_t length,
+                      const util::dtype dtype) const {
+    std::shared_ptr<void> ptr;
+    switch (dtype) {
+    case util::dtype::boolean:
+      ptr = cast_to_type<bool>(data, offset, length);
+      break;
+    case util::dtype::int8:
+      ptr = cast_to_type<int8_t>(data, offset, length);
+      break;
+    case util::dtype::int16:
+      ptr = cast_to_type<int16_t>(data, offset, length);
+      break;
+    case util::dtype::int32:
+      ptr = cast_to_type<int32_t>(data, offset, length);
+      break;
+    case util::dtype::int64:
+      ptr = cast_to_type<int64_t>(data, offset, length);
+      break;
+    case util::dtype::uint8:
+      ptr = cast_to_type<uint8_t>(data, offset, length);
+      break;
+    case util::dtype::uint16:
+      ptr = cast_to_type<uint16_t>(data, offset, length);
+      break;
+    case util::dtype::uint32:
+      ptr = cast_to_type<uint32_t>(data, offset, length);
+      break;
+    case util::dtype::uint64:
+      ptr = cast_to_type<uint64_t>(data, offset, length);
+      break;
+    case util::dtype::float16:
+      throw std::runtime_error("FIXME: as_type for float16 not implemented");
+    case util::dtype::float32:
+      ptr = cast_to_type<float>(data, offset, length);
+      break;
+    case util::dtype::float64:
+      ptr = cast_to_type<double>(data, offset, length);
+      break;
+    case util::dtype::float128:
+      throw std::runtime_error("FIXME: as_type for float128 not implemented");
+    case util::dtype::complex64:
+      throw std::runtime_error("FIXME: as_type for complex64 not implemented");
+    case util::dtype::complex128:
+      throw std::runtime_error("FIXME: as_type for complex128 not implemented");
+    case util::dtype::complex256:
+      throw std::runtime_error("FIXME: as_type for complex256 not implemented");
+    default:
+      throw std::invalid_argument(
+        std::string("cannot recast NumpyArray with format \"")
+        + format_ + std::string("\""));
+    }
+
+    return ptr;
+  }
+
+  template<typename TO, typename FROM>
+  const std::shared_ptr<void>
+  NumpyArray::cast_to_type(const FROM* fromptr, int64_t offset, int64_t length) const {
+    std::shared_ptr<TO>toptr (
+      new TO[length], kernel::array_deleter<TO>());
+
+    struct Error err = kernel::create_NumpyArray_from_NumpyArray<TO, FROM>(
+      fromptr,
+      toptr.get(),
+      offset,
+      length);
+    util::handle_error(err, classname(), nullptr);
+
+    return toptr;
   }
 }

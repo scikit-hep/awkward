@@ -337,7 +337,7 @@ namespace awkward {
   }
 
   const ContentPtr
-  None::numbers_to_type(const util::dtype totype) const {
+  None::numbers_to_type(const std::string& name) const {
     throw std::runtime_error("FIXME: None::numbers_to_type is not implemented.");
   }
 

@@ -628,7 +628,7 @@ namespace awkward {
       copy_to(kernel::Lib ptr_lib) const override;
 
     const ContentPtr
-      numbers_to_type(const util::dtype totype) const override;
+      numbers_to_type(const std::string& name) const override;
 
   protected:
     /// @brief Internal function to merge two byte arrays without promoting
@@ -850,11 +850,20 @@ namespace awkward {
 
    template<typename T>
    const std::shared_ptr<void> string_sort(const T* data,
-                                          int64_t length,
-                                          const Index64& offsets,
-                                          Index64& outoffsets,
-                                          bool ascending,
-                                          bool stable) const;
+                                           int64_t length,
+                                           const Index64& offsets,
+                                           Index64& outoffsets,
+                                           bool ascending,
+                                           bool stable) const;
+
+  template<typename T>
+  const std::shared_ptr<void> as_type(const T* data,
+                                      int64_t offset,
+                                      int64_t length,
+                                      const util::dtype dtype) const;
+
+  template<typename TO, typename FROM>
+  const std::shared_ptr<void> cast_to_type(const FROM* data, int64_t offset, int64_t length) const;
 
   /// @brief See #ptr_lib
   const kernel::Lib ptr_lib_;

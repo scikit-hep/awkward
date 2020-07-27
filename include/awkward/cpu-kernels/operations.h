@@ -825,6 +825,13 @@ extern "C" {
       int64_t fromoffset,
       int64_t length);
   EXPORT_SYMBOL struct Error
+    awkward_NumpyArray_fill_tofloat32_fromfloat64(
+      float* toptr,
+      int64_t tooffset,
+      const double* fromptr,
+      int64_t fromoffset,
+      int64_t length);
+  EXPORT_SYMBOL struct Error
     awkward_NumpyArray_fill_tofloat64_fromfloat32(
       double* toptr,
       int64_t tooffset,

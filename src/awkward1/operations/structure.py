@@ -2693,6 +2693,16 @@ def can_cast(from_, to, casting='safe'):
     """
     return numpy.can_cast(from_, to, casting)
 
+def astype(array, to, highlevel=True):
+    layout = awkward1.operations.convert.to_layout(
+        array, allow_record=False, allow_other=False)
+    out = layout.numbers_to_type(str(to))
+
+    if highlevel:
+        return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
+    else:
+        return out
+
 __all__ = [
     x
     for x in list(globals())

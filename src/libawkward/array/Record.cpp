@@ -585,7 +585,7 @@ namespace awkward {
   }
 
   const ContentPtr
-  Record::numbers_to_type(const util::dtype totype) const {
+  Record::numbers_to_type(const std::string& name) const {
     throw std::runtime_error("FIXME: Record::numbers_to_type is not implemented.");
   }
 

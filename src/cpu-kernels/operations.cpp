@@ -1905,6 +1905,18 @@ ERROR awkward_NumpyArray_fill_tofloat32_fromfloat32(
     fromoffset,
     length);
 }
+// ERROR awkward_NumpyArray_fill_tofloat32_fromfloat64(
+//   float* toptr,
+//   int64_t tooffset,
+//   const double* fromptr,
+//   int64_t fromoffset,
+//   int64_t length) {
+//     for (int64_t i = 0; i < length; i++) {
+//       toptr[i] = (float)fromptr[i];
+//     }
+//   return success();
+// }
+
 ERROR awkward_NumpyArray_fill_tofloat64_fromfloat32(
   double* toptr,
   int64_t tooffset,

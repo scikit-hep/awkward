@@ -9,6 +9,7 @@
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/cpu-kernels/sorting.h"
 
+#include <typeinfo>
 #include <sstream>
 
 #ifndef _MSC_VER
@@ -1050,6 +1051,56 @@ namespace kernel {
     const bool* fromptr,
     int64_t fromoffset,
     int64_t length);
+
+  template <typename T>
+  struct NumpyArrayType{};
+
+  template <typename T, typename FROM>
+  ERROR create_NumpyArray_from_NumpyArray(
+    NumpyArrayType<T>,
+    NumpyArrayType<FROM>,
+    const void* fromptr,
+    void* toptr,
+    int64_t offset,
+    int64_t length)
+  {
+    const FROM* data = (FROM*)fromptr;
+    T* ptr = (T*)toptr;
+    for (int64_t i = 0; i < length; i++) {
+      ptr[i] = (T)data[i];
+    }
+
+    return success();
+  }
+
+  template <typename T, typename FROM>
+  ERROR create_NumpyArray_from_NumpyArray(
+    const void* fromptr,
+    void* toptr,
+    int64_t offset,
+    int64_t length)
+  {
+    return create_NumpyArray_from_NumpyArray(
+      NumpyArrayType<T>{},
+      NumpyArrayType<FROM>{},
+      fromptr,
+      toptr,
+      offset,
+      length);
+  }
+
+  template <typename FROM, typename TO>
+  ERROR NumpyArray_from_NumpyArray(
+    TO* toptr,
+    int64_t tooffset,
+    const FROM* fromptr,
+    int64_t fromoffset,
+    int64_t length) {
+      for (int64_t i = 0; i < length; i++) {
+        toptr[i] = (TO)fromptr[i];
+      }
+      return success();
+    }
 
   template <typename FROM, typename TO>
   ERROR ListArray_fill(

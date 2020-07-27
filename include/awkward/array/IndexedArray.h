@@ -449,7 +449,7 @@ namespace awkward {
       copy_to(kernel::Lib ptr_lib) const override;
 
     const ContentPtr
-      numbers_to_type(const util::dtype totype) const override;
+      numbers_to_type(const std::string& name) const override;
 
   protected:
     template <typename S>

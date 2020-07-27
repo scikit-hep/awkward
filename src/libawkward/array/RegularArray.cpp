@@ -1312,7 +1312,7 @@ namespace awkward {
   }
 
   const ContentPtr
-  RegularArray::numbers_to_type(const util::dtype totype) const {
+  RegularArray::numbers_to_type(const std::string& name) const {
     throw std::runtime_error("FIXME: RegularArray::numbers_to_type is not implemented.");
   }
 

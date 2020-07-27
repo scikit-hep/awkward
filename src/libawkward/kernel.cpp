@@ -4805,6 +4805,23 @@ namespace kernel {
       offsetslength);
   }
 
+  // template <typename T, typename FROM>
+  // ERROR create_NumpyArray_from_NumpyArray(
+  //   NumpyArrayType<float>,
+  //   NumpyArrayType<double>,
+  //   const void* fromptr,
+  //   void* toptr,
+  //   int64_t offset,
+  //   int64_t length)
+  // {
+  //   return awkward_NumpyArray_fill_tofloat32_fromfloat64(
+  //     reinterpret_cast<float*>(toptr),
+  //     0,
+  //     reinterpret_cast<const double*>(fromptr),
+  //     offset,
+  //     length);
+  // }
+
   template<>
   ERROR NumpyArray_fill_frombool<bool>(
     bool *toptr,
