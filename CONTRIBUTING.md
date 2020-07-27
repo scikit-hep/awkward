@@ -49,19 +49,25 @@ You need some additional packages installed on your system to build the document
 
 To build documentation locally, execute the following command from the root directory of the project.
 
-.. code-block:: bash
-
-    sphinx-build docs-sphinx docs-sphinx/_build
+```bash
+sphinx-build docs-sphinx docs-sphinx/_build
+```
 
 this command executes multiple custom Python scripts(some require a working internet connection), in addition to using Sphinx and Doxygen to generate the required browser viewable documentation.
 
-To view the built documentation, open `docs-sphinx/_build/index.html` from the root directory of the project in your preferred web browser.
+To view the built documentation, open
+
+```bash
+docs-sphinx/_build/index.html
+```
+
+from the root directory of the project in your preferred web browser.
 
 Before re-building documentation, you might want to delete the files that were generated to create viewable documentation. A simple command to remove all of them is
 
-.. code-block:: bash
-
-    rm -rf docs-shinx/_auto docs_sphinx/_build docs-sphinx/_static
+```bash
+rm -rf docs-shinx/_auto docs_sphinx/_build docs-sphinx/_static
+```
 
 ### Continuous integration
 
