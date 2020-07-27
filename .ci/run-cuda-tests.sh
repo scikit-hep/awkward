@@ -7,7 +7,6 @@ LOG_FILE_AWKWARD1CUDABUILD="awkward1-cuda-tests "$1" awkward1-cuda-build"
 LOG_FILE_AWKWARD1CUDATEST="awkward1-cuda-tests "$1" awkward1-cuda-test"
 LOG_FOLDER=".ci/logs/"$( date )
 mkdir LOG_FOLDER
-
 conda --version
 python --version
 
@@ -19,7 +18,7 @@ git submodule update --init
 cp -a include src VERSION_INFO cuda-kernels
 
 cd cuda-kernels
-pip install . | tee "${LOG_FOLDER}"/"${LOG_FILE_AWKWARD1CUDABUILD}"
+pip install . | tee ../"${LOG_FOLDER}"/"${LOG_FILE_AWKWARD1CUDABUILD}"
 cd ..
 
 python -c 'import awkward1_cuda_kernels; print(awkward1_cuda_kernels.shared_library_path)'
