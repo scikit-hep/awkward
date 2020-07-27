@@ -1,7 +1,11 @@
 #!/bin/bash
 
 LOG_FOLDER=$( date +%F_%H-%M )
-
+if [ `git ls-remote --heads https://github.com/scikit-hep/awkward-1.0.git $1 | wc -l` -eq 0 ] || [ $# -eq 0 ] 
+then
+    echo "Branch does not exist, or no branch entered!"
+    exit
+fi
 mkdir logs/$LOG_FOLDER
 
 docker build -f ../dev/docker/docker_cuda102/Dockerfile.build -t awkward1-cuda-tests:1.0-cuda10.2 ../.
