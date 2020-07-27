@@ -51,7 +51,7 @@ cp -a include src VERSION_INFO cuda-kernels
 if $LOGS
 then
 	cd cuda-kernels
-	pip install . | tee ../${LOG_FOLDER}/${LOG_FILE_AWKWARD1CUDABUILD} 
+	pip install . | tee ${LOG_FOLDER}/${LOG_FILE_AWKWARD1CUDABUILD} 
 	cd ..
 
 	python -c 'import awkward1_cuda_kernels; print(awkward1_cuda_kernels.shared_library_path)'
