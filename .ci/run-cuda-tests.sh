@@ -7,7 +7,7 @@ LOG_FILE_AWKWARD1CUDABUILD="awkward1-cuda-tests "$1" awkward1-cuda-build"
 LOG_FILE_AWKWARD1CUDATEST="awkward1-cuda-tests "$1" awkward1-cuda-test"
 LOG_FOLDER=".ci/logs/"$( date )
 mkdir LOG_FOLDER
-ls
+ls .ci/logs
 conda --version
 python --version
 
@@ -25,6 +25,5 @@ cd ..
 python -c 'import awkward1_cuda_kernels; print(awkward1_cuda_kernels.shared_library_path)'
 
 python localbuild.py --pytest tests | tee "${LOG_FOLDER}"/"${LOG_FILE_AWKWARD1BUILD}"
-cat "${LOG_FOLDER}"/"${LOG_FILE_AWKWARD1BUILD}"
-python -m pytest -vvrs tests-cuda | tee
-"${LOG_FOLDER}"/"${LOG_FILE_AWKWARD1CUDATEST}"
+python -m pytest -vvrs tests-cuda | tee "${LOG_FOLDER}"/"${LOG_FILE_AWKWARD1CUDATEST}"
+
