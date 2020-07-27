@@ -3,7 +3,7 @@
 LOGS=false
 GIT_BRANCH=master
 
-while getopts ":b:l:" opt; do
+while getopts ":b:l" opt; do
   case $opt in
     b)
 			GIT_BRANCH=$OPTARG
