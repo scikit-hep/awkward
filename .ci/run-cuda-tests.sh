@@ -19,7 +19,7 @@ git submodule update --init
 cp -a include src VERSION_INFO cuda-kernels
 
 cd cuda-kernels
-pip install . | tee ../"${LOG_FOLDER}"/"${LOG_FILE_AWKWARD1CUDABUILD}"
+pip install . 
 cd ..
 
 python -c 'import awkward1_cuda_kernels; print(awkward1_cuda_kernels.shared_library_path)'
