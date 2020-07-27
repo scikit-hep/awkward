@@ -7,6 +7,7 @@ LOG_FILE_AWKWARD1CUDABUILD="awkward1-cuda-tests "$1" awkward1-cuda-build"
 LOG_FILE_AWKWARD1CUDATEST="awkward1-cuda-tests "$1" awkward1-cuda-test"
 LOG_FOLDER=".ci/logs/"$( date )
 mkdir LOG_FOLDER
+ls
 conda --version
 python --version
 
