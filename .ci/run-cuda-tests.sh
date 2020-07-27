@@ -25,6 +25,6 @@ cd ..
 python -c 'import awkward1_cuda_kernels; print(awkward1_cuda_kernels.shared_library_path)'
 
 python localbuild.py --pytest tests | tee "${LOG_FOLDER}"/"${LOG_FILE_AWKWARD1BUILD}"
-
+vim "${LOG_FOLDER}"/"${LOG_FILE_AWKWARD1BUILD}"
 python -m pytest -vvrs tests-cuda | tee
 "${LOG_FOLDER}"/"${LOG_FILE_AWKWARD1CUDATEST}"
