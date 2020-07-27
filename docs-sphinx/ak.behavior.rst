@@ -320,6 +320,7 @@ python decorators assist with some of this boilerplate. Consider the ``Point`` c
 from above; we can implement all the functionality so far described as follows:
 
 .. code-block:: python
+
     @ak.mixin_class(ak.behavior)
     class Point:
         def distance(self, other):
