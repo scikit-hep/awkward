@@ -5,8 +5,7 @@ set -e
 LOG_FILE_AWKWARD1BUILD=$1$2"awkward1-build-test"
 LOG_FILE_AWKWARD1CUDABUILD=$1$2"awkward1-cuda-build"
 LOG_FILE_AWKWARD1CUDATEST=$1$2"awkward1-cuda-test"
-LOG_FOLDER=".ci/logs/"$( date +%F_%H-%M )
-mkdir $LOG_FOLDER
+LOG_FOLDER=".ci/logs/"$3
 
 conda --version
 python --version
