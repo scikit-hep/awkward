@@ -5,7 +5,7 @@ set -e
 LOGS=false
 GIT_BRANCH=master
 CUDA_VERSION=102
-LOG_FOLDER=".ci/logs/"
+LOG_FOLDER="/home/ubuntu/awkward-1.0/.ci"
 
 while getopts ":b:l:c:" opt; do
   case $opt in
@@ -19,7 +19,7 @@ while getopts ":b:l:c:" opt; do
 			;;
     l)
       LOGS=true
-      LOG_FOLDER=".ci/logs/"$OPTARG
+      LOG_FOLDER="/home/ubuntu/awkward-1.0/.ci/"$OPTARG
       ;;
     c)
 			CUDA_VERSION=$OPTARG
