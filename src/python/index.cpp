@@ -96,19 +96,21 @@ make_IndexOf(const py::handle& m, const std::string& name) {
               throw std::invalid_argument(name + std::string(
                 " must be built from a one-dimensional array; try array.ravel()"));
             }
+            py::print("Done");
             auto strides = pytuples_to_vector<int64_t>(array.attr("strides"));
-
+            py::print("Done");
             if (strides[0] != sizeof(T)) {
               throw std::invalid_argument(name + std::string(
                 " must be built from a contiguous array (array.strides == "
                 "(array.itemsize,)); try array.copy()"));
             }
-
+            py::print("Done");
             void* ptr = reinterpret_cast<void*>(py::cast<ssize_t>(array.attr("data").attr("ptr")));
+            py::print("Done");
             std::vector<int64_t> shape = pytuples_to_vector<int64_t>(array.attr("shape"));
-
+            py::print("Done");
             return ak::IndexOf<T>(std::shared_ptr<T>(reinterpret_cast<T*>(ptr),
-                                                     kernel::cuda_array_deleter<T>()),
+                                                     pyobject_deleter<T>(array.ptr())),
                                   0,
                                   (int64_t)shape[0],
                                   kernel::Lib::cuda_kernels);
@@ -136,13 +138,11 @@ make_IndexOf(const py::handle& m, const std::string& name) {
             cupy_memoryptr,
           pybind11::make_tuple(py::cast<ssize_t>(sizeof(T))));
 
-          py::print(cuda_array);
-
-//          return py::module::import("awkward1").attr("layout").attr(name.c_str()).attr("from_cupy")(py::module::import("cupy").attr("ndarray")(
-//            pybind11::make_tuple(py::cast<ssize_t>(cuda_index.length())),
-//            py::format_descriptor<T>::format(),
-//            cupy_memoryptr,
-//            pybind11::make_tuple(py::cast<ssize_t>(sizeof(T)))));
+          return py::module::import("awkward1").attr("layout").attr(name.c_str()).attr("from_cupy")(py::module::import("cupy").attr("ndarray")(
+            pybind11::make_tuple(py::cast<ssize_t>(cuda_index.length())),
+            py::format_descriptor<T>::format(),
+            cupy_memoryptr,
+            pybind11::make_tuple(py::cast<ssize_t>(sizeof(T)))));
         }
 //        else if(ptr_lib == "cpu") {
 //          return self.copy_to(kernel::Lib::cpu_kernels);
