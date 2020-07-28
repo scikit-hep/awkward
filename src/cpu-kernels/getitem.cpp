@@ -1494,7 +1494,7 @@ ERROR awkward_RegularArray_getitem_next_range_spreadadvanced_64(
   return awkward_RegularArray_getitem_next_range_spreadadvanced<int64_t>(
     toadvanced,
     fromadvanced,
-    len,
+    length,
     nextsize);
 }
 
@@ -1554,7 +1554,7 @@ ERROR awkward_RegularArray_getitem_next_array_64(
     tocarry,
     toadvanced,
     fromarray,
-    len,
+    length,
     lenarray,
     size);
 }
