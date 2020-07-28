@@ -6,8 +6,8 @@ GIT_BRANCH=master
 while getopts ":b:l" opt; do
   case $opt in
     b)
-			GIT_BRANCH=$OPTARG
-			;;
+      GIT_BRANCH=$OPTARG
+      ;;
     l)
       LOGS=true
       ;;
