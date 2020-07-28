@@ -62,6 +62,23 @@ Pull requests must pass all [continuous integration](https://dev.azure.com/jpiva
 
 Currently, we only run merge builds (the state of your branch if merged with master), not regular branch builds (the state of your branch as-is), because only merge builds can be made to run for pull requests from external forks and it makes better use of our limited execution time on Azure. If you want to enable regular branch builds, you can turn it on for your branch by editing `trigger/branches/exclude` in [.ci/azure-buildtest-awkwrad.yml](https://github.com/scikit-hep/awkward-1.0/blob/9b6fca3f6e6456860ae40979171f762e0045ce7c/.ci/azure-buildtest-awkward.yml#L1-L5). The merge build trigger is not controlled by the YAML file. It is better, however, to keep up-to-date with `git merge master`.
 
+For development on the cuda-kernels, an AWS instance has been set up to run CI tests. You can email @jpivarski for more information on how to launch the AWS instance. Once you have the instance set up, run the following commands to test your branch.
+
+```
+cd awkward-1.0/.ci
+./launch-cuda-docker-ci.sh -b <branch-name>
+```
+
+You can also pass a `-l` flag to the above command to store logs. The logs are stored in `awkward-1.0/.ci/logs` and are arranged according to the *time* when you started the build. This script runs tests on your branch through `CUDA-10.2`, `CUDA-10.0` and `CUDA-9.0`.
+
+In case you want to test your code on a specific version of cuda, you can run the following command.
+
+```
+docker run -it --gpus all -v /home/ubuntu/awkward-1.0/.ci/logs:/awkward-1.0/.ci/logs awkward1-cuda-tests:1.0-cuda<enter cuda version here(10.2, 10.0, 9.0)> sh .ci/run-cuda-tests.sh -b <branch-name> -l <log-folder-name(stored under awkward-1.0/.ci/logs> -c <102 for cuda10.2, 100 for cuda10.0 and 900 for cuda9.0>
+```
+
+Note: The `-c` flag is a log files naming convention and will default to 102, if you don't mention anything. `-b` defaults to master and not passing `-l` will not store any logs files.   
+
 ### The master branch
 
 The Awkward Array `master` branch must be kept in an unbroken state. Although the recommended way to install Awkward Array is through pip or conda, the `master` branch on GitHub must always be functional. Pull requests for bug fixes and new features are based on `master`, so it has to work for users to test our proposed changes.
