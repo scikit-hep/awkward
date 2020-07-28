@@ -9,12 +9,6 @@ import yaml
 from parser_utils import pytype
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
-CPU_KERNEL_SO = ""
-for root, _, files in os.walk(CURRENT_DIR[:-3]):
-    for filename in files:
-        if filename.endswith("libawkward-cpu-kernels.so"):
-            CPU_KERNEL_SO = os.path.join(root, filename)
-            break
 
 
 def genpykernels():
@@ -214,10 +208,20 @@ def testcpukernels(tests):
                             )[0]
         return funcs
 
-    if CPU_KERNEL_SO == "":
-        raise AssertionError("Unable to find libawkward-cpu-kernels.so")
     with open(os.path.join(CURRENT_DIR, "..", "tests", "test_cpukernels.py"), "w") as f:
-        f.write("import math\nimport ctypes\n\n")
+        f.write("import math\nimport ctypes\nimport os\n\n")
+        f.write(
+            """
+CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
+
+for root, _, files in os.walk(CURRENT_DIR[:-5]):
+    for filename in files:
+        if filename.endswith("libawkward-cpu-kernels.so"):
+            CPU_KERNEL_SO = os.path.join(root, filename)
+            break
+
+"""
+        )
         f.write(
             """
 class Error(ctypes.Structure):
@@ -227,9 +231,10 @@ class Error(ctypes.Structure):
         ("attempt", ctypes.c_int64),
         ("pass_through", ctypes.c_bool),
     ]
+
 """
         )
-        f.write("lib = ctypes.CDLL('" + CPU_KERNEL_SO + "')\n\n")
+        f.write("lib = ctypes.CDLL(CPU_KERNEL_SO)\n\n")
         funcargs = getfuncargs()
         for funcname in tests.keys():
             num = 1

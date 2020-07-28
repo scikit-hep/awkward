@@ -1,5 +1,15 @@
 import math
 import ctypes
+import os
+
+
+CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
+
+for root, _, files in os.walk(CURRENT_DIR[:-5]):
+    for filename in files:
+        if filename.endswith("libawkward-cpu-kernels.so"):
+            CPU_KERNEL_SO = os.path.join(root, filename)
+            break
 
 
 class Error(ctypes.Structure):
@@ -9,7 +19,8 @@ class Error(ctypes.Structure):
         ("attempt", ctypes.c_int64),
         ("pass_through", ctypes.c_bool),
     ]
-lib = ctypes.CDLL('/home/reik/awkward-1.0/localbuild/libawkward-cpu-kernels.so')
+
+lib = ctypes.CDLL(CPU_KERNEL_SO)
 
 def test_awkward_new_Identities32_1():
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
