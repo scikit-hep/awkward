@@ -973,9 +973,9 @@ namespace awkward {
   }
 
   const ContentPtr
-  RecordArray::merge(const ContentPtr& other) const {
+  RecordArray::merge(const ContentPtr& other, int64_t axis) const {
     if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
-      return merge(raw->array());
+      return merge(raw->array(), axis);
     }
 
     if (!parameters_equal(other.get()->parameters())) {
@@ -1051,7 +1051,7 @@ namespace awkward {
               field(i).get()->getitem_range_nowrap(0, mylength);
             ContentPtr theirs =
               rawother->field(i).get()->getitem_range_nowrap(0, theirlength);
-            contents.push_back(mine.get()->merge(theirs));
+            contents.push_back(mine.get()->merge(theirs, axis));
           }
           return std::make_shared<RecordArray>(Identities::none(),
                                                parameters_,
@@ -1071,7 +1071,7 @@ namespace awkward {
               field(key).get()->getitem_range_nowrap(0, mylength);
             ContentPtr theirs =
               rawother->field(key).get()->getitem_range_nowrap(0, theirlength);
-            contents.push_back(mine.get()->merge(theirs));
+            contents.push_back(mine.get()->merge(theirs, axis));
           }
           return std::make_shared<RecordArray>(Identities::none(),
                                                parameters_,

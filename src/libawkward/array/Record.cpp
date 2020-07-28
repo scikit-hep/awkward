@@ -299,7 +299,7 @@ namespace awkward {
   }
 
   const ContentPtr
-  Record::merge(const ContentPtr& other) const {
+  Record::merge(const ContentPtr& other, int64_t axis) const {
     throw std::invalid_argument(
       "Record cannot be merged because it is not an array");
   }

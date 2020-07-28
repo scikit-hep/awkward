@@ -748,8 +748,8 @@ namespace awkward {
   }
 
   const ContentPtr
-  BitMaskedArray::merge(const ContentPtr& other) const {
-    return toIndexedOptionArray64().get()->merge(other);
+  BitMaskedArray::merge(const ContentPtr& other, int64_t axis) const {
+    return toIndexedOptionArray64().get()->merge(other, axis);
   }
 
   const SliceItemPtr

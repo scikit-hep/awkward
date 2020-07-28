@@ -241,7 +241,7 @@ namespace awkward {
       reverse_merge(const ContentPtr& other) const;
 
     const ContentPtr
-      merge(const ContentPtr& other) const override;
+      merge(const ContentPtr& other, int64_t axis) const override;
 
     const SliceItemPtr
       asslice() const override;

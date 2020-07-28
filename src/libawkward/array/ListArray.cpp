@@ -900,9 +900,9 @@ namespace awkward {
 
   template <typename T>
   const ContentPtr
-  ListArrayOf<T>::merge(const ContentPtr& other) const {
+  ListArrayOf<T>::merge(const ContentPtr& other, int64_t axis) const {
     if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
-      return merge(raw->array());
+      return merge(raw->array(), axis);
     }
 
     if (!parameters_equal(other.get()->parameters())) {
@@ -1012,7 +1012,7 @@ namespace awkward {
     ContentPtr content;
     if (ListArray32* rawother =
         dynamic_cast<ListArray32*>(other.get())) {
-      content = content_.get()->merge(rawother->content());
+      content = content_.get()->merge(rawother->content(), axis);
       Index32 other_starts = rawother->starts();
       Index32 other_stops = rawother->stops();
       struct Error err = kernel::ListArray_fill<int32_t, int64_t>(
@@ -1032,7 +1032,7 @@ namespace awkward {
     }
     else if (ListArrayU32* rawother =
              dynamic_cast<ListArrayU32*>(other.get())) {
-      content = content_.get()->merge(rawother->content());
+      content = content_.get()->merge(rawother->content(), axis);
       IndexU32 other_starts = rawother->starts();
       IndexU32 other_stops = rawother->stops();
       struct Error err = kernel::ListArray_fill<uint32_t, int64_t>(
@@ -1052,7 +1052,7 @@ namespace awkward {
     }
     else if (ListArray64* rawother =
              dynamic_cast<ListArray64*>(other.get())) {
-      content = content_.get()->merge(rawother->content());
+      content = content_.get()->merge(rawother->content(), axis);
       Index64 other_starts = rawother->starts();
       Index64 other_stops = rawother->stops();
       struct Error err = kernel::ListArray_fill<int64_t, int64_t>(
@@ -1072,7 +1072,7 @@ namespace awkward {
     }
     else if (ListOffsetArray32* rawother =
              dynamic_cast<ListOffsetArray32*>(other.get())) {
-      content = content_.get()->merge(rawother->content());
+      content = content_.get()->merge(rawother->content(), axis);
       Index32 other_starts = rawother->starts();
       Index32 other_stops = rawother->stops();
       struct Error err = kernel::ListArray_fill<int32_t, int64_t>(
@@ -1091,7 +1091,7 @@ namespace awkward {
     }
     else if (ListOffsetArrayU32* rawother =
              dynamic_cast<ListOffsetArrayU32*>(other.get())) {
-      content = content_.get()->merge(rawother->content());
+      content = content_.get()->merge(rawother->content(), axis);
       IndexU32 other_starts = rawother->starts();
       IndexU32 other_stops = rawother->stops();
       struct Error err = kernel::ListArray_fill<uint32_t, int64_t>(
@@ -1111,7 +1111,7 @@ namespace awkward {
     }
     else if (ListOffsetArray64* rawother =
              dynamic_cast<ListOffsetArray64*>(other.get())) {
-      content = content_.get()->merge(rawother->content());
+      content = content_.get()->merge(rawother->content(), axis);
       Index64 other_starts = rawother->starts();
       Index64 other_stops = rawother->stops();
       struct Error err = kernel::ListArray_fill<int64_t, int64_t>(
@@ -1134,7 +1134,7 @@ namespace awkward {
       ContentPtr listoffsetarray = rawregulararray->toListOffsetArray64(true);
       ListOffsetArray64* rawother =
         dynamic_cast<ListOffsetArray64*>(listoffsetarray.get());
-      content = content_.get()->merge(rawother->content());
+      content = content_.get()->merge(rawother->content(), axis);
       Index64 other_starts = rawother->starts();
       Index64 other_stops = rawother->stops();
       struct Error err = kernel::ListArray_fill<int64_t, int64_t>(

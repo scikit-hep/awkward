@@ -718,9 +718,9 @@ namespace awkward {
   }
 
   const ContentPtr
-  RegularArray::merge(const ContentPtr& other) const {
+  RegularArray::merge(const ContentPtr& other, int64_t axis) const {
     if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
-      return merge(raw->array());
+      return merge(raw->array(), axis);
     }
 
     if (!parameters_equal(other.get()->parameters())) {
@@ -782,14 +782,14 @@ namespace awkward {
         ContentPtr theirs =
           rawother->content().get()->getitem_range_nowrap(
             0, rawother->size()*rawother->length());
-        ContentPtr content = mine.get()->merge(theirs);
+        ContentPtr content = mine.get()->merge(theirs, axis);
         return std::make_shared<RegularArray>(Identities::none(),
                                               parameters_,
                                               content,
                                               size_);
       }
       else {
-        return toListOffsetArray64(true).get()->merge(other);
+        return toListOffsetArray64(true).get()->merge(other, axis);
       }
     }
     else if (dynamic_cast<ListArray32*>(other.get())  ||
@@ -798,7 +798,7 @@ namespace awkward {
              dynamic_cast<ListOffsetArray32*>(other.get())  ||
              dynamic_cast<ListOffsetArrayU32*>(other.get())  ||
              dynamic_cast<ListOffsetArray64*>(other.get())) {
-      return toListOffsetArray64(true).get()->merge(other);
+      return toListOffsetArray64(true).get()->merge(other, axis);
     }
     else {
       throw std::invalid_argument(

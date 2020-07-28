@@ -634,7 +634,7 @@ namespace awkward {
     /// @brief An array with this and the `other` concatenated (this
     /// first, `other` last).
     virtual const ContentPtr
-      merge(const ContentPtr& other) const = 0;
+      merge(const ContentPtr& other, int64_t axis) const = 0;
 
     /// @brief Converts this array into a SliceItem that can be used in
     /// getitem.

@@ -827,7 +827,7 @@ namespace awkward {
     }
 
     const ContentPtr
-      merge(const ContentPtr& other) const override {
+      merge(const ContentPtr& other, int64_t axis) const override {
       if (dynamic_cast<EmptyArray*>(other.get())) {
         return shallow_copy();
       }

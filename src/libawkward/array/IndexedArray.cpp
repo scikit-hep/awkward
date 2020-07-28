@@ -1429,7 +1429,7 @@ namespace awkward {
     int64_t mylength = length();
     Index64 index(theirlength + mylength);
 
-    ContentPtr content = other.get()->merge(content_);
+    ContentPtr content = other.get()->merge(content_, 0);
     struct Error err1 = kernel::IndexedArray_fill_to64_count(
       index.ptr().get(),
       0,
@@ -1481,9 +1481,9 @@ namespace awkward {
 
   template <typename T, bool ISOPTION>
   const ContentPtr
-  IndexedArrayOf<T, ISOPTION>::merge(const ContentPtr& other) const {
+  IndexedArrayOf<T, ISOPTION>::merge(const ContentPtr& other, int64_t axis) const {
     if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
-      return merge(raw->array());
+      return merge(raw->array(), axis);
     }
 
     if (!parameters_equal(other.get()->parameters())) {
@@ -1563,7 +1563,7 @@ namespace awkward {
     bool other_isoption = false;
     if (IndexedArray32* rawother =
         dynamic_cast<IndexedArray32*>(replaced_other.get())) {
-      content = content_.get()->merge(rawother->content());
+      content = content_.get()->merge(rawother->content(), axis);
       Index32 other_index = rawother->index();
       struct Error err = kernel::IndexedArray_fill<int32_t, int64_t>(
         index.ptr().get(),
@@ -1578,7 +1578,7 @@ namespace awkward {
     }
     else if (IndexedArrayU32* rawother =
              dynamic_cast<IndexedArrayU32*>(replaced_other.get())) {
-      content = content_.get()->merge(rawother->content());
+      content = content_.get()->merge(rawother->content(), axis);
       IndexU32 other_index = rawother->index();
       struct Error err = kernel::IndexedArray_fill<uint32_t, int64_t>(
         index.ptr().get(),
@@ -1593,7 +1593,7 @@ namespace awkward {
     }
     else if (IndexedArray64* rawother =
              dynamic_cast<IndexedArray64*>(replaced_other.get())) {
-      content = content_.get()->merge(rawother->content());
+      content = content_.get()->merge(rawother->content(), axis);
       Index64 other_index = rawother->index();
       struct Error err = kernel::IndexedArray_fill<int64_t, int64_t>(
         index.ptr().get(),
@@ -1608,7 +1608,7 @@ namespace awkward {
     }
     else if (IndexedOptionArray32* rawother =
              dynamic_cast<IndexedOptionArray32*>(replaced_other.get())) {
-      content = content_.get()->merge(rawother->content());
+      content = content_.get()->merge(rawother->content(), axis);
       Index32 other_index = rawother->index();
       struct Error err = kernel::IndexedArray_fill<int32_t, int64_t>(
         index.ptr().get(),
@@ -1624,7 +1624,7 @@ namespace awkward {
     }
     else if (IndexedOptionArray64* rawother =
              dynamic_cast<IndexedOptionArray64*>(replaced_other.get())) {
-      content = content_.get()->merge(rawother->content());
+      content = content_.get()->merge(rawother->content(), axis);
       Index64 other_index = rawother->index();
       struct Error err = kernel::IndexedArray_fill<int64_t, int64_t>(
         index.ptr().get(),
@@ -1639,7 +1639,7 @@ namespace awkward {
       other_isoption = true;
     }
     else {
-      content = content_.get()->merge(replaced_other);
+      content = content_.get()->merge(replaced_other, axis);
       struct Error err = kernel::IndexedArray_fill_to64_count(
         index.ptr().get(),
         mylength,

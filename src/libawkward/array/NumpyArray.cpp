@@ -288,7 +288,7 @@ namespace awkward {
                  index.ptr(),
                  std::vector<ssize_t>({ (ssize_t)index.length() }),
                  std::vector<ssize_t>({ (ssize_t)sizeof(int8_t) }),
-                 index.offset() * sizeof(int8_t),
+                 index.offset() * (ssize_t)sizeof(int8_t),
                  sizeof(int8_t),
                  util::dtype_to_format(util::dtype::int8),
                  util::dtype::int8,
@@ -300,7 +300,7 @@ namespace awkward {
                  index.ptr(),
                  std::vector<ssize_t>({ (ssize_t)index.length() }),
                  std::vector<ssize_t>({ (ssize_t)sizeof(uint8_t) }),
-                 index.offset() * sizeof(uint8_t),
+                 index.offset() * (ssize_t)sizeof(uint8_t),
                  sizeof(uint8_t),
                  util::dtype_to_format(util::dtype::uint8),
                  util::dtype::uint8,
@@ -312,7 +312,7 @@ namespace awkward {
                  index.ptr(),
                  std::vector<ssize_t>({ (ssize_t)index.length() }),
                  std::vector<ssize_t>({ (ssize_t)sizeof(int32_t) }),
-                 index.offset() * sizeof(int32_t),
+                 index.offset() * (ssize_t)sizeof(int32_t),
                  sizeof(int32_t),
                  util::dtype_to_format(util::dtype::int32),
                  util::dtype::int32,
@@ -324,7 +324,7 @@ namespace awkward {
                  index.ptr(),
                  std::vector<ssize_t>({ (ssize_t)index.length() }),
                  std::vector<ssize_t>({ (ssize_t)sizeof(uint32_t) }),
-                 index.offset() * sizeof(uint32_t),
+                 index.offset() * (ssize_t)sizeof(uint32_t),
                  sizeof(uint32_t),
                  util::dtype_to_format(util::dtype::uint32),
                  util::dtype::uint32,
@@ -336,7 +336,7 @@ namespace awkward {
                  index.ptr(),
                  std::vector<ssize_t>({ (ssize_t)index.length() }),
                  std::vector<ssize_t>({ (ssize_t)sizeof(int64_t) }),
-                 index.offset() * sizeof(int64_t),
+                 index.offset() * (ssize_t)sizeof(int64_t),
                  sizeof(int64_t),
                  util::dtype_to_format(util::dtype::int64),
                  util::dtype::int64,
@@ -568,7 +568,7 @@ namespace awkward {
     if (length <= 10) {
       for (int64_t i = 0;  i < length;  i++) {
         T* ptr2 = reinterpret_cast<T*>(
-            reinterpret_cast<size_t>(ptr) + stride*((ssize_t)i));
+            reinterpret_cast<size_t>(ptr) + (size_t)stride*((size_t)i));
         if (i != 0) {
           out << " ";
         }
@@ -589,7 +589,7 @@ namespace awkward {
     else {
       for (int64_t i = 0;  i < 5;  i++) {
         T* ptr2 = reinterpret_cast<T*>(
-            reinterpret_cast<size_t>(ptr) + stride*((ssize_t)i));
+            reinterpret_cast<size_t>(ptr) + (size_t)stride*((size_t)i));
         if (i != 0) {
           out << " ";
         }
@@ -609,7 +609,7 @@ namespace awkward {
       out << " ... ";
       for (int64_t i = length - 5;  i < length;  i++) {
         T* ptr2 = reinterpret_cast<T*>(
-            reinterpret_cast<size_t>(ptr) + stride*((ssize_t)i));
+            reinterpret_cast<size_t>(ptr) + (size_t)stride*((size_t)i));
         if (i != length - 5) {
           out << " ";
         }
@@ -1531,9 +1531,9 @@ namespace awkward {
   }
 
   const ContentPtr
-  NumpyArray::merge(const ContentPtr& other) const {
+  NumpyArray::merge(const ContentPtr& other, int64_t axis) const {
     if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
-      return merge(raw->array());
+      return merge(raw->array(), axis);
     }
 
     if (!parameters_equal(other.get()->parameters())) {
@@ -1849,6 +1849,11 @@ namespace awkward {
                   self_offset,
                   self_flatlength);
             break;
+          default:
+            throw std::runtime_error(std::string("enumeration value ")
+              + util::dtype_to_name(dtype_)
+              + std::string(" cannot be handled in case ")
+              + util::dtype_to_name(dtype));
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -1868,6 +1873,11 @@ namespace awkward {
                   other_offset,
                   other_flatlength);
             break;
+          default:
+            throw std::runtime_error(std::string("enumeration value ")
+              + util::dtype_to_name(rawother->dtype())
+              + std::string(" cannot be handled in case ")
+              + util::dtype_to_name(dtype));
         }
         util::handle_error(err, classname(), nullptr);
         break;
@@ -1907,6 +1917,11 @@ namespace awkward {
                   self_offset,
                   self_flatlength);
             break;
+          default:
+            throw std::runtime_error(std::string("enumeration value ")
+              + util::dtype_to_name(dtype_)
+              + std::string(" cannot be handled in case ")
+              + util::dtype_to_name(dtype));
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -1942,6 +1957,11 @@ namespace awkward {
                   other_offset,
                   other_flatlength);
             break;
+          default:
+            throw std::runtime_error(std::string("enumeration value ")
+              + util::dtype_to_name(rawother->dtype())
+              + std::string(" cannot be handled in case ")
+              + util::dtype_to_name(dtype));
         }
         util::handle_error(err, classname(), nullptr);
         break;
@@ -1997,6 +2017,11 @@ namespace awkward {
                   self_offset,
                   self_flatlength);
             break;
+          default:
+            throw std::runtime_error(std::string("enumeration value ")
+              + util::dtype_to_name(dtype_)
+              + std::string(" cannot be handled in case ")
+              + util::dtype_to_name(dtype));
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -2048,6 +2073,11 @@ namespace awkward {
                   other_offset,
                   other_flatlength);
             break;
+          default:
+            throw std::runtime_error(std::string("enumeration value ")
+              + util::dtype_to_name(rawother->dtype())
+              + std::string(" cannot be handled in case ")
+              + util::dtype_to_name(dtype));
         }
         util::handle_error(err, classname(), nullptr);
         break;
@@ -2119,6 +2149,11 @@ namespace awkward {
                   self_offset,
                   self_flatlength);
             break;
+          default:
+            throw std::runtime_error(std::string("enumeration value ")
+              + util::dtype_to_name(dtype_)
+              + std::string(" cannot be handled in case ")
+              + util::dtype_to_name(dtype));
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -2186,6 +2221,11 @@ namespace awkward {
                   other_offset,
                   other_flatlength);
             break;
+          default:
+            throw std::runtime_error(std::string("enumeration value ")
+              + util::dtype_to_name(rawother->dtype())
+              + std::string(" cannot be handled in case ")
+              + util::dtype_to_name(dtype));
         }
         util::handle_error(err, classname(), nullptr);
         break;
@@ -2209,6 +2249,11 @@ namespace awkward {
                   self_offset,
                   self_flatlength);
             break;
+          default:
+            throw std::runtime_error(std::string("enumeration value ")
+              + util::dtype_to_name(dtype_)
+              + std::string(" cannot be handled in case ")
+              + util::dtype_to_name(dtype));
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -2228,6 +2273,11 @@ namespace awkward {
                   other_offset,
                   other_flatlength);
             break;
+          default:
+            throw std::runtime_error(std::string("enumeration value ")
+              + util::dtype_to_name(rawother->dtype())
+              + std::string(" cannot be handled in case ")
+              + util::dtype_to_name(dtype));
         }
         util::handle_error(err, classname(), nullptr);
         break;
@@ -2259,6 +2309,11 @@ namespace awkward {
                   self_offset,
                   self_flatlength);
             break;
+          default:
+            throw std::runtime_error(std::string("enumeration value ")
+              + util::dtype_to_name(dtype_)
+              + std::string(" cannot be handled in case ")
+              + util::dtype_to_name(dtype));
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -2286,6 +2341,11 @@ namespace awkward {
                   other_offset,
                   other_flatlength);
             break;
+          default:
+            throw std::runtime_error(std::string("enumeration value ")
+              + util::dtype_to_name(rawother->dtype())
+              + std::string(" cannot be handled in case ")
+              + util::dtype_to_name(dtype));
         }
         util::handle_error(err, classname(), nullptr);
         break;
@@ -2325,6 +2385,11 @@ namespace awkward {
                   self_offset,
                   self_flatlength);
             break;
+          default:
+            throw std::runtime_error(std::string("enumeration value ")
+              + util::dtype_to_name(dtype_)
+              + std::string(" cannot be handled in case ")
+              + util::dtype_to_name(dtype));
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -2360,6 +2425,11 @@ namespace awkward {
                   other_offset,
                   other_flatlength);
             break;
+          default:
+            throw std::runtime_error(std::string("enumeration value ")
+              + util::dtype_to_name(rawother->dtype())
+              + std::string(" cannot be handled in case ")
+              + util::dtype_to_name(dtype));
         }
         util::handle_error(err, classname(), nullptr);
         break;
@@ -2407,7 +2477,12 @@ namespace awkward {
                   self_offset,
                   self_flatlength);
             break;
-        }
+          default:
+            throw std::runtime_error(std::string("enumeration value ")
+              + util::dtype_to_name(dtype_)
+              + std::string(" cannot be handled in case ")
+              + util::dtype_to_name(dtype));
+      }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
           case util::dtype::boolean:
@@ -2450,6 +2525,11 @@ namespace awkward {
                   other_offset,
                   other_flatlength);
             break;
+          default:
+            throw std::runtime_error(std::string("enumeration value ")
+              + util::dtype_to_name(rawother->dtype())
+              + std::string(" cannot be handled in case ")
+              + util::dtype_to_name(dtype));
         }
         util::handle_error(err, classname(), nullptr);
         break;
@@ -2512,6 +2592,11 @@ namespace awkward {
                   self_offset,
                   self_flatlength);
             break;
+          default:
+            throw std::runtime_error(std::string("enumeration value ")
+              + util::dtype_to_name(dtype_)
+              + std::string(" cannot be handled in case ")
+              + util::dtype_to_name(dtype));
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -2565,6 +2650,11 @@ namespace awkward {
                   other_offset,
                   other_flatlength);
             break;
+          default:
+            throw std::runtime_error(std::string("enumeration value ")
+              + util::dtype_to_name(rawother->dtype())
+              + std::string(" cannot be handled in case ")
+              + util::dtype_to_name(dtype));
         }
         util::handle_error(err, classname(), nullptr);
         break;
@@ -2662,6 +2752,11 @@ namespace awkward {
                   self_offset,
                   self_flatlength);
             break;
+          default:
+            throw std::runtime_error(std::string("enumeration value ")
+              + util::dtype_to_name(dtype_)
+              + std::string(" cannot be handled in case ")
+              + util::dtype_to_name(dtype));
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -2755,6 +2850,11 @@ namespace awkward {
                   other_offset,
                   other_flatlength);
             break;
+          default:
+            throw std::runtime_error(std::string("enumeration value ")
+              + util::dtype_to_name(rawother->dtype())
+              + std::string(" cannot be handled in case ")
+              + util::dtype_to_name(dtype));
         }
         util::handle_error(err, classname(), nullptr);
         break;

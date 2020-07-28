@@ -482,7 +482,7 @@ namespace awkward {
                 len,
                 contents[k].get()->length());
               util::handle_error(err, classname(), identities_.get());
-              contents[k] = contents[k].get()->merge(innercontents[j]);
+              contents[k] = contents[k].get()->merge(innercontents[j], 0);
               unmerged = false;
               break;
             }
@@ -537,7 +537,7 @@ namespace awkward {
                 len,
                 contents[k].get()->length());
               util::handle_error(err, classname(), identities_.get());
-              contents[k] = contents[k].get()->merge(innercontents[j]);
+              contents[k] = contents[k].get()->merge(innercontents[j], 0);
               unmerged = false;
               break;
             }
@@ -592,7 +592,7 @@ namespace awkward {
                 len,
                 contents[k].get()->length());
               util::handle_error(err, classname(), identities_.get());
-              contents[k] = contents[k].get()->merge(innercontents[j]);
+              contents[k] = contents[k].get()->merge(innercontents[j], 0);
               unmerged = false;
               break;
             }
@@ -637,7 +637,7 @@ namespace awkward {
               len,
               contents[k].get()->length());
             util::handle_error(err, classname(), identities_.get());
-            contents[k] = contents[k].get()->merge(contents_[i]);
+            contents[k] = contents[k].get()->merge(contents_[i], 0);
             unmerged = false;
             break;
           }
@@ -1469,9 +1469,9 @@ namespace awkward {
 
   template <typename T, typename I>
   const ContentPtr
-  UnionArrayOf<T, I>::merge(const ContentPtr& other) const {
+  UnionArrayOf<T, I>::merge(const ContentPtr& other, int64_t axis) const {
     if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
-      return merge(raw->array());
+      return merge(raw->array(), axis);
     }
 
     if (!parameters_equal(other.get()->parameters())) {
