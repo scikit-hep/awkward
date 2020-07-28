@@ -15,6 +15,16 @@ def indent_code(code, indent):
     return finalcode
 
 
+def pytype(cpptype):
+    cpptype = cpptype.replace("*", "")
+    if re.match("u?int\d{1,2}(_t)?", cpptype) is not None:
+        return "int"
+    elif cpptype == "double":
+        return "float"
+    else:
+        return cpptype
+
+
 def getheadername(filename):
     if "/" in filename:
         hfile = filename[filename.rfind("/") + 1 : -4] + ".h"
@@ -30,21 +40,3 @@ def arrayconv(cpptype):
         return cpptype
     else:
         return "List[" * count + cpptype[:-count] + "]" * count
-
-
-def gettokens(ctokens, htokens):
-    tokens = OrderedDict()
-    for x in htokens.keys():
-        tokens[x] = OrderedDict()
-        for y in htokens[x].keys():
-            tokens[x][y] = OrderedDict()
-            for z, val in htokens[x][y].items():
-                tokens[x][y][z] = val
-            for i in ctokens[x]["args"]:
-                if i["name"] == y:
-                    if i["list"] > 0:
-                        tokens[x][y]["array"] = i["list"]
-                    else:
-                        tokens[x][y]["array"] = 0
-                    tokens[x][y]["type"] = i["type"]
-    return tokens

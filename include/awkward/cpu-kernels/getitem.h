@@ -301,14 +301,14 @@ extern "C" {
 
   /// @param topos outparam
   /// @param frompos inparam role: NumpyArray-ptr
-  /// @param len inparam
+  /// @param length inparam
   /// @param skip inparam
   /// @param stride inparam
   EXPORT_SYMBOL struct Error
     awkward_NumpyArray_contiguous_next_64(
       int64_t* topos,
       const int64_t* frompos,
-      int64_t len,
+      int64_t length,
       int64_t skip,
       int64_t stride);
 
@@ -871,19 +871,19 @@ extern "C" {
 
   /// @param tocarry outparam
   /// @param at inparam role: ListArray-at
-  /// @param len inparam
+  /// @param length inparam
   /// @param size inparam
   EXPORT_SYMBOL struct Error
     awkward_RegularArray_getitem_next_at_64(
       int64_t* tocarry,
       int64_t at,
-      int64_t len,
+      int64_t length,
       int64_t size);
 
   /// @param tocarry outparam
   /// @param regular_start inparam
   /// @param step inparam
-  /// @param len inparam
+  /// @param length inparam
   /// @param size inparam
   /// @param nextsize inparam
   EXPORT_SYMBOL struct Error
@@ -891,19 +891,19 @@ extern "C" {
       int64_t* tocarry,
       int64_t regular_start,
       int64_t step,
-      int64_t len,
+      int64_t length,
       int64_t size,
       int64_t nextsize);
 
   /// @param toadvanced outparam
   /// @param fromadvanced inparam role: RegularArray-diff
-  /// @param len inparam
+  /// @param length inparam
   /// @param nextsize inparam role: RegularArray-size
   EXPORT_SYMBOL struct Error
     awkward_RegularArray_getitem_next_range_spreadadvanced_64(
       int64_t* toadvanced,
       const int64_t* fromadvanced,
-      int64_t len,
+      int64_t length,
       int64_t nextsize);
 
   /// @param toarray outparam
@@ -920,7 +920,7 @@ extern "C" {
   /// @param tocarry outparam
   /// @param toadvanced outparam
   /// @param fromarray inparam role: ListArray-at-array
-  /// @param len inparam
+  /// @param length inparam
   /// @param lenarray inparam
   /// @param size inparam role: RegularArray-size
   EXPORT_SYMBOL struct Error
@@ -928,7 +928,7 @@ extern "C" {
       int64_t* tocarry,
       int64_t* toadvanced,
       const int64_t* fromarray,
-      int64_t len,
+      int64_t length,
       int64_t lenarray,
       int64_t size);
 
@@ -936,7 +936,7 @@ extern "C" {
   /// @param toadvanced outparam
   /// @param fromadvanced inparam role: RegularArray-diff
   /// @param fromarray inparam role: ListArray-at-array
-  /// @param len inparam
+  /// @param length inparam
   /// @param lenarray inparam
   /// @param size inparam role: RegularArray-size
   EXPORT_SYMBOL struct Error
@@ -945,7 +945,7 @@ extern "C" {
       int64_t* toadvanced,
       const int64_t* fromadvanced,
       const int64_t* fromarray,
-      int64_t len,
+      int64_t length,
       int64_t lenarray,
       int64_t size);
 

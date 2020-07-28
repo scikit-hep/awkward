@@ -126,16 +126,16 @@
         },
         "ByteMaskedArray": {
             "ByteMaskedArray-mask": [
-                {"int": [true, true, true, true, true]},
-                {"int": [true, false, true, true, true]}
+                {"int": [1, 1, 1, 1, 1]},
+                {"int": [1, 1, 1, 1, 1]}
             ],
             "ByteMaskedArray-mask-offset": [
                 {"int": 0},
                 {"int": 0}
             ],
             "ByteMaskedArray-valid_when": [
-                {"bool": 1},
-                {"bool": 0}
+                {"bool": true},
+                {"bool": false}
             ]
         },
         "UnionArray": {

@@ -12,7 +12,7 @@ import black
 import pycparser
 from lark import Lark
 
-from parser_utils import arrayconv, getheadername, indent_code
+from parser_utils import arrayconv, getheadername, indent_code, pytype
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -56,7 +56,14 @@ TEST_BLACKLIST = SPEC_BLACKLIST + [
     "awkward_ListOffsetArray_rpad_axis1",
 ]
 
-SUCCESS_TEST_BLACKLIST = ["awkward_combinations", "awkward_regularize_arrayslice"]
+SUCCESS_TEST_BLACKLIST = [
+    "awkward_combinations",
+    "awkward_regularize_arrayslice",
+    "awkward_RegularArray_broadcast_tooffsets",
+    "awkward_ListArray_validity",
+    "awkward_IndexedArray_validity",
+    "awkward_UnionArray_validity",
+]
 
 FAIL_TEST_BLACKLIST = ["awkward_NumpyArray_fill_to64_fromU64"]
 
@@ -848,18 +855,8 @@ def parseheader(filename):
 
 
 def get_tests(allpykernels, allfuncargs, alltokens, allfuncroles, failfuncs):
-    def pytype(cpptype):
-        cpptype = cpptype.replace("*", "")
-        if re.match("u?int\d{1,2}(_t)?", cpptype) is not None:
-            return "int"
-        elif cpptype == "double":
-            return "float"
-        else:
-            return cpptype
-
     def writepykernels():
         prefix = """
-import copy
 
 kMaxInt64  = 9223372036854775806
 kSliceNone = kMaxInt64 + 1
@@ -927,7 +924,12 @@ kSliceNone = kMaxInt64 + 1
                         intests[arg] = tempval
                     elif allfuncroles[keyfunc][arg]["check"] == "outparam":
                         tests.append({})
-                        intests[arg] = [0] * 50
+                        if argpytype == "int":
+                            intests[arg] = [0] * 50
+                        elif argpytype == "float":
+                            intests[arg] = [1.1] * 50
+                        elif argpytype == "bool":
+                            intests[arg] = [True] * 50
                         checkindex.append(i)
                     else:
                         raise AssertionError(
