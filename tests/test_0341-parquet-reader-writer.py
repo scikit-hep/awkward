@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 
 import sys
+import os
 
 import pytest
 import numpy
@@ -31,35 +32,35 @@ def test_write_read(tmp_path):
     )
     array4 = awkward1.repartition(array3, 2)
 
-    awkward1.to_parquet(array1, "array1.parquet")
-    awkward1.to_parquet(array2, "array2.parquet")
-    awkward1.to_parquet(array3, "array3.parquet")
-    awkward1.to_parquet(array4, "array4.parquet")
+    awkward1.to_parquet(array1, os.path.join(tmp_path, "array1.parquet"))
+    awkward1.to_parquet(array2, os.path.join(tmp_path, "array2.parquet"))
+    awkward1.to_parquet(array3, os.path.join(tmp_path, "array3.parquet"))
+    awkward1.to_parquet(array4, os.path.join(tmp_path, "array4.parquet"))
 
     assert awkward1.to_list(
-        awkward1.from_parquet("array1.parquet")
+        awkward1.from_parquet(os.path.join(tmp_path, "array1.parquet"))
     ) == awkward1.to_list(array1)
     assert awkward1.to_list(
-        awkward1.from_parquet("array2.parquet")
+        awkward1.from_parquet(os.path.join(tmp_path, "array2.parquet"))
     ) == awkward1.to_list(array2)
     assert awkward1.to_list(
-        awkward1.from_parquet("array3.parquet")
+        awkward1.from_parquet(os.path.join(tmp_path, "array3.parquet"))
     ) == awkward1.to_list(array3)
     assert awkward1.to_list(
-        awkward1.from_parquet("array4.parquet")
+        awkward1.from_parquet(os.path.join(tmp_path, "array4.parquet"))
     ) == awkward1.to_list(array4)
 
     assert awkward1.to_list(
-        awkward1.from_parquet("array1.parquet", lazy=True)
+        awkward1.from_parquet(os.path.join(tmp_path, "array1.parquet"), lazy=True)
     ) == awkward1.to_list(array1)
     assert awkward1.to_list(
-        awkward1.from_parquet("array2.parquet", lazy=True)
+        awkward1.from_parquet(os.path.join(tmp_path, "array2.parquet"), lazy=True)
     ) == awkward1.to_list(array2)
     assert awkward1.to_list(
-        awkward1.from_parquet("array3.parquet", lazy=True)
+        awkward1.from_parquet(os.path.join(tmp_path, "array3.parquet"), lazy=True)
     ) == awkward1.to_list(array3)
     assert awkward1.to_list(
-        awkward1.from_parquet("array4.parquet", lazy=True)
+        awkward1.from_parquet(os.path.join(tmp_path, "array4.parquet"), lazy=True)
     ) == awkward1.to_list(array4)
 
 
@@ -81,10 +82,10 @@ def test_explode(tmp_path):
     )
     array4 = awkward1.repartition(array3, 2)
 
-    awkward1.to_parquet(array3, "array3.parquet", explode_records=True)
-    awkward1.to_parquet(array4, "array4.parquet", explode_records=True)
+    awkward1.to_parquet(array3, os.path.join(tmp_path, "array3.parquet"), explode_records=True)
+    awkward1.to_parquet(array4, os.path.join(tmp_path, "array4.parquet"), explode_records=True)
 
-    assert awkward1.from_parquet("array3.parquet") == [
+    assert awkward1.from_parquet(os.path.join(tmp_path, "array3.parquet")) == [
         {"x": [1, 2, 3], "y": [1.1, 2.2, 3.3]},
         {"x": [], "y": []},
         {"x": [4, 5], "y": [4.4, 5.5]},
@@ -92,7 +93,7 @@ def test_explode(tmp_path):
         {"x": [], "y": []},
         {"x": [6, 7, 8, 9], "y": [6.6, 7.7, 8.8, 9.9]},
     ]
-    assert awkward1.from_parquet("array4.parquet") == [
+    assert awkward1.from_parquet(os.path.join(tmp_path, "array4.parquet")) == [
         {"x": [1, 2, 3], "y": [1.1, 2.2, 3.3]},
         {"x": [], "y": []},
         {"x": [4, 5], "y": [4.4, 5.5]},

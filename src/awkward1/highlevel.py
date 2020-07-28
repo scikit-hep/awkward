@@ -524,8 +524,13 @@ class Array(
 
         See also #ak.to_list.
         """
-        for x in self._layout:
-            yield awkward1._util.wrap(x, self._behavior)
+        if awkward1._util.called_by_module("matplotlib"):
+            out = awkward1._connect._numpy.convert_to_array(self._layout, (), {})
+            for x in out:
+                yield x
+        else:
+            for x in self._layout:
+                yield awkward1._util.wrap(x, self._behavior)
 
     def __getitem__(self, where):
         """
