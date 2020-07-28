@@ -26,7 +26,7 @@ kSliceNone = kMaxInt64 + 1
 """
     with open(os.path.join(CURRENT_DIR, "spec.yaml")) as infile:
         spec = yaml.safe_load(infile)["kernels"]
-        with open(os.path.join(CURRENT_DIR, "kernels.py"), "w") as outfile:
+        with open(os.path.join(CURRENT_DIR, "..", "tests", "kernels.py"), "w") as outfile:
             outfile.write(prefix)
             for func in spec:
                 if "def " in func["definition"]:
@@ -108,8 +108,8 @@ def readspec():
 
 
 def testpykernels(tests):
-    with open(os.path.join(CURRENT_DIR, "pykerneltests.py"), "w") as f:
-        f.write("import kernels\n\n")
+    with open(os.path.join(CURRENT_DIR, "..", "tests", "test_pykernels.py"), "w") as f:
+        f.write("import tests.kernels\n\n")
         for funcname in tests.keys():
             num = 1
             for test in tests[funcname]:
@@ -118,7 +118,7 @@ def testpykernels(tests):
                 args = ""
                 for arg, val in test["inargs"].items():
                     f.write(" " * 4 + arg + " = " + str(val) + "\n")
-                f.write(" " * 4 + "funcPy = getattr(kernels, '" + funcname + "')\n")
+                f.write(" " * 4 + "funcPy = getattr(tests.kernels, '" + funcname + "')\n")
                 count = 0
                 for arg in test["inargs"].keys():
                     if count == 0:
@@ -144,7 +144,6 @@ def testpykernels(tests):
                     f.write(" " * 4 + "except:\n")
                     f.write(" " * 8 + "pass\n")
                 f.write("\n")
-    subprocess.check_call(["pytest", os.path.join(CURRENT_DIR, "pykerneltests.py")])
 
 
 def testcpukernels(tests):
@@ -209,7 +208,7 @@ def testcpukernels(tests):
 
     if CPU_KERNEL_SO == "":
         raise AssertionError("Unable to find libawkward-cpu-kernels.so")
-    with open(os.path.join(CURRENT_DIR, "cpukerneltests.py"), "w") as f:
+    with open(os.path.join(CURRENT_DIR, "..", "tests", "test_cpukernels.py"), "w") as f:
         f.write("import math\nimport ctypes\n\n")
         f.write(
             """
@@ -303,7 +302,6 @@ class Error(ctypes.Structure):
                 else:
                     f.write(" " * 4 + "assert funcC(" + args + ").str.contents\n")
                 f.write("\n")
-    subprocess.check_call(["pytest", os.path.join(CURRENT_DIR, "cpukerneltests.py")])
 
 
 if __name__ == "__main__":
