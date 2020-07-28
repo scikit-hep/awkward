@@ -62,22 +62,18 @@ Pull requests must pass all [continuous integration](https://dev.azure.com/jpiva
 
 Currently, we only run merge builds (the state of your branch if merged with master), not regular branch builds (the state of your branch as-is), because only merge builds can be made to run for pull requests from external forks and it makes better use of our limited execution time on Azure. If you want to enable regular branch builds, you can turn it on for your branch by editing `trigger/branches/exclude` in [.ci/azure-buildtest-awkwrad.yml](https://github.com/scikit-hep/awkward-1.0/blob/9b6fca3f6e6456860ae40979171f762e0045ce7c/.ci/azure-buildtest-awkward.yml#L1-L5). The merge build trigger is not controlled by the YAML file. It is better, however, to keep up-to-date with `git merge master`.
 
-For development on the cuda-kernels, an AWS instance has been set up to run CI tests. You can email @jpivarski for more information on how to launch the AWS instance. Once you have the instance set up, run the following commands to test your branch.
+### Semi-automated testing of CUDA kernels
 
-```
-cd awkward-1.0/.ci
-./launch-cuda-docker-ci.sh -b <branch-name>
-```
+For development on the cuda-kernels, an AWS VM with a GPU has been set up to run tests in the `tests-cuda` directory. You can email jpivarski at GMail for more information on how to get permissions to launch the AWS instance. Once inside the GPU-enabled VM, cd to `awkward-1.0` and run the following command to test your branch.
 
-You can also pass a `-l` flag to the above command to store logs. The logs are stored in `awkward-1.0/.ci/logs` and are arranged according to the *time* when you started the build. This script runs tests on your branch through `CUDA-10.2`, `CUDA-10.0` and `CUDA-9.0`.
-
-In case you want to test your code on a specific version of cuda, you can run the following command.
-
-```
-docker run -it --gpus all -v /home/ubuntu/awkward-1.0/.ci/logs:/awkward-1.0/.ci/logs awkward1-cuda-tests:1.0-cuda<enter cuda version here(10.2, 10.0, 9.0)> sh .ci/run-cuda-tests.sh -b <branch-name> -l <log-folder-name(stored under awkward-1.0/.ci/logs> -c <102 for cuda10.2, 100 for cuda10.0 and 900 for cuda9.0>
+```bash
+mv .ci/tests/logs/* .ci/tests/logs-OLD/*
+.ci/launch-cuda-docker-ci.sh -l -b <branch-name>
 ```
 
-Note: The `-c` flag is a log files naming convention and will default to 102, if you don't mention anything. `-b` defaults to master and not passing `-l` will not store any logs files.   
+The `-l` flag logs the output to the `.ci/logs` directory. Only the files ending in `awkward1-cuda-tests` contain the output of the CUDA tests, but the others may be useful for debugging. Awkward's CUDA kernels are tested for CUDA 9.0, 10.0, and 10.2. (These are what the `900`, `100`, and `102` prefixes on the log files mean.)
+
+For debugging, you can enter the Docker container interactively.
 
 ### The master branch
 
