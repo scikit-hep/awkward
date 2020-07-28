@@ -330,7 +330,7 @@ extern "C" {
       int64_t indexoffset,
       int64_t length);
   /// @param toindex outparam
-  /// @param mask inparam role: IndexedArray-mask-unsigned
+  /// @param mask inparam role: IndexedArray-mask
   /// @param maskoffset inparam role: IndexedArray-mask-offset
   /// @param fromindex inparam role: IndexedArray-index
   /// @param indexoffset inparam role: IndexedArray-index-offset

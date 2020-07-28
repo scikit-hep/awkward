@@ -2967,7 +2967,8 @@ ERROR awkward_IndexedOptionArray_rpad_and_clip_mask_axis1(
       toindex[i] = -1;
     }
     else {
-      toindex[i] = count++;
+      toindex[i] = count;
+      count++;
     }
   }
   return success();

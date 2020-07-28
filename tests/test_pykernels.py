@@ -1,18 +1,18 @@
 import tests.kernels
 
-def test_awkward_new_Identities64_1():
+def test_awkward_new_Identities32_1():
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     length = 3
-    funcPy = getattr(tests.kernels, 'awkward_new_Identities64')
+    funcPy = getattr(tests.kernels, 'awkward_new_Identities32')
     funcPy(toptr, length)
     outtoptr = [0, 1, 2]
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
-def test_awkward_new_Identities32_1():
+def test_awkward_new_Identities64_1():
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     length = 3
-    funcPy = getattr(tests.kernels, 'awkward_new_Identities32')
+    funcPy = getattr(tests.kernels, 'awkward_new_Identities64')
     funcPy(toptr, length)
     outtoptr = [0, 1, 2]
     for i in range(len(outtoptr)):
@@ -26,6 +26,21 @@ def test_awkward_Identities32_to_Identities64_1():
     funcPy = getattr(tests.kernels, 'awkward_Identities32_to_Identities64')
     funcPy(toptr, fromptr, length, width)
     outtoptr = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
+def test_awkward_Identities64_from_ListOffsetArray64_1():
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromptr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    fromoffsets = [0, 2, 1, 1, 1, 1, 2, 0, 1, 2]
+    fromptroffset = 0
+    offsetsoffset = 1
+    tolength = 3
+    fromlength = 3
+    fromwidth = 3
+    funcPy = getattr(tests.kernels, 'awkward_Identities64_from_ListOffsetArray64')
+    funcPy(toptr, fromptr, fromoffsets, fromptroffset, offsetsoffset, tolength, fromlength, fromwidth)
+    outtoptr = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
@@ -59,7 +74,7 @@ def test_awkward_Identities32_from_ListOffsetArray32_1():
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
-def test_awkward_Identities64_from_ListOffsetArray64_1():
+def test_awkward_Identities32_from_ListOffsetArrayU32_1():
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromptr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     fromoffsets = [0, 2, 1, 1, 1, 1, 2, 0, 1, 2]
@@ -68,7 +83,7 @@ def test_awkward_Identities64_from_ListOffsetArray64_1():
     tolength = 3
     fromlength = 3
     fromwidth = 3
-    funcPy = getattr(tests.kernels, 'awkward_Identities64_from_ListOffsetArray64')
+    funcPy = getattr(tests.kernels, 'awkward_Identities32_from_ListOffsetArrayU32')
     funcPy(toptr, fromptr, fromoffsets, fromptroffset, offsetsoffset, tolength, fromlength, fromwidth)
     outtoptr = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
     for i in range(len(outtoptr)):
@@ -104,22 +119,7 @@ def test_awkward_Identities64_from_ListOffsetArray32_1():
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
-def test_awkward_Identities32_from_ListOffsetArrayU32_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromptr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    fromoffsets = [0, 2, 1, 1, 1, 1, 2, 0, 1, 2]
-    fromptroffset = 0
-    offsetsoffset = 1
-    tolength = 3
-    fromlength = 3
-    fromwidth = 3
-    funcPy = getattr(tests.kernels, 'awkward_Identities32_from_ListOffsetArrayU32')
-    funcPy(toptr, fromptr, fromoffsets, fromptroffset, offsetsoffset, tolength, fromlength, fromwidth)
-    outtoptr = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_Identities64_from_ListArray32_1():
+def test_awkward_Identities64_from_ListArrayU32_1():
     uniquecontents = [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromptr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
@@ -131,28 +131,7 @@ def test_awkward_Identities64_from_ListArray32_1():
     tolength = 3
     fromlength = 3
     fromwidth = 3
-    funcPy = getattr(tests.kernels, 'awkward_Identities64_from_ListArray32')
-    funcPy(uniquecontents, toptr, fromptr, fromstarts, fromstops, fromptroffset, startsoffset, stopsoffset, tolength, fromlength, fromwidth)
-    outuniquecontents = [False]
-    for i in range(len(outuniquecontents)):
-        assert uniquecontents[i] == outuniquecontents[i]
-    outtoptr = [4, 5, 6, 0.0, -1, -1, -1, -1, 1, 2, 3, 0.0]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_Identities32_from_ListArray64_1():
-    uniquecontents = [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromptr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    fromstarts = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
-    fromstops = [3, 1, 3, 2, 3]
-    fromptroffset = 0
-    startsoffset = 0
-    stopsoffset = 0
-    tolength = 3
-    fromlength = 3
-    fromwidth = 3
-    funcPy = getattr(tests.kernels, 'awkward_Identities32_from_ListArray64')
+    funcPy = getattr(tests.kernels, 'awkward_Identities64_from_ListArrayU32')
     funcPy(uniquecontents, toptr, fromptr, fromstarts, fromstops, fromptroffset, startsoffset, stopsoffset, tolength, fromlength, fromwidth)
     outuniquecontents = [False]
     for i in range(len(outuniquecontents)):
@@ -182,7 +161,7 @@ def test_awkward_Identities32_from_ListArrayU32_1():
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
-def test_awkward_Identities64_from_ListArrayU32_1():
+def test_awkward_Identities32_from_ListArray64_1():
     uniquecontents = [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromptr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
@@ -194,7 +173,7 @@ def test_awkward_Identities64_from_ListArrayU32_1():
     tolength = 3
     fromlength = 3
     fromwidth = 3
-    funcPy = getattr(tests.kernels, 'awkward_Identities64_from_ListArrayU32')
+    funcPy = getattr(tests.kernels, 'awkward_Identities32_from_ListArray64')
     funcPy(uniquecontents, toptr, fromptr, fromstarts, fromstops, fromptroffset, startsoffset, stopsoffset, tolength, fromlength, fromwidth)
     outuniquecontents = [False]
     for i in range(len(outuniquecontents)):
@@ -203,7 +182,7 @@ def test_awkward_Identities64_from_ListArrayU32_1():
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
-def test_awkward_Identities64_from_ListArray64_1():
+def test_awkward_Identities64_from_ListArray32_1():
     uniquecontents = [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromptr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
@@ -215,7 +194,7 @@ def test_awkward_Identities64_from_ListArray64_1():
     tolength = 3
     fromlength = 3
     fromwidth = 3
-    funcPy = getattr(tests.kernels, 'awkward_Identities64_from_ListArray64')
+    funcPy = getattr(tests.kernels, 'awkward_Identities64_from_ListArray32')
     funcPy(uniquecontents, toptr, fromptr, fromstarts, fromstops, fromptroffset, startsoffset, stopsoffset, tolength, fromlength, fromwidth)
     outuniquecontents = [False]
     for i in range(len(outuniquecontents)):
@@ -237,6 +216,27 @@ def test_awkward_Identities32_from_ListArray32_1():
     fromlength = 3
     fromwidth = 3
     funcPy = getattr(tests.kernels, 'awkward_Identities32_from_ListArray32')
+    funcPy(uniquecontents, toptr, fromptr, fromstarts, fromstops, fromptroffset, startsoffset, stopsoffset, tolength, fromlength, fromwidth)
+    outuniquecontents = [False]
+    for i in range(len(outuniquecontents)):
+        assert uniquecontents[i] == outuniquecontents[i]
+    outtoptr = [4, 5, 6, 0.0, -1, -1, -1, -1, 1, 2, 3, 0.0]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
+def test_awkward_Identities64_from_ListArray64_1():
+    uniquecontents = [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromptr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    fromstarts = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+    fromstops = [3, 1, 3, 2, 3]
+    fromptroffset = 0
+    startsoffset = 0
+    stopsoffset = 0
+    tolength = 3
+    fromlength = 3
+    fromwidth = 3
+    funcPy = getattr(tests.kernels, 'awkward_Identities64_from_ListArray64')
     funcPy(uniquecontents, toptr, fromptr, fromstarts, fromstops, fromptroffset, startsoffset, stopsoffset, tolength, fromlength, fromwidth)
     outuniquecontents = [False]
     for i in range(len(outuniquecontents)):
@@ -292,6 +292,63 @@ def test_awkward_Identities64_from_IndexedArray32_1():
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
+def test_awkward_Identities64_from_IndexedArrayU32_1():
+    uniquecontents = [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromptr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    fromindex = [1, 0, 0, 1, 1, 1, 0]
+    fromptroffset = 0
+    indexoffset = 1
+    tolength = 3
+    fromlength = 3
+    fromwidth = 3
+    funcPy = getattr(tests.kernels, 'awkward_Identities64_from_IndexedArrayU32')
+    funcPy(uniquecontents, toptr, fromptr, fromindex, fromptroffset, indexoffset, tolength, fromlength, fromwidth)
+    outuniquecontents = [False]
+    for i in range(len(outuniquecontents)):
+        assert uniquecontents[i] == outuniquecontents[i]
+    outtoptr = [1, 2, 3, -1, -1, -1, -1, -1, -1]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
+def test_awkward_Identities64_from_IndexedArray64_1():
+    uniquecontents = [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromptr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    fromindex = [1, 0, 0, 1, 1, 1, 0]
+    fromptroffset = 0
+    indexoffset = 1
+    tolength = 3
+    fromlength = 3
+    fromwidth = 3
+    funcPy = getattr(tests.kernels, 'awkward_Identities64_from_IndexedArray64')
+    funcPy(uniquecontents, toptr, fromptr, fromindex, fromptroffset, indexoffset, tolength, fromlength, fromwidth)
+    outuniquecontents = [False]
+    for i in range(len(outuniquecontents)):
+        assert uniquecontents[i] == outuniquecontents[i]
+    outtoptr = [1, 2, 3, -1, -1, -1, -1, -1, -1]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
+def test_awkward_Identities32_from_IndexedArray32_1():
+    uniquecontents = [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromptr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    fromindex = [1, 0, 0, 1, 1, 1, 0]
+    fromptroffset = 0
+    indexoffset = 1
+    tolength = 3
+    fromlength = 3
+    fromwidth = 3
+    funcPy = getattr(tests.kernels, 'awkward_Identities32_from_IndexedArray32')
+    funcPy(uniquecontents, toptr, fromptr, fromindex, fromptroffset, indexoffset, tolength, fromlength, fromwidth)
+    outuniquecontents = [False]
+    for i in range(len(outuniquecontents)):
+        assert uniquecontents[i] == outuniquecontents[i]
+    outtoptr = [1, 2, 3, -1, -1, -1, -1, -1, -1]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
 def test_awkward_Identities32_from_IndexedArrayU32_1():
     uniquecontents = [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -330,63 +387,6 @@ def test_awkward_Identities32_from_IndexedArray64_1():
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
-def test_awkward_Identities64_from_IndexedArrayU32_1():
-    uniquecontents = [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromptr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    fromindex = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 0
-    indexoffset = 1
-    tolength = 3
-    fromlength = 3
-    fromwidth = 3
-    funcPy = getattr(tests.kernels, 'awkward_Identities64_from_IndexedArrayU32')
-    funcPy(uniquecontents, toptr, fromptr, fromindex, fromptroffset, indexoffset, tolength, fromlength, fromwidth)
-    outuniquecontents = [False]
-    for i in range(len(outuniquecontents)):
-        assert uniquecontents[i] == outuniquecontents[i]
-    outtoptr = [1, 2, 3, -1, -1, -1, -1, -1, -1]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_Identities32_from_IndexedArray32_1():
-    uniquecontents = [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromptr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    fromindex = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 0
-    indexoffset = 1
-    tolength = 3
-    fromlength = 3
-    fromwidth = 3
-    funcPy = getattr(tests.kernels, 'awkward_Identities32_from_IndexedArray32')
-    funcPy(uniquecontents, toptr, fromptr, fromindex, fromptroffset, indexoffset, tolength, fromlength, fromwidth)
-    outuniquecontents = [False]
-    for i in range(len(outuniquecontents)):
-        assert uniquecontents[i] == outuniquecontents[i]
-    outtoptr = [1, 2, 3, -1, -1, -1, -1, -1, -1]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_Identities64_from_IndexedArray64_1():
-    uniquecontents = [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromptr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    fromindex = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 0
-    indexoffset = 1
-    tolength = 3
-    fromlength = 3
-    fromwidth = 3
-    funcPy = getattr(tests.kernels, 'awkward_Identities64_from_IndexedArray64')
-    funcPy(uniquecontents, toptr, fromptr, fromindex, fromptroffset, indexoffset, tolength, fromlength, fromwidth)
-    outuniquecontents = [False]
-    for i in range(len(outuniquecontents)):
-        assert uniquecontents[i] == outuniquecontents[i]
-    outtoptr = [1, 2, 3, -1, -1, -1, -1, -1, -1]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
 def test_awkward_Identities64_from_UnionArray8_32_1():
     uniquecontents = [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -401,6 +401,28 @@ def test_awkward_Identities64_from_UnionArray8_32_1():
     fromwidth = 3
     which = 0
     funcPy = getattr(tests.kernels, 'awkward_Identities64_from_UnionArray8_32')
+    funcPy(uniquecontents, toptr, fromptr, fromtags, fromindex, fromptroffset, tagsoffset, indexoffset, tolength, fromlength, fromwidth, which)
+    outuniquecontents = [False]
+    for i in range(len(outuniquecontents)):
+        assert uniquecontents[i] == outuniquecontents[i]
+    outtoptr = [1, 2, 3, -1, -1, -1, -1, -1, -1]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
+def test_awkward_Identities32_from_UnionArray8_64_1():
+    uniquecontents = [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromptr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    fromtags = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromindex = [1, 0, 0, 1, 1, 1, 0]
+    fromptroffset = 0
+    tagsoffset = 1
+    indexoffset = 1
+    tolength = 3
+    fromlength = 3
+    fromwidth = 3
+    which = 0
+    funcPy = getattr(tests.kernels, 'awkward_Identities32_from_UnionArray8_64')
     funcPy(uniquecontents, toptr, fromptr, fromtags, fromindex, fromptroffset, tagsoffset, indexoffset, tolength, fromlength, fromwidth, which)
     outuniquecontents = [False]
     for i in range(len(outuniquecontents)):
@@ -453,28 +475,6 @@ def test_awkward_Identities64_from_UnionArray8_64_1():
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
-def test_awkward_Identities32_from_UnionArray8_64_1():
-    uniquecontents = [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromptr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    fromtags = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromindex = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 0
-    tagsoffset = 1
-    indexoffset = 1
-    tolength = 3
-    fromlength = 3
-    fromwidth = 3
-    which = 0
-    funcPy = getattr(tests.kernels, 'awkward_Identities32_from_UnionArray8_64')
-    funcPy(uniquecontents, toptr, fromptr, fromtags, fromindex, fromptroffset, tagsoffset, indexoffset, tolength, fromlength, fromwidth, which)
-    outuniquecontents = [False]
-    for i in range(len(outuniquecontents)):
-        assert uniquecontents[i] == outuniquecontents[i]
-    outtoptr = [1, 2, 3, -1, -1, -1, -1, -1, -1]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
 def test_awkward_Identities64_from_UnionArray8_U32_1():
     uniquecontents = [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -519,18 +519,6 @@ def test_awkward_Identities32_from_UnionArray8_U32_1():
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
-def test_awkward_Identities64_extend_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromptr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    fromoffset = 0
-    fromlength = 3
-    tolength = 3
-    funcPy = getattr(tests.kernels, 'awkward_Identities64_extend')
-    funcPy(toptr, fromptr, fromoffset, fromlength, tolength)
-    outtoptr = [1, 2, 3]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
 def test_awkward_Identities32_extend_1():
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromptr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
@@ -538,6 +526,18 @@ def test_awkward_Identities32_extend_1():
     fromlength = 3
     tolength = 3
     funcPy = getattr(tests.kernels, 'awkward_Identities32_extend')
+    funcPy(toptr, fromptr, fromoffset, fromlength, tolength)
+    outtoptr = [1, 2, 3]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
+def test_awkward_Identities64_extend_1():
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromptr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    fromoffset = 0
+    fromlength = 3
+    tolength = 3
+    funcPy = getattr(tests.kernels, 'awkward_Identities64_extend')
     funcPy(toptr, fromptr, fromoffset, fromlength, tolength)
     outtoptr = [1, 2, 3]
     for i in range(len(outtoptr)):
@@ -592,20 +592,6 @@ def test_awkward_RegularArray_num_64_1():
     for i in range(len(outtonum)):
         assert tonum[i] == outtonum[i]
 
-def test_awkward_ListOffsetArrayU32_flatten_offsets_64_1():
-    tooffsets = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    outeroffsets = [1, 1, 2, 3, 5, 8, 11, 11, 11, 11, 20]
-    outeroffsetsoffset = 1
-    outeroffsetslen = 3
-    inneroffsets = [48, 50, 51, 55, 55, 55, 58, 66, 81, 92, 92, 97, 101, 113, 116, 126, 148, 153, 172, 194, 201, 204, 214, 231, 233, 248, 252, 253, 253, 263, 289, 301, 325]
-    inneroffsetsoffset = 0
-    inneroffsetslen = 3
-    funcPy = getattr(tests.kernels, 'awkward_ListOffsetArrayU32_flatten_offsets_64')
-    funcPy(tooffsets, outeroffsets, outeroffsetsoffset, outeroffsetslen, inneroffsets, inneroffsetsoffset, inneroffsetslen)
-    outtooffsets = [50, 51, 55]
-    for i in range(len(outtooffsets)):
-        assert tooffsets[i] == outtooffsets[i]
-
 def test_awkward_ListOffsetArray64_flatten_offsets_64_1():
     tooffsets = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     outeroffsets = [1, 1, 2, 3, 5, 8, 11, 11, 11, 11, 20]
@@ -615,6 +601,20 @@ def test_awkward_ListOffsetArray64_flatten_offsets_64_1():
     inneroffsetsoffset = 0
     inneroffsetslen = 3
     funcPy = getattr(tests.kernels, 'awkward_ListOffsetArray64_flatten_offsets_64')
+    funcPy(tooffsets, outeroffsets, outeroffsetsoffset, outeroffsetslen, inneroffsets, inneroffsetsoffset, inneroffsetslen)
+    outtooffsets = [50, 51, 55]
+    for i in range(len(outtooffsets)):
+        assert tooffsets[i] == outtooffsets[i]
+
+def test_awkward_ListOffsetArrayU32_flatten_offsets_64_1():
+    tooffsets = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    outeroffsets = [1, 1, 2, 3, 5, 8, 11, 11, 11, 11, 20]
+    outeroffsetsoffset = 1
+    outeroffsetslen = 3
+    inneroffsets = [48, 50, 51, 55, 55, 55, 58, 66, 81, 92, 92, 97, 101, 113, 116, 126, 148, 153, 172, 194, 201, 204, 214, 231, 233, 248, 252, 253, 253, 263, 289, 301, 325]
+    inneroffsetsoffset = 0
+    inneroffsetslen = 3
+    funcPy = getattr(tests.kernels, 'awkward_ListOffsetArrayU32_flatten_offsets_64')
     funcPy(tooffsets, outeroffsets, outeroffsetsoffset, outeroffsetslen, inneroffsets, inneroffsetsoffset, inneroffsetslen)
     outtooffsets = [50, 51, 55]
     for i in range(len(outtooffsets)):
@@ -633,6 +633,20 @@ def test_awkward_ListOffsetArray32_flatten_offsets_64_1():
     outtooffsets = [50, 51, 55]
     for i in range(len(outtooffsets)):
         assert tooffsets[i] == outtooffsets[i]
+
+def test_awkward_IndexedArray64_flatten_none2empty_64_1():
+    outoffsets = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    outindex = [1, 0, 0, 1, 1, 1, 0]
+    outindexoffset = 1
+    outindexlength = 3
+    offsets = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+    offsetsoffset = 0
+    offsetslength = 3
+    funcPy = getattr(tests.kernels, 'awkward_IndexedArray64_flatten_none2empty_64')
+    funcPy(outoffsets, outindex, outindexoffset, outindexlength, offsets, offsetsoffset, offsetslength)
+    outoutoffsets = [14, 1, -12, 14]
+    for i in range(len(outoutoffsets)):
+        assert outoffsets[i] == outoutoffsets[i]
 
 def test_awkward_IndexedArray32_flatten_none2empty_64_1():
     outoffsets = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -662,21 +676,7 @@ def test_awkward_IndexedArrayU32_flatten_none2empty_64_1():
     for i in range(len(outoutoffsets)):
         assert outoffsets[i] == outoutoffsets[i]
 
-def test_awkward_IndexedArray64_flatten_none2empty_64_1():
-    outoffsets = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    outindex = [1, 0, 0, 1, 1, 1, 0]
-    outindexoffset = 1
-    outindexlength = 3
-    offsets = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    offsetsoffset = 0
-    offsetslength = 3
-    funcPy = getattr(tests.kernels, 'awkward_IndexedArray64_flatten_none2empty_64')
-    funcPy(outoffsets, outindex, outindexoffset, outindexlength, offsets, offsetsoffset, offsetslength)
-    outoutoffsets = [14, 1, -12, 14]
-    for i in range(len(outoutoffsets)):
-        assert outoffsets[i] == outoutoffsets[i]
-
-def test_awkward_UnionArray32_flatten_length_64_1():
+def test_awkward_UnionArray64_flatten_length_64_1():
     total_length = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromtags = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromtagsoffset = 1
@@ -685,7 +685,7 @@ def test_awkward_UnionArray32_flatten_length_64_1():
     length = 3
     offsetsraws = [[1, 2, 1, 2, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4]]
     offsetsoffsets = [0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1]
-    funcPy = getattr(tests.kernels, 'awkward_UnionArray32_flatten_length_64')
+    funcPy = getattr(tests.kernels, 'awkward_UnionArray64_flatten_length_64')
     funcPy(total_length, fromtags, fromtagsoffset, fromindex, fromindexoffset, length, offsetsraws, offsetsoffsets)
     outtotal_length = [1]
     for i in range(len(outtotal_length)):
@@ -706,7 +706,7 @@ def test_awkward_UnionArrayU32_flatten_length_64_1():
     for i in range(len(outtotal_length)):
         assert total_length[i] == outtotal_length[i]
 
-def test_awkward_UnionArray64_flatten_length_64_1():
+def test_awkward_UnionArray32_flatten_length_64_1():
     total_length = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromtags = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromtagsoffset = 1
@@ -715,13 +715,13 @@ def test_awkward_UnionArray64_flatten_length_64_1():
     length = 3
     offsetsraws = [[1, 2, 1, 2, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4]]
     offsetsoffsets = [0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1]
-    funcPy = getattr(tests.kernels, 'awkward_UnionArray64_flatten_length_64')
+    funcPy = getattr(tests.kernels, 'awkward_UnionArray32_flatten_length_64')
     funcPy(total_length, fromtags, fromtagsoffset, fromindex, fromindexoffset, length, offsetsraws, offsetsoffsets)
     outtotal_length = [1]
     for i in range(len(outtotal_length)):
         assert total_length[i] == outtotal_length[i]
 
-def test_awkward_UnionArray64_flatten_combine_64_1():
+def test_awkward_UnionArray32_flatten_combine_64_1():
     totags = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     tooffsets = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -732,7 +732,7 @@ def test_awkward_UnionArray64_flatten_combine_64_1():
     length = 3
     offsetsraws = [[1, 2, 1, 2, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4]]
     offsetsoffsets = [0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1]
-    funcPy = getattr(tests.kernels, 'awkward_UnionArray64_flatten_combine_64')
+    funcPy = getattr(tests.kernels, 'awkward_UnionArray32_flatten_combine_64')
     funcPy(totags, toindex, tooffsets, fromtags, fromtagsoffset, fromindex, fromindexoffset, length, offsetsraws, offsetsoffsets)
     outtotags = [0, 0]
     for i in range(len(outtotags)):
@@ -767,7 +767,7 @@ def test_awkward_UnionArrayU32_flatten_combine_64_1():
     for i in range(len(outtooffsets)):
         assert tooffsets[i] == outtooffsets[i]
 
-def test_awkward_UnionArray32_flatten_combine_64_1():
+def test_awkward_UnionArray64_flatten_combine_64_1():
     totags = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     tooffsets = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -778,7 +778,7 @@ def test_awkward_UnionArray32_flatten_combine_64_1():
     length = 3
     offsetsraws = [[1, 2, 1, 2, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4]]
     offsetsoffsets = [0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1]
-    funcPy = getattr(tests.kernels, 'awkward_UnionArray32_flatten_combine_64')
+    funcPy = getattr(tests.kernels, 'awkward_UnionArray64_flatten_combine_64')
     funcPy(totags, toindex, tooffsets, fromtags, fromtagsoffset, fromindex, fromindexoffset, length, offsetsraws, offsetsoffsets)
     outtotags = [0, 0]
     for i in range(len(outtotags)):
@@ -802,18 +802,6 @@ def test_awkward_IndexedArray32_flatten_nextcarry_64_1():
     for i in range(len(outtocarry)):
         assert tocarry[i] == outtocarry[i]
 
-def test_awkward_IndexedArrayU32_flatten_nextcarry_64_1():
-    tocarry = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromindex = [1, 0, 0, 1, 1, 1, 0]
-    indexoffset = 1
-    lenindex = 3
-    lencontent = 3
-    funcPy = getattr(tests.kernels, 'awkward_IndexedArrayU32_flatten_nextcarry_64')
-    funcPy(tocarry, fromindex, indexoffset, lenindex, lencontent)
-    outtocarry = [0, 0, 1]
-    for i in range(len(outtocarry)):
-        assert tocarry[i] == outtocarry[i]
-
 def test_awkward_IndexedArray64_flatten_nextcarry_64_1():
     tocarry = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromindex = [1, 0, 0, 1, 1, 1, 0]
@@ -826,10 +814,22 @@ def test_awkward_IndexedArray64_flatten_nextcarry_64_1():
     for i in range(len(outtocarry)):
         assert tocarry[i] == outtocarry[i]
 
+def test_awkward_IndexedArrayU32_flatten_nextcarry_64_1():
+    tocarry = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromindex = [1, 0, 0, 1, 1, 1, 0]
+    indexoffset = 1
+    lenindex = 3
+    lencontent = 3
+    funcPy = getattr(tests.kernels, 'awkward_IndexedArrayU32_flatten_nextcarry_64')
+    funcPy(tocarry, fromindex, indexoffset, lenindex, lencontent)
+    outtocarry = [0, 0, 1]
+    for i in range(len(outtocarry)):
+        assert tocarry[i] == outtocarry[i]
+
 def test_awkward_IndexedArrayU32_overlay_mask8_to64_1():
     toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     mask = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    maskoffset = 0
+    maskoffset = 1
     fromindex = [1, 0, 0, 1, 1, 1, 0]
     indexoffset = 1
     length = 3
@@ -839,27 +839,27 @@ def test_awkward_IndexedArrayU32_overlay_mask8_to64_1():
     for i in range(len(outtoindex)):
         assert toindex[i] == outtoindex[i]
 
-def test_awkward_IndexedArray32_overlay_mask8_to64_1():
+def test_awkward_IndexedArray64_overlay_mask8_to64_1():
     toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     mask = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    maskoffset = 0
+    maskoffset = 1
     fromindex = [1, 0, 0, 1, 1, 1, 0]
     indexoffset = 1
     length = 3
-    funcPy = getattr(tests.kernels, 'awkward_IndexedArray32_overlay_mask8_to64')
+    funcPy = getattr(tests.kernels, 'awkward_IndexedArray64_overlay_mask8_to64')
     funcPy(toindex, mask, maskoffset, fromindex, indexoffset, length)
     outtoindex = [0, 0, 1]
     for i in range(len(outtoindex)):
         assert toindex[i] == outtoindex[i]
 
-def test_awkward_IndexedArray64_overlay_mask8_to64_1():
+def test_awkward_IndexedArray32_overlay_mask8_to64_1():
     toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     mask = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    maskoffset = 0
+    maskoffset = 1
     fromindex = [1, 0, 0, 1, 1, 1, 0]
     indexoffset = 1
     length = 3
-    funcPy = getattr(tests.kernels, 'awkward_IndexedArray64_overlay_mask8_to64')
+    funcPy = getattr(tests.kernels, 'awkward_IndexedArray32_overlay_mask8_to64')
     funcPy(toindex, mask, maskoffset, fromindex, indexoffset, length)
     outtoindex = [0, 0, 1]
     for i in range(len(outtoindex)):
@@ -919,20 +919,6 @@ def test_awkward_zero_mask8_1():
     for i in range(len(outtomask)):
         assert tomask[i] == outtomask[i]
 
-def test_awkward_IndexedArrayU32_simplifyU32_to64_1():
-    toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    outerindex = [1, 0, 0, 1, 1, 1, 0]
-    outeroffset = 1
-    outerlength = 3
-    innerindex = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    inneroffset = 0
-    innerlength = 3
-    funcPy = getattr(tests.kernels, 'awkward_IndexedArrayU32_simplifyU32_to64')
-    funcPy(toindex, outerindex, outeroffset, outerlength, innerindex, inneroffset, innerlength)
-    outtoindex = [14, 14, 1]
-    for i in range(len(outtoindex)):
-        assert toindex[i] == outtoindex[i]
-
 def test_awkward_IndexedArray32_simplifyU32_to64_1():
     toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     outerindex = [1, 0, 0, 1, 1, 1, 0]
@@ -942,34 +928,6 @@ def test_awkward_IndexedArray32_simplifyU32_to64_1():
     inneroffset = 0
     innerlength = 3
     funcPy = getattr(tests.kernels, 'awkward_IndexedArray32_simplifyU32_to64')
-    funcPy(toindex, outerindex, outeroffset, outerlength, innerindex, inneroffset, innerlength)
-    outtoindex = [14, 14, 1]
-    for i in range(len(outtoindex)):
-        assert toindex[i] == outtoindex[i]
-
-def test_awkward_IndexedArray64_simplify32_to64_1():
-    toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    outerindex = [1, 0, 0, 1, 1, 1, 0]
-    outeroffset = 1
-    outerlength = 3
-    innerindex = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    inneroffset = 0
-    innerlength = 3
-    funcPy = getattr(tests.kernels, 'awkward_IndexedArray64_simplify32_to64')
-    funcPy(toindex, outerindex, outeroffset, outerlength, innerindex, inneroffset, innerlength)
-    outtoindex = [14, 14, 1]
-    for i in range(len(outtoindex)):
-        assert toindex[i] == outtoindex[i]
-
-def test_awkward_IndexedArray32_simplify64_to64_1():
-    toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    outerindex = [1, 0, 0, 1, 1, 1, 0]
-    outeroffset = 1
-    outerlength = 3
-    innerindex = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    inneroffset = 0
-    innerlength = 3
-    funcPy = getattr(tests.kernels, 'awkward_IndexedArray32_simplify64_to64')
     funcPy(toindex, outerindex, outeroffset, outerlength, innerindex, inneroffset, innerlength)
     outtoindex = [14, 14, 1]
     for i in range(len(outtoindex)):
@@ -989,20 +947,6 @@ def test_awkward_IndexedArrayU32_simplify64_to64_1():
     for i in range(len(outtoindex)):
         assert toindex[i] == outtoindex[i]
 
-def test_awkward_IndexedArrayU32_simplify32_to64_1():
-    toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    outerindex = [1, 0, 0, 1, 1, 1, 0]
-    outeroffset = 1
-    outerlength = 3
-    innerindex = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    inneroffset = 0
-    innerlength = 3
-    funcPy = getattr(tests.kernels, 'awkward_IndexedArrayU32_simplify32_to64')
-    funcPy(toindex, outerindex, outeroffset, outerlength, innerindex, inneroffset, innerlength)
-    outtoindex = [14, 14, 1]
-    for i in range(len(outtoindex)):
-        assert toindex[i] == outtoindex[i]
-
 def test_awkward_IndexedArray64_simplify64_to64_1():
     toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     outerindex = [1, 0, 0, 1, 1, 1, 0]
@@ -1017,7 +961,7 @@ def test_awkward_IndexedArray64_simplify64_to64_1():
     for i in range(len(outtoindex)):
         assert toindex[i] == outtoindex[i]
 
-def test_awkward_IndexedArray64_simplifyU32_to64_1():
+def test_awkward_IndexedArrayU32_simplifyU32_to64_1():
     toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     outerindex = [1, 0, 0, 1, 1, 1, 0]
     outeroffset = 1
@@ -1025,7 +969,35 @@ def test_awkward_IndexedArray64_simplifyU32_to64_1():
     innerindex = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
     inneroffset = 0
     innerlength = 3
-    funcPy = getattr(tests.kernels, 'awkward_IndexedArray64_simplifyU32_to64')
+    funcPy = getattr(tests.kernels, 'awkward_IndexedArrayU32_simplifyU32_to64')
+    funcPy(toindex, outerindex, outeroffset, outerlength, innerindex, inneroffset, innerlength)
+    outtoindex = [14, 14, 1]
+    for i in range(len(outtoindex)):
+        assert toindex[i] == outtoindex[i]
+
+def test_awkward_IndexedArray32_simplify64_to64_1():
+    toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    outerindex = [1, 0, 0, 1, 1, 1, 0]
+    outeroffset = 1
+    outerlength = 3
+    innerindex = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+    inneroffset = 0
+    innerlength = 3
+    funcPy = getattr(tests.kernels, 'awkward_IndexedArray32_simplify64_to64')
+    funcPy(toindex, outerindex, outeroffset, outerlength, innerindex, inneroffset, innerlength)
+    outtoindex = [14, 14, 1]
+    for i in range(len(outtoindex)):
+        assert toindex[i] == outtoindex[i]
+
+def test_awkward_IndexedArray64_simplify32_to64_1():
+    toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    outerindex = [1, 0, 0, 1, 1, 1, 0]
+    outeroffset = 1
+    outerlength = 3
+    innerindex = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+    inneroffset = 0
+    innerlength = 3
+    funcPy = getattr(tests.kernels, 'awkward_IndexedArray64_simplify32_to64')
     funcPy(toindex, outerindex, outeroffset, outerlength, innerindex, inneroffset, innerlength)
     outtoindex = [14, 14, 1]
     for i in range(len(outtoindex)):
@@ -1045,6 +1017,34 @@ def test_awkward_IndexedArray32_simplify32_to64_1():
     for i in range(len(outtoindex)):
         assert toindex[i] == outtoindex[i]
 
+def test_awkward_IndexedArrayU32_simplify32_to64_1():
+    toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    outerindex = [1, 0, 0, 1, 1, 1, 0]
+    outeroffset = 1
+    outerlength = 3
+    innerindex = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+    inneroffset = 0
+    innerlength = 3
+    funcPy = getattr(tests.kernels, 'awkward_IndexedArrayU32_simplify32_to64')
+    funcPy(toindex, outerindex, outeroffset, outerlength, innerindex, inneroffset, innerlength)
+    outtoindex = [14, 14, 1]
+    for i in range(len(outtoindex)):
+        assert toindex[i] == outtoindex[i]
+
+def test_awkward_IndexedArray64_simplifyU32_to64_1():
+    toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    outerindex = [1, 0, 0, 1, 1, 1, 0]
+    outeroffset = 1
+    outerlength = 3
+    innerindex = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+    inneroffset = 0
+    innerlength = 3
+    funcPy = getattr(tests.kernels, 'awkward_IndexedArray64_simplifyU32_to64')
+    funcPy(toindex, outerindex, outeroffset, outerlength, innerindex, inneroffset, innerlength)
+    outtoindex = [14, 14, 1]
+    for i in range(len(outtoindex)):
+        assert toindex[i] == outtoindex[i]
+
 def test_awkward_RegularArray_compact_offsets64_1():
     tooffsets = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     length = 3
@@ -1055,14 +1055,14 @@ def test_awkward_RegularArray_compact_offsets64_1():
     for i in range(len(outtooffsets)):
         assert tooffsets[i] == outtooffsets[i]
 
-def test_awkward_ListArray64_compact_offsets_64_1():
+def test_awkward_ListArray32_compact_offsets_64_1():
     tooffsets = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromstarts = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
     fromstops = [3, 1, 3, 2, 3]
     startsoffset = 0
     stopsoffset = 0
     length = 3
-    funcPy = getattr(tests.kernels, 'awkward_ListArray64_compact_offsets_64')
+    funcPy = getattr(tests.kernels, 'awkward_ListArray32_compact_offsets_64')
     funcPy(tooffsets, fromstarts, fromstops, startsoffset, stopsoffset, length)
     outtooffsets = [0, 1, 2, 3]
     for i in range(len(outtooffsets)):
@@ -1081,27 +1081,16 @@ def test_awkward_ListArrayU32_compact_offsets_64_1():
     for i in range(len(outtooffsets)):
         assert tooffsets[i] == outtooffsets[i]
 
-def test_awkward_ListArray32_compact_offsets_64_1():
+def test_awkward_ListArray64_compact_offsets_64_1():
     tooffsets = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromstarts = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
     fromstops = [3, 1, 3, 2, 3]
     startsoffset = 0
     stopsoffset = 0
     length = 3
-    funcPy = getattr(tests.kernels, 'awkward_ListArray32_compact_offsets_64')
+    funcPy = getattr(tests.kernels, 'awkward_ListArray64_compact_offsets_64')
     funcPy(tooffsets, fromstarts, fromstops, startsoffset, stopsoffset, length)
     outtooffsets = [0, 1, 2, 3]
-    for i in range(len(outtooffsets)):
-        assert tooffsets[i] == outtooffsets[i]
-
-def test_awkward_ListOffsetArray32_compact_offsets_64_1():
-    tooffsets = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromoffsets = [1, 1, 2, 3, 5, 8, 11, 11, 11, 11, 20]
-    offsetsoffset = 1
-    length = 3
-    funcPy = getattr(tests.kernels, 'awkward_ListOffsetArray32_compact_offsets_64')
-    funcPy(tooffsets, fromoffsets, offsetsoffset, length)
-    outtooffsets = [0, 1, 2, 4]
     for i in range(len(outtooffsets)):
         assert tooffsets[i] == outtooffsets[i]
 
@@ -1111,6 +1100,17 @@ def test_awkward_ListOffsetArray64_compact_offsets_64_1():
     offsetsoffset = 1
     length = 3
     funcPy = getattr(tests.kernels, 'awkward_ListOffsetArray64_compact_offsets_64')
+    funcPy(tooffsets, fromoffsets, offsetsoffset, length)
+    outtooffsets = [0, 1, 2, 4]
+    for i in range(len(outtooffsets)):
+        assert tooffsets[i] == outtooffsets[i]
+
+def test_awkward_ListOffsetArray32_compact_offsets_64_1():
+    tooffsets = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromoffsets = [1, 1, 2, 3, 5, 8, 11, 11, 11, 11, 20]
+    offsetsoffset = 1
+    length = 3
+    funcPy = getattr(tests.kernels, 'awkward_ListOffsetArray32_compact_offsets_64')
     funcPy(tooffsets, fromoffsets, offsetsoffset, length)
     outtooffsets = [0, 1, 2, 4]
     for i in range(len(outtooffsets)):
@@ -1127,7 +1127,7 @@ def test_awkward_ListOffsetArrayU32_compact_offsets_64_1():
     for i in range(len(outtooffsets)):
         assert tooffsets[i] == outtooffsets[i]
 
-def test_awkward_ListArray32_broadcast_tooffsets_64_1():
+def test_awkward_ListArrayU32_broadcast_tooffsets_64_1():
     tocarry = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromoffsets = [1, 2, 3, 4, 5, 6]
     offsetsoffset = 0
@@ -1137,7 +1137,7 @@ def test_awkward_ListArray32_broadcast_tooffsets_64_1():
     fromstops = [3, 1, 3, 2, 3]
     stopsoffset = 0
     lencontent = 3
-    funcPy = getattr(tests.kernels, 'awkward_ListArray32_broadcast_tooffsets_64')
+    funcPy = getattr(tests.kernels, 'awkward_ListArrayU32_broadcast_tooffsets_64')
     funcPy(tocarry, fromoffsets, offsetsoffset, offsetslength, fromstarts, startsoffset, fromstops, stopsoffset, lencontent)
     outtocarry = [2.0, 0.0]
     for i in range(len(outtocarry)):
@@ -1159,7 +1159,7 @@ def test_awkward_ListArray64_broadcast_tooffsets_64_1():
     for i in range(len(outtocarry)):
         assert tocarry[i] == outtocarry[i]
 
-def test_awkward_ListArrayU32_broadcast_tooffsets_64_1():
+def test_awkward_ListArray32_broadcast_tooffsets_64_1():
     tocarry = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromoffsets = [1, 2, 3, 4, 5, 6]
     offsetsoffset = 0
@@ -1169,7 +1169,7 @@ def test_awkward_ListArrayU32_broadcast_tooffsets_64_1():
     fromstops = [3, 1, 3, 2, 3]
     stopsoffset = 0
     lencontent = 3
-    funcPy = getattr(tests.kernels, 'awkward_ListArrayU32_broadcast_tooffsets_64')
+    funcPy = getattr(tests.kernels, 'awkward_ListArray32_broadcast_tooffsets_64')
     funcPy(tocarry, fromoffsets, offsetsoffset, offsetslength, fromstarts, startsoffset, fromstops, stopsoffset, lencontent)
     outtocarry = [2.0, 0.0]
     for i in range(len(outtocarry)):
@@ -1198,6 +1198,17 @@ def test_awkward_RegularArray_broadcast_tooffsets_size1_64_1():
     for i in range(len(outtocarry)):
         assert tocarry[i] == outtocarry[i]
 
+def test_awkward_ListOffsetArray64_toRegularArray_1():
+    size = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromoffsets = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+    offsetsoffset = 0
+    offsetslength = 3
+    funcPy = getattr(tests.kernels, 'awkward_ListOffsetArray64_toRegularArray')
+    funcPy(size, fromoffsets, offsetsoffset, offsetslength)
+    outsize = [1]
+    for i in range(len(outsize)):
+        assert size[i] == outsize[i]
+
 def test_awkward_ListOffsetArrayU32_toRegularArray_1():
     size = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromoffsets = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
@@ -1220,29 +1231,6 @@ def test_awkward_ListOffsetArray32_toRegularArray_1():
     for i in range(len(outsize)):
         assert size[i] == outsize[i]
 
-def test_awkward_ListOffsetArray64_toRegularArray_1():
-    size = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromoffsets = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
-    offsetsoffset = 0
-    offsetslength = 3
-    funcPy = getattr(tests.kernels, 'awkward_ListOffsetArray64_toRegularArray')
-    funcPy(size, fromoffsets, offsetsoffset, offsetslength)
-    outsize = [1]
-    for i in range(len(outsize)):
-        assert size[i] == outsize[i]
-
-def test_awkward_NumpyArray_fill_touint64_frombool_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    tooffset = 0
-    fromptr = [True, False, True, True, False, True, True, True, True, False, True, True, False, False, False, True, True, False, True, False, True]
-    fromoffset = 0
-    length = 3
-    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_touint64_frombool')
-    funcPy(toptr, tooffset, fromptr, fromoffset, length)
-    outtoptr = [1.0, 0.0, 1.0]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
 def test_awkward_NumpyArray_fill_toint64_frombool_1():
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     tooffset = 0
@@ -1250,6 +1238,18 @@ def test_awkward_NumpyArray_fill_toint64_frombool_1():
     fromoffset = 0
     length = 3
     funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_toint64_frombool')
+    funcPy(toptr, tooffset, fromptr, fromoffset, length)
+    outtoptr = [1.0, 0.0, 1.0]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
+def test_awkward_NumpyArray_fill_toint32_frombool_1():
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    tooffset = 0
+    fromptr = [True, False, True, True, False, True, True, True, True, False, True, True, False, False, False, True, True, False, True, False, True]
+    fromoffset = 0
+    length = 3
+    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_toint32_frombool')
     funcPy(toptr, tooffset, fromptr, fromoffset, length)
     outtoptr = [1.0, 0.0, 1.0]
     for i in range(len(outtoptr)):
@@ -1279,13 +1279,25 @@ def test_awkward_NumpyArray_fill_toint8_frombool_1():
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
-def test_awkward_NumpyArray_fill_touint32_frombool_1():
+def test_awkward_NumpyArray_fill_touint16_frombool_1():
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     tooffset = 0
     fromptr = [True, False, True, True, False, True, True, True, True, False, True, True, False, False, False, True, True, False, True, False, True]
     fromoffset = 0
     length = 3
-    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_touint32_frombool')
+    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_touint16_frombool')
+    funcPy(toptr, tooffset, fromptr, fromoffset, length)
+    outtoptr = [1.0, 0.0, 1.0]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
+def test_awkward_NumpyArray_fill_touint64_frombool_1():
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    tooffset = 0
+    fromptr = [True, False, True, True, False, True, True, True, True, False, True, True, False, False, False, True, True, False, True, False, True]
+    fromoffset = 0
+    length = 3
+    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_touint64_frombool')
     funcPy(toptr, tooffset, fromptr, fromoffset, length)
     outtoptr = [1.0, 0.0, 1.0]
     for i in range(len(outtoptr)):
@@ -1303,27 +1315,27 @@ def test_awkward_NumpyArray_fill_touint8_frombool_1():
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
-def test_awkward_NumpyArray_fill_touint16_frombool_1():
+def test_awkward_NumpyArray_fill_touint32_frombool_1():
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     tooffset = 0
     fromptr = [True, False, True, True, False, True, True, True, True, False, True, True, False, False, False, True, True, False, True, False, True]
     fromoffset = 0
     length = 3
-    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_touint16_frombool')
+    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_touint32_frombool')
     funcPy(toptr, tooffset, fromptr, fromoffset, length)
     outtoptr = [1.0, 0.0, 1.0]
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
-def test_awkward_NumpyArray_fill_toint32_frombool_1():
+def test_awkward_NumpyArray_fill_touint32_fromuint16_1():
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     tooffset = 0
-    fromptr = [True, False, True, True, False, True, True, True, True, False, True, True, False, False, False, True, True, False, True, False, True]
+    fromptr = [5, 8, 7, 0, 8, 6, 12, 7, 4, 6, 8, 7, 8, 4, 4, 4, 9, 10, 6, 5, 3, 5, 7, 5, 3]
     fromoffset = 0
     length = 3
-    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_toint32_frombool')
+    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_touint32_fromuint16')
     funcPy(toptr, tooffset, fromptr, fromoffset, length)
-    outtoptr = [1.0, 0.0, 1.0]
+    outtoptr = [5.0, 8.0, 7.0]
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
@@ -1334,6 +1346,42 @@ def test_awkward_NumpyArray_fill_touint8_fromuint8_1():
     fromoffset = 0
     length = 3
     funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_touint8_fromuint8')
+    funcPy(toptr, tooffset, fromptr, fromoffset, length)
+    outtoptr = [5.0, 8.0, 7.0]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
+def test_awkward_NumpyArray_fill_toint64_fromuint32_1():
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    tooffset = 0
+    fromptr = [5, 8, 7, 0, 8, 6, 12, 7, 4, 6, 8, 7, 8, 4, 4, 4, 9, 10, 6, 5, 3, 5, 7, 5, 3]
+    fromoffset = 0
+    length = 3
+    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_toint64_fromuint32')
+    funcPy(toptr, tooffset, fromptr, fromoffset, length)
+    outtoptr = [5.0, 8.0, 7.0]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
+def test_awkward_NumpyArray_fill_touint64_fromuint64_1():
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    tooffset = 0
+    fromptr = [5, 8, 7, 0, 8, 6, 12, 7, 4, 6, 8, 7, 8, 4, 4, 4, 9, 10, 6, 5, 3, 5, 7, 5, 3]
+    fromoffset = 0
+    length = 3
+    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_touint64_fromuint64')
+    funcPy(toptr, tooffset, fromptr, fromoffset, length)
+    outtoptr = [5.0, 8.0, 7.0]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
+def test_awkward_NumpyArray_fill_toint32_fromint16_1():
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    tooffset = 0
+    fromptr = [5, 8, 7, 0, 8, 6, 12, 7, 4, 6, 8, 7, 8, 4, 4, 4, 9, 10, 6, 5, 3, 5, 7, 5, 3]
+    fromoffset = 0
+    length = 3
+    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_toint32_fromint16')
     funcPy(toptr, tooffset, fromptr, fromoffset, length)
     outtoptr = [5.0, 8.0, 7.0]
     for i in range(len(outtoptr)):
@@ -1351,18 +1399,6 @@ def test_awkward_NumpyArray_fill_touint64_fromuint8_1():
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
-def test_awkward_NumpyArray_fill_toint64_fromint16_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    tooffset = 0
-    fromptr = [5, 8, 7, 0, 8, 6, 12, 7, 4, 6, 8, 7, 8, 4, 4, 4, 9, 10, 6, 5, 3, 5, 7, 5, 3]
-    fromoffset = 0
-    length = 3
-    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_toint64_fromint16')
-    funcPy(toptr, tooffset, fromptr, fromoffset, length)
-    outtoptr = [5.0, 8.0, 7.0]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
 def test_awkward_NumpyArray_fill_touint32_fromuint32_1():
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     tooffset = 0
@@ -1375,85 +1411,49 @@ def test_awkward_NumpyArray_fill_touint32_fromuint32_1():
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
-def test_awkward_NumpyArray_fill_toint32_fromuint8_1():
+def test_awkward_NumpyArray_fill_toint64_fromuint8_1():
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     tooffset = 0
     fromptr = [5, 8, 7, 0, 8, 6, 12, 7, 4, 6, 8, 7, 8, 4, 4, 4, 9, 10, 6, 5, 3, 5, 7, 5, 3]
     fromoffset = 0
     length = 3
-    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_toint32_fromuint8')
+    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_toint64_fromuint8')
     funcPy(toptr, tooffset, fromptr, fromoffset, length)
     outtoptr = [5.0, 8.0, 7.0]
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
-def test_awkward_NumpyArray_fill_toint32_fromint32_1():
+def test_awkward_NumpyArray_fill_toint16_fromint16_1():
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     tooffset = 0
     fromptr = [5, 8, 7, 0, 8, 6, 12, 7, 4, 6, 8, 7, 8, 4, 4, 4, 9, 10, 6, 5, 3, 5, 7, 5, 3]
     fromoffset = 0
     length = 3
-    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_toint32_fromint32')
+    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_toint16_fromint16')
     funcPy(toptr, tooffset, fromptr, fromoffset, length)
     outtoptr = [5.0, 8.0, 7.0]
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
-def test_awkward_NumpyArray_fill_touint16_fromuint8_1():
+def test_awkward_NumpyArray_fill_toint64_fromint16_1():
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     tooffset = 0
     fromptr = [5, 8, 7, 0, 8, 6, 12, 7, 4, 6, 8, 7, 8, 4, 4, 4, 9, 10, 6, 5, 3, 5, 7, 5, 3]
     fromoffset = 0
     length = 3
-    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_touint16_fromuint8')
+    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_toint64_fromint16')
     funcPy(toptr, tooffset, fromptr, fromoffset, length)
     outtoptr = [5.0, 8.0, 7.0]
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
-def test_awkward_NumpyArray_fill_toint64_fromint8_1():
+def test_awkward_NumpyArray_fill_toint8_fromint8_1():
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     tooffset = 0
     fromptr = [5, 8, 7, 0, 8, 6, 12, 7, 4, 6, 8, 7, 8, 4, 4, 4, 9, 10, 6, 5, 3, 5, 7, 5, 3]
     fromoffset = 0
     length = 3
-    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_toint64_fromint8')
-    funcPy(toptr, tooffset, fromptr, fromoffset, length)
-    outtoptr = [5.0, 8.0, 7.0]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_NumpyArray_fill_toint16_fromuint8_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    tooffset = 0
-    fromptr = [5, 8, 7, 0, 8, 6, 12, 7, 4, 6, 8, 7, 8, 4, 4, 4, 9, 10, 6, 5, 3, 5, 7, 5, 3]
-    fromoffset = 0
-    length = 3
-    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_toint16_fromuint8')
-    funcPy(toptr, tooffset, fromptr, fromoffset, length)
-    outtoptr = [5.0, 8.0, 7.0]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_NumpyArray_fill_toint32_fromuint16_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    tooffset = 0
-    fromptr = [5, 8, 7, 0, 8, 6, 12, 7, 4, 6, 8, 7, 8, 4, 4, 4, 9, 10, 6, 5, 3, 5, 7, 5, 3]
-    fromoffset = 0
-    length = 3
-    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_toint32_fromuint16')
-    funcPy(toptr, tooffset, fromptr, fromoffset, length)
-    outtoptr = [5.0, 8.0, 7.0]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_NumpyArray_fill_touint32_fromuint16_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    tooffset = 0
-    fromptr = [5, 8, 7, 0, 8, 6, 12, 7, 4, 6, 8, 7, 8, 4, 4, 4, 9, 10, 6, 5, 3, 5, 7, 5, 3]
-    fromoffset = 0
-    length = 3
-    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_touint32_fromuint16')
+    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_toint8_fromint8')
     funcPy(toptr, tooffset, fromptr, fromoffset, length)
     outtoptr = [5.0, 8.0, 7.0]
     for i in range(len(outtoptr)):
@@ -1471,13 +1471,13 @@ def test_awkward_NumpyArray_fill_touint64_fromuint16_1():
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
-def test_awkward_NumpyArray_fill_toint64_fromuint64_1():
+def test_awkward_NumpyArray_fill_toint16_fromuint8_1():
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     tooffset = 0
     fromptr = [5, 8, 7, 0, 8, 6, 12, 7, 4, 6, 8, 7, 8, 4, 4, 4, 9, 10, 6, 5, 3, 5, 7, 5, 3]
     fromoffset = 0
     length = 3
-    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_toint64_fromuint64')
+    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_toint16_fromuint8')
     funcPy(toptr, tooffset, fromptr, fromoffset, length)
     outtoptr = [5.0, 8.0, 7.0]
     for i in range(len(outtoptr)):
@@ -1507,6 +1507,114 @@ def test_awkward_NumpyArray_fill_toint64_fromint32_1():
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
+def test_awkward_NumpyArray_fill_toint16_fromint8_1():
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    tooffset = 0
+    fromptr = [5, 8, 7, 0, 8, 6, 12, 7, 4, 6, 8, 7, 8, 4, 4, 4, 9, 10, 6, 5, 3, 5, 7, 5, 3]
+    fromoffset = 0
+    length = 3
+    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_toint16_fromint8')
+    funcPy(toptr, tooffset, fromptr, fromoffset, length)
+    outtoptr = [5.0, 8.0, 7.0]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
+def test_awkward_NumpyArray_fill_toint32_fromint32_1():
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    tooffset = 0
+    fromptr = [5, 8, 7, 0, 8, 6, 12, 7, 4, 6, 8, 7, 8, 4, 4, 4, 9, 10, 6, 5, 3, 5, 7, 5, 3]
+    fromoffset = 0
+    length = 3
+    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_toint32_fromint32')
+    funcPy(toptr, tooffset, fromptr, fromoffset, length)
+    outtoptr = [5.0, 8.0, 7.0]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
+def test_awkward_NumpyArray_fill_toint64_fromuint64_1():
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    tooffset = 0
+    fromptr = [5, 8, 7, 0, 8, 6, 12, 7, 4, 6, 8, 7, 8, 4, 4, 4, 9, 10, 6, 5, 3, 5, 7, 5, 3]
+    fromoffset = 0
+    length = 3
+    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_toint64_fromuint64')
+    funcPy(toptr, tooffset, fromptr, fromoffset, length)
+    outtoptr = [5.0, 8.0, 7.0]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
+def test_awkward_NumpyArray_fill_toint64_fromuint16_1():
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    tooffset = 0
+    fromptr = [5, 8, 7, 0, 8, 6, 12, 7, 4, 6, 8, 7, 8, 4, 4, 4, 9, 10, 6, 5, 3, 5, 7, 5, 3]
+    fromoffset = 0
+    length = 3
+    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_toint64_fromuint16')
+    funcPy(toptr, tooffset, fromptr, fromoffset, length)
+    outtoptr = [5.0, 8.0, 7.0]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
+def test_awkward_NumpyArray_fill_toint64_fromint8_1():
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    tooffset = 0
+    fromptr = [5, 8, 7, 0, 8, 6, 12, 7, 4, 6, 8, 7, 8, 4, 4, 4, 9, 10, 6, 5, 3, 5, 7, 5, 3]
+    fromoffset = 0
+    length = 3
+    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_toint64_fromint8')
+    funcPy(toptr, tooffset, fromptr, fromoffset, length)
+    outtoptr = [5.0, 8.0, 7.0]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
+def test_awkward_NumpyArray_fill_toint32_fromuint16_1():
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    tooffset = 0
+    fromptr = [5, 8, 7, 0, 8, 6, 12, 7, 4, 6, 8, 7, 8, 4, 4, 4, 9, 10, 6, 5, 3, 5, 7, 5, 3]
+    fromoffset = 0
+    length = 3
+    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_toint32_fromuint16')
+    funcPy(toptr, tooffset, fromptr, fromoffset, length)
+    outtoptr = [5.0, 8.0, 7.0]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
+def test_awkward_NumpyArray_fill_toint32_fromint8_1():
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    tooffset = 0
+    fromptr = [5, 8, 7, 0, 8, 6, 12, 7, 4, 6, 8, 7, 8, 4, 4, 4, 9, 10, 6, 5, 3, 5, 7, 5, 3]
+    fromoffset = 0
+    length = 3
+    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_toint32_fromint8')
+    funcPy(toptr, tooffset, fromptr, fromoffset, length)
+    outtoptr = [5.0, 8.0, 7.0]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
+def test_awkward_NumpyArray_fill_touint16_fromuint16_1():
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    tooffset = 0
+    fromptr = [5, 8, 7, 0, 8, 6, 12, 7, 4, 6, 8, 7, 8, 4, 4, 4, 9, 10, 6, 5, 3, 5, 7, 5, 3]
+    fromoffset = 0
+    length = 3
+    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_touint16_fromuint16')
+    funcPy(toptr, tooffset, fromptr, fromoffset, length)
+    outtoptr = [5.0, 8.0, 7.0]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
+def test_awkward_NumpyArray_fill_toint32_fromuint8_1():
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    tooffset = 0
+    fromptr = [5, 8, 7, 0, 8, 6, 12, 7, 4, 6, 8, 7, 8, 4, 4, 4, 9, 10, 6, 5, 3, 5, 7, 5, 3]
+    fromoffset = 0
+    length = 3
+    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_toint32_fromuint8')
+    funcPy(toptr, tooffset, fromptr, fromoffset, length)
+    outtoptr = [5.0, 8.0, 7.0]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
 def test_awkward_NumpyArray_fill_toint64_fromint64_1():
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     tooffset = 0
@@ -1531,145 +1639,17 @@ def test_awkward_NumpyArray_fill_touint64_fromuint32_1():
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
-def test_awkward_NumpyArray_fill_toint8_fromint8_1():
+def test_awkward_NumpyArray_fill_touint16_fromuint8_1():
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     tooffset = 0
     fromptr = [5, 8, 7, 0, 8, 6, 12, 7, 4, 6, 8, 7, 8, 4, 4, 4, 9, 10, 6, 5, 3, 5, 7, 5, 3]
     fromoffset = 0
     length = 3
-    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_toint8_fromint8')
+    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_touint16_fromuint8')
     funcPy(toptr, tooffset, fromptr, fromoffset, length)
     outtoptr = [5.0, 8.0, 7.0]
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
-
-def test_awkward_NumpyArray_fill_touint16_fromuint16_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    tooffset = 0
-    fromptr = [5, 8, 7, 0, 8, 6, 12, 7, 4, 6, 8, 7, 8, 4, 4, 4, 9, 10, 6, 5, 3, 5, 7, 5, 3]
-    fromoffset = 0
-    length = 3
-    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_touint16_fromuint16')
-    funcPy(toptr, tooffset, fromptr, fromoffset, length)
-    outtoptr = [5.0, 8.0, 7.0]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_NumpyArray_fill_toint16_fromint8_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    tooffset = 0
-    fromptr = [5, 8, 7, 0, 8, 6, 12, 7, 4, 6, 8, 7, 8, 4, 4, 4, 9, 10, 6, 5, 3, 5, 7, 5, 3]
-    fromoffset = 0
-    length = 3
-    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_toint16_fromint8')
-    funcPy(toptr, tooffset, fromptr, fromoffset, length)
-    outtoptr = [5.0, 8.0, 7.0]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_NumpyArray_fill_touint64_fromuint64_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    tooffset = 0
-    fromptr = [5, 8, 7, 0, 8, 6, 12, 7, 4, 6, 8, 7, 8, 4, 4, 4, 9, 10, 6, 5, 3, 5, 7, 5, 3]
-    fromoffset = 0
-    length = 3
-    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_touint64_fromuint64')
-    funcPy(toptr, tooffset, fromptr, fromoffset, length)
-    outtoptr = [5.0, 8.0, 7.0]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_NumpyArray_fill_toint64_fromuint32_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    tooffset = 0
-    fromptr = [5, 8, 7, 0, 8, 6, 12, 7, 4, 6, 8, 7, 8, 4, 4, 4, 9, 10, 6, 5, 3, 5, 7, 5, 3]
-    fromoffset = 0
-    length = 3
-    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_toint64_fromuint32')
-    funcPy(toptr, tooffset, fromptr, fromoffset, length)
-    outtoptr = [5.0, 8.0, 7.0]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_NumpyArray_fill_toint64_fromuint16_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    tooffset = 0
-    fromptr = [5, 8, 7, 0, 8, 6, 12, 7, 4, 6, 8, 7, 8, 4, 4, 4, 9, 10, 6, 5, 3, 5, 7, 5, 3]
-    fromoffset = 0
-    length = 3
-    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_toint64_fromuint16')
-    funcPy(toptr, tooffset, fromptr, fromoffset, length)
-    outtoptr = [5.0, 8.0, 7.0]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_NumpyArray_fill_toint64_fromuint8_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    tooffset = 0
-    fromptr = [5, 8, 7, 0, 8, 6, 12, 7, 4, 6, 8, 7, 8, 4, 4, 4, 9, 10, 6, 5, 3, 5, 7, 5, 3]
-    fromoffset = 0
-    length = 3
-    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_toint64_fromuint8')
-    funcPy(toptr, tooffset, fromptr, fromoffset, length)
-    outtoptr = [5.0, 8.0, 7.0]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_NumpyArray_fill_toint32_fromint16_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    tooffset = 0
-    fromptr = [5, 8, 7, 0, 8, 6, 12, 7, 4, 6, 8, 7, 8, 4, 4, 4, 9, 10, 6, 5, 3, 5, 7, 5, 3]
-    fromoffset = 0
-    length = 3
-    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_toint32_fromint16')
-    funcPy(toptr, tooffset, fromptr, fromoffset, length)
-    outtoptr = [5.0, 8.0, 7.0]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_NumpyArray_fill_toint16_fromint16_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    tooffset = 0
-    fromptr = [5, 8, 7, 0, 8, 6, 12, 7, 4, 6, 8, 7, 8, 4, 4, 4, 9, 10, 6, 5, 3, 5, 7, 5, 3]
-    fromoffset = 0
-    length = 3
-    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_toint16_fromint16')
-    funcPy(toptr, tooffset, fromptr, fromoffset, length)
-    outtoptr = [5.0, 8.0, 7.0]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_NumpyArray_fill_toint32_fromint8_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    tooffset = 0
-    fromptr = [5, 8, 7, 0, 8, 6, 12, 7, 4, 6, 8, 7, 8, 4, 4, 4, 9, 10, 6, 5, 3, 5, 7, 5, 3]
-    fromoffset = 0
-    length = 3
-    funcPy = getattr(tests.kernels, 'awkward_NumpyArray_fill_toint32_fromint8')
-    funcPy(toptr, tooffset, fromptr, fromoffset, length)
-    outtoptr = [5.0, 8.0, 7.0]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_ListArray_fill_to64_from64_1():
-    tostarts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    tostartsoffset = 3
-    tostops = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    tostopsoffset = 3
-    fromstarts = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
-    fromstartsoffset = 0
-    fromstops = [3, 1, 3, 2, 3]
-    fromstopsoffset = 0
-    length = 3
-    base = 3
-    funcPy = getattr(tests.kernels, 'awkward_ListArray_fill_to64_from64')
-    funcPy(tostarts, tostartsoffset, tostops, tostopsoffset, fromstarts, fromstartsoffset, fromstops, fromstopsoffset, length, base)
-    outtostarts = [0, 0, 0, 5.0, 3.0, 5.0]
-    for i in range(len(outtostarts)):
-        assert tostarts[i] == outtostarts[i]
-    outtostops = [0, 0, 0, 6.0, 4.0, 6.0]
-    for i in range(len(outtostops)):
-        assert tostops[i] == outtostops[i]
 
 def test_awkward_ListArray_fill_to64_fromU32_1():
     tostarts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -1703,6 +1683,26 @@ def test_awkward_ListArray_fill_to64_from32_1():
     length = 3
     base = 3
     funcPy = getattr(tests.kernels, 'awkward_ListArray_fill_to64_from32')
+    funcPy(tostarts, tostartsoffset, tostops, tostopsoffset, fromstarts, fromstartsoffset, fromstops, fromstopsoffset, length, base)
+    outtostarts = [0, 0, 0, 5.0, 3.0, 5.0]
+    for i in range(len(outtostarts)):
+        assert tostarts[i] == outtostarts[i]
+    outtostops = [0, 0, 0, 6.0, 4.0, 6.0]
+    for i in range(len(outtostops)):
+        assert tostops[i] == outtostops[i]
+
+def test_awkward_ListArray_fill_to64_from64_1():
+    tostarts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    tostartsoffset = 3
+    tostops = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    tostopsoffset = 3
+    fromstarts = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+    fromstartsoffset = 0
+    fromstops = [3, 1, 3, 2, 3]
+    fromstopsoffset = 0
+    length = 3
+    base = 3
+    funcPy = getattr(tests.kernels, 'awkward_ListArray_fill_to64_from64')
     funcPy(tostarts, tostartsoffset, tostops, tostopsoffset, fromstarts, fromstartsoffset, fromstops, fromstopsoffset, length, base)
     outtostarts = [0, 0, 0, 5.0, 3.0, 5.0]
     for i in range(len(outtostarts)):
@@ -1774,18 +1774,6 @@ def test_awkward_UnionArray_filltags_to8_from8_1():
     for i in range(len(outtotags)):
         assert totags[i] == outtotags[i]
 
-def test_awkward_UnionArray_fillindex_to64_from32_1():
-    toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    toindexoffset = 3
-    fromindex = [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
-    fromindexoffset = 0
-    length = 3
-    funcPy = getattr(tests.kernels, 'awkward_UnionArray_fillindex_to64_from32')
-    funcPy(toindex, toindexoffset, fromindex, fromindexoffset, length)
-    outtoindex = [0, 0, 0, 4.0, 3.0, 6.0]
-    for i in range(len(outtoindex)):
-        assert toindex[i] == outtoindex[i]
-
 def test_awkward_UnionArray_fillindex_to64_from64_1():
     toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     toindexoffset = 3
@@ -1793,6 +1781,18 @@ def test_awkward_UnionArray_fillindex_to64_from64_1():
     fromindexoffset = 0
     length = 3
     funcPy = getattr(tests.kernels, 'awkward_UnionArray_fillindex_to64_from64')
+    funcPy(toindex, toindexoffset, fromindex, fromindexoffset, length)
+    outtoindex = [0, 0, 0, 4.0, 3.0, 6.0]
+    for i in range(len(outtoindex)):
+        assert toindex[i] == outtoindex[i]
+
+def test_awkward_UnionArray_fillindex_to64_from32_1():
+    toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    toindexoffset = 3
+    fromindex = [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
+    fromindexoffset = 0
+    length = 3
+    funcPy = getattr(tests.kernels, 'awkward_UnionArray_fillindex_to64_from32')
     funcPy(toindex, toindexoffset, fromindex, fromindexoffset, length)
     outtoindex = [0, 0, 0, 4.0, 3.0, 6.0]
     for i in range(len(outtoindex)):
@@ -1828,6 +1828,56 @@ def test_awkward_UnionArray_fillindex_to64_count_1():
     funcPy = getattr(tests.kernels, 'awkward_UnionArray_fillindex_to64_count')
     funcPy(toindex, toindexoffset, length)
     outtoindex = [0, 0, 0, 0.0, 1.0, 2.0]
+    for i in range(len(outtoindex)):
+        assert toindex[i] == outtoindex[i]
+
+def test_awkward_UnionArray8_U32_simplify8_32_to8_64_1():
+    totags = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    outertags = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    outertagsoffset = 1
+    outerindex = [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
+    outerindexoffset = 0
+    innertags = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    innertagsoffset = 0
+    innerindex = [3, 4, 7, 7, 4, 1, 3, 8, 3, 8, 8]
+    innerindexoffset = 1
+    towhich = 3
+    innerwhich = 1
+    outerwhich = 0
+    length = 3
+    base = 3
+    funcPy = getattr(tests.kernels, 'awkward_UnionArray8_U32_simplify8_32_to8_64')
+    funcPy(totags, toindex, outertags, outertagsoffset, outerindex, outerindexoffset, innertags, innertagsoffset, innerindex, innerindexoffset, towhich, innerwhich, outerwhich, length, base)
+    outtotags = [3.0, 3.0, 3.0]
+    for i in range(len(outtotags)):
+        assert totags[i] == outtotags[i]
+    outtoindex = [4.0, 7.0, 11.0]
+    for i in range(len(outtoindex)):
+        assert toindex[i] == outtoindex[i]
+
+def test_awkward_UnionArray8_64_simplify8_32_to8_64_1():
+    totags = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    outertags = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    outertagsoffset = 1
+    outerindex = [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
+    outerindexoffset = 0
+    innertags = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    innertagsoffset = 0
+    innerindex = [3, 4, 7, 7, 4, 1, 3, 8, 3, 8, 8]
+    innerindexoffset = 1
+    towhich = 3
+    innerwhich = 1
+    outerwhich = 0
+    length = 3
+    base = 3
+    funcPy = getattr(tests.kernels, 'awkward_UnionArray8_64_simplify8_32_to8_64')
+    funcPy(totags, toindex, outertags, outertagsoffset, outerindex, outerindexoffset, innertags, innertagsoffset, innerindex, innerindexoffset, towhich, innerwhich, outerwhich, length, base)
+    outtotags = [3.0, 3.0, 3.0]
+    for i in range(len(outtotags)):
+        assert totags[i] == outtotags[i]
+    outtoindex = [4.0, 7.0, 11.0]
     for i in range(len(outtoindex)):
         assert toindex[i] == outtoindex[i]
 
@@ -1881,7 +1931,7 @@ def test_awkward_UnionArray8_32_simplify8_U32_to8_64_1():
     for i in range(len(outtoindex)):
         assert toindex[i] == outtoindex[i]
 
-def test_awkward_UnionArray8_U32_simplify8_64_to8_64_1():
+def test_awkward_UnionArray8_U32_simplify8_U32_to8_64_1():
     totags = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     outertags = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -1897,32 +1947,7 @@ def test_awkward_UnionArray8_U32_simplify8_64_to8_64_1():
     outerwhich = 0
     length = 3
     base = 3
-    funcPy = getattr(tests.kernels, 'awkward_UnionArray8_U32_simplify8_64_to8_64')
-    funcPy(totags, toindex, outertags, outertagsoffset, outerindex, outerindexoffset, innertags, innertagsoffset, innerindex, innerindexoffset, towhich, innerwhich, outerwhich, length, base)
-    outtotags = [3.0, 3.0, 3.0]
-    for i in range(len(outtotags)):
-        assert totags[i] == outtotags[i]
-    outtoindex = [4.0, 7.0, 11.0]
-    for i in range(len(outtoindex)):
-        assert toindex[i] == outtoindex[i]
-
-def test_awkward_UnionArray8_64_simplify8_32_to8_64_1():
-    totags = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    outertags = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    outertagsoffset = 1
-    outerindex = [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
-    outerindexoffset = 0
-    innertags = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-    innertagsoffset = 0
-    innerindex = [3, 4, 7, 7, 4, 1, 3, 8, 3, 8, 8]
-    innerindexoffset = 1
-    towhich = 3
-    innerwhich = 1
-    outerwhich = 0
-    length = 3
-    base = 3
-    funcPy = getattr(tests.kernels, 'awkward_UnionArray8_64_simplify8_32_to8_64')
+    funcPy = getattr(tests.kernels, 'awkward_UnionArray8_U32_simplify8_U32_to8_64')
     funcPy(totags, toindex, outertags, outertagsoffset, outerindex, outerindexoffset, innertags, innertagsoffset, innerindex, innerindexoffset, towhich, innerwhich, outerwhich, length, base)
     outtotags = [3.0, 3.0, 3.0]
     for i in range(len(outtotags)):
@@ -1956,7 +1981,7 @@ def test_awkward_UnionArray8_32_simplify8_32_to8_64_1():
     for i in range(len(outtoindex)):
         assert toindex[i] == outtoindex[i]
 
-def test_awkward_UnionArray8_U32_simplify8_U32_to8_64_1():
+def test_awkward_UnionArray8_64_simplify8_U32_to8_64_1():
     totags = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     outertags = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -1972,7 +1997,7 @@ def test_awkward_UnionArray8_U32_simplify8_U32_to8_64_1():
     outerwhich = 0
     length = 3
     base = 3
-    funcPy = getattr(tests.kernels, 'awkward_UnionArray8_U32_simplify8_U32_to8_64')
+    funcPy = getattr(tests.kernels, 'awkward_UnionArray8_64_simplify8_U32_to8_64')
     funcPy(totags, toindex, outertags, outertagsoffset, outerindex, outerindexoffset, innertags, innertagsoffset, innerindex, innerindexoffset, towhich, innerwhich, outerwhich, length, base)
     outtotags = [3.0, 3.0, 3.0]
     for i in range(len(outtotags)):
@@ -1981,7 +2006,7 @@ def test_awkward_UnionArray8_U32_simplify8_U32_to8_64_1():
     for i in range(len(outtoindex)):
         assert toindex[i] == outtoindex[i]
 
-def test_awkward_UnionArray8_U32_simplify8_32_to8_64_1():
+def test_awkward_UnionArray8_U32_simplify8_64_to8_64_1():
     totags = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     outertags = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -1997,7 +2022,7 @@ def test_awkward_UnionArray8_U32_simplify8_32_to8_64_1():
     outerwhich = 0
     length = 3
     base = 3
-    funcPy = getattr(tests.kernels, 'awkward_UnionArray8_U32_simplify8_32_to8_64')
+    funcPy = getattr(tests.kernels, 'awkward_UnionArray8_U32_simplify8_64_to8_64')
     funcPy(totags, toindex, outertags, outertagsoffset, outerindex, outerindexoffset, innertags, innertagsoffset, innerindex, innerindexoffset, towhich, innerwhich, outerwhich, length, base)
     outtotags = [3.0, 3.0, 3.0]
     for i in range(len(outtotags)):
@@ -2031,28 +2056,23 @@ def test_awkward_UnionArray8_32_simplify8_64_to8_64_1():
     for i in range(len(outtoindex)):
         assert toindex[i] == outtoindex[i]
 
-def test_awkward_UnionArray8_64_simplify8_U32_to8_64_1():
+def test_awkward_UnionArray8_32_simplify_one_to8_64_1():
     totags = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    outertags = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    outertagsoffset = 1
-    outerindex = [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
-    outerindexoffset = 0
-    innertags = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-    innertagsoffset = 0
-    innerindex = [3, 4, 7, 7, 4, 1, 3, 8, 3, 8, 8]
-    innerindexoffset = 1
+    fromtags = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromtagsoffset = 1
+    fromindex = [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
+    fromindexoffset = 0
     towhich = 3
-    innerwhich = 1
-    outerwhich = 0
+    fromwhich = 1
     length = 3
     base = 3
-    funcPy = getattr(tests.kernels, 'awkward_UnionArray8_64_simplify8_U32_to8_64')
-    funcPy(totags, toindex, outertags, outertagsoffset, outerindex, outerindexoffset, innertags, innertagsoffset, innerindex, innerindexoffset, towhich, innerwhich, outerwhich, length, base)
-    outtotags = [3.0, 3.0, 3.0]
+    funcPy = getattr(tests.kernels, 'awkward_UnionArray8_32_simplify_one_to8_64')
+    funcPy(totags, toindex, fromtags, fromtagsoffset, fromindex, fromindexoffset, towhich, fromwhich, length, base)
+    outtotags = []
     for i in range(len(outtotags)):
         assert totags[i] == outtotags[i]
-    outtoindex = [4.0, 7.0, 11.0]
+    outtoindex = []
     for i in range(len(outtoindex)):
         assert toindex[i] == outtoindex[i]
 
@@ -2064,7 +2084,7 @@ def test_awkward_UnionArray8_U32_simplify_one_to8_64_1():
     fromindex = [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
     fromindexoffset = 0
     towhich = 3
-    fromwhich = 3
+    fromwhich = 1
     length = 3
     base = 3
     funcPy = getattr(tests.kernels, 'awkward_UnionArray8_U32_simplify_one_to8_64')
@@ -2084,30 +2104,10 @@ def test_awkward_UnionArray8_64_simplify_one_to8_64_1():
     fromindex = [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
     fromindexoffset = 0
     towhich = 3
-    fromwhich = 3
+    fromwhich = 1
     length = 3
     base = 3
     funcPy = getattr(tests.kernels, 'awkward_UnionArray8_64_simplify_one_to8_64')
-    funcPy(totags, toindex, fromtags, fromtagsoffset, fromindex, fromindexoffset, towhich, fromwhich, length, base)
-    outtotags = []
-    for i in range(len(outtotags)):
-        assert totags[i] == outtotags[i]
-    outtoindex = []
-    for i in range(len(outtoindex)):
-        assert toindex[i] == outtoindex[i]
-
-def test_awkward_UnionArray8_32_simplify_one_to8_64_1():
-    totags = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromtags = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromtagsoffset = 1
-    fromindex = [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
-    fromindexoffset = 0
-    towhich = 3
-    fromwhich = 3
-    length = 3
-    base = 3
-    funcPy = getattr(tests.kernels, 'awkward_UnionArray8_32_simplify_one_to8_64')
     funcPy(totags, toindex, fromtags, fromtagsoffset, fromindex, fromindexoffset, towhich, fromwhich, length, base)
     outtotags = []
     for i in range(len(outtotags)):
@@ -2161,17 +2161,6 @@ def test_awkward_UnionArray8_64_validity_1():
     except:
         pass
 
-def test_awkward_UnionArray_fillna_from32_to64_1():
-    toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromindex = [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
-    offset = 0
-    length = 3
-    funcPy = getattr(tests.kernels, 'awkward_UnionArray_fillna_from32_to64')
-    funcPy(toindex, fromindex, offset, length)
-    outtoindex = [4, 3, 6]
-    for i in range(len(outtoindex)):
-        assert toindex[i] == outtoindex[i]
-
 def test_awkward_UnionArray_fillna_from64_to64_1():
     toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromindex = [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
@@ -2194,13 +2183,24 @@ def test_awkward_UnionArray_fillna_fromU32_to64_1():
     for i in range(len(outtoindex)):
         assert toindex[i] == outtoindex[i]
 
+def test_awkward_UnionArray_fillna_from32_to64_1():
+    toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromindex = [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
+    offset = 0
+    length = 3
+    funcPy = getattr(tests.kernels, 'awkward_UnionArray_fillna_from32_to64')
+    funcPy(toindex, fromindex, offset, length)
+    outtoindex = [4, 3, 6]
+    for i in range(len(outtoindex)):
+        assert toindex[i] == outtoindex[i]
+
 def test_awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_64_1():
     toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    frommask = [1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0]
+    frommask = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     length = 3
     funcPy = getattr(tests.kernels, 'awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_64')
     funcPy(toindex, frommask, length)
-    outtoindex = [-1, -1, -1]
+    outtoindex = [0, 1, 2]
     for i in range(len(outtoindex)):
         assert toindex[i] == outtoindex[i]
 
@@ -2239,19 +2239,6 @@ def test_awkward_RegularArray_rpad_and_clip_axis1_64_1():
     for i in range(len(outtoindex)):
         assert toindex[i] == outtoindex[i]
 
-def test_awkward_ListArrayU32_min_range_1():
-    tomin = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromstarts = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
-    fromstops = [3, 1, 3, 2, 3]
-    lenstarts = 3
-    startsoffset = 0
-    stopsoffset = 0
-    funcPy = getattr(tests.kernels, 'awkward_ListArrayU32_min_range')
-    funcPy(tomin, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset)
-    outtomin = [1]
-    for i in range(len(outtomin)):
-        assert tomin[i] == outtomin[i]
-
 def test_awkward_ListArray64_min_range_1():
     tomin = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromstarts = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
@@ -2260,6 +2247,19 @@ def test_awkward_ListArray64_min_range_1():
     startsoffset = 0
     stopsoffset = 0
     funcPy = getattr(tests.kernels, 'awkward_ListArray64_min_range')
+    funcPy(tomin, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset)
+    outtomin = [1]
+    for i in range(len(outtomin)):
+        assert tomin[i] == outtomin[i]
+
+def test_awkward_ListArrayU32_min_range_1():
+    tomin = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromstarts = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+    fromstops = [3, 1, 3, 2, 3]
+    lenstarts = 3
+    startsoffset = 0
+    stopsoffset = 0
+    funcPy = getattr(tests.kernels, 'awkward_ListArrayU32_min_range')
     funcPy(tomin, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset)
     outtomin = [1]
     for i in range(len(outtomin)):
@@ -2275,6 +2275,20 @@ def test_awkward_ListArray32_min_range_1():
     funcPy = getattr(tests.kernels, 'awkward_ListArray32_min_range')
     funcPy(tomin, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset)
     outtomin = [1]
+    for i in range(len(outtomin)):
+        assert tomin[i] == outtomin[i]
+
+def test_awkward_ListArrayU32_rpad_and_clip_length_axis1_1():
+    tomin = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromstarts = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+    fromstops = [3, 1, 3, 2, 3]
+    target = 3
+    lenstarts = 3
+    startsoffset = 0
+    stopsoffset = 0
+    funcPy = getattr(tests.kernels, 'awkward_ListArrayU32_rpad_and_clip_length_axis1')
+    funcPy(tomin, fromstarts, fromstops, target, lenstarts, startsoffset, stopsoffset)
+    outtomin = [9]
     for i in range(len(outtomin)):
         assert tomin[i] == outtomin[i]
 
@@ -2306,19 +2320,27 @@ def test_awkward_ListArray64_rpad_and_clip_length_axis1_1():
     for i in range(len(outtomin)):
         assert tomin[i] == outtomin[i]
 
-def test_awkward_ListArrayU32_rpad_and_clip_length_axis1_1():
-    tomin = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+def test_awkward_ListArrayU32_rpad_axis1_64_1():
+    toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromstarts = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
     fromstops = [3, 1, 3, 2, 3]
+    tostarts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    tostops = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     target = 3
-    lenstarts = 3
+    length = 3
     startsoffset = 0
     stopsoffset = 0
-    funcPy = getattr(tests.kernels, 'awkward_ListArrayU32_rpad_and_clip_length_axis1')
-    funcPy(tomin, fromstarts, fromstops, target, lenstarts, startsoffset, stopsoffset)
-    outtomin = [9]
-    for i in range(len(outtomin)):
-        assert tomin[i] == outtomin[i]
+    funcPy = getattr(tests.kernels, 'awkward_ListArrayU32_rpad_axis1_64')
+    funcPy(toindex, fromstarts, fromstops, tostarts, tostops, target, length, startsoffset, stopsoffset)
+    outtoindex = [2, -1, -1, 0, -1, -1, 2, -1, -1]
+    for i in range(len(outtoindex)):
+        assert toindex[i] == outtoindex[i]
+    outtostarts = [0, 3, 6]
+    for i in range(len(outtostarts)):
+        assert tostarts[i] == outtostarts[i]
+    outtostops = [3, 6, 9]
+    for i in range(len(outtostops)):
+        assert tostops[i] == outtostops[i]
 
 def test_awkward_ListArray64_rpad_axis1_64_1():
     toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -2331,28 +2353,6 @@ def test_awkward_ListArray64_rpad_axis1_64_1():
     startsoffset = 0
     stopsoffset = 0
     funcPy = getattr(tests.kernels, 'awkward_ListArray64_rpad_axis1_64')
-    funcPy(toindex, fromstarts, fromstops, tostarts, tostops, target, length, startsoffset, stopsoffset)
-    outtoindex = [2, -1, -1, 0, -1, -1, 2, -1, -1]
-    for i in range(len(outtoindex)):
-        assert toindex[i] == outtoindex[i]
-    outtostarts = [0, 3, 6]
-    for i in range(len(outtostarts)):
-        assert tostarts[i] == outtostarts[i]
-    outtostops = [3, 6, 9]
-    for i in range(len(outtostops)):
-        assert tostops[i] == outtostops[i]
-
-def test_awkward_ListArrayU32_rpad_axis1_64_1():
-    toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromstarts = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
-    fromstops = [3, 1, 3, 2, 3]
-    tostarts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    tostops = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    target = 3
-    length = 3
-    startsoffset = 0
-    stopsoffset = 0
-    funcPy = getattr(tests.kernels, 'awkward_ListArrayU32_rpad_axis1_64')
     funcPy(toindex, fromstarts, fromstops, tostarts, tostops, target, length, startsoffset, stopsoffset)
     outtoindex = [2, -1, -1, 0, -1, -1, 2, -1, -1]
     for i in range(len(outtoindex)):
@@ -2386,22 +2386,6 @@ def test_awkward_ListArray32_rpad_axis1_64_1():
     for i in range(len(outtostops)):
         assert tostops[i] == outtostops[i]
 
-def test_awkward_ListOffsetArray64_rpad_length_axis1_1():
-    tooffsets = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromoffsets = [1, 1, 2, 3, 5, 8, 11, 11, 11, 11, 20]
-    offsetsoffset = 1
-    fromlength = 3
-    target = 3
-    tolength = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    funcPy = getattr(tests.kernels, 'awkward_ListOffsetArray64_rpad_length_axis1')
-    funcPy(tooffsets, fromoffsets, offsetsoffset, fromlength, target, tolength)
-    outtooffsets = [0, 3, 6, 9]
-    for i in range(len(outtooffsets)):
-        assert tooffsets[i] == outtooffsets[i]
-    outtolength = [9]
-    for i in range(len(outtolength)):
-        assert tolength[i] == outtolength[i]
-
 def test_awkward_ListOffsetArrayU32_rpad_length_axis1_1():
     tooffsets = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromoffsets = [1, 1, 2, 3, 5, 8, 11, 11, 11, 11, 20]
@@ -2410,6 +2394,22 @@ def test_awkward_ListOffsetArrayU32_rpad_length_axis1_1():
     target = 3
     tolength = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     funcPy = getattr(tests.kernels, 'awkward_ListOffsetArrayU32_rpad_length_axis1')
+    funcPy(tooffsets, fromoffsets, offsetsoffset, fromlength, target, tolength)
+    outtooffsets = [0, 3, 6, 9]
+    for i in range(len(outtooffsets)):
+        assert tooffsets[i] == outtooffsets[i]
+    outtolength = [9]
+    for i in range(len(outtolength)):
+        assert tolength[i] == outtolength[i]
+
+def test_awkward_ListOffsetArray64_rpad_length_axis1_1():
+    tooffsets = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromoffsets = [1, 1, 2, 3, 5, 8, 11, 11, 11, 11, 20]
+    offsetsoffset = 1
+    fromlength = 3
+    target = 3
+    tolength = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    funcPy = getattr(tests.kernels, 'awkward_ListOffsetArray64_rpad_length_axis1')
     funcPy(tooffsets, fromoffsets, offsetsoffset, fromlength, target, tolength)
     outtooffsets = [0, 3, 6, 9]
     for i in range(len(outtooffsets)):
@@ -2443,6 +2443,17 @@ def test_awkward_localindex_64_1():
     for i in range(len(outtoindex)):
         assert toindex[i] == outtoindex[i]
 
+def test_awkward_ListArray64_localindex_64_1():
+    toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    offsets = [1, 1, 2, 3, 5, 8, 11, 11, 11, 11, 20]
+    offsetsoffset = 1
+    length = 3
+    funcPy = getattr(tests.kernels, 'awkward_ListArray64_localindex_64')
+    funcPy(toindex, offsets, offsetsoffset, length)
+    outtoindex = [0, 0, 0, 0, 1]
+    for i in range(len(outtoindex)):
+        assert toindex[i] == outtoindex[i]
+
 def test_awkward_ListArray32_localindex_64_1():
     toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     offsets = [1, 1, 2, 3, 5, 8, 11, 11, 11, 11, 20]
@@ -2465,17 +2476,6 @@ def test_awkward_ListArrayU32_localindex_64_1():
     for i in range(len(outtoindex)):
         assert toindex[i] == outtoindex[i]
 
-def test_awkward_ListArray64_localindex_64_1():
-    toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    offsets = [1, 1, 2, 3, 5, 8, 11, 11, 11, 11, 20]
-    offsetsoffset = 1
-    length = 3
-    funcPy = getattr(tests.kernels, 'awkward_ListArray64_localindex_64')
-    funcPy(toindex, offsets, offsetsoffset, length)
-    outtoindex = [0, 0, 0, 0, 1]
-    for i in range(len(outtoindex)):
-        assert toindex[i] == outtoindex[i]
-
 def test_awkward_RegularArray_localindex_64_1():
     toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     size = 3
@@ -2485,25 +2485,6 @@ def test_awkward_RegularArray_localindex_64_1():
     outtoindex = [0, 1, 2, 0, 1, 2, 0, 1, 2]
     for i in range(len(outtoindex)):
         assert toindex[i] == outtoindex[i]
-
-def test_awkward_ListArray32_combinations_length_64_1():
-    totallen = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    tooffsets = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    n = 3
-    replacement = True
-    starts = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
-    startsoffset = 0
-    stops = [3, 1, 3, 2, 3]
-    stopsoffset = 0
-    length = 3
-    funcPy = getattr(tests.kernels, 'awkward_ListArray32_combinations_length_64')
-    funcPy(totallen, tooffsets, n, replacement, starts, startsoffset, stops, stopsoffset, length)
-    outtotallen = [3]
-    for i in range(len(outtotallen)):
-        assert totallen[i] == outtotallen[i]
-    outtooffsets = [0, 1, 2, 3]
-    for i in range(len(outtooffsets)):
-        assert tooffsets[i] == outtooffsets[i]
 
 def test_awkward_ListArray64_combinations_length_64_1():
     totallen = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -2535,6 +2516,25 @@ def test_awkward_ListArrayU32_combinations_length_64_1():
     stopsoffset = 0
     length = 3
     funcPy = getattr(tests.kernels, 'awkward_ListArrayU32_combinations_length_64')
+    funcPy(totallen, tooffsets, n, replacement, starts, startsoffset, stops, stopsoffset, length)
+    outtotallen = [3]
+    for i in range(len(outtotallen)):
+        assert totallen[i] == outtotallen[i]
+    outtooffsets = [0, 1, 2, 3]
+    for i in range(len(outtooffsets)):
+        assert tooffsets[i] == outtooffsets[i]
+
+def test_awkward_ListArray32_combinations_length_64_1():
+    totallen = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    tooffsets = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    n = 3
+    replacement = True
+    starts = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+    startsoffset = 0
+    stops = [3, 1, 3, 2, 3]
+    stopsoffset = 0
+    length = 3
+    funcPy = getattr(tests.kernels, 'awkward_ListArray32_combinations_length_64')
     funcPy(totallen, tooffsets, n, replacement, starts, startsoffset, stops, stopsoffset, length)
     outtotallen = [3]
     for i in range(len(outtotallen)):
@@ -2595,35 +2595,35 @@ def test_awkward_reduce_count_64_1():
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
-def test_awkward_reduce_countnonzero_int64_64_1():
+def test_awkward_reduce_countnonzero_float32_64_1():
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromptr = [1, 0, 0, 1, 1, 1, 0]
+    fromptr = [1.1, 0.5, 1.3, 4.2, 2.1, 4.4, 1.5, 10.1, 5.6, 7.7, 1.9, 2.0, 3.0]
     fromptroffset = 1
     parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
     parentsoffset = 0
     lenparents = 3
     outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_countnonzero_int64_64')
+    funcPy = getattr(tests.kernels, 'awkward_reduce_countnonzero_float32_64')
     funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
-    outtoptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]
+    outtoptr = [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
-def test_awkward_reduce_countnonzero_int32_64_1():
+def test_awkward_reduce_countnonzero_float64_64_1():
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromptr = [1, 0, 0, 1, 1, 1, 0]
+    fromptr = [1.1, 0.5, 1.3, 4.2, 2.1, 4.4, 1.5, 10.1, 5.6, 7.7, 1.9, 2.0, 3.0]
     fromptroffset = 1
     parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
     parentsoffset = 0
     lenparents = 3
     outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_countnonzero_int32_64')
+    funcPy = getattr(tests.kernels, 'awkward_reduce_countnonzero_float64_64')
     funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
-    outtoptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]
+    outtoptr = [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
-def test_awkward_reduce_countnonzero_uint32_64_1():
+def test_awkward_reduce_sum_uint64_uint8_64_1():
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromptr = [1, 0, 0, 1, 1, 1, 0]
     fromptroffset = 1
@@ -2631,119 +2631,7 @@ def test_awkward_reduce_countnonzero_uint32_64_1():
     parentsoffset = 0
     lenparents = 3
     outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_countnonzero_uint32_64')
-    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
-    outtoptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_reduce_countnonzero_int8_64_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromptr = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 1
-    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    parentsoffset = 0
-    lenparents = 3
-    outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_countnonzero_int8_64')
-    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
-    outtoptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_reduce_countnonzero_uint16_64_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromptr = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 1
-    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    parentsoffset = 0
-    lenparents = 3
-    outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_countnonzero_uint16_64')
-    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
-    outtoptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_reduce_countnonzero_uint64_64_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromptr = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 1
-    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    parentsoffset = 0
-    lenparents = 3
-    outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_countnonzero_uint64_64')
-    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
-    outtoptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_reduce_countnonzero_int16_64_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromptr = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 1
-    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    parentsoffset = 0
-    lenparents = 3
-    outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_countnonzero_int16_64')
-    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
-    outtoptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_reduce_countnonzero_uint8_64_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromptr = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 1
-    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    parentsoffset = 0
-    lenparents = 3
-    outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_countnonzero_uint8_64')
-    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
-    outtoptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_reduce_sum_int64_int8_64_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromptr = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 1
-    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    parentsoffset = 0
-    lenparents = 3
-    outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_sum_int64_int8_64')
-    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
-    outtoptr = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_reduce_sum_uint32_uint16_64_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromptr = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 1
-    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    parentsoffset = 0
-    lenparents = 3
-    outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_sum_uint32_uint16_64')
-    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
-    outtoptr = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_reduce_sum_uint32_uint32_64_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromptr = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 1
-    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    parentsoffset = 0
-    lenparents = 3
-    outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_sum_uint32_uint32_64')
+    funcPy = getattr(tests.kernels, 'awkward_reduce_sum_uint64_uint8_64')
     funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
     outtoptr = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0]
     for i in range(len(outtoptr)):
@@ -2763,7 +2651,7 @@ def test_awkward_reduce_sum_uint32_uint8_64_1():
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
-def test_awkward_reduce_sum_int32_int16_64_1():
+def test_awkward_reduce_sum_int64_int64_64_1():
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromptr = [1, 0, 0, 1, 1, 1, 0]
     fromptroffset = 1
@@ -2771,63 +2659,7 @@ def test_awkward_reduce_sum_int32_int16_64_1():
     parentsoffset = 0
     lenparents = 3
     outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_sum_int32_int16_64')
-    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
-    outtoptr = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_reduce_sum_uint64_uint64_64_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromptr = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 1
-    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    parentsoffset = 0
-    lenparents = 3
-    outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_sum_uint64_uint64_64')
-    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
-    outtoptr = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_reduce_sum_int32_int32_64_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromptr = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 1
-    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    parentsoffset = 0
-    lenparents = 3
-    outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_sum_int32_int32_64')
-    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
-    outtoptr = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_reduce_sum_uint64_uint8_64_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromptr = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 1
-    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    parentsoffset = 0
-    lenparents = 3
-    outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_sum_uint64_uint8_64')
-    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
-    outtoptr = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_reduce_sum_uint64_uint32_64_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromptr = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 1
-    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    parentsoffset = 0
-    lenparents = 3
-    outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_sum_uint64_uint32_64')
+    funcPy = getattr(tests.kernels, 'awkward_reduce_sum_int64_int64_64')
     funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
     outtoptr = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0]
     for i in range(len(outtoptr)):
@@ -2861,7 +2693,7 @@ def test_awkward_reduce_sum_uint64_uint16_64_1():
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
-def test_awkward_reduce_sum_int64_int64_64_1():
+def test_awkward_reduce_sum_uint32_uint16_64_1():
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromptr = [1, 0, 0, 1, 1, 1, 0]
     fromptroffset = 1
@@ -2869,7 +2701,7 @@ def test_awkward_reduce_sum_int64_int64_64_1():
     parentsoffset = 0
     lenparents = 3
     outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_sum_int64_int64_64')
+    funcPy = getattr(tests.kernels, 'awkward_reduce_sum_uint32_uint16_64')
     funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
     outtoptr = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0]
     for i in range(len(outtoptr)):
@@ -2889,6 +2721,76 @@ def test_awkward_reduce_sum_int32_int8_64_1():
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
+def test_awkward_reduce_sum_uint64_uint32_64_1():
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromptr = [1, 0, 0, 1, 1, 1, 0]
+    fromptroffset = 1
+    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+    parentsoffset = 0
+    lenparents = 3
+    outlength = 30
+    funcPy = getattr(tests.kernels, 'awkward_reduce_sum_uint64_uint32_64')
+    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
+    outtoptr = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
+def test_awkward_reduce_sum_int32_int16_64_1():
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromptr = [1, 0, 0, 1, 1, 1, 0]
+    fromptroffset = 1
+    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+    parentsoffset = 0
+    lenparents = 3
+    outlength = 30
+    funcPy = getattr(tests.kernels, 'awkward_reduce_sum_int32_int16_64')
+    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
+    outtoptr = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
+def test_awkward_reduce_sum_uint32_uint32_64_1():
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromptr = [1, 0, 0, 1, 1, 1, 0]
+    fromptroffset = 1
+    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+    parentsoffset = 0
+    lenparents = 3
+    outlength = 30
+    funcPy = getattr(tests.kernels, 'awkward_reduce_sum_uint32_uint32_64')
+    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
+    outtoptr = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
+def test_awkward_reduce_sum_uint64_uint64_64_1():
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromptr = [1, 0, 0, 1, 1, 1, 0]
+    fromptroffset = 1
+    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+    parentsoffset = 0
+    lenparents = 3
+    outlength = 30
+    funcPy = getattr(tests.kernels, 'awkward_reduce_sum_uint64_uint64_64')
+    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
+    outtoptr = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
+def test_awkward_reduce_sum_int64_int8_64_1():
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromptr = [1, 0, 0, 1, 1, 1, 0]
+    fromptroffset = 1
+    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+    parentsoffset = 0
+    lenparents = 3
+    outlength = 30
+    funcPy = getattr(tests.kernels, 'awkward_reduce_sum_int64_int8_64')
+    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
+    outtoptr = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
 def test_awkward_reduce_sum_int64_int16_64_1():
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromptr = [1, 0, 0, 1, 1, 1, 0]
@@ -2898,6 +2800,20 @@ def test_awkward_reduce_sum_int64_int16_64_1():
     lenparents = 3
     outlength = 30
     funcPy = getattr(tests.kernels, 'awkward_reduce_sum_int64_int16_64')
+    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
+    outtoptr = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
+def test_awkward_reduce_sum_int32_int32_64_1():
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromptr = [1, 0, 0, 1, 1, 1, 0]
+    fromptroffset = 1
+    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+    parentsoffset = 0
+    lenparents = 3
+    outlength = 30
+    funcPy = getattr(tests.kernels, 'awkward_reduce_sum_int32_int32_64')
     funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
     outtoptr = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0]
     for i in range(len(outtoptr)):
@@ -2931,7 +2847,7 @@ def test_awkward_reduce_sum_int32_bool_64_1():
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
-def test_awkward_reduce_sum_bool_int8_64_1():
+def test_awkward_reduce_sum_bool_uint8_64_1():
     toptr = [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
     fromptr = [1, 0, 0, 1, 1, 1, 0]
     fromptroffset = 1
@@ -2939,7 +2855,7 @@ def test_awkward_reduce_sum_bool_int8_64_1():
     parentsoffset = 0
     lenparents = 3
     outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_sum_bool_int8_64')
+    funcPy = getattr(tests.kernels, 'awkward_reduce_sum_bool_uint8_64')
     funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
     outtoptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]
     for i in range(len(outtoptr)):
@@ -2954,20 +2870,6 @@ def test_awkward_reduce_sum_bool_uint16_64_1():
     lenparents = 3
     outlength = 30
     funcPy = getattr(tests.kernels, 'awkward_reduce_sum_bool_uint16_64')
-    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
-    outtoptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_reduce_sum_bool_int16_64_1():
-    toptr = [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
-    fromptr = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 1
-    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    parentsoffset = 0
-    lenparents = 3
-    outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_sum_bool_int16_64')
     funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
     outtoptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]
     for i in range(len(outtoptr)):
@@ -3015,6 +2917,34 @@ def test_awkward_reduce_sum_bool_uint32_64_1():
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
+def test_awkward_reduce_sum_bool_int16_64_1():
+    toptr = [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+    fromptr = [1, 0, 0, 1, 1, 1, 0]
+    fromptroffset = 1
+    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+    parentsoffset = 0
+    lenparents = 3
+    outlength = 30
+    funcPy = getattr(tests.kernels, 'awkward_reduce_sum_bool_int16_64')
+    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
+    outtoptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
+def test_awkward_reduce_sum_bool_int8_64_1():
+    toptr = [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+    fromptr = [1, 0, 0, 1, 1, 1, 0]
+    fromptroffset = 1
+    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+    parentsoffset = 0
+    lenparents = 3
+    outlength = 30
+    funcPy = getattr(tests.kernels, 'awkward_reduce_sum_bool_int8_64')
+    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
+    outtoptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
 def test_awkward_reduce_sum_bool_int64_64_1():
     toptr = [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
     fromptr = [1, 0, 0, 1, 1, 1, 0]
@@ -3029,21 +2959,7 @@ def test_awkward_reduce_sum_bool_int64_64_1():
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
-def test_awkward_reduce_sum_bool_uint8_64_1():
-    toptr = [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
-    fromptr = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 1
-    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    parentsoffset = 0
-    lenparents = 3
-    outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_sum_bool_uint8_64')
-    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
-    outtoptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_reduce_prod_int32_int16_64_1():
+def test_awkward_reduce_prod_int64_int16_64_1():
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromptr = [1, 0, 0, 1, 1, 1, 0]
     fromptroffset = 1
@@ -3051,7 +2967,7 @@ def test_awkward_reduce_prod_int32_int16_64_1():
     parentsoffset = 0
     lenparents = 3
     outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_prod_int32_int16_64')
+    funcPy = getattr(tests.kernels, 'awkward_reduce_prod_int64_int16_64')
     funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
     outtoptr = [1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
     for i in range(len(outtoptr)):
@@ -3071,7 +2987,7 @@ def test_awkward_reduce_prod_int64_int64_64_1():
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
-def test_awkward_reduce_prod_uint32_uint16_64_1():
+def test_awkward_reduce_prod_int32_int16_64_1():
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromptr = [1, 0, 0, 1, 1, 1, 0]
     fromptroffset = 1
@@ -3079,91 +2995,7 @@ def test_awkward_reduce_prod_uint32_uint16_64_1():
     parentsoffset = 0
     lenparents = 3
     outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_prod_uint32_uint16_64')
-    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
-    outtoptr = [1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_reduce_prod_uint32_uint8_64_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromptr = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 1
-    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    parentsoffset = 0
-    lenparents = 3
-    outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_prod_uint32_uint8_64')
-    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
-    outtoptr = [1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_reduce_prod_uint32_uint32_64_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromptr = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 1
-    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    parentsoffset = 0
-    lenparents = 3
-    outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_prod_uint32_uint32_64')
-    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
-    outtoptr = [1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_reduce_prod_int64_int16_64_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromptr = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 1
-    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    parentsoffset = 0
-    lenparents = 3
-    outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_prod_int64_int16_64')
-    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
-    outtoptr = [1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_reduce_prod_uint64_uint8_64_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromptr = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 1
-    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    parentsoffset = 0
-    lenparents = 3
-    outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_prod_uint64_uint8_64')
-    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
-    outtoptr = [1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_reduce_prod_uint64_uint64_64_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromptr = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 1
-    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    parentsoffset = 0
-    lenparents = 3
-    outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_prod_uint64_uint64_64')
-    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
-    outtoptr = [1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_reduce_prod_uint64_uint16_64_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromptr = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 1
-    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    parentsoffset = 0
-    lenparents = 3
-    outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_prod_uint64_uint16_64')
+    funcPy = getattr(tests.kernels, 'awkward_reduce_prod_int32_int16_64')
     funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
     outtoptr = [1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
     for i in range(len(outtoptr)):
@@ -3183,6 +3015,34 @@ def test_awkward_reduce_prod_int64_int8_64_1():
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
+def test_awkward_reduce_prod_uint32_uint32_64_1():
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromptr = [1, 0, 0, 1, 1, 1, 0]
+    fromptroffset = 1
+    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+    parentsoffset = 0
+    lenparents = 3
+    outlength = 30
+    funcPy = getattr(tests.kernels, 'awkward_reduce_prod_uint32_uint32_64')
+    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
+    outtoptr = [1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
+def test_awkward_reduce_prod_uint64_uint64_64_1():
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromptr = [1, 0, 0, 1, 1, 1, 0]
+    fromptroffset = 1
+    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+    parentsoffset = 0
+    lenparents = 3
+    outlength = 30
+    funcPy = getattr(tests.kernels, 'awkward_reduce_prod_uint64_uint64_64')
+    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
+    outtoptr = [1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
 def test_awkward_reduce_prod_int32_int32_64_1():
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromptr = [1, 0, 0, 1, 1, 1, 0]
@@ -3197,7 +3057,7 @@ def test_awkward_reduce_prod_int32_int32_64_1():
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
-def test_awkward_reduce_prod_uint64_uint32_64_1():
+def test_awkward_reduce_prod_uint32_uint8_64_1():
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromptr = [1, 0, 0, 1, 1, 1, 0]
     fromptroffset = 1
@@ -3205,7 +3065,49 @@ def test_awkward_reduce_prod_uint64_uint32_64_1():
     parentsoffset = 0
     lenparents = 3
     outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_prod_uint64_uint32_64')
+    funcPy = getattr(tests.kernels, 'awkward_reduce_prod_uint32_uint8_64')
+    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
+    outtoptr = [1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
+def test_awkward_reduce_prod_uint64_uint8_64_1():
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromptr = [1, 0, 0, 1, 1, 1, 0]
+    fromptroffset = 1
+    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+    parentsoffset = 0
+    lenparents = 3
+    outlength = 30
+    funcPy = getattr(tests.kernels, 'awkward_reduce_prod_uint64_uint8_64')
+    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
+    outtoptr = [1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
+def test_awkward_reduce_prod_uint32_uint16_64_1():
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromptr = [1, 0, 0, 1, 1, 1, 0]
+    fromptroffset = 1
+    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+    parentsoffset = 0
+    lenparents = 3
+    outlength = 30
+    funcPy = getattr(tests.kernels, 'awkward_reduce_prod_uint32_uint16_64')
+    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
+    outtoptr = [1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
+def test_awkward_reduce_prod_uint64_uint16_64_1():
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromptr = [1, 0, 0, 1, 1, 1, 0]
+    fromptroffset = 1
+    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+    parentsoffset = 0
+    lenparents = 3
+    outlength = 30
+    funcPy = getattr(tests.kernels, 'awkward_reduce_prod_uint64_uint16_64')
     funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
     outtoptr = [1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
     for i in range(len(outtoptr)):
@@ -3239,6 +3141,20 @@ def test_awkward_reduce_prod_int64_int32_64_1():
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
+def test_awkward_reduce_prod_uint64_uint32_64_1():
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromptr = [1, 0, 0, 1, 1, 1, 0]
+    fromptroffset = 1
+    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+    parentsoffset = 0
+    lenparents = 3
+    outlength = 30
+    funcPy = getattr(tests.kernels, 'awkward_reduce_prod_uint64_uint32_64')
+    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
+    outtoptr = [1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
 def test_awkward_reduce_prod_int64_bool_64_1():
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromptr = [True, False, True, False, True, True, False, True, False, True]
@@ -3267,119 +3183,21 @@ def test_awkward_reduce_prod_int32_bool_64_1():
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
-def test_awkward_reduce_prod_bool_uint64_64_1():
+def test_awkward_reduce_prod_bool_bool_64_1():
     toptr = [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
-    fromptr = [1, 0, 0, 1, 1, 1, 0]
+    fromptr = [True, False, True, False, True, True, False, True, False, True]
     fromptroffset = 1
     parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
     parentsoffset = 0
     lenparents = 3
     outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_prod_bool_uint64_64')
+    funcPy = getattr(tests.kernels, 'awkward_reduce_prod_bool_bool_64')
     funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
-    outtoptr = [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    outtoptr = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1]
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
-def test_awkward_reduce_prod_bool_uint16_64_1():
-    toptr = [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
-    fromptr = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 1
-    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    parentsoffset = 0
-    lenparents = 3
-    outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_prod_bool_uint16_64')
-    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
-    outtoptr = [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_reduce_prod_bool_uint32_64_1():
-    toptr = [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
-    fromptr = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 1
-    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    parentsoffset = 0
-    lenparents = 3
-    outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_prod_bool_uint32_64')
-    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
-    outtoptr = [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_reduce_prod_bool_uint8_64_1():
-    toptr = [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
-    fromptr = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 1
-    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    parentsoffset = 0
-    lenparents = 3
-    outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_prod_bool_uint8_64')
-    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
-    outtoptr = [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_reduce_prod_bool_int32_64_1():
-    toptr = [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
-    fromptr = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 1
-    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    parentsoffset = 0
-    lenparents = 3
-    outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_prod_bool_int32_64')
-    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
-    outtoptr = [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_reduce_prod_bool_int16_64_1():
-    toptr = [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
-    fromptr = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 1
-    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    parentsoffset = 0
-    lenparents = 3
-    outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_prod_bool_int16_64')
-    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
-    outtoptr = [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_reduce_prod_bool_int8_64_1():
-    toptr = [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
-    fromptr = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 1
-    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    parentsoffset = 0
-    lenparents = 3
-    outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_prod_bool_int8_64')
-    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
-    outtoptr = [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_reduce_prod_bool_int64_64_1():
-    toptr = [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
-    fromptr = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 1
-    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    parentsoffset = 0
-    lenparents = 3
-    outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_prod_bool_int64_64')
-    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength)
-    outtoptr = [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_reduce_min_int8_int8_64_1():
+def test_awkward_reduce_min_uint8_uint8_64_1():
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromptr = [1, 0, 0, 1, 1, 1, 0]
     fromptroffset = 1
@@ -3388,37 +3206,7 @@ def test_awkward_reduce_min_int8_int8_64_1():
     lenparents = 3
     outlength = 30
     identity = 3
-    funcPy = getattr(tests.kernels, 'awkward_reduce_min_int8_int8_64')
-    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength, identity)
-    outtoptr = [3, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1, 3, 3]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_reduce_min_uint16_uint16_64_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromptr = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 1
-    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    parentsoffset = 0
-    lenparents = 3
-    outlength = 30
-    identity = 3
-    funcPy = getattr(tests.kernels, 'awkward_reduce_min_uint16_uint16_64')
-    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength, identity)
-    outtoptr = [3, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1, 3, 3]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_reduce_min_int16_int16_64_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromptr = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 1
-    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    parentsoffset = 0
-    lenparents = 3
-    outlength = 30
-    identity = 3
-    funcPy = getattr(tests.kernels, 'awkward_reduce_min_int16_int16_64')
+    funcPy = getattr(tests.kernels, 'awkward_reduce_min_uint8_uint8_64')
     funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength, identity)
     outtoptr = [3, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1, 3, 3]
     for i in range(len(outtoptr)):
@@ -3439,7 +3227,7 @@ def test_awkward_reduce_min_uint32_uint32_64_1():
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
-def test_awkward_reduce_min_uint8_uint8_64_1():
+def test_awkward_reduce_min_int8_int8_64_1():
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromptr = [1, 0, 0, 1, 1, 1, 0]
     fromptroffset = 1
@@ -3448,7 +3236,7 @@ def test_awkward_reduce_min_uint8_uint8_64_1():
     lenparents = 3
     outlength = 30
     identity = 3
-    funcPy = getattr(tests.kernels, 'awkward_reduce_min_uint8_uint8_64')
+    funcPy = getattr(tests.kernels, 'awkward_reduce_min_int8_int8_64')
     funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength, identity)
     outtoptr = [3, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1, 3, 3]
     for i in range(len(outtoptr)):
@@ -3469,6 +3257,21 @@ def test_awkward_reduce_min_int64_int64_64_1():
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
+def test_awkward_reduce_min_int16_int16_64_1():
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromptr = [1, 0, 0, 1, 1, 1, 0]
+    fromptroffset = 1
+    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+    parentsoffset = 0
+    lenparents = 3
+    outlength = 30
+    identity = 3
+    funcPy = getattr(tests.kernels, 'awkward_reduce_min_int16_int16_64')
+    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength, identity)
+    outtoptr = [3, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1, 3, 3]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
 def test_awkward_reduce_min_int32_int32_64_1():
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromptr = [1, 0, 0, 1, 1, 1, 0]
@@ -3479,6 +3282,21 @@ def test_awkward_reduce_min_int32_int32_64_1():
     outlength = 30
     identity = 3
     funcPy = getattr(tests.kernels, 'awkward_reduce_min_int32_int32_64')
+    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength, identity)
+    outtoptr = [3, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1, 3, 3]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
+def test_awkward_reduce_min_uint16_uint16_64_1():
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromptr = [1, 0, 0, 1, 1, 1, 0]
+    fromptroffset = 1
+    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+    parentsoffset = 0
+    lenparents = 3
+    outlength = 30
+    identity = 3
+    funcPy = getattr(tests.kernels, 'awkward_reduce_min_uint16_uint16_64')
     funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength, identity)
     outtoptr = [3, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1, 3, 3]
     for i in range(len(outtoptr)):
@@ -3514,7 +3332,7 @@ def test_awkward_reduce_max_int64_int64_64_1():
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
-def test_awkward_reduce_max_int8_int8_64_1():
+def test_awkward_reduce_max_uint16_uint16_64_1():
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromptr = [1, 0, 0, 1, 1, 1, 0]
     fromptroffset = 1
@@ -3523,7 +3341,7 @@ def test_awkward_reduce_max_int8_int8_64_1():
     lenparents = 3
     outlength = 30
     identity = 3
-    funcPy = getattr(tests.kernels, 'awkward_reduce_max_int8_int8_64')
+    funcPy = getattr(tests.kernels, 'awkward_reduce_max_uint16_uint16_64')
     funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength, identity)
     outtoptr = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
     for i in range(len(outtoptr)):
@@ -3539,21 +3357,6 @@ def test_awkward_reduce_max_int32_int32_64_1():
     outlength = 30
     identity = 3
     funcPy = getattr(tests.kernels, 'awkward_reduce_max_int32_int32_64')
-    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength, identity)
-    outtoptr = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_reduce_max_uint8_uint8_64_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromptr = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 1
-    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    parentsoffset = 0
-    lenparents = 3
-    outlength = 30
-    identity = 3
-    funcPy = getattr(tests.kernels, 'awkward_reduce_max_uint8_uint8_64')
     funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength, identity)
     outtoptr = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
     for i in range(len(outtoptr)):
@@ -3589,6 +3392,36 @@ def test_awkward_reduce_max_uint64_uint64_64_1():
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
+def test_awkward_reduce_max_int8_int8_64_1():
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromptr = [1, 0, 0, 1, 1, 1, 0]
+    fromptroffset = 1
+    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+    parentsoffset = 0
+    lenparents = 3
+    outlength = 30
+    identity = 3
+    funcPy = getattr(tests.kernels, 'awkward_reduce_max_int8_int8_64')
+    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength, identity)
+    outtoptr = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
+def test_awkward_reduce_max_uint8_uint8_64_1():
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromptr = [1, 0, 0, 1, 1, 1, 0]
+    fromptroffset = 1
+    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+    parentsoffset = 0
+    lenparents = 3
+    outlength = 30
+    identity = 3
+    funcPy = getattr(tests.kernels, 'awkward_reduce_max_uint8_uint8_64')
+    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength, identity)
+    outtoptr = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
 def test_awkward_reduce_max_uint32_uint32_64_1():
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromptr = [1, 0, 0, 1, 1, 1, 0]
@@ -3599,21 +3432,6 @@ def test_awkward_reduce_max_uint32_uint32_64_1():
     outlength = 30
     identity = 3
     funcPy = getattr(tests.kernels, 'awkward_reduce_max_uint32_uint32_64')
-    funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength, identity)
-    outtoptr = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_reduce_max_uint16_uint16_64_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromptr = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 1
-    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    parentsoffset = 0
-    lenparents = 3
-    outlength = 30
-    identity = 3
-    funcPy = getattr(tests.kernels, 'awkward_reduce_max_uint16_uint16_64')
     funcPy(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength, identity)
     outtoptr = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
     for i in range(len(outtoptr)):
@@ -3635,7 +3453,7 @@ def test_awkward_reduce_argmin_int32_64_1():
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
-def test_awkward_reduce_argmin_uint16_64_1():
+def test_awkward_reduce_argmin_uint64_64_1():
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromptr = [1, 0, 0, 1, 1, 1, 0]
     fromptroffset = 1
@@ -3645,55 +3463,7 @@ def test_awkward_reduce_argmin_uint16_64_1():
     parentsoffset = 0
     lenparents = 3
     outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_argmin_uint16_64')
-    funcPy(toptr, fromptr, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength)
-    outtoptr = [-1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1, -1]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_reduce_argmin_uint8_64_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromptr = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 1
-    starts = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
-    startsoffset = 0
-    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    parentsoffset = 0
-    lenparents = 3
-    outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_argmin_uint8_64')
-    funcPy(toptr, fromptr, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength)
-    outtoptr = [-1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1, -1]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_reduce_argmin_int64_64_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromptr = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 1
-    starts = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
-    startsoffset = 0
-    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    parentsoffset = 0
-    lenparents = 3
-    outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_argmin_int64_64')
-    funcPy(toptr, fromptr, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength)
-    outtoptr = [-1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1, -1]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_reduce_argmin_uint32_64_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromptr = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 1
-    starts = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
-    startsoffset = 0
-    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    parentsoffset = 0
-    lenparents = 3
-    outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_argmin_uint32_64')
+    funcPy = getattr(tests.kernels, 'awkward_reduce_argmin_uint64_64')
     funcPy(toptr, fromptr, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength)
     outtoptr = [-1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1, -1]
     for i in range(len(outtoptr)):
@@ -3715,22 +3485,6 @@ def test_awkward_reduce_argmin_int8_64_1():
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
-def test_awkward_reduce_argmin_uint64_64_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromptr = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 1
-    starts = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
-    startsoffset = 0
-    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    parentsoffset = 0
-    lenparents = 3
-    outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_argmin_uint64_64')
-    funcPy(toptr, fromptr, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength)
-    outtoptr = [-1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1, -1]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
 def test_awkward_reduce_argmin_int16_64_1():
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromptr = [1, 0, 0, 1, 1, 1, 0]
@@ -3742,6 +3496,70 @@ def test_awkward_reduce_argmin_int16_64_1():
     lenparents = 3
     outlength = 30
     funcPy = getattr(tests.kernels, 'awkward_reduce_argmin_int16_64')
+    funcPy(toptr, fromptr, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength)
+    outtoptr = [-1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1, -1]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
+def test_awkward_reduce_argmin_uint8_64_1():
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromptr = [1, 0, 0, 1, 1, 1, 0]
+    fromptroffset = 1
+    starts = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+    startsoffset = 0
+    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+    parentsoffset = 0
+    lenparents = 3
+    outlength = 30
+    funcPy = getattr(tests.kernels, 'awkward_reduce_argmin_uint8_64')
+    funcPy(toptr, fromptr, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength)
+    outtoptr = [-1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1, -1]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
+def test_awkward_reduce_argmin_uint16_64_1():
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromptr = [1, 0, 0, 1, 1, 1, 0]
+    fromptroffset = 1
+    starts = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+    startsoffset = 0
+    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+    parentsoffset = 0
+    lenparents = 3
+    outlength = 30
+    funcPy = getattr(tests.kernels, 'awkward_reduce_argmin_uint16_64')
+    funcPy(toptr, fromptr, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength)
+    outtoptr = [-1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1, -1]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
+def test_awkward_reduce_argmin_uint32_64_1():
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromptr = [1, 0, 0, 1, 1, 1, 0]
+    fromptroffset = 1
+    starts = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+    startsoffset = 0
+    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+    parentsoffset = 0
+    lenparents = 3
+    outlength = 30
+    funcPy = getattr(tests.kernels, 'awkward_reduce_argmin_uint32_64')
+    funcPy(toptr, fromptr, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength)
+    outtoptr = [-1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1, -1]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
+def test_awkward_reduce_argmin_int64_64_1():
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromptr = [1, 0, 0, 1, 1, 1, 0]
+    fromptroffset = 1
+    starts = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+    startsoffset = 0
+    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+    parentsoffset = 0
+    lenparents = 3
+    outlength = 30
+    funcPy = getattr(tests.kernels, 'awkward_reduce_argmin_int64_64')
     funcPy(toptr, fromptr, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength)
     outtoptr = [-1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1, -1]
     for i in range(len(outtoptr)):
@@ -3763,22 +3581,6 @@ def test_awkward_reduce_argmin_bool_64_1():
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
-def test_awkward_reduce_argmax_uint8_64_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromptr = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 1
-    starts = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
-    startsoffset = 0
-    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    parentsoffset = 0
-    lenparents = 3
-    outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_argmax_uint8_64')
-    funcPy(toptr, fromptr, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength)
-    outtoptr = [-1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1, -1]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
 def test_awkward_reduce_argmax_uint64_64_1():
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromptr = [1, 0, 0, 1, 1, 1, 0]
@@ -3790,54 +3592,6 @@ def test_awkward_reduce_argmax_uint64_64_1():
     lenparents = 3
     outlength = 30
     funcPy = getattr(tests.kernels, 'awkward_reduce_argmax_uint64_64')
-    funcPy(toptr, fromptr, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength)
-    outtoptr = [-1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1, -1]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_reduce_argmax_uint32_64_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromptr = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 1
-    starts = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
-    startsoffset = 0
-    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    parentsoffset = 0
-    lenparents = 3
-    outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_argmax_uint32_64')
-    funcPy(toptr, fromptr, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength)
-    outtoptr = [-1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1, -1]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_reduce_argmax_int32_64_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromptr = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 1
-    starts = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
-    startsoffset = 0
-    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    parentsoffset = 0
-    lenparents = 3
-    outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_argmax_int32_64')
-    funcPy(toptr, fromptr, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength)
-    outtoptr = [-1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1, -1]
-    for i in range(len(outtoptr)):
-        assert toptr[i] == outtoptr[i]
-
-def test_awkward_reduce_argmax_uint16_64_1():
-    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromptr = [1, 0, 0, 1, 1, 1, 0]
-    fromptroffset = 1
-    starts = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
-    startsoffset = 0
-    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    parentsoffset = 0
-    lenparents = 3
-    outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_argmax_uint16_64')
     funcPy(toptr, fromptr, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength)
     outtoptr = [-1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1, -1]
     for i in range(len(outtoptr)):
@@ -3859,7 +3613,7 @@ def test_awkward_reduce_argmax_int64_64_1():
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
-def test_awkward_reduce_argmax_int16_64_1():
+def test_awkward_reduce_argmax_int32_64_1():
     toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromptr = [1, 0, 0, 1, 1, 1, 0]
     fromptroffset = 1
@@ -3869,7 +3623,39 @@ def test_awkward_reduce_argmax_int16_64_1():
     parentsoffset = 0
     lenparents = 3
     outlength = 30
-    funcPy = getattr(tests.kernels, 'awkward_reduce_argmax_int16_64')
+    funcPy = getattr(tests.kernels, 'awkward_reduce_argmax_int32_64')
+    funcPy(toptr, fromptr, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength)
+    outtoptr = [-1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1, -1]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
+def test_awkward_reduce_argmax_uint8_64_1():
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromptr = [1, 0, 0, 1, 1, 1, 0]
+    fromptroffset = 1
+    starts = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+    startsoffset = 0
+    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+    parentsoffset = 0
+    lenparents = 3
+    outlength = 30
+    funcPy = getattr(tests.kernels, 'awkward_reduce_argmax_uint8_64')
+    funcPy(toptr, fromptr, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength)
+    outtoptr = [-1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1, -1]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
+def test_awkward_reduce_argmax_uint16_64_1():
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromptr = [1, 0, 0, 1, 1, 1, 0]
+    fromptroffset = 1
+    starts = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+    startsoffset = 0
+    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+    parentsoffset = 0
+    lenparents = 3
+    outlength = 30
+    funcPy = getattr(tests.kernels, 'awkward_reduce_argmax_uint16_64')
     funcPy(toptr, fromptr, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength)
     outtoptr = [-1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1, -1]
     for i in range(len(outtoptr)):
@@ -3886,6 +3672,38 @@ def test_awkward_reduce_argmax_int8_64_1():
     lenparents = 3
     outlength = 30
     funcPy = getattr(tests.kernels, 'awkward_reduce_argmax_int8_64')
+    funcPy(toptr, fromptr, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength)
+    outtoptr = [-1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1, -1]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
+def test_awkward_reduce_argmax_int16_64_1():
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromptr = [1, 0, 0, 1, 1, 1, 0]
+    fromptroffset = 1
+    starts = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+    startsoffset = 0
+    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+    parentsoffset = 0
+    lenparents = 3
+    outlength = 30
+    funcPy = getattr(tests.kernels, 'awkward_reduce_argmax_int16_64')
+    funcPy(toptr, fromptr, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength)
+    outtoptr = [-1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1, -1]
+    for i in range(len(outtoptr)):
+        assert toptr[i] == outtoptr[i]
+
+def test_awkward_reduce_argmax_uint32_64_1():
+    toptr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromptr = [1, 0, 0, 1, 1, 1, 0]
+    fromptroffset = 1
+    starts = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+    startsoffset = 0
+    parents = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+    parentsoffset = 0
+    lenparents = 3
+    outlength = 30
+    funcPy = getattr(tests.kernels, 'awkward_reduce_argmax_uint32_64')
     funcPy(toptr, fromptr, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength)
     outtoptr = [-1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1, -1]
     for i in range(len(outtoptr)):
@@ -4006,7 +3824,7 @@ def test_awkward_ListOffsetArray_reduce_local_outoffsets_64_1():
     for i in range(len(outoutoffsets)):
         assert outoffsets[i] == outoutoffsets[i]
 
-def test_awkward_IndexedArray64_reduce_next_64_1():
+def test_awkward_IndexedArrayU32_reduce_next_64_1():
     nextcarry = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     nextparents = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     outindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -4015,7 +3833,7 @@ def test_awkward_IndexedArray64_reduce_next_64_1():
     parents = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     parentsoffset = 0
     length = 3
-    funcPy = getattr(tests.kernels, 'awkward_IndexedArray64_reduce_next_64')
+    funcPy = getattr(tests.kernels, 'awkward_IndexedArrayU32_reduce_next_64')
     funcPy(nextcarry, nextparents, outindex, index, indexoffset, parents, parentsoffset, length)
     outnextcarry = [0, 0, 1]
     for i in range(len(outnextcarry)):
@@ -4027,7 +3845,7 @@ def test_awkward_IndexedArray64_reduce_next_64_1():
     for i in range(len(outoutindex)):
         assert outindex[i] == outoutindex[i]
 
-def test_awkward_IndexedArrayU32_reduce_next_64_1():
+def test_awkward_IndexedArray64_reduce_next_64_1():
     nextcarry = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     nextparents = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     outindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -4036,7 +3854,7 @@ def test_awkward_IndexedArrayU32_reduce_next_64_1():
     parents = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     parentsoffset = 0
     length = 3
-    funcPy = getattr(tests.kernels, 'awkward_IndexedArrayU32_reduce_next_64')
+    funcPy = getattr(tests.kernels, 'awkward_IndexedArray64_reduce_next_64')
     funcPy(nextcarry, nextparents, outindex, index, indexoffset, parents, parentsoffset, length)
     outnextcarry = [0, 0, 1]
     for i in range(len(outnextcarry)):
@@ -4168,6 +3986,19 @@ def test_awkward_IndexU8_carry_64_1():
     for i in range(len(outtoindex)):
         assert toindex[i] == outtoindex[i]
 
+def test_awkward_Index32_carry_64_1():
+    toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromindex = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+    carry = [1, 0, 0, 1, 1, 1, 0]
+    fromindexoffset = 0
+    lenfromindex = 3
+    length = 3
+    funcPy = getattr(tests.kernels, 'awkward_Index32_carry_64')
+    funcPy(toindex, fromindex, carry, fromindexoffset, lenfromindex, length)
+    outtoindex = [1, 14, 14]
+    for i in range(len(outtoindex)):
+        assert toindex[i] == outtoindex[i]
+
 def test_awkward_Index64_carry_64_1():
     toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromindex = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
@@ -4207,26 +4038,13 @@ def test_awkward_Index8_carry_64_1():
     for i in range(len(outtoindex)):
         assert toindex[i] == outtoindex[i]
 
-def test_awkward_Index32_carry_64_1():
-    toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromindex = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    carry = [1, 0, 0, 1, 1, 1, 0]
-    fromindexoffset = 0
-    lenfromindex = 3
-    length = 3
-    funcPy = getattr(tests.kernels, 'awkward_Index32_carry_64')
-    funcPy(toindex, fromindex, carry, fromindexoffset, lenfromindex, length)
-    outtoindex = [1, 14, 14]
-    for i in range(len(outtoindex)):
-        assert toindex[i] == outtoindex[i]
-
-def test_awkward_IndexU32_carry_nocheck_64_1():
+def test_awkward_Index64_carry_nocheck_64_1():
     toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromindex = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
     carry = [1, 0, 0, 1, 1, 1, 0]
     fromindexoffset = 0
     length = 3
-    funcPy = getattr(tests.kernels, 'awkward_IndexU32_carry_nocheck_64')
+    funcPy = getattr(tests.kernels, 'awkward_Index64_carry_nocheck_64')
     funcPy(toindex, fromindex, carry, fromindexoffset, length)
     outtoindex = [1, 14, 14]
     for i in range(len(outtoindex)):
@@ -4256,6 +4074,18 @@ def test_awkward_IndexU8_carry_nocheck_64_1():
     for i in range(len(outtoindex)):
         assert toindex[i] == outtoindex[i]
 
+def test_awkward_IndexU32_carry_nocheck_64_1():
+    toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromindex = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+    carry = [1, 0, 0, 1, 1, 1, 0]
+    fromindexoffset = 0
+    length = 3
+    funcPy = getattr(tests.kernels, 'awkward_IndexU32_carry_nocheck_64')
+    funcPy(toindex, fromindex, carry, fromindexoffset, length)
+    outtoindex = [1, 14, 14]
+    for i in range(len(outtoindex)):
+        assert toindex[i] == outtoindex[i]
+
 def test_awkward_Index8_carry_nocheck_64_1():
     toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromindex = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
@@ -4263,18 +4093,6 @@ def test_awkward_Index8_carry_nocheck_64_1():
     fromindexoffset = 0
     length = 3
     funcPy = getattr(tests.kernels, 'awkward_Index8_carry_nocheck_64')
-    funcPy(toindex, fromindex, carry, fromindexoffset, length)
-    outtoindex = [1, 14, 14]
-    for i in range(len(outtoindex)):
-        assert toindex[i] == outtoindex[i]
-
-def test_awkward_Index64_carry_nocheck_64_1():
-    toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromindex = [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-    carry = [1, 0, 0, 1, 1, 1, 0]
-    fromindexoffset = 0
-    length = 3
-    funcPy = getattr(tests.kernels, 'awkward_Index64_carry_nocheck_64')
     funcPy(toindex, fromindex, carry, fromindexoffset, length)
     outtoindex = [1, 14, 14]
     for i in range(len(outtoindex)):
@@ -4469,20 +4287,6 @@ def test_awkward_NumpyArray_getitem_boolean_nonzero_64_1():
     for i in range(len(outtoptr)):
         assert toptr[i] == outtoptr[i]
 
-def test_awkward_ListArray32_getitem_next_at_64_1():
-    tocarry = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromstarts = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
-    fromstops = [3, 1, 3, 2, 3]
-    lenstarts = 3
-    startsoffset = 0
-    stopsoffset = 0
-    at = 0
-    funcPy = getattr(tests.kernels, 'awkward_ListArray32_getitem_next_at_64')
-    funcPy(tocarry, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset, at)
-    outtocarry = [2, 0, 2]
-    for i in range(len(outtocarry)):
-        assert tocarry[i] == outtocarry[i]
-
 def test_awkward_ListArray64_getitem_next_at_64_1():
     tocarry = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromstarts = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
@@ -4511,15 +4315,19 @@ def test_awkward_ListArrayU32_getitem_next_at_64_1():
     for i in range(len(outtocarry)):
         assert tocarry[i] == outtocarry[i]
 
-def test_awkward_ListArrayU32_getitem_next_range_counts_64_1():
-    total = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromoffsets = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+def test_awkward_ListArray32_getitem_next_at_64_1():
+    tocarry = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromstarts = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+    fromstops = [3, 1, 3, 2, 3]
     lenstarts = 3
-    funcPy = getattr(tests.kernels, 'awkward_ListArrayU32_getitem_next_range_counts_64')
-    funcPy(total, fromoffsets, lenstarts)
-    outtotal = [-1]
-    for i in range(len(outtotal)):
-        assert total[i] == outtotal[i]
+    startsoffset = 0
+    stopsoffset = 0
+    at = 0
+    funcPy = getattr(tests.kernels, 'awkward_ListArray32_getitem_next_at_64')
+    funcPy(tocarry, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset, at)
+    outtocarry = [2, 0, 2]
+    for i in range(len(outtocarry)):
+        assert tocarry[i] == outtocarry[i]
 
 def test_awkward_ListArray64_getitem_next_range_counts_64_1():
     total = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -4541,12 +4349,22 @@ def test_awkward_ListArray32_getitem_next_range_counts_64_1():
     for i in range(len(outtotal)):
         assert total[i] == outtotal[i]
 
-def test_awkward_ListArray32_getitem_next_range_spreadadvanced_64_1():
+def test_awkward_ListArrayU32_getitem_next_range_counts_64_1():
+    total = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromoffsets = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+    lenstarts = 3
+    funcPy = getattr(tests.kernels, 'awkward_ListArrayU32_getitem_next_range_counts_64')
+    funcPy(total, fromoffsets, lenstarts)
+    outtotal = [-1]
+    for i in range(len(outtotal)):
+        assert total[i] == outtotal[i]
+
+def test_awkward_ListArrayU32_getitem_next_range_spreadadvanced_64_1():
     toadvanced = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromadvanced = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
     fromoffsets = [1, 2, 3, 4, 5, 6]
     lenstarts = 3
-    funcPy = getattr(tests.kernels, 'awkward_ListArray32_getitem_next_range_spreadadvanced_64')
+    funcPy = getattr(tests.kernels, 'awkward_ListArrayU32_getitem_next_range_spreadadvanced_64')
     funcPy(toadvanced, fromadvanced, fromoffsets, lenstarts)
     outtoadvanced = [0, 2, 0, 2]
     for i in range(len(outtoadvanced)):
@@ -4563,34 +4381,14 @@ def test_awkward_ListArray64_getitem_next_range_spreadadvanced_64_1():
     for i in range(len(outtoadvanced)):
         assert toadvanced[i] == outtoadvanced[i]
 
-def test_awkward_ListArrayU32_getitem_next_range_spreadadvanced_64_1():
+def test_awkward_ListArray32_getitem_next_range_spreadadvanced_64_1():
     toadvanced = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromadvanced = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
     fromoffsets = [1, 2, 3, 4, 5, 6]
     lenstarts = 3
-    funcPy = getattr(tests.kernels, 'awkward_ListArrayU32_getitem_next_range_spreadadvanced_64')
+    funcPy = getattr(tests.kernels, 'awkward_ListArray32_getitem_next_range_spreadadvanced_64')
     funcPy(toadvanced, fromadvanced, fromoffsets, lenstarts)
     outtoadvanced = [0, 2, 0, 2]
-    for i in range(len(outtoadvanced)):
-        assert toadvanced[i] == outtoadvanced[i]
-
-def test_awkward_ListArrayU32_getitem_next_array_64_1():
-    tocarry = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    toadvanced = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromstarts = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
-    fromstops = [3, 1, 3, 2, 3]
-    fromarray = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    startsoffset = 0
-    stopsoffset = 0
-    lenstarts = 3
-    lenarray = 3
-    lencontent = 3
-    funcPy = getattr(tests.kernels, 'awkward_ListArrayU32_getitem_next_array_64')
-    funcPy(tocarry, toadvanced, fromstarts, fromstops, fromarray, startsoffset, stopsoffset, lenstarts, lenarray, lencontent)
-    outtocarry = [2, 2, 2, 0, 0, 0, 2, 2, 2]
-    for i in range(len(outtocarry)):
-        assert tocarry[i] == outtocarry[i]
-    outtoadvanced = [0, 1, 2, 0, 1, 2, 0, 1, 2]
     for i in range(len(outtoadvanced)):
         assert toadvanced[i] == outtoadvanced[i]
 
@@ -4606,6 +4404,26 @@ def test_awkward_ListArray32_getitem_next_array_64_1():
     lenarray = 3
     lencontent = 3
     funcPy = getattr(tests.kernels, 'awkward_ListArray32_getitem_next_array_64')
+    funcPy(tocarry, toadvanced, fromstarts, fromstops, fromarray, startsoffset, stopsoffset, lenstarts, lenarray, lencontent)
+    outtocarry = [2, 2, 2, 0, 0, 0, 2, 2, 2]
+    for i in range(len(outtocarry)):
+        assert tocarry[i] == outtocarry[i]
+    outtoadvanced = [0, 1, 2, 0, 1, 2, 0, 1, 2]
+    for i in range(len(outtoadvanced)):
+        assert toadvanced[i] == outtoadvanced[i]
+
+def test_awkward_ListArrayU32_getitem_next_array_64_1():
+    tocarry = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    toadvanced = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromstarts = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+    fromstops = [3, 1, 3, 2, 3]
+    fromarray = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    startsoffset = 0
+    stopsoffset = 0
+    lenstarts = 3
+    lenarray = 3
+    lencontent = 3
+    funcPy = getattr(tests.kernels, 'awkward_ListArrayU32_getitem_next_array_64')
     funcPy(tocarry, toadvanced, fromstarts, fromstops, fromarray, startsoffset, stopsoffset, lenstarts, lenarray, lencontent)
     outtocarry = [2, 2, 2, 0, 0, 0, 2, 2, 2]
     for i in range(len(outtocarry)):
@@ -4631,27 +4449,6 @@ def test_awkward_ListArray64_getitem_next_array_64_1():
     for i in range(len(outtocarry)):
         assert tocarry[i] == outtocarry[i]
     outtoadvanced = [0, 1, 2, 0, 1, 2, 0, 1, 2]
-    for i in range(len(outtoadvanced)):
-        assert toadvanced[i] == outtoadvanced[i]
-
-def test_awkward_ListArrayU32_getitem_next_array_advanced_64_1():
-    tocarry = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    toadvanced = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromstarts = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
-    fromstops = [3, 1, 3, 2, 3]
-    fromarray = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromadvanced = [1, 2, 3, 4, 5, 6]
-    startsoffset = 0
-    stopsoffset = 0
-    lenstarts = 3
-    lenarray = 3
-    lencontent = 3
-    funcPy = getattr(tests.kernels, 'awkward_ListArrayU32_getitem_next_array_advanced_64')
-    funcPy(tocarry, toadvanced, fromstarts, fromstops, fromarray, fromadvanced, startsoffset, stopsoffset, lenstarts, lenarray, lencontent)
-    outtocarry = [2, 0, 2]
-    for i in range(len(outtocarry)):
-        assert tocarry[i] == outtocarry[i]
-    outtoadvanced = [0, 1, 2]
     for i in range(len(outtoadvanced)):
         assert toadvanced[i] == outtoadvanced[i]
 
@@ -4697,24 +4494,26 @@ def test_awkward_ListArray64_getitem_next_array_advanced_64_1():
     for i in range(len(outtoadvanced)):
         assert toadvanced[i] == outtoadvanced[i]
 
-def test_awkward_ListArrayU32_getitem_carry_64_1():
-    tostarts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    tostops = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+def test_awkward_ListArrayU32_getitem_next_array_advanced_64_1():
+    tocarry = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    toadvanced = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromstarts = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
     fromstops = [3, 1, 3, 2, 3]
-    fromcarry = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromarray = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromadvanced = [1, 2, 3, 4, 5, 6]
     startsoffset = 0
     stopsoffset = 0
     lenstarts = 3
-    lencarry = 3
-    funcPy = getattr(tests.kernels, 'awkward_ListArrayU32_getitem_carry_64')
-    funcPy(tostarts, tostops, fromstarts, fromstops, fromcarry, startsoffset, stopsoffset, lenstarts, lencarry)
-    outtostarts = [2.0, 2.0, 2.0]
-    for i in range(len(outtostarts)):
-        assert tostarts[i] == outtostarts[i]
-    outtostops = [3.0, 3.0, 3.0]
-    for i in range(len(outtostops)):
-        assert tostops[i] == outtostops[i]
+    lenarray = 3
+    lencontent = 3
+    funcPy = getattr(tests.kernels, 'awkward_ListArrayU32_getitem_next_array_advanced_64')
+    funcPy(tocarry, toadvanced, fromstarts, fromstops, fromarray, fromadvanced, startsoffset, stopsoffset, lenstarts, lenarray, lencontent)
+    outtocarry = [2, 0, 2]
+    for i in range(len(outtocarry)):
+        assert tocarry[i] == outtocarry[i]
+    outtoadvanced = [0, 1, 2]
+    for i in range(len(outtoadvanced)):
+        assert toadvanced[i] == outtoadvanced[i]
 
 def test_awkward_ListArray64_getitem_carry_64_1():
     tostarts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -4746,6 +4545,25 @@ def test_awkward_ListArray32_getitem_carry_64_1():
     lenstarts = 3
     lencarry = 3
     funcPy = getattr(tests.kernels, 'awkward_ListArray32_getitem_carry_64')
+    funcPy(tostarts, tostops, fromstarts, fromstops, fromcarry, startsoffset, stopsoffset, lenstarts, lencarry)
+    outtostarts = [2.0, 2.0, 2.0]
+    for i in range(len(outtostarts)):
+        assert tostarts[i] == outtostarts[i]
+    outtostops = [3.0, 3.0, 3.0]
+    for i in range(len(outtostops)):
+        assert tostops[i] == outtostops[i]
+
+def test_awkward_ListArrayU32_getitem_carry_64_1():
+    tostarts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    tostops = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromstarts = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+    fromstops = [3, 1, 3, 2, 3]
+    fromcarry = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    startsoffset = 0
+    stopsoffset = 0
+    lenstarts = 3
+    lencarry = 3
+    funcPy = getattr(tests.kernels, 'awkward_ListArrayU32_getitem_carry_64')
     funcPy(tostarts, tostops, fromstarts, fromstops, fromcarry, startsoffset, stopsoffset, lenstarts, lencarry)
     outtostarts = [2.0, 2.0, 2.0]
     for i in range(len(outtostarts)):
@@ -4855,6 +4673,17 @@ def test_awkward_IndexedArray64_numnull_1():
     for i in range(len(outnumnull)):
         assert numnull[i] == outnumnull[i]
 
+def test_awkward_IndexedArray32_numnull_1():
+    numnull = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromindex = [1, 0, 0, 1, 1, 1, 0]
+    indexoffset = 1
+    lenindex = 3
+    funcPy = getattr(tests.kernels, 'awkward_IndexedArray32_numnull')
+    funcPy(numnull, fromindex, indexoffset, lenindex)
+    outnumnull = [0]
+    for i in range(len(outnumnull)):
+        assert numnull[i] == outnumnull[i]
+
 def test_awkward_IndexedArrayU32_numnull_1():
     numnull = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromindex = [1, 0, 0, 1, 1, 1, 0]
@@ -4866,16 +4695,21 @@ def test_awkward_IndexedArrayU32_numnull_1():
     for i in range(len(outnumnull)):
         assert numnull[i] == outnumnull[i]
 
-def test_awkward_IndexedArray32_numnull_1():
-    numnull = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+def test_awkward_IndexedArrayU32_getitem_nextcarry_outindex_64_1():
+    tocarry = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromindex = [1, 0, 0, 1, 1, 1, 0]
     indexoffset = 1
     lenindex = 3
-    funcPy = getattr(tests.kernels, 'awkward_IndexedArray32_numnull')
-    funcPy(numnull, fromindex, indexoffset, lenindex)
-    outnumnull = [0]
-    for i in range(len(outnumnull)):
-        assert numnull[i] == outnumnull[i]
+    lencontent = 3
+    funcPy = getattr(tests.kernels, 'awkward_IndexedArrayU32_getitem_nextcarry_outindex_64')
+    funcPy(tocarry, toindex, fromindex, indexoffset, lenindex, lencontent)
+    outtocarry = [0, 0, 1]
+    for i in range(len(outtocarry)):
+        assert tocarry[i] == outtocarry[i]
+    outtoindex = [0.0, 1.0, 2.0]
+    for i in range(len(outtoindex)):
+        assert toindex[i] == outtoindex[i]
 
 def test_awkward_IndexedArray32_getitem_nextcarry_outindex_64_1():
     tocarry = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -4901,38 +4735,6 @@ def test_awkward_IndexedArray64_getitem_nextcarry_outindex_64_1():
     lenindex = 3
     lencontent = 3
     funcPy = getattr(tests.kernels, 'awkward_IndexedArray64_getitem_nextcarry_outindex_64')
-    funcPy(tocarry, toindex, fromindex, indexoffset, lenindex, lencontent)
-    outtocarry = [0, 0, 1]
-    for i in range(len(outtocarry)):
-        assert tocarry[i] == outtocarry[i]
-    outtoindex = [0.0, 1.0, 2.0]
-    for i in range(len(outtoindex)):
-        assert toindex[i] == outtoindex[i]
-
-def test_awkward_IndexedArrayU32_getitem_nextcarry_outindex_64_1():
-    tocarry = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromindex = [1, 0, 0, 1, 1, 1, 0]
-    indexoffset = 1
-    lenindex = 3
-    lencontent = 3
-    funcPy = getattr(tests.kernels, 'awkward_IndexedArrayU32_getitem_nextcarry_outindex_64')
-    funcPy(tocarry, toindex, fromindex, indexoffset, lenindex, lencontent)
-    outtocarry = [0, 0, 1]
-    for i in range(len(outtocarry)):
-        assert tocarry[i] == outtocarry[i]
-    outtoindex = [0.0, 1.0, 2.0]
-    for i in range(len(outtoindex)):
-        assert toindex[i] == outtoindex[i]
-
-def test_awkward_IndexedArray32_getitem_nextcarry_outindex_mask_64_1():
-    tocarry = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromindex = [1, 0, 0, 1, 1, 1, 0]
-    indexoffset = 1
-    lenindex = 3
-    lencontent = 3
-    funcPy = getattr(tests.kernels, 'awkward_IndexedArray32_getitem_nextcarry_outindex_mask_64')
     funcPy(tocarry, toindex, fromindex, indexoffset, lenindex, lencontent)
     outtocarry = [0, 0, 1]
     for i in range(len(outtocarry)):
@@ -4973,6 +4775,22 @@ def test_awkward_IndexedArrayU32_getitem_nextcarry_outindex_mask_64_1():
     for i in range(len(outtoindex)):
         assert toindex[i] == outtoindex[i]
 
+def test_awkward_IndexedArray32_getitem_nextcarry_outindex_mask_64_1():
+    tocarry = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromindex = [1, 0, 0, 1, 1, 1, 0]
+    indexoffset = 1
+    lenindex = 3
+    lencontent = 3
+    funcPy = getattr(tests.kernels, 'awkward_IndexedArray32_getitem_nextcarry_outindex_mask_64')
+    funcPy(tocarry, toindex, fromindex, indexoffset, lenindex, lencontent)
+    outtocarry = [0, 0, 1]
+    for i in range(len(outtocarry)):
+        assert tocarry[i] == outtocarry[i]
+    outtoindex = [0.0, 1.0, 2.0]
+    for i in range(len(outtoindex)):
+        assert toindex[i] == outtoindex[i]
+
 def test_awkward_ListOffsetArray_getitem_adjust_offsets_64_1():
     tooffsets = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     tononzero = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -5003,8 +4821,8 @@ def test_awkward_ListOffsetArray_getitem_adjust_offsets_index_64_1():
     nonzero = [48, 50, 51, 55, 55, 55, 58, 66, 81, 92, 92, 97, 101, 113, 116, 126, 148, 153, 172, 194, 201, 204, 214, 231, 233, 248, 252, 253, 253, 263, 289, 301, 325]
     nonzerooffset = 0
     nonzerolength = 3
-    originalmask = [1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0]
-    maskoffset = 0
+    originalmask = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    maskoffset = 1
     masklength = 3
     funcPy = getattr(tests.kernels, 'awkward_ListOffsetArray_getitem_adjust_offsets_index_64')
     funcPy(tooffsets, tononzero, fromoffsets, offsetsoffset, length, index, indexoffset, indexlength, nonzero, nonzerooffset, nonzerolength, originalmask, maskoffset, masklength)
@@ -5037,18 +4855,6 @@ def test_awkward_IndexedArray_getitem_adjust_outindex_64_1():
     for i in range(len(outtononzero)):
         assert tononzero[i] == outtononzero[i]
 
-def test_awkward_IndexedArray32_getitem_nextcarry_64_1():
-    tocarry = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromindex = [1, 0, 0, 1, 1, 1, 0]
-    indexoffset = 1
-    lenindex = 3
-    lencontent = 3
-    funcPy = getattr(tests.kernels, 'awkward_IndexedArray32_getitem_nextcarry_64')
-    funcPy(tocarry, fromindex, indexoffset, lenindex, lencontent)
-    outtocarry = [0, 0, 1]
-    for i in range(len(outtocarry)):
-        assert tocarry[i] == outtocarry[i]
-
 def test_awkward_IndexedArray64_getitem_nextcarry_64_1():
     tocarry = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromindex = [1, 0, 0, 1, 1, 1, 0]
@@ -5073,6 +4879,18 @@ def test_awkward_IndexedArrayU32_getitem_nextcarry_64_1():
     for i in range(len(outtocarry)):
         assert tocarry[i] == outtocarry[i]
 
+def test_awkward_IndexedArray32_getitem_nextcarry_64_1():
+    tocarry = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromindex = [1, 0, 0, 1, 1, 1, 0]
+    indexoffset = 1
+    lenindex = 3
+    lencontent = 3
+    funcPy = getattr(tests.kernels, 'awkward_IndexedArray32_getitem_nextcarry_64')
+    funcPy(tocarry, fromindex, indexoffset, lenindex, lencontent)
+    outtocarry = [0, 0, 1]
+    for i in range(len(outtocarry)):
+        assert tocarry[i] == outtocarry[i]
+
 def test_awkward_IndexedArrayU32_getitem_carry_64_1():
     toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromindex = [1, 0, 0, 1, 1, 1, 0]
@@ -5086,19 +4904,6 @@ def test_awkward_IndexedArrayU32_getitem_carry_64_1():
     for i in range(len(outtoindex)):
         assert toindex[i] == outtoindex[i]
 
-def test_awkward_IndexedArray32_getitem_carry_64_1():
-    toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromindex = [1, 0, 0, 1, 1, 1, 0]
-    fromcarry = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    indexoffset = 1
-    lenindex = 3
-    lencarry = 3
-    funcPy = getattr(tests.kernels, 'awkward_IndexedArray32_getitem_carry_64')
-    funcPy(toindex, fromindex, fromcarry, indexoffset, lenindex, lencarry)
-    outtoindex = [0.0, 0.0, 0.0]
-    for i in range(len(outtoindex)):
-        assert toindex[i] == outtoindex[i]
-
 def test_awkward_IndexedArray64_getitem_carry_64_1():
     toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     fromindex = [1, 0, 0, 1, 1, 1, 0]
@@ -5107,6 +4912,19 @@ def test_awkward_IndexedArray64_getitem_carry_64_1():
     lenindex = 3
     lencarry = 3
     funcPy = getattr(tests.kernels, 'awkward_IndexedArray64_getitem_carry_64')
+    funcPy(toindex, fromindex, fromcarry, indexoffset, lenindex, lencarry)
+    outtoindex = [0.0, 0.0, 0.0]
+    for i in range(len(outtoindex)):
+        assert toindex[i] == outtoindex[i]
+
+def test_awkward_IndexedArray32_getitem_carry_64_1():
+    toindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromindex = [1, 0, 0, 1, 1, 1, 0]
+    fromcarry = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    indexoffset = 1
+    lenindex = 3
+    lencarry = 3
+    funcPy = getattr(tests.kernels, 'awkward_IndexedArray32_getitem_carry_64')
     funcPy(toindex, fromindex, fromcarry, indexoffset, lenindex, lencarry)
     outtoindex = [0.0, 0.0, 0.0]
     for i in range(len(outtoindex)):
@@ -5171,24 +4989,6 @@ def test_awkward_UnionArray8_64_regular_index_1():
     for i in range(len(outcurrent)):
         assert current[i] == outcurrent[i]
 
-def test_awkward_UnionArray8_32_project_64_1():
-    lenout = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    tocarry = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromtags = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    tagsoffset = 1
-    fromindex = [1, 0, 0, 1, 1, 1, 0]
-    indexoffset = 1
-    length = 3
-    which = 1
-    funcPy = getattr(tests.kernels, 'awkward_UnionArray8_32_project_64')
-    funcPy(lenout, tocarry, fromtags, tagsoffset, fromindex, indexoffset, length, which)
-    outlenout = [0]
-    for i in range(len(outlenout)):
-        assert lenout[i] == outlenout[i]
-    outtocarry = []
-    for i in range(len(outtocarry)):
-        assert tocarry[i] == outtocarry[i]
-
 def test_awkward_UnionArray8_U32_project_64_1():
     lenout = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     tocarry = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -5225,6 +5025,24 @@ def test_awkward_UnionArray8_64_project_64_1():
     for i in range(len(outtocarry)):
         assert tocarry[i] == outtocarry[i]
 
+def test_awkward_UnionArray8_32_project_64_1():
+    lenout = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    tocarry = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromtags = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    tagsoffset = 1
+    fromindex = [1, 0, 0, 1, 1, 1, 0]
+    indexoffset = 1
+    length = 3
+    which = 1
+    funcPy = getattr(tests.kernels, 'awkward_UnionArray8_32_project_64')
+    funcPy(lenout, tocarry, fromtags, tagsoffset, fromindex, indexoffset, length, which)
+    outlenout = [0]
+    for i in range(len(outlenout)):
+        assert lenout[i] == outlenout[i]
+    outtocarry = []
+    for i in range(len(outtocarry)):
+        assert tocarry[i] == outtocarry[i]
+
 def test_awkward_missing_repeat_64_1():
     outindex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     index = [1, 0, 0, 1, 1, 1, 0]
@@ -5253,29 +5071,6 @@ def test_awkward_RegularArray_getitem_jagged_expand_64_1():
     for i in range(len(outmultistops)):
         assert multistops[i] == outmultistops[i]
 
-def test_awkward_ListArray32_getitem_jagged_expand_64_1():
-    multistarts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    multistops = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    singleoffsets = [1, 2, 3, 4, 5, 6]
-    tocarry = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    fromstarts = [1, 2, 3, 4, 5, 6]
-    fromstartsoffset = 0
-    fromstops = [3, 4, 5, 6, 7, 8]
-    fromstopsoffset = 0
-    jaggedsize = 2
-    length = 3
-    funcPy = getattr(tests.kernels, 'awkward_ListArray32_getitem_jagged_expand_64')
-    funcPy(multistarts, multistops, singleoffsets, tocarry, fromstarts, fromstartsoffset, fromstops, fromstopsoffset, jaggedsize, length)
-    outmultistarts = [1, 2, 1, 2, 1, 2]
-    for i in range(len(outmultistarts)):
-        assert multistarts[i] == outmultistarts[i]
-    outmultistops = [2, 3, 2, 3, 2, 3]
-    for i in range(len(outmultistops)):
-        assert multistops[i] == outmultistops[i]
-    outtocarry = [1, 2, 2, 3, 3, 4]
-    for i in range(len(outtocarry)):
-        assert tocarry[i] == outtocarry[i]
-
 def test_awkward_ListArrayU32_getitem_jagged_expand_64_1():
     multistarts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     multistops = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -5288,6 +5083,29 @@ def test_awkward_ListArrayU32_getitem_jagged_expand_64_1():
     jaggedsize = 2
     length = 3
     funcPy = getattr(tests.kernels, 'awkward_ListArrayU32_getitem_jagged_expand_64')
+    funcPy(multistarts, multistops, singleoffsets, tocarry, fromstarts, fromstartsoffset, fromstops, fromstopsoffset, jaggedsize, length)
+    outmultistarts = [1, 2, 1, 2, 1, 2]
+    for i in range(len(outmultistarts)):
+        assert multistarts[i] == outmultistarts[i]
+    outmultistops = [2, 3, 2, 3, 2, 3]
+    for i in range(len(outmultistops)):
+        assert multistops[i] == outmultistops[i]
+    outtocarry = [1, 2, 2, 3, 3, 4]
+    for i in range(len(outtocarry)):
+        assert tocarry[i] == outtocarry[i]
+
+def test_awkward_ListArray32_getitem_jagged_expand_64_1():
+    multistarts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    multistops = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    singleoffsets = [1, 2, 3, 4, 5, 6]
+    tocarry = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    fromstarts = [1, 2, 3, 4, 5, 6]
+    fromstartsoffset = 0
+    fromstops = [3, 4, 5, 6, 7, 8]
+    fromstopsoffset = 0
+    jaggedsize = 2
+    length = 3
+    funcPy = getattr(tests.kernels, 'awkward_ListArray32_getitem_jagged_expand_64')
     funcPy(multistarts, multistops, singleoffsets, tocarry, fromstarts, fromstartsoffset, fromstops, fromstopsoffset, jaggedsize, length)
     outmultistarts = [1, 2, 1, 2, 1, 2]
     for i in range(len(outmultistarts)):
@@ -5535,23 +5353,6 @@ def test_awkward_ListArray_getitem_jagged_shrink_64_1():
     for i in range(len(outtolargeoffsets)):
         assert tolargeoffsets[i] == outtolargeoffsets[i]
 
-def test_awkward_ListArray32_getitem_jagged_descend_64_1():
-    tooffsets = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    slicestarts = [1, 2, 3, 4, 5, 6]
-    slicestartsoffset = 0
-    slicestops = [3, 4, 5, 6, 7, 8]
-    slicestopsoffset = 0
-    sliceouterlen = 3
-    fromstarts = [2, 3, 4, 5, 6, 7]
-    fromstartsoffset = 3
-    fromstops = [4, 5, 6, 7, 8, 9]
-    fromstopsoffset = 3
-    funcPy = getattr(tests.kernels, 'awkward_ListArray32_getitem_jagged_descend_64')
-    funcPy(tooffsets, slicestarts, slicestartsoffset, slicestops, slicestopsoffset, sliceouterlen, fromstarts, fromstartsoffset, fromstops, fromstopsoffset)
-    outtooffsets = [1, 3.0, 5.0, 7.0]
-    for i in range(len(outtooffsets)):
-        assert tooffsets[i] == outtooffsets[i]
-
 def test_awkward_ListArrayU32_getitem_jagged_descend_64_1():
     tooffsets = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     slicestarts = [1, 2, 3, 4, 5, 6]
@@ -5581,6 +5382,23 @@ def test_awkward_ListArray64_getitem_jagged_descend_64_1():
     fromstops = [4, 5, 6, 7, 8, 9]
     fromstopsoffset = 3
     funcPy = getattr(tests.kernels, 'awkward_ListArray64_getitem_jagged_descend_64')
+    funcPy(tooffsets, slicestarts, slicestartsoffset, slicestops, slicestopsoffset, sliceouterlen, fromstarts, fromstartsoffset, fromstops, fromstopsoffset)
+    outtooffsets = [1, 3.0, 5.0, 7.0]
+    for i in range(len(outtooffsets)):
+        assert tooffsets[i] == outtooffsets[i]
+
+def test_awkward_ListArray32_getitem_jagged_descend_64_1():
+    tooffsets = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    slicestarts = [1, 2, 3, 4, 5, 6]
+    slicestartsoffset = 0
+    slicestops = [3, 4, 5, 6, 7, 8]
+    slicestopsoffset = 0
+    sliceouterlen = 3
+    fromstarts = [2, 3, 4, 5, 6, 7]
+    fromstartsoffset = 3
+    fromstops = [4, 5, 6, 7, 8, 9]
+    fromstopsoffset = 3
+    funcPy = getattr(tests.kernels, 'awkward_ListArray32_getitem_jagged_descend_64')
     funcPy(tooffsets, slicestarts, slicestartsoffset, slicestops, slicestopsoffset, sliceouterlen, fromstarts, fromstartsoffset, fromstops, fromstopsoffset)
     outtooffsets = [1, 3.0, 5.0, 7.0]
     for i in range(len(outtooffsets)):
@@ -5672,25 +5490,6 @@ def test_awkward_Content_getitem_next_missing_jagged_getmaskstartstop_1():
     for i in range(len(outstops_out)):
         assert stops_out[i] == outstops_out[i]
 
-def test_awkward_MaskedArray64_getitem_next_jagged_project_1():
-    index = [1, 0, 0, 1, 1, 1, 0]
-    index_offset = 1
-    starts_in = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
-    starts_offset = 0
-    stops_in = [3, 1, 3, 2, 3]
-    stops_offset = 0
-    starts_out = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    stops_out = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    length = 3
-    funcPy = getattr(tests.kernels, 'awkward_MaskedArray64_getitem_next_jagged_project')
-    funcPy(index, index_offset, starts_in, starts_offset, stops_in, stops_offset, starts_out, stops_out, length)
-    outstarts_out = [2, 0, 2]
-    for i in range(len(outstarts_out)):
-        assert starts_out[i] == outstarts_out[i]
-    outstops_out = [3, 1, 3]
-    for i in range(len(outstops_out)):
-        assert stops_out[i] == outstops_out[i]
-
 def test_awkward_MaskedArray32_getitem_next_jagged_project_1():
     index = [1, 0, 0, 1, 1, 1, 0]
     index_offset = 1
@@ -5702,6 +5501,25 @@ def test_awkward_MaskedArray32_getitem_next_jagged_project_1():
     stops_out = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     length = 3
     funcPy = getattr(tests.kernels, 'awkward_MaskedArray32_getitem_next_jagged_project')
+    funcPy(index, index_offset, starts_in, starts_offset, stops_in, stops_offset, starts_out, stops_out, length)
+    outstarts_out = [2, 0, 2]
+    for i in range(len(outstarts_out)):
+        assert starts_out[i] == outstarts_out[i]
+    outstops_out = [3, 1, 3]
+    for i in range(len(outstops_out)):
+        assert stops_out[i] == outstops_out[i]
+
+def test_awkward_MaskedArray64_getitem_next_jagged_project_1():
+    index = [1, 0, 0, 1, 1, 1, 0]
+    index_offset = 1
+    starts_in = [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+    starts_offset = 0
+    stops_in = [3, 1, 3, 2, 3]
+    stops_offset = 0
+    starts_out = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    stops_out = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    length = 3
+    funcPy = getattr(tests.kernels, 'awkward_MaskedArray64_getitem_next_jagged_project')
     funcPy(index, index_offset, starts_in, starts_offset, stops_in, stops_offset, starts_out, stops_out, length)
     outstarts_out = [2, 0, 2]
     for i in range(len(outstarts_out)):

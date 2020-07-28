@@ -7,8 +7,8 @@ def awkward_new_Identities(toptr, length):
     for i in range(length):
         toptr[i] = i
 
-awkward_new_Identities64 = awkward_new_Identities
 awkward_new_Identities32 = awkward_new_Identities
+awkward_new_Identities64 = awkward_new_Identities
 
 
 def awkward_Identities32_to_Identities64(toptr, fromptr, length, width):
@@ -45,12 +45,12 @@ def awkward_Identities_from_ListOffsetArray(
                 ]
             toptr[(j * (fromwidth + 1)) + fromwidth] = float(j - start)
 
+awkward_Identities64_from_ListOffsetArray64 = awkward_Identities_from_ListOffsetArray
 awkward_Identities32_from_ListOffsetArray64 = awkward_Identities_from_ListOffsetArray
 awkward_Identities32_from_ListOffsetArray32 = awkward_Identities_from_ListOffsetArray
-awkward_Identities64_from_ListOffsetArray64 = awkward_Identities_from_ListOffsetArray
+awkward_Identities32_from_ListOffsetArrayU32 = awkward_Identities_from_ListOffsetArray
 awkward_Identities64_from_ListOffsetArrayU32 = awkward_Identities_from_ListOffsetArray
 awkward_Identities64_from_ListOffsetArray32 = awkward_Identities_from_ListOffsetArray
-awkward_Identities32_from_ListOffsetArrayU32 = awkward_Identities_from_ListOffsetArray
 
 
 def awkward_Identities_from_ListArray(
@@ -84,12 +84,12 @@ def awkward_Identities_from_ListArray(
             toptr[(j * (fromwidth + 1)) + fromwidth] = float(j - start)
     uniquecontents[0] = True
 
-awkward_Identities64_from_ListArray32 = awkward_Identities_from_ListArray
-awkward_Identities32_from_ListArray64 = awkward_Identities_from_ListArray
-awkward_Identities32_from_ListArrayU32 = awkward_Identities_from_ListArray
 awkward_Identities64_from_ListArrayU32 = awkward_Identities_from_ListArray
-awkward_Identities64_from_ListArray64 = awkward_Identities_from_ListArray
+awkward_Identities32_from_ListArrayU32 = awkward_Identities_from_ListArray
+awkward_Identities32_from_ListArray64 = awkward_Identities_from_ListArray
+awkward_Identities64_from_ListArray32 = awkward_Identities_from_ListArray
 awkward_Identities32_from_ListArray32 = awkward_Identities_from_ListArray
+awkward_Identities64_from_ListArray64 = awkward_Identities_from_ListArray
 
 
 def awkward_Identities_from_RegularArray(
@@ -140,11 +140,11 @@ def awkward_Identities_from_IndexedArray(
     uniquecontents[0] = True
 
 awkward_Identities64_from_IndexedArray32 = awkward_Identities_from_IndexedArray
+awkward_Identities64_from_IndexedArrayU32 = awkward_Identities_from_IndexedArray
+awkward_Identities64_from_IndexedArray64 = awkward_Identities_from_IndexedArray
+awkward_Identities32_from_IndexedArray32 = awkward_Identities_from_IndexedArray
 awkward_Identities32_from_IndexedArrayU32 = awkward_Identities_from_IndexedArray
 awkward_Identities32_from_IndexedArray64 = awkward_Identities_from_IndexedArray
-awkward_Identities64_from_IndexedArrayU32 = awkward_Identities_from_IndexedArray
-awkward_Identities32_from_IndexedArray32 = awkward_Identities_from_IndexedArray
-awkward_Identities64_from_IndexedArray64 = awkward_Identities_from_IndexedArray
 
 
 def awkward_Identities_from_UnionArray(
@@ -182,9 +182,9 @@ def awkward_Identities_from_UnionArray(
     uniquecontents[0] = True
 
 awkward_Identities64_from_UnionArray8_32 = awkward_Identities_from_UnionArray
+awkward_Identities32_from_UnionArray8_64 = awkward_Identities_from_UnionArray
 awkward_Identities32_from_UnionArray8_32 = awkward_Identities_from_UnionArray
 awkward_Identities64_from_UnionArray8_64 = awkward_Identities_from_UnionArray
-awkward_Identities32_from_UnionArray8_64 = awkward_Identities_from_UnionArray
 awkward_Identities64_from_UnionArray8_U32 = awkward_Identities_from_UnionArray
 awkward_Identities32_from_UnionArray8_U32 = awkward_Identities_from_UnionArray
 
@@ -198,8 +198,8 @@ def awkward_Identities_extend(toptr, fromptr, fromoffset, fromlength, tolength):
         toptr[i] = -1
         i = i + 1
 
-awkward_Identities64_extend = awkward_Identities_extend
 awkward_Identities32_extend = awkward_Identities_extend
+awkward_Identities64_extend = awkward_Identities_extend
 
 
 def awkward_ListArray_num(
@@ -236,8 +236,8 @@ def awkward_ListOffsetArray_flatten_offsets(
             inneroffsetsoffset + outeroffsets[outeroffsetsoffset + i]
         ]
 
-awkward_ListOffsetArrayU32_flatten_offsets_64 = awkward_ListOffsetArray_flatten_offsets
 awkward_ListOffsetArray64_flatten_offsets_64 = awkward_ListOffsetArray_flatten_offsets
+awkward_ListOffsetArrayU32_flatten_offsets_64 = awkward_ListOffsetArray_flatten_offsets
 awkward_ListOffsetArray32_flatten_offsets_64 = awkward_ListOffsetArray_flatten_offsets
 
 
@@ -267,9 +267,9 @@ def awkward_IndexedArray_flatten_none2empty(
                 outoffsets[k] = outoffsets[k - 1] + count
                 k = k + 1
 
+awkward_IndexedArray64_flatten_none2empty_64 = awkward_IndexedArray_flatten_none2empty
 awkward_IndexedArray32_flatten_none2empty_64 = awkward_IndexedArray_flatten_none2empty
 awkward_IndexedArrayU32_flatten_none2empty_64 = awkward_IndexedArray_flatten_none2empty
-awkward_IndexedArray64_flatten_none2empty_64 = awkward_IndexedArray_flatten_none2empty
 
 
 def awkward_UnionArray_flatten_length(
@@ -290,9 +290,9 @@ def awkward_UnionArray_flatten_length(
         stop = offsetsraws[tag][(offsetsoffsets[tag] + idx) + 1]
         total_length[0] = total_length[0] + (stop - start)
 
-awkward_UnionArray32_flatten_length_64 = awkward_UnionArray_flatten_length
-awkward_UnionArrayU32_flatten_length_64 = awkward_UnionArray_flatten_length
 awkward_UnionArray64_flatten_length_64 = awkward_UnionArray_flatten_length
+awkward_UnionArrayU32_flatten_length_64 = awkward_UnionArray_flatten_length
+awkward_UnionArray32_flatten_length_64 = awkward_UnionArray_flatten_length
 
 
 def awkward_UnionArray_flatten_combine(
@@ -320,9 +320,9 @@ def awkward_UnionArray_flatten_combine(
             toindex[k] = j
             k = k + 1
 
-awkward_UnionArray64_flatten_combine_64 = awkward_UnionArray_flatten_combine
-awkward_UnionArrayU32_flatten_combine_64 = awkward_UnionArray_flatten_combine
 awkward_UnionArray32_flatten_combine_64 = awkward_UnionArray_flatten_combine
+awkward_UnionArrayU32_flatten_combine_64 = awkward_UnionArray_flatten_combine
+awkward_UnionArray64_flatten_combine_64 = awkward_UnionArray_flatten_combine
 
 
 def awkward_IndexedArray_flatten_nextcarry(
@@ -339,8 +339,8 @@ def awkward_IndexedArray_flatten_nextcarry(
                 k = k + 1
 
 awkward_IndexedArray32_flatten_nextcarry_64 = awkward_IndexedArray_flatten_nextcarry
-awkward_IndexedArrayU32_flatten_nextcarry_64 = awkward_IndexedArray_flatten_nextcarry
 awkward_IndexedArray64_flatten_nextcarry_64 = awkward_IndexedArray_flatten_nextcarry
+awkward_IndexedArrayU32_flatten_nextcarry_64 = awkward_IndexedArray_flatten_nextcarry
 
 
 def awkward_IndexedArray_overlay_mask(
@@ -351,8 +351,8 @@ def awkward_IndexedArray_overlay_mask(
         toindex[i] = -1 if m else fromindex[indexoffset + i]
 
 awkward_IndexedArrayU32_overlay_mask8_to64 = awkward_IndexedArray_overlay_mask
-awkward_IndexedArray32_overlay_mask8_to64 = awkward_IndexedArray_overlay_mask
 awkward_IndexedArray64_overlay_mask8_to64 = awkward_IndexedArray_overlay_mask
+awkward_IndexedArray32_overlay_mask8_to64 = awkward_IndexedArray_overlay_mask
 
 
 def awkward_IndexedArray_mask(tomask, fromindex, indexoffset, length):
@@ -391,15 +391,15 @@ def awkward_IndexedArray_simplify(
             else:
                 toindex[i] = innerindex[inneroffset + j]
 
-awkward_IndexedArrayU32_simplifyU32_to64 = awkward_IndexedArray_simplify
 awkward_IndexedArray32_simplifyU32_to64 = awkward_IndexedArray_simplify
-awkward_IndexedArray64_simplify32_to64 = awkward_IndexedArray_simplify
-awkward_IndexedArray32_simplify64_to64 = awkward_IndexedArray_simplify
 awkward_IndexedArrayU32_simplify64_to64 = awkward_IndexedArray_simplify
-awkward_IndexedArrayU32_simplify32_to64 = awkward_IndexedArray_simplify
 awkward_IndexedArray64_simplify64_to64 = awkward_IndexedArray_simplify
-awkward_IndexedArray64_simplifyU32_to64 = awkward_IndexedArray_simplify
+awkward_IndexedArrayU32_simplifyU32_to64 = awkward_IndexedArray_simplify
+awkward_IndexedArray32_simplify64_to64 = awkward_IndexedArray_simplify
+awkward_IndexedArray64_simplify32_to64 = awkward_IndexedArray_simplify
 awkward_IndexedArray32_simplify32_to64 = awkward_IndexedArray_simplify
+awkward_IndexedArrayU32_simplify32_to64 = awkward_IndexedArray_simplify
+awkward_IndexedArray64_simplifyU32_to64 = awkward_IndexedArray_simplify
 
 
 def awkward_RegularArray_compact_offsets(tooffsets, length, size):
@@ -421,9 +421,9 @@ def awkward_ListArray_compact_offsets(
             raise ValueError("stops[i] < starts[i]")
         tooffsets[i + 1] = tooffsets[i] + (stop - start)
 
-awkward_ListArray64_compact_offsets_64 = awkward_ListArray_compact_offsets
-awkward_ListArrayU32_compact_offsets_64 = awkward_ListArray_compact_offsets
 awkward_ListArray32_compact_offsets_64 = awkward_ListArray_compact_offsets
+awkward_ListArrayU32_compact_offsets_64 = awkward_ListArray_compact_offsets
+awkward_ListArray64_compact_offsets_64 = awkward_ListArray_compact_offsets
 
 
 def awkward_ListOffsetArray_compact_offsets(
@@ -434,8 +434,8 @@ def awkward_ListOffsetArray_compact_offsets(
     for i in range(length):
         tooffsets[i + 1] = fromoffsets[(offsetsoffset + i) + 1] - diff
 
-awkward_ListOffsetArray32_compact_offsets_64 = awkward_ListOffsetArray_compact_offsets
 awkward_ListOffsetArray64_compact_offsets_64 = awkward_ListOffsetArray_compact_offsets
+awkward_ListOffsetArray32_compact_offsets_64 = awkward_ListOffsetArray_compact_offsets
 awkward_ListOffsetArrayU32_compact_offsets_64 = awkward_ListOffsetArray_compact_offsets
 
 
@@ -467,9 +467,9 @@ def awkward_ListArray_broadcast_tooffsets(
             tocarry[k] = float(j)
             k = k + 1
 
-awkward_ListArray32_broadcast_tooffsets_64 = awkward_ListArray_broadcast_tooffsets
-awkward_ListArray64_broadcast_tooffsets_64 = awkward_ListArray_broadcast_tooffsets
 awkward_ListArrayU32_broadcast_tooffsets_64 = awkward_ListArray_broadcast_tooffsets
+awkward_ListArray64_broadcast_tooffsets_64 = awkward_ListArray_broadcast_tooffsets
+awkward_ListArray32_broadcast_tooffsets_64 = awkward_ListArray_broadcast_tooffsets
 
 
 def awkward_RegularArray_broadcast_tooffsets(
@@ -524,78 +524,78 @@ def awkward_ListOffsetArray_toRegularArray(
     if size[0] == -1:
         size[0] = 0
 
+awkward_ListOffsetArray64_toRegularArray = awkward_ListOffsetArray_toRegularArray
 awkward_ListOffsetArrayU32_toRegularArray = awkward_ListOffsetArray_toRegularArray
 awkward_ListOffsetArray32_toRegularArray = awkward_ListOffsetArray_toRegularArray
-awkward_ListOffsetArray64_toRegularArray = awkward_ListOffsetArray_toRegularArray
 
 
 def awkward_NumpyArray_fill_frombool(toptr, tooffset, fromptr, fromoffset, length):
     for i in range(length):
         toptr[tooffset + i] = float(fromptr[fromoffset + i] != 0)
 
-awkward_NumpyArray_fill_touint64_frombool = awkward_NumpyArray_fill_frombool
 awkward_NumpyArray_fill_toint64_frombool = awkward_NumpyArray_fill_frombool
-awkward_NumpyArray_fill_tofloat32_frombool = awkward_NumpyArray_fill_frombool
-awkward_NumpyArray_fill_toint16_frombool = awkward_NumpyArray_fill_frombool
-awkward_NumpyArray_fill_tofloat64_frombool = awkward_NumpyArray_fill_frombool
-awkward_NumpyArray_fill_toint8_frombool = awkward_NumpyArray_fill_frombool
-awkward_NumpyArray_fill_touint32_frombool = awkward_NumpyArray_fill_frombool
-awkward_NumpyArray_fill_touint8_frombool = awkward_NumpyArray_fill_frombool
-awkward_NumpyArray_fill_touint16_frombool = awkward_NumpyArray_fill_frombool
 awkward_NumpyArray_fill_toint32_frombool = awkward_NumpyArray_fill_frombool
+awkward_NumpyArray_fill_toint16_frombool = awkward_NumpyArray_fill_frombool
+awkward_NumpyArray_fill_toint8_frombool = awkward_NumpyArray_fill_frombool
+awkward_NumpyArray_fill_tofloat64_frombool = awkward_NumpyArray_fill_frombool
 awkward_NumpyArray_fill_tobool_frombool = awkward_NumpyArray_fill_frombool
+awkward_NumpyArray_fill_touint16_frombool = awkward_NumpyArray_fill_frombool
+awkward_NumpyArray_fill_touint64_frombool = awkward_NumpyArray_fill_frombool
+awkward_NumpyArray_fill_tofloat32_frombool = awkward_NumpyArray_fill_frombool
+awkward_NumpyArray_fill_touint8_frombool = awkward_NumpyArray_fill_frombool
+awkward_NumpyArray_fill_touint32_frombool = awkward_NumpyArray_fill_frombool
 
 
 def awkward_NumpyArray_fill(toptr, tooffset, fromptr, fromoffset, length):
     for i in range(length):
         toptr[tooffset + i] = float(fromptr[fromoffset + i])
 
-awkward_NumpyArray_fill_touint8_fromuint8 = awkward_NumpyArray_fill
-awkward_NumpyArray_fill_touint64_fromuint8 = awkward_NumpyArray_fill
-awkward_NumpyArray_fill_toint64_fromint16 = awkward_NumpyArray_fill
-awkward_NumpyArray_fill_tofloat64_fromint32 = awkward_NumpyArray_fill
-awkward_NumpyArray_fill_touint32_fromuint32 = awkward_NumpyArray_fill
-awkward_NumpyArray_fill_tofloat32_fromint32 = awkward_NumpyArray_fill
-awkward_NumpyArray_fill_tofloat64_fromuint32 = awkward_NumpyArray_fill
-awkward_NumpyArray_fill_toint32_fromuint8 = awkward_NumpyArray_fill
-awkward_NumpyArray_fill_toint32_fromint32 = awkward_NumpyArray_fill
-awkward_NumpyArray_fill_touint16_fromuint8 = awkward_NumpyArray_fill
-awkward_NumpyArray_fill_tofloat64_fromfloat32 = awkward_NumpyArray_fill
-awkward_NumpyArray_fill_tofloat32_fromuint64 = awkward_NumpyArray_fill
-awkward_NumpyArray_fill_tofloat64_fromfloat64 = awkward_NumpyArray_fill
-awkward_NumpyArray_fill_toint64_fromint8 = awkward_NumpyArray_fill
-awkward_NumpyArray_fill_toint16_fromuint8 = awkward_NumpyArray_fill
-awkward_NumpyArray_fill_tofloat64_fromuint8 = awkward_NumpyArray_fill
-awkward_NumpyArray_fill_toint32_fromuint16 = awkward_NumpyArray_fill
-awkward_NumpyArray_fill_tofloat32_fromint16 = awkward_NumpyArray_fill
 awkward_NumpyArray_fill_touint32_fromuint16 = awkward_NumpyArray_fill
-awkward_NumpyArray_fill_tofloat32_fromint8 = awkward_NumpyArray_fill
-awkward_NumpyArray_fill_tofloat32_fromint64 = awkward_NumpyArray_fill
-awkward_NumpyArray_fill_touint64_fromuint16 = awkward_NumpyArray_fill
-awkward_NumpyArray_fill_tofloat64_fromint16 = awkward_NumpyArray_fill
-awkward_NumpyArray_fill_toint64_fromuint64 = awkward_NumpyArray_fill
-awkward_NumpyArray_fill_touint32_fromuint8 = awkward_NumpyArray_fill
-awkward_NumpyArray_fill_tofloat32_fromuint8 = awkward_NumpyArray_fill
-awkward_NumpyArray_fill_toint64_fromint32 = awkward_NumpyArray_fill
-awkward_NumpyArray_fill_tofloat32_fromuint32 = awkward_NumpyArray_fill
-awkward_NumpyArray_fill_tofloat32_fromfloat32 = awkward_NumpyArray_fill
-awkward_NumpyArray_fill_toint64_fromint64 = awkward_NumpyArray_fill
-awkward_NumpyArray_fill_touint64_fromuint32 = awkward_NumpyArray_fill
-awkward_NumpyArray_fill_toint8_fromint8 = awkward_NumpyArray_fill
-awkward_NumpyArray_fill_tofloat64_fromuint16 = awkward_NumpyArray_fill
-awkward_NumpyArray_fill_touint16_fromuint16 = awkward_NumpyArray_fill
-awkward_NumpyArray_fill_toint16_fromint8 = awkward_NumpyArray_fill
-awkward_NumpyArray_fill_tofloat64_fromint8 = awkward_NumpyArray_fill
-awkward_NumpyArray_fill_touint64_fromuint64 = awkward_NumpyArray_fill
-awkward_NumpyArray_fill_tofloat32_fromuint16 = awkward_NumpyArray_fill
+awkward_NumpyArray_fill_touint8_fromuint8 = awkward_NumpyArray_fill
 awkward_NumpyArray_fill_toint64_fromuint32 = awkward_NumpyArray_fill
-awkward_NumpyArray_fill_toint64_fromuint16 = awkward_NumpyArray_fill
-awkward_NumpyArray_fill_toint64_fromuint8 = awkward_NumpyArray_fill
+awkward_NumpyArray_fill_touint64_fromuint64 = awkward_NumpyArray_fill
 awkward_NumpyArray_fill_toint32_fromint16 = awkward_NumpyArray_fill
-awkward_NumpyArray_fill_tofloat64_fromuint64 = awkward_NumpyArray_fill
 awkward_NumpyArray_fill_tofloat64_fromint64 = awkward_NumpyArray_fill
+awkward_NumpyArray_fill_touint64_fromuint8 = awkward_NumpyArray_fill
+awkward_NumpyArray_fill_tofloat64_fromuint32 = awkward_NumpyArray_fill
+awkward_NumpyArray_fill_touint32_fromuint32 = awkward_NumpyArray_fill
+awkward_NumpyArray_fill_tofloat64_fromint16 = awkward_NumpyArray_fill
+awkward_NumpyArray_fill_toint64_fromuint8 = awkward_NumpyArray_fill
 awkward_NumpyArray_fill_toint16_fromint16 = awkward_NumpyArray_fill
+awkward_NumpyArray_fill_toint64_fromint16 = awkward_NumpyArray_fill
+awkward_NumpyArray_fill_tofloat32_fromuint32 = awkward_NumpyArray_fill
+awkward_NumpyArray_fill_toint8_fromint8 = awkward_NumpyArray_fill
+awkward_NumpyArray_fill_touint64_fromuint16 = awkward_NumpyArray_fill
+awkward_NumpyArray_fill_tofloat32_fromint64 = awkward_NumpyArray_fill
+awkward_NumpyArray_fill_toint16_fromuint8 = awkward_NumpyArray_fill
+awkward_NumpyArray_fill_touint32_fromuint8 = awkward_NumpyArray_fill
+awkward_NumpyArray_fill_tofloat32_fromfloat32 = awkward_NumpyArray_fill
+awkward_NumpyArray_fill_tofloat32_fromuint64 = awkward_NumpyArray_fill
+awkward_NumpyArray_fill_tofloat32_fromint8 = awkward_NumpyArray_fill
+awkward_NumpyArray_fill_toint64_fromint32 = awkward_NumpyArray_fill
+awkward_NumpyArray_fill_toint16_fromint8 = awkward_NumpyArray_fill
+awkward_NumpyArray_fill_toint32_fromint32 = awkward_NumpyArray_fill
+awkward_NumpyArray_fill_toint64_fromuint64 = awkward_NumpyArray_fill
+awkward_NumpyArray_fill_toint64_fromuint16 = awkward_NumpyArray_fill
+awkward_NumpyArray_fill_tofloat64_fromuint8 = awkward_NumpyArray_fill
+awkward_NumpyArray_fill_tofloat32_fromuint16 = awkward_NumpyArray_fill
+awkward_NumpyArray_fill_tofloat64_fromfloat32 = awkward_NumpyArray_fill
+awkward_NumpyArray_fill_tofloat64_fromfloat64 = awkward_NumpyArray_fill
+awkward_NumpyArray_fill_tofloat32_fromuint8 = awkward_NumpyArray_fill
+awkward_NumpyArray_fill_tofloat64_fromint8 = awkward_NumpyArray_fill
+awkward_NumpyArray_fill_toint64_fromint8 = awkward_NumpyArray_fill
+awkward_NumpyArray_fill_tofloat32_fromint16 = awkward_NumpyArray_fill
+awkward_NumpyArray_fill_toint32_fromuint16 = awkward_NumpyArray_fill
 awkward_NumpyArray_fill_toint32_fromint8 = awkward_NumpyArray_fill
+awkward_NumpyArray_fill_touint16_fromuint16 = awkward_NumpyArray_fill
+awkward_NumpyArray_fill_tofloat64_fromint32 = awkward_NumpyArray_fill
+awkward_NumpyArray_fill_tofloat32_fromint32 = awkward_NumpyArray_fill
+awkward_NumpyArray_fill_toint32_fromuint8 = awkward_NumpyArray_fill
+awkward_NumpyArray_fill_tofloat64_fromuint16 = awkward_NumpyArray_fill
+awkward_NumpyArray_fill_toint64_fromint64 = awkward_NumpyArray_fill
+awkward_NumpyArray_fill_tofloat64_fromuint64 = awkward_NumpyArray_fill
+awkward_NumpyArray_fill_touint64_fromuint32 = awkward_NumpyArray_fill
+awkward_NumpyArray_fill_touint16_fromuint8 = awkward_NumpyArray_fill
 
 
 def awkward_ListArray_fill(
@@ -614,9 +614,9 @@ def awkward_ListArray_fill(
         tostarts[tostartsoffset + i] = float(fromstarts[fromstartsoffset + i] + base)
         tostops[tostopsoffset + i] = float(fromstops[fromstopsoffset + i] + base)
 
-awkward_ListArray_fill_to64_from64 = awkward_ListArray_fill
 awkward_ListArray_fill_to64_fromU32 = awkward_ListArray_fill
 awkward_ListArray_fill_to64_from32 = awkward_ListArray_fill
+awkward_ListArray_fill_to64_from64 = awkward_ListArray_fill
 
 
 def awkward_IndexedArray_fill(
@@ -653,8 +653,8 @@ def awkward_UnionArray_fillindex(
     for i in range(length):
         toindex[toindexoffset + i] = float(fromindex[fromindexoffset + i])
 
-awkward_UnionArray_fillindex_to64_from32 = awkward_UnionArray_fillindex
 awkward_UnionArray_fillindex_to64_from64 = awkward_UnionArray_fillindex
+awkward_UnionArray_fillindex_to64_from32 = awkward_UnionArray_fillindex
 awkward_UnionArray_fillindex_to64_fromU32 = awkward_UnionArray_fillindex
 
 
@@ -696,15 +696,15 @@ def awkward_UnionArray_simplify(
                 totags[i] = float(towhich)
                 toindex[i] = float(innerindex[innerindexoffset + j] + base)
 
+awkward_UnionArray8_U32_simplify8_32_to8_64 = awkward_UnionArray_simplify
+awkward_UnionArray8_64_simplify8_32_to8_64 = awkward_UnionArray_simplify
 awkward_UnionArray8_64_simplify8_64_to8_64 = awkward_UnionArray_simplify
 awkward_UnionArray8_32_simplify8_U32_to8_64 = awkward_UnionArray_simplify
-awkward_UnionArray8_U32_simplify8_64_to8_64 = awkward_UnionArray_simplify
-awkward_UnionArray8_64_simplify8_32_to8_64 = awkward_UnionArray_simplify
-awkward_UnionArray8_32_simplify8_32_to8_64 = awkward_UnionArray_simplify
 awkward_UnionArray8_U32_simplify8_U32_to8_64 = awkward_UnionArray_simplify
-awkward_UnionArray8_U32_simplify8_32_to8_64 = awkward_UnionArray_simplify
-awkward_UnionArray8_32_simplify8_64_to8_64 = awkward_UnionArray_simplify
+awkward_UnionArray8_32_simplify8_32_to8_64 = awkward_UnionArray_simplify
 awkward_UnionArray8_64_simplify8_U32_to8_64 = awkward_UnionArray_simplify
+awkward_UnionArray8_U32_simplify8_64_to8_64 = awkward_UnionArray_simplify
+awkward_UnionArray8_32_simplify8_64_to8_64 = awkward_UnionArray_simplify
 
 
 def awkward_UnionArray_simplify_one(
@@ -724,9 +724,9 @@ def awkward_UnionArray_simplify_one(
             totags[i] = float(towhich)
             toindex[i] = float(fromindex[fromindexoffset + i] + base)
 
+awkward_UnionArray8_32_simplify_one_to8_64 = awkward_UnionArray_simplify_one
 awkward_UnionArray8_U32_simplify_one_to8_64 = awkward_UnionArray_simplify_one
 awkward_UnionArray8_64_simplify_one_to8_64 = awkward_UnionArray_simplify_one
-awkward_UnionArray8_32_simplify_one_to8_64 = awkward_UnionArray_simplify_one
 
 
 def awkward_ListArray_validity(
@@ -743,9 +743,9 @@ def awkward_ListArray_validity(
             if stop > lencontent:
                 raise ValueError("stop[i] > len(content)")
 
-awkward_ListArray64_validity = awkward_ListArray_validity
 awkward_ListArrayU32_validity = awkward_ListArray_validity
 awkward_ListArray32_validity = awkward_ListArray_validity
+awkward_ListArray64_validity = awkward_ListArray_validity
 
 
 def awkward_IndexedArray_validity(index, indexoffset, length, lencontent, isoption):
@@ -757,9 +757,9 @@ def awkward_IndexedArray_validity(index, indexoffset, length, lencontent, isopti
         if idx >= lencontent:
             raise ValueError("index[i] >= len(content)")
 
-awkward_IndexedArray32_validity = awkward_IndexedArray_validity
-awkward_IndexedArrayU32_validity = awkward_IndexedArray_validity
 awkward_IndexedArray64_validity = awkward_IndexedArray_validity
+awkward_IndexedArrayU32_validity = awkward_IndexedArray_validity
+awkward_IndexedArray32_validity = awkward_IndexedArray_validity
 
 
 def awkward_UnionArray_validity(
@@ -787,9 +787,9 @@ def awkward_UnionArray_fillna(toindex, fromindex, offset, length):
     for i in range(length):
         toindex[i] = fromindex[offset + i] if fromindex[offset + i] >= 0 else 0
 
-awkward_UnionArray_fillna_from32_to64 = awkward_UnionArray_fillna
 awkward_UnionArray_fillna_from64_to64 = awkward_UnionArray_fillna
 awkward_UnionArray_fillna_fromU32_to64 = awkward_UnionArray_fillna
+awkward_UnionArray_fillna_from32_to64 = awkward_UnionArray_fillna
 
 
 def awkward_IndexedOptionArray_rpad_and_clip_mask_axis1(toindex, frommask, length):
@@ -798,7 +798,8 @@ def awkward_IndexedOptionArray_rpad_and_clip_mask_axis1(toindex, frommask, lengt
         if frommask[i]:
             toindex[i] = -1
         else:
-            toindex[i] = count = count + 1
+            toindex[i] = count
+            count = count + 1
 
 awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_64 = awkward_IndexedOptionArray_rpad_and_clip_mask_axis1
 
@@ -843,8 +844,8 @@ def awkward_ListArray_min_range(
         shorter = shorter if shorter < rangeval else rangeval
     tomin[0] = shorter
 
-awkward_ListArrayU32_min_range = awkward_ListArray_min_range
 awkward_ListArray64_min_range = awkward_ListArray_min_range
+awkward_ListArrayU32_min_range = awkward_ListArray_min_range
 awkward_ListArray32_min_range = awkward_ListArray_min_range
 
 
@@ -857,9 +858,9 @@ def awkward_ListArray_rpad_and_clip_length_axis1(
         length += target if target > rangeval else rangeval
     tomin[0] = length
 
+awkward_ListArrayU32_rpad_and_clip_length_axis1 = awkward_ListArray_rpad_and_clip_length_axis1
 awkward_ListArray32_rpad_and_clip_length_axis1 = awkward_ListArray_rpad_and_clip_length_axis1
 awkward_ListArray64_rpad_and_clip_length_axis1 = awkward_ListArray_rpad_and_clip_length_axis1
-awkward_ListArrayU32_rpad_and_clip_length_axis1 = awkward_ListArray_rpad_and_clip_length_axis1
 
 
 def awkward_ListArray_rpad_axis1(
@@ -884,8 +885,8 @@ def awkward_ListArray_rpad_axis1(
         offset = tostarts[i] + target if target > rangeval else tostarts[i] + rangeval
         tostops[i] = offset
 
-awkward_ListArray64_rpad_axis1_64 = awkward_ListArray_rpad_axis1
 awkward_ListArrayU32_rpad_axis1_64 = awkward_ListArray_rpad_axis1
+awkward_ListArray64_rpad_axis1_64 = awkward_ListArray_rpad_axis1
 awkward_ListArray32_rpad_axis1_64 = awkward_ListArray_rpad_axis1
 
 
@@ -902,9 +903,9 @@ def awkward_ListOffsetArray_rpad_and_clip_axis1(
         for j in range(shorter, target):
             toindex[(i * target) + j] = -1
 
-awkward_ListOffsetArray32_rpad_and_clip_axis1_64 = awkward_ListOffsetArray_rpad_and_clip_axis1
 awkward_ListOffsetArray64_rpad_and_clip_axis1_64 = awkward_ListOffsetArray_rpad_and_clip_axis1
 awkward_ListOffsetArrayU32_rpad_and_clip_axis1_64 = awkward_ListOffsetArray_rpad_and_clip_axis1
+awkward_ListOffsetArray32_rpad_and_clip_axis1_64 = awkward_ListOffsetArray_rpad_and_clip_axis1
 
 
 def awkward_ListOffsetArray_rpad_length_axis1(
@@ -919,8 +920,8 @@ def awkward_ListOffsetArray_rpad_length_axis1(
         tooffsets[i + 1] = tooffsets[i] + longer
     tolength[0] = length
 
-awkward_ListOffsetArray64_rpad_length_axis1 = awkward_ListOffsetArray_rpad_length_axis1
 awkward_ListOffsetArrayU32_rpad_length_axis1 = awkward_ListOffsetArray_rpad_length_axis1
+awkward_ListOffsetArray64_rpad_length_axis1 = awkward_ListOffsetArray_rpad_length_axis1
 awkward_ListOffsetArray32_rpad_length_axis1 = awkward_ListOffsetArray_rpad_length_axis1
 
 
@@ -939,9 +940,9 @@ def awkward_ListOffsetArray_rpad_axis1(
             toindex[count] = -1
             count = count + 1
 
+awkward_ListOffsetArrayU32_rpad_axis1_64 = awkward_ListOffsetArray_rpad_axis1
 awkward_ListOffsetArray64_rpad_axis1_64 = awkward_ListOffsetArray_rpad_axis1
 awkward_ListOffsetArray32_rpad_axis1_64 = awkward_ListOffsetArray_rpad_axis1
-awkward_ListOffsetArrayU32_rpad_axis1_64 = awkward_ListOffsetArray_rpad_axis1
 
 
 def awkward_localindex(toindex, length):
@@ -958,9 +959,9 @@ def awkward_ListArray_localindex(toindex, offsets, offsetsoffset, length):
         for j in range(start, stop):
             toindex[j] = j - start
 
+awkward_ListArray64_localindex_64 = awkward_ListArray_localindex
 awkward_ListArray32_localindex_64 = awkward_ListArray_localindex
 awkward_ListArrayU32_localindex_64 = awkward_ListArray_localindex
-awkward_ListArray64_localindex_64 = awkward_ListArray_localindex
 
 
 def awkward_RegularArray_localindex(toindex, size, length):
@@ -1013,9 +1014,9 @@ def awkward_ListArray_combinations_length(
         totallen[0] = totallen[0] + combinationslen
         tooffsets[i + 1] = tooffsets[i] + combinationslen
 
-awkward_ListArray32_combinations_length_64 = awkward_ListArray_combinations_length
 awkward_ListArray64_combinations_length_64 = awkward_ListArray_combinations_length
 awkward_ListArrayU32_combinations_length_64 = awkward_ListArray_combinations_length
+awkward_ListArray32_combinations_length_64 = awkward_ListArray_combinations_length
 
 
 def awkward_ByteMaskedArray_overlay_mask(
@@ -1174,17 +1175,17 @@ def awkward_reduce_countnonzero(
     for i in range(lenparents):
         toptr[parents[parentsoffset + i]] += fromptr[fromptroffset + i] != 0
 
-awkward_reduce_countnonzero_int64_64 = awkward_reduce_countnonzero
-awkward_reduce_countnonzero_bool_64 = awkward_reduce_countnonzero
 awkward_reduce_countnonzero_float32_64 = awkward_reduce_countnonzero
-awkward_reduce_countnonzero_int32_64 = awkward_reduce_countnonzero
-awkward_reduce_countnonzero_uint32_64 = awkward_reduce_countnonzero
+awkward_reduce_countnonzero_int64_64 = awkward_reduce_countnonzero
 awkward_reduce_countnonzero_int8_64 = awkward_reduce_countnonzero
-awkward_reduce_countnonzero_uint16_64 = awkward_reduce_countnonzero
-awkward_reduce_countnonzero_uint64_64 = awkward_reduce_countnonzero
-awkward_reduce_countnonzero_float64_64 = awkward_reduce_countnonzero
 awkward_reduce_countnonzero_int16_64 = awkward_reduce_countnonzero
+awkward_reduce_countnonzero_int32_64 = awkward_reduce_countnonzero
+awkward_reduce_countnonzero_uint64_64 = awkward_reduce_countnonzero
+awkward_reduce_countnonzero_uint16_64 = awkward_reduce_countnonzero
 awkward_reduce_countnonzero_uint8_64 = awkward_reduce_countnonzero
+awkward_reduce_countnonzero_float64_64 = awkward_reduce_countnonzero
+awkward_reduce_countnonzero_bool_64 = awkward_reduce_countnonzero
+awkward_reduce_countnonzero_uint32_64 = awkward_reduce_countnonzero
 
 
 def awkward_reduce_sum(
@@ -1195,22 +1196,22 @@ def awkward_reduce_sum(
     for i in range(lenparents):
         toptr[parents[parentsoffset + i]] += float(fromptr[fromptroffset + i])
 
-awkward_reduce_sum_int64_int8_64 = awkward_reduce_sum
-awkward_reduce_sum_float64_float64_64 = awkward_reduce_sum
-awkward_reduce_sum_uint32_uint16_64 = awkward_reduce_sum
-awkward_reduce_sum_uint32_uint32_64 = awkward_reduce_sum
-awkward_reduce_sum_uint32_uint8_64 = awkward_reduce_sum
-awkward_reduce_sum_int32_int16_64 = awkward_reduce_sum
-awkward_reduce_sum_uint64_uint64_64 = awkward_reduce_sum
-awkward_reduce_sum_int32_int32_64 = awkward_reduce_sum
 awkward_reduce_sum_uint64_uint8_64 = awkward_reduce_sum
-awkward_reduce_sum_float32_float32_64 = awkward_reduce_sum
-awkward_reduce_sum_uint64_uint32_64 = awkward_reduce_sum
+awkward_reduce_sum_uint32_uint8_64 = awkward_reduce_sum
+awkward_reduce_sum_int64_int64_64 = awkward_reduce_sum
 awkward_reduce_sum_int64_int32_64 = awkward_reduce_sum
 awkward_reduce_sum_uint64_uint16_64 = awkward_reduce_sum
-awkward_reduce_sum_int64_int64_64 = awkward_reduce_sum
+awkward_reduce_sum_float32_float32_64 = awkward_reduce_sum
+awkward_reduce_sum_uint32_uint16_64 = awkward_reduce_sum
 awkward_reduce_sum_int32_int8_64 = awkward_reduce_sum
+awkward_reduce_sum_uint64_uint32_64 = awkward_reduce_sum
+awkward_reduce_sum_int32_int16_64 = awkward_reduce_sum
+awkward_reduce_sum_uint32_uint32_64 = awkward_reduce_sum
+awkward_reduce_sum_uint64_uint64_64 = awkward_reduce_sum
+awkward_reduce_sum_float64_float64_64 = awkward_reduce_sum
+awkward_reduce_sum_int64_int8_64 = awkward_reduce_sum
 awkward_reduce_sum_int64_int16_64 = awkward_reduce_sum
+awkward_reduce_sum_int32_int32_64 = awkward_reduce_sum
 
 
 def awkward_reduce_sum_int64_bool_64(
@@ -1237,17 +1238,17 @@ def awkward_reduce_sum_bool(
     for i in range(lenparents):
         toptr[parents[parentsoffset + i]] |= fromptr[fromptroffset + i] != 0
 
-awkward_reduce_sum_bool_int8_64 = awkward_reduce_sum_bool
+awkward_reduce_sum_bool_uint8_64 = awkward_reduce_sum_bool
 awkward_reduce_sum_bool_uint16_64 = awkward_reduce_sum_bool
-awkward_reduce_sum_bool_int16_64 = awkward_reduce_sum_bool
-awkward_reduce_sum_bool_bool_64 = awkward_reduce_sum_bool
 awkward_reduce_sum_bool_uint64_64 = awkward_reduce_sum_bool
 awkward_reduce_sum_bool_int32_64 = awkward_reduce_sum_bool
+awkward_reduce_sum_bool_bool_64 = awkward_reduce_sum_bool
 awkward_reduce_sum_bool_uint32_64 = awkward_reduce_sum_bool
-awkward_reduce_sum_bool_int64_64 = awkward_reduce_sum_bool
-awkward_reduce_sum_bool_uint8_64 = awkward_reduce_sum_bool
-awkward_reduce_sum_bool_float64_64 = awkward_reduce_sum_bool
 awkward_reduce_sum_bool_float32_64 = awkward_reduce_sum_bool
+awkward_reduce_sum_bool_int16_64 = awkward_reduce_sum_bool
+awkward_reduce_sum_bool_int8_64 = awkward_reduce_sum_bool
+awkward_reduce_sum_bool_int64_64 = awkward_reduce_sum_bool
+awkward_reduce_sum_bool_float64_64 = awkward_reduce_sum_bool
 
 
 def awkward_reduce_prod(
@@ -1258,22 +1259,22 @@ def awkward_reduce_prod(
     for i in range(lenparents):
         toptr[parents[parentsoffset + i]] *= float(fromptr[fromptroffset + i])
 
-awkward_reduce_prod_int32_int16_64 = awkward_reduce_prod
-awkward_reduce_prod_int64_int64_64 = awkward_reduce_prod
-awkward_reduce_prod_uint32_uint16_64 = awkward_reduce_prod
-awkward_reduce_prod_uint32_uint8_64 = awkward_reduce_prod
-awkward_reduce_prod_uint32_uint32_64 = awkward_reduce_prod
-awkward_reduce_prod_float32_float32_64 = awkward_reduce_prod
 awkward_reduce_prod_int64_int16_64 = awkward_reduce_prod
-awkward_reduce_prod_uint64_uint8_64 = awkward_reduce_prod
-awkward_reduce_prod_uint64_uint64_64 = awkward_reduce_prod
-awkward_reduce_prod_uint64_uint16_64 = awkward_reduce_prod
+awkward_reduce_prod_int64_int64_64 = awkward_reduce_prod
+awkward_reduce_prod_int32_int16_64 = awkward_reduce_prod
 awkward_reduce_prod_int64_int8_64 = awkward_reduce_prod
-awkward_reduce_prod_int32_int32_64 = awkward_reduce_prod
-awkward_reduce_prod_uint64_uint32_64 = awkward_reduce_prod
 awkward_reduce_prod_float64_float64_64 = awkward_reduce_prod
+awkward_reduce_prod_uint32_uint32_64 = awkward_reduce_prod
+awkward_reduce_prod_uint64_uint64_64 = awkward_reduce_prod
+awkward_reduce_prod_float32_float32_64 = awkward_reduce_prod
+awkward_reduce_prod_int32_int32_64 = awkward_reduce_prod
+awkward_reduce_prod_uint32_uint8_64 = awkward_reduce_prod
+awkward_reduce_prod_uint64_uint8_64 = awkward_reduce_prod
+awkward_reduce_prod_uint32_uint16_64 = awkward_reduce_prod
+awkward_reduce_prod_uint64_uint16_64 = awkward_reduce_prod
 awkward_reduce_prod_int32_int8_64 = awkward_reduce_prod
 awkward_reduce_prod_int64_int32_64 = awkward_reduce_prod
+awkward_reduce_prod_uint64_uint32_64 = awkward_reduce_prod
 
 
 def awkward_reduce_prod_int64_bool_64(
@@ -1300,17 +1301,17 @@ def awkward_reduce_prod_bool(
     for i in range(lenparents):
         toptr[parents[parentsoffset + i]] &= fromptr[fromptroffset + i] != 0
 
-awkward_reduce_prod_bool_uint64_64 = awkward_reduce_prod_bool
-awkward_reduce_prod_bool_uint16_64 = awkward_reduce_prod_bool
-awkward_reduce_prod_bool_float32_64 = awkward_reduce_prod_bool
-awkward_reduce_prod_bool_uint32_64 = awkward_reduce_prod_bool
-awkward_reduce_prod_bool_uint8_64 = awkward_reduce_prod_bool
-awkward_reduce_prod_bool_float64_64 = awkward_reduce_prod_bool
-awkward_reduce_prod_bool_int32_64 = awkward_reduce_prod_bool
-awkward_reduce_prod_bool_int16_64 = awkward_reduce_prod_bool
-awkward_reduce_prod_bool_int8_64 = awkward_reduce_prod_bool
-awkward_reduce_prod_bool_int64_64 = awkward_reduce_prod_bool
 awkward_reduce_prod_bool_bool_64 = awkward_reduce_prod_bool
+awkward_reduce_prod_bool_int8_64 = awkward_reduce_prod_bool
+awkward_reduce_prod_bool_float32_64 = awkward_reduce_prod_bool
+awkward_reduce_prod_bool_int16_64 = awkward_reduce_prod_bool
+awkward_reduce_prod_bool_uint64_64 = awkward_reduce_prod_bool
+awkward_reduce_prod_bool_uint8_64 = awkward_reduce_prod_bool
+awkward_reduce_prod_bool_int32_64 = awkward_reduce_prod_bool
+awkward_reduce_prod_bool_uint32_64 = awkward_reduce_prod_bool
+awkward_reduce_prod_bool_int64_64 = awkward_reduce_prod_bool
+awkward_reduce_prod_bool_float64_64 = awkward_reduce_prod_bool
+awkward_reduce_prod_bool_uint16_64 = awkward_reduce_prod_bool
 
 
 def awkward_reduce_min(
@@ -1333,15 +1334,15 @@ def awkward_reduce_min(
             else toptr[parents[parentsoffset + i]]
         )
 
-awkward_reduce_min_int8_int8_64 = awkward_reduce_min
-awkward_reduce_min_float64_float64_64 = awkward_reduce_min
-awkward_reduce_min_uint16_uint16_64 = awkward_reduce_min
-awkward_reduce_min_int16_int16_64 = awkward_reduce_min
-awkward_reduce_min_float32_float32_64 = awkward_reduce_min
-awkward_reduce_min_uint32_uint32_64 = awkward_reduce_min
 awkward_reduce_min_uint8_uint8_64 = awkward_reduce_min
+awkward_reduce_min_uint32_uint32_64 = awkward_reduce_min
+awkward_reduce_min_int8_int8_64 = awkward_reduce_min
+awkward_reduce_min_float32_float32_64 = awkward_reduce_min
 awkward_reduce_min_int64_int64_64 = awkward_reduce_min
+awkward_reduce_min_int16_int16_64 = awkward_reduce_min
 awkward_reduce_min_int32_int32_64 = awkward_reduce_min
+awkward_reduce_min_uint16_uint16_64 = awkward_reduce_min
+awkward_reduce_min_float64_float64_64 = awkward_reduce_min
 awkward_reduce_min_uint64_uint64_64 = awkward_reduce_min
 
 
@@ -1366,15 +1367,15 @@ def awkward_reduce_max(
         )
 
 awkward_reduce_max_int64_int64_64 = awkward_reduce_max
-awkward_reduce_max_int8_int8_64 = awkward_reduce_max
+awkward_reduce_max_uint16_uint16_64 = awkward_reduce_max
+awkward_reduce_max_float32_float32_64 = awkward_reduce_max
 awkward_reduce_max_float64_float64_64 = awkward_reduce_max
 awkward_reduce_max_int32_int32_64 = awkward_reduce_max
-awkward_reduce_max_uint8_uint8_64 = awkward_reduce_max
-awkward_reduce_max_float32_float32_64 = awkward_reduce_max
 awkward_reduce_max_int16_int16_64 = awkward_reduce_max
 awkward_reduce_max_uint64_uint64_64 = awkward_reduce_max
+awkward_reduce_max_int8_int8_64 = awkward_reduce_max
+awkward_reduce_max_uint8_uint8_64 = awkward_reduce_max
 awkward_reduce_max_uint32_uint32_64 = awkward_reduce_max
-awkward_reduce_max_uint16_uint16_64 = awkward_reduce_max
 
 
 def awkward_reduce_argmin(
@@ -1400,15 +1401,15 @@ def awkward_reduce_argmin(
             toptr[parent] = i - start
 
 awkward_reduce_argmin_int32_64 = awkward_reduce_argmin
-awkward_reduce_argmin_uint16_64 = awkward_reduce_argmin
-awkward_reduce_argmin_float32_64 = awkward_reduce_argmin
-awkward_reduce_argmin_uint8_64 = awkward_reduce_argmin
-awkward_reduce_argmin_int64_64 = awkward_reduce_argmin
-awkward_reduce_argmin_uint32_64 = awkward_reduce_argmin
-awkward_reduce_argmin_int8_64 = awkward_reduce_argmin
-awkward_reduce_argmin_float64_64 = awkward_reduce_argmin
 awkward_reduce_argmin_uint64_64 = awkward_reduce_argmin
+awkward_reduce_argmin_int8_64 = awkward_reduce_argmin
 awkward_reduce_argmin_int16_64 = awkward_reduce_argmin
+awkward_reduce_argmin_uint8_64 = awkward_reduce_argmin
+awkward_reduce_argmin_uint16_64 = awkward_reduce_argmin
+awkward_reduce_argmin_float64_64 = awkward_reduce_argmin
+awkward_reduce_argmin_uint32_64 = awkward_reduce_argmin
+awkward_reduce_argmin_int64_64 = awkward_reduce_argmin
+awkward_reduce_argmin_float32_64 = awkward_reduce_argmin
 
 
 def awkward_reduce_argmin_bool_64(
@@ -1455,16 +1456,16 @@ def awkward_reduce_argmax(
         ):
             toptr[parent] = i - start
 
-awkward_reduce_argmax_uint8_64 = awkward_reduce_argmax
 awkward_reduce_argmax_uint64_64 = awkward_reduce_argmax
-awkward_reduce_argmax_float64_64 = awkward_reduce_argmax
-awkward_reduce_argmax_uint32_64 = awkward_reduce_argmax
-awkward_reduce_argmax_int32_64 = awkward_reduce_argmax
-awkward_reduce_argmax_uint16_64 = awkward_reduce_argmax
 awkward_reduce_argmax_int64_64 = awkward_reduce_argmax
+awkward_reduce_argmax_int32_64 = awkward_reduce_argmax
+awkward_reduce_argmax_float64_64 = awkward_reduce_argmax
+awkward_reduce_argmax_uint8_64 = awkward_reduce_argmax
+awkward_reduce_argmax_uint16_64 = awkward_reduce_argmax
 awkward_reduce_argmax_float32_64 = awkward_reduce_argmax
-awkward_reduce_argmax_int16_64 = awkward_reduce_argmax
 awkward_reduce_argmax_int8_64 = awkward_reduce_argmax
+awkward_reduce_argmax_int16_64 = awkward_reduce_argmax
+awkward_reduce_argmax_uint32_64 = awkward_reduce_argmax
 
 
 def awkward_reduce_argmax_bool_64(
@@ -1590,8 +1591,8 @@ def awkward_IndexedArray_reduce_next_64(
         else:
             outindex[i] = -1
 
-awkward_IndexedArray64_reduce_next_64 = awkward_IndexedArray_reduce_next_64
 awkward_IndexedArrayU32_reduce_next_64 = awkward_IndexedArray_reduce_next_64
+awkward_IndexedArray64_reduce_next_64 = awkward_IndexedArray_reduce_next_64
 awkward_IndexedArray32_reduce_next_64 = awkward_IndexedArray_reduce_next_64
 
 
@@ -1668,21 +1669,21 @@ def awkward_index_carry(
         toindex[i] = fromindex[fromindexoffset + j]
 
 awkward_IndexU8_carry_64 = awkward_index_carry
+awkward_Index32_carry_64 = awkward_index_carry
 awkward_Index64_carry_64 = awkward_index_carry
 awkward_IndexU32_carry_64 = awkward_index_carry
 awkward_Index8_carry_64 = awkward_index_carry
-awkward_Index32_carry_64 = awkward_index_carry
 
 
 def awkward_index_carry_nocheck(toindex, fromindex, carry, fromindexoffset, length):
     for i in range(length):
         toindex[i] = fromindex[fromindexoffset + carry[i]]
 
-awkward_IndexU32_carry_nocheck_64 = awkward_index_carry_nocheck
+awkward_Index64_carry_nocheck_64 = awkward_index_carry_nocheck
 awkward_Index32_carry_nocheck_64 = awkward_index_carry_nocheck
 awkward_IndexU8_carry_nocheck_64 = awkward_index_carry_nocheck
+awkward_IndexU32_carry_nocheck_64 = awkward_index_carry_nocheck
 awkward_Index8_carry_nocheck_64 = awkward_index_carry_nocheck
-awkward_Index64_carry_nocheck_64 = awkward_index_carry_nocheck
 
 
 def awkward_slicearray_ravel(toptr, fromptr, ndim, shape, strides):
@@ -1849,9 +1850,9 @@ def awkward_ListArray_getitem_next_at(
             raise ValueError("index out of range")
         tocarry[i] = fromstarts[startsoffset + i] + regular_at
 
-awkward_ListArray32_getitem_next_at_64 = awkward_ListArray_getitem_next_at
 awkward_ListArray64_getitem_next_at_64 = awkward_ListArray_getitem_next_at
 awkward_ListArrayU32_getitem_next_at_64 = awkward_ListArray_getitem_next_at
+awkward_ListArray32_getitem_next_at_64 = awkward_ListArray_getitem_next_at
 
 
 def awkward_ListArray_getitem_next_range_carrylength(
@@ -1889,9 +1890,9 @@ def awkward_ListArray_getitem_next_range_carrylength(
                 carrylength[0] = carrylength[0] + 1
                 j += step
 
-awkward_ListArray32_getitem_next_range_carrylength = awkward_ListArray_getitem_next_range_carrylength
-awkward_ListArrayU32_getitem_next_range_carrylength = awkward_ListArray_getitem_next_range_carrylength
 awkward_ListArray64_getitem_next_range_carrylength = awkward_ListArray_getitem_next_range_carrylength
+awkward_ListArrayU32_getitem_next_range_carrylength = awkward_ListArray_getitem_next_range_carrylength
+awkward_ListArray32_getitem_next_range_carrylength = awkward_ListArray_getitem_next_range_carrylength
 
 
 def awkward_ListArray_getitem_next_range(
@@ -1947,9 +1948,9 @@ def awkward_ListArray_getitem_next_range(
                 j += step
             tooffsets[i + 1] = float(k)
 
-awkward_ListArray32_getitem_next_range_64 = awkward_ListArray_getitem_next_range
-awkward_ListArrayU32_getitem_next_range_64 = awkward_ListArray_getitem_next_range
 awkward_ListArray64_getitem_next_range_64 = awkward_ListArray_getitem_next_range
+awkward_ListArrayU32_getitem_next_range_64 = awkward_ListArray_getitem_next_range
+awkward_ListArray32_getitem_next_range_64 = awkward_ListArray_getitem_next_range
 
 
 def awkward_ListArray_getitem_next_range_counts(total, fromoffsets, lenstarts):
@@ -1957,9 +1958,9 @@ def awkward_ListArray_getitem_next_range_counts(total, fromoffsets, lenstarts):
     for i in range(lenstarts):
         total[0] = (total[0] + fromoffsets[i + 1]) - fromoffsets[i]
 
-awkward_ListArrayU32_getitem_next_range_counts_64 = awkward_ListArray_getitem_next_range_counts
 awkward_ListArray64_getitem_next_range_counts_64 = awkward_ListArray_getitem_next_range_counts
 awkward_ListArray32_getitem_next_range_counts_64 = awkward_ListArray_getitem_next_range_counts
+awkward_ListArrayU32_getitem_next_range_counts_64 = awkward_ListArray_getitem_next_range_counts
 
 
 def awkward_ListArray_getitem_next_range_spreadadvanced(
@@ -1970,9 +1971,9 @@ def awkward_ListArray_getitem_next_range_spreadadvanced(
         for j in range(count):
             toadvanced[fromoffsets[i] + j] = fromadvanced[i]
 
-awkward_ListArray32_getitem_next_range_spreadadvanced_64 = awkward_ListArray_getitem_next_range_spreadadvanced
-awkward_ListArray64_getitem_next_range_spreadadvanced_64 = awkward_ListArray_getitem_next_range_spreadadvanced
 awkward_ListArrayU32_getitem_next_range_spreadadvanced_64 = awkward_ListArray_getitem_next_range_spreadadvanced
+awkward_ListArray64_getitem_next_range_spreadadvanced_64 = awkward_ListArray_getitem_next_range_spreadadvanced
+awkward_ListArray32_getitem_next_range_spreadadvanced_64 = awkward_ListArray_getitem_next_range_spreadadvanced
 
 
 def awkward_ListArray_getitem_next_array(
@@ -2004,8 +2005,8 @@ def awkward_ListArray_getitem_next_array(
             tocarry[(i * lenarray) + j] = fromstarts[startsoffset + i] + regular_at
             toadvanced[(i * lenarray) + j] = j
 
-awkward_ListArrayU32_getitem_next_array_64 = awkward_ListArray_getitem_next_array
 awkward_ListArray32_getitem_next_array_64 = awkward_ListArray_getitem_next_array
+awkward_ListArrayU32_getitem_next_array_64 = awkward_ListArray_getitem_next_array
 awkward_ListArray64_getitem_next_array_64 = awkward_ListArray_getitem_next_array
 
 
@@ -2038,9 +2039,9 @@ def awkward_ListArray_getitem_next_array_advanced(
         tocarry[i] = fromstarts[startsoffset + i] + regular_at
         toadvanced[i] = i
 
-awkward_ListArrayU32_getitem_next_array_advanced_64 = awkward_ListArray_getitem_next_array_advanced
 awkward_ListArray32_getitem_next_array_advanced_64 = awkward_ListArray_getitem_next_array_advanced
 awkward_ListArray64_getitem_next_array_advanced_64 = awkward_ListArray_getitem_next_array_advanced
+awkward_ListArrayU32_getitem_next_array_advanced_64 = awkward_ListArray_getitem_next_array_advanced
 
 
 def awkward_ListArray_getitem_carry(
@@ -2060,9 +2061,9 @@ def awkward_ListArray_getitem_carry(
         tostarts[i] = float(fromstarts[startsoffset + fromcarry[i]])
         tostops[i] = float(fromstops[stopsoffset + fromcarry[i]])
 
-awkward_ListArrayU32_getitem_carry_64 = awkward_ListArray_getitem_carry
 awkward_ListArray64_getitem_carry_64 = awkward_ListArray_getitem_carry
 awkward_ListArray32_getitem_carry_64 = awkward_ListArray_getitem_carry
+awkward_ListArrayU32_getitem_carry_64 = awkward_ListArray_getitem_carry
 
 
 def awkward_RegularArray_getitem_next_at(tocarry, at, length, size):
@@ -2146,8 +2147,8 @@ def awkward_IndexedArray_numnull(numnull, fromindex, indexoffset, lenindex):
             numnull[0] = numnull[0] + 1
 
 awkward_IndexedArray64_numnull = awkward_IndexedArray_numnull
-awkward_IndexedArrayU32_numnull = awkward_IndexedArray_numnull
 awkward_IndexedArray32_numnull = awkward_IndexedArray_numnull
+awkward_IndexedArrayU32_numnull = awkward_IndexedArray_numnull
 
 
 def awkward_IndexedArray_getitem_nextcarry_outindex(
@@ -2166,9 +2167,9 @@ def awkward_IndexedArray_getitem_nextcarry_outindex(
                 toindex[i] = float(k)
                 k = k + 1
 
+awkward_IndexedArrayU32_getitem_nextcarry_outindex_64 = awkward_IndexedArray_getitem_nextcarry_outindex
 awkward_IndexedArray32_getitem_nextcarry_outindex_64 = awkward_IndexedArray_getitem_nextcarry_outindex
 awkward_IndexedArray64_getitem_nextcarry_outindex_64 = awkward_IndexedArray_getitem_nextcarry_outindex
-awkward_IndexedArrayU32_getitem_nextcarry_outindex_64 = awkward_IndexedArray_getitem_nextcarry_outindex
 
 
 def awkward_IndexedArray_getitem_nextcarry_outindex_mask(
@@ -2187,9 +2188,9 @@ def awkward_IndexedArray_getitem_nextcarry_outindex_mask(
                 toindex[i] = float(k)
                 k = k + 1
 
-awkward_IndexedArray32_getitem_nextcarry_outindex_mask_64 = awkward_IndexedArray_getitem_nextcarry_outindex_mask
 awkward_IndexedArray64_getitem_nextcarry_outindex_mask_64 = awkward_IndexedArray_getitem_nextcarry_outindex_mask
 awkward_IndexedArrayU32_getitem_nextcarry_outindex_mask_64 = awkward_IndexedArray_getitem_nextcarry_outindex_mask
+awkward_IndexedArray32_getitem_nextcarry_outindex_mask_64 = awkward_IndexedArray_getitem_nextcarry_outindex_mask
 
 
 def awkward_ListOffsetArray_getitem_adjust_offsets(
@@ -2308,9 +2309,9 @@ def awkward_IndexedArray_getitem_nextcarry(
             tocarry[k] = j
             k = k + 1
 
-awkward_IndexedArray32_getitem_nextcarry_64 = awkward_IndexedArray_getitem_nextcarry
 awkward_IndexedArray64_getitem_nextcarry_64 = awkward_IndexedArray_getitem_nextcarry
 awkward_IndexedArrayU32_getitem_nextcarry_64 = awkward_IndexedArray_getitem_nextcarry
+awkward_IndexedArray32_getitem_nextcarry_64 = awkward_IndexedArray_getitem_nextcarry
 
 
 def awkward_IndexedArray_getitem_carry(
@@ -2322,8 +2323,8 @@ def awkward_IndexedArray_getitem_carry(
         toindex[i] = float(fromindex[indexoffset + fromcarry[i]])
 
 awkward_IndexedArrayU32_getitem_carry_64 = awkward_IndexedArray_getitem_carry
-awkward_IndexedArray32_getitem_carry_64 = awkward_IndexedArray_getitem_carry
 awkward_IndexedArray64_getitem_carry_64 = awkward_IndexedArray_getitem_carry
+awkward_IndexedArray32_getitem_carry_64 = awkward_IndexedArray_getitem_carry
 
 
 def awkward_UnionArray_regular_index_getsize(size, fromtags, tagsoffset, length):
@@ -2362,9 +2363,9 @@ def awkward_UnionArray_project(
             tocarry[lenout[0]] = fromindex[indexoffset + i]
             lenout[0] = lenout[0] + 1
 
-awkward_UnionArray8_32_project_64 = awkward_UnionArray_project
 awkward_UnionArray8_U32_project_64 = awkward_UnionArray_project
 awkward_UnionArray8_64_project_64 = awkward_UnionArray_project
+awkward_UnionArray8_32_project_64 = awkward_UnionArray_project
 
 
 def awkward_missing_repeat(
@@ -2413,8 +2414,8 @@ def awkward_ListArray_getitem_jagged_expand(
             multistops[(i * jaggedsize) + j] = singleoffsets[j + 1]
             tocarry[(i * jaggedsize) + j] = start + j
 
-awkward_ListArray32_getitem_jagged_expand_64 = awkward_ListArray_getitem_jagged_expand
 awkward_ListArrayU32_getitem_jagged_expand_64 = awkward_ListArray_getitem_jagged_expand
+awkward_ListArray32_getitem_jagged_expand_64 = awkward_ListArray_getitem_jagged_expand
 awkward_ListArray64_getitem_jagged_expand_64 = awkward_ListArray_getitem_jagged_expand
 
 
@@ -2574,9 +2575,9 @@ def awkward_ListArray_getitem_jagged_descend(
             )
         tooffsets[i + 1] = tooffsets[i] + float(count)
 
-awkward_ListArray32_getitem_jagged_descend_64 = awkward_ListArray_getitem_jagged_descend
 awkward_ListArrayU32_getitem_jagged_descend_64 = awkward_ListArray_getitem_jagged_descend
 awkward_ListArray64_getitem_jagged_descend_64 = awkward_ListArray_getitem_jagged_descend
+awkward_ListArray32_getitem_jagged_descend_64 = awkward_ListArray_getitem_jagged_descend
 
 
 def awkward_ByteMaskedArray_getitem_carry(
@@ -2675,8 +2676,8 @@ def awkward_MaskedArray_getitem_next_jagged_project(
             k = k + 1
         i = i + 1
 
-awkward_MaskedArray64_getitem_next_jagged_project = awkward_MaskedArray_getitem_next_jagged_project
 awkward_MaskedArray32_getitem_next_jagged_project = awkward_MaskedArray_getitem_next_jagged_project
+awkward_MaskedArray64_getitem_next_jagged_project = awkward_MaskedArray_getitem_next_jagged_project
 awkward_MaskedArrayU32_getitem_next_jagged_project = awkward_MaskedArray_getitem_next_jagged_project
 
 

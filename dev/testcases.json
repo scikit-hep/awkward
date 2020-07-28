@@ -103,13 +103,10 @@
                 {"int": 0}
             ],
             "IndexedArray-mask": [
-                {"int": [1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0]}
-            ],
-            "IndexedArray-mask-unsigned": [
                 {"int": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}
             ],
             "IndexedArray-mask-offset": [
-                {"int": 0}
+                {"int": 1}
             ],
             "IndexedArray-isoption": [
                 {"bool": true}
