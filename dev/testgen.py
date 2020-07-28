@@ -26,7 +26,9 @@ kSliceNone = kMaxInt64 + 1
 """
     with open(os.path.join(CURRENT_DIR, "spec.yaml")) as infile:
         spec = yaml.safe_load(infile)["kernels"]
-        with open(os.path.join(CURRENT_DIR, "..", "tests", "kernels.py"), "w") as outfile:
+        with open(
+            os.path.join(CURRENT_DIR, "..", "tests", "kernels.py"), "w"
+        ) as outfile:
             outfile.write(prefix)
             for func in spec:
                 if "def " in func["definition"]:
@@ -113,12 +115,18 @@ def testpykernels(tests):
         for funcname in tests.keys():
             num = 1
             for test in tests[funcname]:
+                if test == []:
+                    raise AssertionError(
+                        "Put proper tests for {0} in specification".format(funcname)
+                    )
                 f.write("def test_" + funcname + "_" + str(num) + "():\n")
                 num += 1
                 args = ""
                 for arg, val in test["inargs"].items():
                     f.write(" " * 4 + arg + " = " + str(val) + "\n")
-                f.write(" " * 4 + "funcPy = getattr(tests.kernels, '" + funcname + "')\n")
+                f.write(
+                    " " * 4 + "funcPy = getattr(tests.kernels, '" + funcname + "')\n"
+                )
                 count = 0
                 for arg in test["inargs"].keys():
                     if count == 0:
