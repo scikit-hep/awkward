@@ -47,20 +47,46 @@ You need some additional packages installed on your system to build the document
 * Sphinx and its dependencies ([Jinja2](https://pypi.org/project/Jinja2/), [sphinxcontrib-serializinghtml](https://pypi.org/project/sphinxcontrib-serializinghtml/), [sphinxcontrib-applehelp](https://pypi.org/project/sphinxcontrib-applehelp/), [sphinxcontrib-devhelp](https://pypi.org/project/sphinxcontrib-devhelp/), [sphinxcontrib-jsmath](https://pypi.org/project/sphinxcontrib-jsmath/), [sphinxcontrib-htmlhelp](https://pypi.org/project/sphinxcontrib-htmlhelp/), [sphinxcontrib-qthelp](https://pypi.org/project/sphinxcontrib-qthelp/), [Pygments](https://pypi.org/project/Pygments/), [docutils](https://pypi.org/project/docutils/), [snowballstemmer](https://pypi.org/project/snowballstemmer/), [Babel](https://pypi.org/project/Babel/), [alabaster](https://pypi.org/project/alabaster/), [imagesize](https://pypi.org/project/imagesize/), [requests](https://pypi.org/project/requests/), [setuptools](https://pypi.org/project/setuptools/), [packaging](https://pypi.org/project/packaging/))  
 
 
-To build documentation locally, execute the following command from the root directory of the project -  
-```sphinx-build docs-sphinx/ docs-sphinx/_build/```   
+To build documentation locally, execute the following command from the root directory of the project.
+
+```bash
+sphinx-build docs-sphinx docs-sphinx/_build
+```
+
 this command executes multiple custom Python scripts(some require a working internet connection), in addition to using Sphinx and Doxygen to generate the required browser viewable documentation.
 
-To view the built documentation, open `docs-sphinx/_build/index.html` from the root directory of the project in your preferred web browser.
+To view the built documentation, open
 
-Before re-building documentation, you might want to delete the files that were generated to create viewable documentation. A simple command to remove all of them is -   
-```rm -rf docs-shinx/_auto/ docs_sphinx/_build/ docs-sphinx/_static/```
+```bash
+docs-sphinx/_build/index.html
+```
+
+from the root directory of the project in your preferred web browser.
+
+Before re-building documentation, you might want to delete the files that were generated to create viewable documentation. A simple command to remove all of them is
+
+```bash
+rm -rf docs-shinx/_auto docs_sphinx/_build docs-sphinx/_static
+```
 
 ### Continuous integration
 
 Pull requests must pass all [continuous integration](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=3&_a=summary) tests before they are merged. I will sometimes cancel non-essential builds to give priority to pull requests that are almost ready to be merged. If you needed the result of the build as a diagnostic, you can ask me to restart your job or make a trivial change to trigger a new build.
 
 Currently, we only run merge builds (the state of your branch if merged with master), not regular branch builds (the state of your branch as-is), because only merge builds can be made to run for pull requests from external forks and it makes better use of our limited execution time on Azure. If you want to enable regular branch builds, you can turn it on for your branch by editing `trigger/branches/exclude` in [.ci/azure-buildtest-awkwrad.yml](https://github.com/scikit-hep/awkward-1.0/blob/9b6fca3f6e6456860ae40979171f762e0045ce7c/.ci/azure-buildtest-awkward.yml#L1-L5). The merge build trigger is not controlled by the YAML file. It is better, however, to keep up-to-date with `git merge master`.
+
+### Semi-automated testing of CUDA kernels
+
+For development on the cuda-kernels, an AWS VM with a GPU has been set up to run tests in the `tests-cuda` directory. You can email jpivarski at GMail for more information on how to get permissions to launch the AWS instance. Once inside the GPU-enabled VM, cd to `awkward-1.0` and run the following command to test your branch.
+
+```bash
+mv .ci/tests/logs/* .ci/tests/logs-OLD/*
+.ci/launch-cuda-docker-ci.sh -l -b <branch-name>
+```
+
+The `-l` flag logs the output to the `.ci/logs` directory. Only the files ending in `awkward1-cuda-tests` contain the output of the CUDA tests, but the others may be useful for debugging. Awkward's CUDA kernels are tested for CUDA 9.0, 10.0, and 10.2. (These are what the `900`, `100`, and `102` prefixes on the log files mean.)
+
+For debugging, you can enter the Docker container interactively.
 
 ### The master branch
 

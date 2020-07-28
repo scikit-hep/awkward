@@ -5,6 +5,7 @@ docs/demos/test-program.cpp
 dev/kernels.py
 dev/cpukerneltests.py
 dev/pykerneltests.py
+.ci/logs/
 
 dependent-project/CMakeFiles
 dependent-project/CMakeCache.txt
