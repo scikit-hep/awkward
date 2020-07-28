@@ -126,7 +126,7 @@ def testpykernels(tests):
                         count += 1
                     else:
                         args += ", " + arg
-                if test["success"] == True:
+                if test["success"]:
                     f.write(" " * 4 + "funcPy" + "(" + args + ")\n")
                     for arg, val in test["outargs"].items():
                         f.write(" " * 4 + "out" + arg + " = " + str(val) + "\n")
@@ -283,7 +283,7 @@ class Error(ctypes.Structure):
                         count += 1
                     else:
                         args += ", " + arg
-                if test["success"] == True:
+                if test["success"]:
                     f.write(" " * 4 + "ret_pass = funcC(" + args + ")\n")
                     for arg, val in test["outargs"].items():
                         f.write(" " * 4 + "out" + arg + " = " + str(val) + "\n")

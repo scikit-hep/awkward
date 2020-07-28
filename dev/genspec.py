@@ -12,7 +12,7 @@ import black
 import pycparser
 from lark import Lark
 
-from parser_utils import arrayconv, getheadername, indent_code, pytype
+from parser_utils import indent_code, pytype
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -102,6 +102,23 @@ PYGEN_BLACKLIST = SPEC_BLACKLIST + [
     "awkward_NumpyArray_getitem_next_null",
     "awkward_NumpyArray_getitem_next_null_64",
 ]
+
+
+def getheadername(filename):
+    if "/" in filename:
+        hfile = filename[filename.rfind("/") + 1 : -4] + ".h"
+    else:
+        hfile = filename[:-4] + ".h"
+    hfile = os.path.join(CURRENT_DIR, "..", "include", "awkward", "cpu-kernels", hfile)
+    return hfile
+
+
+def arrayconv(cpptype):
+    count = cpptype.count("*")
+    if count == 0:
+        return cpptype
+    else:
+        return "List[" * count + cpptype[:-count] + "]" * count
 
 
 def preprocess(filename, skip_implementation=False):
@@ -786,7 +803,7 @@ def getargs(filename):
             | /#include[^\n]*/
             | /#endif[^\n]*/
             | "const"
- 
+
     %import common.CNAME
     %import common.WS
     %ignore WS
