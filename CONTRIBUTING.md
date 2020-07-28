@@ -75,6 +75,19 @@ Pull requests must pass all [continuous integration](https://dev.azure.com/jpiva
 
 Currently, we only run merge builds (the state of your branch if merged with master), not regular branch builds (the state of your branch as-is), because only merge builds can be made to run for pull requests from external forks and it makes better use of our limited execution time on Azure. If you want to enable regular branch builds, you can turn it on for your branch by editing `trigger/branches/exclude` in [.ci/azure-buildtest-awkwrad.yml](https://github.com/scikit-hep/awkward-1.0/blob/9b6fca3f6e6456860ae40979171f762e0045ce7c/.ci/azure-buildtest-awkward.yml#L1-L5). The merge build trigger is not controlled by the YAML file. It is better, however, to keep up-to-date with `git merge master`.
 
+### Semi-automated testing of CUDA kernels
+
+For development on the cuda-kernels, an AWS VM with a GPU has been set up to run tests in the `tests-cuda` directory. You can email jpivarski at GMail for more information on how to get permissions to launch the AWS instance. Once inside the GPU-enabled VM, cd to `awkward-1.0` and run the following command to test your branch.
+
+```bash
+mv .ci/tests/logs/* .ci/tests/logs-OLD/*
+.ci/launch-cuda-docker-ci.sh -l -b <branch-name>
+```
+
+The `-l` flag logs the output to the `.ci/logs` directory. Only the files ending in `awkward1-cuda-tests` contain the output of the CUDA tests, but the others may be useful for debugging. Awkward's CUDA kernels are tested for CUDA 9.0, 10.0, and 10.2. (These are what the `900`, `100`, and `102` prefixes on the log files mean.)
+
+For debugging, you can enter the Docker container interactively.
+
 ### The master branch
 
 The Awkward Array `master` branch must be kept in an unbroken state. Although the recommended way to install Awkward Array is through pip or conda, the `master` branch on GitHub must always be functional. Pull requests for bug fixes and new features are based on `master`, so it has to work for users to test our proposed changes.
