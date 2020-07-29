@@ -74,7 +74,17 @@ make_IndexOf(const py::handle& m, const std::string& name) {
             "Index can only be sliced by an integer or start:stop slice");
         }
       })
-
+      .def("copy_to", [](const ak::IndexOf<T>& self, std::string& ptr_lib) {
+        if(ptr_lib == "cuda") {
+          return self.copy_to(kernel::Lib::cuda_kernels);
+        }
+        else if(ptr_lib == "cpu") {
+          return self.copy_to(kernel::Lib::cpu_kernels);
+        }
+        else {
+          throw std::invalid_argument("Invalid kernel specified, valid kernels are cpu and cuda");
+        }
+      })
   );
 }
 

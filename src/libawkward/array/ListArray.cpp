@@ -31,10 +31,11 @@ namespace awkward {
 
   ListForm::ListForm(bool has_identities,
                      const util::Parameters& parameters,
+                     const FormKey& form_key,
                      Index::Form starts,
                      Index::Form stops,
                      const FormPtr& content)
-      : Form(has_identities, parameters)
+      : Form(has_identities, parameters, form_key)
       , starts_(starts)
       , stops_(stops)
       , content_(content) { }
@@ -86,6 +87,7 @@ namespace awkward {
     content_.get()->tojson_part(builder, verbose);
     identities_tojson(builder, verbose);
     parameters_tojson(builder, verbose);
+    form_key_tojson(builder, verbose);
     builder.endrecord();
   }
 
@@ -93,6 +95,7 @@ namespace awkward {
   ListForm::shallow_copy() const {
     return std::make_shared<ListForm>(has_identities_,
                                       parameters_,
+                                      form_key_,
                                       starts_,
                                       stops_,
                                       content_);
@@ -162,6 +165,7 @@ namespace awkward {
   ListForm::equal(const FormPtr& other,
                   bool check_identities,
                   bool check_parameters,
+                  bool check_form_key,
                   bool compatibility_check) const {
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
@@ -171,12 +175,17 @@ namespace awkward {
         !util::parameters_equal(parameters_, other.get()->parameters())) {
       return false;
     }
+    if (check_form_key  &&
+        !form_key_equals(other.get()->form_key())) {
+      return false;
+    }
     if (ListForm* t = dynamic_cast<ListForm*>(other.get())) {
       return (starts_ == t->starts()  &&
               stops_ == t->stops()  &&
               content_.get()->equal(t->content(),
                                     check_identities,
                                     check_parameters,
+                                    check_form_key,
                                     compatibility_check));
     }
     else {
@@ -438,6 +447,7 @@ namespace awkward {
   ListArrayOf<T>::form(bool materialize) const {
     return std::make_shared<ListForm>(identities_.get() != nullptr,
                                       parameters_,
+                                      FormKey(nullptr),
                                       starts_.form(),
                                       stops_.form(),
                                       content_.get()->form(materialize));

@@ -1626,7 +1626,7 @@ def from_arrow(array, highlevel=True, behavior=None):
             mask = buffers.pop(0)
             child_arrays = []
             keys = []
-            for i in range(tpe.num_children):
+            for i in range(tpe.num_fields):
                 child_arrays.append(
                     popbuffers(
                         None if array is None else array.field(tpe[i].name),
@@ -1691,14 +1691,13 @@ def from_arrow(array, highlevel=True, behavior=None):
                 return out
 
         elif isinstance(tpe, pyarrow.lib.UnionType) and tpe.mode == "sparse":
-            assert tpe.num_buffers == 3
+            assert tpe.num_buffers == 2
             mask = buffers.pop(0)
             tags = numpy.frombuffer(buffers.pop(0), dtype=numpy.int8)[:length]
-            assert buffers.pop(0) is None
             index = numpy.arange(len(tags), dtype=numpy.int32)
 
             contents = []
-            for i in range(tpe.num_children):
+            for i in range(tpe.num_fields):
                 try:
                     sublength = index[tags == i][-1] + 1
                 except IndexError:
@@ -1730,7 +1729,7 @@ def from_arrow(array, highlevel=True, behavior=None):
             index = numpy.frombuffer(buffers.pop(0), dtype=numpy.int32)[:length]
 
             contents = []
-            for i in range(tpe.num_children):
+            for i in range(tpe.num_fields):
                 try:
                     sublength = index[tags == i].max() + 1
                 except ValueError:
@@ -1860,7 +1859,7 @@ def from_arrow(array, highlevel=True, behavior=None):
             data = buffers.pop(0)
             out = numpy.frombuffer(data, dtype=numpy.uint8)
             out = numpy.unpackbits(out).reshape(-1, 8)[:, ::-1].reshape(-1)
-            out = awkward1.layout.NumpyArray(out[:length])
+            out = awkward1.layout.NumpyArray(out[:length].view(numpy.bool_))
             if mask is not None:
                 awk_mask = awkward1.layout.IndexU8(
                     numpy.frombuffer(mask, dtype=numpy.uint8)
@@ -1929,7 +1928,6 @@ def from_arrow(array, highlevel=True, behavior=None):
         return awkward1._util.wrap(recurse(array), behavior)
     else:
         return recurse(array)
-
 
 def to_parquet(array, where, explode_records=False, **options):
     """
@@ -2040,7 +2038,7 @@ def from_parquet(
     row_groups=None,
     use_threads=True,
     lazy=False,
-    lazy_cache="metadata",
+    lazy_cache="attach",
     lazy_cache_key=None,
     highlevel=True,
     behavior=None,
@@ -2057,12 +2055,13 @@ def from_parquet(
         use_threads (bool): Passed to the pyarrow.parquet.ParquetFile.read
             functions; if True, do multithreaded reading.
         lazy (bool): If True, read columns in row groups on demand (as
-            VirtualArrays, in PartitionedArrays if the file has more than one
-            row group); if False, read all requested data immediately.
-        lazy_cache (None, "metadata", or MutableMapping): If lazy, pass this
-            cache to the VirtualArrays. If "metadata", a new dict is created
-            and attached to the output array's metadata as "cache" (only
-            highlevel arrays have metadata).
+            #ak.layout.VirtualArray, possibly in #ak.partition.PartitionedArray
+            if the file has more than one row group); if False, read all
+            requested data immediately.
+        lazy_cache (None, "attach", or MutableMapping): If lazy, pass this
+            cache to the VirtualArrays. If "attach", a new dict is created
+            and attached to the output array as a "cache" parameter on
+            #ak.Array.
         lazy_cache_key (None or str): If lazy, pass this cache_key to the
             VirtualArrays. If None, a process-unique string is constructed.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
@@ -2107,11 +2106,11 @@ def from_parquet(
     if lazy:
         state = _ParquetState(file, use_threads, source, options)
 
-        if lazy_cache is "metadata":
+        if lazy_cache == "attach":
             lazy_cache = {}
-            metadata = {"cache": lazy_cache}
+            toattach = lazy_cache
         else:
-            metadata = None
+            toattach = None
 
         if lazy_cache is None:
             cache = None
@@ -2119,7 +2118,7 @@ def from_parquet(
             cache = awkward1.layout.ArrayCache(lazy_cache)
 
         if lazy_cache_key is None:
-            lazy_cache_key = "ak.from_parquet_{0}".format(_from_parquet_key())
+            lazy_cache_key = "ak.from_parquet:{0}".format(_from_parquet_key())
 
         partitions = []
         offsets = [0]
@@ -2154,7 +2153,7 @@ def from_parquet(
                 partitions, offsets[1:]
             )
         if highlevel:
-            return awkward1._util.wrap(out, behavior, metadata=metadata)
+            return awkward1._util.wrap(out, behavior, cache=toattach)
         else:
             return out
 
@@ -2168,6 +2167,1083 @@ def from_parquet(
             return out[""]
         else:
             return out
+
+
+def _arrayset_key(
+    form_key,
+    attribute,
+    partition,
+    prefix,
+    sep,
+    partition_first,
+):
+    if form_key is None:
+        raise ValueError(
+            "cannot read from arrayset using Forms without form_keys"
+        )
+    if attribute is None:
+        attribute = ""
+    else:
+        attribute = sep + attribute
+    if partition is None:
+        return "{0}{1}{2}".format(
+            prefix,
+            form_key,
+            attribute,
+        )
+    elif partition_first:
+        return "{0}{1}{2}{3}{4}".format(
+            prefix,
+            partition,
+            sep,
+            form_key,
+            attribute,
+        )
+    else:
+        return "{0}{1}{2}{3}{4}".format(
+            prefix,
+            form_key,
+            attribute,
+            sep,
+            partition,
+        )
+
+
+def to_arrayset(
+    array,
+    container=None,
+    partition=None,
+    prefix=None,
+    node_format="node{0}",
+    partition_format="part{0}",
+    sep="-",
+    partition_first=False,
+):
+    u"""
+    Args:
+        array: Data to decompose into an arrayset.
+        container (None or MutableMapping): The str \u2192 NumPy arrays (or
+            Python buffers) that represent the decomposed Awkward Array. This
+            `container` is only assumed to have a `__setitem__` method that
+            accepts strings as keys.
+        partition (None or non-negative int): If None and `array` is not
+            partitioned, keys written to the container have no reference to
+            partitioning; if an integer and `array` is not partitioned, keys
+            use this as their partition number; if `array` is partitioned, the
+            `partition` argument must be None and keys are written with the
+            array's own internal partition numbers.
+        prefix (None or str): If None, keys only contain node and partition
+            information; if a string, keys are all prepended by `prefix + sep`.
+        node_format (str or callable): Python format string or function
+            (returning str) of the node part of keys written to the container
+            and the `form_key` values in the output Form. Its only argument
+            (`{0}` in the format string) is the node number, unique within the
+            `array`.
+        partition_format (str or callable): Python format string or function
+            (returning str) of the partition part of keys written to the
+            container (if any). Its only argument (`{0}` in the format string)
+            is the partition number.
+        sep (str): Separates the prefix, node part, array attribute (e.g.
+            `"starts"`, `"stops"`, `"mask"`), and partition part of the
+            keys written to the container.
+        partition_first (bool): If True, the partition part appears immediately
+            after the prefix (if any); if False, the partition part appears
+            at the end of the keys. This can be relevant if the `container`
+            is sorted or lookup performance depends on alphabetical order.
+
+    Decomposes an Awkward Array into a Form and a collection of arrays, so
+    that data can be losslessly written to file formats and storage devices
+    that only understand named arrays (or binary blobs).
+
+    This function returns a 3-tuple:
+
+        (form, container, num_partitions)
+
+    where the `form` is a #ak.forms.Form (which can be converted to JSON
+    with `tojson`), the `container` is either the MutableMapping you passed in
+    or a new dict containing the NumPy arrays, and `num_partitions` is None
+    if `array` was not partitioned or the number of partitions if it was.
+
+    These are also the first three arguments of #ak.from_arrayset, so a full
+    round-trip is
+
+        >>> reconstituted = ak.from_arrayset(*ak.to_arrayset(original))
+
+    The `container` argument lets you specify your own MutableMapping, which
+    might be an interface to some storage format or device (e.g. h5py). It's
+    okay if the `container` drops NumPy's `dtype` and `shape` information,
+    leaving raw bytes, since `dtype` and `shape` can be reconstituted from
+    the #ak.forms.NumpyForm.
+
+    The `partition` argument lets you fill the `container` one partition at a
+    time using unpartitioned arrays.
+
+    The rest of the arguments determine the format of the keys written to the
+    `container` (which might be restrictive if it represents a storage device).
+
+    Here is a simple example:
+
+        >>> original = ak.Array([[1, 2, 3], [], [4, 5]])
+        >>> form, container, num_partitions = ak.to_arrayset(original)
+        >>> form
+        {
+            "class": "ListOffsetArray64",
+            "offsets": "i64",
+            "content": {
+                "class": "NumpyArray",
+                "itemsize": 8,
+                "format": "l",
+                "primitive": "int64",
+                "form_key": "node1"
+            },
+            "form_key": "node0"
+        }
+        >>> container
+        {'node0-offsets': array([0, 3, 3, 5], dtype=int64),
+         'node1': array([1, 2, 3, 4, 5])}
+        >>> print(num_partitions)
+        None
+
+    which may be read back with
+
+        >>> ak.from_arrayset(form, container)
+        <Array [[1, 2, 3], [], [4, 5]] type='3 * var * int64'>
+
+    (the third argument of #ak.from_arrayset defaults to None).
+
+    Here is an example of building up a partitioned array:
+
+        >>> container = {}
+        >>> form, _, _ = ak.to_arrayset(ak.Array([[1, 2, 3], [], [4, 5]]), container, 0)
+        >>> form, _, _ = ak.to_arrayset(ak.Array([[6, 7, 8, 9]]), container, 1)
+        >>> form, _, _ = ak.to_arrayset(ak.Array([[], [], []]), container, 2)
+        >>> form, _, _ = ak.to_arrayset(ak.Array([[10]]), container, 3)
+        >>> form
+        {
+            "class": "ListOffsetArray64",
+            "offsets": "i64",
+            "content": {
+                "class": "NumpyArray",
+                "itemsize": 8,
+                "format": "l",
+                "primitive": "int64",
+                "form_key": "node1"
+            },
+            "form_key": "node0"
+        }
+        >>> container
+        {'node0-offsets-part0': array([0, 3, 3, 5], dtype=int64),
+         'node1-part0': array([1, 2, 3, 4, 5]),
+         'node0-offsets-part1': array([0, 4], dtype=int64),
+         'node1-part1': array([6, 7, 8, 9]),
+         'node0-offsets-part2': array([0, 0, 0, 0], dtype=int64),
+         'node1-part2': array([], dtype=float64),
+         'node0-offsets-part3': array([0, 1], dtype=int64),
+         'node1-part3': array([10])}
+
+    The object returned by #ak.from_arrayset is now a partitioned array:
+
+        >>> ak.from_arrayset(form, container, 4)
+        <Array [[1, 2, 3], [], [4, ... [], [], [10]] type='8 * var * int64'>
+        >>> ak.partitions(ak.from_arrayset(form, container, 4))
+        [3, 1, 3, 1]
+
+    Which can also lazily load partitions as they are observed:
+
+        >>> lazy = ak.from_arrayset(form, container, 4, lazy=True, lazy_lengths=[3, 1, 3, 1])
+        >>> lazy.cache
+        {}
+        >>> lazy
+        <Array [[1, 2, 3], [], [4, ... [], [], [10]] type='8 * var * int64'>
+        >>> len(lazy.cache)
+        3
+        >>> lazy + 100
+        <Array [[101, 102, 103], [], ... [], [], [110]] type='8 * var * int64'>
+        >>> len(lazy.cache)
+        4
+
+    See also #ak.from_arrayset.
+    """
+    if container is None:
+        container = {}
+
+    def index_form(index):
+        if isinstance(index, awkward1.layout.Index64):
+            return "i64"
+        elif isinstance(index, awkward1.layout.Index32):
+            return "i32"
+        elif isinstance(index, awkward1.layout.IndexU32):
+            return "u32"
+        elif isinstance(index, awkward1.layout.Index8):
+            return "i8"
+        elif isinstance(index, awkward1.layout.IndexU8):
+            return "u8"
+        else:
+            raise AssertionError("unrecognized index: " + repr(index))
+
+    if prefix is None:
+        prefix = ""
+    else:
+        prefix = prefix + sep
+
+    if isinstance(node_format, str) or (
+        awkward1._util.py27 and isinstance(node_format, awkward1._util.unicode)
+    ):
+        tmp1 = node_format
+        node_format = lambda x: tmp1.format(x)
+    if isinstance(partition_format, str) or (
+        awkward1._util.py27 and isinstance(
+            partition_format, awkward1._util.unicode
+        )
+    ):
+        tmp2 = partition_format
+        partition_format = lambda x: tmp2.format(x)
+
+    def key(key_index, attribute, partition):
+        if partition is not None:
+            partition = partition_format(partition)
+        return _arrayset_key(
+            node_format(key_index),
+            attribute,
+            partition,
+            prefix,
+            sep,
+            partition_first,
+        )
+
+    num_form_keys = [0]
+
+    def little_endian(array):
+        return array.astype(array.dtype.newbyteorder("<"), copy=False)
+
+    def fill(layout, part):
+        has_identities = layout.identities is not None
+        parameters = layout.parameters
+        key_index = num_form_keys[0]
+        num_form_keys[0] += 1
+
+        if has_identities:
+            raise NotImplementedError(
+                "ak.to_arrayset for an array with Identities"
+            )
+
+        if isinstance(layout, awkward1.layout.EmptyArray):
+            array = numpy.asarray(layout)
+            container[key(key_index, None, part)] = little_endian(array)
+            return awkward1.forms.EmptyForm(
+                has_identities, parameters, node_format(key_index)
+            )
+
+        elif isinstance(layout, (
+            awkward1.layout.IndexedArray32,
+            awkward1.layout.IndexedArrayU32,
+            awkward1.layout.IndexedArray64
+        )):
+            container[key(key_index, "index", part)] = little_endian(
+                numpy.asarray(layout.index)
+            )
+            return awkward1.forms.IndexedForm(
+                index_form(layout.index),
+                fill(layout.content, part),
+                has_identities,
+                parameters,
+                node_format(key_index),
+            )
+
+        elif isinstance(layout, (
+            awkward1.layout.IndexedOptionArray32,
+            awkward1.layout.IndexedOptionArray64
+        )):
+            container[key(key_index, "index", part)] = little_endian(
+                numpy.asarray(layout.index)
+            )
+            return awkward1.forms.IndexedOptionForm(
+                index_form(layout.index),
+                fill(layout.content, part),
+                has_identities,
+                parameters,
+                node_format(key_index),
+            )
+
+        elif isinstance(layout, awkward1.layout.ByteMaskedArray):
+            container[key(key_index, "mask", part)] = little_endian(
+                numpy.asarray(layout.mask)
+            )
+            return awkward1.forms.ByteMaskedForm(
+                index_form(layout.mask),
+                fill(layout.content, part),
+                layout.valid_when,
+                has_identities,
+                parameters,
+                node_format(key_index),
+            )
+
+        elif isinstance(layout, awkward1.layout.BitMaskedArray):
+            container[key(key_index, "mask", part)] = little_endian(
+                numpy.asarray(layout.mask)
+            )
+            return awkward1.forms.BitMaskedForm(
+                index_form(layout.mask),
+                fill(layout.content, part),
+                layout.valid_when,
+                layout.lsb_order,
+                has_identities,
+                parameters,
+                node_format(key_index),
+            )
+
+        elif isinstance(layout, awkward1.layout.UnmaskedArray):
+            return awkward1.forms.UnmaskedForm(
+                fill(layout.content, part),
+                has_identities,
+                parameters,
+                node_format(key_index),
+            )
+
+        elif isinstance(layout, (
+            awkward1.layout.ListArray32,
+            awkward1.layout.ListArrayU32,
+            awkward1.layout.ListArray64
+        )):
+            container[key(key_index, "starts", part)] = little_endian(
+                numpy.asarray(layout.starts)
+            )
+            container[key(key_index, "stops", part)] = little_endian(
+                numpy.asarray(layout.stops)
+            )
+            return awkward1.forms.ListForm(
+                index_form(layout.starts),
+                index_form(layout.stops),
+                fill(layout.content, part),
+                has_identities,
+                parameters,
+                node_format(key_index),
+            )
+
+        elif isinstance(layout, (
+            awkward1.layout.ListOffsetArray32,
+            awkward1.layout.ListOffsetArrayU32,
+            awkward1.layout.ListOffsetArray64
+        )):
+            container[key(key_index, "offsets", part)] = little_endian(
+                numpy.asarray(layout.offsets)
+            )
+            return awkward1.forms.ListOffsetForm(
+                index_form(layout.offsets),
+                fill(layout.content, part),
+                has_identities,
+                parameters,
+                node_format(key_index),
+            )
+
+        elif isinstance(layout, awkward1.layout.NumpyArray):
+            array = numpy.asarray(layout)
+            container[key(key_index, None, part)] = little_endian(array)
+            form = awkward1.forms.Form.from_numpy(array.dtype)
+            return awkward1.forms.NumpyForm(
+                layout.shape[1:],
+                form.itemsize,
+                form.format,
+                has_identities,
+                parameters,
+                node_format(key_index),
+            )
+
+        elif isinstance(layout, awkward1.layout.RecordArray):
+            forms = []
+            for x in layout.contents:
+                forms.append(fill(x, part))
+            if layout.istuple:
+                return awkward1.forms.RecordForm(
+                    forms,
+                    has_identities,
+                    parameters,
+                    node_format(key_index),
+                )
+            else:
+                return awkward1.forms.RecordForm(
+                    dict(zip(layout.keys(), forms)),
+                    has_identities,
+                    parameters,
+                    node_format(key_index),
+                )
+
+        elif isinstance(layout, awkward1.layout.RegularArray):
+            return awkward1.forms.RegularForm(
+                fill(layout.content, part),
+                layout.size,
+                has_identities,
+                parameters,
+                node_format(key_index),
+            )
+
+        elif isinstance(layout, (
+            awkward1.layout.UnionArray8_32,
+            awkward1.layout.UnionArray8_U32,
+            awkward1.layout.UnionArray8_64
+        )):
+            forms = []
+            for x in layout.contents:
+                forms.append(fill(x, part))
+            container[key(key_index, "tags", part)] = little_endian(
+                numpy.asarray(layout.tags)
+            )
+            container[key(key_index, "index", part)] = little_endian(
+                numpy.asarray(layout.index)
+            )
+            return awkward1.forms.UnionForm(
+                index_form(layout.tags),
+                index_form(layout.index),
+                forms,
+                has_identities,
+                parameters,
+                node_format(key_index),
+            )
+
+        elif isinstance(layout, awkward1.layout.VirtualArray):
+            return fill(layout.array, part)
+
+        else:
+            raise AssertionError("unrecognized layout node type: "
+                                 + str(type(layout)))
+
+    layout = to_layout(array, allow_record=False, allow_other=False)
+
+    if isinstance(layout, awkward1.partition.PartitionedArray):
+        if partition is not None:
+            raise ValueError(
+                "array is partitioned; an explicit 'partition' should not be "
+                "assigned"
+            )
+        form = None
+        for part, content in enumerate(layout.partitions):
+            num_form_keys[0] = 0
+
+            f = fill(content, part)
+
+            if form is None:
+                form = f
+            elif form != f:
+                raise ValueError(
+                    """the Form of partition {0}:
+
+    {1}
+
+differs from the first Form:
+
+    {2}""".format(part, f.tojson(True, False), form.tojson(True, False))
+                )
+
+        num_partitions = len(layout.partitions)
+
+    else:
+        form = fill(layout, partition)
+        num_partitions = None
+
+    return form, container, num_partitions
+
+
+_index_form_to_dtype = _index_form_to_index = _form_to_layout_class = None
+
+
+def _form_to_layout(
+    form,
+    container,
+    partition,
+    prefix,
+    sep,
+    partition_first,
+):
+    global _index_form_to_dtype, _index_form_to_index, _form_to_layout_class
+
+    if _index_form_to_dtype is None:
+        _index_form_to_dtype = {
+            "i8": numpy.dtype("<i1"),
+            "u8": numpy.dtype("<u1"),
+            "i32": numpy.dtype("<i4"),
+            "u32": numpy.dtype("<u4"),
+            "i64": numpy.dtype("<i8"),
+        }
+
+        _index_form_to_index = {
+            "i8": awkward1.layout.Index8,
+            "u8": awkward1.layout.IndexU8,
+            "i32": awkward1.layout.Index32,
+            "u32": awkward1.layout.IndexU32,
+            "i64": awkward1.layout.Index64,
+        }
+
+        _form_to_layout_class = {
+            (awkward1.forms.IndexedForm, "i32"):
+                awkward1.layout.IndexedArray32,
+            (awkward1.forms.IndexedForm, "u32"):
+                awkward1.layout.IndexedArrayU32,
+            (awkward1.forms.IndexedForm, "i64"):
+                awkward1.layout.IndexedArray64,
+
+            (awkward1.forms.IndexedOptionForm, "i32"):
+                awkward1.layout.IndexedOptionArray32,
+            (awkward1.forms.IndexedOptionForm, "i64"):
+                awkward1.layout.IndexedOptionArray64,
+
+            (awkward1.forms.ListForm, "i32"):
+                awkward1.layout.ListArray32,
+            (awkward1.forms.ListForm, "u32"):
+                awkward1.layout.ListArrayU32,
+            (awkward1.forms.ListForm, "i64"):
+                awkward1.layout.ListArray64,
+
+            (awkward1.forms.ListOffsetForm, "i32"):
+                awkward1.layout.ListOffsetArray32,
+            (awkward1.forms.ListOffsetForm, "u32"):
+                awkward1.layout.ListOffsetArrayU32,
+            (awkward1.forms.ListOffsetForm, "i64"):
+                awkward1.layout.ListOffsetArray64,
+
+            (awkward1.forms.UnionForm, "i32"):
+                awkward1.layout.UnionArray8_32,
+            (awkward1.forms.UnionForm, "u32"):
+                awkward1.layout.UnionArray8_U32,
+            (awkward1.forms.UnionForm, "i64"):
+                awkward1.layout.UnionArray8_64,
+        }
+
+
+    if form.has_identities:
+        raise NotImplementedError(
+            "ak.from_arrayset for an array with Identities"
+        )
+    else:
+        identities = None
+
+    parameters = form.parameters
+
+    if isinstance(form, awkward1.forms.BitMaskedForm):
+        raw_mask = container[_arrayset_key(
+            form.form_key,
+            "mask",
+            partition,
+            prefix,
+            sep,
+            partition_first,
+        )].reshape(-1).view("u1")
+        mask = _index_form_to_index[form.mask](
+            raw_mask.view(_index_form_to_dtype[form.mask])
+        )
+
+        content = _form_to_layout(
+            form.content,
+            container,
+            partition,
+            prefix,
+            sep,
+            partition_first,
+        )
+
+        return awkward1.layout.BitMaskedArray(
+            mask,
+            content,
+            form.valid_when,
+            len(content),
+            form.lsb_order,
+            identities,
+            parameters,
+        )
+
+    elif isinstance(form, awkward1.forms.ByteMaskedForm):
+        raw_mask = container[_arrayset_key(
+            form.form_key,
+            "mask",
+            partition,
+            prefix,
+            sep,
+            partition_first,
+        )].reshape(-1).view("u1")
+        mask = _index_form_to_index[form.mask](
+            raw_mask.view(_index_form_to_dtype[form.mask])
+        )
+
+        content = _form_to_layout(
+            form.content,
+            container,
+            partition,
+            prefix,
+            sep,
+            partition_first,
+        )
+
+        return awkward1.layout.ByteMaskedArray(
+            mask, content, form.valid_when, identities, parameters
+        )
+
+    elif isinstance(form, awkward1.forms.EmptyForm):
+        return awkward1.layout.EmptyArray(identities, parameters)
+
+    elif isinstance(form, awkward1.forms.IndexedForm):
+        raw_index = container[_arrayset_key(
+            form.form_key,
+            "index",
+            partition,
+            prefix,
+            sep,
+            partition_first,
+        )].reshape(-1).view("u1")
+        index = _index_form_to_index[form.index](
+            raw_index.view(_index_form_to_dtype[form.index])
+        )
+
+        content = _form_to_layout(
+            form.content,
+            container,
+            partition,
+            prefix,
+            sep,
+            partition_first,
+        )
+
+        return _form_to_layout_class[type(form), form.index](
+            index, content, identities, parameters
+        )
+
+    elif isinstance(form, awkward1.forms.IndexedOptionForm):
+        raw_index = container[_arrayset_key(
+            form.form_key,
+            "index",
+            partition,
+            prefix,
+            sep,
+            partition_first,
+        )].reshape(-1).view("u1")
+        index = _index_form_to_index[form.index](
+            raw_index.view(_index_form_to_dtype[form.index])
+        )
+
+        content = _form_to_layout(
+            form.content,
+            container,
+            partition,
+            prefix,
+            sep,
+            partition_first,
+        )
+
+        return _form_to_layout_class[type(form), form.index](
+            index, content, identities, parameters
+        )
+
+    elif isinstance(form, awkward1.forms.ListForm):
+        raw_starts = container[_arrayset_key(
+            form.form_key,
+            "starts",
+            partition,
+            prefix,
+            sep,
+            partition_first,
+        )].reshape(-1).view("u1")
+        starts = _index_form_to_index[form.starts](
+            raw_starts.view(_index_form_to_dtype[form.starts])
+        )
+        raw_stops = container[_arrayset_key(
+            form.form_key,
+            "stops",
+            partition,
+            prefix,
+            sep,
+            partition_first,
+        )].reshape(-1).view("u1")
+        stops = _index_form_to_index[form.stops](
+            raw_stops.view(_index_form_to_dtype[form.stops])
+        )
+
+        content = _form_to_layout(
+            form.content,
+            container,
+            partition,
+            prefix,
+            sep,
+            partition_first,
+        )
+
+        return _form_to_layout_class[type(form), form.starts](
+            starts, stops, content, identities, parameters
+        )
+
+    elif isinstance(form, awkward1.forms.ListOffsetForm):
+        raw_offsets = container[_arrayset_key(
+            form.form_key,
+            "offsets",
+            partition,
+            prefix,
+            sep,
+            partition_first,
+        )].reshape(-1).view("u1")
+        offsets = _index_form_to_index[form.offsets](
+            raw_offsets.view(_index_form_to_dtype[form.offsets])
+        )
+
+        content = _form_to_layout(
+            form.content,
+            container,
+            partition,
+            prefix,
+            sep,
+            partition_first,
+        )
+
+        return _form_to_layout_class[type(form), form.offsets](
+            offsets, content, identities, parameters
+        )
+
+    elif isinstance(form, awkward1.forms.NumpyForm):
+        raw_array = container[_arrayset_key(
+            form.form_key,
+            None,
+            partition,
+            prefix,
+            sep,
+            partition_first,
+        )].reshape(-1).view("u1")
+
+        dtype_inner_shape = form.to_numpy()
+        if dtype_inner_shape.subdtype is None:
+            dtype, inner_shape = dtype_inner_shape, ()
+        else:
+            dtype, inner_shape = dtype_inner_shape.subdtype
+        shape = (-1,) + inner_shape
+
+        array = raw_array.view(dtype).reshape(shape)
+
+        return awkward1.layout.NumpyArray(array, identities, parameters)
+
+    elif isinstance(form, awkward1.forms.RecordForm):
+        contents = []
+        length = None
+        if form.istuple:
+            keys = None
+            for x in form.contents.values():
+                contents.append(_form_to_layout(
+                    x,
+                    container,
+                    partition,
+                    prefix,
+                    sep,
+                    partition_first,
+                ))
+                if length is None:
+                    length = len(contents[-1])
+                else:
+                    length = min(length, len(contents[-1]))
+        else:
+            keys = []
+            for k, x in form.contents.items():
+                keys.append(k)
+                contents.append(_form_to_layout(
+                    x,
+                    container,
+                    partition,
+                    prefix,
+                    sep,
+                    partition_first,
+                ))
+                if length is None:
+                    length = len(contents[-1])
+                else:
+                    length = min(length, len(contents[-1]))
+
+        return awkward1.layout.RecordArray(
+            contents,
+            keys,
+            length,
+            identities,
+            parameters,
+        )
+
+    elif isinstance(form, awkward1.forms.RegularForm):
+        content = _form_to_layout(
+            form.content,
+            container,
+            partition,
+            prefix,
+            sep,
+            partition_first,
+        )
+
+        return awkward1.layout.RegularArray(
+            content, form.size, identities, parameters
+        )
+
+    elif isinstance(form, awkward1.forms.UnionForm):
+        raw_tags = container[_arrayset_key(
+            form.form_key,
+            "tags",
+            partition,
+            prefix,
+            sep,
+            partition_first,
+        )].reshape(-1).view("u1")
+        tags = _index_form_to_index[form.tags](
+            raw_tags.view(_index_form_to_dtype[form.tags])
+        )
+        raw_index = container[_arrayset_key(
+            form.form_key,
+            "index",
+            partition,
+            prefix,
+            sep,
+            partition_first,
+        )].reshape(-1).view("u1")
+        index = _index_form_to_index[form.index](
+            raw_index.view(_index_form_to_dtype[form.index])
+        )
+
+        contents = []
+        for x in form.contents:
+            contents.append(_form_to_layout(
+                x,
+                container,
+                partition,
+                prefix,
+                sep,
+                partition_first,
+            ))
+
+        return _form_to_layout_class[type(form), form.index](
+            tags, index, contents, identities, parameters
+        )
+
+    elif isinstance(form, awkward1.forms.UnmaskedForm):
+        content = _form_to_layout(
+            form.content,
+            container,
+            partition,
+            prefix,
+            sep,
+            partition_first,
+        )
+
+        return awkward1.layout.UnmaskedArray(content, identities, parameters)
+
+    else:
+        raise AssertionError("unexpected form node type: " + str(type(form)))
+
+
+_from_arrayset_key_number = 0
+_from_arrayset_key_lock = threading.Lock()
+
+
+def _from_arrayset_key():
+    global _from_arrayset_key_number
+    with _from_arrayset_key_lock:
+        out = _from_arrayset_key_number
+        _from_arrayset_key_number += 1
+    return out
+
+
+def from_arrayset(
+    form,
+    container,
+    num_partitions=None,
+    prefix=None,
+    partition_format="part{0}",
+    sep="-",
+    partition_first=False,
+    lazy=False,
+    lazy_cache="attach",
+    lazy_cache_key=None,
+    lazy_lengths=None,
+    highlevel=True,
+    behavior=None,
+):
+    u"""
+    Args:
+        form (#ak.forms.Form or str/dict equivalent): The form of the Awkward
+            Array to reconstitute from a set of NumPy arrays (or binary blobs).
+        container (Mapping, such as dict): The str \u2192 NumPy arrays (or Python
+            buffers) that represent the decomposed Awkward Array. This `container`
+            is only assumed to have a `__getitem__` method that accepts strings
+            as keys.
+        num_partitions (None or int): If None, keys are assumed to not describe
+            partitions and the return value is an unpartitioned array; if an int,
+            this is the number of partitions to look for in the `container`.
+        prefix (None or str): If None, keys are assumed to only contain node and
+            partition information; if a string, keys are assumed to be prepended
+            by `prefix + sep`.
+        partition_format (str or callable): Python format string or function
+            (returning str) of the partition part of keys in the container (if
+            any). Its only argument (`{0}` in the format string) is the
+            partition number.
+        sep (str): Separates the prefix, node part, array attribute (e.g.
+            `"starts"`, `"stops"`, `"mask"`), and partition part of the
+            keys expected in the container.
+        partition_first (bool): If True, the partition part is assumed to appear
+            immediately after the prefix (if any); if False, the partition part
+            is assumed to appear at the end of the keys. This can be relevant
+            if the `container` is sorted or lookup performance depends on
+            alphabetical order.
+        lazy (bool): If True, read the array or its partitions on demand (as
+            #ak.layout.VirtualArray, possibly in #ak.partition.PartitionedArray
+            if `num_partitions` is not None); if False, read all requested data
+            immediately.
+        lazy_cache (None, "attach", or MutableMapping): If lazy, pass this
+            cache to the VirtualArrays. If "attach", a new dict is created
+            and attached to the output array as a "cache" parameter on
+            #ak.Array.
+        lazy_cache_key (None or str): If lazy, pass this cache_key to the
+            VirtualArrays. If None, a process-unique string is constructed.
+        lazy_lengths (None, int, or iterable of ints): If lazy and
+            `num_partitions` is None, `lazy_lengths` must be an integer
+            specifying the length of the Awkward Array output; if lazy and
+            `num_partitions` is an integer, `lazy_lengths` must be an integer
+            or iterable of integers specifying the lengths of all partitions.
+            This additional input is needed to avoid immediately reading the
+            array just to determine its length.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+        behavior (bool): Custom #ak.behavior for the output array, if
+            high-level.
+
+    Reconstructs an Awkward Array from a Form and a collection of arrays, so
+    that data can be losslessly read from file formats and storage devices that
+    only understand named arrays (or binary blobs).
+
+    The first three arguments of this function are the return values of
+    #ak.to_arrayset, so a full round-trip is
+
+        >>> reconstituted = ak.from_arrayset(*ak.to_arrayset(original))
+
+    The `container` argument lets you specify your own Mapping, which might be
+    an interface to some storage format or device (e.g. h5py). It's okay if
+    the `container` dropped NumPy's `dtype` and `shape` information, leaving
+    raw bytes, since `dtype` and `shape` can be reconstituted from the
+    #ak.forms.NumpyForm.
+
+    The `num_partitions` argument is required for partitioned data, to know how
+    many partitions to look for in the `container`.
+
+    The `prefix`, `partition_format`, `sep`, and `partition_first` arguments
+    only specify the formatting of the keys, and they have the same meanings as
+    in #ak.to_arrayset.
+
+    The arguments that begin with `lazy_` are only needed if `lazy` is True.
+    The `lazy_cache` and `lazy_cache_key` determine how the array or its
+    partitions are cached after being read from the `container` (in a no-eviction
+    dict attached to the output #ak.Array as `cache` if not specified). The
+    `lazy_lengths` argument is required.
+
+    See #ak.to_arrayset for examples.
+    """
+
+    if isinstance(form, str) or (
+        awkward1._util.py27 and isinstance(form, awkward1._util.unicode)
+    ):
+        form = awkward1.forms.Form.fromjson(form)
+    elif isinstance(form, dict):
+        form = awkward1.forms.Form.fromjson(json.dumps(form))
+
+    if prefix is None:
+        prefix = ""
+    else:
+        prefix = prefix + sep
+
+    if isinstance(partition_format, str) or (
+        awkward1._util.py27 and isinstance(
+            partition_format, awkward1._util.unicode
+        )
+    ):
+        tmp2 = partition_format
+        partition_format = lambda x: tmp2.format(x)
+
+    if lazy:
+        if lazy_cache == "attach":
+            lazy_cache = {}
+            toattach = lazy_cache
+        else:
+            toattach = None
+
+        if lazy_cache is None:
+            cache = None
+        else:
+            cache = awkward1.layout.ArrayCache(lazy_cache)
+
+        if lazy_cache_key is None:
+            lazy_cache_key = "ak.from_arrayset:{0}".format(_from_arrayset_key())
+
+    else:
+        toattach = None
+
+    if num_partitions is None:
+        args = (form, container, None, prefix, sep, partition_first)
+
+        if lazy:
+            if not isinstance(lazy_lengths, numbers.Integral):
+                raise TypeError(
+                    "for lazy=True and num_partitions=None, lazy_lengths "
+                    "must be an integer, not " + repr(lazy_lengths)
+                )
+
+            generator = awkward1.layout.ArrayGenerator(
+                _form_to_layout,
+                args,
+                form=form,
+                length=lazy_lengths,
+            )
+
+            out = awkward1.layout.VirtualArray(generator, cache, lazy_cache_key)
+
+        else:
+            out = _form_to_layout(*args)
+
+    else:
+        if lazy:
+            if isinstance(lazy_lengths, numbers.Integral):
+                lazy_lengths = [lazy_lengths] * num_partitions
+            elif (
+                isinstance(lazy_lengths, Iterable) and
+                len(lazy_lengths) == num_partitions and
+                all(isinstance(x, numbers.Integral) for x in lazy_lengths)
+            ):
+                pass
+            else:
+                raise TypeError(
+                    "for lazy=True, lazy_lengths must be an integer or "
+                    "iterable of 'num_partitions' integers, not "
+                    + repr(lazy_lengths)
+                )
+
+        partitions = []
+        offsets = [0]
+
+        for part in range(num_partitions):
+            p = partition_format(part)
+            args = (form, container, p, prefix, sep, partition_first)
+
+            if lazy:
+                generator = awkward1.layout.ArrayGenerator(
+                    _form_to_layout,
+                    args,
+                    form=form,
+                    length=lazy_lengths[part],
+                )
+
+                cache_key = "{0}[{1}]".format(lazy_cache_key, part)
+
+                partitions.append(awkward1.layout.VirtualArray(
+                    generator, cache, cache_key
+                ))
+                offsets.append(offsets[-1] + lazy_lengths[part])
+
+            else:
+                partitions.append(_form_to_layout(*args))
+                offsets.append(offsets[-1] + len(partitions[-1]))
+
+        out = awkward1.partition.IrregularlyPartitionedArray(
+            partitions, offsets[1:]
+        )
+
+    if highlevel:
+        return awkward1._util.wrap(out, behavior, cache=toattach)
+    else:
+        return out
 
 
 __all__ = [

@@ -25,6 +25,7 @@ namespace awkward {
     /// @brief Creates a ByteMaskedForm. See ByteMaskedArray for documentation.
     ByteMaskedForm(bool has_identities,
                    const util::Parameters& parameters,
+                   const FormKey& form_key,
                    Index::Form mask,
                    const FormPtr& content,
                    bool valid_when);
@@ -81,6 +82,7 @@ namespace awkward {
       equal(const FormPtr& other,
             bool check_identities,
             bool check_parameters,
+            bool check_form_key,
             bool compatibility_check) const override;
 
   private:

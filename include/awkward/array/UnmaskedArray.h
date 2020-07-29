@@ -21,6 +21,7 @@ namespace awkward {
     /// @brief Creates a UnmaskedForm. See UnmaskedArray for documentation.
     UnmaskedForm(bool has_identities,
                  const util::Parameters& parameters,
+                 const FormKey& form_key,
                  const FormPtr& content);
 
     const FormPtr
@@ -69,6 +70,7 @@ namespace awkward {
       equal(const FormPtr& other,
             bool check_identities,
             bool check_parameters,
+            bool check_form_key,
             bool compatibility_check) const override;
 
   private:

@@ -33,9 +33,10 @@ namespace awkward {
 
   IndexedForm::IndexedForm(bool has_identities,
                            const util::Parameters& parameters,
+                           const FormKey& form_key,
                            Index::Form index,
                            const FormPtr& content)
-      : Form(has_identities, parameters)
+      : Form(has_identities, parameters, form_key)
       , index_(index)
       , content_(content) { }
 
@@ -78,6 +79,7 @@ namespace awkward {
     content_.get()->tojson_part(builder, verbose);
     identities_tojson(builder, verbose);
     parameters_tojson(builder, verbose);
+    form_key_tojson(builder, verbose);
     builder.endrecord();
   }
 
@@ -85,6 +87,7 @@ namespace awkward {
   IndexedForm::shallow_copy() const {
     return std::make_shared<IndexedForm>(has_identities_,
                                          parameters_,
+                                         form_key_,
                                          index_,
                                          content_);
   }
@@ -149,6 +152,7 @@ namespace awkward {
   IndexedForm::equal(const FormPtr& other,
                      bool check_identities,
                      bool check_parameters,
+                     bool check_form_key,
                      bool compatibility_check) const {
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
@@ -158,11 +162,16 @@ namespace awkward {
         !util::parameters_equal(parameters_, other.get()->parameters())) {
       return false;
     }
+    if (check_form_key  &&
+        !form_key_equals(other.get()->form_key())) {
+      return false;
+    }
     if (IndexedForm* t = dynamic_cast<IndexedForm*>(other.get())) {
       return (index_ == t->index()  &&
               content_.get()->equal(t->content(),
                                     check_identities,
                                     check_parameters,
+                                    check_form_key,
                                     compatibility_check));
     }
     else {
@@ -174,9 +183,10 @@ namespace awkward {
 
   IndexedOptionForm::IndexedOptionForm(bool has_identities,
                                        const util::Parameters& parameters,
+                                       const FormKey& form_key,
                                        Index::Form index,
                                        const FormPtr& content)
-      : Form(has_identities, parameters)
+      : Form(has_identities, parameters, form_key)
       , index_(index)
       , content_(content) { }
 
@@ -217,6 +227,7 @@ namespace awkward {
     content_.get()->tojson_part(builder, verbose);
     identities_tojson(builder, verbose);
     parameters_tojson(builder, verbose);
+    form_key_tojson(builder, verbose);
     builder.endrecord();
   }
 
@@ -224,6 +235,7 @@ namespace awkward {
   IndexedOptionForm::shallow_copy() const {
     return std::make_shared<IndexedOptionForm>(has_identities_,
                                                parameters_,
+                                               form_key_,
                                                index_,
                                                content_);
   }
@@ -288,6 +300,7 @@ namespace awkward {
   IndexedOptionForm::equal(const FormPtr& other,
                            bool check_identities,
                            bool check_parameters,
+                           bool check_form_key,
                            bool compatibility_check) const {
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
@@ -297,11 +310,16 @@ namespace awkward {
         !util::parameters_equal(parameters_, other.get()->parameters())) {
       return false;
     }
+    if (check_form_key  &&
+        !form_key_equals(other.get()->form_key())) {
+      return false;
+    }
     if (IndexedOptionForm* t = dynamic_cast<IndexedOptionForm*>(other.get())) {
       return (index_ == t->index()  &&
               content_.get()->equal(t->content(),
                                     check_identities,
                                     check_parameters,
+                                    check_form_key,
                                     compatibility_check));
     }
     else {
@@ -903,12 +921,14 @@ namespace awkward {
       return std::make_shared<IndexedOptionForm>(
                                            identities_.get() != nullptr,
                                            parameters_,
+                                           FormKey(nullptr),
                                            index_.form(),
                                            content_.get()->form(materialize));
     }
     else {
       return std::make_shared<IndexedForm>(identities_.get() != nullptr,
                                            parameters_,
+                                           FormKey(nullptr),
                                            index_.form(),
                                            content_.get()->form(materialize));
     }

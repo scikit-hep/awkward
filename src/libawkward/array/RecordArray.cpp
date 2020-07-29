@@ -25,9 +25,10 @@ namespace awkward {
 
   RecordForm::RecordForm(bool has_identities,
                          const util::Parameters& parameters,
+                         const FormKey& form_key,
                          const util::RecordLookupPtr& recordlookup,
                          const std::vector<FormPtr>& contents)
-      : Form(has_identities, parameters)
+      : Form(has_identities, parameters, form_key)
       , recordlookup_(recordlookup)
       , contents_(contents) {
     if (recordlookup.get() != nullptr  &&
@@ -126,6 +127,7 @@ namespace awkward {
     }
     identities_tojson(builder, verbose);
     parameters_tojson(builder, verbose);
+    form_key_tojson(builder, verbose);
     builder.endrecord();
   }
 
@@ -133,6 +135,7 @@ namespace awkward {
   RecordForm::shallow_copy() const {
     return std::make_shared<RecordForm>(has_identities_,
                                         parameters_,
+                                        form_key_,
                                         recordlookup_,
                                         contents_);
   }
@@ -224,6 +227,7 @@ namespace awkward {
   RecordForm::equal(const FormPtr& other,
                     bool check_identities,
                     bool check_parameters,
+                    bool check_form_key,
                     bool compatibility_check) const {
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
@@ -231,6 +235,10 @@ namespace awkward {
     }
     if (check_parameters  &&
         !util::parameters_equal(parameters_, other.get()->parameters())) {
+      return false;
+    }
+    if (check_form_key  &&
+        !form_key_equals(other.get()->form_key())) {
       return false;
     }
     if (RecordForm* t = dynamic_cast<RecordForm*>(other.get())) {
@@ -262,6 +270,7 @@ namespace awkward {
           if (!content(i).get()->equal(t->content(j),
                                        check_identities,
                                        check_parameters,
+                                       check_form_key,
                                        compatibility_check)) {
             return false;
           }
@@ -276,6 +285,7 @@ namespace awkward {
           if (!content(i).get()->equal(t->content(i),
                                        check_identities,
                                        check_parameters,
+                                       check_form_key,
                                        compatibility_check)) {
             return false;
           }
@@ -505,6 +515,7 @@ namespace awkward {
     }
     return std::make_shared<RecordForm>(identities_.get() != nullptr,
                                         parameters_,
+                                        FormKey(nullptr),
                                         recordlookup_,
                                         contents);
   }

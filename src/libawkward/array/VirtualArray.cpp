@@ -13,9 +13,10 @@ namespace awkward {
 
   VirtualForm::VirtualForm(bool has_identities,
                            const util::Parameters& parameters,
+                           const FormKey& form_key,
                            const FormPtr& form,
                            bool has_length)
-      : Form(has_identities, parameters)
+      : Form(has_identities, parameters, form_key)
       , form_(form)
       , has_length_(has_length) { }
 
@@ -61,6 +62,7 @@ namespace awkward {
     builder.boolean(has_length_);
     identities_tojson(builder, verbose);
     parameters_tojson(builder, verbose);
+    form_key_tojson(builder, verbose);
     builder.endrecord();
   }
 
@@ -68,6 +70,7 @@ namespace awkward {
   VirtualForm::shallow_copy() const {
     return std::make_shared<VirtualForm>(has_identities_,
                                          parameters_,
+                                         form_key_,
                                          form_,
                                          has_length_);
   }
@@ -180,6 +183,7 @@ namespace awkward {
   VirtualForm::equal(const FormPtr& other,
                      bool check_identities,
                      bool check_parameters,
+                     bool check_form_key,
                      bool compatibility_check) const {
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
@@ -189,7 +193,10 @@ namespace awkward {
         !util::parameters_equal(parameters_, other.get()->parameters())) {
       return false;
     }
-
+    if (check_form_key  &&
+        !form_key_equals(other.get()->form_key())) {
+      return false;
+    }
     if (VirtualForm* t = dynamic_cast<VirtualForm*>(other.get())) {
       if (compatibility_check) {
         // Called by ArrayGenerator::generate_and_check; `this` is the expected
@@ -199,6 +206,7 @@ namespace awkward {
           if (!form_.get()->equal(t->form(),
                                   check_identities,
                                   check_parameters,
+                                  check_form_key,
                                   compatibility_check)) {
             return false;
           }
@@ -217,6 +225,7 @@ namespace awkward {
           if (!form_.get()->equal(t->form(),
                                   check_identities,
                                   check_parameters,
+                                  check_form_key,
                                   compatibility_check)) {
             return false;
           }
@@ -351,6 +360,7 @@ namespace awkward {
     int64_t generator_length = generator_.get()->length();
     return std::make_shared<VirtualForm>(identities_.get() != nullptr,
                                          parameters_,
+                                         FormKey(nullptr),
                                          generator_form,
                                          generator_length >= 0);
   }

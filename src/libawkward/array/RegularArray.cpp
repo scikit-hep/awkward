@@ -29,9 +29,10 @@ namespace awkward {
 
   RegularForm::RegularForm(bool has_identities,
                            const util::Parameters& parameters,
+                           const FormKey& form_key,
                            const FormPtr& content,
                            int64_t size)
-      : Form(has_identities, parameters)
+      : Form(has_identities, parameters, form_key)
       , content_(content)
       , size_(size) { }
 
@@ -65,6 +66,7 @@ namespace awkward {
     builder.integer(size_);
     identities_tojson(builder, verbose);
     parameters_tojson(builder, verbose);
+    form_key_tojson(builder, verbose);
     builder.endrecord();
   }
 
@@ -72,6 +74,7 @@ namespace awkward {
   RegularForm::shallow_copy() const {
     return std::make_shared<RegularForm>(has_identities_,
                                          parameters_,
+                                         form_key_,
                                          content_,
                                          size_);
   }
@@ -140,6 +143,7 @@ namespace awkward {
   RegularForm::equal(const FormPtr& other,
                      bool check_identities,
                      bool check_parameters,
+                     bool check_form_key,
                      bool compatibility_check) const {
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
@@ -149,10 +153,15 @@ namespace awkward {
         !util::parameters_equal(parameters_, other.get()->parameters())) {
       return false;
     }
+    if (check_form_key  &&
+        !form_key_equals(other.get()->form_key())) {
+      return false;
+    }
     if (RegularForm* t = dynamic_cast<RegularForm*>(other.get())) {
       return (content_.get()->equal(t->content(),
                                     check_identities,
                                     check_parameters,
+                                    check_form_key,
                                     compatibility_check)  &&
               size_ == t->size());
     }
@@ -367,6 +376,7 @@ namespace awkward {
   RegularArray::form(bool materialize) const {
     return std::make_shared<RegularForm>(identities_.get() != nullptr,
                                          parameters_,
+                                         FormKey(nullptr),
                                          content_.get()->form(materialize),
                                          size_);
   }
@@ -604,6 +614,7 @@ namespace awkward {
     else if (posaxis == depth + 1) {
       Index64 tonum(length());
       struct Error err = kernel::RegularArray_num_64(
+        tonum.ptr_lib(),
         tonum.ptr().get(),
         size_,
         length());

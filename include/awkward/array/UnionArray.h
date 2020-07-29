@@ -23,6 +23,7 @@ namespace awkward {
     /// documentation.
     UnionForm(bool has_identities,
               const util::Parameters& parameters,
+              const FormKey& form_key,
               Index::Form tags,
               Index::Form index,
               const std::vector<FormPtr>& contents);
@@ -85,6 +86,7 @@ namespace awkward {
       equal(const FormPtr& other,
             bool check_identities,
             bool check_parameters,
+            bool check_form_key,
             bool compatibility_check) const override;
 
   private:

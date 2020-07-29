@@ -20,6 +20,7 @@ namespace awkward {
   using ContentPtrVec = std::vector<std::shared_ptr<Content>>;
   class Form;
   using FormPtr       = std::shared_ptr<Form>;
+  using FormKey       = std::shared_ptr<std::string>;
 
   /// @class Form
   ///
@@ -38,9 +39,11 @@ namespace awkward {
     static FormPtr
       fromjson(const std::string& data);
 
-    /// @brief Called by subclass constructors; assigns #has_identities
-    /// and #parameters upon construction.
-    Form(bool has_identities, const util::Parameters& parameters);
+    /// @brief Called by subclass constructors; assigns #has_identities,
+    /// #parameters, and #form_key upon construction.
+    Form(bool has_identities,
+         const util::Parameters& parameters,
+         const FormKey& form_key);
 
     /// @brief Empty destructor; required for some C++ reason.
     virtual ~Form() { }
@@ -69,6 +72,8 @@ namespace awkward {
     /// #has_identities.
     /// @param check_parameters If `true`, Forms are not equal unless they have
     /// the same #parameters.
+    /// @param check_form_key If `true`, Forms are not equal unless they have
+    /// the same #form_key.
     /// @param compatibility_check If `true`, this is part of a compatibility
     /// check between an expected Form (`this`) and a generated array's Form
     /// (`other`). When the expected Form is a VirtualForm, it's allowed to be
@@ -77,7 +82,12 @@ namespace awkward {
       equal(const FormPtr& other,
             bool check_identities,
             bool check_parameters,
+            bool check_form_key,
             bool compatibility_check) const = 0;
+
+    /// @brief Returns `true` if this Form has the same #form_key as the other.
+    bool
+      form_key_equals(const FormKey& other_form_key) const;
 
     /// @brief The parameter associated with `key` at the first level
     /// that has a non-null value, descending only as deep as the first
@@ -110,6 +120,11 @@ namespace awkward {
     /// value is `-1`.
     virtual int64_t
       purelist_depth() const = 0;
+
+    /// @brief An optional string associated with this Form, usually specifying
+    /// where an array may be fetched.
+    const FormKey
+      form_key() const;
 
     /// @brief Returns (a) the minimum list-depth and (b) the maximum
     /// list-depth of the array, which can differ if this array "branches"
@@ -192,21 +207,29 @@ namespace awkward {
 
     /// @brief Internal function for adding identities in #tojson.
     ///
-    /// Must be called between `builder.beginrecord()` and `builder.endrecord`.
+    /// Must be called between `builder.beginrecord()` and `builder.endrecord()`.
     void
       identities_tojson(ToJson& builder, bool verbose) const;
 
     /// @brief Internal function for adding parameters in #tojson.
     ///
-    /// Must be called between `builder.beginrecord()` and `builder.endrecord`.
+    /// Must be called between `builder.beginrecord()` and `builder.endrecord()`.
     void
       parameters_tojson(ToJson& builder, bool verbose) const;
 
+    /// @brief Internal function for adding form_key in #tojson.
+    ///
+    /// Must be called between `builder.beginrecord()` and `builder.endrecord()`.
+    void
+      form_key_tojson(ToJson& builder, bool verbose) const;
+
     protected:
-    /// @brief See #has_identities;
+    /// @brief See #has_identities
     bool has_identities_;
-    /// @brief See #parameters;
+    /// @brief See #parameters
     util::Parameters parameters_;
+    /// @brief See #form_key
+    FormKey form_key_;
   };
 
   /// @class Content

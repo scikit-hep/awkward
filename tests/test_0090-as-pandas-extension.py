@@ -14,6 +14,8 @@ py27 = (sys.version_info[0] < 3)
 
 pandas = pytest.importorskip("pandas")
 
+awkward1.pandas.register()
+
 def test_numpy_structured_arrays_cant_be_pandas_printed():
     a = awkward1.Array([{"a": 1}, {"a": 2}, {"a": 3}, {"a": 4}, {"a": 5}])
     df = pandas.DataFrame({"column": a})

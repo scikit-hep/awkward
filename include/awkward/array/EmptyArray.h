@@ -21,7 +21,8 @@ namespace awkward {
   public:
     /// @brief Creates a EmptyForm. See EmptyArray for documentation.
     EmptyForm(bool has_identities,
-              const util::Parameters& parameters);
+              const util::Parameters& parameters,
+              const FormKey& form_key);
 
     const TypePtr
       type(const util::TypeStrs& typestrs) const override;
@@ -66,6 +67,7 @@ namespace awkward {
       equal(const FormPtr& other,
             bool check_identities,
             bool check_parameters,
+            bool check_form_key,
             bool compatibility_check) const override;
   };
 
