@@ -182,9 +182,9 @@ Avoid using [Python keywords](https://docs.python.org/3/reference/lexical_analys
 
 Make sure to prepend each function definition with -
 ```
-/// @param param1 inparam/outparam (optional role: rolename) (optional instance: number)
-/// @param param2 inparam/outparam (optional role: rolename) (optional instance: number)
-/// @param param3 inparam/outparam (optional role: rolename) (optional instance: number)
+/// @param param1 inparam/outparam (optional role: rolename)
+/// @param param2 inparam/outparam (optional role: rolename)
+/// @param param3 inparam/outparam (optional role: rolename)
 ....
 ```
 
