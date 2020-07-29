@@ -947,11 +947,11 @@ kSliceNone = kMaxInt64 + 1
                             argpytype = pytype(allfuncargs[keyfunc][arg])
                             if allfuncroles[keyfunc][arg]["check"] == "outparam":
                                 if argpytype == "int":
-                                    intests[arg] = [0] * 50
+                                    intests[arg] = [0] * 100
                                 elif argpytype == "float":
-                                    intests[arg] = [1.1] * 50
+                                    intests[arg] = [1.1] * 100
                                 elif argpytype == "bool":
-                                    intests[arg] = [True] * 50
+                                    intests[arg] = [True] * 100
                                 checkindex.append(i)
                             else:
                                 intests[arg] = tests[i]

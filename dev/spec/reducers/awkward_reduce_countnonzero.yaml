@@ -1,9 +1,9 @@
 - name: awkward_reduce_countnonzero
   specializations:
-    - name: awkward_reduce_countnonzero_int16_64
+    - name: awkward_reduce_countnonzero_bool_64
       args:
         - toptr: List[int64_t]
-        - fromptr: List[int16_t]
+        - fromptr: List[bool]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
@@ -18,19 +18,10 @@
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_countnonzero_int8_64
+    - name: awkward_reduce_countnonzero_uint8_64
       args:
         - toptr: List[int64_t]
-        - fromptr: List[int8_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_countnonzero_uint32_64
-      args:
-        - toptr: List[int64_t]
-        - fromptr: List[uint32_t]
+        - fromptr: List[uint8_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
@@ -54,10 +45,28 @@
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_countnonzero_int64_64
+    - name: awkward_reduce_countnonzero_int32_64
       args:
         - toptr: List[int64_t]
-        - fromptr: List[int64_t]
+        - fromptr: List[int32_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_countnonzero_int16_64
+      args:
+        - toptr: List[int64_t]
+        - fromptr: List[int16_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_countnonzero_uint32_64
+      args:
+        - toptr: List[int64_t]
+        - fromptr: List[uint32_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
@@ -72,28 +81,19 @@
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_countnonzero_int32_64
+    - name: awkward_reduce_countnonzero_int8_64
       args:
         - toptr: List[int64_t]
-        - fromptr: List[int32_t]
+        - fromptr: List[int8_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_countnonzero_bool_64
+    - name: awkward_reduce_countnonzero_int64_64
       args:
         - toptr: List[int64_t]
-        - fromptr: List[bool]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_countnonzero_uint8_64
-      args:
-        - toptr: List[int64_t]
-        - fromptr: List[uint8_t]
+        - fromptr: List[int64_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
@@ -111,8 +111,8 @@
             toptr[parents[parentsoffset + i]] += fromptr[fromptroffset + i] != 0
   tests:
     - args:
-        toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        fromptr: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromptr: [True, False, True, False, True, True, False, True, False, True]
         fromptroffset: 1
         parents: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
         parentsoffset: 1
@@ -120,10 +120,10 @@
         outlength: 30
       successful: True
       results:
-        toptr: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        toptr: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     - args:
-        toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        fromptr: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromptr: [True, False, True, False, True, True, False, True, False, True]
         fromptroffset: 1
         parents: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
         parentsoffset: 0
@@ -133,8 +133,8 @@
       results:
         toptr: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     - args:
-        toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        fromptr: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromptr: [True, False, True, False, True, True, False, True, False, True]
         fromptroffset: 1
         parents: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
         parentsoffset: 1
@@ -144,8 +144,8 @@
       results:
         toptr: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     - args:
-        toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        fromptr: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromptr: [True, False, True, False, True, True, False, True, False, True]
         fromptroffset: 1
         parents: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
         parentsoffset: 0
@@ -153,10 +153,98 @@
         outlength: 30
       successful: True
       results:
-        toptr: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        toptr: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     - args:
-        toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        fromptr: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromptr: [True, False, True, False, True, True, False, True, False, True]
+        fromptroffset: 0
+        parents: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        parentsoffset: 1
+        lenparents: 3
+        outlength: 30
+      successful: True
+      results:
+        toptr: [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    - args:
+        toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromptr: [True, False, True, False, True, True, False, True, False, True]
+        fromptroffset: 0
+        parents: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        parentsoffset: 0
+        lenparents: 3
+        outlength: 30
+      successful: True
+      results:
+        toptr: [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    - args:
+        toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromptr: [True, False, True, False, True, True, False, True, False, True]
+        fromptroffset: 0
+        parents: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        parentsoffset: 1
+        lenparents: 3
+        outlength: 30
+      successful: True
+      results:
+        toptr: [0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    - args:
+        toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromptr: [True, False, True, False, True, True, False, True, False, True]
+        fromptroffset: 0
+        parents: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        parentsoffset: 0
+        lenparents: 3
+        outlength: 30
+      successful: True
+      results:
+        toptr: [0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    - args:
+        toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromptr: [False, True, False, False, True, True, False, True, False, False, True]
+        fromptroffset: 1
+        parents: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        parentsoffset: 1
+        lenparents: 3
+        outlength: 30
+      successful: True
+      results:
+        toptr: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    - args:
+        toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromptr: [False, True, False, False, True, True, False, True, False, False, True]
+        fromptroffset: 1
+        parents: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        parentsoffset: 0
+        lenparents: 3
+        outlength: 30
+      successful: True
+      results:
+        toptr: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    - args:
+        toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromptr: [False, True, False, False, True, True, False, True, False, False, True]
+        fromptroffset: 1
+        parents: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        parentsoffset: 1
+        lenparents: 3
+        outlength: 30
+      successful: True
+      results:
+        toptr: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    - args:
+        toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromptr: [False, True, False, False, True, True, False, True, False, False, True]
+        fromptroffset: 1
+        parents: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        parentsoffset: 0
+        lenparents: 3
+        outlength: 30
+      successful: True
+      results:
+        toptr: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    - args:
+        toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromptr: [False, True, False, False, True, True, False, True, False, False, True]
         fromptroffset: 0
         parents: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
         parentsoffset: 1
@@ -166,123 +254,35 @@
       results:
         toptr: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     - args:
-        toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        fromptr: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromptr: [False, True, False, False, True, True, False, True, False, False, True]
         fromptroffset: 0
         parents: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        parentsoffset: 0
+        lenparents: 3
+        outlength: 30
+      successful: True
+      results:
+        toptr: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    - args:
+        toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromptr: [False, True, False, False, True, True, False, True, False, False, True]
+        fromptroffset: 0
+        parents: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        parentsoffset: 1
+        lenparents: 3
+        outlength: 30
+      successful: True
+      results:
+        toptr: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    - args:
+        toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromptr: [False, True, False, False, True, True, False, True, False, False, True]
+        fromptroffset: 0
+        parents: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
         parentsoffset: 0
         lenparents: 3
         outlength: 30
       successful: True
       results:
         toptr: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    - args:
-        toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        fromptr: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
-        fromptroffset: 0
-        parents: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
-        parentsoffset: 1
-        lenparents: 3
-        outlength: 30
-      successful: True
-      results:
-        toptr: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    - args:
-        toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        fromptr: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
-        fromptroffset: 0
-        parents: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
-        parentsoffset: 0
-        lenparents: 3
-        outlength: 30
-      successful: True
-      results:
-        toptr: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    - args:
-        toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        fromptr: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
-        fromptroffset: 1
-        parents: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
-        parentsoffset: 1
-        lenparents: 3
-        outlength: 30
-      successful: True
-      results:
-        toptr: [2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    - args:
-        toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        fromptr: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
-        fromptroffset: 1
-        parents: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
-        parentsoffset: 0
-        lenparents: 3
-        outlength: 30
-      successful: True
-      results:
-        toptr: [2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    - args:
-        toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        fromptr: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
-        fromptroffset: 1
-        parents: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
-        parentsoffset: 1
-        lenparents: 3
-        outlength: 30
-      successful: True
-      results:
-        toptr: [0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    - args:
-        toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        fromptr: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
-        fromptroffset: 1
-        parents: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
-        parentsoffset: 0
-        lenparents: 3
-        outlength: 30
-      successful: True
-      results:
-        toptr: [0, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    - args:
-        toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        fromptr: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
-        fromptroffset: 0
-        parents: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
-        parentsoffset: 1
-        lenparents: 3
-        outlength: 30
-      successful: True
-      results:
-        toptr: [2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    - args:
-        toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        fromptr: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
-        fromptroffset: 0
-        parents: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
-        parentsoffset: 0
-        lenparents: 3
-        outlength: 30
-      successful: True
-      results:
-        toptr: [2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    - args:
-        toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        fromptr: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
-        fromptroffset: 0
-        parents: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
-        parentsoffset: 1
-        lenparents: 3
-        outlength: 30
-      successful: True
-      results:
-        toptr: [0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    - args:
-        toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        fromptr: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
-        fromptroffset: 0
-        parents: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
-        parentsoffset: 0
-        lenparents: 3
-        outlength: 30
-      successful: True
-      results:
-        toptr: [0, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]

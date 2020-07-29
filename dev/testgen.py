@@ -22,7 +22,7 @@ kSliceNone = kMaxInt64 + 1
     with open(os.path.join(CURRENT_DIR, "spec", "spec.yaml")) as infile:
         mainspec = yaml.safe_load(infile)["kernels"]
         with open(
-            os.path.join(CURRENT_DIR, "..", "tests", "kernels.py"), "w"
+            os.path.join(CURRENT_DIR, "..", "tests-kernels", "kernels.py"), "w"
         ) as outfile:
             outfile.write(prefix)
             for filedir in mainspec.values():
@@ -111,9 +111,9 @@ def readspec():
 
 def testpykernels(tests):
     print("Generating file for testing python kernels")
-    with open(os.path.join(CURRENT_DIR, "..", "tests", "test_pykernels.py"), "w") as f:
-        f.write("import tests.kernels\n\n")
-        for funcname in tests.keys():
+    for funcname in tests.keys():
+        with open(os.path.join(CURRENT_DIR, "..", "tests-kernels", "test_" + funcname + ".py"), "w") as f:
+            f.write("import kernels\n\n")
             num = 1
             for test in tests[funcname]:
                 if test == []:
@@ -126,7 +126,7 @@ def testpykernels(tests):
                 for arg, val in test["inargs"].items():
                     f.write(" " * 4 + arg + " = " + str(val) + "\n")
                 f.write(
-                    " " * 4 + "funcPy = getattr(tests.kernels, '" + funcname + "')\n"
+                    " " * 4 + "funcPy = getattr(kernels, '" + funcname + "')\n"
                 )
                 count = 0
                 for arg in test["inargs"].keys():

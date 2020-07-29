@@ -1,10 +1,10 @@
 - name: awkward_ListArray_validity
   specializations:
-    - name: awkward_ListArray32_validity
+    - name: awkward_ListArray64_validity
       args:
-        - starts: List[int32_t]
+        - starts: List[int64_t]
         - startsoffset: int64_t
-        - stops: List[int32_t]
+        - stops: List[int64_t]
         - stopsoffset: int64_t
         - length: int64_t
         - lencontent: int64_t
@@ -16,11 +16,11 @@
         - stopsoffset: int64_t
         - length: int64_t
         - lencontent: int64_t
-    - name: awkward_ListArray64_validity
+    - name: awkward_ListArray32_validity
       args:
-        - starts: List[int64_t]
+        - starts: List[int32_t]
         - startsoffset: int64_t
-        - stops: List[int64_t]
+        - stops: List[int32_t]
         - stopsoffset: int64_t
         - length: int64_t
         - lencontent: int64_t

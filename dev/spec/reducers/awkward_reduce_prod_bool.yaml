@@ -18,6 +18,24 @@
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
+    - name: awkward_reduce_prod_bool_uint64_64
+      args:
+        - toptr: List[bool]
+        - fromptr: List[uint64_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_prod_bool_int64_64
+      args:
+        - toptr: List[bool]
+        - fromptr: List[int64_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
     - name: awkward_reduce_prod_bool_float64_64
       args:
         - toptr: List[bool]
@@ -36,37 +54,10 @@
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_prod_bool_int32_64
-      args:
-        - toptr: List[bool]
-        - fromptr: List[int32_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
     - name: awkward_reduce_prod_bool_uint8_64
       args:
         - toptr: List[bool]
         - fromptr: List[uint8_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_prod_bool_int16_64
-      args:
-        - toptr: List[bool]
-        - fromptr: List[int16_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_prod_bool_int64_64
-      args:
-        - toptr: List[bool]
-        - fromptr: List[int64_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
@@ -90,10 +81,19 @@
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_prod_bool_uint64_64
+    - name: awkward_reduce_prod_bool_int16_64
       args:
         - toptr: List[bool]
-        - fromptr: List[uint64_t]
+        - fromptr: List[int16_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_prod_bool_int32_64
+      args:
+        - toptr: List[bool]
+        - fromptr: List[int32_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
@@ -111,7 +111,7 @@
             toptr[parents[parentsoffset + i]] &= fromptr[fromptroffset + i] != 0
   tests:
     - args:
-        toptr: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        toptr: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
         fromptr: [1.1, 0.5, 1.3, 4.2, 2.1, 4.4, 1.5, 10.1, 5.6, 7.7, 1.9, 2.0, 3.0]
         fromptroffset: 1
         parents: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
@@ -122,7 +122,7 @@
       results:
         toptr: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
     - args:
-        toptr: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        toptr: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
         fromptr: [1.1, 0.5, 1.3, 4.2, 2.1, 4.4, 1.5, 10.1, 5.6, 7.7, 1.9, 2.0, 3.0]
         fromptroffset: 1
         parents: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
@@ -133,7 +133,7 @@
       results:
         toptr: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
     - args:
-        toptr: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        toptr: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
         fromptr: [1.1, 0.5, 1.3, 4.2, 2.1, 4.4, 1.5, 10.1, 5.6, 7.7, 1.9, 2.0, 3.0]
         fromptroffset: 1
         parents: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
@@ -144,7 +144,7 @@
       results:
         toptr: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
     - args:
-        toptr: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        toptr: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
         fromptr: [1.1, 0.5, 1.3, 4.2, 2.1, 4.4, 1.5, 10.1, 5.6, 7.7, 1.9, 2.0, 3.0]
         fromptroffset: 1
         parents: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
@@ -155,7 +155,7 @@
       results:
         toptr: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
     - args:
-        toptr: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        toptr: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
         fromptr: [1.1, 0.5, 1.3, 4.2, 2.1, 4.4, 1.5, 10.1, 5.6, 7.7, 1.9, 2.0, 3.0]
         fromptroffset: 0
         parents: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
@@ -166,7 +166,7 @@
       results:
         toptr: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
     - args:
-        toptr: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        toptr: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
         fromptr: [1.1, 0.5, 1.3, 4.2, 2.1, 4.4, 1.5, 10.1, 5.6, 7.7, 1.9, 2.0, 3.0]
         fromptroffset: 0
         parents: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
@@ -177,7 +177,7 @@
       results:
         toptr: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
     - args:
-        toptr: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        toptr: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
         fromptr: [1.1, 0.5, 1.3, 4.2, 2.1, 4.4, 1.5, 10.1, 5.6, 7.7, 1.9, 2.0, 3.0]
         fromptroffset: 0
         parents: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
@@ -188,7 +188,7 @@
       results:
         toptr: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
     - args:
-        toptr: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        toptr: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
         fromptr: [1.1, 0.5, 1.3, 4.2, 2.1, 4.4, 1.5, 10.1, 5.6, 7.7, 1.9, 2.0, 3.0]
         fromptroffset: 0
         parents: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
@@ -199,7 +199,7 @@
       results:
         toptr: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
     - args:
-        toptr: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        toptr: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
         fromptr: [1.0, 2.1, 3.1, 5.4, 2.3, 5.4, 3.3, 1.1, 6.7, 7.3, 11.9, 10.5, 1.7, 4.5]
         fromptroffset: 1
         parents: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
@@ -210,7 +210,7 @@
       results:
         toptr: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
     - args:
-        toptr: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        toptr: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
         fromptr: [1.0, 2.1, 3.1, 5.4, 2.3, 5.4, 3.3, 1.1, 6.7, 7.3, 11.9, 10.5, 1.7, 4.5]
         fromptroffset: 1
         parents: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
@@ -221,7 +221,7 @@
       results:
         toptr: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
     - args:
-        toptr: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        toptr: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
         fromptr: [1.0, 2.1, 3.1, 5.4, 2.3, 5.4, 3.3, 1.1, 6.7, 7.3, 11.9, 10.5, 1.7, 4.5]
         fromptroffset: 1
         parents: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
@@ -232,7 +232,7 @@
       results:
         toptr: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
     - args:
-        toptr: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        toptr: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
         fromptr: [1.0, 2.1, 3.1, 5.4, 2.3, 5.4, 3.3, 1.1, 6.7, 7.3, 11.9, 10.5, 1.7, 4.5]
         fromptroffset: 1
         parents: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
@@ -243,7 +243,7 @@
       results:
         toptr: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
     - args:
-        toptr: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        toptr: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
         fromptr: [1.0, 2.1, 3.1, 5.4, 2.3, 5.4, 3.3, 1.1, 6.7, 7.3, 11.9, 10.5, 1.7, 4.5]
         fromptroffset: 0
         parents: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
@@ -254,7 +254,7 @@
       results:
         toptr: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
     - args:
-        toptr: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        toptr: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
         fromptr: [1.0, 2.1, 3.1, 5.4, 2.3, 5.4, 3.3, 1.1, 6.7, 7.3, 11.9, 10.5, 1.7, 4.5]
         fromptroffset: 0
         parents: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
@@ -265,7 +265,7 @@
       results:
         toptr: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
     - args:
-        toptr: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        toptr: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
         fromptr: [1.0, 2.1, 3.1, 5.4, 2.3, 5.4, 3.3, 1.1, 6.7, 7.3, 11.9, 10.5, 1.7, 4.5]
         fromptroffset: 0
         parents: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
@@ -276,7 +276,7 @@
       results:
         toptr: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
     - args:
-        toptr: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        toptr: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
         fromptr: [1.0, 2.1, 3.1, 5.4, 2.3, 5.4, 3.3, 1.1, 6.7, 7.3, 11.9, 10.5, 1.7, 4.5]
         fromptroffset: 0
         parents: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
