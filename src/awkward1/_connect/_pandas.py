@@ -25,6 +25,24 @@ def register():
             PandasMixin.__bases__ = (pandas.api.extensions.ExtensionArray,)
 
 
+def vote():
+    global AwkwardDtype
+
+    if AwkwardDtype is None:
+        raise RuntimeError(
+            "You seem to be trying to use an Awkward Array as a Pandas Series "
+            "or DataFrame column. This is currently allowed if you first call"
+            "\n\n    ak.pandas.register()\n\nbut it is being considered for "
+            "deprecation. See"
+            "\n\n    https://github.com/scikit-hep/awkward-1.0/issues/350\n\n"
+            "for reasons why it may be removed and explain your use-case there "
+            "if you don't want it to be removed. Note that this is distinct from"
+            "\n\n    ak.pandas.df(array)\n    ak.pandas.dfs(array)\n\n"
+            "which may work better for you anyway, depending on what you're "
+            "trying to accomplish."
+        )
+
+
 checked_version = False
 
 
@@ -106,7 +124,7 @@ class NoFields(object):
 class PandasMixin(PandasNotImportedYet):
     @property
     def _typ(self):
-        register()
+        vote()
         return "dataframe"
 
     @property
@@ -117,7 +135,7 @@ class PandasMixin(PandasNotImportedYet):
             return [NoFields()]
 
     def _ixs(self, i, axis):
-        register()
+        vote()
         if self.layout.numfields >= 0:
             return get_pandas().Series(self[str(i)])
         else:
@@ -128,7 +146,7 @@ class PandasMixin(PandasNotImportedYet):
     @classmethod
     def _from_sequence(cls, scalars, *args, **kwargs):
         # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray._from_sequence.html
-        register()
+        vote()
         dtype, copy = awkward1._util.extra(
             args, kwargs, [("dtype", None), ("copy", False)]
         )
@@ -137,7 +155,7 @@ class PandasMixin(PandasNotImportedYet):
     @classmethod
     def _from_factorized(cls, values, original):
         # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray._from_factorized.html
-        register()
+        vote()
         raise NotImplementedError("_from_factorized")
 
     # __getitem__(self)
@@ -149,7 +167,7 @@ class PandasMixin(PandasNotImportedYet):
         if awkward1._util.called_by_module(
             "pandas"
         ) and not awkward1._util.called_by_module("dask"):
-            register()
+            vote()
             if isinstance(self.layout, awkward1.partition.PartitionedArray):
                 raise ValueError(
                     "partitioned arrays cannot be Pandas columns; "
@@ -178,7 +196,7 @@ class PandasMixin(PandasNotImportedYet):
 
     def isna(self):
         # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray.isna.html
-        register()
+        vote()
         return numpy.array(awkward1.operations.structure.is_none(self))
 
     def take(self, indices, *args, **kwargs):
@@ -186,7 +204,7 @@ class PandasMixin(PandasNotImportedYet):
         allow_fill, fill_value = awkward1._util.extra(
             args, kwargs, [("allow_fill", False), ("fill_value", None)]
         )
-        register()
+        vote()
 
         if allow_fill:
             content1 = self.layout
@@ -230,7 +248,7 @@ class PandasMixin(PandasNotImportedYet):
     @classmethod
     def _concat_same_type(cls, to_concat):
         # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray._concat_same_type.html
-        register()
+        vote()
         return awkward1.operations.structure.concatenate(to_concat)
 
     # RECOMMENDED for performance:
@@ -241,27 +259,27 @@ class PandasMixin(PandasNotImportedYet):
     #         ("value", None),
     #         ("method", None),
     #         ("limit", None)])
-    #     register()
+    #     vote()
     #     raise NotImplementedError
     #
     # def dropna(self):
     #     # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray.dropna.html
-    #     register()
+    #     vote()
     #     raise NotImplementedError
     #
     # def unique(self):
     #     # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray.unique.html
-    #     register()
+    #     vote()
     #     raise NotImplementedError
     #
     # def factorize(self, na_sentinel):
     #     # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray.factorize.html
-    #     register()
+    #     vote()
     #     raise NotImplementedError
     #
     # def _values_for_factorize(self):
     #     # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray._values_for_factorize.html
-    #     register()
+    #     vote()
     #     raise NotImplementedError
     #
     # def argsort(self, *args, **kwargs):
@@ -269,12 +287,12 @@ class PandasMixin(PandasNotImportedYet):
     #     ascending, kind = awkward1._util.extra(args, kwargs, [
     #         ("ascending", True),
     #         ("kind", "quicksort")])   # "quicksort", "mergesort", "heapsort"
-    #     register()
+    #     vote()
     #     raise NotImplementedError
     #
     # def _values_for_argsort(self):
     #     # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray._values_for_argsort.html
-    #     register()
+    #     vote()
     #     raise NotImplementedError
     #
     # def searchsorted(self, value, *args, **kwargs):
@@ -282,19 +300,18 @@ class PandasMixin(PandasNotImportedYet):
     #     side, sorter = awkward1._util.extra(args, kwargs, [
     #         ("side", "left"),
     #         ("sorter", None)])
-    #     register()
+    #     vote()
     #     raise NotImplementedError
     #
     # def _reduce(self, name, *args, **kwargs):
     #     # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray._reduce.html
     #     skipna, = awkward1._util.extra(args, kwargs, [
     #         ("skipna", True)])
-    #     register()
+    #     vote()
     #     raise NotImplementedError
 
 
 def df(array, how="inner", levelname=lambda i: "sub" * i + "entry", anonymous="values"):
-    register()
     pandas = get_pandas()
     out = None
     for df in dfs(array, levelname=levelname, anonymous=anonymous):
@@ -306,7 +323,6 @@ def df(array, how="inner", levelname=lambda i: "sub" * i + "entry", anonymous="v
 
 
 def dfs(array, levelname=lambda i: "sub" * i + "entry", anonymous="values"):
-    register()
     pandas = get_pandas()
 
     def recurse(layout, row_arrays, col_names):

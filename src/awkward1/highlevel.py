@@ -40,9 +40,9 @@ class Array(
         with_name (None or str): Gives tuples and records a name that can be
             used to override their behavior (see below).
         check_valid (bool): If True, verify that the #layout is valid.
-        metadata (None or MutableMapping): Optional metadata, attached to this
-            array, which persists through `__getitem__` but not any other
-            operations.
+        cache (None or MutableMapping): Stores data for any
+            #ak.layout.VirtualArray nodes that this Array might contain.
+            Persists through `__getitem__` but not any other operations.
 
     High-level array that can contain data of any type.
 
@@ -207,7 +207,7 @@ class Array(
     """
 
     def __init__(
-        self, data, behavior=None, with_name=None, check_valid=False, metadata=None
+        self, data, behavior=None, with_name=None, check_valid=False, cache=None
     ):
         if isinstance(
             data, (awkward1.layout.Content, awkward1.partition.PartitionedArray)
@@ -247,7 +247,7 @@ class Array(
         if check_valid:
             awkward1.operations.describe.validity_error(self, exception=True)
 
-        self.metadata = metadata
+        self.cache = cache
 
     @property
     def layout(self):
@@ -330,15 +330,15 @@ class Array(
             raise TypeError("behavior must be None or a dict")
 
     @property
-    def metadata(self):
-        return self._metadata
+    def cache(self):
+        return self._cache
 
-    @metadata.setter
-    def metadata(self, value):
+    @cache.setter
+    def cache(self, value):
         if value is None or isinstance(value, MutableMapping):
-            self._metadata = value
+            self._cache = value
         else:
-            raise TypeError("metadata must be None or a MutableMapping")
+            raise TypeError("cache must be None or a MutableMapping")
 
     class Mask(object):
         def __init__(self, array, valid_when):
@@ -524,8 +524,13 @@ class Array(
 
         See also #ak.to_list.
         """
-        for x in self._layout:
-            yield awkward1._util.wrap(x, self._behavior)
+        if awkward1._util.called_by_module("matplotlib"):
+            out = awkward1._connect._numpy.convert_to_array(self._layout, (), {})
+            for x in out:
+                yield x
+        else:
+            for x in self._layout:
+                yield awkward1._util.wrap(x, self._behavior)
 
     def __getitem__(self, where):
         """
@@ -878,7 +883,7 @@ class Array(
         have the same dimension as the array being indexed.
         """
         return awkward1._util.wrap(
-            self._layout[where], self._behavior, metadata=self._metadata
+            self._layout[where], self._behavior, cache=self._cache
         )
 
     def __setitem__(self, where, what):
@@ -1347,14 +1352,10 @@ class Array(
             behavior = None
         else:
             behavior = self._behavior
-        if self._metadata is None:
-            metadata = None
-        else:
-            metadata = dict(self._metadata)
-        return form, container, num_partitions, behavior, metadata
+        return form, container, num_partitions, behavior
 
     def __setstate__(self, state):
-        form, container, num_partitions, behavior, metadata = state
+        form, container, num_partitions, behavior = state
         layout = awkward1.from_arrayset(
             form, container, num_partitions, highlevel=False
         )
@@ -1362,7 +1363,7 @@ class Array(
             self.__class__ = awkward1._util.arrayclass(layout, behavior)
         self.layout = layout
         self.behavior = behavior
-        self.metadata = metadata
+        self.cache = None
 
 
 class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
@@ -1377,9 +1378,9 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         with_name (None or str): Gives the record type a name that can be
             used to override its behavior (see below).
         check_valid (bool): If True, verify that the #layout is valid.
-        metadata (None or MutableMapping): Optional metadata, attached to this
-            array, which persists through `__getitem__` but not any other
-            operations.
+        cache (None or MutableMapping): Stores data for any
+            #ak.layout.VirtualArray nodes that this Array might contain.
+            Persists through `__getitem__` but not any other operations.
 
     High-level record that can contain fields of any type.
 
@@ -1396,7 +1397,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
     """
 
     def __init__(
-        self, data, behavior=None, with_name=None, check_valid=False, metadata=None
+        self, data, behavior=None, with_name=None, check_valid=False, cache=None
     ):
         if isinstance(data, awkward1.layout.Record):
             layout = data
@@ -1426,10 +1427,13 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
 
         self.layout = layout
         self.behavior = behavior
+        docstr = self.layout.purelist_parameter("__doc__")
+        if isinstance(docstr, str):
+            self.__doc__ = docstr
         if check_valid:
             awkward1.operations.describe.validity_error(self, exception=True)
 
-        self.metadata = metadata
+        self.cache = cache
 
     @property
     def layout(self):
@@ -1506,15 +1510,15 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
             raise TypeError("behavior must be None or a dict")
 
     @property
-    def metadata(self):
-        return self._metadata
+    def cache(self):
+        return self._cache
 
-    @metadata.setter
-    def metadata(self, value):
+    @cache.setter
+    def cache(self, value):
         if value is None or isinstance(value, MutableMapping):
-            self._metadata = value
+            self._cache = value
         else:
-            raise TypeError("metadata must be None or a MutableMapping")
+            raise TypeError("cache must be None or a MutableMapping")
 
     def tolist(self):
         """
@@ -1626,7 +1630,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
             2
         """
         return awkward1._util.wrap(
-            self._layout[where], self._behavior, metadata=self._metadata
+            self._layout[where], self._behavior, cache=self._cache
         )
 
     def __setitem__(self, where, what):
@@ -1911,14 +1915,10 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
             behavior = None
         else:
             behavior = self._behavior
-        if self._metadata is None:
-            metadata = None
-        else:
-            metadata = dict(self._metadata)
-        return form, container, num_partitions, behavior, metadata, self._layout.at
+        return form, container, num_partitions, behavior, self._layout.at
 
     def __setstate__(self, state):
-        form, container, num_partitions, behavior, metadata, at = state
+        form, container, num_partitions, behavior, at = state
         array = awkward1.from_arrayset(
             form, container, num_partitions, highlevel=False
         )
@@ -1927,7 +1927,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
             self.__class__ = awkward1._util.recordclass(layout, behavior)
         self.layout = layout
         self.behavior = behavior
-        self.metadata = metadata
+        self.cache = None
 
 
 class ArrayBuilder(object):
