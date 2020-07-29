@@ -107,7 +107,7 @@ make_IndexOf(const py::handle& m, const std::string& name) {
           }
           else {
             throw std::invalid_argument(name + std::string(
-              " can only accept CuPy Arrays!"));
+              ".from_cupy() can only accept CuPy Arrays!"));
           }
       })
       .def("copy_to", [name](const ak::IndexOf<T>& self, std::string& ptr_lib) {
