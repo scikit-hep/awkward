@@ -31,10 +31,10 @@ extern "C" {
       int64_t width);
 
 /// @param toptr outparam
-/// @param fromptr inparam role: Identities-array instance: 0
-/// @param fromoffsets inparam role: Identities-array instance: 1
-/// @param fromptroffset inparam role: Identities-array-offset instance: 0
-/// @param offsetsoffset inparam role: Identities-array-offset instance: 1
+/// @param fromptr inparam role: Identities-array
+/// @param fromoffsets inparam role: Identities-same-array
+/// @param fromptroffset inparam role: Identities-array-offset
+/// @param offsetsoffset inparam role: Identities-same-array-offset
 /// @param tolength inparam
 /// @param fromlength inparam
 /// @param fromwidth inparam
@@ -49,10 +49,10 @@ extern "C" {
       int64_t fromlength,
       int64_t fromwidth);
 /// @param toptr outparam
-/// @param fromptr inparam role: Identities-array instance: 0
-/// @param fromoffsets inparam role: Identities-array instance: 1
-/// @param fromptroffset inparam role: Identities-array-offset instance: 0
-/// @param offsetsoffset inparam role: Identities-array-offset instance: 1
+/// @param fromptr inparam role: Identities-array
+/// @param fromoffsets inparam role: Identities-same-array
+/// @param fromptroffset inparam role: Identities-array-offset
+/// @param offsetsoffset inparam role: Identities-same-array-offset
 /// @param tolength inparam
 /// @param fromlength inparam
 /// @param fromwidth inparam
@@ -67,10 +67,10 @@ extern "C" {
       int64_t fromlength,
       int64_t fromwidth);
 /// @param toptr outparam
-/// @param fromptr inparam role: Identities-array instance: 0
-/// @param fromoffsets inparam role: Identities-array instance: 1
-/// @param fromptroffset inparam role: Identities-array-offset instance: 0
-/// @param offsetsoffset inparam role: Identities-array-offset instance: 1
+/// @param fromptr inparam role: Identities-array
+/// @param fromoffsets inparam role: Identities-same-array
+/// @param fromptroffset inparam role: Identities-array-offset
+/// @param offsetsoffset inparam role: Identities-same-array-offset
 /// @param tolength inparam
 /// @param fromlength inparam
 /// @param fromwidth inparam
@@ -85,10 +85,10 @@ extern "C" {
       int64_t fromlength,
       int64_t fromwidth);
 /// @param toptr outparam
-/// @param fromptr inparam role: Identities-array instance: 0
-/// @param fromoffsets inparam role: Identities-array instance: 1
-/// @param fromptroffset inparam role: Identities-array-offset instance: 0
-/// @param offsetsoffset inparam role: Identities-array-offset instance: 1
+/// @param fromptr inparam role: Identities-array
+/// @param fromoffsets inparam role: Identities-same-array
+/// @param fromptroffset inparam role: Identities-array-offset
+/// @param offsetsoffset inparam role: Identities-same-array-offset
 /// @param tolength inparam
 /// @param fromlength inparam
 /// @param fromwidth inparam
@@ -103,10 +103,10 @@ extern "C" {
       int64_t fromlength,
       int64_t fromwidth);
 /// @param toptr outparam
-/// @param fromptr inparam role: Identities-array instance: 0
-/// @param fromoffsets inparam role: Identities-array instance: 1
-/// @param fromptroffset inparam role: Identities-array-offset instance: 0
-/// @param offsetsoffset inparam role: Identities-array-offset instance: 1
+/// @param fromptr inparam role: Identities-array
+/// @param fromoffsets inparam role: Identities-same-array
+/// @param fromptroffset inparam role: Identities-array-offset
+/// @param offsetsoffset inparam role: Identities-same-array-offset
 /// @param tolength inparam
 /// @param fromlength inparam
 /// @param fromwidth inparam
@@ -121,10 +121,10 @@ extern "C" {
       int64_t fromlength,
       int64_t fromwidth);
 /// @param toptr outparam
-/// @param fromptr inparam role: Identities-array instance: 0
-/// @param fromoffsets inparam role: Identities-array instance: 1
-/// @param fromptroffset inparam role: Identities-array-offset instance: 0
-/// @param offsetsoffset inparam role: Identities-array-offset instance: 1
+/// @param fromptr inparam role: Identities-array
+/// @param fromoffsets inparam role: Identities-same-array
+/// @param fromptroffset inparam role: Identities-array-offset
+/// @param offsetsoffset inparam role: Identities-same-array-offset
 /// @param tolength inparam
 /// @param fromlength inparam
 /// @param fromwidth inparam
@@ -142,11 +142,11 @@ extern "C" {
 /// @param uniquecontents outparam role: pointer
 /// @param toptr outparam
 /// @param fromptr inparam role: Identities-array
-/// @param fromstarts inparam role: ListArray-starts
-/// @param fromstops inparam role: ListArray-stops
+/// @param fromstarts inparam role: Identities-same-array
+/// @param fromstops inparam role: Identities-same-array
 /// @param fromptroffset inparam role: Identities-array-offset
-/// @param startsoffset inparam role: ListArray-starts-offset
-/// @param stopsoffset inparam role: ListArray-stops-offset
+/// @param startsoffset inparam role: Identities-same-array-offset
+/// @param stopsoffset inparam role: Identities-same-array-offset
 /// @param tolength inparam
 /// @param fromlength inparam
 /// @param fromwidth inparam
@@ -166,11 +166,11 @@ extern "C" {
 /// @param uniquecontents outparam role: pointer
 /// @param toptr outparam
 /// @param fromptr inparam role: Identities-array
-/// @param fromstarts inparam role: ListArray-starts
-/// @param fromstops inparam role: ListArray-stops
+/// @param fromstarts inparam role: Identities-same-array
+/// @param fromstops inparam role: Identities-same-array
 /// @param fromptroffset inparam role: Identities-array-offset
-/// @param startsoffset inparam role: ListArray-starts-offset
-/// @param stopsoffset inparam role: ListArray-stops-offset
+/// @param startsoffset inparam role: Identities-same-array-offset
+/// @param stopsoffset inparam role: Identities-same-array-offset
 /// @param tolength inparam
 /// @param fromlength inparam
 /// @param fromwidth inparam
@@ -190,11 +190,11 @@ extern "C" {
 /// @param uniquecontents outparam role: pointer
 /// @param toptr outparam
 /// @param fromptr inparam role: Identities-array
-/// @param fromstarts inparam role: ListArray-starts
-/// @param fromstops inparam role: ListArray-stops
+/// @param fromstarts inparam role: Identities-same-array
+/// @param fromstops inparam role: Identities-same-array
 /// @param fromptroffset inparam role: Identities-array-offset
-/// @param startsoffset inparam role: ListArray-starts-offset
-/// @param stopsoffset inparam role: ListArray-stops-offset
+/// @param startsoffset inparam role: Identities-same-array-offset
+/// @param stopsoffset inparam role: Identities-same-array-offset
 /// @param tolength inparam
 /// @param fromlength inparam
 /// @param fromwidth inparam
@@ -214,11 +214,11 @@ extern "C" {
 /// @param uniquecontents outparam role: pointer
 /// @param toptr outparam
 /// @param fromptr inparam role: Identities-array
-/// @param fromstarts inparam role: ListArray-starts
-/// @param fromstops inparam role: ListArray-stops
+/// @param fromstarts inparam role: Identities-same-array
+/// @param fromstops inparam role: Identities-same-array
 /// @param fromptroffset inparam role: Identities-array-offset
-/// @param startsoffset inparam role: ListArray-starts-offset
-/// @param stopsoffset inparam role: ListArray-stops-offset
+/// @param startsoffset inparam role: Identities-same-array-offset
+/// @param stopsoffset inparam role: Identities-same-array-offset
 /// @param tolength inparam
 /// @param fromlength inparam
 /// @param fromwidth inparam
@@ -238,11 +238,11 @@ extern "C" {
 /// @param uniquecontents outparam role: pointer
 /// @param toptr outparam
 /// @param fromptr inparam role: Identities-array
-/// @param fromstarts inparam role: ListArray-starts
-/// @param fromstops inparam role: ListArray-stops
+/// @param fromstarts inparam role: Identities-same-array
+/// @param fromstops inparam role: Identities-same-array
 /// @param fromptroffset inparam role: Identities-array-offset
-/// @param startsoffset inparam role: ListArray-starts-offset
-/// @param stopsoffset inparam role: ListArray-stops-offset
+/// @param startsoffset inparam role: Identities-same-array-offset
+/// @param stopsoffset inparam role: Identities-same-array-offset
 /// @param tolength inparam
 /// @param fromlength inparam
 /// @param fromwidth inparam
@@ -262,11 +262,11 @@ extern "C" {
 /// @param uniquecontents outparam role: pointer
 /// @param toptr outparam
 /// @param fromptr inparam role: Identities-array
-/// @param fromstarts inparam role: ListArray-starts
-/// @param fromstops inparam role: ListArray-stops
+/// @param fromstarts inparam role: Identities-same-array
+/// @param fromstops inparam role: Identities-same-array
 /// @param fromptroffset inparam role: Identities-array-offset
-/// @param startsoffset inparam role: ListArray-starts-offset
-/// @param stopsoffset inparam role: ListArray-stops-offset
+/// @param startsoffset inparam role: Identities-same-array-offset
+/// @param stopsoffset inparam role: Identities-same-array-offset
 /// @param tolength inparam
 /// @param fromlength inparam
 /// @param fromwidth inparam

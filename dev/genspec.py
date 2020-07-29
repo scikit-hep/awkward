@@ -7,6 +7,7 @@ import os
 import re
 from collections import OrderedDict
 from collections.abc import Iterable
+from itertools import product
 
 import black
 import pycparser
@@ -825,8 +826,8 @@ def commentparser(line):
         for i in range(len(line)):
             if i % 2 == 0:
                 key = line[i]
-                if (key != "role") and (key != "instance"):
-                    raise AssertionError("Only role and instance allowed")
+                if key != "role":
+                    raise AssertionError("Only role allowed")
             else:
                 val = line[i]
                 d[key] = val
@@ -875,133 +876,157 @@ kSliceNone = kMaxInt64 + 1
     writepykernels()
     import kernels
 
-    funcs = OrderedDict()
-    for funcname in alltokens.keys():
-        if (
-            "gen" not in alltokens[funcname].keys()
-            and funcname not in TEST_BLACKLIST
-            and funcname not in PYGEN_BLACKLIST
-        ):
-            # Success Tests
-            tests = []
-            intests = OrderedDict()
-            outtests = OrderedDict()
-            checkindex = []
-            if "childfunc" in alltokens[funcname].keys():
-                keyfunc = next(iter(alltokens[funcname]["childfunc"]))
-            else:
-                keyfunc = funcname
-            for i in range(len(allfuncargs[keyfunc].keys())):
-                arg = list(allfuncargs[keyfunc].keys())[i]
-                argpytype = pytype(allfuncargs[keyfunc][arg])
-                with open(os.path.join(CURRENT_DIR, "testcases.json")) as testjson:
-                    data = json.load(testjson)
-                    if allfuncroles[keyfunc][arg]["check"] == "inparam":
-                        if "role" in allfuncroles[keyfunc][arg].keys():
-                            if "instance" in allfuncroles[keyfunc][arg].keys():
-                                tempval = data["success"][
-                                    allfuncroles[keyfunc][arg]["role"][
-                                        : allfuncroles[keyfunc][arg]["role"].find("-")
-                                    ]
-                                ][allfuncroles[keyfunc][arg]["role"]][
-                                    int(allfuncroles[keyfunc][arg]["instance"])
-                                ][
-                                    argpytype
-                                ]
-                            else:
-                                tempval = data["success"][
-                                    allfuncroles[keyfunc][arg]["role"][
-                                        : allfuncroles[keyfunc][arg]["role"].find("-")
-                                    ]
-                                ][allfuncroles[keyfunc][arg]["role"]][0][argpytype]
-                        else:
-                            tempval = data["success"]["num"]
-                        tests.append(tempval)
-                        intests[arg] = tempval
-                    elif allfuncroles[keyfunc][arg]["check"] == "outparam":
-                        tests.append({})
-                        if argpytype == "int":
-                            intests[arg] = [0] * 50
-                        elif argpytype == "float":
-                            intests[arg] = [1.1] * 50
-                        elif argpytype == "bool":
-                            intests[arg] = [True] * 50
-                        checkindex.append(i)
-                    else:
-                        raise AssertionError(
-                            "Function argument must have inparam/outparam role"
-                        )
+    with open(os.path.join(CURRENT_DIR, "testcases.json")) as testjson:
+        data = json.load(testjson)
+        funcs = OrderedDict()
+        for funcname in alltokens.keys():
+            if (
+                "gen" not in alltokens[funcname].keys()
+                and funcname not in TEST_BLACKLIST
+                and funcname not in PYGEN_BLACKLIST
+            ):
+                if "childfunc" in alltokens[funcname].keys():
+                    keyfunc = next(iter(alltokens[funcname]["childfunc"]))
+                else:
+                    keyfunc = funcname
 
-            funcs[funcname] = {}
-            if funcname not in SUCCESS_TEST_BLACKLIST:
+                funcs[funcname] = []
                 funcPy = getattr(kernels, funcname)
-                funcPy(*tests)
-                for i in checkindex:
-                    count = 0
-                    outtests[list(allfuncargs[keyfunc].keys())[i]] = []
-                    for num in sorted(tests[i]):
-                        if num != count:
-                            while num != count:
-                                outtests[list(allfuncargs[keyfunc].keys())[i]].append(0)
-                                count = count + 1
-                        outtests[list(allfuncargs[keyfunc].keys())[i]].append(
-                            tests[i][num]
-                        )
-                        count = count + 1
-                funcs[funcname]["success"] = {}
-                funcs[funcname]["success"]["input"] = copy.copy(intests)
-                funcs[funcname]["success"]["output"] = copy.copy(outtests)
 
-            # Failure Tests
-            tests = []
-            intests = OrderedDict()
-            if funcname not in FAIL_TEST_BLACKLIST and funcname in failfuncs:
-                for i in range(len(allfuncargs[keyfunc].keys())):
-                    arg = list(allfuncargs[keyfunc].keys())[i]
-                    argpytype = pytype(allfuncargs[keyfunc][arg])
-                    with open(os.path.join(CURRENT_DIR, "testcases.json")) as testjson:
-                        data = json.load(testjson)
+                # Success Tests
+                if funcname not in SUCCESS_TEST_BLACKLIST:
+                    # Store all possible values for each arg in list
+                    testvals = []
+                    for i in range(len(allfuncargs[keyfunc].keys())):
+                        arg = list(allfuncargs[keyfunc].keys())[i]
+                        argpytype = pytype(allfuncargs[keyfunc][arg])
                         if allfuncroles[keyfunc][arg]["check"] == "inparam":
+                            tempval = []
                             if "role" in allfuncroles[keyfunc][arg].keys():
-                                if "instance" in allfuncroles[keyfunc][arg].keys():
-                                    tempval = data["failure"][
-                                        allfuncroles[keyfunc][arg]["role"][
-                                            : allfuncroles[keyfunc][arg]["role"].find(
-                                                "-"
-                                            )
-                                        ]
-                                    ][allfuncroles[keyfunc][arg]["role"]][
-                                        int(allfuncroles[keyfunc][arg]["instance"])
-                                    ][
-                                        argpytype
+                                for jsonval in data["success"][
+                                    allfuncroles[keyfunc][arg]["role"][
+                                        : allfuncroles[keyfunc][arg]["role"].find("-")
                                     ]
-                                else:
-                                    tempval = data["failure"][
-                                        allfuncroles[keyfunc][arg]["role"][
-                                            : allfuncroles[keyfunc][arg]["role"].find(
-                                                "-"
-                                            )
-                                        ]
-                                    ][allfuncroles[keyfunc][arg]["role"]][0][argpytype]
+                                ][allfuncroles[keyfunc][arg]["role"]]:
+                                    tempval.append(jsonval[argpytype])
                             else:
-                                tempval = data["failure"]["num"]
-                            tests.append(tempval)
-                            intests[arg] = tempval
+                                for jsonval in data["success"]["num"]:
+                                    tempval.append(jsonval)
                         elif allfuncroles[keyfunc][arg]["check"] == "outparam":
-                            tests.append({})
-                            intests[arg] = [0] * 50
+                            tempval = [{}]
                         else:
                             raise AssertionError(
                                 "Function argument must have inparam/outparam role"
                             )
-                try:
-                    funcPy(*tests)
-                    raise AssertionError("Tests should fail")
-                except:
-                    pass
-                funcs[funcname]["failure"] = {}
-                funcs[funcname]["failure"]["input"] = copy.copy(intests)
+                        testvals.append(tempval)
 
+                    testcombinations = list(
+                        product(
+                            *[v if isinstance(v, Iterable) else [v] for v in testvals]
+                        )
+                    )
+
+                    for combination in testcombinations:
+                        intests = OrderedDict()
+                        outtests = OrderedDict()
+                        tests = copy.deepcopy(list(combination))
+                        checkindex = []
+                        for i in range(len(allfuncargs[keyfunc].keys())):
+                            arg = list(allfuncargs[keyfunc].keys())[i]
+                            argpytype = pytype(allfuncargs[keyfunc][arg])
+                            if allfuncroles[keyfunc][arg]["check"] == "outparam":
+                                if argpytype == "int":
+                                    intests[arg] = [0] * 50
+                                elif argpytype == "float":
+                                    intests[arg] = [1.1] * 50
+                                elif argpytype == "bool":
+                                    intests[arg] = [True] * 50
+                                checkindex.append(i)
+                            else:
+                                intests[arg] = tests[i]
+
+                        funcPy(*tests)
+                        for i in checkindex:
+                            count = 0
+                            outtests[list(allfuncargs[keyfunc].keys())[i]] = []
+                            for num in sorted(tests[i]):
+                                if num != count:
+                                    while num != count:
+                                        outtests[
+                                            list(allfuncargs[keyfunc].keys())[i]
+                                        ].append(0)
+                                        count = count + 1
+                                outtests[list(allfuncargs[keyfunc].keys())[i]].append(
+                                    tests[i][num]
+                                )
+                                count = count + 1
+                        tempdict = {}
+                        tempdict["input"] = copy.copy(intests)
+                        tempdict["output"] = copy.copy(outtests)
+                        tempdict["success"] = True
+                        funcs[funcname].append(tempdict)
+
+                # Failure Tests
+                if keyfunc not in FAIL_TEST_BLACKLIST and keyfunc in failfuncs:
+                    testvals = []
+                    for i in range(len(allfuncargs[keyfunc].keys())):
+                        arg = list(allfuncargs[keyfunc].keys())[i]
+                        argpytype = pytype(allfuncargs[keyfunc][arg])
+                        if allfuncroles[keyfunc][arg]["check"] == "inparam":
+                            tempval = []
+                            if "role" in allfuncroles[keyfunc][arg].keys():
+                                for jsonval in data["failure"][
+                                    allfuncroles[keyfunc][arg]["role"][
+                                        : allfuncroles[keyfunc][arg]["role"].find("-")
+                                    ]
+                                ][allfuncroles[keyfunc][arg]["role"]]:
+                                    tempval.append(jsonval[argpytype])
+                            else:
+                                for jsonval in data["failure"]["num"]:
+                                    tempval.append(jsonval)
+                        elif allfuncroles[keyfunc][arg]["check"] == "outparam":
+                            tempval = [{}]
+                        else:
+                            raise AssertionError(
+                                "Function argument must have inparam/outparam role"
+                            )
+                        testvals.append(tempval)
+
+                    testcombinations = list(
+                        product(
+                            *[v if isinstance(v, Iterable) else [v] for v in testvals]
+                        )
+                    )
+
+                    for combination in testcombinations:
+                        intests = OrderedDict()
+                        outtests = OrderedDict()
+                        tests = copy.deepcopy(list(combination))
+                        checkindex = []
+                        for i in range(len(allfuncargs[keyfunc].keys())):
+                            arg = list(allfuncargs[keyfunc].keys())[i]
+                            argpytype = pytype(allfuncargs[keyfunc][arg])
+                            if allfuncroles[keyfunc][arg]["check"] == "outparam":
+                                if argpytype == "int":
+                                    intests[arg] = [0] * 50
+                                elif argpytype == "float":
+                                    intests[arg] = [1.1] * 50
+                                elif argpytype == "bool":
+                                    intests[arg] = [True] * 50
+                                checkindex.append(i)
+                            else:
+                                intests[arg] = tests[i]
+
+                        try:
+                            funcPy(*tests)
+                            raise AssertionError("Tests should fail")
+                        except:
+                            pass
+
+                        tempdict = {}
+                        tempdict["input"] = copy.copy(intests)
+                        tempdict["success"] = False
+                        funcs[funcname].append(tempdict)
     return funcs
 
 
@@ -1109,29 +1134,15 @@ if __name__ == "__main__":
                     print(indent_code(allpyfuncs[funcname], 6).rstrip())
                 if funcname in tests.keys():
                     print(" " * 4 + "tests:")
-                    for i in range(len(tests[funcname].keys())):
-                        if list(tests[funcname].keys())[i] == "success":
-                            print(" " * 6 + "- args:")
-                            for arg in tests[funcname]["success"]["input"].keys():
-                                print(
-                                    " " * 10 + arg + ": ",
-                                    tests[funcname]["success"]["input"][arg],
-                                )
-                            print(" " * 8 + "successful: true")
-                            print(" " * 8 + "results:")
-                            for arg in tests[funcname]["success"]["output"].keys():
-                                print(
-                                    " " * 10 + arg + ": ",
-                                    tests[funcname]["success"]["output"][arg],
-                                )
-                        elif list(tests[funcname].keys())[i] == "failure":
-                            print(" " * 6 + "- args:")
-                            for arg in tests[funcname]["failure"]["input"].keys():
-                                print(
-                                    " " * 10 + arg + ": ",
-                                    tests[funcname]["failure"]["input"][arg],
-                                )
-                            print(" " * 8 + "successful: false")
+                    for test in tests[funcname]:
+                        print(" " * 6 + "- args:")
+                        for arg in test["input"].keys():
+                            print(" " * 10 + arg + ": ", test["input"][arg])
+                        print(" " * 8 + "successful: ", test["success"])
+                        print(" " * 8 + "results:")
+                        if test["success"] is True:
+                            for arg in test["output"].keys():
+                                print(" " * 10 + arg + ": ", test["output"][arg])
                     print()
     else:
         if kernelname in alltokens.keys() and kernelname not in SPEC_BLACKLIST:
@@ -1180,29 +1191,15 @@ if __name__ == "__main__":
                 print(indent_code(allpyfuncs[kernelname], 6).rstrip())
             if kernelname in tests.keys():
                 print(" " * 4 + "tests:")
-                for i in range(len(tests[kernelname].keys())):
-                    if list(tests[kernelname].keys())[i] == "success":
-                        print(" " * 6 + "- args:")
-                        for arg in tests[kernelname]["success"]["input"].keys():
-                            print(
-                                " " * 10 + arg + ": ",
-                                tests[kernelname]["success"]["input"][arg],
-                            )
-                        print(" " * 8 + "successful: true")
-                        print(" " * 8 + "results:")
-                        for arg in tests[kernelname]["success"]["output"].keys():
-                            print(
-                                " " * 10 + arg + ": ",
-                                tests[kernelname]["success"]["output"][arg],
-                            )
-                    elif list(tests[kernelname].keys())[i] == "failure":
-                        print(" " * 6 + "- args:")
-                        for arg in tests[kernelname]["failure"]["input"].keys():
-                            print(
-                                " " * 10 + arg + ": ",
-                                tests[kernelname]["failure"]["input"][arg],
-                            )
-                        print(" " * 8 + "successful: false")
+                for test in tests[kernelname]:
+                    print(" " * 6 + "- args:")
+                    for arg in test["input"].keys():
+                        print(" " * 10 + arg + ": ", test["input"][arg])
+                    print(" " * 8 + "successful: ", test["success"])
+                    print(" " * 8 + "results:")
+                    if test["success"] is True:
+                        for arg in test["output"].keys():
+                            print(" " * 10 + arg + ": ", test["output"][arg])
                 print()
         else:
             raise ValueError("Function {0} not present".format(kernelname))

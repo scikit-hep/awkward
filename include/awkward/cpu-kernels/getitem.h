@@ -64,9 +64,9 @@ extern "C" {
       int64_t length);
 
   /// @param toindex outparam
-  /// @param fromindex inparam role: IndexedArray-index instance: 1
-  /// @param carry inparam role: IndexedArray-index instance: 0
-  /// @param fromindexoffset inparam role: IndexedArray-index-offset instance: 1
+  /// @param fromindex inparam role: IndexedArray-index
+  /// @param carry inparam role: IndexedArray-index
+  /// @param fromindexoffset inparam role: IndexedArray-index-offset
   /// @param lenfromindex inparam
   /// @param length inparam
   EXPORT_SYMBOL struct Error
@@ -78,9 +78,9 @@ extern "C" {
       int64_t lenfromindex,
       int64_t length);
   /// @param toindex outparam
-  /// @param fromindex inparam role: IndexedArray-index instance: 1
-  /// @param carry inparam role: IndexedArray-index instance: 0
-  /// @param fromindexoffset inparam role: IndexedArray-index-offset instance: 1
+  /// @param fromindex inparam role: IndexedArray-index
+  /// @param carry inparam role: IndexedArray-index
+  /// @param fromindexoffset inparam role: IndexedArray-index-offset
   /// @param lenfromindex inparam
   /// @param length inparam
   EXPORT_SYMBOL struct Error
@@ -92,9 +92,9 @@ extern "C" {
       int64_t lenfromindex,
       int64_t length);
   /// @param toindex outparam
-  /// @param fromindex inparam role: IndexedArray-index instance: 1
-  /// @param carry inparam role: IndexedArray-index instance: 0
-  /// @param fromindexoffset inparam role: IndexedArray-index-offset instance: 1
+  /// @param fromindex inparam role: IndexedArray-index
+  /// @param carry inparam role: IndexedArray-index
+  /// @param fromindexoffset inparam role: IndexedArray-index-offset
   /// @param lenfromindex inparam
   /// @param length inparam
   EXPORT_SYMBOL struct Error
@@ -106,9 +106,9 @@ extern "C" {
       int64_t lenfromindex,
       int64_t length);
   /// @param toindex outparam
-  /// @param fromindex inparam role: IndexedArray-index instance: 1
-  /// @param carry inparam role: IndexedArray-index instance: 0
-  /// @param fromindexoffset inparam role: IndexedArray-index-offset instance: 1
+  /// @param fromindex inparam role: IndexedArray-index
+  /// @param carry inparam role: IndexedArray-index
+  /// @param fromindexoffset inparam role: IndexedArray-index-offset
   /// @param lenfromindex inparam
   /// @param length inparam
   EXPORT_SYMBOL struct Error
@@ -120,9 +120,9 @@ extern "C" {
       int64_t lenfromindex,
       int64_t length);
   /// @param toindex outparam
-  /// @param fromindex inparam role: IndexedArray-index instance: 1
-  /// @param carry inparam role: IndexedArray-index instance: 0
-  /// @param fromindexoffset inparam role: IndexedArray-index-offset instance: 1
+  /// @param fromindex inparam role: IndexedArray-index
+  /// @param carry inparam role: IndexedArray-index
+  /// @param fromindexoffset inparam role: IndexedArray-index-offset
   /// @param lenfromindex inparam
   /// @param length inparam
   EXPORT_SYMBOL struct Error
@@ -135,9 +135,9 @@ extern "C" {
       int64_t length);
 
   /// @param toindex outparam
-  /// @param fromindex inparam role: IndexedArray-index instance: 1
-  /// @param carry inparam role: IndexedArray-index instance: 0
-  /// @param fromindexoffset inparam role: IndexedArray-index-offset instance: 1
+  /// @param fromindex inparam role: IndexedArray-index
+  /// @param carry inparam role: IndexedArray-index
+  /// @param fromindexoffset inparam role: IndexedArray-index-offset
   /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_Index8_carry_nocheck_64(
@@ -147,9 +147,9 @@ extern "C" {
       int64_t fromindexoffset,
       int64_t length);
   /// @param toindex outparam
-  /// @param fromindex inparam role: IndexedArray-index instance: 1
-  /// @param carry inparam role: IndexedArray-index instance: 0
-  /// @param fromindexoffset inparam role: IndexedArray-index-offset instance: 1
+  /// @param fromindex inparam role: IndexedArray-index
+  /// @param carry inparam role: IndexedArray-index
+  /// @param fromindexoffset inparam role: IndexedArray-index-offset
   /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_IndexU8_carry_nocheck_64(
@@ -159,9 +159,9 @@ extern "C" {
       int64_t fromindexoffset,
       int64_t length);
   /// @param toindex outparam
-  /// @param fromindex inparam role: IndexedArray-index instance: 1
-  /// @param carry inparam role: IndexedArray-index instance: 0
-  /// @param fromindexoffset inparam role: IndexedArray-index-offset instance: 1
+  /// @param fromindex inparam role: IndexedArray-index
+  /// @param carry inparam role: IndexedArray-index
+  /// @param fromindexoffset inparam role: IndexedArray-index-offset
   /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_Index32_carry_nocheck_64(
@@ -171,9 +171,9 @@ extern "C" {
       int64_t fromindexoffset,
       int64_t length);
   /// @param toindex outparam
-  /// @param fromindex inparam role: IndexedArray-index instance: 1
-  /// @param carry inparam role: IndexedArray-index instance: 0
-  /// @param fromindexoffset inparam role: IndexedArray-index-offset instance: 1
+  /// @param fromindex inparam role: IndexedArray-index
+  /// @param carry inparam role: IndexedArray-index
+  /// @param fromindexoffset inparam role: IndexedArray-index-offset
   /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_IndexU32_carry_nocheck_64(
@@ -183,9 +183,9 @@ extern "C" {
       int64_t fromindexoffset,
       int64_t length);
   /// @param toindex outparam
-  /// @param fromindex inparam role: IndexedArray-index instance: 1
-  /// @param carry inparam role: IndexedArray-index instance: 0
-  /// @param fromindexoffset inparam role: IndexedArray-index-offset instance: 1
+  /// @param fromindex inparam role: IndexedArray-index
+  /// @param carry inparam role: IndexedArray-index
+  /// @param fromindexoffset inparam role: IndexedArray-index-offset
   /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_Index64_carry_nocheck_64(
@@ -209,10 +209,10 @@ extern "C" {
       const int64_t* strides);
 
   /// @param same outparam role: pointer
-  /// @param bytemask inparam role: ByteMaskedArray-mask instance: 0
-  /// @param bytemaskoffset inparam role: ByteMaskedArray-mask-offset instance: 1
-  /// @param missingindex inparam role: ByteMaskedArray-mask instance: 1
-  /// @param missingindexoffset inparam role: ByteMaskedArray-mask-offset instance: 1
+  /// @param bytemask inparam role: ByteMaskedArray-mask
+  /// @param bytemaskoffset inparam role: ByteMaskedArray-mask-offset
+  /// @param missingindex inparam role: ByteMaskedArray-mask
+  /// @param missingindexoffset inparam role: ByteMaskedArray-mask-offset
   /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_slicemissing_check_same(
@@ -359,8 +359,8 @@ extern "C" {
 
   /// @param nextcarryptr outparam
   /// @param nextadvancedptr outparam
-  /// @param carryptr inparam role: NumpyArray-ptr instance: 0
-  /// @param advancedptr inparam role: NumpyArray-ptr instance: 1
+  /// @param carryptr inparam role: NumpyArray-ptr
+  /// @param advancedptr inparam role: NumpyArray-ptr
   /// @param lencarry inparam
   /// @param lenhead inparam
   /// @param skip inparam
@@ -380,8 +380,8 @@ extern "C" {
 
   /// @param nextcarryptr outparam
   /// @param nextadvancedptr outparam
-  /// @param carryptr inparam role: NumpyArray-ptr instance: 0
-  /// @param flatheadptr inparam role: NumpyArray-ptr instance: 1
+  /// @param carryptr inparam role: NumpyArray-ptr
+  /// @param flatheadptr inparam role: NumpyArray-ptr
   /// @param lencarry inparam
   /// @param lenflathead inparam
   /// @param skip inparam
@@ -396,9 +396,9 @@ extern "C" {
       int64_t skip);
 
   /// @param nextcarryptr outparam
-  /// @param carryptr inparam role: NumpyArray-ptr instance: 0
-  /// @param advancedptr inparam role: NumpyArray-ptr instance: 0
-  /// @param flatheadptr inparam role: NumpyArray-ptr instance: 1
+  /// @param carryptr inparam role: NumpyArray-ptr
+  /// @param advancedptr inparam role: NumpyArray-ptr
+  /// @param flatheadptr inparam role: NumpyArray-ptr
   /// @param lencarry inparam
   /// @param skip inparam
   EXPORT_SYMBOL struct Error
@@ -677,7 +677,7 @@ extern "C" {
   /// @param stopsoffset inparam role: ListArray-stops-offset
   /// @param lenstarts inparam
   /// @param lenarray inparam
-  /// @param lencontent inparam
+  /// @param lencontent inparam role: ListArray-contentlen
   EXPORT_SYMBOL struct Error
     awkward_ListArray32_getitem_next_array_64(
       int64_t* tocarry,
@@ -699,7 +699,7 @@ extern "C" {
   /// @param stopsoffset inparam role: ListArray-stops-offset
   /// @param lenstarts inparam
   /// @param lenarray inparam
-  /// @param lencontent inparam
+  /// @param lencontent inparam role: ListArray-contentlen
   EXPORT_SYMBOL struct Error
     awkward_ListArrayU32_getitem_next_array_64(
       int64_t* tocarry,
@@ -721,7 +721,7 @@ extern "C" {
   /// @param stopsoffset inparam role: ListArray-stops-offset
   /// @param lenstarts inparam
   /// @param lenarray inparam
-  /// @param lencontent inparam
+  /// @param lencontent inparam role: ListArray-contentlen
   EXPORT_SYMBOL struct Error
     awkward_ListArray64_getitem_next_array_64(
       int64_t* tocarry,
@@ -745,7 +745,7 @@ extern "C" {
   /// @param stopsoffset inparam role: ListArray-stops-offset
   /// @param lenstarts inparam
   /// @param lenarray inparam
-  /// @param lencontent inparam
+  /// @param lencontent inparam role: ListArray-contentlen
   EXPORT_SYMBOL struct Error
     awkward_ListArray32_getitem_next_array_advanced_64(
       int64_t* tocarry,
@@ -769,7 +769,7 @@ extern "C" {
   /// @param stopsoffset inparam role: ListArray-stops-offset
   /// @param lenstarts inparam
   /// @param lenarray inparam
-  /// @param lencontent inparam
+  /// @param lencontent inparam role: ListArray-contentlen
   EXPORT_SYMBOL struct Error
     awkward_ListArrayU32_getitem_next_array_advanced_64(
       int64_t* tocarry,
@@ -793,7 +793,7 @@ extern "C" {
   /// @param stopsoffset inparam role: ListArray-stops-offset
   /// @param lenstarts inparam
   /// @param lenarray inparam
-  /// @param lencontent inparam
+  /// @param lencontent inparam role: ListArray-contentlen
   EXPORT_SYMBOL struct Error
     awkward_ListArray64_getitem_next_array_advanced_64(
       int64_t* tocarry,
@@ -1079,11 +1079,11 @@ extern "C" {
 
   /// @param tooffsets outparam
   /// @param tononzero outparam
-  /// @param fromoffsets inparam role: ListOffsetArray-offsets instance: 0
-  /// @param offsetsoffset inparam role: ListOffsetArray-offsets-offset instance: 0
+  /// @param fromoffsets inparam role: ListOffsetArray-offsets
+  /// @param offsetsoffset inparam role: ListOffsetArray-offsets-offset
   /// @param length inparam
-  /// @param nonzero inparam role: ListOffsetArray-offsets instance: 1
-  /// @param nonzerooffset inparam role: ListOffsetArray-offsets-offset instance: 1
+  /// @param nonzero inparam role: ListOffsetArray-offsets
+  /// @param nonzerooffset inparam role: ListOffsetArray-offsets-offset
   /// @param nonzerolength inparam
   EXPORT_SYMBOL struct Error
     awkward_ListOffsetArray_getitem_adjust_offsets_64(
@@ -1098,14 +1098,14 @@ extern "C" {
 
   /// @param tooffsets outparam
   /// @param tononzero outparam
-  /// @param fromoffsets inparam role: ListOffsetArray-offsets instance: 0
-  /// @param offsetsoffset inparam role: ListOffsetArray-offsets-offset instance: 0
+  /// @param fromoffsets inparam role: ListOffsetArray-offsets
+  /// @param offsetsoffset inparam role: ListOffsetArray-offsets-offset
   /// @param length inparam
   /// @param index inparam role: IndexedArray-index
   /// @param indexoffset inparam role: IndexedArray-index-offset
   /// @param indexlength inparam
-  /// @param nonzero inparam role: ListOffsetArray-offsets instance: 1
-  /// @param nonzerooffset inparam role: ListOffsetArray-offsets-offset instance: 1
+  /// @param nonzero inparam role: ListOffsetArray-offsets
+  /// @param nonzerooffset inparam role: ListOffsetArray-offsets-offset
   /// @param nonzerolength inparam
   /// @param originalmask inparam role: IndexedArray-mask
   /// @param maskoffset inparam role: IndexedArray-mask-offset
@@ -1130,11 +1130,11 @@ extern "C" {
   /// @param tomask outparam
   /// @param toindex outparam
   /// @param tononzero outparam
-  /// @param fromindex inparam role: IndexedArray-index instance: 0
-  /// @param fromindexoffset inparam role: IndexedArray-index-offset instance: 0
+  /// @param fromindex inparam role: IndexedArray-index
+  /// @param fromindexoffset inparam role: IndexedArray-index-offset
   /// @param fromindexlength inparam
-  /// @param nonzero inparam role: IndexedArray-index instance: 1
-  /// @param nonzerooffset inparam role: IndexedArray-index-offset instance: 1
+  /// @param nonzero inparam role: IndexedArray-index
+  /// @param nonzerooffset inparam role: IndexedArray-index-offset
   /// @param nonzerolength inparam
   EXPORT_SYMBOL struct Error
     awkward_IndexedArray_getitem_adjust_outindex_64(
@@ -1186,9 +1186,9 @@ extern "C" {
       int64_t lencontent);
 
   /// @param toindex outparam
-  /// @param fromindex inparam role: IndexedArray-index instance: 0
+  /// @param fromindex inparam role: IndexedArray-index
   /// @param fromcarry inparam role: ListArray-at-array
-  /// @param indexoffset inparam role: IndexedArray-index-offset instance: 0
+  /// @param indexoffset inparam role: IndexedArray-index-offset
   /// @param lenindex inparam
   /// @param lencarry inparam
   EXPORT_SYMBOL struct Error
@@ -1200,9 +1200,9 @@ extern "C" {
       int64_t lenindex,
       int64_t lencarry);
   /// @param toindex outparam
-  /// @param fromindex inparam role: IndexedArray-index instance: 0
+  /// @param fromindex inparam role: IndexedArray-index
   /// @param fromcarry inparam role: ListArray-at-array
-  /// @param indexoffset inparam role: IndexedArray-index-offset instance: 0
+  /// @param indexoffset inparam role: IndexedArray-index-offset
   /// @param lenindex inparam
   /// @param lencarry inparam
   EXPORT_SYMBOL struct Error
@@ -1214,9 +1214,9 @@ extern "C" {
       int64_t lenindex,
       int64_t lencarry);
   /// @param toindex outparam
-  /// @param fromindex inparam role: IndexedArray-index instance: 0
+  /// @param fromindex inparam role: IndexedArray-index
   /// @param fromcarry inparam role: ListArray-at-array
-  /// @param indexoffset inparam role: IndexedArray-index-offset instance: 0
+  /// @param indexoffset inparam role: IndexedArray-index-offset
   /// @param lenindex inparam
   /// @param lencarry inparam
   EXPORT_SYMBOL struct Error
@@ -1456,7 +1456,7 @@ extern "C" {
   /// @param sliceouterlen inparam
   /// @param sliceindex inparam role: ListArray-at-array
   /// @param sliceindexoffset inparam role: ListArray-diff-offset
-  /// @param sliceinnerlen inparam
+  /// @param sliceinnerlen inparam role: ListArray-contentlen
   /// @param fromstarts inparam role: ListArray-starts-samediff
   /// @param fromstartsoffset inparam role: ListArray-starts-offset
   /// @param fromstops inparam role: ListArray-stops-samediff
@@ -1488,7 +1488,7 @@ extern "C" {
   /// @param sliceouterlen inparam
   /// @param sliceindex inparam role: ListArray-at-array
   /// @param sliceindexoffset inparam role: ListArray-diff-offset
-  /// @param sliceinnerlen inparam
+  /// @param sliceinnerlen inparam role: ListArray-contentlen
   /// @param fromstarts inparam role: ListArray-starts-samediff
   /// @param fromstartsoffset inparam role: ListArray-starts-offset
   /// @param fromstops inparam role: ListArray-stops-samediff
@@ -1520,7 +1520,7 @@ extern "C" {
   /// @param sliceouterlen inparam
   /// @param sliceindex inparam role: ListArray-at-array
   /// @param sliceindexoffset inparam role: ListArray-diff-offset
-  /// @param sliceinnerlen inparam
+  /// @param sliceinnerlen inparam role: ListArray-contentlen
   /// @param fromstarts inparam role: ListArray-starts-samediff
   /// @param fromstartsoffset inparam role: ListArray-starts-offset
   /// @param fromstops inparam role: ListArray-stops-samediff
@@ -1550,9 +1550,9 @@ extern "C" {
   /// @param slicestops inparam role: ListArray-stops
   /// @param slicestopsoffset inparam role: ListArray-stops-offset
   /// @param length inparam
-  /// @param missing inparam role: ListArray-diff
-  /// @param missingoffset inparam role: ListArray-diff-offset
-  /// @param missinglength inparam
+  /// @param missing inparam role: IndexedArray-index
+  /// @param missingoffset inparam role: IndexedArray-index-offset
+  /// @param missinglength inparam role: ListArray-contentlen
   EXPORT_SYMBOL struct Error
     awkward_ListArray_getitem_jagged_numvalid_64(
       int64_t* numvalid,
@@ -1573,8 +1573,8 @@ extern "C" {
   /// @param slicestops inparam role: ListArray-stops
   /// @param slicestopsoffset inparam role: ListArray-stops-offset
   /// @param length inparam
-  /// @param missing inparam role: ListArray-diff
-  /// @param missingoffset inparam role: ListArray-diff-offset
+  /// @param missing inparam role: IndexedArray-index
+  /// @param missingoffset inparam role: IndexedArray-index-offset
   EXPORT_SYMBOL struct Error
     awkward_ListArray_getitem_jagged_shrink_64(
       int64_t* tocarry,
@@ -1589,15 +1589,15 @@ extern "C" {
       int64_t missingoffset);
 
   /// @param tooffsets outparam
-  /// @param slicestarts inparam role: ListArray-starts-samediff instance: 0
-  /// @param slicestartsoffset inparam role: ListArray-starts-offset instance: 0
-  /// @param slicestops inparam role: ListArray-stops-samediff instance: 0
-  /// @param slicestopsoffset inparam role: ListArray-stops-offset instance: 0
+  /// @param slicestarts inparam role: ListArray-starts-samediff
+  /// @param slicestartsoffset inparam role: ListArray-starts-offset
+  /// @param slicestops inparam role: ListArray-stops-samediff
+  /// @param slicestopsoffset inparam role: ListArray-stops-offset
   /// @param sliceouterlen inparam
-  /// @param fromstarts inparam role: ListArray-starts-samediff instance: 1
-  /// @param fromstartsoffset inparam role: ListArray-starts-offset instance: 1
-  /// @param fromstops inparam role: ListArray-stops-samediff instance: 1
-  /// @param fromstopsoffset inparam role: ListArray-stops-offset instance: 1
+  /// @param fromstarts inparam role: ListArray-starts-samediff
+  /// @param fromstartsoffset inparam role: ListArray-starts-offset
+  /// @param fromstops inparam role: ListArray-stops-samediff
+  /// @param fromstopsoffset inparam role: ListArray-stops-offset
   EXPORT_SYMBOL struct Error
     awkward_ListArray32_getitem_jagged_descend_64(
       int64_t* tooffsets,
@@ -1611,15 +1611,15 @@ extern "C" {
       const int32_t* fromstops,
       int64_t fromstopsoffset);
   /// @param tooffsets outparam
-  /// @param slicestarts inparam role: ListArray-starts-samediff instance: 0
-  /// @param slicestartsoffset inparam role: ListArray-starts-offset instance: 0
-  /// @param slicestops inparam role: ListArray-stops-samediff instance: 0
-  /// @param slicestopsoffset inparam role: ListArray-stops-offset instance: 0
+  /// @param slicestarts inparam role: ListArray-starts-samediff
+  /// @param slicestartsoffset inparam role: ListArray-starts-offset
+  /// @param slicestops inparam role: ListArray-stops-samediff
+  /// @param slicestopsoffset inparam role: ListArray-stops-offset
   /// @param sliceouterlen inparam
-  /// @param fromstarts inparam role: ListArray-starts-samediff instance: 1
-  /// @param fromstartsoffset inparam role: ListArray-starts-offset instance: 1
-  /// @param fromstops inparam role: ListArray-stops-samediff instance: 1
-  /// @param fromstopsoffset inparam role: ListArray-stops-offset instance: 1
+  /// @param fromstarts inparam role: ListArray-starts-samediff
+  /// @param fromstartsoffset inparam role: ListArray-starts-offset
+  /// @param fromstops inparam role: ListArray-stops-samediff
+  /// @param fromstopsoffset inparam role: ListArray-stops-offset
   EXPORT_SYMBOL struct Error
     awkward_ListArrayU32_getitem_jagged_descend_64(
       int64_t* tooffsets,
@@ -1633,15 +1633,15 @@ extern "C" {
       const uint32_t* fromstops,
       int64_t fromstopsoffset);
   /// @param tooffsets outparam
-  /// @param slicestarts inparam role: ListArray-starts-samediff instance: 0
-  /// @param slicestartsoffset inparam role: ListArray-starts-offset instance: 0
-  /// @param slicestops inparam role: ListArray-stops-samediff instance: 0
-  /// @param slicestopsoffset inparam role: ListArray-stops-offset instance: 0
+  /// @param slicestarts inparam role: ListArray-starts-samediff
+  /// @param slicestartsoffset inparam role: ListArray-starts-offset
+  /// @param slicestops inparam role: ListArray-stops-samediff
+  /// @param slicestopsoffset inparam role: ListArray-stops-offset
   /// @param sliceouterlen inparam
-  /// @param fromstarts inparam role: ListArray-starts-samediff instance: 1
-  /// @param fromstartsoffset inparam role: ListArray-starts-offset instance: 1
-  /// @param fromstops inparam role: ListArray-stops-samediff instance: 1
-  /// @param fromstopsoffset inparam role: ListArray-stops-offset instance: 1
+  /// @param fromstarts inparam role: ListArray-starts-samediff
+  /// @param fromstartsoffset inparam role: ListArray-starts-offset
+  /// @param fromstops inparam role: ListArray-stops-samediff
+  /// @param fromstopsoffset inparam role: ListArray-stops-offset
   EXPORT_SYMBOL struct Error
     awkward_ListArray64_getitem_jagged_descend_64(
       int64_t* tooffsets,
@@ -1824,10 +1824,10 @@ extern "C" {
       int64_t length,
       bool validwhen);
 
-  /// @param index_in inparam role: IndexedArray-index instance: 0
-  /// @param index_in_offset inparam role: IndexedArray-index-offset instance: 0
-  /// @param offsets_in inparam role: IndexedArray-index instance: 1
-  /// @param offsets_in_offset inparam role: IndexedArray-index-offset instance: 1
+  /// @param index_in inparam role: IndexedArray-index
+  /// @param index_in_offset inparam role: IndexedArray-index-offset
+  /// @param offsets_in inparam role: IndexedArray-index
+  /// @param offsets_in_offset inparam role: IndexedArray-index-offset
   /// @param mask_out outparam
   /// @param starts_out outparam
   /// @param stops_out outparam
