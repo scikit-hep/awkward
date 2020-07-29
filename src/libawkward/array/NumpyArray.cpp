@@ -5171,9 +5171,10 @@ namespace awkward {
     std::shared_ptr<TO>toptr (
       new TO[length], kernel::array_deleter<TO>());
 
-    struct Error err = kernel::create_NumpyArray_from_NumpyArray<TO, FROM>(
-      fromptr,
+    struct Error err = kernel::NumpyArray_fill<FROM, TO>(
       toptr.get(),
+      0,
+      fromptr,
       offset,
       length);
     util::handle_error(err, classname(), nullptr);
