@@ -1,0 +1,55 @@
+- name: awkward_RegularArray_broadcast_tooffsets_size1
+  specializations:
+    - name: awkward_RegularArray_broadcast_tooffsets_size1_64
+      args:
+        - tocarry: List[int64_t]
+        - fromoffsets: List[int64_t]
+        - offsetsoffset: int64_t
+        - offsetslength: int64_t
+  inparams: ['fromoffsets', 'offsetsoffset', 'offsetslength']
+  outparams: ['tocarry']
+  definition: |
+    def awkward_RegularArray_broadcast_tooffsets_size1(
+        tocarry, fromoffsets, offsetsoffset, offsetslength
+    ):
+        k = 0
+        for i in range(offsetslength - 1):
+            count = int(
+                fromoffsets[(offsetsoffset + i) + 1] - fromoffsets[offsetsoffset + i]
+            )
+            if count < 0:
+                raise ValueError("broadcast's offsets must be monotonically increasing")
+            for j in range(count):
+                tocarry[k] = float(i)
+                k = k + 1
+  tests:
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromoffsets: [0, 3, 6, 9, 12, 15]
+        offsetsoffset: 0
+        offsetslength: 4
+      successful: True
+      results:
+        tocarry: [0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 2.0, 2.0, 2.0]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromoffsets: [0, 3, 6, 9, 12, 15]
+        offsetsoffset: 0
+        offsetslength: 3
+      successful: True
+      results:
+        tocarry: [0.0, 0.0, 0.0, 1.0, 1.0, 1.0]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromoffsets: [0, 3, 2, 9, 12, 15]
+        offsetsoffset: 0
+        offsetslength: 3
+      successful: False
+      results:
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromoffsets: [0, 3, 2, 9, 12, 15]
+        offsetsoffset: 0
+        offsetslength: 4
+      successful: False
+      results:

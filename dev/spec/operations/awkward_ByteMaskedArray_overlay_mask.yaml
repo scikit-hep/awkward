@@ -1,0 +1,726 @@
+- name: awkward_ByteMaskedArray_overlay_mask
+  specializations:
+    - name: awkward_ByteMaskedArray_overlay_mask8
+      args:
+        - tomask: List[int8_t]
+        - theirmask: List[int8_t]
+        - theirmaskoffset: int64_t
+        - mymask: List[int8_t]
+        - mymaskoffset: int64_t
+        - length: int64_t
+        - validwhen: bool
+  inparams: ['theirmask', 'theirmaskoffset', 'mymask', 'mymaskoffset', 'length', 'validwhen']
+  outparams: ['tomask']
+  definition: |
+    def awkward_ByteMaskedArray_overlay_mask(
+        tomask, theirmask, theirmaskoffset, mymask, mymaskoffset, length, validwhen
+    ):
+        for i in range(length):
+            theirs = theirmask[theirmaskoffset + i]
+            mine = (mymask[mymaskoffset + i] != 0) != validwhen
+            tomask[i] = 1 if theirs | mine else 0
+  tests:
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 4
+        validwhen: True
+      successful: True
+      results:
+        tomask: [1, 1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 4
+        validwhen: False
+      successful: True
+      results:
+        tomask: [1, 1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 3
+        validwhen: True
+      successful: True
+      results:
+        tomask: [1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 3
+        validwhen: False
+      successful: True
+      results:
+        tomask: [1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 4
+        validwhen: True
+      successful: True
+      results:
+        tomask: [1, 1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 4
+        validwhen: False
+      successful: True
+      results:
+        tomask: [1, 1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 3
+        validwhen: True
+      successful: True
+      results:
+        tomask: [1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 3
+        validwhen: False
+      successful: True
+      results:
+        tomask: [1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 4
+        validwhen: True
+      successful: True
+      results:
+        tomask: [1, 1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 4
+        validwhen: False
+      successful: True
+      results:
+        tomask: [1, 1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 3
+        validwhen: True
+      successful: True
+      results:
+        tomask: [1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 3
+        validwhen: False
+      successful: True
+      results:
+        tomask: [1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 4
+        validwhen: True
+      successful: True
+      results:
+        tomask: [1, 1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 4
+        validwhen: False
+      successful: True
+      results:
+        tomask: [1, 1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 3
+        validwhen: True
+      successful: True
+      results:
+        tomask: [1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 3
+        validwhen: False
+      successful: True
+      results:
+        tomask: [1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 4
+        validwhen: True
+      successful: True
+      results:
+        tomask: [1, 1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 4
+        validwhen: False
+      successful: True
+      results:
+        tomask: [1, 1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 3
+        validwhen: True
+      successful: True
+      results:
+        tomask: [1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 3
+        validwhen: False
+      successful: True
+      results:
+        tomask: [1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 4
+        validwhen: True
+      successful: True
+      results:
+        tomask: [1, 1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 4
+        validwhen: False
+      successful: True
+      results:
+        tomask: [1, 1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 3
+        validwhen: True
+      successful: True
+      results:
+        tomask: [1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 3
+        validwhen: False
+      successful: True
+      results:
+        tomask: [1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 4
+        validwhen: True
+      successful: True
+      results:
+        tomask: [1, 1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 4
+        validwhen: False
+      successful: True
+      results:
+        tomask: [1, 1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 3
+        validwhen: True
+      successful: True
+      results:
+        tomask: [1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 3
+        validwhen: False
+      successful: True
+      results:
+        tomask: [1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 4
+        validwhen: True
+      successful: True
+      results:
+        tomask: [1, 1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 4
+        validwhen: False
+      successful: True
+      results:
+        tomask: [1, 1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 3
+        validwhen: True
+      successful: True
+      results:
+        tomask: [1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 3
+        validwhen: False
+      successful: True
+      results:
+        tomask: [1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 4
+        validwhen: True
+      successful: True
+      results:
+        tomask: [1, 1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 4
+        validwhen: False
+      successful: True
+      results:
+        tomask: [1, 1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 3
+        validwhen: True
+      successful: True
+      results:
+        tomask: [1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 3
+        validwhen: False
+      successful: True
+      results:
+        tomask: [1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 4
+        validwhen: True
+      successful: True
+      results:
+        tomask: [1, 1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 4
+        validwhen: False
+      successful: True
+      results:
+        tomask: [1, 1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 3
+        validwhen: True
+      successful: True
+      results:
+        tomask: [1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 3
+        validwhen: False
+      successful: True
+      results:
+        tomask: [1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 4
+        validwhen: True
+      successful: True
+      results:
+        tomask: [1, 1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 4
+        validwhen: False
+      successful: True
+      results:
+        tomask: [1, 1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 3
+        validwhen: True
+      successful: True
+      results:
+        tomask: [1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 3
+        validwhen: False
+      successful: True
+      results:
+        tomask: [1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 4
+        validwhen: True
+      successful: True
+      results:
+        tomask: [1, 1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 4
+        validwhen: False
+      successful: True
+      results:
+        tomask: [1, 1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 3
+        validwhen: True
+      successful: True
+      results:
+        tomask: [1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 3
+        validwhen: False
+      successful: True
+      results:
+        tomask: [1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 4
+        validwhen: True
+      successful: True
+      results:
+        tomask: [1, 1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 4
+        validwhen: False
+      successful: True
+      results:
+        tomask: [1, 1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 3
+        validwhen: True
+      successful: True
+      results:
+        tomask: [1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 3
+        validwhen: False
+      successful: True
+      results:
+        tomask: [1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 4
+        validwhen: True
+      successful: True
+      results:
+        tomask: [1, 1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 4
+        validwhen: False
+      successful: True
+      results:
+        tomask: [1, 1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 3
+        validwhen: True
+      successful: True
+      results:
+        tomask: [1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 3
+        validwhen: False
+      successful: True
+      results:
+        tomask: [1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 4
+        validwhen: True
+      successful: True
+      results:
+        tomask: [1, 1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 4
+        validwhen: False
+      successful: True
+      results:
+        tomask: [1, 1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 3
+        validwhen: True
+      successful: True
+      results:
+        tomask: [1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 3
+        validwhen: False
+      successful: True
+      results:
+        tomask: [1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 4
+        validwhen: True
+      successful: True
+      results:
+        tomask: [1, 1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 4
+        validwhen: False
+      successful: True
+      results:
+        tomask: [1, 1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 3
+        validwhen: True
+      successful: True
+      results:
+        tomask: [1, 1, 1]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        theirmask: [1, 1, 1, 1, 1]
+        theirmaskoffset: 0
+        mymask: [1, 1, 1, 1, 1]
+        mymaskoffset: 0
+        length: 3
+        validwhen: False
+      successful: True
+      results:
+        tomask: [1, 1, 1]

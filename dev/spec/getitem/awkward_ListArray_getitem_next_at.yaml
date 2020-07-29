@@ -1,0 +1,452 @@
+- name: awkward_ListArray_getitem_next_at
+  specializations:
+    - name: awkward_ListArray64_getitem_next_at_64
+      args:
+        - tocarry: List[int64_t]
+        - fromstarts: List[int64_t]
+        - fromstops: List[int64_t]
+        - lenstarts: int64_t
+        - startsoffset: int64_t
+        - stopsoffset: int64_t
+        - at: int64_t
+    - name: awkward_ListArray32_getitem_next_at_64
+      args:
+        - tocarry: List[int64_t]
+        - fromstarts: List[int32_t]
+        - fromstops: List[int32_t]
+        - lenstarts: int64_t
+        - startsoffset: int64_t
+        - stopsoffset: int64_t
+        - at: int64_t
+    - name: awkward_ListArrayU32_getitem_next_at_64
+      args:
+        - tocarry: List[int64_t]
+        - fromstarts: List[uint32_t]
+        - fromstops: List[uint32_t]
+        - lenstarts: int64_t
+        - startsoffset: int64_t
+        - stopsoffset: int64_t
+        - at: int64_t
+  inparams: ['fromstarts', 'fromstops', 'lenstarts', 'startsoffset', 'stopsoffset', 'at']
+  outparams: ['tocarry']
+  definition: |
+    def awkward_ListArray_getitem_next_at(
+        tocarry, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset, at
+    ):
+        for i in range(lenstarts):
+            length = fromstops[stopsoffset + i] - fromstarts[startsoffset + i]
+            regular_at = at
+            if regular_at < 0:
+                regular_at += length
+            if not ((0 <= regular_at) and (regular_at < length)):
+                raise ValueError("index out of range")
+            tocarry[i] = fromstarts[startsoffset + i] + regular_at
+  tests:
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromstarts: [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+        fromstops: [3, 1, 3, 2, 3, 1, 2, 3]
+        lenstarts: 4
+        startsoffset: 0
+        stopsoffset: 0
+        at: 0
+      successful: True
+      results:
+        tocarry: [2, 0, 2, 1]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromstarts: [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+        fromstops: [3, 1, 3, 2, 3, 1, 2, 3]
+        lenstarts: 3
+        startsoffset: 0
+        stopsoffset: 0
+        at: 0
+      successful: True
+      results:
+        tocarry: [2, 0, 2]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromstarts: [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+        fromstops: [8, 4, 5, 6, 5, 5, 7]
+        lenstarts: 4
+        startsoffset: 0
+        stopsoffset: 0
+        at: 0
+      successful: True
+      results:
+        tocarry: [2, 0, 2, 1]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromstarts: [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+        fromstops: [8, 4, 5, 6, 5, 5, 7]
+        lenstarts: 3
+        startsoffset: 0
+        stopsoffset: 0
+        at: 0
+      successful: True
+      results:
+        tocarry: [2, 0, 2]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromstarts: [1, 0, 0, 0, 1, 1, 0]
+        fromstops: [3, 1, 3, 2, 3, 1, 2, 3]
+        lenstarts: 4
+        startsoffset: 0
+        stopsoffset: 0
+        at: 0
+      successful: True
+      results:
+        tocarry: [1, 0, 0, 0]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromstarts: [1, 0, 0, 0, 1, 1, 0]
+        fromstops: [3, 1, 3, 2, 3, 1, 2, 3]
+        lenstarts: 3
+        startsoffset: 0
+        stopsoffset: 0
+        at: 0
+      successful: True
+      results:
+        tocarry: [1, 0, 0]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromstarts: [1, 0, 0, 0, 1, 1, 0]
+        fromstops: [8, 4, 5, 6, 5, 5, 7]
+        lenstarts: 4
+        startsoffset: 0
+        stopsoffset: 0
+        at: 0
+      successful: True
+      results:
+        tocarry: [1, 0, 0, 0]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromstarts: [1, 0, 0, 0, 1, 1, 0]
+        fromstops: [8, 4, 5, 6, 5, 5, 7]
+        lenstarts: 3
+        startsoffset: 0
+        stopsoffset: 0
+        at: 0
+      successful: True
+      results:
+        tocarry: [1, 0, 0]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromstarts: [3, 0, 3, 2, 3]
+        fromstops: [2, 10, 3, 1, 3]
+        lenstarts: 3
+        startsoffset: 0
+        stopsoffset: 0
+        at: 4
+      successful: False
+      results:
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromstarts: [3, 0, 3, 2, 3]
+        fromstops: [2, 10, 3, 1, 3]
+        lenstarts: 3
+        startsoffset: 0
+        stopsoffset: 3
+        at: 4
+      successful: False
+      results:
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromstarts: [3, 0, 3, 2, 3]
+        fromstops: [2, 10, 3, 1, 3]
+        lenstarts: 3
+        startsoffset: 3
+        stopsoffset: 0
+        at: 4
+      successful: False
+      results:
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromstarts: [3, 0, 3, 2, 3]
+        fromstops: [2, 10, 3, 1, 3]
+        lenstarts: 3
+        startsoffset: 3
+        stopsoffset: 3
+        at: 4
+      successful: False
+      results:
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromstarts: [3, 0, 3, 2, 3]
+        fromstops: [2, 10, 3, 1, 3]
+        lenstarts: 4
+        startsoffset: 0
+        stopsoffset: 0
+        at: 4
+      successful: False
+      results:
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromstarts: [3, 0, 3, 2, 3]
+        fromstops: [2, 10, 3, 1, 3]
+        lenstarts: 4
+        startsoffset: 0
+        stopsoffset: 3
+        at: 4
+      successful: False
+      results:
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromstarts: [3, 0, 3, 2, 3]
+        fromstops: [2, 10, 3, 1, 3]
+        lenstarts: 4
+        startsoffset: 3
+        stopsoffset: 0
+        at: 4
+      successful: False
+      results:
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromstarts: [3, 0, 3, 2, 3]
+        fromstops: [2, 10, 3, 1, 3]
+        lenstarts: 4
+        startsoffset: 3
+        stopsoffset: 3
+        at: 4
+      successful: False
+      results:
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromstarts: [3, 0, 3, 2, 3]
+        fromstops: [99, 99, 99, 3, 3, 5, 10]
+        lenstarts: 3
+        startsoffset: 0
+        stopsoffset: 0
+        at: 4
+      successful: False
+      results:
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromstarts: [3, 0, 3, 2, 3]
+        fromstops: [99, 99, 99, 3, 3, 5, 10]
+        lenstarts: 3
+        startsoffset: 0
+        stopsoffset: 3
+        at: 4
+      successful: False
+      results:
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromstarts: [3, 0, 3, 2, 3]
+        fromstops: [99, 99, 99, 3, 3, 5, 10]
+        lenstarts: 3
+        startsoffset: 3
+        stopsoffset: 0
+        at: 4
+      successful: False
+      results:
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromstarts: [3, 0, 3, 2, 3]
+        fromstops: [99, 99, 99, 3, 3, 5, 10]
+        lenstarts: 3
+        startsoffset: 3
+        stopsoffset: 3
+        at: 4
+      successful: False
+      results:
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromstarts: [3, 0, 3, 2, 3]
+        fromstops: [99, 99, 99, 3, 3, 5, 10]
+        lenstarts: 4
+        startsoffset: 0
+        stopsoffset: 0
+        at: 4
+      successful: False
+      results:
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromstarts: [3, 0, 3, 2, 3]
+        fromstops: [99, 99, 99, 3, 3, 5, 10]
+        lenstarts: 4
+        startsoffset: 0
+        stopsoffset: 3
+        at: 4
+      successful: False
+      results:
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromstarts: [3, 0, 3, 2, 3]
+        fromstops: [99, 99, 99, 3, 3, 5, 10]
+        lenstarts: 4
+        startsoffset: 3
+        stopsoffset: 0
+        at: 4
+      successful: False
+      results:
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromstarts: [3, 0, 3, 2, 3]
+        fromstops: [99, 99, 99, 3, 3, 5, 10]
+        lenstarts: 4
+        startsoffset: 3
+        stopsoffset: 3
+        at: 4
+      successful: False
+      results:
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromstarts: [99, 99, 99, 0, 3, 3, 5]
+        fromstops: [2, 10, 3, 1, 3]
+        lenstarts: 3
+        startsoffset: 0
+        stopsoffset: 0
+        at: 4
+      successful: False
+      results:
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromstarts: [99, 99, 99, 0, 3, 3, 5]
+        fromstops: [2, 10, 3, 1, 3]
+        lenstarts: 3
+        startsoffset: 0
+        stopsoffset: 3
+        at: 4
+      successful: False
+      results:
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromstarts: [99, 99, 99, 0, 3, 3, 5]
+        fromstops: [2, 10, 3, 1, 3]
+        lenstarts: 3
+        startsoffset: 3
+        stopsoffset: 0
+        at: 4
+      successful: False
+      results:
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromstarts: [99, 99, 99, 0, 3, 3, 5]
+        fromstops: [2, 10, 3, 1, 3]
+        lenstarts: 3
+        startsoffset: 3
+        stopsoffset: 3
+        at: 4
+      successful: False
+      results:
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromstarts: [99, 99, 99, 0, 3, 3, 5]
+        fromstops: [2, 10, 3, 1, 3]
+        lenstarts: 4
+        startsoffset: 0
+        stopsoffset: 0
+        at: 4
+      successful: False
+      results:
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromstarts: [99, 99, 99, 0, 3, 3, 5]
+        fromstops: [2, 10, 3, 1, 3]
+        lenstarts: 4
+        startsoffset: 0
+        stopsoffset: 3
+        at: 4
+      successful: False
+      results:
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromstarts: [99, 99, 99, 0, 3, 3, 5]
+        fromstops: [2, 10, 3, 1, 3]
+        lenstarts: 4
+        startsoffset: 3
+        stopsoffset: 0
+        at: 4
+      successful: False
+      results:
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromstarts: [99, 99, 99, 0, 3, 3, 5]
+        fromstops: [2, 10, 3, 1, 3]
+        lenstarts: 4
+        startsoffset: 3
+        stopsoffset: 3
+        at: 4
+      successful: False
+      results:
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromstarts: [99, 99, 99, 0, 3, 3, 5]
+        fromstops: [99, 99, 99, 3, 3, 5, 10]
+        lenstarts: 3
+        startsoffset: 0
+        stopsoffset: 0
+        at: 4
+      successful: False
+      results:
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromstarts: [99, 99, 99, 0, 3, 3, 5]
+        fromstops: [99, 99, 99, 3, 3, 5, 10]
+        lenstarts: 3
+        startsoffset: 0
+        stopsoffset: 3
+        at: 4
+      successful: False
+      results:
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromstarts: [99, 99, 99, 0, 3, 3, 5]
+        fromstops: [99, 99, 99, 3, 3, 5, 10]
+        lenstarts: 3
+        startsoffset: 3
+        stopsoffset: 0
+        at: 4
+      successful: False
+      results:
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromstarts: [99, 99, 99, 0, 3, 3, 5]
+        fromstops: [99, 99, 99, 3, 3, 5, 10]
+        lenstarts: 3
+        startsoffset: 3
+        stopsoffset: 3
+        at: 4
+      successful: False
+      results:
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromstarts: [99, 99, 99, 0, 3, 3, 5]
+        fromstops: [99, 99, 99, 3, 3, 5, 10]
+        lenstarts: 4
+        startsoffset: 0
+        stopsoffset: 0
+        at: 4
+      successful: False
+      results:
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromstarts: [99, 99, 99, 0, 3, 3, 5]
+        fromstops: [99, 99, 99, 3, 3, 5, 10]
+        lenstarts: 4
+        startsoffset: 0
+        stopsoffset: 3
+        at: 4
+      successful: False
+      results:
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromstarts: [99, 99, 99, 0, 3, 3, 5]
+        fromstops: [99, 99, 99, 3, 3, 5, 10]
+        lenstarts: 4
+        startsoffset: 3
+        stopsoffset: 0
+        at: 4
+      successful: False
+      results:
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromstarts: [99, 99, 99, 0, 3, 3, 5]
+        fromstops: [99, 99, 99, 3, 3, 5, 10]
+        lenstarts: 4
+        startsoffset: 3
+        stopsoffset: 3
+        at: 4
+      successful: False
+      results:

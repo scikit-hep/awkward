@@ -1,0 +1,34 @@
+- name: awkward_RegularArray_getitem_next_range_spreadadvanced
+  specializations:
+    - name: awkward_RegularArray_getitem_next_range_spreadadvanced_64
+      args:
+        - toadvanced: List[int64_t]
+        - fromadvanced: List[int64_t]
+        - length: int64_t
+        - nextsize: int64_t
+  inparams: ['fromadvanced', 'length', 'nextsize']
+  outparams: ['toadvanced']
+  definition: |
+    def awkward_RegularArray_getitem_next_range_spreadadvanced(
+        toadvanced, fromadvanced, length, nextsize
+    ):
+        for i in range(length):
+            for j in range(nextsize):
+                toadvanced[(i * nextsize) + j] = fromadvanced[i]
+  tests:
+    - args:
+        toadvanced: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromadvanced: [0, 3, 6, 9, 12, 15]
+        length: 4
+        nextsize: 3
+      successful: True
+      results:
+        toadvanced: [0, 0, 0, 3, 3, 3, 6, 6, 6, 9, 9, 9]
+    - args:
+        toadvanced: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromadvanced: [0, 3, 6, 9, 12, 15]
+        length: 3
+        nextsize: 3
+      successful: True
+      results:
+        toadvanced: [0, 0, 0, 3, 3, 3, 6, 6, 6]

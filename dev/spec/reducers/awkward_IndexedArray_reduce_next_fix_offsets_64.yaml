@@ -1,0 +1,161 @@
+- name: awkward_IndexedArray_reduce_next_fix_offsets_64
+  args:
+    - outoffsets: List[int64_t]
+    - starts: List[int64_t]
+    - startsoffset: int64_t
+    - startslength: int64_t
+    - outindexlength: int64_t
+  inparams: ['starts', 'startsoffset', 'startslength', 'outindexlength']
+  outparams: ['outoffsets']
+  definition: |
+    def awkward_IndexedArray_reduce_next_fix_offsets_64(
+        outoffsets, starts, startsoffset, startslength, outindexlength
+    ):
+        for i in range(startslength):
+            outoffsets[i] = starts[startsoffset + i]
+        outoffsets[startsoffset + startslength] = outindexlength
+  tests:
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        starts: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        startsoffset: 1
+        startslength: 4
+        outindexlength: 4
+      successful: True
+      results:
+        outoffsets: [0, 0, 1, 1, 0, 4]
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        starts: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        startsoffset: 1
+        startslength: 4
+        outindexlength: 3
+      successful: True
+      results:
+        outoffsets: [0, 0, 1, 1, 0, 3]
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        starts: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        startsoffset: 1
+        startslength: 3
+        outindexlength: 4
+      successful: True
+      results:
+        outoffsets: [0, 0, 1, 0, 4]
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        starts: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        startsoffset: 1
+        startslength: 3
+        outindexlength: 3
+      successful: True
+      results:
+        outoffsets: [0, 0, 1, 0, 3]
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        starts: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        startsoffset: 0
+        startslength: 4
+        outindexlength: 4
+      successful: True
+      results:
+        outoffsets: [1, 0, 0, 1, 4]
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        starts: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        startsoffset: 0
+        startslength: 4
+        outindexlength: 3
+      successful: True
+      results:
+        outoffsets: [1, 0, 0, 1, 3]
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        starts: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        startsoffset: 0
+        startslength: 3
+        outindexlength: 4
+      successful: True
+      results:
+        outoffsets: [1, 0, 0, 4]
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        starts: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        startsoffset: 0
+        startslength: 3
+        outindexlength: 3
+      successful: True
+      results:
+        outoffsets: [1, 0, 0, 3]
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        starts: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        startsoffset: 1
+        startslength: 4
+        outindexlength: 4
+      successful: True
+      results:
+        outoffsets: [1, 2, 2, 0, 0, 4]
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        starts: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        startsoffset: 1
+        startslength: 4
+        outindexlength: 3
+      successful: True
+      results:
+        outoffsets: [1, 2, 2, 0, 0, 3]
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        starts: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        startsoffset: 1
+        startslength: 3
+        outindexlength: 4
+      successful: True
+      results:
+        outoffsets: [1, 2, 2, 0, 4]
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        starts: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        startsoffset: 1
+        startslength: 3
+        outindexlength: 3
+      successful: True
+      results:
+        outoffsets: [1, 2, 2, 0, 3]
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        starts: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        startsoffset: 0
+        startslength: 4
+        outindexlength: 4
+      successful: True
+      results:
+        outoffsets: [1, 1, 2, 2, 4]
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        starts: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        startsoffset: 0
+        startslength: 4
+        outindexlength: 3
+      successful: True
+      results:
+        outoffsets: [1, 1, 2, 2, 3]
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        starts: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        startsoffset: 0
+        startslength: 3
+        outindexlength: 4
+      successful: True
+      results:
+        outoffsets: [1, 1, 2, 4]
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        starts: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        startsoffset: 0
+        startslength: 3
+        outindexlength: 3
+      successful: True
+      results:
+        outoffsets: [1, 1, 2, 3]

@@ -1,0 +1,160 @@
+- name: awkward_ByteMaskedArray_numnull
+  args:
+    - numnull: List[int64_t]
+    - mask: List[int8_t]
+    - maskoffset: int64_t
+    - length: int64_t
+    - validwhen: bool
+  inparams: ['mask', 'maskoffset', 'length', 'validwhen']
+  outparams: ['numnull']
+  definition: |
+    def awkward_ByteMaskedArray_numnull(numnull, mask, maskoffset, length, validwhen):
+        numnull[0] = 0
+        for i in range(length):
+            if (mask[maskoffset + i] != 0) != validwhen:
+                numnull[0] = numnull[0] + 1
+  tests:
+    - args:
+        numnull: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        mask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 4
+        validwhen: True
+      successful: True
+      results:
+        numnull: [0]
+    - args:
+        numnull: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        mask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 4
+        validwhen: False
+      successful: True
+      results:
+        numnull: [4]
+    - args:
+        numnull: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        mask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 3
+        validwhen: True
+      successful: True
+      results:
+        numnull: [0]
+    - args:
+        numnull: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        mask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 3
+        validwhen: False
+      successful: True
+      results:
+        numnull: [3]
+    - args:
+        numnull: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        mask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 4
+        validwhen: True
+      successful: True
+      results:
+        numnull: [0]
+    - args:
+        numnull: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        mask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 4
+        validwhen: False
+      successful: True
+      results:
+        numnull: [4]
+    - args:
+        numnull: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        mask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 3
+        validwhen: True
+      successful: True
+      results:
+        numnull: [0]
+    - args:
+        numnull: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        mask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 3
+        validwhen: False
+      successful: True
+      results:
+        numnull: [3]
+    - args:
+        numnull: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        mask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 4
+        validwhen: True
+      successful: True
+      results:
+        numnull: [0]
+    - args:
+        numnull: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        mask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 4
+        validwhen: False
+      successful: True
+      results:
+        numnull: [4]
+    - args:
+        numnull: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        mask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 3
+        validwhen: True
+      successful: True
+      results:
+        numnull: [0]
+    - args:
+        numnull: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        mask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 3
+        validwhen: False
+      successful: True
+      results:
+        numnull: [3]
+    - args:
+        numnull: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        mask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 4
+        validwhen: True
+      successful: True
+      results:
+        numnull: [0]
+    - args:
+        numnull: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        mask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 4
+        validwhen: False
+      successful: True
+      results:
+        numnull: [4]
+    - args:
+        numnull: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        mask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 3
+        validwhen: True
+      successful: True
+      results:
+        numnull: [0]
+    - args:
+        numnull: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        mask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 3
+        validwhen: False
+      successful: True
+      results:
+        numnull: [3]

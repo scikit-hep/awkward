@@ -1,0 +1,688 @@
+- name: awkward_UnionArray_validity
+  specializations:
+    - name: awkward_UnionArray8_32_validity
+      args:
+        - tags: List[int8_t]
+        - tagsoffset: int64_t
+        - index: List[int32_t]
+        - indexoffset: int64_t
+        - length: int64_t
+        - numcontents: int64_t
+        - lencontents: List[int64_t]
+    - name: awkward_UnionArray8_64_validity
+      args:
+        - tags: List[int8_t]
+        - tagsoffset: int64_t
+        - index: List[int64_t]
+        - indexoffset: int64_t
+        - length: int64_t
+        - numcontents: int64_t
+        - lencontents: List[int64_t]
+    - name: awkward_UnionArray8_U32_validity
+      args:
+        - tags: List[int8_t]
+        - tagsoffset: int64_t
+        - index: List[uint32_t]
+        - indexoffset: int64_t
+        - length: int64_t
+        - numcontents: int64_t
+        - lencontents: List[int64_t]
+  inparams: ['tags', 'tagsoffset', 'index', 'indexoffset', 'length', 'numcontents', 'lencontents']
+  outparams: []
+  definition: |
+    def awkward_UnionArray_validity(
+        tags, tagsoffset, index, indexoffset, length, numcontents, lencontents
+    ):
+        for i in range(length):
+            tag = tags[tagsoffset + i]
+            idx = index[indexoffset + i]
+            if tag < 0:
+                raise ValueError("tags[i] < 0")
+            if idx < 0:
+                raise ValueError("index[i] < 0")
+            if tag >= numcontents:
+                raise ValueError("tags[i] >= len(contents)")
+            lencontent = lencontents[tag]
+            if idx >= lencontent:
+                raise ValueError("index[i] >= len(content[tags[i]])")
+  tests:
+    - args:
+        tags: [-1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 1
+        index: [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
+        indexoffset: 0
+        length: 3
+        numcontents: 3
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [-1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 1
+        index: [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
+        indexoffset: 0
+        length: 3
+        numcontents: 4
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [-1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 1
+        index: [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
+        indexoffset: 0
+        length: 4
+        numcontents: 3
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [-1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 1
+        index: [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
+        indexoffset: 0
+        length: 4
+        numcontents: 4
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [-1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 1
+        index: [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
+        indexoffset: 1
+        length: 3
+        numcontents: 3
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [-1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 1
+        index: [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
+        indexoffset: 1
+        length: 3
+        numcontents: 4
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [-1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 1
+        index: [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
+        indexoffset: 1
+        length: 4
+        numcontents: 3
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [-1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 1
+        index: [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
+        indexoffset: 1
+        length: 4
+        numcontents: 4
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [-1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 1
+        index: [3, 4, 7, 7, 4, 1, 3, 8, 3, 8, 8]
+        indexoffset: 0
+        length: 3
+        numcontents: 3
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [-1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 1
+        index: [3, 4, 7, 7, 4, 1, 3, 8, 3, 8, 8]
+        indexoffset: 0
+        length: 3
+        numcontents: 4
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [-1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 1
+        index: [3, 4, 7, 7, 4, 1, 3, 8, 3, 8, 8]
+        indexoffset: 0
+        length: 4
+        numcontents: 3
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [-1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 1
+        index: [3, 4, 7, 7, 4, 1, 3, 8, 3, 8, 8]
+        indexoffset: 0
+        length: 4
+        numcontents: 4
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [-1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 1
+        index: [3, 4, 7, 7, 4, 1, 3, 8, 3, 8, 8]
+        indexoffset: 1
+        length: 3
+        numcontents: 3
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [-1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 1
+        index: [3, 4, 7, 7, 4, 1, 3, 8, 3, 8, 8]
+        indexoffset: 1
+        length: 3
+        numcontents: 4
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [-1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 1
+        index: [3, 4, 7, 7, 4, 1, 3, 8, 3, 8, 8]
+        indexoffset: 1
+        length: 4
+        numcontents: 3
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [-1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 1
+        index: [3, 4, 7, 7, 4, 1, 3, 8, 3, 8, 8]
+        indexoffset: 1
+        length: 4
+        numcontents: 4
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [-1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 0
+        index: [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
+        indexoffset: 0
+        length: 3
+        numcontents: 3
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [-1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 0
+        index: [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
+        indexoffset: 0
+        length: 3
+        numcontents: 4
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [-1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 0
+        index: [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
+        indexoffset: 0
+        length: 4
+        numcontents: 3
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [-1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 0
+        index: [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
+        indexoffset: 0
+        length: 4
+        numcontents: 4
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [-1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 0
+        index: [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
+        indexoffset: 1
+        length: 3
+        numcontents: 3
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [-1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 0
+        index: [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
+        indexoffset: 1
+        length: 3
+        numcontents: 4
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [-1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 0
+        index: [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
+        indexoffset: 1
+        length: 4
+        numcontents: 3
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [-1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 0
+        index: [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
+        indexoffset: 1
+        length: 4
+        numcontents: 4
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [-1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 0
+        index: [3, 4, 7, 7, 4, 1, 3, 8, 3, 8, 8]
+        indexoffset: 0
+        length: 3
+        numcontents: 3
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [-1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 0
+        index: [3, 4, 7, 7, 4, 1, 3, 8, 3, 8, 8]
+        indexoffset: 0
+        length: 3
+        numcontents: 4
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [-1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 0
+        index: [3, 4, 7, 7, 4, 1, 3, 8, 3, 8, 8]
+        indexoffset: 0
+        length: 4
+        numcontents: 3
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [-1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 0
+        index: [3, 4, 7, 7, 4, 1, 3, 8, 3, 8, 8]
+        indexoffset: 0
+        length: 4
+        numcontents: 4
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [-1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 0
+        index: [3, 4, 7, 7, 4, 1, 3, 8, 3, 8, 8]
+        indexoffset: 1
+        length: 3
+        numcontents: 3
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [-1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 0
+        index: [3, 4, 7, 7, 4, 1, 3, 8, 3, 8, 8]
+        indexoffset: 1
+        length: 3
+        numcontents: 4
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [-1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 0
+        index: [3, 4, 7, 7, 4, 1, 3, 8, 3, 8, 8]
+        indexoffset: 1
+        length: 4
+        numcontents: 3
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [-1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 0
+        index: [3, 4, 7, 7, 4, 1, 3, 8, 3, 8, 8]
+        indexoffset: 1
+        length: 4
+        numcontents: 4
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 1
+        index: [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
+        indexoffset: 0
+        length: 3
+        numcontents: 3
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 1
+        index: [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
+        indexoffset: 0
+        length: 3
+        numcontents: 4
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 1
+        index: [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
+        indexoffset: 0
+        length: 4
+        numcontents: 3
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 1
+        index: [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
+        indexoffset: 0
+        length: 4
+        numcontents: 4
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 1
+        index: [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
+        indexoffset: 1
+        length: 3
+        numcontents: 3
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 1
+        index: [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
+        indexoffset: 1
+        length: 3
+        numcontents: 4
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 1
+        index: [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
+        indexoffset: 1
+        length: 4
+        numcontents: 3
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 1
+        index: [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
+        indexoffset: 1
+        length: 4
+        numcontents: 4
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 1
+        index: [3, 4, 7, 7, 4, 1, 3, 8, 3, 8, 8]
+        indexoffset: 0
+        length: 3
+        numcontents: 3
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 1
+        index: [3, 4, 7, 7, 4, 1, 3, 8, 3, 8, 8]
+        indexoffset: 0
+        length: 3
+        numcontents: 4
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 1
+        index: [3, 4, 7, 7, 4, 1, 3, 8, 3, 8, 8]
+        indexoffset: 0
+        length: 4
+        numcontents: 3
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 1
+        index: [3, 4, 7, 7, 4, 1, 3, 8, 3, 8, 8]
+        indexoffset: 0
+        length: 4
+        numcontents: 4
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 1
+        index: [3, 4, 7, 7, 4, 1, 3, 8, 3, 8, 8]
+        indexoffset: 1
+        length: 3
+        numcontents: 3
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 1
+        index: [3, 4, 7, 7, 4, 1, 3, 8, 3, 8, 8]
+        indexoffset: 1
+        length: 3
+        numcontents: 4
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 1
+        index: [3, 4, 7, 7, 4, 1, 3, 8, 3, 8, 8]
+        indexoffset: 1
+        length: 4
+        numcontents: 3
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 1
+        index: [3, 4, 7, 7, 4, 1, 3, 8, 3, 8, 8]
+        indexoffset: 1
+        length: 4
+        numcontents: 4
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 0
+        index: [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
+        indexoffset: 0
+        length: 3
+        numcontents: 3
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 0
+        index: [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
+        indexoffset: 0
+        length: 3
+        numcontents: 4
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 0
+        index: [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
+        indexoffset: 0
+        length: 4
+        numcontents: 3
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 0
+        index: [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
+        indexoffset: 0
+        length: 4
+        numcontents: 4
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 0
+        index: [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
+        indexoffset: 1
+        length: 3
+        numcontents: 3
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 0
+        index: [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
+        indexoffset: 1
+        length: 3
+        numcontents: 4
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 0
+        index: [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
+        indexoffset: 1
+        length: 4
+        numcontents: 3
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 0
+        index: [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
+        indexoffset: 1
+        length: 4
+        numcontents: 4
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 0
+        index: [3, 4, 7, 7, 4, 1, 3, 8, 3, 8, 8]
+        indexoffset: 0
+        length: 3
+        numcontents: 3
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 0
+        index: [3, 4, 7, 7, 4, 1, 3, 8, 3, 8, 8]
+        indexoffset: 0
+        length: 3
+        numcontents: 4
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 0
+        index: [3, 4, 7, 7, 4, 1, 3, 8, 3, 8, 8]
+        indexoffset: 0
+        length: 4
+        numcontents: 3
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 0
+        index: [3, 4, 7, 7, 4, 1, 3, 8, 3, 8, 8]
+        indexoffset: 0
+        length: 4
+        numcontents: 4
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 0
+        index: [3, 4, 7, 7, 4, 1, 3, 8, 3, 8, 8]
+        indexoffset: 1
+        length: 3
+        numcontents: 3
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 0
+        index: [3, 4, 7, 7, 4, 1, 3, 8, 3, 8, 8]
+        indexoffset: 1
+        length: 3
+        numcontents: 4
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 0
+        index: [3, 4, 7, 7, 4, 1, 3, 8, 3, 8, 8]
+        indexoffset: 1
+        length: 4
+        numcontents: 3
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:
+    - args:
+        tags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 0
+        index: [3, 4, 7, 7, 4, 1, 3, 8, 3, 8, 8]
+        indexoffset: 1
+        length: 4
+        numcontents: 4
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False
+      results:

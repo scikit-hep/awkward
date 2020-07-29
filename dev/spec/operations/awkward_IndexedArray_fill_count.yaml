@@ -1,0 +1,79 @@
+- name: awkward_IndexedArray_fill_count
+  specializations:
+    - name: awkward_IndexedArray_fill_to64_count
+      args:
+        - toindex: List[int64_t]
+        - toindexoffset: int64_t
+        - length: int64_t
+        - base: int64_t
+  inparams: ['toindexoffset', 'length', 'base']
+  outparams: ['toindex']
+  definition: |
+    def awkward_IndexedArray_fill_count(toindex, toindexoffset, length, base):
+        for i in range(length):
+            toindex[toindexoffset + i] = i + base
+  tests:
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        toindexoffset: 1
+        length: 4
+        base: 4
+      successful: True
+      results:
+        toindex: [0, 4, 5, 6, 7]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        toindexoffset: 1
+        length: 4
+        base: 3
+      successful: True
+      results:
+        toindex: [0, 3, 4, 5, 6]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        toindexoffset: 1
+        length: 3
+        base: 4
+      successful: True
+      results:
+        toindex: [0, 4, 5, 6]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        toindexoffset: 1
+        length: 3
+        base: 3
+      successful: True
+      results:
+        toindex: [0, 3, 4, 5]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        toindexoffset: 0
+        length: 4
+        base: 4
+      successful: True
+      results:
+        toindex: [4, 5, 6, 7]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        toindexoffset: 0
+        length: 4
+        base: 3
+      successful: True
+      results:
+        toindex: [3, 4, 5, 6]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        toindexoffset: 0
+        length: 3
+        base: 4
+      successful: True
+      results:
+        toindex: [4, 5, 6]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        toindexoffset: 0
+        length: 3
+        base: 3
+      successful: True
+      results:
+        toindex: [3, 4, 5]

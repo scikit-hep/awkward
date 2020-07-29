@@ -1,0 +1,95 @@
+- name: awkward_ListOffsetArray_compact_offsets
+  specializations:
+    - name: awkward_ListOffsetArray32_compact_offsets_64
+      args:
+        - tooffsets: List[int64_t]
+        - fromoffsets: List[int32_t]
+        - offsetsoffset: int64_t
+        - length: int64_t
+    - name: awkward_ListOffsetArrayU32_compact_offsets_64
+      args:
+        - tooffsets: List[int64_t]
+        - fromoffsets: List[uint32_t]
+        - offsetsoffset: int64_t
+        - length: int64_t
+    - name: awkward_ListOffsetArray64_compact_offsets_64
+      args:
+        - tooffsets: List[int64_t]
+        - fromoffsets: List[int64_t]
+        - offsetsoffset: int64_t
+        - length: int64_t
+  inparams: ['fromoffsets', 'offsetsoffset', 'length']
+  outparams: ['tooffsets']
+  definition: |
+    def awkward_ListOffsetArray_compact_offsets(
+        tooffsets, fromoffsets, offsetsoffset, length
+    ):
+        diff = int(fromoffsets[offsetsoffset + 0])
+        tooffsets[0] = 0
+        for i in range(length):
+            tooffsets[i + 1] = fromoffsets[(offsetsoffset + i) + 1] - diff
+  tests:
+    - args:
+        tooffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromoffsets: [1, 1, 2, 3, 5, 8, 11, 11, 11, 11, 20, 21, 21, 21, 22, 23, 24, 26, 27, 29, 33, 34, 35, 36, 37, 38, 38, 38, 38, 38, 38, 38, 40, 40, 41, 42, 43, 44, 45, 46, 47]
+        offsetsoffset: 1
+        length: 4
+      successful: True
+      results:
+        tooffsets: [0, 1, 2, 4, 7]
+    - args:
+        tooffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromoffsets: [1, 1, 2, 3, 5, 8, 11, 11, 11, 11, 20, 21, 21, 21, 22, 23, 24, 26, 27, 29, 33, 34, 35, 36, 37, 38, 38, 38, 38, 38, 38, 38, 40, 40, 41, 42, 43, 44, 45, 46, 47]
+        offsetsoffset: 1
+        length: 3
+      successful: True
+      results:
+        tooffsets: [0, 1, 2, 4]
+    - args:
+        tooffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromoffsets: [1, 1, 2, 3, 5, 8, 11, 11, 11, 11, 20, 21, 21, 21, 22, 23, 24, 26, 27, 29, 33, 34, 35, 36, 37, 38, 38, 38, 38, 38, 38, 38, 40, 40, 41, 42, 43, 44, 45, 46, 47]
+        offsetsoffset: 0
+        length: 4
+      successful: True
+      results:
+        tooffsets: [0, 0, 1, 2, 4]
+    - args:
+        tooffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromoffsets: [1, 1, 2, 3, 5, 8, 11, 11, 11, 11, 20, 21, 21, 21, 22, 23, 24, 26, 27, 29, 33, 34, 35, 36, 37, 38, 38, 38, 38, 38, 38, 38, 40, 40, 41, 42, 43, 44, 45, 46, 47]
+        offsetsoffset: 0
+        length: 3
+      successful: True
+      results:
+        tooffsets: [0, 0, 1, 2]
+    - args:
+        tooffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromoffsets: [2, 3, 3, 4, 5, 5, 5, 5, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 15, 15, 15, 15, 15]
+        offsetsoffset: 1
+        length: 4
+      successful: True
+      results:
+        tooffsets: [0, 0, 1, 2, 2]
+    - args:
+        tooffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromoffsets: [2, 3, 3, 4, 5, 5, 5, 5, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 15, 15, 15, 15, 15]
+        offsetsoffset: 1
+        length: 3
+      successful: True
+      results:
+        tooffsets: [0, 0, 1, 2]
+    - args:
+        tooffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromoffsets: [2, 3, 3, 4, 5, 5, 5, 5, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 15, 15, 15, 15, 15]
+        offsetsoffset: 0
+        length: 4
+      successful: True
+      results:
+        tooffsets: [0, 1, 1, 2, 3]
+    - args:
+        tooffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromoffsets: [2, 3, 3, 4, 5, 5, 5, 5, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 15, 15, 15, 15, 15]
+        offsetsoffset: 0
+        length: 3
+      successful: True
+      results:
+        tooffsets: [0, 1, 1, 2]

@@ -1,0 +1,9 @@
+- name: awkward_sorting_ranges_length
+  args:
+    - tolength: List[int64_t]
+    - parents: List[int64_t]
+    - parentslength: int64_t
+  inparams: ['parents', 'parentslength']
+  outparams: ['tolength']
+  definition: |
+    Insert Python definition here

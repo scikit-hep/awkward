@@ -1,0 +1,339 @@
+- name: awkward_UnionArray_filltags
+  specializations:
+    - name: awkward_UnionArray_filltags_to8_from8
+      args:
+        - totags: List[int8_t]
+        - totagsoffset: int64_t
+        - fromtags: List[int8_t]
+        - fromtagsoffset: int64_t
+        - length: int64_t
+        - base: int64_t
+  inparams: ['totagsoffset', 'fromtags', 'fromtagsoffset', 'length', 'base']
+  outparams: ['totags']
+  definition: |
+    def awkward_UnionArray_filltags(
+        totags, totagsoffset, fromtags, fromtagsoffset, length, base
+    ):
+        for i in range(length):
+            totags[totagsoffset + i] = float(fromtags[fromtagsoffset + i] + base)
+  tests:
+    - args:
+        totags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        totagsoffset: 4
+        fromtags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromtagsoffset: 1
+        length: 4
+        base: 4
+      successful: True
+      results:
+        totags: [0, 0, 0, 0, 4.0, 4.0, 4.0, 4.0]
+    - args:
+        totags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        totagsoffset: 4
+        fromtags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromtagsoffset: 1
+        length: 4
+        base: 3
+      successful: True
+      results:
+        totags: [0, 0, 0, 0, 3.0, 3.0, 3.0, 3.0]
+    - args:
+        totags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        totagsoffset: 4
+        fromtags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromtagsoffset: 1
+        length: 3
+        base: 4
+      successful: True
+      results:
+        totags: [0, 0, 0, 0, 4.0, 4.0, 4.0]
+    - args:
+        totags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        totagsoffset: 4
+        fromtags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromtagsoffset: 1
+        length: 3
+        base: 3
+      successful: True
+      results:
+        totags: [0, 0, 0, 0, 3.0, 3.0, 3.0]
+    - args:
+        totags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        totagsoffset: 4
+        fromtags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromtagsoffset: 0
+        length: 4
+        base: 4
+      successful: True
+      results:
+        totags: [0, 0, 0, 0, 4.0, 4.0, 4.0, 4.0]
+    - args:
+        totags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        totagsoffset: 4
+        fromtags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromtagsoffset: 0
+        length: 4
+        base: 3
+      successful: True
+      results:
+        totags: [0, 0, 0, 0, 3.0, 3.0, 3.0, 3.0]
+    - args:
+        totags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        totagsoffset: 4
+        fromtags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromtagsoffset: 0
+        length: 3
+        base: 4
+      successful: True
+      results:
+        totags: [0, 0, 0, 0, 4.0, 4.0, 4.0]
+    - args:
+        totags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        totagsoffset: 4
+        fromtags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromtagsoffset: 0
+        length: 3
+        base: 3
+      successful: True
+      results:
+        totags: [0, 0, 0, 0, 3.0, 3.0, 3.0]
+    - args:
+        totags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        totagsoffset: 4
+        fromtags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        fromtagsoffset: 1
+        length: 4
+        base: 4
+      successful: True
+      results:
+        totags: [0, 0, 0, 0, 5.0, 5.0, 5.0, 5.0]
+    - args:
+        totags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        totagsoffset: 4
+        fromtags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        fromtagsoffset: 1
+        length: 4
+        base: 3
+      successful: True
+      results:
+        totags: [0, 0, 0, 0, 4.0, 4.0, 4.0, 4.0]
+    - args:
+        totags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        totagsoffset: 4
+        fromtags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        fromtagsoffset: 1
+        length: 3
+        base: 4
+      successful: True
+      results:
+        totags: [0, 0, 0, 0, 5.0, 5.0, 5.0]
+    - args:
+        totags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        totagsoffset: 4
+        fromtags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        fromtagsoffset: 1
+        length: 3
+        base: 3
+      successful: True
+      results:
+        totags: [0, 0, 0, 0, 4.0, 4.0, 4.0]
+    - args:
+        totags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        totagsoffset: 4
+        fromtags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        fromtagsoffset: 0
+        length: 4
+        base: 4
+      successful: True
+      results:
+        totags: [0, 0, 0, 0, 5.0, 5.0, 5.0, 5.0]
+    - args:
+        totags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        totagsoffset: 4
+        fromtags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        fromtagsoffset: 0
+        length: 4
+        base: 3
+      successful: True
+      results:
+        totags: [0, 0, 0, 0, 4.0, 4.0, 4.0, 4.0]
+    - args:
+        totags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        totagsoffset: 4
+        fromtags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        fromtagsoffset: 0
+        length: 3
+        base: 4
+      successful: True
+      results:
+        totags: [0, 0, 0, 0, 5.0, 5.0, 5.0]
+    - args:
+        totags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        totagsoffset: 4
+        fromtags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        fromtagsoffset: 0
+        length: 3
+        base: 3
+      successful: True
+      results:
+        totags: [0, 0, 0, 0, 4.0, 4.0, 4.0]
+    - args:
+        totags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        totagsoffset: 3
+        fromtags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromtagsoffset: 1
+        length: 4
+        base: 4
+      successful: True
+      results:
+        totags: [0, 0, 0, 4.0, 4.0, 4.0, 4.0]
+    - args:
+        totags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        totagsoffset: 3
+        fromtags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromtagsoffset: 1
+        length: 4
+        base: 3
+      successful: True
+      results:
+        totags: [0, 0, 0, 3.0, 3.0, 3.0, 3.0]
+    - args:
+        totags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        totagsoffset: 3
+        fromtags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromtagsoffset: 1
+        length: 3
+        base: 4
+      successful: True
+      results:
+        totags: [0, 0, 0, 4.0, 4.0, 4.0]
+    - args:
+        totags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        totagsoffset: 3
+        fromtags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromtagsoffset: 1
+        length: 3
+        base: 3
+      successful: True
+      results:
+        totags: [0, 0, 0, 3.0, 3.0, 3.0]
+    - args:
+        totags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        totagsoffset: 3
+        fromtags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromtagsoffset: 0
+        length: 4
+        base: 4
+      successful: True
+      results:
+        totags: [0, 0, 0, 4.0, 4.0, 4.0, 4.0]
+    - args:
+        totags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        totagsoffset: 3
+        fromtags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromtagsoffset: 0
+        length: 4
+        base: 3
+      successful: True
+      results:
+        totags: [0, 0, 0, 3.0, 3.0, 3.0, 3.0]
+    - args:
+        totags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        totagsoffset: 3
+        fromtags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromtagsoffset: 0
+        length: 3
+        base: 4
+      successful: True
+      results:
+        totags: [0, 0, 0, 4.0, 4.0, 4.0]
+    - args:
+        totags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        totagsoffset: 3
+        fromtags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromtagsoffset: 0
+        length: 3
+        base: 3
+      successful: True
+      results:
+        totags: [0, 0, 0, 3.0, 3.0, 3.0]
+    - args:
+        totags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        totagsoffset: 3
+        fromtags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        fromtagsoffset: 1
+        length: 4
+        base: 4
+      successful: True
+      results:
+        totags: [0, 0, 0, 5.0, 5.0, 5.0, 5.0]
+    - args:
+        totags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        totagsoffset: 3
+        fromtags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        fromtagsoffset: 1
+        length: 4
+        base: 3
+      successful: True
+      results:
+        totags: [0, 0, 0, 4.0, 4.0, 4.0, 4.0]
+    - args:
+        totags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        totagsoffset: 3
+        fromtags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        fromtagsoffset: 1
+        length: 3
+        base: 4
+      successful: True
+      results:
+        totags: [0, 0, 0, 5.0, 5.0, 5.0]
+    - args:
+        totags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        totagsoffset: 3
+        fromtags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        fromtagsoffset: 1
+        length: 3
+        base: 3
+      successful: True
+      results:
+        totags: [0, 0, 0, 4.0, 4.0, 4.0]
+    - args:
+        totags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        totagsoffset: 3
+        fromtags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        fromtagsoffset: 0
+        length: 4
+        base: 4
+      successful: True
+      results:
+        totags: [0, 0, 0, 5.0, 5.0, 5.0, 5.0]
+    - args:
+        totags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        totagsoffset: 3
+        fromtags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        fromtagsoffset: 0
+        length: 4
+        base: 3
+      successful: True
+      results:
+        totags: [0, 0, 0, 4.0, 4.0, 4.0, 4.0]
+    - args:
+        totags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        totagsoffset: 3
+        fromtags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        fromtagsoffset: 0
+        length: 3
+        base: 4
+      successful: True
+      results:
+        totags: [0, 0, 0, 5.0, 5.0, 5.0]
+    - args:
+        totags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        totagsoffset: 3
+        fromtags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        fromtagsoffset: 0
+        length: 3
+        base: 3
+      successful: True
+      results:
+        totags: [0, 0, 0, 4.0, 4.0, 4.0]

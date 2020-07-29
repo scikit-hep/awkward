@@ -1,0 +1,42 @@
+- name: awkward_regularize_arrayslice
+  specializations:
+    - name: awkward_regularize_arrayslice_64
+      args:
+        - flatheadptr: List[int64_t]
+        - lenflathead: int64_t
+        - length: int64_t
+  inparams: ['flatheadptr', 'lenflathead', 'length']
+  outparams: []
+  definition: |
+    def awkward_regularize_arrayslice(flatheadptr, lenflathead, length):
+        for i in range(lenflathead):
+            original = flatheadptr[i]
+            if flatheadptr[i] < 0:
+                flatheadptr[i] += length
+            if (flatheadptr[i] < 0) or (flatheadptr[i] >= length):
+                raise ValueError("index out of range")
+  tests:
+    - args:
+        flatheadptr: [5, 8, 7, 0, 8, 6, 12, 7, 4, 6, 8, 7, 8, 4, 4, 4, 9, 10, 6, 5, 3, 5, 7, 5, 3]
+        lenflathead: 3
+        length: 3
+      successful: False
+      results:
+    - args:
+        flatheadptr: [5, 8, 7, 0, 8, 6, 12, 7, 4, 6, 8, 7, 8, 4, 4, 4, 9, 10, 6, 5, 3, 5, 7, 5, 3]
+        lenflathead: 3
+        length: 4
+      successful: False
+      results:
+    - args:
+        flatheadptr: [5, 8, 7, 0, 8, 6, 12, 7, 4, 6, 8, 7, 8, 4, 4, 4, 9, 10, 6, 5, 3, 5, 7, 5, 3]
+        lenflathead: 4
+        length: 3
+      successful: False
+      results:
+    - args:
+        flatheadptr: [5, 8, 7, 0, 8, 6, 12, 7, 4, 6, 8, 7, 8, 4, 4, 4, 9, 10, 6, 5, 3, 5, 7, 5, 3]
+        lenflathead: 4
+        length: 4
+      successful: False
+      results:

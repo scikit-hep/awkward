@@ -1,0 +1,160 @@
+- name: awkward_ByteMaskedArray_mask
+  specializations:
+    - name: awkward_ByteMaskedArray_mask8
+      args:
+        - tomask: List[int8_t]
+        - frommask: List[int8_t]
+        - maskoffset: int64_t
+        - length: int64_t
+        - validwhen: bool
+  inparams: ['frommask', 'maskoffset', 'length', 'validwhen']
+  outparams: ['tomask']
+  definition: |
+    def awkward_ByteMaskedArray_mask(tomask, frommask, maskoffset, length, validwhen):
+        for i in range(length):
+            tomask[i] = (frommask[maskoffset + i] != 0) != validwhen
+  tests:
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        frommask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 4
+        validwhen: True
+      successful: True
+      results:
+        tomask: [False, False, False, False]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        frommask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 4
+        validwhen: False
+      successful: True
+      results:
+        tomask: [True, True, True, True]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        frommask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 3
+        validwhen: True
+      successful: True
+      results:
+        tomask: [False, False, False]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        frommask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 3
+        validwhen: False
+      successful: True
+      results:
+        tomask: [True, True, True]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        frommask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 4
+        validwhen: True
+      successful: True
+      results:
+        tomask: [False, False, False, False]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        frommask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 4
+        validwhen: False
+      successful: True
+      results:
+        tomask: [True, True, True, True]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        frommask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 3
+        validwhen: True
+      successful: True
+      results:
+        tomask: [False, False, False]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        frommask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 3
+        validwhen: False
+      successful: True
+      results:
+        tomask: [True, True, True]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        frommask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 4
+        validwhen: True
+      successful: True
+      results:
+        tomask: [False, False, False, False]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        frommask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 4
+        validwhen: False
+      successful: True
+      results:
+        tomask: [True, True, True, True]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        frommask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 3
+        validwhen: True
+      successful: True
+      results:
+        tomask: [False, False, False]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        frommask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 3
+        validwhen: False
+      successful: True
+      results:
+        tomask: [True, True, True]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        frommask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 4
+        validwhen: True
+      successful: True
+      results:
+        tomask: [False, False, False, False]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        frommask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 4
+        validwhen: False
+      successful: True
+      results:
+        tomask: [True, True, True, True]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        frommask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 3
+        validwhen: True
+      successful: True
+      results:
+        tomask: [False, False, False]
+    - args:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        frommask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 3
+        validwhen: False
+      successful: True
+      results:
+        tomask: [True, True, True]

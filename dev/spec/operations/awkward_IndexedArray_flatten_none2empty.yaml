@@ -1,0 +1,394 @@
+- name: awkward_IndexedArray_flatten_none2empty
+  specializations:
+    - name: awkward_IndexedArrayU32_flatten_none2empty_64
+      args:
+        - outoffsets: List[int64_t]
+        - outindex: List[uint32_t]
+        - outindexoffset: int64_t
+        - outindexlength: int64_t
+        - offsets: List[int64_t]
+        - offsetsoffset: int64_t
+        - offsetslength: int64_t
+    - name: awkward_IndexedArray32_flatten_none2empty_64
+      args:
+        - outoffsets: List[int64_t]
+        - outindex: List[int32_t]
+        - outindexoffset: int64_t
+        - outindexlength: int64_t
+        - offsets: List[int64_t]
+        - offsetsoffset: int64_t
+        - offsetslength: int64_t
+    - name: awkward_IndexedArray64_flatten_none2empty_64
+      args:
+        - outoffsets: List[int64_t]
+        - outindex: List[int64_t]
+        - outindexoffset: int64_t
+        - outindexlength: int64_t
+        - offsets: List[int64_t]
+        - offsetsoffset: int64_t
+        - offsetslength: int64_t
+  inparams: ['outindex', 'outindexoffset', 'outindexlength', 'offsets', 'offsetsoffset', 'offsetslength']
+  outparams: ['outoffsets']
+  definition: |
+    def awkward_IndexedArray_flatten_none2empty(
+        outoffsets,
+        outindex,
+        outindexoffset,
+        outindexlength,
+        offsets,
+        offsetsoffset,
+        offsetslength,
+    ):
+        outoffsets[0] = offsets[offsetsoffset + 0]
+        k = 1
+        for i in range(outindexlength):
+            idx = outindex[outindexoffset + i]
+            if idx < 0:
+                outoffsets[k] = outoffsets[k - 1]
+                k = k + 1
+            else:
+                if ((offsetsoffset + idx) + 1) >= offsetslength:
+                    raise ValueError("flattening offset out of range")
+                else:
+                    count = (
+                        offsets[(offsetsoffset + idx) + 1] - offsets[offsetsoffset + idx]
+                    )
+                    outoffsets[k] = outoffsets[k - 1] + count
+                    k = k + 1
+  tests:
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        outindex: [1, 0, 0, 1, 1, 1, 0]
+        outindexoffset: 1
+        outindexlength: 4
+        offsets: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        offsetsoffset: 0
+        offsetslength: 4
+      successful: True
+      results:
+        outoffsets: [1, 0, -1, -1, -1]
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        outindex: [1, 0, 0, 1, 1, 1, 0]
+        outindexoffset: 1
+        outindexlength: 4
+        offsets: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        offsetsoffset: 0
+        offsetslength: 3
+      successful: True
+      results:
+        outoffsets: [1, 0, -1, -1, -1]
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        outindex: [1, 0, 0, 1, 1, 1, 0]
+        outindexoffset: 1
+        outindexlength: 4
+        offsets: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        offsetsoffset: 0
+        offsetslength: 4
+      successful: True
+      results:
+        outoffsets: [1, 1, 1, 2, 3]
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        outindex: [1, 0, 0, 1, 1, 1, 0]
+        outindexoffset: 1
+        outindexlength: 4
+        offsets: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        offsetsoffset: 0
+        offsetslength: 3
+      successful: True
+      results:
+        outoffsets: [1, 1, 1, 2, 3]
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        outindex: [1, 0, 0, 1, 1, 1, 0]
+        outindexoffset: 1
+        outindexlength: 3
+        offsets: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        offsetsoffset: 0
+        offsetslength: 4
+      successful: True
+      results:
+        outoffsets: [1, 0, -1, -1]
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        outindex: [1, 0, 0, 1, 1, 1, 0]
+        outindexoffset: 1
+        outindexlength: 3
+        offsets: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        offsetsoffset: 0
+        offsetslength: 3
+      successful: True
+      results:
+        outoffsets: [1, 0, -1, -1]
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        outindex: [1, 0, 0, 1, 1, 1, 0]
+        outindexoffset: 1
+        outindexlength: 3
+        offsets: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        offsetsoffset: 0
+        offsetslength: 4
+      successful: True
+      results:
+        outoffsets: [1, 1, 1, 2]
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        outindex: [1, 0, 0, 1, 1, 1, 0]
+        outindexoffset: 1
+        outindexlength: 3
+        offsets: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        offsetsoffset: 0
+        offsetslength: 3
+      successful: True
+      results:
+        outoffsets: [1, 1, 1, 2]
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        outindex: [1, 0, 0, 1, 1, 1, 0]
+        outindexoffset: 0
+        outindexlength: 4
+        offsets: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        offsetsoffset: 0
+        offsetslength: 4
+      successful: True
+      results:
+        outoffsets: [1, 1, 0, -1, -1]
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        outindex: [1, 0, 0, 1, 1, 1, 0]
+        outindexoffset: 0
+        outindexlength: 4
+        offsets: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        offsetsoffset: 0
+        offsetslength: 3
+      successful: True
+      results:
+        outoffsets: [1, 1, 0, -1, -1]
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        outindex: [1, 0, 0, 1, 1, 1, 0]
+        outindexoffset: 0
+        outindexlength: 4
+        offsets: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        offsetsoffset: 0
+        offsetslength: 4
+      successful: True
+      results:
+        outoffsets: [1, 2, 2, 2, 3]
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        outindex: [1, 0, 0, 1, 1, 1, 0]
+        outindexoffset: 0
+        outindexlength: 4
+        offsets: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        offsetsoffset: 0
+        offsetslength: 3
+      successful: True
+      results:
+        outoffsets: [1, 2, 2, 2, 3]
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        outindex: [1, 0, 0, 1, 1, 1, 0]
+        outindexoffset: 0
+        outindexlength: 3
+        offsets: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        offsetsoffset: 0
+        offsetslength: 4
+      successful: True
+      results:
+        outoffsets: [1, 1, 0, -1]
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        outindex: [1, 0, 0, 1, 1, 1, 0]
+        outindexoffset: 0
+        outindexlength: 3
+        offsets: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        offsetsoffset: 0
+        offsetslength: 3
+      successful: True
+      results:
+        outoffsets: [1, 1, 0, -1]
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        outindex: [1, 0, 0, 1, 1, 1, 0]
+        outindexoffset: 0
+        outindexlength: 3
+        offsets: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        offsetsoffset: 0
+        offsetslength: 4
+      successful: True
+      results:
+        outoffsets: [1, 2, 2, 2]
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        outindex: [1, 0, 0, 1, 1, 1, 0]
+        outindexoffset: 0
+        outindexlength: 3
+        offsets: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        offsetsoffset: 0
+        offsetslength: 3
+      successful: True
+      results:
+        outoffsets: [1, 2, 2, 2]
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        outindex: [1, 2, 3, 1, 1, 1, 0]
+        outindexoffset: 1
+        outindexlength: 3
+        offsets: [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+        offsetsoffset: 0
+        offsetslength: 3
+      successful: False
+      results:
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        outindex: [1, 2, 3, 1, 1, 1, 0]
+        outindexoffset: 1
+        outindexlength: 3
+        offsets: [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+        offsetsoffset: 0
+        offsetslength: 4
+      successful: False
+      results:
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        outindex: [1, 2, 3, 1, 1, 1, 0]
+        outindexoffset: 1
+        outindexlength: 3
+        offsets: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        offsetsoffset: 0
+        offsetslength: 3
+      successful: False
+      results:
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        outindex: [1, 2, 3, 1, 1, 1, 0]
+        outindexoffset: 1
+        outindexlength: 3
+        offsets: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        offsetsoffset: 0
+        offsetslength: 4
+      successful: False
+      results:
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        outindex: [1, 2, 3, 1, 1, 1, 0]
+        outindexoffset: 1
+        outindexlength: 4
+        offsets: [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+        offsetsoffset: 0
+        offsetslength: 3
+      successful: False
+      results:
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        outindex: [1, 2, 3, 1, 1, 1, 0]
+        outindexoffset: 1
+        outindexlength: 4
+        offsets: [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+        offsetsoffset: 0
+        offsetslength: 4
+      successful: False
+      results:
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        outindex: [1, 2, 3, 1, 1, 1, 0]
+        outindexoffset: 1
+        outindexlength: 4
+        offsets: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        offsetsoffset: 0
+        offsetslength: 3
+      successful: False
+      results:
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        outindex: [1, 2, 3, 1, 1, 1, 0]
+        outindexoffset: 1
+        outindexlength: 4
+        offsets: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        offsetsoffset: 0
+        offsetslength: 4
+      successful: False
+      results:
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        outindex: [1, 2, 3, 1, 1, 1, 0]
+        outindexoffset: 0
+        outindexlength: 3
+        offsets: [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+        offsetsoffset: 0
+        offsetslength: 3
+      successful: False
+      results:
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        outindex: [1, 2, 3, 1, 1, 1, 0]
+        outindexoffset: 0
+        outindexlength: 3
+        offsets: [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+        offsetsoffset: 0
+        offsetslength: 4
+      successful: False
+      results:
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        outindex: [1, 2, 3, 1, 1, 1, 0]
+        outindexoffset: 0
+        outindexlength: 3
+        offsets: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        offsetsoffset: 0
+        offsetslength: 3
+      successful: False
+      results:
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        outindex: [1, 2, 3, 1, 1, 1, 0]
+        outindexoffset: 0
+        outindexlength: 3
+        offsets: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        offsetsoffset: 0
+        offsetslength: 4
+      successful: False
+      results:
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        outindex: [1, 2, 3, 1, 1, 1, 0]
+        outindexoffset: 0
+        outindexlength: 4
+        offsets: [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+        offsetsoffset: 0
+        offsetslength: 3
+      successful: False
+      results:
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        outindex: [1, 2, 3, 1, 1, 1, 0]
+        outindexoffset: 0
+        outindexlength: 4
+        offsets: [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+        offsetsoffset: 0
+        offsetslength: 4
+      successful: False
+      results:
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        outindex: [1, 2, 3, 1, 1, 1, 0]
+        outindexoffset: 0
+        outindexlength: 4
+        offsets: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        offsetsoffset: 0
+        offsetslength: 3
+      successful: False
+      results:
+    - args:
+        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        outindex: [1, 2, 3, 1, 1, 1, 0]
+        outindexoffset: 0
+        outindexlength: 4
+        offsets: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        offsetsoffset: 0
+        offsetslength: 4
+      successful: False
+      results:

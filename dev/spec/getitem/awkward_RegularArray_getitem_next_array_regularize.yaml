@@ -1,0 +1,51 @@
+- name: awkward_RegularArray_getitem_next_array_regularize
+  specializations:
+    - name: awkward_RegularArray_getitem_next_array_regularize_64
+      args:
+        - toarray: List[int64_t]
+        - fromarray: List[int64_t]
+        - lenarray: int64_t
+        - size: int64_t
+  inparams: ['fromarray', 'lenarray', 'size']
+  outparams: ['toarray']
+  definition: |
+    def awkward_RegularArray_getitem_next_array_regularize(
+        toarray, fromarray, lenarray, size
+    ):
+        for j in range(lenarray):
+            toarray[j] = fromarray[j]
+            if toarray[j] < 0:
+                toarray[j] += size
+            if not ((0 <= toarray[j]) and (toarray[j] < size)):
+                raise ValueError("index out of range")
+  tests:
+    - args:
+        toarray: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromarray: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        lenarray: 4
+        size: 3
+      successful: True
+      results:
+        toarray: [0, 0, 0, 0]
+    - args:
+        toarray: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromarray: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        lenarray: 3
+        size: 3
+      successful: True
+      results:
+        toarray: [0, 0, 0]
+    - args:
+        toarray: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromarray: [5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        lenarray: 3
+        size: 2
+      successful: False
+      results:
+    - args:
+        toarray: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromarray: [5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        lenarray: 4
+        size: 2
+      successful: False
+      results:

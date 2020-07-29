@@ -1,0 +1,70 @@
+- name: awkward_combinations
+  specializations:
+    - name: awkward_combinations_64
+      args:
+        - toindex: List[int64_t]
+        - n: int64_t
+        - replacement: bool
+        - singlelen: int64_t
+  inparams: ['n', 'replacement', 'singlelen']
+  outparams: ['toindex']
+  definition: |
+    def awkward_combinations(toindex, n, replacement, singlelen):
+        raise ValueError("FIXME: awkward_combinations")
+  tests:
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        n: 3
+        replacement: 3
+        singlelen: 3
+      successful: False
+      results:
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        n: 3
+        replacement: 3
+        singlelen: 4
+      successful: False
+      results:
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        n: 3
+        replacement: 4
+        singlelen: 3
+      successful: False
+      results:
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        n: 3
+        replacement: 4
+        singlelen: 4
+      successful: False
+      results:
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        n: 4
+        replacement: 3
+        singlelen: 3
+      successful: False
+      results:
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        n: 4
+        replacement: 3
+        singlelen: 4
+      successful: False
+      results:
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        n: 4
+        replacement: 4
+        singlelen: 3
+      successful: False
+      results:
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        n: 4
+        replacement: 4
+        singlelen: 4
+      successful: False
+      results:

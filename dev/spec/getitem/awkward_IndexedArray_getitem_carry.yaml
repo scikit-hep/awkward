@@ -1,0 +1,341 @@
+- name: awkward_IndexedArray_getitem_carry
+  specializations:
+    - name: awkward_IndexedArrayU32_getitem_carry_64
+      args:
+        - toindex: List[uint32_t]
+        - fromindex: List[uint32_t]
+        - fromcarry: List[int64_t]
+        - indexoffset: int64_t
+        - lenindex: int64_t
+        - lencarry: int64_t
+    - name: awkward_IndexedArray64_getitem_carry_64
+      args:
+        - toindex: List[int64_t]
+        - fromindex: List[int64_t]
+        - fromcarry: List[int64_t]
+        - indexoffset: int64_t
+        - lenindex: int64_t
+        - lencarry: int64_t
+    - name: awkward_IndexedArray32_getitem_carry_64
+      args:
+        - toindex: List[int32_t]
+        - fromindex: List[int32_t]
+        - fromcarry: List[int64_t]
+        - indexoffset: int64_t
+        - lenindex: int64_t
+        - lencarry: int64_t
+  inparams: ['fromindex', 'fromcarry', 'indexoffset', 'lenindex', 'lencarry']
+  outparams: ['toindex']
+  definition: |
+    def awkward_IndexedArray_getitem_carry(
+        toindex, fromindex, fromcarry, indexoffset, lenindex, lencarry
+    ):
+        for i in range(lencarry):
+            if fromcarry[i] >= lenindex:
+                raise ValueError("index out of range")
+            toindex[i] = float(fromindex[indexoffset + fromcarry[i]])
+  tests:
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromindex: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        fromcarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        indexoffset: 1
+        lenindex: 4
+        lencarry: 4
+      successful: True
+      results:
+        toindex: [0.0, 0.0, 0.0, 0.0]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromindex: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        fromcarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        indexoffset: 1
+        lenindex: 4
+        lencarry: 3
+      successful: True
+      results:
+        toindex: [0.0, 0.0, 0.0]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromindex: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        fromcarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        indexoffset: 1
+        lenindex: 3
+        lencarry: 4
+      successful: True
+      results:
+        toindex: [0.0, 0.0, 0.0, 0.0]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromindex: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        fromcarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        indexoffset: 1
+        lenindex: 3
+        lencarry: 3
+      successful: True
+      results:
+        toindex: [0.0, 0.0, 0.0]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromindex: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        fromcarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        indexoffset: 0
+        lenindex: 4
+        lencarry: 4
+      successful: True
+      results:
+        toindex: [1.0, 1.0, 1.0, 1.0]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromindex: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        fromcarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        indexoffset: 0
+        lenindex: 4
+        lencarry: 3
+      successful: True
+      results:
+        toindex: [1.0, 1.0, 1.0]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromindex: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        fromcarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        indexoffset: 0
+        lenindex: 3
+        lencarry: 4
+      successful: True
+      results:
+        toindex: [1.0, 1.0, 1.0, 1.0]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromindex: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        fromcarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        indexoffset: 0
+        lenindex: 3
+        lencarry: 3
+      successful: True
+      results:
+        toindex: [1.0, 1.0, 1.0]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromindex: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        fromcarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        indexoffset: 1
+        lenindex: 4
+        lencarry: 4
+      successful: True
+      results:
+        toindex: [1.0, 1.0, 1.0, 1.0]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromindex: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        fromcarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        indexoffset: 1
+        lenindex: 4
+        lencarry: 3
+      successful: True
+      results:
+        toindex: [1.0, 1.0, 1.0]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromindex: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        fromcarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        indexoffset: 1
+        lenindex: 3
+        lencarry: 4
+      successful: True
+      results:
+        toindex: [1.0, 1.0, 1.0, 1.0]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromindex: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        fromcarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        indexoffset: 1
+        lenindex: 3
+        lencarry: 3
+      successful: True
+      results:
+        toindex: [1.0, 1.0, 1.0]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromindex: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        fromcarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        indexoffset: 0
+        lenindex: 4
+        lencarry: 4
+      successful: True
+      results:
+        toindex: [1.0, 1.0, 1.0, 1.0]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromindex: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        fromcarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        indexoffset: 0
+        lenindex: 4
+        lencarry: 3
+      successful: True
+      results:
+        toindex: [1.0, 1.0, 1.0]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromindex: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        fromcarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        indexoffset: 0
+        lenindex: 3
+        lencarry: 4
+      successful: True
+      results:
+        toindex: [1.0, 1.0, 1.0, 1.0]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromindex: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        fromcarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        indexoffset: 0
+        lenindex: 3
+        lencarry: 3
+      successful: True
+      results:
+        toindex: [1.0, 1.0, 1.0]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromindex: [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+        fromcarry: [5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        indexoffset: 1
+        lenindex: 3
+        lencarry: 3
+      successful: False
+      results:
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromindex: [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+        fromcarry: [5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        indexoffset: 1
+        lenindex: 3
+        lencarry: 4
+      successful: False
+      results:
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromindex: [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+        fromcarry: [5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        indexoffset: 1
+        lenindex: 4
+        lencarry: 3
+      successful: False
+      results:
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromindex: [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+        fromcarry: [5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        indexoffset: 1
+        lenindex: 4
+        lencarry: 4
+      successful: False
+      results:
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromindex: [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+        fromcarry: [5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        indexoffset: 0
+        lenindex: 3
+        lencarry: 3
+      successful: False
+      results:
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromindex: [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+        fromcarry: [5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        indexoffset: 0
+        lenindex: 3
+        lencarry: 4
+      successful: False
+      results:
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromindex: [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+        fromcarry: [5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        indexoffset: 0
+        lenindex: 4
+        lencarry: 3
+      successful: False
+      results:
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromindex: [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+        fromcarry: [5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        indexoffset: 0
+        lenindex: 4
+        lencarry: 4
+      successful: False
+      results:
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromindex: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        fromcarry: [5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        indexoffset: 1
+        lenindex: 3
+        lencarry: 3
+      successful: False
+      results:
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromindex: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        fromcarry: [5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        indexoffset: 1
+        lenindex: 3
+        lencarry: 4
+      successful: False
+      results:
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromindex: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        fromcarry: [5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        indexoffset: 1
+        lenindex: 4
+        lencarry: 3
+      successful: False
+      results:
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromindex: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        fromcarry: [5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        indexoffset: 1
+        lenindex: 4
+        lencarry: 4
+      successful: False
+      results:
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromindex: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        fromcarry: [5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        indexoffset: 0
+        lenindex: 3
+        lencarry: 3
+      successful: False
+      results:
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromindex: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        fromcarry: [5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        indexoffset: 0
+        lenindex: 3
+        lencarry: 4
+      successful: False
+      results:
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromindex: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        fromcarry: [5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        indexoffset: 0
+        lenindex: 4
+        lencarry: 3
+      successful: False
+      results:
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromindex: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        fromcarry: [5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        indexoffset: 0
+        lenindex: 4
+        lencarry: 4
+      successful: False
+      results:

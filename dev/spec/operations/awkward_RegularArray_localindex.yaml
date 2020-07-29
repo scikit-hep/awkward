@@ -1,0 +1,29 @@
+- name: awkward_RegularArray_localindex
+  specializations:
+    - name: awkward_RegularArray_localindex_64
+      args:
+        - toindex: List[int64_t]
+        - size: int64_t
+        - length: int64_t
+  inparams: ['size', 'length']
+  outparams: ['toindex']
+  definition: |
+    def awkward_RegularArray_localindex(toindex, size, length):
+        for i in range(length):
+            for j in range(size):
+                toindex[(i * size) + j] = j
+  tests:
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        size: 3
+        length: 4
+      successful: True
+      results:
+        toindex: [0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        size: 3
+        length: 3
+      successful: True
+      results:
+        toindex: [0, 1, 2, 0, 1, 2, 0, 1, 2]

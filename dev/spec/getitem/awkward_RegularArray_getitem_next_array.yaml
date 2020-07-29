@@ -1,0 +1,65 @@
+- name: awkward_RegularArray_getitem_next_array
+  specializations:
+    - name: awkward_RegularArray_getitem_next_array_64
+      args:
+        - tocarry: List[int64_t]
+        - toadvanced: List[int64_t]
+        - fromarray: List[int64_t]
+        - length: int64_t
+        - lenarray: int64_t
+        - size: int64_t
+  inparams: ['fromarray', 'length', 'lenarray', 'size']
+  outparams: ['tocarry', 'toadvanced']
+  definition: |
+    def awkward_RegularArray_getitem_next_array(
+        tocarry, toadvanced, fromarray, length, lenarray, size
+    ):
+        for i in range(length):
+            for j in range(lenarray):
+                tocarry[(i * lenarray) + j] = (i * size) + fromarray[j]
+                toadvanced[(i * lenarray) + j] = j
+  tests:
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        toadvanced: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromarray: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        length: 4
+        lenarray: 4
+        size: 3
+      successful: True
+      results:
+        tocarry: [0, 0, 0, 0, 3, 3, 3, 3, 6, 6, 6, 6, 9, 9, 9, 9]
+        toadvanced: [0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        toadvanced: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromarray: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        length: 4
+        lenarray: 3
+        size: 3
+      successful: True
+      results:
+        tocarry: [0, 0, 0, 3, 3, 3, 6, 6, 6, 9, 9, 9]
+        toadvanced: [0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        toadvanced: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromarray: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        length: 3
+        lenarray: 4
+        size: 3
+      successful: True
+      results:
+        tocarry: [0, 0, 0, 0, 3, 3, 3, 3, 6, 6, 6, 6]
+        toadvanced: [0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        toadvanced: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromarray: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        length: 3
+        lenarray: 3
+        size: 3
+      successful: True
+      results:
+        tocarry: [0, 0, 0, 3, 3, 3, 6, 6, 6]
+        toadvanced: [0, 1, 2, 0, 1, 2, 0, 1, 2]

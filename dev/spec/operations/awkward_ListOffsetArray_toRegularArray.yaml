@@ -1,0 +1,73 @@
+- name: awkward_ListOffsetArray_toRegularArray
+  specializations:
+    - name: awkward_ListOffsetArray32_toRegularArray
+      args:
+        - size: List[int64_t]
+        - fromoffsets: List[int32_t]
+        - offsetsoffset: int64_t
+        - offsetslength: int64_t
+    - name: awkward_ListOffsetArray64_toRegularArray
+      args:
+        - size: List[int64_t]
+        - fromoffsets: List[int64_t]
+        - offsetsoffset: int64_t
+        - offsetslength: int64_t
+    - name: awkward_ListOffsetArrayU32_toRegularArray
+      args:
+        - size: List[int64_t]
+        - fromoffsets: List[uint32_t]
+        - offsetsoffset: int64_t
+        - offsetslength: int64_t
+  inparams: ['fromoffsets', 'offsetsoffset', 'offsetslength']
+  outparams: ['size']
+  definition: |
+    def awkward_ListOffsetArray_toRegularArray(
+        size, fromoffsets, offsetsoffset, offsetslength
+    ):
+        size[0] = -1
+        for i in range(offsetslength - 1):
+            count = int(
+                fromoffsets[(offsetsoffset + i) + 1] - fromoffsets[offsetsoffset + i]
+            )
+            if count < 0:
+                raise ValueError("offsets must be monotonically increasing")
+            if size[0] == -1:
+                size[0] = count
+            else:
+                if size[0] != count:
+                    raise ValueError(
+                        "cannot convert to RegularArray because subarray lengths are not regular"
+                    )
+        if size[0] == -1:
+            size[0] = 0
+  tests:
+    - args:
+        size: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromoffsets: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+        offsetsoffset: 0
+        offsetslength: 4
+      successful: True
+      results:
+        size: [1]
+    - args:
+        size: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromoffsets: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+        offsetsoffset: 0
+        offsetslength: 3
+      successful: True
+      results:
+        size: [1]
+    - args:
+        size: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromoffsets: [0, 1, 0, -1, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+        offsetsoffset: 0
+        offsetslength: 3
+      successful: False
+      results:
+    - args:
+        size: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromoffsets: [0, 1, 0, -1, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+        offsetsoffset: 0
+        offsetslength: 4
+      successful: False
+      results:

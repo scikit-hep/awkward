@@ -1,0 +1,216 @@
+- name: awkward_UnionArray_regular_index
+  specializations:
+    - name: awkward_UnionArray8_U32_regular_index
+      args:
+        - toindex: List[uint32_t]
+        - current: List[uint32_t]
+        - size: int64_t
+        - fromtags: List[int8_t]
+        - tagsoffset: int64_t
+        - length: int64_t
+    - name: awkward_UnionArray8_32_regular_index
+      args:
+        - toindex: List[int32_t]
+        - current: List[int32_t]
+        - size: int64_t
+        - fromtags: List[int8_t]
+        - tagsoffset: int64_t
+        - length: int64_t
+    - name: awkward_UnionArray8_64_regular_index
+      args:
+        - toindex: List[int64_t]
+        - current: List[int64_t]
+        - size: int64_t
+        - fromtags: List[int8_t]
+        - tagsoffset: int64_t
+        - length: int64_t
+  inparams: ['size', 'fromtags', 'tagsoffset', 'length']
+  outparams: ['toindex', 'current']
+  definition: |
+    def awkward_UnionArray_regular_index(
+        toindex, current, size, fromtags, tagsoffset, length
+    ):
+        count = 0
+        for k in range(size):
+            current[k] = 0
+        for i in range(length):
+            tag = fromtags[tagsoffset + i]
+            toindex[i] = current[tag]
+            current[tag] = current[tag] + 1
+  tests:
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        current: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        size: 4
+        fromtags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 1
+        length: 4
+      successful: True
+      results:
+        toindex: [0, 1, 2, 3]
+        current: [4, 0, 0, 0]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        current: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        size: 4
+        fromtags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 1
+        length: 3
+      successful: True
+      results:
+        toindex: [0, 1, 2]
+        current: [3, 0, 0, 0]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        current: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        size: 4
+        fromtags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 0
+        length: 4
+      successful: True
+      results:
+        toindex: [0, 1, 2, 3]
+        current: [4, 0, 0, 0]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        current: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        size: 4
+        fromtags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 0
+        length: 3
+      successful: True
+      results:
+        toindex: [0, 1, 2]
+        current: [3, 0, 0, 0]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        current: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        size: 4
+        fromtags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 1
+        length: 4
+      successful: True
+      results:
+        toindex: [0, 1, 2, 3]
+        current: [0, 4, 0, 0]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        current: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        size: 4
+        fromtags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 1
+        length: 3
+      successful: True
+      results:
+        toindex: [0, 1, 2]
+        current: [0, 3, 0, 0]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        current: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        size: 4
+        fromtags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 0
+        length: 4
+      successful: True
+      results:
+        toindex: [0, 1, 2, 3]
+        current: [0, 4, 0, 0]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        current: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        size: 4
+        fromtags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 0
+        length: 3
+      successful: True
+      results:
+        toindex: [0, 1, 2]
+        current: [0, 3, 0, 0]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        current: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        size: 3
+        fromtags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 1
+        length: 4
+      successful: True
+      results:
+        toindex: [0, 1, 2, 3]
+        current: [4, 0, 0]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        current: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        size: 3
+        fromtags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 1
+        length: 3
+      successful: True
+      results:
+        toindex: [0, 1, 2]
+        current: [3, 0, 0]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        current: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        size: 3
+        fromtags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 0
+        length: 4
+      successful: True
+      results:
+        toindex: [0, 1, 2, 3]
+        current: [4, 0, 0]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        current: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        size: 3
+        fromtags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 0
+        length: 3
+      successful: True
+      results:
+        toindex: [0, 1, 2]
+        current: [3, 0, 0]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        current: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        size: 3
+        fromtags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 1
+        length: 4
+      successful: True
+      results:
+        toindex: [0, 1, 2, 3]
+        current: [0, 4, 0]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        current: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        size: 3
+        fromtags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 1
+        length: 3
+      successful: True
+      results:
+        toindex: [0, 1, 2]
+        current: [0, 3, 0]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        current: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        size: 3
+        fromtags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 0
+        length: 4
+      successful: True
+      results:
+        toindex: [0, 1, 2, 3]
+        current: [0, 4, 0]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        current: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        size: 3
+        fromtags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 0
+        length: 3
+      successful: True
+      results:
+        toindex: [0, 1, 2]
+        current: [0, 3, 0]

@@ -1,0 +1,37 @@
+- name: awkward_RegularArray_broadcast_tooffsets
+  specializations:
+    - name: awkward_RegularArray_broadcast_tooffsets_64
+      args:
+        - fromoffsets: List[int64_t]
+        - offsetsoffset: int64_t
+        - offsetslength: int64_t
+        - size: int64_t
+  inparams: ['fromoffsets', 'offsetsoffset', 'offsetslength', 'size']
+  outparams: []
+  definition: |
+    def awkward_RegularArray_broadcast_tooffsets(
+        fromoffsets, offsetsoffset, offsetslength, size
+    ):
+        for i in range(offsetslength - 1):
+            count = int(
+                fromoffsets[(offsetsoffset + i) + 1] - fromoffsets[offsetsoffset + i]
+            )
+            if count < 0:
+                raise ValueError("broadcast's offsets must be monotonically increasing")
+            if size != count:
+                raise ValueError("cannot broadcast nested list")
+  tests:
+    - args:
+        fromoffsets: [0, 3, 2, 9, 12, 15]
+        offsetsoffset: 0
+        offsetslength: 3
+        size: 2
+      successful: False
+      results:
+    - args:
+        fromoffsets: [0, 3, 2, 9, 12, 15]
+        offsetsoffset: 0
+        offsetslength: 4
+        size: 2
+      successful: False
+      results:

@@ -1,0 +1,25 @@
+- name: awkward_localindex
+  specializations:
+    - name: awkward_localindex_64
+      args:
+        - toindex: List[int64_t]
+        - length: int64_t
+  inparams: ['length']
+  outparams: ['toindex']
+  definition: |
+    def awkward_localindex(toindex, length):
+        for i in range(length):
+            toindex[i] = i
+  tests:
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        length: 4
+      successful: True
+      results:
+        toindex: [0, 1, 2, 3]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        length: 3
+      successful: True
+      results:
+        toindex: [0, 1, 2]

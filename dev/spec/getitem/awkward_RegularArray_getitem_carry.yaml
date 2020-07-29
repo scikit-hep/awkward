@@ -1,0 +1,32 @@
+- name: awkward_RegularArray_getitem_carry
+  specializations:
+    - name: awkward_RegularArray_getitem_carry_64
+      args:
+        - tocarry: List[int64_t]
+        - fromcarry: List[int64_t]
+        - lencarry: int64_t
+        - size: int64_t
+  inparams: ['fromcarry', 'lencarry', 'size']
+  outparams: ['tocarry']
+  definition: |
+    def awkward_RegularArray_getitem_carry(tocarry, fromcarry, lencarry, size):
+        for i in range(lencarry):
+            for j in range(size):
+                tocarry[(i * size) + j] = (fromcarry[i] * size) + j
+  tests:
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromcarry: [0, 3, 6, 9, 12, 15]
+        lencarry: 4
+        size: 3
+      successful: True
+      results:
+        tocarry: [0, 1, 2, 9, 10, 11, 18, 19, 20, 27, 28, 29]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromcarry: [0, 3, 6, 9, 12, 15]
+        lencarry: 3
+        size: 3
+      successful: True
+      results:
+        tocarry: [0, 1, 2, 9, 10, 11, 18, 19, 20]

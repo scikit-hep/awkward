@@ -1,0 +1,29 @@
+- name: awkward_RegularArray_compact_offsets
+  specializations:
+    - name: awkward_RegularArray_compact_offsets64
+      args:
+        - tooffsets: List[int64_t]
+        - length: int64_t
+        - size: int64_t
+  inparams: ['length', 'size']
+  outparams: ['tooffsets']
+  definition: |
+    def awkward_RegularArray_compact_offsets(tooffsets, length, size):
+        tooffsets[0] = 0
+        for i in range(length):
+            tooffsets[i + 1] = (i + 1) * size
+  tests:
+    - args:
+        tooffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        length: 4
+        size: 3
+      successful: True
+      results:
+        tooffsets: [0, 3, 6, 9, 12]
+    - args:
+        tooffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        length: 3
+        size: 3
+      successful: True
+      results:
+        tooffsets: [0, 3, 6, 9]

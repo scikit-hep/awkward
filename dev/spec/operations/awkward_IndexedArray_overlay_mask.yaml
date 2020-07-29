@@ -1,0 +1,116 @@
+- name: awkward_IndexedArray_overlay_mask
+  specializations:
+    - name: awkward_IndexedArray64_overlay_mask8_to64
+      args:
+        - toindex: List[int64_t]
+        - mask: List[int8_t]
+        - maskoffset: int64_t
+        - fromindex: List[int64_t]
+        - indexoffset: int64_t
+        - length: int64_t
+    - name: awkward_IndexedArrayU32_overlay_mask8_to64
+      args:
+        - toindex: List[int64_t]
+        - mask: List[int8_t]
+        - maskoffset: int64_t
+        - fromindex: List[uint32_t]
+        - indexoffset: int64_t
+        - length: int64_t
+    - name: awkward_IndexedArray32_overlay_mask8_to64
+      args:
+        - toindex: List[int64_t]
+        - mask: List[int8_t]
+        - maskoffset: int64_t
+        - fromindex: List[int32_t]
+        - indexoffset: int64_t
+        - length: int64_t
+  inparams: ['mask', 'maskoffset', 'fromindex', 'indexoffset', 'length']
+  outparams: ['toindex']
+  definition: |
+    def awkward_IndexedArray_overlay_mask(
+        toindex, mask, maskoffset, fromindex, indexoffset, length
+    ):
+        for i in range(length):
+            m = mask[maskoffset + i]
+            toindex[i] = -1 if m else fromindex[indexoffset + i]
+  tests:
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        mask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        maskoffset: 1
+        fromindex: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        indexoffset: 1
+        length: 4
+      successful: True
+      results:
+        toindex: [0, 0, 1, 1]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        mask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        maskoffset: 1
+        fromindex: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        indexoffset: 1
+        length: 3
+      successful: True
+      results:
+        toindex: [0, 0, 1]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        mask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        maskoffset: 1
+        fromindex: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        indexoffset: 0
+        length: 4
+      successful: True
+      results:
+        toindex: [1, 0, 0, 1]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        mask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        maskoffset: 1
+        fromindex: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        indexoffset: 0
+        length: 3
+      successful: True
+      results:
+        toindex: [1, 0, 0]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        mask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        maskoffset: 1
+        fromindex: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        indexoffset: 1
+        length: 4
+      successful: True
+      results:
+        toindex: [1, 2, 2, 0]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        mask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        maskoffset: 1
+        fromindex: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        indexoffset: 1
+        length: 3
+      successful: True
+      results:
+        toindex: [1, 2, 2]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        mask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        maskoffset: 1
+        fromindex: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        indexoffset: 0
+        length: 4
+      successful: True
+      results:
+        toindex: [1, 1, 2, 2]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        mask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        maskoffset: 1
+        fromindex: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        indexoffset: 0
+        length: 3
+      successful: True
+      results:
+        toindex: [1, 1, 2]

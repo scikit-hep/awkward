@@ -1,0 +1,79 @@
+- name: awkward_UnionArray_filltags_const
+  specializations:
+    - name: awkward_UnionArray_filltags_to8_const
+      args:
+        - totags: List[int8_t]
+        - totagsoffset: int64_t
+        - length: int64_t
+        - base: int64_t
+  inparams: ['totagsoffset', 'length', 'base']
+  outparams: ['totags']
+  definition: |
+    def awkward_UnionArray_filltags_const(totags, totagsoffset, length, base):
+        for i in range(length):
+            totags[totagsoffset + i] = float(base)
+  tests:
+    - args:
+        totags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        totagsoffset: 4
+        length: 4
+        base: 4
+      successful: True
+      results:
+        totags: [0, 0, 0, 0, 4.0, 4.0, 4.0, 4.0]
+    - args:
+        totags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        totagsoffset: 4
+        length: 4
+        base: 3
+      successful: True
+      results:
+        totags: [0, 0, 0, 0, 3.0, 3.0, 3.0, 3.0]
+    - args:
+        totags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        totagsoffset: 4
+        length: 3
+        base: 4
+      successful: True
+      results:
+        totags: [0, 0, 0, 0, 4.0, 4.0, 4.0]
+    - args:
+        totags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        totagsoffset: 4
+        length: 3
+        base: 3
+      successful: True
+      results:
+        totags: [0, 0, 0, 0, 3.0, 3.0, 3.0]
+    - args:
+        totags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        totagsoffset: 3
+        length: 4
+        base: 4
+      successful: True
+      results:
+        totags: [0, 0, 0, 4.0, 4.0, 4.0, 4.0]
+    - args:
+        totags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        totagsoffset: 3
+        length: 4
+        base: 3
+      successful: True
+      results:
+        totags: [0, 0, 0, 3.0, 3.0, 3.0, 3.0]
+    - args:
+        totags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        totagsoffset: 3
+        length: 3
+        base: 4
+      successful: True
+      results:
+        totags: [0, 0, 0, 4.0, 4.0, 4.0]
+    - args:
+        totags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        totagsoffset: 3
+        length: 3
+        base: 3
+      successful: True
+      results:
+        totags: [0, 0, 0, 3.0, 3.0, 3.0]

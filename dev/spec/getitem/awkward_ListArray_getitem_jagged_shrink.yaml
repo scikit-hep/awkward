@@ -1,0 +1,563 @@
+- name: awkward_ListArray_getitem_jagged_shrink
+  specializations:
+    - name: awkward_ListArray_getitem_jagged_shrink_64
+      args:
+        - tocarry: List[int64_t]
+        - tosmalloffsets: List[int64_t]
+        - tolargeoffsets: List[int64_t]
+        - slicestarts: List[int64_t]
+        - slicestartsoffset: int64_t
+        - slicestops: List[int64_t]
+        - slicestopsoffset: int64_t
+        - length: int64_t
+        - missing: List[int64_t]
+        - missingoffset: int64_t
+  inparams: ['slicestarts', 'slicestartsoffset', 'slicestops', 'slicestopsoffset', 'length', 'missing', 'missingoffset']
+  outparams: ['tocarry', 'tosmalloffsets', 'tolargeoffsets']
+  definition: |
+    def awkward_ListArray_getitem_jagged_shrink(
+        tocarry,
+        tosmalloffsets,
+        tolargeoffsets,
+        slicestarts,
+        slicestartsoffset,
+        slicestops,
+        slicestopsoffset,
+        length,
+        missing,
+        missingoffset,
+    ):
+        k = 0
+        if length == 0:
+            tosmalloffsets[0] = 0
+            tolargeoffsets[0] = 0
+        else:
+            tosmalloffsets[0] = slicestarts[slicestartsoffset + 0]
+            tolargeoffsets[0] = slicestarts[slicestartsoffset + 0]
+        for i in range(length):
+            slicestart = slicestarts[slicestartsoffset + i]
+            slicestop = slicestops[slicestopsoffset + i]
+            if slicestart != slicestop:
+                smallcount = 0
+                for j in range(slicestart, slicestop):
+                    if missing[missingoffset + j] >= 0:
+                        tocarry[k] = j
+                        k = k + 1
+                        smallcount = smallcount + 1
+                tosmalloffsets[i + 1] = tosmalloffsets[i] + smallcount
+            else:
+                tosmalloffsets[i + 1] = tosmalloffsets[i]
+            tolargeoffsets[i + 1] = tolargeoffsets[i] + (slicestop - slicestart)
+  tests:
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tosmalloffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tolargeoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        slicestarts: [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+        slicestartsoffset: 0
+        slicestops: [3, 1, 3, 2, 3, 1, 2, 3]
+        slicestopsoffset: 0
+        length: 4
+        missing: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        missingoffset: 1
+      successful: True
+      results:
+        tocarry: [2, 0, 2, 1]
+        tosmalloffsets: [2, 3, 4, 5, 6]
+        tolargeoffsets: [2, 3, 4, 5, 6]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tosmalloffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tolargeoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        slicestarts: [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+        slicestartsoffset: 0
+        slicestops: [3, 1, 3, 2, 3, 1, 2, 3]
+        slicestopsoffset: 0
+        length: 4
+        missing: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        missingoffset: 0
+      successful: True
+      results:
+        tocarry: [2, 0, 2, 1]
+        tosmalloffsets: [2, 3, 4, 5, 6]
+        tolargeoffsets: [2, 3, 4, 5, 6]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tosmalloffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tolargeoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        slicestarts: [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+        slicestartsoffset: 0
+        slicestops: [3, 1, 3, 2, 3, 1, 2, 3]
+        slicestopsoffset: 0
+        length: 4
+        missing: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        missingoffset: 1
+      successful: True
+      results:
+        tocarry: [2, 0, 2, 1]
+        tosmalloffsets: [2, 3, 4, 5, 6]
+        tolargeoffsets: [2, 3, 4, 5, 6]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tosmalloffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tolargeoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        slicestarts: [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+        slicestartsoffset: 0
+        slicestops: [3, 1, 3, 2, 3, 1, 2, 3]
+        slicestopsoffset: 0
+        length: 4
+        missing: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        missingoffset: 0
+      successful: True
+      results:
+        tocarry: [2, 0, 2, 1]
+        tosmalloffsets: [2, 3, 4, 5, 6]
+        tolargeoffsets: [2, 3, 4, 5, 6]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tosmalloffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tolargeoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        slicestarts: [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+        slicestartsoffset: 0
+        slicestops: [3, 1, 3, 2, 3, 1, 2, 3]
+        slicestopsoffset: 0
+        length: 3
+        missing: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        missingoffset: 1
+      successful: True
+      results:
+        tocarry: [2, 0, 2]
+        tosmalloffsets: [2, 3, 4, 5]
+        tolargeoffsets: [2, 3, 4, 5]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tosmalloffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tolargeoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        slicestarts: [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+        slicestartsoffset: 0
+        slicestops: [3, 1, 3, 2, 3, 1, 2, 3]
+        slicestopsoffset: 0
+        length: 3
+        missing: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        missingoffset: 0
+      successful: True
+      results:
+        tocarry: [2, 0, 2]
+        tosmalloffsets: [2, 3, 4, 5]
+        tolargeoffsets: [2, 3, 4, 5]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tosmalloffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tolargeoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        slicestarts: [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+        slicestartsoffset: 0
+        slicestops: [3, 1, 3, 2, 3, 1, 2, 3]
+        slicestopsoffset: 0
+        length: 3
+        missing: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        missingoffset: 1
+      successful: True
+      results:
+        tocarry: [2, 0, 2]
+        tosmalloffsets: [2, 3, 4, 5]
+        tolargeoffsets: [2, 3, 4, 5]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tosmalloffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tolargeoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        slicestarts: [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+        slicestartsoffset: 0
+        slicestops: [3, 1, 3, 2, 3, 1, 2, 3]
+        slicestopsoffset: 0
+        length: 3
+        missing: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        missingoffset: 0
+      successful: True
+      results:
+        tocarry: [2, 0, 2]
+        tosmalloffsets: [2, 3, 4, 5]
+        tolargeoffsets: [2, 3, 4, 5]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tosmalloffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tolargeoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        slicestarts: [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+        slicestartsoffset: 0
+        slicestops: [8, 4, 5, 6, 5, 5, 7]
+        slicestopsoffset: 0
+        length: 4
+        missing: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        missingoffset: 1
+      successful: True
+      results:
+        tocarry: [2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 2, 3, 4, 1, 2, 3, 4, 5]
+        tosmalloffsets: [2, 8, 12, 15, 20]
+        tolargeoffsets: [2, 8, 12, 15, 20]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tosmalloffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tolargeoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        slicestarts: [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+        slicestartsoffset: 0
+        slicestops: [8, 4, 5, 6, 5, 5, 7]
+        slicestopsoffset: 0
+        length: 4
+        missing: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        missingoffset: 0
+      successful: True
+      results:
+        tocarry: [2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 2, 3, 4, 1, 2, 3, 4, 5]
+        tosmalloffsets: [2, 8, 12, 15, 20]
+        tolargeoffsets: [2, 8, 12, 15, 20]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tosmalloffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tolargeoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        slicestarts: [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+        slicestartsoffset: 0
+        slicestops: [8, 4, 5, 6, 5, 5, 7]
+        slicestopsoffset: 0
+        length: 4
+        missing: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        missingoffset: 1
+      successful: True
+      results:
+        tocarry: [2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 2, 3, 4, 1, 2, 3, 4, 5]
+        tosmalloffsets: [2, 8, 12, 15, 20]
+        tolargeoffsets: [2, 8, 12, 15, 20]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tosmalloffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tolargeoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        slicestarts: [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+        slicestartsoffset: 0
+        slicestops: [8, 4, 5, 6, 5, 5, 7]
+        slicestopsoffset: 0
+        length: 4
+        missing: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        missingoffset: 0
+      successful: True
+      results:
+        tocarry: [2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 2, 3, 4, 1, 2, 3, 4, 5]
+        tosmalloffsets: [2, 8, 12, 15, 20]
+        tolargeoffsets: [2, 8, 12, 15, 20]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tosmalloffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tolargeoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        slicestarts: [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+        slicestartsoffset: 0
+        slicestops: [8, 4, 5, 6, 5, 5, 7]
+        slicestopsoffset: 0
+        length: 3
+        missing: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        missingoffset: 1
+      successful: True
+      results:
+        tocarry: [2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 2, 3, 4]
+        tosmalloffsets: [2, 8, 12, 15]
+        tolargeoffsets: [2, 8, 12, 15]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tosmalloffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tolargeoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        slicestarts: [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+        slicestartsoffset: 0
+        slicestops: [8, 4, 5, 6, 5, 5, 7]
+        slicestopsoffset: 0
+        length: 3
+        missing: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        missingoffset: 0
+      successful: True
+      results:
+        tocarry: [2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 2, 3, 4]
+        tosmalloffsets: [2, 8, 12, 15]
+        tolargeoffsets: [2, 8, 12, 15]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tosmalloffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tolargeoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        slicestarts: [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+        slicestartsoffset: 0
+        slicestops: [8, 4, 5, 6, 5, 5, 7]
+        slicestopsoffset: 0
+        length: 3
+        missing: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        missingoffset: 1
+      successful: True
+      results:
+        tocarry: [2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 2, 3, 4]
+        tosmalloffsets: [2, 8, 12, 15]
+        tolargeoffsets: [2, 8, 12, 15]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tosmalloffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tolargeoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        slicestarts: [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+        slicestartsoffset: 0
+        slicestops: [8, 4, 5, 6, 5, 5, 7]
+        slicestopsoffset: 0
+        length: 3
+        missing: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        missingoffset: 0
+      successful: True
+      results:
+        tocarry: [2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 2, 3, 4]
+        tosmalloffsets: [2, 8, 12, 15]
+        tolargeoffsets: [2, 8, 12, 15]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tosmalloffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tolargeoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        slicestarts: [1, 0, 0, 0, 1, 1, 0]
+        slicestartsoffset: 0
+        slicestops: [3, 1, 3, 2, 3, 1, 2, 3]
+        slicestopsoffset: 0
+        length: 4
+        missing: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        missingoffset: 1
+      successful: True
+      results:
+        tocarry: [1, 2, 0, 0, 1, 2, 0, 1]
+        tosmalloffsets: [1, 3, 4, 7, 9]
+        tolargeoffsets: [1, 3, 4, 7, 9]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tosmalloffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tolargeoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        slicestarts: [1, 0, 0, 0, 1, 1, 0]
+        slicestartsoffset: 0
+        slicestops: [3, 1, 3, 2, 3, 1, 2, 3]
+        slicestopsoffset: 0
+        length: 4
+        missing: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        missingoffset: 0
+      successful: True
+      results:
+        tocarry: [1, 2, 0, 0, 1, 2, 0, 1]
+        tosmalloffsets: [1, 3, 4, 7, 9]
+        tolargeoffsets: [1, 3, 4, 7, 9]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tosmalloffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tolargeoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        slicestarts: [1, 0, 0, 0, 1, 1, 0]
+        slicestartsoffset: 0
+        slicestops: [3, 1, 3, 2, 3, 1, 2, 3]
+        slicestopsoffset: 0
+        length: 4
+        missing: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        missingoffset: 1
+      successful: True
+      results:
+        tocarry: [1, 2, 0, 0, 1, 2, 0, 1]
+        tosmalloffsets: [1, 3, 4, 7, 9]
+        tolargeoffsets: [1, 3, 4, 7, 9]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tosmalloffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tolargeoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        slicestarts: [1, 0, 0, 0, 1, 1, 0]
+        slicestartsoffset: 0
+        slicestops: [3, 1, 3, 2, 3, 1, 2, 3]
+        slicestopsoffset: 0
+        length: 4
+        missing: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        missingoffset: 0
+      successful: True
+      results:
+        tocarry: [1, 2, 0, 0, 1, 2, 0, 1]
+        tosmalloffsets: [1, 3, 4, 7, 9]
+        tolargeoffsets: [1, 3, 4, 7, 9]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tosmalloffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tolargeoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        slicestarts: [1, 0, 0, 0, 1, 1, 0]
+        slicestartsoffset: 0
+        slicestops: [3, 1, 3, 2, 3, 1, 2, 3]
+        slicestopsoffset: 0
+        length: 3
+        missing: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        missingoffset: 1
+      successful: True
+      results:
+        tocarry: [1, 2, 0, 0, 1, 2]
+        tosmalloffsets: [1, 3, 4, 7]
+        tolargeoffsets: [1, 3, 4, 7]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tosmalloffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tolargeoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        slicestarts: [1, 0, 0, 0, 1, 1, 0]
+        slicestartsoffset: 0
+        slicestops: [3, 1, 3, 2, 3, 1, 2, 3]
+        slicestopsoffset: 0
+        length: 3
+        missing: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        missingoffset: 0
+      successful: True
+      results:
+        tocarry: [1, 2, 0, 0, 1, 2]
+        tosmalloffsets: [1, 3, 4, 7]
+        tolargeoffsets: [1, 3, 4, 7]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tosmalloffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tolargeoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        slicestarts: [1, 0, 0, 0, 1, 1, 0]
+        slicestartsoffset: 0
+        slicestops: [3, 1, 3, 2, 3, 1, 2, 3]
+        slicestopsoffset: 0
+        length: 3
+        missing: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        missingoffset: 1
+      successful: True
+      results:
+        tocarry: [1, 2, 0, 0, 1, 2]
+        tosmalloffsets: [1, 3, 4, 7]
+        tolargeoffsets: [1, 3, 4, 7]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tosmalloffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tolargeoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        slicestarts: [1, 0, 0, 0, 1, 1, 0]
+        slicestartsoffset: 0
+        slicestops: [3, 1, 3, 2, 3, 1, 2, 3]
+        slicestopsoffset: 0
+        length: 3
+        missing: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        missingoffset: 0
+      successful: True
+      results:
+        tocarry: [1, 2, 0, 0, 1, 2]
+        tosmalloffsets: [1, 3, 4, 7]
+        tolargeoffsets: [1, 3, 4, 7]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tosmalloffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tolargeoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        slicestarts: [1, 0, 0, 0, 1, 1, 0]
+        slicestartsoffset: 0
+        slicestops: [8, 4, 5, 6, 5, 5, 7]
+        slicestopsoffset: 0
+        length: 4
+        missing: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        missingoffset: 1
+      successful: True
+      results:
+        tocarry: [1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 0, 1, 2, 3, 4, 0, 1, 2, 3, 4, 5]
+        tosmalloffsets: [1, 8, 12, 17, 23]
+        tolargeoffsets: [1, 8, 12, 17, 23]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tosmalloffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tolargeoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        slicestarts: [1, 0, 0, 0, 1, 1, 0]
+        slicestartsoffset: 0
+        slicestops: [8, 4, 5, 6, 5, 5, 7]
+        slicestopsoffset: 0
+        length: 4
+        missing: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        missingoffset: 0
+      successful: True
+      results:
+        tocarry: [1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 0, 1, 2, 3, 4, 0, 1, 2, 3, 4, 5]
+        tosmalloffsets: [1, 8, 12, 17, 23]
+        tolargeoffsets: [1, 8, 12, 17, 23]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tosmalloffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tolargeoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        slicestarts: [1, 0, 0, 0, 1, 1, 0]
+        slicestartsoffset: 0
+        slicestops: [8, 4, 5, 6, 5, 5, 7]
+        slicestopsoffset: 0
+        length: 4
+        missing: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        missingoffset: 1
+      successful: True
+      results:
+        tocarry: [1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 0, 1, 2, 3, 4, 0, 1, 2, 3, 4, 5]
+        tosmalloffsets: [1, 8, 12, 17, 23]
+        tolargeoffsets: [1, 8, 12, 17, 23]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tosmalloffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tolargeoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        slicestarts: [1, 0, 0, 0, 1, 1, 0]
+        slicestartsoffset: 0
+        slicestops: [8, 4, 5, 6, 5, 5, 7]
+        slicestopsoffset: 0
+        length: 4
+        missing: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        missingoffset: 0
+      successful: True
+      results:
+        tocarry: [1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 0, 1, 2, 3, 4, 0, 1, 2, 3, 4, 5]
+        tosmalloffsets: [1, 8, 12, 17, 23]
+        tolargeoffsets: [1, 8, 12, 17, 23]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tosmalloffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tolargeoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        slicestarts: [1, 0, 0, 0, 1, 1, 0]
+        slicestartsoffset: 0
+        slicestops: [8, 4, 5, 6, 5, 5, 7]
+        slicestopsoffset: 0
+        length: 3
+        missing: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        missingoffset: 1
+      successful: True
+      results:
+        tocarry: [1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 0, 1, 2, 3, 4]
+        tosmalloffsets: [1, 8, 12, 17]
+        tolargeoffsets: [1, 8, 12, 17]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tosmalloffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tolargeoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        slicestarts: [1, 0, 0, 0, 1, 1, 0]
+        slicestartsoffset: 0
+        slicestops: [8, 4, 5, 6, 5, 5, 7]
+        slicestopsoffset: 0
+        length: 3
+        missing: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        missingoffset: 0
+      successful: True
+      results:
+        tocarry: [1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 0, 1, 2, 3, 4]
+        tosmalloffsets: [1, 8, 12, 17]
+        tolargeoffsets: [1, 8, 12, 17]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tosmalloffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tolargeoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        slicestarts: [1, 0, 0, 0, 1, 1, 0]
+        slicestartsoffset: 0
+        slicestops: [8, 4, 5, 6, 5, 5, 7]
+        slicestopsoffset: 0
+        length: 3
+        missing: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        missingoffset: 1
+      successful: True
+      results:
+        tocarry: [1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 0, 1, 2, 3, 4]
+        tosmalloffsets: [1, 8, 12, 17]
+        tolargeoffsets: [1, 8, 12, 17]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tosmalloffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tolargeoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        slicestarts: [1, 0, 0, 0, 1, 1, 0]
+        slicestartsoffset: 0
+        slicestops: [8, 4, 5, 6, 5, 5, 7]
+        slicestopsoffset: 0
+        length: 3
+        missing: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        missingoffset: 0
+      successful: True
+      results:
+        tocarry: [1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 0, 1, 2, 3, 4]
+        tosmalloffsets: [1, 8, 12, 17]
+        tolargeoffsets: [1, 8, 12, 17]

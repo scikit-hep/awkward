@@ -1,0 +1,342 @@
+- name: awkward_slicemissing_check_same
+  args:
+    - same: List[bool]
+    - bytemask: List[int8_t]
+    - bytemaskoffset: int64_t
+    - missingindex: List[int64_t]
+    - missingindexoffset: int64_t
+    - length: int64_t
+  inparams: ['bytemask', 'bytemaskoffset', 'missingindex', 'missingindexoffset', 'length']
+  outparams: ['same']
+  definition: |
+    def awkward_slicemissing_check_same(
+        same, bytemask, bytemaskoffset, missingindex, missingindexoffset, length
+    ):
+        same[0] = True
+        for i in range(length):
+            left = bytemask[bytemaskoffset + i] != 0
+            right = missingindex[missingindexoffset + i] < 0
+            if left != right:
+                same[0] = False
+                return
+  tests:
+    - args:
+        same: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        bytemask: [1, 1, 1, 1, 1]
+        bytemaskoffset: 0
+        missingindex: [1, 1, 1, 1, 1]
+        missingindexoffset: 0
+        length: 4
+      successful: True
+      results:
+        same: [False]
+    - args:
+        same: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        bytemask: [1, 1, 1, 1, 1]
+        bytemaskoffset: 0
+        missingindex: [1, 1, 1, 1, 1]
+        missingindexoffset: 0
+        length: 3
+      successful: True
+      results:
+        same: [False]
+    - args:
+        same: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        bytemask: [1, 1, 1, 1, 1]
+        bytemaskoffset: 0
+        missingindex: [1, 1, 1, 1, 1]
+        missingindexoffset: 0
+        length: 4
+      successful: True
+      results:
+        same: [False]
+    - args:
+        same: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        bytemask: [1, 1, 1, 1, 1]
+        bytemaskoffset: 0
+        missingindex: [1, 1, 1, 1, 1]
+        missingindexoffset: 0
+        length: 3
+      successful: True
+      results:
+        same: [False]
+    - args:
+        same: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        bytemask: [1, 1, 1, 1, 1]
+        bytemaskoffset: 0
+        missingindex: [1, 1, 1, 1, 1]
+        missingindexoffset: 0
+        length: 4
+      successful: True
+      results:
+        same: [False]
+    - args:
+        same: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        bytemask: [1, 1, 1, 1, 1]
+        bytemaskoffset: 0
+        missingindex: [1, 1, 1, 1, 1]
+        missingindexoffset: 0
+        length: 3
+      successful: True
+      results:
+        same: [False]
+    - args:
+        same: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        bytemask: [1, 1, 1, 1, 1]
+        bytemaskoffset: 0
+        missingindex: [1, 1, 1, 1, 1]
+        missingindexoffset: 0
+        length: 4
+      successful: True
+      results:
+        same: [False]
+    - args:
+        same: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        bytemask: [1, 1, 1, 1, 1]
+        bytemaskoffset: 0
+        missingindex: [1, 1, 1, 1, 1]
+        missingindexoffset: 0
+        length: 3
+      successful: True
+      results:
+        same: [False]
+    - args:
+        same: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        bytemask: [1, 1, 1, 1, 1]
+        bytemaskoffset: 0
+        missingindex: [1, 1, 1, 1, 1]
+        missingindexoffset: 0
+        length: 4
+      successful: True
+      results:
+        same: [False]
+    - args:
+        same: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        bytemask: [1, 1, 1, 1, 1]
+        bytemaskoffset: 0
+        missingindex: [1, 1, 1, 1, 1]
+        missingindexoffset: 0
+        length: 3
+      successful: True
+      results:
+        same: [False]
+    - args:
+        same: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        bytemask: [1, 1, 1, 1, 1]
+        bytemaskoffset: 0
+        missingindex: [1, 1, 1, 1, 1]
+        missingindexoffset: 0
+        length: 4
+      successful: True
+      results:
+        same: [False]
+    - args:
+        same: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        bytemask: [1, 1, 1, 1, 1]
+        bytemaskoffset: 0
+        missingindex: [1, 1, 1, 1, 1]
+        missingindexoffset: 0
+        length: 3
+      successful: True
+      results:
+        same: [False]
+    - args:
+        same: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        bytemask: [1, 1, 1, 1, 1]
+        bytemaskoffset: 0
+        missingindex: [1, 1, 1, 1, 1]
+        missingindexoffset: 0
+        length: 4
+      successful: True
+      results:
+        same: [False]
+    - args:
+        same: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        bytemask: [1, 1, 1, 1, 1]
+        bytemaskoffset: 0
+        missingindex: [1, 1, 1, 1, 1]
+        missingindexoffset: 0
+        length: 3
+      successful: True
+      results:
+        same: [False]
+    - args:
+        same: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        bytemask: [1, 1, 1, 1, 1]
+        bytemaskoffset: 0
+        missingindex: [1, 1, 1, 1, 1]
+        missingindexoffset: 0
+        length: 4
+      successful: True
+      results:
+        same: [False]
+    - args:
+        same: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        bytemask: [1, 1, 1, 1, 1]
+        bytemaskoffset: 0
+        missingindex: [1, 1, 1, 1, 1]
+        missingindexoffset: 0
+        length: 3
+      successful: True
+      results:
+        same: [False]
+    - args:
+        same: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        bytemask: [1, 1, 1, 1, 1]
+        bytemaskoffset: 0
+        missingindex: [1, 1, 1, 1, 1]
+        missingindexoffset: 0
+        length: 4
+      successful: True
+      results:
+        same: [False]
+    - args:
+        same: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        bytemask: [1, 1, 1, 1, 1]
+        bytemaskoffset: 0
+        missingindex: [1, 1, 1, 1, 1]
+        missingindexoffset: 0
+        length: 3
+      successful: True
+      results:
+        same: [False]
+    - args:
+        same: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        bytemask: [1, 1, 1, 1, 1]
+        bytemaskoffset: 0
+        missingindex: [1, 1, 1, 1, 1]
+        missingindexoffset: 0
+        length: 4
+      successful: True
+      results:
+        same: [False]
+    - args:
+        same: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        bytemask: [1, 1, 1, 1, 1]
+        bytemaskoffset: 0
+        missingindex: [1, 1, 1, 1, 1]
+        missingindexoffset: 0
+        length: 3
+      successful: True
+      results:
+        same: [False]
+    - args:
+        same: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        bytemask: [1, 1, 1, 1, 1]
+        bytemaskoffset: 0
+        missingindex: [1, 1, 1, 1, 1]
+        missingindexoffset: 0
+        length: 4
+      successful: True
+      results:
+        same: [False]
+    - args:
+        same: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        bytemask: [1, 1, 1, 1, 1]
+        bytemaskoffset: 0
+        missingindex: [1, 1, 1, 1, 1]
+        missingindexoffset: 0
+        length: 3
+      successful: True
+      results:
+        same: [False]
+    - args:
+        same: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        bytemask: [1, 1, 1, 1, 1]
+        bytemaskoffset: 0
+        missingindex: [1, 1, 1, 1, 1]
+        missingindexoffset: 0
+        length: 4
+      successful: True
+      results:
+        same: [False]
+    - args:
+        same: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        bytemask: [1, 1, 1, 1, 1]
+        bytemaskoffset: 0
+        missingindex: [1, 1, 1, 1, 1]
+        missingindexoffset: 0
+        length: 3
+      successful: True
+      results:
+        same: [False]
+    - args:
+        same: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        bytemask: [1, 1, 1, 1, 1]
+        bytemaskoffset: 0
+        missingindex: [1, 1, 1, 1, 1]
+        missingindexoffset: 0
+        length: 4
+      successful: True
+      results:
+        same: [False]
+    - args:
+        same: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        bytemask: [1, 1, 1, 1, 1]
+        bytemaskoffset: 0
+        missingindex: [1, 1, 1, 1, 1]
+        missingindexoffset: 0
+        length: 3
+      successful: True
+      results:
+        same: [False]
+    - args:
+        same: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        bytemask: [1, 1, 1, 1, 1]
+        bytemaskoffset: 0
+        missingindex: [1, 1, 1, 1, 1]
+        missingindexoffset: 0
+        length: 4
+      successful: True
+      results:
+        same: [False]
+    - args:
+        same: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        bytemask: [1, 1, 1, 1, 1]
+        bytemaskoffset: 0
+        missingindex: [1, 1, 1, 1, 1]
+        missingindexoffset: 0
+        length: 3
+      successful: True
+      results:
+        same: [False]
+    - args:
+        same: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        bytemask: [1, 1, 1, 1, 1]
+        bytemaskoffset: 0
+        missingindex: [1, 1, 1, 1, 1]
+        missingindexoffset: 0
+        length: 4
+      successful: True
+      results:
+        same: [False]
+    - args:
+        same: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        bytemask: [1, 1, 1, 1, 1]
+        bytemaskoffset: 0
+        missingindex: [1, 1, 1, 1, 1]
+        missingindexoffset: 0
+        length: 3
+      successful: True
+      results:
+        same: [False]
+    - args:
+        same: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        bytemask: [1, 1, 1, 1, 1]
+        bytemaskoffset: 0
+        missingindex: [1, 1, 1, 1, 1]
+        missingindexoffset: 0
+        length: 4
+      successful: True
+      results:
+        same: [False]
+    - args:
+        same: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+        bytemask: [1, 1, 1, 1, 1]
+        bytemaskoffset: 0
+        missingindex: [1, 1, 1, 1, 1]
+        missingindexoffset: 0
+        length: 3
+      successful: True
+      results:
+        same: [False]

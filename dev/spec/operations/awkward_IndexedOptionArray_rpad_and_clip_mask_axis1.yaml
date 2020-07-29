@@ -1,0 +1,33 @@
+- name: awkward_IndexedOptionArray_rpad_and_clip_mask_axis1
+  specializations:
+    - name: awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_64
+      args:
+        - toindex: List[int64_t]
+        - frommask: List[int8_t]
+        - length: int64_t
+  inparams: ['frommask', 'length']
+  outparams: ['toindex']
+  definition: |
+    def awkward_IndexedOptionArray_rpad_and_clip_mask_axis1(toindex, frommask, length):
+        count = 0
+        for i in range(length):
+            if frommask[i]:
+                toindex[i] = -1
+            else:
+                toindex[i] = count
+                count = count + 1
+  tests:
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        frommask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        length: 4
+      successful: True
+      results:
+        toindex: [0, 1, 2, 3]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        frommask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        length: 3
+      successful: True
+      results:
+        toindex: [0, 1, 2]

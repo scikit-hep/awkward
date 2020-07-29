@@ -1,0 +1,13 @@
+- name: awkward_IndexedArray_local_preparenext_64
+  args:
+    - tocarry: List[int64_t]
+    - starts: List[int64_t]
+    - parents: List[int64_t]
+    - parentsoffset: int64_t
+    - parentslength: int64_t
+    - nextparents: List[int64_t]
+    - nextparentsoffset: int64_t
+  inparams: ['starts', 'parents', 'parentsoffset', 'parentslength', 'nextparents', 'nextparentsoffset']
+  outparams: ['tocarry']
+  definition: |
+    Insert Python definition here

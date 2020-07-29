@@ -1,0 +1,83 @@
+- name: awkward_UnionArray_regular_index_getsize
+  specializations:
+    - name: awkward_UnionArray8_regular_index_getsize
+      args:
+        - size: List[int64_t]
+        - fromtags: List[int8_t]
+        - tagsoffset: int64_t
+        - length: int64_t
+  inparams: ['fromtags', 'tagsoffset', 'length']
+  outparams: ['size']
+  definition: |
+    def awkward_UnionArray_regular_index_getsize(size, fromtags, tagsoffset, length):
+        size[0] = 0
+        for i in range(length):
+            tag = int(fromtags[tagsoffset + i])
+            if size[0] < tag:
+                size[0] = tag
+        size[0] = size[0] + 1
+  tests:
+    - args:
+        size: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromtags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 1
+        length: 4
+      successful: True
+      results:
+        size: [1]
+    - args:
+        size: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromtags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 1
+        length: 3
+      successful: True
+      results:
+        size: [1]
+    - args:
+        size: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromtags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 0
+        length: 4
+      successful: True
+      results:
+        size: [1]
+    - args:
+        size: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromtags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 0
+        length: 3
+      successful: True
+      results:
+        size: [1]
+    - args:
+        size: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromtags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 1
+        length: 4
+      successful: True
+      results:
+        size: [2]
+    - args:
+        size: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromtags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 1
+        length: 3
+      successful: True
+      results:
+        size: [2]
+    - args:
+        size: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromtags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 0
+        length: 4
+      successful: True
+      results:
+        size: [2]
+    - args:
+        size: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromtags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 0
+        length: 3
+      successful: True
+      results:
+        size: [2]

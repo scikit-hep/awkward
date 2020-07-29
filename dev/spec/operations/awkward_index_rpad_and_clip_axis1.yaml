@@ -1,0 +1,54 @@
+- name: awkward_index_rpad_and_clip_axis1
+  specializations:
+    - name: awkward_index_rpad_and_clip_axis1_64
+      args:
+        - tostarts: List[int64_t]
+        - tostops: List[int64_t]
+        - target: int64_t
+        - length: int64_t
+  inparams: ['target', 'length']
+  outparams: ['tostarts', 'tostops']
+  definition: |
+    def awkward_index_rpad_and_clip_axis1(tostarts, tostops, target, length):
+        offset = 0
+        for i in range(length):
+            tostarts[i] = offset
+            offset = offset + target
+            tostops[i] = offset
+  tests:
+    - args:
+        tostarts: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tostops: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        target: 4
+        length: 4
+      successful: True
+      results:
+        tostarts: [0, 4, 8, 12]
+        tostops: [4, 8, 12, 16]
+    - args:
+        tostarts: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tostops: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        target: 4
+        length: 3
+      successful: True
+      results:
+        tostarts: [0, 4, 8]
+        tostops: [4, 8, 12]
+    - args:
+        tostarts: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tostops: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        target: 3
+        length: 4
+      successful: True
+      results:
+        tostarts: [0, 3, 6, 9]
+        tostops: [3, 6, 9, 12]
+    - args:
+        tostarts: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tostops: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        target: 3
+        length: 3
+      successful: True
+      results:
+        tostarts: [0, 3, 6]
+        tostops: [3, 6, 9]

@@ -1,0 +1,40 @@
+- name: awkward_Index32_to_Index64
+  args:
+    - toptr: List[int64_t]
+    - fromptr: List[int32_t]
+    - length: int64_t
+  inparams: ['fromptr', 'length']
+  outparams: ['toptr']
+  definition: |
+    def awkward_Index32_to_Index64(toptr, fromptr, length):
+        for i in range(length):
+            toptr[i] = int(fromptr[i])
+  tests:
+    - args:
+        toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromptr: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        length: 4
+      successful: True
+      results:
+        toptr: [1, 0, 0, 1]
+    - args:
+        toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromptr: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        length: 3
+      successful: True
+      results:
+        toptr: [1, 0, 0]
+    - args:
+        toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromptr: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        length: 4
+      successful: True
+      results:
+        toptr: [1, 1, 2, 2]
+    - args:
+        toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromptr: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        length: 3
+      successful: True
+      results:
+        toptr: [1, 1, 2]

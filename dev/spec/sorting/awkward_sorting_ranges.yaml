@@ -1,0 +1,10 @@
+- name: awkward_sorting_ranges
+  args:
+    - toindex: List[int64_t]
+    - tolength: int64_t
+    - parents: List[int64_t]
+    - parentslength: int64_t
+  inparams: ['tolength', 'parents', 'parentslength']
+  outparams: ['toindex']
+  definition: |
+    Insert Python definition here

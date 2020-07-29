@@ -1,0 +1,165 @@
+- name: awkward_ByteMaskedArray_getitem_nextcarry
+  specializations:
+    - name: awkward_ByteMaskedArray_getitem_nextcarry_64
+      args:
+        - tocarry: List[int64_t]
+        - mask: List[int8_t]
+        - maskoffset: int64_t
+        - length: int64_t
+        - validwhen: bool
+  inparams: ['mask', 'maskoffset', 'length', 'validwhen']
+  outparams: ['tocarry']
+  definition: |
+    def awkward_ByteMaskedArray_getitem_nextcarry(
+        tocarry, mask, maskoffset, length, validwhen
+    ):
+        k = 0
+        for i in range(length):
+            if (mask[maskoffset + i] != 0) == validwhen:
+                tocarry[k] = i
+                k = k + 1
+  tests:
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        mask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 4
+        validwhen: True
+      successful: True
+      results:
+        tocarry: [0, 1, 2, 3]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        mask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 4
+        validwhen: False
+      successful: True
+      results:
+        tocarry: []
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        mask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 3
+        validwhen: True
+      successful: True
+      results:
+        tocarry: [0, 1, 2]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        mask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 3
+        validwhen: False
+      successful: True
+      results:
+        tocarry: []
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        mask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 4
+        validwhen: True
+      successful: True
+      results:
+        tocarry: [0, 1, 2, 3]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        mask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 4
+        validwhen: False
+      successful: True
+      results:
+        tocarry: []
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        mask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 3
+        validwhen: True
+      successful: True
+      results:
+        tocarry: [0, 1, 2]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        mask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 3
+        validwhen: False
+      successful: True
+      results:
+        tocarry: []
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        mask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 4
+        validwhen: True
+      successful: True
+      results:
+        tocarry: [0, 1, 2, 3]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        mask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 4
+        validwhen: False
+      successful: True
+      results:
+        tocarry: []
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        mask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 3
+        validwhen: True
+      successful: True
+      results:
+        tocarry: [0, 1, 2]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        mask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 3
+        validwhen: False
+      successful: True
+      results:
+        tocarry: []
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        mask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 4
+        validwhen: True
+      successful: True
+      results:
+        tocarry: [0, 1, 2, 3]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        mask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 4
+        validwhen: False
+      successful: True
+      results:
+        tocarry: []
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        mask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 3
+        validwhen: True
+      successful: True
+      results:
+        tocarry: [0, 1, 2]
+    - args:
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        mask: [1, 1, 1, 1, 1]
+        maskoffset: 0
+        length: 3
+        validwhen: False
+      successful: True
+      results:
+        tocarry: []

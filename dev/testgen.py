@@ -12,98 +12,105 @@ CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
 def genpykernels():
+    print("Generating Python kernels")
     prefix = """
 
 kMaxInt64  = 9223372036854775806
 kSliceNone = kMaxInt64 + 1
 
 """
-    with open(os.path.join(CURRENT_DIR, "spec.yaml")) as infile:
-        spec = yaml.safe_load(infile)["kernels"]
+    with open(os.path.join(CURRENT_DIR, "spec", "spec.yaml")) as infile:
+        mainspec = yaml.safe_load(infile)["kernels"]
         with open(
             os.path.join(CURRENT_DIR, "..", "tests", "kernels.py"), "w"
         ) as outfile:
             outfile.write(prefix)
-            for func in spec:
-                if "def " in func["definition"]:
-                    outfile.write(func["definition"] + "\n")
-                    if "specializations" in func.keys():
-                        for childfunc in func["specializations"]:
-                            outfile.write(
-                                childfunc["name"] + " = " + func["name"] + "\n"
-                            )
-                        outfile.write("\n\n")
+            for filedir in mainspec.values():
+                for relpath in filedir.values():
+                    with open(os.path.join(CURRENT_DIR, "spec", relpath)) as specfile:
+                        indspec = yaml.safe_load(specfile)[0]
+                        if "def " in indspec["definition"]:
+                            outfile.write(indspec["definition"] + "\n")
+                            if "specializations" in indspec.keys():
+                                for childfunc in indspec["specializations"]:
+                                    outfile.write(
+                                        childfunc["name"]
+                                        + " = "
+                                        + indspec["name"]
+                                        + "\n"
+                                    )
+                                outfile.write("\n\n")
 
 
 def readspec():
     funcs = {}
-    with open(os.path.join(CURRENT_DIR, "spec.yaml")) as infile:
-        spec = yaml.safe_load(infile)["kernels"]
-        for func in spec:
-            if (
-                "def " in func["definition"]
-                and "tests" in func.keys()
-                and func["tests"] is not None
-            ):
-                if "specializations" in func.keys():
-                    for childfunc in func["specializations"]:
-                        funcs[childfunc["name"]] = []
-                        for test in func["tests"]:
-                            # Check if test has correct types
-                            flag = True
-                            count = 0
-                            for arg, val in test["args"].items():
-                                spectype = pytype(
-                                    childfunc["args"][count][arg]
-                                    .replace("List", "")
-                                    .replace("[", "")
-                                    .replace("]", "")
-                                )
-                                while isinstance(val, list):
-                                    val = val[0]
-                                if type(val) != eval(spectype):
-                                    flag = False
-                                count += 1
-                            if flag:
-                                testinfo = {}
-                                testinfo["inargs"] = OrderedDict()
-                                testinfo["inargs"].update(test["args"])
-                                testinfo["success"] = test["successful"]
-                                if testinfo["success"]:
-                                    testinfo["outargs"] = OrderedDict()
-                                    testinfo["outargs"].update(test["results"])
-                                funcs[childfunc["name"]].append(testinfo)
-                else:
-                    funcs[func["name"]] = []
-                    for test in func["tests"]:
-                        # Check if test has correct types
-                        flag = True
-                        count = 0
-                        for arg, val in test["args"].items():
-                            spectype = pytype(
-                                func["args"][count][arg]
-                                .replace("List", "")
-                                .replace("[", "")
-                                .replace("]", "")
-                            )
-                            while isinstance(val, list):
-                                val = val[0]
-                            if type(val) != eval(spectype):
-                                flag = False
-                            count += 1
-                        if flag:
-                            testinfo = {}
-                            testinfo["inargs"] = OrderedDict()
-                            testinfo["inargs"].update(test["args"])
-                            testinfo["success"] = test["successful"]
-                            if testinfo["success"]:
-                                testinfo["outargs"] = OrderedDict()
-                                testinfo["outargs"].update(test["results"])
-                            funcs[func["name"]].append(testinfo)
+    with open(os.path.join(CURRENT_DIR, "spec", "spec.yaml")) as infile:
+        mainspec = yaml.safe_load(infile)["kernels"]
+        for filedir in mainspec.values():
+            for relpath in filedir.values():
+                with open(os.path.join(CURRENT_DIR, "spec", relpath)) as specfile:
+                    indspec = yaml.safe_load(specfile)[0]
+                    if "tests" in indspec.keys():
+                        if "specializations" in indspec.keys():
+                            for childfunc in indspec["specializations"]:
+                                funcs[childfunc["name"]] = []
+                                for test in indspec["tests"]:
+                                    # Check if test has correct types
+                                    flag = True
+                                    count = 0
+                                    for arg, val in test["args"].items():
+                                        spectype = pytype(
+                                            childfunc["args"][count][arg]
+                                            .replace("List", "")
+                                            .replace("[", "")
+                                            .replace("]", "")
+                                        )
+                                        while isinstance(val, list):
+                                            val = val[0]
+                                        if type(val) != eval(spectype):
+                                            flag = False
+                                        count += 1
+                                    if flag:
+                                        testinfo = {}
+                                        testinfo["inargs"] = OrderedDict()
+                                        testinfo["inargs"].update(test["args"])
+                                        testinfo["success"] = test["successful"]
+                                        if testinfo["success"]:
+                                            testinfo["outargs"] = OrderedDict()
+                                            testinfo["outargs"].update(test["results"])
+                                        funcs[childfunc["name"]].append(testinfo)
+                        else:
+                            funcs[indspec["name"]] = []
+                            for test in indspec["tests"]:
+                                # Check if test has correct types
+                                flag = True
+                                count = 0
+                                for arg, val in test["args"].items():
+                                    spectype = pytype(
+                                        indspec["args"][count][arg]
+                                        .replace("List", "")
+                                        .replace("[", "")
+                                        .replace("]", "")
+                                    )
+                                    while isinstance(val, list):
+                                        val = val[0]
+                                    if type(val) != eval(spectype):
+                                        flag = False
+                                    count += 1
+                                if flag:
+                                    testinfo = {}
+                                    testinfo["inargs"] = OrderedDict()
+                                    testinfo["inargs"].update(test["args"])
+                                    testinfo["success"] = test["successful"]
+                                    if testinfo["success"]:
+                                        testinfo["outargs"] = OrderedDict()
+                                        testinfo["outargs"].update(test["results"])
+                                    funcs[indspec["name"]].append(testinfo)
     return funcs
 
 
 def testpykernels(tests):
+    print("Generating file for testing python kernels")
     with open(os.path.join(CURRENT_DIR, "..", "tests", "test_pykernels.py"), "w") as f:
         f.write("import tests.kernels\n\n")
         for funcname in tests.keys():
@@ -149,6 +156,8 @@ def testpykernels(tests):
 
 
 def testcpukernels(tests):
+    print("Generating file for testing CPU kernels")
+
     def getctypelist(typedict):
         newctypes = []
         for typename in typedict.values():
@@ -185,27 +194,30 @@ def testcpukernels(tests):
 
     def getfuncargs():
         funcs = {}
-        with open(os.path.join(CURRENT_DIR, "spec.yaml")) as infile:
-            spec = yaml.safe_load(infile)["kernels"]
-            for func in spec:
-                if (
-                    "def " in func["definition"]
-                    and "tests" in func.keys()
-                    and func["tests"] is not None
-                ):
-                    if "specializations" in func.keys():
-                        for childfunc in func["specializations"]:
-                            funcs[childfunc["name"]] = {}
-                            for arg in childfunc["args"]:
-                                funcs[childfunc["name"]][list(arg.keys())[0]] = list(
-                                    arg.values()
-                                )[0]
-                    else:
-                        funcs[func["name"]] = {}
-                        for arg in func["args"]:
-                            funcs[func["name"]][list(arg.keys())[0]] = list(
-                                arg.values()
-                            )[0]
+        with open(os.path.join(CURRENT_DIR, "spec", "spec.yaml")) as infile:
+            mainspec = yaml.safe_load(infile)["kernels"]
+            for filedir in mainspec.values():
+                for relpath in filedir.values():
+                    with open(os.path.join(CURRENT_DIR, "spec", relpath)) as specfile:
+                        indspec = yaml.safe_load(specfile)[0]
+                        if (
+                            "def " in indspec["definition"]
+                            and "tests" in indspec.keys()
+                            and indspec["tests"] is not None
+                        ):
+                            if "specializations" in indspec.keys():
+                                for childfunc in indspec["specializations"]:
+                                    funcs[childfunc["name"]] = {}
+                                    for arg in childfunc["args"]:
+                                        funcs[childfunc["name"]][
+                                            list(arg.keys())[0]
+                                        ] = list(arg.values())[0]
+                            else:
+                                funcs[indspec["name"]] = {}
+                                for arg in indspec["args"]:
+                                    funcs[indspec["name"]][list(arg.keys())[0]] = list(
+                                        arg.values()
+                                    )[0]
         return funcs
 
     with open(os.path.join(CURRENT_DIR, "..", "tests", "test_cpukernels.py"), "w") as f:

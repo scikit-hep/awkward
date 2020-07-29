@@ -1,0 +1,122 @@
+- name: awkward_NumpyArray_fill_frombool
+  specializations:
+    - name: awkward_NumpyArray_fill_tofloat64_frombool
+      args:
+        - toptr: List[double]
+        - tooffset: int64_t
+        - fromptr: List[bool]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_touint16_frombool
+      args:
+        - toptr: List[uint16_t]
+        - tooffset: int64_t
+        - fromptr: List[bool]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_tobool_frombool
+      args:
+        - toptr: List[bool]
+        - tooffset: int64_t
+        - fromptr: List[bool]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_touint32_frombool
+      args:
+        - toptr: List[uint32_t]
+        - tooffset: int64_t
+        - fromptr: List[bool]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_toint32_frombool
+      args:
+        - toptr: List[int32_t]
+        - tooffset: int64_t
+        - fromptr: List[bool]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_toint64_frombool
+      args:
+        - toptr: List[int64_t]
+        - tooffset: int64_t
+        - fromptr: List[bool]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_tofloat32_frombool
+      args:
+        - toptr: List[float]
+        - tooffset: int64_t
+        - fromptr: List[bool]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_toint16_frombool
+      args:
+        - toptr: List[int16_t]
+        - tooffset: int64_t
+        - fromptr: List[bool]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_toint8_frombool
+      args:
+        - toptr: List[int8_t]
+        - tooffset: int64_t
+        - fromptr: List[bool]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_touint8_frombool
+      args:
+        - toptr: List[uint8_t]
+        - tooffset: int64_t
+        - fromptr: List[bool]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_touint64_frombool
+      args:
+        - toptr: List[uint64_t]
+        - tooffset: int64_t
+        - fromptr: List[bool]
+        - fromoffset: int64_t
+        - length: int64_t
+  inparams: ['tooffset', 'fromptr', 'fromoffset', 'length']
+  outparams: ['toptr']
+  definition: |
+    def awkward_NumpyArray_fill_frombool(toptr, tooffset, fromptr, fromoffset, length):
+        for i in range(length):
+            toptr[tooffset + i] = float(fromptr[fromoffset + i] != 0)
+  tests:
+    - args:
+        toptr: [1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1]
+        tooffset: 0
+        fromptr: [True, False, True, True, False, True, True, True, True, False, True, True, False, False, False, True, True, False, True, False, True]
+        fromoffset: 0
+        length: 4
+      successful: True
+      results:
+        toptr: [1.0, 0.0, 1.0, 1.0]
+    - args:
+        toptr: [1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1]
+        tooffset: 0
+        fromptr: [True, False, True, True, False, True, True, True, True, False, True, True, False, False, False, True, True, False, True, False, True]
+        fromoffset: 0
+        length: 3
+      successful: True
+      results:
+        toptr: [1.0, 0.0, 1.0]
+    - args:
+        toptr: [1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1]
+        tooffset: 0
+        fromptr: [True, True, False, True, False, True, True, False, True, False, True, False, True, False, False]
+        fromoffset: 0
+        length: 4
+      successful: True
+      results:
+        toptr: [1.0, 1.0, 0.0, 1.0]
+    - args:
+        toptr: [1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1]
+        tooffset: 0
+        fromptr: [True, True, False, True, False, True, True, False, True, False, True, False, True, False, False]
+        fromoffset: 0
+        length: 3
+      successful: True
+      results:
+        toptr: [1.0, 1.0, 0.0]

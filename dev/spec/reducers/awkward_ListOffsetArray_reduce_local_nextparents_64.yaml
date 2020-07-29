@@ -1,0 +1,83 @@
+- name: awkward_ListOffsetArray_reduce_local_nextparents_64
+  args:
+    - nextparents: List[int64_t]
+    - offsets: List[int64_t]
+    - offsetsoffset: int64_t
+    - length: int64_t
+  inparams: ['offsets', 'offsetsoffset', 'length']
+  outparams: ['nextparents']
+  definition: |
+    def awkward_ListOffsetArray_reduce_local_nextparents_64(
+        nextparents, offsets, offsetsoffset, length
+    ):
+        initialoffset = offsets[offsetsoffset]
+        for i in range(length):
+            j = offsets[offsetsoffset + i] - initialoffset
+            while j < (offsets[(offsetsoffset + i) + 1] - initialoffset):
+                nextparents[j] = i
+                j = j + 1
+  tests:
+    - args:
+        nextparents: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        offsets: [1, 1, 2, 3, 5, 8, 11, 11, 11, 11, 20, 21, 21, 21, 22, 23, 24, 26, 27, 29, 33, 34, 35, 36, 37, 38, 38, 38, 38, 38, 38, 38, 40, 40, 41, 42, 43, 44, 45, 46, 47]
+        offsetsoffset: 1
+        length: 4
+      successful: True
+      results:
+        nextparents: [0, 1, 2, 2, 3, 3, 3]
+    - args:
+        nextparents: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        offsets: [1, 1, 2, 3, 5, 8, 11, 11, 11, 11, 20, 21, 21, 21, 22, 23, 24, 26, 27, 29, 33, 34, 35, 36, 37, 38, 38, 38, 38, 38, 38, 38, 40, 40, 41, 42, 43, 44, 45, 46, 47]
+        offsetsoffset: 1
+        length: 3
+      successful: True
+      results:
+        nextparents: [0, 1, 2, 2]
+    - args:
+        nextparents: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        offsets: [1, 1, 2, 3, 5, 8, 11, 11, 11, 11, 20, 21, 21, 21, 22, 23, 24, 26, 27, 29, 33, 34, 35, 36, 37, 38, 38, 38, 38, 38, 38, 38, 40, 40, 41, 42, 43, 44, 45, 46, 47]
+        offsetsoffset: 0
+        length: 4
+      successful: True
+      results:
+        nextparents: [1, 2, 3, 3]
+    - args:
+        nextparents: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        offsets: [1, 1, 2, 3, 5, 8, 11, 11, 11, 11, 20, 21, 21, 21, 22, 23, 24, 26, 27, 29, 33, 34, 35, 36, 37, 38, 38, 38, 38, 38, 38, 38, 40, 40, 41, 42, 43, 44, 45, 46, 47]
+        offsetsoffset: 0
+        length: 3
+      successful: True
+      results:
+        nextparents: [1, 2]
+    - args:
+        nextparents: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        offsets: [2, 3, 3, 4, 5, 5, 5, 5, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 15, 15, 15, 15, 15]
+        offsetsoffset: 1
+        length: 4
+      successful: True
+      results:
+        nextparents: [1, 2]
+    - args:
+        nextparents: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        offsets: [2, 3, 3, 4, 5, 5, 5, 5, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 15, 15, 15, 15, 15]
+        offsetsoffset: 1
+        length: 3
+      successful: True
+      results:
+        nextparents: [1, 2]
+    - args:
+        nextparents: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        offsets: [2, 3, 3, 4, 5, 5, 5, 5, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 15, 15, 15, 15, 15]
+        offsetsoffset: 0
+        length: 4
+      successful: True
+      results:
+        nextparents: [0, 2, 3]
+    - args:
+        nextparents: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        offsets: [2, 3, 3, 4, 5, 5, 5, 5, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 15, 15, 15, 15, 15]
+        offsetsoffset: 0
+        length: 3
+      successful: True
+      results:
+        nextparents: [0, 2]

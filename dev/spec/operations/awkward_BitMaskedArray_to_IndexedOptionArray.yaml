@@ -1,0 +1,121 @@
+- name: awkward_BitMaskedArray_to_IndexedOptionArray
+  specializations:
+    - name: awkward_BitMaskedArray_to_IndexedOptionArray64
+      args:
+        - toindex: List[int64_t]
+        - frombitmask: List[uint8_t]
+        - bitmaskoffset: int64_t
+        - bitmasklength: int64_t
+        - validwhen: bool
+        - lsb_order: bool
+  inparams: ['frombitmask', 'bitmaskoffset', 'bitmasklength', 'validwhen', 'lsb_order']
+  outparams: ['toindex']
+  definition: |
+    def awkward_BitMaskedArray_to_IndexedOptionArray(
+        toindex, frombitmask, bitmaskoffset, bitmasklength, validwhen, lsb_order
+    ):
+        if lsb_order:
+            for i in range(bitmasklength):
+                byte = frombitmask[bitmaskoffset + i]
+                if (byte & int(1)) == validwhen:
+                    toindex[(i * 8) + 0] = (i * 8) + 0
+                else:
+                    toindex[(i * 8) + 0] = -1
+                byte >>= 1
+                if (byte & int(1)) == validwhen:
+                    toindex[(i * 8) + 1] = (i * 8) + 1
+                else:
+                    toindex[(i * 8) + 1] = -1
+                byte >>= 1
+                if (byte & int(1)) == validwhen:
+                    toindex[(i * 8) + 2] = (i * 8) + 2
+                else:
+                    toindex[(i * 8) + 2] = -1
+                byte >>= 1
+                if (byte & int(1)) == validwhen:
+                    toindex[(i * 8) + 3] = (i * 8) + 3
+                else:
+                    toindex[(i * 8) + 3] = -1
+                byte >>= 1
+                if (byte & int(1)) == validwhen:
+                    toindex[(i * 8) + 4] = (i * 8) + 4
+                else:
+                    toindex[(i * 8) + 4] = -1
+                byte >>= 1
+                if (byte & int(1)) == validwhen:
+                    toindex[(i * 8) + 5] = (i * 8) + 5
+                else:
+                    toindex[(i * 8) + 5] = -1
+                byte >>= 1
+                if (byte & int(1)) == validwhen:
+                    toindex[(i * 8) + 6] = (i * 8) + 6
+                else:
+                    toindex[(i * 8) + 6] = -1
+                byte >>= 1
+                if (byte & int(1)) == validwhen:
+                    toindex[(i * 8) + 7] = (i * 8) + 7
+                else:
+                    toindex[(i * 8) + 7] = -1
+        else:
+            for i in range(bitmasklength):
+                byte = frombitmask[bitmaskoffset + i]
+                if ((byte & int(128)) != 0) == validwhen:
+                    toindex[(i * 8) + 0] = (i * 8) + 0
+                else:
+                    toindex[(i * 8) + 0] = -1
+                byte <<= 1
+                if ((byte & int(128)) != 0) == validwhen:
+                    toindex[(i * 8) + 1] = (i * 8) + 1
+                else:
+                    toindex[(i * 8) + 1] = -1
+                byte <<= 1
+                if ((byte & int(128)) != 0) == validwhen:
+                    toindex[(i * 8) + 2] = (i * 8) + 2
+                else:
+                    toindex[(i * 8) + 2] = -1
+                byte <<= 1
+                if ((byte & int(128)) != 0) == validwhen:
+                    toindex[(i * 8) + 3] = (i * 8) + 3
+                else:
+                    toindex[(i * 8) + 3] = -1
+                byte <<= 1
+                if ((byte & int(128)) != 0) == validwhen:
+                    toindex[(i * 8) + 4] = (i * 8) + 4
+                else:
+                    toindex[(i * 8) + 4] = -1
+                byte <<= 1
+                if ((byte & int(128)) != 0) == validwhen:
+                    toindex[(i * 8) + 5] = (i * 8) + 5
+                else:
+                    toindex[(i * 8) + 5] = -1
+                byte <<= 1
+                if ((byte & int(128)) != 0) == validwhen:
+                    toindex[(i * 8) + 6] = (i * 8) + 6
+                else:
+                    toindex[(i * 8) + 6] = -1
+                byte <<= 1
+                if ((byte & int(128)) != 0) == validwhen:
+                    toindex[(i * 8) + 7] = (i * 8) + 7
+                else:
+                    toindex[(i * 8) + 7] = -1
+  tests:
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        frombitmask: [244, 251, 64, 0, 133]
+        bitmaskoffset: 1
+        bitmasklength: 4
+        validwhen: True
+        lsb_order: False
+      successful: True
+      results:
+        toindex: [0, 1, 2, 3, 4, -1, 6, 7, -1, 9, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 24, -1, -1, -1, -1, 29, -1, 31]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        frombitmask: [244, 251, 64, 0, 133]
+        bitmaskoffset: 1
+        bitmasklength: 3
+        validwhen: True
+        lsb_order: False
+      successful: True
+      results:
+        toindex: [0, 1, 2, 3, 4, -1, 6, 7, -1, 9, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]

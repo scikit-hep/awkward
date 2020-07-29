@@ -2,6 +2,7 @@
 
 import argparse
 import copy
+import importlib
 import json
 import os
 import re
@@ -103,6 +104,14 @@ PYGEN_BLACKLIST = SPEC_BLACKLIST + [
     "awkward_NumpyArray_getitem_next_null",
     "awkward_NumpyArray_getitem_next_null_64",
 ]
+
+
+def getdirname(filename):
+    if "/" in filename:
+        name = filename[filename.rfind("/") + 1 : -4]
+    else:
+        name = filename[:-4]
+    return name
 
 
 def getheadername(filename):
@@ -876,6 +885,8 @@ kSliceNone = kMaxInt64 + 1
     writepykernels()
     import kernels
 
+    importlib.reload(kernels)
+
     with open(os.path.join(CURRENT_DIR, "testcases.json")) as testjson:
         data = json.load(testjson)
         funcs = OrderedDict()
@@ -1058,148 +1069,185 @@ if __name__ == "__main__":
         os.path.join(CURRENT_DIR, "..", "src", "cpu-kernels", "sorting.cpp"),
     ]
 
-    failfuncs = []
-    alltokens = OrderedDict()
-    allpyfuncs = OrderedDict()
-    allfuncargs = OrderedDict()
-    allfuncroles = OrderedDict()
+    with open(os.path.join(CURRENT_DIR, "spec", "spec.yaml"), "w") as mainspec:
+        mainspec.write("kernels:\n")
+        for filename in kernelfiles:
+            mainspec.write(" " * 2 + getdirname(filename) + ":\n")
+            if "sorting.cpp" in filename:
+                pfile, tokens = preprocess(filename, skip_implementation=True)
+            else:
+                pfile, tokens = preprocess(filename)
+                pyfuncs = genpython(pfile)
 
-    for filename in kernelfiles:
-        if "sorting.cpp" in filename:
-            pfile, tokens = preprocess(filename, skip_implementation=True)
-        else:
-            pfile, tokens = preprocess(filename)
-            pyfuncs = genpython(pfile)
-            allpyfuncs.update(pyfuncs)
+            hfile = getheadername(filename)
+            funcroles = parseheader(hfile)
+            funcargs = getargs(hfile)
+            failfuncs = check_fail_func(filename)
 
-        hfile = getheadername(filename)
-        allfuncroles.update(parseheader(hfile))
-        allfuncargs.update(getargs(hfile))
-        failfuncs.extend(check_fail_func(filename))
-        alltokens.update(tokens)
+            if "sorting.cpp" not in filename:
+                tests = get_tests(pyfuncs, funcargs, tokens, funcroles, failfuncs)
+            paramchecks = get_paramcheck(funcroles, tokens, funcargs)
 
-    tests = get_tests(allpyfuncs, allfuncargs, alltokens, allfuncroles, failfuncs)
-    paramchecks = get_paramcheck(allfuncroles, alltokens, allfuncargs)
-
-    if kernelname is None:
-        print("kernels:")
-        for funcname in alltokens.keys():
-            if (
-                "gen" not in alltokens[funcname].keys()
-                and funcname not in SPEC_BLACKLIST
-            ):
-                print(" " * 2 + "- name: " + funcname)
-                if "childfunc" in alltokens[funcname].keys():
-                    print(" " * 4 + "specializations:")
-                    for childfunc in alltokens[funcname]["childfunc"]:
-                        print(" " * 4 + "- name: " + childfunc)
-                        print(" " * 6 + "args:")
-                        for arg in allfuncargs[childfunc].keys():
+            if kernelname is None:
+                for funcname in tokens.keys():
+                    if (
+                        "gen" not in tokens[funcname].keys()
+                        and funcname not in SPEC_BLACKLIST
+                    ):
+                        with open(
+                            os.path.join(
+                                CURRENT_DIR,
+                                "spec",
+                                getdirname(filename),
+                                funcname + ".yaml",
+                            ),
+                            "w",
+                        ) as f:
+                            mainspec.write(
+                                " " * 4
+                                + funcname
+                                + ": "
+                                + os.path.join(
+                                    getdirname(filename),
+                                    funcname + ".yaml\n",
+                                )
+                            )
+                            f.write("- name: " + funcname + "\n")
+                            if "childfunc" in tokens[funcname].keys():
+                                f.write(" " * 2 + "specializations:\n")
+                                for childfunc in tokens[funcname]["childfunc"]:
+                                    f.write(" " * 4 + "- name: " + childfunc + "\n")
+                                    f.write(" " * 6 + "args:\n")
+                                    for arg in funcargs[childfunc].keys():
+                                        f.write(
+                                            " " * 8
+                                            + "- "
+                                            + arg
+                                            + ": "
+                                            + arrayconv(funcargs[childfunc][arg])
+                                            + "\n"
+                                        )
+                            else:
+                                f.write(" " * 2 + "args:\n")
+                                for arg in funcargs[funcname].keys():
+                                    f.write(
+                                        " " * 4
+                                        + "- "
+                                        + arg
+                                        + ": "
+                                        + arrayconv(funcargs[funcname][arg])
+                                        + "\n"
+                                    )
+                            inparams = []
+                            outparams = []
+                            for arg in paramchecks[funcname].keys():
+                                if (
+                                    paramchecks[funcname][arg] == "inparam"
+                                    or paramchecks[funcname][arg] == "inoutparam"
+                                ):
+                                    inparams.append(str(arg))
+                                if (
+                                    paramchecks[funcname][arg] == "outparam"
+                                    or paramchecks[funcname][arg] == "inoutparam"
+                                ):
+                                    outparams.append(str(arg))
+                            f.write(" " * 2 + "inparams: " + str(inparams) + "\n")
+                            f.write(" " * 2 + "outparams: " + str(outparams) + "\n")
+                            f.write(" " * 2 + "definition: |\n")
+                            if funcname in PYGEN_BLACKLIST or "sorting.cpp" in filename:
+                                f.write(" " * 4 + "Insert Python definition here\n")
+                            else:
+                                f.write(
+                                    indent_code(pyfuncs[funcname], 4).rstrip() + "\n"
+                                )
+                            if (
+                                "sorting.cpp" not in filename
+                                and funcname not in TEST_BLACKLIST
+                                and funcname in tests.keys()
+                            ):
+                                f.write(" " * 2 + "tests:\n")
+                                for test in tests[funcname]:
+                                    f.write(" " * 4 + "- args:\n")
+                                    for arg in test["input"].keys():
+                                        f.write(
+                                            " " * 8
+                                            + arg
+                                            + ": "
+                                            + str(test["input"][arg])
+                                            + "\n"
+                                        )
+                                    f.write(
+                                        " " * 6
+                                        + "successful: "
+                                        + str(test["success"])
+                                        + "\n"
+                                    )
+                                    f.write(" " * 6 + "results:\n")
+                                    if test["success"] is True:
+                                        for arg in test["output"].keys():
+                                            f.write(
+                                                " " * 8
+                                                + arg
+                                                + ": "
+                                                + str(test["output"][arg])
+                                                + "\n"
+                                            )
+            else:
+                if kernelname in tokens.keys() and kernelname not in SPEC_BLACKLIST:
+                    print("name: ", kernelname)
+                    if "childfunc" in tokens[kernelname].keys():
+                        print("specializations:")
+                        for childfunc in tokens[kernelname]["childfunc"]:
+                            print(" " * 2 + "- name: " + childfunc)
+                            print(" " * 4 + "args:")
+                            for arg in funcargs[childfunc].keys():
+                                print(
+                                    " " * 6
+                                    + "- "
+                                    + arg
+                                    + ": "
+                                    + arrayconv(funcargs[childfunc][arg])
+                                )
+                    else:
+                        for arg in funcargs[kernelname].keys():
                             print(
-                                " " * 8
+                                " " * 2
                                 + "- "
                                 + arg
                                 + ": "
-                                + arrayconv(allfuncargs[childfunc][arg])
+                                + arrayconv(funcargs[kernelname][arg])
                             )
+                    inparams = []
+                    outparams = []
+                    for arg in paramchecks[kernelname].keys():
+                        if (
+                            paramchecks[kernelname][arg] == "inparam"
+                            or paramchecks[kernelname][arg] == "inoutparam"
+                        ):
+                            inparams.append(str(arg))
+                        if (
+                            paramchecks[kernelname][arg] == "outparam"
+                            or paramchecks[kernelname][arg] == "inoutparam"
+                        ):
+                            outparams.append(str(arg))
+                    print(" " * 4 + "inparams: ", inparams)
+                    print(" " * 4 + "outparams: ", outparams)
+                    print(" " * 4 + "definition: |")
+                    if kernelname in PYGEN_BLACKLIST or "sorting.cpp" in filename:
+                        print(" " * 6 + "Insert Python definition here")
+                    else:
+                        print(indent_code(pyfuncs[kernelname], 6).rstrip())
+                    if kernelname in tests.keys():
+                        print(" " * 4 + "tests:")
+                        for test in tests[kernelname]:
+                            print(" " * 6 + "- args:")
+                            for arg in test["input"].keys():
+                                print(" " * 10 + arg + ": ", test["input"][arg])
+                            print(" " * 8 + "successful: ", test["success"])
+                            print(" " * 8 + "results:")
+                            if test["success"] is True:
+                                for arg in test["output"].keys():
+                                    print(" " * 10 + arg + ": ", test["output"][arg])
+                        print()
                 else:
-                    print(" " * 4 + "args:")
-                    for arg in allfuncargs[funcname].keys():
-                        print(
-                            " " * 6
-                            + "- "
-                            + arg
-                            + ": "
-                            + arrayconv(allfuncargs[funcname][arg])
-                        )
-                inparams = []
-                outparams = []
-                for arg in paramchecks[funcname].keys():
-                    if (
-                        paramchecks[funcname][arg] == "inparam"
-                        or paramchecks[funcname][arg] == "inoutparam"
-                    ):
-                        inparams.append(str(arg))
-                    if (
-                        paramchecks[funcname][arg] == "outparam"
-                        or paramchecks[funcname][arg] == "inoutparam"
-                    ):
-                        outparams.append(str(arg))
-                print(" " * 4 + "inparams: ", inparams)
-                print(" " * 4 + "outparams: ", outparams)
-                print(" " * 4 + "definition: |")
-                if funcname in PYGEN_BLACKLIST:
-                    print(" " * 6 + "Insert Python definition here")
-                else:
-                    print(indent_code(allpyfuncs[funcname], 6).rstrip())
-                if funcname in tests.keys():
-                    print(" " * 4 + "tests:")
-                    for test in tests[funcname]:
-                        print(" " * 6 + "- args:")
-                        for arg in test["input"].keys():
-                            print(" " * 10 + arg + ": ", test["input"][arg])
-                        print(" " * 8 + "successful: ", test["success"])
-                        print(" " * 8 + "results:")
-                        if test["success"] is True:
-                            for arg in test["output"].keys():
-                                print(" " * 10 + arg + ": ", test["output"][arg])
-                    print()
-    else:
-        if kernelname in alltokens.keys() and kernelname not in SPEC_BLACKLIST:
-            print("name: ", kernelname)
-            if "childfunc" in alltokens[kernelname].keys():
-                print("specializations:")
-                for childfunc in alltokens[kernelname]["childfunc"]:
-                    print(" " * 2 + "- name: " + childfunc)
-                    print(" " * 4 + "args:")
-                    for arg in allfuncargs[childfunc].keys():
-                        print(
-                            " " * 6
-                            + "- "
-                            + arg
-                            + ": "
-                            + arrayconv(allfuncargs[childfunc][arg])
-                        )
-            else:
-                for arg in allfuncargs[kernelname].keys():
-                    print(
-                        " " * 2
-                        + "- "
-                        + arg
-                        + ": "
-                        + arrayconv(allfuncargs[kernelname][arg])
-                    )
-            inparams = []
-            outparams = []
-            for arg in paramchecks[kernelname].keys():
-                if (
-                    paramchecks[kernelname][arg] == "inparam"
-                    or paramchecks[kernelname][arg] == "inoutparam"
-                ):
-                    inparams.append(str(arg))
-                if (
-                    paramchecks[kernelname][arg] == "outparam"
-                    or paramchecks[kernelname][arg] == "inoutparam"
-                ):
-                    outparams.append(str(arg))
-            print(" " * 4 + "inparams: ", inparams)
-            print(" " * 4 + "outparams: ", outparams)
-            print(" " * 4 + "definition: |")
-            if kernelname in PYGEN_BLACKLIST:
-                print(" " * 6 + "Insert Python definition here")
-            else:
-                print(indent_code(allpyfuncs[kernelname], 6).rstrip())
-            if kernelname in tests.keys():
-                print(" " * 4 + "tests:")
-                for test in tests[kernelname]:
-                    print(" " * 6 + "- args:")
-                    for arg in test["input"].keys():
-                        print(" " * 10 + arg + ": ", test["input"][arg])
-                    print(" " * 8 + "successful: ", test["success"])
-                    print(" " * 8 + "results:")
-                    if test["success"] is True:
-                        for arg in test["output"].keys():
-                            print(" " * 10 + arg + ": ", test["output"][arg])
-                print()
-        else:
-            raise ValueError("Function {0} not present".format(kernelname))
+                    raise ValueError("Function {0} not present".format(kernelname))
