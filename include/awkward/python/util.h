@@ -54,4 +54,22 @@ private:
   PyObject* pyobj_;
 };
 
+/// An utility function to convert Python tuples into std::vectors
+template <typename T>
+std::vector<T> pytuples_to_vector(py::object tuple) {
+  std::vector<T> c_tuple;
+  for(auto i : tuple) {
+    try {
+      int64_t element = py::cast<T>(i);
+      c_tuple.push_back(element);
+    }
+    catch (...) {
+      throw std::runtime_error(std::string(
+        "Error occured while processing tuple!"));
+    }
+  }
+
+  return c_tuple;
+}
+
 #endif // AWKWARDPY_UTIL_H_

@@ -7,23 +7,6 @@
 #include "awkward/python/index.h"
 
 template <typename T>
-std::vector<T> pytuples_to_vector(py::object tuple) {
-  std::vector<T> c_tuple;
-  for(auto i : tuple) {
-    try {
-      int64_t element = py::cast<T>(i);
-      c_tuple.push_back(element);
-    }
-    catch (...) {
-      throw std::runtime_error(std::string(
-        "Error occured while processing tuple!"));
-    }
-  }
-
-  return c_tuple;
-}
-
-template <typename T>
 py::class_<ak::IndexOf<T>>
 make_IndexOf(const py::handle& m, const std::string& name) {
   return (py::class_<ak::IndexOf<T>>(m, name.c_str(), py::buffer_protocol())
@@ -92,23 +75,30 @@ make_IndexOf(const py::handle& m, const std::string& name) {
       })
       .def_static("from_cupy", [name](py::object array) -> ak::IndexOf<T> {
           if(py::isinstance(array, py::module::import("cupy").attr("ndarray"))) {
+            if(!py::dtype(array.attr("dtype")).equal(py::dtype::of<T>())) {
+                throw std::invalid_argument(name + std::string(
+                  " must be built from a CuPy ") +
+                  py::cast<std::string>(py::str(py::dtype::of<T>())) +
+                  std::string(" array"));
+            }
+
             if (py::cast<int64_t>(array.attr("ndim")) != 1) {
               throw std::invalid_argument(name + std::string(
                 " must be built from a one-dimensional array; try array.ravel()"));
             }
-            py::print("Done");
+
             auto strides = pytuples_to_vector<int64_t>(array.attr("strides"));
-            py::print("Done");
+
             if (strides[0] != sizeof(T)) {
               throw std::invalid_argument(name + std::string(
                 " must be built from a contiguous array (array.strides == "
                 "(array.itemsize,)); try array.copy()"));
             }
-            py::print("Done");
+
             void* ptr = reinterpret_cast<void*>(py::cast<ssize_t>(array.attr("data").attr("ptr")));
-            py::print("Done");
+
             std::vector<int64_t> shape = pytuples_to_vector<int64_t>(array.attr("shape"));
-            py::print("Done");
+
             return ak::IndexOf<T>(std::shared_ptr<T>(reinterpret_cast<T*>(ptr),
                                                      pyobject_deleter<T>(array.ptr())),
                                   0,
