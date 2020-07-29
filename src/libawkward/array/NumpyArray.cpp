@@ -570,7 +570,7 @@ namespace awkward {
     if (length <= 10) {
       for (int64_t i = 0;  i < length;  i++) {
         T* ptr2 = reinterpret_cast<T*>(
-            reinterpret_cast<size_t>(ptr) + stride*((ssize_t)i));
+            reinterpret_cast<size_t>(ptr) + (size_t)(stride*i));
         if (i != 0) {
           out << " ";
         }
@@ -591,7 +591,7 @@ namespace awkward {
     else {
       for (int64_t i = 0;  i < 5;  i++) {
         T* ptr2 = reinterpret_cast<T*>(
-            reinterpret_cast<size_t>(ptr) + stride*((ssize_t)i));
+            reinterpret_cast<size_t>(ptr) + (size_t)(stride*i));
         if (i != 0) {
           out << " ";
         }
@@ -611,7 +611,7 @@ namespace awkward {
       out << " ... ";
       for (int64_t i = length - 5;  i < length;  i++) {
         T* ptr2 = reinterpret_cast<T*>(
-            reinterpret_cast<size_t>(ptr) + stride*((ssize_t)i));
+            reinterpret_cast<size_t>(ptr) + (size_t)(stride*i));
         if (i != length - 5) {
           out << " ";
         }
