@@ -966,8 +966,6 @@ kSliceNone = kMaxInt64 + 1
                     for x in range(2):
                         intests = OrderedDict()
                         outtests = OrderedDict()
-                        tests = []
-                        checkindex = []
                         for i in range(len(allfuncargs[keyfunc].keys())):
                             arg = list(allfuncargs[keyfunc].keys())[i]
                             argpytype = pytype(allfuncargs[keyfunc][arg])
@@ -982,27 +980,18 @@ kSliceNone = kMaxInt64 + 1
                                     ][allfuncroles[keyfunc][arg]["role"]][x][argpytype]
                                 else:
                                     tempval = data["failure"]["num"][x]
-                                tests.append(tempval)
                                 intests[arg] = tempval
                             elif allfuncroles[keyfunc][arg]["check"] == "outparam":
-                                tests.append({})
                                 if argpytype == "int":
                                     intests[arg] = [0] * 50
                                 elif argpytype == "float":
                                     intests[arg] = [1.1] * 50
                                 elif argpytype == "bool":
                                     intests[arg] = [True] * 50
-                                checkindex.append(i)
                             else:
                                 raise AssertionError(
                                     "Function argument must have inparam/outparam role"
                                 )
-
-                        try:
-                            funcPy(*tests)
-                            raise AssertionError("Tests should fail")
-                        except:
-                            pass
 
                         tempdict = {}
                         tempdict["input"] = copy.copy(intests)

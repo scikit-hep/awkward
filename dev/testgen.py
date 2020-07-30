@@ -113,7 +113,7 @@ def testpykernels(tests):
     print("Generating file for testing python kernels")
     for funcname in tests.keys():
         with open(os.path.join(CURRENT_DIR, "..", "tests-kernels", "test_" + funcname + ".py"), "w") as f:
-            f.write("import kernels\n\n")
+            f.write("import pytest\nimport kernels\n\n")
             num = 1
             for test in tests[funcname]:
                 if test == []:
@@ -147,11 +147,8 @@ def testpykernels(tests):
                         else:
                             f.write(" " * 4 + "assert " + arg + " == out" + arg + "\n")
                 else:
-                    f.write(" " * 4 + "try:\n")
+                    f.write(" " * 4 + "with pytest.raises(Exception):\n")
                     f.write(" " * 8 + "funcPy(" + args + ")\n")
-                    f.write(" " * 8 + "assert False\n")
-                    f.write(" " * 4 + "except:\n")
-                    f.write(" " * 8 + "pass\n")
                 f.write("\n")
 
 
