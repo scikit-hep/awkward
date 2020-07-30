@@ -143,10 +143,10 @@ extern "C" {
 /// @param toptr outparam
 /// @param fromptr inparam role: Identities-array
 /// @param fromstarts inparam role: Identities-same-array
-/// @param fromstops inparam role: Identities-same-array
+/// @param fromstops inparam role: Identities-same-array2
 /// @param fromptroffset inparam role: Identities-array-offset
 /// @param startsoffset inparam role: Identities-same-array-offset
-/// @param stopsoffset inparam role: Identities-same-array-offset
+/// @param stopsoffset inparam role: Identities-same-array2-offset
 /// @param tolength inparam
 /// @param fromlength inparam
 /// @param fromwidth inparam
@@ -167,10 +167,10 @@ extern "C" {
 /// @param toptr outparam
 /// @param fromptr inparam role: Identities-array
 /// @param fromstarts inparam role: Identities-same-array
-/// @param fromstops inparam role: Identities-same-array
+/// @param fromstops inparam role: Identities-same-array2
 /// @param fromptroffset inparam role: Identities-array-offset
 /// @param startsoffset inparam role: Identities-same-array-offset
-/// @param stopsoffset inparam role: Identities-same-array-offset
+/// @param stopsoffset inparam role: Identities-same-array2-offset
 /// @param tolength inparam
 /// @param fromlength inparam
 /// @param fromwidth inparam
@@ -191,10 +191,10 @@ extern "C" {
 /// @param toptr outparam
 /// @param fromptr inparam role: Identities-array
 /// @param fromstarts inparam role: Identities-same-array
-/// @param fromstops inparam role: Identities-same-array
+/// @param fromstops inparam role: Identities-same-array2
 /// @param fromptroffset inparam role: Identities-array-offset
 /// @param startsoffset inparam role: Identities-same-array-offset
-/// @param stopsoffset inparam role: Identities-same-array-offset
+/// @param stopsoffset inparam role: Identities-same-array2-offset
 /// @param tolength inparam
 /// @param fromlength inparam
 /// @param fromwidth inparam
@@ -215,10 +215,10 @@ extern "C" {
 /// @param toptr outparam
 /// @param fromptr inparam role: Identities-array
 /// @param fromstarts inparam role: Identities-same-array
-/// @param fromstops inparam role: Identities-same-array
+/// @param fromstops inparam role: Identities-same-array2
 /// @param fromptroffset inparam role: Identities-array-offset
 /// @param startsoffset inparam role: Identities-same-array-offset
-/// @param stopsoffset inparam role: Identities-same-array-offset
+/// @param stopsoffset inparam role: Identities-same-array2-offset
 /// @param tolength inparam
 /// @param fromlength inparam
 /// @param fromwidth inparam
@@ -239,10 +239,10 @@ extern "C" {
 /// @param toptr outparam
 /// @param fromptr inparam role: Identities-array
 /// @param fromstarts inparam role: Identities-same-array
-/// @param fromstops inparam role: Identities-same-array
+/// @param fromstops inparam role: Identities-same-array2
 /// @param fromptroffset inparam role: Identities-array-offset
 /// @param startsoffset inparam role: Identities-same-array-offset
-/// @param stopsoffset inparam role: Identities-same-array-offset
+/// @param stopsoffset inparam role: Identities-same-array2-offset
 /// @param tolength inparam
 /// @param fromlength inparam
 /// @param fromwidth inparam
@@ -263,10 +263,10 @@ extern "C" {
 /// @param toptr outparam
 /// @param fromptr inparam role: Identities-array
 /// @param fromstarts inparam role: Identities-same-array
-/// @param fromstops inparam role: Identities-same-array
+/// @param fromstops inparam role: Identities-same-array2
 /// @param fromptroffset inparam role: Identities-array-offset
 /// @param startsoffset inparam role: Identities-same-array-offset
-/// @param stopsoffset inparam role: Identities-same-array-offset
+/// @param stopsoffset inparam role: Identities-same-array2-offset
 /// @param tolength inparam
 /// @param fromlength inparam
 /// @param fromwidth inparam

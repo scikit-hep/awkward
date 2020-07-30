@@ -1,5 +1,16 @@
 - name: awkward_ListArray_getitem_next_range_carrylength
   specializations:
+    - name: awkward_ListArrayU32_getitem_next_range_carrylength
+      args:
+        - carrylength: List[int64_t]
+        - fromstarts: List[uint32_t]
+        - fromstops: List[uint32_t]
+        - lenstarts: int64_t
+        - startsoffset: int64_t
+        - stopsoffset: int64_t
+        - start: int64_t
+        - stop: int64_t
+        - step: int64_t
     - name: awkward_ListArray32_getitem_next_range_carrylength
       args:
         - carrylength: List[int64_t]
@@ -16,17 +27,6 @@
         - carrylength: List[int64_t]
         - fromstarts: List[int64_t]
         - fromstops: List[int64_t]
-        - lenstarts: int64_t
-        - startsoffset: int64_t
-        - stopsoffset: int64_t
-        - start: int64_t
-        - stop: int64_t
-        - step: int64_t
-    - name: awkward_ListArrayU32_getitem_next_range_carrylength
-      args:
-        - carrylength: List[int64_t]
-        - fromstarts: List[uint32_t]
-        - fromstops: List[uint32_t]
         - lenstarts: int64_t
         - startsoffset: int64_t
         - stopsoffset: int64_t

@@ -22,8 +22,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -38,8 +38,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -54,8 +54,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -70,8 +70,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -86,8 +86,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -102,8 +102,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -118,8 +118,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -134,8 +134,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -150,8 +150,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -166,8 +166,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -182,8 +182,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -199,8 +199,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -215,8 +215,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -231,8 +231,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -247,8 +247,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -263,8 +263,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -279,8 +279,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -295,8 +295,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -311,8 +311,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -327,8 +327,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -343,8 +343,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -359,8 +359,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -375,8 +375,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -391,8 +391,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -407,8 +407,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -423,8 +423,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -439,8 +439,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -455,8 +455,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -471,8 +471,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -488,8 +488,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -504,8 +504,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -520,8 +520,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -536,8 +536,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -552,8 +552,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -568,8 +568,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -584,8 +584,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -600,8 +600,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -616,8 +616,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -632,8 +632,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -648,8 +648,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -665,8 +665,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -681,8 +681,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -697,8 +697,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -713,8 +713,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -729,8 +729,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -745,8 +745,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -761,8 +761,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -777,8 +777,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -793,8 +793,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -809,8 +809,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -825,8 +825,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -841,8 +841,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -857,8 +857,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -873,8 +873,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -889,8 +889,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -905,8 +905,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -921,8 +921,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -937,8 +937,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -954,8 +954,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -970,8 +970,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -986,8 +986,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -1002,8 +1002,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -1018,8 +1018,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -1034,8 +1034,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -1050,8 +1050,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -1066,8 +1066,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -1082,8 +1082,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -1098,8 +1098,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -1114,8 +1114,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -1131,8 +1131,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   /// @param identity inparam
@@ -1149,8 +1149,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   /// @param identity inparam
@@ -1167,8 +1167,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   /// @param identity inparam
@@ -1185,8 +1185,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   /// @param identity inparam
@@ -1203,8 +1203,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   /// @param identity inparam
@@ -1221,8 +1221,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   /// @param identity inparam
@@ -1239,8 +1239,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   /// @param identity inparam
@@ -1257,8 +1257,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   /// @param identity inparam
@@ -1275,8 +1275,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   /// @param identity inparam
@@ -1293,8 +1293,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   /// @param identity inparam
@@ -1312,8 +1312,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   /// @param identity inparam
@@ -1330,8 +1330,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   /// @param identity inparam
@@ -1348,8 +1348,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   /// @param identity inparam
@@ -1366,8 +1366,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   /// @param identity inparam
@@ -1384,8 +1384,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   /// @param identity inparam
@@ -1402,8 +1402,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   /// @param identity inparam
@@ -1420,8 +1420,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   /// @param identity inparam
@@ -1438,8 +1438,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   /// @param identity inparam
@@ -1456,8 +1456,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   /// @param identity inparam
@@ -1474,8 +1474,8 @@ extern "C" {
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
   /// @param fromptroffset inparam role: IndexedArray-index-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   /// @param identity inparam
@@ -1495,8 +1495,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset
   /// @param starts inparam role: ListArray-starts
   /// @param startsoffset inparam role: ListArray-starts-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -1515,8 +1515,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset
   /// @param starts inparam role: ListArray-starts
   /// @param startsoffset inparam role: ListArray-starts-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -1535,8 +1535,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset
   /// @param starts inparam role: ListArray-starts
   /// @param startsoffset inparam role: ListArray-starts-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -1555,8 +1555,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset
   /// @param starts inparam role: ListArray-starts
   /// @param startsoffset inparam role: ListArray-starts-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -1575,8 +1575,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset
   /// @param starts inparam role: ListArray-starts
   /// @param startsoffset inparam role: ListArray-starts-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -1595,8 +1595,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset
   /// @param starts inparam role: ListArray-starts
   /// @param startsoffset inparam role: ListArray-starts-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -1615,8 +1615,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset
   /// @param starts inparam role: ListArray-starts
   /// @param startsoffset inparam role: ListArray-starts-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -1635,8 +1635,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset
   /// @param starts inparam role: ListArray-starts
   /// @param startsoffset inparam role: ListArray-starts-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -1655,8 +1655,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset
   /// @param starts inparam role: ListArray-starts
   /// @param startsoffset inparam role: ListArray-starts-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -1675,8 +1675,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset
   /// @param starts inparam role: ListArray-starts
   /// @param startsoffset inparam role: ListArray-starts-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -1695,8 +1695,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset
   /// @param starts inparam role: ListArray-starts
   /// @param startsoffset inparam role: ListArray-starts-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -1716,8 +1716,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset
   /// @param starts inparam role: ListArray-starts
   /// @param startsoffset inparam role: ListArray-starts-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -1736,8 +1736,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset
   /// @param starts inparam role: ListArray-starts
   /// @param startsoffset inparam role: ListArray-starts-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -1756,8 +1756,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset
   /// @param starts inparam role: ListArray-starts
   /// @param startsoffset inparam role: ListArray-starts-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -1776,8 +1776,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset
   /// @param starts inparam role: ListArray-starts
   /// @param startsoffset inparam role: ListArray-starts-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -1796,8 +1796,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset
   /// @param starts inparam role: ListArray-starts
   /// @param startsoffset inparam role: ListArray-starts-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -1816,8 +1816,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset
   /// @param starts inparam role: ListArray-starts
   /// @param startsoffset inparam role: ListArray-starts-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -1836,8 +1836,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset
   /// @param starts inparam role: ListArray-starts
   /// @param startsoffset inparam role: ListArray-starts-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -1856,8 +1856,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset
   /// @param starts inparam role: ListArray-starts
   /// @param startsoffset inparam role: ListArray-starts-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -1876,8 +1876,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset
   /// @param starts inparam role: ListArray-starts
   /// @param startsoffset inparam role: ListArray-starts-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -1896,8 +1896,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset
   /// @param starts inparam role: ListArray-starts
   /// @param startsoffset inparam role: ListArray-starts-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -1916,8 +1916,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset
   /// @param starts inparam role: ListArray-starts
   /// @param startsoffset inparam role: ListArray-starts-offset
-  /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
+  /// @param parents inparam role: IndexedArray-index-outer
+  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error
@@ -1972,7 +1972,7 @@ extern "C" {
   /// @param distincts outparam
   /// @param distinctslen inparam
   /// @param offsetscopy inparam role: ListOffsetArray-offsets
-  /// @param offsets inparam role: ListOffsetArray-offsets
+  /// @param offsets inparam role: ListOffsetArray2-offsets
   /// @param offsetsoffset inparam role: ListOffsetArray-offsets-offset
   /// @param length inparam
   /// @param parents inparam role: Identities-array
@@ -2018,7 +2018,7 @@ extern "C" {
   /// @param outstops outparam
   /// @param distincts inparam role: IndexedArray-index
   /// @param lendistincts inparam
-  /// @param gaps inparam role: IndexedArray-index
+  /// @param gaps inparam role: IndexedArray-index-outer
   /// @param outlength inparam
   EXPORT_SYMBOL struct Error
     awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64(

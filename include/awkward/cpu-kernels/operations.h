@@ -410,12 +410,12 @@ extern "C" {
       int64_t length);
 
   /// @param toindex outparam
-  /// @param outerindex inparam role: IndexedArray-index
-  /// @param outeroffset inparam role: IndexedArray-index-offset
+  /// @param outerindex inparam role: IndexedArray-index-outer
+  /// @param outeroffset inparam role: IndexedArray-index-outer-offset
   /// @param outerlength inparam
-  /// @param innerindex inparam role: IndexedArray-index
-  /// @param inneroffset inparam role: IndexedArray-index-offset
-  /// @param innerlength inparam
+  /// @param innerindex inparam role: IndexedArray-index-inner
+  /// @param inneroffset inparam role: IndexedArray-index-outer-offset
+  /// @param innerlength inparam role: IndexedArray-lencontent
   EXPORT_SYMBOL struct Error
     awkward_IndexedArray32_simplify32_to64(
       int64_t* toindex,
@@ -426,12 +426,12 @@ extern "C" {
       int64_t inneroffset,
       int64_t innerlength);
   /// @param toindex outparam
-  /// @param outerindex inparam role: IndexedArray-index
-  /// @param outeroffset inparam role: IndexedArray-index-offset
+  /// @param outerindex inparam role: IndexedArray-index-outer
+  /// @param outeroffset inparam role: IndexedArray-index-outer-offset
   /// @param outerlength inparam
-  /// @param innerindex inparam role: IndexedArray-index
-  /// @param inneroffset inparam role: IndexedArray-index-offset
-  /// @param innerlength inparam
+  /// @param innerindex inparam role: IndexedArray-index-inner
+  /// @param inneroffset inparam role: IndexedArray-index-outer-offset
+  /// @param innerlength inparam role: IndexedArray-lencontent
   EXPORT_SYMBOL struct Error
     awkward_IndexedArray32_simplifyU32_to64(
       int64_t* toindex,
@@ -442,12 +442,12 @@ extern "C" {
       int64_t inneroffset,
       int64_t innerlength);
   /// @param toindex outparam
-  /// @param outerindex inparam role: IndexedArray-index
-  /// @param outeroffset inparam role: IndexedArray-index-offset
+  /// @param outerindex inparam role: IndexedArray-index-outer
+  /// @param outeroffset inparam role: IndexedArray-index-outer-offset
   /// @param outerlength inparam
-  /// @param innerindex inparam role: IndexedArray-index
-  /// @param inneroffset inparam role: IndexedArray-index-offset
-  /// @param innerlength inparam
+  /// @param innerindex inparam role: IndexedArray-index-inner
+  /// @param inneroffset inparam role: IndexedArray-index-outer-offset
+  /// @param innerlength inparam role: IndexedArray-lencontent
   EXPORT_SYMBOL struct Error
     awkward_IndexedArray32_simplify64_to64(
       int64_t* toindex,
@@ -458,12 +458,12 @@ extern "C" {
       int64_t inneroffset,
       int64_t innerlength);
   /// @param toindex outparam
-  /// @param outerindex inparam role: IndexedArray-index
-  /// @param outeroffset inparam role: IndexedArray-index-offset
+  /// @param outerindex inparam role: IndexedArray-index-outer
+  /// @param outeroffset inparam role: IndexedArray-index-outer-offset
   /// @param outerlength inparam
-  /// @param innerindex inparam role: IndexedArray-index
-  /// @param inneroffset inparam role: IndexedArray-index-offset
-  /// @param innerlength inparam
+  /// @param innerindex inparam role: IndexedArray-index-inner
+  /// @param inneroffset inparam role: IndexedArray-index-outer-offset
+  /// @param innerlength inparam role: IndexedArray-lencontent
   EXPORT_SYMBOL struct Error
     awkward_IndexedArrayU32_simplify32_to64(
       int64_t* toindex,
@@ -474,12 +474,12 @@ extern "C" {
       int64_t inneroffset,
       int64_t innerlength);
   /// @param toindex outparam
-  /// @param outerindex inparam role: IndexedArray-index
-  /// @param outeroffset inparam role: IndexedArray-index-offset
+  /// @param outerindex inparam role: IndexedArray-index-outer
+  /// @param outeroffset inparam role: IndexedArray-index-outer-offset
   /// @param outerlength inparam
-  /// @param innerindex inparam role: IndexedArray-index
-  /// @param inneroffset inparam role: IndexedArray-index-offset
-  /// @param innerlength inparam
+  /// @param innerindex inparam role: IndexedArray-index-inner
+  /// @param inneroffset inparam role: IndexedArray-index-outer-offset
+  /// @param innerlength inparam role: IndexedArray-lencontent
   EXPORT_SYMBOL struct Error
     awkward_IndexedArrayU32_simplifyU32_to64(
       int64_t* toindex,
@@ -490,12 +490,12 @@ extern "C" {
       int64_t inneroffset,
       int64_t innerlength);
   /// @param toindex outparam
-  /// @param outerindex inparam role: IndexedArray-index
-  /// @param outeroffset inparam role: IndexedArray-index-offset
+  /// @param outerindex inparam role: IndexedArray-index-outer
+  /// @param outeroffset inparam role: IndexedArray-index-outer-offset
   /// @param outerlength inparam
-  /// @param innerindex inparam role: IndexedArray-index
-  /// @param inneroffset inparam role: IndexedArray-index-offset
-  /// @param innerlength inparam
+  /// @param innerindex inparam role: IndexedArray-index-inner
+  /// @param inneroffset inparam role: IndexedArray-index-outer-offset
+  /// @param innerlength inparam role: IndexedArray-lencontent
   EXPORT_SYMBOL struct Error
     awkward_IndexedArrayU32_simplify64_to64(
       int64_t* toindex,
@@ -506,12 +506,12 @@ extern "C" {
       int64_t inneroffset,
       int64_t innerlength);
   /// @param toindex outparam
-  /// @param outerindex inparam role: IndexedArray-index
-  /// @param outeroffset inparam role: IndexedArray-index-offset
+  /// @param outerindex inparam role: IndexedArray-index-outer
+  /// @param outeroffset inparam role: IndexedArray-index-outer-offset
   /// @param outerlength inparam
-  /// @param innerindex inparam role: IndexedArray-index
-  /// @param inneroffset inparam role: IndexedArray-index-offset
-  /// @param innerlength inparam
+  /// @param innerindex inparam role: IndexedArray-index-inner
+  /// @param inneroffset inparam role: IndexedArray-index-outer-offset
+  /// @param innerlength inparam role: IndexedArray-lencontent
   EXPORT_SYMBOL struct Error
     awkward_IndexedArray64_simplify32_to64(
       int64_t* toindex,
@@ -522,12 +522,12 @@ extern "C" {
       int64_t inneroffset,
       int64_t innerlength);
   /// @param toindex outparam
-  /// @param outerindex inparam role: IndexedArray-index
-  /// @param outeroffset inparam role: IndexedArray-index-offset
+  /// @param outerindex inparam role: IndexedArray-index-outer
+  /// @param outeroffset inparam role: IndexedArray-index-outer-offset
   /// @param outerlength inparam
-  /// @param innerindex inparam role: IndexedArray-index
-  /// @param inneroffset inparam role: IndexedArray-index-offset
-  /// @param innerlength inparam
+  /// @param innerindex inparam role: IndexedArray-index-inner
+  /// @param inneroffset inparam role: IndexedArray-index-outer-offset
+  /// @param innerlength inparam role: IndexedArray-lencontent
   EXPORT_SYMBOL struct Error
     awkward_IndexedArray64_simplifyU32_to64(
       int64_t* toindex,
@@ -538,12 +538,12 @@ extern "C" {
       int64_t inneroffset,
       int64_t innerlength);
   /// @param toindex outparam
-  /// @param outerindex inparam role: IndexedArray-index
-  /// @param outeroffset inparam role: IndexedArray-index-offset
+  /// @param outerindex inparam role: IndexedArray-index-outer
+  /// @param outeroffset inparam role: IndexedArray-index-outer-offset
   /// @param outerlength inparam
-  /// @param innerindex inparam role: IndexedArray-index
-  /// @param inneroffset inparam role: IndexedArray-index-offset
-  /// @param innerlength inparam
+  /// @param innerindex inparam role: IndexedArray-index-inner
+  /// @param inneroffset inparam role: IndexedArray-index-outer-offset
+  /// @param innerlength inparam role: IndexedArray-lencontent
   EXPORT_SYMBOL struct Error
     awkward_IndexedArray64_simplify64_to64(
       int64_t* toindex,
@@ -1631,14 +1631,14 @@ extern "C" {
 
   /// @param totags outparam
   /// @param toindex outparam
-  /// @param outertags inparam role: UnionArray-tags
-  /// @param outertagsoffset inparam role: UnionArray-tags-offset
-  /// @param outerindex inparam role: UnionArray-index
-  /// @param outerindexoffset inparam role: UnionArray-index-offset
-  /// @param innertags inparam role: UnionArray-tags
-  /// @param innertagsoffset inparam role: UnionArray-tags-offset
-  /// @param innerindex inparam role: UnionArray-index
-  /// @param innerindexoffset inparam role: UnionArray-index-offset
+  /// @param outertags inparam role: UnionArray-tags-outer
+  /// @param outertagsoffset inparam role: UnionArray-tags-outer-offset
+  /// @param outerindex inparam role: UnionArray-index-outer
+  /// @param outerindexoffset inparam role: UnionArray-index-outer-offset
+  /// @param innertags inparam role: UnionArray-tags-inner
+  /// @param innertagsoffset inparam role: UnionArray-tags-inner-offset
+  /// @param innerindex inparam role: UnionArray-index-inner
+  /// @param innerindexoffset inparam role: UnionArray-index-inner-offset
   /// @param towhich inparam
   /// @param innerwhich inparam role: UnionArray-innerwhich
   /// @param outerwhich inparam role: UnionArray-outerwhich
@@ -1663,14 +1663,14 @@ extern "C" {
       int64_t base);
   /// @param totags outparam
   /// @param toindex outparam
-  /// @param outertags inparam role: UnionArray-tags
-  /// @param outertagsoffset inparam role: UnionArray-tags-offset
-  /// @param outerindex inparam role: UnionArray-index
-  /// @param outerindexoffset inparam role: UnionArray-index-offset
-  /// @param innertags inparam role: UnionArray-tags
-  /// @param innertagsoffset inparam role: UnionArray-tags-offset
-  /// @param innerindex inparam role: UnionArray-index
-  /// @param innerindexoffset inparam role: UnionArray-index-offset
+  /// @param outertags inparam role: UnionArray-tags-outer
+  /// @param outertagsoffset inparam role: UnionArray-tags-outer-offset
+  /// @param outerindex inparam role: UnionArray-index-outer
+  /// @param outerindexoffset inparam role: UnionArray-index-outer-offset
+  /// @param innertags inparam role: UnionArray-tags-inner
+  /// @param innertagsoffset inparam role: UnionArray-tags-inner-offset
+  /// @param innerindex inparam role: UnionArray-index-inner
+  /// @param innerindexoffset inparam role: UnionArray-index-inner-offset
   /// @param towhich inparam
   /// @param innerwhich inparam role: UnionArray-innerwhich
   /// @param outerwhich inparam role: UnionArray-outerwhich
@@ -1695,14 +1695,14 @@ extern "C" {
       int64_t base);
   /// @param totags outparam
   /// @param toindex outparam
-  /// @param outertags inparam role: UnionArray-tags
-  /// @param outertagsoffset inparam role: UnionArray-tags-offset
-  /// @param outerindex inparam role: UnionArray-index
-  /// @param outerindexoffset inparam role: UnionArray-index-offset
-  /// @param innertags inparam role: UnionArray-tags
-  /// @param innertagsoffset inparam role: UnionArray-tags-offset
-  /// @param innerindex inparam role: UnionArray-index
-  /// @param innerindexoffset inparam role: UnionArray-index-offset
+  /// @param outertags inparam role: UnionArray-tags-outer
+  /// @param outertagsoffset inparam role: UnionArray-tags-outer-offset
+  /// @param outerindex inparam role: UnionArray-index-outer
+  /// @param outerindexoffset inparam role: UnionArray-index-outer-offset
+  /// @param innertags inparam role: UnionArray-tags-inner
+  /// @param innertagsoffset inparam role: UnionArray-tags-inner-offset
+  /// @param innerindex inparam role: UnionArray-index-inner
+  /// @param innerindexoffset inparam role: UnionArray-index-inner-offset
   /// @param towhich inparam
   /// @param innerwhich inparam role: UnionArray-innerwhich
   /// @param outerwhich inparam role: UnionArray-outerwhich
@@ -1727,14 +1727,14 @@ extern "C" {
       int64_t base);
   /// @param totags outparam
   /// @param toindex outparam
-  /// @param outertags inparam role: UnionArray-tags
-  /// @param outertagsoffset inparam role: UnionArray-tags-offset
-  /// @param outerindex inparam role: UnionArray-index
-  /// @param outerindexoffset inparam role: UnionArray-index-offset
-  /// @param innertags inparam role: UnionArray-tags
-  /// @param innertagsoffset inparam role: UnionArray-tags-offset
-  /// @param innerindex inparam role: UnionArray-index
-  /// @param innerindexoffset inparam role: UnionArray-index-offset
+  /// @param outertags inparam role: UnionArray-tags-outer
+  /// @param outertagsoffset inparam role: UnionArray-tags-outer-offset
+  /// @param outerindex inparam role: UnionArray-index-outer
+  /// @param outerindexoffset inparam role: UnionArray-index-outer-offset
+  /// @param innertags inparam role: UnionArray-tags-inner
+  /// @param innertagsoffset inparam role: UnionArray-tags-inner-offset
+  /// @param innerindex inparam role: UnionArray-index-inner
+  /// @param innerindexoffset inparam role: UnionArray-index-inner-offset
   /// @param towhich inparam
   /// @param innerwhich inparam role: UnionArray-innerwhich
   /// @param outerwhich inparam role: UnionArray-outerwhich
@@ -1759,14 +1759,14 @@ extern "C" {
       int64_t base);
   /// @param totags outparam
   /// @param toindex outparam
-  /// @param outertags inparam role: UnionArray-tags
-  /// @param outertagsoffset inparam role: UnionArray-tags-offset
-  /// @param outerindex inparam role: UnionArray-index
-  /// @param outerindexoffset inparam role: UnionArray-index-offset
-  /// @param innertags inparam role: UnionArray-tags
-  /// @param innertagsoffset inparam role: UnionArray-tags-offset
-  /// @param innerindex inparam role: UnionArray-index
-  /// @param innerindexoffset inparam role: UnionArray-index-offset
+  /// @param outertags inparam role: UnionArray-tags-outer
+  /// @param outertagsoffset inparam role: UnionArray-tags-outer-offset
+  /// @param outerindex inparam role: UnionArray-index-outer
+  /// @param outerindexoffset inparam role: UnionArray-index-outer-offset
+  /// @param innertags inparam role: UnionArray-tags-inner
+  /// @param innertagsoffset inparam role: UnionArray-tags-inner-offset
+  /// @param innerindex inparam role: UnionArray-index-inner
+  /// @param innerindexoffset inparam role: UnionArray-index-inner-offset
   /// @param towhich inparam
   /// @param innerwhich inparam role: UnionArray-innerwhich
   /// @param outerwhich inparam role: UnionArray-outerwhich
@@ -1791,14 +1791,14 @@ extern "C" {
       int64_t base);
   /// @param totags outparam
   /// @param toindex outparam
-  /// @param outertags inparam role: UnionArray-tags
-  /// @param outertagsoffset inparam role: UnionArray-tags-offset
-  /// @param outerindex inparam role: UnionArray-index
-  /// @param outerindexoffset inparam role: UnionArray-index-offset
-  /// @param innertags inparam role: UnionArray-tags
-  /// @param innertagsoffset inparam role: UnionArray-tags-offset
-  /// @param innerindex inparam role: UnionArray-index
-  /// @param innerindexoffset inparam role: UnionArray-index-offset
+  /// @param outertags inparam role: UnionArray-tags-outer
+  /// @param outertagsoffset inparam role: UnionArray-tags-outer-offset
+  /// @param outerindex inparam role: UnionArray-index-outer
+  /// @param outerindexoffset inparam role: UnionArray-index-outer-offset
+  /// @param innertags inparam role: UnionArray-tags-inner
+  /// @param innertagsoffset inparam role: UnionArray-tags-inner-offset
+  /// @param innerindex inparam role: UnionArray-index-inner
+  /// @param innerindexoffset inparam role: UnionArray-index-inner-offset
   /// @param towhich inparam
   /// @param innerwhich inparam role: UnionArray-innerwhich
   /// @param outerwhich inparam role: UnionArray-outerwhich
@@ -1823,14 +1823,14 @@ extern "C" {
       int64_t base);
   /// @param totags outparam
   /// @param toindex outparam
-  /// @param outertags inparam role: UnionArray-tags
-  /// @param outertagsoffset inparam role: UnionArray-tags-offset
-  /// @param outerindex inparam role: UnionArray-index
-  /// @param outerindexoffset inparam role: UnionArray-index-offset
-  /// @param innertags inparam role: UnionArray-tags
-  /// @param innertagsoffset inparam role: UnionArray-tags-offset
-  /// @param innerindex inparam role: UnionArray-index
-  /// @param innerindexoffset inparam role: UnionArray-index-offset
+  /// @param outertags inparam role: UnionArray-tags-outer
+  /// @param outertagsoffset inparam role: UnionArray-tags-outer-offset
+  /// @param outerindex inparam role: UnionArray-index-outer
+  /// @param outerindexoffset inparam role: UnionArray-index-outer-offset
+  /// @param innertags inparam role: UnionArray-tags-inner
+  /// @param innertagsoffset inparam role: UnionArray-tags-inner-offset
+  /// @param innerindex inparam role: UnionArray-index-inner
+  /// @param innerindexoffset inparam role: UnionArray-index-inner-offset
   /// @param towhich inparam
   /// @param innerwhich inparam role: UnionArray-innerwhich
   /// @param outerwhich inparam role: UnionArray-outerwhich
@@ -1855,14 +1855,14 @@ extern "C" {
       int64_t base);
   /// @param totags outparam
   /// @param toindex outparam
-  /// @param outertags inparam role: UnionArray-tags
-  /// @param outertagsoffset inparam role: UnionArray-tags-offset
-  /// @param outerindex inparam role: UnionArray-index
-  /// @param outerindexoffset inparam role: UnionArray-index-offset
-  /// @param innertags inparam role: UnionArray-tags
-  /// @param innertagsoffset inparam role: UnionArray-tags-offset
-  /// @param innerindex inparam role: UnionArray-index
-  /// @param innerindexoffset inparam role: UnionArray-index-offset
+  /// @param outertags inparam role: UnionArray-tags-outer
+  /// @param outertagsoffset inparam role: UnionArray-tags-outer-offset
+  /// @param outerindex inparam role: UnionArray-index-outer
+  /// @param outerindexoffset inparam role: UnionArray-index-outer-offset
+  /// @param innertags inparam role: UnionArray-tags-inner
+  /// @param innertagsoffset inparam role: UnionArray-tags-inner-offset
+  /// @param innerindex inparam role: UnionArray-index-inner
+  /// @param innerindexoffset inparam role: UnionArray-index-inner-offset
   /// @param towhich inparam
   /// @param innerwhich inparam role: UnionArray-innerwhich
   /// @param outerwhich inparam role: UnionArray-outerwhich
@@ -1887,14 +1887,14 @@ extern "C" {
       int64_t base);
   /// @param totags outparam
   /// @param toindex outparam
-  /// @param outertags inparam role: UnionArray-tags
-  /// @param outertagsoffset inparam role: UnionArray-tags-offset
-  /// @param outerindex inparam role: UnionArray-index
-  /// @param outerindexoffset inparam role: UnionArray-index-offset
-  /// @param innertags inparam role: UnionArray-tags
-  /// @param innertagsoffset inparam role: UnionArray-tags-offset
-  /// @param innerindex inparam role: UnionArray-index
-  /// @param innerindexoffset inparam role: UnionArray-index-offset
+  /// @param outertags inparam role: UnionArray-tags-outer
+  /// @param outertagsoffset inparam role: UnionArray-tags-outer-offset
+  /// @param outerindex inparam role: UnionArray-index-outer
+  /// @param outerindexoffset inparam role: UnionArray-index-outer-offset
+  /// @param innertags inparam role: UnionArray-tags-inner
+  /// @param innertagsoffset inparam role: UnionArray-tags-inner-offset
+  /// @param innerindex inparam role: UnionArray-index-inner
+  /// @param innerindexoffset inparam role: UnionArray-index-inner-offset
   /// @param towhich inparam
   /// @param innerwhich inparam role: UnionArray-innerwhich
   /// @param outerwhich inparam role: UnionArray-outerwhich
@@ -2660,8 +2660,8 @@ extern "C" {
   /// @param tomask outparam
   /// @param theirmask inparam role: ByteMaskedArray-mask
   /// @param theirmaskoffset inparam role: ByteMaskedArray-mask-offset
-  /// @param mymask inparam role: ByteMaskedArray-mask
-  /// @param mymaskoffset inparam role: ByteMaskedArray-mask-offset
+  /// @param mymask inparam role: ByteMaskedArray-mask2
+  /// @param mymaskoffset inparam role: ByteMaskedArray-mask2-offset
   /// @param length inparam
   /// @param validwhen inparam role: ByteMaskedArray-valid_when
   EXPORT_SYMBOL struct Error

@@ -27,11 +27,9 @@
         offsetslength: 3
         size: 2
       successful: False
-      results:
     - args:
         fromoffsets: [0, 3, 2, 9, 12, 15]
         offsetsoffset: 0
         offsetslength: 4
-        size: 2
+        size: 3
       successful: False
-      results:

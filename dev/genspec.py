@@ -8,7 +8,6 @@ import os
 import re
 from collections import OrderedDict
 from collections.abc import Iterable
-from itertools import product
 
 import black
 import pycparser
@@ -906,55 +905,40 @@ kSliceNone = kMaxInt64 + 1
 
                 # Success Tests
                 if funcname not in SUCCESS_TEST_BLACKLIST:
-                    # Store all possible values for each arg in list
-                    testvals = []
-                    for i in range(len(allfuncargs[keyfunc].keys())):
-                        arg = list(allfuncargs[keyfunc].keys())[i]
-                        argpytype = pytype(allfuncargs[keyfunc][arg])
-                        if allfuncroles[keyfunc][arg]["check"] == "inparam":
-                            tempval = []
-                            if "role" in allfuncroles[keyfunc][arg].keys():
-                                for jsonval in data["success"][
-                                    allfuncroles[keyfunc][arg]["role"][
-                                        : allfuncroles[keyfunc][arg]["role"].find("-")
-                                    ]
-                                ][allfuncroles[keyfunc][arg]["role"]]:
-                                    tempval.append(jsonval[argpytype])
-                            else:
-                                for jsonval in data["success"]["num"]:
-                                    tempval.append(jsonval)
-                        elif allfuncroles[keyfunc][arg]["check"] == "outparam":
-                            tempval = [{}]
-                        else:
-                            raise AssertionError(
-                                "Function argument must have inparam/outparam role"
-                            )
-                        testvals.append(tempval)
-
-                    testcombinations = list(
-                        product(
-                            *[v if isinstance(v, Iterable) else [v] for v in testvals]
-                        )
-                    )
-
-                    for combination in testcombinations:
+                    for x in range(2):
                         intests = OrderedDict()
                         outtests = OrderedDict()
-                        tests = copy.deepcopy(list(combination))
+                        tests = []
                         checkindex = []
                         for i in range(len(allfuncargs[keyfunc].keys())):
                             arg = list(allfuncargs[keyfunc].keys())[i]
                             argpytype = pytype(allfuncargs[keyfunc][arg])
-                            if allfuncroles[keyfunc][arg]["check"] == "outparam":
+                            if allfuncroles[keyfunc][arg]["check"] == "inparam":
+                                if "role" in allfuncroles[keyfunc][arg].keys():
+                                    tempval = data["success"][
+                                        allfuncroles[keyfunc][arg]["role"][
+                                            : allfuncroles[keyfunc][arg]["role"].find(
+                                                "-"
+                                            )
+                                        ]
+                                    ][allfuncroles[keyfunc][arg]["role"]][x][argpytype]
+                                else:
+                                    tempval = data["success"]["num"][x]
+                                tests.append(tempval)
+                                intests[arg] = tempval
+                            elif allfuncroles[keyfunc][arg]["check"] == "outparam":
+                                tests.append({})
                                 if argpytype == "int":
-                                    intests[arg] = [0] * 100
+                                    intests[arg] = [0] * 50
                                 elif argpytype == "float":
-                                    intests[arg] = [1.1] * 100
+                                    intests[arg] = [1.1] * 50
                                 elif argpytype == "bool":
-                                    intests[arg] = [True] * 100
+                                    intests[arg] = [True] * 50
                                 checkindex.append(i)
                             else:
-                                intests[arg] = tests[i]
+                                raise AssertionError(
+                                    "Function argument must have inparam/outparam role"
+                                )
 
                         funcPy(*tests)
                         for i in checkindex:
@@ -979,45 +963,29 @@ kSliceNone = kMaxInt64 + 1
 
                 # Failure Tests
                 if keyfunc not in FAIL_TEST_BLACKLIST and keyfunc in failfuncs:
-                    testvals = []
-                    for i in range(len(allfuncargs[keyfunc].keys())):
-                        arg = list(allfuncargs[keyfunc].keys())[i]
-                        argpytype = pytype(allfuncargs[keyfunc][arg])
-                        if allfuncroles[keyfunc][arg]["check"] == "inparam":
-                            tempval = []
-                            if "role" in allfuncroles[keyfunc][arg].keys():
-                                for jsonval in data["failure"][
-                                    allfuncroles[keyfunc][arg]["role"][
-                                        : allfuncroles[keyfunc][arg]["role"].find("-")
-                                    ]
-                                ][allfuncroles[keyfunc][arg]["role"]]:
-                                    tempval.append(jsonval[argpytype])
-                            else:
-                                for jsonval in data["failure"]["num"]:
-                                    tempval.append(jsonval)
-                        elif allfuncroles[keyfunc][arg]["check"] == "outparam":
-                            tempval = [{}]
-                        else:
-                            raise AssertionError(
-                                "Function argument must have inparam/outparam role"
-                            )
-                        testvals.append(tempval)
-
-                    testcombinations = list(
-                        product(
-                            *[v if isinstance(v, Iterable) else [v] for v in testvals]
-                        )
-                    )
-
-                    for combination in testcombinations:
+                    for x in range(2):
                         intests = OrderedDict()
                         outtests = OrderedDict()
-                        tests = copy.deepcopy(list(combination))
+                        tests = []
                         checkindex = []
                         for i in range(len(allfuncargs[keyfunc].keys())):
                             arg = list(allfuncargs[keyfunc].keys())[i]
                             argpytype = pytype(allfuncargs[keyfunc][arg])
-                            if allfuncroles[keyfunc][arg]["check"] == "outparam":
+                            if allfuncroles[keyfunc][arg]["check"] == "inparam":
+                                if "role" in allfuncroles[keyfunc][arg].keys():
+                                    tempval = data["failure"][
+                                        allfuncroles[keyfunc][arg]["role"][
+                                            : allfuncroles[keyfunc][arg]["role"].find(
+                                                "-"
+                                            )
+                                        ]
+                                    ][allfuncroles[keyfunc][arg]["role"]][x][argpytype]
+                                else:
+                                    tempval = data["failure"]["num"][x]
+                                tests.append(tempval)
+                                intests[arg] = tempval
+                            elif allfuncroles[keyfunc][arg]["check"] == "outparam":
+                                tests.append({})
                                 if argpytype == "int":
                                     intests[arg] = [0] * 50
                                 elif argpytype == "float":
@@ -1026,7 +994,9 @@ kSliceNone = kMaxInt64 + 1
                                     intests[arg] = [True] * 50
                                 checkindex.append(i)
                             else:
-                                intests[arg] = tests[i]
+                                raise AssertionError(
+                                    "Function argument must have inparam/outparam role"
+                                )
 
                         try:
                             funcPy(*tests)
@@ -1108,8 +1078,7 @@ if __name__ == "__main__":
                                 + funcname
                                 + ": "
                                 + os.path.join(
-                                    getdirname(filename),
-                                    funcname + ".yaml\n",
+                                    getdirname(filename), funcname + ".yaml\n",
                                 )
                             )
                             f.write("- name: " + funcname + "\n")
@@ -1182,8 +1151,8 @@ if __name__ == "__main__":
                                         + str(test["success"])
                                         + "\n"
                                     )
-                                    f.write(" " * 6 + "results:\n")
                                     if test["success"] is True:
+                                        f.write(" " * 6 + "results:\n")
                                         for arg in test["output"].keys():
                                             f.write(
                                                 " " * 8

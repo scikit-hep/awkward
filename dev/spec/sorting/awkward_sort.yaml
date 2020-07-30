@@ -1,19 +1,9 @@
 - name: awkward_sort
   specializations:
-    - name: awkward_sort_float64
+    - name: awkward_sort_uint16
       args:
-        - toptr: List[double]
-        - fromptr: List[double]
-        - length: int64_t
-        - offsets: List[int64_t]
-        - offsetslength: int64_t
-        - parentslength: int64_t
-        - ascending: bool
-        - stable: bool
-    - name: awkward_sort_int8
-      args:
-        - toptr: List[int8_t]
-        - fromptr: List[int8_t]
+        - toptr: List[uint16_t]
+        - fromptr: List[uint16_t]
         - length: int64_t
         - offsets: List[int64_t]
         - offsetslength: int64_t
@@ -40,26 +30,6 @@
         - parentslength: int64_t
         - ascending: bool
         - stable: bool
-    - name: awkward_sort_int64
-      args:
-        - toptr: List[int64_t]
-        - fromptr: List[int64_t]
-        - length: int64_t
-        - offsets: List[int64_t]
-        - offsetslength: int64_t
-        - parentslength: int64_t
-        - ascending: bool
-        - stable: bool
-    - name: awkward_sort_float32
-      args:
-        - toptr: List[float]
-        - fromptr: List[float]
-        - length: int64_t
-        - offsets: List[int64_t]
-        - offsetslength: int64_t
-        - parentslength: int64_t
-        - ascending: bool
-        - stable: bool
     - name: awkward_sort_bool
       args:
         - toptr: List[bool]
@@ -70,20 +40,10 @@
         - parentslength: int64_t
         - ascending: bool
         - stable: bool
-    - name: awkward_sort_uint8
+    - name: awkward_sort_int64
       args:
-        - toptr: List[uint8_t]
-        - fromptr: List[uint8_t]
-        - length: int64_t
-        - offsets: List[int64_t]
-        - offsetslength: int64_t
-        - parentslength: int64_t
-        - ascending: bool
-        - stable: bool
-    - name: awkward_sort_uint16
-      args:
-        - toptr: List[uint16_t]
-        - fromptr: List[uint16_t]
+        - toptr: List[int64_t]
+        - fromptr: List[int64_t]
         - length: int64_t
         - offsets: List[int64_t]
         - offsetslength: int64_t
@@ -100,10 +60,50 @@
         - parentslength: int64_t
         - ascending: bool
         - stable: bool
+    - name: awkward_sort_float64
+      args:
+        - toptr: List[double]
+        - fromptr: List[double]
+        - length: int64_t
+        - offsets: List[int64_t]
+        - offsetslength: int64_t
+        - parentslength: int64_t
+        - ascending: bool
+        - stable: bool
     - name: awkward_sort_int32
       args:
         - toptr: List[int32_t]
         - fromptr: List[int32_t]
+        - length: int64_t
+        - offsets: List[int64_t]
+        - offsetslength: int64_t
+        - parentslength: int64_t
+        - ascending: bool
+        - stable: bool
+    - name: awkward_sort_uint8
+      args:
+        - toptr: List[uint8_t]
+        - fromptr: List[uint8_t]
+        - length: int64_t
+        - offsets: List[int64_t]
+        - offsetslength: int64_t
+        - parentslength: int64_t
+        - ascending: bool
+        - stable: bool
+    - name: awkward_sort_float32
+      args:
+        - toptr: List[float]
+        - fromptr: List[float]
+        - length: int64_t
+        - offsets: List[int64_t]
+        - offsetslength: int64_t
+        - parentslength: int64_t
+        - ascending: bool
+        - stable: bool
+    - name: awkward_sort_int8
+      args:
+        - toptr: List[int8_t]
+        - fromptr: List[int8_t]
         - length: int64_t
         - offsets: List[int64_t]
         - offsetslength: int64_t
