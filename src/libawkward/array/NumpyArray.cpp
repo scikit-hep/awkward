@@ -288,8 +288,8 @@ namespace awkward {
                  index.ptr(),
                  std::vector<ssize_t>({ (ssize_t)index.length() }),
                  std::vector<ssize_t>({ (ssize_t)sizeof(int8_t) }),
-                 index.offset() * sizeof(int8_t),
-                 sizeof(int8_t),
+                 index.offset() * (ssize_t)sizeof(int8_t),
+                 (ssize_t)sizeof(int8_t),
                  util::dtype_to_format(util::dtype::int8),
                  util::dtype::int8,
                  index.ptr_lib()) { }
@@ -300,8 +300,8 @@ namespace awkward {
                  index.ptr(),
                  std::vector<ssize_t>({ (ssize_t)index.length() }),
                  std::vector<ssize_t>({ (ssize_t)sizeof(uint8_t) }),
-                 index.offset() * sizeof(uint8_t),
-                 sizeof(uint8_t),
+                 index.offset() * (ssize_t)sizeof(uint8_t),
+                 (ssize_t)sizeof(uint8_t),
                  util::dtype_to_format(util::dtype::uint8),
                  util::dtype::uint8,
                  index.ptr_lib()) { }
@@ -312,8 +312,8 @@ namespace awkward {
                  index.ptr(),
                  std::vector<ssize_t>({ (ssize_t)index.length() }),
                  std::vector<ssize_t>({ (ssize_t)sizeof(int32_t) }),
-                 index.offset() * sizeof(int32_t),
-                 sizeof(int32_t),
+                 index.offset() * (ssize_t)sizeof(int32_t),
+                 (ssize_t)sizeof(int32_t),
                  util::dtype_to_format(util::dtype::int32),
                  util::dtype::int32,
                  index.ptr_lib()) { }
@@ -324,8 +324,8 @@ namespace awkward {
                  index.ptr(),
                  std::vector<ssize_t>({ (ssize_t)index.length() }),
                  std::vector<ssize_t>({ (ssize_t)sizeof(uint32_t) }),
-                 index.offset() * sizeof(uint32_t),
-                 sizeof(uint32_t),
+                 index.offset() * (ssize_t)sizeof(uint32_t),
+                 (ssize_t)sizeof(uint32_t),
                  util::dtype_to_format(util::dtype::uint32),
                  util::dtype::uint32,
                  index.ptr_lib()) { }
@@ -336,8 +336,8 @@ namespace awkward {
                  index.ptr(),
                  std::vector<ssize_t>({ (ssize_t)index.length() }),
                  std::vector<ssize_t>({ (ssize_t)sizeof(int64_t) }),
-                 index.offset() * sizeof(int64_t),
-                 sizeof(int64_t),
+                 index.offset() * (ssize_t)sizeof(int64_t),
+                 (ssize_t)sizeof(int64_t),
                  util::dtype_to_format(util::dtype::int64),
                  util::dtype::int64,
                  index.ptr_lib()) { }
@@ -568,7 +568,7 @@ namespace awkward {
     if (length <= 10) {
       for (int64_t i = 0;  i < length;  i++) {
         T* ptr2 = reinterpret_cast<T*>(
-            reinterpret_cast<size_t>(ptr) + stride*((ssize_t)i));
+            reinterpret_cast<ssize_t>(ptr) + stride*((ssize_t)i));
         if (i != 0) {
           out << " ";
         }
@@ -589,7 +589,7 @@ namespace awkward {
     else {
       for (int64_t i = 0;  i < 5;  i++) {
         T* ptr2 = reinterpret_cast<T*>(
-            reinterpret_cast<size_t>(ptr) + stride*((ssize_t)i));
+            reinterpret_cast<ssize_t>(ptr) + stride*((ssize_t)i));
         if (i != 0) {
           out << " ";
         }
@@ -609,7 +609,7 @@ namespace awkward {
       out << " ... ";
       for (int64_t i = length - 5;  i < length;  i++) {
         T* ptr2 = reinterpret_cast<T*>(
-            reinterpret_cast<size_t>(ptr) + stride*((ssize_t)i));
+            reinterpret_cast<ssize_t>(ptr) + stride*((ssize_t)i));
         if (i != length - 5) {
           out << " ";
         }
@@ -1774,7 +1774,7 @@ namespace awkward {
       std::vector<ssize_t> shape;
       std::vector<ssize_t> strides;
       shape.emplace_back(shape_[0] + other_shape[0]);
-      strides.emplace_back(itemsize);
+      strides.emplace_back((ssize_t)itemsize);
       int64_t self_flatlength = shape_[0];
       int64_t other_flatlength = other_shape[0];
       for (int64_t i = ((int64_t)shape_.size()) - 1;  i > 0;  i--) {
@@ -1849,6 +1849,9 @@ namespace awkward {
                   self_offset,
                   self_flatlength);
             break;
+          default:
+            throw std::runtime_error(
+              "dtype_ not in {boolean, int8} (1)");
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -1868,6 +1871,9 @@ namespace awkward {
                   other_offset,
                   other_flatlength);
             break;
+          default:
+            throw std::runtime_error(
+              "dtype_ not in {boolean, int8} (2)");
         }
         util::handle_error(err, classname(), nullptr);
         break;
@@ -1907,6 +1913,9 @@ namespace awkward {
                   self_offset,
                   self_flatlength);
             break;
+          default:
+            throw std::runtime_error(
+                "dtype_ not in {boolean, int8, int16, uint8} (1)");
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -1942,6 +1951,9 @@ namespace awkward {
                   other_offset,
                   other_flatlength);
             break;
+          default:
+            throw std::runtime_error(
+                "dtype_ not in {boolean, int8, int16, uint8} (2)");
         }
         util::handle_error(err, classname(), nullptr);
         break;
@@ -1997,6 +2009,9 @@ namespace awkward {
                   self_offset,
                   self_flatlength);
             break;
+          default:
+            throw std::runtime_error(
+                "dtype_ not in {boolean, int8, int16, int32, uint8, uint16} (1)");
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -2048,6 +2063,9 @@ namespace awkward {
                   other_offset,
                   other_flatlength);
             break;
+          default:
+            throw std::runtime_error(
+                "dtype_ not in {boolean, int8, int16, int32, uint8, uint16} (2)");
         }
         util::handle_error(err, classname(), nullptr);
         break;
@@ -2119,6 +2137,10 @@ namespace awkward {
                   self_offset,
                   self_flatlength);
             break;
+          default:
+            throw std::runtime_error(
+                "dtype_ not in {boolean, int8, int16, int32, int64, "
+                "uint8, uint16, uint32} (1)");
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -2186,6 +2208,10 @@ namespace awkward {
                   other_offset,
                   other_flatlength);
             break;
+          default:
+            throw std::runtime_error(
+                "dtype_ not in {boolean, int8, int16, int32, int64, "
+                "uint8, uint16, uint32} (2)");
         }
         util::handle_error(err, classname(), nullptr);
         break;
@@ -2209,6 +2235,9 @@ namespace awkward {
                   self_offset,
                   self_flatlength);
             break;
+          default:
+            throw std::runtime_error(
+                "dtype_ not in {boolean, uint8} (1)");
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -2228,6 +2257,9 @@ namespace awkward {
                   other_offset,
                   other_flatlength);
             break;
+          default:
+            throw std::runtime_error(
+                "dtype_ not in {boolean, uint8} (2)");
         }
         util::handle_error(err, classname(), nullptr);
         break;
@@ -2259,6 +2291,9 @@ namespace awkward {
                   self_offset,
                   self_flatlength);
             break;
+          default:
+            throw std::runtime_error(
+                "dtype_ not in {boolean, uint8, uint16} (1)");
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -2286,6 +2321,9 @@ namespace awkward {
                   other_offset,
                   other_flatlength);
             break;
+          default:
+            throw std::runtime_error(
+                "dtype_ not in {boolean, uint8, uint16} (2)");
         }
         util::handle_error(err, classname(), nullptr);
         break;
@@ -2325,6 +2363,9 @@ namespace awkward {
                   self_offset,
                   self_flatlength);
             break;
+          default:
+            throw std::runtime_error(
+                "dtype_ not in {boolean, uint8, uint16, uint32} (1)");
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -2360,6 +2401,9 @@ namespace awkward {
                   other_offset,
                   other_flatlength);
             break;
+          default:
+            throw std::runtime_error(
+                "dtype_ not in {boolean, uint8, uint16, uint32} (2)");
         }
         util::handle_error(err, classname(), nullptr);
         break;
@@ -2407,6 +2451,9 @@ namespace awkward {
                   self_offset,
                   self_flatlength);
             break;
+          default:
+            throw std::runtime_error(
+                "dtype_ not in {boolean, uint8, uint16, uint32, uint64} (1)");
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -2450,6 +2497,9 @@ namespace awkward {
                   other_offset,
                   other_flatlength);
             break;
+          default:
+            throw std::runtime_error(
+                "dtype_ not in {boolean, uint8, uint16, uint32, uint64} (2)");
         }
         util::handle_error(err, classname(), nullptr);
         break;
@@ -2512,6 +2562,10 @@ namespace awkward {
                   self_offset,
                   self_flatlength);
             break;
+          default:
+            throw std::runtime_error(
+                "dtype_ not in {boolean, int8, int16, uint8, uint16, "
+                "float16, float32} (1)");
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -2565,6 +2619,10 @@ namespace awkward {
                   other_offset,
                   other_flatlength);
             break;
+          default:
+            throw std::runtime_error(
+                "dtype_ not in {boolean, int8, int16, uint8, uint16, "
+                "float16, float32} (2)");
         }
         util::handle_error(err, classname(), nullptr);
         break;
@@ -2662,6 +2720,10 @@ namespace awkward {
                   self_offset,
                   self_flatlength);
             break;
+          default:
+            throw std::runtime_error(
+                "dtype_ not in {boolean, int8, int16, int32, int64, "
+                "uint8, uint16, uint32, uint64 float16, float32, float64} (1)");
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -2755,6 +2817,10 @@ namespace awkward {
                   other_offset,
                   other_flatlength);
             break;
+          default:
+            throw std::runtime_error(
+                "dtype_ not in {boolean, int8, int16, int32, int64, "
+                "uint8, uint16, uint32, uint64 float16, float32, float64} (2)");
         }
         util::handle_error(err, classname(), nullptr);
         break;

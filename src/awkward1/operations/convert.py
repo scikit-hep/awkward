@@ -3246,6 +3246,125 @@ def from_arrayset(
         return out
 
 
+def to_pandas(
+    array, how="inner", levelname=lambda i: "sub" * i + "entry", anonymous="values"
+):
+    pandas = awkward1._connect._pandas.get_pandas()
+
+    if how is not None:
+        out = None
+        for df in to_pandas(array, how=None, levelname=levelname, anonymous=anonymous):
+            if out is None:
+                out = df
+            else:
+                out = pandas.merge(out, df, how=how, left_index=True, right_index=True)
+        return out
+
+    def recurse(layout, row_arrays, col_names):
+        if layout.purelist_depth > 1:
+            offsets, flattened = layout.offsets_and_flatten(axis=1)
+            offsets = numpy.asarray(offsets)
+            starts, stops = offsets[:-1], offsets[1:]
+            counts = stops - starts
+            if awkward1._util.win:
+                counts = counts.astype(numpy.int32)
+            if len(row_arrays) == 0:
+                newrows = [
+                    numpy.repeat(numpy.arange(len(counts), dtype=counts.dtype), counts)
+                ]
+            else:
+                newrows = [numpy.repeat(x, counts) for x in row_arrays]
+            newrows.append(
+                numpy.arange(offsets[-1], dtype=counts.dtype)
+                - numpy.repeat(starts, counts)
+            )
+            return recurse(flattened, newrows, col_names)
+
+        elif isinstance(layout, awkward1.layout.RecordArray):
+            return sum(
+                [
+                    recurse(layout.field(n), row_arrays, col_names + (n,))
+                    for n in layout.keys()
+                ],
+                [],
+            )
+
+        else:
+            try:
+                return [
+                    (
+                        awkward1.operations.convert.to_numpy(layout),
+                        row_arrays,
+                        col_names,
+                    )
+                ]
+            except Exception:
+                return [(layout, row_arrays, col_names)]
+
+    layout = awkward1.operations.convert.to_layout(
+        array, allow_record=True, allow_other=False
+    )
+    if isinstance(layout, awkward1.partition.PartitionedArray):
+        layout = layout.toContent()
+
+    if isinstance(layout, awkward1.layout.Record):
+        layout2 = layout.array[layout.at : layout.at + 1]
+    else:
+        layout2 = layout
+
+    tables = []
+    last_row_arrays = None
+    for column, row_arrays, col_names in recurse(layout2, [], ()):
+        if isinstance(layout, awkward1.layout.Record):
+            row_arrays = row_arrays[1:]  # Record --> one-element RecordArray
+        if len(col_names) == 0:
+            columns = [anonymous]
+        else:
+            columns = pandas.MultiIndex.from_tuples([col_names])
+
+        if (
+            last_row_arrays is not None
+            and len(last_row_arrays) == len(row_arrays)
+            and all(
+                numpy.array_equal(x, y) for x, y in zip(last_row_arrays, row_arrays)
+            )
+        ):
+            oldcolumns = tables[-1].columns
+            if isinstance(oldcolumns, pandas.MultiIndex):
+                numold = len(oldcolumns.levels)
+            else:
+                numold = max(len(x) for x in oldcolumns)
+            numnew = len(columns.levels)
+            maxnum = max(numold, numnew)
+            if numold != maxnum:
+                oldcolumns = pandas.MultiIndex.from_tuples(
+                    [x + ("",) * (maxnum - numold) for x in oldcolumns]
+                )
+                tables[-1].columns = oldcolumns
+            if numnew != maxnum:
+                columns = pandas.MultiIndex.from_tuples(
+                    [x + ("",) * (maxnum - numnew) for x in columns]
+                )
+
+            newframe = pandas.DataFrame(
+                data=column, index=tables[-1].index, columns=columns
+            )
+            tables[-1] = pandas.concat([tables[-1], newframe], axis=1)
+
+        else:
+            if len(row_arrays) == 0:
+                index = pandas.RangeIndex(len(column), name=levelname(0))
+            else:
+                index = pandas.MultiIndex.from_arrays(
+                    row_arrays, names=[levelname(i) for i in range(len(row_arrays))]
+                )
+            tables.append(pandas.DataFrame(data=column, index=index, columns=columns))
+
+        last_row_arrays = row_arrays
+
+    return tables
+
+
 __all__ = [
     x
     for x in list(globals())

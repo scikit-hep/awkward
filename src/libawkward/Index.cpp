@@ -56,8 +56,8 @@ namespace awkward {
 
   template <typename T>
   IndexOf<T>::IndexOf(int64_t length, kernel::Lib ptr_lib)
-    : ptr_lib_(ptr_lib)
-    , ptr_(kernel::ptr_alloc<T>(ptr_lib, length))
+    : ptr_(kernel::ptr_alloc<T>(ptr_lib, length))
+    , ptr_lib_(ptr_lib)
     , offset_(0)
     , length_(length) { }
 
@@ -66,8 +66,8 @@ namespace awkward {
                       int64_t offset,
                       int64_t length,
                       kernel::Lib ptr_lib)
-      : ptr_lib_(ptr_lib)
-      , ptr_(ptr)
+      : ptr_(ptr)
+      , ptr_lib_(ptr_lib)
       , offset_(offset)
       , length_(length) { }
 

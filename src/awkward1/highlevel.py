@@ -123,42 +123,18 @@ class Array(
     Pandas
     ******
 
-    ak.Arrays can be used as [Pandas](https://pandas.pydata.org/) DataFrame
-    columns and Series, in place of NumPy arrays. Their data structures are not
-    copied or converted into Python objects (not even NumPy's `"O"` dtype), so
-    this is the most efficient way to fill DataFrames with arbitrary data
-    structures.
-
-    As a consequence, however, ak.Array must include the following methods in
-    its namespace (other than names with underscores):
-
-       * `columns`: Property like #ak.keys, except that the list cannot be
-         empty (a special placeholder is used instead).
-       * `dtype`: Property with the same value as
-         #ak._connect._pandas.get_dtype. It provides no information about
-         the type of data in the array.
-       * `ndim`: Property whose value is `1`, which does not reflect the
-         structure of the data in the array.
-       * `shape`: Property whose value is a single-item tuple containing
-         the length of the array (#ak.Array.__len__). It does not reflect
-         the structure of the data in the array.
-       * `isna()`: Method whose value is equal to #ak.is_none, implementing
-         [pd.Series.isna](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.isna.html)
-       * `take(indices, allow_fill=None, fill_value=None)`: method implementing
-         [pd.Series.take](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.take.html)
-         for the ak.Array.
-       * `copy()`: Method implementing
-         [pd.Series.copy](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.copy.html),
-         which completely copies the array (all nodes, all buffers).
-
-    It's also possible to convert Awkward data structures into Pandas
+    Ragged arrays (list type) can be converted into Pandas
     [MultiIndex](https://pandas.pydata.org/pandas-docs/stable/user_guide/advanced.html)
-    rows and columns. In this case, the data in Pandas are not Awkward Arrays.
+    rows and nested records can be converted into MultiIndex columns. If the
+    Awkward Array has only one "branch" of nested lists (i.e. different record
+    fields do not have different-length lists, but a single chain of lists-of-lists
+    is okay), then it can be losslessly converted into a single DataFrame.
+    Otherwise, multiple DataFrames are needed, though they can be merged (with a
+    loss of information).
 
-    See #ak.pandas.df to convert an ak.Array into one Pandas DataFrame (lossy).
-
-    See #ak.pandas.dfs to convert an ak.Array into as many DataFrames as are
-    needed to preserve its list structure.
+    The #ak.to_pandas function performs this conversion; if `how=None`, it
+    returns a list of DataFrames; otherwise, `how` is passed to `pd.merge` when
+    merging the resultant DataFrames.
 
     Numba
     *****
@@ -524,13 +500,8 @@ class Array(
 
         See also #ak.to_list.
         """
-        if awkward1._util.called_by_module("matplotlib"):
-            out = awkward1._connect._numpy.convert_to_array(self._layout, (), {})
-            for x in out:
-                yield x
-        else:
-            for x in self._layout:
-                yield awkward1._util.wrap(x, self._behavior)
+        for x in self._layout:
+            yield awkward1._util.wrap(x, self._behavior)
 
     def __getitem__(self, where):
         """
@@ -1223,9 +1194,6 @@ class Array(
         significant performance hit, but would also break functionality, since
         nested lists in a NumPy `"O"` array are severed from the array and
         cannot be sliced as dimensions.
-
-        Only exception: Pandas can generate NumPy `"O"` arrays to print
-        Array fragments to the screen.
         """
         if awkward1._util.called_by_module(
             "pandas.io.formats.format"
