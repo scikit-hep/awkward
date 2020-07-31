@@ -1,14 +1,14 @@
 - name: awkward_ListArray_fill
   specializations:
-    - name: awkward_ListArray_fill_to64_from32
+    - name: awkward_ListArray_fill_to64_from64
       args:
         - tostarts: List[int64_t]
         - tostartsoffset: int64_t
         - tostops: List[int64_t]
         - tostopsoffset: int64_t
-        - fromstarts: List[int32_t]
+        - fromstarts: List[int64_t]
         - fromstartsoffset: int64_t
-        - fromstops: List[int32_t]
+        - fromstops: List[int64_t]
         - fromstopsoffset: int64_t
         - length: int64_t
         - base: int64_t
@@ -24,15 +24,15 @@
         - fromstopsoffset: int64_t
         - length: int64_t
         - base: int64_t
-    - name: awkward_ListArray_fill_to64_from64
+    - name: awkward_ListArray_fill_to64_from32
       args:
         - tostarts: List[int64_t]
         - tostartsoffset: int64_t
         - tostops: List[int64_t]
         - tostopsoffset: int64_t
-        - fromstarts: List[int64_t]
+        - fromstarts: List[int32_t]
         - fromstartsoffset: int64_t
-        - fromstops: List[int64_t]
+        - fromstops: List[int32_t]
         - fromstopsoffset: int64_t
         - length: int64_t
         - base: int64_t

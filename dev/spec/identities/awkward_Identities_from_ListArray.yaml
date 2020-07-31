@@ -1,36 +1,10 @@
 - name: awkward_Identities_from_ListArray
   specializations:
-    - name: awkward_Identities32_from_ListArray32
+    - name: awkward_Identities64_from_ListArray64
       args:
         - uniquecontents: List[bool]
-        - toptr: List[int32_t]
-        - fromptr: List[int32_t]
-        - fromstarts: List[int32_t]
-        - fromstops: List[int32_t]
-        - fromptroffset: int64_t
-        - startsoffset: int64_t
-        - stopsoffset: int64_t
-        - tolength: int64_t
-        - fromlength: int64_t
-        - fromwidth: int64_t
-    - name: awkward_Identities32_from_ListArrayU32
-      args:
-        - uniquecontents: List[bool]
-        - toptr: List[int32_t]
-        - fromptr: List[int32_t]
-        - fromstarts: List[uint32_t]
-        - fromstops: List[uint32_t]
-        - fromptroffset: int64_t
-        - startsoffset: int64_t
-        - stopsoffset: int64_t
-        - tolength: int64_t
-        - fromlength: int64_t
-        - fromwidth: int64_t
-    - name: awkward_Identities32_from_ListArray64
-      args:
-        - uniquecontents: List[bool]
-        - toptr: List[int32_t]
-        - fromptr: List[int32_t]
+        - toptr: List[int64_t]
+        - fromptr: List[int64_t]
         - fromstarts: List[int64_t]
         - fromstops: List[int64_t]
         - fromptroffset: int64_t
@@ -52,6 +26,19 @@
         - tolength: int64_t
         - fromlength: int64_t
         - fromwidth: int64_t
+    - name: awkward_Identities32_from_ListArrayU32
+      args:
+        - uniquecontents: List[bool]
+        - toptr: List[int32_t]
+        - fromptr: List[int32_t]
+        - fromstarts: List[uint32_t]
+        - fromstops: List[uint32_t]
+        - fromptroffset: int64_t
+        - startsoffset: int64_t
+        - stopsoffset: int64_t
+        - tolength: int64_t
+        - fromlength: int64_t
+        - fromwidth: int64_t
     - name: awkward_Identities64_from_ListArrayU32
       args:
         - uniquecontents: List[bool]
@@ -65,13 +52,26 @@
         - tolength: int64_t
         - fromlength: int64_t
         - fromwidth: int64_t
-    - name: awkward_Identities64_from_ListArray64
+    - name: awkward_Identities32_from_ListArray64
       args:
         - uniquecontents: List[bool]
-        - toptr: List[int64_t]
-        - fromptr: List[int64_t]
+        - toptr: List[int32_t]
+        - fromptr: List[int32_t]
         - fromstarts: List[int64_t]
         - fromstops: List[int64_t]
+        - fromptroffset: int64_t
+        - startsoffset: int64_t
+        - stopsoffset: int64_t
+        - tolength: int64_t
+        - fromlength: int64_t
+        - fromwidth: int64_t
+    - name: awkward_Identities32_from_ListArray32
+      args:
+        - uniquecontents: List[bool]
+        - toptr: List[int32_t]
+        - fromptr: List[int32_t]
+        - fromstarts: List[int32_t]
+        - fromstops: List[int32_t]
         - fromptroffset: int64_t
         - startsoffset: int64_t
         - stopsoffset: int64_t

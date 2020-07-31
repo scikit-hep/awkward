@@ -1,11 +1,11 @@
 - name: awkward_IndexedArray_reduce_next_64
   specializations:
-    - name: awkward_IndexedArrayU32_reduce_next_64
+    - name: awkward_IndexedArray32_reduce_next_64
       args:
         - nextcarry: List[int64_t]
         - nextparents: List[int64_t]
         - outindex: List[int64_t]
-        - index: List[uint32_t]
+        - index: List[int32_t]
         - indexoffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
@@ -20,12 +20,12 @@
         - parents: List[int64_t]
         - parentsoffset: int64_t
         - length: int64_t
-    - name: awkward_IndexedArray32_reduce_next_64
+    - name: awkward_IndexedArrayU32_reduce_next_64
       args:
         - nextcarry: List[int64_t]
         - nextparents: List[int64_t]
         - outindex: List[int64_t]
-        - index: List[int32_t]
+        - index: List[uint32_t]
         - indexoffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t

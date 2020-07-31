@@ -1,5 +1,17 @@
 - name: awkward_ListArray_getitem_next_array
   specializations:
+    - name: awkward_ListArray32_getitem_next_array_64
+      args:
+        - tocarry: List[int64_t]
+        - toadvanced: List[int64_t]
+        - fromstarts: List[int32_t]
+        - fromstops: List[int32_t]
+        - fromarray: List[int64_t]
+        - startsoffset: int64_t
+        - stopsoffset: int64_t
+        - lenstarts: int64_t
+        - lenarray: int64_t
+        - lencontent: int64_t
     - name: awkward_ListArrayU32_getitem_next_array_64
       args:
         - tocarry: List[int64_t]
@@ -18,18 +30,6 @@
         - toadvanced: List[int64_t]
         - fromstarts: List[int64_t]
         - fromstops: List[int64_t]
-        - fromarray: List[int64_t]
-        - startsoffset: int64_t
-        - stopsoffset: int64_t
-        - lenstarts: int64_t
-        - lenarray: int64_t
-        - lencontent: int64_t
-    - name: awkward_ListArray32_getitem_next_array_64
-      args:
-        - tocarry: List[int64_t]
-        - toadvanced: List[int64_t]
-        - fromstarts: List[int32_t]
-        - fromstops: List[int32_t]
         - fromarray: List[int64_t]
         - startsoffset: int64_t
         - stopsoffset: int64_t

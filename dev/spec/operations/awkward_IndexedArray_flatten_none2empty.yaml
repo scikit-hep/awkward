@@ -1,9 +1,9 @@
 - name: awkward_IndexedArray_flatten_none2empty
   specializations:
-    - name: awkward_IndexedArrayU32_flatten_none2empty_64
+    - name: awkward_IndexedArray32_flatten_none2empty_64
       args:
         - outoffsets: List[int64_t]
-        - outindex: List[uint32_t]
+        - outindex: List[int32_t]
         - outindexoffset: int64_t
         - outindexlength: int64_t
         - offsets: List[int64_t]
@@ -18,10 +18,10 @@
         - offsets: List[int64_t]
         - offsetsoffset: int64_t
         - offsetslength: int64_t
-    - name: awkward_IndexedArray32_flatten_none2empty_64
+    - name: awkward_IndexedArrayU32_flatten_none2empty_64
       args:
         - outoffsets: List[int64_t]
-        - outindex: List[int32_t]
+        - outindex: List[uint32_t]
         - outindexoffset: int64_t
         - outindexlength: int64_t
         - offsets: List[int64_t]

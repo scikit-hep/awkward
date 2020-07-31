@@ -58,6 +58,13 @@ TEST_BLACKLIST = SPEC_BLACKLIST + [
     "awkward_ListOffsetArray_rpad_axis1",
 ]
 
+SUCCESS_TEST_BLACKLIST = TEST_BLACKLIST + [
+    "awkward_RegularArray_broadcast_tooffsets",
+    "awkward_ListArray_validity",
+    "awkward_IndexedArray_validity",
+    "awkward_UnionArray_validity",
+]
+
 PYGEN_BLACKLIST = SPEC_BLACKLIST + [
     "awkward_sorting_ranges",
     "awkward_sorting_ranges_length",
@@ -973,29 +980,33 @@ kSliceNone = kMaxInt64 + 1
                             )
                         tests.append(copy.deepcopy(temp[key]))
 
-                    tempdict = {}
-                    tempdict["input"] = copy.deepcopy(intests)
                     try:
                         funcPy(*tests)
-                        for i in checkindex:
-                            count = 0
-                            outtests[list(allfuncargs[keyfunc].keys())[i]] = []
-                            for num in sorted(tests[i]):
-                                if num != count:
-                                    while num != count:
-                                        outtests[
-                                            list(allfuncargs[keyfunc].keys())[i]
-                                        ].append(0)
-                                        count = count + 1
-                                outtests[list(allfuncargs[keyfunc].keys())[i]].append(
-                                    tests[i][num]
-                                )
-                                count = count + 1
-                        tempdict["output"] = copy.copy(outtests)
-                        tempdict["success"] = True
+                        if funcname not in SUCCESS_TEST_BLACKLIST:
+                            for i in checkindex:
+                                count = 0
+                                outtests[list(allfuncargs[keyfunc].keys())[i]] = []
+                                for num in sorted(tests[i]):
+                                    if num != count:
+                                        while num != count:
+                                            outtests[
+                                                list(allfuncargs[keyfunc].keys())[i]
+                                            ].append(0)
+                                            count = count + 1
+                                    outtests[
+                                        list(allfuncargs[keyfunc].keys())[i]
+                                    ].append(tests[i][num])
+                                    count = count + 1
+                            tempdict = {}
+                            tempdict["input"] = copy.deepcopy(intests)
+                            tempdict["output"] = copy.copy(outtests)
+                            tempdict["success"] = True
+                            funcs[funcname].append(tempdict)
                     except ValueError:
+                        tempdict = {}
+                        tempdict["input"] = copy.deepcopy(intests)
                         tempdict["success"] = False
-                    funcs[funcname].append(tempdict)
+                        funcs[funcname].append(tempdict)
 
     return funcs
 

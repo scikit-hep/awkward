@@ -1,45 +1,9 @@
 - name: awkward_reduce_prod_bool
   specializations:
-    - name: awkward_reduce_prod_bool_uint16_64
-      args:
-        - toptr: List[bool]
-        - fromptr: List[uint16_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_prod_bool_float32_64
-      args:
-        - toptr: List[bool]
-        - fromptr: List[float]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
     - name: awkward_reduce_prod_bool_uint8_64
       args:
         - toptr: List[bool]
         - fromptr: List[uint8_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_prod_bool_int32_64
-      args:
-        - toptr: List[bool]
-        - fromptr: List[int32_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_prod_bool_uint64_64
-      args:
-        - toptr: List[bool]
-        - fromptr: List[uint64_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
@@ -54,28 +18,28 @@
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_prod_bool_uint32_64
-      args:
-        - toptr: List[bool]
-        - fromptr: List[uint32_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_prod_bool_int64_64
-      args:
-        - toptr: List[bool]
-        - fromptr: List[int64_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
     - name: awkward_reduce_prod_bool_float64_64
       args:
         - toptr: List[bool]
         - fromptr: List[double]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_prod_bool_float32_64
+      args:
+        - toptr: List[bool]
+        - fromptr: List[float]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_prod_bool_uint32_64
+      args:
+        - toptr: List[bool]
+        - fromptr: List[uint32_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
@@ -90,10 +54,46 @@
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
+    - name: awkward_reduce_prod_bool_uint64_64
+      args:
+        - toptr: List[bool]
+        - fromptr: List[uint64_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_prod_bool_int64_64
+      args:
+        - toptr: List[bool]
+        - fromptr: List[int64_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
     - name: awkward_reduce_prod_bool_int8_64
       args:
         - toptr: List[bool]
         - fromptr: List[int8_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_prod_bool_int32_64
+      args:
+        - toptr: List[bool]
+        - fromptr: List[int32_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_prod_bool_uint16_64
+      args:
+        - toptr: List[bool]
+        - fromptr: List[uint16_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t

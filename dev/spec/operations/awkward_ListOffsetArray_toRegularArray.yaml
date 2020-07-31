@@ -1,15 +1,15 @@
 - name: awkward_ListOffsetArray_toRegularArray
   specializations:
-    - name: awkward_ListOffsetArrayU32_toRegularArray
-      args:
-        - size: List[int64_t]
-        - fromoffsets: List[uint32_t]
-        - offsetsoffset: int64_t
-        - offsetslength: int64_t
     - name: awkward_ListOffsetArray64_toRegularArray
       args:
         - size: List[int64_t]
         - fromoffsets: List[int64_t]
+        - offsetsoffset: int64_t
+        - offsetslength: int64_t
+    - name: awkward_ListOffsetArrayU32_toRegularArray
+      args:
+        - size: List[int64_t]
+        - fromoffsets: List[uint32_t]
         - offsetsoffset: int64_t
         - offsetslength: int64_t
     - name: awkward_ListOffsetArray32_toRegularArray

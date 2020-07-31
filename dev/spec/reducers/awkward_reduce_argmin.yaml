@@ -1,64 +1,9 @@
 - name: awkward_reduce_argmin
   specializations:
-    - name: awkward_reduce_argmin_uint8_64
+    - name: awkward_reduce_argmin_int64_64
       args:
         - toptr: List[int64_t]
-        - fromptr: List[uint8_t]
-        - fromptroffset: int64_t
-        - starts: List[int64_t]
-        - startsoffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_argmin_uint64_64
-      args:
-        - toptr: List[int64_t]
-        - fromptr: List[uint64_t]
-        - fromptroffset: int64_t
-        - starts: List[int64_t]
-        - startsoffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_argmin_int32_64
-      args:
-        - toptr: List[int64_t]
-        - fromptr: List[int32_t]
-        - fromptroffset: int64_t
-        - starts: List[int64_t]
-        - startsoffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_argmin_float32_64
-      args:
-        - toptr: List[int64_t]
-        - fromptr: List[float]
-        - fromptroffset: int64_t
-        - starts: List[int64_t]
-        - startsoffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_argmin_uint32_64
-      args:
-        - toptr: List[int64_t]
-        - fromptr: List[uint32_t]
-        - fromptroffset: int64_t
-        - starts: List[int64_t]
-        - startsoffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_argmin_int16_64
-      args:
-        - toptr: List[int64_t]
-        - fromptr: List[int16_t]
+        - fromptr: List[int64_t]
         - fromptroffset: int64_t
         - starts: List[int64_t]
         - startsoffset: int64_t
@@ -77,17 +22,6 @@
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_argmin_int64_64
-      args:
-        - toptr: List[int64_t]
-        - fromptr: List[int64_t]
-        - fromptroffset: int64_t
-        - starts: List[int64_t]
-        - startsoffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
     - name: awkward_reduce_argmin_uint16_64
       args:
         - toptr: List[int64_t]
@@ -99,10 +33,76 @@
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
+    - name: awkward_reduce_argmin_int16_64
+      args:
+        - toptr: List[int64_t]
+        - fromptr: List[int16_t]
+        - fromptroffset: int64_t
+        - starts: List[int64_t]
+        - startsoffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_argmin_uint8_64
+      args:
+        - toptr: List[int64_t]
+        - fromptr: List[uint8_t]
+        - fromptroffset: int64_t
+        - starts: List[int64_t]
+        - startsoffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_argmin_float32_64
+      args:
+        - toptr: List[int64_t]
+        - fromptr: List[float]
+        - fromptroffset: int64_t
+        - starts: List[int64_t]
+        - startsoffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_argmin_uint64_64
+      args:
+        - toptr: List[int64_t]
+        - fromptr: List[uint64_t]
+        - fromptroffset: int64_t
+        - starts: List[int64_t]
+        - startsoffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
     - name: awkward_reduce_argmin_int8_64
       args:
         - toptr: List[int64_t]
         - fromptr: List[int8_t]
+        - fromptroffset: int64_t
+        - starts: List[int64_t]
+        - startsoffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_argmin_int32_64
+      args:
+        - toptr: List[int64_t]
+        - fromptr: List[int32_t]
+        - fromptroffset: int64_t
+        - starts: List[int64_t]
+        - startsoffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_argmin_uint32_64
+      args:
+        - toptr: List[int64_t]
+        - fromptr: List[uint32_t]
         - fromptroffset: int64_t
         - starts: List[int64_t]
         - startsoffset: int64_t

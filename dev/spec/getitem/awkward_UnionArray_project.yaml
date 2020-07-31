@@ -1,5 +1,15 @@
 - name: awkward_UnionArray_project
   specializations:
+    - name: awkward_UnionArray8_64_project_64
+      args:
+        - lenout: List[int64_t]
+        - tocarry: List[int64_t]
+        - fromtags: List[int8_t]
+        - tagsoffset: int64_t
+        - fromindex: List[int64_t]
+        - indexoffset: int64_t
+        - length: int64_t
+        - which: int64_t
     - name: awkward_UnionArray8_U32_project_64
       args:
         - lenout: List[int64_t]
@@ -17,16 +27,6 @@
         - fromtags: List[int8_t]
         - tagsoffset: int64_t
         - fromindex: List[int32_t]
-        - indexoffset: int64_t
-        - length: int64_t
-        - which: int64_t
-    - name: awkward_UnionArray8_64_project_64
-      args:
-        - lenout: List[int64_t]
-        - tocarry: List[int64_t]
-        - fromtags: List[int8_t]
-        - tagsoffset: int64_t
-        - fromindex: List[int64_t]
         - indexoffset: int64_t
         - length: int64_t
         - which: int64_t

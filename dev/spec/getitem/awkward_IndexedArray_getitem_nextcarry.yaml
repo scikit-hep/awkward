@@ -1,12 +1,5 @@
 - name: awkward_IndexedArray_getitem_nextcarry
   specializations:
-    - name: awkward_IndexedArrayU32_getitem_nextcarry_64
-      args:
-        - tocarry: List[int64_t]
-        - fromindex: List[uint32_t]
-        - indexoffset: int64_t
-        - lenindex: int64_t
-        - lencontent: int64_t
     - name: awkward_IndexedArray64_getitem_nextcarry_64
       args:
         - tocarry: List[int64_t]
@@ -18,6 +11,13 @@
       args:
         - tocarry: List[int64_t]
         - fromindex: List[int32_t]
+        - indexoffset: int64_t
+        - lenindex: int64_t
+        - lencontent: int64_t
+    - name: awkward_IndexedArrayU32_getitem_nextcarry_64
+      args:
+        - tocarry: List[int64_t]
+        - fromindex: List[uint32_t]
         - indexoffset: int64_t
         - lenindex: int64_t
         - lencontent: int64_t

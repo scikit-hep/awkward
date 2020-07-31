@@ -1,13 +1,5 @@
 - name: awkward_IndexedArray_fill
   specializations:
-    - name: awkward_IndexedArray_fill_to64_from32
-      args:
-        - toindex: List[int64_t]
-        - toindexoffset: int64_t
-        - fromindex: List[int32_t]
-        - fromindexoffset: int64_t
-        - length: int64_t
-        - base: int64_t
     - name: awkward_IndexedArray_fill_to64_from64
       args:
         - toindex: List[int64_t]
@@ -21,6 +13,14 @@
         - toindex: List[int64_t]
         - toindexoffset: int64_t
         - fromindex: List[uint32_t]
+        - fromindexoffset: int64_t
+        - length: int64_t
+        - base: int64_t
+    - name: awkward_IndexedArray_fill_to64_from32
+      args:
+        - toindex: List[int64_t]
+        - toindexoffset: int64_t
+        - fromindex: List[int32_t]
         - fromindexoffset: int64_t
         - length: int64_t
         - base: int64_t

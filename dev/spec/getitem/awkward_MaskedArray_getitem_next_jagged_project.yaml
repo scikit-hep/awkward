@@ -1,16 +1,5 @@
 - name: awkward_MaskedArray_getitem_next_jagged_project
   specializations:
-    - name: awkward_MaskedArray64_getitem_next_jagged_project
-      args:
-        - index: List[int64_t]
-        - index_offset: int64_t
-        - starts_in: List[int64_t]
-        - starts_offset: int64_t
-        - stops_in: List[int64_t]
-        - stops_offset: int64_t
-        - starts_out: List[int64_t]
-        - stops_out: List[int64_t]
-        - length: int64_t
     - name: awkward_MaskedArrayU32_getitem_next_jagged_project
       args:
         - index: List[uint32_t]
@@ -25,6 +14,17 @@
     - name: awkward_MaskedArray32_getitem_next_jagged_project
       args:
         - index: List[int32_t]
+        - index_offset: int64_t
+        - starts_in: List[int64_t]
+        - starts_offset: int64_t
+        - stops_in: List[int64_t]
+        - stops_offset: int64_t
+        - starts_out: List[int64_t]
+        - stops_out: List[int64_t]
+        - length: int64_t
+    - name: awkward_MaskedArray64_getitem_next_jagged_project
+      args:
+        - index: List[int64_t]
         - index_offset: int64_t
         - starts_in: List[int64_t]
         - starts_offset: int64_t

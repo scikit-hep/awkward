@@ -1,11 +1,5 @@
 - name: awkward_IndexedArray_mask
   specializations:
-    - name: awkward_IndexedArray64_mask8
-      args:
-        - tomask: List[int8_t]
-        - fromindex: List[int64_t]
-        - indexoffset: int64_t
-        - length: int64_t
     - name: awkward_IndexedArrayU32_mask8
       args:
         - tomask: List[int8_t]
@@ -16,6 +10,12 @@
       args:
         - tomask: List[int8_t]
         - fromindex: List[int32_t]
+        - indexoffset: int64_t
+        - length: int64_t
+    - name: awkward_IndexedArray64_mask8
+      args:
+        - tomask: List[int8_t]
+        - fromindex: List[int64_t]
         - indexoffset: int64_t
         - length: int64_t
   inparams: ['fromindex', 'indexoffset', 'length']

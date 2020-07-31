@@ -1,5 +1,13 @@
 - name: awkward_IndexedArray_overlay_mask
   specializations:
+    - name: awkward_IndexedArray64_overlay_mask8_to64
+      args:
+        - toindex: List[int64_t]
+        - mask: List[int8_t]
+        - maskoffset: int64_t
+        - fromindex: List[int64_t]
+        - indexoffset: int64_t
+        - length: int64_t
     - name: awkward_IndexedArrayU32_overlay_mask8_to64
       args:
         - toindex: List[int64_t]
@@ -14,14 +22,6 @@
         - mask: List[int8_t]
         - maskoffset: int64_t
         - fromindex: List[int32_t]
-        - indexoffset: int64_t
-        - length: int64_t
-    - name: awkward_IndexedArray64_overlay_mask8_to64
-      args:
-        - toindex: List[int64_t]
-        - mask: List[int8_t]
-        - maskoffset: int64_t
-        - fromindex: List[int64_t]
         - indexoffset: int64_t
         - length: int64_t
   inparams: ['mask', 'maskoffset', 'fromindex', 'indexoffset', 'length']

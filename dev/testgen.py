@@ -54,31 +54,37 @@ def readspec():
                         if "specializations" in indspec.keys():
                             for childfunc in indspec["specializations"]:
                                 funcs[childfunc["name"]] = []
-                                for test in indspec["tests"]:
-                                    # Check if test has correct types
-                                    flag = True
-                                    count = 0
-                                    for arg, val in test["args"].items():
-                                        spectype = pytype(
-                                            childfunc["args"][count][arg]
-                                            .replace("List", "")
-                                            .replace("[", "")
-                                            .replace("]", "")
-                                        )
-                                        while isinstance(val, list):
-                                            val = val[0]
-                                        if type(val) != eval(spectype):
-                                            flag = False
-                                        count += 1
-                                    if flag:
-                                        testinfo = {}
-                                        testinfo["inargs"] = OrderedDict()
-                                        testinfo["inargs"].update(test["args"])
-                                        testinfo["success"] = test["successful"]
-                                        if testinfo["success"]:
-                                            testinfo["outargs"] = OrderedDict()
-                                            testinfo["outargs"].update(test["results"])
-                                        funcs[childfunc["name"]].append(testinfo)
+                                if indspec["tests"] is None:
+                                    pass
+                                    # raise AssertionError("No tests in specification for {0}".format(indspec["name"]))
+                                else:  # FIXME: Remove this handling before merging
+                                    for test in indspec["tests"]:
+                                        # Check if test has correct types
+                                        flag = True
+                                        count = 0
+                                        for arg, val in test["args"].items():
+                                            spectype = pytype(
+                                                childfunc["args"][count][arg]
+                                                .replace("List", "")
+                                                .replace("[", "")
+                                                .replace("]", "")
+                                            )
+                                            while isinstance(val, list):
+                                                val = val[0]
+                                            if type(val) != eval(spectype):
+                                                flag = False
+                                            count += 1
+                                        if flag:
+                                            testinfo = {}
+                                            testinfo["inargs"] = OrderedDict()
+                                            testinfo["inargs"].update(test["args"])
+                                            testinfo["success"] = test["successful"]
+                                            if testinfo["success"]:
+                                                testinfo["outargs"] = OrderedDict()
+                                                testinfo["outargs"].update(
+                                                    test["results"]
+                                                )
+                                            funcs[childfunc["name"]].append(testinfo)
                         else:
                             funcs[indspec["name"]] = []
                             for test in indspec["tests"]:
@@ -112,7 +118,12 @@ def readspec():
 def testpykernels(tests):
     print("Generating file for testing python kernels")
     for funcname in tests.keys():
-        with open(os.path.join(CURRENT_DIR, "..", "tests-kernels", "test_" + funcname + ".py"), "w") as f:
+        with open(
+            os.path.join(
+                CURRENT_DIR, "..", "tests-kernels", "test_py" + funcname + ".py"
+            ),
+            "w",
+        ) as f:
             f.write("import pytest\nimport kernels\n\n")
             num = 1
             for test in tests[funcname]:
@@ -120,14 +131,12 @@ def testpykernels(tests):
                     raise AssertionError(
                         "Put proper tests for {0} in specification".format(funcname)
                     )
-                f.write("def test_" + funcname + "_" + str(num) + "():\n")
+                f.write("def test_py" + funcname + "_" + str(num) + "():\n")
                 num += 1
                 args = ""
                 for arg, val in test["inargs"].items():
                     f.write(" " * 4 + arg + " = " + str(val) + "\n")
-                f.write(
-                    " " * 4 + "funcPy = getattr(kernels, '" + funcname + "')\n"
-                )
+                f.write(" " * 4 + "funcPy = getattr(kernels, '" + funcname + "')\n")
                 count = 0
                 for arg in test["inargs"].keys():
                     if count == 0:
@@ -217,38 +226,18 @@ def testcpukernels(tests):
                                     )[0]
         return funcs
 
-    with open(os.path.join(CURRENT_DIR, "..", "tests", "test_cpukernels.py"), "w") as f:
-        f.write("import math\nimport ctypes\nimport os\n\n")
-        f.write(
-            """
-CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
-
-for root, _, files in os.walk(CURRENT_DIR[:-5]):
-    for filename in files:
-        if filename.endswith("libawkward-cpu-kernels.so"):
-            CPU_KERNEL_SO = os.path.join(root, filename)
-            break
-
-"""
-        )
-        f.write(
-            """
-class Error(ctypes.Structure):
-    _fields_ = [
-        ("str", ctypes.POINTER(ctypes.c_char)),
-        ("identity", ctypes.c_int64),
-        ("attempt", ctypes.c_int64),
-        ("pass_through", ctypes.c_bool),
-    ]
-
-"""
-        )
-        f.write("lib = ctypes.CDLL(CPU_KERNEL_SO)\n\n")
-        funcargs = getfuncargs()
-        for funcname in tests.keys():
+    funcargs = getfuncargs()
+    for funcname in tests.keys():
+        with open(
+            os.path.join(
+                CURRENT_DIR, "..", "tests-kernels", "test_cpu" + funcname + ".py"
+            ),
+            "w",
+        ) as f:
+            f.write("import math\nimport ctypes\n\n")
             num = 1
             for test in tests[funcname]:
-                f.write("def test_" + funcname + "_" + str(num) + "():\n")
+                f.write("def test_cpu" + funcname + "_" + str(num) + "():\n")
                 num += 1
                 for arg, val in test["inargs"].items():
                     f.write(" " * 4 + arg + " = " + str(val) + "\n")

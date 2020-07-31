@@ -1,23 +1,5 @@
 - name: awkward_IndexedArray_simplify
   specializations:
-    - name: awkward_IndexedArray64_simplify32_to64
-      args:
-        - toindex: List[int64_t]
-        - outerindex: List[int64_t]
-        - outeroffset: int64_t
-        - outerlength: int64_t
-        - innerindex: List[int32_t]
-        - inneroffset: int64_t
-        - innerlength: int64_t
-    - name: awkward_IndexedArray32_simplify64_to64
-      args:
-        - toindex: List[int64_t]
-        - outerindex: List[int32_t]
-        - outeroffset: int64_t
-        - outerlength: int64_t
-        - innerindex: List[int64_t]
-        - inneroffset: int64_t
-        - innerlength: int64_t
     - name: awkward_IndexedArrayU32_simplify64_to64
       args:
         - toindex: List[int64_t]
@@ -25,6 +7,15 @@
         - outeroffset: int64_t
         - outerlength: int64_t
         - innerindex: List[int64_t]
+        - inneroffset: int64_t
+        - innerlength: int64_t
+    - name: awkward_IndexedArrayU32_simplifyU32_to64
+      args:
+        - toindex: List[int64_t]
+        - outerindex: List[uint32_t]
+        - outeroffset: int64_t
+        - outerlength: int64_t
+        - innerindex: List[uint32_t]
         - inneroffset: int64_t
         - innerlength: int64_t
     - name: awkward_IndexedArray64_simplifyU32_to64
@@ -36,22 +27,22 @@
         - innerindex: List[uint32_t]
         - inneroffset: int64_t
         - innerlength: int64_t
-    - name: awkward_IndexedArrayU32_simplify32_to64
-      args:
-        - toindex: List[int64_t]
-        - outerindex: List[uint32_t]
-        - outeroffset: int64_t
-        - outerlength: int64_t
-        - innerindex: List[int32_t]
-        - inneroffset: int64_t
-        - innerlength: int64_t
-    - name: awkward_IndexedArray32_simplifyU32_to64
+    - name: awkward_IndexedArray32_simplify32_to64
       args:
         - toindex: List[int64_t]
         - outerindex: List[int32_t]
         - outeroffset: int64_t
         - outerlength: int64_t
-        - innerindex: List[uint32_t]
+        - innerindex: List[int32_t]
+        - inneroffset: int64_t
+        - innerlength: int64_t
+    - name: awkward_IndexedArray64_simplify32_to64
+      args:
+        - toindex: List[int64_t]
+        - outerindex: List[int64_t]
+        - outeroffset: int64_t
+        - outerlength: int64_t
+        - innerindex: List[int32_t]
         - inneroffset: int64_t
         - innerlength: int64_t
     - name: awkward_IndexedArray64_simplify64_to64
@@ -63,22 +54,31 @@
         - innerindex: List[int64_t]
         - inneroffset: int64_t
         - innerlength: int64_t
-    - name: awkward_IndexedArray32_simplify32_to64
+    - name: awkward_IndexedArray32_simplifyU32_to64
       args:
         - toindex: List[int64_t]
         - outerindex: List[int32_t]
         - outeroffset: int64_t
         - outerlength: int64_t
-        - innerindex: List[int32_t]
+        - innerindex: List[uint32_t]
         - inneroffset: int64_t
         - innerlength: int64_t
-    - name: awkward_IndexedArrayU32_simplifyU32_to64
+    - name: awkward_IndexedArray32_simplify64_to64
+      args:
+        - toindex: List[int64_t]
+        - outerindex: List[int32_t]
+        - outeroffset: int64_t
+        - outerlength: int64_t
+        - innerindex: List[int64_t]
+        - inneroffset: int64_t
+        - innerlength: int64_t
+    - name: awkward_IndexedArrayU32_simplify32_to64
       args:
         - toindex: List[int64_t]
         - outerindex: List[uint32_t]
         - outeroffset: int64_t
         - outerlength: int64_t
-        - innerindex: List[uint32_t]
+        - innerindex: List[int32_t]
         - inneroffset: int64_t
         - innerlength: int64_t
   inparams: ['outerindex', 'outeroffset', 'outerlength', 'innerindex', 'inneroffset', 'innerlength']

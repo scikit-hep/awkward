@@ -1,27 +1,5 @@
 - name: awkward_Identities_from_IndexedArray
   specializations:
-    - name: awkward_Identities32_from_IndexedArray64
-      args:
-        - uniquecontents: List[bool]
-        - toptr: List[int32_t]
-        - fromptr: List[int32_t]
-        - fromindex: List[int64_t]
-        - fromptroffset: int64_t
-        - indexoffset: int64_t
-        - tolength: int64_t
-        - fromlength: int64_t
-        - fromwidth: int64_t
-    - name: awkward_Identities64_from_IndexedArray64
-      args:
-        - uniquecontents: List[bool]
-        - toptr: List[int64_t]
-        - fromptr: List[int64_t]
-        - fromindex: List[int64_t]
-        - fromptroffset: int64_t
-        - indexoffset: int64_t
-        - tolength: int64_t
-        - fromlength: int64_t
-        - fromwidth: int64_t
     - name: awkward_Identities32_from_IndexedArray32
       args:
         - uniquecontents: List[bool]
@@ -55,12 +33,34 @@
         - tolength: int64_t
         - fromlength: int64_t
         - fromwidth: int64_t
+    - name: awkward_Identities32_from_IndexedArray64
+      args:
+        - uniquecontents: List[bool]
+        - toptr: List[int32_t]
+        - fromptr: List[int32_t]
+        - fromindex: List[int64_t]
+        - fromptroffset: int64_t
+        - indexoffset: int64_t
+        - tolength: int64_t
+        - fromlength: int64_t
+        - fromwidth: int64_t
     - name: awkward_Identities64_from_IndexedArrayU32
       args:
         - uniquecontents: List[bool]
         - toptr: List[int64_t]
         - fromptr: List[int64_t]
         - fromindex: List[uint32_t]
+        - fromptroffset: int64_t
+        - indexoffset: int64_t
+        - tolength: int64_t
+        - fromlength: int64_t
+        - fromwidth: int64_t
+    - name: awkward_Identities64_from_IndexedArray64
+      args:
+        - uniquecontents: List[bool]
+        - toptr: List[int64_t]
+        - fromptr: List[int64_t]
+        - fromindex: List[int64_t]
         - fromptroffset: int64_t
         - indexoffset: int64_t
         - tolength: int64_t

@@ -1,21 +1,21 @@
 - name: awkward_UnionArray_flatten_length
   specializations:
-    - name: awkward_UnionArrayU32_flatten_length_64
-      args:
-        - total_length: List[int64_t]
-        - fromtags: List[int8_t]
-        - fromtagsoffset: int64_t
-        - fromindex: List[uint32_t]
-        - fromindexoffset: int64_t
-        - length: int64_t
-        - offsetsraws: List[List[int64_t]]
-        - offsetsoffsets: List[int64_t]
     - name: awkward_UnionArray32_flatten_length_64
       args:
         - total_length: List[int64_t]
         - fromtags: List[int8_t]
         - fromtagsoffset: int64_t
         - fromindex: List[int32_t]
+        - fromindexoffset: int64_t
+        - length: int64_t
+        - offsetsraws: List[List[int64_t]]
+        - offsetsoffsets: List[int64_t]
+    - name: awkward_UnionArrayU32_flatten_length_64
+      args:
+        - total_length: List[int64_t]
+        - fromtags: List[int8_t]
+        - fromtagsoffset: int64_t
+        - fromindex: List[uint32_t]
         - fromindexoffset: int64_t
         - length: int64_t
         - offsetsraws: List[List[int64_t]]

@@ -1,5 +1,13 @@
 - name: awkward_ListOffsetArray_rpad_length_axis1
   specializations:
+    - name: awkward_ListOffsetArrayU32_rpad_length_axis1
+      args:
+        - tooffsets: List[uint32_t]
+        - fromoffsets: List[uint32_t]
+        - offsetsoffset: int64_t
+        - fromlength: int64_t
+        - target: int64_t
+        - tolength: List[int64_t]
     - name: awkward_ListOffsetArray32_rpad_length_axis1
       args:
         - tooffsets: List[int32_t]
@@ -12,14 +20,6 @@
       args:
         - tooffsets: List[int64_t]
         - fromoffsets: List[int64_t]
-        - offsetsoffset: int64_t
-        - fromlength: int64_t
-        - target: int64_t
-        - tolength: List[int64_t]
-    - name: awkward_ListOffsetArrayU32_rpad_length_axis1
-      args:
-        - tooffsets: List[uint32_t]
-        - fromoffsets: List[uint32_t]
         - offsetsoffset: int64_t
         - fromlength: int64_t
         - target: int64_t

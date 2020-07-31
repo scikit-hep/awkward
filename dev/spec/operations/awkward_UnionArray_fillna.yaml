@@ -1,9 +1,9 @@
 - name: awkward_UnionArray_fillna
   specializations:
-    - name: awkward_UnionArray_fillna_from32_to64
+    - name: awkward_UnionArray_fillna_fromU32_to64
       args:
         - toindex: List[int64_t]
-        - fromindex: List[int32_t]
+        - fromindex: List[uint32_t]
         - offset: int64_t
         - length: int64_t
     - name: awkward_UnionArray_fillna_from64_to64
@@ -12,10 +12,10 @@
         - fromindex: List[int64_t]
         - offset: int64_t
         - length: int64_t
-    - name: awkward_UnionArray_fillna_fromU32_to64
+    - name: awkward_UnionArray_fillna_from32_to64
       args:
         - toindex: List[int64_t]
-        - fromindex: List[uint32_t]
+        - fromindex: List[int32_t]
         - offset: int64_t
         - length: int64_t
   inparams: ['fromindex', 'offset', 'length']

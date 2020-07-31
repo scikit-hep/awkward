@@ -8,18 +8,18 @@
         - fromtags: List[int8_t]
         - tagsoffset: int64_t
         - length: int64_t
-    - name: awkward_UnionArray8_64_regular_index
-      args:
-        - toindex: List[int64_t]
-        - current: List[int64_t]
-        - size: int64_t
-        - fromtags: List[int8_t]
-        - tagsoffset: int64_t
-        - length: int64_t
     - name: awkward_UnionArray8_32_regular_index
       args:
         - toindex: List[int32_t]
         - current: List[int32_t]
+        - size: int64_t
+        - fromtags: List[int8_t]
+        - tagsoffset: int64_t
+        - length: int64_t
+    - name: awkward_UnionArray8_64_regular_index
+      args:
+        - toindex: List[int64_t]
+        - current: List[int64_t]
         - size: int64_t
         - fromtags: List[int8_t]
         - tagsoffset: int64_t

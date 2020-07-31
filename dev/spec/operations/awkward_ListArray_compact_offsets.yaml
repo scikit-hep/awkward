@@ -1,5 +1,13 @@
 - name: awkward_ListArray_compact_offsets
   specializations:
+    - name: awkward_ListArray32_compact_offsets_64
+      args:
+        - tooffsets: List[int64_t]
+        - fromstarts: List[int32_t]
+        - fromstops: List[int32_t]
+        - startsoffset: int64_t
+        - stopsoffset: int64_t
+        - length: int64_t
     - name: awkward_ListArrayU32_compact_offsets_64
       args:
         - tooffsets: List[int64_t]
@@ -13,14 +21,6 @@
         - tooffsets: List[int64_t]
         - fromstarts: List[int64_t]
         - fromstops: List[int64_t]
-        - startsoffset: int64_t
-        - stopsoffset: int64_t
-        - length: int64_t
-    - name: awkward_ListArray32_compact_offsets_64
-      args:
-        - tooffsets: List[int64_t]
-        - fromstarts: List[int32_t]
-        - fromstops: List[int32_t]
         - startsoffset: int64_t
         - stopsoffset: int64_t
         - length: int64_t

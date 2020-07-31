@@ -1,17 +1,17 @@
 - name: awkward_IndexedArray_getitem_carry
   specializations:
-    - name: awkward_IndexedArray64_getitem_carry_64
-      args:
-        - toindex: List[int64_t]
-        - fromindex: List[int64_t]
-        - fromcarry: List[int64_t]
-        - indexoffset: int64_t
-        - lenindex: int64_t
-        - lencarry: int64_t
     - name: awkward_IndexedArrayU32_getitem_carry_64
       args:
         - toindex: List[uint32_t]
         - fromindex: List[uint32_t]
+        - fromcarry: List[int64_t]
+        - indexoffset: int64_t
+        - lenindex: int64_t
+        - lencarry: int64_t
+    - name: awkward_IndexedArray64_getitem_carry_64
+      args:
+        - toindex: List[int64_t]
+        - fromindex: List[int64_t]
         - fromcarry: List[int64_t]
         - indexoffset: int64_t
         - lenindex: int64_t
