@@ -1,5 +1,16 @@
 - name: awkward_ListArray_combinations_length
   specializations:
+    - name: awkward_ListArrayU32_combinations_length_64
+      args:
+        - totallen: List[int64_t]
+        - tooffsets: List[int64_t]
+        - n: int64_t
+        - replacement: bool
+        - starts: List[uint32_t]
+        - startsoffset: int64_t
+        - stops: List[uint32_t]
+        - stopsoffset: int64_t
+        - length: int64_t
     - name: awkward_ListArray64_combinations_length_64
       args:
         - totallen: List[int64_t]
@@ -20,17 +31,6 @@
         - starts: List[int32_t]
         - startsoffset: int64_t
         - stops: List[int32_t]
-        - stopsoffset: int64_t
-        - length: int64_t
-    - name: awkward_ListArrayU32_combinations_length_64
-      args:
-        - totallen: List[int64_t]
-        - tooffsets: List[int64_t]
-        - n: int64_t
-        - replacement: bool
-        - starts: List[uint32_t]
-        - startsoffset: int64_t
-        - stops: List[uint32_t]
         - stopsoffset: int64_t
         - length: int64_t
   inparams: ['n', 'replacement', 'starts', 'startsoffset', 'stops', 'stopsoffset', 'length']
@@ -75,23 +75,23 @@
     - args:
         totallen: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         tooffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        n: 4
+        n: 3
         replacement: True
-        starts: [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+        starts: [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1]
         startsoffset: 0
         stops: [3, 1, 3, 2, 3, 1, 2, 3]
         stopsoffset: 0
-        length: 4
+        length: 3
       successful: True
       results:
-        totallen: [4]
-        tooffsets: [0, 1, 2, 3, 4]
+        totallen: [3]
+        tooffsets: [0, 1, 2, 3]
     - args:
         totallen: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         tooffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         n: 3
         replacement: False
-        starts: [1, 0, 0, 0, 1, 1, 0]
+        starts: [1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1]
         startsoffset: 1
         stops: [8, 4, 5, 6, 5, 5, 7]
         stopsoffset: 1

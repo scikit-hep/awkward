@@ -26,11 +26,11 @@
         theirmaskoffset: 0
         mymask: [1, 1, 1, 1, 1]
         mymaskoffset: 0
-        length: 4
+        length: 3
         validwhen: True
       successful: True
       results:
-        tomask: [1, 1, 1, 1]
+        tomask: [1, 1, 1]
     - args:
         tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         theirmask: [1, 1, 1, 1, 1]

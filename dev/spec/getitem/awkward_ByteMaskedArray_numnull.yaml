@@ -18,7 +18,7 @@
         numnull: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         mask: [1, 1, 1, 1, 1]
         maskoffset: 0
-        length: 4
+        length: 3
         validwhen: True
       successful: True
       results:

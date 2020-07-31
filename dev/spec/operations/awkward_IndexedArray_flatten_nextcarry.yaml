@@ -1,5 +1,12 @@
 - name: awkward_IndexedArray_flatten_nextcarry
   specializations:
+    - name: awkward_IndexedArrayU32_flatten_nextcarry_64
+      args:
+        - tocarry: List[int64_t]
+        - fromindex: List[uint32_t]
+        - indexoffset: int64_t
+        - lenindex: int64_t
+        - lencontent: int64_t
     - name: awkward_IndexedArray32_flatten_nextcarry_64
       args:
         - tocarry: List[int64_t]
@@ -11,13 +18,6 @@
       args:
         - tocarry: List[int64_t]
         - fromindex: List[int64_t]
-        - indexoffset: int64_t
-        - lenindex: int64_t
-        - lencontent: int64_t
-    - name: awkward_IndexedArrayU32_flatten_nextcarry_64
-      args:
-        - tocarry: List[int64_t]
-        - fromindex: List[uint32_t]
         - indexoffset: int64_t
         - lenindex: int64_t
         - lencontent: int64_t
@@ -41,11 +41,11 @@
         tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         fromindex: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
         indexoffset: 1
-        lenindex: 4
-        lencontent: 4
+        lenindex: 3
+        lencontent: 3
       successful: True
       results:
-        tocarry: [0, 0, 1, 1]
+        tocarry: [0, 0, 1]
     - args:
         tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         fromindex: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
@@ -55,17 +55,3 @@
       successful: True
       results:
         tocarry: [1, 1, 2]
-    - args:
-        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        fromindex: [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-        indexoffset: 1
-        lenindex: 3
-        lencontent: 3
-      successful: False
-    - args:
-        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        fromindex: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
-        indexoffset: 0
-        lenindex: 4
-        lencontent: 4
-      successful: False

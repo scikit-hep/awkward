@@ -8,6 +8,7 @@ import os
 import re
 from collections import OrderedDict
 from collections.abc import Iterable
+from itertools import product
 
 import black
 import pycparser
@@ -56,17 +57,6 @@ TEST_BLACKLIST = SPEC_BLACKLIST + [
     "awkward_ListOffsetArray_rpad_and_clip_axis1",
     "awkward_ListOffsetArray_rpad_axis1",
 ]
-
-SUCCESS_TEST_BLACKLIST = [
-    "awkward_combinations",
-    "awkward_regularize_arrayslice",
-    "awkward_RegularArray_broadcast_tooffsets",
-    "awkward_ListArray_validity",
-    "awkward_IndexedArray_validity",
-    "awkward_UnionArray_validity",
-]
-
-FAIL_TEST_BLACKLIST = ["awkward_NumpyArray_fill_to64_fromU64"]
 
 PYGEN_BLACKLIST = SPEC_BLACKLIST + [
     "awkward_sorting_ranges",
@@ -903,43 +893,89 @@ kSliceNone = kMaxInt64 + 1
                 funcs[funcname] = []
                 funcPy = getattr(kernels, funcname)
 
-                # Success Tests
-                if funcname not in SUCCESS_TEST_BLACKLIST:
-                    for x in range(2):
-                        intests = OrderedDict()
-                        outtests = OrderedDict()
-                        tests = []
-                        checkindex = []
-                        for i in range(len(allfuncargs[keyfunc].keys())):
-                            arg = list(allfuncargs[keyfunc].keys())[i]
-                            argpytype = pytype(allfuncargs[keyfunc][arg])
-                            if allfuncroles[keyfunc][arg]["check"] == "inparam":
-                                if "role" in allfuncroles[keyfunc][arg].keys():
-                                    tempval = data["success"][
-                                        allfuncroles[keyfunc][arg]["role"][
-                                            : allfuncroles[keyfunc][arg]["role"].find(
-                                                "-"
-                                            )
-                                        ]
-                                    ][allfuncroles[keyfunc][arg]["role"]][x][argpytype]
-                                else:
-                                    tempval = data["success"]["num"][x]
-                                tests.append(tempval)
-                                intests[arg] = tempval
-                            elif allfuncroles[keyfunc][arg]["check"] == "outparam":
-                                tests.append({})
-                                if argpytype == "int":
-                                    intests[arg] = [0] * 50
-                                elif argpytype == "float":
-                                    intests[arg] = [1.1] * 50
-                                elif argpytype == "bool":
-                                    intests[arg] = [True] * 50
-                                checkindex.append(i)
-                            else:
-                                raise AssertionError(
-                                    "Function argument must have inparam/outparam role"
-                                )
+                firstdict = {}
+                instancedict = {}
+                checkindex = []
 
+                count = 0
+                for i in range(len(allfuncargs[keyfunc].keys())):
+                    arg = list(allfuncargs[keyfunc].keys())[i]
+                    argpytype = pytype(allfuncargs[keyfunc][arg])
+                    firstdict[arg] = []
+                    if allfuncroles[keyfunc][arg]["check"] == "inparam":
+                        if "role" in allfuncroles[keyfunc][arg].keys():
+                            group = allfuncroles[keyfunc][arg]["role"][
+                                : allfuncroles[keyfunc][arg]["role"].find("-")
+                            ]
+                            if group not in instancedict.keys():
+                                instancedict[group] = []
+                            instancedict[group].append(arg)
+                            for x in range(
+                                len(data[group][allfuncroles[keyfunc][arg]["role"]])
+                            ):
+                                firstdict[arg].append(
+                                    data[group][allfuncroles[keyfunc][arg]["role"]][x][
+                                        argpytype
+                                    ]
+                                )
+                        else:
+                            group = str(count)
+                            assert group not in instancedict.keys()
+                            instancedict[group] = [arg]
+                            firstdict[arg].append(data["num"])
+                            assert len(firstdict[arg]) == 1
+                            count += 1
+                    elif allfuncroles[keyfunc][arg]["check"] == "outparam":
+                        group = str(count)
+                        assert group not in instancedict.keys()
+                        instancedict[group] = [arg]
+                        firstdict[arg].append({})
+                        assert (len(firstdict[arg])) == 1
+                        checkindex.append(i)
+                        count += 1
+                    else:
+                        raise AssertionError(
+                            "Function argument must have inparam/outparam role"
+                        )
+
+                instancedictlist = list(instancedict.keys())
+
+                combinations = []
+                for name in instancedictlist:
+                    temp = []
+                    for arg in instancedict[name]:
+                        temp.append(firstdict[arg])
+                    combinations.append(zip(*temp))
+
+                for x in product(*combinations):
+                    temp = {}
+                    for groupName, t in zip(instancedictlist, x):
+                        for key, value in zip(instancedict[groupName], t):
+                            temp[key] = value
+
+                    tests = []
+                    intests = OrderedDict()
+                    outtests = OrderedDict()
+                    for key in firstdict.keys():
+                        argpytype = pytype(allfuncargs[keyfunc][key])
+                        if allfuncroles[keyfunc][key]["check"] == "outparam":
+                            if argpytype == "int":
+                                intests[key] = [0] * 50
+                            elif argpytype == "float":
+                                intests[key] = [1.1] * 50
+                            elif argpytype == "bool":
+                                intests[key] = [True] * 50
+                        elif allfuncroles[keyfunc][key]["check"] == "inparam":
+                            intests[key] = temp[key]
+                        else:
+                            raise AssertionError(
+                                "Invalid roles should have been filtered"
+                            )
+                        tests.append(copy.deepcopy(temp[key]))
+
+                    tempdict = {}
+                    tempdict["input"] = copy.deepcopy(intests)
+                    try:
                         funcPy(*tests)
                         for i in checkindex:
                             count = 0
@@ -955,48 +991,12 @@ kSliceNone = kMaxInt64 + 1
                                     tests[i][num]
                                 )
                                 count = count + 1
-                        tempdict = {}
-                        tempdict["input"] = copy.copy(intests)
                         tempdict["output"] = copy.copy(outtests)
                         tempdict["success"] = True
-                        funcs[funcname].append(tempdict)
-
-                # Failure Tests
-                if keyfunc not in FAIL_TEST_BLACKLIST and keyfunc in failfuncs:
-                    for x in range(2):
-                        intests = OrderedDict()
-                        outtests = OrderedDict()
-                        for i in range(len(allfuncargs[keyfunc].keys())):
-                            arg = list(allfuncargs[keyfunc].keys())[i]
-                            argpytype = pytype(allfuncargs[keyfunc][arg])
-                            if allfuncroles[keyfunc][arg]["check"] == "inparam":
-                                if "role" in allfuncroles[keyfunc][arg].keys():
-                                    tempval = data["failure"][
-                                        allfuncroles[keyfunc][arg]["role"][
-                                            : allfuncroles[keyfunc][arg]["role"].find(
-                                                "-"
-                                            )
-                                        ]
-                                    ][allfuncroles[keyfunc][arg]["role"]][x][argpytype]
-                                else:
-                                    tempval = data["failure"]["num"][x]
-                                intests[arg] = tempval
-                            elif allfuncroles[keyfunc][arg]["check"] == "outparam":
-                                if argpytype == "int":
-                                    intests[arg] = [0] * 50
-                                elif argpytype == "float":
-                                    intests[arg] = [1.1] * 50
-                                elif argpytype == "bool":
-                                    intests[arg] = [True] * 50
-                            else:
-                                raise AssertionError(
-                                    "Function argument must have inparam/outparam role"
-                                )
-
-                        tempdict = {}
-                        tempdict["input"] = copy.copy(intests)
+                    except ValueError:
                         tempdict["success"] = False
-                        funcs[funcname].append(tempdict)
+                    funcs[funcname].append(tempdict)
+
     return funcs
 
 

@@ -1495,8 +1495,8 @@ extern "C" {
   /// @param fromptroffset inparam role: IndexedArray-index-offset
   /// @param starts inparam role: ListArray-starts
   /// @param startsoffset inparam role: ListArray-starts-offset
-  /// @param parents inparam role: IndexedArray-index-outer
-  /// @param parentsoffset inparam role: IndexedArray-index-outer-offset
+  /// @param parents inparam role: IndexedArray-index-inner
+  /// @param parentsoffset inparam role: IndexedArray-index-inner-offset
   /// @param lenparents inparam role: IndexedArray-lenparents
   /// @param outlength inparam role: IndexedArray-outlength
   EXPORT_SYMBOL struct Error

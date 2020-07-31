@@ -1,10 +1,5 @@
 - name: awkward_ListArray_getitem_next_range_counts
   specializations:
-    - name: awkward_ListArray32_getitem_next_range_counts_64
-      args:
-        - total: List[int64_t]
-        - fromoffsets: List[int32_t]
-        - lenstarts: int64_t
     - name: awkward_ListArrayU32_getitem_next_range_counts_64
       args:
         - total: List[int64_t]
@@ -14,6 +9,11 @@
       args:
         - total: List[int64_t]
         - fromoffsets: List[int64_t]
+        - lenstarts: int64_t
+    - name: awkward_ListArray32_getitem_next_range_counts_64
+      args:
+        - total: List[int64_t]
+        - fromoffsets: List[int32_t]
         - lenstarts: int64_t
   inparams: ['fromoffsets', 'lenstarts']
   outparams: ['total']
@@ -25,14 +25,14 @@
   tests:
     - args:
         total: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        fromoffsets: [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
-        lenstarts: 4
+        fromoffsets: [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1]
+        lenstarts: 3
       successful: True
       results:
-        total: [0]
+        total: [-1]
     - args:
         total: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        fromoffsets: [1, 0, 0, 0, 1, 1, 0]
+        fromoffsets: [1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1]
         lenstarts: 3
       successful: True
       results:

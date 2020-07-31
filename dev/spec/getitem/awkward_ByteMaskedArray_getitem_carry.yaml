@@ -23,12 +23,12 @@
         tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         frommask: [1, 1, 1, 1, 1]
         frommaskoffset: 0
-        lenmask: 4
+        lenmask: 3
         fromcarry: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
-        lencarry: 4
+        lencarry: 3
       successful: True
       results:
-        tomask: [1, 1, 1, 1]
+        tomask: [1, 1, 1]
     - args:
         tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         frommask: [1, 1, 1, 1, 1]
@@ -41,17 +41,21 @@
         tomask: [1, 1, 1]
     - args:
         tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        frommask: [True, True, True, True, True]
+        frommask: [1, 1, 1, 1, 1]
         frommaskoffset: 0
         lenmask: 3
-        fromcarry: [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+        fromcarry: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
         lencarry: 3
-      successful: False
+      successful: True
+      results:
+        tomask: [1, 1, 1]
     - args:
         tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        frommask: [True, False, True, True, True]
+        frommask: [1, 1, 1, 1, 1]
         frommaskoffset: 0
-        lenmask: 4
-        fromcarry: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
-        lencarry: 4
-      successful: False
+        lenmask: 3
+        fromcarry: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        lencarry: 3
+      successful: True
+      results:
+        tomask: [1, 1, 1]

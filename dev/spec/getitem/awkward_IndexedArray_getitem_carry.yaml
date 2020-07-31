@@ -40,11 +40,21 @@
         fromindex: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
         fromcarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         indexoffset: 1
-        lenindex: 4
-        lencarry: 4
+        lenindex: 3
+        lencarry: 3
       successful: True
       results:
-        toindex: [0.0, 0.0, 0.0, 0.0]
+        toindex: [0.0, 0.0, 0.0]
+    - args:
+        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromindex: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        fromcarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        indexoffset: 1
+        lenindex: 3
+        lencarry: 3
+      successful: True
+      results:
+        toindex: [0.0, 0.0, 0.0]
     - args:
         toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         fromindex: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
@@ -57,17 +67,11 @@
         toindex: [1.0, 1.0, 1.0]
     - args:
         toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        fromindex: [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-        fromcarry: [5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-        indexoffset: 1
+        fromindex: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        fromcarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        indexoffset: 0
         lenindex: 3
         lencarry: 3
-      successful: False
-    - args:
-        toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        fromindex: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
-        fromcarry: [5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-        indexoffset: 0
-        lenindex: 4
-        lencarry: 4
-      successful: False
+      successful: True
+      results:
+        toindex: [1.0, 1.0, 1.0]

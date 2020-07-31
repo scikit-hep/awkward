@@ -1,15 +1,5 @@
 - name: awkward_Identities_from_ListOffsetArray
   specializations:
-    - name: awkward_Identities64_from_ListOffsetArrayU32
-      args:
-        - toptr: List[int64_t]
-        - fromptr: List[int64_t]
-        - fromoffsets: List[uint32_t]
-        - fromptroffset: int64_t
-        - offsetsoffset: int64_t
-        - tolength: int64_t
-        - fromlength: int64_t
-        - fromwidth: int64_t
     - name: awkward_Identities64_from_ListOffsetArray64
       args:
         - toptr: List[int64_t]
@@ -20,11 +10,11 @@
         - tolength: int64_t
         - fromlength: int64_t
         - fromwidth: int64_t
-    - name: awkward_Identities32_from_ListOffsetArray64
+    - name: awkward_Identities32_from_ListOffsetArrayU32
       args:
         - toptr: List[int32_t]
         - fromptr: List[int32_t]
-        - fromoffsets: List[int64_t]
+        - fromoffsets: List[uint32_t]
         - fromptroffset: int64_t
         - offsetsoffset: int64_t
         - tolength: int64_t
@@ -50,10 +40,20 @@
         - tolength: int64_t
         - fromlength: int64_t
         - fromwidth: int64_t
-    - name: awkward_Identities32_from_ListOffsetArrayU32
+    - name: awkward_Identities32_from_ListOffsetArray64
       args:
         - toptr: List[int32_t]
         - fromptr: List[int32_t]
+        - fromoffsets: List[int64_t]
+        - fromptroffset: int64_t
+        - offsetsoffset: int64_t
+        - tolength: int64_t
+        - fromlength: int64_t
+        - fromwidth: int64_t
+    - name: awkward_Identities64_from_ListOffsetArrayU32
+      args:
+        - toptr: List[int64_t]
+        - fromptr: List[int64_t]
         - fromoffsets: List[uint32_t]
         - fromptroffset: int64_t
         - offsetsoffset: int64_t
@@ -99,12 +99,12 @@
         fromoffsets: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
         fromptroffset: 0
         offsetsoffset: 0
-        tolength: 4
-        fromlength: 4
-        fromwidth: 4
+        tolength: 3
+        fromlength: 3
+        fromwidth: 3
       successful: True
       results:
-        toptr: [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
+        toptr: [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
     - args:
         toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         fromptr: [0, 2, 1, 1, 1, 1, 2, 0, 1, 2, 0, 1, 0, 2, 0, 1, 1, 1, 0, 2, 2, 2, 1, 2, 0, 1]
@@ -117,23 +117,3 @@
       successful: True
       results:
         toptr: [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
-    - args:
-        toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        fromptr: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-        fromoffsets: [1, 2, 3, 4, 5, 6, 7, 8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-        fromptroffset: 0
-        offsetsoffset: 0
-        tolength: 3
-        fromlength: 3
-        fromwidth: 3
-      successful: False
-    - args:
-        toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        fromptr: [0, 2, 5, 1, 1, 1, 2, 0, 1, 2]
-        fromoffsets: [2, 3, 1, 4, 6, 8, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
-        fromptroffset: 1
-        offsetsoffset: 1
-        tolength: 4
-        fromlength: 4
-        fromwidth: 4
-      successful: False

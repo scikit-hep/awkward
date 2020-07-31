@@ -1,16 +1,5 @@
 - name: awkward_ListArray_broadcast_tooffsets
   specializations:
-    - name: awkward_ListArrayU32_broadcast_tooffsets_64
-      args:
-        - tocarry: List[int64_t]
-        - fromoffsets: List[int64_t]
-        - offsetsoffset: int64_t
-        - offsetslength: int64_t
-        - fromstarts: List[uint32_t]
-        - startsoffset: int64_t
-        - fromstops: List[uint32_t]
-        - stopsoffset: int64_t
-        - lencontent: int64_t
     - name: awkward_ListArray32_broadcast_tooffsets_64
       args:
         - tocarry: List[int64_t]
@@ -20,6 +9,17 @@
         - fromstarts: List[int32_t]
         - startsoffset: int64_t
         - fromstops: List[int32_t]
+        - stopsoffset: int64_t
+        - lencontent: int64_t
+    - name: awkward_ListArrayU32_broadcast_tooffsets_64
+      args:
+        - tocarry: List[int64_t]
+        - fromoffsets: List[int64_t]
+        - offsetsoffset: int64_t
+        - offsetslength: int64_t
+        - fromstarts: List[uint32_t]
+        - startsoffset: int64_t
+        - fromstops: List[uint32_t]
         - stopsoffset: int64_t
         - lencontent: int64_t
     - name: awkward_ListArray64_broadcast_tooffsets_64
@@ -68,7 +68,7 @@
         tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         fromoffsets: [1, 3, 5, 7, 9, 11]
         offsetsoffset: 0
-        offsetslength: 4
+        offsetslength: 3
         fromstarts: [1, 2, 3, 4, 5, 6]
         startsoffset: 0
         fromstops: [3, 4, 5, 6, 7, 8]
@@ -76,7 +76,7 @@
         lencontent: 10
       successful: True
       results:
-        tocarry: [1.0, 2.0, 2.0, 3.0, 3.0, 4.0]
+        tocarry: [1.0, 2.0, 2.0, 3.0]
     - args:
         tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         fromoffsets: [1, 3, 5, 7, 9, 11]
@@ -90,25 +90,3 @@
       successful: True
       results:
         tocarry: [2.0, 3.0, 3.0, 4.0]
-    - args:
-        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        fromoffsets: [1, 4, 5, 7, 9, 11]
-        offsetsoffset: 0
-        offsetslength: 3
-        fromstarts: [1, 2, 3, 4, 5, 6]
-        startsoffset: 0
-        fromstops: [2, 3, 4, 5, 6, 7]
-        stopsoffset: 0
-        lencontent: 4
-      successful: False
-    - args:
-        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        fromoffsets: [1, 4, 5, 7, 9, 11]
-        offsetsoffset: 0
-        offsetslength: 4
-        fromstarts: [3, 4, 1, 2, 4, 2]
-        startsoffset: 3
-        fromstops: [1, 5, 2, 6, 3, 5]
-        stopsoffset: 3
-        lencontent: 4
-      successful: False

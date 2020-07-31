@@ -26,7 +26,7 @@
         bytemaskoffset: 0
         missingindex: [1, 1, 1, 1, 1]
         missingindexoffset: 0
-        length: 4
+        length: 3
       successful: True
       results:
         same: [False]

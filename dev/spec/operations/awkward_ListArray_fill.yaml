@@ -1,17 +1,5 @@
 - name: awkward_ListArray_fill
   specializations:
-    - name: awkward_ListArray_fill_to64_fromU32
-      args:
-        - tostarts: List[int64_t]
-        - tostartsoffset: int64_t
-        - tostops: List[int64_t]
-        - tostopsoffset: int64_t
-        - fromstarts: List[uint32_t]
-        - fromstartsoffset: int64_t
-        - fromstops: List[uint32_t]
-        - fromstopsoffset: int64_t
-        - length: int64_t
-        - base: int64_t
     - name: awkward_ListArray_fill_to64_from32
       args:
         - tostarts: List[int64_t]
@@ -21,6 +9,18 @@
         - fromstarts: List[int32_t]
         - fromstartsoffset: int64_t
         - fromstops: List[int32_t]
+        - fromstopsoffset: int64_t
+        - length: int64_t
+        - base: int64_t
+    - name: awkward_ListArray_fill_to64_fromU32
+      args:
+        - tostarts: List[int64_t]
+        - tostartsoffset: int64_t
+        - tostops: List[int64_t]
+        - tostopsoffset: int64_t
+        - fromstarts: List[uint32_t]
+        - fromstartsoffset: int64_t
+        - fromstops: List[uint32_t]
         - fromstopsoffset: int64_t
         - length: int64_t
         - base: int64_t
@@ -57,25 +57,25 @@
   tests:
     - args:
         tostarts: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        tostartsoffset: 4
+        tostartsoffset: 3
         tostops: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        tostopsoffset: 4
-        fromstarts: [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+        tostopsoffset: 3
+        fromstarts: [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1]
         fromstartsoffset: 0
         fromstops: [3, 1, 3, 2, 3, 1, 2, 3]
         fromstopsoffset: 0
-        length: 4
-        base: 4
+        length: 3
+        base: 3
       successful: True
       results:
-        tostarts: [0, 0, 0, 0, 6.0, 4.0, 6.0, 5.0]
-        tostops: [0, 0, 0, 0, 7.0, 5.0, 7.0, 6.0]
+        tostarts: [0, 0, 0, 5.0, 3.0, 5.0]
+        tostops: [0, 0, 0, 6.0, 4.0, 6.0]
     - args:
         tostarts: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         tostartsoffset: 3
         tostops: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         tostopsoffset: 3
-        fromstarts: [1, 0, 0, 0, 1, 1, 0]
+        fromstarts: [1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1]
         fromstartsoffset: 1
         fromstops: [8, 4, 5, 6, 5, 5, 7]
         fromstopsoffset: 1

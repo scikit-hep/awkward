@@ -1,17 +1,17 @@
 - name: awkward_UnionArray_fillindex
   specializations:
-    - name: awkward_UnionArray_fillindex_to64_fromU32
-      args:
-        - toindex: List[int64_t]
-        - toindexoffset: int64_t
-        - fromindex: List[uint32_t]
-        - fromindexoffset: int64_t
-        - length: int64_t
     - name: awkward_UnionArray_fillindex_to64_from64
       args:
         - toindex: List[int64_t]
         - toindexoffset: int64_t
         - fromindex: List[int64_t]
+        - fromindexoffset: int64_t
+        - length: int64_t
+    - name: awkward_UnionArray_fillindex_to64_fromU32
+      args:
+        - toindex: List[int64_t]
+        - toindexoffset: int64_t
+        - fromindex: List[uint32_t]
         - fromindexoffset: int64_t
         - length: int64_t
     - name: awkward_UnionArray_fillindex_to64_from32
@@ -32,13 +32,13 @@
   tests:
     - args:
         toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        toindexoffset: 4
+        toindexoffset: 3
         fromindex: [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
         fromindexoffset: 0
-        length: 4
+        length: 3
       successful: True
       results:
-        toindex: [0, 0, 0, 0, 4.0, 3.0, 6.0, 6.0]
+        toindex: [0, 0, 0, 4.0, 3.0, 6.0]
     - args:
         toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         toindexoffset: 3

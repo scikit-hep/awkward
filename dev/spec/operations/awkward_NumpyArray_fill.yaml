@@ -1,10 +1,290 @@
 - name: awkward_NumpyArray_fill
   specializations:
+    - name: awkward_NumpyArray_fill_toint64_fromint8
+      args:
+        - toptr: List[int64_t]
+        - tooffset: int64_t
+        - fromptr: List[int8_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_toint64_fromuint32
+      args:
+        - toptr: List[int64_t]
+        - tooffset: int64_t
+        - fromptr: List[uint32_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_tofloat32_fromint64
+      args:
+        - toptr: List[float]
+        - tooffset: int64_t
+        - fromptr: List[int64_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_tofloat64_fromint16
+      args:
+        - toptr: List[double]
+        - tooffset: int64_t
+        - fromptr: List[int16_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_touint64_fromuint64
+      args:
+        - toptr: List[uint64_t]
+        - tooffset: int64_t
+        - fromptr: List[uint64_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_tofloat64_fromuint64
+      args:
+        - toptr: List[double]
+        - tooffset: int64_t
+        - fromptr: List[uint64_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_tofloat32_fromint32
+      args:
+        - toptr: List[float]
+        - tooffset: int64_t
+        - fromptr: List[int32_t]
+        - fromoffset: int64_t
+        - length: int64_t
     - name: awkward_NumpyArray_fill_toint64_fromint16
       args:
         - toptr: List[int64_t]
         - tooffset: int64_t
         - fromptr: List[int16_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_toint32_fromint16
+      args:
+        - toptr: List[int32_t]
+        - tooffset: int64_t
+        - fromptr: List[int16_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_touint8_fromuint8
+      args:
+        - toptr: List[uint8_t]
+        - tooffset: int64_t
+        - fromptr: List[uint8_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_tofloat32_fromuint64
+      args:
+        - toptr: List[float]
+        - tooffset: int64_t
+        - fromptr: List[uint64_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_touint32_fromuint8
+      args:
+        - toptr: List[uint32_t]
+        - tooffset: int64_t
+        - fromptr: List[uint8_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_tofloat64_fromint64
+      args:
+        - toptr: List[double]
+        - tooffset: int64_t
+        - fromptr: List[int64_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_tofloat64_fromfloat32
+      args:
+        - toptr: List[double]
+        - tooffset: int64_t
+        - fromptr: List[float]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_tofloat64_fromfloat64
+      args:
+        - toptr: List[double]
+        - tooffset: int64_t
+        - fromptr: List[double]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_tofloat32_fromint8
+      args:
+        - toptr: List[float]
+        - tooffset: int64_t
+        - fromptr: List[int8_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_toint16_fromuint8
+      args:
+        - toptr: List[int16_t]
+        - tooffset: int64_t
+        - fromptr: List[uint8_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_tofloat32_fromfloat32
+      args:
+        - toptr: List[float]
+        - tooffset: int64_t
+        - fromptr: List[float]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_tofloat64_fromuint16
+      args:
+        - toptr: List[double]
+        - tooffset: int64_t
+        - fromptr: List[uint16_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_tofloat64_fromint32
+      args:
+        - toptr: List[double]
+        - tooffset: int64_t
+        - fromptr: List[int32_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_touint32_fromuint32
+      args:
+        - toptr: List[uint32_t]
+        - tooffset: int64_t
+        - fromptr: List[uint32_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_tofloat64_fromuint32
+      args:
+        - toptr: List[double]
+        - tooffset: int64_t
+        - fromptr: List[uint32_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_toint64_fromuint8
+      args:
+        - toptr: List[int64_t]
+        - tooffset: int64_t
+        - fromptr: List[uint8_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_touint16_fromuint8
+      args:
+        - toptr: List[uint16_t]
+        - tooffset: int64_t
+        - fromptr: List[uint8_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_tofloat32_fromuint16
+      args:
+        - toptr: List[float]
+        - tooffset: int64_t
+        - fromptr: List[uint16_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_toint64_fromint64
+      args:
+        - toptr: List[int64_t]
+        - tooffset: int64_t
+        - fromptr: List[int64_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_toint16_fromint16
+      args:
+        - toptr: List[int16_t]
+        - tooffset: int64_t
+        - fromptr: List[int16_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_toint32_fromuint16
+      args:
+        - toptr: List[int32_t]
+        - tooffset: int64_t
+        - fromptr: List[uint16_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_toint32_fromuint8
+      args:
+        - toptr: List[int32_t]
+        - tooffset: int64_t
+        - fromptr: List[uint8_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_touint64_fromuint16
+      args:
+        - toptr: List[uint64_t]
+        - tooffset: int64_t
+        - fromptr: List[uint16_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_tofloat32_fromuint8
+      args:
+        - toptr: List[float]
+        - tooffset: int64_t
+        - fromptr: List[uint8_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_toint32_fromint32
+      args:
+        - toptr: List[int32_t]
+        - tooffset: int64_t
+        - fromptr: List[int32_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_touint16_fromuint16
+      args:
+        - toptr: List[uint16_t]
+        - tooffset: int64_t
+        - fromptr: List[uint16_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_tofloat32_fromint16
+      args:
+        - toptr: List[float]
+        - tooffset: int64_t
+        - fromptr: List[int16_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_toint64_fromint32
+      args:
+        - toptr: List[int64_t]
+        - tooffset: int64_t
+        - fromptr: List[int32_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_tofloat64_fromint8
+      args:
+        - toptr: List[double]
+        - tooffset: int64_t
+        - fromptr: List[int8_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_touint64_fromuint8
+      args:
+        - toptr: List[uint64_t]
+        - tooffset: int64_t
+        - fromptr: List[uint8_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_touint32_fromuint16
+      args:
+        - toptr: List[uint32_t]
+        - tooffset: int64_t
+        - fromptr: List[uint16_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_toint64_fromuint16
+      args:
+        - toptr: List[int64_t]
+        - tooffset: int64_t
+        - fromptr: List[uint16_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_tofloat64_fromuint8
+      args:
+        - toptr: List[double]
+        - tooffset: int64_t
+        - fromptr: List[uint8_t]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_toint8_fromint8
+      args:
+        - toptr: List[int8_t]
+        - tooffset: int64_t
+        - fromptr: List[int8_t]
         - fromoffset: int64_t
         - length: int64_t
     - name: awkward_NumpyArray_fill_tofloat32_fromuint32
@@ -21,53 +301,11 @@
         - fromptr: List[uint32_t]
         - fromoffset: int64_t
         - length: int64_t
-    - name: awkward_NumpyArray_fill_tofloat32_fromuint8
-      args:
-        - toptr: List[float]
-        - tooffset: int64_t
-        - fromptr: List[uint8_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_touint16_fromuint8
-      args:
-        - toptr: List[uint16_t]
-        - tooffset: int64_t
-        - fromptr: List[uint8_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_tofloat64_fromint16
-      args:
-        - toptr: List[double]
-        - tooffset: int64_t
-        - fromptr: List[int16_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_toint32_fromint32
+    - name: awkward_NumpyArray_fill_toint32_fromint8
       args:
         - toptr: List[int32_t]
         - tooffset: int64_t
-        - fromptr: List[int32_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_toint64_fromuint32
-      args:
-        - toptr: List[int64_t]
-        - tooffset: int64_t
-        - fromptr: List[uint32_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_touint64_fromuint64
-      args:
-        - toptr: List[uint64_t]
-        - tooffset: int64_t
-        - fromptr: List[uint64_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_tofloat64_fromint32
-      args:
-        - toptr: List[double]
-        - tooffset: int64_t
-        - fromptr: List[int32_t]
+        - fromptr: List[int8_t]
         - fromoffset: int64_t
         - length: int64_t
     - name: awkward_NumpyArray_fill_toint64_fromuint64
@@ -77,249 +315,11 @@
         - fromptr: List[uint64_t]
         - fromoffset: int64_t
         - length: int64_t
-    - name: awkward_NumpyArray_fill_toint8_fromint8
-      args:
-        - toptr: List[int8_t]
-        - tooffset: int64_t
-        - fromptr: List[int8_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_toint32_fromint16
-      args:
-        - toptr: List[int32_t]
-        - tooffset: int64_t
-        - fromptr: List[int16_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_toint64_fromint8
-      args:
-        - toptr: List[int64_t]
-        - tooffset: int64_t
-        - fromptr: List[int8_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_tofloat64_fromuint8
-      args:
-        - toptr: List[double]
-        - tooffset: int64_t
-        - fromptr: List[uint8_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_tofloat32_fromuint64
-      args:
-        - toptr: List[float]
-        - tooffset: int64_t
-        - fromptr: List[uint64_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_toint16_fromint16
-      args:
-        - toptr: List[int16_t]
-        - tooffset: int64_t
-        - fromptr: List[int16_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_tofloat64_fromuint16
-      args:
-        - toptr: List[double]
-        - tooffset: int64_t
-        - fromptr: List[uint16_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_tofloat64_fromfloat64
-      args:
-        - toptr: List[double]
-        - tooffset: int64_t
-        - fromptr: List[double]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_touint32_fromuint16
-      args:
-        - toptr: List[uint32_t]
-        - tooffset: int64_t
-        - fromptr: List[uint16_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_tofloat64_fromfloat32
-      args:
-        - toptr: List[double]
-        - tooffset: int64_t
-        - fromptr: List[float]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_toint32_fromuint8
-      args:
-        - toptr: List[int32_t]
-        - tooffset: int64_t
-        - fromptr: List[uint8_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_toint64_fromint32
-      args:
-        - toptr: List[int64_t]
-        - tooffset: int64_t
-        - fromptr: List[int32_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_tofloat64_fromuint32
-      args:
-        - toptr: List[double]
-        - tooffset: int64_t
-        - fromptr: List[uint32_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_tofloat64_fromint64
-      args:
-        - toptr: List[double]
-        - tooffset: int64_t
-        - fromptr: List[int64_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_tofloat32_fromuint16
-      args:
-        - toptr: List[float]
-        - tooffset: int64_t
-        - fromptr: List[uint16_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_touint32_fromuint8
-      args:
-        - toptr: List[uint32_t]
-        - tooffset: int64_t
-        - fromptr: List[uint8_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_touint8_fromuint8
-      args:
-        - toptr: List[uint8_t]
-        - tooffset: int64_t
-        - fromptr: List[uint8_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_tofloat32_fromfloat32
-      args:
-        - toptr: List[float]
-        - tooffset: int64_t
-        - fromptr: List[float]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_toint32_fromuint16
-      args:
-        - toptr: List[int32_t]
-        - tooffset: int64_t
-        - fromptr: List[uint16_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_touint16_fromuint16
-      args:
-        - toptr: List[uint16_t]
-        - tooffset: int64_t
-        - fromptr: List[uint16_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_touint64_fromuint16
-      args:
-        - toptr: List[uint64_t]
-        - tooffset: int64_t
-        - fromptr: List[uint16_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_tofloat64_fromuint64
-      args:
-        - toptr: List[double]
-        - tooffset: int64_t
-        - fromptr: List[uint64_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_touint64_fromuint8
-      args:
-        - toptr: List[uint64_t]
-        - tooffset: int64_t
-        - fromptr: List[uint8_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_tofloat64_fromint8
-      args:
-        - toptr: List[double]
-        - tooffset: int64_t
-        - fromptr: List[int8_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_tofloat32_fromint64
-      args:
-        - toptr: List[float]
-        - tooffset: int64_t
-        - fromptr: List[int64_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_toint64_fromuint16
-      args:
-        - toptr: List[int64_t]
-        - tooffset: int64_t
-        - fromptr: List[uint16_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_toint16_fromuint8
-      args:
-        - toptr: List[int16_t]
-        - tooffset: int64_t
-        - fromptr: List[uint8_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_tofloat32_fromint8
-      args:
-        - toptr: List[float]
-        - tooffset: int64_t
-        - fromptr: List[int8_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_tofloat32_fromint16
-      args:
-        - toptr: List[float]
-        - tooffset: int64_t
-        - fromptr: List[int16_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_toint64_fromint64
-      args:
-        - toptr: List[int64_t]
-        - tooffset: int64_t
-        - fromptr: List[int64_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_toint64_fromuint8
-      args:
-        - toptr: List[int64_t]
-        - tooffset: int64_t
-        - fromptr: List[uint8_t]
-        - fromoffset: int64_t
-        - length: int64_t
     - name: awkward_NumpyArray_fill_toint16_fromint8
       args:
         - toptr: List[int16_t]
         - tooffset: int64_t
         - fromptr: List[int8_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_toint32_fromint8
-      args:
-        - toptr: List[int32_t]
-        - tooffset: int64_t
-        - fromptr: List[int8_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_touint32_fromuint32
-      args:
-        - toptr: List[uint32_t]
-        - tooffset: int64_t
-        - fromptr: List[uint32_t]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_tofloat32_fromint32
-      args:
-        - toptr: List[float]
-        - tooffset: int64_t
-        - fromptr: List[int32_t]
         - fromoffset: int64_t
         - length: int64_t
   inparams: ['tooffset', 'fromptr', 'fromoffset', 'length']
@@ -334,10 +334,10 @@
         tooffset: 0
         fromptr: [5, 8, 7, 0, 8, 6, 12, 7, 4, 6, 8, 7, 8, 4, 4, 4, 9, 10, 6, 5, 3, 5, 7, 5, 3]
         fromoffset: 0
-        length: 4
+        length: 3
       successful: True
       results:
-        toptr: [5.0, 8.0, 7.0, 0.0]
+        toptr: [5.0, 8.0, 7.0]
     - args:
         toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         tooffset: 0

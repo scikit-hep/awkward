@@ -1,15 +1,15 @@
 - name: awkward_IndexedArray_validity
   specializations:
-    - name: awkward_IndexedArray64_validity
+    - name: awkward_IndexedArray32_validity
       args:
-        - index: List[int64_t]
+        - index: List[int32_t]
         - indexoffset: int64_t
         - length: int64_t
         - lencontent: int64_t
         - isoption: bool
-    - name: awkward_IndexedArray32_validity
+    - name: awkward_IndexedArray64_validity
       args:
-        - index: List[int32_t]
+        - index: List[int64_t]
         - indexoffset: int64_t
         - length: int64_t
         - lencontent: int64_t
@@ -34,16 +34,18 @@
                 raise ValueError("index[i] >= len(content)")
   tests:
     - args:
-        index: [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
+        index: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
         indexoffset: 1
         length: 3
         lencontent: 9
         isoption: True
-      successful: False
+      successful: True
+      results:
     - args:
-        index: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        index: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
         indexoffset: 0
-        length: 4
+        length: 3
         lencontent: 10
         isoption: False
-      successful: False
+      successful: True
+      results:

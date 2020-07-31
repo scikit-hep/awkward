@@ -1,18 +1,18 @@
 - name: awkward_ListArray_compact_offsets
   specializations:
-    - name: awkward_ListArray64_compact_offsets_64
-      args:
-        - tooffsets: List[int64_t]
-        - fromstarts: List[int64_t]
-        - fromstops: List[int64_t]
-        - startsoffset: int64_t
-        - stopsoffset: int64_t
-        - length: int64_t
     - name: awkward_ListArrayU32_compact_offsets_64
       args:
         - tooffsets: List[int64_t]
         - fromstarts: List[uint32_t]
         - fromstops: List[uint32_t]
+        - startsoffset: int64_t
+        - stopsoffset: int64_t
+        - length: int64_t
+    - name: awkward_ListArray64_compact_offsets_64
+      args:
+        - tooffsets: List[int64_t]
+        - fromstarts: List[int64_t]
+        - fromstops: List[int64_t]
         - startsoffset: int64_t
         - stopsoffset: int64_t
         - length: int64_t
@@ -40,17 +40,17 @@
   tests:
     - args:
         tooffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        fromstarts: [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+        fromstarts: [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1]
         fromstops: [3, 1, 3, 2, 3, 1, 2, 3]
         startsoffset: 0
         stopsoffset: 0
-        length: 4
+        length: 3
       successful: True
       results:
-        tooffsets: [0, 1, 2, 3, 4]
+        tooffsets: [0, 1, 2, 3]
     - args:
         tooffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        fromstarts: [1, 0, 0, 0, 1, 1, 0]
+        fromstarts: [1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1]
         fromstops: [8, 4, 5, 6, 5, 5, 7]
         startsoffset: 1
         stopsoffset: 1
@@ -58,19 +58,3 @@
       successful: True
       results:
         tooffsets: [0, 4, 9, 15]
-    - args:
-        tooffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        fromstarts: [3, 0, 3, 2, 3]
-        fromstops: [2, 10, 3, 1, 3]
-        startsoffset: 0
-        stopsoffset: 0
-        length: 3
-      successful: False
-    - args:
-        tooffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        fromstarts: [99, 99, 99, 0, 3, 3, 5]
-        fromstops: [99, 99, 99, 3, 3, 5, 10]
-        startsoffset: 3
-        stopsoffset: 3
-        length: 4
-      successful: False

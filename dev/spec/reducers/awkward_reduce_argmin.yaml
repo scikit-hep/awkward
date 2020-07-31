@@ -1,9 +1,9 @@
 - name: awkward_reduce_argmin
   specializations:
-    - name: awkward_reduce_argmin_int64_64
+    - name: awkward_reduce_argmin_uint8_64
       args:
         - toptr: List[int64_t]
-        - fromptr: List[int64_t]
+        - fromptr: List[uint8_t]
         - fromptroffset: int64_t
         - starts: List[int64_t]
         - startsoffset: int64_t
@@ -33,10 +33,10 @@
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_argmin_int8_64
+    - name: awkward_reduce_argmin_float32_64
       args:
         - toptr: List[int64_t]
-        - fromptr: List[int8_t]
+        - fromptr: List[float]
         - fromptroffset: int64_t
         - starts: List[int64_t]
         - startsoffset: int64_t
@@ -44,21 +44,10 @@
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_argmin_uint16_64
+    - name: awkward_reduce_argmin_uint32_64
       args:
         - toptr: List[int64_t]
-        - fromptr: List[uint16_t]
-        - fromptroffset: int64_t
-        - starts: List[int64_t]
-        - startsoffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_argmin_uint8_64
-      args:
-        - toptr: List[int64_t]
-        - fromptr: List[uint8_t]
+        - fromptr: List[uint32_t]
         - fromptroffset: int64_t
         - starts: List[int64_t]
         - startsoffset: int64_t
@@ -77,17 +66,6 @@
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_argmin_float32_64
-      args:
-        - toptr: List[int64_t]
-        - fromptr: List[float]
-        - fromptroffset: int64_t
-        - starts: List[int64_t]
-        - startsoffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
     - name: awkward_reduce_argmin_float64_64
       args:
         - toptr: List[int64_t]
@@ -99,10 +77,32 @@
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_argmin_uint32_64
+    - name: awkward_reduce_argmin_int64_64
       args:
         - toptr: List[int64_t]
-        - fromptr: List[uint32_t]
+        - fromptr: List[int64_t]
+        - fromptroffset: int64_t
+        - starts: List[int64_t]
+        - startsoffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_argmin_uint16_64
+      args:
+        - toptr: List[int64_t]
+        - fromptr: List[uint16_t]
+        - fromptroffset: int64_t
+        - starts: List[int64_t]
+        - startsoffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_argmin_int8_64
+      args:
+        - toptr: List[int64_t]
+        - fromptr: List[int8_t]
         - fromptroffset: int64_t
         - starts: List[int64_t]
         - startsoffset: int64_t
@@ -139,7 +139,7 @@
         toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         fromptr: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
         fromptroffset: 1
-        starts: [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+        starts: [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1]
         startsoffset: 0
         parents: [2, 3, 6, 5, 3, 7, 9, 5, 4]
         parentsoffset: 0
@@ -150,9 +150,35 @@
         toptr: [-1, -1, -2, 0, -1, -1, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
     - args:
         toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromptr: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        fromptroffset: 1
+        starts: [1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1]
+        startsoffset: 1
+        parents: [2, 3, 6, 5, 3, 7, 9, 5, 4]
+        parentsoffset: 0
+        lenparents: 3
+        outlength: 30
+      successful: True
+      results:
+        toptr: [-1, -1, 0, 0, -1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
+    - args:
+        toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         fromptr: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
         fromptroffset: 0
-        starts: [1, 0, 0, 0, 1, 1, 0]
+        starts: [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1]
+        startsoffset: 0
+        parents: [2, 5, 3, 4, 7, 6, 3, 4, 5]
+        parentsoffset: 0
+        lenparents: 3
+        outlength: 30
+      successful: True
+      results:
+        toptr: [-1, -1, -2, 1, -1, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
+    - args:
+        toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromptr: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        fromptroffset: 0
+        starts: [1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1]
         startsoffset: 1
         parents: [2, 5, 3, 4, 7, 6, 3, 4, 5]
         parentsoffset: 0

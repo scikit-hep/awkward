@@ -17,23 +17,6 @@
         - fromstops: List[int32_t]
         - fromstopsoffset: int64_t
         - contentlen: int64_t
-    - name: awkward_ListArrayU32_getitem_jagged_apply_64
-      args:
-        - tooffsets: List[int64_t]
-        - tocarry: List[int64_t]
-        - slicestarts: List[int64_t]
-        - slicestartsoffset: int64_t
-        - slicestops: List[int64_t]
-        - slicestopsoffset: int64_t
-        - sliceouterlen: int64_t
-        - sliceindex: List[int64_t]
-        - sliceindexoffset: int64_t
-        - sliceinnerlen: int64_t
-        - fromstarts: List[uint32_t]
-        - fromstartsoffset: int64_t
-        - fromstops: List[uint32_t]
-        - fromstopsoffset: int64_t
-        - contentlen: int64_t
     - name: awkward_ListArray64_getitem_jagged_apply_64
       args:
         - tooffsets: List[int64_t]
@@ -49,6 +32,23 @@
         - fromstarts: List[int64_t]
         - fromstartsoffset: int64_t
         - fromstops: List[int64_t]
+        - fromstopsoffset: int64_t
+        - contentlen: int64_t
+    - name: awkward_ListArrayU32_getitem_jagged_apply_64
+      args:
+        - tooffsets: List[int64_t]
+        - tocarry: List[int64_t]
+        - slicestarts: List[int64_t]
+        - slicestartsoffset: int64_t
+        - slicestops: List[int64_t]
+        - slicestopsoffset: int64_t
+        - sliceouterlen: int64_t
+        - sliceindex: List[int64_t]
+        - sliceindexoffset: int64_t
+        - sliceinnerlen: int64_t
+        - fromstarts: List[uint32_t]
+        - fromstartsoffset: int64_t
+        - fromstops: List[uint32_t]
         - fromstopsoffset: int64_t
         - contentlen: int64_t
   inparams: ['slicestarts', 'slicestartsoffset', 'slicestops', 'slicestopsoffset', 'sliceouterlen', 'sliceindex', 'sliceindexoffset', 'sliceinnerlen', 'fromstarts', 'fromstartsoffset', 'fromstops', 'fromstopsoffset', 'contentlen']
@@ -101,11 +101,11 @@
     - args:
         tooffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        slicestarts: [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+        slicestarts: [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1]
         slicestartsoffset: 0
         slicestops: [3, 1, 3, 2, 3, 1, 2, 3]
         slicestopsoffset: 0
-        sliceouterlen: 4
+        sliceouterlen: 3
         sliceindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         sliceindexoffset: 0
         sliceinnerlen: 10
@@ -116,12 +116,12 @@
         contentlen: 10
       successful: True
       results:
-        tooffsets: [0.0, 1.0, 2.0, 3.0, 4.0]
-        tocarry: [1, 2, 3, 4]
+        tooffsets: [0.0, 1.0, 2.0, 3.0]
+        tocarry: [1, 2, 3]
     - args:
         tooffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        slicestarts: [1, 0, 0, 0, 1, 1, 0]
+        slicestarts: [1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1]
         slicestartsoffset: 1
         slicestops: [8, 4, 5, 6, 5, 5, 7]
         slicestopsoffset: 1
@@ -138,37 +138,3 @@
       results:
         tooffsets: [0.0, 4.0, 9.0, 15.0]
         tocarry: [2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4]
-    - args:
-        tooffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        slicestarts: [3, 0, 3, 2, 3]
-        slicestartsoffset: 0
-        slicestops: [2, 10, 3, 1, 3]
-        slicestopsoffset: 0
-        sliceouterlen: 3
-        sliceindex: [5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-        sliceindexoffset: 0
-        sliceinnerlen: 4
-        fromstarts: [1, 2, 3, 4, 5, 6]
-        fromstartsoffset: 0
-        fromstops: [2, 3, 4, 5, 6, 7]
-        fromstopsoffset: 0
-        contentlen: 4
-      successful: False
-    - args:
-        tooffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        slicestarts: [99, 99, 99, 0, 3, 3, 5]
-        slicestartsoffset: 3
-        slicestops: [99, 99, 99, 3, 3, 5, 10]
-        slicestopsoffset: 3
-        sliceouterlen: 4
-        sliceindex: [5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-        sliceindexoffset: 0
-        sliceinnerlen: 4
-        fromstarts: [3, 4, 1, 2, 4, 2]
-        fromstartsoffset: 3
-        fromstops: [1, 5, 2, 6, 3, 5]
-        fromstopsoffset: 3
-        contentlen: 4
-      successful: False

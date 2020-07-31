@@ -23,6 +23,6 @@
       successful: False
     - args:
         flatheadptr: [2, 1, 4, 3, 5, 2, 10, 11, 20, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 0, 6, 2, 3]
-        lenflathead: 4
-        length: 4
+        lenflathead: 3
+        length: 3
       successful: False

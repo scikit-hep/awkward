@@ -46,13 +46,13 @@
         tononzero: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         fromindex: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
         fromindexoffset: 1
-        fromindexlength: 4
+        fromindexlength: 3
         nonzero: [2, 3, 6, 5, 3, 7, 9, 5, 4]
         nonzerooffset: 0
-        nonzerolength: 4
+        nonzerolength: 3
       successful: True
       results:
-        tomask: [False, False, False, False]
+        tomask: [False, False, False]
         toindex: []
         tononzero: []
     - args:

@@ -1,12 +1,12 @@
 - name: awkward_UnionArray_simplify_one
   specializations:
-    - name: awkward_UnionArray8_U32_simplify_one_to8_64
+    - name: awkward_UnionArray8_64_simplify_one_to8_64
       args:
         - totags: List[int8_t]
         - toindex: List[int64_t]
         - fromtags: List[int8_t]
         - fromtagsoffset: int64_t
-        - fromindex: List[uint32_t]
+        - fromindex: List[int64_t]
         - fromindexoffset: int64_t
         - towhich: int64_t
         - fromwhich: int64_t
@@ -24,13 +24,13 @@
         - fromwhich: int64_t
         - length: int64_t
         - base: int64_t
-    - name: awkward_UnionArray8_64_simplify_one_to8_64
+    - name: awkward_UnionArray8_U32_simplify_one_to8_64
       args:
         - totags: List[int8_t]
         - toindex: List[int64_t]
         - fromtags: List[int8_t]
         - fromtagsoffset: int64_t
-        - fromindex: List[int64_t]
+        - fromindex: List[uint32_t]
         - fromindexoffset: int64_t
         - towhich: int64_t
         - fromwhich: int64_t
@@ -63,10 +63,10 @@
         fromtagsoffset: 1
         fromindex: [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
         fromindexoffset: 0
-        towhich: 4
-        fromwhich: 4
-        length: 4
-        base: 4
+        towhich: 3
+        fromwhich: 3
+        length: 3
+        base: 3
       successful: True
       results:
         totags: []

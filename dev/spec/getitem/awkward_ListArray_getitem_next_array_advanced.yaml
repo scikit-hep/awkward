@@ -1,5 +1,18 @@
 - name: awkward_ListArray_getitem_next_array_advanced
   specializations:
+    - name: awkward_ListArray32_getitem_next_array_advanced_64
+      args:
+        - tocarry: List[int64_t]
+        - toadvanced: List[int64_t]
+        - fromstarts: List[int32_t]
+        - fromstops: List[int32_t]
+        - fromarray: List[int64_t]
+        - fromadvanced: List[int64_t]
+        - startsoffset: int64_t
+        - stopsoffset: int64_t
+        - lenstarts: int64_t
+        - lenarray: int64_t
+        - lencontent: int64_t
     - name: awkward_ListArrayU32_getitem_next_array_advanced_64
       args:
         - tocarry: List[int64_t]
@@ -19,19 +32,6 @@
         - toadvanced: List[int64_t]
         - fromstarts: List[int64_t]
         - fromstops: List[int64_t]
-        - fromarray: List[int64_t]
-        - fromadvanced: List[int64_t]
-        - startsoffset: int64_t
-        - stopsoffset: int64_t
-        - lenstarts: int64_t
-        - lenarray: int64_t
-        - lencontent: int64_t
-    - name: awkward_ListArray32_getitem_next_array_advanced_64
-      args:
-        - tocarry: List[int64_t]
-        - toadvanced: List[int64_t]
-        - fromstarts: List[int32_t]
-        - fromstops: List[int32_t]
         - fromarray: List[int64_t]
         - fromadvanced: List[int64_t]
         - startsoffset: int64_t
@@ -74,23 +74,23 @@
     - args:
         tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         toadvanced: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        fromstarts: [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 2]
+        fromstarts: [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1]
         fromstops: [3, 1, 3, 2, 3, 1, 2, 3]
         fromarray: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         fromadvanced: [1, 2, 3, 4, 5, 6]
         startsoffset: 0
         stopsoffset: 0
-        lenstarts: 4
-        lenarray: 4
+        lenstarts: 3
+        lenarray: 3
         lencontent: 10
       successful: True
       results:
-        tocarry: [2, 0, 2, 1]
-        toadvanced: [0, 1, 2, 3]
+        tocarry: [2, 0, 2]
+        toadvanced: [0, 1, 2]
     - args:
         tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         toadvanced: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        fromstarts: [1, 0, 0, 0, 1, 1, 0]
+        fromstarts: [1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1]
         fromstops: [8, 4, 5, 6, 5, 5, 7]
         fromarray: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         fromadvanced: [1, 2, 3, 4, 5, 6]
@@ -103,29 +103,3 @@
       results:
         tocarry: [0, 0, 0]
         toadvanced: [0, 1, 2]
-    - args:
-        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        toadvanced: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        fromstarts: [3, 0, 3, 2, 3]
-        fromstops: [2, 10, 3, 1, 3]
-        fromarray: [5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-        fromadvanced: [1, 2, 3, 4, 5, 6]
-        startsoffset: 0
-        stopsoffset: 0
-        lenstarts: 3
-        lenarray: 3
-        lencontent: 4
-      successful: False
-    - args:
-        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        toadvanced: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        fromstarts: [99, 99, 99, 0, 3, 3, 5]
-        fromstops: [99, 99, 99, 3, 3, 5, 10]
-        fromarray: [5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-        fromadvanced: [1, 2, 3, 4, 5, 6]
-        startsoffset: 3
-        stopsoffset: 3
-        lenstarts: 4
-        lenarray: 4
-        lencontent: 4
-      successful: False

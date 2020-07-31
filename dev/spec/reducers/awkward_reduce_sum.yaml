@@ -9,109 +9,10 @@
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_sum_uint64_uint32_64
-      args:
-        - toptr: List[uint64_t]
-        - fromptr: List[uint32_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_sum_float64_float64_64
-      args:
-        - toptr: List[double]
-        - fromptr: List[double]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_sum_int64_int32_64
-      args:
-        - toptr: List[int64_t]
-        - fromptr: List[int32_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_sum_uint64_uint64_64
-      args:
-        - toptr: List[uint64_t]
-        - fromptr: List[uint64_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_sum_uint32_uint8_64
-      args:
-        - toptr: List[uint32_t]
-        - fromptr: List[uint8_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_sum_float32_float32_64
-      args:
-        - toptr: List[float]
-        - fromptr: List[float]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_sum_int32_int8_64
-      args:
-        - toptr: List[int32_t]
-        - fromptr: List[int8_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_sum_uint32_uint16_64
-      args:
-        - toptr: List[uint32_t]
-        - fromptr: List[uint16_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_sum_int64_int64_64
-      args:
-        - toptr: List[int64_t]
-        - fromptr: List[int64_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_sum_int32_int32_64
-      args:
-        - toptr: List[int32_t]
-        - fromptr: List[int32_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
     - name: awkward_reduce_sum_int32_int16_64
       args:
         - toptr: List[int32_t]
         - fromptr: List[int16_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_sum_uint64_uint16_64
-      args:
-        - toptr: List[uint64_t]
-        - fromptr: List[uint16_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
@@ -126,6 +27,15 @@
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
+    - name: awkward_reduce_sum_float32_float32_64
+      args:
+        - toptr: List[float]
+        - fromptr: List[float]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
     - name: awkward_reduce_sum_uint32_uint32_64
       args:
         - toptr: List[uint32_t]
@@ -135,9 +45,99 @@
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
+    - name: awkward_reduce_sum_uint64_uint64_64
+      args:
+        - toptr: List[uint64_t]
+        - fromptr: List[uint64_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_sum_int32_int8_64
+      args:
+        - toptr: List[int32_t]
+        - fromptr: List[int8_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_sum_int64_int64_64
+      args:
+        - toptr: List[int64_t]
+        - fromptr: List[int64_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_sum_float64_float64_64
+      args:
+        - toptr: List[double]
+        - fromptr: List[double]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_sum_uint32_uint16_64
+      args:
+        - toptr: List[uint32_t]
+        - fromptr: List[uint16_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_sum_uint64_uint32_64
+      args:
+        - toptr: List[uint64_t]
+        - fromptr: List[uint32_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_sum_uint64_uint16_64
+      args:
+        - toptr: List[uint64_t]
+        - fromptr: List[uint16_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_sum_int32_int32_64
+      args:
+        - toptr: List[int32_t]
+        - fromptr: List[int32_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
     - name: awkward_reduce_sum_uint64_uint8_64
       args:
         - toptr: List[uint64_t]
+        - fromptr: List[uint8_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_sum_int64_int32_64
+      args:
+        - toptr: List[int64_t]
+        - fromptr: List[int32_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_sum_uint32_uint8_64
+      args:
+        - toptr: List[uint32_t]
         - fromptr: List[uint8_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]

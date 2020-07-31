@@ -1,9 +1,45 @@
 - name: awkward_reduce_countnonzero
   specializations:
-    - name: awkward_reduce_countnonzero_uint64_64
+    - name: awkward_reduce_countnonzero_int32_64
       args:
         - toptr: List[int64_t]
-        - fromptr: List[uint64_t]
+        - fromptr: List[int32_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_countnonzero_uint16_64
+      args:
+        - toptr: List[int64_t]
+        - fromptr: List[uint16_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_countnonzero_uint32_64
+      args:
+        - toptr: List[int64_t]
+        - fromptr: List[uint32_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_countnonzero_uint8_64
+      args:
+        - toptr: List[int64_t]
+        - fromptr: List[uint8_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_countnonzero_int64_64
+      args:
+        - toptr: List[int64_t]
+        - fromptr: List[int64_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
@@ -36,55 +72,10 @@
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_countnonzero_uint32_64
+    - name: awkward_reduce_countnonzero_uint64_64
       args:
         - toptr: List[int64_t]
-        - fromptr: List[uint32_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_countnonzero_int64_64
-      args:
-        - toptr: List[int64_t]
-        - fromptr: List[int64_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_countnonzero_uint16_64
-      args:
-        - toptr: List[int64_t]
-        - fromptr: List[uint16_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_countnonzero_int8_64
-      args:
-        - toptr: List[int64_t]
-        - fromptr: List[int8_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_countnonzero_uint8_64
-      args:
-        - toptr: List[int64_t]
-        - fromptr: List[uint8_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_countnonzero_int32_64
-      args:
-        - toptr: List[int64_t]
-        - fromptr: List[int32_t]
+        - fromptr: List[uint64_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
@@ -94,6 +85,15 @@
       args:
         - toptr: List[int64_t]
         - fromptr: List[double]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_countnonzero_int8_64
+      args:
+        - toptr: List[int64_t]
+        - fromptr: List[int8_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t

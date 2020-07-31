@@ -1,9 +1,9 @@
 - name: awkward_ListOffsetArray_rpad_and_clip_axis1
   specializations:
-    - name: awkward_ListOffsetArrayU32_rpad_and_clip_axis1_64
+    - name: awkward_ListOffsetArray32_rpad_and_clip_axis1_64
       args:
         - toindex: List[int64_t]
-        - fromoffsets: List[uint32_t]
+        - fromoffsets: List[int32_t]
         - offsetsoffset: int64_t
         - length: int64_t
         - target: int64_t
@@ -14,10 +14,10 @@
         - offsetsoffset: int64_t
         - length: int64_t
         - target: int64_t
-    - name: awkward_ListOffsetArray32_rpad_and_clip_axis1_64
+    - name: awkward_ListOffsetArrayU32_rpad_and_clip_axis1_64
       args:
         - toindex: List[int64_t]
-        - fromoffsets: List[int32_t]
+        - fromoffsets: List[uint32_t]
         - offsetsoffset: int64_t
         - length: int64_t
         - target: int64_t

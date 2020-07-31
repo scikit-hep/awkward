@@ -60,13 +60,13 @@
         outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         outindex: [1, 0, 0, 1, 1, 1, 0]
         outindexoffset: 1
-        outindexlength: 4
+        outindexlength: 3
         offsets: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
         offsetsoffset: 0
-        offsetslength: 4
+        offsetslength: 3
       successful: True
       results:
-        outoffsets: [1, 0, -1, -1, -1]
+        outoffsets: [1, 0, -1, -1]
     - args:
         outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         outindex: [1, 0, 0, 1, 1, 1, 0]
@@ -78,21 +78,3 @@
       successful: True
       results:
         outoffsets: [1, 2, 2, 2]
-    - args:
-        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        outindex: [1, 2, 3, 1, 1, 1, 0]
-        outindexoffset: 1
-        outindexlength: 3
-        offsets: [14, 1, 27, 25, 3, 27, 7, 33, 18, 13]
-        offsetsoffset: 0
-        offsetslength: 3
-      successful: False
-    - args:
-        outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        outindex: [1, 2, 3, 1, 1, 1, 0]
-        outindexoffset: 0
-        outindexlength: 4
-        offsets: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
-        offsetsoffset: 0
-        offsetslength: 4
-      successful: False

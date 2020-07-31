@@ -1,15 +1,5 @@
 - name: awkward_UnionArray_project
   specializations:
-    - name: awkward_UnionArray8_32_project_64
-      args:
-        - lenout: List[int64_t]
-        - tocarry: List[int64_t]
-        - fromtags: List[int8_t]
-        - tagsoffset: int64_t
-        - fromindex: List[int32_t]
-        - indexoffset: int64_t
-        - length: int64_t
-        - which: int64_t
     - name: awkward_UnionArray8_U32_project_64
       args:
         - lenout: List[int64_t]
@@ -17,6 +7,16 @@
         - fromtags: List[int8_t]
         - tagsoffset: int64_t
         - fromindex: List[uint32_t]
+        - indexoffset: int64_t
+        - length: int64_t
+        - which: int64_t
+    - name: awkward_UnionArray8_32_project_64
+      args:
+        - lenout: List[int64_t]
+        - tocarry: List[int64_t]
+        - fromtags: List[int8_t]
+        - tagsoffset: int64_t
+        - fromindex: List[int32_t]
         - indexoffset: int64_t
         - length: int64_t
         - which: int64_t
@@ -49,12 +49,38 @@
         tagsoffset: 1
         fromindex: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
         indexoffset: 1
-        length: 4
+        length: 3
         which: 1
       successful: True
       results:
         lenout: [0]
         tocarry: []
+    - args:
+        lenout: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromtags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 1
+        fromindex: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        indexoffset: 0
+        length: 3
+        which: 1
+      successful: True
+      results:
+        lenout: [0]
+        tocarry: []
+    - args:
+        lenout: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        fromtags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tagsoffset: 0
+        fromindex: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
+        indexoffset: 1
+        length: 3
+        which: 1
+      successful: True
+      results:
+        lenout: [3]
+        tocarry: [0, 0, 1]
     - args:
         lenout: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]

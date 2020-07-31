@@ -19,11 +19,11 @@
         outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         starts: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
         startsoffset: 1
-        startslength: 4
-        outindexlength: 4
+        startslength: 3
+        outindexlength: 3
       successful: True
       results:
-        outoffsets: [0, 0, 1, 1, 0, 4]
+        outoffsets: [0, 0, 1, 0, 3]
     - args:
         outoffsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         starts: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
