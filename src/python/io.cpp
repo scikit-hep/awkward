@@ -23,10 +23,14 @@ make_fromjson(py::module& m, const std::string& name) {
            double resize,
            int64_t buffersize) -> std::shared_ptr<ak::Content> {
     bool isarray = false;
+    bool isrecord = false;
     for (char const &x: source) {
       if (x != 9  &&  x != 10  &&  x != 13  &&  x != 32) {  // whitespace
-        if (x == 91) {       // opening square bracket
+        if (x == 91) {         // opening square bracket
           isarray = true;
+        }
+        else if (x == 123) {   // opening curly bracket
+          isrecord = true;
         }
         break;
       }
@@ -34,6 +38,11 @@ make_fromjson(py::module& m, const std::string& name) {
     if (isarray) {
       return ak::FromJsonString(
         source.c_str(), ak::ArrayBuilderOptions(initial, resize));
+    }
+    if (isrecord) {
+      return ak::FromJsonString(
+        source.c_str(), ak::ArrayBuilderOptions(initial, resize)
+      ).get()->getitem_at_nowrap(0).get()->getitem_at_nowrap(0);
     }
     else {
 #ifdef _MSC_VER
