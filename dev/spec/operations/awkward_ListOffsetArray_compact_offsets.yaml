@@ -1,11 +1,5 @@
 - name: awkward_ListOffsetArray_compact_offsets
   specializations:
-    - name: awkward_ListOffsetArray32_compact_offsets_64
-      args:
-        - tooffsets: List[int64_t]
-        - fromoffsets: List[int32_t]
-        - offsetsoffset: int64_t
-        - length: int64_t
     - name: awkward_ListOffsetArray64_compact_offsets_64
       args:
         - tooffsets: List[int64_t]
@@ -16,6 +10,12 @@
       args:
         - tooffsets: List[int64_t]
         - fromoffsets: List[uint32_t]
+        - offsetsoffset: int64_t
+        - length: int64_t
+    - name: awkward_ListOffsetArray32_compact_offsets_64
+      args:
+        - tooffsets: List[int64_t]
+        - fromoffsets: List[int32_t]
         - offsetsoffset: int64_t
         - length: int64_t
   inparams: ['fromoffsets', 'offsetsoffset', 'length']

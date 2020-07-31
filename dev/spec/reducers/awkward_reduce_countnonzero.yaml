@@ -1,45 +1,9 @@
 - name: awkward_reduce_countnonzero
   specializations:
-    - name: awkward_reduce_countnonzero_int64_64
+    - name: awkward_reduce_countnonzero_int16_64
       args:
         - toptr: List[int64_t]
-        - fromptr: List[int64_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_countnonzero_bool_64
-      args:
-        - toptr: List[int64_t]
-        - fromptr: List[bool]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_countnonzero_float32_64
-      args:
-        - toptr: List[int64_t]
-        - fromptr: List[float]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_countnonzero_uint32_64
-      args:
-        - toptr: List[int64_t]
-        - fromptr: List[uint32_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-    - name: awkward_reduce_countnonzero_float64_64
-      args:
-        - toptr: List[int64_t]
-        - fromptr: List[double]
+        - fromptr: List[int16_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
@@ -54,10 +18,37 @@
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
+    - name: awkward_reduce_countnonzero_float32_64
+      args:
+        - toptr: List[int64_t]
+        - fromptr: List[float]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_countnonzero_float64_64
+      args:
+        - toptr: List[int64_t]
+        - fromptr: List[double]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
     - name: awkward_reduce_countnonzero_int8_64
       args:
         - toptr: List[int64_t]
         - fromptr: List[int8_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_countnonzero_int64_64
+      args:
+        - toptr: List[int64_t]
+        - fromptr: List[int64_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
@@ -81,10 +72,10 @@
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-    - name: awkward_reduce_countnonzero_int16_64
+    - name: awkward_reduce_countnonzero_uint32_64
       args:
         - toptr: List[int64_t]
-        - fromptr: List[int16_t]
+        - fromptr: List[uint32_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
@@ -94,6 +85,15 @@
       args:
         - toptr: List[int64_t]
         - fromptr: List[int32_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+    - name: awkward_reduce_countnonzero_bool_64
+      args:
+        - toptr: List[int64_t]
+        - fromptr: List[bool]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
@@ -123,7 +123,7 @@
         toptr: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     - args:
         toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        fromptr: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        fromptr: [1, 1, 2, -2, 0, 2, 0, 2, 1, 1]
         fromptroffset: 0
         parents: [2, 5, 3, 4, 7, 6, 3, 4, 5]
         parentsoffset: 0

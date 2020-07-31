@@ -1,5 +1,12 @@
 - name: awkward_UnionArray_fillindex
   specializations:
+    - name: awkward_UnionArray_fillindex_to64_fromU32
+      args:
+        - toindex: List[int64_t]
+        - toindexoffset: int64_t
+        - fromindex: List[uint32_t]
+        - fromindexoffset: int64_t
+        - length: int64_t
     - name: awkward_UnionArray_fillindex_to64_from32
       args:
         - toindex: List[int64_t]
@@ -12,13 +19,6 @@
         - toindex: List[int64_t]
         - toindexoffset: int64_t
         - fromindex: List[int64_t]
-        - fromindexoffset: int64_t
-        - length: int64_t
-    - name: awkward_UnionArray_fillindex_to64_fromU32
-      args:
-        - toindex: List[int64_t]
-        - toindexoffset: int64_t
-        - fromindex: List[uint32_t]
         - fromindexoffset: int64_t
         - length: int64_t
   inparams: ['toindexoffset', 'fromindex', 'fromindexoffset', 'length']

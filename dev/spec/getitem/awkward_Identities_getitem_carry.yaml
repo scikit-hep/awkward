@@ -35,44 +35,40 @@
     - args:
         newidentitiesptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         identitiesptr: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
-        carryptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        carryptr: [0, 1, 0, 2, 1, 2, 0, 1, 2, 0]
         lencarry: 3
         offset: 1
         width: 3
-        length: 3
-      successful: True
-      results:
-        newidentitiesptr: [0, 0, 1, 0, 0, 1, 0, 0, 1]
+        length: -1
+      successful: False
     - args:
         newidentitiesptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         identitiesptr: [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1]
-        carryptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        carryptr: [0, 2, 0, 0, 1, 0, 2, 1, 1, 1]
         lencarry: 3
         offset: 1
         width: 3
-        length: 3
+        length: 5
       successful: True
       results:
-        newidentitiesptr: [0, 0, 1, 0, 0, 1, 0, 0, 1]
+        newidentitiesptr: [0, 0, 1, 0, 1, 0, 0, 0, 1]
     - args:
         newidentitiesptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        identitiesptr: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
-        carryptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        identitiesptr: [1, 1, 2, -2, 0, 2, 0, 2, 1, 1]
+        carryptr: [0, 1, 0, 2, 1, 2, 0, 1, 2, 0]
         lencarry: 3
         offset: 0
         width: 3
-        length: 3
-      successful: True
-      results:
-        newidentitiesptr: [1, 1, 2, 1, 1, 2, 1, 1, 2]
+        length: -1
+      successful: False
     - args:
         newidentitiesptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        identitiesptr: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
-        carryptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        identitiesptr: [1, 1, 2, -2, 0, 2, 0, 2, 1, 1]
+        carryptr: [0, 2, 0, 0, 1, 0, 2, 1, 1, 1]
         lencarry: 3
         offset: 0
         width: 3
-        length: 3
+        length: 5
       successful: True
       results:
-        newidentitiesptr: [1, 1, 2, 1, 1, 2, 1, 1, 2]
+        newidentitiesptr: [1, 1, 2, 0, 2, 1, 1, 1, 2]

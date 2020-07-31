@@ -74,7 +74,7 @@
         slicestops: [3, 1, 3, 2, 3, 1, 2, 3]
         slicestopsoffset: 0
         length: 3
-        missing: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        missing: [1, 1, 2, -2, 0, 2, 0, 2, 1, 1]
         missingoffset: 0
       successful: True
       results:
@@ -106,10 +106,10 @@
         slicestops: [8, 4, 5, 6, 5, 5, 7]
         slicestopsoffset: 1
         length: 3
-        missing: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        missing: [1, 1, 2, -2, 0, 2, 0, 2, 1, 1]
         missingoffset: 0
       successful: True
       results:
-        tocarry: [0, 1, 2, 3, 0, 1, 2, 3, 4, 0, 1, 2, 3, 4, 5]
-        tosmalloffsets: [0, 4, 9, 15]
+        tocarry: [0, 1, 2, 0, 1, 2, 4, 0, 1, 2, 4, 5]
+        tosmalloffsets: [0, 3, 7, 12]
         tolargeoffsets: [0, 4, 9, 15]

@@ -6,16 +6,16 @@
         - fromindex: List[int32_t]
         - indexoffset: int64_t
         - lenindex: int64_t
-    - name: awkward_IndexedArray64_numnull
-      args:
-        - numnull: List[int64_t]
-        - fromindex: List[int64_t]
-        - indexoffset: int64_t
-        - lenindex: int64_t
     - name: awkward_IndexedArrayU32_numnull
       args:
         - numnull: List[int64_t]
         - fromindex: List[uint32_t]
+        - indexoffset: int64_t
+        - lenindex: int64_t
+    - name: awkward_IndexedArray64_numnull
+      args:
+        - numnull: List[int64_t]
+        - fromindex: List[int64_t]
         - indexoffset: int64_t
         - lenindex: int64_t
   inparams: ['fromindex', 'indexoffset', 'lenindex']
@@ -37,7 +37,7 @@
         numnull: [0]
     - args:
         numnull: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        fromindex: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        fromindex: [1, 1, 2, -2, 0, 2, 0, 2, 1, 1]
         indexoffset: 0
         lenindex: 3
       successful: True

@@ -1,15 +1,5 @@
 - name: awkward_reduce_max
   specializations:
-    - name: awkward_reduce_max_int32_int32_64
-      args:
-        - toptr: List[int32_t]
-        - fromptr: List[int32_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-        - identity: int32_t
     - name: awkward_reduce_max_uint64_uint64_64
       args:
         - toptr: List[uint64_t]
@@ -30,26 +20,6 @@
         - lenparents: int64_t
         - outlength: int64_t
         - identity: int16_t
-    - name: awkward_reduce_max_uint8_uint8_64
-      args:
-        - toptr: List[uint8_t]
-        - fromptr: List[uint8_t]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-        - identity: uint8_t
-    - name: awkward_reduce_max_float64_float64_64
-      args:
-        - toptr: List[double]
-        - fromptr: List[double]
-        - fromptroffset: int64_t
-        - parents: List[int64_t]
-        - parentsoffset: int64_t
-        - lenparents: int64_t
-        - outlength: int64_t
-        - identity: double
     - name: awkward_reduce_max_int64_int64_64
       args:
         - toptr: List[int64_t]
@@ -70,6 +40,36 @@
         - lenparents: int64_t
         - outlength: int64_t
         - identity: int8_t
+    - name: awkward_reduce_max_float32_float32_64
+      args:
+        - toptr: List[float]
+        - fromptr: List[float]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+        - identity: float
+    - name: awkward_reduce_max_float64_float64_64
+      args:
+        - toptr: List[double]
+        - fromptr: List[double]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+        - identity: double
+    - name: awkward_reduce_max_uint8_uint8_64
+      args:
+        - toptr: List[uint8_t]
+        - fromptr: List[uint8_t]
+        - fromptroffset: int64_t
+        - parents: List[int64_t]
+        - parentsoffset: int64_t
+        - lenparents: int64_t
+        - outlength: int64_t
+        - identity: uint8_t
     - name: awkward_reduce_max_uint32_uint32_64
       args:
         - toptr: List[uint32_t]
@@ -90,16 +90,16 @@
         - lenparents: int64_t
         - outlength: int64_t
         - identity: uint16_t
-    - name: awkward_reduce_max_float32_float32_64
+    - name: awkward_reduce_max_int32_int32_64
       args:
-        - toptr: List[float]
-        - fromptr: List[float]
+        - toptr: List[int32_t]
+        - fromptr: List[int32_t]
         - fromptroffset: int64_t
         - parents: List[int64_t]
         - parentsoffset: int64_t
         - lenparents: int64_t
         - outlength: int64_t
-        - identity: float
+        - identity: int32_t
   inparams: ['fromptr', 'fromptroffset', 'parents', 'parentsoffset', 'lenparents', 'outlength', 'identity']
   outparams: ['toptr']
   definition: |
@@ -137,7 +137,7 @@
         toptr: [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
     - args:
         toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        fromptr: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        fromptr: [1, 1, 2, -2, 0, 2, 0, 2, 1, 1]
         fromptroffset: 0
         parents: [2, 5, 3, 4, 7, 6, 3, 4, 5]
         parentsoffset: 0

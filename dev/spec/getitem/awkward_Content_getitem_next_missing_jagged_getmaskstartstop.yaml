@@ -49,7 +49,7 @@
         starts_out: [1, 2, 5]
         stops_out: [2, 5, 4]
     - args:
-        index_in: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        index_in: [1, 1, 2, -2, 0, 2, 0, 2, 1, 1]
         index_in_offset: 0
         offsets_in: [1, 4, 2, 3, 6, 4, 2, 3, 1]
         offsets_in_offset: 1

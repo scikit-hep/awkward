@@ -56,6 +56,9 @@ TEST_BLACKLIST = SPEC_BLACKLIST + [
     "awkward_regularize_rangeslice",
     "awkward_ListOffsetArray_rpad_and_clip_axis1",
     "awkward_ListOffsetArray_rpad_axis1",
+    "awkward_UnionArray_flatten_combine",
+    "awkward_UnionArray_flatten_length",
+    "awkward_ListArray_getitem_jagged_numvalid"
 ]
 
 SUCCESS_TEST_BLACKLIST = TEST_BLACKLIST + [
@@ -63,6 +66,7 @@ SUCCESS_TEST_BLACKLIST = TEST_BLACKLIST + [
     "awkward_ListArray_validity",
     "awkward_IndexedArray_validity",
     "awkward_UnionArray_validity",
+    "awkward_regularize_arrayslice",
 ]
 
 PYGEN_BLACKLIST = SPEC_BLACKLIST + [

@@ -1,43 +1,10 @@
 - name: awkward_Identities_from_IndexedArray
   specializations:
-    - name: awkward_Identities32_from_IndexedArray32
-      args:
-        - uniquecontents: List[bool]
-        - toptr: List[int32_t]
-        - fromptr: List[int32_t]
-        - fromindex: List[int32_t]
-        - fromptroffset: int64_t
-        - indexoffset: int64_t
-        - tolength: int64_t
-        - fromlength: int64_t
-        - fromwidth: int64_t
-    - name: awkward_Identities32_from_IndexedArrayU32
-      args:
-        - uniquecontents: List[bool]
-        - toptr: List[int32_t]
-        - fromptr: List[int32_t]
-        - fromindex: List[uint32_t]
-        - fromptroffset: int64_t
-        - indexoffset: int64_t
-        - tolength: int64_t
-        - fromlength: int64_t
-        - fromwidth: int64_t
-    - name: awkward_Identities64_from_IndexedArray32
+    - name: awkward_Identities64_from_IndexedArray64
       args:
         - uniquecontents: List[bool]
         - toptr: List[int64_t]
         - fromptr: List[int64_t]
-        - fromindex: List[int32_t]
-        - fromptroffset: int64_t
-        - indexoffset: int64_t
-        - tolength: int64_t
-        - fromlength: int64_t
-        - fromwidth: int64_t
-    - name: awkward_Identities32_from_IndexedArray64
-      args:
-        - uniquecontents: List[bool]
-        - toptr: List[int32_t]
-        - fromptr: List[int32_t]
         - fromindex: List[int64_t]
         - fromptroffset: int64_t
         - indexoffset: int64_t
@@ -55,11 +22,44 @@
         - tolength: int64_t
         - fromlength: int64_t
         - fromwidth: int64_t
-    - name: awkward_Identities64_from_IndexedArray64
+    - name: awkward_Identities64_from_IndexedArray32
       args:
         - uniquecontents: List[bool]
         - toptr: List[int64_t]
         - fromptr: List[int64_t]
+        - fromindex: List[int32_t]
+        - fromptroffset: int64_t
+        - indexoffset: int64_t
+        - tolength: int64_t
+        - fromlength: int64_t
+        - fromwidth: int64_t
+    - name: awkward_Identities32_from_IndexedArrayU32
+      args:
+        - uniquecontents: List[bool]
+        - toptr: List[int32_t]
+        - fromptr: List[int32_t]
+        - fromindex: List[uint32_t]
+        - fromptroffset: int64_t
+        - indexoffset: int64_t
+        - tolength: int64_t
+        - fromlength: int64_t
+        - fromwidth: int64_t
+    - name: awkward_Identities32_from_IndexedArray32
+      args:
+        - uniquecontents: List[bool]
+        - toptr: List[int32_t]
+        - fromptr: List[int32_t]
+        - fromindex: List[int32_t]
+        - fromptroffset: int64_t
+        - indexoffset: int64_t
+        - tolength: int64_t
+        - fromlength: int64_t
+        - fromwidth: int64_t
+    - name: awkward_Identities32_from_IndexedArray64
+      args:
+        - uniquecontents: List[bool]
+        - toptr: List[int32_t]
+        - fromptr: List[int32_t]
         - fromindex: List[int64_t]
         - fromptroffset: int64_t
         - indexoffset: int64_t
@@ -115,7 +115,7 @@
         uniquecontents: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
         toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         fromptr: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-        fromindex: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        fromindex: [1, 1, 2, -2, 0, 2, 0, 2, 1, 1]
         fromptroffset: 0
         indexoffset: 0
         tolength: 3
@@ -143,7 +143,7 @@
         uniquecontents: [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
         toptr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         fromptr: [0, 2, 1, 1, 1, 1, 2, 0, 1, 2, 0, 1, 0, 2, 0, 1, 1, 1, 0, 2, 2, 2, 1, 2, 0, 1]
-        fromindex: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        fromindex: [1, 1, 2, -2, 0, 2, 0, 2, 1, 1]
         fromptroffset: 1
         indexoffset: 0
         tolength: 3

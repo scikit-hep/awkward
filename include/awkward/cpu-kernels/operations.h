@@ -2410,7 +2410,7 @@ extern "C" {
   /// @param index inparam role: UnionArray-index
   /// @param indexoffset inparam role: UnionArray-index-offset
   /// @param length inparam
-  /// @param numcontents inparam
+  /// @param numcontents inparam role: UnionArray-numcontents
   /// @param lencontents inparam role: UnionArray-lencontents
   EXPORT_SYMBOL struct Error
     awkward_UnionArray8_32_validity(
@@ -2426,7 +2426,7 @@ extern "C" {
   /// @param index inparam role: UnionArray-index
   /// @param indexoffset inparam role: UnionArray-index-offset
   /// @param length inparam
-  /// @param numcontents inparam
+  /// @param numcontents inparam role: UnionArray-numcontents
   /// @param lencontents inparam role: UnionArray-lencontents
   EXPORT_SYMBOL struct Error
     awkward_UnionArray8_U32_validity(
@@ -2442,7 +2442,7 @@ extern "C" {
   /// @param index inparam role: UnionArray-index
   /// @param indexoffset inparam role: UnionArray-index-offset
   /// @param length inparam
-  /// @param numcontents inparam
+  /// @param numcontents inparam role: UnionArray-numcontents
   /// @param lencontents inparam role: UnionArray-lencontents
   EXPORT_SYMBOL struct Error
     awkward_UnionArray8_64_validity(

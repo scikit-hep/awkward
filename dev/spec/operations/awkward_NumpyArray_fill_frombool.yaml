@@ -1,47 +1,5 @@
 - name: awkward_NumpyArray_fill_frombool
   specializations:
-    - name: awkward_NumpyArray_fill_toint8_frombool
-      args:
-        - toptr: List[int8_t]
-        - tooffset: int64_t
-        - fromptr: List[bool]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_touint64_frombool
-      args:
-        - toptr: List[uint64_t]
-        - tooffset: int64_t
-        - fromptr: List[bool]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_touint32_frombool
-      args:
-        - toptr: List[uint32_t]
-        - tooffset: int64_t
-        - fromptr: List[bool]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_touint16_frombool
-      args:
-        - toptr: List[uint16_t]
-        - tooffset: int64_t
-        - fromptr: List[bool]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_toint32_frombool
-      args:
-        - toptr: List[int32_t]
-        - tooffset: int64_t
-        - fromptr: List[bool]
-        - fromoffset: int64_t
-        - length: int64_t
-    - name: awkward_NumpyArray_fill_tobool_frombool
-      args:
-        - toptr: List[bool]
-        - tooffset: int64_t
-        - fromptr: List[bool]
-        - fromoffset: int64_t
-        - length: int64_t
     - name: awkward_NumpyArray_fill_touint8_frombool
       args:
         - toptr: List[uint8_t]
@@ -63,9 +21,37 @@
         - fromptr: List[bool]
         - fromoffset: int64_t
         - length: int64_t
-    - name: awkward_NumpyArray_fill_tofloat64_frombool
+    - name: awkward_NumpyArray_fill_tobool_frombool
       args:
-        - toptr: List[double]
+        - toptr: List[bool]
+        - tooffset: int64_t
+        - fromptr: List[bool]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_touint32_frombool
+      args:
+        - toptr: List[uint32_t]
+        - tooffset: int64_t
+        - fromptr: List[bool]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_touint16_frombool
+      args:
+        - toptr: List[uint16_t]
+        - tooffset: int64_t
+        - fromptr: List[bool]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_touint64_frombool
+      args:
+        - toptr: List[uint64_t]
+        - tooffset: int64_t
+        - fromptr: List[bool]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_toint8_frombool
+      args:
+        - toptr: List[int8_t]
         - tooffset: int64_t
         - fromptr: List[bool]
         - fromoffset: int64_t
@@ -73,6 +59,20 @@
     - name: awkward_NumpyArray_fill_toint16_frombool
       args:
         - toptr: List[int16_t]
+        - tooffset: int64_t
+        - fromptr: List[bool]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_toint32_frombool
+      args:
+        - toptr: List[int32_t]
+        - tooffset: int64_t
+        - fromptr: List[bool]
+        - fromoffset: int64_t
+        - length: int64_t
+    - name: awkward_NumpyArray_fill_tofloat64_frombool
+      args:
+        - toptr: List[double]
         - tooffset: int64_t
         - fromptr: List[bool]
         - fromoffset: int64_t

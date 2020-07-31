@@ -23,7 +23,7 @@ extern "C" {
 
   /// @param flatheadptr inparam role: NumpyArray-ptr
   /// @param lenflathead inparam
-  /// @param length inparam
+  /// @param length inparam role: NumpyArray-length
   EXPORT_SYMBOL struct Error
     awkward_regularize_arrayslice_64(
       int64_t* flatheadptr,
@@ -67,7 +67,7 @@ extern "C" {
   /// @param fromindex inparam role: IndexedArray-index
   /// @param carry inparam role: IndexedArray-index-small
   /// @param fromindexoffset inparam role: IndexedArray-index-offset
-  /// @param lenfromindex inparam
+  /// @param lenfromindex inparam role: IndexedArray-lenfromindex
   /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_Index8_carry_64(
@@ -81,7 +81,7 @@ extern "C" {
   /// @param fromindex inparam role: IndexedArray-index
   /// @param carry inparam role: IndexedArray-index-small
   /// @param fromindexoffset inparam role: IndexedArray-index-offset
-  /// @param lenfromindex inparam
+  /// @param lenfromindex inparam role: IndexedArray-lenfromindex
   /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_IndexU8_carry_64(
@@ -95,7 +95,7 @@ extern "C" {
   /// @param fromindex inparam role: IndexedArray-index
   /// @param carry inparam role: IndexedArray-index-small
   /// @param fromindexoffset inparam role: IndexedArray-index-offset
-  /// @param lenfromindex inparam
+  /// @param lenfromindex inparam role: IndexedArray-lenfromindex
   /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_Index32_carry_64(
@@ -109,7 +109,7 @@ extern "C" {
   /// @param fromindex inparam role: IndexedArray-index
   /// @param carry inparam role: IndexedArray-index-small
   /// @param fromindexoffset inparam role: IndexedArray-index-offset
-  /// @param lenfromindex inparam
+  /// @param lenfromindex inparam role: IndexedArray-lenfromindex
   /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_IndexU32_carry_64(
@@ -123,7 +123,7 @@ extern "C" {
   /// @param fromindex inparam role: IndexedArray-index
   /// @param carry inparam role: IndexedArray-index-small
   /// @param fromindexoffset inparam role: IndexedArray-index-offset
-  /// @param lenfromindex inparam
+  /// @param lenfromindex inparam role: IndexedArray-lenfromindex
   /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_Index64_carry_64(
@@ -244,11 +244,11 @@ extern "C" {
 
   /// @param newidentitiesptr outparam
   /// @param identitiesptr inparam role: IndexedArray-index
-  /// @param carryptr inparam role: ListArray-at-array
+  /// @param carryptr inparam role: ListArray-carry
   /// @param lencarry inparam
   /// @param offset inparam role: IndexedArray-index-offset
   /// @param width inparam
-  /// @param length inparam
+  /// @param length inparam role: ListArray-carry-indexlen
   EXPORT_SYMBOL struct Error
     awkward_Identities32_getitem_carry_64(
       int32_t* newidentitiesptr,
@@ -260,11 +260,11 @@ extern "C" {
       int64_t length);
   /// @param newidentitiesptr outparam
   /// @param identitiesptr inparam role: IndexedArray-index
-  /// @param carryptr inparam role: ListArray-at-array
+  /// @param carryptr inparam role: ListArray-carry
   /// @param lencarry inparam
   /// @param offset inparam role: IndexedArray-index-offset
   /// @param width inparam
-  /// @param length inparam
+  /// @param length inparam role: ListArray-carry-indexlen
   EXPORT_SYMBOL struct Error
     awkward_Identities64_getitem_carry_64(
       int64_t* newidentitiesptr,
@@ -381,7 +381,7 @@ extern "C" {
   /// @param nextcarryptr outparam
   /// @param nextadvancedptr outparam
   /// @param carryptr inparam role: NumpyArray-ptr
-  /// @param flatheadptr inparam role: NumpyArray-ptr2
+  /// @param flatheadptr inparam role: NumpyArray2-ptr
   /// @param lencarry inparam
   /// @param lenflathead inparam
   /// @param skip inparam
@@ -397,8 +397,8 @@ extern "C" {
 
   /// @param nextcarryptr outparam
   /// @param carryptr inparam role: NumpyArray-ptr
-  /// @param advancedptr inparam role: NumpyArray-ptr2
-  /// @param flatheadptr inparam role: NumpyArray-ptr3
+  /// @param advancedptr inparam role: NumpyArray2-ptr
+  /// @param flatheadptr inparam role: NumpyArray3-ptr
   /// @param lencarry inparam
   /// @param skip inparam
   EXPORT_SYMBOL struct Error

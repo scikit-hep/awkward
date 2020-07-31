@@ -34,7 +34,7 @@
         frommask: [1, 1, 1, 1, 1]
         frommaskoffset: 0
         lenmask: 3
-        fromcarry: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        fromcarry: [1, 1, 2, -2, 0, 2, 0, 2, 1, 1]
         lencarry: 3
       successful: True
       results:
@@ -54,7 +54,7 @@
         frommask: [1, 1, 1, 1, 1]
         frommaskoffset: 0
         lenmask: 3
-        fromcarry: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        fromcarry: [1, 1, 2, -2, 0, 2, 0, 2, 1, 1]
         lencarry: 3
       successful: True
       results:

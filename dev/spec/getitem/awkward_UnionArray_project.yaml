@@ -1,12 +1,12 @@
 - name: awkward_UnionArray_project
   specializations:
-    - name: awkward_UnionArray8_64_project_64
+    - name: awkward_UnionArray8_32_project_64
       args:
         - lenout: List[int64_t]
         - tocarry: List[int64_t]
         - fromtags: List[int8_t]
         - tagsoffset: int64_t
-        - fromindex: List[int64_t]
+        - fromindex: List[int32_t]
         - indexoffset: int64_t
         - length: int64_t
         - which: int64_t
@@ -20,13 +20,13 @@
         - indexoffset: int64_t
         - length: int64_t
         - which: int64_t
-    - name: awkward_UnionArray8_32_project_64
+    - name: awkward_UnionArray8_64_project_64
       args:
         - lenout: List[int64_t]
         - tocarry: List[int64_t]
         - fromtags: List[int8_t]
         - tagsoffset: int64_t
-        - fromindex: List[int32_t]
+        - fromindex: List[int64_t]
         - indexoffset: int64_t
         - length: int64_t
         - which: int64_t
@@ -60,7 +60,7 @@
         tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         fromtags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         tagsoffset: 1
-        fromindex: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        fromindex: [1, 1, 2, -2, 0, 2, 0, 2, 1, 1]
         indexoffset: 0
         length: 3
         which: 1
@@ -86,7 +86,7 @@
         tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         fromtags: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
         tagsoffset: 0
-        fromindex: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        fromindex: [1, 1, 2, -2, 0, 2, 0, 2, 1, 1]
         indexoffset: 0
         length: 3
         which: 1

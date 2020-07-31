@@ -1,14 +1,5 @@
 - name: awkward_UnionArray_validity
   specializations:
-    - name: awkward_UnionArray8_64_validity
-      args:
-        - tags: List[int8_t]
-        - tagsoffset: int64_t
-        - index: List[int64_t]
-        - indexoffset: int64_t
-        - length: int64_t
-        - numcontents: int64_t
-        - lencontents: List[int64_t]
     - name: awkward_UnionArray8_U32_validity
       args:
         - tags: List[int8_t]
@@ -23,6 +14,15 @@
         - tags: List[int8_t]
         - tagsoffset: int64_t
         - index: List[int32_t]
+        - indexoffset: int64_t
+        - length: int64_t
+        - numcontents: int64_t
+        - lencontents: List[int64_t]
+    - name: awkward_UnionArray8_64_validity
+      args:
+        - tags: List[int8_t]
+        - tagsoffset: int64_t
+        - index: List[int64_t]
         - indexoffset: int64_t
         - length: int64_t
         - numcontents: int64_t
@@ -46,3 +46,12 @@
             if idx >= lencontent:
                 raise ValueError("index[i] >= len(content[tags[i]])")
   tests:
+    - args:
+        tags: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tagsoffset: 1
+        index: [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]
+        indexoffset: 0
+        length: 3
+        numcontents: -1
+        lencontents: [7, 8, 9, 10, 11, 12]
+      successful: False

@@ -1,10 +1,10 @@
 - name: awkward_IndexedArray_getitem_nextcarry_outindex
   specializations:
-    - name: awkward_IndexedArray32_getitem_nextcarry_outindex_64
+    - name: awkward_IndexedArrayU32_getitem_nextcarry_outindex_64
       args:
         - tocarry: List[int64_t]
-        - toindex: List[int32_t]
-        - fromindex: List[int32_t]
+        - toindex: List[uint32_t]
+        - fromindex: List[uint32_t]
         - indexoffset: int64_t
         - lenindex: int64_t
         - lencontent: int64_t
@@ -16,11 +16,11 @@
         - indexoffset: int64_t
         - lenindex: int64_t
         - lencontent: int64_t
-    - name: awkward_IndexedArrayU32_getitem_nextcarry_outindex_64
+    - name: awkward_IndexedArray32_getitem_nextcarry_outindex_64
       args:
         - tocarry: List[int64_t]
-        - toindex: List[uint32_t]
-        - fromindex: List[uint32_t]
+        - toindex: List[int32_t]
+        - fromindex: List[int32_t]
         - indexoffset: int64_t
         - lenindex: int64_t
         - lencontent: int64_t
@@ -57,7 +57,7 @@
     - args:
         tocarry: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         toindex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        fromindex: [1, 1, 2, 2, 0, 2, 0, 2, 1, 1]
+        fromindex: [1, 1, 2, -2, 0, 2, 0, 2, 1, 1]
         indexoffset: 0
         lenindex: 3
         lencontent: 3

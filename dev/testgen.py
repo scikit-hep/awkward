@@ -55,9 +55,12 @@ def readspec():
                             for childfunc in indspec["specializations"]:
                                 funcs[childfunc["name"]] = []
                                 if indspec["tests"] is None:
-                                    pass
-                                    # raise AssertionError("No tests in specification for {0}".format(indspec["name"]))
-                                else:  # FIXME: Remove this handling before merging
+                                    raise AssertionError(
+                                        "No tests in specification for {0}".format(
+                                            indspec["name"]
+                                        )
+                                    )
+                                else:
                                     for test in indspec["tests"]:
                                         # Check if test has correct types
                                         flag = True
@@ -87,31 +90,38 @@ def readspec():
                                             funcs[childfunc["name"]].append(testinfo)
                         else:
                             funcs[indspec["name"]] = []
-                            for test in indspec["tests"]:
-                                # Check if test has correct types
-                                flag = True
-                                count = 0
-                                for arg, val in test["args"].items():
-                                    spectype = pytype(
-                                        indspec["args"][count][arg]
-                                        .replace("List", "")
-                                        .replace("[", "")
-                                        .replace("]", "")
+                            if indspec["tests"] is None:
+                                raise AssertionError(
+                                    "No tests in specification for {0}".format(
+                                        indspec["name"]
                                     )
-                                    while isinstance(val, list):
-                                        val = val[0]
-                                    if type(val) != eval(spectype):
-                                        flag = False
-                                    count += 1
-                                if flag:
-                                    testinfo = {}
-                                    testinfo["inargs"] = OrderedDict()
-                                    testinfo["inargs"].update(test["args"])
-                                    testinfo["success"] = test["successful"]
-                                    if testinfo["success"]:
-                                        testinfo["outargs"] = OrderedDict()
-                                        testinfo["outargs"].update(test["results"])
-                                    funcs[indspec["name"]].append(testinfo)
+                                )
+                            else:
+                                for test in indspec["tests"]:
+                                    # Check if test has correct types
+                                    flag = True
+                                    count = 0
+                                    for arg, val in test["args"].items():
+                                        spectype = pytype(
+                                            indspec["args"][count][arg]
+                                            .replace("List", "")
+                                            .replace("[", "")
+                                            .replace("]", "")
+                                        )
+                                        while isinstance(val, list):
+                                            val = val[0]
+                                        if type(val) != eval(spectype):
+                                            flag = False
+                                        count += 1
+                                    if flag:
+                                        testinfo = {}
+                                        testinfo["inargs"] = OrderedDict()
+                                        testinfo["inargs"].update(test["args"])
+                                        testinfo["success"] = test["successful"]
+                                        if testinfo["success"]:
+                                            testinfo["outargs"] = OrderedDict()
+                                            testinfo["outargs"].update(test["results"])
+                                        funcs[indspec["name"]].append(testinfo)
     return funcs
 
 

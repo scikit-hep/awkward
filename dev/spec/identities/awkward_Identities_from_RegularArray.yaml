@@ -1,18 +1,18 @@
 - name: awkward_Identities_from_RegularArray
   specializations:
-    - name: awkward_Identities64_from_RegularArray
+    - name: awkward_Identities32_from_RegularArray
       args:
-        - toptr: List[int64_t]
-        - fromptr: List[int64_t]
+        - toptr: List[int32_t]
+        - fromptr: List[int32_t]
         - fromptroffset: int64_t
         - size: int64_t
         - tolength: int64_t
         - fromlength: int64_t
         - fromwidth: int64_t
-    - name: awkward_Identities32_from_RegularArray
+    - name: awkward_Identities64_from_RegularArray
       args:
-        - toptr: List[int32_t]
-        - fromptr: List[int32_t]
+        - toptr: List[int64_t]
+        - fromptr: List[int64_t]
         - fromptroffset: int64_t
         - size: int64_t
         - tolength: int64_t

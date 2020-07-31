@@ -7,17 +7,17 @@
         - offsetsoffset: int64_t
         - fromlength: int64_t
         - target: int64_t
-    - name: awkward_ListOffsetArrayU32_rpad_axis1_64
-      args:
-        - toindex: List[int64_t]
-        - fromoffsets: List[uint32_t]
-        - offsetsoffset: int64_t
-        - fromlength: int64_t
-        - target: int64_t
     - name: awkward_ListOffsetArray64_rpad_axis1_64
       args:
         - toindex: List[int64_t]
         - fromoffsets: List[int64_t]
+        - offsetsoffset: int64_t
+        - fromlength: int64_t
+        - target: int64_t
+    - name: awkward_ListOffsetArrayU32_rpad_axis1_64
+      args:
+        - toindex: List[int64_t]
+        - fromoffsets: List[uint32_t]
         - offsetsoffset: int64_t
         - fromlength: int64_t
         - target: int64_t

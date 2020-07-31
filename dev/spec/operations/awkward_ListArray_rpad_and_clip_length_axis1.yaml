@@ -1,14 +1,5 @@
 - name: awkward_ListArray_rpad_and_clip_length_axis1
   specializations:
-    - name: awkward_ListArray32_rpad_and_clip_length_axis1
-      args:
-        - tomin: List[int64_t]
-        - fromstarts: List[int32_t]
-        - fromstops: List[int32_t]
-        - target: int64_t
-        - lenstarts: int64_t
-        - startsoffset: int64_t
-        - stopsoffset: int64_t
     - name: awkward_ListArrayU32_rpad_and_clip_length_axis1
       args:
         - tomin: List[int64_t]
@@ -23,6 +14,15 @@
         - tomin: List[int64_t]
         - fromstarts: List[int64_t]
         - fromstops: List[int64_t]
+        - target: int64_t
+        - lenstarts: int64_t
+        - startsoffset: int64_t
+        - stopsoffset: int64_t
+    - name: awkward_ListArray32_rpad_and_clip_length_axis1
+      args:
+        - tomin: List[int64_t]
+        - fromstarts: List[int32_t]
+        - fromstops: List[int32_t]
         - target: int64_t
         - lenstarts: int64_t
         - startsoffset: int64_t
