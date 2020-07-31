@@ -173,23 +173,13 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
 
 <table>
   <tr>
-    <td width="33%" valign="top">
-      <a href="https://awkward-array.org/how-to.html">
-        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/panel-data-analysts.png" width="268">
+    <td width="66%" valign="top">
+      <a href="https://awkward-array.org">
+        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/panel-tutorials.png" width="570">
       </a>
       <p align="center"><b>
-        <a href="https://awkward-array.org/how-to.html">
-        How-to documentation<br>for data analysts
-        </a>
-      </b></p>
-    </td>
-    <td width="33%" valign="top">
-      <a href="https://awkward-array.org/how-it-works.html">
-        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/panel-developers.png" width="268">
-      </a>
-      <p align="center"><b>
-        <a href="https://awkward-array.org/how-it-works.html">
-        How-it-works tutorials<br>for developers
+        <a href="https://awkward-array.org">
+        How-to tutorials
         </a>
       </b></p>
     </td>
@@ -199,7 +189,7 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
       </a>
       <p align="center"><b>
         <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
-        Python<br>API reference
+        Python API reference
         </a>
       </b></p>
       <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
@@ -207,7 +197,7 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
       </a>
       <p align="center"><b>
         <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
-        C++<br>API reference
+        C++ API reference
         </a>
       </b></p>
     </td>
@@ -266,6 +256,20 @@ For a similar problem 10 million times larger than the one above (on a single-th
 Speed and memory factors in the double digits are common because we're replacing Python's dynamically typed, pointer-chasing virtual machine with type-specialized, precompiled routines on contiguous data. (In other words, for the same reasons as NumPy.) Even higher speedups are possible when Awkward Array is paired with [Numba](https://numba.pydata.org/).
 
 Our [presentation at SciPy 2020](https://youtu.be/WlnUF3LRBj4) provides a good introduction, showing how to use these arrays in a real analysis.
+
+# Installation
+
+Awkward Array can be installed [from PyPI](https://pypi.org/project/awkward1/) using pip:
+
+```bash
+pip install awkward1
+```
+
+Most users will get a precompiled binary (wheel) for your operating system and Python version. If not, the above attempts to compile from source.
+
+   * Report bugs, request features, and ask for additional documentation on [GitHub Issues](https://github.com/scikit-hep/awkward-1.0/issues). If you have a general "How do I…?" question, we'll answer it as a new [example in the tutorial](https://awkward-array.org/how-to.html).
+   * If you have a problem that's too specific to be new documentation or it isn't exclusively related to Awkward Array, it might be more appropriate to ask on [StackOverflow with the [awkward-array] tag](https://stackoverflow.com/questions/tagged/awkward-array). Be sure to include tags for any other libraries that you use, such as Pandas or PyTorch.
+   * The [Gitter Scikit-HEP/community](https://gitter.im/Scikit-HEP/community) is a way to get in touch with all Scikit-HEP developers and users.
 """,
       long_description_content_type = "text/markdown",
       url = "https://github.com/scikit-hep/awkward-1.0",

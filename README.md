@@ -15,7 +15,7 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
   <tr>
     <td width="66%" valign="top">
       <a href="https://awkward-array.org">
-        <img src="docs-img/panel-tutorials.png" width="536">
+        <img src="docs-img/panel-tutorials.png" width="570">
       </a>
       <p align="center"><b>
         <a href="https://awkward-array.org">
@@ -29,7 +29,7 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
       </a>
       <p align="center"><b>
         <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
-        Python<br>API reference
+        Python API reference
         </a>
       </b></p>
       <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
@@ -37,7 +37,7 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
       </a>
       <p align="center"><b>
         <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
-        C++<br>API reference
+        C++ API reference
         </a>
       </b></p>
     </td>
