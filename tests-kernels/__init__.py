@@ -2,8 +2,9 @@ import os
 import ctypes
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
+TOP_DIR = os.path.join(CURRENT_DIR, "..")
 
-for root, _, files in os.walk(CURRENT_DIR[:-5]):
+for root, _, files in os.walk(TOP_DIR):
     for filename in files:
         if filename.endswith("libawkward-cpu-kernels.so"):
             CPU_KERNEL_SO = os.path.join(root, filename)

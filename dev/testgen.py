@@ -234,7 +234,7 @@ def testcpukernels(tests):
             ),
             "w",
         ) as f:
-            f.write("import math\nimport ctypes\n\n")
+            f.write("import math\nimport ctypes\nfrom __init__ import lib, Error\n\n")
             num = 1
             for test in tests[funcname]:
                 f.write("def test_cpu" + funcname + "_" + str(num) + "():\n")
