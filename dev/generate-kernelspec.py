@@ -14,7 +14,7 @@ import black
 import pycparser
 from lark import Lark
 
-from parser_utils import indent_code, pytype
+from parser_utils import indent_code
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -58,7 +58,8 @@ TEST_BLACKLIST = SPEC_BLACKLIST + [
     "awkward_ListOffsetArray_rpad_axis1",
     "awkward_UnionArray_flatten_combine",
     "awkward_UnionArray_flatten_length",
-    "awkward_ListArray_getitem_jagged_numvalid"
+    "awkward_ListArray_getitem_jagged_numvalid",
+    "awkward_NumpyArray_fill",
 ]
 
 SUCCESS_TEST_BLACKLIST = TEST_BLACKLIST + [
@@ -104,6 +105,16 @@ PYGEN_BLACKLIST = SPEC_BLACKLIST + [
     "awkward_NumpyArray_getitem_next_null",
     "awkward_NumpyArray_getitem_next_null_64",
 ]
+
+
+def pytype(cpptype):
+    cpptype = cpptype.replace("*", "")
+    if re.match("u?int\d{1,2}(_t)?", cpptype) is not None:
+        return "int"
+    elif cpptype == "double":
+        return "float"
+    else:
+        return cpptype
 
 
 def getdirname(filename):
@@ -300,52 +311,6 @@ def preprocess(filename, skip_implementation=False):
             code += line
 
     return code, tokens
-
-
-def check_fail_func(filename):
-    pfile, _ = preprocess(filename)
-    func = False
-    funcfails = []
-    allfails = []
-    fail = []
-    for line in pfile.splitlines():
-        if func is False and re.search("\s.*\(", line):
-            funcname = re.search("\s.*\(", line).group()[1:-1]
-            func = True
-            parans = []
-            if line.count("{") > 0:
-                for _ in range(line.count("{")):
-                    parans.append("{")
-        if func and line.count("{") > 0:
-            for _ in range(line.count("{")):
-                parans.append("{")
-        if func and "return failure" in line:
-            allfails.append(funcname)
-            funcfails.append(funcname)
-        elif func and "return awkward" in line:
-            if re.search("return .*<", line) is not None:
-                x = line[
-                    re.search("return .*<", line).span()[0]
-                    + 6 : re.search("return .*<", line).span()[1]
-                    - 1
-                ].strip()
-            else:
-                x = line[
-                    re.search("return .*\(", line).span()[0]
-                    + 6 : re.search("return .*\(", line).span()[1]
-                    - 1
-                ].strip()
-            if x in allfails:
-                fail.append(funcname)
-            if x in funcfails:
-                funcfails.remove(x)
-        if func and line.count("}") > 0:
-            for _ in range(line.count("}")):
-                parans.pop()
-            if len(parans) == 0:
-                func = False
-    fail.extend(funcfails)
-    return fail
 
 
 class FuncBody(object):
@@ -860,7 +825,7 @@ def parseheader(filename):
         return funcs
 
 
-def get_tests(allpykernels, allfuncargs, alltokens, allfuncroles, failfuncs):
+def get_tests(allpykernels, allfuncargs, alltokens, allfuncroles):
     def writepykernels():
         prefix = """
 
@@ -887,7 +852,9 @@ kSliceNone = kMaxInt64 + 1
 
     importlib.reload(kernels)
 
-    with open(os.path.join(CURRENT_DIR, "testcases.json")) as testjson:
+    with open(
+        os.path.join(CURRENT_DIR, "..", "kernel-specification", "samples.json")
+    ) as testjson:
         data = json.load(testjson)
         funcs = OrderedDict()
         for funcname in alltokens.keys():
@@ -971,9 +938,9 @@ kSliceNone = kMaxInt64 + 1
                         argpytype = pytype(allfuncargs[keyfunc][key])
                         if allfuncroles[keyfunc][key]["check"] == "outparam":
                             if argpytype == "int":
-                                intests[key] = [0] * 50
+                                intests[key] = [123] * 50
                             elif argpytype == "float":
-                                intests[key] = [1.1] * 50
+                                intests[key] = [123.0] * 50
                             elif argpytype == "bool":
                                 intests[key] = [True] * 50
                         elif allfuncroles[keyfunc][key]["check"] == "inparam":
@@ -995,7 +962,7 @@ kSliceNone = kMaxInt64 + 1
                                         while num != count:
                                             outtests[
                                                 list(allfuncargs[keyfunc].keys())[i]
-                                            ].append(0)
+                                            ].append(123)
                                             count = count + 1
                                     outtests[
                                         list(allfuncargs[keyfunc].keys())[i]
@@ -1043,7 +1010,9 @@ if __name__ == "__main__":
         os.path.join(CURRENT_DIR, "..", "src", "cpu-kernels", "sorting.cpp"),
     ]
 
-    with open(os.path.join(CURRENT_DIR, "spec", "spec.yaml"), "w") as mainspec:
+    with open(
+        os.path.join(CURRENT_DIR, "..", "kernel-specification", "kernelnames.yml"), "w"
+    ) as mainspec:
         mainspec.write("kernels:\n")
         for filename in kernelfiles:
             mainspec.write(" " * 2 + getdirname(filename) + ":\n")
@@ -1056,10 +1025,9 @@ if __name__ == "__main__":
             hfile = getheadername(filename)
             funcroles = parseheader(hfile)
             funcargs = getargs(hfile)
-            failfuncs = check_fail_func(filename)
 
             if "sorting.cpp" not in filename:
-                tests = get_tests(pyfuncs, funcargs, tokens, funcroles, failfuncs)
+                tests = get_tests(pyfuncs, funcargs, tokens, funcroles)
             paramchecks = get_paramcheck(funcroles, tokens, funcargs)
 
             if kernelname is None:
@@ -1068,12 +1036,24 @@ if __name__ == "__main__":
                         "gen" not in tokens[funcname].keys()
                         and funcname not in SPEC_BLACKLIST
                     ):
+                        try:
+                            os.mkdir(
+                                os.path.join(
+                                    CURRENT_DIR,
+                                    "..",
+                                    "kernel-specification",
+                                    getdirname(filename),
+                                )
+                            )
+                        except FileExistsError:
+                            pass
                         with open(
                             os.path.join(
                                 CURRENT_DIR,
-                                "spec",
+                                "..",
+                                "kernel-specification",
                                 getdirname(filename),
-                                funcname + ".yaml",
+                                funcname + ".yml",
                             ),
                             "w",
                         ) as f:
@@ -1082,7 +1062,7 @@ if __name__ == "__main__":
                                 + funcname
                                 + ": "
                                 + os.path.join(
-                                    getdirname(filename), funcname + ".yaml\n",
+                                    getdirname(filename), funcname + ".yml\n",
                                 )
                             )
                             f.write("- name: " + funcname + "\n")

@@ -24,7 +24,9 @@ A second implementation, ``libawkward-cuda-kernels.so``, is provided as a separa
 The interface, as well as specifications for each function's behavior through a normative Python implementation, are presented below.
 
 """
-    with open(os.path.join(CURRENT_DIR, "spec", "spec.yaml")) as infile:
+    with open(
+        os.path.join(CURRENT_DIR, "..", "kernel-specification", "kernelnames.yml")
+    ) as infile:
         mainspec = yaml.safe_load(infile)["kernels"]
         with open(
             os.path.join(CURRENT_DIR, "..", "docs-sphinx", "_auto", "kernels.rst",), "w"
@@ -32,7 +34,9 @@ The interface, as well as specifications for each function's behavior through a 
             outfile.write(prefix)
             for filedir in mainspec.values():
                 for relpath in filedir.values():
-                    with open(os.path.join(CURRENT_DIR, "spec", relpath)) as specfile:
+                    with open(
+                        os.path.join(CURRENT_DIR, "..", "kernel-specification", relpath)
+                    ) as specfile:
                         indspec = yaml.safe_load(specfile)[0]
                         outfile.write(indspec["name"] + "\n")
                         print("Generating doc for " + indspec["name"])

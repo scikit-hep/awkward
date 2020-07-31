@@ -1,9 +1,0 @@
-- name: awkward_ListOffsetArray_local_preparenext_64
-  args:
-    - tocarry: List[int64_t]
-    - fromindex: List[int64_t]
-    - length: int64_t
-  inparams: ['fromindex', 'length']
-  outparams: ['tocarry']
-  definition: |
-    Insert Python definition here

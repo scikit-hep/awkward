@@ -1,14 +1,22 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 import os
-import subprocess
+import re
 from collections import OrderedDict
 
 import yaml
 
-from parser_utils import pytype
-
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
+
+
+def pytype(cpptype):
+    cpptype = cpptype.replace("*", "")
+    if re.match("u?int\d{1,2}(_t)?", cpptype) is not None:
+        return "int"
+    elif cpptype == "double":
+        return "float"
+    else:
+        return cpptype
 
 
 def genpykernels():
@@ -19,15 +27,17 @@ kMaxInt64  = 9223372036854775806
 kSliceNone = kMaxInt64 + 1
 
 """
-    with open(os.path.join(CURRENT_DIR, "spec", "spec.yaml")) as infile:
+    with open(
+        os.path.join(CURRENT_DIR, "..", "kernel-specification", "kernelnames.yml")
+    ) as infile:
         mainspec = yaml.safe_load(infile)["kernels"]
-        with open(
-            os.path.join(CURRENT_DIR, "..", "tests-kernels", "kernels.py"), "w"
-        ) as outfile:
+        with open(os.path.join(CURRENT_DIR, "kernels.py"), "w") as outfile:
             outfile.write(prefix)
             for filedir in mainspec.values():
                 for relpath in filedir.values():
-                    with open(os.path.join(CURRENT_DIR, "spec", relpath)) as specfile:
+                    with open(
+                        os.path.join(CURRENT_DIR, "..", "kernel-specification", relpath)
+                    ) as specfile:
                         indspec = yaml.safe_load(specfile)[0]
                         if "def " in indspec["definition"]:
                             outfile.write(indspec["definition"] + "\n")
@@ -44,11 +54,15 @@ kSliceNone = kMaxInt64 + 1
 
 def readspec():
     funcs = {}
-    with open(os.path.join(CURRENT_DIR, "spec", "spec.yaml")) as infile:
+    with open(
+        os.path.join(CURRENT_DIR, "..", "kernel-specification", "kernelnames.yml")
+    ) as infile:
         mainspec = yaml.safe_load(infile)["kernels"]
         for filedir in mainspec.values():
             for relpath in filedir.values():
-                with open(os.path.join(CURRENT_DIR, "spec", relpath)) as specfile:
+                with open(
+                    os.path.join(CURRENT_DIR, "..", "kernel-specification", relpath)
+                ) as specfile:
                     indspec = yaml.safe_load(specfile)[0]
                     if "tests" in indspec.keys():
                         if "specializations" in indspec.keys():
@@ -128,12 +142,7 @@ def readspec():
 def testpykernels(tests):
     print("Generating file for testing python kernels")
     for funcname in tests.keys():
-        with open(
-            os.path.join(
-                CURRENT_DIR, "..", "tests-kernels", "test_py" + funcname + ".py"
-            ),
-            "w",
-        ) as f:
+        with open(os.path.join(CURRENT_DIR, "test_py" + funcname + ".py"), "w",) as f:
             f.write("import pytest\nimport kernels\n\n")
             num = 1
             for test in tests[funcname]:
@@ -210,11 +219,15 @@ def testcpukernels(tests):
 
     def getfuncargs():
         funcs = {}
-        with open(os.path.join(CURRENT_DIR, "spec", "spec.yaml")) as infile:
+        with open(
+            os.path.join(CURRENT_DIR, "..", "kernel-specification", "kernelnames.yml")
+        ) as infile:
             mainspec = yaml.safe_load(infile)["kernels"]
             for filedir in mainspec.values():
                 for relpath in filedir.values():
-                    with open(os.path.join(CURRENT_DIR, "spec", relpath)) as specfile:
+                    with open(
+                        os.path.join(CURRENT_DIR, "..", "kernel-specification", relpath)
+                    ) as specfile:
                         indspec = yaml.safe_load(specfile)[0]
                         if (
                             "def " in indspec["definition"]
@@ -238,12 +251,7 @@ def testcpukernels(tests):
 
     funcargs = getfuncargs()
     for funcname in tests.keys():
-        with open(
-            os.path.join(
-                CURRENT_DIR, "..", "tests-kernels", "test_cpu" + funcname + ".py"
-            ),
-            "w",
-        ) as f:
+        with open(os.path.join(CURRENT_DIR, "test_cpu" + funcname + ".py"), "w",) as f:
             f.write("import math\nimport ctypes\nfrom __init__ import lib, Error\n\n")
             num = 1
             for test in tests[funcname]:
