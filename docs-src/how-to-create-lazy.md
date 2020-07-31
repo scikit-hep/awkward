@@ -11,8 +11,8 @@ kernelspec:
   name: python3
 ---
 
-Slow control and fast math
-==========================
+How to create lazy arrays
+=========================
 
 **This is a stub:** I intend to write this article, but haven't yet.
 
