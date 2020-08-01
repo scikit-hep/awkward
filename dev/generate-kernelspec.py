@@ -892,7 +892,6 @@ kSliceNone = kMaxInt64 + 1
                 count = 0
                 for i in range(len(allfuncargs[keyfunc].keys())):
                     arg = list(allfuncargs[keyfunc].keys())[i]
-                    argpytype = pytype(allfuncargs[keyfunc][arg])
                     firstdict[arg] = []
                     if allfuncroles[keyfunc][arg]["check"] == "inparam":
                         if "role" in allfuncroles[keyfunc][arg].keys():
@@ -902,14 +901,18 @@ kSliceNone = kMaxInt64 + 1
                             if group not in instancedict.keys():
                                 instancedict[group] = []
                             instancedict[group].append(arg)
-                            for x in range(
-                                len(data[group][allfuncroles[keyfunc][arg]["role"]])
-                            ):
-                                firstdict[arg].append(
-                                    data[group][allfuncroles[keyfunc][arg]["role"]][x][
-                                        argpytype
-                                    ]
-                                )
+                            if group not in data.keys() and group[:-1] in data.keys():
+                                pseudogroup = group[:-1]
+                            elif group in data.keys():
+                                pseudogroup = group
+                            role = (
+                                pseudogroup
+                                + allfuncroles[keyfunc][arg]["role"][
+                                    allfuncroles[keyfunc][arg]["role"].find("-") :
+                                ]
+                            )
+                            for x in range(len(data[pseudogroup])):
+                                firstdict[arg].append(data[pseudogroup][x][role])
                         else:
                             group = str(count)
                             assert group not in instancedict.keys()
@@ -949,14 +952,8 @@ kSliceNone = kMaxInt64 + 1
                     intests = OrderedDict()
                     outtests = OrderedDict()
                     for key in firstdict.keys():
-                        argpytype = pytype(allfuncargs[keyfunc][key])
                         if allfuncroles[keyfunc][key]["check"] == "outparam":
-                            if argpytype == "int":
-                                intests[key] = [123] * 50
-                            elif argpytype == "float":
-                                intests[key] = [123.0] * 50
-                            elif argpytype == "bool":
-                                intests[key] = [True] * 50
+                            intests[key] = [123.0] * 50
                         elif allfuncroles[keyfunc][key]["check"] == "inparam":
                             intests[key] = temp[key]
                         else:
@@ -972,7 +969,7 @@ kSliceNone = kMaxInt64 + 1
                                 count = 0
                                 outtests[list(allfuncargs[keyfunc].keys())[i]] = []
                                 for num in sorted(tests[i]):
-                                    if num != count:
+                                    if num != count and count < num:
                                         while num != count:
                                             outtests[
                                                 list(allfuncargs[keyfunc].keys())[i]

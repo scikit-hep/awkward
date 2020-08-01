@@ -1,396 +1,144 @@
 {
-    "ListArray": {
-        "ListArray-starts": [
-            {"int": [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1]},
-            {"int": [1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1]}
-        ],
-        "ListArray-starts-samediff": [
-            {"int": [1, 2, 3, 4, 5, 6]},
-            {"int": [1, 2, 3, 4, 5, 6]}
-        ],
-        "ListArray-starts-samediff2": [
-            {"int": [1, 2, 3, 4, 5, 6]},
-            {"int": [1, 2, 3, 4, 5, 6]}
-        ],
-        "ListArray-stops": [
-            {"int": [3, 1, 3, 2, 3, 1, 2, 3]},
-            {"int": [8, 4, 5, 6, 5, 5, 7]}
-        ],
-        "ListArray-stops-samediff": [
-            {"int": [3, 4, 5, 6, 7, 8]},
-            {"int": [3, 4, 5, 6, 7, 8]}
-        ],
-        "ListArray-stops-samediff2": [
-            {"int": [3, 4, 5, 6, 7, 8]},
-            {"int": [3, 4, 5, 6, 7, 8]}
-        ],
-        "ListArray-starts-offset": [
-            {"int": 0},
-            {"int": 1}
-        ],
-        "ListArray-stops-offset": [
-            {"int": 0},
-            {"int": 1}
-        ],
-        "ListArray-samediff-offsets": [
-            {"int": [1, 3, 5, 7, 9, 11]},
-            {"int": [1, 3, 5, 7, 9, 11]}
-        ],
-        "ListArray-diff": [
-            {"int": [1, 2, 3, 4, 5, 6]},
-            {"int": [1, 2, 3, 4, 5, 6]}
-        ],
-        "ListArray-diff-offset": [
-            {"int": 0},
-            {"int": 0}
-        ],
-        "ListArray-replacement": [
-            {"bool": true},
-            {"bool": false}
-        ],
-        "ListArray-at": [
-            {"int": 0},
-            {"int": 5}
-        ],
-        "ListArray-at-array": [
-            {"int": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
-            {"int": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}
-        ],
-        "ListArray-carry": [
-            {"int": [0, 1, 0, 2, 1, 2, 0, 1, 2, 0]},
-            {"int": [0, 2, 0, 0, 1, 0, 2, 1, 1, 1]}
-        ],
-        "ListArray-carry-indexlen": [
-            {"int": -1},
-            {"int": 5}
-        ],
-        "ListArray-jaggedsize": [
-            {"int": 2},
-            {"int": 2}
-        ],
-        "ListArray-contentlen": [
-            {"int": 10},
-            {"int": 10}
-        ]
-    },
-    "NumpyArray": {
-        "NumpyArray-ptr": [
-            {"int": [5, 8, 7, 0, 8, 6, 12, 7, 4, 6, 8, 7, 8, 4, 4, 4, 9, 10, 6, 5, 3, 5, 7, 5, 3],
-                "float": [5.2, 8.1, 7.0, 0, 8.1, 6.2, 12.3, 7.4, 4.4, 6.5, 8.6, 8.1, 8.9, 5.0, 1.1, 2.3, 4.3, 6.5],
-                "bool": [true, false, true, true, false, true, true, true, true, false, true, true, false, false, false, true, true, false, true, false, true]},
-            {"int": [2, 1, -25, 3, 5, 2, 10, 11, 20, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 0, 6, 2, 3],
-                "bool": [true, true, false, true, false, true, true, false, true, false, true, false, true, false, false]}
-        ],
-        "NumpyArray-out-offset": [
-            {"int": 0},
-            {"int": 0}
-        ],
-        "NumpyArray-ptr-offset": [
-            {"int": 0},
-            {"int": 0}
-        ],
-        "NumpyArray-length": [
-            {"int": 2, "float": 2.0},
-            {"int": 20, "float": 20.0}
-        ]
-    },
-    "NumpyArray2": {
-        "NumpyArray2-ptr": [
-            {"int": [5, 8, 7, 0, 8, 6, 12, 7, 4, 6, 8, 7, 8, 4, 4, 4, 9, 10, 6, 5, 3, 5, 7, 5, 3],
-                "float": [5.2, 8.1, 7.0, 0, 8.1, 6.2, 12.3, 7.4, 4.4, 6.5, 8.6, 8.1, 8.9, 5.0, 1.1, 2.3, 4.3, 6.5],
-                "bool": [true, false, true, true, false, true, true, true, true, false, true, true, false, false, false, true, true, false, true, false, true]},
-            {"int": [2, 1, 4, 3, 5, 2, 10, 11, 20, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 0, 6, 2, 3],
-                "bool": [true, true, false, true, false, true, true, false, true, false, true, false, true, false, false]}
-        ],
-        "NumpyArray2-out-offset": [
-            {"int": 0},
-            {"int": 0}
-        ],
-        "NumpyArray2-ptr-offset": [
-            {"int": 0},
-            {"int": 0}
-        ],
-        "NumpyArray2-length": [
-            {"int": 10, "float": 10.1},
-            {"int": 2, "float": 2.2}
-        ]
-    },
-    "NumpyArray3": {
-        "NumpyArray3-ptr": [
-            {"int": [5, 8, 7, 0, 8, 6, 12, 7, 4, 6, 8, 7, 8, 4, 4, 4, 9, 10, 6, 5, 3, 5, 7, 5, 3],
-                "float": [5.2, 8.1, 7.0, 0, 8.1, 6.2, 12.3, 7.4, 4.4, 6.5, 8.6, 8.1, 8.9, 5.0, 1.1, 2.3, 4.3, 6.5],
-                "bool": [true, false, true, true, false, true, true, true, true, false, true, true, false, false, false, true, true, false, true, false, true]},
-            {"int": [2, 1, 4, 3, 5, 2, 10, 11, 20, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 0, 6, 2, 3],
-                "bool": [true, true, false, true, false, true, true, false, true, false, true, false, true, false, false]}
-        ],
-        "NumpyArray3-out-offset": [
-            {"int": 0},
-            {"int": 0}
-        ],
-        "NumpyArray3-ptr-offset": [
-            {"int": 0},
-            {"int": 0}
-        ],
-        "NumpyArray3-length": [
-            {"int": 10, "float": 10.1},
-            {"int": 2, "float": 2.2}
-        ]
-    },
-    "RegularArray": {
-        "RegularArray-size": [
-            {"int": 3},
-            {"int": 2}
-        ],
-        "RegularArray-diff": [
-            {"int": [0, 3, 6, 9, 12, 15]},
-            {"int": [0, 3, 6, 9, 12, 15]}
-        ],
-        "RegularArray-diff-offset": [
-            {"int": 0},
-            {"int": 0}
-        ]
-    },
-    "ListOffsetArray": {
-        "ListOffsetArray-offsets": [
-            {"int": [1, 1, 2, 3, 5, 8, 11, 11, 11, 11, 20, 21, 21, 21, 22, 23, 24, 26, 27, 29, 33, 34, 35, 36, 37, 38, 38, 38, 38, 38, 38, 38, 40, 40, 41, 42, 43, 44, 45, 46, 47]},
-            {"int": [2, 3, 3, 4, 5, 5, 5, 5, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 15, 15, 15, 15, 15]}
-        ],
-        "ListOffsetArray-offsets2": [
-            {"int": [1, 1, 2, 3, 5, 8, 11, 11, 11, 11, 20, 21, 21, 21, 22, 23, 24, 26, 27, 29, 33, 34, 35, 36, 37, 38, 38, 38, 38, 38, 38, 38, 40, 40, 41, 42, 43, 44, 45, 46, 47]},
-            {"int": [2, 3, 3, 4, 5, 5, 5, 5, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 15, 15, 15, 15, 15]}
-        ],
-        "ListOffsetArray-offsets-offset": [
-            {"int": 1},
-            {"int": 0}
-        ],
-        "ListOffsetArray-offsets-offset2": [
-            {"int": 1},
-            {"int": 0}
-        ],
-        "ListOffsetArray-incr": [
-            {"int": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]},
-            {"int": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]}
-        ],
-        "ListOffsetArray-incr-offset": [
-            {"int": 0},
-            {"int": 0}
-        ]
-    },
-    "IndexedArray": {
-        "IndexedArray-index": [
-            {"int": [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1],
-             "float": [1.0, 1.1, 2.0, 1.2, 2.3, 1.5, 2.3, 2.9, 2.7],
-             "bool": [true, false, true, true, true, false, true, false, true, false, true]},
-            {"int": [1, 1, 2, -2, 0, 2, 0, 2, 1, 1],
-             "float": [1.0, 1.1, 2.0, 1.2, 2.3, 1.5, 2.3, 2.9, 2.7],
-             "bool": [true, false, true, true, true, false, true, false, true, false, true]}
-        ],
-        "IndexedArray-index-small": [
-            {"int": [1, 0, 0, 1, 1, 1, 0]},
-            {"int": [1, 0, 0, 1, 1, 1, 0]}
-        ],
-        "IndexedArray-index-small-offset": [
-            {"int": 0},
-            {"int": 0}
-        ],
-        "IndexedArray-index-inner": [
-            {"int": [1, 2, 5, 4, 2, 3, 1, 3, 4]},
-            {"int": [1, 4, 2, 3, 6, 4, 2, 3, 1]}
-        ],
-        "IndexedArray-index-inner-offset": [
-            {"int": 0},
-            {"int": 1}
-        ],
-        "IndexedArray-index-outer": [
-            {"int": [2, 3, 6, 5, 3, 7, 9, 5, 4]},
-            {"int": [2, 5, 3, 4, 7, 6, 3, 4, 5]}
-        ],
-        "IndexedArray-index-outer-offset": [
-            {"int": 0},
-            {"int": 0}
-        ],
-        "IndexedArray-index-offset": [
-            {"int": 1},
-            {"int": 0}
-        ],
-        "IndexedArray-mask": [
-            {"int": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
-            {"int": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}
-        ],
-        "IndexedArray-mask-offset": [
-            {"int": 0},
-            {"int": 1}
-        ],
-        "IndexedArray-mask2": [
-            {"int": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
-            {"int": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}
-        ],
-        "IndexedArray-mask2-offset": [
-            {"int": 0},
-            {"int": 1}
-        ],
-        "IndexedArray-isoption": [
-            {"bool": true},
-            {"bool": false}
-        ],
-        "IndexedArray-lencontent": [
-            {"int": -2},
-            {"int": 10}
-        ],
-        "IndexedArray-lenparents": [
-            {"int": 3},
-            {"int": 3}
-        ],
-        "IndexedArray-outlength": [
-            {"int": 30},
-            {"int": 30}
-        ],
-        "IndexedArray-lenfromindex": [
-            {"int": -1, "float": -1.0},
-            {"int": 5, "float": 5.0}
-        ]
-    },
-    "ByteMaskedArray": {
-        "ByteMaskedArray-mask": [
-            {"int": [1, 1, 1, 1, 1]},
-            {"int": [1, 1, 1, 1, 1]}
-        ],
-        "ByteMaskedArray-mask-offset": [
-            {"int": 0},
-            {"int": 0}
-        ],
-        "ByteMaskedArray-mask2": [
-            {"int": [1, 1, 1, 1, 1]},
-            {"int": [1, 1, 1, 1, 1]}
-        ],
-        "ByteMaskedArray-mask2-offset": [
-            {"int": 0},
-            {"int": 0}
-        ],
-        "ByteMaskedArray-valid_when": [
-            {"bool": true},
-            {"bool": false}
-        ]
-    },
-    "UnionArray": {
-        "UnionArray-tags": [
-            {"int": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
-            {"int": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]}
-        ],
-        "UnionArray-tags-offset": [
-            {"int": 1},
-            {"int": 0}
-        ],
-        "UnionArray-tags-inner": [
-            {"int": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
-            {"int": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]}
-        ],
-        "UnionArray-tags-outer": [
-            {"int": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
-            {"int": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]}
-        ],
-        "UnionArray-tags-inner-offset": [
-            {"int": 0},
-            {"int": 1}
-        ],
-        "UnionArray-tags-outer-offset": [
-            {"int": 0},
-            {"int": 1}
-        ],
-        "UnionArray-index": [
-            {"int": [4, 3, 6, 6, 3, 7, 3, 8, 3, 8, 8]},
-            {"int": [3, 4, 7, 7, 4, 1, 3, 8, 3, 8, 8]}
-        ],
-        "UnionArray-index-offset": [
-            {"int": 0},
-            {"int": 1}
-        ],
-        "UnionArray-index-inner": [
-            {"int": [3, 2, 5, 5, 2, 6, 2, 7, 3, 7, 7]},
-            {"int": [2, 3, 6, 6, 3, 0, 2, 7, 2, 7, 7]}
-        ],
-        "UnionArray-index-inner-offset": [
-            {"int": 0},
-            {"int": 1}
-        ],
-        "UnionArray-index-outer": [
-            {"int": [5, 4, 7, 7, 4, 8, 4, 9, 4, 7, 8]},
-            {"int": [4, 5, 7, 7, 0, 1, 3, 4, 2, 4, 5, 2]}
-        ],
-        "UnionArray-index-outer-offset": [
-            {"int": 0},
-            {"int": 1}
-        ],
-        "UnionArray-offsets-raw": [
-            {"int": [[1, 2, 1, 2, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4], [2, 1, 0, 3, 1, 2, 0, 3, 1, 2, 2, 2, 1, 2, 3, 1, 0, 2, 3, 0, 2, 1]]},
-            {"int": [[1, 2, 1, 2, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4], [2, 1, 0, 3, 1, 2, 0, 3, 1, 2, 2, 2, 1, 2, 3, 1, 0, 2, 3, 0, 2, 1]]}
-        ],
-        "UnionArray-offsets-offsets": [
-            {"int": [0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1]},
-            {"int": [0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1]}
-        ],
-        "UnionArray-lencontents": [
-            {"int": [7, 8, 9, 10, 11, 12]},
-            {"int": [7, 8, 9, 10, 11, 12]}
-        ],
-        "UnionArray-innerwhich": [
-            {"int": 1},
-            {"int": 1}
-        ],
-        "UnionArray-outerwhich": [
-            {"int": 0},
-            {"int": 1}
-        ],
-        "UnionArray-numcontents": [
-            {"int": -1},
-            {"int": 20}
-        ]
-    },
-    "BitMaskedArray": {
-        "BitMaskedArray-mask": [
-            {"int": [244, 251, 64, 0, 133]},
-            {"int": [244, 251, 64, 0, 133]}
-        ],
-        "BitMaskedArray-mask-offset": [
-            {"int": 1},
-            {"int": 1}
-        ],
-        "BitMaskedArray-valid_when": [
-            {"bool": true},
-            {"bool": false}
-        ],
-        "BitMaskedArray-lsb_order": [
-            {"int": 0,
-            "bool": false},
-            {"int": 1,
-            "bool": true}
-        ]
-    },
-    "Identities": {
-        "Identities-array": [
-            {"int": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]},
-            {"int": [0, 2, 1, 1, 1, 1, 2, 0, 1, 2, 0, 1, 0, 2, 0, 1, 1, 1, 0, 2, 2, 2, 1, 2, 0, 1]}
-        ],
-        "Identities-array-offset": [
-            {"int": 0},
-            {"int": 1}
-        ],
-        "Identities-same-array": [
-            {"int": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]},
-            {"int": [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]}
-        ],
-        "Identities-same-array2": [
-            {"int": [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]},
-            {"int": [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]}
-        ],
-        "Identities-same-array-offset": [
-            {"int": 0},
-            {"int": 1}
-        ],
-        "Identities-same-array2-offset": [
-            {"int": 1},
-            {"int": 2}
-        ]
-    },
+    "ListArray": [
+        {
+            "ListArray-starts": [2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1],
+            "ListArray-starts-offset": 0,
+            "ListArray-stops": [3, 2, 4, 5, 3, 4, 2, 5, 3, 4, 6, 11],
+            "ListArray-stops-offset": 0,
+            "ListArray-length": 3,
+            "ListArray-at": 0
+        },
+        {
+            "ListArray-starts": [1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1],
+            "ListArray-starts-offset": 1,
+            "ListArray-stops": [8, 4, 5, 6, 5, 5, 7],
+            "ListArray-stops-offset": 1,
+            "ListArray-length": 10,
+            "ListArray-at": 5
+        },
+        {
+            "ListArray-starts": [1, 4, 5, 6, 5, 5, 7, 1, 2, 1, 3, 1, 5, 3, 2],
+            "ListArray-starts-offset": 1,
+            "ListArray-stops": [1, 4, 5, 6, 5, 5, 7, 1, 2, 1, 3, 1, 5, 3, 2],
+            "ListArray-stops-offset": 1,
+            "ListArray-length": 5,
+            "ListArray-at": 0
+        }
+    ],
+    "ListOffsetArray": [
+        {
+            "ListOffsetArray-offsets": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            "ListOffsetArray-offsets-offset": 0,
+            "ListOffsetArray-length": 5,
+            "ListOffsetArray-rawoffsets": [[1, 2, 1, 2, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4], [2, 1, 0, 3, 1, 2, 0, 3, 1, 2, 2, 2, 1, 2, 3, 1, 0, 2, 3, 0, 2, 1]]
+        },
+        {
+            "ListOffsetArray-offsets": [2, 3, 3, 4, 5, 5, 5, 5, 5, 6, 7, 8, 10, 11],
+            "ListOffsetArray-offsets-offset": 1,
+            "ListOffsetArray-length": 1,
+            "ListOffsetArray-rawoffsets": [[1, 1, 1, 2, 2, 2, 1, 3, 1, 2, 3, 4, 1, 2, 4, 1, 2, 3, 4], [0, 1, 3, 3, 1, 0, 0, 3, 1, 2, 2, 2, 1, 2]]
+        },
+        {
+            "ListOffsetArray-offsets": [2, 1, 0, 1, 2, 0, 1, 2, 2, 2, 1, 2, 1, 0, 0, 0, 0],
+            "ListOffsetArray-offsets-offset": 1,
+            "ListOffsetArray-length": 6,
+            "ListOffsetArray-rawoffsets": [[3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4], [2, 1, 2, 3, 1, 0, 2, 3, 0, 2, 1]]
+        }
+    ],
+    "Identities": [
+        {
+            "Identities-array": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+            "Identities-array-offset": 0
+        },
+        {
+            "Identities-array": [0, 2, 1, 1, 1, 1, 2, 0, 1, 2, 0, 1, 0, 2, 0, 1, 1, 1, 0, 2, 2, 2, 1, 2, 0, 1],
+            "Identities-array-offset": 1
+        }
+    ],
+    "RegularArray": [
+        {
+            "RegularArray-size": 3
+        },
+        {
+            "RegularArray-size": 2
+        }
+    ],
+    "IndexedArray": [
+        {
+            "IndexedArray-index": [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1],
+            "IndexedArray-index-offset": 0,
+            "IndexedArray-length": 2,
+            "IndexedArray-parents": [1, 1, 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1],
+            "IndexedArray-parents-offset": 1
+        },
+        {
+            "IndexedArray-index": [1, 2, 2, 3, 0, 2, 0, 2, 1, 1],
+            "IndexedArray-index-offset": 0,
+            "IndexedArray-length": 1,
+            "IndexedArray-parents": [0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1],
+            "IndexedArray-parents-offset": 0
+        },
+        {
+            "IndexedArray-index": [1, 3, 0, 3, 5, 2, 0, 2, 1, 1],
+            "IndexedArray-index-offset": 0,
+            "IndexedArray-length": 1,
+            "IndexedArray-parents": [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
+            "IndexedArray-parents-offset": 1
+        }
+    ],
+    "UnionArray": [
+        {
+            "UnionArray-tags": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            "UnionArray-tags-offset": 1,
+            "UnionArray-which": 0,
+            "UnionArray-length": 3
+        },
+        {
+            "UnionArray-tags": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            "UnionArray-tags-offset": 0,
+            "UnionArray-which": 1,
+            "UnionArray-length": 2
+        }
+    ],
+    "NumpyArray": [
+        {
+            "NumpyArray-ptr": [1, 2, 4, 2, 3, 1, 4, 2, 2, 2, 1, 4, 3],
+            "NumpyArray-ptr-offset": 0,
+            "NumpyArray-length": 5
+        },
+        {
+            "NumpyArray-ptr": [-1, 2, 4, 0, -3],
+            "NumpyArray-ptr-offset": 1,
+            "NumpyArray-length": 3
+        }
+    ],
+    "ByteMaskedArray": [
+        {
+            "ByteMaskedArray-mask": [1, 1, 1, 1, 1],
+            "ByteMaskedArray-mask-offset": 0,
+            "ByteMaskedArray-valid_when": true,
+            "ByteMaskedArray-length": 0
+        },
+        {
+            "ByteMaskedArray-mask": [0, 0, 0, 0, 0],
+            "ByteMaskedArray-mask-offset": 0,
+            "ByteMaskedArray-valid_when": false,
+            "ByteMaskedArray-length": 5
+        }
+    ],
+    "BitMaskedArray": [
+        {
+            "BitMaskedArray-mask": [1, 1, 1, 1, 1],
+            "BitMaskedArray-mask-offset": 0,
+            "BitMaskedArray-valid_when": true,
+            "BitMaskedArray-lsb_order": true
+        },
+        {
+            "BitMaskedArray-mask": [0, 0, 0, 0, 0],
+            "BitMaskedArray-mask-offset": 0,
+            "BitMaskedArray-valid_when": false,
+            "BitMaskedArray-lsb_order": false
+        }
+    ],
     "num": 3
 }
