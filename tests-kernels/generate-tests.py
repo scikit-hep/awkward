@@ -90,6 +90,15 @@ def readspec():
                                                 val = val[0]
                                             if type(val) != eval(spectype):
                                                 flag = False
+                                            elif test["successful"] and (
+                                                "U32" in childfunc["name"]
+                                                or "U64" in childfunc["name"]
+                                                or (
+                                                    arg in test["results"].keys()
+                                                    and -1 in test["results"][arg]
+                                                )
+                                            ):
+                                                flag = False
                                             count += 1
                                         if flag:
                                             testinfo = {}
@@ -125,6 +134,15 @@ def readspec():
                                         while isinstance(val, list):
                                             val = val[0]
                                         if type(val) != eval(spectype):
+                                            flag = False
+                                        elif test["successful"] and (
+                                            "U32" in indspec["name"]
+                                            or "U64" in indspec["name"]
+                                            or (
+                                                arg in test["results"].keys()
+                                                and -1 in test["results"][arg]
+                                            )
+                                        ):
                                             flag = False
                                         count += 1
                                     if flag:

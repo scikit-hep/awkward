@@ -68,6 +68,10 @@ TEST_BLACKLIST = SPEC_BLACKLIST + [
     "awkward_UnionArray_flatten_length",
     "awkward_ListArray_getitem_jagged_numvalid",
     "awkward_NumpyArray_fill",
+    "awkward_ListArray_getitem_next_range_spreadadvanced",
+    "awkward_ListOffsetArray_reduce_local_nextparents_64",
+    "awkward_NumpyArray_getitem_next_array_advanced",
+    "awkward_ListOffsetArray_reduce_local_nextparents_64",
 ]
 
 SUCCESS_TEST_BLACKLIST = TEST_BLACKLIST + [
@@ -952,8 +956,14 @@ kSliceNone = kMaxInt64 + 1
                     intests = OrderedDict()
                     outtests = OrderedDict()
                     for key in firstdict.keys():
+                        argpytype = pytype(allfuncargs[keyfunc][key])
                         if allfuncroles[keyfunc][key]["check"] == "outparam":
-                            intests[key] = [123.0] * 50
+                            if argpytype == "int":
+                                intests[key] = [123] * 50
+                            elif argpytype == "float":
+                                intests[key] = [123.0] * 50
+                            elif argpytype == "bool":
+                                intests[key] = [True] * 50
                         elif allfuncroles[keyfunc][key]["check"] == "inparam":
                             intests[key] = temp[key]
                         else:
@@ -971,9 +981,21 @@ kSliceNone = kMaxInt64 + 1
                                 for num in sorted(tests[i]):
                                     if num != count and count < num:
                                         while num != count:
-                                            outtests[
-                                                list(allfuncargs[keyfunc].keys())[i]
-                                            ].append(123)
+                                            argpytype = pytype(
+                                                list(allfuncargs[keyfunc].values())[i]
+                                            )
+                                            if argpytype == "int":
+                                                outtests[
+                                                    list(allfuncargs[keyfunc].keys())[i]
+                                                ].append(123)
+                                            elif argpytype == "float":
+                                                outtests[
+                                                    list(allfuncargs[keyfunc].keys())[i]
+                                                ].append(123.0)
+                                            elif argpytype == "bool":
+                                                outtests[
+                                                    list(allfuncargs[keyfunc].keys())[i]
+                                                ].append(True)
                                             count = count + 1
                                     outtests[
                                         list(allfuncargs[keyfunc].keys())[i]
