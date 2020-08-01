@@ -5,7 +5,6 @@ docs/demos/test-program.cpp
 .ci/logs/
 
 # Specification
-dev/kernels.py
 kernel-specification/kernelnames.yml
 kernel-specification/operations/
 kernel-specification/reducers/

@@ -2,18 +2,23 @@
 
 import argparse
 import copy
-import importlib
 import json
 import os
 import re
+import sys
 from collections import OrderedDict
-from collections.abc import Iterable
 from itertools import product
 
 import pycparser
 from lark import Lark
 
 from parser_utils import indent_code
+
+if sys.version[0] == "3":
+    from collections.abc import Iterable
+else:
+    from collections import Iterable
+
 
 try:
     import black
@@ -791,11 +796,21 @@ def getargs(filename):
 
 def commentparser(line):
     def flatten(l):
-        for el in l:
-            if isinstance(el, Iterable) and not isinstance(el, (str, bytes)):
-                yield from flatten(el)
-            else:
-                yield el
+        # https://stackoverflow.com/a/2158532/4647107
+        if sys.version[0] == "3":
+            for el in l:
+                if isinstance(el, Iterable) and not isinstance(el, (str, bytes)):
+                    for sub in flatten(el):
+                        yield sub
+                else:
+                    yield el
+        else:
+            for el in l:
+                if isinstance(el, Iterable) and not isinstance(el, basestring):
+                    for sub in flatten(el):
+                        yield sub
+                else:
+                    yield el
 
     d = OrderedDict()
     line = line[line.find("@param") + len("@param") + 1 :]
@@ -844,31 +859,25 @@ def parseheader(filename):
 
 
 def get_tests(allpykernels, allfuncargs, alltokens, allfuncroles):
-    def writepykernels():
-        prefix = """
+    kernelcode = """
 
 kMaxInt64  = 9223372036854775806
 kSliceNone = kMaxInt64 + 1
 
 """
-        with open(os.path.join(CURRENT_DIR, "kernels.py"), "w") as f:
-            f.write(prefix)
-            for func in alltokens.keys():
-                if (
-                    "gen" not in alltokens[func].keys()
-                    and func not in TEST_BLACKLIST
-                    and func not in PYGEN_BLACKLIST
-                ):
-                    f.write(allpykernels[func] + "\n")
-                    if "childfunc" in alltokens[func].keys():
-                        for childfunc in alltokens[func]["childfunc"]:
-                            f.write(childfunc + " = " + func + "\n")
-                        f.write("\n")
+    for func in alltokens.keys():
+        if (
+            "gen" not in alltokens[func].keys()
+            and func not in TEST_BLACKLIST
+            and func not in PYGEN_BLACKLIST
+        ):
+            kernelcode += allpykernels[func][:4] + "py" + allpykernels[func][4:] + "\n"
+            if "childfunc" in alltokens[func].keys():
+                for childfunc in alltokens[func]["childfunc"]:
+                    kernelcode += childfunc + " = " + "py" + func + "\n"
+                kernelcode += "\n"
 
-    writepykernels()
-    import kernels
-
-    importlib.reload(kernels)
+    exec(kernelcode)
 
     with open(
         os.path.join(CURRENT_DIR, "..", "kernel-specification", "samples.json")
@@ -887,9 +896,9 @@ kSliceNone = kMaxInt64 + 1
                     keyfunc = funcname
 
                 funcs[funcname] = []
-                funcPy = getattr(kernels, funcname)
+                funcPy = eval("py" + funcname)
 
-                firstdict = {}
+                firstdict = OrderedDict()
                 instancedict = {}
                 checkindex = []
 
@@ -1078,7 +1087,7 @@ if __name__ == "__main__":
                                     getdirname(filename),
                                 )
                             )
-                        except FileExistsError:
+                        except:
                             pass
                         with open(
                             os.path.join(

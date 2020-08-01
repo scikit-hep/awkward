@@ -78,28 +78,27 @@ def readspec():
                                     for test in indspec["tests"]:
                                         # Check if test has correct types
                                         flag = True
-                                        count = 0
-                                        for arg, val in test["args"].items():
-                                            spectype = pytype(
-                                                childfunc["args"][count][arg]
-                                                .replace("List", "")
-                                                .replace("[", "")
-                                                .replace("]", "")
-                                            )
-                                            while isinstance(val, list):
-                                                val = val[0]
-                                            if type(val) != eval(spectype):
-                                                flag = False
-                                            elif test["successful"] and (
-                                                "U32" in childfunc["name"]
-                                                or "U64" in childfunc["name"]
-                                                or (
-                                                    arg in test["results"].keys()
-                                                    and -1 in test["results"][arg]
+                                        for x in childfunc["args"]:
+                                            for arg, val in x.items():
+                                                spectype = pytype(
+                                                    val.replace("List", "")
+                                                    .replace("[", "")
+                                                    .replace("]", "")
                                                 )
-                                            ):
-                                                flag = False
-                                            count += 1
+                                                testval = test["args"][arg]
+                                                while isinstance(testval, list):
+                                                    testval = testval[0]
+                                                if type(testval) != eval(spectype):
+                                                    flag = False
+                                                elif test["successful"] and (
+                                                    "U32" in childfunc["name"]
+                                                    or "U64" in childfunc["name"]
+                                                    or (
+                                                        arg in test["results"].keys()
+                                                        and -1 in test["results"][arg]
+                                                    )
+                                                ):
+                                                    flag = False
                                         if flag:
                                             testinfo = {}
                                             testinfo["inargs"] = OrderedDict()
@@ -123,28 +122,30 @@ def readspec():
                                 for test in indspec["tests"]:
                                     # Check if test has correct types
                                     flag = True
-                                    count = 0
-                                    for arg, val in test["args"].items():
-                                        spectype = pytype(
-                                            indspec["args"][count][arg]
-                                            .replace("List", "")
-                                            .replace("[", "")
-                                            .replace("]", "")
-                                        )
-                                        while isinstance(val, list):
-                                            val = val[0]
-                                        if type(val) != eval(spectype):
-                                            flag = False
-                                        elif test["successful"] and (
-                                            "U32" in indspec["name"]
-                                            or "U64" in indspec["name"]
-                                            or (
-                                                arg in test["results"].keys()
-                                                and -1 in test["results"][arg]
-                                            )
-                                        ):
-                                            flag = False
-                                        count += 1
+                                    for test in indspec["tests"]:
+                                        # Check if test has correct types
+                                        flag = True
+                                        for x in indspec["args"]:
+                                            for arg, val in x.items():
+                                                spectype = pytype(
+                                                    val.replace("List", "")
+                                                    .replace("[", "")
+                                                    .replace("]", "")
+                                                )
+                                                testval = test["args"][arg]
+                                                while isinstance(testval, list):
+                                                    testval = testval[0]
+                                                if type(testval) != eval(spectype):
+                                                    flag = False
+                                                elif test["successful"] and (
+                                                    "U32" in indspec["name"]
+                                                    or "U64" in indspec["name"]
+                                                    or (
+                                                        arg in test["results"].keys()
+                                                        and -1 in test["results"][arg]
+                                                    )
+                                                ):
+                                                    flag = False
                                     if flag:
                                         testinfo = {}
                                         testinfo["inargs"] = OrderedDict()
@@ -177,10 +178,10 @@ def testpykernels(tests):
                 count = 0
                 for arg in test["inargs"].keys():
                     if count == 0:
-                        args += arg
+                        args += arg + "=" + arg
                         count += 1
                     else:
-                        args += ", " + arg
+                        args += ", " + arg + "=" + arg
                 if test["success"]:
                     f.write(" " * 4 + "funcPy" + "(" + args + ")\n")
                     for arg, val in test["outargs"].items():
@@ -254,23 +255,31 @@ def testcpukernels(tests):
                         ):
                             if "specializations" in indspec.keys():
                                 for childfunc in indspec["specializations"]:
-                                    funcs[childfunc["name"]] = {}
-                                    for arg in childfunc["args"]:
-                                        funcs[childfunc["name"]][
+                                    if tests[childfunc["name"]] == []:
+                                        print(childfunc["name"] + " not tested")
+                                    else:
+                                        funcs[childfunc["name"]] = OrderedDict()
+                                        for arg in childfunc["args"]:
+                                            funcs[childfunc["name"]][
+                                                list(arg.keys())[0]
+                                            ] = list(arg.values())[0]
+
+                            else:
+                                if tests[indspec["name"]] == []:
+                                    print(indspec["name"] + " not tested")
+                                else:
+                                    funcs[indspec["name"]] = OrderedDict()
+                                    for arg in indspec["args"]:
+                                        funcs[indspec["name"]][
                                             list(arg.keys())[0]
                                         ] = list(arg.values())[0]
-                            else:
-                                funcs[indspec["name"]] = {}
-                                for arg in indspec["args"]:
-                                    funcs[indspec["name"]][list(arg.keys())[0]] = list(
-                                        arg.values()
-                                    )[0]
+
         return funcs
 
     funcargs = getfuncargs()
     for funcname in tests.keys():
         with open(os.path.join(CURRENT_DIR, "test_cpu" + funcname + ".py"), "w",) as f:
-            f.write("import math\nimport ctypes\nfrom __init__ import lib, Error\n\n")
+            f.write("import ctypes\nfrom __init__ import lib, Error\n\n")
             num = 1
             for test in tests[funcname]:
                 f.write("def test_cpu" + funcname + "_" + str(num) + "():\n")
@@ -323,7 +332,7 @@ def testcpukernels(tests):
                 )
                 args = ""
                 count = 0
-                for arg in test["inargs"].keys():
+                for arg in funcargs[funcname].keys():
                     if count == 0:
                         args += arg
                         count += 1
@@ -337,11 +346,11 @@ def testcpukernels(tests):
                             f.write(" " * 4 + "for i in range(len(out" + arg + ")):\n")
                             f.write(
                                 " " * 8
-                                + "assert math.isclose("
+                                + "assert abs("
                                 + arg
-                                + "[i], out"
+                                + "[i] - out"
                                 + arg
-                                + "[i], rel_tol=0.0001)\n"
+                                + "[i]) <= 0.0001\n"
                             )
                         else:
                             f.write(" " * 4 + "assert " + arg + " == out" + arg + "\n")
