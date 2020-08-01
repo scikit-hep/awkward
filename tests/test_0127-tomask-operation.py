@@ -88,7 +88,7 @@ def test_ByteMaskedArray_to_slice():
     maskedarray = awkward1.layout.ByteMaskedArray(mask, content, valid_when=False)
     assert awkward1.to_list(maskedarray) == [5, 2, None, 3, 9, None, 1]
 
-    assert awkward1.layout._slice_tostring(maskedarray) == "[missing([0, 1, -1, ..., 3, -1, 4], array([5, 2, 3, 9, 1]))]"
+    assert awkward1._ext._slice_tostring(maskedarray) == "[missing([0, 1, -1, ..., 3, -1, 4], array([5, 2, 3, 9, 1]))]"
 
 def test_ByteMaskedArray_as_slice():
     array = awkward1.Array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], check_valid=True)

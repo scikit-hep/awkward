@@ -4,11 +4,6 @@
 - file: what-is-awkward
   title: "What is an Awkward Array?"
 
-- header: "How-to tutorials"
-
-- file: how-to
-  title: "Introduction"
-
 - file: how-to-convert
   title: "Converting arrays"
   expand_sections: true
@@ -38,8 +33,8 @@
       title: "ArrayBuilder (easy & general)"
     - file: how-to-create-layout
       title: "Layout (faster)"
-    - file: how-to-create-lazy-dask
-      title: "Lazy arrays and Dask"
+    - file: how-to-create-lazy
+      title: "Lazy arrays"
 
 - file: how-to-use-in-numba
   title: "Using arrays in Numba"
@@ -135,26 +130,3 @@
       title: "In Numba"
     - file: how-to-specialize-lorentz
       title: "For physics: Lorentz vectors"
-
-- header: "How-it-works tutorials"
-
-- file: how-it-works
-  title: "Introduction"
-
-- file: articles-data-types
-  title: "Abstract data types"
-
-- file: articles-layouts
-  title: "Columnar layouts"
-
-- file: articles-arrays-are-functions
-  title: "Arrays as functional programming"
-
-- file: articles-vectorization
-  title: "Slow control and fast math"
-
-- file: articles-arraybuilder
-  title: "Record-oriented → columnar"
-
-- file: articles-identities
-  title: "Array element identities"
