@@ -10,11 +10,19 @@ from collections import OrderedDict
 from collections.abc import Iterable
 from itertools import product
 
-import black
 import pycparser
 from lark import Lark
 
 from parser_utils import indent_code
+
+try:
+    import black
+
+    blackmode = black.FileMode()  # Initialize black config
+    blackimported = True
+except ImportError:
+    blackimported = False
+
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -699,20 +707,26 @@ def remove_return(code):
 
 
 def genpython(pfile):
-    blackmode = black.FileMode()  # Initialize black config
     ast = pycparser.c_parser.CParser().parse(pfile)
     funcs = OrderedDict()
     for i in range(len(ast.ext)):
         decl = FuncDecl(ast.ext[i].decl)
         if decl.name not in SPEC_BLACKLIST:
-            funcs[decl.name] = black.format_str(
-                (
+            if blackimported:
+                funcs[decl.name] = black.format_str(
+                    (
+                        "def {0}({1})".format(decl.name, decl.arrange_args(),)
+                        + ":\n"
+                        + remove_return(FuncBody(ast.ext[i].body).code)
+                    ),
+                    mode=blackmode,
+                )
+            else:
+                funcs[decl.name] = (
                     "def {0}({1})".format(decl.name, decl.arrange_args(),)
                     + ":\n"
                     + remove_return(FuncBody(ast.ext[i].body).code)
-                ),
-                mode=blackmode,
-            )
+                )
     return funcs
 
 
