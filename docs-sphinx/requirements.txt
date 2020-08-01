@@ -1,2 +1,5 @@
 sphinx>=2.4.4
 PyYAML
+black
+pycparser
+lark-parser
