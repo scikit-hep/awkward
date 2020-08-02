@@ -3052,7 +3052,7 @@ ERROR awkward_ByteMaskedArray_getitem_nextcarry_64(
 template <typename T>
 ERROR awkward_ByteMaskedArray_getitem_nextcarry_outindex(
   T* tocarry,
-  T* toindex,
+  T* outindex,
   const int8_t* mask,
   int64_t maskoffset,
   int64_t length,
@@ -3061,25 +3061,25 @@ ERROR awkward_ByteMaskedArray_getitem_nextcarry_outindex(
   for (int64_t i = 0;  i < length;  i++) {
     if ((mask[maskoffset + i] != 0) == validwhen) {
       tocarry[k] = i;
-      toindex[i] = (T)k;
+      outindex[i] = (T)k;
       k++;
     }
     else {
-      toindex[i] = -1;
+      outindex[i] = -1;
     }
   }
   return success();
 }
 ERROR awkward_ByteMaskedArray_getitem_nextcarry_outindex_64(
   int64_t* tocarry,
-  int64_t* toindex,
+  int64_t* outindex,
   const int8_t* mask,
   int64_t maskoffset,
   int64_t length,
   bool validwhen) {
   return awkward_ByteMaskedArray_getitem_nextcarry_outindex<int64_t>(
     tocarry,
-    toindex,
+    outindex,
     mask,
     maskoffset,
     length,
