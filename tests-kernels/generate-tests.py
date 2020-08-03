@@ -68,84 +68,30 @@ def readspec():
                         if "specializations" in indspec.keys():
                             for childfunc in indspec["specializations"]:
                                 funcs[childfunc["name"]] = []
-                                if indspec["tests"] is None:
-                                    raise AssertionError(
-                                        "No tests in specification for {0}".format(
-                                            indspec["name"]
-                                        )
-                                    )
-                                else:
-                                    for test in indspec["tests"]:
-                                        # Check if test has correct types
-                                        flag = True
-                                        for x in childfunc["args"]:
-                                            for arg, val in x.items():
-                                                spectype = pytype(
-                                                    val.replace("List", "")
-                                                    .replace("[", "")
-                                                    .replace("]", "")
-                                                )
-                                                testval = test["args"][arg]
-                                                while isinstance(testval, list):
-                                                    testval = testval[0]
-                                                if type(testval) != eval(spectype):
-                                                    flag = False
-                                                elif test["successful"] and (
-                                                    "U32" in childfunc["name"]
-                                                    or "U64" in childfunc["name"]
-                                                    or (
-                                                        arg in test["results"].keys()
-                                                        and -1 in test["results"][arg]
-                                                    )
-                                                ):
-                                                    flag = False
-                                        if flag:
-                                            testinfo = {}
-                                            testinfo["inargs"] = OrderedDict()
-                                            testinfo["inargs"].update(test["args"])
-                                            testinfo["success"] = test["successful"]
-                                            if testinfo["success"]:
-                                                testinfo["outargs"] = OrderedDict()
-                                                testinfo["outargs"].update(
-                                                    test["results"]
-                                                )
-                                            funcs[childfunc["name"]].append(testinfo)
-                        else:
-                            funcs[indspec["name"]] = []
-                            if indspec["tests"] is None:
-                                raise AssertionError(
-                                    "No tests in specification for {0}".format(
-                                        indspec["name"]
-                                    )
-                                )
-                            else:
                                 for test in indspec["tests"]:
                                     # Check if test has correct types
                                     flag = True
-                                    for test in indspec["tests"]:
-                                        # Check if test has correct types
-                                        flag = True
-                                        for x in indspec["args"]:
-                                            for arg, val in x.items():
-                                                spectype = pytype(
-                                                    val.replace("List", "")
-                                                    .replace("[", "")
-                                                    .replace("]", "")
+                                    for x in childfunc["args"]:
+                                        for arg, val in x.items():
+                                            spectype = pytype(
+                                                val.replace("List", "")
+                                                .replace("[", "")
+                                                .replace("]", "")
+                                            )
+                                            testval = test["args"][arg]
+                                            while isinstance(testval, list):
+                                                testval = testval[0]
+                                            if type(testval) != eval(spectype):
+                                                flag = False
+                                            elif test["successful"] and (
+                                                "U32" in childfunc["name"]
+                                                or "U64" in childfunc["name"]
+                                                or (
+                                                    arg in test["results"].keys()
+                                                    and -1 in test["results"][arg]
                                                 )
-                                                testval = test["args"][arg]
-                                                while isinstance(testval, list):
-                                                    testval = testval[0]
-                                                if type(testval) != eval(spectype):
-                                                    flag = False
-                                                elif test["successful"] and (
-                                                    "U32" in indspec["name"]
-                                                    or "U64" in indspec["name"]
-                                                    or (
-                                                        arg in test["results"].keys()
-                                                        and -1 in test["results"][arg]
-                                                    )
-                                                ):
-                                                    flag = False
+                                            ):
+                                                flag = False
                                     if flag:
                                         testinfo = {}
                                         testinfo["inargs"] = OrderedDict()
@@ -154,7 +100,47 @@ def readspec():
                                         if testinfo["success"]:
                                             testinfo["outargs"] = OrderedDict()
                                             testinfo["outargs"].update(test["results"])
-                                        funcs[indspec["name"]].append(testinfo)
+                                        funcs[childfunc["name"]].append(testinfo)
+                        else:
+                            funcs[indspec["name"]] = []
+                            for test in indspec["tests"]:
+                                # Check if test has correct types
+                                flag = True
+                                for test in indspec["tests"]:
+                                    # Check if test has correct types
+                                    flag = True
+                                    for x in indspec["args"]:
+                                        for arg, val in x.items():
+                                            spectype = pytype(
+                                                val.replace("List", "")
+                                                .replace("[", "")
+                                                .replace("]", "")
+                                            )
+                                            testval = test["args"][arg]
+                                            while isinstance(testval, list):
+                                                testval = testval[0]
+                                            if type(testval) != eval(spectype):
+                                                flag = False
+                                            elif test["successful"] and (
+                                                "U32" in indspec["name"]
+                                                or "U64" in indspec["name"]
+                                                or (
+                                                    arg in test["results"].keys()
+                                                    and -1 in test["results"][arg]
+                                                )
+                                            ):
+                                                flag = False
+                                if flag:
+                                    testinfo = {}
+                                    testinfo["inargs"] = OrderedDict()
+                                    testinfo["inargs"].update(test["args"])
+                                    testinfo["success"] = test["successful"]
+                                    if testinfo["success"]:
+                                        testinfo["outargs"] = OrderedDict()
+                                        testinfo["outargs"].update(test["results"])
+                                    funcs[indspec["name"]].append(testinfo)
+                    else:
+                        funcs[indspec["name"]] = []
     return funcs
 
 
@@ -164,39 +150,54 @@ def testpykernels(tests):
         with open(os.path.join(CURRENT_DIR, "test_py" + funcname + ".py"), "w",) as f:
             f.write("import pytest\nimport kernels\n\n")
             num = 1
-            for test in tests[funcname]:
-                if test == []:
-                    raise AssertionError(
-                        "Put proper tests for {0} in specification".format(funcname)
-                    )
+            if tests[funcname] == []:
+                f.write(
+                    "@pytest.mark.skip(reason='Unable to generate any tests for kernel')\n"
+                )
                 f.write("def test_py" + funcname + "_" + str(num) + "():\n")
-                num += 1
-                args = ""
-                for arg, val in test["inargs"].items():
-                    f.write(" " * 4 + arg + " = " + str(val) + "\n")
-                f.write(" " * 4 + "funcPy = getattr(kernels, '" + funcname + "')\n")
-                count = 0
-                for arg in test["inargs"].keys():
-                    if count == 0:
-                        args += arg + "=" + arg
-                        count += 1
-                    else:
-                        args += ", " + arg + "=" + arg
-                if test["success"]:
-                    f.write(" " * 4 + "funcPy" + "(" + args + ")\n")
-                    for arg, val in test["outargs"].items():
-                        f.write(" " * 4 + "out" + arg + " = " + str(val) + "\n")
-                        if isinstance(val, list):
-                            f.write(" " * 4 + "for i in range(len(out" + arg + ")):\n")
-                            f.write(
-                                " " * 8 + "assert " + arg + "[i] == out" + arg + "[i]\n"
-                            )
+                f.write(
+                    " " * 4
+                    + "raise NotImplementedError('Unable to generate any tests for kernel')\n"
+                )
+            else:
+                for test in tests[funcname]:
+                    f.write("def test_py" + funcname + "_" + str(num) + "():\n")
+                    num += 1
+                    args = ""
+                    for arg, val in test["inargs"].items():
+                        f.write(" " * 4 + arg + " = " + str(val) + "\n")
+                    f.write(" " * 4 + "funcPy = getattr(kernels, '" + funcname + "')\n")
+                    count = 0
+                    for arg in test["inargs"].keys():
+                        if count == 0:
+                            args += arg + "=" + arg
+                            count += 1
                         else:
-                            f.write(" " * 4 + "assert " + arg + " == out" + arg + "\n")
-                else:
-                    f.write(" " * 4 + "with pytest.raises(Exception):\n")
-                    f.write(" " * 8 + "funcPy(" + args + ")\n")
-                f.write("\n")
+                            args += ", " + arg + "=" + arg
+                    if test["success"]:
+                        f.write(" " * 4 + "funcPy" + "(" + args + ")\n")
+                        for arg, val in test["outargs"].items():
+                            f.write(" " * 4 + "out" + arg + " = " + str(val) + "\n")
+                            if isinstance(val, list):
+                                f.write(
+                                    " " * 4 + "for i in range(len(out" + arg + ")):\n"
+                                )
+                                f.write(
+                                    " " * 8
+                                    + "assert "
+                                    + arg
+                                    + "[i] == out"
+                                    + arg
+                                    + "[i]\n"
+                                )
+                            else:
+                                f.write(
+                                    " " * 4 + "assert " + arg + " == out" + arg + "\n"
+                                )
+                    else:
+                        f.write(" " * 4 + "with pytest.raises(Exception):\n")
+                        f.write(" " * 8 + "funcPy(" + args + ")\n")
+                    f.write("\n")
 
 
 def testcpukernels(tests):
@@ -255,20 +256,16 @@ def testcpukernels(tests):
                         ):
                             if "specializations" in indspec.keys():
                                 for childfunc in indspec["specializations"]:
-                                    if tests[childfunc["name"]] == []:
-                                        print(childfunc["name"] + " not tested")
-                                    else:
-                                        funcs[childfunc["name"]] = OrderedDict()
+                                    funcs[childfunc["name"]] = OrderedDict()
+                                    if tests[childfunc["name"]] != []:
                                         for arg in childfunc["args"]:
                                             funcs[childfunc["name"]][
                                                 list(arg.keys())[0]
                                             ] = list(arg.values())[0]
 
                             else:
-                                if tests[indspec["name"]] == []:
-                                    print(indspec["name"] + " not tested")
-                                else:
-                                    funcs[indspec["name"]] = OrderedDict()
+                                funcs[indspec["name"]] = OrderedDict()
+                                if tests[indspec["name"]] != []:
                                     for arg in indspec["args"]:
                                         funcs[indspec["name"]][
                                             list(arg.keys())[0]
@@ -279,8 +276,17 @@ def testcpukernels(tests):
     funcargs = getfuncargs()
     for funcname in tests.keys():
         with open(os.path.join(CURRENT_DIR, "test_cpu" + funcname + ".py"), "w",) as f:
-            f.write("import ctypes\nfrom __init__ import lib, Error\n\n")
+            f.write("import ctypes\nimport pytest\nfrom __init__ import lib, Error\n\n")
             num = 1
+            if tests[funcname] == []:
+                f.write(
+                    "@pytest.mark.skip(reason='Unable to generate any tests for kernel')\n"
+                )
+                f.write("def test_cpu" + funcname + "_" + str(num) + "():\n")
+                f.write(
+                    " " * 4
+                    + "raise NotImplementedError('Unable to generate any tests for kernel')\n"
+                )
             for test in tests[funcname]:
                 f.write("def test_cpu" + funcname + "_" + str(num) + "():\n")
                 num += 1
