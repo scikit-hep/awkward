@@ -1,1 +1,4 @@
 pytest>=3.9
+PyYAML
+pycparser
+lark-parser

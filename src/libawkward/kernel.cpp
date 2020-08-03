@@ -9633,30 +9633,22 @@ namespace kernel {
     int64_t *toindex,
     int64_t tolength,
     const int64_t *parents,
-    int64_t parentsoffset,
-    int64_t parentslength,
-    int64_t outlength) {
+    int64_t parentslength) {
     return awkward_sorting_ranges(
       toindex,
       tolength,
       parents,
-      parentsoffset,
-      parentslength,
-      outlength);
+      parentslength);
   }
 
   ERROR sorting_ranges_length(
     int64_t *tolength,
     const int64_t *parents,
-    int64_t parentsoffset,
-    int64_t parentslength,
-    int64_t outlength) {
+    int64_t parentslength) {
     return awkward_sorting_ranges_length(
       tolength,
       parents,
-      parentsoffset,
-      parentslength,
-      outlength);
+      parentslength);
   }
 
   template<>
@@ -10103,7 +10095,6 @@ namespace kernel {
   Error NumpyArray_sort_asstrings<uint8_t>(
     uint8_t *toptr,
     const uint8_t *fromptr,
-    int64_t length,
     const int64_t *offsets,
     int64_t offsetslength,
     int64_t *outoffsets,
@@ -10112,7 +10103,6 @@ namespace kernel {
     return awkward_NumpyArray_sort_asstrings_uint8(
       toptr,
       fromptr,
-      length,
       offsets,
       offsetslength,
       outoffsets,

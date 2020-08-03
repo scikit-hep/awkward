@@ -471,10 +471,10 @@ template <typename T>
 ERROR awkward_NumpyArray_contiguous_next(
   T* topos,
   const T* frompos,
-  int64_t len,
+  int64_t length,
   int64_t skip,
   int64_t stride) {
-  for (int64_t i = 0;  i < len;  i++) {
+  for (int64_t i = 0;  i < length;  i++) {
     for (int64_t j = 0;  j < skip;  j++) {
       topos[i*skip + j] = frompos[i] + j*stride;
     }
@@ -484,13 +484,13 @@ ERROR awkward_NumpyArray_contiguous_next(
 ERROR awkward_NumpyArray_contiguous_next_64(
   int64_t* topos,
   const int64_t* frompos,
-  int64_t len,
+  int64_t length,
   int64_t skip,
   int64_t stride) {
   return awkward_NumpyArray_contiguous_next<int64_t>(
     topos,
     frompos,
-    len,
+    length,
     skip,
     stride);
 }
@@ -1129,8 +1129,8 @@ ERROR awkward_ListArray_getitem_next_array(
     if (fromstops[stopsoffset + i] < fromstarts[startsoffset + i]) {
       return failure("stops[i] < starts[i]", i, kSliceNone);
     }
-    if (fromstarts[startsoffset + i] != fromstops[stopsoffset + i]  &&
-        fromstops[stopsoffset + i] > lencontent) {
+    if ((fromstarts[startsoffset + i] != fromstops[stopsoffset + i])  &&
+        (fromstops[stopsoffset + i] > lencontent)) {
       return failure("stops[i] > len(content)", i, kSliceNone);
     }
     int64_t length = fromstops[stopsoffset + i] - fromstarts[startsoffset + i];
@@ -1235,8 +1235,8 @@ ERROR awkward_ListArray_getitem_next_array_advanced(
     if (fromstops[stopsoffset + i] < fromstarts[startsoffset + i]) {
       return failure("stops[i] < starts[i]", i, kSliceNone);
     }
-    if (fromstarts[startsoffset + i] != fromstops[stopsoffset + i]  &&
-        fromstops[stopsoffset + i] > lencontent) {
+    if ((fromstarts[startsoffset + i] != fromstops[stopsoffset + i])  &&
+        (fromstops[stopsoffset + i] > lencontent)) {
       return failure("stops[i] > len(content)", i, kSliceNone);
     }
     int64_t length = fromstops[stopsoffset + i] - fromstarts[startsoffset + i];
@@ -1416,7 +1416,7 @@ template <typename T>
 ERROR awkward_RegularArray_getitem_next_at(
   T* tocarry,
   int64_t at,
-  int64_t len,
+  int64_t length,
   int64_t size) {
   int64_t regular_at = at;
   if (regular_at < 0) {
@@ -1425,7 +1425,7 @@ ERROR awkward_RegularArray_getitem_next_at(
   if (!(0 <= regular_at  &&  regular_at < size)) {
     return failure("index out of range", kSliceNone, at);
   }
-  for (int64_t i = 0;  i < len;  i++) {
+  for (int64_t i = 0;  i < length;  i++) {
     tocarry[i] = i*size + regular_at;
   }
   return success();
@@ -1433,12 +1433,12 @@ ERROR awkward_RegularArray_getitem_next_at(
 ERROR awkward_RegularArray_getitem_next_at_64(
   int64_t* tocarry,
   int64_t at,
-  int64_t len,
+  int64_t length,
   int64_t size) {
   return awkward_RegularArray_getitem_next_at<int64_t>(
     tocarry,
     at,
-    len,
+    length,
     size);
 }
 
@@ -1447,10 +1447,10 @@ ERROR awkward_RegularArray_getitem_next_range(
   T* tocarry,
   int64_t regular_start,
   int64_t step,
-  int64_t len,
+  int64_t length,
   int64_t size,
   int64_t nextsize) {
-  for (int64_t i = 0;  i < len;  i++) {
+  for (int64_t i = 0;  i < length;  i++) {
     for (int64_t j = 0;  j < nextsize;  j++) {
       tocarry[i*nextsize + j] = i*size + regular_start + j*step;
     }
@@ -1461,14 +1461,14 @@ ERROR awkward_RegularArray_getitem_next_range_64(
   int64_t* tocarry,
   int64_t regular_start,
   int64_t step,
-  int64_t len,
+  int64_t length,
   int64_t size,
   int64_t nextsize) {
   return awkward_RegularArray_getitem_next_range<int64_t>(
     tocarry,
     regular_start,
     step,
-    len,
+    length,
     size,
     nextsize);
 }
@@ -1477,9 +1477,9 @@ template <typename T>
 ERROR awkward_RegularArray_getitem_next_range_spreadadvanced(
   T* toadvanced,
   const T* fromadvanced,
-  int64_t len,
+  int64_t length,
   int64_t nextsize) {
-  for (int64_t i = 0;  i < len;  i++) {
+  for (int64_t i = 0;  i < length;  i++) {
     for (int64_t j = 0;  j < nextsize;  j++) {
       toadvanced[i*nextsize + j] = fromadvanced[i];
     }
@@ -1489,12 +1489,12 @@ ERROR awkward_RegularArray_getitem_next_range_spreadadvanced(
 ERROR awkward_RegularArray_getitem_next_range_spreadadvanced_64(
   int64_t* toadvanced,
   const int64_t* fromadvanced,
-  int64_t len,
+  int64_t length,
   int64_t nextsize) {
   return awkward_RegularArray_getitem_next_range_spreadadvanced<int64_t>(
     toadvanced,
     fromadvanced,
-    len,
+    length,
     nextsize);
 }
 
@@ -1532,10 +1532,10 @@ ERROR awkward_RegularArray_getitem_next_array(
   T* tocarry,
   T* toadvanced,
   const T* fromarray,
-  int64_t len,
+  int64_t length,
   int64_t lenarray,
   int64_t size) {
-  for (int64_t i = 0;  i < len;  i++) {
+  for (int64_t i = 0;  i < length;  i++) {
     for (int64_t j = 0;  j < lenarray;  j++) {
       tocarry[i*lenarray + j] = i*size + fromarray[j];
       toadvanced[i*lenarray + j] = j;
@@ -1547,14 +1547,14 @@ ERROR awkward_RegularArray_getitem_next_array_64(
   int64_t* tocarry,
   int64_t* toadvanced,
   const int64_t* fromarray,
-  int64_t len,
+  int64_t length,
   int64_t lenarray,
   int64_t size) {
   return awkward_RegularArray_getitem_next_array<int64_t>(
     tocarry,
     toadvanced,
     fromarray,
-    len,
+    length,
     lenarray,
     size);
 }
@@ -1565,10 +1565,10 @@ ERROR awkward_RegularArray_getitem_next_array_advanced(
   T* toadvanced,
   const T* fromadvanced,
   const T* fromarray,
-  int64_t len,
+  int64_t length,
   int64_t lenarray,
   int64_t size) {
-  for (int64_t i = 0;  i < len;  i++) {
+  for (int64_t i = 0;  i < length;  i++) {
     tocarry[i] = i*size + fromarray[fromadvanced[i]];
     toadvanced[i] = i;
   }
@@ -1579,7 +1579,7 @@ ERROR awkward_RegularArray_getitem_next_array_advanced_64(
   int64_t* toadvanced,
   const int64_t* fromadvanced,
   const int64_t* fromarray,
-  int64_t len,
+  int64_t length,
   int64_t lenarray,
   int64_t size) {
   return awkward_RegularArray_getitem_next_array_advanced<int64_t>(
@@ -1587,7 +1587,7 @@ ERROR awkward_RegularArray_getitem_next_array_advanced_64(
     toadvanced,
     fromadvanced,
     fromarray,
-    len,
+    length,
     lenarray,
     size);
 }
@@ -3052,7 +3052,7 @@ ERROR awkward_ByteMaskedArray_getitem_nextcarry_64(
 template <typename T>
 ERROR awkward_ByteMaskedArray_getitem_nextcarry_outindex(
   T* tocarry,
-  T* toindex,
+  T* outindex,
   const int8_t* mask,
   int64_t maskoffset,
   int64_t length,
@@ -3061,25 +3061,25 @@ ERROR awkward_ByteMaskedArray_getitem_nextcarry_outindex(
   for (int64_t i = 0;  i < length;  i++) {
     if ((mask[maskoffset + i] != 0) == validwhen) {
       tocarry[k] = i;
-      toindex[i] = (T)k;
+      outindex[i] = (T)k;
       k++;
     }
     else {
-      toindex[i] = -1;
+      outindex[i] = -1;
     }
   }
   return success();
 }
 ERROR awkward_ByteMaskedArray_getitem_nextcarry_outindex_64(
   int64_t* tocarry,
-  int64_t* toindex,
+  int64_t* outindex,
   const int8_t* mask,
   int64_t maskoffset,
   int64_t length,
   bool validwhen) {
   return awkward_ByteMaskedArray_getitem_nextcarry_outindex<int64_t>(
     tocarry,
-    toindex,
+    outindex,
     mask,
     maskoffset,
     length,
