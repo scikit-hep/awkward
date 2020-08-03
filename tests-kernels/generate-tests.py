@@ -362,11 +362,11 @@ def testcpukernels(tests):
                             )
                             f.write(
                                 " " * 8
-                                + "assert abs("
+                                + "assert "
                                 + arg
-                                + "[i] - pytest_"
+                                + "[i] == pytest.approx(pytest_"
                                 + arg
-                                + "[i]) <= 0.0001\n"
+                                + "[i])\n"
                             )
                         else:
                             f.write(
