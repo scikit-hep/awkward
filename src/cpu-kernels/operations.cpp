@@ -1173,22 +1173,22 @@ ERROR awkward_NumpyArray_fill_frombool(
   int64_t fromoffset,
   int64_t length) {
   for (int64_t i = 0;  i < length;  i++) {
-    toptr[tooffset + i] = (TO)(fromptr[fromoffset + i] != 0);
+    toptr[tooffset + i] = (TO)(fromptr[fromoffset + i] ? 1 : 0);
   }
   return success();
 }
-ERROR frombool(
+
+template <typename FROM>
+ERROR awkward_NumpyArray_fill_tobool(
   bool* toptr,
   int64_t tooffset,
-  const bool* fromptr,
+  const FROM* fromptr,
   int64_t fromoffset,
   int64_t length) {
-  return awkward_NumpyArray_fill_frombool<bool>(
-    toptr,
-    tooffset,
-    fromptr,
-    fromoffset,
-    length);
+  for (int64_t i = 0;  i < length;  i++) {
+    toptr[tooffset + i] = fromptr[fromoffset + i] > 0 ? true : false;
+  }
+  return success();
 }
 
 template <typename FROM, typename TO>
@@ -1221,11 +1221,12 @@ ERROR func(                                                \
     fromoffset,                                            \
     length);                                               \
 }
-#define AWKWARD_NUMPY_ARRAY_FILL_FROMBOOL(func, from_type, to_type) \
+
+#define AWKWARD_NUMPY_ARRAY_FILL_FROMBOOL(func, to_type)   \
 ERROR func(                                                \
   to_type* toptr,                                          \
   int64_t tooffset,                                        \
-  const from_type* fromptr,                                \
+  const bool* fromptr,                                     \
   int64_t fromoffset,                                      \
   int64_t length) {                                        \
   return awkward_NumpyArray_fill_frombool<to_type>(        \
@@ -1236,19 +1237,44 @@ ERROR func(                                                \
     length);                                               \
 }
 
-AWKWARD_NUMPY_ARRAY_FILL_FROMBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(bool, bool), bool, bool)
-AWKWARD_NUMPY_ARRAY_FILL_FROMBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(bool, int8), bool, int8_t)
-AWKWARD_NUMPY_ARRAY_FILL_FROMBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(bool, int16), bool, int16_t)
-AWKWARD_NUMPY_ARRAY_FILL_FROMBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(bool, int32), bool, int32_t)
-AWKWARD_NUMPY_ARRAY_FILL_FROMBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(bool, int64), bool, int64_t)
-AWKWARD_NUMPY_ARRAY_FILL_FROMBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(bool, uint8), bool, uint8_t)
-AWKWARD_NUMPY_ARRAY_FILL_FROMBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(bool, uint16), bool, uint16_t)
-AWKWARD_NUMPY_ARRAY_FILL_FROMBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(bool, uint32), bool, uint32_t)
-AWKWARD_NUMPY_ARRAY_FILL_FROMBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(bool, uint64), bool, uint64_t)
-AWKWARD_NUMPY_ARRAY_FILL_FROMBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(bool, float32), bool, float)
-AWKWARD_NUMPY_ARRAY_FILL_FROMBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(bool, float64), bool, double)
+#define AWKWARD_NUMPY_ARRAY_FILL_TOBOOL(func, from_type)   \
+ERROR func(                                                \
+  bool* toptr,                                             \
+  int64_t tooffset,                                        \
+  const from_type* fromptr,                                \
+  int64_t fromoffset,                                      \
+  int64_t length) {                                        \
+  return awkward_NumpyArray_fill_tobool<from_type>(        \
+    toptr,                                                 \
+    tooffset,                                              \
+    fromptr,                                               \
+    fromoffset,                                            \
+    length);                                               \
+}
 
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int8, bool), int8_t, bool)
+AWKWARD_NUMPY_ARRAY_FILL_FROMBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(bool, bool), bool)
+AWKWARD_NUMPY_ARRAY_FILL_FROMBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(bool, int8), int8_t)
+AWKWARD_NUMPY_ARRAY_FILL_FROMBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(bool, int16), int16_t)
+AWKWARD_NUMPY_ARRAY_FILL_FROMBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(bool, int32), int32_t)
+AWKWARD_NUMPY_ARRAY_FILL_FROMBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(bool, int64), int64_t)
+AWKWARD_NUMPY_ARRAY_FILL_FROMBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(bool, uint8), uint8_t)
+AWKWARD_NUMPY_ARRAY_FILL_FROMBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(bool, uint16), uint16_t)
+AWKWARD_NUMPY_ARRAY_FILL_FROMBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(bool, uint32), uint32_t)
+AWKWARD_NUMPY_ARRAY_FILL_FROMBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(bool, uint64), uint64_t)
+AWKWARD_NUMPY_ARRAY_FILL_FROMBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(bool, float32), float)
+AWKWARD_NUMPY_ARRAY_FILL_FROMBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(bool, float64), double)
+
+AWKWARD_NUMPY_ARRAY_FILL_TOBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int8, bool), int8_t)
+AWKWARD_NUMPY_ARRAY_FILL_TOBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int16, bool), int16_t)
+AWKWARD_NUMPY_ARRAY_FILL_TOBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int32, bool), int32_t)
+AWKWARD_NUMPY_ARRAY_FILL_TOBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int64, bool), int64_t)
+AWKWARD_NUMPY_ARRAY_FILL_TOBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint8, bool), uint8_t)
+AWKWARD_NUMPY_ARRAY_FILL_TOBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint16, bool), uint16_t)
+AWKWARD_NUMPY_ARRAY_FILL_TOBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint32, bool), uint32_t)
+AWKWARD_NUMPY_ARRAY_FILL_TOBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint64, bool), uint64_t)
+AWKWARD_NUMPY_ARRAY_FILL_TOBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(float32, bool), float)
+AWKWARD_NUMPY_ARRAY_FILL_TOBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(float64, bool), double)
+
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int8, int8), int8_t, int8_t)
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int8, int16), int8_t, int16_t)
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int8, int32), int8_t, int32_t)
@@ -1260,7 +1286,6 @@ AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int8, uint64), int8_t, ui
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int8, float32), int8_t, float)
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int8, float64), int8_t, double)
 
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int16, bool), int16_t, bool)
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int16, int8), int16_t, int8_t)
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int16, int16), int16_t, int16_t)
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int16, int32), int16_t, int32_t)
@@ -1272,7 +1297,6 @@ AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int16, uint64), int16_t, 
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int16, float32), int16_t, float)
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int16, float64), int16_t, double)
 
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int32, bool), int32_t, bool)
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int32, int8), int32_t, int8_t)
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int32, int16), int32_t, int16_t)
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int32, int32), int32_t, int32_t)
@@ -1284,7 +1308,6 @@ AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int32, uint64), int32_t, 
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int32, float32), int32_t, float)
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int32, float64), int32_t, double)
 
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int64, bool), int64_t, bool)
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int64, int8), int64_t, int8_t)
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int64, int16), int64_t, int16_t)
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int64, int32), int64_t, int32_t)
@@ -1296,7 +1319,6 @@ AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int64, uint64), int64_t, 
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int64, float32), int64_t, float)
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int64, float64), int64_t, double)
 
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint8, bool), uint8_t, bool)
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint8, int8), uint8_t, int8_t)
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint8, int16), uint8_t, int16_t)
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint8, int32), uint8_t, int32_t)
@@ -1308,7 +1330,6 @@ AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint8, uint64), uint8_t, 
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint8, float32), uint8_t, float)
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint8, float64), uint8_t, double)
 
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint16, bool), uint16_t, bool)
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint16, int8), uint16_t, int8_t)
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint16, int16), uint16_t, int16_t)
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint16, int32), uint16_t, int32_t)
@@ -1320,7 +1341,6 @@ AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint16, uint64), uint16_t
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint16, float32), uint16_t, float)
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint16, float64), uint16_t, double)
 
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint32, bool), uint32_t, bool)
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint32, int8), uint32_t, int8_t)
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint32, int16), uint32_t, int16_t)
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint32, int32), uint32_t, int32_t)
@@ -1332,7 +1352,6 @@ AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint32, uint64), uint32_t
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint32, float32), uint32_t, float)
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint32, float64), uint32_t, double)
 
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint64, bool), uint64_t, bool)
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint64, int8), uint64_t, int8_t)
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint64, int16), uint64_t, int16_t)
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint64, int32), uint64_t, int32_t)
@@ -1344,7 +1363,6 @@ AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint64, uint64), uint64_t
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint64, float32), uint64_t, float)
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint64, float64), uint64_t, double)
 
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(float32, bool), float, bool)
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(float32, int8), float, int8_t)
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(float32, int16), float, int16_t)
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(float32, int32), float, int32_t)
@@ -1356,7 +1374,6 @@ AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(float32, uint64), float, 
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(float32, float32), float, float)
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(float32, float64), float, double)
 
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(float64, bool), double, bool)
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(float64, int8), double, int8_t)
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(float64, int16), double, int16_t)
 AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(float64, int32), double, int32_t)
@@ -1371,6 +1388,7 @@ AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(float64, float64), double
 #undef AWKWARD_NUMPY_ARRAY_FILL_FUNC
 #undef AWKWARD_NUMPY_ARRAY_FILL
 #undef AWKWARD_NUMPY_ARRAY_FILL_FROMBOOL
+#undef AWKWARD_NUMPY_ARRAY_FILL_TOBOOL
 
 template <typename FROM, typename TO>
 ERROR awkward_ListArray_fill(
