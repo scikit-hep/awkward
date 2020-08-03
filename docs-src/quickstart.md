@@ -20,6 +20,8 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
 Quickstart
 ==========
 
+Use the panel on the left for tutorials, click below for reference documentation, or [here for GitHub](https://github.com/scikit-hep/awkward-1.0).
+
 <table style="margin-top: 30px">
   <tr>
     <td width="50%" valign="top" align="center">
@@ -43,28 +45,6 @@ Quickstart
       </b></p>
     </td>
   </tr>
-  <tr style="margin-top: 20px">
-    <td width="50%" valign="top" align="center">
-      <a href="how-to.html">
-        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/panel-data-analysts.png" width="80%">
-      </a>
-      <p align="center" style="margin-top: 10px"><b>
-        <a href="how-to.html">
-        How-to documentation<br>for data analysts
-        </a>
-      </b></p>
-    </td>
-    <td width="50%" valign="top" align="center">
-      <a href="how-it-works.html">
-        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/panel-developers.png" width="80%">
-      </a>
-      <p align="center" style="margin-top: 10px"><b>
-        <a href="how-it-works.html">
-        How-it-works tutorials<br>for developers
-        </a>
-      </b></p>
-    </td>
-  </tr>
 </table>
 
 Installation
@@ -81,7 +61,7 @@ Most users will get a precompiled binary (wheel) for your operating system and P
 Getting help
 ------------
 
-Report bugs, request features, and ask for additional documentation on [GitHub Issues](https://github.com/scikit-hep/awkward-1.0/issues). If you have a general "How do I…?" question, we'll answer it as a new [example in the tutorial](how-to).
+Report bugs, request features, and ask for additional documentation on [GitHub Issues](https://github.com/scikit-hep/awkward-1.0/issues). If you have a general "How do I…?" question, we'll answer it as a new example on this site.
 
 If you have a problem that's too specific to be new documentation or it isn't exclusively related to Awkward Array, it might be more appropriate to ask on [StackOverflow with the [awkward-array] tag](https://stackoverflow.com/questions/tagged/awkward-array). Be sure to include tags for any other libraries that you use, such as Pandas or PyTorch.
 

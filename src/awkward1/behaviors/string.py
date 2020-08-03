@@ -12,7 +12,11 @@ class ByteBehavior(awkward1.highlevel.Array):
     __name__ = "Array"
 
     def __bytes__(self):
-        return numpy.asarray(self.layout).tostring()
+        tmp = numpy.asarray(self.layout)
+        if hasattr(tmp, "tobytes"):
+            return tmp.tobytes()
+        else:
+            return tmp.tostring()
 
     def __str__(self):
         return str(self.__bytes__())
@@ -29,7 +33,11 @@ class CharBehavior(awkward1.highlevel.Array):
     __name__ = "Array"
 
     def __bytes__(self):
-        return numpy.asarray(self.layout).tostring()
+        tmp = numpy.asarray(self.layout)
+        if hasattr(tmp, "tobytes"):
+            return tmp.tobytes()
+        else:
+            return tmp.tostring()
 
     def __str__(self):
         return self.__bytes__().decode("utf-8", "surrogateescape")

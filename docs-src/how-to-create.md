@@ -16,4 +16,4 @@ Creating arrays
 
    * **[ArrayBuilder (easy & general)](how-to-create-arraybuilder)**
    * **[Layout (faster)](how-to-create-layout)**
-   * **[Lazy arrays and Dask](how-to-create-lazy-dask)**
+   * **[Lazy arrays](how-to-create-lazy)**
