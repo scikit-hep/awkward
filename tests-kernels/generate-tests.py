@@ -177,22 +177,30 @@ def testpykernels(tests):
                     if test["success"]:
                         f.write(" " * 4 + "funcPy" + "(" + args + ")\n")
                         for arg, val in test["outargs"].items():
-                            f.write(" " * 4 + "out" + arg + " = " + str(val) + "\n")
+                            f.write(" " * 4 + "pytest_" + arg + " = " + str(val) + "\n")
                             if isinstance(val, list):
                                 f.write(
-                                    " " * 4 + "for i in range(len(out" + arg + ")):\n"
+                                    " " * 4
+                                    + "for i in range(len(pytest_"
+                                    + arg
+                                    + ")):\n"
                                 )
                                 f.write(
                                     " " * 8
                                     + "assert "
                                     + arg
-                                    + "[i] == out"
+                                    + "[i] == pytest_"
                                     + arg
                                     + "[i]\n"
                                 )
                             else:
                                 f.write(
-                                    " " * 4 + "assert " + arg + " == out" + arg + "\n"
+                                    " " * 4
+                                    + "assert "
+                                    + arg
+                                    + " == pytest_"
+                                    + arg
+                                    + "\n"
                                 )
                     else:
                         f.write(" " * 4 + "with pytest.raises(Exception):\n")
@@ -347,19 +355,23 @@ def testcpukernels(tests):
                 if test["success"]:
                     f.write(" " * 4 + "ret_pass = funcC(" + args + ")\n")
                     for arg, val in test["outargs"].items():
-                        f.write(" " * 4 + "out" + arg + " = " + str(val) + "\n")
+                        f.write(" " * 4 + "pytest_" + arg + " = " + str(val) + "\n")
                         if isinstance(val, list):
-                            f.write(" " * 4 + "for i in range(len(out" + arg + ")):\n")
+                            f.write(
+                                " " * 4 + "for i in range(len(pytest_" + arg + ")):\n"
+                            )
                             f.write(
                                 " " * 8
                                 + "assert abs("
                                 + arg
-                                + "[i] - out"
+                                + "[i] - pytest_"
                                 + arg
                                 + "[i]) <= 0.0001\n"
                             )
                         else:
-                            f.write(" " * 4 + "assert " + arg + " == out" + arg + "\n")
+                            f.write(
+                                " " * 4 + "assert " + arg + " == pytest_" + arg + "\n"
+                            )
                     f.write(" " * 4 + "assert not ret_pass.str\n")
                 else:
                     f.write(" " * 4 + "assert funcC(" + args + ").str.contents\n")
