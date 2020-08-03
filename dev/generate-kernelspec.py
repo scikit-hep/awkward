@@ -4,6 +4,7 @@ import argparse
 import copy
 import json
 import os
+import platform
 import re
 import sys
 from collections import OrderedDict
@@ -135,16 +136,24 @@ def pytype(cpptype):
 
 
 def getdirname(filename):
-    if "/" in filename:
-        name = filename[filename.rfind("/") + 1 : -4]
+    if platform.system() == "Windows":
+        delimiter = "\\"
+    else:
+        delimiter = "/"
+    if delimiter in filename:
+        name = filename[filename.rfind(delimiter) + 1 : -4]
     else:
         name = filename[:-4]
     return name
 
 
 def getheadername(filename):
-    if "/" in filename:
-        hfile = filename[filename.rfind("/") + 1 : -4] + ".h"
+    if platform.system() == "Windows":
+        delimiter = "\\"
+    else:
+        delimiter = "/"
+    if delimiter in filename:
+        hfile = filename[filename.rfind(delimiter) + 1 : -4] + ".h"
     else:
         hfile = filename[:-4] + ".h"
     hfile = os.path.join(CURRENT_DIR, "..", "include", "awkward", "cpu-kernels", hfile)
