@@ -901,7 +901,7 @@ namespace awkward {
 
     Index64 parents(length());
     struct Error err = kernel::content_reduce_zeroparents_64(
-      parents.ptr().get(),
+      parents.data(),
       length());
     util::handle_error(err, classname(), identities_.get());
 
@@ -951,7 +951,7 @@ namespace awkward {
     starts.setitem_at_nowrap(0, 0);
     Index64 parents(length());
     struct Error err = kernel::content_reduce_zeroparents_64(
-      parents.ptr().get(),
+      parents.data(),
       length());
     util::handle_error(err, classname(), identities_.get());
     ContentPtr next = argsort_next(negaxis,
@@ -1007,7 +1007,7 @@ namespace awkward {
 
     Index64 parents(length());
     struct Error err = kernel::content_reduce_zeroparents_64(
-      parents.ptr().get(),
+      parents.data(),
       length());
     util::handle_error(err, classname(), identities_.get());
 
@@ -1087,25 +1087,25 @@ namespace awkward {
     ContentPtrVec contents({ shallow_copy(), other });
 
     struct Error err1 = kernel::UnionArray_filltags_to8_const(
-      tags.ptr().get(),
+      tags.data(),
       0,
       mylength,
       0);
     util::handle_error(err1, classname(), identities_.get());
     struct Error err2 = kernel::UnionArray_fillindex_count_64(
-      index.ptr().get(),
+      index.data(),
       0,
       mylength);
     util::handle_error(err2, classname(), identities_.get());
 
     struct Error err3 = kernel::UnionArray_filltags_to8_const(
-      tags.ptr().get(),
+      tags.data(),
       mylength,
       theirlength,
       1);
     util::handle_error(err3, classname(), identities_.get());
     struct Error err4 = kernel::UnionArray_fillindex_count_64(
-      index.ptr().get(),
+      index.data(),
       mylength,
       theirlength);
     util::handle_error(err4, classname(), identities_.get());
@@ -1124,7 +1124,7 @@ namespace awkward {
     }
     Index64 index(target);
     struct Error err = kernel::index_rpad_and_clip_axis0_64(
-      index.ptr().get(),
+      index.data(),
       target,
       length());
     util::handle_error(err, classname(), identities_.get());
@@ -1140,7 +1140,7 @@ namespace awkward {
   Content::localindex_axis0() const {
     Index64 localindex(length());
     struct Error err = kernel::localindex_64(
-      localindex.ptr().get(),
+      localindex.data(),
       length());
     util::handle_error(err, classname(), identities_.get());
     return std::make_shared<NumpyArray>(localindex);
@@ -1186,8 +1186,8 @@ namespace awkward {
     IndexOf<int64_t> fromindex(n);
     struct Error err = kernel::RegularArray_combinations_64(
       tocarryraw.data(),
-      toindex.ptr().get(),
-      fromindex.ptr().get(),
+      toindex.data(),
+      fromindex.data(),
       n,
       replacement,
       length(),
