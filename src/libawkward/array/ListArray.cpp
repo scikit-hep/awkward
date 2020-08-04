@@ -235,11 +235,11 @@ namespace awkward {
     int64_t len = starts_.length();
     Index64 out(len + 1);
     struct Error err = kernel::ListArray_compact_offsets_64<T>(
-      out.ptr().get(),
-      starts_.ptr().get(),
-      stops_.ptr().get(),
-      starts_.offset(),
-      stops_.offset(),
+      out.data(),
+      starts_.data(),
+      stops_.data(),
+      0,   // DROP
+      0,   // DROP
       len);
     util::handle_error(err, classname(), identities_.get());
     return out;
@@ -262,14 +262,14 @@ namespace awkward {
     int64_t carrylen = offsets.getitem_at_nowrap(offsets.length() - 1);
     Index64 nextcarry(carrylen);
     struct Error err = kernel::ListArray_broadcast_tooffsets_64<T>(
-      nextcarry.ptr().get(),
-      offsets.ptr().get(),
-      offsets.offset(),
+      nextcarry.data(),
+      offsets.data(),
+      0,   // DROP
       offsets.length(),
-      starts_.ptr().get(),
-      starts_.offset(),
-      stops_.ptr().get(),
-      stops_.offset(),
+      starts_.data(),
+      0,   // DROP
+      stops_.data(),
+      0,   // DROP
       content_.get()->length());
     util::handle_error(err, classname(), identities_.get());
 
@@ -352,13 +352,13 @@ namespace awkward {
           reinterpret_cast<Identities32*>(subidentities.get());
         struct Error err = kernel::Identities_from_ListArray<int32_t, T>(
           &uniquecontents,
-          rawsubidentities->ptr().get(),
-          rawidentities->ptr().get(),
-          starts_.ptr().get(),
-          stops_.ptr().get(),
-          rawidentities->offset(),
-          starts_.offset(),
-          stops_.offset(),
+          rawsubidentities->data(),
+          rawidentities->data(),
+          starts_.data(),
+          stops_.data(),
+          0,   // DROP
+          0,   // DROP
+          0,   // DROP
           content_.get()->length(),
           length(),
           rawidentities->width());
@@ -382,13 +382,13 @@ namespace awkward {
           reinterpret_cast<Identities64*>(subidentities.get());
         struct Error err = kernel::Identities_from_ListArray<int64_t, T>(
           &uniquecontents,
-          rawsubidentities->ptr().get(),
-          rawidentities->ptr().get(),
-          starts_.ptr().get(),
-          stops_.ptr().get(),
-          rawidentities->offset(),
-          starts_.offset(),
-          stops_.offset(),
+          rawsubidentities->data(),
+          rawidentities->data(),
+          starts_.data(),
+          stops_.data(),
+          0,   // DROP
+          0,   // DROP
+          0,   // DROP
           content_.get()->length(),
           length(),
           rawidentities->width());
@@ -705,13 +705,13 @@ namespace awkward {
     IndexOf<T> nextstarts(carry.length());
     IndexOf<T> nextstops(carry.length());
     struct Error err = kernel::ListArray_getitem_carry_64<T>(
-      nextstarts.ptr().get(),
-      nextstops.ptr().get(),
-      starts_.ptr().get(),
-      stops_.ptr().get(),
-      carry.ptr().get(),
-      starts_.offset(),
-      stops_.offset(),
+      nextstarts.data(),
+      nextstops.data(),
+      starts_.data(),
+      stops_.data(),
+      carry.data(),
+      0,   // DROP
+      0,   // DROP
       lenstarts,
       carry.length());
     util::handle_error(err, classname(), identities_.get());
@@ -760,10 +760,10 @@ namespace awkward {
   const std::string
   ListArrayOf<T>::validityerror(const std::string& path) const {
     struct Error err = kernel::ListArray_validity<T>(
-      starts_.ptr().get(),
-      starts_.offset(),
-      stops_.ptr().get(),
-      stops_.offset(),
+      starts_.data(),
+      0,   // DROP
+      stops_.data(),
+      0,   // DROP
       starts_.length(),
       content_.get()->length());
     if (err.str == nullptr) {
@@ -795,11 +795,11 @@ namespace awkward {
       Index64 tonum(length());
       struct Error err = kernel::ListArray_num_64<T>(
         tonum.ptr_lib(),
-        tonum.ptr().get(),
-        starts_.ptr().get(),
-        starts_.offset(),
-        stops_.ptr().get(),
-        stops_.offset(),
+        tonum.data(),
+        starts_.data(),
+        0,   // DROP
+        stops_.data(),
+        0,   // DROP
         length());
       util::handle_error(err, classname(), identities_.get());
       return std::make_shared<NumpyArray>(tonum);
@@ -964,42 +964,42 @@ namespace awkward {
 
     if (std::is_same<T, int32_t>::value) {
       struct Error err = kernel::ListArray_fill<int32_t, int64_t>(
-        starts.ptr().get(),
+        starts.data(),
         0,
-        stops.ptr().get(),
+        stops.data(),
         0,
-        reinterpret_cast<int32_t*>(starts_.ptr().get()),
-        starts_.offset(),
-        reinterpret_cast<int32_t*>(stops_.ptr().get()),
-        stops_.offset(),
+        reinterpret_cast<int32_t*>(starts_.data()),
+        0,   // DROP
+        reinterpret_cast<int32_t*>(stops_.data()),
+        0,   // DROP
         mylength,
         0);
       util::handle_error(err, classname(), identities_.get());
     }
     else if (std::is_same<T, uint32_t>::value) {
       struct Error err = kernel::ListArray_fill<uint32_t, int64_t>(
-        starts.ptr().get(),
+        starts.data(),
         0,
-        stops.ptr().get(),
+        stops.data(),
         0,
-        reinterpret_cast<uint32_t*>(starts_.ptr().get()),
-        starts_.offset(),
-        reinterpret_cast<uint32_t*>(stops_.ptr().get()),
-        stops_.offset(),
+        reinterpret_cast<uint32_t*>(starts_.data()),
+        0,   // DROP
+        reinterpret_cast<uint32_t*>(stops_.data()),
+        0,   // DROP
         mylength,
         0);
       util::handle_error(err, classname(), identities_.get());
     }
     else if (std::is_same<T, int64_t>::value) {
       struct Error err = kernel::ListArray_fill<int64_t, int64_t>(
-        starts.ptr().get(),
+        starts.data(),
         0,
-        stops.ptr().get(),
+        stops.data(),
         0,
-        reinterpret_cast<int64_t*>(starts_.ptr().get()),
-        starts_.offset(),
-        reinterpret_cast<int64_t*>(stops_.ptr().get()),
-        stops_.offset(),
+        reinterpret_cast<int64_t*>(starts_.data()),
+        0,   // DROP
+        reinterpret_cast<int64_t*>(stops_.data()),
+        0,   // DROP
         mylength,
         0);
       util::handle_error(err, classname(), identities_.get());
@@ -1016,14 +1016,14 @@ namespace awkward {
       Index32 other_starts = rawother->starts();
       Index32 other_stops = rawother->stops();
       struct Error err = kernel::ListArray_fill<int32_t, int64_t>(
-        starts.ptr().get(),
+        starts.data(),
         mylength,
-        stops.ptr().get(),
+        stops.data(),
         mylength,
-        other_starts.ptr().get(),
-        other_starts.offset(),
-        other_stops.ptr().get(),
-        other_stops.offset(),
+        other_starts.data(),
+        0,   // DROP
+        other_stops.data(),
+        0,   // DROP
         theirlength,
         mycontentlength);
       util::handle_error(err,
@@ -1036,14 +1036,14 @@ namespace awkward {
       IndexU32 other_starts = rawother->starts();
       IndexU32 other_stops = rawother->stops();
       struct Error err = kernel::ListArray_fill<uint32_t, int64_t>(
-        starts.ptr().get(),
+        starts.data(),
         mylength,
-        stops.ptr().get(),
+        stops.data(),
         mylength,
-        other_starts.ptr().get(),
-        other_starts.offset(),
-        other_stops.ptr().get(),
-        other_stops.offset(),
+        other_starts.data(),
+        0,   // DROP
+        other_stops.data(),
+        0,   // DROP
         theirlength,
         mycontentlength);
       util::handle_error(err,
@@ -1056,14 +1056,14 @@ namespace awkward {
       Index64 other_starts = rawother->starts();
       Index64 other_stops = rawother->stops();
       struct Error err = kernel::ListArray_fill<int64_t, int64_t>(
-        starts.ptr().get(),
+        starts.data(),
         mylength,
-        stops.ptr().get(),
+        stops.data(),
         mylength,
-        other_starts.ptr().get(),
-        other_starts.offset(),
-        other_stops.ptr().get(),
-        other_stops.offset(),
+        other_starts.data(),
+        0,   // DROP
+        other_stops.data(),
+        0,   // DROP
         theirlength,
         mycontentlength);
       util::handle_error(err,
@@ -1076,14 +1076,14 @@ namespace awkward {
       Index32 other_starts = rawother->starts();
       Index32 other_stops = rawother->stops();
       struct Error err = kernel::ListArray_fill<int32_t, int64_t>(
-        starts.ptr().get(),
+        starts.data(),
         mylength,
-        stops.ptr().get(),
+        stops.data(),
         mylength,
-        other_starts.ptr().get(),
-        other_starts.offset(),
-        other_stops.ptr().get(),
-        other_stops.offset(),
+        other_starts.data(),
+        0,   // DROP
+        other_stops.data(),
+        0,   // DROP
         theirlength,
         mycontentlength);
       util::handle_error(err, rawother->classname(),
@@ -1095,14 +1095,14 @@ namespace awkward {
       IndexU32 other_starts = rawother->starts();
       IndexU32 other_stops = rawother->stops();
       struct Error err = kernel::ListArray_fill<uint32_t, int64_t>(
-        starts.ptr().get(),
+        starts.data(),
         mylength,
-        stops.ptr().get(),
+        stops.data(),
         mylength,
-        other_starts.ptr().get(),
-        other_starts.offset(),
-        other_stops.ptr().get(),
-        other_stops.offset(),
+        other_starts.data(),
+        0,   // DROP
+        other_stops.data(),
+        0,   // DROP
         theirlength,
         mycontentlength);
       util::handle_error(err,
@@ -1115,14 +1115,14 @@ namespace awkward {
       Index64 other_starts = rawother->starts();
       Index64 other_stops = rawother->stops();
       struct Error err = kernel::ListArray_fill<int64_t, int64_t>(
-        starts.ptr().get(),
+        starts.data(),
         mylength,
-        stops.ptr().get(),
+        stops.data(),
         mylength,
-        other_starts.ptr().get(),
-        other_starts.offset(),
-        other_stops.ptr().get(),
-        other_stops.offset(),
+        other_starts.data(),
+        0,   // DROP
+        other_stops.data(),
+        0,   // DROP
         theirlength,
         mycontentlength);
       util::handle_error(err,
@@ -1138,14 +1138,14 @@ namespace awkward {
       Index64 other_starts = rawother->starts();
       Index64 other_stops = rawother->stops();
       struct Error err = kernel::ListArray_fill<int64_t, int64_t>(
-        starts.ptr().get(),
+        starts.data(),
         mylength,
-        stops.ptr().get(),
+        stops.data(),
         mylength,
-        other_starts.ptr().get(),
-        other_starts.offset(),
-        other_stops.ptr().get(),
-        other_stops.offset(),
+        other_starts.data(),
+        0,   // DROP
+        other_stops.data(),
+        0,   // DROP
         theirlength,
         mycontentlength);
       util::handle_error(err,
@@ -1192,11 +1192,11 @@ namespace awkward {
       int64_t min = target;
       struct Error err1 = kernel::ListArray_min_range<T>(
         &min,
-        starts_.ptr().get(),
-        stops_.ptr().get(),
+        starts_.data(),
+        stops_.data(),
         starts_.length(),
-        starts_.offset(),
-        stops_.offset());
+        0,   // DROP
+        0);   // DROP
       util::handle_error(err1, classname(), identities_.get());
       if (target < min) {
         return shallow_copy();
@@ -1206,28 +1206,27 @@ namespace awkward {
         struct Error err2 =
           kernel::ListArray_rpad_and_clip_length_axis1<T>(
           &tolength,
-          starts_.ptr().get(),
-          stops_.ptr().get(),
+          starts_.data(),
+          stops_.data(),
           target,
           starts_.length(),
-          starts_.offset(),
-          stops_.offset()
-        );
+          0,   // DROP
+          0);   // DROP
         util::handle_error(err2, classname(), identities_.get());
 
         Index64 index(tolength);
         IndexOf<T> starts(starts_.length());
         IndexOf<T> stops(starts_.length());
         struct Error err3 = kernel::ListArray_rpad_axis1_64<T>(
-          index.ptr().get(),
-          starts_.ptr().get(),
-          stops_.ptr().get(),
-          starts.ptr().get(),
-          stops.ptr().get(),
+          index.data(),
+          starts_.data(),
+          stops_.data(),
+          starts.data(),
+          stops.data(),
           target,
           starts_.length(),
-          starts_.offset(),
-          stops_.offset());
+          0,   // DROP
+          0);   // DROP
         util::handle_error(err3, classname(), identities_.get());
 
         std::shared_ptr<IndexedOptionArray64> next =
@@ -1291,9 +1290,9 @@ namespace awkward {
         offsets.getitem_at_nowrap(offsets.length() - 1);
       Index64 localindex(innerlength);
       struct Error err = kernel::ListArray_localindex_64(
-        localindex.ptr().get(),
-        offsets.ptr().get(),
-        offsets.offset(),
+        localindex.data(),
+        offsets.data(),
+        0,   // DROP
         offsets.length() - 1);
       util::handle_error(err, classname(), identities_.get());
       return std::make_shared<ListOffsetArray64>(
@@ -1334,13 +1333,13 @@ namespace awkward {
       Index64 offsets(length() + 1);
       struct Error err1 = kernel::ListArray_combinations_length_64<T>(
         &totallen,
-        offsets.ptr().get(),
+        offsets.data(),
         n,
         replacement,
-        starts_.ptr().get(),
-        starts_.offset(),
-        stops_.ptr().get(),
-        stops_.offset(),
+        starts_.data(),
+        0,   // DROP
+        stops_.data(),
+        0,   // DROP
         length());
       util::handle_error(err1, classname(), identities_.get());
 
@@ -1360,10 +1359,10 @@ namespace awkward {
         fromindex,
         n,
         replacement,
-        starts_.ptr().get(),
-        starts_.offset(),
-        stops_.ptr().get(),
-        stops_.offset(),
+        starts_.data(),
+        0,   // DROP
+        stops_.data(),
+        0,   // DROP
         length());
       util::handle_error(err2, classname(), identities_.get());
 
@@ -1457,12 +1456,12 @@ namespace awkward {
     Slice nexttail = tail.tail();
     Index64 nextcarry(lenstarts);
     struct Error err = kernel::ListArray_getitem_next_at_64<T>(
-      nextcarry.ptr().get(),
-      starts_.ptr().get(),
-      stops_.ptr().get(),
+      nextcarry.data(),
+      starts_.data(),
+      stops_.data(),
       lenstarts,
-      starts_.offset(),
-      stops_.offset(),
+      0,   // DROP
+      0,   // DROP
       at.at());
     util::handle_error(err, classname(), identities_.get());
     ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
@@ -1495,11 +1494,11 @@ namespace awkward {
     struct Error err1 =
       kernel::ListArray_getitem_next_range_carrylength<T>(
       &carrylength,
-      starts_.ptr().get(),
-      stops_.ptr().get(),
+      starts_.data(),
+      stops_.data(),
       lenstarts,
-      starts_.offset(),
-      stops_.offset(),
+      0,   // DROP
+      0,   // DROP
       start,
       stop,
       step);
@@ -1509,13 +1508,13 @@ namespace awkward {
     Index64 nextcarry(carrylength);
 
     struct Error err2 = kernel::ListArray_getitem_next_range_64<T>(
-      nextoffsets.ptr().get(),
-      nextcarry.ptr().get(),
-      starts_.ptr().get(),
-      stops_.ptr().get(),
+      nextoffsets.data(),
+      nextcarry.data(),
+      starts_.data(),
+      stops_.data(),
       lenstarts,
-      starts_.offset(),
-      stops_.offset(),
+      0,   // DROP
+      0,   // DROP
       start,
       stop,
       step);
@@ -1534,15 +1533,15 @@ namespace awkward {
       struct Error err1 =
         kernel::ListArray_getitem_next_range_counts_64<T>(
         &total,
-        nextoffsets.ptr().get(),
+        nextoffsets.data(),
         lenstarts);
       util::handle_error(err1, classname(), identities_.get());
       Index64 nextadvanced(total);
       struct Error err2 =
         kernel::ListArray_getitem_next_range_spreadadvanced_64<T>(
-        nextadvanced.ptr().get(),
-        advanced.ptr().get(),
-        nextoffsets.ptr().get(),
+        nextadvanced.data(),
+        advanced.data(),
+        nextoffsets.data(),
         lenstarts);
       util::handle_error(err2, classname(), identities_.get());
       return std::make_shared<ListOffsetArrayOf<T>>(
@@ -1573,13 +1572,13 @@ namespace awkward {
       Index64 nextcarry(lenstarts*flathead.length());
       Index64 nextadvanced(lenstarts*flathead.length());
       struct Error err = kernel::ListArray_getitem_next_array_64<T>(
-        nextcarry.ptr().get(),
-        nextadvanced.ptr().get(),
-        starts_.ptr().get(),
-        stops_.ptr().get(),
-        flathead.ptr().get(),
-        starts_.offset(),
-        stops_.offset(),
+        nextcarry.data(),
+        nextadvanced.data(),
+        starts_.data(),
+        stops_.data(),
+        flathead.data(),
+        0,   // DROP
+        0,   // DROP
         lenstarts,
         flathead.length(),
         content_.get()->length());
@@ -1596,14 +1595,14 @@ namespace awkward {
       Index64 nextadvanced(lenstarts);
       struct Error err =
         kernel::ListArray_getitem_next_array_advanced_64<T>(
-        nextcarry.ptr().get(),
-        nextadvanced.ptr().get(),
-        starts_.ptr().get(),
-        stops_.ptr().get(),
-        flathead.ptr().get(),
-        advanced.ptr().get(),
-        starts_.offset(),
-        stops_.offset(),
+        nextcarry.data(),
+        nextadvanced.data(),
+        starts_.data(),
+        stops_.data(),
+        flathead.data(),
+        advanced.data(),
+        0,   // DROP
+        0,   // DROP
         lenstarts,
         flathead.length(),
         content_.get()->length());
@@ -1635,14 +1634,14 @@ namespace awkward {
     Index64 multistops(jagged.length()*len);
     Index64 nextcarry(jagged.length()*len);
     struct Error err = kernel::ListArray_getitem_jagged_expand_64(
-      multistarts.ptr().get(),
-      multistops.ptr().get(),
-      singleoffsets.ptr().get(),
-      nextcarry.ptr().get(),
-      starts_.ptr().get(),
-      starts_.offset(),
-      stops_.ptr().get(),
-      stops_.offset(),
+      multistarts.data(),
+      multistops.data(),
+      singleoffsets.data(),
+      nextcarry.data(),
+      starts_.data(),
+      0,   // DROP
+      stops_.data(),
+      0,   // DROP
       jagged.length(),
       len);
     util::handle_error(err, classname(), identities_.get());
@@ -1682,10 +1681,10 @@ namespace awkward {
     int64_t carrylen;
     struct Error err1 = kernel::ListArray_getitem_jagged_carrylen_64(
       &carrylen,
-      slicestarts.ptr().get(),
-      slicestarts.offset(),
-      slicestops.ptr().get(),
-      slicestops.offset(),
+      slicestarts.data(),
+      0,   // DROP
+      slicestops.data(),
+      0,   // DROP
       slicestarts.length());
     util::handle_error(err1, classname(), identities_.get());
 
@@ -1693,20 +1692,20 @@ namespace awkward {
     Index64 outoffsets(slicestarts.length() + 1);
     Index64 nextcarry(carrylen);
     struct Error err2 = kernel::ListArray_getitem_jagged_apply_64<T>(
-      outoffsets.ptr().get(),
-      nextcarry.ptr().get(),
-      slicestarts.ptr().get(),
-      slicestarts.offset(),
-      slicestops.ptr().get(),
-      slicestops.offset(),
+      outoffsets.data(),
+      nextcarry.data(),
+      slicestarts.data(),
+      0,   // DROP
+      slicestops.data(),
+      0,   // DROP
       slicestarts.length(),
-      sliceindex.ptr().get(),
-      sliceindex.offset(),
+      sliceindex.data(),
+      0,   // DROP
       sliceindex.length(),
-      starts_.ptr().get(),
-      starts_.offset(),
-      stops_.ptr().get(),
-      stops_.offset(),
+      starts_.data(),
+      0,   // DROP
+      stops_.data(),
+      0,   // DROP
       content_.get()->length());
     util::handle_error(err2, classname(), nullptr);
 
@@ -1740,13 +1739,13 @@ namespace awkward {
     int64_t numvalid;
     struct Error err1 = kernel::ListArray_getitem_jagged_numvalid_64(
       &numvalid,
-      slicestarts.ptr().get(),
-      slicestarts.offset(),
-      slicestops.ptr().get(),
-      slicestops.offset(),
+      slicestarts.data(),
+      0,   // DROP
+      slicestops.data(),
+      0,   // DROP
       slicestarts.length(),
-      missing.ptr().get(),
-      missing.offset(),
+      missing.data(),
+      0,   // DROP
       missing.length());
     util::handle_error(err1, classname(), nullptr);
 
@@ -1754,16 +1753,16 @@ namespace awkward {
     Index64 smalloffsets(slicestarts.length() + 1);
     Index64 largeoffsets(slicestarts.length() + 1);
     struct Error err2 = kernel::ListArray_getitem_jagged_shrink_64(
-      nextcarry.ptr().get(),
-      smalloffsets.ptr().get(),
-      largeoffsets.ptr().get(),
-      slicestarts.ptr().get(),
-      slicestarts.offset(),
-      slicestops.ptr().get(),
-      slicestops.offset(),
+      nextcarry.data(),
+      smalloffsets.data(),
+      largeoffsets.data(),
+      slicestarts.data(),
+      0,   // DROP
+      slicestops.data(),
+      0,   // DROP
       slicestarts.length(),
-      missing.ptr().get(),
-      missing.offset());
+      missing.data(),
+      0);   // DROP
     util::handle_error(err2, classname(), nullptr);
 
     ContentPtr out;
@@ -1822,16 +1821,16 @@ namespace awkward {
 
     Index64 outoffsets(slicestarts.length() + 1);
     struct Error err = kernel::ListArray_getitem_jagged_descend_64<T>(
-      outoffsets.ptr().get(),
-      slicestarts.ptr().get(),
-      slicestarts.offset(),
-      slicestops.ptr().get(),
-      slicestops.offset(),
+      outoffsets.data(),
+      slicestarts.data(),
+      0,   // DROP
+      slicestops.data(),
+      0,   // DROP
       slicestarts.length(),
-      starts_.ptr().get(),
-      starts_.offset(),
-      stops_.ptr().get(),
-      stops_.offset());
+      starts_.data(),
+      0,   // DROP
+      stops_.data(),
+      0);   // DROP
     util::handle_error(err, classname(), identities_.get());
 
     Index64 sliceoffsets = slicecontent.offsets();
