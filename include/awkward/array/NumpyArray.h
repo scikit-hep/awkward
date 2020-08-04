@@ -191,7 +191,7 @@ namespace awkward {
       ptr_lib() const;
 
     /// @brief Raw pointer to the beginning of data (i.e. offset accounted for).
-    const void*
+    void*
       data() const;
 
     /// @brief Number of elements in each dimension. A one-dimensional

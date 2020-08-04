@@ -254,7 +254,7 @@ namespace awkward {
     }
 
     /// @brief Raw pointer to the beginning of data (i.e. offset accounted for).
-    const T*
+    T*
       data() const {
       return ptr_.get() + offset_;
     }

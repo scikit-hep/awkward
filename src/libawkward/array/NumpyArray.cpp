@@ -347,7 +347,7 @@ namespace awkward {
     return ptr_;
   }
 
-  const void*
+  void*
   NumpyArray::data() const {
     return reinterpret_cast<void*>(reinterpret_cast<char*>(ptr_.get()) +
                                    byteoffset_);

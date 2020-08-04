@@ -309,7 +309,7 @@ namespace awkward {
       ptr_lib() const;
 
     /// @brief Raw pointer to the beginning of data (i.e. offset accounted for).
-    const T*
+    T*
       data() const;
 
     const std::string

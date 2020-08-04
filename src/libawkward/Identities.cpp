@@ -98,7 +98,7 @@ namespace awkward {
   }
 
   template <typename T>
-  const T*
+  T*
   IdentitiesOf<T>::data() const {
     return ptr_.get() + offset_;
   }

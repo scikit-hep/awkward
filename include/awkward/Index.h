@@ -100,7 +100,7 @@ namespace awkward {
       ptr_lib() const;
 
     /// @brief Raw pointer to the beginning of data (i.e. offset accounted for).
-    const T*
+    T*
       data() const;
 
     /// @brief Location of item zero in the buffer, relative to
