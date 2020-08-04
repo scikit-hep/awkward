@@ -2,10 +2,10 @@
 
 #include "awkward/python/kernel_utils.h"
 
-py::enum_<kernel::Lib>
-make_Libenum(const py::handle& m, const std::string& name) {
-  return (py::enum_<kernel::Lib>(m, name.c_str())
-    .value("cpu", kernel::Lib::cpu_kernels)
-    .value("cuda", kernel::Lib::cuda_kernels)
+py::enum_<kernel::lib>
+make_lib_enum(const py::handle& m, const std::string& name) {
+  return (py::enum_<kernel::lib>(m, name.c_str())
+    .value("cpu", kernel::lib::cpu)
+    .value("cuda", kernel::lib::cuda)
     .export_values());
 }

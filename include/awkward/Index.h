@@ -82,21 +82,21 @@ namespace awkward {
     /// `ptr` can be reference counted among all arrays that use the same
     /// buffer.
     /// @param length Number of elements in the array.
-    /// @param Choose the Kernel Library for this array, default:= cpu_kernels
+    /// @param Choose the Kernel Library for this array, default:= kernel::lib::cpu
     IndexOf<T>(const std::shared_ptr<T>& ptr,
                int64_t offset,
                int64_t length,
-               kernel::Lib ptr_lib = kernel::Lib::cpu_kernels);
+               kernel::lib ptr_lib = kernel::lib::cpu);
 
     /// @brief Allocates a new integer array buffer with a given #length.
-    IndexOf<T>(int64_t length, kernel::Lib ptr_lib = kernel::Lib::cpu_kernels);
+    IndexOf<T>(int64_t length, kernel::lib ptr_lib = kernel::lib::cpu);
 
     /// @brief Reference-counted pointer to the integer array buffer.
     const std::shared_ptr<T>
       ptr() const;
 
     /// @brief The Kernel Library that ptr uses.
-    kernel::Lib
+    kernel::lib
       ptr_lib() const;
 
     /// @brief Raw pointer to the beginning of data (i.e. offset accounted for).
@@ -213,13 +213,13 @@ namespace awkward {
       deep_copy() const;
 
     const IndexOf<T>
-      copy_to(kernel::Lib ptr_lib) const;
+      copy_to(kernel::lib ptr_lib) const;
 
   private:
     /// @brief See #ptr.
     const std::shared_ptr<T> ptr_;
     /// @brief See #ptr_lib
-    const kernel::Lib ptr_lib_;
+    const kernel::lib ptr_lib_;
     /// @brief See #offset.
     const int64_t offset_;
     /// @brief See #length.

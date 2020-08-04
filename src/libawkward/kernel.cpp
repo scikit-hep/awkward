@@ -25,17 +25,17 @@ namespace kernel {
   std::shared_ptr<LibraryCallback> lib_callback = std::make_shared<LibraryCallback>();
 
   LibraryCallback::LibraryCallback() {
-    lib_path_callbacks[kernel::Lib::cuda_kernels] = std::vector<std::shared_ptr<LibraryPathCallback>>();
+    lib_path_callbacks[kernel::lib::cuda] = std::vector<std::shared_ptr<LibraryPathCallback>>();
   }
 
   void LibraryCallback::add_library_path_callback(
-    kernel::Lib ptr_lib,
+    kernel::lib ptr_lib,
     const std::shared_ptr<LibraryPathCallback> &callback) {
     std::lock_guard<std::mutex> lock(lib_path_callbacks_mutex);
     lib_path_callbacks.at(ptr_lib).push_back(callback);
   }
 
-  std::string LibraryCallback::awkward_library_path(kernel::Lib ptr_lib) {
+  std::string LibraryCallback::awkward_library_path(kernel::lib ptr_lib) {
 #ifndef _MSC_VER
     for (const auto& i : lib_path_callbacks.at(ptr_lib)) {
       auto handle = dlopen(i->library_path().c_str(), RTLD_LAZY);
@@ -48,7 +48,7 @@ namespace kernel {
     return std::string("");
   }
 
-  void *acquire_handle(kernel::Lib ptr_lib) {
+  void *acquire_handle(kernel::lib ptr_lib) {
     void *handle = nullptr;
 #ifndef _MSC_VER
     std::string path = lib_callback->awkward_library_path(ptr_lib);
@@ -56,7 +56,7 @@ namespace kernel {
       handle = dlopen(path.c_str(), RTLD_LAZY);
     }
     if (!handle) {
-      if (ptr_lib == kernel::Lib::cuda_kernels) {
+      if (ptr_lib == kernel::lib::cuda) {
         throw std::invalid_argument(
           "array resides on a GPU, but 'awkward1-cuda-kernels' is not "
           "installed; install it with:\n\n    "
@@ -72,7 +72,7 @@ namespace kernel {
 #ifndef _MSC_VER
     symbol_ptr = dlsym(handle, symbol_name.c_str());
 
-    if(!symbol_ptr) {
+    if (!symbol_ptr) {
       std::stringstream out;
       out << symbol_name;
       out << " not found in .so";
@@ -135,7 +135,7 @@ namespace kernel {
   void cuda_array_deleter<bool>::operator()(bool const *p) {
     FORM_KERNEL(awkward_ptrbool_dealloc,
                 awkward_cuda_ptrbool_dealloc,
-                kernel::Lib::cuda_kernels);
+                kernel::lib::cuda);
     util::handle_error((*awkward_cuda_ptrbool_dealloc_t)(p));
   }
 
@@ -143,7 +143,7 @@ namespace kernel {
   void cuda_array_deleter<char>::operator()(char const *p) {
     FORM_KERNEL(awkward_ptrchar_dealloc,
                 awkward_cuda_ptrchar_dealloc,
-                kernel::Lib::cuda_kernels);
+                kernel::lib::cuda);
     util::handle_error((*awkward_cuda_ptrchar_dealloc_t)(p));
   }
 
@@ -151,7 +151,7 @@ namespace kernel {
   void cuda_array_deleter<int8_t>::operator()(int8_t const *p) {
     FORM_KERNEL(awkward_ptr8_dealloc,
                 awkward_cuda_ptr8_dealloc,
-                kernel::Lib::cuda_kernels);
+                kernel::lib::cuda);
     util::handle_error((*awkward_cuda_ptr8_dealloc_t)(p));
   }
 
@@ -159,7 +159,7 @@ namespace kernel {
   void cuda_array_deleter<uint8_t>::operator()(uint8_t const *p) {
     FORM_KERNEL(awkward_ptrU8_dealloc,
                 awkward_cuda_ptrU8_dealloc,
-                kernel::Lib::cuda_kernels);
+                kernel::lib::cuda);
     util::handle_error((*awkward_cuda_ptrU8_dealloc_t)(p));
   }
 
@@ -167,7 +167,7 @@ namespace kernel {
   void cuda_array_deleter<int16_t>::operator()(int16_t const *p) {
     FORM_KERNEL(awkward_ptr16_dealloc,
                 awkward_cuda_ptr16_dealloc,
-                kernel::Lib::cuda_kernels);
+                kernel::lib::cuda);
     util::handle_error((*awkward_cuda_ptr16_dealloc_t)(p));
   }
 
@@ -175,7 +175,7 @@ namespace kernel {
   void cuda_array_deleter<uint16_t>::operator()(uint16_t const *p) {
     FORM_KERNEL(awkward_ptrU16_dealloc,
                 awkward_cuda_ptrU16_dealloc,
-                kernel::Lib::cuda_kernels);
+                kernel::lib::cuda);
     util::handle_error((*awkward_cuda_ptrU16_dealloc_t)(p));
   }
 
@@ -183,7 +183,7 @@ namespace kernel {
   void cuda_array_deleter<int32_t>::operator()(int32_t const *p) {
     FORM_KERNEL(awkward_ptr32_dealloc,
                 awkward_cuda_ptr32_dealloc,
-                kernel::Lib::cuda_kernels);
+                kernel::lib::cuda);
     util::handle_error((*awkward_cuda_ptr32_dealloc_t)(p));
   }
 
@@ -191,7 +191,7 @@ namespace kernel {
   void cuda_array_deleter<uint32_t>::operator()(uint32_t const *p) {
     FORM_KERNEL(awkward_ptrU32_dealloc,
                 awkward_cuda_ptrU32_dealloc,
-                kernel::Lib::cuda_kernels);
+                kernel::lib::cuda);
     util::handle_error((*awkward_cuda_ptrU32_dealloc_t)(p));
   }
 
@@ -199,7 +199,7 @@ namespace kernel {
   void cuda_array_deleter<int64_t>::operator()(int64_t const *p) {
     FORM_KERNEL(awkward_ptr64_dealloc,
                 awkward_cuda_ptr64_dealloc,
-                kernel::Lib::cuda_kernels);
+                kernel::lib::cuda);
     util::handle_error((*awkward_cuda_ptr64_dealloc_t)(p));
   }
 
@@ -207,7 +207,7 @@ namespace kernel {
   void cuda_array_deleter<uint64_t>::operator()(uint64_t const *p) {
     FORM_KERNEL(awkward_ptrU64_dealloc,
                 awkward_cuda_ptrU64_dealloc,
-                kernel::Lib::cuda_kernels);
+                kernel::lib::cuda);
     util::handle_error((*awkward_cuda_ptrU64_dealloc_t)(p));
   }
 
@@ -215,7 +215,7 @@ namespace kernel {
   void cuda_array_deleter<float>::operator()(float const *p) {
     FORM_KERNEL(awkward_ptrfloat32_dealloc,
                 awkward_cuda_ptrfloat32_dealloc,
-                kernel::Lib::cuda_kernels);
+                kernel::lib::cuda);
     util::handle_error((*awkward_cuda_ptrfloat32_dealloc_t)(p));
   }
 
@@ -223,14 +223,14 @@ namespace kernel {
   void cuda_array_deleter<double>::operator()(double const *p) {
     FORM_KERNEL(awkward_ptrfloat64_dealloc,
                 awkward_cuda_ptrfloat64_dealloc,
-                kernel::Lib::cuda_kernels);
+                kernel::lib::cuda);
     util::handle_error((*awkward_cuda_ptrfloat64_dealloc_t)(p));
   }
 
   template<typename T>
-  int get_ptr_device_num(kernel::Lib ptr_lib, T *ptr) {
-    if (ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = acquire_handle(kernel::Lib::cuda_kernels);
+  int get_ptr_device_num(kernel::lib ptr_lib, T *ptr) {
+    if (ptr_lib == kernel::lib::cuda) {
+      auto handle = acquire_handle(kernel::lib::cuda);
 
       int device_num = -1;
 
@@ -251,34 +251,34 @@ namespace kernel {
     return -1;
   }
 
-  template int get_ptr_device_num(kernel::Lib ptr_lib, void *ptr);
+  template int get_ptr_device_num(kernel::lib ptr_lib, void *ptr);
 
-  template int get_ptr_device_num(kernel::Lib ptr_lib, bool *ptr);
+  template int get_ptr_device_num(kernel::lib ptr_lib, bool *ptr);
 
-  template int get_ptr_device_num(kernel::Lib ptr_lib, int8_t *ptr);
+  template int get_ptr_device_num(kernel::lib ptr_lib, int8_t *ptr);
 
-  template int get_ptr_device_num(kernel::Lib ptr_lib, uint8_t *ptr);
+  template int get_ptr_device_num(kernel::lib ptr_lib, uint8_t *ptr);
 
-  template int get_ptr_device_num(kernel::Lib ptr_lib, int16_t *ptr);
+  template int get_ptr_device_num(kernel::lib ptr_lib, int16_t *ptr);
 
-  template int get_ptr_device_num(kernel::Lib ptr_lib, uint16_t *ptr);
+  template int get_ptr_device_num(kernel::lib ptr_lib, uint16_t *ptr);
 
-  template int get_ptr_device_num(kernel::Lib ptr_lib, int32_t *ptr);
+  template int get_ptr_device_num(kernel::lib ptr_lib, int32_t *ptr);
 
-  template int get_ptr_device_num(kernel::Lib ptr_lib, uint32_t *ptr);
+  template int get_ptr_device_num(kernel::lib ptr_lib, uint32_t *ptr);
 
-  template int get_ptr_device_num(kernel::Lib ptr_lib, int64_t *ptr);
+  template int get_ptr_device_num(kernel::lib ptr_lib, int64_t *ptr);
 
-  template int get_ptr_device_num(kernel::Lib ptr_lib, uint64_t *ptr);
+  template int get_ptr_device_num(kernel::lib ptr_lib, uint64_t *ptr);
 
-  template int get_ptr_device_num(kernel::Lib ptr_lib, float *ptr);
+  template int get_ptr_device_num(kernel::lib ptr_lib, float *ptr);
 
-  template int get_ptr_device_num(kernel::Lib ptr_lib, double *ptr);
+  template int get_ptr_device_num(kernel::lib ptr_lib, double *ptr);
 
   template<typename T>
-  std::string get_ptr_device_name(kernel::Lib ptr_lib, T *ptr) {
-    if (ptr_lib == kernel::Lib::cuda_kernels) {
-      auto handle = acquire_handle(kernel::Lib::cuda_kernels);
+  std::string get_ptr_device_name(kernel::lib ptr_lib, T *ptr) {
+    if (ptr_lib == kernel::lib::cuda) {
+      auto handle = acquire_handle(kernel::lib::cuda);
 
       std::string device_name = std::string("");
 
@@ -297,43 +297,43 @@ namespace kernel {
     return std::string("");
   }
 
-  template std::string get_ptr_device_name(kernel::Lib ptr_lib, void *ptr);
+  template std::string get_ptr_device_name(kernel::lib ptr_lib, void *ptr);
 
-  template std::string get_ptr_device_name(kernel::Lib ptr_lib, bool *ptr);
+  template std::string get_ptr_device_name(kernel::lib ptr_lib, bool *ptr);
 
-  template std::string get_ptr_device_name(kernel::Lib ptr_lib, int8_t *ptr);
+  template std::string get_ptr_device_name(kernel::lib ptr_lib, int8_t *ptr);
 
-  template std::string get_ptr_device_name(kernel::Lib ptr_lib, uint8_t *ptr);
+  template std::string get_ptr_device_name(kernel::lib ptr_lib, uint8_t *ptr);
 
-  template std::string get_ptr_device_name(kernel::Lib ptr_lib, int16_t *ptr);
-
-  template std::string
-  get_ptr_device_name(kernel::Lib ptr_lib, uint16_t *ptr);
-
-  template std::string get_ptr_device_name(kernel::Lib ptr_lib, int32_t *ptr);
+  template std::string get_ptr_device_name(kernel::lib ptr_lib, int16_t *ptr);
 
   template std::string
-  get_ptr_device_name(kernel::Lib ptr_lib, uint32_t *ptr);
+  get_ptr_device_name(kernel::lib ptr_lib, uint16_t *ptr);
 
-  template std::string get_ptr_device_name(kernel::Lib ptr_lib, int64_t *ptr);
+  template std::string get_ptr_device_name(kernel::lib ptr_lib, int32_t *ptr);
 
   template std::string
-  get_ptr_device_name(kernel::Lib ptr_lib, uint64_t *ptr);
+  get_ptr_device_name(kernel::lib ptr_lib, uint32_t *ptr);
 
-  template std::string get_ptr_device_name(kernel::Lib ptr_lib, float *ptr);
+  template std::string get_ptr_device_name(kernel::lib ptr_lib, int64_t *ptr);
 
-  template std::string get_ptr_device_name(kernel::Lib ptr_lib, double *ptr);
+  template std::string
+  get_ptr_device_name(kernel::lib ptr_lib, uint64_t *ptr);
+
+  template std::string get_ptr_device_name(kernel::lib ptr_lib, float *ptr);
+
+  template std::string get_ptr_device_name(kernel::lib ptr_lib, double *ptr);
 
   template<>
   Error copy_to(
-    kernel::Lib TO,
-    kernel::Lib FROM,
+    kernel::lib TO,
+    kernel::lib FROM,
     bool *to_ptr,
     bool *from_ptr,
     int64_t length) {
 #ifndef _MSC_VER
-    if(TO == kernel::Lib::cuda_kernels) {
-      auto handle = acquire_handle(kernel::Lib::cuda_kernels);
+    if (TO == kernel::lib::cuda) {
+      auto handle = acquire_handle(kernel::lib::cuda);
 
       typedef Error (func_awkward_cuda_H2Dbool_t)
         (bool *to_ptr, bool *from_ptr, int64_t length);
@@ -344,8 +344,8 @@ namespace kernel {
 
       return (*func_awkward_cuda_H2Dbool)(to_ptr, from_ptr, length);
     }
-    else if(TO == kernel::Lib::cpu_kernels && FROM == kernel::Lib::cuda_kernels) {
-      auto handle = acquire_handle(kernel::Lib::cuda_kernels);
+    else if (TO == kernel::lib::cpu  &&  FROM == kernel::lib::cuda) {
+      auto handle = acquire_handle(kernel::lib::cuda);
 
       typedef Error (func_awkward_cuda_D2Hbool_t)
         (bool *to_ptr, bool *from_ptr, int64_t length);
@@ -362,14 +362,14 @@ namespace kernel {
 
   template<>
   Error copy_to(
-    kernel::Lib TO,
-    kernel::Lib FROM,
+    kernel::lib TO,
+    kernel::lib FROM,
     int8_t *to_ptr,
     int8_t *from_ptr,
     int64_t length) {
 #ifndef _MSC_VER
-    if(TO == kernel::Lib::cuda_kernels) {
-      auto handle = acquire_handle(kernel::Lib::cuda_kernels);
+    if (TO == kernel::lib::cuda) {
+      auto handle = acquire_handle(kernel::lib::cuda);
 
       typedef Error (func_awkward_cuda_H2D8_t)
         (int8_t *to_ptr, int8_t *from_ptr, int64_t length);
@@ -380,8 +380,8 @@ namespace kernel {
 
       return (*func_awkward_cuda_H2D8)(to_ptr, from_ptr, length);
     }
-    else if(TO == kernel::Lib::cpu_kernels && FROM == kernel::Lib::cuda_kernels) {
-      auto handle = acquire_handle(kernel::Lib::cuda_kernels);
+    else if (TO == kernel::lib::cpu  &&  FROM == kernel::lib::cuda) {
+      auto handle = acquire_handle(kernel::lib::cuda);
 
       typedef Error (func_awkward_cuda_D2H8_t)
         (int8_t *to_ptr, int8_t *from_ptr, int64_t length);
@@ -398,14 +398,14 @@ namespace kernel {
 
   template<>
   Error copy_to(
-    kernel::Lib TO,
-    kernel::Lib FROM,
+    kernel::lib TO,
+    kernel::lib FROM,
     uint8_t *to_ptr,
     uint8_t *from_ptr,
     int64_t length) {
 #ifndef _MSC_VER
-    if(TO == kernel::Lib::cuda_kernels) {
-      auto handle = acquire_handle(kernel::Lib::cuda_kernels);
+    if (TO == kernel::lib::cuda) {
+      auto handle = acquire_handle(kernel::lib::cuda);
 
       typedef Error (func_awkward_cuda_H2DU8_t)
         (uint8_t *to_ptr, uint8_t *from_ptr, int64_t length);
@@ -416,8 +416,8 @@ namespace kernel {
 
       return (*func_awkward_cuda_H2DU8)(to_ptr, from_ptr, length);
     }
-    else if(TO == kernel::Lib::cpu_kernels && FROM == kernel::Lib::cuda_kernels) {
-      auto handle = acquire_handle(kernel::Lib::cuda_kernels);
+    else if (TO == kernel::lib::cpu  &&  FROM == kernel::lib::cuda) {
+      auto handle = acquire_handle(kernel::lib::cuda);
 
       typedef Error (func_awkward_cuda_D2HU8_t)
         (uint8_t *to_ptr, uint8_t *from_ptr, int64_t length);
@@ -434,14 +434,14 @@ namespace kernel {
 
   template<>
   Error copy_to(
-    kernel::Lib TO,
-    kernel::Lib FROM,
+    kernel::lib TO,
+    kernel::lib FROM,
     int16_t *to_ptr,
     int16_t *from_ptr,
     int64_t length) {
 #ifndef _MSC_VER
-    if(TO == kernel::Lib::cuda_kernels) {
-      auto handle = acquire_handle(kernel::Lib::cuda_kernels);
+    if (TO == kernel::lib::cuda) {
+      auto handle = acquire_handle(kernel::lib::cuda);
 
       typedef Error (func_awkward_cuda_H2D16_t)
         (int16_t *to_ptr, int16_t *from_ptr, int64_t length);
@@ -452,8 +452,8 @@ namespace kernel {
 
       return (*func_awkward_cuda_H2D16)(to_ptr, from_ptr, length);
     }
-    else if(TO == kernel::Lib::cpu_kernels && FROM == kernel::Lib::cuda_kernels) {
-      auto handle = acquire_handle(kernel::Lib::cuda_kernels);
+    else if (TO == kernel::lib::cpu  &&  FROM == kernel::lib::cuda) {
+      auto handle = acquire_handle(kernel::lib::cuda);
 
       typedef Error (func_awkward_cuda_D2H16_t)
         (int16_t *to_ptr, int16_t *from_ptr, int64_t length);
@@ -470,14 +470,14 @@ namespace kernel {
 
   template<>
   Error copy_to(
-    kernel::Lib TO,
-    kernel::Lib FROM,
+    kernel::lib TO,
+    kernel::lib FROM,
     uint16_t *to_ptr,
     uint16_t *from_ptr,
     int64_t length) {
 #ifndef _MSC_VER
-    if(TO == kernel::Lib::cuda_kernels) {
-      auto handle = acquire_handle(kernel::Lib::cuda_kernels);
+    if (TO == kernel::lib::cuda) {
+      auto handle = acquire_handle(kernel::lib::cuda);
 
       typedef Error (func_awkward_cuda_H2DU16_t)
         (uint16_t *to_ptr, uint16_t *from_ptr, int64_t length);
@@ -488,8 +488,8 @@ namespace kernel {
 
       return (*func_awkward_cuda_H2DU16)(to_ptr, from_ptr, length);
     }
-    else if(TO == kernel::Lib::cpu_kernels && FROM == kernel::Lib::cuda_kernels) {
-      auto handle = acquire_handle(kernel::Lib::cuda_kernels);
+    else if (TO == kernel::lib::cpu  &&  FROM == kernel::lib::cuda) {
+      auto handle = acquire_handle(kernel::lib::cuda);
 
       typedef Error (func_awkward_cuda_D2HU16_t)
         (uint16_t *to_ptr, uint16_t *from_ptr, int64_t length);
@@ -506,14 +506,14 @@ namespace kernel {
 
   template<>
   Error copy_to(
-    kernel::Lib TO,
-    kernel::Lib FROM,
+    kernel::lib TO,
+    kernel::lib FROM,
     int32_t *to_ptr,
     int32_t *from_ptr,
     int64_t length) {
 #ifndef _MSC_VER
-    if(TO == kernel::Lib::cuda_kernels) {
-      auto handle = acquire_handle(kernel::Lib::cuda_kernels);
+    if (TO == kernel::lib::cuda) {
+      auto handle = acquire_handle(kernel::lib::cuda);
 
       typedef Error (func_awkward_cuda_H2D32_t)
         (int32_t *to_ptr, int32_t *from_ptr, int64_t length);
@@ -524,8 +524,8 @@ namespace kernel {
 
       return (*func_awkward_cuda_H2D32)(to_ptr, from_ptr, length);
     }
-    else if(TO == kernel::Lib::cpu_kernels && FROM == kernel::Lib::cuda_kernels) {
-      auto handle = acquire_handle(kernel::Lib::cuda_kernels);
+    else if (TO == kernel::lib::cpu  &&  FROM == kernel::lib::cuda) {
+      auto handle = acquire_handle(kernel::lib::cuda);
 
       typedef Error (func_awkward_cuda_D2H32_t)
         (int32_t *to_ptr, int32_t *from_ptr, int64_t length);
@@ -542,14 +542,14 @@ namespace kernel {
 
   template<>
   Error copy_to(
-    kernel::Lib TO,
-    kernel::Lib FROM,
+    kernel::lib TO,
+    kernel::lib FROM,
     uint32_t *to_ptr,
     uint32_t *from_ptr,
     int64_t length) {
 #ifndef _MSC_VER
-    if(TO == kernel::Lib::cuda_kernels) {
-      auto handle = acquire_handle(kernel::Lib::cuda_kernels);
+    if (TO == kernel::lib::cuda) {
+      auto handle = acquire_handle(kernel::lib::cuda);
 
       typedef Error (func_awkward_cuda_H2DU32_t)
         (uint32_t *to_ptr, uint32_t *from_ptr, int64_t length);
@@ -560,8 +560,8 @@ namespace kernel {
 
       return (*func_awkward_cuda_H2DU32)(to_ptr, from_ptr, length);
     }
-    else if(TO == kernel::Lib::cpu_kernels && FROM == kernel::Lib::cuda_kernels) {
-      auto handle = acquire_handle(kernel::Lib::cuda_kernels);
+    else if (TO == kernel::lib::cpu  &&  FROM == kernel::lib::cuda) {
+      auto handle = acquire_handle(kernel::lib::cuda);
 
       typedef Error (func_awkward_cuda_D2HU32_t)
         (uint32_t *to_ptr, uint32_t *from_ptr, int64_t length);
@@ -578,14 +578,14 @@ namespace kernel {
 
   template<>
   Error copy_to(
-    kernel::Lib TO,
-    kernel::Lib FROM,
+    kernel::lib TO,
+    kernel::lib FROM,
     int64_t *to_ptr,
     int64_t *from_ptr,
     int64_t length) {
 #ifndef _MSC_VER
-    if(TO == kernel::Lib::cuda_kernels) {
-      auto handle = acquire_handle(kernel::Lib::cuda_kernels);
+    if (TO == kernel::lib::cuda) {
+      auto handle = acquire_handle(kernel::lib::cuda);
 
       typedef Error (func_awkward_cuda_H2D64_t)
         (int64_t *to_ptr, int64_t *from_ptr, int64_t length);
@@ -596,8 +596,8 @@ namespace kernel {
 
       return (*func_awkward_cuda_H2D64)(to_ptr, from_ptr, length);
     }
-    else if(TO == kernel::Lib::cpu_kernels && FROM == kernel::Lib::cuda_kernels) {
-      auto handle = acquire_handle(kernel::Lib::cuda_kernels);
+    else if (TO == kernel::lib::cpu  &&  FROM == kernel::lib::cuda) {
+      auto handle = acquire_handle(kernel::lib::cuda);
 
       typedef Error (func_awkward_cuda_D2H64_t)
         (int64_t *to_ptr, int64_t *from_ptr, int64_t length);
@@ -614,14 +614,14 @@ namespace kernel {
 
   template<>
   Error copy_to(
-    kernel::Lib TO,
-    kernel::Lib FROM,
+    kernel::lib TO,
+    kernel::lib FROM,
     uint64_t *to_ptr,
     uint64_t *from_ptr,
     int64_t length) {
 #ifndef _MSC_VER
-    if(TO == kernel::Lib::cuda_kernels) {
-      auto handle = acquire_handle(kernel::Lib::cuda_kernels);
+    if (TO == kernel::lib::cuda) {
+      auto handle = acquire_handle(kernel::lib::cuda);
 
       typedef Error (func_awkward_cuda_H2DU64_t)
         (uint64_t *to_ptr, uint64_t *from_ptr, int64_t length);
@@ -632,8 +632,8 @@ namespace kernel {
 
       return (*func_awkward_cuda_H2DU64)(to_ptr, from_ptr, length);
     }
-    else if(TO == kernel::Lib::cpu_kernels && FROM == kernel::Lib::cuda_kernels) {
-      auto handle = acquire_handle(kernel::Lib::cuda_kernels);
+    else if (TO == kernel::lib::cpu  &&  FROM == kernel::lib::cuda) {
+      auto handle = acquire_handle(kernel::lib::cuda);
 
       typedef Error (func_awkward_cuda_D2HU64_t)
         (uint64_t *to_ptr, uint64_t *from_ptr, int64_t length);
@@ -650,14 +650,14 @@ namespace kernel {
 
   template<>
   Error copy_to(
-    kernel::Lib TO,
-    kernel::Lib FROM,
+    kernel::lib TO,
+    kernel::lib FROM,
     float *to_ptr,
     float *from_ptr,
     int64_t length) {
 #ifndef _MSC_VER
-    if(TO == kernel::Lib::cuda_kernels) {
-      auto handle = acquire_handle(kernel::Lib::cuda_kernels);
+    if (TO == kernel::lib::cuda) {
+      auto handle = acquire_handle(kernel::lib::cuda);
 
       typedef Error (func_awkward_cuda_H2Dfloat32_t)
         (float *to_ptr, float *from_ptr, int64_t length);
@@ -668,8 +668,8 @@ namespace kernel {
 
       return (*func_awkward_cuda_H2Dfloat32)(to_ptr, from_ptr, length);
     }
-    else if(TO == kernel::Lib::cpu_kernels && FROM == kernel::Lib::cuda_kernels) {
-      auto handle = acquire_handle(kernel::Lib::cuda_kernels);
+    else if (TO == kernel::lib::cpu  &&  FROM == kernel::lib::cuda) {
+      auto handle = acquire_handle(kernel::lib::cuda);
 
       typedef Error (func_awkward_cuda_D2Hfloat32_t)
         (float *to_ptr, float *from_ptr, int64_t length);
@@ -686,14 +686,14 @@ namespace kernel {
 
   template<>
   Error copy_to(
-    kernel::Lib TO,
-    kernel::Lib FROM,
+    kernel::lib TO,
+    kernel::lib FROM,
     double *to_ptr,
     double *from_ptr,
     int64_t length) {
 #ifndef _MSC_VER
-    if(TO == kernel::Lib::cuda_kernels) {
-      auto handle = acquire_handle(kernel::Lib::cuda_kernels);
+    if (TO == kernel::lib::cuda) {
+      auto handle = acquire_handle(kernel::lib::cuda);
       typedef Error (func_awkward_cuda_H2Dfloat64_t)
         (double *to_ptr, double *from_ptr, int64_t length);
       func_awkward_cuda_H2Dfloat64_t
@@ -703,8 +703,8 @@ namespace kernel {
 
       return (*func_awkward_cuda_H2Dfloat64)(to_ptr, from_ptr, length);
     }
-    else if(TO == kernel::Lib::cpu_kernels && FROM == kernel::Lib::cuda_kernels) {
-      auto handle = acquire_handle(kernel::Lib::cuda_kernels);
+    else if (TO == kernel::lib::cpu  &&  FROM == kernel::lib::cuda) {
+      auto handle = acquire_handle(kernel::lib::cuda);
 
       typedef Error (func_awkward_cuda_D2Hfloat64_t)
         (double *to_ptr, double *from_ptr, int64_t length);
@@ -720,12 +720,12 @@ namespace kernel {
   }
 
   template<>
-  std::shared_ptr<bool> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+  std::shared_ptr<bool> ptr_alloc(kernel::lib ptr_lib, int64_t length) {
+    if (ptr_lib == kernel::lib::cpu) {
       return std::shared_ptr<bool>(awkward_ptrbool_alloc(length),
                                    kernel::array_deleter<bool>());
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       FORM_KERNEL(awkward_ptrbool_alloc, awkward_cuda_ptrbool_alloc, ptr_lib);
       return std::shared_ptr<bool>((*awkward_cuda_ptrbool_alloc_t)(length),
                                    kernel::cuda_array_deleter<bool>());
@@ -736,12 +736,12 @@ namespace kernel {
   }
 
   template<>
-  std::shared_ptr<int8_t> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+  std::shared_ptr<int8_t> ptr_alloc(kernel::lib ptr_lib, int64_t length) {
+    if (ptr_lib == kernel::lib::cpu) {
       return std::shared_ptr<int8_t>(awkward_ptr8_alloc(length),
                                      kernel::array_deleter<int8_t>());
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       FORM_KERNEL(awkward_ptr8_alloc, awkward_cuda_ptr8_alloc, ptr_lib)
 
       return std::shared_ptr<int8_t>((*awkward_cuda_ptr8_alloc_t)(length),
@@ -753,12 +753,12 @@ namespace kernel {
   }
 
   template<>
-  std::shared_ptr<uint8_t> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+  std::shared_ptr<uint8_t> ptr_alloc(kernel::lib ptr_lib, int64_t length) {
+    if (ptr_lib == kernel::lib::cpu) {
       return std::shared_ptr<uint8_t>(awkward_ptrU8_alloc(length),
                                       kernel::array_deleter<uint8_t>());
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       FORM_KERNEL(awkward_ptrU8_alloc, awkward_cuda_ptrU8_alloc, ptr_lib);
 
       return std::shared_ptr<uint8_t>(
@@ -771,12 +771,12 @@ namespace kernel {
   }
 
   template<>
-  std::shared_ptr<int16_t> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+  std::shared_ptr<int16_t> ptr_alloc(kernel::lib ptr_lib, int64_t length) {
+    if (ptr_lib == kernel::lib::cpu) {
       return std::shared_ptr<int16_t>(awkward_ptr16_alloc(length),
                                       kernel::array_deleter<int16_t>());
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       FORM_KERNEL(awkward_ptr16_alloc, awkward_cuda_ptr16_alloc, ptr_lib)
 
       return std::shared_ptr<int16_t>(
@@ -789,12 +789,12 @@ namespace kernel {
   }
 
   template<>
-  std::shared_ptr<uint16_t> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+  std::shared_ptr<uint16_t> ptr_alloc(kernel::lib ptr_lib, int64_t length) {
+    if (ptr_lib == kernel::lib::cpu) {
       return std::shared_ptr<uint16_t>(awkward_ptrU16_alloc(length),
                                        kernel::array_deleter<uint16_t>());
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       FORM_KERNEL(awkward_ptrU16_alloc, awkward_cuda_ptrU16_alloc, ptr_lib)
 
       return std::shared_ptr<uint16_t>(
@@ -807,12 +807,12 @@ namespace kernel {
   }
 
   template<>
-  std::shared_ptr<int32_t> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+  std::shared_ptr<int32_t> ptr_alloc(kernel::lib ptr_lib, int64_t length) {
+    if (ptr_lib == kernel::lib::cpu) {
       return std::shared_ptr<int32_t>(awkward_ptr32_alloc(length),
                                       kernel::array_deleter<int32_t>());
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       FORM_KERNEL(awkward_ptr32_alloc, awkward_cuda_ptr32_alloc, ptr_lib)
 
       return std::shared_ptr<int32_t>(
@@ -825,12 +825,12 @@ namespace kernel {
   }
 
   template<>
-  std::shared_ptr<uint32_t> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+  std::shared_ptr<uint32_t> ptr_alloc(kernel::lib ptr_lib, int64_t length) {
+    if (ptr_lib == kernel::lib::cpu) {
       return std::shared_ptr<uint32_t>(awkward_ptrU32_alloc(length),
                                        kernel::array_deleter<uint32_t>());
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       FORM_KERNEL(awkward_ptrU32_alloc, awkward_cuda_ptrU32_alloc, ptr_lib)
 
       return std::shared_ptr<uint32_t>(
@@ -843,12 +843,12 @@ namespace kernel {
   }
 
   template<>
-  std::shared_ptr<int64_t> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+  std::shared_ptr<int64_t> ptr_alloc(kernel::lib ptr_lib, int64_t length) {
+    if (ptr_lib == kernel::lib::cpu) {
       return std::shared_ptr<int64_t>(awkward_ptr64_alloc(length),
                                       kernel::array_deleter<int64_t>());
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       FORM_KERNEL(awkward_ptr64_alloc, awkward_cuda_ptr64_alloc, ptr_lib)
 
       return std::shared_ptr<int64_t>(
@@ -861,12 +861,12 @@ namespace kernel {
   }
 
   template<>
-  std::shared_ptr<uint64_t> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+  std::shared_ptr<uint64_t> ptr_alloc(kernel::lib ptr_lib, int64_t length) {
+    if (ptr_lib == kernel::lib::cpu) {
       return std::shared_ptr<uint64_t>(awkward_ptrU64_alloc(length),
                                        kernel::array_deleter<uint64_t>());
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       FORM_KERNEL(awkward_ptrU64_alloc, awkward_cuda_ptrU64_alloc, ptr_lib)
 
       return std::shared_ptr<uint64_t>(
@@ -879,12 +879,12 @@ namespace kernel {
   }
 
   template<>
-  std::shared_ptr<float> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+  std::shared_ptr<float> ptr_alloc(kernel::lib ptr_lib, int64_t length) {
+    if (ptr_lib == kernel::lib::cpu) {
       return std::shared_ptr<float>(awkward_ptrfloat32_alloc(length),
                                     kernel::array_deleter<float>());
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       FORM_KERNEL(awkward_ptrfloat32_alloc, awkward_cuda_ptrfloat32_alloc, ptr_lib)
 
       return std::shared_ptr<float>(
@@ -897,12 +897,12 @@ namespace kernel {
   }
 
   template<>
-  std::shared_ptr<double> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+  std::shared_ptr<double> ptr_alloc(kernel::lib ptr_lib, int64_t length) {
+    if (ptr_lib == kernel::lib::cpu) {
       return std::shared_ptr<double>(awkward_ptrfloat64_alloc(length),
                                      kernel::array_deleter<double>());
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       FORM_KERNEL(awkward_ptrfloat64_alloc, awkward_cuda_ptrfloat64_alloc, ptr_lib)
 
       return std::shared_ptr<double>(
@@ -915,9 +915,9 @@ namespace kernel {
   }
 
   const std::string
-  fully_qualified_cache_key(const std::string& cache_key, kernel::Lib ptr_lib) {
+  fully_qualified_cache_key(const std::string& cache_key, kernel::lib ptr_lib) {
     switch (ptr_lib) {
-      case kernel::Lib::cuda_kernels:
+      case kernel::lib::cuda:
         return cache_key + std::string(":cuda");
       default:
         return cache_key;
@@ -927,13 +927,13 @@ namespace kernel {
 /////////////////////////////////// awkward/cpu-kernels/getitem.h
 
   template<>
-  bool NumpyArray_getitem_at(kernel::Lib ptr_lib,
+  bool NumpyArray_getitem_at(kernel::lib ptr_lib,
                              bool *ptr,
                              int64_t at) {
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArraybool_getitem_at(ptr, at);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       FORM_KERNEL(awkward_NumpyArraybool_getitem_at,
                   awkward_cuda_NumpyArraybool_getitem_at,
                   ptr_lib);
@@ -945,13 +945,13 @@ namespace kernel {
   }
 
   template<>
-  int8_t NumpyArray_getitem_at(kernel::Lib ptr_lib,
+  int8_t NumpyArray_getitem_at(kernel::lib ptr_lib,
                                int8_t *ptr,
                                int64_t at) {
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray8_getitem_at(ptr, at);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       FORM_KERNEL(awkward_NumpyArray8_getitem_at,
                   awkward_cuda_NumpyArray8_getitem_at,
                   ptr_lib);
@@ -963,13 +963,13 @@ namespace kernel {
   }
 
   template<>
-  uint8_t NumpyArray_getitem_at(kernel::Lib ptr_lib,
+  uint8_t NumpyArray_getitem_at(kernel::lib ptr_lib,
                                 uint8_t *ptr,
                                 int64_t at) {
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArrayU8_getitem_at(ptr, at);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       FORM_KERNEL(awkward_NumpyArrayU8_getitem_at,
                   awkward_cuda_NumpyArrayU8_getitem_at,
                   ptr_lib);
@@ -981,13 +981,13 @@ namespace kernel {
   }
 
   template<>
-  int16_t NumpyArray_getitem_at(kernel::Lib ptr_lib,
+  int16_t NumpyArray_getitem_at(kernel::lib ptr_lib,
                                 int16_t *ptr,
                                 int64_t at) {
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray16_getitem_at(ptr, at);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       FORM_KERNEL(awkward_NumpyArray16_getitem_at,
                   awkward_cuda_NumpyArray16_getitem_at,
                   ptr_lib);
@@ -999,13 +999,13 @@ namespace kernel {
   }
 
   template<>
-  uint16_t NumpyArray_getitem_at(kernel::Lib ptr_lib,
+  uint16_t NumpyArray_getitem_at(kernel::lib ptr_lib,
                                  uint16_t *ptr,
                                  int64_t at) {
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArrayU16_getitem_at(ptr, at);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       FORM_KERNEL(awkward_NumpyArrayU16_getitem_at,
                   awkward_cuda_NumpyArrayU16_getitem_at,
                   ptr_lib);
@@ -1017,13 +1017,13 @@ namespace kernel {
   }
 
   template<>
-  int32_t NumpyArray_getitem_at(kernel::Lib ptr_lib,
+  int32_t NumpyArray_getitem_at(kernel::lib ptr_lib,
                                 int32_t *ptr,
                                 int64_t at) {
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray32_getitem_at(ptr, at);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       FORM_KERNEL(awkward_NumpyArray32_getitem_at,
                   awkward_cuda_NumpyArray32_getitem_at,
                   ptr_lib);
@@ -1035,13 +1035,13 @@ namespace kernel {
   }
 
   template<>
-  uint32_t NumpyArray_getitem_at(kernel::Lib ptr_lib,
+  uint32_t NumpyArray_getitem_at(kernel::lib ptr_lib,
                                  uint32_t *ptr,
                                  int64_t at) {
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArrayU32_getitem_at(ptr, at);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       FORM_KERNEL(awkward_NumpyArrayU32_getitem_at,
                   awkward_cuda_NumpyArrayU32_getitem_at,
                   ptr_lib);
@@ -1053,13 +1053,13 @@ namespace kernel {
   }
 
   template<>
-  int64_t NumpyArray_getitem_at(kernel::Lib ptr_lib,
+  int64_t NumpyArray_getitem_at(kernel::lib ptr_lib,
                                 int64_t *ptr,
                                 int64_t at) {
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray64_getitem_at(ptr, at);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       FORM_KERNEL(awkward_NumpyArray64_getitem_at,
                   awkward_cuda_NumpyArray64_getitem_at,
                   ptr_lib);
@@ -1071,13 +1071,13 @@ namespace kernel {
   }
 
   template<>
-  uint64_t NumpyArray_getitem_at(kernel::Lib ptr_lib,
+  uint64_t NumpyArray_getitem_at(kernel::lib ptr_lib,
                                  uint64_t *ptr,
                                  int64_t at) {
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArrayU64_getitem_at(ptr, at);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       FORM_KERNEL(awkward_NumpyArrayU64_getitem_at,
                   awkward_cuda_NumpyArrayU64_getitem_at,
                   ptr_lib);
@@ -1089,13 +1089,13 @@ namespace kernel {
   }
 
   template<>
-  float NumpyArray_getitem_at(kernel::Lib ptr_lib,
+  float NumpyArray_getitem_at(kernel::lib ptr_lib,
                               float *ptr,
                               int64_t at) {
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArrayfloat32_getitem_at(ptr, at);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       FORM_KERNEL(awkward_NumpyArrayfloat32_getitem_at,
                   awkward_cuda_NumpyArrayfloat32_getitem_at,
                   ptr_lib);
@@ -1107,13 +1107,13 @@ namespace kernel {
   }
 
   template<>
-  double NumpyArray_getitem_at(kernel::Lib ptr_lib,
+  double NumpyArray_getitem_at(kernel::lib ptr_lib,
                                double *ptr,
                                int64_t at) {
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArrayfloat64_getitem_at(ptr, at);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       FORM_KERNEL(awkward_NumpyArrayfloat64_getitem_at,
                   awkward_cuda_NumpyArrayfloat64_getitem_at,
                   ptr_lib);
@@ -1145,14 +1145,14 @@ namespace kernel {
     int64_t *flatheadptr,
     int64_t lenflathead,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_regularize_arrayslice_64(
         flatheadptr,
         lenflathead,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for regularize_arrayslice_64");
     }
@@ -1167,14 +1167,14 @@ namespace kernel {
     int64_t *toptr,
     const int8_t *fromptr,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_Index8_to_Index64(
         toptr,
         fromptr,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for Index_to_Index64");
     }
@@ -1189,14 +1189,14 @@ namespace kernel {
     int64_t *toptr,
     const uint8_t *fromptr,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_IndexU8_to_Index64(
         toptr,
         fromptr,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for Index_to_Index64");
     }
@@ -1211,14 +1211,14 @@ namespace kernel {
     int64_t *toptr,
     const int32_t *fromptr,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_Index32_to_Index64(
         toptr,
         fromptr,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for Index_to_Index64");
     }
@@ -1233,14 +1233,14 @@ namespace kernel {
     int64_t *toptr,
     const uint32_t *fromptr,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_IndexU32_to_Index64(
         toptr,
         fromptr,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for Index_to_Index64");
     }
@@ -1416,8 +1416,8 @@ namespace kernel {
     int64_t ndim,
     const int64_t *shape,
     const int64_t *strides) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_slicearray_ravel_64(
         toptr,
         fromptr,
@@ -1425,7 +1425,7 @@ namespace kernel {
         shape,
         strides);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for slicearray_ravel_64");
     }
@@ -1442,8 +1442,8 @@ namespace kernel {
     const int64_t *missingindex,
     int64_t missingindexoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_slicemissing_check_same(
         same,
         bytemask,
@@ -1452,7 +1452,7 @@ namespace kernel {
         missingindexoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for slicemissing_check_same");
     }
@@ -1466,13 +1466,13 @@ namespace kernel {
   ERROR carry_arange(
     int32_t *toptr,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_carry_arange32(
         toptr,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for carry_arange");
     }
@@ -1486,13 +1486,13 @@ namespace kernel {
   ERROR carry_arange(
     uint32_t *toptr,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_carry_arangeU32(
         toptr,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for carry_arange");
     }
@@ -1506,13 +1506,13 @@ namespace kernel {
   ERROR carry_arange(
     int64_t *toptr,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_carry_arange64(
         toptr,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for carry_arange");
     }
@@ -1531,8 +1531,8 @@ namespace kernel {
     int64_t offset,
     int64_t width,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_Identities32_getitem_carry_64(
         newidentitiesptr,
         identitiesptr,
@@ -1542,7 +1542,7 @@ namespace kernel {
         width,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for Identities_getitem_carry_64");
     }
@@ -1561,8 +1561,8 @@ namespace kernel {
     int64_t offset,
     int64_t width,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_Identities64_getitem_carry_64(
         newidentitiesptr,
         identitiesptr,
@@ -1572,7 +1572,7 @@ namespace kernel {
         width,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for Identities_getitem_carry_64");
     }
@@ -1586,14 +1586,14 @@ namespace kernel {
     int64_t *toptr,
     int64_t skip,
     int64_t stride) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_contiguous_init_64(
         toptr,
         skip,
         stride);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_contiguous_init_64");
     }
@@ -1611,8 +1611,8 @@ namespace kernel {
     int64_t stride,
     int64_t offset,
     const int64_t *pos) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_contiguous_copy_64(
         toptr,
         fromptr,
@@ -1621,7 +1621,7 @@ namespace kernel {
         offset,
         pos);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_contiguous_copy_64");
     }
@@ -1637,8 +1637,8 @@ namespace kernel {
     int64_t len,
     int64_t skip,
     int64_t stride) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_contiguous_next_64(
         topos,
         frompos,
@@ -1646,7 +1646,7 @@ namespace kernel {
         skip,
         stride);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_contiguous_next_64");
     }
@@ -1663,8 +1663,8 @@ namespace kernel {
     int64_t stride,
     int64_t offset,
     const int64_t *pos) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_getitem_next_null_64(
         toptr,
         fromptr,
@@ -1673,7 +1673,7 @@ namespace kernel {
         offset,
         pos);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_getitem_next_null_64");
     }
@@ -1689,8 +1689,8 @@ namespace kernel {
     int64_t lencarry,
     int64_t skip,
     int64_t at) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_getitem_next_at_64(
         nextcarryptr,
         carryptr,
@@ -1698,7 +1698,7 @@ namespace kernel {
         skip,
         at);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_getitem_next_at_64");
     }
@@ -1716,8 +1716,8 @@ namespace kernel {
     int64_t skip,
     int64_t start,
     int64_t step) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_getitem_next_range_64(
         nextcarryptr,
         carryptr,
@@ -1727,7 +1727,7 @@ namespace kernel {
         start,
         step);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_getitem_next_range_64");
     }
@@ -1747,8 +1747,8 @@ namespace kernel {
     int64_t skip,
     int64_t start,
     int64_t step) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_getitem_next_range_advanced_64(
         nextcarryptr,
         nextadvancedptr,
@@ -1760,7 +1760,7 @@ namespace kernel {
         start,
         step);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_getitem_next_range_advanced_64");
     }
@@ -1778,8 +1778,8 @@ namespace kernel {
     int64_t lencarry,
     int64_t lenflathead,
     int64_t skip) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_getitem_next_array_64(
         nextcarryptr,
         nextadvancedptr,
@@ -1789,7 +1789,7 @@ namespace kernel {
         lenflathead,
         skip);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_getitem_next_array_64");
     }
@@ -1806,8 +1806,8 @@ namespace kernel {
     const int64_t *flatheadptr,
     int64_t lencarry,
     int64_t skip) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_getitem_next_array_advanced_64(
         nextcarryptr,
         carryptr,
@@ -1816,7 +1816,7 @@ namespace kernel {
         lencarry,
         skip);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_getitem_next_array_advanced_64");
     }
@@ -1832,8 +1832,8 @@ namespace kernel {
     int64_t byteoffset,
     int64_t length,
     int64_t stride) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_getitem_boolean_numtrue(
         numtrue,
         fromptr,
@@ -1841,7 +1841,7 @@ namespace kernel {
         length,
         stride);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_getitem_boolean_numtrue");
     }
@@ -1857,8 +1857,8 @@ namespace kernel {
     int64_t byteoffset,
     int64_t length,
     int64_t stride) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_getitem_boolean_nonzero_64(
         toptr,
         fromptr,
@@ -1866,7 +1866,7 @@ namespace kernel {
         length,
         stride);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_getitem_boolean_nonzero_64");
     }
@@ -2379,15 +2379,15 @@ namespace kernel {
     int64_t at,
     int64_t len,
     int64_t size) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_RegularArray_getitem_next_at_64(
         tocarry,
         at,
         len,
         size);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for RegularArray_getitem_next_at_64");
     }
@@ -2404,8 +2404,8 @@ namespace kernel {
     int64_t len,
     int64_t size,
     int64_t nextsize) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_RegularArray_getitem_next_range_64(
         tocarry,
         regular_start,
@@ -2414,7 +2414,7 @@ namespace kernel {
         size,
         nextsize);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for RegularArray_getitem_next_range_64");
     }
@@ -2429,15 +2429,15 @@ namespace kernel {
     const int64_t *fromadvanced,
     int64_t len,
     int64_t nextsize) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_RegularArray_getitem_next_range_spreadadvanced_64(
         toadvanced,
         fromadvanced,
         len,
         nextsize);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for RegularArray_getitem_next_range_spreadadvanced_64");
     }
@@ -2452,15 +2452,15 @@ namespace kernel {
     const int64_t *fromarray,
     int64_t lenarray,
     int64_t size) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_RegularArray_getitem_next_array_regularize_64(
         toarray,
         fromarray,
         lenarray,
         size);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for RegularArray_getitem_next_array_regularize_64");
     }
@@ -2477,8 +2477,8 @@ namespace kernel {
     int64_t len,
     int64_t lenarray,
     int64_t size) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_RegularArray_getitem_next_array_64(
         tocarry,
         toadvanced,
@@ -2487,7 +2487,7 @@ namespace kernel {
         lenarray,
         size);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for RegularArray_getitem_next_array_64");
     }
@@ -2505,8 +2505,8 @@ namespace kernel {
     int64_t len,
     int64_t lenarray,
     int64_t size) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_RegularArray_getitem_next_array_advanced_64(
         tocarry,
         toadvanced,
@@ -2516,7 +2516,7 @@ namespace kernel {
         lenarray,
         size);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for RegularArray_getitem_next_array_advanced_64");
     }
@@ -2531,15 +2531,15 @@ namespace kernel {
     const int64_t *fromcarry,
     int64_t lencarry,
     int64_t size) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_RegularArray_getitem_carry_64(
         tocarry,
         fromcarry,
         lencarry,
         size);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for RegularArray_getitem_carry_64");
     }
@@ -2699,8 +2699,8 @@ namespace kernel {
     const int64_t *nonzero,
     int64_t nonzerooffset,
     int64_t nonzerolength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListOffsetArray_getitem_adjust_offsets_64(
         tooffsets,
         tononzero,
@@ -2711,7 +2711,7 @@ namespace kernel {
         nonzerooffset,
         nonzerolength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_getitem_adjust_offsets_64");
     }
@@ -2736,8 +2736,8 @@ namespace kernel {
     const int8_t *originalmask,
     int64_t maskoffset,
     int64_t masklength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListOffsetArray_getitem_adjust_offsets_index_64(
         tooffsets,
         tononzero,
@@ -2754,7 +2754,7 @@ namespace kernel {
         maskoffset,
         masklength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_getitem_adjust_offsets_index_64");
     }
@@ -2774,8 +2774,8 @@ namespace kernel {
     const int64_t *nonzero,
     int64_t nonzerooffset,
     int64_t nonzerolength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_IndexedArray_getitem_adjust_outindex_64(
         tomask,
         toindex,
@@ -2787,7 +2787,7 @@ namespace kernel {
         nonzerooffset,
         nonzerolength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for IndexedArray_getitem_adjust_outindex_64");
     }
@@ -2804,8 +2804,8 @@ namespace kernel {
     int64_t indexoffset,
     int64_t lenindex,
     int64_t lencontent) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_IndexedArray32_getitem_nextcarry_64(
         tocarry,
         fromindex,
@@ -2813,7 +2813,7 @@ namespace kernel {
         lenindex,
         lencontent);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for IndexedArray_getitem_nextcarry_64");
     }
@@ -2830,8 +2830,8 @@ namespace kernel {
     int64_t indexoffset,
     int64_t lenindex,
     int64_t lencontent) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_IndexedArrayU32_getitem_nextcarry_64(
         tocarry,
         fromindex,
@@ -2839,7 +2839,7 @@ namespace kernel {
         lenindex,
         lencontent);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for IndexedArray_getitem_nextcarry_64");
     }
@@ -2856,8 +2856,8 @@ namespace kernel {
     int64_t indexoffset,
     int64_t lenindex,
     int64_t lencontent) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_IndexedArray64_getitem_nextcarry_64(
         tocarry,
         fromindex,
@@ -2865,7 +2865,7 @@ namespace kernel {
         lenindex,
         lencontent);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for IndexedArray_getitem_nextcarry_64");
     }
@@ -3060,8 +3060,8 @@ namespace kernel {
     int64_t indexlength,
     int64_t repetitions,
     int64_t regularsize) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_missing_repeat_64(
         outindex,
         index,
@@ -3070,7 +3070,7 @@ namespace kernel {
         repetitions,
         regularsize);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for missing_repeat_64");
     }
@@ -3086,8 +3086,8 @@ namespace kernel {
     const int64_t *singleoffsets,
     int64_t regularsize,
     int64_t regularlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_RegularArray_getitem_jagged_expand_64(
         multistarts,
         multistops,
@@ -3095,7 +3095,7 @@ namespace kernel {
         regularsize,
         regularlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for RegularArray_getitem_jagged_expand_64");
     }
@@ -3187,8 +3187,8 @@ namespace kernel {
     const int64_t *slicestops,
     int64_t slicestopsoffset,
     int64_t sliceouterlen) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListArray_getitem_jagged_carrylen_64(
         carrylen,
         slicestarts,
@@ -3197,7 +3197,7 @@ namespace kernel {
         slicestopsoffset,
         sliceouterlen);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_jagged_carrylen_64");
     }
@@ -3322,8 +3322,8 @@ namespace kernel {
     const int64_t *missing,
     int64_t missingoffset,
     int64_t missinglength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListArray_getitem_jagged_numvalid_64(
         numvalid,
         slicestarts,
@@ -3335,7 +3335,7 @@ namespace kernel {
         missingoffset,
         missinglength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_jagged_numvalid_64");
     }
@@ -3356,8 +3356,8 @@ namespace kernel {
     int64_t length,
     const int64_t *missing,
     int64_t missingoffset) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListArray_getitem_jagged_shrink_64(
         tocarry,
         tosmalloffsets,
@@ -3370,7 +3370,7 @@ namespace kernel {
         missing,
         missingoffset);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_jagged_shrink_64");
     }
@@ -3456,14 +3456,14 @@ namespace kernel {
   }
 
   template<>
-  int8_t index_getitem_at_nowrap(kernel::Lib ptr_lib,
+  int8_t index_getitem_at_nowrap(kernel::lib ptr_lib,
                                  int8_t *ptr,
                                  int64_t offset,
                                  int64_t at) {
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_Index8_getitem_at_nowrap(ptr, offset, at);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       FORM_KERNEL(awkward_Index8_getitem_at_nowrap,
                   awkward_cuda_Index8_getitem_at_nowrap,
                   ptr_lib);
@@ -3475,14 +3475,14 @@ namespace kernel {
   }
 
   template<>
-  uint8_t index_getitem_at_nowrap(kernel::Lib ptr_lib,
+  uint8_t index_getitem_at_nowrap(kernel::lib ptr_lib,
                                   uint8_t *ptr,
                                   int64_t offset,
                                   int64_t at) {
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_IndexU8_getitem_at_nowrap(ptr, offset, at);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       FORM_KERNEL(awkward_IndexU8_getitem_at_nowrap,
                   awkward_cuda_IndexU8_getitem_at_nowrap,
                   ptr_lib);
@@ -3494,14 +3494,14 @@ namespace kernel {
   }
 
   template<>
-  int32_t index_getitem_at_nowrap(kernel::Lib ptr_lib,
+  int32_t index_getitem_at_nowrap(kernel::lib ptr_lib,
                                   int32_t *ptr,
                                   int64_t offset,
                                   int64_t at) {
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_Index32_getitem_at_nowrap(ptr, offset, at);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       FORM_KERNEL(awkward_Index32_getitem_at_nowrap,
                   awkward_cuda_Index32_getitem_at_nowrap,
                   ptr_lib);
@@ -3513,14 +3513,14 @@ namespace kernel {
   }
 
   template<>
-  uint32_t index_getitem_at_nowrap(kernel::Lib ptr_lib,
+  uint32_t index_getitem_at_nowrap(kernel::lib ptr_lib,
                                    uint32_t *ptr,
                                    int64_t offset,
                                    int64_t at) {
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_IndexU32_getitem_at_nowrap(ptr, offset, at);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       FORM_KERNEL(awkward_IndexU32_getitem_at_nowrap,
                   awkward_cuda_IndexU32_getitem_at_nowrap,
                   ptr_lib);
@@ -3532,14 +3532,14 @@ namespace kernel {
   }
 
   template<>
-  int64_t index_getitem_at_nowrap(kernel::Lib ptr_lib,
+  int64_t index_getitem_at_nowrap(kernel::lib ptr_lib,
                                   int64_t *ptr,
                                   int64_t offset,
                                   int64_t at) {
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_Index64_getitem_at_nowrap(ptr, offset, at);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       FORM_KERNEL(awkward_Index64_getitem_at_nowrap,
                   awkward_cuda_Index64_getitem_at_nowrap,
                   ptr_lib);
@@ -3551,15 +3551,15 @@ namespace kernel {
   }
 
   template<>
-  void index_setitem_at_nowrap(kernel::Lib ptr_lib,
+  void index_setitem_at_nowrap(kernel::lib ptr_lib,
                                int8_t *ptr,
                                int64_t offset,
                                int64_t at,
                                int8_t value) {
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    if (ptr_lib == kernel::lib::cpu) {
       awkward_Index8_setitem_at_nowrap(ptr, offset, at, value);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       FORM_KERNEL(awkward_Index8_setitem_at_nowrap,
                   awkward_cuda_Index8_setitem_at_nowrap,
                   ptr_lib);
@@ -3571,15 +3571,15 @@ namespace kernel {
   }
 
   template<>
-  void index_setitem_at_nowrap(kernel::Lib ptr_lib,
+  void index_setitem_at_nowrap(kernel::lib ptr_lib,
                                uint8_t *ptr,
                                int64_t offset,
                                int64_t at,
                                uint8_t value) {
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    if (ptr_lib == kernel::lib::cpu) {
       awkward_IndexU8_setitem_at_nowrap(ptr, offset, at, value);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       FORM_KERNEL(awkward_IndexU8_setitem_at_nowrap,
                   awkward_cuda_IndexU8_setitem_at_nowrap,
                   ptr_lib);
@@ -3591,15 +3591,15 @@ namespace kernel {
   }
 
   template<>
-  void index_setitem_at_nowrap(kernel::Lib ptr_lib,
+  void index_setitem_at_nowrap(kernel::lib ptr_lib,
                                int32_t *ptr,
                                int64_t offset,
                                int64_t at,
                                int32_t value) {
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    if (ptr_lib == kernel::lib::cpu) {
       awkward_Index32_setitem_at_nowrap(ptr, offset, at, value);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       FORM_KERNEL(awkward_Index32_setitem_at_nowrap,
                   awkward_cuda_Index32_setitem_at_nowrap,
                   ptr_lib);
@@ -3611,15 +3611,15 @@ namespace kernel {
   }
 
   template<>
-  void index_setitem_at_nowrap(kernel::Lib ptr_lib,
+  void index_setitem_at_nowrap(kernel::lib ptr_lib,
                                uint32_t *ptr,
                                int64_t offset,
                                int64_t at,
                                uint32_t value) {
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    if (ptr_lib == kernel::lib::cpu) {
       awkward_IndexU32_setitem_at_nowrap(ptr, offset, at, value);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       FORM_KERNEL(awkward_IndexU32_setitem_at_nowrap,
                   awkward_cuda_IndexU32_setitem_at_nowrap,
                   ptr_lib);
@@ -3631,15 +3631,15 @@ namespace kernel {
   }
 
   template<>
-  void index_setitem_at_nowrap(kernel::Lib ptr_lib,
+  void index_setitem_at_nowrap(kernel::lib ptr_lib,
                                int64_t *ptr,
                                int64_t offset,
                                int64_t at,
                                int64_t value) {
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    if (ptr_lib == kernel::lib::cpu) {
       awkward_Index64_setitem_at_nowrap(ptr, offset, at, value);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       FORM_KERNEL(awkward_Index64_setitem_at_nowrap,
                   awkward_cuda_Index64_setitem_at_nowrap,
                   ptr_lib);
@@ -3657,8 +3657,8 @@ namespace kernel {
     int64_t lenmask,
     const int64_t *fromcarry,
     int64_t lencarry) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ByteMaskedArray_getitem_carry_64(
         tomask,
         frommask,
@@ -3667,7 +3667,7 @@ namespace kernel {
         fromcarry,
         lencarry);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ByteMaskedArray_getitem_carry_64");
     }
@@ -3683,8 +3683,8 @@ namespace kernel {
     int64_t maskoffset,
     int64_t length,
     bool validwhen) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ByteMaskedArray_numnull(
         numnull,
         mask,
@@ -3692,7 +3692,7 @@ namespace kernel {
         length,
         validwhen);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ByteMaskedArray_numnull");
     }
@@ -3708,8 +3708,8 @@ namespace kernel {
     int64_t maskoffset,
     int64_t length,
     bool validwhen) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ByteMaskedArray_getitem_nextcarry_64(
         tocarry,
         mask,
@@ -3717,7 +3717,7 @@ namespace kernel {
         length,
         validwhen);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ByteMaskedArray_getitem_nextcarry_64");
     }
@@ -3734,8 +3734,8 @@ namespace kernel {
     int64_t maskoffset,
     int64_t length,
     bool validwhen) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ByteMaskedArray_getitem_nextcarry_outindex_64(
         tocarry,
         toindex,
@@ -3744,7 +3744,7 @@ namespace kernel {
         length,
         validwhen);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ByteMaskedArray_getitem_nextcarry_outindex_64");
     }
@@ -3760,8 +3760,8 @@ namespace kernel {
     int64_t maskoffset,
     int64_t length,
     bool validwhen) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ByteMaskedArray_toIndexedOptionArray64(
         toindex,
         mask,
@@ -3769,7 +3769,7 @@ namespace kernel {
         length,
         validwhen);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ByteMaskedArray_toIndexedOptionArray64");
     }
@@ -3783,13 +3783,13 @@ namespace kernel {
       int64_t *index_in, int64_t index_in_offset, int64_t *offsets_in,
       int64_t offsets_in_offset, int64_t *mask_out, int64_t *starts_out,
       int64_t *stops_out, int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_Content_getitem_next_missing_jagged_getmaskstartstop(
           index_in, index_in_offset, offsets_in, offsets_in_offset, mask_out,
           starts_out, stops_out, length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for Content_getitem_next_missing_jagged_getmaskstartstop");
     }
@@ -3804,13 +3804,13 @@ namespace kernel {
       int32_t *index, int64_t index_offset, int64_t *starts_in,
       int64_t starts_offset, int64_t *stops_in, int64_t stops_offset,
       int64_t *starts_out, int64_t *stops_out, int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_MaskedArray32_getitem_next_jagged_project(
           index, index_offset, starts_in, starts_offset, stops_in, stops_offset,
           starts_out, stops_out, length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for MaskedArray_getitem_next_jagged_project");
     }
@@ -3824,13 +3824,13 @@ namespace kernel {
       uint32_t *index, int64_t index_offset, int64_t *starts_in,
       int64_t starts_offset, int64_t *stops_in, int64_t stops_offset,
       int64_t *starts_out, int64_t *stops_out, int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_MaskedArrayU32_getitem_next_jagged_project(
           index, index_offset, starts_in, starts_offset, stops_in, stops_offset,
           starts_out, stops_out, length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for MaskedArray_getitem_next_jagged_project");
     }
@@ -3844,13 +3844,13 @@ namespace kernel {
       int64_t *index, int64_t index_offset, int64_t *starts_in,
       int64_t starts_offset, int64_t *stops_in, int64_t stops_offset,
       int64_t *starts_out, int64_t *stops_out, int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_MaskedArray64_getitem_next_jagged_project(
           index, index_offset, starts_in, starts_offset, stops_in, stops_offset,
           starts_out, stops_out, length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for MaskedArray_getitem_next_jagged_project");
     }
@@ -3866,13 +3866,13 @@ namespace kernel {
   ERROR new_Identities(
     int32_t *toptr,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_new_Identities32(
         toptr,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for new_Identities");
     }
@@ -3886,13 +3886,13 @@ namespace kernel {
   ERROR new_Identities(
     int64_t *toptr,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_new_Identities64(
         toptr,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for new_Identities");
     }
@@ -3908,15 +3908,15 @@ namespace kernel {
     const int32_t *fromptr,
     int64_t length,
     int64_t width) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_Identities32_to_Identities64(
         toptr,
         fromptr,
         length,
         width);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for Identities_to_Identities64");
     }
@@ -3936,8 +3936,8 @@ namespace kernel {
     int64_t tolength,
     int64_t fromlength,
     int64_t fromwidth) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_Identities32_from_ListOffsetArray32(
         toptr,
         fromptr,
@@ -3948,7 +3948,7 @@ namespace kernel {
         fromlength,
         fromwidth);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for Identities_from_ListOffsetArray<int32_t, int32_t>");
     }
@@ -3968,8 +3968,8 @@ namespace kernel {
     int64_t tolength,
     int64_t fromlength,
     int64_t fromwidth) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_Identities32_from_ListOffsetArrayU32(
         toptr,
         fromptr,
@@ -3980,7 +3980,7 @@ namespace kernel {
         fromlength,
         fromwidth);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for Identities_from_ListOffsetArray<int32_t, uint32_t>");
     }
@@ -4000,8 +4000,8 @@ namespace kernel {
     int64_t tolength,
     int64_t fromlength,
     int64_t fromwidth) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_Identities32_from_ListOffsetArray64(
         toptr,
         fromptr,
@@ -4012,7 +4012,7 @@ namespace kernel {
         fromlength,
         fromwidth);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for Identities_from_ListOffsetArray<int32_t, int64_t>");
     }
@@ -4032,8 +4032,8 @@ namespace kernel {
     int64_t tolength,
     int64_t fromlength,
     int64_t fromwidth) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_Identities64_from_ListOffsetArray32(
         toptr,
         fromptr,
@@ -4044,7 +4044,7 @@ namespace kernel {
         fromlength,
         fromwidth);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for Identities_from_ListOffsetArray<int64_t, int32_t>");
     }
@@ -4064,8 +4064,8 @@ namespace kernel {
     int64_t tolength,
     int64_t fromlength,
     int64_t fromwidth) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_Identities64_from_ListOffsetArrayU32(
         toptr,
         fromptr,
@@ -4076,7 +4076,7 @@ namespace kernel {
         fromlength,
         fromwidth);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for Identities_from_ListOffsetArray<int64_t, uint32_t>");
     }
@@ -4096,8 +4096,8 @@ namespace kernel {
     int64_t tolength,
     int64_t fromlength,
     int64_t fromwidth) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_Identities64_from_ListOffsetArray64(
         toptr,
         fromptr,
@@ -4108,7 +4108,7 @@ namespace kernel {
         fromlength,
         fromwidth);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for Identities_from_ListOffsetArray<int64_t, int64_t>");
     }
@@ -4131,8 +4131,8 @@ namespace kernel {
     int64_t tolength,
     int64_t fromlength,
     int64_t fromwidth) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_Identities32_from_ListArray32(
         uniquecontents,
         toptr,
@@ -4146,7 +4146,7 @@ namespace kernel {
         fromlength,
         fromwidth);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for Identities_from_ListArray<int32_t, int32_t>");
     }
@@ -4169,8 +4169,8 @@ namespace kernel {
     int64_t tolength,
     int64_t fromlength,
     int64_t fromwidth) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_Identities32_from_ListArrayU32(
         uniquecontents,
         toptr,
@@ -4184,7 +4184,7 @@ namespace kernel {
         fromlength,
         fromwidth);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for Identities_from_ListArray<int32_t, uint32_t>");
     }
@@ -4207,8 +4207,8 @@ namespace kernel {
     int64_t tolength,
     int64_t fromlength,
     int64_t fromwidth) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_Identities32_from_ListArray64(
         uniquecontents,
         toptr,
@@ -4222,7 +4222,7 @@ namespace kernel {
         fromlength,
         fromwidth);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for Identities_from_ListArray<int32_t, int64_t>");
     }
@@ -4245,8 +4245,8 @@ namespace kernel {
     int64_t tolength,
     int64_t fromlength,
     int64_t fromwidth) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_Identities64_from_ListArray32(
         uniquecontents,
         toptr,
@@ -4260,7 +4260,7 @@ namespace kernel {
         fromlength,
         fromwidth);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for Identities_from_ListArray<int64_t, int32_t>");
     }
@@ -4283,8 +4283,8 @@ namespace kernel {
     int64_t tolength,
     int64_t fromlength,
     int64_t fromwidth) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_Identities64_from_ListArrayU32(
         uniquecontents,
         toptr,
@@ -4298,7 +4298,7 @@ namespace kernel {
         fromlength,
         fromwidth);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for Identities_from_ListArray<int64_t, uint32_t>");
     }
@@ -4321,8 +4321,8 @@ namespace kernel {
     int64_t tolength,
     int64_t fromlength,
     int64_t fromwidth) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_Identities64_from_ListArray64(
         uniquecontents,
         toptr,
@@ -4336,7 +4336,7 @@ namespace kernel {
         fromlength,
         fromwidth);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for Identities_from_ListArray<int64_t, int64_t>");
     }
@@ -4355,8 +4355,8 @@ namespace kernel {
     int64_t tolength,
     int64_t fromlength,
     int64_t fromwidth) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_Identities32_from_RegularArray(
         toptr,
         fromptr,
@@ -4366,7 +4366,7 @@ namespace kernel {
         fromlength,
         fromwidth);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for Identities_from_RegularArray");
     }
@@ -4385,8 +4385,8 @@ namespace kernel {
     int64_t tolength,
     int64_t fromlength,
     int64_t fromwidth) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_Identities64_from_RegularArray(
         toptr,
         fromptr,
@@ -4396,7 +4396,7 @@ namespace kernel {
         fromlength,
         fromwidth);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for Identities_from_RegularArray");
     }
@@ -4725,8 +4725,8 @@ namespace kernel {
     int64_t fromoffset,
     int64_t fromlength,
     int64_t tolength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_Identities32_extend(
         toptr,
         fromptr,
@@ -4734,7 +4734,7 @@ namespace kernel {
         fromlength,
         tolength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for Identities_extend");
     }
@@ -4751,8 +4751,8 @@ namespace kernel {
     int64_t fromoffset,
     int64_t fromlength,
     int64_t tolength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_Identities64_extend(
         toptr,
         fromptr,
@@ -4760,7 +4760,7 @@ namespace kernel {
         fromlength,
         tolength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for Identities_extend");
     }
@@ -4774,14 +4774,14 @@ namespace kernel {
 
   template<>
   ERROR ListArray_num_64<int32_t>(
-    kernel::Lib ptr_lib,
+    kernel::lib ptr_lib,
     int64_t *tonum,
     const int32_t *fromstarts,
     int64_t startsoffset,
     const int32_t *fromstops,
     int64_t stopsoffset,
     int64_t length) {
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListArray32_num_64(
         tonum,
         fromstarts,
@@ -4790,7 +4790,7 @@ namespace kernel {
         stopsoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       FORM_KERNEL(awkward_ListArray32_num_64,
                   awkward_cuda_ListArray32_num_64,
                   ptr_lib);
@@ -4809,14 +4809,14 @@ namespace kernel {
 
   template<>
   ERROR ListArray_num_64<uint32_t>(
-    kernel::Lib ptr_lib,
+    kernel::lib ptr_lib,
     int64_t *tonum,
     const uint32_t *fromstarts,
     int64_t startsoffset,
     const uint32_t *fromstops,
     int64_t stopsoffset,
     int64_t length) {
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListArrayU32_num_64(
         tonum,
         fromstarts,
@@ -4825,7 +4825,7 @@ namespace kernel {
         stopsoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       FORM_KERNEL(awkward_ListArrayU32_num_64,
                   awkward_cuda_ListArrayU32_num_64,
                   ptr_lib);
@@ -4844,14 +4844,14 @@ namespace kernel {
 
   template<>
   ERROR ListArray_num_64<int64_t>(
-    kernel::Lib ptr_lib,
+    kernel::lib ptr_lib,
     int64_t *tonum,
     const int64_t *fromstarts,
     int64_t startsoffset,
     const int64_t *fromstops,
     int64_t stopsoffset,
     int64_t length) {
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListArray64_num_64(
         tonum,
         fromstarts,
@@ -4860,7 +4860,7 @@ namespace kernel {
         stopsoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       FORM_KERNEL(awkward_ListArray64_num_64,
                   awkward_cuda_ListArray64_num_64,
                   ptr_lib);
@@ -4878,17 +4878,17 @@ namespace kernel {
   }
 
   ERROR RegularArray_num_64(
-    kernel::Lib ptr_lib,
+    kernel::lib ptr_lib,
     int64_t *tonum,
     int64_t size,
     int64_t length) {
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_RegularArray_num_64(
         tonum,
         size,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       FORM_KERNEL(awkward_RegularArray_num_64,
                   awkward_cuda_RegularArray_num_64,
                   ptr_lib);
@@ -4911,8 +4911,8 @@ namespace kernel {
     const int64_t *inneroffsets,
     int64_t inneroffsetsoffset,
     int64_t inneroffsetslen) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListOffsetArray32_flatten_offsets_64(
         tooffsets,
         outeroffsets,
@@ -4922,7 +4922,7 @@ namespace kernel {
         inneroffsetsoffset,
         inneroffsetslen);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_flatten_offsets_64<int32_t>");
     }
@@ -4941,8 +4941,8 @@ namespace kernel {
     const int64_t *inneroffsets,
     int64_t inneroffsetsoffset,
     int64_t inneroffsetslen) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListOffsetArrayU32_flatten_offsets_64(
         tooffsets,
         outeroffsets,
@@ -4952,7 +4952,7 @@ namespace kernel {
         inneroffsetsoffset,
         inneroffsetslen);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_flatten_offsets_64<uint32_t>");
     }
@@ -4971,8 +4971,8 @@ namespace kernel {
     const int64_t *inneroffsets,
     int64_t inneroffsetsoffset,
     int64_t inneroffsetslen) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListOffsetArray64_flatten_offsets_64(
         tooffsets,
         outeroffsets,
@@ -4982,7 +4982,7 @@ namespace kernel {
         inneroffsetsoffset,
         inneroffsetslen);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_flatten_offsets_64<int64_t>");
     }
@@ -5001,8 +5001,8 @@ namespace kernel {
     const int64_t *offsets,
     int64_t offsetsoffset,
     int64_t offsetslength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_IndexedArray32_flatten_none2empty_64(
         outoffsets,
         outindex,
@@ -5012,7 +5012,7 @@ namespace kernel {
         offsetsoffset,
         offsetslength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for IndexedArray_flatten_none2empty_64<int32_t>");
     }
@@ -5031,8 +5031,8 @@ namespace kernel {
     const int64_t *offsets,
     int64_t offsetsoffset,
     int64_t offsetslength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_IndexedArrayU32_flatten_none2empty_64(
         outoffsets,
         outindex,
@@ -5042,7 +5042,7 @@ namespace kernel {
         offsetsoffset,
         offsetslength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for IndexedArray_flatten_none2empty_64<uint32_t>");
     }
@@ -5061,8 +5061,8 @@ namespace kernel {
     const int64_t *offsets,
     int64_t offsetsoffset,
     int64_t offsetslength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_IndexedArray64_flatten_none2empty_64(
         outoffsets,
         outindex,
@@ -5072,7 +5072,7 @@ namespace kernel {
         offsetsoffset,
         offsetslength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for IndexedArray_flatten_none2empty_64<int64_t>");
     }
@@ -5092,8 +5092,8 @@ namespace kernel {
     int64_t length,
     int64_t **offsetsraws,
     int64_t *offsetsoffsets) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_UnionArray32_flatten_length_64(
         total_length,
         fromtags,
@@ -5104,7 +5104,7 @@ namespace kernel {
         offsetsraws,
         offsetsoffsets);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for UnionArray_flatten_length_64<int8_t, int32_t>");
     }
@@ -5124,8 +5124,8 @@ namespace kernel {
     int64_t length,
     int64_t **offsetsraws,
     int64_t *offsetsoffsets) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_UnionArrayU32_flatten_length_64(
         total_length,
         fromtags,
@@ -5136,7 +5136,7 @@ namespace kernel {
         offsetsraws,
         offsetsoffsets);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for UnionArray_flatten_length_64<int8_t, uint32_t>");
     }
@@ -5156,8 +5156,8 @@ namespace kernel {
     int64_t length,
     int64_t **offsetsraws,
     int64_t *offsetsoffsets) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_UnionArray64_flatten_length_64(
         total_length,
         fromtags,
@@ -5168,7 +5168,7 @@ namespace kernel {
         offsetsraws,
         offsetsoffsets);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for UnionArray_flatten_length_64<int8_t, int64_t>");
     }
@@ -5190,8 +5190,8 @@ namespace kernel {
     int64_t length,
     int64_t **offsetsraws,
     int64_t *offsetsoffsets) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_UnionArray32_flatten_combine_64(
         totags,
         toindex,
@@ -5204,7 +5204,7 @@ namespace kernel {
         offsetsraws,
         offsetsoffsets);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for UnionArray_flatten_combine_64<int8_t, int32_t>");
     }
@@ -5226,8 +5226,8 @@ namespace kernel {
     int64_t length,
     int64_t **offsetsraws,
     int64_t *offsetsoffsets) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_UnionArrayU32_flatten_combine_64(
         totags,
         toindex,
@@ -5240,7 +5240,7 @@ namespace kernel {
         offsetsraws,
         offsetsoffsets);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for UnionArray_flatten_combine_64<int8_t, uint32_t>");
     }
@@ -5262,8 +5262,8 @@ namespace kernel {
     int64_t length,
     int64_t **offsetsraws,
     int64_t *offsetsoffsets) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_UnionArray64_flatten_combine_64(
         totags,
         toindex,
@@ -5276,7 +5276,7 @@ namespace kernel {
         offsetsraws,
         offsetsoffsets);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for UnionArray_flatten_combine_64<int8_t, int64_t>");
     }
@@ -5293,8 +5293,8 @@ namespace kernel {
     int64_t indexoffset,
     int64_t lenindex,
     int64_t lencontent) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_IndexedArray32_flatten_nextcarry_64(
         tocarry,
         fromindex,
@@ -5302,7 +5302,7 @@ namespace kernel {
         lenindex,
         lencontent);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for IndexedArray_flatten_nextcarry_64<int32_t>");
     }
@@ -5319,8 +5319,8 @@ namespace kernel {
     int64_t indexoffset,
     int64_t lenindex,
     int64_t lencontent) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_IndexedArrayU32_flatten_nextcarry_64(
         tocarry,
         fromindex,
@@ -5328,7 +5328,7 @@ namespace kernel {
         lenindex,
         lencontent);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for IndexedArray_flatten_nextcarry_64<uint32_t>");
     }
@@ -5345,8 +5345,8 @@ namespace kernel {
     int64_t indexoffset,
     int64_t lenindex,
     int64_t lencontent) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_IndexedArray64_flatten_nextcarry_64(
         tocarry,
         fromindex,
@@ -5354,7 +5354,7 @@ namespace kernel {
         lenindex,
         lencontent);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for IndexedArray_flatten_nextcarry_64<int64_t>");
     }
@@ -5372,8 +5372,8 @@ namespace kernel {
     const int32_t *fromindex,
     int64_t indexoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_IndexedArray32_overlay_mask8_to64(
         toindex,
         mask,
@@ -5382,7 +5382,7 @@ namespace kernel {
         indexoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for IndexedArray_overlay_mask8_to64<int32_t>");
     }
@@ -5400,8 +5400,8 @@ namespace kernel {
     const uint32_t *fromindex,
     int64_t indexoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_IndexedArrayU32_overlay_mask8_to64(
         toindex,
         mask,
@@ -5410,7 +5410,7 @@ namespace kernel {
         indexoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for IndexedArray_overlay_mask8_to64<uint32_t>");
     }
@@ -5428,8 +5428,8 @@ namespace kernel {
     const int64_t *fromindex,
     int64_t indexoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_IndexedArray64_overlay_mask8_to64(
         toindex,
         mask,
@@ -5438,7 +5438,7 @@ namespace kernel {
         indexoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for IndexedArray_overlay_mask8_to64<int64_t>");
     }
@@ -5454,15 +5454,15 @@ namespace kernel {
     const int32_t *fromindex,
     int64_t indexoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_IndexedArray32_mask8(
         tomask,
         fromindex,
         indexoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for IndexedArray_mask8<int32_t>");
     }
@@ -5478,15 +5478,15 @@ namespace kernel {
     const uint32_t *fromindex,
     int64_t indexoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_IndexedArrayU32_mask8(
         tomask,
         fromindex,
         indexoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for IndexedArray_mask8<uint32_t>");
     }
@@ -5502,15 +5502,15 @@ namespace kernel {
     const int64_t *fromindex,
     int64_t indexoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_IndexedArray64_mask8(
         tomask,
         fromindex,
         indexoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for IndexedArray_mask8<int64_t>");
     }
@@ -5526,8 +5526,8 @@ namespace kernel {
     int64_t maskoffset,
     int64_t length,
     bool validwhen) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ByteMaskedArray_mask8(
         tomask,
         frommask,
@@ -5535,7 +5535,7 @@ namespace kernel {
         length,
         validwhen);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ByteMaskedArray_mask8");
     }
@@ -5548,11 +5548,11 @@ namespace kernel {
   ERROR zero_mask8(
     int8_t *tomask,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_zero_mask8(tomask, length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for zero_mask8");
     }
@@ -5571,8 +5571,8 @@ namespace kernel {
     const int32_t *innerindex,
     int64_t inneroffset,
     int64_t innerlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_IndexedArray32_simplify32_to64(
         toindex,
         outerindex,
@@ -5582,7 +5582,7 @@ namespace kernel {
         inneroffset,
         innerlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for IndexedArray_simplify32_to64<int32_t>");
     }
@@ -5601,8 +5601,8 @@ namespace kernel {
     const int32_t *innerindex,
     int64_t inneroffset,
     int64_t innerlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_IndexedArrayU32_simplify32_to64(
         toindex,
         outerindex,
@@ -5612,7 +5612,7 @@ namespace kernel {
         inneroffset,
         innerlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for IndexedArray_simplify32_to64<uint32_t>");
     }
@@ -5631,8 +5631,8 @@ namespace kernel {
     const int32_t *innerindex,
     int64_t inneroffset,
     int64_t innerlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_IndexedArray64_simplify32_to64(
         toindex,
         outerindex,
@@ -5642,7 +5642,7 @@ namespace kernel {
         inneroffset,
         innerlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for IndexedArray_simplify32_to64<int64_t>");
     }
@@ -5661,8 +5661,8 @@ namespace kernel {
     const uint32_t *innerindex,
     int64_t inneroffset,
     int64_t innerlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_IndexedArray32_simplifyU32_to64(
         toindex,
         outerindex,
@@ -5672,7 +5672,7 @@ namespace kernel {
         inneroffset,
         innerlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for IndexedArray_simplifyU32_to64<int32_t>");
     }
@@ -5691,8 +5691,8 @@ namespace kernel {
     const uint32_t *innerindex,
     int64_t inneroffset,
     int64_t innerlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_IndexedArrayU32_simplifyU32_to64(
         toindex,
         outerindex,
@@ -5702,7 +5702,7 @@ namespace kernel {
         inneroffset,
         innerlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for IndexedArray_simplifyU32_to64<uint32_t>");
     }
@@ -5721,8 +5721,8 @@ namespace kernel {
     const uint32_t *innerindex,
     int64_t inneroffset,
     int64_t innerlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_IndexedArray64_simplifyU32_to64(
         toindex,
         outerindex,
@@ -5732,7 +5732,7 @@ namespace kernel {
         inneroffset,
         innerlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for IndexedArray_simplifyU32_to64<int64_t>");
     }
@@ -5751,8 +5751,8 @@ namespace kernel {
     const int64_t *innerindex,
     int64_t inneroffset,
     int64_t innerlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_IndexedArray32_simplify64_to64(
         toindex,
         outerindex,
@@ -5762,7 +5762,7 @@ namespace kernel {
         inneroffset,
         innerlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for IndexedArray_simplify64_to64<int32_t>");
     }
@@ -5781,8 +5781,8 @@ namespace kernel {
     const int64_t *innerindex,
     int64_t inneroffset,
     int64_t innerlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_IndexedArrayU32_simplify64_to64(
         toindex,
         outerindex,
@@ -5792,7 +5792,7 @@ namespace kernel {
         inneroffset,
         innerlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for IndexedArray_simplify64_to64<uint32_t>");
     }
@@ -5811,8 +5811,8 @@ namespace kernel {
     const int64_t *innerindex,
     int64_t inneroffset,
     int64_t innerlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_IndexedArray64_simplify64_to64(
         toindex,
         outerindex,
@@ -5822,7 +5822,7 @@ namespace kernel {
         inneroffset,
         innerlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for IndexedArray_simplify64_to64<int64_t>");
     }
@@ -5840,8 +5840,8 @@ namespace kernel {
     int64_t startsoffset,
     int64_t stopsoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListArray32_compact_offsets_64(
         tooffsets,
         fromstarts,
@@ -5850,7 +5850,7 @@ namespace kernel {
         stopsoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListArray_compact_offsets_64");
     }
@@ -5868,8 +5868,8 @@ namespace kernel {
     int64_t startsoffset,
     int64_t stopsoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListArrayU32_compact_offsets_64(
         tooffsets,
         fromstarts,
@@ -5878,7 +5878,7 @@ namespace kernel {
         stopsoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListArray_compact_offsets_64");
     }
@@ -5896,8 +5896,8 @@ namespace kernel {
     int64_t startsoffset,
     int64_t stopsoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListArray64_compact_offsets_64(
         tooffsets,
         fromstarts,
@@ -5906,7 +5906,7 @@ namespace kernel {
         stopsoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListArray_compact_offsets_64");
     }
@@ -5920,14 +5920,14 @@ namespace kernel {
     int64_t *tooffsets,
     int64_t length,
     int64_t size) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_RegularArray_compact_offsets64(
         tooffsets,
         length,
         size);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for RegularArray_compact_offsets_64");
     }
@@ -5943,15 +5943,15 @@ namespace kernel {
     const int32_t *fromoffsets,
     int64_t offsetsoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListOffsetArray32_compact_offsets_64(
         tooffsets,
         fromoffsets,
         offsetsoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_compact_offsets_64");
     }
@@ -5967,15 +5967,15 @@ namespace kernel {
     const uint32_t *fromoffsets,
     int64_t offsetsoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListOffsetArrayU32_compact_offsets_64(
         tooffsets,
         fromoffsets,
         offsetsoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_compact_offsets_64");
     }
@@ -5991,15 +5991,15 @@ namespace kernel {
     const int64_t *fromoffsets,
     int64_t offsetsoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListOffsetArray64_compact_offsets_64(
         tooffsets,
         fromoffsets,
         offsetsoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_compact_offsets_64");
     }
@@ -6020,8 +6020,8 @@ namespace kernel {
     const int32_t *fromstops,
     int64_t stopsoffset,
     int64_t lencontent) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListArray32_broadcast_tooffsets_64(
         tocarry,
         fromoffsets,
@@ -6033,7 +6033,7 @@ namespace kernel {
         stopsoffset,
         lencontent);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListArray_broadcast_tooffsets_64<int32_t>");
     }
@@ -6054,8 +6054,8 @@ namespace kernel {
     const uint32_t *fromstops,
     int64_t stopsoffset,
     int64_t lencontent) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListArrayU32_broadcast_tooffsets_64(
         tocarry,
         fromoffsets,
@@ -6067,7 +6067,7 @@ namespace kernel {
         stopsoffset,
         lencontent);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListArray_broadcast_tooffsets_64<uint32_t>");
     }
@@ -6088,8 +6088,8 @@ namespace kernel {
     const int64_t *fromstops,
     int64_t stopsoffset,
     int64_t lencontent) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListArray64_broadcast_tooffsets_64(
         tocarry,
         fromoffsets,
@@ -6101,7 +6101,7 @@ namespace kernel {
         stopsoffset,
         lencontent);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListArray_broadcast_tooffsets_64<int64_t>");
     }
@@ -6116,15 +6116,15 @@ namespace kernel {
     int64_t offsetsoffset,
     int64_t offsetslength,
     int64_t size) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_RegularArray_broadcast_tooffsets_64(
         fromoffsets,
         offsetsoffset,
         offsetslength,
         size);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for RegularArray_broadcast_tooffsets_64");
     }
@@ -6139,15 +6139,15 @@ namespace kernel {
     const int64_t *fromoffsets,
     int64_t offsetsoffset,
     int64_t offsetslength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_RegularArray_broadcast_tooffsets_size1_64(
         tocarry,
         fromoffsets,
         offsetsoffset,
         offsetslength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for RegularArray_broadcast_tooffsets_size1_64");
     }
@@ -6163,15 +6163,15 @@ namespace kernel {
     const int32_t *fromoffsets,
     int64_t offsetsoffset,
     int64_t offsetslength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListOffsetArray32_toRegularArray(
         size,
         fromoffsets,
         offsetsoffset,
         offsetslength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_toRegularArray<int32_t>");
     }
@@ -6187,15 +6187,15 @@ namespace kernel {
     const uint32_t *fromoffsets,
     int64_t offsetsoffset,
     int64_t offsetslength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListOffsetArrayU32_toRegularArray(
         size,
         fromoffsets,
         offsetsoffset,
         offsetslength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_toRegularArray<uint32_t>");
     }
@@ -6211,15 +6211,15 @@ namespace kernel {
     const int64_t *fromoffsets,
     int64_t offsetsoffset,
     int64_t offsetslength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListOffsetArray64_toRegularArray(
         size,
         fromoffsets,
         offsetsoffset,
         offsetslength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_toRegularArray");
     }
@@ -6236,8 +6236,8 @@ namespace kernel {
     const bool *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_tobool_frombool(
         toptr,
         tooffset,
@@ -6245,7 +6245,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill_frombool<bool>");
     }
@@ -6262,8 +6262,8 @@ namespace kernel {
     const bool *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_toint8_frombool(
         toptr,
         tooffset,
@@ -6271,7 +6271,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill_frombool<int8_t>");
     }
@@ -6288,8 +6288,8 @@ namespace kernel {
     const bool *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_toint16_frombool(
         toptr,
         tooffset,
@@ -6297,7 +6297,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill_frombool<int16_t>");
     }
@@ -6314,8 +6314,8 @@ namespace kernel {
     const bool *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_toint32_frombool(
         toptr,
         tooffset,
@@ -6323,7 +6323,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill_frombool<int32_t>");
     }
@@ -6340,8 +6340,8 @@ namespace kernel {
     const bool *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_toint64_frombool(
         toptr,
         tooffset,
@@ -6349,7 +6349,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill_frombool<int64_t>");
     }
@@ -6366,8 +6366,8 @@ namespace kernel {
     const bool *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_touint8_frombool(
         toptr,
         tooffset,
@@ -6375,7 +6375,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill_frombool<uint8_t>");
     }
@@ -6392,8 +6392,8 @@ namespace kernel {
     const bool *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_touint16_frombool(
         toptr,
         tooffset,
@@ -6401,7 +6401,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill_frombool<uint16_t>");
     }
@@ -6418,8 +6418,8 @@ namespace kernel {
     const bool *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_touint32_frombool(
         toptr,
         tooffset,
@@ -6427,7 +6427,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill_frombool<uint32_t>");
     }
@@ -6444,8 +6444,8 @@ namespace kernel {
     const bool *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_touint64_frombool(
         toptr,
         tooffset,
@@ -6453,7 +6453,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill_frombool<uint64_t>");
     }
@@ -6470,8 +6470,8 @@ namespace kernel {
     const bool *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_tofloat32_frombool(
         toptr,
         tooffset,
@@ -6479,7 +6479,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill_frombool<float>");
     }
@@ -6496,8 +6496,8 @@ namespace kernel {
     const bool *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_tofloat64_frombool(
         toptr,
         tooffset,
@@ -6505,7 +6505,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill_frombool<double>");
     }
@@ -6522,8 +6522,8 @@ namespace kernel {
     const int8_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_toint8_fromint8(
         toptr,
         tooffset,
@@ -6531,7 +6531,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int8_t, int8_t>");
     }
@@ -6548,8 +6548,8 @@ namespace kernel {
     const int8_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_toint16_fromint8(
         toptr,
         tooffset,
@@ -6557,7 +6557,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int8_t, int16_t>");
     }
@@ -6574,8 +6574,8 @@ namespace kernel {
     const int8_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_toint32_fromint8(
         toptr,
         tooffset,
@@ -6583,7 +6583,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int8_t, int32_t>");
     }
@@ -6600,8 +6600,8 @@ namespace kernel {
     const int8_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_toint64_fromint8(
         toptr,
         tooffset,
@@ -6609,7 +6609,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int8_t, int64_t>");
     }
@@ -6626,8 +6626,8 @@ namespace kernel {
     const int8_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_tofloat32_fromint8(
         toptr,
         tooffset,
@@ -6635,7 +6635,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int8_t, float>");
     }
@@ -6652,8 +6652,8 @@ namespace kernel {
     const int8_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_tofloat64_fromint8(
         toptr,
         tooffset,
@@ -6661,7 +6661,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int8_t, double>");
     }
@@ -6678,8 +6678,8 @@ namespace kernel {
     const int16_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_toint16_fromint16(
         toptr,
         tooffset,
@@ -6687,7 +6687,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int16_t, int16_t>");
     }
@@ -6704,8 +6704,8 @@ namespace kernel {
     const int16_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_toint32_fromint16(
         toptr,
         tooffset,
@@ -6713,7 +6713,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int16_t, int32_t>");
     }
@@ -6730,8 +6730,8 @@ namespace kernel {
     const int16_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_toint64_fromint16(
         toptr,
         tooffset,
@@ -6739,7 +6739,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int16_t, int64_t>");
     }
@@ -6756,8 +6756,8 @@ namespace kernel {
     const int16_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_tofloat32_fromint16(
         toptr,
         tooffset,
@@ -6765,7 +6765,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int16_t, float>");
     }
@@ -6782,8 +6782,8 @@ namespace kernel {
     const int16_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_tofloat64_fromint16(
         toptr,
         tooffset,
@@ -6791,7 +6791,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int16_t, double>");
     }
@@ -6808,8 +6808,8 @@ namespace kernel {
     const int32_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_toint32_fromint32(
         toptr,
         tooffset,
@@ -6817,7 +6817,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int32_t, int32_t>");
     }
@@ -6834,8 +6834,8 @@ namespace kernel {
     const int32_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_toint64_fromint32(
         toptr,
         tooffset,
@@ -6843,7 +6843,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int32_t, int64_t>");
     }
@@ -6860,8 +6860,8 @@ namespace kernel {
     const int32_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_tofloat32_fromint32(
         toptr,
         tooffset,
@@ -6869,7 +6869,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int32_t, float>");
     }
@@ -6886,8 +6886,8 @@ namespace kernel {
     const int32_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_tofloat64_fromint32(
         toptr,
         tooffset,
@@ -6895,7 +6895,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int32_t, double>");
     }
@@ -6912,8 +6912,8 @@ namespace kernel {
     const int64_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_toint64_fromint64(
         toptr,
         tooffset,
@@ -6921,7 +6921,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int64_t, int64_t>");
     }
@@ -6938,8 +6938,8 @@ namespace kernel {
     const int64_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_tofloat32_fromint64(
         toptr,
         tooffset,
@@ -6947,7 +6947,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int64_t, float>");
     }
@@ -6964,8 +6964,8 @@ namespace kernel {
     const int64_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_tofloat64_fromint64(
         toptr,
         tooffset,
@@ -6973,7 +6973,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int64_t, double>");
     }
@@ -6990,8 +6990,8 @@ namespace kernel {
     const uint8_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_toint16_fromuint8(
         toptr,
         tooffset,
@@ -6999,7 +6999,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint8_t, int16_t>");
     }
@@ -7016,8 +7016,8 @@ namespace kernel {
     const uint8_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_toint32_fromuint8(
         toptr,
         tooffset,
@@ -7025,7 +7025,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint8_t, int32_t>");
     }
@@ -7042,8 +7042,8 @@ namespace kernel {
     const uint8_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_toint64_fromuint8(
         toptr,
         tooffset,
@@ -7051,7 +7051,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint8_t, int64_t>");
     }
@@ -7068,8 +7068,8 @@ namespace kernel {
     const uint8_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_touint8_fromuint8(
         toptr,
         tooffset,
@@ -7077,7 +7077,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint8_t, uint8_t>");
     }
@@ -7094,8 +7094,8 @@ namespace kernel {
     const uint8_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_touint16_fromuint8(
         toptr,
         tooffset,
@@ -7103,7 +7103,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint8_t, uint16_t>");
     }
@@ -7120,8 +7120,8 @@ namespace kernel {
     const uint8_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_touint32_fromuint8(
         toptr,
         tooffset,
@@ -7129,7 +7129,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint8_t, uint32_t>");
     }
@@ -7146,8 +7146,8 @@ namespace kernel {
     const uint8_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_touint64_fromuint8(
         toptr,
         tooffset,
@@ -7155,7 +7155,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint8_t, uint64_t>");
     }
@@ -7172,8 +7172,8 @@ namespace kernel {
     const uint8_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_tofloat32_fromuint8(
         toptr,
         tooffset,
@@ -7181,7 +7181,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint8_t, float>");
     }
@@ -7198,8 +7198,8 @@ namespace kernel {
     const uint8_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_tofloat64_fromuint8(
         toptr,
         tooffset,
@@ -7207,7 +7207,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint8_t, double>");
     }
@@ -7224,8 +7224,8 @@ namespace kernel {
     const uint16_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_toint32_fromuint16(
         toptr,
         tooffset,
@@ -7233,7 +7233,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint16_t, int32_t>");
     }
@@ -7250,8 +7250,8 @@ namespace kernel {
     const uint16_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_toint64_fromuint16(
         toptr,
         tooffset,
@@ -7259,7 +7259,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint16_t, int64_t>");
     }
@@ -7276,8 +7276,8 @@ namespace kernel {
     const uint16_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_touint16_fromuint16(
         toptr,
         tooffset,
@@ -7285,7 +7285,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint16_t, uint16_t>");
     }
@@ -7302,8 +7302,8 @@ namespace kernel {
     const uint16_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_touint32_fromuint16(
         toptr,
         tooffset,
@@ -7311,7 +7311,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint16_t, uint32_t>");
     }
@@ -7328,8 +7328,8 @@ namespace kernel {
     const uint16_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_touint64_fromuint16(
         toptr,
         tooffset,
@@ -7337,7 +7337,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint16_t, uint64_t>");
     }
@@ -7354,8 +7354,8 @@ namespace kernel {
     const uint16_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_tofloat32_fromuint16(
         toptr,
         tooffset,
@@ -7363,7 +7363,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint16_t, float>");
     }
@@ -7380,8 +7380,8 @@ namespace kernel {
     const uint16_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_tofloat64_fromuint16(
         toptr,
         tooffset,
@@ -7389,7 +7389,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint16_t, double>");
     }
@@ -7406,8 +7406,8 @@ namespace kernel {
     const uint32_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_toint64_fromuint32(
         toptr,
         tooffset,
@@ -7415,7 +7415,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint32_t, int64_t>");
     }
@@ -7432,8 +7432,8 @@ namespace kernel {
     const uint32_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_touint32_fromuint32(
         toptr,
         tooffset,
@@ -7441,7 +7441,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint32_t, uint32_t>");
     }
@@ -7458,8 +7458,8 @@ namespace kernel {
     const uint32_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_touint64_fromuint32(
         toptr,
         tooffset,
@@ -7467,7 +7467,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint32_t, uint64_t>");
     }
@@ -7484,8 +7484,8 @@ namespace kernel {
     const uint32_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_tofloat32_fromuint32(
         toptr,
         tooffset,
@@ -7493,7 +7493,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint32_t, float>");
     }
@@ -7510,8 +7510,8 @@ namespace kernel {
     const uint32_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_tofloat64_fromuint32(
         toptr,
         tooffset,
@@ -7519,7 +7519,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint32_t, double>");
     }
@@ -7536,8 +7536,8 @@ namespace kernel {
     const uint64_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_touint64_fromuint64(
         toptr,
         tooffset,
@@ -7545,7 +7545,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint64_t, uint64_t>");
     }
@@ -7562,8 +7562,8 @@ namespace kernel {
     const uint64_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_toint64_fromuint64(
         toptr,
         tooffset,
@@ -7571,7 +7571,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint64_t, int64_t>");
     }
@@ -7588,8 +7588,8 @@ namespace kernel {
     const uint64_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_tofloat32_fromuint64(
         toptr,
         tooffset,
@@ -7597,7 +7597,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint64_t, float>");
     }
@@ -7614,8 +7614,8 @@ namespace kernel {
     const uint64_t *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_tofloat64_fromuint64(
         toptr,
         tooffset,
@@ -7623,7 +7623,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint64_t, double>");
     }
@@ -7640,8 +7640,8 @@ namespace kernel {
     const float *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_tofloat32_fromfloat32(
         toptr,
         tooffset,
@@ -7649,7 +7649,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<float, float>");
     }
@@ -7666,8 +7666,8 @@ namespace kernel {
     const float *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_tofloat64_fromfloat32(
         toptr,
         tooffset,
@@ -7675,7 +7675,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<float, double>");
     }
@@ -7692,8 +7692,8 @@ namespace kernel {
     const double *fromptr,
     int64_t fromoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_fill_tofloat64_fromfloat64(
         toptr,
         tooffset,
@@ -7701,7 +7701,7 @@ namespace kernel {
         fromoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<double, double>");
     }
@@ -7723,8 +7723,8 @@ namespace kernel {
     int64_t fromstopsoffset,
     int64_t length,
     int64_t base) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListArray_fill_to64_from32(
         tostarts,
         tostartsoffset,
@@ -7737,7 +7737,7 @@ namespace kernel {
         length,
         base);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListArray_fill");
     }
@@ -7759,8 +7759,8 @@ namespace kernel {
     int64_t fromstopsoffset,
     int64_t length,
     int64_t base) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListArray_fill_to64_fromU32(
         tostarts,
         tostartsoffset,
@@ -7773,7 +7773,7 @@ namespace kernel {
         length,
         base);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListArray_fill");
     }
@@ -7795,8 +7795,8 @@ namespace kernel {
     int64_t fromstopsoffset,
     int64_t length,
     int64_t base) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListArray_fill_to64_from64(
         tostarts,
         tostartsoffset,
@@ -7809,7 +7809,7 @@ namespace kernel {
         length,
         base);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListArray_fill");
     }
@@ -7827,8 +7827,8 @@ namespace kernel {
     int64_t fromindexoffset,
     int64_t length,
     int64_t base) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_IndexedArray_fill_to64_from32(
         toindex,
         toindexoffset,
@@ -7837,7 +7837,7 @@ namespace kernel {
         length,
         base);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for IndexedArray_fill");
     }
@@ -7855,8 +7855,8 @@ namespace kernel {
     int64_t fromindexoffset,
     int64_t length,
     int64_t base) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_IndexedArray_fill_to64_fromU32(
         toindex,
         toindexoffset,
@@ -7865,7 +7865,7 @@ namespace kernel {
         length,
         base);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for IndexedArray_fill");
     }
@@ -7883,8 +7883,8 @@ namespace kernel {
     int64_t fromindexoffset,
     int64_t length,
     int64_t base) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_IndexedArray_fill_to64_from64(
         toindex,
         toindexoffset,
@@ -7893,7 +7893,7 @@ namespace kernel {
         length,
         base);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for IndexedArray_fill");
     }
@@ -7908,15 +7908,15 @@ namespace kernel {
     int64_t toindexoffset,
     int64_t length,
     int64_t base) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_IndexedArray_fill_to64_count(
         toindex,
         toindexoffset,
         length,
         base);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for IndexedArray_fill_to64_count");
     }
@@ -7933,8 +7933,8 @@ namespace kernel {
     int64_t fromtagsoffset,
     int64_t length,
     int64_t base) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_UnionArray_filltags_to8_from8(
         totags,
         totagsoffset,
@@ -7943,7 +7943,7 @@ namespace kernel {
         length,
         base);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for UnionArray_filltags_to8_from8");
     }
@@ -7960,8 +7960,8 @@ namespace kernel {
     const int32_t *fromindex,
     int64_t fromindexoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_UnionArray_fillindex_to64_from32(
         toindex,
         toindexoffset,
@@ -7969,7 +7969,7 @@ namespace kernel {
         fromindexoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for UnionArray_fillindex");
     }
@@ -7986,8 +7986,8 @@ namespace kernel {
     const uint32_t *fromindex,
     int64_t fromindexoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_UnionArray_fillindex_to64_fromU32(
         toindex,
         toindexoffset,
@@ -7995,7 +7995,7 @@ namespace kernel {
         fromindexoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for UnionArray_fillindex");
     }
@@ -8012,8 +8012,8 @@ namespace kernel {
     const int64_t *fromindex,
     int64_t fromindexoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_UnionArray_fillindex_to64_from64(
         toindex,
         toindexoffset,
@@ -8021,7 +8021,7 @@ namespace kernel {
         fromindexoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for UnionArray_fillindex");
     }
@@ -8036,15 +8036,15 @@ namespace kernel {
     int64_t totagsoffset,
     int64_t length,
     int64_t base) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_UnionArray_filltags_to8_const(
         totags,
         totagsoffset,
         length,
         base);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for UnionArray_filltags_to8_const");
     }
@@ -8058,14 +8058,14 @@ namespace kernel {
     int64_t *toindex,
     int64_t toindexoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_UnionArray_fillindex_to64_count(
         toindex,
         toindexoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for UnionArray_fillindex_count_64");
     }
@@ -8092,8 +8092,8 @@ namespace kernel {
     int64_t outerwhich,
     int64_t length,
     int64_t base) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_UnionArray8_32_simplify8_32_to8_64(
         totags,
         toindex,
@@ -8111,7 +8111,7 @@ namespace kernel {
         length,
         base);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for UnionArray_simplify8_32_to8_64<int8_t, int32_t>");
     }
@@ -8138,8 +8138,8 @@ namespace kernel {
     int64_t outerwhich,
     int64_t length,
     int64_t base) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_UnionArray8_U32_simplify8_32_to8_64(
         totags,
         toindex,
@@ -8157,7 +8157,7 @@ namespace kernel {
         length,
         base);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for UnionArray_simplify8_32_to8_64<int8_t, uint32_t>");
     }
@@ -8184,8 +8184,8 @@ namespace kernel {
     int64_t outerwhich,
     int64_t length,
     int64_t base) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_UnionArray8_64_simplify8_32_to8_64(
         totags,
         toindex,
@@ -8203,7 +8203,7 @@ namespace kernel {
         length,
         base);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for UnionArray_simplify8_32_to8_64<int8_t, int64_t>");
     }
@@ -8230,8 +8230,8 @@ namespace kernel {
     int64_t outerwhich,
     int64_t length,
     int64_t base) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_UnionArray8_32_simplify8_U32_to8_64(
         totags,
         toindex,
@@ -8249,7 +8249,7 @@ namespace kernel {
         length,
         base);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for UnionArray_simplify8_U32_to8_64<int8_t, int32_t>");
     }
@@ -8276,8 +8276,8 @@ namespace kernel {
     int64_t outerwhich,
     int64_t length,
     int64_t base) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_UnionArray8_U32_simplify8_U32_to8_64(
         totags,
         toindex,
@@ -8295,7 +8295,7 @@ namespace kernel {
         length,
         base);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for UnionArray_simplify8_U32_to8_64<int8_t, uint32_t>");
     }
@@ -8322,8 +8322,8 @@ namespace kernel {
     int64_t outerwhich,
     int64_t length,
     int64_t base) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_UnionArray8_64_simplify8_U32_to8_64(
         totags,
         toindex,
@@ -8341,7 +8341,7 @@ namespace kernel {
         length,
         base);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for UnionArray_simplify8_U32_to8_64<int8_t, int64_t>");
     }
@@ -8368,8 +8368,8 @@ namespace kernel {
     int64_t outerwhich,
     int64_t length,
     int64_t base) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_UnionArray8_32_simplify8_64_to8_64(
         totags,
         toindex,
@@ -8387,7 +8387,7 @@ namespace kernel {
         length,
         base);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for UnionArray_simplify8_64_to8_64<int8_t, int32_t>");
     }
@@ -8414,8 +8414,8 @@ namespace kernel {
     int64_t outerwhich,
     int64_t length,
     int64_t base) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_UnionArray8_U32_simplify8_64_to8_64(
         totags,
         toindex,
@@ -8433,7 +8433,7 @@ namespace kernel {
         length,
         base);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for UnionArray_simplify8_64_to8_64<int8_t, uint32_t>");
     }
@@ -8460,8 +8460,8 @@ namespace kernel {
     int64_t outerwhich,
     int64_t length,
     int64_t base) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_UnionArray8_64_simplify8_64_to8_64(
         totags,
         toindex,
@@ -8479,7 +8479,7 @@ namespace kernel {
         length,
         base);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for UnionArray_simplify8_64_to8_64<int8_t, int64_t>");
     }
@@ -8501,8 +8501,8 @@ namespace kernel {
     int64_t fromwhich,
     int64_t length,
     int64_t base) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_UnionArray8_32_simplify_one_to8_64(
         totags,
         toindex,
@@ -8515,7 +8515,7 @@ namespace kernel {
         length,
         base);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for UnionArray_simplify_one_to8_64<int8_t, int32_t>");
     }
@@ -8537,8 +8537,8 @@ namespace kernel {
     int64_t fromwhich,
     int64_t length,
     int64_t base) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_UnionArray8_U32_simplify_one_to8_64(
         totags,
         toindex,
@@ -8551,7 +8551,7 @@ namespace kernel {
         length,
         base);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for UnionArray_simplify_one_to8_64<int8_t, uint32_t>");
     }
@@ -8573,8 +8573,8 @@ namespace kernel {
     int64_t fromwhich,
     int64_t length,
     int64_t base) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_UnionArray8_64_simplify_one_to8_64(
         totags,
         toindex,
@@ -8587,7 +8587,7 @@ namespace kernel {
         length,
         base);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for UnionArray_simplify_one_to8_64<int8_t, int64_t>");
     }
@@ -8605,8 +8605,8 @@ namespace kernel {
     int64_t stopsoffset,
     int64_t length,
     int64_t lencontent) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListArray32_validity(
         starts,
         startsoffset,
@@ -8615,7 +8615,7 @@ namespace kernel {
         length,
         lencontent);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListArray_validity<int32_t>");
     }
@@ -8633,8 +8633,8 @@ namespace kernel {
     int64_t stopsoffset,
     int64_t length,
     int64_t lencontent) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListArrayU32_validity(
         starts,
         startsoffset,
@@ -8643,7 +8643,7 @@ namespace kernel {
         length,
         lencontent);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListArray_validity<uint32_t>");
     }
@@ -8661,8 +8661,8 @@ namespace kernel {
     int64_t stopsoffset,
     int64_t length,
     int64_t lencontent) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListArray64_validity(
         starts,
         startsoffset,
@@ -8671,7 +8671,7 @@ namespace kernel {
         length,
         lencontent);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListArray_validity<int64_t>");
     }
@@ -8688,8 +8688,8 @@ namespace kernel {
     int64_t length,
     int64_t lencontent,
     bool isoption) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_IndexedArray32_validity(
         index,
         indexoffset,
@@ -8697,7 +8697,7 @@ namespace kernel {
         lencontent,
         isoption);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for IndexedArray_validity<int32_t>");
     }
@@ -8714,8 +8714,8 @@ namespace kernel {
     int64_t length,
     int64_t lencontent,
     bool isoption) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_IndexedArrayU32_validity(
         index,
         indexoffset,
@@ -8723,7 +8723,7 @@ namespace kernel {
         lencontent,
         isoption);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for IndexedArray_validity<uint32_t>");
     }
@@ -8740,8 +8740,8 @@ namespace kernel {
     int64_t length,
     int64_t lencontent,
     bool isoption) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_IndexedArray64_validity(
         index,
         indexoffset,
@@ -8749,7 +8749,7 @@ namespace kernel {
         lencontent,
         isoption);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for IndexedArray_validity<int64_t>");
     }
@@ -8768,8 +8768,8 @@ namespace kernel {
     int64_t length,
     int64_t numcontents,
     const int64_t *lencontents) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_UnionArray8_32_validity(
         tags,
         tagsoffset,
@@ -8779,7 +8779,7 @@ namespace kernel {
         numcontents,
         lencontents);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for UnionArray_validity<int8_t, int32_t>");
     }
@@ -8798,8 +8798,8 @@ namespace kernel {
     int64_t length,
     int64_t numcontents,
     const int64_t *lencontents) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_UnionArray8_U32_validity(
         tags,
         tagsoffset,
@@ -8809,7 +8809,7 @@ namespace kernel {
         numcontents,
         lencontents);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for UnionArray_validity<int8_t, uint32_t>");
     }
@@ -8828,8 +8828,8 @@ namespace kernel {
     int64_t length,
     int64_t numcontents,
     const int64_t *lencontents) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_UnionArray8_64_validity(
         tags,
         tagsoffset,
@@ -8839,7 +8839,7 @@ namespace kernel {
         numcontents,
         lencontents);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for UnionArray_validity<int8_t, int64_t>");
     }
@@ -8855,15 +8855,15 @@ namespace kernel {
     const int32_t *fromindex,
     int64_t offset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_UnionArray_fillna_from32_to64(
         toindex,
         fromindex,
         offset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for UnionArray_fillna_64<int32_t>");
     }
@@ -8879,15 +8879,15 @@ namespace kernel {
     const uint32_t *fromindex,
     int64_t offset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_UnionArray_fillna_fromU32_to64(
         toindex,
         fromindex,
         offset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for UnionArray_fillna_64<uint32_t>");
     }
@@ -8903,15 +8903,15 @@ namespace kernel {
     const int64_t *fromindex,
     int64_t offset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_UnionArray_fillna_from64_to64(
         toindex,
         fromindex,
         offset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for UnionArray_fillna_64<int64_t>");
     }
@@ -8925,14 +8925,14 @@ namespace kernel {
     int64_t *toindex,
     const int8_t *frommask,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_64(
         toindex,
         frommask,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for IndexedOptionArray_rpad_and_clip_mask_axis1_64");
     }
@@ -8946,14 +8946,14 @@ namespace kernel {
     int64_t *toindex,
     int64_t target,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_index_rpad_and_clip_axis0_64(
         toindex,
         target,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for index_rpad_and_clip_axis0_64");
     }
@@ -8968,15 +8968,15 @@ namespace kernel {
     int64_t *tostops,
     int64_t target,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_index_rpad_and_clip_axis1_64(
         tostarts,
         tostops,
         target,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for index_rpad_and_clip_axis1_64");
     }
@@ -8991,15 +8991,15 @@ namespace kernel {
     int64_t target,
     int64_t size,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_RegularArray_rpad_and_clip_axis1_64(
         toindex,
         target,
         size,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for RegularArray_rpad_and_clip_axis1_64");
     }
@@ -9017,8 +9017,8 @@ namespace kernel {
     int64_t lenstarts,
     int64_t startsoffset,
     int64_t stopsoffset) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListArray32_min_range(
         tomin,
         fromstarts,
@@ -9027,7 +9027,7 @@ namespace kernel {
         startsoffset,
         stopsoffset);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListArray_min_range<int32_t>");
     }
@@ -9045,8 +9045,8 @@ namespace kernel {
     int64_t lenstarts,
     int64_t startsoffset,
     int64_t stopsoffset) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListArrayU32_min_range(
         tomin,
         fromstarts,
@@ -9055,7 +9055,7 @@ namespace kernel {
         startsoffset,
         stopsoffset);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListArray_min_range<uint32_t>");
     }
@@ -9073,8 +9073,8 @@ namespace kernel {
     int64_t lenstarts,
     int64_t startsoffset,
     int64_t stopsoffset) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListArray64_min_range(
         tomin,
         fromstarts,
@@ -9083,7 +9083,7 @@ namespace kernel {
         startsoffset,
         stopsoffset);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListArray_min_range<int64_t>");
     }
@@ -9102,8 +9102,8 @@ namespace kernel {
     int64_t lenstarts,
     int64_t startsoffset,
     int64_t stopsoffset) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListArray32_rpad_and_clip_length_axis1(
         tolength,
         fromstarts,
@@ -9113,7 +9113,7 @@ namespace kernel {
         startsoffset,
         stopsoffset);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListArray_rpad_and_clip_length_axis1<int32_t>");
     }
@@ -9132,8 +9132,8 @@ namespace kernel {
     int64_t lenstarts,
     int64_t startsoffset,
     int64_t stopsoffset) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListArrayU32_rpad_and_clip_length_axis1(
         tolength,
         fromstarts,
@@ -9143,7 +9143,7 @@ namespace kernel {
         startsoffset,
         stopsoffset);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListArray_rpad_and_clip_length_axis1<uint32_t>");
     }
@@ -9162,8 +9162,8 @@ namespace kernel {
     int64_t lenstarts,
     int64_t startsoffset,
     int64_t stopsoffset) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListArray64_rpad_and_clip_length_axis1(
         tolength,
         fromstarts,
@@ -9173,7 +9173,7 @@ namespace kernel {
         startsoffset,
         stopsoffset);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListArray_rpad_and_clip_length_axis1<int64_t>");
     }
@@ -9194,8 +9194,8 @@ namespace kernel {
     int64_t length,
     int64_t startsoffset,
     int64_t stopsoffset) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListArray32_rpad_axis1_64(
         toindex,
         fromstarts,
@@ -9207,7 +9207,7 @@ namespace kernel {
         startsoffset,
         stopsoffset);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListArray_rpad_axis1_64<int32_t>");
     }
@@ -9228,8 +9228,8 @@ namespace kernel {
     int64_t length,
     int64_t startsoffset,
     int64_t stopsoffset) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListArrayU32_rpad_axis1_64(
         toindex,
         fromstarts,
@@ -9241,7 +9241,7 @@ namespace kernel {
         startsoffset,
         stopsoffset);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListArray_rpad_axis1_64<uint32_t>");
     }
@@ -9262,8 +9262,8 @@ namespace kernel {
     int64_t length,
     int64_t startsoffset,
     int64_t stopsoffset) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListArray64_rpad_axis1_64(
         toindex,
         fromstarts,
@@ -9275,7 +9275,7 @@ namespace kernel {
         startsoffset,
         stopsoffset);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListArray_rpad_axis1_64<int64_t>");
     }
@@ -9292,8 +9292,8 @@ namespace kernel {
     int64_t offsetsoffset,
     int64_t length,
     int64_t target) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListOffsetArray32_rpad_and_clip_axis1_64(
         toindex,
         fromoffsets,
@@ -9301,7 +9301,7 @@ namespace kernel {
         length,
         target);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_rpad_and_clip_axis1_64<int32_t>");
     }
@@ -9318,8 +9318,8 @@ namespace kernel {
     int64_t offsetsoffset,
     int64_t length,
     int64_t target) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListOffsetArrayU32_rpad_and_clip_axis1_64(
         toindex,
         fromoffsets,
@@ -9327,7 +9327,7 @@ namespace kernel {
         length,
         target);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_rpad_and_clip_axis1_64<uint32_t>");
     }
@@ -9344,8 +9344,8 @@ namespace kernel {
     int64_t offsetsoffset,
     int64_t length,
     int64_t target) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListOffsetArray64_rpad_and_clip_axis1_64(
         toindex,
         fromoffsets,
@@ -9353,7 +9353,7 @@ namespace kernel {
         length,
         target);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_rpad_and_clip_axis1_64<int64_t>");
     }
@@ -9371,8 +9371,8 @@ namespace kernel {
     int64_t fromlength,
     int64_t length,
     int64_t *tocount) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListOffsetArray32_rpad_length_axis1(
         tooffsets,
         fromoffsets,
@@ -9381,7 +9381,7 @@ namespace kernel {
         length,
         tocount);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_rpad_length_axis1<int32_t>");
     }
@@ -9399,8 +9399,8 @@ namespace kernel {
     int64_t fromlength,
     int64_t length,
     int64_t *tocount) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListOffsetArrayU32_rpad_length_axis1(
         tooffsets,
         fromoffsets,
@@ -9409,7 +9409,7 @@ namespace kernel {
         length,
         tocount);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_rpad_length_axis1<uint32_t>");
     }
@@ -9427,8 +9427,8 @@ namespace kernel {
     int64_t fromlength,
     int64_t length,
     int64_t *tocount) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListOffsetArray64_rpad_length_axis1(
         tooffsets,
         fromoffsets,
@@ -9437,7 +9437,7 @@ namespace kernel {
         length,
         tocount);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_rpad_length_axis1<int64_t>");
     }
@@ -9454,8 +9454,8 @@ namespace kernel {
     int64_t offsetsoffset,
     int64_t fromlength,
     int64_t target) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListOffsetArray32_rpad_axis1_64(
         toindex,
         fromoffsets,
@@ -9463,7 +9463,7 @@ namespace kernel {
         fromlength,
         target);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_rpad_axis1_64<int32_t>");
     }
@@ -9480,8 +9480,8 @@ namespace kernel {
     int64_t offsetsoffset,
     int64_t fromlength,
     int64_t target) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListOffsetArrayU32_rpad_axis1_64(
         toindex,
         fromoffsets,
@@ -9489,7 +9489,7 @@ namespace kernel {
         fromlength,
         target);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_rpad_axis1_64<uint32_t>");
     }
@@ -9506,8 +9506,8 @@ namespace kernel {
     int64_t offsetsoffset,
     int64_t fromlength,
     int64_t target) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListOffsetArray64_rpad_axis1_64(
         toindex,
         fromoffsets,
@@ -9515,7 +9515,7 @@ namespace kernel {
         fromlength,
         target);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_rpad_axis1_64<int64_t>");
     }
@@ -9528,13 +9528,13 @@ namespace kernel {
   ERROR localindex_64(
     int64_t *toindex,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_localindex_64(
         toindex,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for localindex_64");
     }
@@ -9550,15 +9550,15 @@ namespace kernel {
     const int32_t *offsets,
     int64_t offsetsoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListArray32_localindex_64(
         toindex,
         offsets,
         offsetsoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListArray_localindex_64<int32_t>");
     }
@@ -9574,15 +9574,15 @@ namespace kernel {
     const uint32_t *offsets,
     int64_t offsetsoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListArrayU32_localindex_64(
         toindex,
         offsets,
         offsetsoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListArray_localindex_64<uint32_t>");
     }
@@ -9598,15 +9598,15 @@ namespace kernel {
     const int64_t *offsets,
     int64_t offsetsoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListArray64_localindex_64(
         toindex,
         offsets,
         offsetsoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListArray_localindex_64<int64_t>");
     }
@@ -9620,14 +9620,14 @@ namespace kernel {
     int64_t *toindex,
     int64_t size,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_RegularArray_localindex_64(
         toindex,
         size,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for RegularArray_localindex_64");
     }
@@ -9643,15 +9643,15 @@ namespace kernel {
     int64_t n,
     bool replacement,
     int64_t singlelen) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_combinations_64(
         toindex,
         n,
         replacement,
         singlelen);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for combinations");
     }
@@ -9672,8 +9672,8 @@ namespace kernel {
     const int32_t *stops,
     int64_t stopsoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListArray32_combinations_length_64(
         totallen,
         tooffsets,
@@ -9685,7 +9685,7 @@ namespace kernel {
         stopsoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListArray_combinations_length_64<int32_t>");
     }
@@ -9706,8 +9706,8 @@ namespace kernel {
     const uint32_t *stops,
     int64_t stopsoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListArrayU32_combinations_length_64(
         totallen,
         tooffsets,
@@ -9719,7 +9719,7 @@ namespace kernel {
         stopsoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListArray_combinations_length_64<uint32_t>");
     }
@@ -9740,8 +9740,8 @@ namespace kernel {
     const int64_t *stops,
     int64_t stopsoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListArray64_combinations_length_64(
         totallen,
         tooffsets,
@@ -9753,7 +9753,7 @@ namespace kernel {
         stopsoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListArray_combinations_length_64<int64_t>");
     }
@@ -9775,8 +9775,8 @@ namespace kernel {
     const int32_t *stops,
     int64_t stopsoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListArray32_combinations_64(
         tocarry,
         toindex,
@@ -9789,7 +9789,7 @@ namespace kernel {
         stopsoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListArray_combinations_64<int32_t>");
     }
@@ -9811,8 +9811,8 @@ namespace kernel {
     const uint32_t *stops,
     int64_t stopsoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListArrayU32_combinations_64(
         tocarry,
         toindex,
@@ -9825,7 +9825,7 @@ namespace kernel {
         stopsoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListArray_combinations_64<uint32_t>");
     }
@@ -9847,8 +9847,8 @@ namespace kernel {
     const int64_t *stops,
     int64_t stopsoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListArray64_combinations_64(
         tocarry,
         toindex,
@@ -9861,7 +9861,7 @@ namespace kernel {
         stopsoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListArray_combinations_64<int64_t>");
     }
@@ -9879,8 +9879,8 @@ namespace kernel {
     bool replacement,
     int64_t size,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_RegularArray_combinations_64(
         tocarry,
         toindex,
@@ -9890,7 +9890,7 @@ namespace kernel {
         size,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for RegularArray_combinations_64");
     }
@@ -9908,8 +9908,8 @@ namespace kernel {
     int64_t mymaskoffset,
     int64_t length,
     bool validwhen) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ByteMaskedArray_overlay_mask8(
         tomask,
         theirmask,
@@ -9919,7 +9919,7 @@ namespace kernel {
         length,
         validwhen);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ByteMaskedArray_overlay_mask8");
     }
@@ -9936,8 +9936,8 @@ namespace kernel {
     int64_t bitmasklength,
     bool validwhen,
     bool lsb_order) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_BitMaskedArray_to_ByteMaskedArray(
         tobytemask,
         frombitmask,
@@ -9946,7 +9946,7 @@ namespace kernel {
         validwhen,
         lsb_order);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for BitMaskedArray_to_ByteMaskedArray");
     }
@@ -9963,8 +9963,8 @@ namespace kernel {
     int64_t bitmasklength,
     bool validwhen,
     bool lsb_order) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_BitMaskedArray_to_IndexedOptionArray64(
         toindex,
         frombitmask,
@@ -9973,7 +9973,7 @@ namespace kernel {
         validwhen,
         lsb_order);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for BitMaskedArray_to_IndexedOptionArray64");
     }
@@ -9991,8 +9991,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_count_64(
         toptr,
         parents,
@@ -10000,7 +10000,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_count_64");
     }
@@ -10019,8 +10019,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_countnonzero_bool_64(
         toptr,
         fromptr,
@@ -10030,7 +10030,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_countnonzero_64");
     }
@@ -10049,8 +10049,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_countnonzero_uint8_64(
         toptr,
         fromptr,
@@ -10060,7 +10060,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_countnonzero_64");
     }
@@ -10079,8 +10079,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_countnonzero_int8_64(
         toptr,
         fromptr,
@@ -10090,7 +10090,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_countnonzero_64");
     }
@@ -10109,8 +10109,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_countnonzero_int16_64(
         toptr,
         fromptr,
@@ -10120,7 +10120,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_countnonzero_64");
     }
@@ -10139,8 +10139,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_countnonzero_uint16_64(
         toptr,
         fromptr,
@@ -10150,7 +10150,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_countnonzero_64");
     }
@@ -10169,8 +10169,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_countnonzero_int32_64(
         toptr,
         fromptr,
@@ -10180,7 +10180,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_countnonzero_64");
     }
@@ -10199,8 +10199,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_countnonzero_uint32_64(
         toptr,
         fromptr,
@@ -10210,7 +10210,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_countnonzero_64");
     }
@@ -10229,8 +10229,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_countnonzero_int64_64(
         toptr,
         fromptr,
@@ -10240,7 +10240,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_countnonzero_64");
     }
@@ -10259,8 +10259,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_countnonzero_uint64_64(
         toptr,
         fromptr,
@@ -10270,7 +10270,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_countnonzero_64");
     }
@@ -10289,8 +10289,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_countnonzero_float32_64(
         toptr,
         fromptr,
@@ -10300,7 +10300,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_countnonzero_64");
     }
@@ -10319,8 +10319,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_countnonzero_float64_64(
         toptr,
         fromptr,
@@ -10330,7 +10330,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_countnonzero_64");
     }
@@ -10349,8 +10349,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_sum_int64_bool_64(
         toptr,
         fromptr,
@@ -10360,7 +10360,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_sum_64");
     }
@@ -10379,8 +10379,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_sum_int64_int8_64(
         toptr,
         fromptr,
@@ -10390,7 +10390,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_sum_64");
     }
@@ -10409,8 +10409,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_sum_uint64_uint8_64(
         toptr,
         fromptr,
@@ -10420,7 +10420,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_sum_64");
     }
@@ -10439,8 +10439,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_sum_int64_int16_64(
         toptr,
         fromptr,
@@ -10450,7 +10450,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_sum_64");
     }
@@ -10469,8 +10469,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_sum_uint64_uint16_64(
         toptr,
         fromptr,
@@ -10480,7 +10480,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_sum_64");
     }
@@ -10499,8 +10499,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_sum_int64_int32_64(
         toptr,
         fromptr,
@@ -10510,7 +10510,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_sum_64");
     }
@@ -10529,8 +10529,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_sum_uint64_uint32_64(
         toptr,
         fromptr,
@@ -10540,7 +10540,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_sum_64");
     }
@@ -10559,8 +10559,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_sum_int64_int64_64(
         toptr,
         fromptr,
@@ -10570,7 +10570,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_sum_64");
     }
@@ -10589,8 +10589,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_sum_uint64_uint64_64(
         toptr,
         fromptr,
@@ -10600,7 +10600,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_sum_64");
     }
@@ -10619,8 +10619,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_sum_float32_float32_64(
         toptr,
         fromptr,
@@ -10630,7 +10630,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_sum_64");
     }
@@ -10649,8 +10649,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_sum_float64_float64_64(
         toptr,
         fromptr,
@@ -10660,7 +10660,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_sum_64");
     }
@@ -10679,8 +10679,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_sum_int32_bool_64(
         toptr,
         fromptr,
@@ -10690,7 +10690,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_sum_64");
     }
@@ -10709,8 +10709,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_sum_int32_int8_64(
         toptr,
         fromptr,
@@ -10720,7 +10720,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_sum_64");
     }
@@ -10739,8 +10739,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_sum_uint32_uint8_64(
         toptr,
         fromptr,
@@ -10750,7 +10750,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_sum_64");
     }
@@ -10769,8 +10769,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_sum_int32_int16_64(
         toptr,
         fromptr,
@@ -10780,7 +10780,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_sum_64");
     }
@@ -10799,8 +10799,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_sum_uint32_uint16_64(
         toptr,
         fromptr,
@@ -10810,7 +10810,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_sum_64");
     }
@@ -10829,8 +10829,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_sum_int32_int32_64(
         toptr,
         fromptr,
@@ -10840,7 +10840,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_sum_64");
     }
@@ -10859,8 +10859,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_sum_uint32_uint32_64(
         toptr,
         fromptr,
@@ -10870,7 +10870,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_sum_64");
     }
@@ -10889,8 +10889,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_sum_bool_bool_64(
         toptr,
         fromptr,
@@ -10900,7 +10900,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_sum_bool_64");
     }
@@ -10919,8 +10919,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_sum_bool_int8_64(
         toptr,
         fromptr,
@@ -10930,7 +10930,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_sum_bool_64");
     }
@@ -10949,8 +10949,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_sum_bool_uint8_64(
         toptr,
         fromptr,
@@ -10960,7 +10960,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_sum_bool_64");
     }
@@ -10979,8 +10979,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_sum_bool_int16_64(
         toptr,
         fromptr,
@@ -10990,7 +10990,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_sum_bool_64");
     }
@@ -11009,8 +11009,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_sum_bool_uint16_64(
         toptr,
         fromptr,
@@ -11020,7 +11020,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_sum_bool_64");
     }
@@ -11039,8 +11039,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_sum_bool_int32_64(
         toptr,
         fromptr,
@@ -11050,7 +11050,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_sum_bool_64");
     }
@@ -11069,8 +11069,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_sum_bool_uint32_64(
         toptr,
         fromptr,
@@ -11080,7 +11080,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_sum_bool_64");
     }
@@ -11099,8 +11099,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_sum_bool_int64_64(
         toptr,
         fromptr,
@@ -11110,7 +11110,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_sum_bool_64");
     }
@@ -11129,8 +11129,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_sum_bool_uint64_64(
         toptr,
         fromptr,
@@ -11140,7 +11140,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_sum_bool_64");
     }
@@ -11159,8 +11159,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_sum_bool_float32_64(
         toptr,
         fromptr,
@@ -11170,7 +11170,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_sum_bool_64");
     }
@@ -11189,8 +11189,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_sum_bool_float64_64(
         toptr,
         fromptr,
@@ -11200,7 +11200,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_sum_bool_64");
     }
@@ -11219,8 +11219,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_prod_int64_bool_64(
         toptr,
         fromptr,
@@ -11230,7 +11230,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_prod_64");
     }
@@ -11249,8 +11249,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_prod_int64_int8_64(
         toptr,
         fromptr,
@@ -11260,7 +11260,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_prod_64");
     }
@@ -11279,8 +11279,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_prod_uint64_uint8_64(
         toptr,
         fromptr,
@@ -11290,7 +11290,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_prod_64");
     }
@@ -11309,8 +11309,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_prod_int64_int16_64(
         toptr,
         fromptr,
@@ -11320,7 +11320,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_prod_64");
     }
@@ -11339,8 +11339,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_prod_uint64_uint16_64(
         toptr,
         fromptr,
@@ -11350,7 +11350,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_prod_64");
     }
@@ -11369,8 +11369,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_prod_int64_int32_64(
         toptr,
         fromptr,
@@ -11380,7 +11380,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_prod_64");
     }
@@ -11399,8 +11399,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_prod_uint64_uint32_64(
         toptr,
         fromptr,
@@ -11410,7 +11410,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_prod_64");
     }
@@ -11429,8 +11429,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_prod_int64_int64_64(
         toptr,
         fromptr,
@@ -11440,7 +11440,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_prod_64");
     }
@@ -11459,8 +11459,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_prod_uint64_uint64_64(
         toptr,
         fromptr,
@@ -11470,7 +11470,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_prod_64");
     }
@@ -11489,8 +11489,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_prod_float32_float32_64(
         toptr,
         fromptr,
@@ -11500,7 +11500,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_prod_64");
     }
@@ -11519,8 +11519,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_prod_float64_float64_64(
         toptr,
         fromptr,
@@ -11530,7 +11530,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_prod_64");
     }
@@ -11549,8 +11549,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_prod_int32_bool_64(
         toptr,
         fromptr,
@@ -11560,7 +11560,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_prod_64");
     }
@@ -11579,8 +11579,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_prod_int32_int8_64(
         toptr,
         fromptr,
@@ -11590,7 +11590,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_prod_64");
     }
@@ -11609,8 +11609,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_prod_uint32_uint8_64(
         toptr,
         fromptr,
@@ -11620,7 +11620,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_prod_64");
     }
@@ -11639,8 +11639,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_prod_int32_int16_64(
         toptr,
         fromptr,
@@ -11650,7 +11650,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_prod_64");
     }
@@ -11669,8 +11669,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_prod_uint32_uint16_64(
         toptr,
         fromptr,
@@ -11680,7 +11680,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_prod_64");
     }
@@ -11699,8 +11699,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_prod_int32_int32_64(
         toptr,
         fromptr,
@@ -11710,7 +11710,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_prod_64");
     }
@@ -11729,8 +11729,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_prod_uint32_uint32_64(
         toptr,
         fromptr,
@@ -11740,7 +11740,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_prod_64");
     }
@@ -11759,8 +11759,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_prod_bool_bool_64(
         toptr,
         fromptr,
@@ -11770,7 +11770,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_prod_bool_64");
     }
@@ -11789,8 +11789,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_prod_bool_int8_64(
         toptr,
         fromptr,
@@ -11800,7 +11800,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_prod_bool_64");
     }
@@ -11819,8 +11819,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_prod_bool_uint8_64(
         toptr,
         fromptr,
@@ -11830,7 +11830,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_prod_bool_64");
     }
@@ -11849,8 +11849,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_prod_bool_int16_64(
         toptr,
         fromptr,
@@ -11860,7 +11860,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_prod_bool_64");
     }
@@ -11879,8 +11879,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_prod_bool_uint16_64(
         toptr,
         fromptr,
@@ -11890,7 +11890,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_prod_bool_64");
     }
@@ -11909,8 +11909,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_prod_bool_int32_64(
         toptr,
         fromptr,
@@ -11920,7 +11920,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_prod_bool_64");
     }
@@ -11939,8 +11939,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_prod_bool_uint32_64(
         toptr,
         fromptr,
@@ -11950,7 +11950,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_prod_bool_64");
     }
@@ -11969,8 +11969,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_prod_bool_int64_64(
         toptr,
         fromptr,
@@ -11980,7 +11980,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_prod_bool_64");
     }
@@ -11999,8 +11999,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_prod_bool_uint64_64(
         toptr,
         fromptr,
@@ -12010,7 +12010,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_prod_bool_64");
     }
@@ -12029,8 +12029,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_prod_bool_float32_64(
         toptr,
         fromptr,
@@ -12040,7 +12040,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_prod_bool_64");
     }
@@ -12059,8 +12059,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_prod_bool_float64_64(
         toptr,
         fromptr,
@@ -12070,7 +12070,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_prod_bool_64");
     }
@@ -12090,8 +12090,8 @@ namespace kernel {
     int64_t lenparents,
     int64_t outlength,
     int8_t identity) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_min_int8_int8_64(
         toptr,
         fromptr,
@@ -12102,7 +12102,7 @@ namespace kernel {
         outlength,
         identity);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_min_64");
     }
@@ -12122,8 +12122,8 @@ namespace kernel {
     int64_t lenparents,
     int64_t outlength,
     uint8_t identity) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_min_uint8_uint8_64(
         toptr,
         fromptr,
@@ -12134,7 +12134,7 @@ namespace kernel {
         outlength,
         identity);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_min_64");
     }
@@ -12154,8 +12154,8 @@ namespace kernel {
     int64_t lenparents,
     int64_t outlength,
     int16_t identity) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_min_int16_int16_64(
         toptr,
         fromptr,
@@ -12166,7 +12166,7 @@ namespace kernel {
         outlength,
         identity);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_min_64");
     }
@@ -12186,8 +12186,8 @@ namespace kernel {
     int64_t lenparents,
     int64_t outlength,
     uint16_t identity) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_min_uint16_uint16_64(
         toptr,
         fromptr,
@@ -12198,7 +12198,7 @@ namespace kernel {
         outlength,
         identity);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_min_64");
     }
@@ -12218,8 +12218,8 @@ namespace kernel {
     int64_t lenparents,
     int64_t outlength,
     int32_t identity) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_min_int32_int32_64(
         toptr,
         fromptr,
@@ -12230,7 +12230,7 @@ namespace kernel {
         outlength,
         identity);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_min_64");
     }
@@ -12250,8 +12250,8 @@ namespace kernel {
     int64_t lenparents,
     int64_t outlength,
     uint32_t identity) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_min_uint32_uint32_64(
         toptr,
         fromptr,
@@ -12262,7 +12262,7 @@ namespace kernel {
         outlength,
         identity);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_min_64");
     }
@@ -12282,8 +12282,8 @@ namespace kernel {
     int64_t lenparents,
     int64_t outlength,
     int64_t identity) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_min_int64_int64_64(
         toptr,
         fromptr,
@@ -12294,7 +12294,7 @@ namespace kernel {
         outlength,
         identity);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_min_64");
     }
@@ -12314,8 +12314,8 @@ namespace kernel {
     int64_t lenparents,
     int64_t outlength,
     uint64_t identity) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_min_uint64_uint64_64(
         toptr,
         fromptr,
@@ -12326,7 +12326,7 @@ namespace kernel {
         outlength,
         identity);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_min_64");
     }
@@ -12346,8 +12346,8 @@ namespace kernel {
     int64_t lenparents,
     int64_t outlength,
     float identity) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_min_float32_float32_64(
         toptr,
         fromptr,
@@ -12358,7 +12358,7 @@ namespace kernel {
         outlength,
         identity);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_min_64");
     }
@@ -12378,8 +12378,8 @@ namespace kernel {
     int64_t lenparents,
     int64_t outlength,
     double identity) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_min_float64_float64_64(
         toptr,
         fromptr,
@@ -12390,7 +12390,7 @@ namespace kernel {
         outlength,
         identity);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_min_64");
     }
@@ -12410,8 +12410,8 @@ namespace kernel {
     int64_t lenparents,
     int64_t outlength,
     int8_t identity) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_max_int8_int8_64(
         toptr,
         fromptr,
@@ -12422,7 +12422,7 @@ namespace kernel {
         outlength,
         identity);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_max_64");
     }
@@ -12442,8 +12442,8 @@ namespace kernel {
     int64_t lenparents,
     int64_t outlength,
     uint8_t identity) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_max_uint8_uint8_64(
         toptr,
         fromptr,
@@ -12454,7 +12454,7 @@ namespace kernel {
         outlength,
         identity);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_max_64");
     }
@@ -12474,8 +12474,8 @@ namespace kernel {
     int64_t lenparents,
     int64_t outlength,
     int16_t identity) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_max_int16_int16_64(
         toptr,
         fromptr,
@@ -12486,7 +12486,7 @@ namespace kernel {
         outlength,
         identity);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_max_64");
     }
@@ -12506,8 +12506,8 @@ namespace kernel {
     int64_t lenparents,
     int64_t outlength,
     uint16_t identity) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_max_uint16_uint16_64(
         toptr,
         fromptr,
@@ -12518,7 +12518,7 @@ namespace kernel {
         outlength,
         identity);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_max_64");
     }
@@ -12538,8 +12538,8 @@ namespace kernel {
     int64_t lenparents,
     int64_t outlength,
     int32_t identity) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_max_int32_int32_64(
         toptr,
         fromptr,
@@ -12550,7 +12550,7 @@ namespace kernel {
         outlength,
         identity);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_max_64");
     }
@@ -12570,8 +12570,8 @@ namespace kernel {
     int64_t lenparents,
     int64_t outlength,
     uint32_t identity) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_max_uint32_uint32_64(
         toptr,
         fromptr,
@@ -12582,7 +12582,7 @@ namespace kernel {
         outlength,
         identity);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_max_64");
     }
@@ -12602,8 +12602,8 @@ namespace kernel {
     int64_t lenparents,
     int64_t outlength,
     int64_t identity) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_max_int64_int64_64(
         toptr,
         fromptr,
@@ -12614,7 +12614,7 @@ namespace kernel {
         outlength,
         identity);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_max_64");
     }
@@ -12634,8 +12634,8 @@ namespace kernel {
     int64_t lenparents,
     int64_t outlength,
     uint64_t identity) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_max_uint64_uint64_64(
         toptr,
         fromptr,
@@ -12646,7 +12646,7 @@ namespace kernel {
         outlength,
         identity);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_max_64");
     }
@@ -12666,8 +12666,8 @@ namespace kernel {
     int64_t lenparents,
     int64_t outlength,
     float identity) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_max_float32_float32_64(
         toptr,
         fromptr,
@@ -12678,7 +12678,7 @@ namespace kernel {
         outlength,
         identity);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_max_64");
     }
@@ -12698,8 +12698,8 @@ namespace kernel {
     int64_t lenparents,
     int64_t outlength,
     double identity) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_max_float64_float64_64(
         toptr,
         fromptr,
@@ -12710,7 +12710,7 @@ namespace kernel {
         outlength,
         identity);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_max_64");
     }
@@ -12731,8 +12731,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_argmin_bool_64(
         toptr,
         fromptr,
@@ -12744,7 +12744,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_argmin_64");
     }
@@ -12765,8 +12765,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_argmin_int8_64(
         toptr,
         fromptr,
@@ -12778,7 +12778,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_argmin_64");
     }
@@ -12799,8 +12799,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_argmin_uint8_64(
         toptr,
         fromptr,
@@ -12812,7 +12812,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_argmin_64");
     }
@@ -12833,8 +12833,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_argmin_int16_64(
         toptr,
         fromptr,
@@ -12846,7 +12846,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_argmin_64");
     }
@@ -12867,8 +12867,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_argmin_uint16_64(
         toptr,
         fromptr,
@@ -12880,7 +12880,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_argmin_64");
     }
@@ -12901,8 +12901,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_argmin_int32_64(
         toptr,
         fromptr,
@@ -12914,7 +12914,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_argmin_64");
     }
@@ -12935,8 +12935,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_argmin_uint32_64(
         toptr,
         fromptr,
@@ -12948,7 +12948,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_argmin_64");
     }
@@ -12969,8 +12969,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_argmin_int64_64(
         toptr,
         fromptr,
@@ -12982,7 +12982,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_argmin_64");
     }
@@ -13003,8 +13003,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_argmin_uint64_64(
         toptr,
         fromptr,
@@ -13016,7 +13016,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_argmin_64");
     }
@@ -13037,8 +13037,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_argmin_float32_64(
         toptr,
         fromptr,
@@ -13050,7 +13050,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_argmin_64");
     }
@@ -13071,8 +13071,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_argmin_float64_64(
         toptr,
         fromptr,
@@ -13084,7 +13084,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_argmin_64");
     }
@@ -13106,8 +13106,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_argmax_bool_64(
         toptr,
         fromptr,
@@ -13119,7 +13119,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_argmax_64");
     }
@@ -13140,8 +13140,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_argmax_int8_64(
         toptr,
         fromptr,
@@ -13153,7 +13153,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_argmax_64");
     }
@@ -13174,8 +13174,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_argmax_uint8_64(
         toptr,
         fromptr,
@@ -13187,7 +13187,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_argmax_64");
     }
@@ -13208,8 +13208,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_argmax_int16_64(
         toptr,
         fromptr,
@@ -13221,7 +13221,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_argmax_64");
     }
@@ -13242,8 +13242,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_argmax_uint16_64(
         toptr,
         fromptr,
@@ -13255,7 +13255,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_argmax_64");
     }
@@ -13276,8 +13276,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_argmax_int32_64(
         toptr,
         fromptr,
@@ -13289,7 +13289,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_argmax_64");
     }
@@ -13310,8 +13310,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_argmax_uint32_64(
         toptr,
         fromptr,
@@ -13323,7 +13323,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_argmax_64");
     }
@@ -13344,8 +13344,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_argmax_int64_64(
         toptr,
         fromptr,
@@ -13357,7 +13357,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_argmax_64");
     }
@@ -13378,8 +13378,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_argmax_uint64_64(
         toptr,
         fromptr,
@@ -13391,7 +13391,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_argmax_64");
     }
@@ -13412,8 +13412,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_argmax_float32_64(
         toptr,
         fromptr,
@@ -13425,7 +13425,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_argmax_64");
     }
@@ -13446,8 +13446,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_reduce_argmax_float64_64(
         toptr,
         fromptr,
@@ -13459,7 +13459,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for reduce_argmax_64");
     }
@@ -13472,13 +13472,13 @@ namespace kernel {
   ERROR content_reduce_zeroparents_64(
     int64_t *toparents,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_content_reduce_zeroparents_64(
         toparents,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for content_reduce_zeroparents_64");
     }
@@ -13494,8 +13494,8 @@ namespace kernel {
     const int64_t *offsets,
     int64_t offsetsoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListOffsetArray_reduce_global_startstop_64(
         globalstart,
         globalstop,
@@ -13503,7 +13503,7 @@ namespace kernel {
         offsetsoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_reduce_global_startstop_64");
     }
@@ -13519,8 +13519,8 @@ namespace kernel {
     const int64_t *offsets,
     int64_t offsetsoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64(
         maxcount,
         offsetscopy,
@@ -13528,7 +13528,7 @@ namespace kernel {
         offsetsoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64");
     }
@@ -13552,8 +13552,8 @@ namespace kernel {
     const int64_t *parents,
     int64_t parentsoffset,
     int64_t maxcount) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListOffsetArray_reduce_nonlocal_preparenext_64(
         nextcarry,
         nextparents,
@@ -13569,7 +13569,7 @@ namespace kernel {
         parentsoffset,
         maxcount);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_reduce_nonlocal_preparenext_64");
     }
@@ -13583,14 +13583,14 @@ namespace kernel {
     int64_t *nextstarts,
     const int64_t *nextparents,
     int64_t nextlen) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64(
         nextstarts,
         nextparents,
         nextlen);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_reduce_nonlocal_nextstarts_64");
     }
@@ -13605,15 +13605,15 @@ namespace kernel {
     const int64_t *parents,
     int64_t parentsoffset,
     int64_t lenparents) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListOffsetArray_reduce_nonlocal_findgaps_64(
         gaps,
         parents,
         parentsoffset,
         lenparents);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_reduce_nonlocal_findgaps_64");
     }
@@ -13630,8 +13630,8 @@ namespace kernel {
     int64_t lendistincts,
     const int64_t *gaps,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64(
         outstarts,
         outstops,
@@ -13640,7 +13640,7 @@ namespace kernel {
         gaps,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_reduce_nonlocal_outstartsstops_64");
     }
@@ -13655,15 +13655,15 @@ namespace kernel {
     const int64_t *offsets,
     int64_t offsetsoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListOffsetArray_reduce_local_nextparents_64(
         nextparents,
         offsets,
         offsetsoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_reduce_local_nextparents_64");
     }
@@ -13679,8 +13679,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListOffsetArray_reduce_local_outoffsets_64(
         outoffsets,
         parents,
@@ -13688,7 +13688,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_reduce_local_outoffsets_64");
     }
@@ -13708,8 +13708,8 @@ namespace kernel {
     int64_t *parents,
     int64_t parentsoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_IndexedArray32_reduce_next_64(
         nextcarry,
         nextparents,
@@ -13720,7 +13720,7 @@ namespace kernel {
         parentsoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for IndexedArray_reduce_next_64<int32_t>");
     }
@@ -13740,8 +13740,8 @@ namespace kernel {
     int64_t *parents,
     int64_t parentsoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_IndexedArrayU32_reduce_next_64(
         nextcarry,
         nextparents,
@@ -13752,7 +13752,7 @@ namespace kernel {
         parentsoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for IndexedArray_reduce_next_64<uint32_t>");
     }
@@ -13772,8 +13772,8 @@ namespace kernel {
     int64_t *parents,
     int64_t parentsoffset,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_IndexedArray64_reduce_next_64(
         nextcarry,
         nextparents,
@@ -13784,7 +13784,7 @@ namespace kernel {
         parentsoffset,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for IndexedArray_reduce_next_64<int64_t>");
     }
@@ -13800,8 +13800,8 @@ namespace kernel {
     int64_t startsoffset,
     int64_t startslength,
     int64_t outindexlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_IndexedArray_reduce_next_fix_offsets_64(
         outoffsets,
         starts,
@@ -13809,7 +13809,7 @@ namespace kernel {
         startslength,
         outindexlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for IndexedArray_reduce_next_fix_offsets_64");
     }
@@ -13825,8 +13825,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t lenparents,
     int64_t outlength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_reduce_mask_ByteMaskedArray_64(
         toptr,
         parents,
@@ -13834,7 +13834,7 @@ namespace kernel {
         lenparents,
         outlength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_reduce_mask_ByteMaskedArray_64");
     }
@@ -13854,8 +13854,8 @@ namespace kernel {
     int64_t parentsoffset,
     int64_t length,
     bool validwhen) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ByteMaskedArray_reduce_next_64(
         nextcarry,
         nextparents,
@@ -13867,7 +13867,7 @@ namespace kernel {
         length,
         validwhen);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ByteMaskedArray_reduce_next_64");
     }
@@ -13884,15 +13884,15 @@ namespace kernel {
     int64_t tolength,
     const int64_t *parents,
     int64_t parentslength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_sorting_ranges(
         toindex,
         tolength,
         parents,
         parentslength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for sorting_ranges");
     }
@@ -13906,14 +13906,14 @@ namespace kernel {
     int64_t *tolength,
     const int64_t *parents,
     int64_t parentslength) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_sorting_ranges_length(
         tolength,
         parents,
         parentslength);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for sorting_ranges_length");
     }
@@ -13932,8 +13932,8 @@ namespace kernel {
     int64_t offsetslength,
     bool ascending,
     bool stable) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_argsort_bool(
         toptr,
         fromptr,
@@ -13943,7 +13943,7 @@ namespace kernel {
         ascending,
         stable);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_argsort<bool>");
     }
@@ -13962,8 +13962,8 @@ namespace kernel {
     int64_t offsetslength,
     bool ascending,
     bool stable) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_argsort_int8(
         toptr,
         fromptr,
@@ -13973,7 +13973,7 @@ namespace kernel {
         ascending,
         stable);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_argsort<int8_t>");
     }
@@ -13992,8 +13992,8 @@ namespace kernel {
     int64_t offsetslength,
     bool ascending,
     bool stable) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_argsort_uint8(
         toptr,
         fromptr,
@@ -14003,7 +14003,7 @@ namespace kernel {
         ascending,
         stable);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_argsort<uint8_t>");
     }
@@ -14022,8 +14022,8 @@ namespace kernel {
     int64_t offsetslength,
     bool ascending,
     bool stable) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_argsort_int16(
         toptr,
         fromptr,
@@ -14033,7 +14033,7 @@ namespace kernel {
         ascending,
         stable);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_argsort<int16_t>");
     }
@@ -14052,8 +14052,8 @@ namespace kernel {
     int64_t offsetslength,
     bool ascending,
     bool stable) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_argsort_uint16(
         toptr,
         fromptr,
@@ -14063,7 +14063,7 @@ namespace kernel {
         ascending,
         stable);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_argsort<uint16_t>");
     }
@@ -14082,8 +14082,8 @@ namespace kernel {
     int64_t offsetslength,
     bool ascending,
     bool stable) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_argsort_int32(
         toptr,
         fromptr,
@@ -14093,7 +14093,7 @@ namespace kernel {
         ascending,
         stable);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_argsort<int32_t>");
     }
@@ -14112,8 +14112,8 @@ namespace kernel {
     int64_t offsetslength,
     bool ascending,
     bool stable) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_argsort_uint32(
         toptr,
         fromptr,
@@ -14123,7 +14123,7 @@ namespace kernel {
         ascending,
         stable);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_argsort<uint32_t>");
     }
@@ -14142,8 +14142,8 @@ namespace kernel {
     int64_t offsetslength,
     bool ascending,
     bool stable) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_argsort_int64(
         toptr,
         fromptr,
@@ -14153,7 +14153,7 @@ namespace kernel {
         ascending,
         stable);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_argsort<int64_t>");
     }
@@ -14172,8 +14172,8 @@ namespace kernel {
     int64_t offsetslength,
     bool ascending,
     bool stable) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_argsort_uint64(
         toptr,
         fromptr,
@@ -14183,7 +14183,7 @@ namespace kernel {
         ascending,
         stable);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_argsort<uint64_t>");
     }
@@ -14202,8 +14202,8 @@ namespace kernel {
     int64_t offsetslength,
     bool ascending,
     bool stable) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_argsort_float32(
         toptr,
         fromptr,
@@ -14213,7 +14213,7 @@ namespace kernel {
         ascending,
         stable);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_argsort<float>");
     }
@@ -14232,8 +14232,8 @@ namespace kernel {
     int64_t offsetslength,
     bool ascending,
     bool stable) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_argsort_float64(
         toptr,
         fromptr,
@@ -14243,7 +14243,7 @@ namespace kernel {
         ascending,
         stable);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_argsort<double>");
     }
@@ -14263,8 +14263,8 @@ namespace kernel {
     int64_t parentslength,
     bool ascending,
     bool stable) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_sort_bool(
         toptr,
         fromptr,
@@ -14275,7 +14275,7 @@ namespace kernel {
         ascending,
         stable);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_sort<bool>");
     }
@@ -14295,8 +14295,8 @@ namespace kernel {
     int64_t parentslength,
     bool ascending,
     bool stable) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_sort_uint8(
         toptr,
         fromptr,
@@ -14307,7 +14307,7 @@ namespace kernel {
         ascending,
         stable);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_sort<uint8_t>");
     }
@@ -14327,8 +14327,8 @@ namespace kernel {
     int64_t parentslength,
     bool ascending,
     bool stable) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_sort_int8(
         toptr,
         fromptr,
@@ -14339,7 +14339,7 @@ namespace kernel {
         ascending,
         stable);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_sort<int8_t>");
     }
@@ -14359,8 +14359,8 @@ namespace kernel {
     int64_t parentslength,
     bool ascending,
     bool stable) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_sort_uint16(
         toptr,
         fromptr,
@@ -14371,7 +14371,7 @@ namespace kernel {
         ascending,
         stable);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_sort<uint16_t>");
     }
@@ -14391,8 +14391,8 @@ namespace kernel {
     int64_t parentslength,
     bool ascending,
     bool stable) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_sort_int16(
         toptr,
         fromptr,
@@ -14403,7 +14403,7 @@ namespace kernel {
         ascending,
         stable);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_sort<int16_t>");
     }
@@ -14423,8 +14423,8 @@ namespace kernel {
     int64_t parentslength,
     bool ascending,
     bool stable) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_sort_uint32(
         toptr,
         fromptr,
@@ -14435,7 +14435,7 @@ namespace kernel {
         ascending,
         stable);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_sort<uint32_t>");
     }
@@ -14455,8 +14455,8 @@ namespace kernel {
     int64_t parentslength,
     bool ascending,
     bool stable) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_sort_int32(
         toptr,
         fromptr,
@@ -14467,7 +14467,7 @@ namespace kernel {
         ascending,
         stable);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_sort<int32_t>");
     }
@@ -14487,8 +14487,8 @@ namespace kernel {
     int64_t parentslength,
     bool ascending,
     bool stable) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_sort_uint64(
         toptr,
         fromptr,
@@ -14499,7 +14499,7 @@ namespace kernel {
         ascending,
         stable);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_sort<uint64_t>");
     }
@@ -14519,8 +14519,8 @@ namespace kernel {
     int64_t parentslength,
     bool ascending,
     bool stable) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_sort_int64(
         toptr,
         fromptr,
@@ -14531,7 +14531,7 @@ namespace kernel {
         ascending,
         stable);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_sort<int64_t>");
     }
@@ -14551,8 +14551,8 @@ namespace kernel {
     int64_t parentslength,
     bool ascending,
     bool stable) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_sort_float32(
         toptr,
         fromptr,
@@ -14563,7 +14563,7 @@ namespace kernel {
         ascending,
         stable);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_sort<float>");
     }
@@ -14583,8 +14583,8 @@ namespace kernel {
     int64_t parentslength,
     bool ascending,
     bool stable) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_sort_float64(
         toptr,
         fromptr,
@@ -14595,7 +14595,7 @@ namespace kernel {
         ascending,
         stable);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_sort<double>");
     }
@@ -14614,8 +14614,8 @@ namespace kernel {
     int64_t *outoffsets,
     bool ascending,
     bool stable) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_NumpyArray_sort_asstrings_uint8(
         toptr,
         fromptr,
@@ -14625,7 +14625,7 @@ namespace kernel {
         ascending,
         stable);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for NumpyArray_sort_asstrings<uint8_t>");
     }
@@ -14639,14 +14639,14 @@ namespace kernel {
     int64_t *tocarry,
     const int64_t *fromindex,
     int64_t length) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_ListOffsetArray_local_preparenext_64(
         tocarry,
         fromindex,
         length);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_local_preparenext_64");
     }
@@ -14664,8 +14664,8 @@ namespace kernel {
     int64_t parentslength,
     const int64_t *nextparents,
     int64_t nextparentsoffset) {
-    kernel::Lib ptr_lib = kernel::Lib::cpu_kernels;
-    if (ptr_lib == kernel::Lib::cpu_kernels) {
+    kernel::lib ptr_lib = kernel::lib::cpu;
+    if (ptr_lib == kernel::lib::cpu) {
       return awkward_IndexedArray_local_preparenext_64(
         tocarry,
         starts,
@@ -14675,7 +14675,7 @@ namespace kernel {
         nextparents,
         nextparentsoffset);
     }
-    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+    else if (ptr_lib == kernel::lib::cuda) {
       throw std::runtime_error(
         "not implemented: ptr_lib == cuda_kernels for IndexedArray_local_preparenext_64");
     }

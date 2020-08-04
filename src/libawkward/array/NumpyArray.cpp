@@ -264,10 +264,10 @@ namespace awkward {
                          ssize_t itemsize,
                          const std::string format,
                          util::dtype dtype,
-                         const kernel::Lib ptr_lib)
+                         const kernel::lib ptr_lib)
       : Content(identities, parameters)
-      , ptr_lib_(ptr_lib)
       , ptr_(ptr)
+      , ptr_lib_(ptr_lib)
       , shape_(shape)
       , strides_(strides)
       , byteoffset_(byteoffset)
@@ -353,7 +353,7 @@ namespace awkward {
                                    byteoffset_);
   }
 
-  kernel::Lib
+  kernel::lib
   NumpyArray::ptr_lib() const {
     return ptr_lib_;
   }
@@ -503,7 +503,7 @@ namespace awkward {
   }
 
   template <typename T>
-  void tostring_as(kernel::Lib ptr_lib,
+  void tostring_as(kernel::lib ptr_lib,
                    std::stringstream& out,
                    T* ptr,
                    ssize_t stride,
@@ -734,7 +734,7 @@ namespace awkward {
     out << "\" at=\"0x";
     out << std::hex << std::setw(12) << std::setfill('0')
         << reinterpret_cast<ssize_t>(ptr_.get());
-    if(ptr_lib() == kernel::Lib::cuda_kernels) {
+    if(ptr_lib() == kernel::lib::cuda) {
       out << "\">\n";
       out << kernellib_asstring(indent + std::string("    "), "", "\n");
 
@@ -770,13 +770,13 @@ namespace awkward {
   NumpyArray::kernellib_asstring(const std::string &indent,
                                  const std::string &pre,
                                  const std::string &post) const {
-    if(ptr_lib_ == kernel::Lib::cpu_kernels) {
+    if (ptr_lib_ == kernel::lib::cpu) {
       return "";
     }
     else {
       std::stringstream out;
       out << indent << pre << "<Lib name=\"";
-      if(ptr_lib_ == kernel::Lib::cuda_kernels) {
+      if (ptr_lib_ == kernel::lib::cuda) {
         out << "cuda\" " << "device_number=\"" << kernel::get_ptr_device_num(ptr_lib(), ptr_.get())
         << "\" device_name=\"" << kernel::get_ptr_device_name(ptr_lib(), ptr_.get()) << "\"";
       }
@@ -4689,7 +4689,7 @@ namespace awkward {
   }
 
   const ContentPtr
-  NumpyArray::copy_to(kernel::Lib ptr_lib) const {
+  NumpyArray::copy_to(kernel::lib ptr_lib) const {
     if (ptr_lib_ == ptr_lib) {
       return std::make_shared<NumpyArray>(identities_,
                                           parameters_,

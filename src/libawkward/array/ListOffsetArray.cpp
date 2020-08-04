@@ -2248,7 +2248,7 @@ namespace awkward {
 
   template <typename T>
   const ContentPtr
-  ListOffsetArrayOf<T>::copy_to(kernel::Lib ptr_lib) const {
+  ListOffsetArrayOf<T>::copy_to(kernel::lib ptr_lib) const {
     IndexOf<T> offsets = offsets_.copy_to(ptr_lib);
     ContentPtr content = content_->copy_to(ptr_lib);
     return std::make_shared<ListOffsetArrayOf<T>>(identities(),

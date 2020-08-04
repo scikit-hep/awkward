@@ -2291,7 +2291,7 @@ namespace awkward {
 
   template <typename T, bool ISOPTION>
   const ContentPtr
-  IndexedArrayOf<T, ISOPTION>::copy_to(kernel::Lib ptr_lib) const {
+  IndexedArrayOf<T, ISOPTION>::copy_to(kernel::lib ptr_lib) const {
     IndexOf<T> index = index_.copy_to(ptr_lib);
     ContentPtr content = content_->copy_to(ptr_lib);
     return std::make_shared<IndexedArrayOf<T, ISOPTION>>(identities_,

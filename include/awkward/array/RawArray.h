@@ -191,14 +191,14 @@ namespace awkward {
     /// buffer.
     /// @param length Number of elements in the array.
     /// @param itemsize Number of bytes per item; should agree with the format.
-    /// @param Choose the Kernel Library for this array, default:= cpu_kernels
+    /// @param Choose the Kernel Library for this array, default:= kernel::lib::cpu
     RawArrayOf<T>(const IdentitiesPtr& identities,
                   const util::Parameters& parameters,
                   const std::shared_ptr<T>& ptr,
                   const int64_t offset,
                   const int64_t length,
                   const int64_t itemsize,
-                  const kernel::Lib ptr_lib = kernel::Lib::cpu_kernels)
+                  const kernel::lib ptr_lib = kernel::lib::cpu)
         : Content(identities, parameters)
         , ptr_lib_(ptr_lib)
         , ptr_(ptr)
@@ -217,7 +217,7 @@ namespace awkward {
                   const util::Parameters& parameters,
                   const std::shared_ptr<T>& ptr,
                   const int64_t length,
-                  const kernel::Lib ptr_lib = kernel::Lib::cpu_kernels)
+                  const kernel::lib ptr_lib = kernel::lib::cpu)
         : Content(identities, parameters)
         , ptr_lib_(ptr_lib)
         , ptr_(ptr)
@@ -234,7 +234,7 @@ namespace awkward {
     RawArrayOf<T>(const IdentitiesPtr& identities,
                   const util::Parameters& parameters,
                   const int64_t length,
-                  const kernel::Lib ptr_lib = kernel::Lib::cpu_kernels)
+                  const kernel::lib ptr_lib = kernel::lib::cpu)
         : Content(identities, parameters)
         , ptr_lib_(ptr_lib)
         , ptr_(kernel::ptr_alloc<T>(ptr_lib_, length))
@@ -248,7 +248,7 @@ namespace awkward {
       return ptr_;
     }
 
-    const kernel::Lib
+    const kernel::lib
     ptr_lib() const {
       return ptr_lib_;
     }
@@ -1177,7 +1177,7 @@ namespace awkward {
     }
 
     const ContentPtr
-      copy_to(kernel::Lib ptr_lib) const override {
+      copy_to(kernel::lib ptr_lib) const override {
         if(ptr_lib == ptr_lib_) {
           return std::make_shared<RawArrayOf<T>>(identities(),
                                                  parameters(),
@@ -1208,7 +1208,7 @@ namespace awkward {
     }
 
   private:
-    const kernel::Lib ptr_lib_;
+    const kernel::lib ptr_lib_;
     const std::shared_ptr<T> ptr_;
     const int64_t offset_;
     const int64_t length_;

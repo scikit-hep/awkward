@@ -1291,14 +1291,14 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
           .def("copy_to",
                [](const T&self,
                       std::string ptr_lib) -> py::object {
-               if(ptr_lib == "cuda") {
-                 return box(self.copy_to(kernel::Lib::cuda_kernels));
+               if (ptr_lib == "cpu") {
+                 return box(self.copy_to(kernel::lib::cpu));
                }
-               else if(ptr_lib == "cpu") {
-                 return box(self.copy_to(kernel::Lib::cpu_kernels));
+               else if (ptr_lib == "cuda") {
+                 return box(self.copy_to(kernel::lib::cuda));
                }
                else {
-                 throw std::invalid_argument("Invalid kernel specified, valid kernels are cpu and cuda");
+                 throw std::invalid_argument("specify 'cpu' or 'cuda'");
                }
           });
   }

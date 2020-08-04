@@ -450,7 +450,7 @@ namespace awkward {
                           const Slice& tail) const override;
 
     const ContentPtr
-      copy_to(kernel::Lib ptr_lib) const override;
+      copy_to(kernel::lib ptr_lib) const override;
 
   protected:
     template <typename S>

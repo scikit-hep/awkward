@@ -911,7 +911,7 @@ namespace awkward {
   }
 
   const ContentPtr
-  BitMaskedArray::copy_to(kernel::Lib ptr_lib) const {
+  BitMaskedArray::copy_to(kernel::lib ptr_lib) const {
     IndexU8 mask = mask_.copy_to(ptr_lib);
     ContentPtr  content = content_->copy_to(ptr_lib);
     return std::make_shared<BitMaskedArray>(identities(),

@@ -169,7 +169,7 @@ namespace awkward {
                ssize_t itemsize,
                const std::string format,
                util::dtype dtype,
-               const kernel::Lib ptr_lib = kernel::Lib::cpu_kernels);
+               const kernel::lib ptr_lib = kernel::lib::cpu);
 
     /// @brief Creates a NumpyArray from an {@link IndexOf Index8}.
     NumpyArray(const Index8 index);
@@ -187,7 +187,7 @@ namespace awkward {
       ptr() const;
 
     /// @param ptr_lib Indicates the kernel libraries to use for this `ptr`.
-    kernel::Lib
+    kernel::lib
       ptr_lib() const;
 
     /// @brief Raw pointer to the beginning of data (i.e. offset accounted for).
@@ -550,7 +550,7 @@ namespace awkward {
     /// @brief An utility function to create a new instance of NumpyArray on the
     /// GPU identical to this one.
     const ContentPtr
-      copy_to(kernel::Lib ptr_lib) const override;
+      copy_to(kernel::lib ptr_lib) const override;
 
   protected:
     /// @brief Internal function to merge two byte arrays without promoting
@@ -778,10 +778,10 @@ namespace awkward {
                                           bool ascending,
                                           bool stable) const;
 
-  /// @brief See #ptr_lib
-  const kernel::Lib ptr_lib_;
   /// @brief See #ptr.
   std::shared_ptr<void> ptr_;
+  /// @brief See #ptr_lib
+  const kernel::lib ptr_lib_;
   /// @brief See #shape.
   std::vector<ssize_t> shape_;
   /// @brief See #strides.

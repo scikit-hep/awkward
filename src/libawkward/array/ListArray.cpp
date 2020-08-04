@@ -1848,7 +1848,7 @@ namespace awkward {
 
   template <typename T>
   const ContentPtr
-  ListArrayOf<T>::copy_to(kernel::Lib ptr_lib) const {
+  ListArrayOf<T>::copy_to(kernel::lib ptr_lib) const {
     IndexOf<T> starts = starts_.copy_to(ptr_lib);
     IndexOf<T> stops = stops_.copy_to(ptr_lib);
     ContentPtr content= content_->copy_to(ptr_lib);

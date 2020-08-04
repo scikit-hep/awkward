@@ -69,10 +69,10 @@ namespace awkward {
                                 const FieldLoc& fieldloc,
                                 int64_t width,
                                 int64_t length,
-                                kernel::Lib ptr_lib)
+                                kernel::lib ptr_lib)
       : Identities(ref, fieldloc, 0, width, length)
-      , ptr_lib_(ptr_lib)
-      , ptr_(kernel::ptr_alloc<T>(ptr_lib, width*length)) { }
+      , ptr_(kernel::ptr_alloc<T>(ptr_lib, width*length))
+      , ptr_lib_(ptr_lib) { }
 
   template <typename T>
   IdentitiesOf<T>::IdentitiesOf(const Ref ref,
@@ -81,10 +81,10 @@ namespace awkward {
                                 int64_t width,
                                 int64_t length,
                                 const std::shared_ptr<T> ptr,
-                                kernel::Lib ptr_lib)
+                                kernel::lib ptr_lib)
       : Identities(ref, fieldloc, offset, width, length)
-      , ptr_lib_(ptr_lib)
-      , ptr_(ptr) { }
+      , ptr_(ptr)
+      , ptr_lib_(ptr_lib) { }
 
   template <typename T>
   const std::shared_ptr<T>
@@ -93,7 +93,7 @@ namespace awkward {
   }
 
   template<typename T>
-  kernel::Lib IdentitiesOf<T>::ptr_lib() const {
+  kernel::lib IdentitiesOf<T>::ptr_lib() const {
     return ptr_lib_;
   }
 
@@ -345,7 +345,7 @@ namespace awkward {
 
   template <typename T>
   const IdentitiesPtr
-  IdentitiesOf<T>::copy_to(kernel::Lib ptr_lib) const {
+  IdentitiesOf<T>::copy_to(kernel::lib ptr_lib) const {
     if(ptr_lib == ptr_lib_) {
       return std::make_shared<IdentitiesOf<T>>(ref(),
                                                fieldloc(),
@@ -357,11 +357,11 @@ namespace awkward {
     }
     std::shared_ptr<T> ptr = kernel::ptr_alloc<T>(ptr_lib, width_*length_);
 
-    Error err =  kernel::copy_to<T>(ptr_lib,
-                                    ptr_lib_,
-                                    ptr.get(),
-                                    ptr_.get(),
-                                    width_ * length_);
+    Error err = kernel::copy_to<T>(ptr_lib,
+                                   ptr_lib_,
+                                   ptr.get(),
+                                   ptr_.get(),
+                                   width_ * length_);
     util::handle_error(err);
 
     return std::make_shared<IdentitiesOf<T>>(ref(),
@@ -370,7 +370,7 @@ namespace awkward {
                                              width(),
                                              length(),
                                              ptr,
-                                             kernel::Lib::cuda_kernels);
+                                             ptr_lib);
   }
 
   template class EXPORT_SYMBOL IdentitiesOf<int32_t>;

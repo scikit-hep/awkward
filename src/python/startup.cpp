@@ -39,7 +39,7 @@ std::string StartupLibraryPathCallback::library_path() {
 void
 make_startup(py::module& m, const std::string& name) {
   m.def(name.c_str(), []() -> void {
-    kernel::lib_callback->add_library_path_callback(kernel::Lib::cuda_kernels,
-                                                    std::make_shared<StartupLibraryPathCallback>());
+    kernel::lib_callback->add_library_path_callback(
+      kernel::lib::cuda, std::make_shared<StartupLibraryPathCallback>());
   });
 }

@@ -1481,7 +1481,7 @@ namespace awkward {
   }
 
   const ContentPtr
-  RecordArray::copy_to(kernel::Lib ptr_lib) const {
+  RecordArray::copy_to(kernel::lib ptr_lib) const {
     ContentPtrVec content_vec;
     for(auto i : contents_) {
       ContentPtr ptr = i->copy_to(ptr_lib);

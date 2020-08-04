@@ -58,7 +58,7 @@ namespace awkward {
   IndexOf<T>::IndexOf(const std::shared_ptr<T>& ptr,
                       int64_t offset,
                       int64_t length,
-                      kernel::Lib ptr_lib)
+                      kernel::lib ptr_lib)
       : ptr_(ptr)
       , ptr_lib_(ptr_lib)
       , offset_(offset)
@@ -77,7 +77,7 @@ namespace awkward {
   }
 
   template <typename T>
-  IndexOf<T>::IndexOf(int64_t length, kernel::Lib ptr_lib)
+  IndexOf<T>::IndexOf(int64_t length, kernel::lib ptr_lib)
     : ptr_(kernel::ptr_alloc<T>(ptr_lib, length))
     , ptr_lib_(ptr_lib)
     , offset_(0)
@@ -154,15 +154,14 @@ namespace awkward {
         out << (int64_t) getitem_at_nowrap(i);
       }
     }
-    if(ptr_lib_ == kernel::Lib::cpu_kernels) {
-      out << "]\" offset=\"" << offset_ << "\" length=\"" << length_
-          << "\" at=\"0x" << std::hex << std::setw(12) << std::setfill('0')
-          << reinterpret_cast<ssize_t>(ptr_.get()) << "\"/>" << post;
+    out << "]\" offset=\"" << offset_ << "\" length=\"" << length_
+        << "\" at=\"0x" << std::hex << std::setw(12) << std::setfill('0')
+        << reinterpret_cast<ssize_t>(ptr_.get());
+    if(ptr_lib_ == kernel::lib::cpu) {
+      out << "\"/>" << post;
     }
     else {
-      out << "]\" offset=\"" << offset_ << "\" length=\"" << length_
-          << "\" at=\"0x" << std::hex << std::setw(12) << std::setfill('0')
-          << reinterpret_cast<ssize_t>(ptr_.get()) << "\">";
+      out << "\">";
       out << kernellib_asstring("\n" + indent + std::string("    "), "", "\n");
       out << indent << "</" << classname() << ">" << post;
     }
@@ -174,13 +173,13 @@ namespace awkward {
   IndexOf<T>::kernellib_asstring(const std::string &indent,
                                  const std::string &pre,
                                  const std::string &post) const {
-    if(ptr_lib_ == kernel::Lib::cpu_kernels) {
+    if (ptr_lib_ == kernel::lib::cpu) {
       return "";
     }
     else {
       std::stringstream out;
       out << indent << pre << "<Lib name=\"";
-      if(ptr_lib_ == kernel::Lib::cuda_kernels) {
+      if (ptr_lib_ == kernel::lib::cuda) {
         out << "cuda\" " << "device_number=\"" << kernel::get_ptr_device_num(ptr_lib(), ptr_.get())
         << "\" device_name=\"" << kernel::get_ptr_device_name(ptr_lib(), ptr_.get()) << "\"";
       }
@@ -345,13 +344,13 @@ namespace awkward {
   }
 
   template<typename T>
-  kernel::Lib IndexOf<T>::ptr_lib() const {
+  kernel::lib IndexOf<T>::ptr_lib() const {
     return ptr_lib_;
   }
 
   template<typename T>
   const IndexOf<T>
-  IndexOf<T>::copy_to(kernel::Lib ptr_lib) const {
+  IndexOf<T>::copy_to(kernel::lib ptr_lib) const {
     if(ptr_lib == ptr_lib_) {
       return *this;
     }

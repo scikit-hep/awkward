@@ -18,10 +18,10 @@
 using namespace awkward;
 
 namespace kernel {
-  enum Lib {
-      cpu_kernels,
-      cuda_kernels,
-      num_libs
+  enum class lib {
+      cpu,
+      cuda,
+      size
   };
 
   class LibraryPathCallback {
@@ -35,14 +35,13 @@ namespace kernel {
       LibraryCallback();
 
       void add_library_path_callback(
-        kernel::Lib ptr_lib,
+        kernel::lib ptr_lib,
         const std::shared_ptr<LibraryPathCallback> &callback);
 
-      std::string awkward_library_path(kernel::Lib ptr_lib);
+      std::string awkward_library_path(kernel::lib ptr_lib);
 
   private:
-      std::map<kernel::Lib, std::vector<std::shared_ptr<LibraryPathCallback>>> lib_path_callbacks;
-
+      std::map<kernel::lib, std::vector<std::shared_ptr<LibraryPathCallback>>> lib_path_callbacks;
       std::mutex lib_path_callbacks_mutex;
   };
 
@@ -51,7 +50,7 @@ namespace kernel {
   /// @brief Internal utility function to return an opaque ptr if an handle is
   /// acquired for the specified ptr_lib. If not, then it raises an appropriate
   /// exception
-  void* acquire_handle(kernel::Lib ptr_lib);
+  void* acquire_handle(kernel::lib ptr_lib);
 
   /// @brief Internal utility function to return an opaque ptr if an symbol is
   /// found for the corresponding handle. If not, then it raises an appropriate
@@ -107,7 +106,7 @@ namespace kernel {
   /// Returns the corresponding device number, else -1 if it's on main memory
   template<typename T>
   int
-  get_ptr_device_num(kernel::Lib ptr_lib, T *ptr);
+  get_ptr_device_num(kernel::lib ptr_lib, T *ptr);
 
   /// @brief A utility function to get the device name on which the
   /// array is located
@@ -115,10 +114,10 @@ namespace kernel {
   /// Returns the corresponding device name, else empty string if it's on main memory
   template <typename T>
   std::string
-  get_ptr_device_name(kernel::Lib ptr_lib, T* ptr);
+  get_ptr_device_name(kernel::lib ptr_lib, T* ptr);
 
   const std::string
-  fully_qualified_cache_key(const std::string& cache_key, kernel::Lib ptr_lib);
+  fully_qualified_cache_key(const std::string& cache_key, kernel::lib ptr_lib);
 
   /// @class no_deleter
   ///
@@ -146,8 +145,8 @@ namespace kernel {
   ///
   /// @note This function has not been implemented to handle Multi-GPU setups
   template<typename T>
-  ERROR copy_to(kernel::Lib TO,
-                kernel::Lib FROM,
+  ERROR copy_to(kernel::lib TO,
+                kernel::lib FROM,
                 T *to_ptr,
                 T *from_ptr,
                 int64_t length);
@@ -157,7 +156,7 @@ namespace kernel {
   ///
   /// @note This function has not been implemented to handle Multi-GPU setups
   template<typename T>
-  std::shared_ptr<T> ptr_alloc(kernel::Lib ptr_lib,
+  std::shared_ptr<T> ptr_alloc(kernel::lib ptr_lib,
                                int64_t length);
 
   /////////////////////////////////// awkward/cpu-kernels/getitem.h
@@ -166,7 +165,7 @@ namespace kernel {
   ///
   /// @note This does not have a corresponding cpu_kernel
   template <typename T>
-  T NumpyArray_getitem_at(kernel::Lib ptr_lib,
+  T NumpyArray_getitem_at(kernel::lib ptr_lib,
                           T* ptr,
                           int64_t at);
 
@@ -685,14 +684,14 @@ namespace kernel {
 
     template <typename T>
     T index_getitem_at_nowrap(
-      kernel::Lib ptr_lib,
+      kernel::lib ptr_lib,
       T* ptr,
       int64_t offset,
       int64_t at);
 
     template <typename T>
     void index_setitem_at_nowrap(
-      kernel::Lib ptr_lib,
+      kernel::lib ptr_lib,
       T* ptr,
       int64_t offset,
       int64_t at,
@@ -840,7 +839,7 @@ namespace kernel {
 
   template <typename T>
   ERROR ListArray_num_64(
-    kernel::Lib ptr_lib,
+    kernel::lib ptr_lib,
     int64_t* tonum,
     const T* fromstarts,
     int64_t startsoffset,
@@ -849,7 +848,7 @@ namespace kernel {
     int64_t length);
 
   ERROR RegularArray_num_64(
-    kernel::Lib ptr_lib,
+    kernel::lib ptr_lib,
     int64_t* tonum,
     int64_t size,
     int64_t length);
