@@ -219,19 +219,24 @@ def preprocess(filename, skip_implementation=False):
             if func is True and line.count("{") > 0 and not skip_implementation:
                 for _ in range(line.count("{")):
                     parans.append("{")
-            if func is False and re.search("\s.*\(", line):
+            if func is False and "awkward_" in line:
                 if skip_implementation and "{" not in line:
                     funcer = True
-                funcname = re.search("\s.*\(", line).group()[1:-1]
+                templine = line[: line.find("awkward_")]
+                if (
+                    re.search("u?int\d{1,2}_t\*?\*?", templine)
+                    or re.search("bool", templine)
+                    or re.search("float", templine)
+                    or re.search("double", templine)
+                ):
+                    line = line[line.find("awkward_") :]
+                funcname = line[line.find("awkward_") : line.find("(")]
                 tokens[funcname] = OrderedDict()
-                line = line.replace(line.split(" ")[0], "int", 1)
                 func = True
                 parans = []
-                code += line
                 if line.count("{") > 0:
                     for _ in range(line.count("{")):
                         parans.append("{")
-                continue
             if func is True and "return awkward" in line:
                 if re.search("return .*<", line) is not None:
                     x = line[
@@ -280,11 +285,19 @@ def preprocess(filename, skip_implementation=False):
             elif func is True and templatecall is True:
                 line = ""
             if func is True:
-                while re.search("u?int\d{1,2}_t\*?", line) is not None:
+                while (
+                    "awkward_" not in line
+                    and re.search("u?int\d{1,2}_t\*?", line) is not None
+                ) or (
+                    "awkward_" in line
+                    and "(" in line
+                    and re.search("u?int\d{1,2}_t\*?", line) is not None
+                    and re.search("u?int\d{1,2}_t\*?", line).span()[0] > line.find("(")
+                ):
                     line = line.replace(
                         re.search("u?int\d{1,2}_t", line).group(), "int"
                     )
-            if func is True and " ERROR " in line:
+            if "ERROR" in line:
                 line = line.replace("ERROR", "int", 1)
             if func is True and "(size_t)" in line:
                 line = line.replace("(size_t)", "")
@@ -293,18 +306,27 @@ def preprocess(filename, skip_implementation=False):
             if func is True and templ is True:
                 for x in templateids:
                     if x in line:
-                        if (
-                            line[line.find(x) - 1] == " "
-                            or line[line.find(x) - 1] == "*"
-                            or line[line.find(x) - 1]
+                        if ("awkward_" not in line and line.find(x) != -1) or (
+                            "awkward_" in line
+                            and "(" in line
+                            and line.rfind(x) > line.find("(")
                         ):
                             if x.endswith("*"):
                                 x = x[:-1]
                             if ("(" + x + ")") in line:
                                 line = line.replace(x, "float")
+                            elif "awkward_" in line and "(" in line:
+                                line = "int".join(line.rsplit(x, 1))
                             else:
                                 line = line.replace(x, "int")
-            if func is True and line.find("bool") != -1:
+            if func is True and (
+                ("awkward_" not in line and line.find("bool") != -1)
+                or (
+                    "awkward_" in line
+                    and "(" in line
+                    and line.rfind("bool") > line.find("(")
+                )
+            ):
                 if line.find("bool*") != -1:
                     typename = "bool*"
                 else:
@@ -312,7 +334,10 @@ def preprocess(filename, skip_implementation=False):
                 if "=" not in line and "(" not in line:
                     varname = line[line.find(typename) + len(typename) + 1 :]
                     varname = re.sub("[\W_]+", "", varname)
-                line = line.replace("bool", "int", 1)
+                if "awkward_" in line and "(" in line:
+                    line = "int".join(line.rsplit("bool", 1))
+                else:
+                    line = line.replace("bool", "int", 1)
             if funcer and "{" in line and skip_implementation:
                 funcer = False
             elif skip_implementation and "return" in line and "(" in line:
