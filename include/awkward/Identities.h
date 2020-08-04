@@ -308,6 +308,10 @@ namespace awkward {
     kernel::Lib
       ptr_lib() const;
 
+    /// @brief Raw pointer to the beginning of data (i.e. offset accounted for).
+    const T*
+      data() const;
+
     const std::string
       classname() const override;
 

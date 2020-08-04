@@ -95,6 +95,14 @@ namespace awkward {
     const std::shared_ptr<T>
       ptr() const;
 
+    /// @brief The Kernel Library that ptr uses.
+    kernel::Lib
+      ptr_lib() const;
+
+    /// @brief Raw pointer to the beginning of data (i.e. offset accounted for).
+    const T*
+      data() const;
+
     /// @brief Location of item zero in the buffer, relative to
     /// #ptr, measured in the number of elements.
     ///
@@ -107,10 +115,6 @@ namespace awkward {
     /// @brief Number of elements in the array.
     int64_t
       length() const;
-
-    /// @brief The Kernel Library that ptr uses.
-    kernel::Lib
-      ptr_lib() const;
 
     /// @brief User-friendly name of this class: `"Index8"`, `"IndexU8"`,
     /// `"Index32"`, `"IndexU32"`, or `"Index64"`.

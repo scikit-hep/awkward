@@ -347,6 +347,17 @@ namespace awkward {
     return ptr_;
   }
 
+  const void*
+  NumpyArray::data() const {
+    return reinterpret_cast<void*>(reinterpret_cast<char*>(ptr_.get()) +
+                                   byteoffset_);
+  }
+
+  kernel::Lib
+  NumpyArray::ptr_lib() const {
+    return ptr_lib_;
+  }
+
   const std::vector<ssize_t>
   NumpyArray::shape() const {
     return shape_;
@@ -380,11 +391,6 @@ namespace awkward {
   ssize_t
   NumpyArray::ndim() const {
     return (ssize_t)shape_.size();
-  }
-
-  kernel::Lib
-  NumpyArray::ptr_lib() const {
-    return ptr_lib_;
   }
 
   bool

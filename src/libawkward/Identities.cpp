@@ -92,6 +92,17 @@ namespace awkward {
     return ptr_;
   }
 
+  template<typename T>
+  kernel::Lib IdentitiesOf<T>::ptr_lib() const {
+    return ptr_lib_;
+  }
+
+  template <typename T>
+  const T*
+  IdentitiesOf<T>::data() const {
+    return ptr_.get() + offset_;
+  }
+
   template <typename T>
   const std::string
   IdentitiesOf<T>::classname() const {
@@ -330,11 +341,6 @@ namespace awkward {
     kernel::regularize_rangeslice(&regular_start, &regular_stop,
       true, start != Slice::none(), stop != Slice::none(), length_);
     return getitem_range_nowrap(regular_start, regular_stop);
-  }
-
-  template<typename T>
-  kernel::Lib IdentitiesOf<T>::ptr_lib() const {
-    return ptr_lib_;
   }
 
   template <typename T>

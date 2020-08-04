@@ -190,6 +190,10 @@ namespace awkward {
     kernel::Lib
       ptr_lib() const;
 
+    /// @brief Raw pointer to the beginning of data (i.e. offset accounted for).
+    const void*
+      data() const;
+
     /// @brief Number of elements in each dimension. A one-dimensional
     /// array has a shape of length one.
     ///

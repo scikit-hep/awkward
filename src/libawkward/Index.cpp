@@ -55,13 +55,6 @@ namespace awkward {
   Index::~Index() = default;
 
   template <typename T>
-  IndexOf<T>::IndexOf(int64_t length, kernel::Lib ptr_lib)
-    : ptr_(kernel::ptr_alloc<T>(ptr_lib, length))
-    , ptr_lib_(ptr_lib)
-    , offset_(0)
-    , length_(length) { }
-
-  template <typename T>
   IndexOf<T>::IndexOf(const std::shared_ptr<T>& ptr,
                       int64_t offset,
                       int64_t length,
@@ -76,6 +69,19 @@ namespace awkward {
   IndexOf<T>::ptr() const {
     return ptr_;
   }
+
+  template <typename T>
+  const T*
+  IndexOf<T>::data() const {
+    return ptr_.get() + offset_;
+  }
+
+  template <typename T>
+  IndexOf<T>::IndexOf(int64_t length, kernel::Lib ptr_lib)
+    : ptr_(kernel::ptr_alloc<T>(ptr_lib, length))
+    , ptr_lib_(ptr_lib)
+    , offset_(0)
+    , length_(length) { }
 
   template <typename T>
   int64_t

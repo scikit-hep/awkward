@@ -248,6 +248,17 @@ namespace awkward {
       return ptr_;
     }
 
+    const kernel::Lib
+    ptr_lib() const {
+      return ptr_lib_;
+    }
+
+    /// @brief Raw pointer to the beginning of data (i.e. offset accounted for).
+    const T*
+      data() const {
+      return ptr_.get() + offset_;
+    }
+
     /// @brief Location of item zero in the buffer, relative to
     /// #ptr, measured in the number of elements.
     ///
@@ -264,12 +275,6 @@ namespace awkward {
       itemsize() const {
       return itemsize_;
     }
-
-    const kernel::Lib
-    ptr_lib() const {
-      return ptr_lib_;
-    }
-
 
     /// @brief Location of item zero in the buffer, relative to
     /// `ptr`, measured in bytes, rather than number of elements; see #offset.
