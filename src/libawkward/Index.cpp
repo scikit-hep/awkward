@@ -281,8 +281,12 @@ namespace awkward {
       length_ == 0 ? nullptr : new int64_t[(size_t)length_],
       kernel::array_deleter<int64_t>());
     if (length_ != 0) {
-      kernel::Index_to_Index64<int8_t>(ptr.get(), &ptr_.get()[(size_t)offset_],
-                                       length_);
+      struct Error err = kernel::Index_to_Index64<int8_t>(
+        kernel::lib::cpu,   // DERIVE
+        ptr.get(),
+        &ptr_.get()[(size_t)offset_],
+        length_);
+      util::handle_error(err);
     }
     return IndexOf<int64_t>(ptr, 0, length_);
   }
@@ -293,8 +297,12 @@ namespace awkward {
       length_ == 0 ? nullptr : new int64_t[(size_t)length_],
       kernel::array_deleter<int64_t>());
     if (length_ != 0) {
-      kernel::Index_to_Index64<uint8_t>(ptr.get(), &ptr_.get()[(size_t)offset_],
-                                        length_);
+      struct Error err = kernel::Index_to_Index64<uint8_t>(
+        kernel::lib::cpu,   // DERIVE
+        ptr.get(),
+        &ptr_.get()[(size_t)offset_],
+        length_);
+      util::handle_error(err);
     }
     return IndexOf<int64_t>(ptr, 0, length_);
   }
@@ -305,8 +313,12 @@ namespace awkward {
       length_ == 0 ? nullptr : new int64_t[(size_t)length_],
       kernel::array_deleter<int64_t>());
     if (length_ != 0) {
-      kernel::Index_to_Index64<int32_t>(ptr.get(),
-                                        &ptr_.get()[(size_t)offset_], length_);
+      struct Error err = kernel::Index_to_Index64<int32_t>(
+        kernel::lib::cpu,   // DERIVE
+        ptr.get(),
+        &ptr_.get()[(size_t)offset_],
+        length_);
+      util::handle_error(err);
     }
     return IndexOf<int64_t>(ptr, 0, length_);
   }
@@ -317,9 +329,12 @@ namespace awkward {
       length_ == 0 ? nullptr : new int64_t[(size_t)length_],
       kernel::array_deleter<int64_t>());
     if (length_ != 0) {
-      kernel::Index_to_Index64<uint32_t>(ptr.get(),
-                                         &ptr_.get()[(size_t)offset_],
-                                         length_);
+      struct Error err = kernel::Index_to_Index64<uint32_t>(
+        kernel::lib::cpu,   // DERIVE
+        ptr.get(),
+        &ptr_.get()[(size_t)offset_],
+        length_);
+      util::handle_error(err);
     }
     return IndexOf<int64_t>(ptr, 0, length_);
   }

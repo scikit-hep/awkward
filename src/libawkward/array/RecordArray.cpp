@@ -443,6 +443,7 @@ namespace awkward {
       Identities32* rawidentities =
         reinterpret_cast<Identities32*>(newidentities.get());
       struct Error err = kernel::new_Identities<int32_t>(
+        kernel::lib::cpu,   // DERIVE
         rawidentities->data(),
         len);
       util::handle_error(err, classname(), identities_.get());
@@ -455,10 +456,10 @@ namespace awkward {
                                        1, len);
       Identities64* rawidentities =
         reinterpret_cast<Identities64*>(newidentities.get());
-      struct Error err =
-        kernel::new_Identities<int64_t>(
-          rawidentities->data(),
-          len);
+      struct Error err = kernel::new_Identities<int64_t>(
+        kernel::lib::cpu,   // DERIVE
+        rawidentities->data(),
+        len);
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
     }

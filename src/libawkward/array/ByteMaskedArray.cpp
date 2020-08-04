@@ -213,6 +213,7 @@ namespace awkward {
   ByteMaskedArray::project() const {
     int64_t numnull;
     struct Error err1 = kernel::ByteMaskedArray_numnull(
+      kernel::lib::cpu,   // DERIVE
       &numnull,
       mask_.data(),
       0,   // DROP
@@ -222,6 +223,7 @@ namespace awkward {
 
     Index64 nextcarry(length() - numnull);
     struct Error err2 = kernel::ByteMaskedArray_getitem_nextcarry_64(
+      kernel::lib::cpu,   // DERIVE
       nextcarry.data(),
       mask_.data(),
       0,   // DROP
@@ -244,6 +246,7 @@ namespace awkward {
 
     Index8 nextmask(length());
     struct Error err = kernel::ByteMaskedArray_overlay_mask8(
+      kernel::lib::cpu,   // DERIVE
       nextmask.data(),
       mask.data(),
       0,   // DROP
@@ -266,6 +269,7 @@ namespace awkward {
     else {
       Index8 out(length());
       struct Error err = kernel::ByteMaskedArray_mask8(
+        kernel::lib::cpu,   // DERIVE
         out.data(),
         mask_.data(),
         0,   // DROP
@@ -300,6 +304,7 @@ namespace awkward {
   ByteMaskedArray::toIndexedOptionArray64() const {
     Index64 index(length());
     struct Error err = kernel::ByteMaskedArray_toIndexedOptionArray64(
+      kernel::lib::cpu,   // DERIVE
       index.data(),
       mask_.data(),
       0,   // DROP
@@ -341,6 +346,7 @@ namespace awkward {
         Identities32* rawsubidentities =
           reinterpret_cast<Identities32*>(subidentities.get());
         struct Error err = kernel::Identities_extend<int32_t>(
+          kernel::lib::cpu,   // DERIVE
           rawsubidentities->data(),
           rawidentities->data(),
           0,   // DROP
@@ -359,6 +365,7 @@ namespace awkward {
         Identities64* rawsubidentities =
           reinterpret_cast<Identities64*>(subidentities.get());
         struct Error err = kernel::Identities_extend<int64_t>(
+          kernel::lib::cpu,   // DERIVE
           rawsubidentities->data(),
           rawidentities->data(),
           0,   // DROP
@@ -384,8 +391,10 @@ namespace awkward {
                                        length());
       Identities32* rawidentities =
         reinterpret_cast<Identities32*>(newidentities.get());
-      struct Error err = kernel::new_Identities<int32_t>(rawidentities->data(),
-                                                         length());
+      struct Error err = kernel::new_Identities<int32_t>(
+        kernel::lib::cpu,   // DERIVE
+        rawidentities->data(),
+        length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
     }
@@ -397,8 +406,10 @@ namespace awkward {
                                        length());
       Identities64* rawidentities =
         reinterpret_cast<Identities64*>(newidentities.get());
-      struct Error err =
-        kernel::new_Identities<int64_t>(rawidentities->data(), length());
+      struct Error err = kernel::new_Identities<int64_t>(
+        kernel::lib::cpu,   // DERIVE
+        rawidentities->data(),
+        length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
     }
@@ -652,6 +663,7 @@ namespace awkward {
   ByteMaskedArray::carry(const Index64& carry, bool allow_lazy) const {
     Index8 nextmask(carry.length());
     struct Error err = kernel::ByteMaskedArray_getitem_carry_64(
+      kernel::lib::cpu,   // DERIVE
       nextmask.data(),
       mask_.data(),
       0,   // DROP
@@ -759,8 +771,8 @@ namespace awkward {
       }
       else {
         Index64 outoffsets(offsets.length() + numnull);
-        struct Error err =
-          kernel::IndexedArray_flatten_none2empty_64<int64_t>(
+        struct Error err = kernel::IndexedArray_flatten_none2empty_64<int64_t>(
+          kernel::lib::cpu,   // DERIVE
           outoffsets.data(),
           outindex.data(),
           0,   // DROP
@@ -860,8 +872,8 @@ namespace awkward {
     else if (posaxis == depth + 1) {
       Index8 mask = bytemask();
       Index64 index(mask.length());
-      struct Error err =
-        kernel::IndexedOptionArray_rpad_and_clip_mask_axis1_64(
+      struct Error err = kernel::IndexedOptionArray_rpad_and_clip_mask_axis1_64(
+        kernel::lib::cpu,   // DERIVE
         index.data(),
         mask.data(),
         mask.length());
@@ -895,8 +907,8 @@ namespace awkward {
     else if (posaxis == depth + 1) {
       Index8 mask = bytemask();
       Index64 index(mask.length());
-      struct Error err =
-        kernel::IndexedOptionArray_rpad_and_clip_mask_axis1_64(
+      struct Error err = kernel::IndexedOptionArray_rpad_and_clip_mask_axis1_64(
+        kernel::lib::cpu,   // DERIVE
         index.data(),
         mask.data(),
         mask.length());
@@ -929,6 +941,7 @@ namespace awkward {
                                bool keepdims) const {
     int64_t numnull;
     struct Error err1 = kernel::ByteMaskedArray_numnull(
+      kernel::lib::cpu,   // DERIVE
       &numnull,
       mask_.data(),
       0,   // DROP
@@ -940,6 +953,7 @@ namespace awkward {
     Index64 nextcarry(length() - numnull);
     Index64 outindex(length());
     struct Error err2 = kernel::ByteMaskedArray_reduce_next_64(
+      kernel::lib::cpu,   // DERIVE
       nextcarry.data(),
       nextparents.data(),
       outindex.data(),
@@ -978,6 +992,7 @@ namespace awkward {
             "a ListOffsetArray64 whose offsets start at zero");
         }
         struct Error err3 = kernel::IndexedArray_reduce_next_fix_offsets_64(
+          kernel::lib::cpu,   // DERIVE
           outoffsets.data(),
           starts.data(),
           0,   // DROP
@@ -1071,6 +1086,7 @@ namespace awkward {
                              bool keepdims) const {
     int64_t numnull;
     struct Error err1 = kernel::ByteMaskedArray_numnull(
+      kernel::lib::cpu,   // DERIVE
       &numnull,
       mask_.data(),
       0,   // DROP
@@ -1082,6 +1098,7 @@ namespace awkward {
     Index64 nextcarry(length() - numnull);
     Index64 outindex(length());
     struct Error err2 = kernel::ByteMaskedArray_reduce_next_64(
+      kernel::lib::cpu,   // DERIVE
       nextcarry.data(),
       nextparents.data(),
       outindex.data(),
@@ -1120,6 +1137,7 @@ namespace awkward {
             "a ListOffsetArray64 whose offsets start at zero");
         }
         struct Error err3 = kernel::IndexedArray_reduce_next_fix_offsets_64(
+          kernel::lib::cpu,   // DERIVE
           outoffsets.data(),
           starts.data(),
           0,   // DROP
@@ -1156,6 +1174,7 @@ namespace awkward {
                                 bool keepdims) const {
     int64_t numnull;
     struct Error err1 = kernel::ByteMaskedArray_numnull(
+      kernel::lib::cpu,   // DERIVE
       &numnull,
       mask_.data(),
       0,   // DROP
@@ -1167,6 +1186,7 @@ namespace awkward {
     Index64 nextcarry(length() - numnull);
     Index64 outindex(length());
     struct Error err2 = kernel::ByteMaskedArray_reduce_next_64(
+      kernel::lib::cpu,   // DERIVE
       nextcarry.data(),
       nextparents.data(),
       outindex.data(),
@@ -1205,6 +1225,7 @@ namespace awkward {
             "a ListOffsetArray64 whose offsets start at zero");
         }
         struct Error err3 = kernel::IndexedArray_reduce_next_fix_offsets_64(
+          kernel::lib::cpu,   // DERIVE
           outoffsets.data(),
           starts.data(),
           0,   // DROP
@@ -1319,6 +1340,7 @@ namespace awkward {
     Index64 reducedstarts(length() - numnull);
     Index64 reducedstops(length() - numnull);
     struct Error err = kernel::MaskedArray_getitem_next_jagged_project<int64_t>(
+        kernel::lib::cpu,   // DERIVE
         outindex.data(),
         0,   // DROP
         slicestarts.data(),
@@ -1340,6 +1362,7 @@ namespace awkward {
   const std::pair<Index64, Index64>
   ByteMaskedArray::nextcarry_outindex(int64_t& numnull) const {
     struct Error err1 = kernel::ByteMaskedArray_numnull(
+      kernel::lib::cpu,   // DERIVE
       &numnull,
       mask_.data(),
       0,   // DROP
@@ -1350,6 +1373,7 @@ namespace awkward {
     Index64 nextcarry(length() - numnull);
     Index64 outindex(length());
     struct Error err2 = kernel::ByteMaskedArray_getitem_nextcarry_outindex_64(
+      kernel::lib::cpu,   // DERIVE
       nextcarry.data(),
       outindex.data(),
       mask_.data(),

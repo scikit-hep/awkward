@@ -325,7 +325,7 @@ namespace awkward {
     template std::string get_ptr_device_name(kernel::lib ptr_lib, double *ptr);
 
     template<>
-    Error copy_to(
+    ERROR copy_to(
       kernel::lib TO,
       kernel::lib FROM,
       bool *to_ptr,
@@ -361,7 +361,7 @@ namespace awkward {
     }
 
     template<>
-    Error copy_to(
+    ERROR copy_to(
       kernel::lib TO,
       kernel::lib FROM,
       int8_t *to_ptr,
@@ -397,7 +397,7 @@ namespace awkward {
     }
 
     template<>
-    Error copy_to(
+    ERROR copy_to(
       kernel::lib TO,
       kernel::lib FROM,
       uint8_t *to_ptr,
@@ -433,7 +433,7 @@ namespace awkward {
     }
 
     template<>
-    Error copy_to(
+    ERROR copy_to(
       kernel::lib TO,
       kernel::lib FROM,
       int16_t *to_ptr,
@@ -469,7 +469,7 @@ namespace awkward {
     }
 
     template<>
-    Error copy_to(
+    ERROR copy_to(
       kernel::lib TO,
       kernel::lib FROM,
       uint16_t *to_ptr,
@@ -505,7 +505,7 @@ namespace awkward {
     }
 
     template<>
-    Error copy_to(
+    ERROR copy_to(
       kernel::lib TO,
       kernel::lib FROM,
       int32_t *to_ptr,
@@ -541,7 +541,7 @@ namespace awkward {
     }
 
     template<>
-    Error copy_to(
+    ERROR copy_to(
       kernel::lib TO,
       kernel::lib FROM,
       uint32_t *to_ptr,
@@ -577,7 +577,7 @@ namespace awkward {
     }
 
     template<>
-    Error copy_to(
+    ERROR copy_to(
       kernel::lib TO,
       kernel::lib FROM,
       int64_t *to_ptr,
@@ -613,7 +613,7 @@ namespace awkward {
     }
 
     template<>
-    Error copy_to(
+    ERROR copy_to(
       kernel::lib TO,
       kernel::lib FROM,
       uint64_t *to_ptr,
@@ -649,7 +649,7 @@ namespace awkward {
     }
 
     template<>
-    Error copy_to(
+    ERROR copy_to(
       kernel::lib TO,
       kernel::lib FROM,
       float *to_ptr,
@@ -685,7 +685,7 @@ namespace awkward {
     }
 
     template<>
-    Error copy_to(
+    ERROR copy_to(
       kernel::lib TO,
       kernel::lib FROM,
       double *to_ptr,
@@ -1142,10 +1142,10 @@ namespace awkward {
     }
 
     ERROR regularize_arrayslice_64(
+      kernel::lib ptr_lib,
       int64_t *flatheadptr,
       int64_t lenflathead,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_regularize_arrayslice_64(
           flatheadptr,
@@ -1164,10 +1164,10 @@ namespace awkward {
 
     template<>
     ERROR Index_to_Index64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const int8_t *fromptr,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_Index8_to_Index64(
           toptr,
@@ -1186,10 +1186,10 @@ namespace awkward {
 
     template<>
     ERROR Index_to_Index64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const uint8_t *fromptr,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexU8_to_Index64(
           toptr,
@@ -1208,10 +1208,10 @@ namespace awkward {
 
     template<>
     ERROR Index_to_Index64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const int32_t *fromptr,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_Index32_to_Index64(
           toptr,
@@ -1230,10 +1230,10 @@ namespace awkward {
 
     template<>
     ERROR Index_to_Index64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const uint32_t *fromptr,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexU32_to_Index64(
           toptr,
@@ -1251,172 +1251,282 @@ namespace awkward {
     }
 
     template<>
-    Error Index_carry_64<int8_t>(
+    ERROR Index_carry_64<int8_t>(
+      kernel::lib ptr_lib,
       int8_t *toindex,
       const int8_t *fromindex,
       const int64_t *carry,
       int64_t fromindexoffset,
       int64_t lenfromindex,
       int64_t length) {
-      return awkward_Index8_carry_64(
-        toindex,
-        fromindex,
-        carry,
-        fromindexoffset,
-        lenfromindex,
-        length);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_Index8_carry_64(
+          toindex,
+          fromindex,
+          carry,
+          fromindexoffset,
+          lenfromindex,
+          length);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for Index_carry_64");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for Index_carry_64");
+      }
     }
 
     template<>
-    Error Index_carry_64<uint8_t>(
+    ERROR Index_carry_64<uint8_t>(
+      kernel::lib ptr_lib,
       uint8_t *toindex,
       const uint8_t *fromindex,
       const int64_t *carry,
       int64_t fromindexoffset,
       int64_t lenfromindex,
       int64_t length) {
-      return awkward_IndexU8_carry_64(
-        toindex,
-        fromindex,
-        carry,
-        fromindexoffset,
-        lenfromindex,
-        length);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_IndexU8_carry_64(
+          toindex,
+          fromindex,
+          carry,
+          fromindexoffset,
+          lenfromindex,
+          length);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for Index_carry_64");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for Index_carry_64");
+      }
     }
 
     template<>
-    Error Index_carry_64<int32_t>(
+    ERROR Index_carry_64<int32_t>(
+      kernel::lib ptr_lib,
       int32_t *toindex,
       const int32_t *fromindex,
       const int64_t *carry,
       int64_t fromindexoffset,
       int64_t lenfromindex,
       int64_t length) {
-      return awkward_Index32_carry_64(
-        toindex,
-        fromindex,
-        carry,
-        fromindexoffset,
-        lenfromindex,
-        length);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_Index32_carry_64(
+          toindex,
+          fromindex,
+          carry,
+          fromindexoffset,
+          lenfromindex,
+          length);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for Index_carry_64");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for Index_carry_64");
+      }
     }
 
     template<>
-    Error Index_carry_64<uint32_t>(
+    ERROR Index_carry_64<uint32_t>(
+      kernel::lib ptr_lib,
       uint32_t *toindex,
       const uint32_t *fromindex,
       const int64_t *carry,
       int64_t fromindexoffset,
       int64_t lenfromindex,
       int64_t length) {
-      return awkward_IndexU32_carry_64(
-        toindex,
-        fromindex,
-        carry,
-        fromindexoffset,
-        lenfromindex,
-        length);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_IndexU32_carry_64(
+          toindex,
+          fromindex,
+          carry,
+          fromindexoffset,
+          lenfromindex,
+          length);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for Index_carry_64");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for Index_carry_64");
+      }
     }
 
     template<>
-    Error Index_carry_64<int64_t>(
+    ERROR Index_carry_64<int64_t>(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       const int64_t *fromindex,
       const int64_t *carry,
       int64_t fromindexoffset,
       int64_t lenfromindex,
       int64_t length) {
-      return awkward_Index64_carry_64(
-        toindex,
-        fromindex,
-        carry,
-        fromindexoffset,
-        lenfromindex,
-        length);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_Index64_carry_64(
+          toindex,
+          fromindex,
+          carry,
+          fromindexoffset,
+          lenfromindex,
+          length);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for Index_carry_64");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for Index_carry_64");
+      }
     }
 
     template<>
-    Error Index_carry_nocheck_64<int8_t>(
+    ERROR Index_carry_nocheck_64<int8_t>(
+      kernel::lib ptr_lib,
       int8_t *toindex,
       const int8_t *fromindex,
       const int64_t *carry,
       int64_t fromindexoffset,
       int64_t length) {
-      return awkward_Index8_carry_nocheck_64(
-        toindex,
-        fromindex,
-        carry,
-        fromindexoffset,
-        length);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_Index8_carry_nocheck_64(
+          toindex,
+          fromindex,
+          carry,
+          fromindexoffset,
+          length);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for Index_carry_nocheck_64");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for Index_carry_nocheck_64");
+      }
     }
 
     template<>
-    Error Index_carry_nocheck_64<uint8_t>(
+    ERROR Index_carry_nocheck_64<uint8_t>(
+      kernel::lib ptr_lib,
       uint8_t *toindex,
       const uint8_t *fromindex,
       const int64_t *carry,
       int64_t fromindexoffset,
       int64_t length) {
-      return awkward_IndexU8_carry_nocheck_64(
-        toindex,
-        fromindex,
-        carry,
-        fromindexoffset,
-        length);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_IndexU8_carry_nocheck_64(
+          toindex,
+          fromindex,
+          carry,
+          fromindexoffset,
+          length);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for Index_carry_nocheck_64");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for Index_carry_nocheck_64");
+      }
     }
 
     template<>
-    Error Index_carry_nocheck_64<int32_t>(
+    ERROR Index_carry_nocheck_64<int32_t>(
+      kernel::lib ptr_lib,
       int32_t *toindex,
       const int32_t *fromindex,
       const int64_t *carry,
       int64_t fromindexoffset,
       int64_t length) {
-      return awkward_Index32_carry_nocheck_64(
-        toindex,
-        fromindex,
-        carry,
-        fromindexoffset,
-        length);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_Index32_carry_nocheck_64(
+          toindex,
+          fromindex,
+          carry,
+          fromindexoffset,
+          length);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for Index_carry_nocheck_64");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for Index_carry_nocheck_64");
+      }
     }
 
     template<>
-    Error Index_carry_nocheck_64<uint32_t>(
+    ERROR Index_carry_nocheck_64<uint32_t>(
+      kernel::lib ptr_lib,
       uint32_t *toindex,
       const uint32_t *fromindex,
       const int64_t *carry,
       int64_t fromindexoffset,
       int64_t length) {
-      return awkward_IndexU32_carry_nocheck_64(
-        toindex,
-        fromindex,
-        carry,
-        fromindexoffset,
-        length);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_IndexU32_carry_nocheck_64(
+          toindex,
+          fromindex,
+          carry,
+          fromindexoffset,
+          length);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for Index_carry_nocheck_64");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for Index_carry_nocheck_64");
+      }
     }
 
     template<>
-    Error Index_carry_nocheck_64<int64_t>(
+    ERROR Index_carry_nocheck_64<int64_t>(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       const int64_t *fromindex,
       const int64_t *carry,
       int64_t fromindexoffset,
       int64_t length) {
-      return awkward_Index64_carry_nocheck_64(
-        toindex,
-        fromindex,
-        carry,
-        fromindexoffset,
-        length);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_Index64_carry_nocheck_64(
+          toindex,
+          fromindex,
+          carry,
+          fromindexoffset,
+          length);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for Index_carry_nocheck_64");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for Index_carry_nocheck_64");
+      }
     }
 
     ERROR slicearray_ravel_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const int64_t *fromptr,
       int64_t ndim,
       const int64_t *shape,
       const int64_t *strides) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_slicearray_ravel_64(
           toptr,
@@ -1436,13 +1546,13 @@ namespace awkward {
     }
 
     ERROR slicemissing_check_same(
+      kernel::lib ptr_lib,
       bool *same,
       const int8_t *bytemask,
       int64_t bytemaskoffset,
       const int64_t *missingindex,
       int64_t missingindexoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_slicemissing_check_same(
           same,
@@ -1464,9 +1574,9 @@ namespace awkward {
 
     template<>
     ERROR carry_arange(
+      kernel::lib ptr_lib,
       int32_t *toptr,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_carry_arange32(
           toptr,
@@ -1484,9 +1594,9 @@ namespace awkward {
 
     template<>
     ERROR carry_arange(
+      kernel::lib ptr_lib,
       uint32_t *toptr,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_carry_arangeU32(
           toptr,
@@ -1504,9 +1614,9 @@ namespace awkward {
 
     template<>
     ERROR carry_arange(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_carry_arange64(
           toptr,
@@ -1524,6 +1634,7 @@ namespace awkward {
 
     template<>
     ERROR Identities_getitem_carry_64(
+      kernel::lib ptr_lib,
       int32_t *newidentitiesptr,
       const int32_t *identitiesptr,
       const int64_t *carryptr,
@@ -1531,7 +1642,6 @@ namespace awkward {
       int64_t offset,
       int64_t width,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_Identities32_getitem_carry_64(
           newidentitiesptr,
@@ -1554,6 +1664,7 @@ namespace awkward {
 
     template<>
     ERROR Identities_getitem_carry_64(
+      kernel::lib ptr_lib,
       int64_t *newidentitiesptr,
       const int64_t *identitiesptr,
       const int64_t *carryptr,
@@ -1561,7 +1672,6 @@ namespace awkward {
       int64_t offset,
       int64_t width,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_Identities64_getitem_carry_64(
           newidentitiesptr,
@@ -1583,10 +1693,10 @@ namespace awkward {
     }
 
     ERROR NumpyArray_contiguous_init_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       int64_t skip,
       int64_t stride) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_contiguous_init_64(
           toptr,
@@ -1605,13 +1715,13 @@ namespace awkward {
 
 
     ERROR NumpyArray_contiguous_copy_64(
+      kernel::lib ptr_lib,
       uint8_t *toptr,
       const uint8_t *fromptr,
       int64_t len,
       int64_t stride,
       int64_t offset,
       const int64_t *pos) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_contiguous_copy_64(
           toptr,
@@ -1632,12 +1742,12 @@ namespace awkward {
     }
 
     ERROR NumpyArray_contiguous_next_64(
+      kernel::lib ptr_lib,
       int64_t *topos,
       const int64_t *frompos,
       int64_t len,
       int64_t skip,
       int64_t stride) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_contiguous_next_64(
           topos,
@@ -1657,13 +1767,13 @@ namespace awkward {
     }
 
     ERROR NumpyArray_getitem_next_null_64(
+      kernel::lib ptr_lib,
       uint8_t *toptr,
       const uint8_t *fromptr,
       int64_t len,
       int64_t stride,
       int64_t offset,
       const int64_t *pos) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_getitem_next_null_64(
           toptr,
@@ -1684,12 +1794,12 @@ namespace awkward {
     }
 
     ERROR NumpyArray_getitem_next_at_64(
+      kernel::lib ptr_lib,
       int64_t *nextcarryptr,
       const int64_t *carryptr,
       int64_t lencarry,
       int64_t skip,
       int64_t at) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_getitem_next_at_64(
           nextcarryptr,
@@ -1709,6 +1819,7 @@ namespace awkward {
     }
 
     ERROR NumpyArray_getitem_next_range_64(
+      kernel::lib ptr_lib,
       int64_t *nextcarryptr,
       const int64_t *carryptr,
       int64_t lencarry,
@@ -1716,7 +1827,6 @@ namespace awkward {
       int64_t skip,
       int64_t start,
       int64_t step) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_getitem_next_range_64(
           nextcarryptr,
@@ -1738,6 +1848,7 @@ namespace awkward {
     }
 
     ERROR NumpyArray_getitem_next_range_advanced_64(
+      kernel::lib ptr_lib,
       int64_t *nextcarryptr,
       int64_t *nextadvancedptr,
       const int64_t *carryptr,
@@ -1747,7 +1858,6 @@ namespace awkward {
       int64_t skip,
       int64_t start,
       int64_t step) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_getitem_next_range_advanced_64(
           nextcarryptr,
@@ -1771,6 +1881,7 @@ namespace awkward {
     }
 
     ERROR NumpyArray_getitem_next_array_64(
+      kernel::lib ptr_lib,
       int64_t *nextcarryptr,
       int64_t *nextadvancedptr,
       const int64_t *carryptr,
@@ -1778,7 +1889,6 @@ namespace awkward {
       int64_t lencarry,
       int64_t lenflathead,
       int64_t skip) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_getitem_next_array_64(
           nextcarryptr,
@@ -1800,13 +1910,13 @@ namespace awkward {
     }
 
     ERROR NumpyArray_getitem_next_array_advanced_64(
+      kernel::lib ptr_lib,
       int64_t *nextcarryptr,
       const int64_t *carryptr,
       const int64_t *advancedptr,
       const int64_t *flatheadptr,
       int64_t lencarry,
       int64_t skip) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_getitem_next_array_advanced_64(
           nextcarryptr,
@@ -1827,12 +1937,12 @@ namespace awkward {
     }
 
     ERROR NumpyArray_getitem_boolean_numtrue(
+      kernel::lib ptr_lib,
       int64_t *numtrue,
       const int8_t *fromptr,
       int64_t byteoffset,
       int64_t length,
       int64_t stride) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_getitem_boolean_numtrue(
           numtrue,
@@ -1852,12 +1962,12 @@ namespace awkward {
     }
 
     ERROR NumpyArray_getitem_boolean_nonzero_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const int8_t *fromptr,
       int64_t byteoffset,
       int64_t length,
       int64_t stride) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_getitem_boolean_nonzero_64(
           toptr,
@@ -1877,7 +1987,8 @@ namespace awkward {
     }
 
     template<>
-    Error ListArray_getitem_next_at_64<int32_t>(
+    ERROR ListArray_getitem_next_at_64<int32_t>(
+      kernel::lib ptr_lib,
       int64_t *tocarry,
       const int32_t *fromstarts,
       const int32_t *fromstops,
@@ -1885,18 +1996,29 @@ namespace awkward {
       int64_t startsoffset,
       int64_t stopsoffset,
       int64_t at) {
-      return awkward_ListArray32_getitem_next_at_64(
-        tocarry,
-        fromstarts,
-        fromstops,
-        lenstarts,
-        startsoffset,
-        stopsoffset,
-        at);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_ListArray32_getitem_next_at_64(
+          tocarry,
+          fromstarts,
+          fromstops,
+          lenstarts,
+          startsoffset,
+          stopsoffset,
+          at);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_at_64");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for ListArray_getitem_next_at_64");
+      }
     }
 
     template<>
-    Error ListArray_getitem_next_at_64<uint32_t>(
+    ERROR ListArray_getitem_next_at_64<uint32_t>(
+      kernel::lib ptr_lib,
       int64_t *tocarry,
       const uint32_t *fromstarts,
       const uint32_t *fromstops,
@@ -1904,18 +2026,29 @@ namespace awkward {
       int64_t startsoffset,
       int64_t stopsoffset,
       int64_t at) {
-      return awkward_ListArrayU32_getitem_next_at_64(
-        tocarry,
-        fromstarts,
-        fromstops,
-        lenstarts,
-        startsoffset,
-        stopsoffset,
-        at);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_ListArrayU32_getitem_next_at_64(
+          tocarry,
+          fromstarts,
+          fromstops,
+          lenstarts,
+          startsoffset,
+          stopsoffset,
+          at);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_at_64<uint32_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for ListArray_getitem_next_at_64<uint32_t>");
+      }
     }
 
     template<>
-    Error ListArray_getitem_next_at_64<int64_t>(
+    ERROR ListArray_getitem_next_at_64<int64_t>(
+      kernel::lib ptr_lib,
       int64_t *tocarry,
       const int64_t *fromstarts,
       const int64_t *fromstops,
@@ -1923,18 +2056,29 @@ namespace awkward {
       int64_t startsoffset,
       int64_t stopsoffset,
       int64_t at) {
-      return awkward_ListArray64_getitem_next_at_64(
-        tocarry,
-        fromstarts,
-        fromstops,
-        lenstarts,
-        startsoffset,
-        stopsoffset,
-        at);
-    }
+      if (ptr_lib == kernel::lib::cpu) {
+       return awkward_ListArray64_getitem_next_at_64(
+         tocarry,
+         fromstarts,
+         fromstops,
+         lenstarts,
+         startsoffset,
+         stopsoffset,
+         at);
+     }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_at_64<int64_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for ListArray_getitem_next_at_64<int64_t>");
+      }
+     }
 
     template<>
-    Error ListArray_getitem_next_range_carrylength<int32_t>(
+    ERROR ListArray_getitem_next_range_carrylength<int32_t>(
+      kernel::lib ptr_lib,
       int64_t *carrylength,
       const int32_t *fromstarts,
       const int32_t *fromstops,
@@ -1944,20 +2088,31 @@ namespace awkward {
       int64_t start,
       int64_t stop,
       int64_t step) {
-      return awkward_ListArray32_getitem_next_range_carrylength(
-        carrylength,
-        fromstarts,
-        fromstops,
-        lenstarts,
-        startsoffset,
-        stopsoffset,
-        start,
-        stop,
-        step);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_ListArray32_getitem_next_range_carrylength(
+          carrylength,
+          fromstarts,
+          fromstops,
+          lenstarts,
+          startsoffset,
+          stopsoffset,
+          start,
+          stop,
+          step);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_range_carrylength<int32_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for ListArray_getitem_next_range_carrylength<int32_t>");
+      }
     }
 
     template<>
-    Error ListArray_getitem_next_range_carrylength<uint32_t>(
+    ERROR ListArray_getitem_next_range_carrylength<uint32_t>(
+      kernel::lib ptr_lib,
       int64_t *carrylength,
       const uint32_t *fromstarts,
       const uint32_t *fromstops,
@@ -1967,20 +2122,31 @@ namespace awkward {
       int64_t start,
       int64_t stop,
       int64_t step) {
-      return awkward_ListArrayU32_getitem_next_range_carrylength(
-        carrylength,
-        fromstarts,
-        fromstops,
-        lenstarts,
-        startsoffset,
-        stopsoffset,
-        start,
-        stop,
-        step);
-    }
+      if (ptr_lib == kernel::lib::cpu) {
+       return awkward_ListArrayU32_getitem_next_range_carrylength(
+         carrylength,
+         fromstarts,
+         fromstops,
+         lenstarts,
+         startsoffset,
+         stopsoffset,
+         start,
+         stop,
+         step);
+     }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_range_carrylength<uint32_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for ListArray_getitem_next_range_carrylength<uint32_t>");
+      }
+     }
 
     template<>
-    Error ListArray_getitem_next_range_carrylength<int64_t>(
+    ERROR ListArray_getitem_next_range_carrylength<int64_t>(
+      kernel::lib ptr_lib,
       int64_t *carrylength,
       const int64_t *fromstarts,
       const int64_t *fromstops,
@@ -1990,20 +2156,31 @@ namespace awkward {
       int64_t start,
       int64_t stop,
       int64_t step) {
-      return awkward_ListArray64_getitem_next_range_carrylength(
-        carrylength,
-        fromstarts,
-        fromstops,
-        lenstarts,
-        startsoffset,
-        stopsoffset,
-        start,
-        stop,
-        step);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_ListArray64_getitem_next_range_carrylength(
+          carrylength,
+          fromstarts,
+          fromstops,
+          lenstarts,
+          startsoffset,
+          stopsoffset,
+          start,
+          stop,
+          step);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_range_carrylength<int64_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for ListArray_getitem_next_range_carrylength<int64_t>");
+      }
     }
 
     template<>
-    Error ListArray_getitem_next_range_64<int32_t>(
+    ERROR ListArray_getitem_next_range_64<int32_t>(
+      kernel::lib ptr_lib,
       int32_t *tooffsets,
       int64_t *tocarry,
       const int32_t *fromstarts,
@@ -2014,21 +2191,32 @@ namespace awkward {
       int64_t start,
       int64_t stop,
       int64_t step) {
-      return awkward_ListArray32_getitem_next_range_64(
-        tooffsets,
-        tocarry,
-        fromstarts,
-        fromstops,
-        lenstarts,
-        startsoffset,
-        stopsoffset,
-        start,
-        stop,
-        step);
-    }
+      if (ptr_lib == kernel::lib::cpu) {
+       return awkward_ListArray32_getitem_next_range_64(
+         tooffsets,
+         tocarry,
+         fromstarts,
+         fromstops,
+         lenstarts,
+         startsoffset,
+         stopsoffset,
+         start,
+         stop,
+         step);
+     }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_range_64<int32_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for ListArray_getitem_next_range_64<int32_t>");
+      }
+     }
 
     template<>
-    Error ListArray_getitem_next_range_64<uint32_t>(
+    ERROR ListArray_getitem_next_range_64<uint32_t>(
+      kernel::lib ptr_lib,
       uint32_t *tooffsets,
       int64_t *tocarry,
       const uint32_t *fromstarts,
@@ -2039,21 +2227,32 @@ namespace awkward {
       int64_t start,
       int64_t stop,
       int64_t step) {
-      return awkward_ListArrayU32_getitem_next_range_64(
-        tooffsets,
-        tocarry,
-        fromstarts,
-        fromstops,
-        lenstarts,
-        startsoffset,
-        stopsoffset,
-        start,
-        stop,
-        step);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_ListArrayU32_getitem_next_range_64(
+          tooffsets,
+          tocarry,
+          fromstarts,
+          fromstops,
+          lenstarts,
+          startsoffset,
+          stopsoffset,
+          start,
+          stop,
+          step);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_range_64<uint32_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for ListArray_getitem_next_range_64<uint32_t>");
+      }
     }
 
     template<>
-    Error ListArray_getitem_next_range_64<int64_t>(
+    ERROR ListArray_getitem_next_range_64<int64_t>(
+      kernel::lib ptr_lib,
       int64_t *tooffsets,
       int64_t *tocarry,
       const int64_t *fromstarts,
@@ -2064,93 +2263,170 @@ namespace awkward {
       int64_t start,
       int64_t stop,
       int64_t step) {
-      return awkward_ListArray64_getitem_next_range_64(
-        tooffsets,
-        tocarry,
-        fromstarts,
-        fromstops,
-        lenstarts,
-        startsoffset,
-        stopsoffset,
-        start,
-        stop,
-        step);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_ListArray64_getitem_next_range_64(
+          tooffsets,
+          tocarry,
+          fromstarts,
+          fromstops,
+          lenstarts,
+          startsoffset,
+          stopsoffset,
+          start,
+          stop,
+          step);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_range_64<int64_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for ListArray_getitem_next_range_64<int64_t>");
+      }
     }
 
     template<>
-    Error ListArray_getitem_next_range_counts_64<int32_t>(
+    ERROR ListArray_getitem_next_range_counts_64<int32_t>(
+      kernel::lib ptr_lib,
       int64_t *total,
       const int32_t *fromoffsets,
       int64_t lenstarts) {
-      return awkward_ListArray32_getitem_next_range_counts_64(
-        total,
-        fromoffsets,
-        lenstarts);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_ListArray32_getitem_next_range_counts_64(
+          total,
+          fromoffsets,
+          lenstarts);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_range_counts_64<int32_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for ListArray_getitem_next_range_counts_64<int32_t>");
+      }
     }
 
     template<>
-    Error ListArray_getitem_next_range_counts_64<uint32_t>(
+    ERROR ListArray_getitem_next_range_counts_64<uint32_t>(
+      kernel::lib ptr_lib,
       int64_t *total,
       const uint32_t *fromoffsets,
       int64_t lenstarts) {
-      return awkward_ListArrayU32_getitem_next_range_counts_64(
-        total,
-        fromoffsets,
-        lenstarts);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_ListArrayU32_getitem_next_range_counts_64(
+          total,
+          fromoffsets,
+          lenstarts);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_range_counts_64<uint32_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for ListArray_getitem_next_range_counts_64<uint32_t>");
+      }
     }
 
     template<>
-    Error ListArray_getitem_next_range_counts_64<int64_t>(
+    ERROR ListArray_getitem_next_range_counts_64<int64_t>(
+      kernel::lib ptr_lib,
       int64_t *total,
       const int64_t *fromoffsets,
       int64_t lenstarts) {
-      return awkward_ListArray64_getitem_next_range_counts_64(
-        total,
-        fromoffsets,
-        lenstarts);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_ListArray64_getitem_next_range_counts_64(
+          total,
+          fromoffsets,
+          lenstarts);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_range_counts_64<int64_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for ListArray_getitem_next_range_counts_64<int64_t>");
+      }
     }
 
     template<>
-    Error ListArray_getitem_next_range_spreadadvanced_64<int32_t>(
+    ERROR ListArray_getitem_next_range_spreadadvanced_64<int32_t>(
+      kernel::lib ptr_lib,
       int64_t *toadvanced,
       const int64_t *fromadvanced,
       const int32_t *fromoffsets,
       int64_t lenstarts) {
-      return awkward_ListArray32_getitem_next_range_spreadadvanced_64(
-        toadvanced,
-        fromadvanced,
-        fromoffsets,
-        lenstarts);
-    }
+      if (ptr_lib == kernel::lib::cpu) {
+       return awkward_ListArray32_getitem_next_range_spreadadvanced_64(
+         toadvanced,
+         fromadvanced,
+         fromoffsets,
+         lenstarts);
+     }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_range_spreadadvanced_64<int32_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for ListArray_getitem_next_range_spreadadvanced_64<int32_t>");
+      }
+     }
 
     template<>
-    Error ListArray_getitem_next_range_spreadadvanced_64<uint32_t>(
+    ERROR ListArray_getitem_next_range_spreadadvanced_64<uint32_t>(
+      kernel::lib ptr_lib,
       int64_t *toadvanced,
       const int64_t *fromadvanced,
       const uint32_t *fromoffsets,
       int64_t lenstarts) {
-      return awkward_ListArrayU32_getitem_next_range_spreadadvanced_64(
-        toadvanced,
-        fromadvanced,
-        fromoffsets,
-        lenstarts);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_ListArrayU32_getitem_next_range_spreadadvanced_64(
+          toadvanced,
+          fromadvanced,
+          fromoffsets,
+          lenstarts);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_range_spreadadvanced_64<uint32_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for ListArray_getitem_next_range_spreadadvanced_64<uint32_t>");
+      }
     }
 
     template<>
-    Error ListArray_getitem_next_range_spreadadvanced_64<int64_t>(
+    ERROR ListArray_getitem_next_range_spreadadvanced_64<int64_t>(
+      kernel::lib ptr_lib,
       int64_t *toadvanced,
       const int64_t *fromadvanced,
       const int64_t *fromoffsets,
       int64_t lenstarts) {
-      return awkward_ListArray64_getitem_next_range_spreadadvanced_64(
-        toadvanced,
-        fromadvanced,
-        fromoffsets,
-        lenstarts);
-    }
+      if (ptr_lib == kernel::lib::cpu) {
+       return awkward_ListArray64_getitem_next_range_spreadadvanced_64(
+         toadvanced,
+         fromadvanced,
+         fromoffsets,
+         lenstarts);
+     }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_range_spreadadvanced_64<int64_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for ListArray_getitem_next_range_spreadadvanced_64<int64_t>");
+      }
+     }
 
     template<>
-    Error ListArray_getitem_next_array_64<int32_t>(
+    ERROR ListArray_getitem_next_array_64<int32_t>(
+      kernel::lib ptr_lib,
       int64_t *tocarry,
       int64_t *toadvanced,
       const int32_t *fromstarts,
@@ -2161,21 +2437,32 @@ namespace awkward {
       int64_t lenstarts,
       int64_t lenarray,
       int64_t lencontent) {
-      return awkward_ListArray32_getitem_next_array_64(
-        tocarry,
-        toadvanced,
-        fromstarts,
-        fromstops,
-        fromarray,
-        startsoffset,
-        stopsoffset,
-        lenstarts,
-        lenarray,
-        lencontent);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_ListArray32_getitem_next_array_64(
+          tocarry,
+          toadvanced,
+          fromstarts,
+          fromstops,
+          fromarray,
+          startsoffset,
+          stopsoffset,
+          lenstarts,
+          lenarray,
+          lencontent);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_array_64<int32_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for ListArray_getitem_next_array_64<int32_t>");
+      }
     }
 
     template<>
-    Error ListArray_getitem_next_array_64<uint32_t>(
+    ERROR ListArray_getitem_next_array_64<uint32_t>(
+      kernel::lib ptr_lib,
       int64_t *tocarry,
       int64_t *toadvanced,
       const uint32_t *fromstarts,
@@ -2186,21 +2473,32 @@ namespace awkward {
       int64_t lenstarts,
       int64_t lenarray,
       int64_t lencontent) {
-      return awkward_ListArrayU32_getitem_next_array_64(
-        tocarry,
-        toadvanced,
-        fromstarts,
-        fromstops,
-        fromarray,
-        startsoffset,
-        stopsoffset,
-        lenstarts,
-        lenarray,
-        lencontent);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_ListArrayU32_getitem_next_array_64(
+          tocarry,
+          toadvanced,
+          fromstarts,
+          fromstops,
+          fromarray,
+          startsoffset,
+          stopsoffset,
+          lenstarts,
+          lenarray,
+          lencontent);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_array_64<uint32_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for ListArray_getitem_next_array_64<uint32_t>");
+      }
     }
 
     template<>
-    Error ListArray_getitem_next_array_64<int64_t>(
+    ERROR ListArray_getitem_next_array_64<int64_t>(
+      kernel::lib ptr_lib,
       int64_t *tocarry,
       int64_t *toadvanced,
       const int64_t *fromstarts,
@@ -2211,21 +2509,32 @@ namespace awkward {
       int64_t lenstarts,
       int64_t lenarray,
       int64_t lencontent) {
-      return awkward_ListArray64_getitem_next_array_64(
-        tocarry,
-        toadvanced,
-        fromstarts,
-        fromstops,
-        fromarray,
-        startsoffset,
-        stopsoffset,
-        lenstarts,
-        lenarray,
-        lencontent);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_ListArray64_getitem_next_array_64(
+          tocarry,
+          toadvanced,
+          fromstarts,
+          fromstops,
+          fromarray,
+          startsoffset,
+          stopsoffset,
+          lenstarts,
+          lenarray,
+          lencontent);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_array_64<int64_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for ListArray_getitem_next_array_64<int64_t>");
+      }
     }
 
     template<>
-    Error ListArray_getitem_next_array_advanced_64<int32_t>(
+    ERROR ListArray_getitem_next_array_advanced_64<int32_t>(
+      kernel::lib ptr_lib,
       int64_t *tocarry,
       int64_t *toadvanced,
       const int32_t *fromstarts,
@@ -2237,22 +2546,33 @@ namespace awkward {
       int64_t lenstarts,
       int64_t lenarray,
       int64_t lencontent) {
-      return awkward_ListArray32_getitem_next_array_advanced_64(
-        tocarry,
-        toadvanced,
-        fromstarts,
-        fromstops,
-        fromarray,
-        fromadvanced,
-        startsoffset,
-        stopsoffset,
-        lenstarts,
-        lenarray,
-        lencontent);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_ListArray32_getitem_next_array_advanced_64(
+          tocarry,
+          toadvanced,
+          fromstarts,
+          fromstops,
+          fromarray,
+          fromadvanced,
+          startsoffset,
+          stopsoffset,
+          lenstarts,
+          lenarray,
+          lencontent);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_array_advanced_64<int32_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for ListArray_getitem_next_array_advanced_64<int32_t>");
+      }
     }
 
     template<>
-    Error ListArray_getitem_next_array_advanced_64<uint32_t>(
+    ERROR ListArray_getitem_next_array_advanced_64<uint32_t>(
+      kernel::lib ptr_lib,
       int64_t *tocarry,
       int64_t *toadvanced,
       const uint32_t *fromstarts,
@@ -2264,22 +2584,33 @@ namespace awkward {
       int64_t lenstarts,
       int64_t lenarray,
       int64_t lencontent) {
-      return awkward_ListArrayU32_getitem_next_array_advanced_64(
-        tocarry,
-        toadvanced,
-        fromstarts,
-        fromstops,
-        fromarray,
-        fromadvanced,
-        startsoffset,
-        stopsoffset,
-        lenstarts,
-        lenarray,
-        lencontent);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_ListArrayU32_getitem_next_array_advanced_64(
+          tocarry,
+          toadvanced,
+          fromstarts,
+          fromstops,
+          fromarray,
+          fromadvanced,
+          startsoffset,
+          stopsoffset,
+          lenstarts,
+          lenarray,
+          lencontent);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_array_advanced_64<uint32_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for ListArray_getitem_next_array_advanced_64<uint32_t>");
+      }
     }
 
     template<>
-    Error ListArray_getitem_next_array_advanced_64<int64_t>(
+    ERROR ListArray_getitem_next_array_advanced_64<int64_t>(
+      kernel::lib ptr_lib,
       int64_t *tocarry,
       int64_t *toadvanced,
       const int64_t *fromstarts,
@@ -2291,22 +2622,33 @@ namespace awkward {
       int64_t lenstarts,
       int64_t lenarray,
       int64_t lencontent) {
-      return awkward_ListArray64_getitem_next_array_advanced_64(
-        tocarry,
-        toadvanced,
-        fromstarts,
-        fromstops,
-        fromarray,
-        fromadvanced,
-        startsoffset,
-        stopsoffset,
-        lenstarts,
-        lenarray,
-        lencontent);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_ListArray64_getitem_next_array_advanced_64(
+          tocarry,
+          toadvanced,
+          fromstarts,
+          fromstops,
+          fromarray,
+          fromadvanced,
+          startsoffset,
+          stopsoffset,
+          lenstarts,
+          lenarray,
+          lencontent);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_array_advanced_64<int64_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for ListArray_getitem_next_array_advanced_64<int64_t>");
+      }
     }
 
     template<>
-    Error ListArray_getitem_carry_64<int32_t>(
+    ERROR ListArray_getitem_carry_64<int32_t>(
+      kernel::lib ptr_lib,
       int32_t *tostarts,
       int32_t *tostops,
       const int32_t *fromstarts,
@@ -2316,20 +2658,31 @@ namespace awkward {
       int64_t stopsoffset,
       int64_t lenstarts,
       int64_t lencarry) {
-      return awkward_ListArray32_getitem_carry_64(
-        tostarts,
-        tostops,
-        fromstarts,
-        fromstops,
-        fromcarry,
-        startsoffset,
-        stopsoffset,
-        lenstarts,
-        lencarry);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_ListArray32_getitem_carry_64(
+          tostarts,
+          tostops,
+          fromstarts,
+          fromstops,
+          fromcarry,
+          startsoffset,
+          stopsoffset,
+          lenstarts,
+          lencarry);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_carry_64<int32_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for ListArray_getitem_carry_64<int32_t>");
+      }
     }
 
     template<>
-    Error ListArray_getitem_carry_64<uint32_t>(
+    ERROR ListArray_getitem_carry_64<uint32_t>(
+      kernel::lib ptr_lib,
       uint32_t *tostarts,
       uint32_t *tostops,
       const uint32_t *fromstarts,
@@ -2339,20 +2692,31 @@ namespace awkward {
       int64_t stopsoffset,
       int64_t lenstarts,
       int64_t lencarry) {
-      return awkward_ListArrayU32_getitem_carry_64(
-        tostarts,
-        tostops,
-        fromstarts,
-        fromstops,
-        fromcarry,
-        startsoffset,
-        stopsoffset,
-        lenstarts,
-        lencarry);
-    }
+      if (ptr_lib == kernel::lib::cpu) {
+       return awkward_ListArrayU32_getitem_carry_64(
+         tostarts,
+         tostops,
+         fromstarts,
+         fromstops,
+         fromcarry,
+         startsoffset,
+         stopsoffset,
+         lenstarts,
+         lencarry);
+     }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_carry_64<uint32_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for ListArray_getitem_carry_64<uint32_t>");
+      }
+     }
 
     template<>
-    Error ListArray_getitem_carry_64<int64_t>(
+    ERROR ListArray_getitem_carry_64<int64_t>(
+      kernel::lib ptr_lib,
       int64_t *tostarts,
       int64_t *tostops,
       const int64_t *fromstarts,
@@ -2362,24 +2726,34 @@ namespace awkward {
       int64_t stopsoffset,
       int64_t lenstarts,
       int64_t lencarry) {
-      return awkward_ListArray64_getitem_carry_64(
-        tostarts,
-        tostops,
-        fromstarts,
-        fromstops,
-        fromcarry,
-        startsoffset,
-        stopsoffset,
-        lenstarts,
-        lencarry);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_ListArray64_getitem_carry_64(
+          tostarts,
+          tostops,
+          fromstarts,
+          fromstops,
+          fromcarry,
+          startsoffset,
+          stopsoffset,
+          lenstarts,
+          lencarry);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_carry_64<int64_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for ListArray_getitem_carry_64<int64_t>");
+      }
     }
 
     ERROR RegularArray_getitem_next_at_64(
+      kernel::lib ptr_lib,
       int64_t *tocarry,
       int64_t at,
       int64_t len,
       int64_t size) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_RegularArray_getitem_next_at_64(
           tocarry,
@@ -2398,13 +2772,13 @@ namespace awkward {
     }
 
     ERROR RegularArray_getitem_next_range_64(
+      kernel::lib ptr_lib,
       int64_t *tocarry,
       int64_t regular_start,
       int64_t step,
       int64_t len,
       int64_t size,
       int64_t nextsize) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_RegularArray_getitem_next_range_64(
           tocarry,
@@ -2425,11 +2799,11 @@ namespace awkward {
     }
 
     ERROR RegularArray_getitem_next_range_spreadadvanced_64(
+      kernel::lib ptr_lib,
       int64_t *toadvanced,
       const int64_t *fromadvanced,
       int64_t len,
       int64_t nextsize) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_RegularArray_getitem_next_range_spreadadvanced_64(
           toadvanced,
@@ -2448,11 +2822,11 @@ namespace awkward {
     }
 
     ERROR RegularArray_getitem_next_array_regularize_64(
+      kernel::lib ptr_lib,
       int64_t *toarray,
       const int64_t *fromarray,
       int64_t lenarray,
       int64_t size) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_RegularArray_getitem_next_array_regularize_64(
           toarray,
@@ -2471,13 +2845,13 @@ namespace awkward {
     }
 
     ERROR RegularArray_getitem_next_array_64(
+      kernel::lib ptr_lib,
       int64_t *tocarry,
       int64_t *toadvanced,
       const int64_t *fromarray,
       int64_t len,
       int64_t lenarray,
       int64_t size) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_RegularArray_getitem_next_array_64(
           tocarry,
@@ -2498,6 +2872,7 @@ namespace awkward {
     }
 
     ERROR RegularArray_getitem_next_array_advanced_64(
+      kernel::lib ptr_lib,
       int64_t *tocarry,
       int64_t *toadvanced,
       const int64_t *fromadvanced,
@@ -2505,7 +2880,6 @@ namespace awkward {
       int64_t len,
       int64_t lenarray,
       int64_t size) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_RegularArray_getitem_next_array_advanced_64(
           tocarry,
@@ -2527,11 +2901,11 @@ namespace awkward {
     }
 
     ERROR RegularArray_getitem_carry_64(
+      kernel::lib ptr_lib,
       int64_t *tocarry,
       const int64_t *fromcarry,
       int64_t lencarry,
       int64_t size) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_RegularArray_getitem_carry_64(
           tocarry,
@@ -2550,147 +2924,247 @@ namespace awkward {
     }
 
     template<>
-    Error IndexedArray_numnull<int32_t>(
+    ERROR IndexedArray_numnull<int32_t>(
+      kernel::lib ptr_lib,
       int64_t *numnull,
       const int32_t *fromindex,
       int64_t indexoffset,
       int64_t lenindex) {
-      return awkward_IndexedArray32_numnull(
-        numnull,
-        fromindex,
-        indexoffset,
-        lenindex);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_IndexedArray32_numnull(
+          numnull,
+          fromindex,
+          indexoffset,
+          lenindex);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for IndexedArray_numnull<int32_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for IndexedArray_numnull<int32_t>");
+      }
     }
 
     template<>
-    Error IndexedArray_numnull<uint32_t>(
+    ERROR IndexedArray_numnull<uint32_t>(
+      kernel::lib ptr_lib,
       int64_t *numnull,
       const uint32_t *fromindex,
       int64_t indexoffset,
       int64_t lenindex) {
-      return awkward_IndexedArrayU32_numnull(
-        numnull,
-        fromindex,
-        indexoffset,
-        lenindex);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_IndexedArrayU32_numnull(
+          numnull,
+          fromindex,
+          indexoffset,
+          lenindex);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for IndexedArray_numnull<uint32_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for IndexedArray_numnull<uint32_t>");
+      }
     }
 
     template<>
-    Error IndexedArray_numnull<int64_t>(
+    ERROR IndexedArray_numnull<int64_t>(
+      kernel::lib ptr_lib,
       int64_t *numnull,
       const int64_t *fromindex,
       int64_t indexoffset,
       int64_t lenindex) {
-      return awkward_IndexedArray64_numnull(
-        numnull,
-        fromindex,
-        indexoffset,
-        lenindex);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_IndexedArray64_numnull(
+          numnull,
+          fromindex,
+          indexoffset,
+          lenindex);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for IndexedArray_numnull<int64_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for IndexedArray_numnull<int64_t>");
+      }
     }
 
     template<>
-    Error IndexedArray_getitem_nextcarry_outindex_64<int32_t>(
+    ERROR IndexedArray_getitem_nextcarry_outindex_64<int32_t>(
+      kernel::lib ptr_lib,
       int64_t *tocarry,
       int32_t *toindex,
       const int32_t *fromindex,
       int64_t indexoffset,
       int64_t lenindex,
       int64_t lencontent) {
-      return awkward_IndexedArray32_getitem_nextcarry_outindex_64(
-        tocarry,
-        toindex,
-        fromindex,
-        indexoffset,
-        lenindex,
-        lencontent);
-    }
+      if (ptr_lib == kernel::lib::cpu) {
+       return awkward_IndexedArray32_getitem_nextcarry_outindex_64(
+         tocarry,
+         toindex,
+         fromindex,
+         indexoffset,
+         lenindex,
+         lencontent);
+     }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for IndexedArray_getitem_nextcarry_outindex_64<int32_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for IndexedArray_getitem_nextcarry_outindex_64<int32_t>");
+      }
+     }
 
     template<>
-    Error IndexedArray_getitem_nextcarry_outindex_64<uint32_t>(
+    ERROR IndexedArray_getitem_nextcarry_outindex_64<uint32_t>(
+      kernel::lib ptr_lib,
       int64_t *tocarry,
       uint32_t *toindex,
       const uint32_t *fromindex,
       int64_t indexoffset,
       int64_t lenindex,
       int64_t lencontent) {
-      return awkward_IndexedArrayU32_getitem_nextcarry_outindex_64(
-        tocarry,
-        toindex,
-        fromindex,
-        indexoffset,
-        lenindex,
-        lencontent);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_IndexedArrayU32_getitem_nextcarry_outindex_64(
+          tocarry,
+          toindex,
+          fromindex,
+          indexoffset,
+          lenindex,
+          lencontent);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for IndexedArray_getitem_nextcarry_outindex_64<uint32_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for IndexedArray_getitem_nextcarry_outindex_64<uint32_t>");
+      }
     }
 
     template<>
-    Error IndexedArray_getitem_nextcarry_outindex_64<int64_t>(
+    ERROR IndexedArray_getitem_nextcarry_outindex_64<int64_t>(
+      kernel::lib ptr_lib,
       int64_t *tocarry,
       int64_t *toindex,
       const int64_t *fromindex,
       int64_t indexoffset,
       int64_t lenindex,
       int64_t lencontent) {
-      return awkward_IndexedArray64_getitem_nextcarry_outindex_64(
-        tocarry,
-        toindex,
-        fromindex,
-        indexoffset,
-        lenindex,
-        lencontent);
-    }
+      if (ptr_lib == kernel::lib::cpu) {
+       return awkward_IndexedArray64_getitem_nextcarry_outindex_64(
+         tocarry,
+         toindex,
+         fromindex,
+         indexoffset,
+         lenindex,
+         lencontent);
+     }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for IndexedArray_getitem_nextcarry_outindex_64<int64_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for IndexedArray_getitem_nextcarry_outindex_64<int64_t>");
+      }
+     }
 
     template<>
-    Error IndexedArray_getitem_nextcarry_outindex_mask_64<int32_t>(
+    ERROR IndexedArray_getitem_nextcarry_outindex_mask_64<int32_t>(
+      kernel::lib ptr_lib,
       int64_t *tocarry,
       int64_t *toindex,
       const int32_t *fromindex,
       int64_t indexoffset,
       int64_t lenindex,
       int64_t lencontent) {
-      return awkward_IndexedArray32_getitem_nextcarry_outindex_mask_64(
-        tocarry,
-        toindex,
-        fromindex,
-        indexoffset,
-        lenindex,
-        lencontent);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_IndexedArray32_getitem_nextcarry_outindex_mask_64(
+          tocarry,
+          toindex,
+          fromindex,
+          indexoffset,
+          lenindex,
+          lencontent);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for IndexedArray_getitem_nextcarry_outindex_mask_64<int32_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for IndexedArray_getitem_nextcarry_outindex_mask_64<int32_t>");
+      }
     }
 
     template<>
-    Error IndexedArray_getitem_nextcarry_outindex_mask_64<uint32_t>(
+    ERROR IndexedArray_getitem_nextcarry_outindex_mask_64<uint32_t>(
+      kernel::lib ptr_lib,
       int64_t *tocarry,
       int64_t *toindex,
       const uint32_t *fromindex,
       int64_t indexoffset,
       int64_t lenindex,
       int64_t lencontent) {
-      return awkward_IndexedArrayU32_getitem_nextcarry_outindex_mask_64(
-        tocarry,
-        toindex,
-        fromindex,
-        indexoffset,
-        lenindex,
-        lencontent);
-    }
+      if (ptr_lib == kernel::lib::cpu) {
+       return awkward_IndexedArrayU32_getitem_nextcarry_outindex_mask_64(
+         tocarry,
+         toindex,
+         fromindex,
+         indexoffset,
+         lenindex,
+         lencontent);
+     }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for IndexedArray_getitem_nextcarry_outindex_mask_64<uint32_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for IndexedArray_getitem_nextcarry_outindex_mask_64<uint32_t>");
+      }
+     }
 
     template<>
-    Error IndexedArray_getitem_nextcarry_outindex_mask_64<int64_t>(
+    ERROR IndexedArray_getitem_nextcarry_outindex_mask_64<int64_t>(
+      kernel::lib ptr_lib,
       int64_t *tocarry,
       int64_t *toindex,
       const int64_t *fromindex,
       int64_t indexoffset,
       int64_t lenindex,
       int64_t lencontent) {
-      return awkward_IndexedArray64_getitem_nextcarry_outindex_mask_64(
-        tocarry,
-        toindex,
-        fromindex,
-        indexoffset,
-        lenindex,
-        lencontent);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_IndexedArray64_getitem_nextcarry_outindex_mask_64(
+          tocarry,
+          toindex,
+          fromindex,
+          indexoffset,
+          lenindex,
+          lencontent);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for IndexedArray_getitem_nextcarry_outindex_mask_64<int64_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for IndexedArray_getitem_nextcarry_outindex_mask_64<int64_t>");
+      }
     }
 
     ERROR ListOffsetArray_getitem_adjust_offsets_64(
+      kernel::lib ptr_lib,
       int64_t *tooffsets,
       int64_t *tononzero,
       const int64_t *fromoffsets,
@@ -2699,7 +3173,6 @@ namespace awkward {
       const int64_t *nonzero,
       int64_t nonzerooffset,
       int64_t nonzerolength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray_getitem_adjust_offsets_64(
           tooffsets,
@@ -2722,6 +3195,7 @@ namespace awkward {
     }
 
     ERROR ListOffsetArray_getitem_adjust_offsets_index_64(
+      kernel::lib ptr_lib,
       int64_t *tooffsets,
       int64_t *tononzero,
       const int64_t *fromoffsets,
@@ -2736,7 +3210,6 @@ namespace awkward {
       const int8_t *originalmask,
       int64_t maskoffset,
       int64_t masklength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray_getitem_adjust_offsets_index_64(
           tooffsets,
@@ -2765,6 +3238,7 @@ namespace awkward {
     }
 
     ERROR IndexedArray_getitem_adjust_outindex_64(
+      kernel::lib ptr_lib,
       int8_t *tomask,
       int64_t *toindex,
       int64_t *tononzero,
@@ -2774,7 +3248,6 @@ namespace awkward {
       const int64_t *nonzero,
       int64_t nonzerooffset,
       int64_t nonzerolength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray_getitem_adjust_outindex_64(
           tomask,
@@ -2799,12 +3272,12 @@ namespace awkward {
 
     template<>
     ERROR IndexedArray_getitem_nextcarry_64(
+      kernel::lib ptr_lib,
       int64_t *tocarry,
       const int32_t *fromindex,
       int64_t indexoffset,
       int64_t lenindex,
       int64_t lencontent) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray32_getitem_nextcarry_64(
           tocarry,
@@ -2825,12 +3298,12 @@ namespace awkward {
 
     template<>
     ERROR IndexedArray_getitem_nextcarry_64(
+      kernel::lib ptr_lib,
       int64_t *tocarry,
       const uint32_t *fromindex,
       int64_t indexoffset,
       int64_t lenindex,
       int64_t lencontent) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArrayU32_getitem_nextcarry_64(
           tocarry,
@@ -2851,12 +3324,12 @@ namespace awkward {
 
     template<>
     ERROR IndexedArray_getitem_nextcarry_64(
+      kernel::lib ptr_lib,
       int64_t *tocarry,
       const int64_t *fromindex,
       int64_t indexoffset,
       int64_t lenindex,
       int64_t lencontent) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray64_getitem_nextcarry_64(
           tocarry,
@@ -2876,122 +3349,200 @@ namespace awkward {
     }
 
     template<>
-    Error IndexedArray_getitem_carry_64<int32_t>(
+    ERROR IndexedArray_getitem_carry_64<int32_t>(
+      kernel::lib ptr_lib,
       int32_t *toindex,
       const int32_t *fromindex,
       const int64_t *fromcarry,
       int64_t indexoffset,
       int64_t lenindex,
       int64_t lencarry) {
-      return awkward_IndexedArray32_getitem_carry_64(
-        toindex,
-        fromindex,
-        fromcarry,
-        indexoffset,
-        lenindex,
-        lencarry);
-    }
+      if (ptr_lib == kernel::lib::cpu) {
+       return awkward_IndexedArray32_getitem_carry_64(
+         toindex,
+         fromindex,
+         fromcarry,
+         indexoffset,
+         lenindex,
+         lencarry);
+     }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for IndexedArray_getitem_carry_64<int32_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for IndexedArray_getitem_carry_64<int32_t>");
+      }
+     }
 
     template<>
-    Error IndexedArray_getitem_carry_64<uint32_t>(
+    ERROR IndexedArray_getitem_carry_64<uint32_t>(
+      kernel::lib ptr_lib,
       uint32_t *toindex,
       const uint32_t *fromindex,
       const int64_t *fromcarry,
       int64_t indexoffset,
       int64_t lenindex,
       int64_t lencarry) {
-      return awkward_IndexedArrayU32_getitem_carry_64(
-        toindex,
-        fromindex,
-        fromcarry,
-        indexoffset,
-        lenindex,
-        lencarry);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_IndexedArrayU32_getitem_carry_64(
+          toindex,
+          fromindex,
+          fromcarry,
+          indexoffset,
+          lenindex,
+          lencarry);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for IndexedArray_getitem_carry_64<uint32_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for IndexedArray_getitem_carry_64<uint32_t>");
+      }
     }
 
     template<>
-    Error IndexedArray_getitem_carry_64<int64_t>(
+    ERROR IndexedArray_getitem_carry_64<int64_t>(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       const int64_t *fromindex,
       const int64_t *fromcarry,
       int64_t indexoffset,
       int64_t lenindex,
       int64_t lencarry) {
-      return awkward_IndexedArray64_getitem_carry_64(
-        toindex,
-        fromindex,
-        fromcarry,
-        indexoffset,
-        lenindex,
-        lencarry);
-    }
+      if (ptr_lib == kernel::lib::cpu) {
+       return awkward_IndexedArray64_getitem_carry_64(
+         toindex,
+         fromindex,
+         fromcarry,
+         indexoffset,
+         lenindex,
+         lencarry);
+     }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for IndexedArray_getitem_carry_64<int64_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for IndexedArray_getitem_carry_64<int64_t>");
+      }
+     }
 
     template<>
-    Error UnionArray_regular_index_getsize<int8_t>(
+    ERROR UnionArray_regular_index_getsize<int8_t>(
+      kernel::lib ptr_lib,
       int64_t *size,
       const int8_t *fromtags,
       int64_t tagsoffset,
       int64_t length) {
-      return awkward_UnionArray8_regular_index_getsize(
-        size,
-        fromtags,
-        tagsoffset,
-        length);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_UnionArray8_regular_index_getsize(
+          size,
+          fromtags,
+          tagsoffset,
+          length);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for UnionArray_regular_index_getsize<int8_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for UnionArray_regular_index_getsize<int8_t>");
+      }
     }
 
     template<>
-    Error UnionArray_regular_index<int8_t, int32_t>(
+    ERROR UnionArray_regular_index<int8_t, int32_t>(
+      kernel::lib ptr_lib,
       int32_t *toindex,
       int32_t *current,
       int64_t size,
       const int8_t *fromtags,
       int64_t tagsoffset,
       int64_t length) {
-      return awkward_UnionArray8_32_regular_index(
-        toindex,
-        current,
-        size,
-        fromtags,
-        tagsoffset,
-        length);
-    }
+      if (ptr_lib == kernel::lib::cpu) {
+       return awkward_UnionArray8_32_regular_index(
+         toindex,
+         current,
+         size,
+         fromtags,
+         tagsoffset,
+         length);
+     }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for UnionArray_regular_index<int8_t, int32_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for UnionArray_regular_index<int8_t, int32_t>");
+      }
+     }
 
     template<>
-    Error UnionArray_regular_index<int8_t, uint32_t>(
+    ERROR UnionArray_regular_index<int8_t, uint32_t>(
+      kernel::lib ptr_lib,
       uint32_t *toindex,
       uint32_t *current,
       int64_t size,
       const int8_t *fromtags,
       int64_t tagsoffset,
       int64_t length) {
-      return awkward_UnionArray8_U32_regular_index(
-        toindex,
-        current,
-        size,
-        fromtags,
-        tagsoffset,
-        length);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_UnionArray8_U32_regular_index(
+          toindex,
+          current,
+          size,
+          fromtags,
+          tagsoffset,
+          length);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for UnionArray_regular_index<int8_t, uint32_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for UnionArray_regular_index<int8_t, uint32_t>");
+      }
     }
 
     template<>
-    Error UnionArray_regular_index<int8_t, int64_t>(
+    ERROR UnionArray_regular_index<int8_t, int64_t>(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       int64_t *current,
       int64_t size,
       const int8_t *fromtags,
       int64_t tagsoffset,
       int64_t length) {
-      return awkward_UnionArray8_64_regular_index(
-        toindex,
-        current,
-        size,
-        fromtags,
-        tagsoffset,
-        length);
-    }
+      if (ptr_lib == kernel::lib::cpu) {
+       return awkward_UnionArray8_64_regular_index(
+         toindex,
+         current,
+         size,
+         fromtags,
+         tagsoffset,
+         length);
+     }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for UnionArray_regular_index<int8_t, int64_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for UnionArray_regular_index<int8_t, int64_t>");
+      }
+     }
 
     template<>
-    Error UnionArray_project_64<int8_t, int32_t>(
+    ERROR UnionArray_project_64<int8_t, int32_t>(
+      kernel::lib ptr_lib,
       int64_t *lenout,
       int64_t *tocarry,
       const int8_t *fromtags,
@@ -3000,19 +3551,30 @@ namespace awkward {
       int64_t indexoffset,
       int64_t length,
       int64_t which) {
-      return awkward_UnionArray8_32_project_64(
-        lenout,
-        tocarry,
-        fromtags,
-        tagsoffset,
-        fromindex,
-        indexoffset,
-        length,
-        which);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_UnionArray8_32_project_64(
+          lenout,
+          tocarry,
+          fromtags,
+          tagsoffset,
+          fromindex,
+          indexoffset,
+          length,
+          which);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for UnionArray_project_64<int8_t, int32_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for UnionArray_project_64<int8_t, int32_t>");
+      }
     }
 
     template<>
-    Error UnionArray_project_64<int8_t, uint32_t>(
+    ERROR UnionArray_project_64<int8_t, uint32_t>(
+      kernel::lib ptr_lib,
       int64_t *lenout,
       int64_t *tocarry,
       const int8_t *fromtags,
@@ -3021,19 +3583,30 @@ namespace awkward {
       int64_t indexoffset,
       int64_t length,
       int64_t which) {
-      return awkward_UnionArray8_U32_project_64(
-        lenout,
-        tocarry,
-        fromtags,
-        tagsoffset,
-        fromindex,
-        indexoffset,
-        length,
-        which);
-    }
+      if (ptr_lib == kernel::lib::cpu) {
+       return awkward_UnionArray8_U32_project_64(
+         lenout,
+         tocarry,
+         fromtags,
+         tagsoffset,
+         fromindex,
+         indexoffset,
+         length,
+         which);
+     }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for UnionArray_project_64<int8_t, uint32_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for UnionArray_project_64<int8_t, uint32_t>");
+      }
+     }
 
     template<>
-    Error UnionArray_project_64<int8_t, int64_t>(
+    ERROR UnionArray_project_64<int8_t, int64_t>(
+      kernel::lib ptr_lib,
       int64_t *lenout,
       int64_t *tocarry,
       const int8_t *fromtags,
@@ -3042,25 +3615,35 @@ namespace awkward {
       int64_t indexoffset,
       int64_t length,
       int64_t which) {
-      return awkward_UnionArray8_64_project_64(
-        lenout,
-        tocarry,
-        fromtags,
-        tagsoffset,
-        fromindex,
-        indexoffset,
-        length,
-        which);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_UnionArray8_64_project_64(
+          lenout,
+          tocarry,
+          fromtags,
+          tagsoffset,
+          fromindex,
+          indexoffset,
+          length,
+          which);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for UnionArray_project_64<int8_t, int64_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for UnionArray_project_64<int8_t, int64_t>");
+      }
     }
 
     ERROR missing_repeat_64(
+      kernel::lib ptr_lib,
       int64_t *outindex,
       const int64_t *index,
       int64_t indexoffset,
       int64_t indexlength,
       int64_t repetitions,
       int64_t regularsize) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_missing_repeat_64(
           outindex,
@@ -3081,12 +3664,12 @@ namespace awkward {
     }
 
     ERROR RegularArray_getitem_jagged_expand_64(
+      kernel::lib ptr_lib,
       int64_t *multistarts,
       int64_t *multistops,
       const int64_t *singleoffsets,
       int64_t regularsize,
       int64_t regularlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_RegularArray_getitem_jagged_expand_64(
           multistarts,
@@ -3106,7 +3689,8 @@ namespace awkward {
     }
 
     template<>
-    Error ListArray_getitem_jagged_expand_64<int32_t>(
+    ERROR ListArray_getitem_jagged_expand_64<int32_t>(
+      kernel::lib ptr_lib,
       int64_t *multistarts,
       int64_t *multistops,
       const int64_t *singleoffsets,
@@ -3117,21 +3701,32 @@ namespace awkward {
       int64_t fromstopsoffset,
       int64_t jaggedsize,
       int64_t length) {
-      return awkward_ListArray32_getitem_jagged_expand_64(
-        multistarts,
-        multistops,
-        singleoffsets,
-        tocarry,
-        fromstarts,
-        fromstartsoffset,
-        fromstops,
-        fromstopsoffset,
-        jaggedsize,
-        length);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_ListArray32_getitem_jagged_expand_64(
+          multistarts,
+          multistops,
+          singleoffsets,
+          tocarry,
+          fromstarts,
+          fromstartsoffset,
+          fromstops,
+          fromstopsoffset,
+          jaggedsize,
+          length);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_jagged_expand_64<int32_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for ListArray_getitem_jagged_expand_64<int32_t>");
+      }
     }
 
     template<>
-    Error ListArray_getitem_jagged_expand_64(
+    ERROR ListArray_getitem_jagged_expand_64(
+      kernel::lib ptr_lib,
       int64_t *multistarts,
       int64_t *multistops,
       const int64_t *singleoffsets,
@@ -3142,21 +3737,32 @@ namespace awkward {
       int64_t fromstopsoffset,
       int64_t jaggedsize,
       int64_t length) {
-      return awkward_ListArrayU32_getitem_jagged_expand_64(
-        multistarts,
-        multistops,
-        singleoffsets,
-        tocarry,
-        fromstarts,
-        fromstartsoffset,
-        fromstops,
-        fromstopsoffset,
-        jaggedsize,
-        length);
-    }
+      if (ptr_lib == kernel::lib::cpu) {
+       return awkward_ListArrayU32_getitem_jagged_expand_64(
+         multistarts,
+         multistops,
+         singleoffsets,
+         tocarry,
+         fromstarts,
+         fromstartsoffset,
+         fromstops,
+         fromstopsoffset,
+         jaggedsize,
+         length);
+     }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_jagged_expand_64");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for ListArray_getitem_jagged_expand_64");
+      }
+     }
 
     template<>
-    Error ListArray_getitem_jagged_expand_64(
+    ERROR ListArray_getitem_jagged_expand_64(
+      kernel::lib ptr_lib,
       int64_t *multistarts,
       int64_t *multistops,
       const int64_t *singleoffsets,
@@ -3167,27 +3773,37 @@ namespace awkward {
       int64_t fromstopsoffset,
       int64_t jaggedsize,
       int64_t length) {
-      return awkward_ListArray64_getitem_jagged_expand_64(
-        multistarts,
-        multistops,
-        singleoffsets,
-        tocarry,
-        fromstarts,
-        fromstartsoffset,
-        fromstops,
-        fromstopsoffset,
-        jaggedsize,
-        length);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_ListArray64_getitem_jagged_expand_64(
+          multistarts,
+          multistops,
+          singleoffsets,
+          tocarry,
+          fromstarts,
+          fromstartsoffset,
+          fromstops,
+          fromstopsoffset,
+          jaggedsize,
+          length);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_jagged_expand_64");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for ListArray_getitem_jagged_expand_64");
+      }
     }
 
     ERROR ListArray_getitem_jagged_carrylen_64(
+      kernel::lib ptr_lib,
       int64_t *carrylen,
       const int64_t *slicestarts,
       int64_t slicestartsoffset,
       const int64_t *slicestops,
       int64_t slicestopsoffset,
       int64_t sliceouterlen) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray_getitem_jagged_carrylen_64(
           carrylen,
@@ -3208,7 +3824,8 @@ namespace awkward {
     }
 
     template<>
-    Error ListArray_getitem_jagged_apply_64<int32_t>(
+    ERROR ListArray_getitem_jagged_apply_64<int32_t>(
+      kernel::lib ptr_lib,
       int64_t *tooffsets,
       int64_t *tocarry,
       const int64_t *slicestarts,
@@ -3224,26 +3841,37 @@ namespace awkward {
       const int32_t *fromstops,
       int64_t fromstopsoffset,
       int64_t contentlen) {
-      return awkward_ListArray32_getitem_jagged_apply_64(
-        tooffsets,
-        tocarry,
-        slicestarts,
-        slicestartsoffset,
-        slicestops,
-        slicestopsoffset,
-        sliceouterlen,
-        sliceindex,
-        sliceindexoffset,
-        sliceinnerlen,
-        fromstarts,
-        fromstartsoffset,
-        fromstops,
-        fromstopsoffset,
-        contentlen);
-    }
+      if (ptr_lib == kernel::lib::cpu) {
+       return awkward_ListArray32_getitem_jagged_apply_64(
+         tooffsets,
+         tocarry,
+         slicestarts,
+         slicestartsoffset,
+         slicestops,
+         slicestopsoffset,
+         sliceouterlen,
+         sliceindex,
+         sliceindexoffset,
+         sliceinnerlen,
+         fromstarts,
+         fromstartsoffset,
+         fromstops,
+         fromstopsoffset,
+         contentlen);
+     }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_jagged_apply_64<int32_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for ListArray_getitem_jagged_apply_64<int32_t>");
+      }
+     }
 
     template<>
-    Error ListArray_getitem_jagged_apply_64<uint32_t>(
+    ERROR ListArray_getitem_jagged_apply_64<uint32_t>(
+      kernel::lib ptr_lib,
       int64_t *tooffsets,
       int64_t *tocarry,
       const int64_t *slicestarts,
@@ -3259,26 +3887,37 @@ namespace awkward {
       const uint32_t *fromstops,
       int64_t fromstopsoffset,
       int64_t contentlen) {
-      return awkward_ListArrayU32_getitem_jagged_apply_64(
-        tooffsets,
-        tocarry,
-        slicestarts,
-        slicestartsoffset,
-        slicestops,
-        slicestopsoffset,
-        sliceouterlen,
-        sliceindex,
-        sliceindexoffset,
-        sliceinnerlen,
-        fromstarts,
-        fromstartsoffset,
-        fromstops,
-        fromstopsoffset,
-        contentlen);
-    }
+      if (ptr_lib == kernel::lib::cpu) {
+       return awkward_ListArrayU32_getitem_jagged_apply_64(
+         tooffsets,
+         tocarry,
+         slicestarts,
+         slicestartsoffset,
+         slicestops,
+         slicestopsoffset,
+         sliceouterlen,
+         sliceindex,
+         sliceindexoffset,
+         sliceinnerlen,
+         fromstarts,
+         fromstartsoffset,
+         fromstops,
+         fromstopsoffset,
+         contentlen);
+     }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_jagged_apply_64<uint32_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for ListArray_getitem_jagged_apply_64<uint32_t>");
+      }
+     }
 
     template<>
-    Error ListArray_getitem_jagged_apply_64<int64_t>(
+    ERROR ListArray_getitem_jagged_apply_64<int64_t>(
+      kernel::lib ptr_lib,
       int64_t *tooffsets,
       int64_t *tocarry,
       const int64_t *slicestarts,
@@ -3294,25 +3933,36 @@ namespace awkward {
       const int64_t *fromstops,
       int64_t fromstopsoffset,
       int64_t contentlen) {
-      return awkward_ListArray64_getitem_jagged_apply_64(
-        tooffsets,
-        tocarry,
-        slicestarts,
-        slicestartsoffset,
-        slicestops,
-        slicestopsoffset,
-        sliceouterlen,
-        sliceindex,
-        sliceindexoffset,
-        sliceinnerlen,
-        fromstarts,
-        fromstartsoffset,
-        fromstops,
-        fromstopsoffset,
-        contentlen);
-    }
+      if (ptr_lib == kernel::lib::cpu) {
+       return awkward_ListArray64_getitem_jagged_apply_64(
+         tooffsets,
+         tocarry,
+         slicestarts,
+         slicestartsoffset,
+         slicestops,
+         slicestopsoffset,
+         sliceouterlen,
+         sliceindex,
+         sliceindexoffset,
+         sliceinnerlen,
+         fromstarts,
+         fromstartsoffset,
+         fromstops,
+         fromstopsoffset,
+         contentlen);
+     }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_jagged_apply_64<int64_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for ListArray_getitem_jagged_apply_64<int64_t>");
+      }
+     }
 
     ERROR ListArray_getitem_jagged_numvalid_64(
+      kernel::lib ptr_lib,
       int64_t *numvalid,
       const int64_t *slicestarts,
       int64_t slicestartsoffset,
@@ -3322,7 +3972,6 @@ namespace awkward {
       const int64_t *missing,
       int64_t missingoffset,
       int64_t missinglength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray_getitem_jagged_numvalid_64(
           numvalid,
@@ -3346,6 +3995,7 @@ namespace awkward {
     }
 
     ERROR ListArray_getitem_jagged_shrink_64(
+      kernel::lib ptr_lib,
       int64_t *tocarry,
       int64_t *tosmalloffsets,
       int64_t *tolargeoffsets,
@@ -3356,7 +4006,6 @@ namespace awkward {
       int64_t length,
       const int64_t *missing,
       int64_t missingoffset) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray_getitem_jagged_shrink_64(
           tocarry,
@@ -3381,7 +4030,8 @@ namespace awkward {
     }
 
     template<>
-    Error ListArray_getitem_jagged_descend_64<int32_t>(
+    ERROR ListArray_getitem_jagged_descend_64<int32_t>(
+      kernel::lib ptr_lib,
       int64_t *tooffsets,
       const int64_t *slicestarts,
       int64_t slicestartsoffset,
@@ -3392,21 +4042,32 @@ namespace awkward {
       int64_t fromstartsoffset,
       const int32_t *fromstops,
       int64_t fromstopsoffset) {
-      return awkward_ListArray32_getitem_jagged_descend_64(
-        tooffsets,
-        slicestarts,
-        slicestartsoffset,
-        slicestops,
-        slicestopsoffset,
-        sliceouterlen,
-        fromstarts,
-        fromstartsoffset,
-        fromstops,
-        fromstopsoffset);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_ListArray32_getitem_jagged_descend_64(
+          tooffsets,
+          slicestarts,
+          slicestartsoffset,
+          slicestops,
+          slicestopsoffset,
+          sliceouterlen,
+          fromstarts,
+          fromstartsoffset,
+          fromstops,
+          fromstopsoffset);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_jagged_descend_64<int32_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for ListArray_getitem_jagged_descend_64<int32_t>");
+      }
     }
 
     template<>
-    Error ListArray_getitem_jagged_descend_64<uint32_t>(
+    ERROR ListArray_getitem_jagged_descend_64<uint32_t>(
+      kernel::lib ptr_lib,
       int64_t *tooffsets,
       const int64_t *slicestarts,
       int64_t slicestartsoffset,
@@ -3417,21 +4078,32 @@ namespace awkward {
       int64_t fromstartsoffset,
       const uint32_t *fromstops,
       int64_t fromstopsoffset) {
-      return awkward_ListArrayU32_getitem_jagged_descend_64(
-        tooffsets,
-        slicestarts,
-        slicestartsoffset,
-        slicestops,
-        slicestopsoffset,
-        sliceouterlen,
-        fromstarts,
-        fromstartsoffset,
-        fromstops,
-        fromstopsoffset);
-    }
+      if (ptr_lib == kernel::lib::cpu) {
+       return awkward_ListArrayU32_getitem_jagged_descend_64(
+         tooffsets,
+         slicestarts,
+         slicestartsoffset,
+         slicestops,
+         slicestopsoffset,
+         sliceouterlen,
+         fromstarts,
+         fromstartsoffset,
+         fromstops,
+         fromstopsoffset);
+     }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_jagged_descend_64<uint32_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for ListArray_getitem_jagged_descend_64<uint32_t>");
+      }
+     }
 
     template<>
-    Error ListArray_getitem_jagged_descend_64<int64_t>(
+    ERROR ListArray_getitem_jagged_descend_64<int64_t>(
+      kernel::lib ptr_lib,
       int64_t *tooffsets,
       const int64_t *slicestarts,
       int64_t slicestartsoffset,
@@ -3442,17 +4114,27 @@ namespace awkward {
       int64_t fromstartsoffset,
       const int64_t *fromstops,
       int64_t fromstopsoffset) {
-      return awkward_ListArray64_getitem_jagged_descend_64(
-        tooffsets,
-        slicestarts,
-        slicestartsoffset,
-        slicestops,
-        slicestopsoffset,
-        sliceouterlen,
-        fromstarts,
-        fromstartsoffset,
-        fromstops,
-        fromstopsoffset);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_ListArray64_getitem_jagged_descend_64(
+          tooffsets,
+          slicestarts,
+          slicestartsoffset,
+          slicestops,
+          slicestopsoffset,
+          sliceouterlen,
+          fromstarts,
+          fromstartsoffset,
+          fromstops,
+          fromstopsoffset);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_jagged_descend_64<int64_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for ListArray_getitem_jagged_descend_64<int64_t>");
+      }
     }
 
     template<>
@@ -3651,13 +4333,13 @@ namespace awkward {
     }
 
     ERROR ByteMaskedArray_getitem_carry_64(
+      kernel::lib ptr_lib,
       int8_t *tomask,
       const int8_t *frommask,
       int64_t frommaskoffset,
       int64_t lenmask,
       const int64_t *fromcarry,
       int64_t lencarry) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ByteMaskedArray_getitem_carry_64(
           tomask,
@@ -3678,12 +4360,12 @@ namespace awkward {
     }
 
     ERROR ByteMaskedArray_numnull(
+      kernel::lib ptr_lib,
       int64_t *numnull,
       const int8_t *mask,
       int64_t maskoffset,
       int64_t length,
       bool validwhen) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ByteMaskedArray_numnull(
           numnull,
@@ -3703,12 +4385,12 @@ namespace awkward {
     }
 
     ERROR ByteMaskedArray_getitem_nextcarry_64(
+      kernel::lib ptr_lib,
       int64_t *tocarry,
       const int8_t *mask,
       int64_t maskoffset,
       int64_t length,
       bool validwhen) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ByteMaskedArray_getitem_nextcarry_64(
           tocarry,
@@ -3728,13 +4410,13 @@ namespace awkward {
     }
 
     ERROR ByteMaskedArray_getitem_nextcarry_outindex_64(
+      kernel::lib ptr_lib,
       int64_t *tocarry,
       int64_t *toindex,
       const int8_t *mask,
       int64_t maskoffset,
       int64_t length,
       bool validwhen) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ByteMaskedArray_getitem_nextcarry_outindex_64(
           tocarry,
@@ -3755,12 +4437,12 @@ namespace awkward {
     }
 
     ERROR ByteMaskedArray_toIndexedOptionArray64(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       const int8_t *mask,
       int64_t maskoffset,
       int64_t length,
       bool validwhen) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ByteMaskedArray_toIndexedOptionArray64(
           toindex,
@@ -3780,10 +4462,10 @@ namespace awkward {
     }
 
     ERROR Content_getitem_next_missing_jagged_getmaskstartstop(
+      kernel::lib ptr_lib,
         int64_t *index_in, int64_t index_in_offset, int64_t *offsets_in,
         int64_t offsets_in_offset, int64_t *mask_out, int64_t *starts_out,
         int64_t *stops_out, int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_Content_getitem_next_missing_jagged_getmaskstartstop(
             index_in, index_in_offset, offsets_in, offsets_in_offset, mask_out,
@@ -3801,10 +4483,10 @@ namespace awkward {
 
     template <>
     ERROR MaskedArray_getitem_next_jagged_project(
+      kernel::lib ptr_lib,
         int32_t *index, int64_t index_offset, int64_t *starts_in,
         int64_t starts_offset, int64_t *stops_in, int64_t stops_offset,
         int64_t *starts_out, int64_t *stops_out, int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_MaskedArray32_getitem_next_jagged_project(
             index, index_offset, starts_in, starts_offset, stops_in, stops_offset,
@@ -3821,10 +4503,10 @@ namespace awkward {
     }
     template <>
     ERROR MaskedArray_getitem_next_jagged_project(
+      kernel::lib ptr_lib,
         uint32_t *index, int64_t index_offset, int64_t *starts_in,
         int64_t starts_offset, int64_t *stops_in, int64_t stops_offset,
         int64_t *starts_out, int64_t *stops_out, int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_MaskedArrayU32_getitem_next_jagged_project(
             index, index_offset, starts_in, starts_offset, stops_in, stops_offset,
@@ -3841,10 +4523,10 @@ namespace awkward {
     }
     template <>
     ERROR MaskedArray_getitem_next_jagged_project(
+      kernel::lib ptr_lib,
         int64_t *index, int64_t index_offset, int64_t *starts_in,
         int64_t starts_offset, int64_t *stops_in, int64_t stops_offset,
         int64_t *starts_out, int64_t *stops_out, int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_MaskedArray64_getitem_next_jagged_project(
             index, index_offset, starts_in, starts_offset, stops_in, stops_offset,
@@ -3864,9 +4546,9 @@ namespace awkward {
 
     template<>
     ERROR new_Identities(
+      kernel::lib ptr_lib,
       int32_t *toptr,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_new_Identities32(
           toptr,
@@ -3884,9 +4566,9 @@ namespace awkward {
 
     template<>
     ERROR new_Identities(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_new_Identities64(
           toptr,
@@ -3904,11 +4586,11 @@ namespace awkward {
 
     template<>
     ERROR Identities_to_Identities64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const int32_t *fromptr,
       int64_t length,
       int64_t width) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_Identities32_to_Identities64(
           toptr,
@@ -3928,6 +4610,7 @@ namespace awkward {
 
     template<>
     ERROR Identities_from_ListOffsetArray<int32_t, int32_t>(
+      kernel::lib ptr_lib,
       int32_t *toptr,
       const int32_t *fromptr,
       const int32_t *fromoffsets,
@@ -3936,7 +4619,6 @@ namespace awkward {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_Identities32_from_ListOffsetArray32(
           toptr,
@@ -3960,6 +4642,7 @@ namespace awkward {
 
     template<>
     ERROR Identities_from_ListOffsetArray<int32_t, uint32_t>(
+      kernel::lib ptr_lib,
       int32_t *toptr,
       const int32_t *fromptr,
       const uint32_t *fromoffsets,
@@ -3968,7 +4651,6 @@ namespace awkward {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_Identities32_from_ListOffsetArrayU32(
           toptr,
@@ -3992,6 +4674,7 @@ namespace awkward {
 
     template<>
     ERROR Identities_from_ListOffsetArray<int32_t, int64_t>(
+      kernel::lib ptr_lib,
       int32_t *toptr,
       const int32_t *fromptr,
       const int64_t *fromoffsets,
@@ -4000,7 +4683,6 @@ namespace awkward {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_Identities32_from_ListOffsetArray64(
           toptr,
@@ -4024,6 +4706,7 @@ namespace awkward {
 
     template<>
     ERROR Identities_from_ListOffsetArray<int64_t, int32_t>(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const int64_t *fromptr,
       const int32_t *fromoffsets,
@@ -4032,7 +4715,6 @@ namespace awkward {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_Identities64_from_ListOffsetArray32(
           toptr,
@@ -4056,6 +4738,7 @@ namespace awkward {
 
     template<>
     ERROR Identities_from_ListOffsetArray<int64_t, uint32_t>(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const int64_t *fromptr,
       const uint32_t *fromoffsets,
@@ -4064,7 +4747,6 @@ namespace awkward {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_Identities64_from_ListOffsetArrayU32(
           toptr,
@@ -4088,6 +4770,7 @@ namespace awkward {
 
     template<>
     ERROR Identities_from_ListOffsetArray<int64_t, int64_t>(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const int64_t *fromptr,
       const int64_t *fromoffsets,
@@ -4096,7 +4779,6 @@ namespace awkward {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_Identities64_from_ListOffsetArray64(
           toptr,
@@ -4120,6 +4802,7 @@ namespace awkward {
 
     template<>
     ERROR Identities_from_ListArray<int32_t, int32_t>(
+      kernel::lib ptr_lib,
       bool *uniquecontents,
       int32_t *toptr,
       const int32_t *fromptr,
@@ -4131,7 +4814,6 @@ namespace awkward {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_Identities32_from_ListArray32(
           uniquecontents,
@@ -4158,6 +4840,7 @@ namespace awkward {
 
     template<>
     ERROR Identities_from_ListArray<int32_t, uint32_t>(
+      kernel::lib ptr_lib,
       bool *uniquecontents,
       int32_t *toptr,
       const int32_t *fromptr,
@@ -4169,7 +4852,6 @@ namespace awkward {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_Identities32_from_ListArrayU32(
           uniquecontents,
@@ -4196,6 +4878,7 @@ namespace awkward {
 
     template<>
     ERROR Identities_from_ListArray<int32_t, int64_t>(
+      kernel::lib ptr_lib,
       bool *uniquecontents,
       int32_t *toptr,
       const int32_t *fromptr,
@@ -4207,7 +4890,6 @@ namespace awkward {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_Identities32_from_ListArray64(
           uniquecontents,
@@ -4234,6 +4916,7 @@ namespace awkward {
 
     template<>
     ERROR Identities_from_ListArray<int64_t, int32_t>(
+      kernel::lib ptr_lib,
       bool *uniquecontents,
       int64_t *toptr,
       const int64_t *fromptr,
@@ -4245,7 +4928,6 @@ namespace awkward {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_Identities64_from_ListArray32(
           uniquecontents,
@@ -4272,6 +4954,7 @@ namespace awkward {
 
     template<>
     ERROR Identities_from_ListArray<int64_t, uint32_t>(
+      kernel::lib ptr_lib,
       bool *uniquecontents,
       int64_t *toptr,
       const int64_t *fromptr,
@@ -4283,7 +4966,6 @@ namespace awkward {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_Identities64_from_ListArrayU32(
           uniquecontents,
@@ -4310,6 +4992,7 @@ namespace awkward {
 
     template<>
     ERROR Identities_from_ListArray<int64_t, int64_t>(
+      kernel::lib ptr_lib,
       bool *uniquecontents,
       int64_t *toptr,
       const int64_t *fromptr,
@@ -4321,7 +5004,6 @@ namespace awkward {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_Identities64_from_ListArray64(
           uniquecontents,
@@ -4348,6 +5030,7 @@ namespace awkward {
 
     template<>
     ERROR Identities_from_RegularArray(
+      kernel::lib ptr_lib,
       int32_t *toptr,
       const int32_t *fromptr,
       int64_t fromptroffset,
@@ -4355,7 +5038,6 @@ namespace awkward {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_Identities32_from_RegularArray(
           toptr,
@@ -4378,6 +5060,7 @@ namespace awkward {
 
     template<>
     ERROR Identities_from_RegularArray(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const int64_t *fromptr,
       int64_t fromptroffset,
@@ -4385,7 +5068,6 @@ namespace awkward {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_Identities64_from_RegularArray(
           toptr,
@@ -4407,7 +5089,8 @@ namespace awkward {
     }
 
     template<>
-    Error Identities_from_IndexedArray<int32_t, int32_t>(
+    ERROR Identities_from_IndexedArray<int32_t, int32_t>(
+      kernel::lib ptr_lib,
       bool *uniquecontents,
       int32_t *toptr,
       const int32_t *fromptr,
@@ -4417,20 +5100,31 @@ namespace awkward {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
-      return awkward_Identities32_from_IndexedArray32(
-        uniquecontents,
-        toptr,
-        fromptr,
-        fromindex,
-        fromptroffset,
-        indexoffset,
-        tolength,
-        fromlength,
-        fromwidth);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_Identities32_from_IndexedArray32(
+          uniquecontents,
+          toptr,
+          fromptr,
+          fromindex,
+          fromptroffset,
+          indexoffset,
+          tolength,
+          fromlength,
+          fromwidth);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for Identities_from_IndexedArray<int32_t, int32_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for Identities_from_IndexedArray<int32_t, int32_t>");
+      }
     }
 
     template<>
-    Error Identities_from_IndexedArray<int32_t, uint32_t>(
+    ERROR Identities_from_IndexedArray<int32_t, uint32_t>(
+      kernel::lib ptr_lib,
       bool *uniquecontents,
       int32_t *toptr,
       const int32_t *fromptr,
@@ -4440,20 +5134,31 @@ namespace awkward {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
-      return awkward_Identities32_from_IndexedArrayU32(
-        uniquecontents,
-        toptr,
-        fromptr,
-        fromindex,
-        fromptroffset,
-        indexoffset,
-        tolength,
-        fromlength,
-        fromwidth);
-    }
+      if (ptr_lib == kernel::lib::cpu) {
+       return awkward_Identities32_from_IndexedArrayU32(
+         uniquecontents,
+         toptr,
+         fromptr,
+         fromindex,
+         fromptroffset,
+         indexoffset,
+         tolength,
+         fromlength,
+         fromwidth);
+     }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for Identities_from_IndexedArray<int32_t, uint32_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for Identities_from_IndexedArray<int32_t, uint32_t>");
+      }
+     }
 
     template<>
-    Error Identities_from_IndexedArray<int32_t, int64_t>(
+    ERROR Identities_from_IndexedArray<int32_t, int64_t>(
+      kernel::lib ptr_lib,
       bool *uniquecontents,
       int32_t *toptr,
       const int32_t *fromptr,
@@ -4463,20 +5168,31 @@ namespace awkward {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
-      return awkward_Identities32_from_IndexedArray64(
-        uniquecontents,
-        toptr,
-        fromptr,
-        fromindex,
-        fromptroffset,
-        indexoffset,
-        tolength,
-        fromlength,
-        fromwidth);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_Identities32_from_IndexedArray64(
+          uniquecontents,
+          toptr,
+          fromptr,
+          fromindex,
+          fromptroffset,
+          indexoffset,
+          tolength,
+          fromlength,
+          fromwidth);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for Identities_from_IndexedArray<int32_t, int64_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for Identities_from_IndexedArray<int32_t, int64_t>");
+      }
     }
 
     template<>
-    Error Identities_from_IndexedArray<int64_t, int32_t>(
+    ERROR Identities_from_IndexedArray<int64_t, int32_t>(
+      kernel::lib ptr_lib,
       bool *uniquecontents,
       int64_t *toptr,
       const int64_t *fromptr,
@@ -4486,20 +5202,31 @@ namespace awkward {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
-      return awkward_Identities64_from_IndexedArray32(
-        uniquecontents,
-        toptr,
-        fromptr,
-        fromindex,
-        fromptroffset,
-        indexoffset,
-        tolength,
-        fromlength,
-        fromwidth);
-    }
+      if (ptr_lib == kernel::lib::cpu) {
+       return awkward_Identities64_from_IndexedArray32(
+         uniquecontents,
+         toptr,
+         fromptr,
+         fromindex,
+         fromptroffset,
+         indexoffset,
+         tolength,
+         fromlength,
+         fromwidth);
+     }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for Identities_from_IndexedArray<int64_t, int32_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for Identities_from_IndexedArray<int64_t, int32_t>");
+      }
+     }
 
     template<>
-    Error Identities_from_IndexedArray<int64_t, uint32_t>(
+    ERROR Identities_from_IndexedArray<int64_t, uint32_t>(
+      kernel::lib ptr_lib,
       bool *uniquecontents,
       int64_t *toptr,
       const int64_t *fromptr,
@@ -4509,20 +5236,31 @@ namespace awkward {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
-      return awkward_Identities64_from_IndexedArrayU32(
-        uniquecontents,
-        toptr,
-        fromptr,
-        fromindex,
-        fromptroffset,
-        indexoffset,
-        tolength,
-        fromlength,
-        fromwidth);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_Identities64_from_IndexedArrayU32(
+          uniquecontents,
+          toptr,
+          fromptr,
+          fromindex,
+          fromptroffset,
+          indexoffset,
+          tolength,
+          fromlength,
+          fromwidth);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for Identities_from_IndexedArray<int64_t, uint32_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for Identities_from_IndexedArray<int64_t, uint32_t>");
+      }
     }
 
     template<>
-    Error Identities_from_IndexedArray<int64_t, int64_t>(
+    ERROR Identities_from_IndexedArray<int64_t, int64_t>(
+      kernel::lib ptr_lib,
       bool *uniquecontents,
       int64_t *toptr,
       const int64_t *fromptr,
@@ -4532,20 +5270,31 @@ namespace awkward {
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
-      return awkward_Identities64_from_IndexedArray64(
-        uniquecontents,
-        toptr,
-        fromptr,
-        fromindex,
-        fromptroffset,
-        indexoffset,
-        tolength,
-        fromlength,
-        fromwidth);
-    }
+      if (ptr_lib == kernel::lib::cpu) {
+       return awkward_Identities64_from_IndexedArray64(
+         uniquecontents,
+         toptr,
+         fromptr,
+         fromindex,
+         fromptroffset,
+         indexoffset,
+         tolength,
+         fromlength,
+         fromwidth);
+     }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for Identities_from_IndexedArray<int64_t, int64_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for Identities_from_IndexedArray<int64_t, int64_t>");
+      }
+     }
 
     template<>
-    Error Identities_from_UnionArray<int32_t, int8_t, int32_t>(
+    ERROR Identities_from_UnionArray<int32_t, int8_t, int32_t>(
+      kernel::lib ptr_lib,
       bool *uniquecontents,
       int32_t *toptr,
       const int32_t *fromptr,
@@ -4558,23 +5307,34 @@ namespace awkward {
       int64_t fromlength,
       int64_t fromwidth,
       int64_t which) {
-      return awkward_Identities32_from_UnionArray8_32(
-        uniquecontents,
-        toptr,
-        fromptr,
-        fromtags,
-        fromindex,
-        fromptroffset,
-        tagsoffset,
-        indexoffset,
-        tolength,
-        fromlength,
-        fromwidth,
-        which);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_Identities32_from_UnionArray8_32(
+          uniquecontents,
+          toptr,
+          fromptr,
+          fromtags,
+          fromindex,
+          fromptroffset,
+          tagsoffset,
+          indexoffset,
+          tolength,
+          fromlength,
+          fromwidth,
+          which);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for Identities_from_UnionArray<int32_t, int8_t, int32_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for Identities_from_UnionArray<int32_t, int8_t, int32_t>");
+      }
     }
 
     template<>
-    Error Identities_from_UnionArray<int32_t, int8_t, uint32_t>(
+    ERROR Identities_from_UnionArray<int32_t, int8_t, uint32_t>(
+      kernel::lib ptr_lib,
       bool *uniquecontents,
       int32_t *toptr,
       const int32_t *fromptr,
@@ -4587,23 +5347,34 @@ namespace awkward {
       int64_t fromlength,
       int64_t fromwidth,
       int64_t which) {
-      return awkward_Identities32_from_UnionArray8_U32(
-        uniquecontents,
-        toptr,
-        fromptr,
-        fromtags,
-        fromindex,
-        fromptroffset,
-        tagsoffset,
-        indexoffset,
-        tolength,
-        fromlength,
-        fromwidth,
-        which);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_Identities32_from_UnionArray8_U32(
+          uniquecontents,
+          toptr,
+          fromptr,
+          fromtags,
+          fromindex,
+          fromptroffset,
+          tagsoffset,
+          indexoffset,
+          tolength,
+          fromlength,
+          fromwidth,
+          which);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for Identities_from_UnionArray<int32_t, int8_t, uint32_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for Identities_from_UnionArray<int32_t, int8_t, uint32_t>");
+      }
     }
 
     template<>
-    Error Identities_from_UnionArray<int32_t, int8_t, int64_t>(
+    ERROR Identities_from_UnionArray<int32_t, int8_t, int64_t>(
+      kernel::lib ptr_lib,
       bool *uniquecontents,
       int32_t *toptr,
       const int32_t *fromptr,
@@ -4616,23 +5387,34 @@ namespace awkward {
       int64_t fromlength,
       int64_t fromwidth,
       int64_t which) {
-      return awkward_Identities32_from_UnionArray8_64(
-        uniquecontents,
-        toptr,
-        fromptr,
-        fromtags,
-        fromindex,
-        fromptroffset,
-        tagsoffset,
-        indexoffset,
-        tolength,
-        fromlength,
-        fromwidth,
-        which);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_Identities32_from_UnionArray8_64(
+          uniquecontents,
+          toptr,
+          fromptr,
+          fromtags,
+          fromindex,
+          fromptroffset,
+          tagsoffset,
+          indexoffset,
+          tolength,
+          fromlength,
+          fromwidth,
+          which);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for Identities_from_UnionArray<int32_t, int8_t, int64_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for Identities_from_UnionArray<int32_t, int8_t, int64_t>");
+      }
     }
 
     template<>
-    Error Identities_from_UnionArray<int64_t, int8_t, int32_t>(
+    ERROR Identities_from_UnionArray<int64_t, int8_t, int32_t>(
+      kernel::lib ptr_lib,
       bool *uniquecontents,
       int64_t *toptr,
       const int64_t *fromptr,
@@ -4645,23 +5427,34 @@ namespace awkward {
       int64_t fromlength,
       int64_t fromwidth,
       int64_t which) {
-      return awkward_Identities64_from_UnionArray8_32(
-        uniquecontents,
-        toptr,
-        fromptr,
-        fromtags,
-        fromindex,
-        fromptroffset,
-        tagsoffset,
-        indexoffset,
-        tolength,
-        fromlength,
-        fromwidth,
-        which);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_Identities64_from_UnionArray8_32(
+          uniquecontents,
+          toptr,
+          fromptr,
+          fromtags,
+          fromindex,
+          fromptroffset,
+          tagsoffset,
+          indexoffset,
+          tolength,
+          fromlength,
+          fromwidth,
+          which);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for Identities_from_UnionArray<int64_t, int8_t, int32_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for Identities_from_UnionArray<int64_t, int8_t, int32_t>");
+      }
     }
 
     template<>
-    Error Identities_from_UnionArray<int64_t, int8_t, uint32_t>(
+    ERROR Identities_from_UnionArray<int64_t, int8_t, uint32_t>(
+      kernel::lib ptr_lib,
       bool *uniquecontents,
       int64_t *toptr,
       const int64_t *fromptr,
@@ -4674,23 +5467,34 @@ namespace awkward {
       int64_t fromlength,
       int64_t fromwidth,
       int64_t which) {
-      return awkward_Identities64_from_UnionArray8_U32(
-        uniquecontents,
-        toptr,
-        fromptr,
-        fromtags,
-        fromindex,
-        fromptroffset,
-        tagsoffset,
-        indexoffset,
-        tolength,
-        fromlength,
-        fromwidth,
-        which);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_Identities64_from_UnionArray8_U32(
+          uniquecontents,
+          toptr,
+          fromptr,
+          fromtags,
+          fromindex,
+          fromptroffset,
+          tagsoffset,
+          indexoffset,
+          tolength,
+          fromlength,
+          fromwidth,
+          which);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for Identities_from_UnionArray<int64_t, int8_t, uint32_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for Identities_from_UnionArray<int64_t, int8_t, uint32_t>");
+      }
     }
 
     template<>
-    Error Identities_from_UnionArray<int64_t, int8_t, int64_t>(
+    ERROR Identities_from_UnionArray<int64_t, int8_t, int64_t>(
+      kernel::lib ptr_lib,
       bool *uniquecontents,
       int64_t *toptr,
       const int64_t *fromptr,
@@ -4703,29 +5507,39 @@ namespace awkward {
       int64_t fromlength,
       int64_t fromwidth,
       int64_t which) {
-      return awkward_Identities64_from_UnionArray8_64(
-        uniquecontents,
-        toptr,
-        fromptr,
-        fromtags,
-        fromindex,
-        fromptroffset,
-        tagsoffset,
-        indexoffset,
-        tolength,
-        fromlength,
-        fromwidth,
-        which);
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_Identities64_from_UnionArray8_64(
+          uniquecontents,
+          toptr,
+          fromptr,
+          fromtags,
+          fromindex,
+          fromptroffset,
+          tagsoffset,
+          indexoffset,
+          tolength,
+          fromlength,
+          fromwidth,
+          which);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          "not implemented: ptr_lib == cuda_kernels for Identities_from_UnionArray<int64_t, int8_t, int64_t>");
+      }
+      else {
+        throw std::runtime_error(
+          "unrecognized ptr_lib for Identities_from_UnionArray<int64_t, int8_t, int64_t>");
+      }
     }
 
     template<>
     ERROR Identities_extend(
+      kernel::lib ptr_lib,
       int32_t *toptr,
       const int32_t *fromptr,
       int64_t fromoffset,
       int64_t fromlength,
       int64_t tolength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_Identities32_extend(
           toptr,
@@ -4746,12 +5560,12 @@ namespace awkward {
 
     template<>
     ERROR Identities_extend(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const int64_t *fromptr,
       int64_t fromoffset,
       int64_t fromlength,
       int64_t tolength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_Identities64_extend(
           toptr,
@@ -4904,6 +5718,7 @@ namespace awkward {
 
     template<>
     ERROR ListOffsetArray_flatten_offsets_64<int32_t>(
+      kernel::lib ptr_lib,
       int64_t *tooffsets,
       const int32_t *outeroffsets,
       int64_t outeroffsetsoffset,
@@ -4911,7 +5726,6 @@ namespace awkward {
       const int64_t *inneroffsets,
       int64_t inneroffsetsoffset,
       int64_t inneroffsetslen) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray32_flatten_offsets_64(
           tooffsets,
@@ -4934,6 +5748,7 @@ namespace awkward {
 
     template<>
     ERROR ListOffsetArray_flatten_offsets_64<uint32_t>(
+      kernel::lib ptr_lib,
       int64_t *tooffsets,
       const uint32_t *outeroffsets,
       int64_t outeroffsetsoffset,
@@ -4941,7 +5756,6 @@ namespace awkward {
       const int64_t *inneroffsets,
       int64_t inneroffsetsoffset,
       int64_t inneroffsetslen) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArrayU32_flatten_offsets_64(
           tooffsets,
@@ -4964,6 +5778,7 @@ namespace awkward {
 
     template<>
     ERROR ListOffsetArray_flatten_offsets_64<int64_t>(
+      kernel::lib ptr_lib,
       int64_t *tooffsets,
       const int64_t *outeroffsets,
       int64_t outeroffsetsoffset,
@@ -4971,7 +5786,6 @@ namespace awkward {
       const int64_t *inneroffsets,
       int64_t inneroffsetsoffset,
       int64_t inneroffsetslen) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray64_flatten_offsets_64(
           tooffsets,
@@ -4994,6 +5808,7 @@ namespace awkward {
 
     template<>
     ERROR IndexedArray_flatten_none2empty_64<int32_t>(
+      kernel::lib ptr_lib,
       int64_t *outoffsets,
       const int32_t *outindex,
       int64_t outindexoffset,
@@ -5001,7 +5816,6 @@ namespace awkward {
       const int64_t *offsets,
       int64_t offsetsoffset,
       int64_t offsetslength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray32_flatten_none2empty_64(
           outoffsets,
@@ -5024,6 +5838,7 @@ namespace awkward {
 
     template<>
     ERROR IndexedArray_flatten_none2empty_64<uint32_t>(
+      kernel::lib ptr_lib,
       int64_t *outoffsets,
       const uint32_t *outindex,
       int64_t outindexoffset,
@@ -5031,7 +5846,6 @@ namespace awkward {
       const int64_t *offsets,
       int64_t offsetsoffset,
       int64_t offsetslength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArrayU32_flatten_none2empty_64(
           outoffsets,
@@ -5054,6 +5868,7 @@ namespace awkward {
 
     template<>
     ERROR IndexedArray_flatten_none2empty_64<int64_t>(
+      kernel::lib ptr_lib,
       int64_t *outoffsets,
       const int64_t *outindex,
       int64_t outindexoffset,
@@ -5061,7 +5876,6 @@ namespace awkward {
       const int64_t *offsets,
       int64_t offsetsoffset,
       int64_t offsetslength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray64_flatten_none2empty_64(
           outoffsets,
@@ -5084,6 +5898,7 @@ namespace awkward {
 
     template<>
     ERROR UnionArray_flatten_length_64<int8_t, int32_t>(
+      kernel::lib ptr_lib,
       int64_t *total_length,
       const int8_t *fromtags,
       int64_t fromtagsoffset,
@@ -5092,7 +5907,6 @@ namespace awkward {
       int64_t length,
       int64_t **offsetsraws,
       int64_t *offsetsoffsets) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray32_flatten_length_64(
           total_length,
@@ -5116,6 +5930,7 @@ namespace awkward {
 
     template<>
     ERROR UnionArray_flatten_length_64<int8_t, uint32_t>(
+      kernel::lib ptr_lib,
       int64_t *total_length,
       const int8_t *fromtags,
       int64_t fromtagsoffset,
@@ -5124,7 +5939,6 @@ namespace awkward {
       int64_t length,
       int64_t **offsetsraws,
       int64_t *offsetsoffsets) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArrayU32_flatten_length_64(
           total_length,
@@ -5148,6 +5962,7 @@ namespace awkward {
 
     template<>
     ERROR UnionArray_flatten_length_64<int8_t, int64_t>(
+      kernel::lib ptr_lib,
       int64_t *total_length,
       const int8_t *fromtags,
       int64_t fromtagsoffset,
@@ -5156,7 +5971,6 @@ namespace awkward {
       int64_t length,
       int64_t **offsetsraws,
       int64_t *offsetsoffsets) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray64_flatten_length_64(
           total_length,
@@ -5180,6 +5994,7 @@ namespace awkward {
 
     template<>
     ERROR UnionArray_flatten_combine_64<int8_t, int32_t>(
+      kernel::lib ptr_lib,
       int8_t *totags,
       int64_t *toindex,
       int64_t *tooffsets,
@@ -5190,7 +6005,6 @@ namespace awkward {
       int64_t length,
       int64_t **offsetsraws,
       int64_t *offsetsoffsets) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray32_flatten_combine_64(
           totags,
@@ -5216,6 +6030,7 @@ namespace awkward {
 
     template<>
     ERROR UnionArray_flatten_combine_64<int8_t, uint32_t>(
+      kernel::lib ptr_lib,
       int8_t *totags,
       int64_t *toindex,
       int64_t *tooffsets,
@@ -5226,7 +6041,6 @@ namespace awkward {
       int64_t length,
       int64_t **offsetsraws,
       int64_t *offsetsoffsets) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArrayU32_flatten_combine_64(
           totags,
@@ -5252,6 +6066,7 @@ namespace awkward {
 
     template<>
     ERROR UnionArray_flatten_combine_64<int8_t, int64_t>(
+      kernel::lib ptr_lib,
       int8_t *totags,
       int64_t *toindex,
       int64_t *tooffsets,
@@ -5262,7 +6077,6 @@ namespace awkward {
       int64_t length,
       int64_t **offsetsraws,
       int64_t *offsetsoffsets) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray64_flatten_combine_64(
           totags,
@@ -5288,12 +6102,12 @@ namespace awkward {
 
     template<>
     ERROR IndexedArray_flatten_nextcarry_64<int32_t>(
+      kernel::lib ptr_lib,
       int64_t *tocarry,
       const int32_t *fromindex,
       int64_t indexoffset,
       int64_t lenindex,
       int64_t lencontent) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray32_flatten_nextcarry_64(
           tocarry,
@@ -5314,12 +6128,12 @@ namespace awkward {
 
     template<>
     ERROR IndexedArray_flatten_nextcarry_64<uint32_t>(
+      kernel::lib ptr_lib,
       int64_t *tocarry,
       const uint32_t *fromindex,
       int64_t indexoffset,
       int64_t lenindex,
       int64_t lencontent) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArrayU32_flatten_nextcarry_64(
           tocarry,
@@ -5340,12 +6154,12 @@ namespace awkward {
 
     template<>
     ERROR IndexedArray_flatten_nextcarry_64<int64_t>(
+      kernel::lib ptr_lib,
       int64_t *tocarry,
       const int64_t *fromindex,
       int64_t indexoffset,
       int64_t lenindex,
       int64_t lencontent) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray64_flatten_nextcarry_64(
           tocarry,
@@ -5366,13 +6180,13 @@ namespace awkward {
 
     template<>
     ERROR IndexedArray_overlay_mask8_to64<int32_t>(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       const int8_t *mask,
       int64_t maskoffset,
       const int32_t *fromindex,
       int64_t indexoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray32_overlay_mask8_to64(
           toindex,
@@ -5394,13 +6208,13 @@ namespace awkward {
 
     template<>
     ERROR IndexedArray_overlay_mask8_to64<uint32_t>(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       const int8_t *mask,
       int64_t maskoffset,
       const uint32_t *fromindex,
       int64_t indexoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArrayU32_overlay_mask8_to64(
           toindex,
@@ -5422,13 +6236,13 @@ namespace awkward {
 
     template<>
     ERROR IndexedArray_overlay_mask8_to64<int64_t>(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       const int8_t *mask,
       int64_t maskoffset,
       const int64_t *fromindex,
       int64_t indexoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray64_overlay_mask8_to64(
           toindex,
@@ -5450,11 +6264,11 @@ namespace awkward {
 
     template<>
     ERROR IndexedArray_mask8<int32_t>(
+      kernel::lib ptr_lib,
       int8_t *tomask,
       const int32_t *fromindex,
       int64_t indexoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray32_mask8(
           tomask,
@@ -5474,11 +6288,11 @@ namespace awkward {
 
     template<>
     ERROR IndexedArray_mask8<uint32_t>(
+      kernel::lib ptr_lib,
       int8_t *tomask,
       const uint32_t *fromindex,
       int64_t indexoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArrayU32_mask8(
           tomask,
@@ -5498,11 +6312,11 @@ namespace awkward {
 
     template<>
     ERROR IndexedArray_mask8<int64_t>(
+      kernel::lib ptr_lib,
       int8_t *tomask,
       const int64_t *fromindex,
       int64_t indexoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray64_mask8(
           tomask,
@@ -5521,12 +6335,12 @@ namespace awkward {
     }
 
     ERROR ByteMaskedArray_mask8(
+      kernel::lib ptr_lib,
       int8_t *tomask,
       const int8_t *frommask,
       int64_t maskoffset,
       int64_t length,
       bool validwhen) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ByteMaskedArray_mask8(
           tomask,
@@ -5546,9 +6360,9 @@ namespace awkward {
     }
 
     ERROR zero_mask8(
+      kernel::lib ptr_lib,
       int8_t *tomask,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_zero_mask8(tomask, length);
       }
@@ -5564,6 +6378,7 @@ namespace awkward {
 
     template<>
     ERROR IndexedArray_simplify32_to64<int32_t>(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       const int32_t *outerindex,
       int64_t outeroffset,
@@ -5571,7 +6386,6 @@ namespace awkward {
       const int32_t *innerindex,
       int64_t inneroffset,
       int64_t innerlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray32_simplify32_to64(
           toindex,
@@ -5594,6 +6408,7 @@ namespace awkward {
 
     template<>
     ERROR IndexedArray_simplify32_to64<uint32_t>(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       const uint32_t *outerindex,
       int64_t outeroffset,
@@ -5601,7 +6416,6 @@ namespace awkward {
       const int32_t *innerindex,
       int64_t inneroffset,
       int64_t innerlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArrayU32_simplify32_to64(
           toindex,
@@ -5624,6 +6438,7 @@ namespace awkward {
 
     template<>
     ERROR IndexedArray_simplify32_to64<int64_t>(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       const int64_t *outerindex,
       int64_t outeroffset,
@@ -5631,7 +6446,6 @@ namespace awkward {
       const int32_t *innerindex,
       int64_t inneroffset,
       int64_t innerlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray64_simplify32_to64(
           toindex,
@@ -5654,6 +6468,7 @@ namespace awkward {
 
     template<>
     ERROR IndexedArray_simplifyU32_to64<int32_t>(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       const int32_t *outerindex,
       int64_t outeroffset,
@@ -5661,7 +6476,6 @@ namespace awkward {
       const uint32_t *innerindex,
       int64_t inneroffset,
       int64_t innerlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray32_simplifyU32_to64(
           toindex,
@@ -5684,6 +6498,7 @@ namespace awkward {
 
     template<>
     ERROR IndexedArray_simplifyU32_to64<uint32_t>(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       const uint32_t *outerindex,
       int64_t outeroffset,
@@ -5691,7 +6506,6 @@ namespace awkward {
       const uint32_t *innerindex,
       int64_t inneroffset,
       int64_t innerlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArrayU32_simplifyU32_to64(
           toindex,
@@ -5714,6 +6528,7 @@ namespace awkward {
 
     template<>
     ERROR IndexedArray_simplifyU32_to64<int64_t>(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       const int64_t *outerindex,
       int64_t outeroffset,
@@ -5721,7 +6536,6 @@ namespace awkward {
       const uint32_t *innerindex,
       int64_t inneroffset,
       int64_t innerlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray64_simplifyU32_to64(
           toindex,
@@ -5744,6 +6558,7 @@ namespace awkward {
 
     template<>
     ERROR IndexedArray_simplify64_to64<int32_t>(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       const int32_t *outerindex,
       int64_t outeroffset,
@@ -5751,7 +6566,6 @@ namespace awkward {
       const int64_t *innerindex,
       int64_t inneroffset,
       int64_t innerlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray32_simplify64_to64(
           toindex,
@@ -5774,6 +6588,7 @@ namespace awkward {
 
     template<>
     ERROR IndexedArray_simplify64_to64<uint32_t>(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       const uint32_t *outerindex,
       int64_t outeroffset,
@@ -5781,7 +6596,6 @@ namespace awkward {
       const int64_t *innerindex,
       int64_t inneroffset,
       int64_t innerlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArrayU32_simplify64_to64(
           toindex,
@@ -5804,6 +6618,7 @@ namespace awkward {
 
     template<>
     ERROR IndexedArray_simplify64_to64<int64_t>(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       const int64_t *outerindex,
       int64_t outeroffset,
@@ -5811,7 +6626,6 @@ namespace awkward {
       const int64_t *innerindex,
       int64_t inneroffset,
       int64_t innerlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray64_simplify64_to64(
           toindex,
@@ -5834,13 +6648,13 @@ namespace awkward {
 
     template<>
     ERROR ListArray_compact_offsets_64(
+      kernel::lib ptr_lib,
       int64_t *tooffsets,
       const int32_t *fromstarts,
       const int32_t *fromstops,
       int64_t startsoffset,
       int64_t stopsoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray32_compact_offsets_64(
           tooffsets,
@@ -5862,13 +6676,13 @@ namespace awkward {
 
     template<>
     ERROR ListArray_compact_offsets_64(
+      kernel::lib ptr_lib,
       int64_t *tooffsets,
       const uint32_t *fromstarts,
       const uint32_t *fromstops,
       int64_t startsoffset,
       int64_t stopsoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArrayU32_compact_offsets_64(
           tooffsets,
@@ -5890,13 +6704,13 @@ namespace awkward {
 
     template<>
     ERROR ListArray_compact_offsets_64(
+      kernel::lib ptr_lib,
       int64_t *tooffsets,
       const int64_t *fromstarts,
       const int64_t *fromstops,
       int64_t startsoffset,
       int64_t stopsoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray64_compact_offsets_64(
           tooffsets,
@@ -5917,10 +6731,10 @@ namespace awkward {
     }
 
     ERROR RegularArray_compact_offsets_64(
+      kernel::lib ptr_lib,
       int64_t *tooffsets,
       int64_t length,
       int64_t size) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_RegularArray_compact_offsets64(
           tooffsets,
@@ -5939,11 +6753,11 @@ namespace awkward {
 
     template<>
     ERROR ListOffsetArray_compact_offsets_64(
+      kernel::lib ptr_lib,
       int64_t *tooffsets,
       const int32_t *fromoffsets,
       int64_t offsetsoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray32_compact_offsets_64(
           tooffsets,
@@ -5963,11 +6777,11 @@ namespace awkward {
 
     template<>
     ERROR ListOffsetArray_compact_offsets_64(
+      kernel::lib ptr_lib,
       int64_t *tooffsets,
       const uint32_t *fromoffsets,
       int64_t offsetsoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArrayU32_compact_offsets_64(
           tooffsets,
@@ -5987,11 +6801,11 @@ namespace awkward {
 
     template<>
     ERROR ListOffsetArray_compact_offsets_64(
+      kernel::lib ptr_lib,
       int64_t *tooffsets,
       const int64_t *fromoffsets,
       int64_t offsetsoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray64_compact_offsets_64(
           tooffsets,
@@ -6011,6 +6825,7 @@ namespace awkward {
 
     template<>
     ERROR ListArray_broadcast_tooffsets_64<int32_t>(
+      kernel::lib ptr_lib,
       int64_t *tocarry,
       const int64_t *fromoffsets,
       int64_t offsetsoffset,
@@ -6020,7 +6835,6 @@ namespace awkward {
       const int32_t *fromstops,
       int64_t stopsoffset,
       int64_t lencontent) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray32_broadcast_tooffsets_64(
           tocarry,
@@ -6045,6 +6859,7 @@ namespace awkward {
 
     template<>
     ERROR ListArray_broadcast_tooffsets_64<uint32_t>(
+      kernel::lib ptr_lib,
       int64_t *tocarry,
       const int64_t *fromoffsets,
       int64_t offsetsoffset,
@@ -6054,7 +6869,6 @@ namespace awkward {
       const uint32_t *fromstops,
       int64_t stopsoffset,
       int64_t lencontent) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArrayU32_broadcast_tooffsets_64(
           tocarry,
@@ -6079,6 +6893,7 @@ namespace awkward {
 
     template<>
     ERROR ListArray_broadcast_tooffsets_64<int64_t>(
+      kernel::lib ptr_lib,
       int64_t *tocarry,
       const int64_t *fromoffsets,
       int64_t offsetsoffset,
@@ -6088,7 +6903,6 @@ namespace awkward {
       const int64_t *fromstops,
       int64_t stopsoffset,
       int64_t lencontent) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray64_broadcast_tooffsets_64(
           tocarry,
@@ -6112,11 +6926,11 @@ namespace awkward {
     }
 
     ERROR RegularArray_broadcast_tooffsets_64(
+      kernel::lib ptr_lib,
       const int64_t *fromoffsets,
       int64_t offsetsoffset,
       int64_t offsetslength,
       int64_t size) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_RegularArray_broadcast_tooffsets_64(
           fromoffsets,
@@ -6135,11 +6949,11 @@ namespace awkward {
     }
 
     ERROR RegularArray_broadcast_tooffsets_size1_64(
+      kernel::lib ptr_lib,
       int64_t *tocarry,
       const int64_t *fromoffsets,
       int64_t offsetsoffset,
       int64_t offsetslength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_RegularArray_broadcast_tooffsets_size1_64(
           tocarry,
@@ -6159,11 +6973,11 @@ namespace awkward {
 
     template<>
     ERROR ListOffsetArray_toRegularArray<int32_t>(
+      kernel::lib ptr_lib,
       int64_t *size,
       const int32_t *fromoffsets,
       int64_t offsetsoffset,
       int64_t offsetslength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray32_toRegularArray(
           size,
@@ -6183,11 +6997,11 @@ namespace awkward {
 
     template<>
     ERROR ListOffsetArray_toRegularArray<uint32_t>(
+      kernel::lib ptr_lib,
       int64_t *size,
       const uint32_t *fromoffsets,
       int64_t offsetsoffset,
       int64_t offsetslength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArrayU32_toRegularArray(
           size,
@@ -6207,11 +7021,11 @@ namespace awkward {
 
     template<>
     ERROR ListOffsetArray_toRegularArray(
+      kernel::lib ptr_lib,
       int64_t *size,
       const int64_t *fromoffsets,
       int64_t offsetsoffset,
       int64_t offsetslength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray64_toRegularArray(
           size,
@@ -6231,12 +7045,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill_frombool<bool>(
+      kernel::lib ptr_lib,
       bool *toptr,
       int64_t tooffset,
       const bool *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tobool_frombool(
           toptr,
@@ -6257,12 +7071,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill_frombool<int8_t>(
+      kernel::lib ptr_lib,
       int8_t *toptr,
       int64_t tooffset,
       const bool *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint8_frombool(
           toptr,
@@ -6283,12 +7097,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill_frombool<int16_t>(
+      kernel::lib ptr_lib,
       int16_t *toptr,
       int64_t tooffset,
       const bool *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint16_frombool(
           toptr,
@@ -6309,12 +7123,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill_frombool<int32_t>(
+      kernel::lib ptr_lib,
       int32_t *toptr,
       int64_t tooffset,
       const bool *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint32_frombool(
           toptr,
@@ -6335,12 +7149,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill_frombool<int64_t>(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       int64_t tooffset,
       const bool *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint64_frombool(
           toptr,
@@ -6361,12 +7175,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill_frombool<uint8_t>(
+      kernel::lib ptr_lib,
       uint8_t *toptr,
       int64_t tooffset,
       const bool *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_touint8_frombool(
           toptr,
@@ -6387,12 +7201,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill_frombool<uint16_t>(
+      kernel::lib ptr_lib,
       uint16_t *toptr,
       int64_t tooffset,
       const bool *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_touint16_frombool(
           toptr,
@@ -6413,12 +7227,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill_frombool<uint32_t>(
+      kernel::lib ptr_lib,
       uint32_t *toptr,
       int64_t tooffset,
       const bool *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_touint32_frombool(
           toptr,
@@ -6439,12 +7253,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill_frombool<uint64_t>(
+      kernel::lib ptr_lib,
       uint64_t *toptr,
       int64_t tooffset,
       const bool *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_touint64_frombool(
           toptr,
@@ -6465,12 +7279,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill_frombool<float>(
+      kernel::lib ptr_lib,
       float *toptr,
       int64_t tooffset,
       const bool *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat32_frombool(
           toptr,
@@ -6491,12 +7305,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill_frombool<double>(
+      kernel::lib ptr_lib,
       double *toptr,
       int64_t tooffset,
       const bool *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat64_frombool(
           toptr,
@@ -6517,12 +7331,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<int8_t, int8_t>(
+      kernel::lib ptr_lib,
       int8_t *toptr,
       int64_t tooffset,
       const int8_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint8_fromint8(
           toptr,
@@ -6543,12 +7357,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<int8_t, int16_t>(
+      kernel::lib ptr_lib,
       int16_t *toptr,
       int64_t tooffset,
       const int8_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint16_fromint8(
           toptr,
@@ -6569,12 +7383,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<int8_t, int32_t>(
+      kernel::lib ptr_lib,
       int32_t *toptr,
       int64_t tooffset,
       const int8_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint32_fromint8(
           toptr,
@@ -6595,12 +7409,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<int8_t, int64_t>(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       int64_t tooffset,
       const int8_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint64_fromint8(
           toptr,
@@ -6621,12 +7435,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<int8_t, float>(
+      kernel::lib ptr_lib,
       float *toptr,
       int64_t tooffset,
       const int8_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat32_fromint8(
           toptr,
@@ -6647,12 +7461,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<int8_t, double>(
+      kernel::lib ptr_lib,
       double *toptr,
       int64_t tooffset,
       const int8_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat64_fromint8(
           toptr,
@@ -6673,12 +7487,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<int16_t, int16_t>(
+      kernel::lib ptr_lib,
       int16_t *toptr,
       int64_t tooffset,
       const int16_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint16_fromint16(
           toptr,
@@ -6699,12 +7513,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<int16_t, int32_t>(
+      kernel::lib ptr_lib,
       int32_t *toptr,
       int64_t tooffset,
       const int16_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint32_fromint16(
           toptr,
@@ -6725,12 +7539,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<int16_t, int64_t>(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       int64_t tooffset,
       const int16_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint64_fromint16(
           toptr,
@@ -6751,12 +7565,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<int16_t, float>(
+      kernel::lib ptr_lib,
       float *toptr,
       int64_t tooffset,
       const int16_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat32_fromint16(
           toptr,
@@ -6777,12 +7591,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<int16_t, double>(
+      kernel::lib ptr_lib,
       double *toptr,
       int64_t tooffset,
       const int16_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat64_fromint16(
           toptr,
@@ -6803,12 +7617,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<int32_t, int32_t>(
+      kernel::lib ptr_lib,
       int32_t *toptr,
       int64_t tooffset,
       const int32_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint32_fromint32(
           toptr,
@@ -6829,12 +7643,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<int32_t, int64_t>(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       int64_t tooffset,
       const int32_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint64_fromint32(
           toptr,
@@ -6855,12 +7669,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<int32_t, float>(
+      kernel::lib ptr_lib,
       float *toptr,
       int64_t tooffset,
       const int32_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat32_fromint32(
           toptr,
@@ -6881,12 +7695,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<int32_t, double>(
+      kernel::lib ptr_lib,
       double *toptr,
       int64_t tooffset,
       const int32_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat64_fromint32(
           toptr,
@@ -6907,12 +7721,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<int64_t, int64_t>(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       int64_t tooffset,
       const int64_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint64_fromint64(
           toptr,
@@ -6933,12 +7747,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<int64_t, float>(
+      kernel::lib ptr_lib,
       float *toptr,
       int64_t tooffset,
       const int64_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat32_fromint64(
           toptr,
@@ -6959,12 +7773,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<int64_t, double>(
+      kernel::lib ptr_lib,
       double *toptr,
       int64_t tooffset,
       const int64_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat64_fromint64(
           toptr,
@@ -6985,12 +7799,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<uint8_t, int16_t>(
+      kernel::lib ptr_lib,
       int16_t *toptr,
       int64_t tooffset,
       const uint8_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint16_fromuint8(
           toptr,
@@ -7011,12 +7825,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<uint8_t, int32_t>(
+      kernel::lib ptr_lib,
       int32_t *toptr,
       int64_t tooffset,
       const uint8_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint32_fromuint8(
           toptr,
@@ -7037,12 +7851,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<uint8_t, int64_t>(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       int64_t tooffset,
       const uint8_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint64_fromuint8(
           toptr,
@@ -7063,12 +7877,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<uint8_t, uint8_t>(
+      kernel::lib ptr_lib,
       uint8_t *toptr,
       int64_t tooffset,
       const uint8_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_touint8_fromuint8(
           toptr,
@@ -7089,12 +7903,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<uint8_t, uint16_t>(
+      kernel::lib ptr_lib,
       uint16_t *toptr,
       int64_t tooffset,
       const uint8_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_touint16_fromuint8(
           toptr,
@@ -7115,12 +7929,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<uint8_t, uint32_t>(
+      kernel::lib ptr_lib,
       uint32_t *toptr,
       int64_t tooffset,
       const uint8_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_touint32_fromuint8(
           toptr,
@@ -7141,12 +7955,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<uint8_t, uint64_t>(
+      kernel::lib ptr_lib,
       uint64_t *toptr,
       int64_t tooffset,
       const uint8_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_touint64_fromuint8(
           toptr,
@@ -7167,12 +7981,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<uint8_t, float>(
+      kernel::lib ptr_lib,
       float *toptr,
       int64_t tooffset,
       const uint8_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat32_fromuint8(
           toptr,
@@ -7193,12 +8007,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<uint8_t, double>(
+      kernel::lib ptr_lib,
       double *toptr,
       int64_t tooffset,
       const uint8_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat64_fromuint8(
           toptr,
@@ -7219,12 +8033,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<uint16_t, int32_t>(
+      kernel::lib ptr_lib,
       int32_t *toptr,
       int64_t tooffset,
       const uint16_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint32_fromuint16(
           toptr,
@@ -7245,12 +8059,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<uint16_t, int64_t>(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       int64_t tooffset,
       const uint16_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint64_fromuint16(
           toptr,
@@ -7271,12 +8085,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<uint16_t, uint16_t>(
+      kernel::lib ptr_lib,
       uint16_t *toptr,
       int64_t tooffset,
       const uint16_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_touint16_fromuint16(
           toptr,
@@ -7297,12 +8111,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<uint16_t, uint32_t>(
+      kernel::lib ptr_lib,
       uint32_t *toptr,
       int64_t tooffset,
       const uint16_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_touint32_fromuint16(
           toptr,
@@ -7323,12 +8137,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<uint16_t, uint64_t>(
+      kernel::lib ptr_lib,
       uint64_t *toptr,
       int64_t tooffset,
       const uint16_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_touint64_fromuint16(
           toptr,
@@ -7349,12 +8163,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<uint16_t, float>(
+      kernel::lib ptr_lib,
       float *toptr,
       int64_t tooffset,
       const uint16_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat32_fromuint16(
           toptr,
@@ -7375,12 +8189,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<uint16_t, double>(
+      kernel::lib ptr_lib,
       double *toptr,
       int64_t tooffset,
       const uint16_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat64_fromuint16(
           toptr,
@@ -7401,12 +8215,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<uint32_t, int64_t>(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       int64_t tooffset,
       const uint32_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint64_fromuint32(
           toptr,
@@ -7427,12 +8241,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<uint32_t, uint32_t>(
+      kernel::lib ptr_lib,
       uint32_t *toptr,
       int64_t tooffset,
       const uint32_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_touint32_fromuint32(
           toptr,
@@ -7453,12 +8267,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<uint32_t, uint64_t>(
+      kernel::lib ptr_lib,
       uint64_t *toptr,
       int64_t tooffset,
       const uint32_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_touint64_fromuint32(
           toptr,
@@ -7479,12 +8293,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<uint32_t, float>(
+      kernel::lib ptr_lib,
       float *toptr,
       int64_t tooffset,
       const uint32_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat32_fromuint32(
           toptr,
@@ -7505,12 +8319,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<uint32_t, double>(
+      kernel::lib ptr_lib,
       double *toptr,
       int64_t tooffset,
       const uint32_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat64_fromuint32(
           toptr,
@@ -7531,12 +8345,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<uint64_t, uint64_t>(
+      kernel::lib ptr_lib,
       uint64_t *toptr,
       int64_t tooffset,
       const uint64_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_touint64_fromuint64(
           toptr,
@@ -7557,12 +8371,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<uint64_t, int64_t>(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       int64_t tooffset,
       const uint64_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint64_fromuint64(
           toptr,
@@ -7583,12 +8397,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<uint64_t, float>(
+      kernel::lib ptr_lib,
       float *toptr,
       int64_t tooffset,
       const uint64_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat32_fromuint64(
           toptr,
@@ -7609,12 +8423,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<uint64_t, double>(
+      kernel::lib ptr_lib,
       double *toptr,
       int64_t tooffset,
       const uint64_t *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat64_fromuint64(
           toptr,
@@ -7635,12 +8449,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<float, float>(
+      kernel::lib ptr_lib,
       float *toptr,
       int64_t tooffset,
       const float *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat32_fromfloat32(
           toptr,
@@ -7661,12 +8475,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<float, double>(
+      kernel::lib ptr_lib,
       double *toptr,
       int64_t tooffset,
       const float *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat64_fromfloat32(
           toptr,
@@ -7687,12 +8501,12 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_fill<double, double>(
+      kernel::lib ptr_lib,
       double *toptr,
       int64_t tooffset,
       const double *fromptr,
       int64_t fromoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat64_fromfloat64(
           toptr,
@@ -7713,6 +8527,7 @@ namespace awkward {
 
     template<>
     ERROR ListArray_fill(
+      kernel::lib ptr_lib,
       int64_t *tostarts,
       int64_t tostartsoffset,
       int64_t *tostops,
@@ -7723,7 +8538,6 @@ namespace awkward {
       int64_t fromstopsoffset,
       int64_t length,
       int64_t base) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray_fill_to64_from32(
           tostarts,
@@ -7749,6 +8563,7 @@ namespace awkward {
 
     template<>
     ERROR ListArray_fill(
+      kernel::lib ptr_lib,
       int64_t *tostarts,
       int64_t tostartsoffset,
       int64_t *tostops,
@@ -7759,7 +8574,6 @@ namespace awkward {
       int64_t fromstopsoffset,
       int64_t length,
       int64_t base) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray_fill_to64_fromU32(
           tostarts,
@@ -7785,6 +8599,7 @@ namespace awkward {
 
     template<>
     ERROR ListArray_fill(
+      kernel::lib ptr_lib,
       int64_t *tostarts,
       int64_t tostartsoffset,
       int64_t *tostops,
@@ -7795,7 +8610,6 @@ namespace awkward {
       int64_t fromstopsoffset,
       int64_t length,
       int64_t base) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray_fill_to64_from64(
           tostarts,
@@ -7821,13 +8635,13 @@ namespace awkward {
 
     template<>
     ERROR IndexedArray_fill(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       int64_t toindexoffset,
       const int32_t *fromindex,
       int64_t fromindexoffset,
       int64_t length,
       int64_t base) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray_fill_to64_from32(
           toindex,
@@ -7849,13 +8663,13 @@ namespace awkward {
 
     template<>
     ERROR IndexedArray_fill(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       int64_t toindexoffset,
       const uint32_t *fromindex,
       int64_t fromindexoffset,
       int64_t length,
       int64_t base) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray_fill_to64_fromU32(
           toindex,
@@ -7877,13 +8691,13 @@ namespace awkward {
 
     template<>
     ERROR IndexedArray_fill(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       int64_t toindexoffset,
       const int64_t *fromindex,
       int64_t fromindexoffset,
       int64_t length,
       int64_t base) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray_fill_to64_from64(
           toindex,
@@ -7904,11 +8718,11 @@ namespace awkward {
     }
 
     ERROR IndexedArray_fill_to64_count(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       int64_t toindexoffset,
       int64_t length,
       int64_t base) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray_fill_to64_count(
           toindex,
@@ -7927,13 +8741,13 @@ namespace awkward {
     }
 
     ERROR UnionArray_filltags_to8_from8(
+      kernel::lib ptr_lib,
       int8_t *totags,
       int64_t totagsoffset,
       const int8_t *fromtags,
       int64_t fromtagsoffset,
       int64_t length,
       int64_t base) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray_filltags_to8_from8(
           totags,
@@ -7955,12 +8769,12 @@ namespace awkward {
 
     template<>
     ERROR UnionArray_fillindex(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       int64_t toindexoffset,
       const int32_t *fromindex,
       int64_t fromindexoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray_fillindex_to64_from32(
           toindex,
@@ -7981,12 +8795,12 @@ namespace awkward {
 
     template<>
     ERROR UnionArray_fillindex(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       int64_t toindexoffset,
       const uint32_t *fromindex,
       int64_t fromindexoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray_fillindex_to64_fromU32(
           toindex,
@@ -8007,12 +8821,12 @@ namespace awkward {
 
     template<>
     ERROR UnionArray_fillindex(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       int64_t toindexoffset,
       const int64_t *fromindex,
       int64_t fromindexoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray_fillindex_to64_from64(
           toindex,
@@ -8032,11 +8846,11 @@ namespace awkward {
     }
 
     ERROR UnionArray_filltags_to8_const(
+      kernel::lib ptr_lib,
       int8_t *totags,
       int64_t totagsoffset,
       int64_t length,
       int64_t base) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray_filltags_to8_const(
           totags,
@@ -8055,10 +8869,10 @@ namespace awkward {
     }
 
     ERROR UnionArray_fillindex_count_64(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       int64_t toindexoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray_fillindex_to64_count(
           toindex,
@@ -8077,6 +8891,7 @@ namespace awkward {
 
     template<>
     ERROR UnionArray_simplify8_32_to8_64<int8_t, int32_t>(
+      kernel::lib ptr_lib,
       int8_t *totags,
       int64_t *toindex,
       const int8_t *outertags,
@@ -8092,7 +8907,6 @@ namespace awkward {
       int64_t outerwhich,
       int64_t length,
       int64_t base) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray8_32_simplify8_32_to8_64(
           totags,
@@ -8123,6 +8937,7 @@ namespace awkward {
 
     template<>
     ERROR UnionArray_simplify8_32_to8_64<int8_t, uint32_t>(
+      kernel::lib ptr_lib,
       int8_t *totags,
       int64_t *toindex,
       const int8_t *outertags,
@@ -8138,7 +8953,6 @@ namespace awkward {
       int64_t outerwhich,
       int64_t length,
       int64_t base) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray8_U32_simplify8_32_to8_64(
           totags,
@@ -8169,6 +8983,7 @@ namespace awkward {
 
     template<>
     ERROR UnionArray_simplify8_32_to8_64<int8_t, int64_t>(
+      kernel::lib ptr_lib,
       int8_t *totags,
       int64_t *toindex,
       const int8_t *outertags,
@@ -8184,7 +8999,6 @@ namespace awkward {
       int64_t outerwhich,
       int64_t length,
       int64_t base) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray8_64_simplify8_32_to8_64(
           totags,
@@ -8215,6 +9029,7 @@ namespace awkward {
 
     template<>
     ERROR UnionArray_simplify8_U32_to8_64<int8_t, int32_t>(
+      kernel::lib ptr_lib,
       int8_t *totags,
       int64_t *toindex,
       const int8_t *outertags,
@@ -8230,7 +9045,6 @@ namespace awkward {
       int64_t outerwhich,
       int64_t length,
       int64_t base) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray8_32_simplify8_U32_to8_64(
           totags,
@@ -8261,6 +9075,7 @@ namespace awkward {
 
     template<>
     ERROR UnionArray_simplify8_U32_to8_64<int8_t, uint32_t>(
+      kernel::lib ptr_lib,
       int8_t *totags,
       int64_t *toindex,
       const int8_t *outertags,
@@ -8276,7 +9091,6 @@ namespace awkward {
       int64_t outerwhich,
       int64_t length,
       int64_t base) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray8_U32_simplify8_U32_to8_64(
           totags,
@@ -8307,6 +9121,7 @@ namespace awkward {
 
     template<>
     ERROR UnionArray_simplify8_U32_to8_64<int8_t, int64_t>(
+      kernel::lib ptr_lib,
       int8_t *totags,
       int64_t *toindex,
       const int8_t *outertags,
@@ -8322,7 +9137,6 @@ namespace awkward {
       int64_t outerwhich,
       int64_t length,
       int64_t base) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray8_64_simplify8_U32_to8_64(
           totags,
@@ -8353,6 +9167,7 @@ namespace awkward {
 
     template<>
     ERROR UnionArray_simplify8_64_to8_64<int8_t, int32_t>(
+      kernel::lib ptr_lib,
       int8_t *totags,
       int64_t *toindex,
       const int8_t *outertags,
@@ -8368,7 +9183,6 @@ namespace awkward {
       int64_t outerwhich,
       int64_t length,
       int64_t base) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray8_32_simplify8_64_to8_64(
           totags,
@@ -8399,6 +9213,7 @@ namespace awkward {
 
     template<>
     ERROR UnionArray_simplify8_64_to8_64<int8_t, uint32_t>(
+      kernel::lib ptr_lib,
       int8_t *totags,
       int64_t *toindex,
       const int8_t *outertags,
@@ -8414,7 +9229,6 @@ namespace awkward {
       int64_t outerwhich,
       int64_t length,
       int64_t base) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray8_U32_simplify8_64_to8_64(
           totags,
@@ -8445,6 +9259,7 @@ namespace awkward {
 
     template<>
     ERROR UnionArray_simplify8_64_to8_64<int8_t, int64_t>(
+      kernel::lib ptr_lib,
       int8_t *totags,
       int64_t *toindex,
       const int8_t *outertags,
@@ -8460,7 +9275,6 @@ namespace awkward {
       int64_t outerwhich,
       int64_t length,
       int64_t base) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray8_64_simplify8_64_to8_64(
           totags,
@@ -8491,6 +9305,7 @@ namespace awkward {
 
     template<>
     ERROR UnionArray_simplify_one_to8_64<int8_t, int32_t>(
+      kernel::lib ptr_lib,
       int8_t *totags,
       int64_t *toindex,
       const int8_t *fromtags,
@@ -8501,7 +9316,6 @@ namespace awkward {
       int64_t fromwhich,
       int64_t length,
       int64_t base) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray8_32_simplify_one_to8_64(
           totags,
@@ -8527,6 +9341,7 @@ namespace awkward {
 
     template<>
     ERROR UnionArray_simplify_one_to8_64<int8_t, uint32_t>(
+      kernel::lib ptr_lib,
       int8_t *totags,
       int64_t *toindex,
       const int8_t *fromtags,
@@ -8537,7 +9352,6 @@ namespace awkward {
       int64_t fromwhich,
       int64_t length,
       int64_t base) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray8_U32_simplify_one_to8_64(
           totags,
@@ -8563,6 +9377,7 @@ namespace awkward {
 
     template<>
     ERROR UnionArray_simplify_one_to8_64<int8_t, int64_t>(
+      kernel::lib ptr_lib,
       int8_t *totags,
       int64_t *toindex,
       const int8_t *fromtags,
@@ -8573,7 +9388,6 @@ namespace awkward {
       int64_t fromwhich,
       int64_t length,
       int64_t base) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray8_64_simplify_one_to8_64(
           totags,
@@ -8599,13 +9413,13 @@ namespace awkward {
 
     template<>
     ERROR ListArray_validity<int32_t>(
+      kernel::lib ptr_lib,
       const int32_t *starts,
       int64_t startsoffset,
       const int32_t *stops,
       int64_t stopsoffset,
       int64_t length,
       int64_t lencontent) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray32_validity(
           starts,
@@ -8627,13 +9441,13 @@ namespace awkward {
 
     template<>
     ERROR ListArray_validity<uint32_t>(
+      kernel::lib ptr_lib,
       const uint32_t *starts,
       int64_t startsoffset,
       const uint32_t *stops,
       int64_t stopsoffset,
       int64_t length,
       int64_t lencontent) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArrayU32_validity(
           starts,
@@ -8655,13 +9469,13 @@ namespace awkward {
 
     template<>
     ERROR ListArray_validity<int64_t>(
+      kernel::lib ptr_lib,
       const int64_t *starts,
       int64_t startsoffset,
       const int64_t *stops,
       int64_t stopsoffset,
       int64_t length,
       int64_t lencontent) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray64_validity(
           starts,
@@ -8683,12 +9497,12 @@ namespace awkward {
 
     template<>
     ERROR IndexedArray_validity<int32_t>(
+      kernel::lib ptr_lib,
       const int32_t *index,
       int64_t indexoffset,
       int64_t length,
       int64_t lencontent,
       bool isoption) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray32_validity(
           index,
@@ -8709,12 +9523,12 @@ namespace awkward {
 
     template<>
     ERROR IndexedArray_validity<uint32_t>(
+      kernel::lib ptr_lib,
       const uint32_t *index,
       int64_t indexoffset,
       int64_t length,
       int64_t lencontent,
       bool isoption) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArrayU32_validity(
           index,
@@ -8735,12 +9549,12 @@ namespace awkward {
 
     template<>
     ERROR IndexedArray_validity<int64_t>(
+      kernel::lib ptr_lib,
       const int64_t *index,
       int64_t indexoffset,
       int64_t length,
       int64_t lencontent,
       bool isoption) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray64_validity(
           index,
@@ -8761,6 +9575,7 @@ namespace awkward {
 
     template<>
     ERROR UnionArray_validity<int8_t, int32_t>(
+      kernel::lib ptr_lib,
       const int8_t *tags,
       int64_t tagsoffset,
       const int32_t *index,
@@ -8768,7 +9583,6 @@ namespace awkward {
       int64_t length,
       int64_t numcontents,
       const int64_t *lencontents) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray8_32_validity(
           tags,
@@ -8791,6 +9605,7 @@ namespace awkward {
 
     template<>
     ERROR UnionArray_validity<int8_t, uint32_t>(
+      kernel::lib ptr_lib,
       const int8_t *tags,
       int64_t tagsoffset,
       const uint32_t *index,
@@ -8798,7 +9613,6 @@ namespace awkward {
       int64_t length,
       int64_t numcontents,
       const int64_t *lencontents) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray8_U32_validity(
           tags,
@@ -8821,6 +9635,7 @@ namespace awkward {
 
     template<>
     ERROR UnionArray_validity<int8_t, int64_t>(
+      kernel::lib ptr_lib,
       const int8_t *tags,
       int64_t tagsoffset,
       const int64_t *index,
@@ -8828,7 +9643,6 @@ namespace awkward {
       int64_t length,
       int64_t numcontents,
       const int64_t *lencontents) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray8_64_validity(
           tags,
@@ -8851,11 +9665,11 @@ namespace awkward {
 
     template<>
     ERROR UnionArray_fillna_64<int32_t>(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       const int32_t *fromindex,
       int64_t offset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray_fillna_from32_to64(
           toindex,
@@ -8875,11 +9689,11 @@ namespace awkward {
 
     template<>
     ERROR UnionArray_fillna_64<uint32_t>(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       const uint32_t *fromindex,
       int64_t offset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray_fillna_fromU32_to64(
           toindex,
@@ -8899,11 +9713,11 @@ namespace awkward {
 
     template<>
     ERROR UnionArray_fillna_64<int64_t>(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       const int64_t *fromindex,
       int64_t offset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray_fillna_from64_to64(
           toindex,
@@ -8922,10 +9736,10 @@ namespace awkward {
     }
 
     ERROR IndexedOptionArray_rpad_and_clip_mask_axis1_64(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       const int8_t *frommask,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_64(
           toindex,
@@ -8943,10 +9757,10 @@ namespace awkward {
     }
 
     ERROR index_rpad_and_clip_axis0_64(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       int64_t target,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_index_rpad_and_clip_axis0_64(
           toindex,
@@ -8964,11 +9778,11 @@ namespace awkward {
     }
 
     ERROR index_rpad_and_clip_axis1_64(
+      kernel::lib ptr_lib,
       int64_t *tostarts,
       int64_t *tostops,
       int64_t target,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_index_rpad_and_clip_axis1_64(
           tostarts,
@@ -8987,11 +9801,11 @@ namespace awkward {
     }
 
     ERROR RegularArray_rpad_and_clip_axis1_64(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       int64_t target,
       int64_t size,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_RegularArray_rpad_and_clip_axis1_64(
           toindex,
@@ -9011,13 +9825,13 @@ namespace awkward {
 
     template<>
     ERROR ListArray_min_range<int32_t>(
+      kernel::lib ptr_lib,
       int64_t *tomin,
       const int32_t *fromstarts,
       const int32_t *fromstops,
       int64_t lenstarts,
       int64_t startsoffset,
       int64_t stopsoffset) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray32_min_range(
           tomin,
@@ -9039,13 +9853,13 @@ namespace awkward {
 
     template<>
     ERROR ListArray_min_range<uint32_t>(
+      kernel::lib ptr_lib,
       int64_t *tomin,
       const uint32_t *fromstarts,
       const uint32_t *fromstops,
       int64_t lenstarts,
       int64_t startsoffset,
       int64_t stopsoffset) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArrayU32_min_range(
           tomin,
@@ -9067,13 +9881,13 @@ namespace awkward {
 
     template<>
     ERROR ListArray_min_range<int64_t>(
+      kernel::lib ptr_lib,
       int64_t *tomin,
       const int64_t *fromstarts,
       const int64_t *fromstops,
       int64_t lenstarts,
       int64_t startsoffset,
       int64_t stopsoffset) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray64_min_range(
           tomin,
@@ -9095,6 +9909,7 @@ namespace awkward {
 
     template<>
     ERROR ListArray_rpad_and_clip_length_axis1<int32_t>(
+      kernel::lib ptr_lib,
       int64_t *tolength,
       const int32_t *fromstarts,
       const int32_t *fromstops,
@@ -9102,7 +9917,6 @@ namespace awkward {
       int64_t lenstarts,
       int64_t startsoffset,
       int64_t stopsoffset) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray32_rpad_and_clip_length_axis1(
           tolength,
@@ -9125,6 +9939,7 @@ namespace awkward {
 
     template<>
     ERROR ListArray_rpad_and_clip_length_axis1<uint32_t>(
+      kernel::lib ptr_lib,
       int64_t *tolength,
       const uint32_t *fromstarts,
       const uint32_t *fromstops,
@@ -9132,7 +9947,6 @@ namespace awkward {
       int64_t lenstarts,
       int64_t startsoffset,
       int64_t stopsoffset) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArrayU32_rpad_and_clip_length_axis1(
           tolength,
@@ -9155,6 +9969,7 @@ namespace awkward {
 
     template<>
     ERROR ListArray_rpad_and_clip_length_axis1<int64_t>(
+      kernel::lib ptr_lib,
       int64_t *tolength,
       const int64_t *fromstarts,
       const int64_t *fromstops,
@@ -9162,7 +9977,6 @@ namespace awkward {
       int64_t lenstarts,
       int64_t startsoffset,
       int64_t stopsoffset) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray64_rpad_and_clip_length_axis1(
           tolength,
@@ -9185,6 +9999,7 @@ namespace awkward {
 
     template<>
     ERROR ListArray_rpad_axis1_64<int32_t>(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       const int32_t *fromstarts,
       const int32_t *fromstops,
@@ -9194,7 +10009,6 @@ namespace awkward {
       int64_t length,
       int64_t startsoffset,
       int64_t stopsoffset) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray32_rpad_axis1_64(
           toindex,
@@ -9219,6 +10033,7 @@ namespace awkward {
 
     template<>
     ERROR ListArray_rpad_axis1_64<uint32_t>(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       const uint32_t *fromstarts,
       const uint32_t *fromstops,
@@ -9228,7 +10043,6 @@ namespace awkward {
       int64_t length,
       int64_t startsoffset,
       int64_t stopsoffset) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArrayU32_rpad_axis1_64(
           toindex,
@@ -9253,6 +10067,7 @@ namespace awkward {
 
     template<>
     ERROR ListArray_rpad_axis1_64<int64_t>(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       const int64_t *fromstarts,
       const int64_t *fromstops,
@@ -9262,7 +10077,6 @@ namespace awkward {
       int64_t length,
       int64_t startsoffset,
       int64_t stopsoffset) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray64_rpad_axis1_64(
           toindex,
@@ -9287,12 +10101,12 @@ namespace awkward {
 
     template<>
     ERROR ListOffsetArray_rpad_and_clip_axis1_64<int32_t>(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       const int32_t *fromoffsets,
       int64_t offsetsoffset,
       int64_t length,
       int64_t target) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray32_rpad_and_clip_axis1_64(
           toindex,
@@ -9313,12 +10127,12 @@ namespace awkward {
 
     template<>
     ERROR ListOffsetArray_rpad_and_clip_axis1_64<uint32_t>(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       const uint32_t *fromoffsets,
       int64_t offsetsoffset,
       int64_t length,
       int64_t target) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArrayU32_rpad_and_clip_axis1_64(
           toindex,
@@ -9339,12 +10153,12 @@ namespace awkward {
 
     template<>
     ERROR ListOffsetArray_rpad_and_clip_axis1_64<int64_t>(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       const int64_t *fromoffsets,
       int64_t offsetsoffset,
       int64_t length,
       int64_t target) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray64_rpad_and_clip_axis1_64(
           toindex,
@@ -9365,13 +10179,13 @@ namespace awkward {
 
     template<>
     ERROR ListOffsetArray_rpad_length_axis1<int32_t>(
+      kernel::lib ptr_lib,
       int32_t *tooffsets,
       const int32_t *fromoffsets,
       int64_t offsetsoffset,
       int64_t fromlength,
       int64_t length,
       int64_t *tocount) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray32_rpad_length_axis1(
           tooffsets,
@@ -9393,13 +10207,13 @@ namespace awkward {
 
     template<>
     ERROR ListOffsetArray_rpad_length_axis1<uint32_t>(
+      kernel::lib ptr_lib,
       uint32_t *tooffsets,
       const uint32_t *fromoffsets,
       int64_t offsetsoffset,
       int64_t fromlength,
       int64_t length,
       int64_t *tocount) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArrayU32_rpad_length_axis1(
           tooffsets,
@@ -9421,13 +10235,13 @@ namespace awkward {
 
     template<>
     ERROR ListOffsetArray_rpad_length_axis1<int64_t>(
+      kernel::lib ptr_lib,
       int64_t *tooffsets,
       const int64_t *fromoffsets,
       int64_t offsetsoffset,
       int64_t fromlength,
       int64_t length,
       int64_t *tocount) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray64_rpad_length_axis1(
           tooffsets,
@@ -9449,12 +10263,12 @@ namespace awkward {
 
     template<>
     ERROR ListOffsetArray_rpad_axis1_64<int32_t>(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       const int32_t *fromoffsets,
       int64_t offsetsoffset,
       int64_t fromlength,
       int64_t target) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray32_rpad_axis1_64(
           toindex,
@@ -9475,12 +10289,12 @@ namespace awkward {
 
     template<>
     ERROR ListOffsetArray_rpad_axis1_64<uint32_t>(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       const uint32_t *fromoffsets,
       int64_t offsetsoffset,
       int64_t fromlength,
       int64_t target) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArrayU32_rpad_axis1_64(
           toindex,
@@ -9501,12 +10315,12 @@ namespace awkward {
 
     template<>
     ERROR ListOffsetArray_rpad_axis1_64<int64_t>(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       const int64_t *fromoffsets,
       int64_t offsetsoffset,
       int64_t fromlength,
       int64_t target) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray64_rpad_axis1_64(
           toindex,
@@ -9526,9 +10340,9 @@ namespace awkward {
     }
 
     ERROR localindex_64(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_localindex_64(
           toindex,
@@ -9546,11 +10360,11 @@ namespace awkward {
 
     template<>
     ERROR ListArray_localindex_64<int32_t>(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       const int32_t *offsets,
       int64_t offsetsoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray32_localindex_64(
           toindex,
@@ -9570,11 +10384,11 @@ namespace awkward {
 
     template<>
     ERROR ListArray_localindex_64<uint32_t>(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       const uint32_t *offsets,
       int64_t offsetsoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArrayU32_localindex_64(
           toindex,
@@ -9594,11 +10408,11 @@ namespace awkward {
 
     template<>
     ERROR ListArray_localindex_64<int64_t>(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       const int64_t *offsets,
       int64_t offsetsoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray64_localindex_64(
           toindex,
@@ -9617,10 +10431,10 @@ namespace awkward {
     }
 
     ERROR RegularArray_localindex_64(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       int64_t size,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_RegularArray_localindex_64(
           toindex,
@@ -9639,11 +10453,11 @@ namespace awkward {
 
     template<>
     ERROR combinations(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       int64_t n,
       bool replacement,
       int64_t singlelen) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_combinations_64(
           toindex,
@@ -9663,6 +10477,7 @@ namespace awkward {
 
     template<>
     ERROR ListArray_combinations_length_64<int32_t>(
+      kernel::lib ptr_lib,
       int64_t *totallen,
       int64_t *tooffsets,
       int64_t n,
@@ -9672,7 +10487,6 @@ namespace awkward {
       const int32_t *stops,
       int64_t stopsoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray32_combinations_length_64(
           totallen,
@@ -9697,6 +10511,7 @@ namespace awkward {
 
     template<>
     ERROR ListArray_combinations_length_64<uint32_t>(
+      kernel::lib ptr_lib,
       int64_t *totallen,
       int64_t *tooffsets,
       int64_t n,
@@ -9706,7 +10521,6 @@ namespace awkward {
       const uint32_t *stops,
       int64_t stopsoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArrayU32_combinations_length_64(
           totallen,
@@ -9731,6 +10545,7 @@ namespace awkward {
 
     template<>
     ERROR ListArray_combinations_length_64<int64_t>(
+      kernel::lib ptr_lib,
       int64_t *totallen,
       int64_t *tooffsets,
       int64_t n,
@@ -9740,7 +10555,6 @@ namespace awkward {
       const int64_t *stops,
       int64_t stopsoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray64_combinations_length_64(
           totallen,
@@ -9765,6 +10579,7 @@ namespace awkward {
 
     template<>
     ERROR ListArray_combinations_64<int32_t>(
+      kernel::lib ptr_lib,
       int64_t **tocarry,
       int64_t *toindex,
       int64_t *fromindex,
@@ -9775,7 +10590,6 @@ namespace awkward {
       const int32_t *stops,
       int64_t stopsoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray32_combinations_64(
           tocarry,
@@ -9801,6 +10615,7 @@ namespace awkward {
 
     template<>
     ERROR ListArray_combinations_64<uint32_t>(
+      kernel::lib ptr_lib,
       int64_t **tocarry,
       int64_t *toindex,
       int64_t *fromindex,
@@ -9811,7 +10626,6 @@ namespace awkward {
       const uint32_t *stops,
       int64_t stopsoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArrayU32_combinations_64(
           tocarry,
@@ -9837,6 +10651,7 @@ namespace awkward {
 
     template<>
     ERROR ListArray_combinations_64<int64_t>(
+      kernel::lib ptr_lib,
       int64_t **tocarry,
       int64_t *toindex,
       int64_t *fromindex,
@@ -9847,7 +10662,6 @@ namespace awkward {
       const int64_t *stops,
       int64_t stopsoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray64_combinations_64(
           tocarry,
@@ -9872,6 +10686,7 @@ namespace awkward {
     }
 
     ERROR RegularArray_combinations_64(
+      kernel::lib ptr_lib,
       int64_t **tocarry,
       int64_t *toindex,
       int64_t *fromindex,
@@ -9879,7 +10694,6 @@ namespace awkward {
       bool replacement,
       int64_t size,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_RegularArray_combinations_64(
           tocarry,
@@ -9901,6 +10715,7 @@ namespace awkward {
     }
 
     ERROR ByteMaskedArray_overlay_mask8(
+      kernel::lib ptr_lib,
       int8_t *tomask,
       const int8_t *theirmask,
       int64_t theirmaskoffset,
@@ -9908,7 +10723,6 @@ namespace awkward {
       int64_t mymaskoffset,
       int64_t length,
       bool validwhen) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ByteMaskedArray_overlay_mask8(
           tomask,
@@ -9930,13 +10744,13 @@ namespace awkward {
     }
 
     ERROR BitMaskedArray_to_ByteMaskedArray(
+      kernel::lib ptr_lib,
       int8_t *tobytemask,
       const uint8_t *frombitmask,
       int64_t bitmaskoffset,
       int64_t bitmasklength,
       bool validwhen,
       bool lsb_order) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_BitMaskedArray_to_ByteMaskedArray(
           tobytemask,
@@ -9957,13 +10771,13 @@ namespace awkward {
     }
 
     ERROR BitMaskedArray_to_IndexedOptionArray64(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       const uint8_t *frombitmask,
       int64_t bitmaskoffset,
       int64_t bitmasklength,
       bool validwhen,
       bool lsb_order) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_BitMaskedArray_to_IndexedOptionArray64(
           toindex,
@@ -9986,12 +10800,12 @@ namespace awkward {
     /////////////////////////////////// awkward/cpu-kernels/reducers.h
 
     ERROR reduce_count_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const int64_t *parents,
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_count_64(
           toptr,
@@ -10012,6 +10826,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_countnonzero_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const bool *fromptr,
       int64_t fromptroffset,
@@ -10019,7 +10834,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_countnonzero_bool_64(
           toptr,
@@ -10042,6 +10856,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_countnonzero_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const uint8_t *fromptr,
       int64_t fromptroffset,
@@ -10049,7 +10864,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_countnonzero_uint8_64(
           toptr,
@@ -10072,6 +10886,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_countnonzero_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const int8_t *fromptr,
       int64_t fromptroffset,
@@ -10079,7 +10894,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_countnonzero_int8_64(
           toptr,
@@ -10102,6 +10916,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_countnonzero_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const int16_t *fromptr,
       int64_t fromptroffset,
@@ -10109,7 +10924,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_countnonzero_int16_64(
           toptr,
@@ -10132,6 +10946,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_countnonzero_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const uint16_t *fromptr,
       int64_t fromptroffset,
@@ -10139,7 +10954,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_countnonzero_uint16_64(
           toptr,
@@ -10162,6 +10976,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_countnonzero_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const int32_t *fromptr,
       int64_t fromptroffset,
@@ -10169,7 +10984,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_countnonzero_int32_64(
           toptr,
@@ -10192,6 +11006,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_countnonzero_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const uint32_t *fromptr,
       int64_t fromptroffset,
@@ -10199,7 +11014,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_countnonzero_uint32_64(
           toptr,
@@ -10222,6 +11036,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_countnonzero_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const int64_t *fromptr,
       int64_t fromptroffset,
@@ -10229,7 +11044,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_countnonzero_int64_64(
           toptr,
@@ -10252,6 +11066,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_countnonzero_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const uint64_t *fromptr,
       int64_t fromptroffset,
@@ -10259,7 +11074,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_countnonzero_uint64_64(
           toptr,
@@ -10282,6 +11096,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_countnonzero_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const float *fromptr,
       int64_t fromptroffset,
@@ -10289,7 +11104,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_countnonzero_float32_64(
           toptr,
@@ -10312,6 +11126,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_countnonzero_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const double *fromptr,
       int64_t fromptroffset,
@@ -10319,7 +11134,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_countnonzero_float64_64(
           toptr,
@@ -10342,6 +11156,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_sum_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const bool *fromptr,
       int64_t fromptroffset,
@@ -10349,7 +11164,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_int64_bool_64(
           toptr,
@@ -10372,6 +11186,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_sum_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const int8_t *fromptr,
       int64_t fromptroffset,
@@ -10379,7 +11194,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_int64_int8_64(
           toptr,
@@ -10402,6 +11216,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_sum_64(
+      kernel::lib ptr_lib,
       uint64_t *toptr,
       const uint8_t *fromptr,
       int64_t fromptroffset,
@@ -10409,7 +11224,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_uint64_uint8_64(
           toptr,
@@ -10432,6 +11246,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_sum_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const int16_t *fromptr,
       int64_t fromptroffset,
@@ -10439,7 +11254,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_int64_int16_64(
           toptr,
@@ -10462,6 +11276,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_sum_64(
+      kernel::lib ptr_lib,
       uint64_t *toptr,
       const uint16_t *fromptr,
       int64_t fromptroffset,
@@ -10469,7 +11284,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_uint64_uint16_64(
           toptr,
@@ -10492,6 +11306,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_sum_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const int32_t *fromptr,
       int64_t fromptroffset,
@@ -10499,7 +11314,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_int64_int32_64(
           toptr,
@@ -10522,6 +11336,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_sum_64(
+      kernel::lib ptr_lib,
       uint64_t *toptr,
       const uint32_t *fromptr,
       int64_t fromptroffset,
@@ -10529,7 +11344,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_uint64_uint32_64(
           toptr,
@@ -10552,6 +11366,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_sum_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const int64_t *fromptr,
       int64_t fromptroffset,
@@ -10559,7 +11374,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_int64_int64_64(
           toptr,
@@ -10582,6 +11396,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_sum_64(
+      kernel::lib ptr_lib,
       uint64_t *toptr,
       const uint64_t *fromptr,
       int64_t fromptroffset,
@@ -10589,7 +11404,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_uint64_uint64_64(
           toptr,
@@ -10612,6 +11426,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_sum_64(
+      kernel::lib ptr_lib,
       float *toptr,
       const float *fromptr,
       int64_t fromptroffset,
@@ -10619,7 +11434,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_float32_float32_64(
           toptr,
@@ -10642,6 +11456,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_sum_64(
+      kernel::lib ptr_lib,
       double *toptr,
       const double *fromptr,
       int64_t fromptroffset,
@@ -10649,7 +11464,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_float64_float64_64(
           toptr,
@@ -10672,6 +11486,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_sum_64(
+      kernel::lib ptr_lib,
       int32_t *toptr,
       const bool *fromptr,
       int64_t fromptroffset,
@@ -10679,7 +11494,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_int32_bool_64(
           toptr,
@@ -10702,6 +11516,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_sum_64(
+      kernel::lib ptr_lib,
       int32_t *toptr,
       const int8_t *fromptr,
       int64_t fromptroffset,
@@ -10709,7 +11524,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_int32_int8_64(
           toptr,
@@ -10732,6 +11546,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_sum_64(
+      kernel::lib ptr_lib,
       uint32_t *toptr,
       const uint8_t *fromptr,
       int64_t fromptroffset,
@@ -10739,7 +11554,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_uint32_uint8_64(
           toptr,
@@ -10762,6 +11576,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_sum_64(
+      kernel::lib ptr_lib,
       int32_t *toptr,
       const int16_t *fromptr,
       int64_t fromptroffset,
@@ -10769,7 +11584,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_int32_int16_64(
           toptr,
@@ -10792,6 +11606,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_sum_64(
+      kernel::lib ptr_lib,
       uint32_t *toptr,
       const uint16_t *fromptr,
       int64_t fromptroffset,
@@ -10799,7 +11614,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_uint32_uint16_64(
           toptr,
@@ -10822,6 +11636,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_sum_64(
+      kernel::lib ptr_lib,
       int32_t *toptr,
       const int32_t *fromptr,
       int64_t fromptroffset,
@@ -10829,7 +11644,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_int32_int32_64(
           toptr,
@@ -10852,6 +11666,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_sum_64(
+      kernel::lib ptr_lib,
       uint32_t *toptr,
       const uint32_t *fromptr,
       int64_t fromptroffset,
@@ -10859,7 +11674,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_uint32_uint32_64(
           toptr,
@@ -10882,6 +11696,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_sum_bool_64(
+      kernel::lib ptr_lib,
       bool *toptr,
       const bool *fromptr,
       int64_t fromptroffset,
@@ -10889,7 +11704,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_bool_bool_64(
           toptr,
@@ -10912,6 +11726,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_sum_bool_64(
+      kernel::lib ptr_lib,
       bool *toptr,
       const int8_t *fromptr,
       int64_t fromptroffset,
@@ -10919,7 +11734,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_bool_int8_64(
           toptr,
@@ -10942,6 +11756,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_sum_bool_64(
+      kernel::lib ptr_lib,
       bool *toptr,
       const uint8_t *fromptr,
       int64_t fromptroffset,
@@ -10949,7 +11764,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_bool_uint8_64(
           toptr,
@@ -10972,6 +11786,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_sum_bool_64(
+      kernel::lib ptr_lib,
       bool *toptr,
       const int16_t *fromptr,
       int64_t fromptroffset,
@@ -10979,7 +11794,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_bool_int16_64(
           toptr,
@@ -11002,6 +11816,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_sum_bool_64(
+      kernel::lib ptr_lib,
       bool *toptr,
       const uint16_t *fromptr,
       int64_t fromptroffset,
@@ -11009,7 +11824,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_bool_uint16_64(
           toptr,
@@ -11032,6 +11846,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_sum_bool_64(
+      kernel::lib ptr_lib,
       bool *toptr,
       const int32_t *fromptr,
       int64_t fromptroffset,
@@ -11039,7 +11854,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_bool_int32_64(
           toptr,
@@ -11062,6 +11876,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_sum_bool_64(
+      kernel::lib ptr_lib,
       bool *toptr,
       const uint32_t *fromptr,
       int64_t fromptroffset,
@@ -11069,7 +11884,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_bool_uint32_64(
           toptr,
@@ -11092,6 +11906,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_sum_bool_64(
+      kernel::lib ptr_lib,
       bool *toptr,
       const int64_t *fromptr,
       int64_t fromptroffset,
@@ -11099,7 +11914,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_bool_int64_64(
           toptr,
@@ -11122,6 +11936,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_sum_bool_64(
+      kernel::lib ptr_lib,
       bool *toptr,
       const uint64_t *fromptr,
       int64_t fromptroffset,
@@ -11129,7 +11944,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_bool_uint64_64(
           toptr,
@@ -11152,6 +11966,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_sum_bool_64(
+      kernel::lib ptr_lib,
       bool *toptr,
       const float *fromptr,
       int64_t fromptroffset,
@@ -11159,7 +11974,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_bool_float32_64(
           toptr,
@@ -11182,6 +11996,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_sum_bool_64(
+      kernel::lib ptr_lib,
       bool *toptr,
       const double *fromptr,
       int64_t fromptroffset,
@@ -11189,7 +12004,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_bool_float64_64(
           toptr,
@@ -11212,6 +12026,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_prod_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const bool *fromptr,
       int64_t fromptroffset,
@@ -11219,7 +12034,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_int64_bool_64(
           toptr,
@@ -11242,6 +12056,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_prod_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const int8_t *fromptr,
       int64_t fromptroffset,
@@ -11249,7 +12064,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_int64_int8_64(
           toptr,
@@ -11272,6 +12086,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_prod_64(
+      kernel::lib ptr_lib,
       uint64_t *toptr,
       const uint8_t *fromptr,
       int64_t fromptroffset,
@@ -11279,7 +12094,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_uint64_uint8_64(
           toptr,
@@ -11302,6 +12116,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_prod_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const int16_t *fromptr,
       int64_t fromptroffset,
@@ -11309,7 +12124,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_int64_int16_64(
           toptr,
@@ -11332,6 +12146,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_prod_64(
+      kernel::lib ptr_lib,
       uint64_t *toptr,
       const uint16_t *fromptr,
       int64_t fromptroffset,
@@ -11339,7 +12154,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_uint64_uint16_64(
           toptr,
@@ -11362,6 +12176,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_prod_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const int32_t *fromptr,
       int64_t fromptroffset,
@@ -11369,7 +12184,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_int64_int32_64(
           toptr,
@@ -11392,6 +12206,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_prod_64(
+      kernel::lib ptr_lib,
       uint64_t *toptr,
       const uint32_t *fromptr,
       int64_t fromptroffset,
@@ -11399,7 +12214,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_uint64_uint32_64(
           toptr,
@@ -11422,6 +12236,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_prod_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const int64_t *fromptr,
       int64_t fromptroffset,
@@ -11429,7 +12244,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_int64_int64_64(
           toptr,
@@ -11452,6 +12266,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_prod_64(
+      kernel::lib ptr_lib,
       uint64_t *toptr,
       const uint64_t *fromptr,
       int64_t fromptroffset,
@@ -11459,7 +12274,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_uint64_uint64_64(
           toptr,
@@ -11482,6 +12296,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_prod_64(
+      kernel::lib ptr_lib,
       float *toptr,
       const float *fromptr,
       int64_t fromptroffset,
@@ -11489,7 +12304,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_float32_float32_64(
           toptr,
@@ -11512,6 +12326,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_prod_64(
+      kernel::lib ptr_lib,
       double *toptr,
       const double *fromptr,
       int64_t fromptroffset,
@@ -11519,7 +12334,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_float64_float64_64(
           toptr,
@@ -11542,6 +12356,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_prod_64(
+      kernel::lib ptr_lib,
       int32_t *toptr,
       const bool *fromptr,
       int64_t fromptroffset,
@@ -11549,7 +12364,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_int32_bool_64(
           toptr,
@@ -11572,6 +12386,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_prod_64(
+      kernel::lib ptr_lib,
       int32_t *toptr,
       const int8_t *fromptr,
       int64_t fromptroffset,
@@ -11579,7 +12394,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_int32_int8_64(
           toptr,
@@ -11602,6 +12416,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_prod_64(
+      kernel::lib ptr_lib,
       uint32_t *toptr,
       const uint8_t *fromptr,
       int64_t fromptroffset,
@@ -11609,7 +12424,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_uint32_uint8_64(
           toptr,
@@ -11632,6 +12446,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_prod_64(
+      kernel::lib ptr_lib,
       int32_t *toptr,
       const int16_t *fromptr,
       int64_t fromptroffset,
@@ -11639,7 +12454,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_int32_int16_64(
           toptr,
@@ -11662,6 +12476,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_prod_64(
+      kernel::lib ptr_lib,
       uint32_t *toptr,
       const uint16_t *fromptr,
       int64_t fromptroffset,
@@ -11669,7 +12484,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_uint32_uint16_64(
           toptr,
@@ -11692,6 +12506,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_prod_64(
+      kernel::lib ptr_lib,
       int32_t *toptr,
       const int32_t *fromptr,
       int64_t fromptroffset,
@@ -11699,7 +12514,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_int32_int32_64(
           toptr,
@@ -11722,6 +12536,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_prod_64(
+      kernel::lib ptr_lib,
       uint32_t *toptr,
       const uint32_t *fromptr,
       int64_t fromptroffset,
@@ -11729,7 +12544,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_uint32_uint32_64(
           toptr,
@@ -11752,6 +12566,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_prod_bool_64(
+      kernel::lib ptr_lib,
       bool *toptr,
       const bool *fromptr,
       int64_t fromptroffset,
@@ -11759,7 +12574,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_bool_bool_64(
           toptr,
@@ -11782,6 +12596,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_prod_bool_64(
+      kernel::lib ptr_lib,
       bool *toptr,
       const int8_t *fromptr,
       int64_t fromptroffset,
@@ -11789,7 +12604,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_bool_int8_64(
           toptr,
@@ -11812,6 +12626,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_prod_bool_64(
+      kernel::lib ptr_lib,
       bool *toptr,
       const uint8_t *fromptr,
       int64_t fromptroffset,
@@ -11819,7 +12634,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_bool_uint8_64(
           toptr,
@@ -11842,6 +12656,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_prod_bool_64(
+      kernel::lib ptr_lib,
       bool *toptr,
       const int16_t *fromptr,
       int64_t fromptroffset,
@@ -11849,7 +12664,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_bool_int16_64(
           toptr,
@@ -11872,6 +12686,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_prod_bool_64(
+      kernel::lib ptr_lib,
       bool *toptr,
       const uint16_t *fromptr,
       int64_t fromptroffset,
@@ -11879,7 +12694,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_bool_uint16_64(
           toptr,
@@ -11902,6 +12716,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_prod_bool_64(
+      kernel::lib ptr_lib,
       bool *toptr,
       const int32_t *fromptr,
       int64_t fromptroffset,
@@ -11909,7 +12724,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_bool_int32_64(
           toptr,
@@ -11932,6 +12746,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_prod_bool_64(
+      kernel::lib ptr_lib,
       bool *toptr,
       const uint32_t *fromptr,
       int64_t fromptroffset,
@@ -11939,7 +12754,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_bool_uint32_64(
           toptr,
@@ -11962,6 +12776,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_prod_bool_64(
+      kernel::lib ptr_lib,
       bool *toptr,
       const int64_t *fromptr,
       int64_t fromptroffset,
@@ -11969,7 +12784,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_bool_int64_64(
           toptr,
@@ -11992,6 +12806,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_prod_bool_64(
+      kernel::lib ptr_lib,
       bool *toptr,
       const uint64_t *fromptr,
       int64_t fromptroffset,
@@ -11999,7 +12814,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_bool_uint64_64(
           toptr,
@@ -12022,6 +12836,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_prod_bool_64(
+      kernel::lib ptr_lib,
       bool *toptr,
       const float *fromptr,
       int64_t fromptroffset,
@@ -12029,7 +12844,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_bool_float32_64(
           toptr,
@@ -12052,6 +12866,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_prod_bool_64(
+      kernel::lib ptr_lib,
       bool *toptr,
       const double *fromptr,
       int64_t fromptroffset,
@@ -12059,7 +12874,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_bool_float64_64(
           toptr,
@@ -12082,6 +12896,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_min_64(
+      kernel::lib ptr_lib,
       int8_t *toptr,
       const int8_t *fromptr,
       int64_t fromptroffset,
@@ -12090,7 +12905,6 @@ namespace awkward {
       int64_t lenparents,
       int64_t outlength,
       int8_t identity) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_min_int8_int8_64(
           toptr,
@@ -12114,6 +12928,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_min_64(
+      kernel::lib ptr_lib,
       uint8_t *toptr,
       const uint8_t *fromptr,
       int64_t fromptroffset,
@@ -12122,7 +12937,6 @@ namespace awkward {
       int64_t lenparents,
       int64_t outlength,
       uint8_t identity) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_min_uint8_uint8_64(
           toptr,
@@ -12146,6 +12960,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_min_64(
+      kernel::lib ptr_lib,
       int16_t *toptr,
       const int16_t *fromptr,
       int64_t fromptroffset,
@@ -12154,7 +12969,6 @@ namespace awkward {
       int64_t lenparents,
       int64_t outlength,
       int16_t identity) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_min_int16_int16_64(
           toptr,
@@ -12178,6 +12992,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_min_64(
+      kernel::lib ptr_lib,
       uint16_t *toptr,
       const uint16_t *fromptr,
       int64_t fromptroffset,
@@ -12186,7 +13001,6 @@ namespace awkward {
       int64_t lenparents,
       int64_t outlength,
       uint16_t identity) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_min_uint16_uint16_64(
           toptr,
@@ -12210,6 +13024,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_min_64(
+      kernel::lib ptr_lib,
       int32_t *toptr,
       const int32_t *fromptr,
       int64_t fromptroffset,
@@ -12218,7 +13033,6 @@ namespace awkward {
       int64_t lenparents,
       int64_t outlength,
       int32_t identity) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_min_int32_int32_64(
           toptr,
@@ -12242,6 +13056,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_min_64(
+      kernel::lib ptr_lib,
       uint32_t *toptr,
       const uint32_t *fromptr,
       int64_t fromptroffset,
@@ -12250,7 +13065,6 @@ namespace awkward {
       int64_t lenparents,
       int64_t outlength,
       uint32_t identity) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_min_uint32_uint32_64(
           toptr,
@@ -12274,6 +13088,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_min_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const int64_t *fromptr,
       int64_t fromptroffset,
@@ -12282,7 +13097,6 @@ namespace awkward {
       int64_t lenparents,
       int64_t outlength,
       int64_t identity) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_min_int64_int64_64(
           toptr,
@@ -12306,6 +13120,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_min_64(
+      kernel::lib ptr_lib,
       uint64_t *toptr,
       const uint64_t *fromptr,
       int64_t fromptroffset,
@@ -12314,7 +13129,6 @@ namespace awkward {
       int64_t lenparents,
       int64_t outlength,
       uint64_t identity) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_min_uint64_uint64_64(
           toptr,
@@ -12338,6 +13152,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_min_64(
+      kernel::lib ptr_lib,
       float *toptr,
       const float *fromptr,
       int64_t fromptroffset,
@@ -12346,7 +13161,6 @@ namespace awkward {
       int64_t lenparents,
       int64_t outlength,
       float identity) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_min_float32_float32_64(
           toptr,
@@ -12370,6 +13184,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_min_64(
+      kernel::lib ptr_lib,
       double *toptr,
       const double *fromptr,
       int64_t fromptroffset,
@@ -12378,7 +13193,6 @@ namespace awkward {
       int64_t lenparents,
       int64_t outlength,
       double identity) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_min_float64_float64_64(
           toptr,
@@ -12402,6 +13216,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_max_64(
+      kernel::lib ptr_lib,
       int8_t *toptr,
       const int8_t *fromptr,
       int64_t fromptroffset,
@@ -12410,7 +13225,6 @@ namespace awkward {
       int64_t lenparents,
       int64_t outlength,
       int8_t identity) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_max_int8_int8_64(
           toptr,
@@ -12434,6 +13248,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_max_64(
+      kernel::lib ptr_lib,
       uint8_t *toptr,
       const uint8_t *fromptr,
       int64_t fromptroffset,
@@ -12442,7 +13257,6 @@ namespace awkward {
       int64_t lenparents,
       int64_t outlength,
       uint8_t identity) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_max_uint8_uint8_64(
           toptr,
@@ -12466,6 +13280,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_max_64(
+      kernel::lib ptr_lib,
       int16_t *toptr,
       const int16_t *fromptr,
       int64_t fromptroffset,
@@ -12474,7 +13289,6 @@ namespace awkward {
       int64_t lenparents,
       int64_t outlength,
       int16_t identity) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_max_int16_int16_64(
           toptr,
@@ -12498,6 +13312,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_max_64(
+      kernel::lib ptr_lib,
       uint16_t *toptr,
       const uint16_t *fromptr,
       int64_t fromptroffset,
@@ -12506,7 +13321,6 @@ namespace awkward {
       int64_t lenparents,
       int64_t outlength,
       uint16_t identity) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_max_uint16_uint16_64(
           toptr,
@@ -12530,6 +13344,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_max_64(
+      kernel::lib ptr_lib,
       int32_t *toptr,
       const int32_t *fromptr,
       int64_t fromptroffset,
@@ -12538,7 +13353,6 @@ namespace awkward {
       int64_t lenparents,
       int64_t outlength,
       int32_t identity) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_max_int32_int32_64(
           toptr,
@@ -12562,6 +13376,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_max_64(
+      kernel::lib ptr_lib,
       uint32_t *toptr,
       const uint32_t *fromptr,
       int64_t fromptroffset,
@@ -12570,7 +13385,6 @@ namespace awkward {
       int64_t lenparents,
       int64_t outlength,
       uint32_t identity) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_max_uint32_uint32_64(
           toptr,
@@ -12594,6 +13408,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_max_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const int64_t *fromptr,
       int64_t fromptroffset,
@@ -12602,7 +13417,6 @@ namespace awkward {
       int64_t lenparents,
       int64_t outlength,
       int64_t identity) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_max_int64_int64_64(
           toptr,
@@ -12626,6 +13440,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_max_64(
+      kernel::lib ptr_lib,
       uint64_t *toptr,
       const uint64_t *fromptr,
       int64_t fromptroffset,
@@ -12634,7 +13449,6 @@ namespace awkward {
       int64_t lenparents,
       int64_t outlength,
       uint64_t identity) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_max_uint64_uint64_64(
           toptr,
@@ -12658,6 +13472,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_max_64(
+      kernel::lib ptr_lib,
       float *toptr,
       const float *fromptr,
       int64_t fromptroffset,
@@ -12666,7 +13481,6 @@ namespace awkward {
       int64_t lenparents,
       int64_t outlength,
       float identity) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_max_float32_float32_64(
           toptr,
@@ -12690,6 +13504,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_max_64(
+      kernel::lib ptr_lib,
       double *toptr,
       const double *fromptr,
       int64_t fromptroffset,
@@ -12698,7 +13513,6 @@ namespace awkward {
       int64_t lenparents,
       int64_t outlength,
       double identity) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_max_float64_float64_64(
           toptr,
@@ -12722,6 +13536,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_argmin_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const bool *fromptr,
       int64_t fromptroffset,
@@ -12731,7 +13546,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmin_bool_64(
           toptr,
@@ -12756,6 +13570,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_argmin_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const int8_t *fromptr,
       int64_t fromptroffset,
@@ -12765,7 +13580,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmin_int8_64(
           toptr,
@@ -12790,6 +13604,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_argmin_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const uint8_t *fromptr,
       int64_t fromptroffset,
@@ -12799,7 +13614,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmin_uint8_64(
           toptr,
@@ -12824,6 +13638,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_argmin_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const int16_t *fromptr,
       int64_t fromptroffset,
@@ -12833,7 +13648,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmin_int16_64(
           toptr,
@@ -12858,6 +13672,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_argmin_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const uint16_t *fromptr,
       int64_t fromptroffset,
@@ -12867,7 +13682,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmin_uint16_64(
           toptr,
@@ -12892,6 +13706,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_argmin_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const int32_t *fromptr,
       int64_t fromptroffset,
@@ -12901,7 +13716,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmin_int32_64(
           toptr,
@@ -12926,6 +13740,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_argmin_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const uint32_t *fromptr,
       int64_t fromptroffset,
@@ -12935,7 +13750,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmin_uint32_64(
           toptr,
@@ -12960,6 +13774,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_argmin_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const int64_t *fromptr,
       int64_t fromptroffset,
@@ -12969,7 +13784,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmin_int64_64(
           toptr,
@@ -12994,6 +13808,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_argmin_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const uint64_t *fromptr,
       int64_t fromptroffset,
@@ -13003,7 +13818,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmin_uint64_64(
           toptr,
@@ -13028,6 +13842,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_argmin_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const float *fromptr,
       int64_t fromptroffset,
@@ -13037,7 +13852,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmin_float32_64(
           toptr,
@@ -13062,6 +13876,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_argmin_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const double *fromptr,
       int64_t fromptroffset,
@@ -13071,7 +13886,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmin_float64_64(
           toptr,
@@ -13097,6 +13911,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_argmax_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const bool *fromptr,
       int64_t fromptroffset,
@@ -13106,7 +13921,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmax_bool_64(
           toptr,
@@ -13131,6 +13945,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_argmax_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const int8_t *fromptr,
       int64_t fromptroffset,
@@ -13140,7 +13955,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmax_int8_64(
           toptr,
@@ -13165,6 +13979,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_argmax_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const uint8_t *fromptr,
       int64_t fromptroffset,
@@ -13174,7 +13989,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmax_uint8_64(
           toptr,
@@ -13199,6 +14013,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_argmax_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const int16_t *fromptr,
       int64_t fromptroffset,
@@ -13208,7 +14023,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmax_int16_64(
           toptr,
@@ -13233,6 +14047,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_argmax_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const uint16_t *fromptr,
       int64_t fromptroffset,
@@ -13242,7 +14057,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmax_uint16_64(
           toptr,
@@ -13267,6 +14081,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_argmax_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const int32_t *fromptr,
       int64_t fromptroffset,
@@ -13276,7 +14091,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmax_int32_64(
           toptr,
@@ -13301,6 +14115,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_argmax_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const uint32_t *fromptr,
       int64_t fromptroffset,
@@ -13310,7 +14125,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmax_uint32_64(
           toptr,
@@ -13335,6 +14149,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_argmax_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const int64_t *fromptr,
       int64_t fromptroffset,
@@ -13344,7 +14159,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmax_int64_64(
           toptr,
@@ -13369,6 +14183,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_argmax_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const uint64_t *fromptr,
       int64_t fromptroffset,
@@ -13378,7 +14193,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmax_uint64_64(
           toptr,
@@ -13403,6 +14217,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_argmax_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const float *fromptr,
       int64_t fromptroffset,
@@ -13412,7 +14227,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmax_float32_64(
           toptr,
@@ -13437,6 +14251,7 @@ namespace awkward {
 
     template<>
     ERROR reduce_argmax_64(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const double *fromptr,
       int64_t fromptroffset,
@@ -13446,7 +14261,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmax_float64_64(
           toptr,
@@ -13470,9 +14284,9 @@ namespace awkward {
     }
 
     ERROR content_reduce_zeroparents_64(
+      kernel::lib ptr_lib,
       int64_t *toparents,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_content_reduce_zeroparents_64(
           toparents,
@@ -13489,12 +14303,12 @@ namespace awkward {
     }
 
     ERROR ListOffsetArray_reduce_global_startstop_64(
+      kernel::lib ptr_lib,
       int64_t *globalstart,
       int64_t *globalstop,
       const int64_t *offsets,
       int64_t offsetsoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray_reduce_global_startstop_64(
           globalstart,
@@ -13514,12 +14328,12 @@ namespace awkward {
     }
 
     ERROR ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64(
+      kernel::lib ptr_lib,
       int64_t *maxcount,
       int64_t *offsetscopy,
       const int64_t *offsets,
       int64_t offsetsoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64(
           maxcount,
@@ -13539,6 +14353,7 @@ namespace awkward {
     }
 
     ERROR ListOffsetArray_reduce_nonlocal_preparenext_64(
+      kernel::lib ptr_lib,
       int64_t *nextcarry,
       int64_t *nextparents,
       int64_t nextlen,
@@ -13552,7 +14367,6 @@ namespace awkward {
       const int64_t *parents,
       int64_t parentsoffset,
       int64_t maxcount) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray_reduce_nonlocal_preparenext_64(
           nextcarry,
@@ -13580,10 +14394,10 @@ namespace awkward {
     }
 
     ERROR ListOffsetArray_reduce_nonlocal_nextstarts_64(
+      kernel::lib ptr_lib,
       int64_t *nextstarts,
       const int64_t *nextparents,
       int64_t nextlen) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64(
           nextstarts,
@@ -13601,11 +14415,11 @@ namespace awkward {
     }
 
     ERROR ListOffsetArray_reduce_nonlocal_findgaps_64(
+      kernel::lib ptr_lib,
       int64_t *gaps,
       const int64_t *parents,
       int64_t parentsoffset,
       int64_t lenparents) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray_reduce_nonlocal_findgaps_64(
           gaps,
@@ -13624,13 +14438,13 @@ namespace awkward {
     }
 
     ERROR ListOffsetArray_reduce_nonlocal_outstartsstops_64(
+      kernel::lib ptr_lib,
       int64_t *outstarts,
       int64_t *outstops,
       const int64_t *distincts,
       int64_t lendistincts,
       const int64_t *gaps,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64(
           outstarts,
@@ -13651,11 +14465,11 @@ namespace awkward {
     }
 
     ERROR ListOffsetArray_reduce_local_nextparents_64(
+      kernel::lib ptr_lib,
       int64_t *nextparents,
       const int64_t *offsets,
       int64_t offsetsoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray_reduce_local_nextparents_64(
           nextparents,
@@ -13674,12 +14488,12 @@ namespace awkward {
     }
 
     ERROR ListOffsetArray_reduce_local_outoffsets_64(
+      kernel::lib ptr_lib,
       int64_t *outoffsets,
       const int64_t *parents,
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray_reduce_local_outoffsets_64(
           outoffsets,
@@ -13700,6 +14514,7 @@ namespace awkward {
 
     template<>
     ERROR IndexedArray_reduce_next_64<int32_t>(
+      kernel::lib ptr_lib,
       int64_t *nextcarry,
       int64_t *nextparents,
       int64_t *outindex,
@@ -13708,7 +14523,6 @@ namespace awkward {
       int64_t *parents,
       int64_t parentsoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray32_reduce_next_64(
           nextcarry,
@@ -13732,6 +14546,7 @@ namespace awkward {
 
     template<>
     ERROR IndexedArray_reduce_next_64<uint32_t>(
+      kernel::lib ptr_lib,
       int64_t *nextcarry,
       int64_t *nextparents,
       int64_t *outindex,
@@ -13740,7 +14555,6 @@ namespace awkward {
       int64_t *parents,
       int64_t parentsoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArrayU32_reduce_next_64(
           nextcarry,
@@ -13764,6 +14578,7 @@ namespace awkward {
 
     template<>
     ERROR IndexedArray_reduce_next_64<int64_t>(
+      kernel::lib ptr_lib,
       int64_t *nextcarry,
       int64_t *nextparents,
       int64_t *outindex,
@@ -13772,7 +14587,6 @@ namespace awkward {
       int64_t *parents,
       int64_t parentsoffset,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray64_reduce_next_64(
           nextcarry,
@@ -13795,12 +14609,12 @@ namespace awkward {
     }
 
     ERROR IndexedArray_reduce_next_fix_offsets_64(
+      kernel::lib ptr_lib,
       int64_t *outoffsets,
       const int64_t *starts,
       int64_t startsoffset,
       int64_t startslength,
       int64_t outindexlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray_reduce_next_fix_offsets_64(
           outoffsets,
@@ -13820,12 +14634,12 @@ namespace awkward {
     }
 
     ERROR NumpyArray_reduce_mask_ByteMaskedArray_64(
+      kernel::lib ptr_lib,
       int8_t *toptr,
       const int64_t *parents,
       int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_reduce_mask_ByteMaskedArray_64(
           toptr,
@@ -13845,6 +14659,7 @@ namespace awkward {
     }
 
     ERROR ByteMaskedArray_reduce_next_64(
+      kernel::lib ptr_lib,
       int64_t *nextcarry,
       int64_t *nextparents,
       int64_t *outindex,
@@ -13854,7 +14669,6 @@ namespace awkward {
       int64_t parentsoffset,
       int64_t length,
       bool validwhen) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ByteMaskedArray_reduce_next_64(
           nextcarry,
@@ -13880,11 +14694,11 @@ namespace awkward {
     /////////////////////////////////// awkward/cpu-kernels/sorting.h
 
     ERROR sorting_ranges(
+      kernel::lib ptr_lib,
       int64_t *toindex,
       int64_t tolength,
       const int64_t *parents,
       int64_t parentslength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_sorting_ranges(
           toindex,
@@ -13903,10 +14717,10 @@ namespace awkward {
     }
 
     ERROR sorting_ranges_length(
+      kernel::lib ptr_lib,
       int64_t *tolength,
       const int64_t *parents,
       int64_t parentslength) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_sorting_ranges_length(
           tolength,
@@ -13925,6 +14739,7 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_argsort<bool>(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const bool *fromptr,
       int64_t length,
@@ -13932,7 +14747,6 @@ namespace awkward {
       int64_t offsetslength,
       bool ascending,
       bool stable) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_argsort_bool(
           toptr,
@@ -13955,6 +14769,7 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_argsort<int8_t>(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const int8_t *fromptr,
       int64_t length,
@@ -13962,7 +14777,6 @@ namespace awkward {
       int64_t offsetslength,
       bool ascending,
       bool stable) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_argsort_int8(
           toptr,
@@ -13985,6 +14799,7 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_argsort<uint8_t>(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const uint8_t *fromptr,
       int64_t length,
@@ -13992,7 +14807,6 @@ namespace awkward {
       int64_t offsetslength,
       bool ascending,
       bool stable) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_argsort_uint8(
           toptr,
@@ -14015,6 +14829,7 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_argsort<int16_t>(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const int16_t *fromptr,
       int64_t length,
@@ -14022,7 +14837,6 @@ namespace awkward {
       int64_t offsetslength,
       bool ascending,
       bool stable) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_argsort_int16(
           toptr,
@@ -14045,6 +14859,7 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_argsort<uint16_t>(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const uint16_t *fromptr,
       int64_t length,
@@ -14052,7 +14867,6 @@ namespace awkward {
       int64_t offsetslength,
       bool ascending,
       bool stable) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_argsort_uint16(
           toptr,
@@ -14075,6 +14889,7 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_argsort<int32_t>(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const int32_t *fromptr,
       int64_t length,
@@ -14082,7 +14897,6 @@ namespace awkward {
       int64_t offsetslength,
       bool ascending,
       bool stable) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_argsort_int32(
           toptr,
@@ -14105,6 +14919,7 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_argsort<uint32_t>(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const uint32_t *fromptr,
       int64_t length,
@@ -14112,7 +14927,6 @@ namespace awkward {
       int64_t offsetslength,
       bool ascending,
       bool stable) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_argsort_uint32(
           toptr,
@@ -14135,6 +14949,7 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_argsort<int64_t>(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const int64_t *fromptr,
       int64_t length,
@@ -14142,7 +14957,6 @@ namespace awkward {
       int64_t offsetslength,
       bool ascending,
       bool stable) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_argsort_int64(
           toptr,
@@ -14165,6 +14979,7 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_argsort<uint64_t>(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const uint64_t *fromptr,
       int64_t length,
@@ -14172,7 +14987,6 @@ namespace awkward {
       int64_t offsetslength,
       bool ascending,
       bool stable) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_argsort_uint64(
           toptr,
@@ -14195,6 +15009,7 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_argsort<float>(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const float *fromptr,
       int64_t length,
@@ -14202,7 +15017,6 @@ namespace awkward {
       int64_t offsetslength,
       bool ascending,
       bool stable) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_argsort_float32(
           toptr,
@@ -14225,6 +15039,7 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_argsort<double>(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const double *fromptr,
       int64_t length,
@@ -14232,7 +15047,6 @@ namespace awkward {
       int64_t offsetslength,
       bool ascending,
       bool stable) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_argsort_float64(
           toptr,
@@ -14255,6 +15069,7 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_sort<bool>(
+      kernel::lib ptr_lib,
       bool *toptr,
       const bool *fromptr,
       int64_t length,
@@ -14263,7 +15078,6 @@ namespace awkward {
       int64_t parentslength,
       bool ascending,
       bool stable) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_sort_bool(
           toptr,
@@ -14287,6 +15101,7 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_sort<uint8_t>(
+      kernel::lib ptr_lib,
       uint8_t *toptr,
       const uint8_t *fromptr,
       int64_t length,
@@ -14295,7 +15110,6 @@ namespace awkward {
       int64_t parentslength,
       bool ascending,
       bool stable) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_sort_uint8(
           toptr,
@@ -14319,6 +15133,7 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_sort<int8_t>(
+      kernel::lib ptr_lib,
       int8_t *toptr,
       const int8_t *fromptr,
       int64_t length,
@@ -14327,7 +15142,6 @@ namespace awkward {
       int64_t parentslength,
       bool ascending,
       bool stable) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_sort_int8(
           toptr,
@@ -14351,6 +15165,7 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_sort<uint16_t>(
+      kernel::lib ptr_lib,
       uint16_t *toptr,
       const uint16_t *fromptr,
       int64_t length,
@@ -14359,7 +15174,6 @@ namespace awkward {
       int64_t parentslength,
       bool ascending,
       bool stable) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_sort_uint16(
           toptr,
@@ -14383,6 +15197,7 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_sort<int16_t>(
+      kernel::lib ptr_lib,
       int16_t *toptr,
       const int16_t *fromptr,
       int64_t length,
@@ -14391,7 +15206,6 @@ namespace awkward {
       int64_t parentslength,
       bool ascending,
       bool stable) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_sort_int16(
           toptr,
@@ -14415,6 +15229,7 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_sort<uint32_t>(
+      kernel::lib ptr_lib,
       uint32_t *toptr,
       const uint32_t *fromptr,
       int64_t length,
@@ -14423,7 +15238,6 @@ namespace awkward {
       int64_t parentslength,
       bool ascending,
       bool stable) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_sort_uint32(
           toptr,
@@ -14447,6 +15261,7 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_sort<int32_t>(
+      kernel::lib ptr_lib,
       int32_t *toptr,
       const int32_t *fromptr,
       int64_t length,
@@ -14455,7 +15270,6 @@ namespace awkward {
       int64_t parentslength,
       bool ascending,
       bool stable) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_sort_int32(
           toptr,
@@ -14479,6 +15293,7 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_sort<uint64_t>(
+      kernel::lib ptr_lib,
       uint64_t *toptr,
       const uint64_t *fromptr,
       int64_t length,
@@ -14487,7 +15302,6 @@ namespace awkward {
       int64_t parentslength,
       bool ascending,
       bool stable) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_sort_uint64(
           toptr,
@@ -14511,6 +15325,7 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_sort<int64_t>(
+      kernel::lib ptr_lib,
       int64_t *toptr,
       const int64_t *fromptr,
       int64_t length,
@@ -14519,7 +15334,6 @@ namespace awkward {
       int64_t parentslength,
       bool ascending,
       bool stable) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_sort_int64(
           toptr,
@@ -14543,6 +15357,7 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_sort<float>(
+      kernel::lib ptr_lib,
       float *toptr,
       const float *fromptr,
       int64_t length,
@@ -14551,7 +15366,6 @@ namespace awkward {
       int64_t parentslength,
       bool ascending,
       bool stable) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_sort_float32(
           toptr,
@@ -14575,6 +15389,7 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_sort<double>(
+      kernel::lib ptr_lib,
       double *toptr,
       const double *fromptr,
       int64_t length,
@@ -14583,7 +15398,6 @@ namespace awkward {
       int64_t parentslength,
       bool ascending,
       bool stable) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_sort_float64(
           toptr,
@@ -14607,6 +15421,7 @@ namespace awkward {
 
     template<>
     ERROR NumpyArray_sort_asstrings<uint8_t>(
+      kernel::lib ptr_lib,
       uint8_t *toptr,
       const uint8_t *fromptr,
       const int64_t *offsets,
@@ -14614,7 +15429,6 @@ namespace awkward {
       int64_t *outoffsets,
       bool ascending,
       bool stable) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_sort_asstrings_uint8(
           toptr,
@@ -14636,10 +15450,10 @@ namespace awkward {
     }
 
     ERROR ListOffsetArray_local_preparenext_64(
+      kernel::lib ptr_lib,
       int64_t *tocarry,
       const int64_t *fromindex,
       int64_t length) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray_local_preparenext_64(
           tocarry,
@@ -14657,6 +15471,7 @@ namespace awkward {
     }
 
     ERROR IndexedArray_local_preparenext_64(
+      kernel::lib ptr_lib,
       int64_t *tocarry,
       const int64_t *starts,
       const int64_t *parents,
@@ -14664,7 +15479,6 @@ namespace awkward {
       int64_t parentslength,
       const int64_t *nextparents,
       int64_t nextparentsoffset) {
-      kernel::lib ptr_lib = kernel::lib::cpu;
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray_local_preparenext_64(
           tocarry,

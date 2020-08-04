@@ -244,6 +244,7 @@ namespace awkward {
   BitMaskedArray::bytemask() const {
     Index8 bytemask(mask_.length() * 8);
     struct Error err = kernel::BitMaskedArray_to_ByteMaskedArray(
+      kernel::lib::cpu,   // DERIVE
       bytemask.data(),
       mask_.data(),
       0,  // DROP
@@ -278,6 +279,7 @@ namespace awkward {
   BitMaskedArray::toByteMaskedArray() const {
     Index8 bytemask(mask_.length() * 8);
     struct Error err = kernel::BitMaskedArray_to_ByteMaskedArray(
+      kernel::lib::cpu,   // DERIVE
       bytemask.data(),
       mask_.data(),
       0,   // DROP
@@ -297,6 +299,7 @@ namespace awkward {
   BitMaskedArray::toIndexedOptionArray64() const {
     Index64 index(mask_.length() * 8);
     struct Error err = kernel::BitMaskedArray_to_IndexedOptionArray64(
+      kernel::lib::cpu,   // DERIVE
       index.data(),
       mask_.data(),
       0,   // DROP
@@ -340,6 +343,7 @@ namespace awkward {
         Identities32* rawsubidentities =
           reinterpret_cast<Identities32*>(subidentities.get());
         struct Error err = kernel::Identities_extend<int32_t>(
+          kernel::lib::cpu,   // DERIVE
           rawsubidentities->data(),
           rawidentities->data(),
           0,  // DROP
@@ -358,6 +362,7 @@ namespace awkward {
         Identities64* rawsubidentities =
           reinterpret_cast<Identities64*>(subidentities.get());
         struct Error err = kernel::Identities_extend<int64_t>(
+          kernel::lib::cpu,   // DERIVE
           rawsubidentities->data(),
           rawidentities->data(),
           0,   // DROP
@@ -383,8 +388,10 @@ namespace awkward {
                                        length());
       Identities32* rawidentities =
         reinterpret_cast<Identities32*>(newidentities.get());
-      struct Error err =
-        kernel::new_Identities<int32_t>(rawidentities->data(), length());
+      struct Error err = kernel::new_Identities<int32_t>(
+        kernel::lib::cpu,   // DERIVE
+        rawidentities->data(),
+        length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
     }
@@ -396,8 +403,10 @@ namespace awkward {
                                        length());
       Identities64* rawidentities =
         reinterpret_cast<Identities64*>(newidentities.get());
-      struct Error err = kernel::new_Identities<int64_t>(rawidentities->data(),
-                                                         length());
+      struct Error err = kernel::new_Identities<int64_t>(
+        kernel::lib::cpu,   // DERIVE
+        rawidentities->data(),
+        length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
     }

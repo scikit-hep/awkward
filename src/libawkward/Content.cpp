@@ -901,6 +901,7 @@ namespace awkward {
 
     Index64 parents(length());
     struct Error err = kernel::content_reduce_zeroparents_64(
+      kernel::lib::cpu,   // DERIVE
       parents.data(),
       length());
     util::handle_error(err, classname(), identities_.get());
@@ -951,6 +952,7 @@ namespace awkward {
     starts.setitem_at_nowrap(0, 0);
     Index64 parents(length());
     struct Error err = kernel::content_reduce_zeroparents_64(
+      kernel::lib::cpu,   // DERIVE
       parents.data(),
       length());
     util::handle_error(err, classname(), identities_.get());
@@ -1007,6 +1009,7 @@ namespace awkward {
 
     Index64 parents(length());
     struct Error err = kernel::content_reduce_zeroparents_64(
+      kernel::lib::cpu,   // DERIVE
       parents.data(),
       length());
     util::handle_error(err, classname(), identities_.get());
@@ -1087,24 +1090,28 @@ namespace awkward {
     ContentPtrVec contents({ shallow_copy(), other });
 
     struct Error err1 = kernel::UnionArray_filltags_to8_const(
+      kernel::lib::cpu,   // DERIVE
       tags.data(),
       0,
       mylength,
       0);
     util::handle_error(err1, classname(), identities_.get());
     struct Error err2 = kernel::UnionArray_fillindex_count_64(
+      kernel::lib::cpu,   // DERIVE
       index.data(),
       0,
       mylength);
     util::handle_error(err2, classname(), identities_.get());
 
     struct Error err3 = kernel::UnionArray_filltags_to8_const(
+      kernel::lib::cpu,   // DERIVE
       tags.data(),
       mylength,
       theirlength,
       1);
     util::handle_error(err3, classname(), identities_.get());
     struct Error err4 = kernel::UnionArray_fillindex_count_64(
+      kernel::lib::cpu,   // DERIVE
       index.data(),
       mylength,
       theirlength);
@@ -1124,6 +1131,7 @@ namespace awkward {
     }
     Index64 index(target);
     struct Error err = kernel::index_rpad_and_clip_axis0_64(
+      kernel::lib::cpu,   // DERIVE
       index.data(),
       target,
       length());
@@ -1140,6 +1148,7 @@ namespace awkward {
   Content::localindex_axis0() const {
     Index64 localindex(length());
     struct Error err = kernel::localindex_64(
+      kernel::lib::cpu,   // DERIVE
       localindex.data(),
       length());
     util::handle_error(err, classname(), identities_.get());
@@ -1185,6 +1194,7 @@ namespace awkward {
     IndexOf<int64_t> toindex(n);
     IndexOf<int64_t> fromindex(n);
     struct Error err = kernel::RegularArray_combinations_64(
+      kernel::lib::cpu,   // DERIVE
       tocarryraw.data(),
       toindex.data(),
       fromindex.data(),
@@ -1378,6 +1388,7 @@ namespace awkward {
     Index64 outindex(index.length()*length);
 
     struct Error err = kernel::missing_repeat_64(
+      kernel::lib::cpu,   // DERIVE
       outindex.ptr().get(),
       index.ptr().get(),
       index.offset(),
@@ -1418,11 +1429,16 @@ namespace awkward {
     Index64 outputmask(index.length());
     Index64 starts(index.length());
     Index64 stops(index.length());
-    struct Error err =
-        kernel::Content_getitem_next_missing_jagged_getmaskstartstop(
-            index.ptr().get(), index.offset(), jagged->offsets().ptr().get(),
-            jagged->offsets().offset(), outputmask.ptr().get(),
-            starts.ptr().get(), stops.ptr().get(), index.length());
+    struct Error err = kernel::Content_getitem_next_missing_jagged_getmaskstartstop(
+      kernel::lib::cpu,   // DERIVE
+      index.ptr().get(),
+      index.offset(),
+      jagged->offsets().ptr().get(),
+      jagged->offsets().offset(),
+      outputmask.ptr().get(),
+      starts.ptr().get(),
+      stops.ptr().get(),
+      index.length());
     util::handle_error(err, that.get()->classname(), nullptr);
     ContentPtr tmp = content.get()->getitem_next_jagged(
         starts, stops, jagged->content(), tail);
