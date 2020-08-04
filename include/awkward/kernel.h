@@ -146,7 +146,7 @@ namespace kernel {
   ///
   /// @note This function has not been implemented to handle Multi-GPU setups
   template<typename T>
-  Error copy_to(kernel::Lib TO,
+  ERROR copy_to(kernel::Lib TO,
                 kernel::Lib FROM,
                 T *to_ptr,
                 T *from_ptr,
@@ -170,6 +170,7 @@ namespace kernel {
                           T* ptr,
                           int64_t at);
 
+  // FIXME: move regularize_rangeslice to common.h; it's not a kernel.
   void regularize_rangeslice(
     int64_t* start,
     int64_t* stop,
