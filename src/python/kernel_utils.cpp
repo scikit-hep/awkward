@@ -2,10 +2,12 @@
 
 #include "awkward/python/kernel_utils.h"
 
-py::enum_<kernel::lib>
+namespace ak = awkward;
+
+py::enum_<ak::kernel::lib>
 make_lib_enum(const py::handle& m, const std::string& name) {
-  return (py::enum_<kernel::lib>(m, name.c_str())
-    .value("cpu", kernel::lib::cpu)
-    .value("cuda", kernel::lib::cuda)
+  return (py::enum_<ak::kernel::lib>(m, name.c_str())
+    .value("cpu", ak::kernel::lib::cpu)
+    .value("cuda", ak::kernel::lib::cuda)
     .export_values());
 }

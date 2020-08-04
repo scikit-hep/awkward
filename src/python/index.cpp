@@ -76,10 +76,10 @@ make_IndexOf(const py::handle& m, const std::string& name) {
       })
       .def("copy_to", [](const ak::IndexOf<T>& self, std::string& ptr_lib) {
         if (ptr_lib == "cpu") {
-          return self.copy_to(kernel::lib::cpu);
+          return self.copy_to(ak::kernel::lib::cpu);
         }
         else if (ptr_lib == "cuda") {
-          return self.copy_to(kernel::lib::cuda);
+          return self.copy_to(ak::kernel::lib::cuda);
         }
         else {
           throw std::invalid_argument("specify 'cpu' or 'cuda'");

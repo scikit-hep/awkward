@@ -1289,18 +1289,18 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
                return box(self.argsort(axis, ascending, false));
           })
           .def("copy_to",
-               [](const T&self,
-                      std::string ptr_lib) -> py::object {
+               [](const T&self, const std::string& ptr_lib) -> py::object {
                if (ptr_lib == "cpu") {
-                 return box(self.copy_to(kernel::lib::cpu));
+                 return box(self.copy_to(ak::kernel::lib::cpu));
                }
                else if (ptr_lib == "cuda") {
-                 return box(self.copy_to(kernel::lib::cuda));
+                 return box(self.copy_to(ak::kernel::lib::cuda));
                }
                else {
                  throw std::invalid_argument("specify 'cpu' or 'cuda'");
                }
-          });
+          })
+    ;
   }
 
 ////////// EmptyArray

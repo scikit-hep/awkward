@@ -5,7 +5,7 @@
 
 #include "awkward/python/startup.h"
 
-// namespace ak = awkward;
+ namespace ak = awkward;
 
 std::string StartupLibraryPathCallback::library_path() {
   // Fetches Path Eagerly
@@ -39,7 +39,7 @@ std::string StartupLibraryPathCallback::library_path() {
 void
 make_startup(py::module& m, const std::string& name) {
   m.def(name.c_str(), []() -> void {
-    kernel::lib_callback->add_library_path_callback(
-      kernel::lib::cuda, std::make_shared<StartupLibraryPathCallback>());
+    ak::kernel::lib_callback->add_library_path_callback(
+      ak::kernel::lib::cuda, std::make_shared<StartupLibraryPathCallback>());
   });
 }

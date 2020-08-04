@@ -29,7 +29,7 @@ PYBIND11_MODULE(_ext, m) {
 
   ////////// kernel_utils.h
 
-  make_lib_enum(m, "kernelLib");
+  make_lib_enum(m, "kernel_lib");
 
   ////////// index.h
 
