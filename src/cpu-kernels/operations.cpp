@@ -1177,6 +1177,17 @@ ERROR awkward_NumpyArray_fill_frombool(
   }
   return success();
 }
+ERROR awkward_NumpyArray_fill_tobool_frombool( bool* toptr, int64_t tooffset, const bool* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill_frombool<bool>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_toint8_frombool( int8_t* toptr, int64_t tooffset, const bool* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill_frombool<int8_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_toint16_frombool( int16_t* toptr, int64_t tooffset, const bool* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill_frombool<int16_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_toint32_frombool( int32_t* toptr, int64_t tooffset, const bool* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill_frombool<int32_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_toint64_frombool( int64_t* toptr, int64_t tooffset, const bool* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill_frombool<int64_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint8_frombool( uint8_t* toptr, int64_t tooffset, const bool* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill_frombool<uint8_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint16_frombool( uint16_t* toptr, int64_t tooffset, const bool* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill_frombool<uint16_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint32_frombool( uint32_t* toptr, int64_t tooffset, const bool* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill_frombool<uint32_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint64_frombool( uint64_t* toptr, int64_t tooffset, const bool* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill_frombool<uint64_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_tofloat32_frombool( float* toptr, int64_t tooffset, const bool* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill_frombool<float>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_tofloat64_frombool( double* toptr, int64_t tooffset, const bool* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill_frombool<double>( toptr, tooffset, fromptr, fromoffset, length); }
 
 template <typename FROM>
 ERROR awkward_NumpyArray_fill_tobool(
@@ -1190,6 +1201,16 @@ ERROR awkward_NumpyArray_fill_tobool(
   }
   return success();
 }
+ERROR awkward_NumpyArray_fill_tobool_fromint8( bool* toptr, int64_t tooffset, const int8_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill_tobool<int8_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_tobool_fromint16( bool* toptr, int64_t tooffset, const int16_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill_tobool<int16_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_tobool_fromint32( bool* toptr, int64_t tooffset, const int32_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill_tobool<int32_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_tobool_fromint64( bool* toptr, int64_t tooffset, const int64_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill_tobool<int64_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_tobool_fromuint8( bool* toptr, int64_t tooffset, const uint8_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill_tobool<uint8_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_tobool_fromuint16( bool* toptr, int64_t tooffset, const uint16_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill_tobool<uint16_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_tobool_fromuint32( bool* toptr, int64_t tooffset, const uint32_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill_tobool<uint32_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_tobool_fromuint64( bool* toptr, int64_t tooffset, const uint64_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill_tobool<uint64_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_tobool_fromfloat32( bool* toptr, int64_t tooffset, const float* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill_tobool<float>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_tobool_fromfloat64( bool* toptr, int64_t tooffset, const double* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill_tobool<double>( toptr, tooffset, fromptr, fromoffset, length); }
 
 template <typename FROM, typename TO>
 ERROR awkward_NumpyArray_fill(
@@ -1203,192 +1224,115 @@ ERROR awkward_NumpyArray_fill(
   }
   return success();
 }
+ERROR awkward_NumpyArray_fill_toint8_fromint8( int8_t* toptr, int64_t tooffset, const int8_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<int8_t, int8_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_toint16_fromint8( int16_t* toptr, int64_t tooffset, const int8_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<int8_t, int16_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_toint32_fromint8( int32_t* toptr, int64_t tooffset, const int8_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<int8_t, int32_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_toint64_fromint8( int64_t* toptr, int64_t tooffset, const int8_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<int8_t, int64_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint8_fromint8( uint8_t* toptr, int64_t tooffset, const int8_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<int8_t, uint8_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint16_fromint8( uint16_t* toptr, int64_t tooffset, const int8_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<int8_t, uint16_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint32_fromint8( uint32_t* toptr, int64_t tooffset, const int8_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<int8_t, uint32_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint64_fromint8( uint64_t* toptr, int64_t tooffset, const int8_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<int8_t, uint64_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_tofloat32_fromint8( float* toptr, int64_t tooffset, const int8_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<int8_t, float>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_tofloat64_fromint8( double* toptr, int64_t tooffset, const int8_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<int8_t, double>( toptr, tooffset, fromptr, fromoffset, length); }
 
-#define AWKWARD_NUMPY_ARRAY_FILL_FUNC(from_type_name, to_type_name) \
-awkward_NumpyArray_fill_to ## to_type_name ## _from ## from_type_name
+ERROR awkward_NumpyArray_fill_toint8_fromint16( int8_t* toptr, int64_t tooffset, const int16_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<int16_t, int8_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_toint16_fromint16( int16_t* toptr, int64_t tooffset, const int16_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<int16_t, int16_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_toint32_fromint16( int32_t* toptr, int64_t tooffset, const int16_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<int16_t, int32_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_toint64_fromint16( int64_t* toptr, int64_t tooffset, const int16_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<int16_t, int64_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint8_fromint16( uint8_t* toptr, int64_t tooffset, const int16_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<int16_t, uint8_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint16_fromint16( uint16_t* toptr, int64_t tooffset, const int16_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<int16_t, uint16_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint32_fromint16( uint32_t* toptr, int64_t tooffset, const int16_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<int16_t, uint32_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint64_fromint16( uint64_t* toptr, int64_t tooffset, const int16_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<int16_t, uint64_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_tofloat32_fromint16( float* toptr, int64_t tooffset, const int16_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<int16_t, float>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_tofloat64_fromint16( double* toptr, int64_t tooffset, const int16_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<int16_t, double>( toptr, tooffset, fromptr, fromoffset, length); }
 
-#define AWKWARD_NUMPY_ARRAY_FILL(func, from_type, to_type) \
-ERROR func(                                                \
-  to_type* toptr,                                          \
-  int64_t tooffset,                                        \
-  const from_type* fromptr,                                \
-  int64_t fromoffset,                                      \
-  int64_t length) {                                        \
-  return awkward_NumpyArray_fill<from_type, to_type>(      \
-    toptr,                                                 \
-    tooffset,                                              \
-    fromptr,                                               \
-    fromoffset,                                            \
-    length);                                               \
-}
+ERROR awkward_NumpyArray_fill_toint8_fromint32( int8_t* toptr, int64_t tooffset, const int32_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<int32_t, int8_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_toint16_fromint32( int16_t* toptr, int64_t tooffset, const int32_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<int32_t, int16_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_toint32_fromint32( int32_t* toptr, int64_t tooffset, const int32_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<int32_t, int32_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_toint64_fromint32( int64_t* toptr, int64_t tooffset, const int32_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<int32_t, int64_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint8_fromint32( uint8_t* toptr, int64_t tooffset, const int32_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<int32_t, uint8_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint16_fromint32( uint16_t* toptr, int64_t tooffset, const int32_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<int32_t, uint16_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint32_fromint32( uint32_t* toptr, int64_t tooffset, const int32_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<int32_t, uint32_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint64_fromint32( uint64_t* toptr, int64_t tooffset, const int32_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<int32_t, uint64_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_tofloat32_fromint32( float* toptr, int64_t tooffset, const int32_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<int32_t, float>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_tofloat64_fromint32( double* toptr, int64_t tooffset, const int32_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<int32_t, double>( toptr, tooffset, fromptr, fromoffset, length); }
 
-#define AWKWARD_NUMPY_ARRAY_FILL_FROMBOOL(func, to_type)   \
-ERROR func(                                                \
-  to_type* toptr,                                          \
-  int64_t tooffset,                                        \
-  const bool* fromptr,                                     \
-  int64_t fromoffset,                                      \
-  int64_t length) {                                        \
-  return awkward_NumpyArray_fill_frombool<to_type>(        \
-    toptr,                                                 \
-    tooffset,                                              \
-    fromptr,                                               \
-    fromoffset,                                            \
-    length);                                               \
-}
+ERROR awkward_NumpyArray_fill_toint8_fromint64( int8_t* toptr, int64_t tooffset, const int64_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<int64_t, int8_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_toint16_fromint64( int16_t* toptr, int64_t tooffset, const int64_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<int64_t, int16_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_toint32_fromint64( int32_t* toptr, int64_t tooffset, const int64_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<int64_t, int32_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_toint64_fromint64( int64_t* toptr, int64_t tooffset, const int64_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<int64_t, int64_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint8_fromint64( uint8_t* toptr, int64_t tooffset, const int64_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<int64_t, uint8_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint16_fromint64( uint16_t* toptr, int64_t tooffset, const int64_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<int64_t, uint16_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint32_fromint64( uint32_t* toptr, int64_t tooffset, const int64_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<int64_t, uint32_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint64_fromint64( uint64_t* toptr, int64_t tooffset, const int64_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<int64_t, uint64_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_tofloat32_fromint64( float* toptr, int64_t tooffset, const int64_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<int64_t, float>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_tofloat64_fromint64( double* toptr, int64_t tooffset, const int64_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<int64_t, double>( toptr, tooffset, fromptr, fromoffset, length); }
 
-#define AWKWARD_NUMPY_ARRAY_FILL_TOBOOL(func, from_type)   \
-ERROR func(                                                \
-  bool* toptr,                                             \
-  int64_t tooffset,                                        \
-  const from_type* fromptr,                                \
-  int64_t fromoffset,                                      \
-  int64_t length) {                                        \
-  return awkward_NumpyArray_fill_tobool<from_type>(        \
-    toptr,                                                 \
-    tooffset,                                              \
-    fromptr,                                               \
-    fromoffset,                                            \
-    length);                                               \
-}
+ERROR awkward_NumpyArray_fill_toint8_fromuint8( int8_t* toptr, int64_t tooffset, const uint8_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<uint8_t, int8_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_toint16_fromuint8( int16_t* toptr, int64_t tooffset, const uint8_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<uint8_t, int16_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_toint32_fromuint8( int32_t* toptr, int64_t tooffset, const uint8_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<uint8_t, int32_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_toint64_fromuint8( int64_t* toptr, int64_t tooffset, const uint8_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<uint8_t, int64_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint8_fromuint8( uint8_t* toptr, int64_t tooffset, const uint8_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<uint8_t, uint8_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint16_fromuint8( uint16_t* toptr, int64_t tooffset, const uint8_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<uint8_t, uint16_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint32_fromuint8( uint32_t* toptr, int64_t tooffset, const uint8_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<uint8_t, uint32_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint64_fromuint8( uint64_t* toptr, int64_t tooffset, const uint8_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<uint8_t, uint64_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_tofloat32_fromuint8( float* toptr, int64_t tooffset, const uint8_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<uint8_t, float>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_tofloat64_fromuint8( double* toptr, int64_t tooffset, const uint8_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<uint8_t, double>( toptr, tooffset, fromptr, fromoffset, length); }
 
-AWKWARD_NUMPY_ARRAY_FILL_FROMBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(bool, bool), bool)
-AWKWARD_NUMPY_ARRAY_FILL_FROMBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(bool, int8), int8_t)
-AWKWARD_NUMPY_ARRAY_FILL_FROMBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(bool, int16), int16_t)
-AWKWARD_NUMPY_ARRAY_FILL_FROMBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(bool, int32), int32_t)
-AWKWARD_NUMPY_ARRAY_FILL_FROMBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(bool, int64), int64_t)
-AWKWARD_NUMPY_ARRAY_FILL_FROMBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(bool, uint8), uint8_t)
-AWKWARD_NUMPY_ARRAY_FILL_FROMBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(bool, uint16), uint16_t)
-AWKWARD_NUMPY_ARRAY_FILL_FROMBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(bool, uint32), uint32_t)
-AWKWARD_NUMPY_ARRAY_FILL_FROMBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(bool, uint64), uint64_t)
-AWKWARD_NUMPY_ARRAY_FILL_FROMBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(bool, float32), float)
-AWKWARD_NUMPY_ARRAY_FILL_FROMBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(bool, float64), double)
+ERROR awkward_NumpyArray_fill_toint8_fromuint16( int8_t* toptr, int64_t tooffset, const uint16_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<uint16_t, int8_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_toint16_fromuint16( int16_t* toptr, int64_t tooffset, const uint16_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<uint16_t, int16_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_toint32_fromuint16( int32_t* toptr, int64_t tooffset, const uint16_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<uint16_t, int32_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_toint64_fromuint16( int64_t* toptr, int64_t tooffset, const uint16_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<uint16_t, int64_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint8_fromuint16( uint8_t* toptr, int64_t tooffset, const uint16_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<uint16_t, uint8_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint16_fromuint16( uint16_t* toptr, int64_t tooffset, const uint16_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<uint16_t, uint16_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint32_fromuint16( uint32_t* toptr, int64_t tooffset, const uint16_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<uint16_t, uint32_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint64_fromuint16( uint64_t* toptr, int64_t tooffset, const uint16_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<uint16_t, uint64_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_tofloat32_fromuint16( float* toptr, int64_t tooffset, const uint16_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<uint16_t, float>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_tofloat64_fromuint16( double* toptr, int64_t tooffset, const uint16_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<uint16_t, double>( toptr, tooffset, fromptr, fromoffset, length); }
 
-AWKWARD_NUMPY_ARRAY_FILL_TOBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int8, bool), int8_t)
-AWKWARD_NUMPY_ARRAY_FILL_TOBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int16, bool), int16_t)
-AWKWARD_NUMPY_ARRAY_FILL_TOBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int32, bool), int32_t)
-AWKWARD_NUMPY_ARRAY_FILL_TOBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int64, bool), int64_t)
-AWKWARD_NUMPY_ARRAY_FILL_TOBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint8, bool), uint8_t)
-AWKWARD_NUMPY_ARRAY_FILL_TOBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint16, bool), uint16_t)
-AWKWARD_NUMPY_ARRAY_FILL_TOBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint32, bool), uint32_t)
-AWKWARD_NUMPY_ARRAY_FILL_TOBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint64, bool), uint64_t)
-AWKWARD_NUMPY_ARRAY_FILL_TOBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(float32, bool), float)
-AWKWARD_NUMPY_ARRAY_FILL_TOBOOL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(float64, bool), double)
+ERROR awkward_NumpyArray_fill_toint8_fromuint32( int8_t* toptr, int64_t tooffset, const uint32_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<uint32_t, int8_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_toint16_fromuint32( int16_t* toptr, int64_t tooffset, const uint32_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<uint32_t, int16_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_toint32_fromuint32( int32_t* toptr, int64_t tooffset, const uint32_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<uint32_t, int32_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_toint64_fromuint32( int64_t* toptr, int64_t tooffset, const uint32_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<uint32_t, int64_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint8_fromuint32( uint8_t* toptr, int64_t tooffset, const uint32_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<uint32_t, uint8_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint16_fromuint32( uint16_t* toptr, int64_t tooffset, const uint32_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<uint32_t, uint16_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint32_fromuint32( uint32_t* toptr, int64_t tooffset, const uint32_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<uint32_t, uint32_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint64_fromuint32( uint64_t* toptr, int64_t tooffset, const uint32_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<uint32_t, uint64_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_tofloat32_fromuint32( float* toptr, int64_t tooffset, const uint32_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<uint32_t, float>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_tofloat64_fromuint32( double* toptr, int64_t tooffset, const uint32_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<uint32_t, double>( toptr, tooffset, fromptr, fromoffset, length); }
 
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int8, int8), int8_t, int8_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int8, int16), int8_t, int16_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int8, int32), int8_t, int32_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int8, int64), int8_t, int64_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int8, uint8), int8_t, uint8_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int8, uint16), int8_t, uint16_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int8, uint32), int8_t, uint32_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int8, uint64), int8_t, uint64_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int8, float32), int8_t, float)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int8, float64), int8_t, double)
+ERROR awkward_NumpyArray_fill_toint8_fromuint64( int8_t* toptr, int64_t tooffset, const uint64_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<uint64_t, int8_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_toint16_fromuint64( int16_t* toptr, int64_t tooffset, const uint64_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<uint64_t, int16_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_toint32_fromuint64( int32_t* toptr, int64_t tooffset, const uint64_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<uint64_t, int32_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_toint64_fromuint64( int64_t* toptr, int64_t tooffset, const uint64_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<uint64_t, int64_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint8_fromuint64( uint8_t* toptr, int64_t tooffset, const uint64_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<uint64_t, uint8_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint16_fromuint64( uint16_t* toptr, int64_t tooffset, const uint64_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<uint64_t, uint16_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint32_fromuint64( uint32_t* toptr, int64_t tooffset, const uint64_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<uint64_t, uint32_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint64_fromuint64( uint64_t* toptr, int64_t tooffset, const uint64_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<uint64_t, uint64_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_tofloat32_fromuint64( float* toptr, int64_t tooffset, const uint64_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<uint64_t, float>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_tofloat64_fromuint64( double* toptr, int64_t tooffset, const uint64_t* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<uint64_t, double>( toptr, tooffset, fromptr, fromoffset, length); }
 
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int16, int8), int16_t, int8_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int16, int16), int16_t, int16_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int16, int32), int16_t, int32_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int16, int64), int16_t, int64_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int16, uint8), int16_t, uint8_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int16, uint16), int16_t, uint16_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int16, uint32), int16_t, uint32_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int16, uint64), int16_t, uint64_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int16, float32), int16_t, float)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int16, float64), int16_t, double)
+ERROR awkward_NumpyArray_fill_toint8_fromfloat32( int8_t* toptr, int64_t tooffset, const float* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<float, int8_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_toint16_fromfloat32( int16_t* toptr, int64_t tooffset, const float* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<float, int16_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_toint32_fromfloat32( int32_t* toptr, int64_t tooffset, const float* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<float, int32_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_toint64_fromfloat32( int64_t* toptr, int64_t tooffset, const float* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<float, int64_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint8_fromfloat32( uint8_t* toptr, int64_t tooffset, const float* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<float, uint8_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint16_fromfloat32( uint16_t* toptr, int64_t tooffset, const float* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<float, uint16_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint32_fromfloat32( uint32_t* toptr, int64_t tooffset, const float* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<float, uint32_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint64_fromfloat32( uint64_t* toptr, int64_t tooffset, const float* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<float, uint64_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_tofloat32_fromfloat32( float* toptr, int64_t tooffset, const float* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<float, float>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_tofloat64_fromfloat32( double* toptr, int64_t tooffset, const float* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<float, double>( toptr, tooffset, fromptr, fromoffset, length); }
 
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int32, int8), int32_t, int8_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int32, int16), int32_t, int16_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int32, int32), int32_t, int32_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int32, int64), int32_t, int64_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int32, uint8), int32_t, uint8_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int32, uint16), int32_t, uint16_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int32, uint32), int32_t, uint32_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int32, uint64), int32_t, uint64_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int32, float32), int32_t, float)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int32, float64), int32_t, double)
-
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int64, int8), int64_t, int8_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int64, int16), int64_t, int16_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int64, int32), int64_t, int32_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int64, int64), int64_t, int64_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int64, uint8), int64_t, uint8_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int64, uint16), int64_t, uint16_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int64, uint32), int64_t, uint32_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int64, uint64), int64_t, uint64_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int64, float32), int64_t, float)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(int64, float64), int64_t, double)
-
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint8, int8), uint8_t, int8_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint8, int16), uint8_t, int16_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint8, int32), uint8_t, int32_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint8, int64), uint8_t, int64_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint8, uint8), uint8_t, uint8_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint8, uint16), uint8_t, uint16_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint8, uint32), uint8_t, uint32_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint8, uint64), uint8_t, uint64_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint8, float32), uint8_t, float)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint8, float64), uint8_t, double)
-
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint16, int8), uint16_t, int8_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint16, int16), uint16_t, int16_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint16, int32), uint16_t, int32_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint16, int64), uint16_t, int64_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint16, uint8), uint16_t, uint8_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint16, uint16), uint16_t, uint16_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint16, uint32), uint16_t, uint32_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint16, uint64), uint16_t, uint64_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint16, float32), uint16_t, float)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint16, float64), uint16_t, double)
-
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint32, int8), uint32_t, int8_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint32, int16), uint32_t, int16_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint32, int32), uint32_t, int32_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint32, int64), uint32_t, int64_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint32, uint8), uint32_t, uint8_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint32, uint16), uint32_t, uint16_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint32, uint32), uint32_t, uint32_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint32, uint64), uint32_t, uint64_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint32, float32), uint32_t, float)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint32, float64), uint32_t, double)
-
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint64, int8), uint64_t, int8_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint64, int16), uint64_t, int16_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint64, int32), uint64_t, int32_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint64, int64), uint64_t, int64_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint64, uint8), uint64_t, uint8_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint64, uint16), uint64_t, uint16_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint64, uint32), uint64_t, uint32_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint64, uint64), uint64_t, uint64_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint64, float32), uint64_t, float)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(uint64, float64), uint64_t, double)
-
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(float32, int8), float, int8_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(float32, int16), float, int16_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(float32, int32), float, int32_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(float32, int64), float, int64_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(float32, uint8), float, uint8_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(float32, uint16), float, uint16_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(float32, uint32), float, uint32_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(float32, uint64), float, uint64_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(float32, float32), float, float)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(float32, float64), float, double)
-
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(float64, int8), double, int8_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(float64, int16), double, int16_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(float64, int32), double, int32_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(float64, int64), double, int64_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(float64, uint8), double, uint8_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(float64, uint16), double, uint16_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(float64, uint32), double, uint32_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(float64, uint64), double, uint64_t)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(float64, float32), double, float)
-AWKWARD_NUMPY_ARRAY_FILL(AWKWARD_NUMPY_ARRAY_FILL_FUNC(float64, float64), double, double)
-
-#undef AWKWARD_NUMPY_ARRAY_FILL_FUNC
-#undef AWKWARD_NUMPY_ARRAY_FILL
-#undef AWKWARD_NUMPY_ARRAY_FILL_FROMBOOL
-#undef AWKWARD_NUMPY_ARRAY_FILL_TOBOOL
+ERROR awkward_NumpyArray_fill_toint8_fromfloat64( int8_t* toptr, int64_t tooffset, const double* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<double, int8_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_toint16_fromfloat64( int16_t* toptr, int64_t tooffset, const double* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<double, int16_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_toint32_fromfloat64( int32_t* toptr, int64_t tooffset, const double* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<double, int32_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_toint64_fromfloat64( int64_t* toptr, int64_t tooffset, const double* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<double, int64_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint8_fromfloat64( uint8_t* toptr, int64_t tooffset, const double* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<double, uint8_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint16_fromfloat64( uint16_t* toptr, int64_t tooffset, const double* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<double, uint16_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint32_fromfloat64( uint32_t* toptr, int64_t tooffset, const double* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<double, uint32_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_touint64_fromfloat64( uint64_t* toptr, int64_t tooffset, const double* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<double, uint64_t>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_tofloat32_fromfloat64( float* toptr, int64_t tooffset, const double* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<double, float>( toptr, tooffset, fromptr, fromoffset, length); }
+ERROR awkward_NumpyArray_fill_tofloat64_fromfloat64( double* toptr, int64_t tooffset, const double* fromptr, int64_t fromoffset, int64_t length) { return awkward_NumpyArray_fill<double, double>( toptr, tooffset, fromptr, fromoffset, length); }
 
 template <typename FROM, typename TO>
 ERROR awkward_ListArray_fill(
