@@ -403,18 +403,6 @@ namespace awkward {
     return false;  // false for isscalar(), too
   }
 
-  void*
-  NumpyArray::byteptr() const {
-    return reinterpret_cast<void*>(
-      reinterpret_cast<ssize_t>(ptr_.get()) + byteoffset_);
-  }
-
-  void*
-  NumpyArray::byteptr(ssize_t at) const {
-    return reinterpret_cast<void*>(
-      reinterpret_cast<ssize_t>(ptr_.get()) + byteoffset_ + at);
-  }
-
   ssize_t
   NumpyArray::bytelength() const {
     if (isscalar()) {
@@ -427,57 +415,7 @@ namespace awkward {
 
   uint8_t
   NumpyArray::getbyte(ssize_t at) const {
-    return *reinterpret_cast<uint8_t*>(byteptr(at));
-  }
-
-  int8_t
-  NumpyArray::getint8(ssize_t at) const  {
-    return *reinterpret_cast<int8_t*>(byteptr(at));
-  }
-
-  uint8_t
-  NumpyArray::getuint8(ssize_t at) const {
-    return *reinterpret_cast<uint8_t*>(byteptr(at));
-  }
-
-  int16_t
-  NumpyArray::getint16(ssize_t at) const {
-    return *reinterpret_cast<int16_t*>(byteptr(at));
-  }
-
-  uint16_t
-  NumpyArray::getuint16(ssize_t at) const {
-    return *reinterpret_cast<uint16_t*>(byteptr(at));
-  }
-
-  int32_t
-  NumpyArray::getint32(ssize_t at) const {
-    return *reinterpret_cast<int32_t*>(byteptr(at));
-  }
-
-  uint32_t
-  NumpyArray::getuint32(ssize_t at) const {
-    return *reinterpret_cast<uint32_t*>(byteptr(at));
-  }
-
-  int64_t
-  NumpyArray::getint64(ssize_t at) const {
-    return *reinterpret_cast<int64_t*>(byteptr(at));
-  }
-
-  uint64_t
-  NumpyArray::getuint64(ssize_t at) const {
-    return *reinterpret_cast<uint64_t*>(byteptr(at));
-  }
-
-  float_t
-  NumpyArray::getfloat(ssize_t at) const {
-    return *reinterpret_cast<float*>(byteptr(at));
-  }
-
-  double_t
-  NumpyArray::getdouble(ssize_t at) const {
-    return *reinterpret_cast<double*>(byteptr(at));
+    return *(reinterpret_cast<uint8_t*>(ptr_.get()) + byteoffset_ + at*strides_[0]);
   }
 
   const ContentPtr
@@ -568,7 +506,6 @@ namespace awkward {
   void tostring_as(kernel::Lib ptr_lib,
                    std::stringstream& out,
                    T* ptr,
-                   ssize_t byteoffset,
                    ssize_t stride,
                    int64_t length) {
     if (length <= 10) {
@@ -690,88 +627,77 @@ namespace awkward {
     if (ndim() == 1  &&  dtype_ == util::dtype::boolean) {
       tostring_as<bool>(ptr_lib(),
                         out,
-                        reinterpret_cast<bool*>(byteptr()),
-                        byteoffset_,
+                        reinterpret_cast<bool*>(data()),
                         strides_[0],
                         length());
     }
     else if (ndim() == 1  &&  dtype_ == util::dtype::int8) {
       tostring_as<int8_t>(ptr_lib(),
                           out,
-                          reinterpret_cast<int8_t*>(byteptr()),
-                          byteoffset_,
+                          reinterpret_cast<int8_t*>(data()),
                           strides_[0],
                           length());
     }
     else if (ndim() == 1  &&  dtype_ == util::dtype::int16) {
       tostring_as<int16_t>(ptr_lib(),
                            out,
-                           reinterpret_cast<int16_t*>(byteptr()),
-                           byteoffset_,
+                           reinterpret_cast<int16_t*>(data()),
                            strides_[0],
                            length());
     }
     else if (ndim() == 1  &&  dtype_ == util::dtype::int32) {
       tostring_as<int32_t>(ptr_lib(),
                            out,
-                           reinterpret_cast<int32_t*>(byteptr()),
-                           byteoffset_,
+                           reinterpret_cast<int32_t*>(data()),
                            strides_[0],
                            length());
     }
     else if (ndim() == 1  &&  dtype_ == util::dtype::int64) {
       tostring_as<int64_t>(ptr_lib(),
                            out,
-                           reinterpret_cast<int64_t*>(byteptr()),
-                           byteoffset_,
+                           reinterpret_cast<int64_t*>(data()),
                            strides_[0],
                            length());
     }
     else if (ndim() == 1  &&  dtype_ == util::dtype::uint8) {
       tostring_as<uint8_t>(ptr_lib(),
                            out,
-                           reinterpret_cast<uint8_t*>(byteptr()),
-                           byteoffset_,
+                           reinterpret_cast<uint8_t*>(data()),
                            strides_[0],
                            length());
     }
     else if (ndim() == 1  &&  dtype_ == util::dtype::uint16) {
       tostring_as<uint16_t>(ptr_lib(),
                             out,
-                            reinterpret_cast<uint16_t*>(byteptr()),
-                            byteoffset_,
+                            reinterpret_cast<uint16_t*>(data()),
                             strides_[0],
                             length());
     }
     else if (ndim() == 1  &&  dtype_ == util::dtype::uint32) {
       tostring_as<uint32_t>(ptr_lib(),
                             out,
-                            reinterpret_cast<uint32_t*>(byteptr()),
-                            byteoffset_,
+                            reinterpret_cast<uint32_t*>(data()),
                             strides_[0],
                             length());
     }
     else if (ndim() == 1  &&  dtype_ == util::dtype::uint64) {
       tostring_as<uint64_t>(ptr_lib(),
                             out,
-                            reinterpret_cast<uint64_t*>(byteptr()),
-                            byteoffset_,
+                            reinterpret_cast<uint64_t*>(data()),
                             strides_[0],
                             length());
     }
     else if (ndim() == 1  &&  dtype_ == util::dtype::float32) {
       tostring_as<float>(ptr_lib(),
                          out,
-                         reinterpret_cast<float*>(byteptr()),
-                         byteoffset_,
+                         reinterpret_cast<float*>(data()),
                          strides_[0],
                          length());
     }
     else if (ndim() == 1  &&  dtype_ == util::dtype::float64) {
       tostring_as<double>(ptr_lib(),
                           out,
-                          reinterpret_cast<double*>(byteptr()),
-                          byteoffset_,
+                          reinterpret_cast<double*>(data()),
                           strides_[0],
                           length());
     }
@@ -4609,11 +4535,11 @@ namespace awkward {
   NumpyArray::tojson_boolean(ToJson& builder,
                              bool include_beginendlist) const {
     if (ndim() == 0) {
-      bool* array = reinterpret_cast<bool*>(byteptr());
+      bool* array = reinterpret_cast<bool*>(data());
       builder.boolean(array[0]);
     }
     else if (ndim() == 1) {
-      bool* array = reinterpret_cast<bool*>(byteptr());
+      bool* array = reinterpret_cast<bool*>(data());
       int64_t stride = (int64_t)(strides_[0]);
       if (include_beginendlist) {
         builder.beginlist();
@@ -4651,11 +4577,11 @@ namespace awkward {
   NumpyArray::tojson_integer(ToJson& builder,
                              bool include_beginendlist) const {
     if (ndim() == 0) {
-      T* array = reinterpret_cast<T*>(byteptr());
+      T* array = reinterpret_cast<T*>(data());
       builder.integer((int64_t)array[0]);
     }
     else if (ndim() == 1) {
-      T* array = reinterpret_cast<T*>(byteptr());
+      T* array = reinterpret_cast<T*>(data());
       int64_t stride = strides_[0] / (int64_t)(sizeof(T));
       if (include_beginendlist) {
         builder.beginlist();
@@ -4693,11 +4619,11 @@ namespace awkward {
   NumpyArray::tojson_real(ToJson& builder,
                           bool include_beginendlist) const {
     if (ndim() == 0) {
-      T* array = reinterpret_cast<T*>(byteptr());
+      T* array = reinterpret_cast<T*>(data());
       builder.real(array[0]);
     }
     else if (ndim() == 1) {
-      T* array = reinterpret_cast<T*>(byteptr());
+      T* array = reinterpret_cast<T*>(data());
       int64_t stride = strides_[0] / (int64_t)(sizeof(T));
       if (include_beginendlist) {
         builder.beginlist();
@@ -4734,11 +4660,11 @@ namespace awkward {
   NumpyArray::tojson_string(ToJson& builder,
                             bool include_beginendlist) const {
     if (ndim() == 0) {
-      char* array = reinterpret_cast<char*>(byteptr());
+      char* array = reinterpret_cast<char*>(data());
       builder.string(array, 1);
     }
     else if (ndim() == 1) {
-      char* array = reinterpret_cast<char*>(byteptr());
+      char* array = reinterpret_cast<char*>(data());
       builder.string(array, length());
     }
     else {

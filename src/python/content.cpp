@@ -27,7 +27,7 @@ box(const std::shared_ptr<ak::Content>& content) {
            dynamic_cast<ak::NumpyArray*>(content.get())) {
     if (raw->isscalar()) {
       return py::array(py::buffer_info(
-        raw->byteptr(),
+        raw->data(),
         raw->itemsize(),
         raw->format(),
         raw->ndim(),
@@ -1653,7 +1653,7 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
                          ak::Content>(m, name.c_str(), py::buffer_protocol())
       .def_buffer([](const ak::NumpyArray& self) -> py::buffer_info {
         return py::buffer_info(
-          self.byteptr(),
+          self.data(),
           self.itemsize(),
           self.format(),
           self.ndim(),
