@@ -214,17 +214,17 @@ namespace awkward {
     int64_t numnull;
     struct Error err1 = kernel::ByteMaskedArray_numnull(
       &numnull,
-      mask_.ptr().get(),
-      mask_.offset(),
+      mask_.data(),
+      0,   // DROP
       length(),
       valid_when_);
     util::handle_error(err1, classname(), identities_.get());
 
     Index64 nextcarry(length() - numnull);
     struct Error err2 = kernel::ByteMaskedArray_getitem_nextcarry_64(
-      nextcarry.ptr().get(),
-      mask_.ptr().get(),
-      mask_.offset(),
+      nextcarry.data(),
+      mask_.data(),
+      0,   // DROP
       length(),
       valid_when_);
     util::handle_error(err2, classname(), identities_.get());
@@ -244,11 +244,11 @@ namespace awkward {
 
     Index8 nextmask(length());
     struct Error err = kernel::ByteMaskedArray_overlay_mask8(
-      nextmask.ptr().get(),
-      mask.ptr().get(),
-      mask.offset(),
-      mask_.ptr().get(),
-      mask_.offset(),
+      nextmask.data(),
+      mask.data(),
+      0,   // DROP
+      mask_.data(),
+      0,   // DROP
       length(),
       valid_when_);
     util::handle_error(err, classname(), identities_.get());
@@ -266,9 +266,9 @@ namespace awkward {
     else {
       Index8 out(length());
       struct Error err = kernel::ByteMaskedArray_mask8(
-        out.ptr().get(),
-        mask_.ptr().get(),
-        mask_.offset(),
+        out.data(),
+        mask_.data(),
+        0,   // DROP
         mask_.length(),
         valid_when_);
       util::handle_error(err, classname(), identities_.get());
@@ -300,9 +300,9 @@ namespace awkward {
   ByteMaskedArray::toIndexedOptionArray64() const {
     Index64 index(length());
     struct Error err = kernel::ByteMaskedArray_toIndexedOptionArray64(
-      index.ptr().get(),
-      mask_.ptr().get(),
-      mask_.offset(),
+      index.data(),
+      mask_.data(),
+      0,   // DROP
       mask_.length(),
       valid_when_);
     util::handle_error(err, classname(), identities_.get());
@@ -341,9 +341,9 @@ namespace awkward {
         Identities32* rawsubidentities =
           reinterpret_cast<Identities32*>(subidentities.get());
         struct Error err = kernel::Identities_extend<int32_t>(
-          rawsubidentities->ptr().get(),
-          rawidentities->ptr().get(),
-          rawidentities->offset(),
+          rawsubidentities->data(),
+          rawidentities->data(),
+          0,   // DROP
           rawidentities->length(),
           content_.get()->length());
         util::handle_error(err, classname(), identities_.get());
@@ -359,9 +359,9 @@ namespace awkward {
         Identities64* rawsubidentities =
           reinterpret_cast<Identities64*>(subidentities.get());
         struct Error err = kernel::Identities_extend<int64_t>(
-          rawsubidentities->ptr().get(),
-          rawidentities->ptr().get(),
-          rawidentities->offset(),
+          rawsubidentities->data(),
+          rawidentities->data(),
+          0,   // DROP
           rawidentities->length(),
           content_.get()->length());
         util::handle_error(err, classname(), identities_.get());
@@ -384,7 +384,7 @@ namespace awkward {
                                        length());
       Identities32* rawidentities =
         reinterpret_cast<Identities32*>(newidentities.get());
-      struct Error err = kernel::new_Identities<int32_t>(rawidentities->ptr().get(),
+      struct Error err = kernel::new_Identities<int32_t>(rawidentities->data(),
                                                          length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
@@ -398,7 +398,7 @@ namespace awkward {
       Identities64* rawidentities =
         reinterpret_cast<Identities64*>(newidentities.get());
       struct Error err =
-        kernel::new_Identities<int64_t>(rawidentities->ptr().get(), length());
+        kernel::new_Identities<int64_t>(rawidentities->data(), length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
     }
@@ -652,11 +652,11 @@ namespace awkward {
   ByteMaskedArray::carry(const Index64& carry, bool allow_lazy) const {
     Index8 nextmask(carry.length());
     struct Error err = kernel::ByteMaskedArray_getitem_carry_64(
-      nextmask.ptr().get(),
-      mask_.ptr().get(),
-      mask_.offset(),
+      nextmask.data(),
+      mask_.data(),
+      0,   // DROP
       mask_.length(),
-      carry.ptr().get(),
+      carry.data(),
       carry.length());
     util::handle_error(err, classname(), identities_.get());
     IdentitiesPtr identities(nullptr);
@@ -761,12 +761,12 @@ namespace awkward {
         Index64 outoffsets(offsets.length() + numnull);
         struct Error err =
           kernel::IndexedArray_flatten_none2empty_64<int64_t>(
-          outoffsets.ptr().get(),
-          outindex.ptr().get(),
-          outindex.offset(),
+          outoffsets.data(),
+          outindex.data(),
+          0,   // DROP
           outindex.length(),
-          offsets.ptr().get(),
-          offsets.offset(),
+          offsets.data(),
+          0,   // DROP
           offsets.length());
         util::handle_error(err, classname(), identities_.get());
         return std::pair<Index64, ContentPtr>(outoffsets, flattened);
@@ -862,8 +862,8 @@ namespace awkward {
       Index64 index(mask.length());
       struct Error err =
         kernel::IndexedOptionArray_rpad_and_clip_mask_axis1_64(
-        index.ptr().get(),
-        mask.ptr().get(),
+        index.data(),
+        mask.data(),
         mask.length());
       util::handle_error(err, classname(), identities_.get());
 
@@ -897,8 +897,8 @@ namespace awkward {
       Index64 index(mask.length());
       struct Error err =
         kernel::IndexedOptionArray_rpad_and_clip_mask_axis1_64(
-        index.ptr().get(),
-        mask.ptr().get(),
+        index.data(),
+        mask.data(),
         mask.length());
       util::handle_error(err, classname(), identities_.get());
 
@@ -930,8 +930,8 @@ namespace awkward {
     int64_t numnull;
     struct Error err1 = kernel::ByteMaskedArray_numnull(
       &numnull,
-      mask_.ptr().get(),
-      mask_.offset(),
+      mask_.data(),
+      0,   // DROP
       length(),
       valid_when_);
     util::handle_error(err1, classname(), identities_.get());
@@ -940,13 +940,13 @@ namespace awkward {
     Index64 nextcarry(length() - numnull);
     Index64 outindex(length());
     struct Error err2 = kernel::ByteMaskedArray_reduce_next_64(
-      nextcarry.ptr().get(),
-      nextparents.ptr().get(),
-      outindex.ptr().get(),
-      mask_.ptr().get(),
-      mask_.offset(),
-      parents.ptr().get(),
-      parents.offset(),
+      nextcarry.data(),
+      nextparents.data(),
+      outindex.data(),
+      mask_.data(),
+      0,   // DROP
+      parents.data(),
+      0,   // DROP
       length(),
       valid_when_);
     util::handle_error(err2, classname(), identities_.get());
@@ -978,9 +978,9 @@ namespace awkward {
             "a ListOffsetArray64 whose offsets start at zero");
         }
         struct Error err3 = kernel::IndexedArray_reduce_next_fix_offsets_64(
-          outoffsets.ptr().get(),
-          starts.ptr().get(),
-          starts.offset(),
+          outoffsets.data(),
+          starts.data(),
+          0,   // DROP
           starts.length(),
           outindex.length());
         util::handle_error(err3, classname(), identities_.get());
@@ -1072,8 +1072,8 @@ namespace awkward {
     int64_t numnull;
     struct Error err1 = kernel::ByteMaskedArray_numnull(
       &numnull,
-      mask_.ptr().get(),
-      mask_.offset(),
+      mask_.data(),
+      0,   // DROP
       length(),
       valid_when_);
     util::handle_error(err1, classname(), identities_.get());
@@ -1082,13 +1082,13 @@ namespace awkward {
     Index64 nextcarry(length() - numnull);
     Index64 outindex(length());
     struct Error err2 = kernel::ByteMaskedArray_reduce_next_64(
-      nextcarry.ptr().get(),
-      nextparents.ptr().get(),
-      outindex.ptr().get(),
-      mask_.ptr().get(),
-      mask_.offset(),
-      parents.ptr().get(),
-      parents.offset(),
+      nextcarry.data(),
+      nextparents.data(),
+      outindex.data(),
+      mask_.data(),
+      0,   // DROP
+      parents.data(),
+      0,   // DROP
       length(),
       valid_when_);
     util::handle_error(err2, classname(), identities_.get());
@@ -1120,9 +1120,9 @@ namespace awkward {
             "a ListOffsetArray64 whose offsets start at zero");
         }
         struct Error err3 = kernel::IndexedArray_reduce_next_fix_offsets_64(
-          outoffsets.ptr().get(),
-          starts.ptr().get(),
-          starts.offset(),
+          outoffsets.data(),
+          starts.data(),
+          0,   // DROP
           starts.length(),
           outindex.length());
         util::handle_error(err3, classname(), identities_.get());
@@ -1157,8 +1157,8 @@ namespace awkward {
     int64_t numnull;
     struct Error err1 = kernel::ByteMaskedArray_numnull(
       &numnull,
-      mask_.ptr().get(),
-      mask_.offset(),
+      mask_.data(),
+      0,   // DROP
       length(),
       valid_when_);
     util::handle_error(err1, classname(), identities_.get());
@@ -1167,13 +1167,13 @@ namespace awkward {
     Index64 nextcarry(length() - numnull);
     Index64 outindex(length());
     struct Error err2 = kernel::ByteMaskedArray_reduce_next_64(
-      nextcarry.ptr().get(),
-      nextparents.ptr().get(),
-      outindex.ptr().get(),
-      mask_.ptr().get(),
-      mask_.offset(),
-      parents.ptr().get(),
-      parents.offset(),
+      nextcarry.data(),
+      nextparents.data(),
+      outindex.data(),
+      mask_.data(),
+      0,   // DROP
+      parents.data(),
+      0,   // DROP
       length(),
       valid_when_);
     util::handle_error(err2, classname(), identities_.get());
@@ -1205,9 +1205,9 @@ namespace awkward {
             "a ListOffsetArray64 whose offsets start at zero");
         }
         struct Error err3 = kernel::IndexedArray_reduce_next_fix_offsets_64(
-          outoffsets.ptr().get(),
-          starts.ptr().get(),
-          starts.offset(),
+          outoffsets.data(),
+          starts.data(),
+          0,   // DROP
           starts.length(),
           outindex.length());
         util::handle_error(err3, classname(), identities_.get());
@@ -1319,9 +1319,15 @@ namespace awkward {
     Index64 reducedstarts(length() - numnull);
     Index64 reducedstops(length() - numnull);
     struct Error err = kernel::MaskedArray_getitem_next_jagged_project<int64_t>(
-        outindex.ptr().get(), outindex.offset(), slicestarts.ptr().get(),
-        slicestarts.offset(), slicestops.ptr().get(), slicestops.offset(),
-        reducedstarts.ptr().get(), reducedstops.ptr().get(), length());
+        outindex.data(),
+        0,   // DROP
+        slicestarts.data(),
+        0,   // DROP
+        slicestops.data(),
+        0,   // DROP
+        reducedstarts.data(),
+        reducedstops.data(),
+        length());
     util::handle_error(err, classname(), identities_.get());
 
     ContentPtr next = content_.get()->carry(nextcarry, true);
@@ -1335,8 +1341,8 @@ namespace awkward {
   ByteMaskedArray::nextcarry_outindex(int64_t& numnull) const {
     struct Error err1 = kernel::ByteMaskedArray_numnull(
       &numnull,
-      mask_.ptr().get(),
-      mask_.offset(),
+      mask_.data(),
+      0,   // DROP
       mask_.length(),
       valid_when_);
     util::handle_error(err1, classname(), identities_.get());
@@ -1344,10 +1350,10 @@ namespace awkward {
     Index64 nextcarry(length() - numnull);
     Index64 outindex(length());
     struct Error err2 = kernel::ByteMaskedArray_getitem_nextcarry_outindex_64(
-      nextcarry.ptr().get(),
-      outindex.ptr().get(),
-      mask_.ptr().get(),
-      mask_.offset(),
+      nextcarry.data(),
+      outindex.data(),
+      mask_.data(),
+      0,   // DROP
       mask_.length(),
       valid_when_);
     util::handle_error(err2, classname(), identities_.get());
