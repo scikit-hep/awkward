@@ -41,8 +41,8 @@ namespace awkward {
 
     struct Error err = kernel::reduce_count_64(
       ptr.get(),
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -208,8 +208,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -229,8 +229,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -249,8 +249,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -269,8 +269,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -289,8 +289,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -309,8 +309,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -329,8 +329,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -349,8 +349,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -369,8 +369,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -389,8 +389,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -409,8 +409,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -467,8 +467,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
 #else
@@ -478,8 +478,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
 #endif
@@ -500,8 +500,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
 #else
@@ -511,8 +511,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
 #endif
@@ -533,8 +533,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
 #else
@@ -544,8 +544,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
 #endif
@@ -566,8 +566,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
 #else
@@ -577,8 +577,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
 #endif
@@ -599,8 +599,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
 #else
@@ -610,8 +610,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
 #endif
@@ -632,8 +632,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
 #else
@@ -643,8 +643,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
 #endif
@@ -665,8 +665,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
 #else
@@ -676,8 +676,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
 #endif
@@ -697,8 +697,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -717,8 +717,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -737,8 +737,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -757,8 +757,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -815,8 +815,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
 #else
@@ -826,8 +826,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
 #endif
@@ -848,8 +848,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
 #else
@@ -859,8 +859,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
 #endif
@@ -881,8 +881,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
 #else
@@ -892,8 +892,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
 #endif
@@ -914,8 +914,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
 #else
@@ -925,8 +925,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
 #endif
@@ -947,8 +947,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
 #else
@@ -958,8 +958,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
 #endif
@@ -980,8 +980,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
 #else
@@ -991,8 +991,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
 #endif
@@ -1013,8 +1013,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
 #else
@@ -1024,8 +1024,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
 #endif
@@ -1045,8 +1045,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -1065,8 +1065,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -1085,8 +1085,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -1105,8 +1105,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -1142,8 +1142,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -1162,8 +1162,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -1182,8 +1182,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -1202,8 +1202,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -1222,8 +1222,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -1242,8 +1242,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -1262,8 +1262,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -1282,8 +1282,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -1302,8 +1302,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -1322,8 +1322,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -1342,8 +1342,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -1379,8 +1379,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -1399,8 +1399,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -1419,8 +1419,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -1439,8 +1439,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -1459,8 +1459,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -1479,8 +1479,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -1499,8 +1499,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -1519,8 +1519,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -1539,8 +1539,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -1559,8 +1559,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -1579,8 +1579,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -1611,8 +1611,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -1631,8 +1631,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength,
       std::numeric_limits<int8_t>::max());
@@ -1652,8 +1652,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength,
       std::numeric_limits<uint8_t>::max());
@@ -1673,8 +1673,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength,
       std::numeric_limits<int16_t>::max());
@@ -1694,8 +1694,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength,
       std::numeric_limits<uint16_t>::max());
@@ -1715,8 +1715,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength,
       std::numeric_limits<int32_t>::max());
@@ -1736,8 +1736,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength,
       std::numeric_limits<uint32_t>::max());
@@ -1757,8 +1757,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength,
       std::numeric_limits<int64_t>::max());
@@ -1778,8 +1778,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength,
       std::numeric_limits<uint64_t>::max());
@@ -1799,8 +1799,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength,
       std::numeric_limits<float>::infinity());
@@ -1820,8 +1820,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength,
       std::numeric_limits<double>::infinity());
@@ -1853,8 +1853,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -1873,8 +1873,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength,
       std::numeric_limits<int8_t>::min());
@@ -1894,8 +1894,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength,
       std::numeric_limits<uint8_t>::min());
@@ -1915,8 +1915,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength,
       std::numeric_limits<int16_t>::min());
@@ -1936,8 +1936,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength,
       std::numeric_limits<uint16_t>::min());
@@ -1957,8 +1957,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength,
       std::numeric_limits<int32_t>::min());
@@ -1978,8 +1978,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength,
       std::numeric_limits<uint32_t>::min());
@@ -1999,8 +1999,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength,
       std::numeric_limits<int64_t>::min());
@@ -2020,8 +2020,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength,
       std::numeric_limits<uint64_t>::min());
@@ -2041,8 +2041,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength,
       -std::numeric_limits<float>::infinity());
@@ -2062,8 +2062,8 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      parents.ptr().get(),
-      parents.offset(),
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength,
       -std::numeric_limits<double>::infinity());
@@ -2100,10 +2100,10 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      starts.ptr().get(),
-      starts.offset(),
-      parents.ptr().get(),
-      parents.offset(),
+      starts.data(),
+      0,   // DROP
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -2122,10 +2122,10 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      starts.ptr().get(),
-      starts.offset(),
-      parents.ptr().get(),
-      parents.offset(),
+      starts.data(),
+      0,   // DROP
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -2144,10 +2144,10 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      starts.ptr().get(),
-      starts.offset(),
-      parents.ptr().get(),
-      parents.offset(),
+      starts.data(),
+      0,   // DROP
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -2166,10 +2166,10 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      starts.ptr().get(),
-      starts.offset(),
-      parents.ptr().get(),
-      parents.offset(),
+      starts.data(),
+      0,   // DROP
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -2188,10 +2188,10 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      starts.ptr().get(),
-      starts.offset(),
-      parents.ptr().get(),
-      parents.offset(),
+      starts.data(),
+      0,   // DROP
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -2210,10 +2210,10 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      starts.ptr().get(),
-      starts.offset(),
-      parents.ptr().get(),
-      parents.offset(),
+      starts.data(),
+      0,   // DROP
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -2232,10 +2232,10 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      starts.ptr().get(),
-      starts.offset(),
-      parents.ptr().get(),
-      parents.offset(),
+      starts.data(),
+      0,   // DROP
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -2254,10 +2254,10 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      starts.ptr().get(),
-      starts.offset(),
-      parents.ptr().get(),
-      parents.offset(),
+      starts.data(),
+      0,   // DROP
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -2276,10 +2276,10 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      starts.ptr().get(),
-      starts.offset(),
-      parents.ptr().get(),
-      parents.offset(),
+      starts.data(),
+      0,   // DROP
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -2298,10 +2298,10 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      starts.ptr().get(),
-      starts.offset(),
-      parents.ptr().get(),
-      parents.offset(),
+      starts.data(),
+      0,   // DROP
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -2320,10 +2320,10 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      starts.ptr().get(),
-      starts.offset(),
-      parents.ptr().get(),
-      parents.offset(),
+      starts.data(),
+      0,   // DROP
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -2359,10 +2359,10 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      starts.ptr().get(),
-      starts.offset(),
-      parents.ptr().get(),
-      parents.offset(),
+      starts.data(),
+      0,   // DROP
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -2381,10 +2381,10 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      starts.ptr().get(),
-      starts.offset(),
-      parents.ptr().get(),
-      parents.offset(),
+      starts.data(),
+      0,   // DROP
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -2403,10 +2403,10 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      starts.ptr().get(),
-      starts.offset(),
-      parents.ptr().get(),
-      parents.offset(),
+      starts.data(),
+      0,   // DROP
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -2425,10 +2425,10 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      starts.ptr().get(),
-      starts.offset(),
-      parents.ptr().get(),
-      parents.offset(),
+      starts.data(),
+      0,   // DROP
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -2447,10 +2447,10 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      starts.ptr().get(),
-      starts.offset(),
-      parents.ptr().get(),
-      parents.offset(),
+      starts.data(),
+      0,   // DROP
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -2469,10 +2469,10 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      starts.ptr().get(),
-      starts.offset(),
-      parents.ptr().get(),
-      parents.offset(),
+      starts.data(),
+      0,   // DROP
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -2491,10 +2491,10 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      starts.ptr().get(),
-      starts.offset(),
-      parents.ptr().get(),
-      parents.offset(),
+      starts.data(),
+      0,   // DROP
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -2513,10 +2513,10 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      starts.ptr().get(),
-      starts.offset(),
-      parents.ptr().get(),
-      parents.offset(),
+      starts.data(),
+      0,   // DROP
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -2535,10 +2535,10 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      starts.ptr().get(),
-      starts.offset(),
-      parents.ptr().get(),
-      parents.offset(),
+      starts.data(),
+      0,   // DROP
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -2557,10 +2557,10 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      starts.ptr().get(),
-      starts.offset(),
-      parents.ptr().get(),
-      parents.offset(),
+      starts.data(),
+      0,   // DROP
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
@@ -2579,10 +2579,10 @@ namespace awkward {
       ptr.get(),
       data,
       offset,
-      starts.ptr().get(),
-      starts.offset(),
-      parents.ptr().get(),
-      parents.offset(),
+      starts.data(),
+      0,   // DROP
+      parents.data(),
+      0,   // DROP
       parents.length(),
       outlength);
     util::handle_error(err, util::quote(name(), true), nullptr);
