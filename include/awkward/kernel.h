@@ -1604,15 +1604,11 @@ namespace kernel {
     int64_t* toindex,
     int64_t tolength,
     const int64_t* parents,
-    int64_t parentsoffset,
-    int64_t parentslength,
-    int64_t outlength);
+    int64_t parentslength);
   ERROR sorting_ranges_length(
     int64_t* tolength,
     const int64_t* parents,
-    int64_t parentsoffset,
-    int64_t parentslength,
-    int64_t outlength);
+    int64_t parentslength);
   template <typename T>
   ERROR
   NumpyArray_argsort(
@@ -1641,7 +1637,6 @@ namespace kernel {
   NumpyArray_sort_asstrings(
     T* toptr,
     const T* fromptr,
-    int64_t length,
     const int64_t* offsets,
     int64_t offsetslength,
     int64_t* outoffsets,

@@ -9293,36 +9293,37 @@ namespace kernel {
 
   /////////////////////////////////// awkward/cpu-kernels/sorting.h
 
-  ERROR
-  sorting_ranges(int64_t *toindex,
-                 int64_t tolength,
-                 const int64_t *parents,
-                 int64_t parentsoffset,
-                 int64_t parentslength,
-                 int64_t outlength) {
+  ERROR sorting_ranges(
+    int64_t *toindex,
+    int64_t tolength,
+    const int64_t *parents,
+    int64_t parentslength) {
     return awkward_sorting_ranges(
-        toindex, tolength, parents, parentsoffset, parentslength, outlength);
+      toindex,
+      tolength,
+      parents,
+      parentslength);
   }
 
-  ERROR
-  sorting_ranges_length(int64_t *tolength,
-                        const int64_t *parents,
-                        int64_t parentsoffset,
-                        int64_t parentslength,
-                        int64_t outlength) {
+  ERROR sorting_ranges_length(
+    int64_t *tolength,
+    const int64_t *parents,
+    int64_t parentslength) {
     return awkward_sorting_ranges_length(
-        tolength, parents, parentsoffset, parentslength, outlength);
+      tolength,
+      parents,
+      parentslength);
   }
 
-  template <>
-  Error
-  NumpyArray_argsort<bool>(int64_t *toptr,
-                           const bool *fromptr,
-                           int64_t length,
-                           const int64_t *offsets,
-                           int64_t offsetslength,
-                           bool ascending,
-                           bool stable) {
+  template<>
+  Error NumpyArray_argsort<bool>(
+    int64_t *toptr,
+    const bool *fromptr,
+    int64_t length,
+    const int64_t *offsets,
+    int64_t offsetslength,
+    bool ascending,
+    bool stable) {
     return awkward_argsort_bool(
         toptr, fromptr, length, offsets, offsetslength, ascending, stable);
   }
@@ -9454,253 +9455,269 @@ namespace kernel {
                              bool ascending,
                              bool stable) {
     return awkward_argsort_float64(
-        toptr, fromptr, length, offsets, offsetslength, ascending, stable);
+      toptr,
+      fromptr,
+      length,
+      offsets,
+      offsetslength,
+      ascending,
+      stable);
   }
 
-  template <>
-  Error
-  NumpyArray_sort<bool>(bool *toptr,
-                        const bool *fromptr,
-                        int64_t length,
-                        const int64_t *offsets,
-                        int64_t offsetslength,
-                        int64_t parentslength,
-                        bool ascending,
-                        bool stable) {
-    return awkward_sort_bool(toptr,
-                             fromptr,
-                             length,
-                             offsets,
-                             offsetslength,
-                             parentslength,
-                             ascending,
-                             stable);
+  template<>
+  Error NumpyArray_sort<bool>(
+    bool *toptr,
+    const bool *fromptr,
+    int64_t length,
+    const int64_t *offsets,
+    int64_t offsetslength,
+    int64_t parentslength,
+    bool ascending,
+    bool stable) {
+    return awkward_sort_bool(
+      toptr,
+      fromptr,
+      length,
+      offsets,
+      offsetslength,
+      parentslength,
+      ascending,
+      stable);
   }
 
-  template <>
-  Error
-  NumpyArray_sort<uint8_t>(uint8_t *toptr,
-                           const uint8_t *fromptr,
-                           int64_t length,
-                           const int64_t *offsets,
-                           int64_t offsetslength,
-                           int64_t parentslength,
-                           bool ascending,
-                           bool stable) {
-    return awkward_sort_uint8(toptr,
-                              fromptr,
-                              length,
-                              offsets,
-                              offsetslength,
-                              parentslength,
-                              ascending,
-                              stable);
+  template<>
+  Error NumpyArray_sort<uint8_t>(
+    uint8_t *toptr,
+    const uint8_t *fromptr,
+    int64_t length,
+    const int64_t *offsets,
+    int64_t offsetslength,
+    int64_t parentslength,
+    bool ascending,
+    bool stable) {
+    return awkward_sort_uint8(
+      toptr,
+      fromptr,
+      length,
+      offsets,
+      offsetslength,
+      parentslength,
+      ascending,
+      stable);
   }
 
-  template <>
-  Error
-  NumpyArray_sort<int8_t>(int8_t *toptr,
-                          const int8_t *fromptr,
-                          int64_t length,
-                          const int64_t *offsets,
-                          int64_t offsetslength,
-                          int64_t parentslength,
-                          bool ascending,
-                          bool stable) {
-    return awkward_sort_int8(toptr,
-                             fromptr,
-                             length,
-                             offsets,
-                             offsetslength,
-                             parentslength,
-                             ascending,
-                             stable);
+  template<>
+  Error NumpyArray_sort<int8_t>(
+    int8_t *toptr,
+    const int8_t *fromptr,
+    int64_t length,
+    const int64_t *offsets,
+    int64_t offsetslength,
+    int64_t parentslength,
+    bool ascending,
+    bool stable) {
+    return awkward_sort_int8(
+      toptr,
+      fromptr,
+      length,
+      offsets,
+      offsetslength,
+      parentslength,
+      ascending,
+      stable);
   }
 
-  template <>
-  Error
-  NumpyArray_sort<uint16_t>(uint16_t *toptr,
-                            const uint16_t *fromptr,
-                            int64_t length,
-                            const int64_t *offsets,
-                            int64_t offsetslength,
-                            int64_t parentslength,
-                            bool ascending,
-                            bool stable) {
-    return awkward_sort_uint16(toptr,
-                               fromptr,
-                               length,
-                               offsets,
-                               offsetslength,
-                               parentslength,
-                               ascending,
-                               stable);
+  template<>
+  Error NumpyArray_sort<uint16_t>(
+    uint16_t *toptr,
+    const uint16_t *fromptr,
+    int64_t length,
+    const int64_t *offsets,
+    int64_t offsetslength,
+    int64_t parentslength,
+    bool ascending,
+    bool stable) {
+    return awkward_sort_uint16(
+      toptr,
+      fromptr,
+      length,
+      offsets,
+      offsetslength,
+      parentslength,
+      ascending,
+      stable);
   }
 
-  template <>
-  Error
-  NumpyArray_sort<int16_t>(int16_t *toptr,
-                           const int16_t *fromptr,
-                           int64_t length,
-                           const int64_t *offsets,
-                           int64_t offsetslength,
-                           int64_t parentslength,
-                           bool ascending,
-                           bool stable) {
-    return awkward_sort_int16(toptr,
-                              fromptr,
-                              length,
-                              offsets,
-                              offsetslength,
-                              parentslength,
-                              ascending,
-                              stable);
+  template<>
+  Error NumpyArray_sort<int16_t>(
+    int16_t *toptr,
+    const int16_t *fromptr,
+    int64_t length,
+    const int64_t *offsets,
+    int64_t offsetslength,
+    int64_t parentslength,
+    bool ascending,
+    bool stable) {
+    return awkward_sort_int16(
+      toptr,
+      fromptr,
+      length,
+      offsets,
+      offsetslength,
+      parentslength,
+      ascending,
+      stable);
   }
 
-  template <>
-  Error
-  NumpyArray_sort<uint32_t>(uint32_t *toptr,
-                            const uint32_t *fromptr,
-                            int64_t length,
-                            const int64_t *offsets,
-                            int64_t offsetslength,
-                            int64_t parentslength,
-                            bool ascending,
-                            bool stable) {
-    return awkward_sort_uint32(toptr,
-                               fromptr,
-                               length,
-                               offsets,
-                               offsetslength,
-                               parentslength,
-                               ascending,
-                               stable);
+  template<>
+  Error NumpyArray_sort<uint32_t>(
+    uint32_t *toptr,
+    const uint32_t *fromptr,
+    int64_t length,
+    const int64_t *offsets,
+    int64_t offsetslength,
+    int64_t parentslength,
+    bool ascending,
+    bool stable) {
+    return awkward_sort_uint32(
+      toptr,
+      fromptr,
+      length,
+      offsets,
+      offsetslength,
+      parentslength,
+      ascending,
+      stable);
   }
 
-  template <>
-  Error
-  NumpyArray_sort<int32_t>(int32_t *toptr,
-                           const int32_t *fromptr,
-                           int64_t length,
-                           const int64_t *offsets,
-                           int64_t offsetslength,
-                           int64_t parentslength,
-                           bool ascending,
-                           bool stable) {
-    return awkward_sort_int32(toptr,
-                              fromptr,
-                              length,
-                              offsets,
-                              offsetslength,
-                              parentslength,
-                              ascending,
-                              stable);
+  template<>
+  Error NumpyArray_sort<int32_t>(
+    int32_t *toptr,
+    const int32_t *fromptr,
+    int64_t length,
+    const int64_t *offsets,
+    int64_t offsetslength,
+    int64_t parentslength,
+    bool ascending,
+    bool stable) {
+    return awkward_sort_int32(
+      toptr,
+      fromptr,
+      length,
+      offsets,
+      offsetslength,
+      parentslength,
+      ascending,
+      stable);
   }
 
-  template <>
-  Error
-  NumpyArray_sort<uint64_t>(uint64_t *toptr,
-                            const uint64_t *fromptr,
-                            int64_t length,
-                            const int64_t *offsets,
-                            int64_t offsetslength,
-                            int64_t parentslength,
-                            bool ascending,
-                            bool stable) {
-    return awkward_sort_uint64(toptr,
-                               fromptr,
-                               length,
-                               offsets,
-                               offsetslength,
-                               parentslength,
-                               ascending,
-                               stable);
+  template<>
+  Error NumpyArray_sort<uint64_t>(
+    uint64_t *toptr,
+    const uint64_t *fromptr,
+    int64_t length,
+    const int64_t *offsets,
+    int64_t offsetslength,
+    int64_t parentslength,
+    bool ascending,
+    bool stable) {
+    return awkward_sort_uint64(
+      toptr,
+      fromptr,
+      length,
+      offsets,
+      offsetslength,
+      parentslength,
+      ascending,
+      stable);
   }
 
-  template <>
-  Error
-  NumpyArray_sort<int64_t>(int64_t *toptr,
-                           const int64_t *fromptr,
-                           int64_t length,
-                           const int64_t *offsets,
-                           int64_t offsetslength,
-                           int64_t parentslength,
-                           bool ascending,
-                           bool stable) {
-    return awkward_sort_int64(toptr,
-                              fromptr,
-                              length,
-                              offsets,
-                              offsetslength,
-                              parentslength,
-                              ascending,
-                              stable);
+  template<>
+  Error NumpyArray_sort<int64_t>(
+    int64_t *toptr,
+    const int64_t *fromptr,
+    int64_t length,
+    const int64_t *offsets,
+    int64_t offsetslength,
+    int64_t parentslength,
+    bool ascending,
+    bool stable) {
+    return awkward_sort_int64(
+      toptr,
+      fromptr,
+      length,
+      offsets,
+      offsetslength,
+      parentslength,
+      ascending,
+      stable);
   }
 
-  template <>
-  Error
-  NumpyArray_sort<float>(float *toptr,
-                         const float *fromptr,
-                         int64_t length,
-                         const int64_t *offsets,
-                         int64_t offsetslength,
-                         int64_t parentslength,
-                         bool ascending,
-                         bool stable) {
-    return awkward_sort_float32(toptr,
-                                fromptr,
-                                length,
-                                offsets,
-                                offsetslength,
-                                parentslength,
-                                ascending,
-                                stable);
+  template<>
+  Error NumpyArray_sort<float>(
+    float *toptr,
+    const float *fromptr,
+    int64_t length,
+    const int64_t *offsets,
+    int64_t offsetslength,
+    int64_t parentslength,
+    bool ascending,
+    bool stable) {
+    return awkward_sort_float32(
+      toptr,
+      fromptr,
+      length,
+      offsets,
+      offsetslength,
+      parentslength,
+      ascending,
+      stable);
   }
 
-  template <>
-  Error
-  NumpyArray_sort<double>(double *toptr,
-                          const double *fromptr,
-                          int64_t length,
-                          const int64_t *offsets,
-                          int64_t offsetslength,
-                          int64_t parentslength,
-                          bool ascending,
-                          bool stable) {
-    return awkward_sort_float64(toptr,
-                                fromptr,
-                                length,
-                                offsets,
-                                offsetslength,
-                                parentslength,
-                                ascending,
-                                stable);
+  template<>
+  Error NumpyArray_sort<double>(
+    double *toptr,
+    const double *fromptr,
+    int64_t length,
+    const int64_t *offsets,
+    int64_t offsetslength,
+    int64_t parentslength,
+    bool ascending,
+    bool stable) {
+    return awkward_sort_float64(
+      toptr,
+      fromptr,
+      length,
+      offsets,
+      offsetslength,
+      parentslength,
+      ascending,
+      stable);
   }
 
-  template <>
-  Error
-  NumpyArray_sort_asstrings<uint8_t>(uint8_t *toptr,
-                                     const uint8_t *fromptr,
-                                     int64_t length,
-                                     const int64_t *offsets,
-                                     int64_t offsetslength,
-                                     int64_t *outoffsets,
-                                     bool ascending,
-                                     bool stable) {
-    return awkward_NumpyArray_sort_asstrings_uint8(toptr,
-                                                   fromptr,
-                                                   length,
-                                                   offsets,
-                                                   offsetslength,
-                                                   outoffsets,
-                                                   ascending,
-                                                   stable);
+  template<>
+  Error NumpyArray_sort_asstrings<uint8_t>(
+    uint8_t *toptr,
+    const uint8_t *fromptr,
+    const int64_t *offsets,
+    int64_t offsetslength,
+    int64_t *outoffsets,
+    bool ascending,
+    bool stable) {
+    return awkward_NumpyArray_sort_asstrings_uint8(
+      toptr,
+      fromptr,
+      offsets,
+      offsetslength,
+      outoffsets,
+      ascending,
+      stable);
   }
 
-  ERROR
-  ListOffsetArray_local_preparenext_64(int64_t *tocarry,
-                                       const int64_t *fromindex,
-                                       int64_t length) {
+  ERROR ListOffsetArray_local_preparenext_64(
+    int64_t *tocarry,
+    const int64_t *fromindex,
+    int64_t length) {
     return awkward_ListOffsetArray_local_preparenext_64(
         tocarry, fromindex, length);
   }

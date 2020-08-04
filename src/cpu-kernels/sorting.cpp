@@ -11,9 +11,7 @@ ERROR awkward_sorting_ranges(
   int64_t* toindex,
   int64_t tolength,
   const int64_t* parents,
-  int64_t parentsoffset,
-  int64_t parentslength,
-  int64_t outlength) {
+  int64_t parentslength) {
   int64_t j = 0;
   int64_t k = 0;
   toindex[0] = k;
@@ -33,9 +31,7 @@ ERROR awkward_sorting_ranges(
 ERROR awkward_sorting_ranges_length(
   int64_t* tolength,
   const int64_t* parents,
-  int64_t parentsoffset,
-  int64_t parentslength,
-  int64_t outlength) {
+  int64_t parentslength) {
   int64_t length = 2;
   for (int64_t i = 1;  i < parentslength;  i++) {
     if(parents[i - 1] != parents[i]) {
@@ -604,7 +600,6 @@ ERROR awkward_IndexedArray_local_preparenext_64(
 ERROR awkward_NumpyArray_sort_asstrings_uint8(
     uint8_t* toptr,
     const uint8_t* fromptr,
-    int64_t length,
     const int64_t* offsets,
     int64_t offsetslength,
     int64_t* outoffsets,

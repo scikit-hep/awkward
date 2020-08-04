@@ -61,15 +61,9 @@ subprocess.check_call(["doxygen", os.path.join("docs-doxygen", "Doxyfile")], cwd
 exec(open("prepare_docstrings.py").read(), dict(globals()))
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
-pythongen = os.path.join(current_dir, "..", "dev", "genpython.py")
-identities = os.path.join(current_dir, "..", "src", "cpu-kernels", "identities.cpp",)
-operations = os.path.join(current_dir, "..", "src", "cpu-kernels", "operations.cpp",)
-reducers = os.path.join(current_dir, "..", "src", "cpu-kernels", "reducers.cpp",)
-getitem = os.path.join(current_dir, "..", "src", "cpu-kernels", "getitem.cpp",)
-
-sorting = os.path.join(current_dir, "..", "src", "cpu-kernels", "sorting.cpp")
-subprocess.check_call(
-    [sys.executable, pythongen, identities, operations, reducers, getitem, sorting]
-)
+specgen = os.path.join(current_dir, "..", "dev", "generate-kernelspec.py")
+subprocess.check_call([sys.executable, specgen])
+docgen = os.path.join(current_dir, "..", "dev", "generate-kerneldocs.py")
+subprocess.check_call([sys.executable, docgen])
 
 exec(open("make_changelog.py").read(), dict(globals()))
