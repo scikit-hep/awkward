@@ -139,8 +139,7 @@ namespace kernel {
   void cuda_array_deleter<bool>::operator()(bool const *p) {
     FORM_KERNEL(awkward_ptrbool_dealloc,
                 awkward_cuda_ptrbool_dealloc,
-                kernel::Lib::cuda_kernels)
-
+                kernel::Lib::cuda_kernels);
     util::handle_error((*awkward_cuda_ptrbool_dealloc_t)(p));
   }
 
@@ -148,8 +147,7 @@ namespace kernel {
   void cuda_array_deleter<char>::operator()(char const *p) {
     FORM_KERNEL(awkward_ptrchar_dealloc,
                 awkward_cuda_ptrchar_dealloc,
-                kernel::Lib::cuda_kernels)
-
+                kernel::Lib::cuda_kernels);
     util::handle_error((*awkward_cuda_ptrchar_dealloc_t)(p));
   }
 
@@ -157,8 +155,7 @@ namespace kernel {
   void cuda_array_deleter<int8_t>::operator()(int8_t const *p) {
     FORM_KERNEL(awkward_ptr8_dealloc,
                 awkward_cuda_ptr8_dealloc,
-                kernel::Lib::cuda_kernels)
-
+                kernel::Lib::cuda_kernels);
     util::handle_error((*awkward_cuda_ptr8_dealloc_t)(p));
   }
 
@@ -166,8 +163,7 @@ namespace kernel {
   void cuda_array_deleter<uint8_t>::operator()(uint8_t const *p) {
     FORM_KERNEL(awkward_ptrU8_dealloc,
                 awkward_cuda_ptrU8_dealloc,
-                kernel::Lib::cuda_kernels)
-
+                kernel::Lib::cuda_kernels);
     util::handle_error((*awkward_cuda_ptrU8_dealloc_t)(p));
   }
 
@@ -175,8 +171,7 @@ namespace kernel {
   void cuda_array_deleter<int16_t>::operator()(int16_t const *p) {
     FORM_KERNEL(awkward_ptr16_dealloc,
                 awkward_cuda_ptr16_dealloc,
-                kernel::Lib::cuda_kernels)
-
+                kernel::Lib::cuda_kernels);
     util::handle_error((*awkward_cuda_ptr16_dealloc_t)(p));
   }
 
@@ -184,8 +179,7 @@ namespace kernel {
   void cuda_array_deleter<uint16_t>::operator()(uint16_t const *p) {
     FORM_KERNEL(awkward_ptrU16_dealloc,
                 awkward_cuda_ptrU16_dealloc,
-                kernel::Lib::cuda_kernels)
-
+                kernel::Lib::cuda_kernels);
     util::handle_error((*awkward_cuda_ptrU16_dealloc_t)(p));
   }
 
@@ -193,8 +187,7 @@ namespace kernel {
   void cuda_array_deleter<int32_t>::operator()(int32_t const *p) {
     FORM_KERNEL(awkward_ptr32_dealloc,
                 awkward_cuda_ptr32_dealloc,
-                kernel::Lib::cuda_kernels)
-
+                kernel::Lib::cuda_kernels);
     util::handle_error((*awkward_cuda_ptr32_dealloc_t)(p));
   }
 
@@ -202,8 +195,7 @@ namespace kernel {
   void cuda_array_deleter<uint32_t>::operator()(uint32_t const *p) {
     FORM_KERNEL(awkward_ptrU32_dealloc,
                 awkward_cuda_ptrU32_dealloc,
-                kernel::Lib::cuda_kernels)
-
+                kernel::Lib::cuda_kernels);
     util::handle_error((*awkward_cuda_ptrU32_dealloc_t)(p));
   }
 
@@ -211,8 +203,7 @@ namespace kernel {
   void cuda_array_deleter<int64_t>::operator()(int64_t const *p) {
     FORM_KERNEL(awkward_ptr64_dealloc,
                 awkward_cuda_ptr64_dealloc,
-                kernel::Lib::cuda_kernels)
-
+                kernel::Lib::cuda_kernels);
     util::handle_error((*awkward_cuda_ptr64_dealloc_t)(p));
   }
 
@@ -220,8 +211,7 @@ namespace kernel {
   void cuda_array_deleter<uint64_t>::operator()(uint64_t const *p) {
     FORM_KERNEL(awkward_ptrU64_dealloc,
                 awkward_cuda_ptrU64_dealloc,
-                kernel::Lib::cuda_kernels)
-
+                kernel::Lib::cuda_kernels);
     util::handle_error((*awkward_cuda_ptrU64_dealloc_t)(p));
   }
 
@@ -229,8 +219,7 @@ namespace kernel {
   void cuda_array_deleter<float>::operator()(float const *p) {
     FORM_KERNEL(awkward_ptrfloat32_dealloc,
                 awkward_cuda_ptrfloat32_dealloc,
-                kernel::Lib::cuda_kernels)
-
+                kernel::Lib::cuda_kernels);
     util::handle_error((*awkward_cuda_ptrfloat32_dealloc_t)(p));
   }
 
@@ -238,8 +227,7 @@ namespace kernel {
   void cuda_array_deleter<double>::operator()(double const *p) {
     FORM_KERNEL(awkward_ptrfloat64_dealloc,
                 awkward_cuda_ptrfloat64_dealloc,
-                kernel::Lib::cuda_kernels)
-
+                kernel::Lib::cuda_kernels);
     util::handle_error((*awkward_cuda_ptrfloat64_dealloc_t)(p));
   }
 
@@ -737,145 +725,197 @@ namespace kernel {
 
   template<>
   std::shared_ptr<bool> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
-    if (ptr_lib == kernel::Lib::cuda_kernels) {
-      FORM_KERNEL(awkward_ptrbool_alloc, awkward_cuda_ptrbool_alloc, ptr_lib)
-
+    if (ptr_lib == kernel::Lib::cpu_kernels) {
+      return std::shared_ptr<bool>(awkward_ptrbool_alloc(length),
+                                   kernel::array_deleter<bool>());
+    }
+    else if (ptr_lib == kernel::Lib::cuda_kernels) {
+      FORM_KERNEL(awkward_ptrbool_alloc, awkward_cuda_ptrbool_alloc, ptr_lib);
       return std::shared_ptr<bool>((*awkward_cuda_ptrbool_alloc_t)(length),
                                    kernel::cuda_array_deleter<bool>());
     }
-    return std::shared_ptr<bool>(awkward_ptrbool_alloc(length),
-                                 kernel::array_deleter<bool>());
+    else {
+      throw std::runtime_error("unrecognized ptr_lib in ptr_alloc<bool>");
+    }
   }
 
   template<>
   std::shared_ptr<int8_t> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
-    if (ptr_lib == kernel::Lib::cuda_kernels) {
+    if (ptr_lib == kernel::Lib::cpu_kernels) {
+      return std::shared_ptr<int8_t>(awkward_ptr8_alloc(length),
+                                     kernel::array_deleter<int8_t>());
+    }
+    else if (ptr_lib == kernel::Lib::cuda_kernels) {
       FORM_KERNEL(awkward_ptr8_alloc, awkward_cuda_ptr8_alloc, ptr_lib)
 
       return std::shared_ptr<int8_t>((*awkward_cuda_ptr8_alloc_t)(length),
                                      kernel::cuda_array_deleter<int8_t>());
     }
-    return std::shared_ptr<int8_t>(awkward_ptr8_alloc(length),
-                                   kernel::array_deleter<int8_t>());
+    else {
+      throw std::runtime_error("unrecognized ptr_lib in ptr_alloc<bool>");
+    }
   }
 
   template<>
   std::shared_ptr<uint8_t> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
-    if (ptr_lib == kernel::Lib::cuda_kernels) {
+    if (ptr_lib == kernel::Lib::cpu_kernels) {
+      return std::shared_ptr<uint8_t>(awkward_ptrU8_alloc(length),
+                                      kernel::array_deleter<uint8_t>());
+    }
+    else if (ptr_lib == kernel::Lib::cuda_kernels) {
       FORM_KERNEL(awkward_ptrU8_alloc, awkward_cuda_ptrU8_alloc, ptr_lib);
 
       return std::shared_ptr<uint8_t>(
         (*awkward_cuda_ptrU8_alloc_t)(length),
         kernel::cuda_array_deleter<uint8_t>());
     }
-    return std::shared_ptr<uint8_t>(awkward_ptrU8_alloc(length),
-                                    kernel::array_deleter<uint8_t>());
+    else {
+      throw std::runtime_error("unrecognized ptr_lib in ptr_alloc<uint8_t>");
+    }
   }
 
   template<>
   std::shared_ptr<int16_t> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
-#ifndef _MSC_VER
-    if (ptr_lib == kernel::Lib::cuda_kernels) {
+    if (ptr_lib == kernel::Lib::cpu_kernels) {
+      return std::shared_ptr<int16_t>(awkward_ptr16_alloc(length),
+                                      kernel::array_deleter<int16_t>());
+    }
+    else if (ptr_lib == kernel::Lib::cuda_kernels) {
       FORM_KERNEL(awkward_ptr16_alloc, awkward_cuda_ptr16_alloc, ptr_lib)
 
       return std::shared_ptr<int16_t>(
         (*awkward_cuda_ptr16_alloc_t)(length),
         kernel::cuda_array_deleter<int16_t>());
     }
-#endif
-    return std::shared_ptr<int16_t>(awkward_ptr16_alloc(length),
-                                    kernel::array_deleter<int16_t>());
+    else {
+      throw std::runtime_error("unrecognized ptr_lib in ptr_alloc<int16_t>");
+    }
   }
 
   template<>
   std::shared_ptr<uint16_t> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
-    if (ptr_lib == kernel::Lib::cuda_kernels) {
+    if (ptr_lib == kernel::Lib::cpu_kernels) {
+      return std::shared_ptr<uint16_t>(awkward_ptrU16_alloc(length),
+                                       kernel::array_deleter<uint16_t>());
+    }
+    else if (ptr_lib == kernel::Lib::cuda_kernels) {
       FORM_KERNEL(awkward_ptrU16_alloc, awkward_cuda_ptrU16_alloc, ptr_lib)
 
       return std::shared_ptr<uint16_t>(
         (*awkward_cuda_ptrU16_alloc_t)(length),
         kernel::cuda_array_deleter<uint16_t>());
     }
-    return std::shared_ptr<uint16_t>(awkward_ptrU16_alloc(length),
-                                     kernel::array_deleter<uint16_t>());
+    else {
+      throw std::runtime_error("unrecognized ptr_lib in ptr_alloc<uint16_t>");
+    }
   }
 
   template<>
   std::shared_ptr<int32_t> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
-    if (ptr_lib == kernel::Lib::cuda_kernels) {
+    if (ptr_lib == kernel::Lib::cpu_kernels) {
+      return std::shared_ptr<int32_t>(awkward_ptr32_alloc(length),
+                                      kernel::array_deleter<int32_t>());
+    }
+    else if (ptr_lib == kernel::Lib::cuda_kernels) {
       FORM_KERNEL(awkward_ptr32_alloc, awkward_cuda_ptr32_alloc, ptr_lib)
 
       return std::shared_ptr<int32_t>(
         (*awkward_cuda_ptr32_alloc_t)(length),
         kernel::cuda_array_deleter<int32_t>());
     }
-    return std::shared_ptr<int32_t>(awkward_ptr32_alloc(length),
-                                    kernel::array_deleter<int32_t>());
+    else {
+      throw std::runtime_error("unrecognized ptr_lib in ptr_alloc<int32_t>");
+    }
   }
 
   template<>
   std::shared_ptr<uint32_t> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
-    if (ptr_lib == kernel::Lib::cuda_kernels) {
+    if (ptr_lib == kernel::Lib::cpu_kernels) {
+      return std::shared_ptr<uint32_t>(awkward_ptrU32_alloc(length),
+                                       kernel::array_deleter<uint32_t>());
+    }
+    else if (ptr_lib == kernel::Lib::cuda_kernels) {
       FORM_KERNEL(awkward_ptrU32_alloc, awkward_cuda_ptrU32_alloc, ptr_lib)
 
       return std::shared_ptr<uint32_t>(
         (*awkward_cuda_ptrU32_alloc_t)(length),
         kernel::cuda_array_deleter<uint32_t>());
     }
-    return std::shared_ptr<uint32_t>(awkward_ptrU32_alloc(length),
-                                     kernel::array_deleter<uint32_t>());
+    else {
+      throw std::runtime_error("unrecognized ptr_lib in ptr_alloc<uint32_t>");
+    }
   }
 
   template<>
   std::shared_ptr<int64_t> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
-    if (ptr_lib == kernel::Lib::cuda_kernels) {
+    if (ptr_lib == kernel::Lib::cpu_kernels) {
+      return std::shared_ptr<int64_t>(awkward_ptr64_alloc(length),
+                                      kernel::array_deleter<int64_t>());
+    }
+    else if (ptr_lib == kernel::Lib::cuda_kernels) {
       FORM_KERNEL(awkward_ptr64_alloc, awkward_cuda_ptr64_alloc, ptr_lib)
 
       return std::shared_ptr<int64_t>(
         (*awkward_cuda_ptr64_alloc_t)(length),
         kernel::cuda_array_deleter<int64_t>());
     }
-    return std::shared_ptr<int64_t>(awkward_ptr64_alloc(length),
-                                    kernel::array_deleter<int64_t>());
+    else {
+      throw std::runtime_error("unrecognized ptr_lib in ptr_alloc<int64_t>");
+    }
   }
 
   template<>
   std::shared_ptr<uint64_t> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
-    if (ptr_lib == kernel::Lib::cuda_kernels) {
+    if (ptr_lib == kernel::Lib::cpu_kernels) {
+      return std::shared_ptr<uint64_t>(awkward_ptrU64_alloc(length),
+                                       kernel::array_deleter<uint64_t>());
+    }
+    else if (ptr_lib == kernel::Lib::cuda_kernels) {
       FORM_KERNEL(awkward_ptrU64_alloc, awkward_cuda_ptrU64_alloc, ptr_lib)
 
       return std::shared_ptr<uint64_t>(
         (*awkward_cuda_ptrU64_alloc_t)(length),
         kernel::cuda_array_deleter<uint64_t>());
     }
-    return std::shared_ptr<uint64_t>(awkward_ptrU64_alloc(length),
-                                     kernel::array_deleter<uint64_t>());
+    else {
+      throw std::runtime_error("unrecognized ptr_lib in ptr_alloc<uint64_t>");
+    }
   }
 
   template<>
   std::shared_ptr<float> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
-    if (ptr_lib == kernel::Lib::cuda_kernels) {
+    if (ptr_lib == kernel::Lib::cpu_kernels) {
+      return std::shared_ptr<float>(awkward_ptrfloat32_alloc(length),
+                                    kernel::array_deleter<float>());
+    }
+    else if (ptr_lib == kernel::Lib::cuda_kernels) {
       FORM_KERNEL(awkward_ptrfloat32_alloc, awkward_cuda_ptrfloat32_alloc, ptr_lib)
 
       return std::shared_ptr<float>(
         (*awkward_cuda_ptrfloat32_alloc_t)(length),
         kernel::cuda_array_deleter<float>());
     }
-    return std::shared_ptr<float>(awkward_ptrfloat32_alloc(length),
-                                  kernel::array_deleter<float>());
+    else {
+      throw std::runtime_error("unrecognized ptr_lib in ptr_alloc<float>");
+    }
   }
 
   template<>
   std::shared_ptr<double> ptr_alloc(kernel::Lib ptr_lib, int64_t length) {
-    if (ptr_lib == kernel::Lib::cuda_kernels) {
+    if (ptr_lib == kernel::Lib::cpu_kernels) {
+      return std::shared_ptr<double>(awkward_ptrfloat64_alloc(length),
+                                     kernel::array_deleter<double>());
+    }
+    else if (ptr_lib == kernel::Lib::cuda_kernels) {
       FORM_KERNEL(awkward_ptrfloat64_alloc, awkward_cuda_ptrfloat64_alloc, ptr_lib)
 
       return std::shared_ptr<double>(
         (*awkward_cuda_ptrfloat64_alloc_t)(length),
         kernel::cuda_array_deleter<double>());
     }
-    return std::shared_ptr<double>(awkward_ptrfloat64_alloc(length),
-                                   kernel::array_deleter<double>());
+    else {
+      throw std::runtime_error("unrecognized ptr_lib in ptr_alloc<double>");
+    }
   }
 
   const std::string
@@ -894,154 +934,198 @@ namespace kernel {
   bool NumpyArray_getitem_at(kernel::Lib ptr_lib,
                              bool *ptr,
                              int64_t at) {
-    if (ptr_lib == kernel::Lib::cuda_kernels) {
+    if (ptr_lib == kernel::Lib::cpu_kernels) {
+      return awkward_NumpyArraybool_getitem_at(ptr, at);
+    }
+    else if (ptr_lib == kernel::Lib::cuda_kernels) {
       FORM_KERNEL(awkward_NumpyArraybool_getitem_at,
                   awkward_cuda_NumpyArraybool_getitem_at,
-                  ptr_lib)
-
+                  ptr_lib);
       return (*awkward_cuda_NumpyArraybool_getitem_at_t)(ptr, at);
     }
-    return awkward_NumpyArraybool_getitem_at(ptr, at);
+    else {
+      throw std::runtime_error("unrecognized ptr_lib in bool NumpyArray_getitem_at");
+    }
   }
 
   template<>
   int8_t NumpyArray_getitem_at(kernel::Lib ptr_lib,
                                int8_t *ptr,
                                int64_t at) {
-    if (ptr_lib == kernel::Lib::cuda_kernels) {
+    if (ptr_lib == kernel::Lib::cpu_kernels) {
+      return awkward_NumpyArray8_getitem_at(ptr, at);
+    }
+    else if (ptr_lib == kernel::Lib::cuda_kernels) {
       FORM_KERNEL(awkward_NumpyArray8_getitem_at,
                   awkward_cuda_NumpyArray8_getitem_at,
-                  ptr_lib)
-
+                  ptr_lib);
       return (*awkward_cuda_NumpyArray8_getitem_at_t)(ptr, at);
     }
-    return awkward_NumpyArray8_getitem_at(ptr, at);
+    else {
+      throw std::runtime_error("unrecognized ptr_lib in int8_t NumpyArray_getitem_at");
+    }
   }
 
   template<>
   uint8_t NumpyArray_getitem_at(kernel::Lib ptr_lib,
                                 uint8_t *ptr,
                                 int64_t at) {
-    if (ptr_lib == kernel::Lib::cuda_kernels) {
+    if (ptr_lib == kernel::Lib::cpu_kernels) {
+      return awkward_NumpyArrayU8_getitem_at(ptr, at);
+    }
+    else if (ptr_lib == kernel::Lib::cuda_kernels) {
       FORM_KERNEL(awkward_NumpyArrayU8_getitem_at,
                   awkward_cuda_NumpyArrayU8_getitem_at,
-                  ptr_lib)
-
+                  ptr_lib);
       return (*awkward_cuda_NumpyArrayU8_getitem_at_t)(ptr, at);
     }
-    return awkward_NumpyArrayU8_getitem_at(ptr, at);
+    else {
+      throw std::runtime_error("unrecognized ptr_lib in uint8_t NumpyArray_getitem_at");
+    }
   }
 
   template<>
   int16_t NumpyArray_getitem_at(kernel::Lib ptr_lib,
                                 int16_t *ptr,
                                 int64_t at) {
-    if (ptr_lib == kernel::Lib::cuda_kernels) {
+    if (ptr_lib == kernel::Lib::cpu_kernels) {
+      return awkward_NumpyArray16_getitem_at(ptr, at);
+    }
+    else if (ptr_lib == kernel::Lib::cuda_kernels) {
       FORM_KERNEL(awkward_NumpyArray16_getitem_at,
                   awkward_cuda_NumpyArray16_getitem_at,
-                  ptr_lib)
-
+                  ptr_lib);
       return (*awkward_cuda_NumpyArray16_getitem_at_t)(ptr, at);
     }
-    return awkward_NumpyArray16_getitem_at(ptr, at);
+    else {
+      throw std::runtime_error("unrecognized ptr_lib in int16_t NumpyArray_getitem_at");
+    }
   }
 
   template<>
   uint16_t NumpyArray_getitem_at(kernel::Lib ptr_lib,
                                  uint16_t *ptr,
                                  int64_t at) {
-    if (ptr_lib == kernel::Lib::cuda_kernels) {
+    if (ptr_lib == kernel::Lib::cpu_kernels) {
+      return awkward_NumpyArrayU16_getitem_at(ptr, at);
+    }
+    else if (ptr_lib == kernel::Lib::cuda_kernels) {
       FORM_KERNEL(awkward_NumpyArrayU16_getitem_at,
                   awkward_cuda_NumpyArrayU16_getitem_at,
-                  ptr_lib)
-
+                  ptr_lib);
       return (*awkward_cuda_NumpyArrayU16_getitem_at_t)(ptr, at);
     }
-    return awkward_NumpyArrayU16_getitem_at(ptr, at);
+    else {
+      throw std::runtime_error("unrecognized ptr_lib in uint16_t NumpyArray_getitem_at");
+    }
   }
 
   template<>
   int32_t NumpyArray_getitem_at(kernel::Lib ptr_lib,
                                 int32_t *ptr,
                                 int64_t at) {
-    if (ptr_lib == kernel::Lib::cuda_kernels) {
+    if (ptr_lib == kernel::Lib::cpu_kernels) {
+      return awkward_NumpyArray32_getitem_at(ptr, at);
+    }
+    else if (ptr_lib == kernel::Lib::cuda_kernels) {
       FORM_KERNEL(awkward_NumpyArray32_getitem_at,
                   awkward_cuda_NumpyArray32_getitem_at,
-                  ptr_lib)
-
+                  ptr_lib);
       return (*awkward_cuda_NumpyArray32_getitem_at_t)(ptr, at);
     }
-    return awkward_NumpyArray32_getitem_at(ptr, at);
+    else {
+      throw std::runtime_error("unrecognized ptr_lib in int32_t NumpyArray_getitem_at");
+    }
   }
 
   template<>
   uint32_t NumpyArray_getitem_at(kernel::Lib ptr_lib,
                                  uint32_t *ptr,
                                  int64_t at) {
-    if (ptr_lib == kernel::Lib::cuda_kernels) {
+    if (ptr_lib == kernel::Lib::cpu_kernels) {
+      return awkward_NumpyArrayU32_getitem_at(ptr, at);
+    }
+    else if (ptr_lib == kernel::Lib::cuda_kernels) {
       FORM_KERNEL(awkward_NumpyArrayU32_getitem_at,
                   awkward_cuda_NumpyArrayU32_getitem_at,
-                  ptr_lib)
-
+                  ptr_lib);
       return (*awkward_cuda_NumpyArrayU32_getitem_at_t)(ptr, at);
     }
-    return awkward_NumpyArrayU32_getitem_at(ptr, at);
+    else {
+      throw std::runtime_error("unrecognized ptr_lib in uint32_t NumpyArray_getitem_at");
+    }
   }
 
   template<>
   int64_t NumpyArray_getitem_at(kernel::Lib ptr_lib,
                                 int64_t *ptr,
                                 int64_t at) {
-    if (ptr_lib == kernel::Lib::cuda_kernels) {
+    if (ptr_lib == kernel::Lib::cpu_kernels) {
+      return awkward_NumpyArray64_getitem_at(ptr, at);
+    }
+    else if (ptr_lib == kernel::Lib::cuda_kernels) {
       FORM_KERNEL(awkward_NumpyArray64_getitem_at,
                   awkward_cuda_NumpyArray64_getitem_at,
-                  ptr_lib)
-
+                  ptr_lib);
       return (*awkward_cuda_NumpyArray64_getitem_at_t)(ptr, at);
     }
-    return awkward_NumpyArray64_getitem_at(ptr, at);
+    else {
+      throw std::runtime_error("unrecognized ptr_lib in int64_t NumpyArray_getitem_at");
+    }
   }
 
   template<>
   uint64_t NumpyArray_getitem_at(kernel::Lib ptr_lib,
                                  uint64_t *ptr,
                                  int64_t at) {
-    if (ptr_lib == kernel::Lib::cuda_kernels) {
+    if (ptr_lib == kernel::Lib::cpu_kernels) {
+      return awkward_NumpyArrayU64_getitem_at(ptr, at);
+    }
+    else if (ptr_lib == kernel::Lib::cuda_kernels) {
       FORM_KERNEL(awkward_NumpyArrayU64_getitem_at,
                   awkward_cuda_NumpyArrayU64_getitem_at,
-                  ptr_lib)
-
+                  ptr_lib);
       return (*awkward_cuda_NumpyArrayU64_getitem_at_t)(ptr, at);
     }
-    return awkward_NumpyArrayU64_getitem_at(ptr, at);
+    else {
+      throw std::runtime_error("unrecognized ptr_lib in uint64_t NumpyArray_getitem_at");
+    }
   }
 
   template<>
   float NumpyArray_getitem_at(kernel::Lib ptr_lib,
                               float *ptr,
                               int64_t at) {
-    if (ptr_lib == kernel::Lib::cuda_kernels) {
+    if (ptr_lib == kernel::Lib::cpu_kernels) {
+      return awkward_NumpyArrayfloat32_getitem_at(ptr, at);
+    }
+    else if (ptr_lib == kernel::Lib::cuda_kernels) {
       FORM_KERNEL(awkward_NumpyArrayfloat32_getitem_at,
                   awkward_cuda_NumpyArrayfloat32_getitem_at,
-                  ptr_lib)
-
+                  ptr_lib);
       return (*awkward_cuda_NumpyArrayfloat32_getitem_at_t)(ptr, at);
     }
-    return awkward_NumpyArrayfloat32_getitem_at(ptr, at);
+    else {
+      throw std::runtime_error("unrecognized ptr_lib in float NumpyArray_getitem_at");
+    }
   }
 
   template<>
   double NumpyArray_getitem_at(kernel::Lib ptr_lib,
                                double *ptr,
                                int64_t at) {
-    if (ptr_lib == kernel::Lib::cuda_kernels) {
+    if (ptr_lib == kernel::Lib::cpu_kernels) {
+      return awkward_NumpyArrayfloat64_getitem_at(ptr, at);
+    }
+    else if (ptr_lib == kernel::Lib::cuda_kernels) {
       FORM_KERNEL(awkward_NumpyArrayfloat64_getitem_at,
                   awkward_cuda_NumpyArrayfloat64_getitem_at,
-                  ptr_lib)
-
+                  ptr_lib);
       return (*awkward_cuda_NumpyArrayfloat64_getitem_at_t)(ptr, at);
     }
-    return awkward_NumpyArrayfloat64_getitem_at(ptr, at);
+    else {
+      throw std::runtime_error("unrecognized ptr_lib in double NumpyArray_getitem_at");
+    }
   }
 
   void regularize_rangeslice(
@@ -2928,14 +3012,18 @@ namespace kernel {
                                  int8_t *ptr,
                                  int64_t offset,
                                  int64_t at) {
-    if (ptr_lib == kernel::Lib::cuda_kernels) {
+    if (ptr_lib == kernel::Lib::cpu_kernels) {
+      return awkward_Index8_getitem_at_nowrap(ptr, offset, at);
+    }
+    else if (ptr_lib == kernel::Lib::cuda_kernels) {
       FORM_KERNEL(awkward_Index8_getitem_at_nowrap,
                   awkward_cuda_Index8_getitem_at_nowrap,
-                  ptr_lib)
-
+                  ptr_lib);
       return (*awkward_cuda_Index8_getitem_at_nowrap_t)(ptr, offset, at);
     }
-    return awkward_Index8_getitem_at_nowrap(ptr, offset, at);
+    else {
+      throw std::runtime_error("unrecognized ptr_lib in int8_t index_getitem_at_nowrap");
+    }
   }
 
   template<>
@@ -2943,14 +3031,18 @@ namespace kernel {
                                   uint8_t *ptr,
                                   int64_t offset,
                                   int64_t at) {
-    if (ptr_lib == kernel::Lib::cuda_kernels) {
+    if (ptr_lib == kernel::Lib::cpu_kernels) {
+      return awkward_IndexU8_getitem_at_nowrap(ptr, offset, at);
+    }
+    else if (ptr_lib == kernel::Lib::cuda_kernels) {
       FORM_KERNEL(awkward_IndexU8_getitem_at_nowrap,
                   awkward_cuda_IndexU8_getitem_at_nowrap,
-                  ptr_lib)
-
+                  ptr_lib);
       return (*awkward_cuda_IndexU8_getitem_at_nowrap_t)(ptr, offset, at);
     }
-    return awkward_IndexU8_getitem_at_nowrap(ptr, offset, at);
+    else {
+      throw std::runtime_error("unrecognized ptr_lib in uint8_t index_getitem_at_nowrap");
+    }
   }
 
   template<>
@@ -2958,14 +3050,18 @@ namespace kernel {
                                   int32_t *ptr,
                                   int64_t offset,
                                   int64_t at) {
-    if (ptr_lib == kernel::Lib::cuda_kernels) {
+    if (ptr_lib == kernel::Lib::cpu_kernels) {
+      return awkward_Index32_getitem_at_nowrap(ptr, offset, at);
+    }
+    else if (ptr_lib == kernel::Lib::cuda_kernels) {
       FORM_KERNEL(awkward_Index32_getitem_at_nowrap,
                   awkward_cuda_Index32_getitem_at_nowrap,
-                  ptr_lib)
-
+                  ptr_lib);
       return (*awkward_cuda_Index32_getitem_at_nowrap_t)(ptr, offset, at);
     }
-    return awkward_Index32_getitem_at_nowrap(ptr, offset, at);
+    else {
+      throw std::runtime_error("unrecognized ptr_lib in int32_t index_getitem_at_nowrap");
+    }
   }
 
   template<>
@@ -2973,14 +3069,18 @@ namespace kernel {
                                    uint32_t *ptr,
                                    int64_t offset,
                                    int64_t at) {
-    if (ptr_lib == kernel::Lib::cuda_kernels) {
+    if (ptr_lib == kernel::Lib::cpu_kernels) {
+      return awkward_IndexU32_getitem_at_nowrap(ptr, offset, at);
+    }
+    else if (ptr_lib == kernel::Lib::cuda_kernels) {
       FORM_KERNEL(awkward_IndexU32_getitem_at_nowrap,
                   awkward_cuda_IndexU32_getitem_at_nowrap,
-                  ptr_lib)
-
+                  ptr_lib);
       return (*awkward_cuda_IndexU32_getitem_at_nowrap_t)(ptr, offset, at);
     }
-    return awkward_IndexU32_getitem_at_nowrap(ptr, offset, at);
+    else {
+      throw std::runtime_error("unrecognized ptr_lib in uint32_t index_getitem_at_nowrap");
+    }
   }
 
   template<>
@@ -2988,14 +3088,18 @@ namespace kernel {
                                   int64_t *ptr,
                                   int64_t offset,
                                   int64_t at) {
-    if (ptr_lib == kernel::Lib::cuda_kernels) {
+    if (ptr_lib == kernel::Lib::cpu_kernels) {
+      return awkward_Index64_getitem_at_nowrap(ptr, offset, at);
+    }
+    else if (ptr_lib == kernel::Lib::cuda_kernels) {
       FORM_KERNEL(awkward_Index64_getitem_at_nowrap,
                   awkward_cuda_Index64_getitem_at_nowrap,
-                  ptr_lib)
-
+                  ptr_lib);
       return (*awkward_cuda_Index64_getitem_at_nowrap_t)(ptr, offset, at);
     }
-    return awkward_Index64_getitem_at_nowrap(ptr, offset, at);
+    else {
+      throw std::runtime_error("unrecognized ptr_lib in int64_t index_getitem_at_nowrap");
+    }
   }
 
   template<>
@@ -3004,13 +3108,18 @@ namespace kernel {
                                int64_t offset,
                                int64_t at,
                                int8_t value) {
-    if (ptr_lib == kernel::Lib::cuda_kernels) {
+    if (ptr_lib == kernel::Lib::cpu_kernels) {
+      awkward_Index8_setitem_at_nowrap(ptr, offset, at, value);
+    }
+    else if (ptr_lib == kernel::Lib::cuda_kernels) {
       FORM_KERNEL(awkward_Index8_setitem_at_nowrap,
                   awkward_cuda_Index8_setitem_at_nowrap,
-                  ptr_lib)
+                  ptr_lib);
       (*awkward_cuda_Index8_setitem_at_nowrap_t)(ptr, offset, at, value);
     }
-    awkward_Index8_setitem_at_nowrap(ptr, offset, at, value);
+    else {
+      throw std::runtime_error("unrecognized ptr_lib in void index_setitem_at_nowrap");
+    }
   }
 
   template<>
@@ -3019,13 +3128,18 @@ namespace kernel {
                                int64_t offset,
                                int64_t at,
                                uint8_t value) {
-    if (ptr_lib == kernel::Lib::cuda_kernels) {
+    if (ptr_lib == kernel::Lib::cpu_kernels) {
+      awkward_IndexU8_setitem_at_nowrap(ptr, offset, at, value);
+    }
+    else if (ptr_lib == kernel::Lib::cuda_kernels) {
       FORM_KERNEL(awkward_IndexU8_setitem_at_nowrap,
                   awkward_cuda_IndexU8_setitem_at_nowrap,
-                  ptr_lib)
+                  ptr_lib);
       (*awkward_cuda_IndexU8_setitem_at_nowrap_t)(ptr, offset, at, value);
     }
-    awkward_IndexU8_setitem_at_nowrap(ptr, offset, at, value);
+    else {
+      throw std::runtime_error("unrecognized ptr_lib in void index_setitem_at_nowrap");
+    }
   }
 
   template<>
@@ -3034,13 +3148,18 @@ namespace kernel {
                                int64_t offset,
                                int64_t at,
                                int32_t value) {
-    if (ptr_lib == kernel::Lib::cuda_kernels) {
+    if (ptr_lib == kernel::Lib::cpu_kernels) {
+      awkward_Index32_setitem_at_nowrap(ptr, offset, at, value);
+    }
+    else if (ptr_lib == kernel::Lib::cuda_kernels) {
       FORM_KERNEL(awkward_Index32_setitem_at_nowrap,
                   awkward_cuda_Index32_setitem_at_nowrap,
-                  ptr_lib)
+                  ptr_lib);
       (*awkward_cuda_Index32_setitem_at_nowrap_t)(ptr, offset, at, value);
     }
-    awkward_Index32_setitem_at_nowrap(ptr, offset, at, value);
+    else {
+      throw std::runtime_error("unrecognized ptr_lib in void index_setitem_at_nowrap");
+    }
   }
 
   template<>
@@ -3049,13 +3168,18 @@ namespace kernel {
                                int64_t offset,
                                int64_t at,
                                uint32_t value) {
-    if (ptr_lib == kernel::Lib::cuda_kernels) {
+    if (ptr_lib == kernel::Lib::cpu_kernels) {
+      awkward_IndexU32_setitem_at_nowrap(ptr, offset, at, value);
+    }
+    else if (ptr_lib == kernel::Lib::cuda_kernels) {
       FORM_KERNEL(awkward_IndexU32_setitem_at_nowrap,
                   awkward_cuda_IndexU32_setitem_at_nowrap,
-                  ptr_lib)
+                  ptr_lib);
       (*awkward_cuda_IndexU32_setitem_at_nowrap_t)(ptr, offset, at, value);
     }
-    awkward_IndexU32_setitem_at_nowrap(ptr, offset, at, value);
+    else {
+      throw std::runtime_error("unrecognized ptr_lib in void index_setitem_at_nowrap");
+    }
   }
 
   template<>
@@ -3064,13 +3188,18 @@ namespace kernel {
                                int64_t offset,
                                int64_t at,
                                int64_t value) {
-    if (ptr_lib == kernel::Lib::cuda_kernels) {
+    if (ptr_lib == kernel::Lib::cpu_kernels) {
+      awkward_Index64_setitem_at_nowrap(ptr, offset, at, value);
+    }
+    else if (ptr_lib == kernel::Lib::cuda_kernels) {
       FORM_KERNEL(awkward_Index64_setitem_at_nowrap,
                   awkward_cuda_Index64_setitem_at_nowrap,
-                  ptr_lib)
+                  ptr_lib);
       (*awkward_cuda_Index64_setitem_at_nowrap_t)(ptr, offset, at, value);
     }
-    awkward_Index64_setitem_at_nowrap(ptr, offset, at, value);
+    else {
+      throw std::runtime_error("unrecognized ptr_lib in void index_setitem_at_nowrap");
+    }
   }
 
   ERROR ByteMaskedArray_getitem_carry_64(
@@ -3895,11 +4024,19 @@ namespace kernel {
     const int32_t *fromstops,
     int64_t stopsoffset,
     int64_t length) {
-    if (ptr_lib == kernel::Lib::cuda_kernels) {
+    if (ptr_lib == kernel::Lib::cpu_kernels) {
+      return awkward_ListArray32_num_64(
+        tonum,
+        fromstarts,
+        startsoffset,
+        fromstops,
+        stopsoffset,
+        length);
+    }
+    else if (ptr_lib == kernel::Lib::cuda_kernels) {
       FORM_KERNEL(awkward_ListArray32_num_64,
                   awkward_cuda_ListArray32_num_64,
                   ptr_lib);
-
       return (*awkward_cuda_ListArray32_num_64_t)(
         tonum,
         fromstarts,
@@ -3908,13 +4045,9 @@ namespace kernel {
         stopsoffset,
         length);
     }
-    return awkward_ListArray32_num_64(
-      tonum,
-      fromstarts,
-      startsoffset,
-      fromstops,
-      stopsoffset,
-      length);
+    else {
+      throw std::runtime_error("unrecognized ptr_lib in ListArray_num_64<int32_t>");
+    }
   }
 
   template<>
@@ -3926,11 +4059,19 @@ namespace kernel {
     const uint32_t *fromstops,
     int64_t stopsoffset,
     int64_t length) {
-    if (ptr_lib == kernel::Lib::cuda_kernels) {
+    if (ptr_lib == kernel::Lib::cpu_kernels) {
+      return awkward_ListArrayU32_num_64(
+        tonum,
+        fromstarts,
+        startsoffset,
+        fromstops,
+        stopsoffset,
+        length);
+    }
+    else if (ptr_lib == kernel::Lib::cuda_kernels) {
       FORM_KERNEL(awkward_ListArrayU32_num_64,
                   awkward_cuda_ListArrayU32_num_64,
                   ptr_lib);
-
       return (*awkward_cuda_ListArrayU32_num_64_t)(
         tonum,
         fromstarts,
@@ -3939,13 +4080,9 @@ namespace kernel {
         stopsoffset,
         length);
     }
-    return awkward_ListArrayU32_num_64(
-      tonum,
-      fromstarts,
-      startsoffset,
-      fromstops,
-      stopsoffset,
-      length);
+    else {
+      throw std::runtime_error("unrecognized ptr_lib in ListArray_num_64<uint32_t>");
+    }
   }
 
   template<>
@@ -3957,11 +4094,19 @@ namespace kernel {
     const int64_t *fromstops,
     int64_t stopsoffset,
     int64_t length) {
-    if (ptr_lib == kernel::Lib::cuda_kernels) {
+    if (ptr_lib == kernel::Lib::cpu_kernels) {
+      return awkward_ListArray64_num_64(
+        tonum,
+        fromstarts,
+        startsoffset,
+        fromstops,
+        stopsoffset,
+        length);
+    }
+    else if (ptr_lib == kernel::Lib::cuda_kernels) {
       FORM_KERNEL(awkward_ListArray64_num_64,
                   awkward_cuda_ListArray64_num_64,
                   ptr_lib);
-
       return (*awkward_cuda_ListArray64_num_64_t)(
         tonum,
         fromstarts,
@@ -3970,13 +4115,9 @@ namespace kernel {
         stopsoffset,
         length);
     }
-    return awkward_ListArray64_num_64(
-      tonum,
-      fromstarts,
-      startsoffset,
-      fromstops,
-      stopsoffset,
-      length);
+    else {
+      throw std::runtime_error("unrecognized ptr_lib in ListArray_num_64<int64_t>");
+    }
   }
 
   ERROR RegularArray_num_64(
@@ -3984,20 +4125,24 @@ namespace kernel {
     int64_t *tonum,
     int64_t size,
     int64_t length) {
-    if (ptr_lib == kernel::Lib::cuda_kernels) {
+    if (ptr_lib == kernel::Lib::cpu_kernels) {
+      return awkward_RegularArray_num_64(
+        tonum,
+        size,
+        length);
+    }
+    else if (ptr_lib == kernel::Lib::cuda_kernels) {
       FORM_KERNEL(awkward_RegularArray_num_64,
                   awkward_cuda_RegularArray_num_64,
-                  ptr_lib)
-
+                  ptr_lib);
       return (*awkward_cuda_RegularArray_num_64_t)(
         tonum,
         size,
         length);
     }
-    return awkward_RegularArray_num_64(
-      tonum,
-      size,
-      length);
+    else {
+      throw std::runtime_error("unrecognized ptr_lib in RegularArray_num_64");
+    }
   }
 
   template<>
