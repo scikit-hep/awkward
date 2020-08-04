@@ -361,12 +361,12 @@ namespace awkward {
     Error err =  kernel::copy_to<T>(ptr_lib,
                                     ptr_lib_,
                                     ptr.get(),
-                                    ptr_.get(),
+                                    data(),
                                     length_);
     util::handle_error(err);
 
     return IndexOf<T>(ptr,
-                      offset(),
+                      0,
                       length(),
                       ptr_lib);
   }

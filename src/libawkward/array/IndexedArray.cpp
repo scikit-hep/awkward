@@ -364,16 +364,16 @@ namespace awkward {
       int64_t numnull;
       struct Error err1 = kernel::IndexedArray_numnull<T>(
         &numnull,
-        index_.ptr().get(),
-        index_.offset(),
+        index_.data(),
+        0,   // DROP
         index_.length());
       util::handle_error(err1, classname(), identities_.get());
 
       Index64 nextcarry(length() - numnull);
       struct Error err2 = kernel::IndexedArray_flatten_nextcarry_64<T>(
-        nextcarry.ptr().get(),
-        index_.ptr().get(),
-        index_.offset(),
+        nextcarry.data(),
+        index_.data(),
+        0,   // DROP
         index_.length(),
         content_.get()->length());
       util::handle_error(err2, classname(), identities_.get());
@@ -383,9 +383,9 @@ namespace awkward {
     else {
       Index64 nextcarry(length());
       struct Error err = kernel::IndexedArray_getitem_nextcarry_64<T>(
-        nextcarry.ptr().get(),
-        index_.ptr().get(),
-        index_.offset(),
+        nextcarry.data(),
+        index_.data(),
+        0,   // DROP
         index_.length(),
         content_.get()->length());
       util::handle_error(err, classname(), identities_.get());
@@ -407,11 +407,11 @@ namespace awkward {
 
     Index64 nextindex(index_.length());
     struct Error err = kernel::IndexedArray_overlay_mask8_to64<T>(
-      nextindex.ptr().get(),
-      mask.ptr().get(),
-      mask.offset(),
-      index_.ptr().get(),
-      index_.offset(),
+      nextindex.data(),
+      mask.data(),
+      0,   // DROP
+      index_.data(),
+      0,   // DROP
       index_.length());
     util::handle_error(err, classname(), identities_.get());
 
@@ -425,9 +425,9 @@ namespace awkward {
     if (ISOPTION) {
       Index8 out(index_.length());
       struct Error err = kernel::IndexedArray_mask8(
-        out.ptr().get(),
-        index_.ptr().get(),
-        index_.offset(),
+        out.data(),
+        index_.data(),
+        0,   // DROP
         index_.length());
       util::handle_error(err, classname(), identities_.get());
       return out;
@@ -435,7 +435,7 @@ namespace awkward {
     else {
       Index8 out(index_.length());
       struct Error err = kernel::zero_mask8(
-        out.ptr().get(),
+        out.data(),
         index_.length());
       util::handle_error(err, classname(), identities_.get());
       return out;
@@ -451,12 +451,12 @@ namespace awkward {
         Index32 inner = rawcontent->index();
         Index64 result(index_.length());
         struct Error err = kernel::IndexedArray_simplify32_to64(
-          result.ptr().get(),
-          index_.ptr().get(),
-          index_.offset(),
+          result.data(),
+          index_.data(),
+          0,   // DROP
           index_.length(),
-          inner.ptr().get(),
-          inner.offset(),
+          inner.data(),
+          0,   // DROP
           inner.length());
         util::handle_error(err, classname(), identities_.get());
         return std::make_shared<IndexedOptionArray64>(identities_,
@@ -469,12 +469,12 @@ namespace awkward {
         IndexU32 inner = rawcontent->index();
         Index64 result(index_.length());
         struct Error err = kernel::IndexedArray_simplifyU32_to64(
-          result.ptr().get(),
-          index_.ptr().get(),
-          index_.offset(),
+          result.data(),
+          index_.data(),
+          0,   // DROP
           index_.length(),
-          inner.ptr().get(),
-          inner.offset(),
+          inner.data(),
+          0,   // DROP
           inner.length());
         util::handle_error(err, classname(), identities_.get());
         return std::make_shared<IndexedOptionArray64>(identities_,
@@ -487,12 +487,12 @@ namespace awkward {
         Index64 inner = rawcontent->index();
         Index64 result(index_.length());
         struct Error err = kernel::IndexedArray_simplify64_to64(
-          result.ptr().get(),
-          index_.ptr().get(),
-          index_.offset(),
+          result.data(),
+          index_.data(),
+          0,   // DROP
           index_.length(),
-          inner.ptr().get(),
-          inner.offset(),
+          inner.data(),
+          0,   // DROP
           inner.length());
         util::handle_error(err, classname(), identities_.get());
         return std::make_shared<IndexedOptionArray64>(identities_,
@@ -505,12 +505,12 @@ namespace awkward {
         Index32 inner = rawcontent->index();
         Index64 result(index_.length());
         struct Error err = kernel::IndexedArray_simplify32_to64(
-          result.ptr().get(),
-          index_.ptr().get(),
-          index_.offset(),
+          result.data(),
+          index_.data(),
+          0,   // DROP
           index_.length(),
-          inner.ptr().get(),
-          inner.offset(),
+          inner.data(),
+          0,   // DROP
           inner.length());
         util::handle_error(err, classname(), identities_.get());
         return std::make_shared<IndexedOptionArray64>(identities_,
@@ -523,12 +523,12 @@ namespace awkward {
         Index64 inner = rawcontent->index();
         Index64 result(index_.length());
         struct Error err = kernel::IndexedArray_simplify64_to64(
-          result.ptr().get(),
-          index_.ptr().get(),
-          index_.offset(),
+          result.data(),
+          index_.data(),
+          0,   // DROP
           index_.length(),
-          inner.ptr().get(),
-          inner.offset(),
+          inner.data(),
+          0,   // DROP
           inner.length());
         util::handle_error(err, classname(), identities_.get());
         return std::make_shared<IndexedOptionArray64>(identities_,
@@ -544,12 +544,12 @@ namespace awkward {
         Index64 inner = rawcontent->index();
         Index64 result(index_.length());
         struct Error err = kernel::IndexedArray_simplify64_to64(
-          result.ptr().get(),
-          index_.ptr().get(),
-          index_.offset(),
+          result.data(),
+          index_.data(),
+          0,   // DROP
           index_.length(),
-          inner.ptr().get(),
-          inner.offset(),
+          inner.data(),
+          0,   // DROP
           inner.length());
         util::handle_error(err, classname(), identities_.get());
         return std::make_shared<IndexedOptionArray64>(identities_,
@@ -565,12 +565,12 @@ namespace awkward {
         Index64 inner = rawcontent->index();
         Index64 result(index_.length());
         struct Error err = kernel::IndexedArray_simplify64_to64(
-          result.ptr().get(),
-          index_.ptr().get(),
-          index_.offset(),
+          result.data(),
+          index_.data(),
+          0,   // DROP
           index_.length(),
-          inner.ptr().get(),
-          inner.offset(),
+          inner.data(),
+          0,   // DROP
           inner.length());
         util::handle_error(err, classname(), identities_.get());
         return std::make_shared<IndexedOptionArray64>(identities_,
@@ -586,12 +586,12 @@ namespace awkward {
         Index64 inner = rawcontent->index();
         Index64 result(index_.length());
         struct Error err = kernel::IndexedArray_simplify64_to64(
-          result.ptr().get(),
-          index_.ptr().get(),
-          index_.offset(),
+          result.data(),
+          index_.data(),
+          0,   // DROP
           index_.length(),
-          inner.ptr().get(),
-          inner.offset(),
+          inner.data(),
+          0,   // DROP
           inner.length());
         util::handle_error(err, classname(), identities_.get());
         return std::make_shared<IndexedOptionArray64>(identities_,
@@ -609,12 +609,12 @@ namespace awkward {
         Index32 inner = rawcontent->index();
         Index64 result(index_.length());
         struct Error err = kernel::IndexedArray_simplify32_to64(
-          result.ptr().get(),
-          index_.ptr().get(),
-          index_.offset(),
+          result.data(),
+          index_.data(),
+          0,   // DROP
           index_.length(),
-          inner.ptr().get(),
-          inner.offset(),
+          inner.data(),
+          0,   // DROP
           inner.length());
         util::handle_error(err, classname(), identities_.get());
         return std::make_shared<IndexedArray64>(identities_,
@@ -627,12 +627,12 @@ namespace awkward {
         IndexU32 inner = rawcontent->index();
         Index64 result(index_.length());
         struct Error err = kernel::IndexedArray_simplifyU32_to64(
-          result.ptr().get(),
-          index_.ptr().get(),
-          index_.offset(),
+          result.data(),
+          index_.data(),
+          0,   // DROP
           index_.length(),
-          inner.ptr().get(),
-          inner.offset(),
+          inner.data(),
+          0,   // DROP
           inner.length());
         util::handle_error(err, classname(), identities_.get());
         return std::make_shared<IndexedArray64>(identities_,
@@ -645,12 +645,12 @@ namespace awkward {
         Index64 inner = rawcontent->index();
         Index64 result(index_.length());
         struct Error err = kernel::IndexedArray_simplify64_to64(
-          result.ptr().get(),
-          index_.ptr().get(),
-          index_.offset(),
+          result.data(),
+          index_.data(),
+          0,   // DROP
           index_.length(),
-          inner.ptr().get(),
-          inner.offset(),
+          inner.data(),
+          0,   // DROP
           inner.length());
         util::handle_error(err, classname(), identities_.get());
         return std::make_shared<IndexedArray64>(identities_,
@@ -663,12 +663,12 @@ namespace awkward {
         Index32 inner = rawcontent->index();
         Index64 result(index_.length());
         struct Error err = kernel::IndexedArray_simplify32_to64(
-          result.ptr().get(),
-          index_.ptr().get(),
-          index_.offset(),
+          result.data(),
+          index_.data(),
+          0,   // DROP
           index_.length(),
-          inner.ptr().get(),
-          inner.offset(),
+          inner.data(),
+          0,   // DROP
           inner.length());
         util::handle_error(err, classname(), identities_.get());
         return std::make_shared<IndexedOptionArray64>(identities_,
@@ -681,12 +681,12 @@ namespace awkward {
         Index64 inner = rawcontent->index();
         Index64 result(index_.length());
         struct Error err = kernel::IndexedArray_simplify64_to64(
-          result.ptr().get(),
-          index_.ptr().get(),
-          index_.offset(),
+          result.data(),
+          index_.data(),
+          0,   // DROP
           index_.length(),
-          inner.ptr().get(),
-          inner.offset(),
+          inner.data(),
+          0,   // DROP
           inner.length());
         util::handle_error(err, classname(), identities_.get());
         return std::make_shared<IndexedOptionArray64>(identities_,
@@ -702,12 +702,12 @@ namespace awkward {
         Index64 inner = rawcontent->index();
         Index64 result(index_.length());
         struct Error err = kernel::IndexedArray_simplify64_to64(
-          result.ptr().get(),
-          index_.ptr().get(),
-          index_.offset(),
+          result.data(),
+          index_.data(),
+          0,   // DROP
           index_.length(),
-          inner.ptr().get(),
-          inner.offset(),
+          inner.data(),
+          0,   // DROP
           inner.length());
         util::handle_error(err, classname(), identities_.get());
         return std::make_shared<IndexedOptionArray64>(identities_,
@@ -723,12 +723,12 @@ namespace awkward {
         Index64 inner = rawcontent->index();
         Index64 result(index_.length());
         struct Error err = kernel::IndexedArray_simplify64_to64(
-          result.ptr().get(),
-          index_.ptr().get(),
-          index_.offset(),
+          result.data(),
+          index_.data(),
+          0,   // DROP
           index_.length(),
-          inner.ptr().get(),
-          inner.offset(),
+          inner.data(),
+          0,   // DROP
           inner.length());
         util::handle_error(err, classname(), identities_.get());
         return std::make_shared<IndexedOptionArray64>(identities_,
@@ -744,12 +744,12 @@ namespace awkward {
         Index64 inner = rawcontent->index();
         Index64 result(index_.length());
         struct Error err = kernel::IndexedArray_simplify64_to64(
-          result.ptr().get(),
-          index_.ptr().get(),
-          index_.offset(),
+          result.data(),
+          index_.data(),
+          0,   // DROP
           index_.length(),
-          inner.ptr().get(),
-          inner.offset(),
+          inner.data(),
+          0,   // DROP
           inner.length());
         util::handle_error(err, classname(), identities_.get());
         return std::make_shared<IndexedOptionArray64>(identities_,
@@ -826,11 +826,11 @@ namespace awkward {
           reinterpret_cast<Identities32*>(subidentities.get());
         struct Error err = kernel::Identities_from_IndexedArray<int32_t, T>(
           &uniquecontents,
-          rawsubidentitites->ptr().get(),
-          rawidentities->ptr().get(),
-          index_.ptr().get(),
-          rawidentities->offset(),
-          index_.offset(),
+          rawsubidentitites->data(),
+          rawidentities->data(),
+          index_.data(),
+          0,   // DROP
+          0,   // DROP
           content_.get()->length(),
           length(),
           rawidentities->width());
@@ -854,11 +854,11 @@ namespace awkward {
           reinterpret_cast<Identities64*>(subidentities.get());
         struct Error err = kernel::Identities_from_IndexedArray<int64_t, T>(
           &uniquecontents,
-          rawsubidentitites->ptr().get(),
-          rawidentities->ptr().get(),
-          index_.ptr().get(),
-          rawidentities->offset(),
-          index_.offset(),
+          rawsubidentitites->data(),
+          rawidentities->data(),
+          index_.data(),
+          0,   // DROP
+          0,   // DROP
           content_.get()->length(),
           length(),
           rawidentities->width());
@@ -1172,9 +1172,9 @@ namespace awkward {
       else {
         Index64 nextcarry(length());
         struct Error err = kernel::IndexedArray_getitem_nextcarry_64<T>(
-          nextcarry.ptr().get(),
-          index_.ptr().get(),
-          index_.offset(),
+          nextcarry.data(),
+          index_.data(),
+          0,   // DROP
           index_.length(),
           content_.get()->length());
         util::handle_error(err, classname(), identities_.get());
