@@ -2,11 +2,9 @@
 
 #include <algorithm>
 #include <iomanip>
-#include <limits>
 #include <numeric>
 #include <sstream>
 #include <stdexcept>
-#include <type_traits>
 
 #include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
