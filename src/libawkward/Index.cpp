@@ -157,7 +157,7 @@ namespace awkward {
     out << "]\" offset=\"" << offset_ << "\" length=\"" << length_
         << "\" at=\"0x" << std::hex << std::setw(12) << std::setfill('0')
         << reinterpret_cast<ssize_t>(ptr_.get());
-    if(ptr_lib_ == kernel::lib::cpu) {
+    if (ptr_lib_ == kernel::lib::cpu) {
       out << "\"/>" << post;
     }
     else {
@@ -366,7 +366,7 @@ namespace awkward {
   template<typename T>
   const IndexOf<T>
   IndexOf<T>::copy_to(kernel::lib ptr_lib) const {
-    if(ptr_lib == ptr_lib_) {
+    if (ptr_lib == ptr_lib_) {
       return *this;
     }
 

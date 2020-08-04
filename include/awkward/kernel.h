@@ -166,9 +166,9 @@ namespace awkward {
     ///
     /// @note This does not have a corresponding cpu_kernel
     template <typename T>
-    T NumpyArray_getitem_at(kernel::lib ptr_lib,
-                            T* ptr,
-                            int64_t at);
+    T NumpyArray_getitem_at0(
+      kernel::lib ptr_lib,
+      T* ptr);
 
     // FIXME: move regularize_rangeslice to common.h; it's not a kernel.
     void regularize_rangeslice(

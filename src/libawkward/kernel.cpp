@@ -927,200 +927,200 @@ namespace awkward {
   /////////////////////////////////// awkward/cpu-kernels/getitem.h
 
     template<>
-    bool NumpyArray_getitem_at(kernel::lib ptr_lib,
-                               bool *ptr,
-                               int64_t at) {
+    bool NumpyArray_getitem_at0(
+      kernel::lib ptr_lib,
+      bool *ptr) {
       if (ptr_lib == kernel::lib::cpu) {
-        return awkward_NumpyArraybool_getitem_at(ptr, at);
+        return awkward_NumpyArraybool_getitem_at0(ptr);
       }
       else if (ptr_lib == kernel::lib::cuda) {
-        FORM_KERNEL(awkward_NumpyArraybool_getitem_at,
-                    awkward_cuda_NumpyArraybool_getitem_at,
+        FORM_KERNEL(awkward_NumpyArraybool_getitem_at0,
+                    awkward_cuda_NumpyArraybool_getitem_at0,
                     ptr_lib);
-        return (*awkward_cuda_NumpyArraybool_getitem_at_t)(ptr, at);
+        return (*awkward_cuda_NumpyArraybool_getitem_at0_t)(ptr);
       }
       else {
-        throw std::runtime_error("unrecognized ptr_lib in bool NumpyArray_getitem_at");
+        throw std::runtime_error("unrecognized ptr_lib in bool NumpyArray_getitem_at0");
       }
     }
 
     template<>
-    int8_t NumpyArray_getitem_at(kernel::lib ptr_lib,
-                                 int8_t *ptr,
-                                 int64_t at) {
+    int8_t NumpyArray_getitem_at0(
+      kernel::lib ptr_lib,
+      int8_t *ptr) {
       if (ptr_lib == kernel::lib::cpu) {
-        return awkward_NumpyArray8_getitem_at(ptr, at);
+        return awkward_NumpyArray8_getitem_at0(ptr);
       }
       else if (ptr_lib == kernel::lib::cuda) {
-        FORM_KERNEL(awkward_NumpyArray8_getitem_at,
-                    awkward_cuda_NumpyArray8_getitem_at,
+        FORM_KERNEL(awkward_NumpyArray8_getitem_at0,
+                    awkward_cuda_NumpyArray8_getitem_at0,
                     ptr_lib);
-        return (*awkward_cuda_NumpyArray8_getitem_at_t)(ptr, at);
+        return (*awkward_cuda_NumpyArray8_getitem_at0_t)(ptr);
       }
       else {
-        throw std::runtime_error("unrecognized ptr_lib in int8_t NumpyArray_getitem_at");
+        throw std::runtime_error("unrecognized ptr_lib in int8_t NumpyArray_getitem_at0");
       }
     }
 
     template<>
-    uint8_t NumpyArray_getitem_at(kernel::lib ptr_lib,
-                                  uint8_t *ptr,
-                                  int64_t at) {
+    uint8_t NumpyArray_getitem_at0(
+      kernel::lib ptr_lib,
+      uint8_t *ptr) {
       if (ptr_lib == kernel::lib::cpu) {
-        return awkward_NumpyArrayU8_getitem_at(ptr, at);
+        return awkward_NumpyArrayU8_getitem_at0(ptr);
       }
       else if (ptr_lib == kernel::lib::cuda) {
-        FORM_KERNEL(awkward_NumpyArrayU8_getitem_at,
-                    awkward_cuda_NumpyArrayU8_getitem_at,
+        FORM_KERNEL(awkward_NumpyArrayU8_getitem_at0,
+                    awkward_cuda_NumpyArrayU8_getitem_at0,
                     ptr_lib);
-        return (*awkward_cuda_NumpyArrayU8_getitem_at_t)(ptr, at);
+        return (*awkward_cuda_NumpyArrayU8_getitem_at0_t)(ptr);
       }
       else {
-        throw std::runtime_error("unrecognized ptr_lib in uint8_t NumpyArray_getitem_at");
+        throw std::runtime_error("unrecognized ptr_lib in uint8_t NumpyArray_getitem_at0");
       }
     }
 
     template<>
-    int16_t NumpyArray_getitem_at(kernel::lib ptr_lib,
-                                  int16_t *ptr,
-                                  int64_t at) {
+    int16_t NumpyArray_getitem_at0(
+      kernel::lib ptr_lib,
+      int16_t *ptr) {
       if (ptr_lib == kernel::lib::cpu) {
-        return awkward_NumpyArray16_getitem_at(ptr, at);
+        return awkward_NumpyArray16_getitem_at0(ptr);
       }
       else if (ptr_lib == kernel::lib::cuda) {
-        FORM_KERNEL(awkward_NumpyArray16_getitem_at,
-                    awkward_cuda_NumpyArray16_getitem_at,
+        FORM_KERNEL(awkward_NumpyArray16_getitem_at0,
+                    awkward_cuda_NumpyArray16_getitem_at0,
                     ptr_lib);
-        return (*awkward_cuda_NumpyArray16_getitem_at_t)(ptr, at);
+        return (*awkward_cuda_NumpyArray16_getitem_at0_t)(ptr);
       }
       else {
-        throw std::runtime_error("unrecognized ptr_lib in int16_t NumpyArray_getitem_at");
+        throw std::runtime_error("unrecognized ptr_lib in int16_t NumpyArray_getitem_at0");
       }
     }
 
     template<>
-    uint16_t NumpyArray_getitem_at(kernel::lib ptr_lib,
-                                   uint16_t *ptr,
-                                   int64_t at) {
+    uint16_t NumpyArray_getitem_at0(
+      kernel::lib ptr_lib,
+      uint16_t *ptr) {
       if (ptr_lib == kernel::lib::cpu) {
-        return awkward_NumpyArrayU16_getitem_at(ptr, at);
+        return awkward_NumpyArrayU16_getitem_at0(ptr);
       }
       else if (ptr_lib == kernel::lib::cuda) {
-        FORM_KERNEL(awkward_NumpyArrayU16_getitem_at,
-                    awkward_cuda_NumpyArrayU16_getitem_at,
+        FORM_KERNEL(awkward_NumpyArrayU16_getitem_at0,
+                    awkward_cuda_NumpyArrayU16_getitem_at0,
                     ptr_lib);
-        return (*awkward_cuda_NumpyArrayU16_getitem_at_t)(ptr, at);
+        return (*awkward_cuda_NumpyArrayU16_getitem_at0_t)(ptr);
       }
       else {
-        throw std::runtime_error("unrecognized ptr_lib in uint16_t NumpyArray_getitem_at");
+        throw std::runtime_error("unrecognized ptr_lib in uint16_t NumpyArray_getitem_at0");
       }
     }
 
     template<>
-    int32_t NumpyArray_getitem_at(kernel::lib ptr_lib,
-                                  int32_t *ptr,
-                                  int64_t at) {
+    int32_t NumpyArray_getitem_at0(
+      kernel::lib ptr_lib,
+      int32_t *ptr) {
       if (ptr_lib == kernel::lib::cpu) {
-        return awkward_NumpyArray32_getitem_at(ptr, at);
+        return awkward_NumpyArray32_getitem_at0(ptr);
       }
       else if (ptr_lib == kernel::lib::cuda) {
-        FORM_KERNEL(awkward_NumpyArray32_getitem_at,
-                    awkward_cuda_NumpyArray32_getitem_at,
+        FORM_KERNEL(awkward_NumpyArray32_getitem_at0,
+                    awkward_cuda_NumpyArray32_getitem_at0,
                     ptr_lib);
-        return (*awkward_cuda_NumpyArray32_getitem_at_t)(ptr, at);
+        return (*awkward_cuda_NumpyArray32_getitem_at0_t)(ptr);
       }
       else {
-        throw std::runtime_error("unrecognized ptr_lib in int32_t NumpyArray_getitem_at");
+        throw std::runtime_error("unrecognized ptr_lib in int32_t NumpyArray_getitem_at0");
       }
     }
 
     template<>
-    uint32_t NumpyArray_getitem_at(kernel::lib ptr_lib,
-                                   uint32_t *ptr,
-                                   int64_t at) {
+    uint32_t NumpyArray_getitem_at0(
+      kernel::lib ptr_lib,
+      uint32_t *ptr) {
       if (ptr_lib == kernel::lib::cpu) {
-        return awkward_NumpyArrayU32_getitem_at(ptr, at);
+        return awkward_NumpyArrayU32_getitem_at0(ptr);
       }
       else if (ptr_lib == kernel::lib::cuda) {
-        FORM_KERNEL(awkward_NumpyArrayU32_getitem_at,
-                    awkward_cuda_NumpyArrayU32_getitem_at,
+        FORM_KERNEL(awkward_NumpyArrayU32_getitem_at0,
+                    awkward_cuda_NumpyArrayU32_getitem_at0,
                     ptr_lib);
-        return (*awkward_cuda_NumpyArrayU32_getitem_at_t)(ptr, at);
+        return (*awkward_cuda_NumpyArrayU32_getitem_at0_t)(ptr);
       }
       else {
-        throw std::runtime_error("unrecognized ptr_lib in uint32_t NumpyArray_getitem_at");
+        throw std::runtime_error("unrecognized ptr_lib in uint32_t NumpyArray_getitem_at0");
       }
     }
 
     template<>
-    int64_t NumpyArray_getitem_at(kernel::lib ptr_lib,
-                                  int64_t *ptr,
-                                  int64_t at) {
+    int64_t NumpyArray_getitem_at0(
+        kernel::lib ptr_lib,
+        int64_t *ptr) {
       if (ptr_lib == kernel::lib::cpu) {
-        return awkward_NumpyArray64_getitem_at(ptr, at);
+        return awkward_NumpyArray64_getitem_at0(ptr);
       }
       else if (ptr_lib == kernel::lib::cuda) {
-        FORM_KERNEL(awkward_NumpyArray64_getitem_at,
-                    awkward_cuda_NumpyArray64_getitem_at,
+        FORM_KERNEL(awkward_NumpyArray64_getitem_at0,
+                    awkward_cuda_NumpyArray64_getitem_at0,
                     ptr_lib);
-        return (*awkward_cuda_NumpyArray64_getitem_at_t)(ptr, at);
+        return (*awkward_cuda_NumpyArray64_getitem_at0_t)(ptr);
       }
       else {
-        throw std::runtime_error("unrecognized ptr_lib in int64_t NumpyArray_getitem_at");
+        throw std::runtime_error("unrecognized ptr_lib in int64_t NumpyArray_getitem_at0");
       }
     }
 
     template<>
-    uint64_t NumpyArray_getitem_at(kernel::lib ptr_lib,
-                                   uint64_t *ptr,
-                                   int64_t at) {
+    uint64_t NumpyArray_getitem_at0(
+        kernel::lib ptr_lib,
+        uint64_t *ptr) {
       if (ptr_lib == kernel::lib::cpu) {
-        return awkward_NumpyArrayU64_getitem_at(ptr, at);
+        return awkward_NumpyArrayU64_getitem_at0(ptr);
       }
       else if (ptr_lib == kernel::lib::cuda) {
-        FORM_KERNEL(awkward_NumpyArrayU64_getitem_at,
-                    awkward_cuda_NumpyArrayU64_getitem_at,
+        FORM_KERNEL(awkward_NumpyArrayU64_getitem_at0,
+                    awkward_cuda_NumpyArrayU64_getitem_at0,
                     ptr_lib);
-        return (*awkward_cuda_NumpyArrayU64_getitem_at_t)(ptr, at);
+        return (*awkward_cuda_NumpyArrayU64_getitem_at0_t)(ptr);
       }
       else {
-        throw std::runtime_error("unrecognized ptr_lib in uint64_t NumpyArray_getitem_at");
+        throw std::runtime_error("unrecognized ptr_lib in uint64_t NumpyArray_getitem_at0");
       }
     }
 
     template<>
-    float NumpyArray_getitem_at(kernel::lib ptr_lib,
-                                float *ptr,
-                                int64_t at) {
+    float NumpyArray_getitem_at0(
+      kernel::lib ptr_lib,
+      float *ptr) {
       if (ptr_lib == kernel::lib::cpu) {
-        return awkward_NumpyArrayfloat32_getitem_at(ptr, at);
+        return awkward_NumpyArrayfloat32_getitem_at0(ptr);
       }
       else if (ptr_lib == kernel::lib::cuda) {
-        FORM_KERNEL(awkward_NumpyArrayfloat32_getitem_at,
-                    awkward_cuda_NumpyArrayfloat32_getitem_at,
+        FORM_KERNEL(awkward_NumpyArrayfloat32_getitem_at0,
+                    awkward_cuda_NumpyArrayfloat32_getitem_at0,
                     ptr_lib);
-        return (*awkward_cuda_NumpyArrayfloat32_getitem_at_t)(ptr, at);
+        return (*awkward_cuda_NumpyArrayfloat32_getitem_at0_t)(ptr);
       }
       else {
-        throw std::runtime_error("unrecognized ptr_lib in float NumpyArray_getitem_at");
+        throw std::runtime_error("unrecognized ptr_lib in float NumpyArray_getitem_at0");
       }
     }
 
     template<>
-    double NumpyArray_getitem_at(kernel::lib ptr_lib,
-                                 double *ptr,
-                                 int64_t at) {
+    double NumpyArray_getitem_at0(
+      kernel::lib ptr_lib,
+      double *ptr) {
       if (ptr_lib == kernel::lib::cpu) {
-        return awkward_NumpyArrayfloat64_getitem_at(ptr, at);
+        return awkward_NumpyArrayfloat64_getitem_at0(ptr);
       }
       else if (ptr_lib == kernel::lib::cuda) {
-        FORM_KERNEL(awkward_NumpyArrayfloat64_getitem_at,
-                    awkward_cuda_NumpyArrayfloat64_getitem_at,
+        FORM_KERNEL(awkward_NumpyArrayfloat64_getitem_at0,
+                    awkward_cuda_NumpyArrayfloat64_getitem_at0,
                     ptr_lib);
-        return (*awkward_cuda_NumpyArrayfloat64_getitem_at_t)(ptr, at);
+        return (*awkward_cuda_NumpyArrayfloat64_getitem_at0_t)(ptr);
       }
       else {
-        throw std::runtime_error("unrecognized ptr_lib in double NumpyArray_getitem_at");
+        throw std::runtime_error("unrecognized ptr_lib in double NumpyArray_getitem_at0");
       }
     }
 

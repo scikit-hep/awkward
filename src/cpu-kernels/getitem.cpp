@@ -2880,60 +2880,49 @@ int64_t awkward_Index64_getitem_at_nowrap(
   return ptr[(size_t)(offset + at)];
 }
 
-bool awkward_NumpyArraybool_getitem_at(
-  const bool* ptr,
-  int64_t at) {
-  return ptr[at];
+bool awkward_NumpyArraybool_getitem_at0(
+  const bool* ptr) {
+  return ptr[0];
 }
-int8_t awkward_NumpyArray8_getitem_at(
-  const int8_t* ptr,
-  int64_t at) {
-  return ptr[at];
+int8_t awkward_NumpyArray8_getitem_at0(
+  const int8_t* ptr) {
+  return ptr[0];
 }
-uint8_t awkward_NumpyArrayU8_getitem_at(
-  const uint8_t* ptr,
-  int64_t at) {
-  return ptr[at];
+uint8_t awkward_NumpyArrayU8_getitem_at0(
+  const uint8_t* ptr) {
+  return ptr[0];
 }
-int16_t awkward_NumpyArray16_getitem_at(
-  const int16_t* ptr,
-  int64_t at) {
-  return ptr[at];
+int16_t awkward_NumpyArray16_getitem_at0(
+  const int16_t* ptr) {
+  return ptr[0];
 }
-uint16_t awkward_NumpyArrayU16_getitem_at(
-  const uint16_t* ptr,
-  int64_t at) {
-  return ptr[at];
+uint16_t awkward_NumpyArrayU16_getitem_at0(
+  const uint16_t* ptr) {
+  return ptr[0];
 }
-int32_t awkward_NumpyArray32_getitem_at(
-  const int32_t* ptr,
-  int64_t at) {
-  return ptr[at];
+int32_t awkward_NumpyArray32_getitem_at0(
+  const int32_t* ptr) {
+  return ptr[0];
 }
-uint32_t awkward_NumpyArrayU32_getitem_at(
-  const uint32_t* ptr,
-  int64_t at) {
-  return ptr[at];
+uint32_t awkward_NumpyArrayU32_getitem_at0(
+  const uint32_t* ptr) {
+  return ptr[0];
 }
-int64_t awkward_NumpyArray64_getitem_at(
-  const int64_t* ptr,
-  int64_t at) {
-  return ptr[at];
+int64_t awkward_NumpyArray64_getitem_at0(
+  const int64_t* ptr) {
+  return ptr[0];
 }
-uint64_t awkward_NumpyArrayU64_getitem_at(
-  const uint64_t* ptr,
-  int64_t at) {
-  return ptr[at];
+uint64_t awkward_NumpyArrayU64_getitem_at0(
+  const uint64_t* ptr) {
+  return ptr[0];
 }
-float awkward_NumpyArrayfloat32_getitem_at(
-  const float* ptr,
-  int64_t at) {
-  return ptr[at];
+float awkward_NumpyArrayfloat32_getitem_at0(
+  const float* ptr) {
+  return ptr[0];
 }
-double awkward_NumpyArrayfloat64_getitem_at(
-  const double* ptr,
-  int64_t at) {
-  return ptr[at];
+double awkward_NumpyArrayfloat64_getitem_at0(
+  const double* ptr) {
+  return ptr[0];
 }
 
 void awkward_Index8_setitem_at_nowrap(

@@ -520,16 +520,16 @@ namespace awkward {
           out << " ";
         }
         if (std::is_same<T, bool>::value) {
-          out << (kernel::NumpyArray_getitem_at(ptr_lib, ptr2, 0) ? "true" : "false");
+          out << (kernel::NumpyArray_getitem_at0(ptr_lib, ptr2) ? "true" : "false");
         }
         else if (std::is_same<T, char>::value) {
-          out << (int)kernel::NumpyArray_getitem_at(ptr_lib, ptr2, 0);
+          out << (int)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
         }
         else if (std::is_same<T, unsigned char>::value) {
-          out << (unsigned int)kernel::NumpyArray_getitem_at(ptr_lib, ptr2, 0);
+          out << (unsigned int)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
         }
         else {
-          out << kernel::NumpyArray_getitem_at(ptr_lib, ptr2, 0);
+          out << kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
         }
       }
     }
@@ -541,16 +541,16 @@ namespace awkward {
           out << " ";
         }
         if (std::is_same<T, bool>::value) {
-          out << (kernel::NumpyArray_getitem_at(ptr_lib, ptr2, 0) ? "true" : "false");
+          out << (kernel::NumpyArray_getitem_at0(ptr_lib, ptr2) ? "true" : "false");
         }
         else if (std::is_same<T, char>::value) {
-          out << (int)kernel::NumpyArray_getitem_at(ptr_lib, ptr2, 0);
+          out << (int)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
         }
         else if (std::is_same<T, unsigned char>::value) {
-          out << (unsigned int)kernel::NumpyArray_getitem_at(ptr_lib, ptr2, 0);
+          out << (unsigned int)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
         }
         else {
-          out << kernel::NumpyArray_getitem_at(ptr_lib, ptr2, 0);
+          out << kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
         }
       }
       out << " ... ";
@@ -561,16 +561,16 @@ namespace awkward {
           out << " ";
         }
         if (std::is_same<T, bool>::value) {
-          out << (kernel::NumpyArray_getitem_at(ptr_lib, ptr2, 0) ? "true" : "false");
+          out << (kernel::NumpyArray_getitem_at0(ptr_lib, ptr2) ? "true" : "false");
         }
         else if (std::is_same<T, char>::value) {
-          out << (int)kernel::NumpyArray_getitem_at(ptr_lib, ptr2, 0);
+          out << (int)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
         }
         else if (std::is_same<T, unsigned char>::value) {
-          out << (unsigned int)kernel::NumpyArray_getitem_at(ptr_lib, ptr2, 0);
+          out << (unsigned int)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
         }
         else {
-          out << kernel::NumpyArray_getitem_at(ptr_lib, ptr2, 0);
+          out << kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
         }
       }
     }
@@ -738,7 +738,7 @@ namespace awkward {
     out << "\" at=\"0x";
     out << std::hex << std::setw(12) << std::setfill('0')
         << reinterpret_cast<ssize_t>(ptr_.get());
-    if(ptr_lib() == kernel::lib::cuda) {
+    if (ptr_lib() == kernel::lib::cuda) {
       out << "\">\n";
       out << kernellib_asstring(indent + std::string("    "), "", "\n");
 

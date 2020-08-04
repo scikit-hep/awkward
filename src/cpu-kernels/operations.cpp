@@ -2963,7 +2963,7 @@ ERROR awkward_IndexedOptionArray_rpad_and_clip_mask_axis1(
   int64_t length) {
   int64_t count = 0;
   for (int64_t i = 0; i < length; i++) {
-    if(frommask[i]) {
+    if (frommask[i]) {
       toindex[i] = -1;
     }
     else {

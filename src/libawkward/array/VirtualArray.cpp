@@ -304,7 +304,7 @@ namespace awkward {
     ContentPtr out(nullptr);
     kernel::lib src_ptrlib = check_key(cache_key_);
     if (cache_.get() != nullptr) {
-      if(src_ptrlib != ptr_lib_) {
+      if (src_ptrlib != ptr_lib_) {
         out = cache_.get()->get(cache_key())->copy_to(ptr_lib_);
       }
       else {
@@ -312,7 +312,7 @@ namespace awkward {
       }
     }
     if (out.get() == nullptr) {
-      if(src_ptrlib != ptr_lib_) {
+      if (src_ptrlib != ptr_lib_) {
         out = generator_.get()->generate_and_check()->copy_to(src_ptrlib);
       }
       else {

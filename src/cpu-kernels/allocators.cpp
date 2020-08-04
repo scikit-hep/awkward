@@ -5,7 +5,7 @@
 
 template <typename T>
 T *awkward_ptr_alloc(int64_t length) {
-  if(length != 0) {
+  if (length != 0) {
     return new T[(size_t) length];
   }
   return nullptr;

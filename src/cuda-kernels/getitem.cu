@@ -61,91 +61,57 @@ int64_t awkward_cuda_Index64_getitem_at_nowrap(
 }
 
 template <typename T>
-T awkward_cuda_NumpyArray_getitem_at(const T* ptr,
-                                     int64_t at) {
+T awkward_cuda_NumpyArray_getitem_at0(const T* ptr) {
   T item;
   cudaMemcpy(&item,
-             &ptr[(int64_t) (at)],
+             &ptr[0],
              sizeof(T),
              cudaMemcpyDeviceToHost);
   return item;
 }
-bool awkward_cuda_NumpyArraybool_getitem_at(
-  const bool* ptr,
-  int64_t at) {
-  return awkward_cuda_NumpyArray_getitem_at<bool>(
-    ptr,
-    at);
+bool awkward_cuda_NumpyArraybool_getitem_at0(
+  const bool* ptr) {
+  return awkward_cuda_NumpyArray_getitem_at0<bool>(ptr);
 }
-int8_t awkward_cuda_NumpyArray8_getitem_at(
-  const int8_t* ptr,
-  int64_t at) {
-  return awkward_cuda_NumpyArray_getitem_at<int8_t>(
-    ptr,
-    at);
+int8_t awkward_cuda_NumpyArray8_getitem_at0(
+  const int8_t* ptr) {
+  return awkward_cuda_NumpyArray_getitem_at0<int8_t>(ptr);
 }
-uint8_t awkward_cuda_NumpyArrayU8_getitem_at(
-  const uint8_t* ptr,
-  int64_t at) {
-  return awkward_cuda_NumpyArray_getitem_at<uint8_t>(
-    ptr,
-    at);
+uint8_t awkward_cuda_NumpyArrayU8_getitem_at0(
+  const uint8_t* ptr) {
+  return awkward_cuda_NumpyArray_getitem_at0<uint8_t>(ptr);
 }
-int16_t awkward_cuda_NumpyArray16_getitem_at(
-  const int16_t* ptr,
-  int64_t at) {
-  return awkward_cuda_NumpyArray_getitem_at<int16_t>(
-    ptr,
-    at);
+int16_t awkward_cuda_NumpyArray16_getitem_at0(
+  const int16_t* ptr) {
+  return awkward_cuda_NumpyArray_getitem_at0<int16_t>(ptr);
 }
-uint16_t awkward_cuda_NumpyArrayU16_getitem_at(
-  const uint16_t* ptr,
-  int64_t at) {
-  return awkward_cuda_NumpyArray_getitem_at<uint16_t>(
-    ptr,
-    at);
+uint16_t awkward_cuda_NumpyArrayU16_getitem_at0(
+  const uint16_t* ptr) {
+  return awkward_cuda_NumpyArray_getitem_at0<uint16_t>(ptr);
 }
-int32_t awkward_cuda_NumpyArray32_getitem_at(
-  const int32_t* ptr,
-  int64_t at) {
-  return awkward_cuda_NumpyArray_getitem_at<int32_t>(
-    ptr,
-    at);
+int32_t awkward_cuda_NumpyArray32_getitem_at0(
+  const int32_t* ptr) {
+  return awkward_cuda_NumpyArray_getitem_at0<int32_t>(ptr);
 }
-uint32_t awkward_cuda_NumpyArrayU32_getitem_at(
-  const uint32_t* ptr,
-  int64_t at) {
-  return awkward_cuda_NumpyArray_getitem_at<uint32_t>(
-    ptr,
-    at);
+uint32_t awkward_cuda_NumpyArrayU32_getitem_at0(
+  const uint32_t* ptr) {
+  return awkward_cuda_NumpyArray_getitem_at0<uint32_t>(ptr);
 }
-int64_t awkward_cuda_NumpyArray64_getitem_at(
-  const int64_t* ptr,
-  int64_t at) {
-  return awkward_cuda_NumpyArray_getitem_at<int64_t>(
-    ptr,
-    at);
+int64_t awkward_cuda_NumpyArray64_getitem_at0(
+  const int64_t* ptr) {
+  return awkward_cuda_NumpyArray_getitem_at0<int64_t>(ptr);
 }
-uint64_t awkward_cuda_NumpyArrayU64_getitem_at(
-  const uint64_t* ptr,
-  int64_t at) {
-  return awkward_cuda_NumpyArray_getitem_at<uint64_t>(
-    ptr,
-    at);
+uint64_t awkward_cuda_NumpyArrayU64_getitem_at0(
+  const uint64_t* ptr) {
+  return awkward_cuda_NumpyArray_getitem_at0<uint64_t>(ptr);
 }
-float awkward_cuda_NumpyArrayfloat32_getitem_at(
-  const float* ptr,
-  int64_t at) {
-  return awkward_cuda_NumpyArray_getitem_at<float>(
-    ptr,
-    at);
+float awkward_cuda_NumpyArrayfloat32_getitem_at0(
+  const float* ptr) {
+  return awkward_cuda_NumpyArray_getitem_at0<float>(ptr);
 }
-double awkward_cuda_NumpyArrayfloat64_getitem_at(
-  const double* ptr,
-  int64_t at) {
-  return awkward_cuda_NumpyArray_getitem_at<double>(
-    ptr,
-    at);
+double awkward_cuda_NumpyArrayfloat64_getitem_at0(
+  const double* ptr) {
+  return awkward_cuda_NumpyArray_getitem_at0<double>(ptr);
 }
 
 template <typename T>

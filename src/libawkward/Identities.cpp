@@ -349,7 +349,7 @@ namespace awkward {
   template <typename T>
   const IdentitiesPtr
   IdentitiesOf<T>::copy_to(kernel::lib ptr_lib) const {
-    if(ptr_lib == ptr_lib_) {
+    if (ptr_lib == ptr_lib_) {
       return std::make_shared<IdentitiesOf<T>>(ref(),
                                                fieldloc(),
                                                offset(),
