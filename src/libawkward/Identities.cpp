@@ -148,8 +148,8 @@ namespace awkward {
                                                          length_);
       Identities64* raw = reinterpret_cast<Identities64*>(out.get());
       kernel::Identities_to_Identities64<int32_t>(
-        raw->ptr().get(),
-        reinterpret_cast<int32_t*>(ptr_.get()),
+        raw->data(),
+        reinterpret_cast<int32_t*>(data()),
         length_,
         width_);
       return out;
@@ -255,10 +255,10 @@ namespace awkward {
     if (std::is_same<T, int32_t>::value) {
       struct Error err = kernel::Identities_getitem_carry_64<int32_t>(
         reinterpret_cast<int32_t*>(rawout->ptr().get()),
-        reinterpret_cast<int32_t*>(ptr_.get()),
-        carry.ptr().get(),
+        reinterpret_cast<int32_t*>(data()),
+        carry.data(),
         carry.length(),
-        offset_,
+        0,   // DROP
         width_,
         length_);
       util::handle_error(err, classname(), nullptr);
@@ -266,10 +266,10 @@ namespace awkward {
     else if (std::is_same<T, int64_t>::value) {
       struct Error err = kernel::Identities_getitem_carry_64<int64_t>(
         reinterpret_cast<int64_t*>(rawout->ptr().get()),
-        reinterpret_cast<int64_t*>(ptr_.get()),
-        carry.ptr().get(),
+        reinterpret_cast<int64_t*>(data()),
+        carry.data(),
         carry.length(),
-        offset_,
+        0,   // DROP
         width_,
         length_);
       util::handle_error(err, classname(), nullptr);
