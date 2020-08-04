@@ -9,7 +9,6 @@
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/cpu-kernels/sorting.h"
 
-#include <typeinfo>
 #include <sstream>
 
 #ifndef _MSC_VER
