@@ -1227,7 +1227,9 @@ namespace awkward {
                            const Slice& tail,
                            const Index64& advanced) const {
     Index64 carry(shape_[0]);
-    struct Error err = kernel::carry_arange<int64_t>(carry.ptr().get(), shape_[0]);
+    struct Error err = kernel::carry_arange<int64_t>(
+      carry.data(),
+      shape_[0]);
     util::handle_error(err, classname(), identities_.get());
     return getitem_next(head,
                         tail,
@@ -1244,10 +1246,10 @@ namespace awkward {
       kernel::ptr_alloc<uint8_t>(ptr_lib_, carry.length()*((int64_t)strides_[0])));
     struct Error err = kernel::NumpyArray_getitem_next_null_64(
       reinterpret_cast<uint8_t*>(ptr.get()),
-      reinterpret_cast<uint8_t*>(ptr_.get()),
+      reinterpret_cast<uint8_t*>(data()),
       carry.length(),
       strides_[0],
-      byteoffset_,
+      0,   // DROP
       carry.ptr().get());
     util::handle_error(err, classname(), identities_.get());
 
@@ -1359,7 +1361,7 @@ namespace awkward {
 
     struct Error err = kernel::RegularArray_num_64(
       ptr_lib(),
-      tonum.ptr().get(),
+      tonum.data(),
       size,
       reps);
     util::handle_error(err, classname(), identities_.get());
@@ -1800,11 +1802,6 @@ namespace awkward {
 
       NumpyArray contiguous_other = rawother->contiguous();
 
-      int64_t self_offset = (contiguous_self.byteoffset() /
-                             contiguous_self.itemsize());
-      int64_t other_offset = (contiguous_other.byteoffset() /
-                              contiguous_other.itemsize());
-
       struct Error err;
 
       switch (dtype) {
@@ -1813,15 +1810,15 @@ namespace awkward {
         err = kernel::NumpyArray_fill_frombool<bool>(
                 reinterpret_cast<bool*>(ptr.get()),
                 0,
-                reinterpret_cast<bool*>(contiguous_self.ptr().get()),
-                self_offset,
+                reinterpret_cast<bool*>(contiguous_self.data()),
+                0,   // DROP
                 self_flatlength);
         util::handle_error(err, classname(), nullptr);
         err = kernel::NumpyArray_fill_frombool<bool>(
                 reinterpret_cast<bool*>(ptr.get()),
                 self_flatlength,
-                reinterpret_cast<bool*>(contiguous_other.ptr().get()),
-                other_offset,
+                reinterpret_cast<bool*>(contiguous_other.data()),
+                0,   // DROP
                 other_flatlength);
         util::handle_error(err, classname(), nullptr);
         break;
@@ -1843,16 +1840,16 @@ namespace awkward {
             err = kernel::NumpyArray_fill_frombool<int8_t>(
                   reinterpret_cast<int8_t*>(ptr.get()),
                   0,
-                  reinterpret_cast<bool*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<bool*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           case util::dtype::int8:
             err = kernel::NumpyArray_fill<int8_t, int8_t>(
                   reinterpret_cast<int8_t*>(ptr.get()),
                   0,
-                  reinterpret_cast<int8_t*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<int8_t*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           default:
@@ -1865,16 +1862,16 @@ namespace awkward {
             err = kernel::NumpyArray_fill_frombool<int8_t>(
                   reinterpret_cast<int8_t*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<bool*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<bool*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           case util::dtype::int8:
             err = kernel::NumpyArray_fill<int8_t, int8_t>(
                   reinterpret_cast<int8_t*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<int8_t*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<int8_t*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           default:
@@ -1891,32 +1888,32 @@ namespace awkward {
             err = kernel::NumpyArray_fill_frombool<int16_t>(
                   reinterpret_cast<int16_t*>(ptr.get()),
                   0,
-                  reinterpret_cast<bool*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<bool*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           case util::dtype::int8:
             err = kernel::NumpyArray_fill<int8_t, int16_t>(
                   reinterpret_cast<int16_t*>(ptr.get()),
                   0,
-                  reinterpret_cast<int8_t*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<int8_t*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           case util::dtype::int16:
             err = kernel::NumpyArray_fill<int16_t, int16_t>(
                   reinterpret_cast<int16_t*>(ptr.get()),
                   0,
-                  reinterpret_cast<int16_t*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<int16_t*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           case util::dtype::uint8:
             err = kernel::NumpyArray_fill<uint8_t, int16_t>(
                   reinterpret_cast<int16_t*>(ptr.get()),
                   0,
-                  reinterpret_cast<uint8_t*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<uint8_t*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           default:
@@ -1929,32 +1926,32 @@ namespace awkward {
             err = kernel::NumpyArray_fill_frombool<int16_t>(
                   reinterpret_cast<int16_t*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<bool*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<bool*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           case util::dtype::int8:
             err = kernel::NumpyArray_fill<int8_t, int16_t>(
                   reinterpret_cast<int16_t*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<int8_t*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<int8_t*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           case util::dtype::int16:
             err = kernel::NumpyArray_fill<int16_t, int16_t>(
                   reinterpret_cast<int16_t*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<int16_t*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<int16_t*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           case util::dtype::uint8:
             err = kernel::NumpyArray_fill<uint8_t, int16_t>(
                   reinterpret_cast<int16_t*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<uint8_t*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<uint8_t*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           default:
@@ -1971,48 +1968,48 @@ namespace awkward {
             err = kernel::NumpyArray_fill_frombool<int32_t>(
                   reinterpret_cast<int32_t*>(ptr.get()),
                   0,
-                  reinterpret_cast<bool*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<bool*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           case util::dtype::int8:
             err = kernel::NumpyArray_fill<int8_t, int32_t>(
                   reinterpret_cast<int32_t*>(ptr.get()),
                   0,
-                  reinterpret_cast<int8_t*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<int8_t*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           case util::dtype::int16:
             err = kernel::NumpyArray_fill<int16_t, int32_t>(
                   reinterpret_cast<int32_t*>(ptr.get()),
                   0,
-                  reinterpret_cast<int16_t*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<int16_t*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           case util::dtype::int32:
             err = kernel::NumpyArray_fill<int32_t, int32_t>(
                   reinterpret_cast<int32_t*>(ptr.get()),
                   0,
-                  reinterpret_cast<int32_t*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<int32_t*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           case util::dtype::uint8:
             err = kernel::NumpyArray_fill<uint8_t, int32_t>(
                   reinterpret_cast<int32_t*>(ptr.get()),
                   0,
-                  reinterpret_cast<uint8_t*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<uint8_t*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           case util::dtype::uint16:
             err = kernel::NumpyArray_fill<uint16_t, int32_t>(
                   reinterpret_cast<int32_t*>(ptr.get()),
                   0,
-                  reinterpret_cast<uint16_t*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<uint16_t*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           default:
@@ -2025,48 +2022,48 @@ namespace awkward {
             err = kernel::NumpyArray_fill_frombool<int32_t>(
                   reinterpret_cast<int32_t*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<bool*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<bool*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           case util::dtype::int8:
             err = kernel::NumpyArray_fill<int8_t, int32_t>(
                   reinterpret_cast<int32_t*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<int8_t*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<int8_t*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           case util::dtype::int16:
             err = kernel::NumpyArray_fill<int16_t, int32_t>(
                   reinterpret_cast<int32_t*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<int16_t*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<int16_t*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           case util::dtype::int32:
             err = kernel::NumpyArray_fill<int32_t , int32_t>(
                   reinterpret_cast<int32_t*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<int32_t*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<int32_t*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           case util::dtype::uint8:
             err = kernel::NumpyArray_fill<uint8_t, int32_t>(
                   reinterpret_cast<int32_t*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<uint8_t*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<uint8_t*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           case util::dtype::uint16:
             err = kernel::NumpyArray_fill<uint16_t, int32_t>(
                   reinterpret_cast<int32_t*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<uint16_t*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<uint16_t*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           default:
@@ -2083,64 +2080,64 @@ namespace awkward {
             err = kernel::NumpyArray_fill_frombool<int64_t>(
                   reinterpret_cast<int64_t*>(ptr.get()),
                   0,
-                  reinterpret_cast<bool*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<bool*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           case util::dtype::int8:
             err = kernel::NumpyArray_fill<int8_t, int64_t>(
                   reinterpret_cast<int64_t*>(ptr.get()),
                   0,
-                  reinterpret_cast<int8_t*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<int8_t*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           case util::dtype::int16:
             err = kernel::NumpyArray_fill<int16_t, int64_t>(
                   reinterpret_cast<int64_t*>(ptr.get()),
                   0,
-                  reinterpret_cast<int16_t*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<int16_t*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           case util::dtype::int32:
             err = kernel::NumpyArray_fill<int32_t, int64_t>(
                   reinterpret_cast<int64_t*>(ptr.get()),
                   0,
-                  reinterpret_cast<int32_t*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<int32_t*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           case util::dtype::int64:
             err = kernel::NumpyArray_fill<int64_t, int64_t>(
                   reinterpret_cast<int64_t*>(ptr.get()),
                   0,
-                  reinterpret_cast<int64_t*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<int64_t*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           case util::dtype::uint8:
             err = kernel::NumpyArray_fill<uint8_t, int64_t>(
                   reinterpret_cast<int64_t*>(ptr.get()),
                   0,
-                  reinterpret_cast<uint8_t*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<uint8_t*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           case util::dtype::uint16:
             err = kernel::NumpyArray_fill<uint16_t, int64_t>(
                   reinterpret_cast<int64_t*>(ptr.get()),
                   0,
-                  reinterpret_cast<uint16_t*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<uint16_t*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           case util::dtype::uint32:
             err = kernel::NumpyArray_fill<uint32_t, int64_t>(
                   reinterpret_cast<int64_t*>(ptr.get()),
                   0,
-                  reinterpret_cast<uint32_t*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<uint32_t*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           default:
@@ -2154,64 +2151,64 @@ namespace awkward {
             err = kernel::NumpyArray_fill_frombool<int64_t>(
                   reinterpret_cast<int64_t*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<bool*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<bool*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           case util::dtype::int8:
             err = kernel::NumpyArray_fill<int8_t, int64_t>(
                   reinterpret_cast<int64_t*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<int8_t*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<int8_t*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           case util::dtype::int16:
             err = kernel::NumpyArray_fill<int16_t, int64_t>(
                   reinterpret_cast<int64_t*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<int16_t*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<int16_t*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           case util::dtype::int32:
             err = kernel::NumpyArray_fill<int32_t , int64_t>(
                   reinterpret_cast<int64_t*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<int32_t*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<int32_t*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           case util::dtype::int64:
             err = kernel::NumpyArray_fill<int64_t, int64_t>(
                   reinterpret_cast<int64_t*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<int64_t*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<int64_t*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           case util::dtype::uint8:
             err = kernel::NumpyArray_fill<uint8_t, int64_t>(
                   reinterpret_cast<int64_t*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<uint8_t*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<uint8_t*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           case util::dtype::uint16:
             err = kernel::NumpyArray_fill<uint16_t, int64_t>(
                   reinterpret_cast<int64_t*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<uint16_t*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<uint16_t*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           case util::dtype::uint32:
             err = kernel::NumpyArray_fill<uint32_t, int64_t>(
                   reinterpret_cast<int64_t*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<uint32_t*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<uint32_t*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           default:
@@ -2229,16 +2226,16 @@ namespace awkward {
             err = kernel::NumpyArray_fill_frombool<uint8_t>(
                   reinterpret_cast<uint8_t*>(ptr.get()),
                   0,
-                  reinterpret_cast<bool*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<bool*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           case util::dtype::uint8:
             err = kernel::NumpyArray_fill<uint8_t, uint8_t>(
                   reinterpret_cast<uint8_t*>(ptr.get()),
                   0,
-                  reinterpret_cast<uint8_t*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<uint8_t*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           default:
@@ -2251,16 +2248,16 @@ namespace awkward {
             err = kernel::NumpyArray_fill_frombool<uint8_t>(
                   reinterpret_cast<uint8_t*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<bool*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<bool*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           case util::dtype::uint8:
             err = kernel::NumpyArray_fill<uint8_t, uint8_t>(
                   reinterpret_cast<uint8_t*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<uint8_t*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<uint8_t*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           default:
@@ -2277,24 +2274,24 @@ namespace awkward {
             err = kernel::NumpyArray_fill_frombool<uint16_t>(
                   reinterpret_cast<uint16_t*>(ptr.get()),
                   0,
-                  reinterpret_cast<bool*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<bool*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           case util::dtype::uint8:
             err = kernel::NumpyArray_fill<uint8_t, uint16_t>(
                   reinterpret_cast<uint16_t*>(ptr.get()),
                   0,
-                  reinterpret_cast<uint8_t*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<uint8_t*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           case util::dtype::uint16:
             err = kernel::NumpyArray_fill<uint16_t, uint16_t>(
                   reinterpret_cast<uint16_t*>(ptr.get()),
                   0,
-                  reinterpret_cast<uint16_t*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<uint16_t*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           default:
@@ -2307,24 +2304,24 @@ namespace awkward {
             err = kernel::NumpyArray_fill_frombool<uint16_t>(
                   reinterpret_cast<uint16_t*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<bool*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<bool*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           case util::dtype::uint8:
             err = kernel::NumpyArray_fill<uint8_t, uint16_t>(
                   reinterpret_cast<uint16_t*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<uint8_t*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<uint8_t*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           case util::dtype::uint16:
             err = kernel::NumpyArray_fill<uint16_t, uint16_t>(
                   reinterpret_cast<uint16_t*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<uint16_t*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<uint16_t*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           default:
@@ -2341,32 +2338,32 @@ namespace awkward {
             err = kernel::NumpyArray_fill_frombool<uint32_t>(
                   reinterpret_cast<uint32_t*>(ptr.get()),
                   0,
-                  reinterpret_cast<bool*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<bool*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           case util::dtype::uint8:
             err = kernel::NumpyArray_fill<uint8_t, uint32_t>(
                   reinterpret_cast<uint32_t*>(ptr.get()),
                   0,
-                  reinterpret_cast<uint8_t*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<uint8_t*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           case util::dtype::uint16:
             err = kernel::NumpyArray_fill<uint16_t, uint32_t>(
                   reinterpret_cast<uint32_t*>(ptr.get()),
                   0,
-                  reinterpret_cast<uint16_t*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<uint16_t*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           case util::dtype::uint32:
             err = kernel::NumpyArray_fill<uint32_t, uint32_t>(
                   reinterpret_cast<uint32_t*>(ptr.get()),
                   0,
-                  reinterpret_cast<uint32_t*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<uint32_t*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           default:
@@ -2379,32 +2376,32 @@ namespace awkward {
             err = kernel::NumpyArray_fill_frombool<uint32_t>(
                   reinterpret_cast<uint32_t*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<bool*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<bool*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           case util::dtype::uint8:
             err = kernel::NumpyArray_fill<uint8_t, uint32_t>(
                   reinterpret_cast<uint32_t*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<uint8_t*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<uint8_t*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           case util::dtype::uint16:
             err = kernel::NumpyArray_fill<uint16_t, uint32_t>(
                   reinterpret_cast<uint32_t*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<uint16_t*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<uint16_t*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           case util::dtype::uint32:
             err = kernel::NumpyArray_fill<uint32_t, uint32_t>(
                   reinterpret_cast<uint32_t*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<uint32_t*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<uint32_t*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           default:
@@ -2421,40 +2418,40 @@ namespace awkward {
             err = kernel::NumpyArray_fill_frombool<uint64_t>(
                   reinterpret_cast<uint64_t*>(ptr.get()),
                   0,
-                  reinterpret_cast<bool*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<bool*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           case util::dtype::uint8:
             err = kernel::NumpyArray_fill<uint8_t, uint64_t>(
                   reinterpret_cast<uint64_t*>(ptr.get()),
                   0,
-                  reinterpret_cast<uint8_t*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<uint8_t*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           case util::dtype::uint16:
             err = kernel::NumpyArray_fill<uint16_t, uint64_t>(
                   reinterpret_cast<uint64_t*>(ptr.get()),
                   0,
-                  reinterpret_cast<uint16_t*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<uint16_t*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           case util::dtype::uint32:
             err = kernel::NumpyArray_fill<uint32_t, uint64_t>(
                   reinterpret_cast<uint64_t*>(ptr.get()),
                   0,
-                  reinterpret_cast<uint32_t*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<uint32_t*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           case util::dtype::uint64:
             err = kernel::NumpyArray_fill<uint64_t, uint64_t>(
                   reinterpret_cast<uint64_t*>(ptr.get()),
                   0,
-                  reinterpret_cast<uint64_t*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<uint64_t*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           default:
@@ -2467,40 +2464,40 @@ namespace awkward {
             err = kernel::NumpyArray_fill_frombool<uint64_t>(
                   reinterpret_cast<uint64_t*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<bool*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<bool*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           case util::dtype::uint8:
             err = kernel::NumpyArray_fill<uint8_t, uint64_t>(
                   reinterpret_cast<uint64_t*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<uint8_t*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<uint8_t*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           case util::dtype::uint16:
             err = kernel::NumpyArray_fill<uint16_t, uint64_t>(
                   reinterpret_cast<uint64_t*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<uint16_t*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<uint16_t*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           case util::dtype::uint32:
             err = kernel::NumpyArray_fill<uint32_t, uint64_t>(
                   reinterpret_cast<uint64_t*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<uint32_t*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<uint32_t*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           case util::dtype::uint64:
             err = kernel::NumpyArray_fill<uint64_t, uint64_t>(
                   reinterpret_cast<uint64_t*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<uint64_t*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<uint64_t*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           default:
@@ -2522,40 +2519,40 @@ namespace awkward {
             err = kernel::NumpyArray_fill_frombool<float>(
                   reinterpret_cast<float*>(ptr.get()),
                   0,
-                  reinterpret_cast<bool*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<bool*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           case util::dtype::int8:
             err = kernel::NumpyArray_fill<int8_t, float>(
                   reinterpret_cast<float*>(ptr.get()),
                   0,
-                  reinterpret_cast<int8_t*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<int8_t*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           case util::dtype::int16:
             err = kernel::NumpyArray_fill<int16_t, float>(
                   reinterpret_cast<float*>(ptr.get()),
                   0,
-                  reinterpret_cast<int16_t*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<int16_t*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           case util::dtype::uint8:
             err = kernel::NumpyArray_fill<uint8_t, float>(
                   reinterpret_cast<float*>(ptr.get()),
                   0,
-                  reinterpret_cast<uint8_t*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<uint8_t*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           case util::dtype::uint16:
             err = kernel::NumpyArray_fill<uint16_t, float>(
                   reinterpret_cast<float*>(ptr.get()),
                   0,
-                  reinterpret_cast<uint16_t*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<uint16_t*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           case util::dtype::float16:
@@ -2564,8 +2561,8 @@ namespace awkward {
             err = kernel::NumpyArray_fill<float, float>(
                   reinterpret_cast<float*>(ptr.get()),
                   0,
-                  reinterpret_cast<float*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<float*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           default:
@@ -2579,40 +2576,40 @@ namespace awkward {
             err = kernel::NumpyArray_fill_frombool<float>(
                   reinterpret_cast<float*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<bool*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<bool*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           case util::dtype::int8:
             err = kernel::NumpyArray_fill<int8_t, float>(
                   reinterpret_cast<float*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<int8_t*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<int8_t*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           case util::dtype::int16:
             err = kernel::NumpyArray_fill<int16_t, float>(
                   reinterpret_cast<float*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<int16_t*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<int16_t*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           case util::dtype::uint8:
             err = kernel::NumpyArray_fill<uint8_t, float>(
                   reinterpret_cast<float*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<uint8_t*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<uint8_t*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           case util::dtype::uint16:
             err = kernel::NumpyArray_fill<uint16_t, float>(
                   reinterpret_cast<float*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<uint16_t*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<uint16_t*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           case util::dtype::float16:
@@ -2621,8 +2618,8 @@ namespace awkward {
             err = kernel::NumpyArray_fill<float, float>(
                   reinterpret_cast<float*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<float*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<float*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           default:
@@ -2640,72 +2637,72 @@ namespace awkward {
             err = kernel::NumpyArray_fill_frombool<double>(
                   reinterpret_cast<double*>(ptr.get()),
                   0,
-                  reinterpret_cast<bool*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<bool*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           case util::dtype::int8:
             err = kernel::NumpyArray_fill<int8_t, double>(
                   reinterpret_cast<double*>(ptr.get()),
                   0,
-                  reinterpret_cast<int8_t*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<int8_t*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           case util::dtype::int16:
             err = kernel::NumpyArray_fill<int16_t, double>(
                   reinterpret_cast<double*>(ptr.get()),
                   0,
-                  reinterpret_cast<int16_t*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<int16_t*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           case util::dtype::int32:
             err = kernel::NumpyArray_fill<int32_t, double>(
                   reinterpret_cast<double*>(ptr.get()),
                   0,
-                  reinterpret_cast<int32_t*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<int32_t*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           case util::dtype::int64:
             err = kernel::NumpyArray_fill<int64_t, double>(
                   reinterpret_cast<double*>(ptr.get()),
                   0,
-                  reinterpret_cast<int64_t*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<int64_t*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           case util::dtype::uint8:
             err = kernel::NumpyArray_fill<uint8_t, double>(
                   reinterpret_cast<double*>(ptr.get()),
                   0,
-                  reinterpret_cast<uint8_t*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<uint8_t*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           case util::dtype::uint16:
             err = kernel::NumpyArray_fill<uint16_t, double>(
                   reinterpret_cast<double*>(ptr.get()),
                   0,
-                  reinterpret_cast<uint16_t*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<uint16_t*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           case util::dtype::uint32:
             err = kernel::NumpyArray_fill<uint32_t, double>(
                   reinterpret_cast<double*>(ptr.get()),
                   0,
-                  reinterpret_cast<uint32_t*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<uint32_t*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           case util::dtype::uint64:
             err = kernel::NumpyArray_fill<uint64_t, double>(
                   reinterpret_cast<double*>(ptr.get()),
                   0,
-                  reinterpret_cast<uint64_t*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<uint64_t*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           case util::dtype::float16:
@@ -2714,16 +2711,16 @@ namespace awkward {
             err = kernel::NumpyArray_fill<float, double>(
                   reinterpret_cast<double*>(ptr.get()),
                   0,
-                  reinterpret_cast<float*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<float*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           case util::dtype::float64:
             err = kernel::NumpyArray_fill<double, double>(
                   reinterpret_cast<double*>(ptr.get()),
                   0,
-                  reinterpret_cast<double*>(contiguous_self.ptr().get()),
-                  self_offset,
+                  reinterpret_cast<double*>(contiguous_self.data()),
+                  0,   // DROP
                   self_flatlength);
             break;
           default:
@@ -2737,72 +2734,72 @@ namespace awkward {
             err = kernel::NumpyArray_fill_frombool<double>(
                   reinterpret_cast<double*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<bool*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<bool*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           case util::dtype::int8:
             err = kernel::NumpyArray_fill<int8_t, double>(
                   reinterpret_cast<double*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<int8_t*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<int8_t*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           case util::dtype::int16:
             err = kernel::NumpyArray_fill<int16_t, double>(
                   reinterpret_cast<double*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<int16_t*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<int16_t*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           case util::dtype::int32:
             err = kernel::NumpyArray_fill<int32_t , double>(
                   reinterpret_cast<double*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<int32_t*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<int32_t*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           case util::dtype::int64:
             err = kernel::NumpyArray_fill<int64_t, double>(
                   reinterpret_cast<double*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<int64_t*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<int64_t*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           case util::dtype::uint8:
             err = kernel::NumpyArray_fill<uint8_t, double>(
                   reinterpret_cast<double*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<uint8_t*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<uint8_t*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           case util::dtype::uint16:
             err = kernel::NumpyArray_fill<uint16_t, double>(
                   reinterpret_cast<double*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<uint16_t*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<uint16_t*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           case util::dtype::uint32:
             err = kernel::NumpyArray_fill<uint32_t, double>(
                   reinterpret_cast<double*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<uint32_t*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<uint32_t*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           case util::dtype::uint64:
             err = kernel::NumpyArray_fill<uint64_t, double>(
                   reinterpret_cast<double*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<uint64_t*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<uint64_t*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           case util::dtype::float16:
@@ -2811,16 +2808,16 @@ namespace awkward {
             err = kernel::NumpyArray_fill<float, double>(
                   reinterpret_cast<double*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<float*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<float*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           case util::dtype::float64:
             err = kernel::NumpyArray_fill<double, double>(
                   reinterpret_cast<double*>(ptr.get()),
                   self_flatlength,
-                  reinterpret_cast<double*>(contiguous_other.ptr().get()),
-                  other_offset,
+                  reinterpret_cast<double*>(contiguous_other.data()),
+                  0,   // DROP
                   other_flatlength);
             break;
           default:
@@ -2888,16 +2885,16 @@ namespace awkward {
     err = kernel::NumpyArray_fill<uint8_t, uint8_t>(
             reinterpret_cast<uint8_t*>(ptr.get()),
             0,
-            reinterpret_cast<uint8_t*>(contiguous_self.ptr().get()),
-            (int64_t)contiguous_self.byteoffset(),
+            reinterpret_cast<uint8_t*>(contiguous_self.data()),
+            0,   // DROP
             contiguous_self.length());
     util::handle_error(err, classname(), nullptr);
 
     err = kernel::NumpyArray_fill<uint8_t, uint8_t>(
             reinterpret_cast<uint8_t*>(ptr.get()),
             length(),
-            reinterpret_cast<uint8_t*>(contiguous_other.ptr().get()),
-            (int64_t)contiguous_other.byteoffset(),
+            reinterpret_cast<uint8_t*>(contiguous_other.data()),
+            0,   // DROP
             contiguous_other.length());
     util::handle_error(err, classname(), nullptr);
 
@@ -2937,66 +2934,64 @@ namespace awkward {
 
     else if (util::is_integer(dtype_)) {
       NumpyArray contiguous_self = contiguous();
-      int64_t offset = ((int64_t)contiguous_self.byteoffset() /
-                        (int64_t)itemsize_);
       Index64 index(length());
 
       struct Error err;
       switch (dtype_) {
       case util::dtype::int8:
         err = kernel::NumpyArray_fill<int8_t, int64_t>(
-                index.ptr().get(),
+                index.data(),
                 0,
-                reinterpret_cast<int8_t*>(contiguous_self.ptr().get()),
-                offset,
+                reinterpret_cast<int8_t*>(contiguous_self.data()),
+                0,   // DROP
                 length());
         break;
       case util::dtype::int16:
         err = kernel::NumpyArray_fill<int16_t, int64_t>(
-                index.ptr().get(),
+                index.data(),
                 0,
-                reinterpret_cast<int16_t*>(contiguous_self.ptr().get()),
-                offset,
+                reinterpret_cast<int16_t*>(contiguous_self.data()),
+                0,   // DROP
                 length());
         break;
       case util::dtype::int32:
         err = kernel::NumpyArray_fill<int32_t, int64_t>(
-                index.ptr().get(),
+                index.data(),
                 0,
-                reinterpret_cast<int32_t*>(contiguous_self.ptr().get()),
-                offset,
+                reinterpret_cast<int32_t*>(contiguous_self.data()),
+                0,   // DROP
                 length());
         break;
       case util::dtype::uint8:
         err = kernel::NumpyArray_fill<uint8_t, int64_t>(
-                index.ptr().get(),
+                index.data(),
                 0,
-                reinterpret_cast<uint8_t*>(contiguous_self.ptr().get()),
-                offset,
+                reinterpret_cast<uint8_t*>(contiguous_self.data()),
+                0,   // DROP
                 length());
         break;
       case util::dtype::uint16:
         err = kernel::NumpyArray_fill<uint16_t, int64_t>(
-                index.ptr().get(),
+                index.data(),
                 0,
-                reinterpret_cast<uint16_t*>(contiguous_self.ptr().get()),
-                offset,
+                reinterpret_cast<uint16_t*>(contiguous_self.data()),
+                0,   // DROP
                 length());
         break;
       case util::dtype::uint32:
         err = kernel::NumpyArray_fill<uint32_t, int64_t>(
-                index.ptr().get(),
+                index.data(),
                 0,
-                reinterpret_cast<uint32_t*>(contiguous_self.ptr().get()),
-                offset,
+                reinterpret_cast<uint32_t*>(contiguous_self.data()),
+                0,   // DROP
                 length());
         break;
       case util::dtype::uint64:
         err = kernel::NumpyArray_fill<uint64_t, int64_t>(
-                index.ptr().get(),
+                index.data(),
                 0,
-                reinterpret_cast<uint64_t*>(contiguous_self.ptr().get()),
-                offset,
+                reinterpret_cast<uint64_t*>(contiguous_self.data()),
+                0,   // DROP
                 length());
         break;
       default:
@@ -3015,17 +3010,17 @@ namespace awkward {
       int64_t numtrue;
       struct Error err1 = kernel::NumpyArray_getitem_boolean_numtrue(
         &numtrue,
-        reinterpret_cast<int8_t*>(ptr_.get()),
-        (int64_t)byteoffset_,
+        reinterpret_cast<int8_t*>(data()),
+        0,   // DROP
         (int64_t)shape_[0],
         (int64_t)strides_[0]);
       util::handle_error(err1, classname(), identities_.get());
 
       Index64 index(numtrue);
       struct Error err2 = kernel::NumpyArray_getitem_boolean_nonzero_64(
-        index.ptr().get(),
-        reinterpret_cast<int8_t*>(ptr_.get()),
-        (int64_t)byteoffset_,
+        index.data(),
+        reinterpret_cast<int8_t*>(data()),
+        0,   // DROP
         (int64_t)shape_[0],
         (int64_t)strides_[0]);
       util::handle_error(err2, classname(), identities_.get());
@@ -3106,64 +3101,64 @@ namespace awkward {
       std::shared_ptr<void> ptr;
       switch (dtype_) {
       case util::dtype::boolean:
-        ptr = reducer.apply_bool(reinterpret_cast<bool*>(ptr_.get()),
-                                 byteoffset_ / itemsize_,
+        ptr = reducer.apply_bool(reinterpret_cast<bool*>(data()),
+                                 0,   // DROP
                                  starts,
                                  parents,
                                  outlength);
         break;
       case util::dtype::int8:
-        ptr = reducer.apply_int8(reinterpret_cast<int8_t*>(ptr_.get()),
-                                 byteoffset_ / itemsize_,
+        ptr = reducer.apply_int8(reinterpret_cast<int8_t*>(data()),
+                                 0,   // DROP
                                  starts,
                                  parents,
                                  outlength);
         break;
       case util::dtype::int16:
-        ptr = reducer.apply_int16(reinterpret_cast<int16_t*>(ptr_.get()),
-                                  byteoffset_ / itemsize_,
+        ptr = reducer.apply_int16(reinterpret_cast<int16_t*>(data()),
+                                  0,   // DROP
                                   starts,
                                   parents,
                                   outlength);
         break;
       case util::dtype::int32:
-        ptr = reducer.apply_int32(reinterpret_cast<int32_t*>(ptr_.get()),
-                                  byteoffset_ / itemsize_,
+        ptr = reducer.apply_int32(reinterpret_cast<int32_t*>(data()),
+                                  0,   // DROP
                                   starts,
                                   parents,
                                   outlength);
         break;
       case util::dtype::int64:
-        ptr = reducer.apply_int64(reinterpret_cast<int64_t*>(ptr_.get()),
-                                  byteoffset_ / itemsize_,
+        ptr = reducer.apply_int64(reinterpret_cast<int64_t*>(data()),
+                                  0,   // DROP
                                   starts,
                                   parents,
                                   outlength);
         break;
       case util::dtype::uint8:
-        ptr = reducer.apply_uint8(reinterpret_cast<uint8_t*>(ptr_.get()),
-                                  byteoffset_ / itemsize_,
+        ptr = reducer.apply_uint8(reinterpret_cast<uint8_t*>(data()),
+                                  0,   // DROP
                                   starts,
                                   parents,
                                   outlength);
         break;
       case util::dtype::uint16:
-        ptr = reducer.apply_uint16(reinterpret_cast<uint16_t*>(ptr_.get()),
-                                   byteoffset_ / itemsize_,
+        ptr = reducer.apply_uint16(reinterpret_cast<uint16_t*>(data()),
+                                   0,   // DROP
                                    starts,
                                    parents,
                                    outlength);
         break;
       case util::dtype::uint32:
-        ptr = reducer.apply_uint32(reinterpret_cast<uint32_t*>(ptr_.get()),
-                                   byteoffset_ / itemsize_,
+        ptr = reducer.apply_uint32(reinterpret_cast<uint32_t*>(data()),
+                                   0,   // DROp
                                    starts,
                                    parents,
                                    outlength);
         break;
       case util::dtype::uint64:
-        ptr = reducer.apply_uint64(reinterpret_cast<uint64_t*>(ptr_.get()),
-                                   byteoffset_ / itemsize_,
+        ptr = reducer.apply_uint64(reinterpret_cast<uint64_t*>(data()),
+                                   0,   // DROP
                                    starts,
                                    parents,
                                    outlength);
@@ -3171,15 +3166,15 @@ namespace awkward {
       case util::dtype::float16:
         throw std::runtime_error("FIXME: reducers on float16");
       case util::dtype::float32:
-        ptr = reducer.apply_float32(reinterpret_cast<float*>(ptr_.get()),
-                                    byteoffset_ / itemsize_,
+        ptr = reducer.apply_float32(reinterpret_cast<float*>(data()),
+                                    0,   // DROP
                                     starts,
                                     parents,
                                     outlength);
         break;
       case util::dtype::float64:
-        ptr = reducer.apply_float64(reinterpret_cast<double*>(ptr_.get()),
-                                    byteoffset_ / itemsize_,
+        ptr = reducer.apply_float64(reinterpret_cast<double*>(data()),
+                                    0,   // DROP
                                     starts,
                                     parents,
                                     outlength);
@@ -3221,9 +3216,9 @@ namespace awkward {
       if (mask) {
         Index8 mask(outlength);
         struct Error err = kernel::NumpyArray_reduce_mask_ByteMaskedArray_64(
-          mask.ptr().get(),
-          parents.ptr().get(),
-          parents.offset(),
+          mask.data(),
+          parents.data(),
+          0,   // DROP
           parents.length(),
           outlength);
         util::handle_error(err, classname(), nullptr);
@@ -3311,14 +3306,13 @@ namespace awkward {
     }
     else {
       std::shared_ptr<Content> out;
-      int64_t offset = byteoffset_ / itemsize_;
       std::shared_ptr<void> ptr;
 
       switch (dtype_) {
       case util::dtype::boolean:
-        ptr = array_sort<bool>(reinterpret_cast<bool*>(ptr_.get()),
+        ptr = array_sort<bool>(reinterpret_cast<bool*>(data()),
                                length(),
-                               offset,
+                               0,   // DROP
                                starts,
                                parents,
                                outlength,
@@ -3326,9 +3320,9 @@ namespace awkward {
                                stable);
         break;
       case util::dtype::int8:
-        ptr = array_sort<int8_t>(reinterpret_cast<int8_t*>(ptr_.get()),
+        ptr = array_sort<int8_t>(reinterpret_cast<int8_t*>(data()),
                                  length(),
-                                 offset,
+                                 0,   // DROP
                                  starts,
                                  parents,
                                  outlength,
@@ -3336,9 +3330,9 @@ namespace awkward {
                                  stable);
         break;
       case util::dtype::int16:
-        ptr = array_sort<int16_t>(reinterpret_cast<int16_t*>(ptr_.get()),
+        ptr = array_sort<int16_t>(reinterpret_cast<int16_t*>(data()),
                                   length(),
-                                  offset,
+                                  0,   // DROP
                                   starts,
                                   parents,
                                   outlength,
@@ -3346,9 +3340,9 @@ namespace awkward {
                                   stable);
         break;
       case util::dtype::int32:
-        ptr = array_sort<int32_t>(reinterpret_cast<int32_t*>(ptr_.get()),
+        ptr = array_sort<int32_t>(reinterpret_cast<int32_t*>(data()),
                                   length(),
-                                  offset,
+                                  0,   // DROP
                                   starts,
                                   parents,
                                   outlength,
@@ -3356,9 +3350,9 @@ namespace awkward {
                                   stable);
         break;
       case util::dtype::int64:
-        ptr = array_sort<int64_t>(reinterpret_cast<int64_t*>(ptr_.get()),
+        ptr = array_sort<int64_t>(reinterpret_cast<int64_t*>(data()),
                                   length(),
-                                  offset,
+                                  0,   // DROP
                                   starts,
                                   parents,
                                   outlength,
@@ -3366,9 +3360,9 @@ namespace awkward {
                                   stable);
         break;
       case util::dtype::uint8:
-        ptr = array_sort<uint8_t>(reinterpret_cast<uint8_t*>(ptr_.get()),
+        ptr = array_sort<uint8_t>(reinterpret_cast<uint8_t*>(data()),
                                   length(),
-                                  offset,
+                                  0,   // DROP
                                   starts,
                                   parents,
                                   outlength,
@@ -3376,9 +3370,9 @@ namespace awkward {
                                   stable);
         break;
       case util::dtype::uint16:
-        ptr = array_sort<uint16_t>(reinterpret_cast<uint16_t*>(ptr_.get()),
+        ptr = array_sort<uint16_t>(reinterpret_cast<uint16_t*>(data()),
                                    length(),
-                                   offset,
+                                   0,   // DROP
                                    starts,
                                    parents,
                                    outlength,
@@ -3386,9 +3380,9 @@ namespace awkward {
                                    stable);
         break;
       case util::dtype::uint32:
-        ptr = array_sort<uint32_t>(reinterpret_cast<uint32_t*>(ptr_.get()),
+        ptr = array_sort<uint32_t>(reinterpret_cast<uint32_t*>(data()),
                                    length(),
-                                   offset,
+                                   0,   // DROP
                                    starts,
                                    parents,
                                    outlength,
@@ -3396,9 +3390,9 @@ namespace awkward {
                                    stable);
         break;
       case util::dtype::uint64:
-        ptr = array_sort<uint64_t>(reinterpret_cast<uint64_t*>(ptr_.get()),
+        ptr = array_sort<uint64_t>(reinterpret_cast<uint64_t*>(data()),
                                    length(),
-                                   offset,
+                                   0,   // DROP
                                    starts,
                                    parents,
                                    outlength,
@@ -3408,9 +3402,9 @@ namespace awkward {
       case util::dtype::float16:
         throw std::runtime_error("FIXME: sort for float16 not implemented");
       case util::dtype::float32:
-        ptr = array_sort<float>(reinterpret_cast<float*>(ptr_.get()),
+        ptr = array_sort<float>(reinterpret_cast<float*>(data()),
                                 length(),
-                                offset,
+                                0,   // DROP
                                 starts,
                                 parents,
                                 outlength,
@@ -3418,9 +3412,9 @@ namespace awkward {
                                 stable);
         break;
       case util::dtype::float64:
-        ptr = array_sort<double>(reinterpret_cast<double*>(ptr_.get()),
+        ptr = array_sort<double>(reinterpret_cast<double*>(data()),
                                  length(),
-                                 offset,
+                                 0,   // DROP
                                  starts,
                                  parents,
                                  outlength,
@@ -3485,14 +3479,13 @@ namespace awkward {
     }
     else {
       std::shared_ptr<Content> out;
-      int64_t offset = byteoffset_ / itemsize_;
       std::shared_ptr<void> ptr;
 
       switch (dtype_) {
       case util::dtype::boolean:
-        ptr = index_sort<bool>(reinterpret_cast<bool*>(ptr_.get()),
+        ptr = index_sort<bool>(reinterpret_cast<bool*>(data()),
                                length(),
-                               offset,
+                               0,   // DROP
                                starts,
                                parents,
                                outlength,
@@ -3500,9 +3493,9 @@ namespace awkward {
                                stable);
         break;
       case util::dtype::int8:
-        ptr = index_sort<int8_t>(reinterpret_cast<int8_t*>(ptr_.get()),
+        ptr = index_sort<int8_t>(reinterpret_cast<int8_t*>(data()),
                                  length(),
-                                 offset,
+                                 0,   // DROP
                                  starts,
                                  parents,
                                  outlength,
@@ -3510,9 +3503,9 @@ namespace awkward {
                                  stable);
         break;
       case util::dtype::int16:
-        ptr = index_sort<int16_t>(reinterpret_cast<int16_t*>(ptr_.get()),
+        ptr = index_sort<int16_t>(reinterpret_cast<int16_t*>(data()),
                                   length(),
-                                  offset,
+                                  0,   // DROP
                                   starts,
                                   parents,
                                   outlength,
@@ -3520,9 +3513,9 @@ namespace awkward {
                                   stable);
         break;
       case util::dtype::int32:
-        ptr = index_sort<int32_t>(reinterpret_cast<int32_t*>(ptr_.get()),
+        ptr = index_sort<int32_t>(reinterpret_cast<int32_t*>(data()),
                                   length(),
-                                  offset,
+                                  0,   // DROP
                                   starts,
                                   parents,
                                   outlength,
@@ -3530,9 +3523,9 @@ namespace awkward {
                                   stable);
         break;
       case util::dtype::int64:
-        ptr = index_sort<int64_t>(reinterpret_cast<int64_t*>(ptr_.get()),
+        ptr = index_sort<int64_t>(reinterpret_cast<int64_t*>(data()),
                                   length(),
-                                  offset,
+                                  0,   // DROP
                                   starts,
                                   parents,
                                   outlength,
@@ -3540,9 +3533,9 @@ namespace awkward {
                                   stable);
         break;
       case util::dtype::uint8:
-        ptr = index_sort<uint8_t>(reinterpret_cast<uint8_t*>(ptr_.get()),
+        ptr = index_sort<uint8_t>(reinterpret_cast<uint8_t*>(data()),
                                   length(),
-                                  offset,
+                                  0,   // DROP
                                   starts,
                                   parents,
                                   outlength,
@@ -3550,9 +3543,9 @@ namespace awkward {
                                   stable);
         break;
       case util::dtype::uint16:
-        ptr = index_sort<uint16_t>(reinterpret_cast<uint16_t*>(ptr_.get()),
+        ptr = index_sort<uint16_t>(reinterpret_cast<uint16_t*>(data()),
                                    length(),
-                                   offset,
+                                   0,   // DROP
                                    starts,
                                    parents,
                                    outlength,
@@ -3560,9 +3553,9 @@ namespace awkward {
                                    stable);
         break;
       case util::dtype::uint32:
-        ptr = index_sort<uint32_t>(reinterpret_cast<uint32_t*>(ptr_.get()),
+        ptr = index_sort<uint32_t>(reinterpret_cast<uint32_t*>(data()),
                                    length(),
-                                   offset,
+                                   0,   // DROP
                                    starts,
                                    parents,
                                    outlength,
@@ -3570,9 +3563,9 @@ namespace awkward {
                                    stable);
         break;
       case util::dtype::uint64:
-        ptr = index_sort<uint64_t>(reinterpret_cast<uint64_t*>(ptr_.get()),
+        ptr = index_sort<uint64_t>(reinterpret_cast<uint64_t*>(data()),
                                    length(),
-                                   offset,
+                                   0,   // DROP
                                    starts,
                                    parents,
                                    outlength,
@@ -3582,9 +3575,9 @@ namespace awkward {
       case util::dtype::float16:
         throw std::runtime_error("FIXME: argsort for float16 not implemented");
       case util::dtype::float32:
-        ptr = index_sort<float>(reinterpret_cast<float*>(ptr_.get()),
+        ptr = index_sort<float>(reinterpret_cast<float*>(data()),
                                 length(),
-                                offset,
+                                0,   // DROP
                                 starts,
                                 parents,
                                 outlength,
@@ -3592,9 +3585,9 @@ namespace awkward {
                                 stable);
         break;
       case util::dtype::float64:
-        ptr = index_sort<double>(reinterpret_cast<double*>(ptr_.get()),
+        ptr = index_sort<double>(reinterpret_cast<double*>(data()),
                                  length(),
-                                 offset,
+                                 0,   // DROP
                                  starts,
                                  parents,
                                  outlength,
@@ -3650,7 +3643,7 @@ namespace awkward {
     Index64 outoffsets(offsets.length());
 
     if (dtype_ == util::dtype::uint8) {
-      ptr = string_sort<uint8_t>(reinterpret_cast<uint8_t*>(ptr_.get()),
+      ptr = string_sort<uint8_t>(reinterpret_cast<uint8_t*>(data()),
                                  length(),
                                  offsets,
                                  outoffsets,
@@ -3818,7 +3811,7 @@ namespace awkward {
     else {
       Index64 bytepos(shape_[0]);
       struct Error err =
-        kernel::NumpyArray_contiguous_init_64(bytepos.ptr().get(),
+        kernel::NumpyArray_contiguous_init_64(bytepos.data(),
                                               shape_[0],
                                               strides_[0]);
       util::handle_error(err, classname(), identities_.get());
@@ -3834,11 +3827,11 @@ namespace awkward {
 
       struct Error err = kernel::NumpyArray_contiguous_copy_64(
         reinterpret_cast<uint8_t*>(ptr.get()),
-        reinterpret_cast<uint8_t*>(ptr_.get()),
+        reinterpret_cast<uint8_t*>(data()),
         bytepos.length(),
         strides_[0],
-        byteoffset_,
-        bytepos.ptr().get());
+        0,   // DROP
+        bytepos.data());
       util::handle_error(err, classname(), identities_.get());
       return NumpyArray(identities_,
                         parameters_,
@@ -3856,11 +3849,11 @@ namespace awkward {
         kernel::ptr_alloc<uint8_t>(ptr_lib_, bytepos.length()*((int64_t)itemsize_)));
       struct Error err = kernel::NumpyArray_contiguous_copy_64(
         reinterpret_cast<uint8_t*>(ptr.get()),
-        reinterpret_cast<uint8_t*>(ptr_.get()),
+        reinterpret_cast<uint8_t*>(data()),
         bytepos.length(),
         itemsize_,
-        byteoffset_,
-        bytepos.ptr().get());
+        0,   // DROP
+        bytepos.data());
       util::handle_error(err, classname(), identities_.get());
       std::vector<ssize_t> strides = { itemsize_ };
       return NumpyArray(identities_,
@@ -3887,8 +3880,8 @@ namespace awkward {
 
       Index64 nextbytepos(bytepos.length()*shape_[1]);
       struct Error err = kernel::NumpyArray_contiguous_next_64(
-        nextbytepos.ptr().get(),
-        bytepos.ptr().get(),
+        nextbytepos.data(),
+        bytepos.data(),
         bytepos.length(),
         (int64_t)shape_[1],
         (int64_t)strides_[1]);
@@ -4121,10 +4114,10 @@ namespace awkward {
                                                 carry.length()*stride));
       struct Error err = kernel::NumpyArray_getitem_next_null_64(
         reinterpret_cast<uint8_t*>(ptr.get()),
-        reinterpret_cast<uint8_t*>(ptr_.get()),
+        reinterpret_cast<uint8_t*>(data()),
         carry.length(),
         stride,
-        byteoffset_,
+        0,   // DROP
         carry.ptr().get());
       util::handle_error(err, classname(), identities_.get());
 
@@ -4265,8 +4258,8 @@ namespace awkward {
 
     Index64 nextcarry(carry.length());
     struct Error err = kernel::NumpyArray_getitem_next_at_64(
-      nextcarry.ptr().get(),
-      carry.ptr().get(),
+      nextcarry.data(),
+      carry.data(),
       carry.length(),
       shape_[1],   // because this is contiguous
       regular_at);
@@ -4342,8 +4335,8 @@ namespace awkward {
     if (advanced.length() == 0) {
       Index64 nextcarry(carry.length()*lenhead);
       struct Error err = kernel::NumpyArray_getitem_next_range_64(
-        nextcarry.ptr().get(),
-        carry.ptr().get(),
+        nextcarry.data(),
+        carry.data(),
         carry.length(),
         lenhead,
         shape_[1],   // because this is contiguous
@@ -4381,10 +4374,10 @@ namespace awkward {
       Index64 nextcarry(carry.length()*lenhead);
       Index64 nextadvanced(carry.length()*lenhead);
       struct Error err = kernel::NumpyArray_getitem_next_range_advanced_64(
-        nextcarry.ptr().get(),
-        nextadvanced.ptr().get(),
-        carry.ptr().get(),
-        advanced.ptr().get(),
+        nextcarry.data(),
+        nextadvanced.data(),
+        carry.data(),
+        advanced.data(),
         carry.length(),
         lenhead,
         shape_[1],   // because this is contiguous
@@ -4525,7 +4518,7 @@ namespace awkward {
 
     Index64 flathead = array.ravel();
     struct Error err = kernel::regularize_arrayslice_64(
-      flathead.ptr().get(),
+      flathead.data(),
       flathead.length(),
       shape_[1]);
     util::handle_error(err, classname(), identities_.get());
@@ -4534,10 +4527,10 @@ namespace awkward {
       Index64 nextcarry(carry.length()*flathead.length());
       Index64 nextadvanced(carry.length()*flathead.length());
       struct Error err = kernel::NumpyArray_getitem_next_array_64(
-        nextcarry.ptr().get(),
-        nextadvanced.ptr().get(),
-        carry.ptr().get(),
-        flathead.ptr().get(),
+        nextcarry.data(),
+        nextadvanced.data(),
+        carry.data(),
+        flathead.data(),
         carry.length(),
         flathead.length(),
         shape_[1]);   // because this is contiguous
@@ -4580,10 +4573,10 @@ namespace awkward {
     else {
       Index64 nextcarry(carry.length());
       struct Error err = kernel::NumpyArray_getitem_next_array_advanced_64(
-        nextcarry.ptr().get(),
-        carry.ptr().get(),
-        advanced.ptr().get(),
-        flathead.ptr().get(),
+        nextcarry.data(),
+        carry.data(),
+        advanced.data(),
+        flathead.data(),
         carry.length(),
         shape_[1]);   // because this is contiguous
       util::handle_error(err, classname(), identities_.get());
@@ -4799,7 +4792,7 @@ namespace awkward {
         ptr_lib,
         ptr_lib_,
         reinterpret_cast<bool*>(ptr.get()),
-        reinterpret_cast<bool*>(ptr_.get()),
+        reinterpret_cast<bool*>(data()),
         length);
       break;
     case util::dtype::int8:
@@ -4808,7 +4801,7 @@ namespace awkward {
         ptr_lib,
         ptr_lib_,
         reinterpret_cast<int8_t*>(ptr.get()),
-        reinterpret_cast<int8_t*>(ptr_.get()),
+        reinterpret_cast<int8_t*>(data()),
         length);
       break;
     case util::dtype::int16:
@@ -4817,7 +4810,7 @@ namespace awkward {
         ptr_lib,
         ptr_lib_,
         reinterpret_cast<int16_t*>(ptr.get()),
-        reinterpret_cast<int16_t*>(ptr_.get()),
+        reinterpret_cast<int16_t*>(data()),
         length);
       break;
     case util::dtype::int32:
@@ -4826,7 +4819,7 @@ namespace awkward {
         ptr_lib,
         ptr_lib_,
         reinterpret_cast<int32_t*>(ptr.get()),
-        reinterpret_cast<int32_t*>(ptr_.get()),
+        reinterpret_cast<int32_t*>(data()),
         length);
       break;
     case util::dtype::int64:
@@ -4835,7 +4828,7 @@ namespace awkward {
         ptr_lib,
         ptr_lib_,
         reinterpret_cast<int64_t*>(ptr.get()),
-        reinterpret_cast<int64_t*>(ptr_.get()),
+        reinterpret_cast<int64_t*>(data()),
         length);
       break;
     case util::dtype::uint8:
@@ -4844,7 +4837,7 @@ namespace awkward {
         ptr_lib,
         ptr_lib_,
         reinterpret_cast<uint8_t*>(ptr.get()),
-        reinterpret_cast<uint8_t*>(ptr_.get()),
+        reinterpret_cast<uint8_t*>(data()),
         length);
       break;
     case util::dtype::uint16:
@@ -4853,7 +4846,7 @@ namespace awkward {
         ptr_lib,
         ptr_lib_,
         reinterpret_cast<uint16_t*>(ptr.get()),
-        reinterpret_cast<uint16_t*>(ptr_.get()),
+        reinterpret_cast<uint16_t*>(data()),
         length);
       break;
     case util::dtype::uint32:
@@ -4862,7 +4855,7 @@ namespace awkward {
         ptr_lib,
         ptr_lib_,
         reinterpret_cast<uint32_t*>(ptr.get()),
-        reinterpret_cast<uint32_t*>(ptr_.get()),
+        reinterpret_cast<uint32_t*>(data()),
         length);
       break;
     case util::dtype::uint64:
@@ -4871,7 +4864,7 @@ namespace awkward {
         ptr_lib,
         ptr_lib_,
         reinterpret_cast<uint64_t*>(ptr.get()),
-        reinterpret_cast<uint64_t*>(ptr_.get()),
+        reinterpret_cast<uint64_t*>(data()),
         length);
       break;
     case util::dtype::float16:
@@ -4882,7 +4875,7 @@ namespace awkward {
         ptr_lib,
         ptr_lib_,
         reinterpret_cast<float*>(ptr.get()),
-        reinterpret_cast<float*>(ptr_.get()),
+        reinterpret_cast<float*>(data()),
         length);
       break;
     case util::dtype::float64:
@@ -4891,7 +4884,7 @@ namespace awkward {
         ptr_lib,
         ptr_lib_,
         reinterpret_cast<double*>(ptr.get()),
-        reinterpret_cast<double*>(ptr_.get()),
+        reinterpret_cast<double*>(data()),
         length);
       break;
     case util::dtype::float128:
@@ -4941,15 +4934,15 @@ namespace awkward {
     int64_t ranges_length = 0;
     struct Error err1 = kernel::sorting_ranges_length(
       &ranges_length,
-      parents.ptr().get(),
+      parents.data(),
       parents.length());
     util::handle_error(err1, classname(), nullptr);
 
     Index64 outranges(ranges_length);
     struct Error err2 = kernel::sorting_ranges(
-      outranges.ptr().get(),
+      outranges.data(),
       ranges_length,
-      parents.ptr().get(),
+      parents.data(),
       parents.length());
     util::handle_error(err2, classname(), nullptr);
 
@@ -4957,7 +4950,7 @@ namespace awkward {
       ptr.get(),
       data,
       length,
-      outranges.ptr().get(),
+      outranges.data(),
       ranges_length,
       ascending,
       stable);
@@ -4986,15 +4979,15 @@ namespace awkward {
     int64_t ranges_length = 0;
     struct Error err1 = kernel::sorting_ranges_length(
       &ranges_length,
-      parents.ptr().get(),
+      parents.data(),
       parents.length());
     util::handle_error(err1, classname(), nullptr);
 
     Index64 outranges(ranges_length);
     struct Error err2 = kernel::sorting_ranges(
-      outranges.ptr().get(),
+      outranges.data(),
       ranges_length,
-      parents.ptr().get(),
+      parents.data(),
       parents.length());
     util::handle_error(err2, classname(), nullptr);
 
@@ -5002,7 +4995,7 @@ namespace awkward {
       ptr.get(),
       data,
       length,
-      outranges.ptr().get(),
+      outranges.data(),
       ranges_length,
       parents.length(),
       ascending,
@@ -5030,9 +5023,9 @@ namespace awkward {
     struct Error err = kernel::NumpyArray_sort_asstrings(
       ptr.get(),
       data,
-      offsets.ptr().get(),
+      offsets.data(),
       offsets.length(),
-      outoffsets.ptr().get(),
+      outoffsets.data(),
       ascending,
       stable);
     util::handle_error(err, classname(), nullptr);
