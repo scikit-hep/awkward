@@ -443,10 +443,10 @@ extern "C" {
       int64_t* tocarry,
       const int64_t* starts,
       const int64_t* parents,
-      int64_t parentsoffset,
+      // int64_t parentsoffset,   // MAYBE
       int64_t parentslength,
-      const int64_t* nextparents,
-      int64_t nextparentsoffset);
+      const int64_t* nextparents);  // ,
+      // int64_t nextparentsoffset);   // MAYBE
 
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index

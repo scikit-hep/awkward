@@ -74,7 +74,7 @@ extern "C" {
       int8_t* toindex,
       const int8_t* fromindex,
       const int64_t* carry,
-      int64_t fromindexoffset,
+      // int64_t fromindexoffset,   // MAYBE
       int64_t lenfromindex,
       int64_t length);
   /// @param toindex outparam
@@ -88,7 +88,7 @@ extern "C" {
       uint8_t* toindex,
       const uint8_t* fromindex,
       const int64_t* carry,
-      int64_t fromindexoffset,
+      // int64_t fromindexoffset,   // MAYBE
       int64_t lenfromindex,
       int64_t length);
   /// @param toindex outparam
@@ -102,7 +102,7 @@ extern "C" {
       int32_t* toindex,
       const int32_t* fromindex,
       const int64_t* carry,
-      int64_t fromindexoffset,
+      // int64_t fromindexoffset,   // MAYBE
       int64_t lenfromindex,
       int64_t length);
   /// @param toindex outparam
@@ -116,7 +116,7 @@ extern "C" {
       uint32_t* toindex,
       const uint32_t* fromindex,
       const int64_t* carry,
-      int64_t fromindexoffset,
+      // int64_t fromindexoffset,   // MAYBE
       int64_t lenfromindex,
       int64_t length);
   /// @param toindex outparam
@@ -130,7 +130,7 @@ extern "C" {
       int64_t* toindex,
       const int64_t* fromindex,
       const int64_t* carry,
-      int64_t fromindexoffset,
+      // int64_t fromindexoffset,   // MAYBE
       int64_t lenfromindex,
       int64_t length);
 
@@ -144,7 +144,7 @@ extern "C" {
       int8_t* toindex,
       const int8_t* fromindex,
       const int64_t* carry,
-      int64_t fromindexoffset,
+      // int64_t fromindexoffset,   // MAYBE
       int64_t length);
   /// @param toindex outparam
   /// @param fromindex inparam role: IndexedArray-index
@@ -156,7 +156,7 @@ extern "C" {
       uint8_t* toindex,
       const uint8_t* fromindex,
       const int64_t* carry,
-      int64_t fromindexoffset,
+      // int64_t fromindexoffset,   // MAYBE
       int64_t length);
   /// @param toindex outparam
   /// @param fromindex inparam role: IndexedArray-index
@@ -168,7 +168,7 @@ extern "C" {
       int32_t* toindex,
       const int32_t* fromindex,
       const int64_t* carry,
-      int64_t fromindexoffset,
+      // int64_t fromindexoffset,   // MAYBE
       int64_t length);
   /// @param toindex outparam
   /// @param fromindex inparam role: IndexedArray-index
@@ -180,7 +180,7 @@ extern "C" {
       uint32_t* toindex,
       const uint32_t* fromindex,
       const int64_t* carry,
-      int64_t fromindexoffset,
+      // int64_t fromindexoffset,   // MAYBE
       int64_t length);
   /// @param toindex outparam
   /// @param fromindex inparam role: IndexedArray-index
@@ -192,7 +192,7 @@ extern "C" {
       int64_t* toindex,
       const int64_t* fromindex,
       const int64_t* carry,
-      int64_t fromindexoffset,
+      // int64_t fromindexoffset,   // MAYBE
       int64_t length);
 
   /// @param toptr outparam
@@ -218,9 +218,9 @@ extern "C" {
     awkward_slicemissing_check_same(
       bool* same,
       const int8_t* bytemask,
-      int64_t bytemaskoffset,
+      // int64_t bytemaskoffset,   // MAYBE
       const int64_t* missingindex,
-      int64_t missingindexoffset,
+      // int64_t missingindexoffset,   // MAYBE
       int64_t length);
 
   /// @param toptr outparam
@@ -255,7 +255,7 @@ extern "C" {
       const int32_t* identitiesptr,
       const int64_t* carryptr,
       int64_t lencarry,
-      int64_t offset,
+      // int64_t offset,   // MAYBE
       int64_t width,
       int64_t length);
   /// @param newidentitiesptr outparam
@@ -271,7 +271,7 @@ extern "C" {
       const int64_t* identitiesptr,
       const int64_t* carryptr,
       int64_t lencarry,
-      int64_t offset,
+      // int64_t offset,   // MAYBE
       int64_t width,
       int64_t length);
 
@@ -296,7 +296,7 @@ extern "C" {
       const uint8_t* fromptr,
       int64_t len,
       int64_t stride,
-      int64_t offset,
+      // int64_t offset,   // MAYBE
       const int64_t* pos);
 
   /// @param topos outparam
@@ -324,7 +324,7 @@ extern "C" {
       const uint8_t* fromptr,
       int64_t len,
       int64_t stride,
-      int64_t offset,
+      // int64_t offset,   // MAYBE
       const int64_t* pos);
 
   /// @param nextcarryptr outparam
@@ -419,7 +419,7 @@ extern "C" {
     awkward_NumpyArray_getitem_boolean_numtrue(
       int64_t* numtrue,
       const int8_t* fromptr,
-      int64_t byteoffset,
+      // int64_t byteoffset,   // MAYBE
       int64_t length,
       int64_t stride);
 
@@ -432,7 +432,7 @@ extern "C" {
     awkward_NumpyArray_getitem_boolean_nonzero_64(
       int64_t* toptr,
       const int8_t* fromptr,
-      int64_t byteoffset,
+      // int64_t byteoffset,   // MAYBE
       int64_t length,
       int64_t stride);
 
@@ -449,8 +449,8 @@ extern "C" {
       const int32_t* fromstarts,
       const int32_t* fromstops,
       int64_t lenstarts,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      // int64_t startsoffset,   // MAYBE
+      // int64_t stopsoffset,   // MAYBE
       int64_t at);
   /// @param tocarry outparam
   /// @param fromstarts inparam role: ListArray-starts
@@ -465,8 +465,8 @@ extern "C" {
       const uint32_t* fromstarts,
       const uint32_t* fromstops,
       int64_t lenstarts,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      // int64_t startsoffset,   // MAYBE
+      // int64_t stopsoffset,   // MAYBE
       int64_t at);
   /// @param tocarry outparam
   /// @param fromstarts inparam role: ListArray-starts
@@ -481,8 +481,8 @@ extern "C" {
       const int64_t* fromstarts,
       const int64_t* fromstops,
       int64_t lenstarts,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      // int64_t startsoffset,   // MAYBE
+      // int64_t stopsoffset,   // MAYBE
       int64_t at);
 
   /// @param carrylength outparam
@@ -500,8 +500,8 @@ extern "C" {
       const int32_t* fromstarts,
       const int32_t* fromstops,
       int64_t lenstarts,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      // int64_t startsoffset,   // MAYBE
+      // int64_t stopsoffset,   // MAYBE
       int64_t start,
       int64_t stop,
       int64_t step);
@@ -520,8 +520,8 @@ extern "C" {
       const uint32_t* fromstarts,
       const uint32_t* fromstops,
       int64_t lenstarts,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      // int64_t startsoffset,   // MAYBE
+      // int64_t stopsoffset,   // MAYBE
       int64_t start,
       int64_t stop,
       int64_t step);
@@ -540,8 +540,8 @@ extern "C" {
       const int64_t* fromstarts,
       const int64_t* fromstops,
       int64_t lenstarts,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      // int64_t startsoffset,   // MAYBE
+      // int64_t stopsoffset,   // MAYBE
       int64_t start,
       int64_t stop,
       int64_t step);
@@ -563,8 +563,8 @@ extern "C" {
       const int32_t* fromstarts,
       const int32_t* fromstops,
       int64_t lenstarts,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      // int64_t startsoffset,   // MAYBE
+      // int64_t stopsoffset,   // MAYBE
       int64_t start,
       int64_t stop,
       int64_t step);
@@ -585,8 +585,8 @@ extern "C" {
       const uint32_t* fromstarts,
       const uint32_t* fromstops,
       int64_t lenstarts,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      // int64_t startsoffset,   // MAYBE
+      // int64_t stopsoffset,   // MAYBE
       int64_t start,
       int64_t stop,
       int64_t step);
@@ -607,8 +607,8 @@ extern "C" {
       const int64_t* fromstarts,
       const int64_t* fromstops,
       int64_t lenstarts,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      // int64_t startsoffset,   // MAYBE
+      // int64_t stopsoffset,   // MAYBE
       int64_t start,
       int64_t stop,
       int64_t step);
@@ -686,8 +686,8 @@ extern "C" {
       const int32_t* fromstarts,
       const int32_t* fromstops,
       const int64_t* fromarray,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      // int64_t startsoffset,   // MAYBE
+      // int64_t stopsoffset,   // MAYBE
       int64_t lenstarts,
       int64_t lenarray,
       int64_t lencontent);
@@ -708,8 +708,8 @@ extern "C" {
       const uint32_t* fromstarts,
       const uint32_t* fromstops,
       const int64_t* fromarray,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      // int64_t startsoffset,   // MAYBE
+      // int64_t stopsoffset,   // MAYBE
       int64_t lenstarts,
       int64_t lenarray,
       int64_t lencontent);
@@ -730,8 +730,8 @@ extern "C" {
       const int64_t* fromstarts,
       const int64_t* fromstops,
       const int64_t* fromarray,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      // int64_t startsoffset,   // MAYBE
+      // int64_t stopsoffset,   // MAYBE
       int64_t lenstarts,
       int64_t lenarray,
       int64_t lencontent);
@@ -755,8 +755,8 @@ extern "C" {
       const int32_t* fromstops,
       const int64_t* fromarray,
       const int64_t* fromadvanced,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      // int64_t startsoffset,   // MAYBE
+      // int64_t stopsoffset,   // MAYBE
       int64_t lenstarts,
       int64_t lenarray,
       int64_t lencontent);
@@ -779,8 +779,8 @@ extern "C" {
       const uint32_t* fromstops,
       const int64_t* fromarray,
       const int64_t* fromadvanced,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      // int64_t startsoffset,   // MAYBE
+      // int64_t stopsoffset,   // MAYBE
       int64_t lenstarts,
       int64_t lenarray,
       int64_t lencontent);
@@ -803,8 +803,8 @@ extern "C" {
       const int64_t* fromstops,
       const int64_t* fromarray,
       const int64_t* fromadvanced,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      // int64_t startsoffset,   // MAYBE
+      // int64_t stopsoffset,   // MAYBE
       int64_t lenstarts,
       int64_t lenarray,
       int64_t lencontent);
@@ -825,8 +825,8 @@ extern "C" {
       const int32_t* fromstarts,
       const int32_t* fromstops,
       const int64_t* fromcarry,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      // int64_t startsoffset,   // MAYBE
+      // int64_t stopsoffset,   // MAYBE
       int64_t lenstarts,
       int64_t lencarry);
   /// @param tostarts outparam
@@ -845,8 +845,8 @@ extern "C" {
       const uint32_t* fromstarts,
       const uint32_t* fromstops,
       const int64_t* fromcarry,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      // int64_t startsoffset,   // MAYBE
+      // int64_t stopsoffset,   // MAYBE
       int64_t lenstarts,
       int64_t lencarry);
   /// @param tostarts outparam
@@ -865,8 +865,8 @@ extern "C" {
       const int64_t* fromstarts,
       const int64_t* fromstops,
       const int64_t* fromcarry,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      // int64_t startsoffset,   // MAYBE
+      // int64_t stopsoffset,   // MAYBE
       int64_t lenstarts,
       int64_t lencarry);
 
@@ -969,7 +969,7 @@ extern "C" {
     awkward_IndexedArray32_numnull(
       int64_t* numnull,
       const int32_t* fromindex,
-      int64_t indexoffset,
+      // int64_t indexoffset,   // MAYBE
       int64_t lenindex);
   /// @param numnull outparam role: pointer
   /// @param fromindex inparam role: IndexedArray-index
@@ -979,7 +979,7 @@ extern "C" {
     awkward_IndexedArrayU32_numnull(
       int64_t* numnull,
       const uint32_t* fromindex,
-      int64_t indexoffset,
+      // int64_t indexoffset,   // MAYBE
       int64_t lenindex);
   /// @param numnull outparam role: pointer
   /// @param fromindex inparam role: IndexedArray-index
@@ -989,7 +989,7 @@ extern "C" {
     awkward_IndexedArray64_numnull(
       int64_t* numnull,
       const int64_t* fromindex,
-      int64_t indexoffset,
+      // int64_t indexoffset,   // MAYBE
       int64_t lenindex);
 
   /// @param tocarry outparam
@@ -1003,7 +1003,7 @@ extern "C" {
       int64_t* tocarry,
       int32_t* toindex,
       const int32_t* fromindex,
-      int64_t indexoffset,
+      // int64_t indexoffset,   // MAYBE
       int64_t lenindex,
       int64_t lencontent);
   /// @param tocarry outparam
@@ -1017,7 +1017,7 @@ extern "C" {
       int64_t* tocarry,
       uint32_t* toindex,
       const uint32_t* fromindex,
-      int64_t indexoffset,
+      // int64_t indexoffset,   // MAYBE
       int64_t lenindex,
       int64_t lencontent);
   /// @param tocarry outparam
@@ -1031,7 +1031,7 @@ extern "C" {
       int64_t* tocarry,
       int64_t* toindex,
       const int64_t* fromindex,
-      int64_t indexoffset,
+      // int64_t indexoffset,   // MAYBE
       int64_t lenindex,
       int64_t lencontent);
 
@@ -1046,7 +1046,7 @@ extern "C" {
       int64_t* tocarry,
       int64_t* toindex,
       const int32_t* fromindex,
-      int64_t indexoffset,
+      // int64_t indexoffset,   // MAYBE
       int64_t lenindex,
       int64_t lencontent);
   /// @param tocarry outparam
@@ -1060,7 +1060,7 @@ extern "C" {
       int64_t* tocarry,
       int64_t* toindex,
       const uint32_t* fromindex,
-      int64_t indexoffset,
+      // int64_t indexoffset,   // MAYBE
       int64_t lenindex,
       int64_t lencontent);
   /// @param tocarry outparam
@@ -1074,7 +1074,7 @@ extern "C" {
       int64_t* tocarry,
       int64_t* toindex,
       const int64_t* fromindex,
-      int64_t indexoffset,
+      // int64_t indexoffset,   // MAYBE
       int64_t lenindex,
       int64_t lencontent);
 
@@ -1091,10 +1091,10 @@ extern "C" {
       int64_t* tooffsets,
       int64_t* tononzero,
       const int64_t* fromoffsets,
-      int64_t offsetsoffset,
+      // int64_t offsetsoffset,   // MAYBE
       int64_t length,
       const int64_t* nonzero,
-      int64_t nonzerooffset,
+      // int64_t nonzerooffset,   // MAYBE
       int64_t nonzerolength);
 
   /// @param tooffsets outparam
@@ -1116,16 +1116,16 @@ extern "C" {
       int64_t* tooffsets,
       int64_t* tononzero,
       const int64_t* fromoffsets,
-      int64_t offsetsoffset,
+      // int64_t offsetsoffset,   // MAYBE
       int64_t length,
       const int64_t* index,
-      int64_t indexoffset,
+      // int64_t indexoffset,   // MAYBE
       int64_t indexlength,
       const int64_t* nonzero,
-      int64_t nonzerooffset,
+      // int64_t nonzerooffset,   // MAYBE
       int64_t nonzerolength,
       const int8_t* originalmask,
-      int64_t maskoffset,
+      // int64_t maskoffset,   // MAYBE
       int64_t masklength);
 
   /// @param tomask outparam
@@ -1143,10 +1143,10 @@ extern "C" {
       int64_t* toindex,
       int64_t* tononzero,
       const int64_t* fromindex,
-      int64_t fromindexoffset,
+      // int64_t fromindexoffset,   // MAYBE
       int64_t fromindexlength,
       const int64_t* nonzero,
-      int64_t nonzerooffset,
+      // int64_t nonzerooffset,   // MAYBE
       int64_t nonzerolength);
 
   /// @param tocarry outparam
@@ -1158,7 +1158,7 @@ extern "C" {
     awkward_IndexedArray32_getitem_nextcarry_64(
       int64_t* tocarry,
       const int32_t* fromindex,
-      int64_t indexoffset,
+      // int64_t indexoffset,   // MAYBE
       int64_t lenindex,
       int64_t lencontent);
   /// @param tocarry outparam
@@ -1170,7 +1170,7 @@ extern "C" {
     awkward_IndexedArrayU32_getitem_nextcarry_64(
       int64_t* tocarry,
       const uint32_t* fromindex,
-      int64_t indexoffset,
+      // int64_t indexoffset,   // MAYBE
       int64_t lenindex,
       int64_t lencontent);
   /// @param tocarry outparam
@@ -1182,7 +1182,7 @@ extern "C" {
     awkward_IndexedArray64_getitem_nextcarry_64(
       int64_t* tocarry,
       const int64_t* fromindex,
-      int64_t indexoffset,
+      // int64_t indexoffset,   // MAYBE
       int64_t lenindex,
       int64_t lencontent);
 
@@ -1197,7 +1197,7 @@ extern "C" {
       int32_t* toindex,
       const int32_t* fromindex,
       const int64_t* fromcarry,
-      int64_t indexoffset,
+      // int64_t indexoffset,   // MAYBE
       int64_t lenindex,
       int64_t lencarry);
   /// @param toindex outparam
@@ -1211,7 +1211,7 @@ extern "C" {
       uint32_t* toindex,
       const uint32_t* fromindex,
       const int64_t* fromcarry,
-      int64_t indexoffset,
+      // int64_t indexoffset,   // MAYBE
       int64_t lenindex,
       int64_t lencarry);
   /// @param toindex outparam
@@ -1225,7 +1225,7 @@ extern "C" {
       int64_t* toindex,
       const int64_t* fromindex,
       const int64_t* fromcarry,
-      int64_t indexoffset,
+      // int64_t indexoffset,   // MAYBE
       int64_t lenindex,
       int64_t lencarry);
 
@@ -1237,7 +1237,7 @@ extern "C" {
     awkward_UnionArray8_regular_index_getsize(
       int64_t* size,
       const int8_t* fromtags,
-      int64_t tagsoffset,
+      // int64_t tagsoffset,   // MAYBE
       int64_t length);
 
   /// @param toindex outparam
@@ -1252,7 +1252,7 @@ extern "C" {
       int32_t* current,
       int64_t size,
       const int8_t* fromtags,
-      int64_t tagsoffset,
+      // int64_t tagsoffset,   // MAYBE
       int64_t length);
   /// @param toindex outparam
   /// @param current outparam
@@ -1266,7 +1266,7 @@ extern "C" {
       uint32_t* current,
       int64_t size,
       const int8_t* fromtags,
-      int64_t tagsoffset,
+      // int64_t tagsoffset,   // MAYBE
       int64_t length);
   /// @param toindex outparam
   /// @param current outparam
@@ -1280,7 +1280,7 @@ extern "C" {
       int64_t* current,
       int64_t size,
       const int8_t* fromtags,
-      int64_t tagsoffset,
+      // int64_t tagsoffset,   // MAYBE
       int64_t length);
 
   /// @param lenout outparam role: pointer
@@ -1296,9 +1296,9 @@ extern "C" {
       int64_t* lenout,
       int64_t* tocarry,
       const int8_t* fromtags,
-      int64_t tagsoffset,
+      // int64_t tagsoffset,   // MAYBE
       const int32_t* fromindex,
-      int64_t indexoffset,
+      // int64_t indexoffset,   // MAYBE
       int64_t length,
       int64_t which);
   /// @param lenout outparam role: pointer
@@ -1314,9 +1314,9 @@ extern "C" {
       int64_t* lenout,
       int64_t* tocarry,
       const int8_t* fromtags,
-      int64_t tagsoffset,
+      // int64_t tagsoffset,   // MAYBE
       const uint32_t* fromindex,
-      int64_t indexoffset,
+      // int64_t indexoffset,   // MAYBE
       int64_t length,
       int64_t which);
   /// @param lenout outparam role: pointer
@@ -1332,9 +1332,9 @@ extern "C" {
       int64_t* lenout,
       int64_t* tocarry,
       const int8_t* fromtags,
-      int64_t tagsoffset,
+      // int64_t tagsoffset,   // MAYBE
       const int64_t* fromindex,
-      int64_t indexoffset,
+      // int64_t indexoffset,   // MAYBE
       int64_t length,
       int64_t which);
 
@@ -1348,7 +1348,7 @@ extern "C" {
     awkward_missing_repeat_64(
       int64_t* outindex,
       const int64_t* index,
-      int64_t indexoffset,
+      // int64_t indexoffset,   // MAYBE
       int64_t indexlength,
       int64_t repetitions,
       int64_t regularsize);
@@ -1383,9 +1383,9 @@ extern "C" {
       const int64_t* singleoffsets,
       int64_t* tocarry,
       const int32_t* fromstarts,
-      int64_t fromstartsoffset,
+      // int64_t fromstartsoffset,   // MAYBE
       const int32_t* fromstops,
-      int64_t fromstopsoffset,
+      // int64_t fromstopsoffset,   // MAYBE
       int64_t jaggedsize,
       int64_t length);
   /// @param multistarts outparam
@@ -1405,9 +1405,9 @@ extern "C" {
       const int64_t* singleoffsets,
       int64_t* tocarry,
       const uint32_t* fromstarts,
-      int64_t fromstartsoffset,
+      // int64_t fromstartsoffset,   // MAYBE
       const uint32_t* fromstops,
-      int64_t fromstopsoffset,
+      // int64_t fromstopsoffset,   // MAYBE
       int64_t jaggedsize,
       int64_t length);
   /// @param multistarts outparam
@@ -1427,9 +1427,9 @@ extern "C" {
       const int64_t* singleoffsets,
       int64_t* tocarry,
       const int64_t* fromstarts,
-      int64_t fromstartsoffset,
+      // int64_t fromstartsoffset,   // MAYBE
       const int64_t* fromstops,
-      int64_t fromstopsoffset,
+      // int64_t fromstopsoffset,   // MAYBE
       int64_t jaggedsize,
       int64_t length);
 
@@ -1443,9 +1443,9 @@ extern "C" {
     awkward_ListArray_getitem_jagged_carrylen_64(
       int64_t* carrylen,
       const int64_t* slicestarts,
-      int64_t slicestartsoffset,
+      // int64_t slicestartsoffset,   // MAYBE
       const int64_t* slicestops,
-      int64_t slicestopsoffset,
+      // int64_t slicestopsoffset,   // MAYBE
       int64_t sliceouterlen);
 
   /// @param tooffsets outparam
@@ -1468,17 +1468,17 @@ extern "C" {
       int64_t* tooffsets,
       int64_t* tocarry,
       const int64_t* slicestarts,
-      int64_t slicestartsoffset,
+      // int64_t slicestartsoffset,   // MAYBE
       const int64_t* slicestops,
-      int64_t slicestopsoffset,
+      // int64_t slicestopsoffset,   // MAYBE
       int64_t sliceouterlen,
       const int64_t* sliceindex,
-      int64_t sliceindexoffset,
+      // int64_t sliceindexoffset,   // MAYBE
       int64_t sliceinnerlen,
       const int32_t* fromstarts,
-      int64_t fromstartsoffset,
+      // int64_t fromstartsoffset,   // MAYBE
       const int32_t* fromstops,
-      int64_t fromstopsoffset,
+      // int64_t fromstopsoffset,   // MAYBE
       int64_t contentlen);
   /// @param tooffsets outparam
   /// @param tocarry outparam
@@ -1500,17 +1500,17 @@ extern "C" {
       int64_t* tooffsets,
       int64_t* tocarry,
       const int64_t* slicestarts,
-      int64_t slicestartsoffset,
+      // int64_t slicestartsoffset,   // MAYBE
       const int64_t* slicestops,
-      int64_t slicestopsoffset,
+      // int64_t slicestopsoffset,   // MAYBE
       int64_t sliceouterlen,
       const int64_t* sliceindex,
-      int64_t sliceindexoffset,
+      // int64_t sliceindexoffset,   // MAYBE
       int64_t sliceinnerlen,
       const uint32_t* fromstarts,
-      int64_t fromstartsoffset,
+      // int64_t fromstartsoffset,   // MAYBE
       const uint32_t* fromstops,
-      int64_t fromstopsoffset,
+      // int64_t fromstopsoffset,   // MAYBE
       int64_t contentlen);
   /// @param tooffsets outparam
   /// @param tocarry outparam
@@ -1532,17 +1532,17 @@ extern "C" {
       int64_t* tooffsets,
       int64_t* tocarry,
       const int64_t* slicestarts,
-      int64_t slicestartsoffset,
+      // int64_t slicestartsoffset,   // MAYBE
       const int64_t* slicestops,
-      int64_t slicestopsoffset,
+      // int64_t slicestopsoffset,   // MAYBE
       int64_t sliceouterlen,
       const int64_t* sliceindex,
-      int64_t sliceindexoffset,
+      // int64_t sliceindexoffset,   // MAYBE
       int64_t sliceinnerlen,
       const int64_t* fromstarts,
-      int64_t fromstartsoffset,
+      // int64_t fromstartsoffset,   // MAYBE
       const int64_t* fromstops,
-      int64_t fromstopsoffset,
+      // int64_t fromstopsoffset,   // MAYBE
       int64_t contentlen);
 
   /// @param numvalid outparam role: pointer
@@ -1558,12 +1558,12 @@ extern "C" {
     awkward_ListArray_getitem_jagged_numvalid_64(
       int64_t* numvalid,
       const int64_t* slicestarts,
-      int64_t slicestartsoffset,
+      // int64_t slicestartsoffset,   // MAYBE
       const int64_t* slicestops,
-      int64_t slicestopsoffset,
+      // int64_t slicestopsoffset,   // MAYBE
       int64_t length,
       const int64_t* missing,
-      int64_t missingoffset,
+      // int64_t missingoffset,   // MAYBE
       int64_t missinglength);
 
   /// @param tocarry outparam
@@ -1582,12 +1582,12 @@ extern "C" {
       int64_t* tosmalloffsets,
       int64_t* tolargeoffsets,
       const int64_t* slicestarts,
-      int64_t slicestartsoffset,
+      // int64_t slicestartsoffset,   // MAYBE
       const int64_t* slicestops,
-      int64_t slicestopsoffset,
+      // int64_t slicestopsoffset,   // MAYBE
       int64_t length,
-      const int64_t* missing,
-      int64_t missingoffset);
+      const int64_t* missing);  // ,
+      // int64_t missingoffset);   // MAYBE
 
   /// @param tooffsets outparam
   /// @param slicestarts inparam role: ListArray-starts
@@ -1603,14 +1603,14 @@ extern "C" {
     awkward_ListArray32_getitem_jagged_descend_64(
       int64_t* tooffsets,
       const int64_t* slicestarts,
-      int64_t slicestartsoffset,
+      // int64_t slicestartsoffset,   // MAYBE
       const int64_t* slicestops,
-      int64_t slicestopsoffset,
+      // int64_t slicestopsoffset,   // MAYBE
       int64_t sliceouterlen,
       const int32_t* fromstarts,
-      int64_t fromstartsoffset,
-      const int32_t* fromstops,
-      int64_t fromstopsoffset);
+      // int64_t fromstartsoffset,   // MAYBE
+      const int32_t* fromstops);  // ,
+      // int64_t fromstopsoffset);   // MAYBE
   /// @param tooffsets outparam
   /// @param slicestarts inparam role: ListArray-starts
   /// @param slicestartsoffset inparam role: ListArray-starts-offset
@@ -1625,14 +1625,14 @@ extern "C" {
     awkward_ListArrayU32_getitem_jagged_descend_64(
       int64_t* tooffsets,
       const int64_t* slicestarts,
-      int64_t slicestartsoffset,
+      // int64_t slicestartsoffset,   // MAYBE
       const int64_t* slicestops,
-      int64_t slicestopsoffset,
+      // int64_t slicestopsoffset,   // MAYBE
       int64_t sliceouterlen,
       const uint32_t* fromstarts,
-      int64_t fromstartsoffset,
-      const uint32_t* fromstops,
-      int64_t fromstopsoffset);
+      // int64_t fromstartsoffset,   // MAYBE
+      const uint32_t* fromstops);  // ,
+      // int64_t fromstopsoffset);   // MAYBE
   /// @param tooffsets outparam
   /// @param slicestarts inparam role: ListArray-starts
   /// @param slicestartsoffset inparam role: ListArray-starts-offset
@@ -1647,39 +1647,39 @@ extern "C" {
     awkward_ListArray64_getitem_jagged_descend_64(
       int64_t* tooffsets,
       const int64_t* slicestarts,
-      int64_t slicestartsoffset,
+      // int64_t slicestartsoffset,   // MAYBE
       const int64_t* slicestops,
-      int64_t slicestopsoffset,
+      // int64_t slicestopsoffset,   // MAYBE
       int64_t sliceouterlen,
       const int64_t* fromstarts,
-      int64_t fromstartsoffset,
-      const int64_t* fromstops,
-      int64_t fromstopsoffset);
+      // int64_t fromstartsoffset,   // MAYBE
+      const int64_t* fromstops);  // ,
+      // int64_t fromstopsoffset);   // MAYBE
 
   EXPORT_SYMBOL int8_t
     awkward_Index8_getitem_at_nowrap(
       const int8_t* ptr,
-      int64_t offset,
+      // int64_t offset,   // MAYBE
       int64_t at);
   EXPORT_SYMBOL uint8_t
     awkward_IndexU8_getitem_at_nowrap(
       const uint8_t* ptr,
-      int64_t offset,
+      // int64_t offset,   // MAYBE
       int64_t at);
   EXPORT_SYMBOL int32_t
     awkward_Index32_getitem_at_nowrap(
       const int32_t* ptr,
-      int64_t offset,
+      // int64_t offset,   // MAYBE
       int64_t at);
   EXPORT_SYMBOL uint32_t
     awkward_IndexU32_getitem_at_nowrap(
       const uint32_t* ptr,
-      int64_t offset,
+      // int64_t offset,   // MAYBE
       int64_t at);
   EXPORT_SYMBOL int64_t
     awkward_Index64_getitem_at_nowrap(
       const int64_t* ptr,
-      int64_t offset,
+      // int64_t offset,   // MAYBE
       int64_t at);
 
   EXPORT_SYMBOL bool
@@ -1719,31 +1719,31 @@ extern "C" {
   EXPORT_SYMBOL void
     awkward_Index8_setitem_at_nowrap(
       int8_t* ptr,
-      int64_t offset,
+      // int64_t offset,   // MAYBE
       int64_t at,
       int8_t value);
   EXPORT_SYMBOL void
     awkward_IndexU8_setitem_at_nowrap(
       uint8_t* ptr,
-      int64_t offset,
+      // int64_t offset,   // MAYBE
       int64_t at,
       uint8_t value);
   EXPORT_SYMBOL void
     awkward_Index32_setitem_at_nowrap(
       int32_t* ptr,
-      int64_t offset,
+      // int64_t offset,   // MAYBE
       int64_t at,
       int32_t value);
   EXPORT_SYMBOL void
     awkward_IndexU32_setitem_at_nowrap(
       uint32_t* ptr,
-      int64_t offset,
+      // int64_t offset,   // MAYBE
       int64_t at,
       uint32_t value);
   EXPORT_SYMBOL void
     awkward_Index64_setitem_at_nowrap(
       int64_t* ptr,
-      int64_t offset,
+      // int64_t offset,   // MAYBE
       int64_t at,
       int64_t value);
 
@@ -1757,7 +1757,7 @@ extern "C" {
     awkward_ByteMaskedArray_getitem_carry_64(
       int8_t* tomask,
       const int8_t* frommask,
-      int64_t frommaskoffset,
+      // int64_t frommaskoffset,   // MAYBE
       int64_t lenmask,
       const int64_t* fromcarry,
       int64_t lencarry);
@@ -1771,7 +1771,7 @@ extern "C" {
     awkward_ByteMaskedArray_numnull(
       int64_t* numnull,
       const int8_t* mask,
-      int64_t maskoffset,
+      // int64_t maskoffset,   // MAYBE
       int64_t length,
       bool validwhen);
   /// @param tocarry outparam
@@ -1783,7 +1783,7 @@ extern "C" {
     awkward_ByteMaskedArray_getitem_nextcarry_64(
       int64_t* tocarry,
       const int8_t* mask,
-      int64_t maskoffset,
+      // int64_t maskoffset,   // MAYBE
       int64_t length,
       bool validwhen);
   /// @param tocarry outparam
@@ -1797,7 +1797,7 @@ extern "C" {
       int64_t* tocarry,
       int64_t* outindex,
       const int8_t* mask,
-      int64_t maskoffset,
+      // int64_t maskoffset,   // MAYBE
       int64_t length,
       bool validwhen);
 
@@ -1810,7 +1810,7 @@ extern "C" {
     awkward_ByteMaskedArray_toIndexedOptionArray64(
       int64_t* toindex,
       const int8_t* mask,
-      int64_t maskoffset,
+      // int64_t maskoffset,   // MAYBE
       int64_t length,
       bool validwhen);
 
@@ -1824,9 +1824,14 @@ extern "C" {
   /// @param length inparam
   EXPORT_SYMBOL struct Error
   awkward_Content_getitem_next_missing_jagged_getmaskstartstop(
-      int64_t* index_in, int64_t index_in_offset, int64_t* offsets_in,
-      int64_t offsets_in_offset, int64_t* mask_out, int64_t* starts_out,
-      int64_t* stops_out, int64_t length);
+      int64_t* index_in,
+      // int64_t index_in_offset,   // MAYBE
+      int64_t* offsets_in,
+      // int64_t offsets_in_offset,   // MAYBE
+      int64_t* mask_out,
+      int64_t* starts_out,
+      int64_t* stops_out,
+      int64_t length);
 
   /// @param index inparam role: IndexedArray-index
   /// @param index_offset inparam role: IndexedArray-index-offset
@@ -1838,9 +1843,15 @@ extern "C" {
   /// @param stops_out outparam
   /// @param length inparam
   EXPORT_SYMBOL struct Error awkward_MaskedArray32_getitem_next_jagged_project(
-      int32_t* index, int64_t index_offset, int64_t* starts_in,
-      int64_t starts_offset, int64_t* stops_in, int64_t stops_offset,
-      int64_t* starts_out, int64_t* stops_out, int64_t length);
+      int32_t* index,
+      // int64_t index_offset,   // MAYBE
+      int64_t* starts_in,
+      // int64_t starts_offset,   // MAYBE
+      int64_t* stops_in,
+      // int64_t stops_offset,   // MAYBE
+      int64_t* starts_out,
+      int64_t* stops_out,
+      int64_t length);
   /// @param index inparam role: IndexedArray-index
   /// @param index_offset inparam role: IndexedArray-index-offset
   /// @param starts_in inparam role: ListArray-starts
@@ -1851,9 +1862,15 @@ extern "C" {
   /// @param stops_out outparam
   /// @param length inparam
   EXPORT_SYMBOL struct Error awkward_MaskedArrayU32_getitem_next_jagged_project(
-      uint32_t* index, int64_t index_offset, int64_t* starts_in,
-      int64_t starts_offset, int64_t* stops_in, int64_t stops_offset,
-      int64_t* starts_out, int64_t* stops_out, int64_t length);
+      uint32_t* index,
+      // int64_t index_offset,   // MAYBE
+      int64_t* starts_in,
+      // int64_t starts_offset,   // MAYBE
+      int64_t* stops_in,
+      // int64_t stops_offset,   // MAYBE
+      int64_t* starts_out,
+      int64_t* stops_out,
+      int64_t length);
   /// @param index inparam role: IndexedArray-index
   /// @param index_offset inparam role: IndexedArray-index-offset
   /// @param starts_in inparam role: ListArray-starts
@@ -1864,9 +1881,15 @@ extern "C" {
   /// @param stops_out outparam
   /// @param length inparam
   EXPORT_SYMBOL struct Error awkward_MaskedArray64_getitem_next_jagged_project(
-      int64_t* index, int64_t index_offset, int64_t* starts_in,
-      int64_t starts_offset, int64_t* stops_in, int64_t stops_offset,
-      int64_t* starts_out, int64_t* stops_out, int64_t length);
+      int64_t* index,
+      // int64_t index_offset,   // MAYBE
+      int64_t* starts_in,
+      // int64_t starts_offset,   // MAYBE
+      int64_t* stops_in,
+      // int64_t stops_offset,   // MAYBE
+      int64_t* starts_out,
+      int64_t* stops_out,
+      int64_t length);
 }
 
 #endif // AWKWARDCPU_GETITEM_H_

@@ -22,15 +22,6 @@ namespace awkward {
 
   namespace kernel {
 
-int64_t oink(int64_t x, int64_t line) {
-  if (x != 999) {
-    throw std::runtime_error(std::string("OINK! on line ") + std::to_string(line));
-  }
-  else {
-    return 123;
-  }
-}
-
     std::shared_ptr<LibraryCallback> lib_callback = std::make_shared<LibraryCallback>();
 
     LibraryCallback::LibraryCallback() {
@@ -1265,7 +1256,7 @@ int64_t oink(int64_t x, int64_t line) {
       int8_t *toindex,
       const int8_t *fromindex,
       const int64_t *carry,
-      int64_t fromindexoffset,
+      int64_t fromindexoffset,   // DROP
       int64_t lenfromindex,
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -1273,7 +1264,6 @@ int64_t oink(int64_t x, int64_t line) {
           toindex,
           fromindex,
           carry,
-          oink(fromindexoffset, __LINE__),
           lenfromindex,
           length);
       }
@@ -1293,7 +1283,7 @@ int64_t oink(int64_t x, int64_t line) {
       uint8_t *toindex,
       const uint8_t *fromindex,
       const int64_t *carry,
-      int64_t fromindexoffset,
+      int64_t fromindexoffset,   // DROP
       int64_t lenfromindex,
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -1301,7 +1291,6 @@ int64_t oink(int64_t x, int64_t line) {
           toindex,
           fromindex,
           carry,
-          oink(fromindexoffset, __LINE__),
           lenfromindex,
           length);
       }
@@ -1321,7 +1310,7 @@ int64_t oink(int64_t x, int64_t line) {
       int32_t *toindex,
       const int32_t *fromindex,
       const int64_t *carry,
-      int64_t fromindexoffset,
+      int64_t fromindexoffset,   // DROP
       int64_t lenfromindex,
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -1329,7 +1318,6 @@ int64_t oink(int64_t x, int64_t line) {
           toindex,
           fromindex,
           carry,
-          oink(fromindexoffset, __LINE__),
           lenfromindex,
           length);
       }
@@ -1349,7 +1337,7 @@ int64_t oink(int64_t x, int64_t line) {
       uint32_t *toindex,
       const uint32_t *fromindex,
       const int64_t *carry,
-      int64_t fromindexoffset,
+      int64_t fromindexoffset,   // DROP
       int64_t lenfromindex,
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -1357,7 +1345,6 @@ int64_t oink(int64_t x, int64_t line) {
           toindex,
           fromindex,
           carry,
-          oink(fromindexoffset, __LINE__),
           lenfromindex,
           length);
       }
@@ -1377,7 +1364,7 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *toindex,
       const int64_t *fromindex,
       const int64_t *carry,
-      int64_t fromindexoffset,
+      int64_t fromindexoffset,   // DROP
       int64_t lenfromindex,
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -1385,7 +1372,6 @@ int64_t oink(int64_t x, int64_t line) {
           toindex,
           fromindex,
           carry,
-          oink(fromindexoffset, __LINE__),
           lenfromindex,
           length);
       }
@@ -1405,14 +1391,13 @@ int64_t oink(int64_t x, int64_t line) {
       int8_t *toindex,
       const int8_t *fromindex,
       const int64_t *carry,
-      int64_t fromindexoffset,
+      int64_t fromindexoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_Index8_carry_nocheck_64(
           toindex,
           fromindex,
           carry,
-          oink(fromindexoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -1431,14 +1416,13 @@ int64_t oink(int64_t x, int64_t line) {
       uint8_t *toindex,
       const uint8_t *fromindex,
       const int64_t *carry,
-      int64_t fromindexoffset,
+      int64_t fromindexoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexU8_carry_nocheck_64(
           toindex,
           fromindex,
           carry,
-          oink(fromindexoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -1457,14 +1441,13 @@ int64_t oink(int64_t x, int64_t line) {
       int32_t *toindex,
       const int32_t *fromindex,
       const int64_t *carry,
-      int64_t fromindexoffset,
+      int64_t fromindexoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_Index32_carry_nocheck_64(
           toindex,
           fromindex,
           carry,
-          oink(fromindexoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -1483,14 +1466,13 @@ int64_t oink(int64_t x, int64_t line) {
       uint32_t *toindex,
       const uint32_t *fromindex,
       const int64_t *carry,
-      int64_t fromindexoffset,
+      int64_t fromindexoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexU32_carry_nocheck_64(
           toindex,
           fromindex,
           carry,
-          oink(fromindexoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -1509,14 +1491,13 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *toindex,
       const int64_t *fromindex,
       const int64_t *carry,
-      int64_t fromindexoffset,
+      int64_t fromindexoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_Index64_carry_nocheck_64(
           toindex,
           fromindex,
           carry,
-          oink(fromindexoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -1558,17 +1539,15 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       bool *same,
       const int8_t *bytemask,
-      int64_t bytemaskoffset,
+      int64_t bytemaskoffset,   // DROP
       const int64_t *missingindex,
-      int64_t missingindexoffset,
+      int64_t missingindexoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_slicemissing_check_same(
           same,
           bytemask,
-          oink(bytemaskoffset, __LINE__),
           missingindex,
-          oink(missingindexoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -1648,7 +1627,7 @@ int64_t oink(int64_t x, int64_t line) {
       const int32_t *identitiesptr,
       const int64_t *carryptr,
       int64_t lencarry,
-      int64_t offset,
+      int64_t offset,   // DROP
       int64_t width,
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -1657,7 +1636,6 @@ int64_t oink(int64_t x, int64_t line) {
           identitiesptr,
           carryptr,
           lencarry,
-          oink(offset, __LINE__),
           width,
           length);
       }
@@ -1678,7 +1656,7 @@ int64_t oink(int64_t x, int64_t line) {
       const int64_t *identitiesptr,
       const int64_t *carryptr,
       int64_t lencarry,
-      int64_t offset,
+      int64_t offset,   // DROP
       int64_t width,
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -1687,7 +1665,6 @@ int64_t oink(int64_t x, int64_t line) {
           identitiesptr,
           carryptr,
           lencarry,
-          oink(offset, __LINE__),
           width,
           length);
       }
@@ -1729,7 +1706,7 @@ int64_t oink(int64_t x, int64_t line) {
       const uint8_t *fromptr,
       int64_t len,
       int64_t stride,
-      int64_t offset,
+      int64_t offset,   // DROP
       const int64_t *pos) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_contiguous_copy_64(
@@ -1737,7 +1714,6 @@ int64_t oink(int64_t x, int64_t line) {
           fromptr,
           len,
           stride,
-          oink(offset, __LINE__),
           pos);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -1781,7 +1757,7 @@ int64_t oink(int64_t x, int64_t line) {
       const uint8_t *fromptr,
       int64_t len,
       int64_t stride,
-      int64_t offset,
+      int64_t offset,   // DROP
       const int64_t *pos) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_getitem_next_null_64(
@@ -1789,7 +1765,6 @@ int64_t oink(int64_t x, int64_t line) {
           fromptr,
           len,
           stride,
-          oink(offset, __LINE__),
           pos);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -1949,14 +1924,13 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *numtrue,
       const int8_t *fromptr,
-      int64_t byteoffset,
+      int64_t byteoffset,   // DROP
       int64_t length,
       int64_t stride) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_getitem_boolean_numtrue(
           numtrue,
           fromptr,
-          oink(byteoffset, __LINE__),
           length,
           stride);
       }
@@ -1974,14 +1948,13 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int8_t *fromptr,
-      int64_t byteoffset,
+      int64_t byteoffset,   // DROP
       int64_t length,
       int64_t stride) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_getitem_boolean_nonzero_64(
           toptr,
           fromptr,
-          oink(byteoffset, __LINE__),
           length,
           stride);
       }
@@ -2002,8 +1975,8 @@ int64_t oink(int64_t x, int64_t line) {
       const int32_t *fromstarts,
       const int32_t *fromstops,
       int64_t lenstarts,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      int64_t startsoffset,   // DROP
+      int64_t stopsoffset,   // DROP
       int64_t at) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray32_getitem_next_at_64(
@@ -2011,8 +1984,6 @@ int64_t oink(int64_t x, int64_t line) {
           fromstarts,
           fromstops,
           lenstarts,
-          oink(startsoffset, __LINE__),
-          oink(stopsoffset, __LINE__),
           at);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -2032,8 +2003,8 @@ int64_t oink(int64_t x, int64_t line) {
       const uint32_t *fromstarts,
       const uint32_t *fromstops,
       int64_t lenstarts,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      int64_t startsoffset,   // DROP
+      int64_t stopsoffset,   // DROP
       int64_t at) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArrayU32_getitem_next_at_64(
@@ -2041,8 +2012,6 @@ int64_t oink(int64_t x, int64_t line) {
           fromstarts,
           fromstops,
           lenstarts,
-          oink(startsoffset, __LINE__),
-          oink(stopsoffset, __LINE__),
           at);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -2062,8 +2031,8 @@ int64_t oink(int64_t x, int64_t line) {
       const int64_t *fromstarts,
       const int64_t *fromstops,
       int64_t lenstarts,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      int64_t startsoffset,   // DROP
+      int64_t stopsoffset,   // DROP
       int64_t at) {
       if (ptr_lib == kernel::lib::cpu) {
        return awkward_ListArray64_getitem_next_at_64(
@@ -2071,8 +2040,6 @@ int64_t oink(int64_t x, int64_t line) {
          fromstarts,
          fromstops,
          lenstarts,
-         oink(startsoffset, __LINE__),
-         oink(stopsoffset, __LINE__),
          at);
      }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -2092,8 +2059,8 @@ int64_t oink(int64_t x, int64_t line) {
       const int32_t *fromstarts,
       const int32_t *fromstops,
       int64_t lenstarts,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      int64_t startsoffset,   // DROP
+      int64_t stopsoffset,   // DROP
       int64_t start,
       int64_t stop,
       int64_t step) {
@@ -2103,8 +2070,6 @@ int64_t oink(int64_t x, int64_t line) {
           fromstarts,
           fromstops,
           lenstarts,
-          oink(startsoffset, __LINE__),
-          oink(stopsoffset, __LINE__),
           start,
           stop,
           step);
@@ -2126,8 +2091,8 @@ int64_t oink(int64_t x, int64_t line) {
       const uint32_t *fromstarts,
       const uint32_t *fromstops,
       int64_t lenstarts,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      int64_t startsoffset,   // DROP
+      int64_t stopsoffset,   // DROP
       int64_t start,
       int64_t stop,
       int64_t step) {
@@ -2137,8 +2102,6 @@ int64_t oink(int64_t x, int64_t line) {
          fromstarts,
          fromstops,
          lenstarts,
-         oink(startsoffset, __LINE__),
-         oink(stopsoffset, __LINE__),
          start,
          stop,
          step);
@@ -2160,8 +2123,8 @@ int64_t oink(int64_t x, int64_t line) {
       const int64_t *fromstarts,
       const int64_t *fromstops,
       int64_t lenstarts,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      int64_t startsoffset,   // DROP
+      int64_t stopsoffset,   // DROP
       int64_t start,
       int64_t stop,
       int64_t step) {
@@ -2171,8 +2134,6 @@ int64_t oink(int64_t x, int64_t line) {
           fromstarts,
           fromstops,
           lenstarts,
-          oink(startsoffset, __LINE__),
-          oink(stopsoffset, __LINE__),
           start,
           stop,
           step);
@@ -2195,8 +2156,8 @@ int64_t oink(int64_t x, int64_t line) {
       const int32_t *fromstarts,
       const int32_t *fromstops,
       int64_t lenstarts,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      int64_t startsoffset,   // DROP
+      int64_t stopsoffset,   // DROP
       int64_t start,
       int64_t stop,
       int64_t step) {
@@ -2207,8 +2168,6 @@ int64_t oink(int64_t x, int64_t line) {
          fromstarts,
          fromstops,
          lenstarts,
-         oink(startsoffset, __LINE__),
-         oink(stopsoffset, __LINE__),
          start,
          stop,
          step);
@@ -2231,8 +2190,8 @@ int64_t oink(int64_t x, int64_t line) {
       const uint32_t *fromstarts,
       const uint32_t *fromstops,
       int64_t lenstarts,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      int64_t startsoffset,   // DROP
+      int64_t stopsoffset,   // DROP
       int64_t start,
       int64_t stop,
       int64_t step) {
@@ -2243,8 +2202,6 @@ int64_t oink(int64_t x, int64_t line) {
           fromstarts,
           fromstops,
           lenstarts,
-          oink(startsoffset, __LINE__),
-          oink(stopsoffset, __LINE__),
           start,
           stop,
           step);
@@ -2267,8 +2224,8 @@ int64_t oink(int64_t x, int64_t line) {
       const int64_t *fromstarts,
       const int64_t *fromstops,
       int64_t lenstarts,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      int64_t startsoffset,   // DROP
+      int64_t stopsoffset,   // DROP
       int64_t start,
       int64_t stop,
       int64_t step) {
@@ -2279,8 +2236,6 @@ int64_t oink(int64_t x, int64_t line) {
           fromstarts,
           fromstops,
           lenstarts,
-          oink(startsoffset, __LINE__),
-          oink(stopsoffset, __LINE__),
           start,
           stop,
           step);
@@ -2441,8 +2396,8 @@ int64_t oink(int64_t x, int64_t line) {
       const int32_t *fromstarts,
       const int32_t *fromstops,
       const int64_t *fromarray,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      int64_t startsoffset,   // DROP
+      int64_t stopsoffset,   // DROP
       int64_t lenstarts,
       int64_t lenarray,
       int64_t lencontent) {
@@ -2453,8 +2408,6 @@ int64_t oink(int64_t x, int64_t line) {
           fromstarts,
           fromstops,
           fromarray,
-          oink(startsoffset, __LINE__),
-          oink(stopsoffset, __LINE__),
           lenstarts,
           lenarray,
           lencontent);
@@ -2477,8 +2430,8 @@ int64_t oink(int64_t x, int64_t line) {
       const uint32_t *fromstarts,
       const uint32_t *fromstops,
       const int64_t *fromarray,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      int64_t startsoffset,   // DROP
+      int64_t stopsoffset,   // DROP
       int64_t lenstarts,
       int64_t lenarray,
       int64_t lencontent) {
@@ -2489,8 +2442,6 @@ int64_t oink(int64_t x, int64_t line) {
           fromstarts,
           fromstops,
           fromarray,
-          oink(startsoffset, __LINE__),
-          oink(stopsoffset, __LINE__),
           lenstarts,
           lenarray,
           lencontent);
@@ -2513,8 +2464,8 @@ int64_t oink(int64_t x, int64_t line) {
       const int64_t *fromstarts,
       const int64_t *fromstops,
       const int64_t *fromarray,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      int64_t startsoffset,   // DROP
+      int64_t stopsoffset,   // DROP
       int64_t lenstarts,
       int64_t lenarray,
       int64_t lencontent) {
@@ -2525,8 +2476,6 @@ int64_t oink(int64_t x, int64_t line) {
           fromstarts,
           fromstops,
           fromarray,
-          oink(startsoffset, __LINE__),
-          oink(stopsoffset, __LINE__),
           lenstarts,
           lenarray,
           lencontent);
@@ -2550,8 +2499,8 @@ int64_t oink(int64_t x, int64_t line) {
       const int32_t *fromstops,
       const int64_t *fromarray,
       const int64_t *fromadvanced,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      int64_t startsoffset,   // DROP
+      int64_t stopsoffset,   // DROP
       int64_t lenstarts,
       int64_t lenarray,
       int64_t lencontent) {
@@ -2563,8 +2512,6 @@ int64_t oink(int64_t x, int64_t line) {
           fromstops,
           fromarray,
           fromadvanced,
-          oink(startsoffset, __LINE__),
-          oink(stopsoffset, __LINE__),
           lenstarts,
           lenarray,
           lencontent);
@@ -2588,8 +2535,8 @@ int64_t oink(int64_t x, int64_t line) {
       const uint32_t *fromstops,
       const int64_t *fromarray,
       const int64_t *fromadvanced,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      int64_t startsoffset,   // DROP
+      int64_t stopsoffset,   // DROP
       int64_t lenstarts,
       int64_t lenarray,
       int64_t lencontent) {
@@ -2601,8 +2548,6 @@ int64_t oink(int64_t x, int64_t line) {
           fromstops,
           fromarray,
           fromadvanced,
-          oink(startsoffset, __LINE__),
-          oink(stopsoffset, __LINE__),
           lenstarts,
           lenarray,
           lencontent);
@@ -2626,8 +2571,8 @@ int64_t oink(int64_t x, int64_t line) {
       const int64_t *fromstops,
       const int64_t *fromarray,
       const int64_t *fromadvanced,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      int64_t startsoffset,   // DROP
+      int64_t stopsoffset,   // DROP
       int64_t lenstarts,
       int64_t lenarray,
       int64_t lencontent) {
@@ -2639,8 +2584,6 @@ int64_t oink(int64_t x, int64_t line) {
           fromstops,
           fromarray,
           fromadvanced,
-          oink(startsoffset, __LINE__),
-          oink(stopsoffset, __LINE__),
           lenstarts,
           lenarray,
           lencontent);
@@ -2663,8 +2606,8 @@ int64_t oink(int64_t x, int64_t line) {
       const int32_t *fromstarts,
       const int32_t *fromstops,
       const int64_t *fromcarry,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      int64_t startsoffset,   // DROP
+      int64_t stopsoffset,   // DROP
       int64_t lenstarts,
       int64_t lencarry) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -2674,8 +2617,6 @@ int64_t oink(int64_t x, int64_t line) {
           fromstarts,
           fromstops,
           fromcarry,
-          oink(startsoffset, __LINE__),
-          oink(stopsoffset, __LINE__),
           lenstarts,
           lencarry);
       }
@@ -2697,8 +2638,8 @@ int64_t oink(int64_t x, int64_t line) {
       const uint32_t *fromstarts,
       const uint32_t *fromstops,
       const int64_t *fromcarry,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      int64_t startsoffset,   // DROP
+      int64_t stopsoffset,   // DROP
       int64_t lenstarts,
       int64_t lencarry) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -2708,8 +2649,6 @@ int64_t oink(int64_t x, int64_t line) {
          fromstarts,
          fromstops,
          fromcarry,
-         oink(startsoffset, __LINE__),
-         oink(stopsoffset, __LINE__),
          lenstarts,
          lencarry);
      }
@@ -2731,8 +2670,8 @@ int64_t oink(int64_t x, int64_t line) {
       const int64_t *fromstarts,
       const int64_t *fromstops,
       const int64_t *fromcarry,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      int64_t startsoffset,   // DROP
+      int64_t stopsoffset,   // DROP
       int64_t lenstarts,
       int64_t lencarry) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -2742,8 +2681,6 @@ int64_t oink(int64_t x, int64_t line) {
           fromstarts,
           fromstops,
           fromcarry,
-          oink(startsoffset, __LINE__),
-          oink(stopsoffset, __LINE__),
           lenstarts,
           lencarry);
       }
@@ -2937,13 +2874,12 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *numnull,
       const int32_t *fromindex,
-      int64_t indexoffset,
+      int64_t indexoffset,   // DROP
       int64_t lenindex) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray32_numnull(
           numnull,
           fromindex,
-          oink(indexoffset, __LINE__),
           lenindex);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -2961,13 +2897,12 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *numnull,
       const uint32_t *fromindex,
-      int64_t indexoffset,
+      int64_t indexoffset,   // DROP
       int64_t lenindex) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArrayU32_numnull(
           numnull,
           fromindex,
-          oink(indexoffset, __LINE__),
           lenindex);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -2985,13 +2920,12 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *numnull,
       const int64_t *fromindex,
-      int64_t indexoffset,
+      int64_t indexoffset,   // DROP
       int64_t lenindex) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray64_numnull(
           numnull,
           fromindex,
-          oink(indexoffset, __LINE__),
           lenindex);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -3010,7 +2944,7 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *tocarry,
       int32_t *toindex,
       const int32_t *fromindex,
-      int64_t indexoffset,
+      int64_t indexoffset,   // DROP
       int64_t lenindex,
       int64_t lencontent) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -3018,7 +2952,6 @@ int64_t oink(int64_t x, int64_t line) {
          tocarry,
          toindex,
          fromindex,
-         oink(indexoffset, __LINE__),
          lenindex,
          lencontent);
      }
@@ -3038,7 +2971,7 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *tocarry,
       uint32_t *toindex,
       const uint32_t *fromindex,
-      int64_t indexoffset,
+      int64_t indexoffset,   // DROP
       int64_t lenindex,
       int64_t lencontent) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -3046,7 +2979,6 @@ int64_t oink(int64_t x, int64_t line) {
           tocarry,
           toindex,
           fromindex,
-          oink(indexoffset, __LINE__),
           lenindex,
           lencontent);
       }
@@ -3066,7 +2998,7 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *tocarry,
       int64_t *toindex,
       const int64_t *fromindex,
-      int64_t indexoffset,
+      int64_t indexoffset,   // DROP
       int64_t lenindex,
       int64_t lencontent) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -3074,7 +3006,6 @@ int64_t oink(int64_t x, int64_t line) {
          tocarry,
          toindex,
          fromindex,
-         oink(indexoffset, __LINE__),
          lenindex,
          lencontent);
      }
@@ -3094,7 +3025,7 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *tocarry,
       int64_t *toindex,
       const int32_t *fromindex,
-      int64_t indexoffset,
+      int64_t indexoffset,   // DROP
       int64_t lenindex,
       int64_t lencontent) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -3102,7 +3033,6 @@ int64_t oink(int64_t x, int64_t line) {
           tocarry,
           toindex,
           fromindex,
-          oink(indexoffset, __LINE__),
           lenindex,
           lencontent);
       }
@@ -3122,7 +3052,7 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *tocarry,
       int64_t *toindex,
       const uint32_t *fromindex,
-      int64_t indexoffset,
+      int64_t indexoffset,   // DROP
       int64_t lenindex,
       int64_t lencontent) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -3130,7 +3060,6 @@ int64_t oink(int64_t x, int64_t line) {
          tocarry,
          toindex,
          fromindex,
-         oink(indexoffset, __LINE__),
          lenindex,
          lencontent);
      }
@@ -3150,7 +3079,7 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *tocarry,
       int64_t *toindex,
       const int64_t *fromindex,
-      int64_t indexoffset,
+      int64_t indexoffset,   // DROP
       int64_t lenindex,
       int64_t lencontent) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -3158,7 +3087,6 @@ int64_t oink(int64_t x, int64_t line) {
           tocarry,
           toindex,
           fromindex,
-          oink(indexoffset, __LINE__),
           lenindex,
           lencontent);
       }
@@ -3177,20 +3105,18 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *tooffsets,
       int64_t *tononzero,
       const int64_t *fromoffsets,
-      int64_t offsetsoffset,
+      int64_t offsetsoffset,   // DROP
       int64_t length,
       const int64_t *nonzero,
-      int64_t nonzerooffset,
+      int64_t nonzerooffset,   // DROP
       int64_t nonzerolength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray_getitem_adjust_offsets_64(
           tooffsets,
           tononzero,
           fromoffsets,
-          oink(offsetsoffset, __LINE__),
           length,
           nonzero,
-          oink(nonzerooffset, __LINE__),
           nonzerolength);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -3208,32 +3134,28 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *tooffsets,
       int64_t *tononzero,
       const int64_t *fromoffsets,
-      int64_t offsetsoffset,
+      int64_t offsetsoffset,   // DROP
       int64_t length,
       const int64_t *index,
-      int64_t indexoffset,
+      int64_t indexoffset,   // DROP
       int64_t indexlength,
       const int64_t *nonzero,
-      int64_t nonzerooffset,
+      int64_t nonzerooffset,   // DROP
       int64_t nonzerolength,
       const int8_t *originalmask,
-      int64_t maskoffset,
+      int64_t maskoffset,   // DROP
       int64_t masklength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray_getitem_adjust_offsets_index_64(
           tooffsets,
           tononzero,
           fromoffsets,
-          oink(offsetsoffset, __LINE__),
           length,
           index,
-          oink(indexoffset, __LINE__),
           indexlength,
           nonzero,
-          oink(nonzerooffset, __LINE__),
           nonzerolength,
           originalmask,
-          oink(maskoffset, __LINE__),
           masklength);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -3252,10 +3174,10 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *toindex,
       int64_t *tononzero,
       const int64_t *fromindex,
-      int64_t fromindexoffset,
+      int64_t fromindexoffset,   // DROP
       int64_t fromindexlength,
       const int64_t *nonzero,
-      int64_t nonzerooffset,
+      int64_t nonzerooffset,   // DROP
       int64_t nonzerolength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray_getitem_adjust_outindex_64(
@@ -3263,10 +3185,8 @@ int64_t oink(int64_t x, int64_t line) {
           toindex,
           tononzero,
           fromindex,
-          oink(fromindexoffset, __LINE__),
           fromindexlength,
           nonzero,
-          oink(nonzerooffset, __LINE__),
           nonzerolength);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -3284,14 +3204,13 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *tocarry,
       const int32_t *fromindex,
-      int64_t indexoffset,
+      int64_t indexoffset,   // DROP
       int64_t lenindex,
       int64_t lencontent) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray32_getitem_nextcarry_64(
           tocarry,
           fromindex,
-          oink(indexoffset, __LINE__),
           lenindex,
           lencontent);
       }
@@ -3310,14 +3229,13 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *tocarry,
       const uint32_t *fromindex,
-      int64_t indexoffset,
+      int64_t indexoffset,   // DROP
       int64_t lenindex,
       int64_t lencontent) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArrayU32_getitem_nextcarry_64(
           tocarry,
           fromindex,
-          oink(indexoffset, __LINE__),
           lenindex,
           lencontent);
       }
@@ -3336,14 +3254,13 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *tocarry,
       const int64_t *fromindex,
-      int64_t indexoffset,
+      int64_t indexoffset,   // DROP
       int64_t lenindex,
       int64_t lencontent) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray64_getitem_nextcarry_64(
           tocarry,
           fromindex,
-          oink(indexoffset, __LINE__),
           lenindex,
           lencontent);
       }
@@ -3363,7 +3280,7 @@ int64_t oink(int64_t x, int64_t line) {
       int32_t *toindex,
       const int32_t *fromindex,
       const int64_t *fromcarry,
-      int64_t indexoffset,
+      int64_t indexoffset,   // DROP
       int64_t lenindex,
       int64_t lencarry) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -3371,7 +3288,6 @@ int64_t oink(int64_t x, int64_t line) {
          toindex,
          fromindex,
          fromcarry,
-         oink(indexoffset, __LINE__),
          lenindex,
          lencarry);
      }
@@ -3391,7 +3307,7 @@ int64_t oink(int64_t x, int64_t line) {
       uint32_t *toindex,
       const uint32_t *fromindex,
       const int64_t *fromcarry,
-      int64_t indexoffset,
+      int64_t indexoffset,   // DROP
       int64_t lenindex,
       int64_t lencarry) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -3399,7 +3315,6 @@ int64_t oink(int64_t x, int64_t line) {
           toindex,
           fromindex,
           fromcarry,
-          oink(indexoffset, __LINE__),
           lenindex,
           lencarry);
       }
@@ -3419,7 +3334,7 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *toindex,
       const int64_t *fromindex,
       const int64_t *fromcarry,
-      int64_t indexoffset,
+      int64_t indexoffset,   // DROP
       int64_t lenindex,
       int64_t lencarry) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -3427,7 +3342,6 @@ int64_t oink(int64_t x, int64_t line) {
          toindex,
          fromindex,
          fromcarry,
-         oink(indexoffset, __LINE__),
          lenindex,
          lencarry);
      }
@@ -3446,13 +3360,12 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *size,
       const int8_t *fromtags,
-      int64_t tagsoffset,
+      int64_t tagsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray8_regular_index_getsize(
           size,
           fromtags,
-          oink(tagsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -3472,7 +3385,7 @@ int64_t oink(int64_t x, int64_t line) {
       int32_t *current,
       int64_t size,
       const int8_t *fromtags,
-      int64_t tagsoffset,
+      int64_t tagsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
        return awkward_UnionArray8_32_regular_index(
@@ -3480,7 +3393,6 @@ int64_t oink(int64_t x, int64_t line) {
          current,
          size,
          fromtags,
-         oink(tagsoffset, __LINE__),
          length);
      }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -3500,7 +3412,7 @@ int64_t oink(int64_t x, int64_t line) {
       uint32_t *current,
       int64_t size,
       const int8_t *fromtags,
-      int64_t tagsoffset,
+      int64_t tagsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray8_U32_regular_index(
@@ -3508,7 +3420,6 @@ int64_t oink(int64_t x, int64_t line) {
           current,
           size,
           fromtags,
-          oink(tagsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -3528,7 +3439,7 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *current,
       int64_t size,
       const int8_t *fromtags,
-      int64_t tagsoffset,
+      int64_t tagsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
        return awkward_UnionArray8_64_regular_index(
@@ -3536,7 +3447,6 @@ int64_t oink(int64_t x, int64_t line) {
          current,
          size,
          fromtags,
-         oink(tagsoffset, __LINE__),
          length);
      }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -3555,9 +3465,9 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *lenout,
       int64_t *tocarry,
       const int8_t *fromtags,
-      int64_t tagsoffset,
+      int64_t tagsoffset,   // DROP
       const int32_t *fromindex,
-      int64_t indexoffset,
+      int64_t indexoffset,   // DROP
       int64_t length,
       int64_t which) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -3565,9 +3475,7 @@ int64_t oink(int64_t x, int64_t line) {
           lenout,
           tocarry,
           fromtags,
-          oink(tagsoffset, __LINE__),
           fromindex,
-          oink(indexoffset, __LINE__),
           length,
           which);
       }
@@ -3587,9 +3495,9 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *lenout,
       int64_t *tocarry,
       const int8_t *fromtags,
-      int64_t tagsoffset,
+      int64_t tagsoffset,   // DROP
       const uint32_t *fromindex,
-      int64_t indexoffset,
+      int64_t indexoffset,   // DROP
       int64_t length,
       int64_t which) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -3597,9 +3505,7 @@ int64_t oink(int64_t x, int64_t line) {
          lenout,
          tocarry,
          fromtags,
-         oink(tagsoffset, __LINE__),
          fromindex,
-         oink(indexoffset, __LINE__),
          length,
          which);
      }
@@ -3619,9 +3525,9 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *lenout,
       int64_t *tocarry,
       const int8_t *fromtags,
-      int64_t tagsoffset,
+      int64_t tagsoffset,   // DROP
       const int64_t *fromindex,
-      int64_t indexoffset,
+      int64_t indexoffset,   // DROP
       int64_t length,
       int64_t which) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -3629,9 +3535,7 @@ int64_t oink(int64_t x, int64_t line) {
           lenout,
           tocarry,
           fromtags,
-          oink(tagsoffset, __LINE__),
           fromindex,
-          oink(indexoffset, __LINE__),
           length,
           which);
       }
@@ -3649,7 +3553,7 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *outindex,
       const int64_t *index,
-      int64_t indexoffset,
+      int64_t indexoffset,   // DROP
       int64_t indexlength,
       int64_t repetitions,
       int64_t regularsize) {
@@ -3657,7 +3561,6 @@ int64_t oink(int64_t x, int64_t line) {
         return awkward_missing_repeat_64(
           outindex,
           index,
-          oink(indexoffset, __LINE__),
           indexlength,
           repetitions,
           regularsize);
@@ -3705,9 +3608,9 @@ int64_t oink(int64_t x, int64_t line) {
       const int64_t *singleoffsets,
       int64_t *tocarry,
       const int32_t *fromstarts,
-      int64_t fromstartsoffset,
+      int64_t fromstartsoffset,   // DROP
       const int32_t *fromstops,
-      int64_t fromstopsoffset,
+      int64_t fromstopsoffset,   // DROP
       int64_t jaggedsize,
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -3717,9 +3620,7 @@ int64_t oink(int64_t x, int64_t line) {
           singleoffsets,
           tocarry,
           fromstarts,
-          oink(fromstartsoffset, __LINE__),
           fromstops,
-          oink(fromstopsoffset, __LINE__),
           jaggedsize,
           length);
       }
@@ -3741,9 +3642,9 @@ int64_t oink(int64_t x, int64_t line) {
       const int64_t *singleoffsets,
       int64_t *tocarry,
       const uint32_t *fromstarts,
-      int64_t fromstartsoffset,
+      int64_t fromstartsoffset,   // DROP
       const uint32_t *fromstops,
-      int64_t fromstopsoffset,
+      int64_t fromstopsoffset,   // DROP
       int64_t jaggedsize,
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -3753,9 +3654,7 @@ int64_t oink(int64_t x, int64_t line) {
          singleoffsets,
          tocarry,
          fromstarts,
-         oink(fromstartsoffset, __LINE__),
          fromstops,
-         oink(fromstopsoffset, __LINE__),
          jaggedsize,
          length);
      }
@@ -3777,9 +3676,9 @@ int64_t oink(int64_t x, int64_t line) {
       const int64_t *singleoffsets,
       int64_t *tocarry,
       const int64_t *fromstarts,
-      int64_t fromstartsoffset,
+      int64_t fromstartsoffset,   // DROP
       const int64_t *fromstops,
-      int64_t fromstopsoffset,
+      int64_t fromstopsoffset,   // DROP
       int64_t jaggedsize,
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -3789,9 +3688,7 @@ int64_t oink(int64_t x, int64_t line) {
           singleoffsets,
           tocarry,
           fromstarts,
-          oink(fromstartsoffset, __LINE__),
           fromstops,
-          oink(fromstopsoffset, __LINE__),
           jaggedsize,
           length);
       }
@@ -3809,17 +3706,15 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *carrylen,
       const int64_t *slicestarts,
-      int64_t slicestartsoffset,
+      int64_t slicestartsoffset,   // DROP
       const int64_t *slicestops,
-      int64_t slicestopsoffset,
+      int64_t slicestopsoffset,   // DROP
       int64_t sliceouterlen) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray_getitem_jagged_carrylen_64(
           carrylen,
           slicestarts,
-          oink(slicestartsoffset, __LINE__),
           slicestops,
-          oink(slicestopsoffset, __LINE__),
           sliceouterlen);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -3838,34 +3733,29 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *tooffsets,
       int64_t *tocarry,
       const int64_t *slicestarts,
-      int64_t slicestartsoffset,
+      int64_t slicestartsoffset,   // DROP
       const int64_t *slicestops,
-      int64_t slicestopsoffset,
+      int64_t slicestopsoffset,   // DROP
       int64_t sliceouterlen,
       const int64_t *sliceindex,
-      int64_t sliceindexoffset,
+      int64_t sliceindexoffset,   // DROP
       int64_t sliceinnerlen,
       const int32_t *fromstarts,
-      int64_t fromstartsoffset,
+      int64_t fromstartsoffset,   // DROP
       const int32_t *fromstops,
-      int64_t fromstopsoffset,
+      int64_t fromstopsoffset,   // DROP
       int64_t contentlen) {
       if (ptr_lib == kernel::lib::cpu) {
        return awkward_ListArray32_getitem_jagged_apply_64(
          tooffsets,
          tocarry,
          slicestarts,
-         oink(slicestartsoffset, __LINE__),
          slicestops,
-         oink(slicestopsoffset, __LINE__),
          sliceouterlen,
          sliceindex,
-         oink(sliceindexoffset, __LINE__),
          sliceinnerlen,
          fromstarts,
-         oink(fromstartsoffset, __LINE__),
          fromstops,
-         oink(fromstopsoffset, __LINE__),
          contentlen);
      }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -3884,34 +3774,29 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *tooffsets,
       int64_t *tocarry,
       const int64_t *slicestarts,
-      int64_t slicestartsoffset,
+      int64_t slicestartsoffset,   // DROP
       const int64_t *slicestops,
-      int64_t slicestopsoffset,
+      int64_t slicestopsoffset,   // DROP
       int64_t sliceouterlen,
       const int64_t *sliceindex,
-      int64_t sliceindexoffset,
+      int64_t sliceindexoffset,   // DROP
       int64_t sliceinnerlen,
       const uint32_t *fromstarts,
-      int64_t fromstartsoffset,
+      int64_t fromstartsoffset,   // DROP
       const uint32_t *fromstops,
-      int64_t fromstopsoffset,
+      int64_t fromstopsoffset,   // DROP
       int64_t contentlen) {
       if (ptr_lib == kernel::lib::cpu) {
        return awkward_ListArrayU32_getitem_jagged_apply_64(
          tooffsets,
          tocarry,
          slicestarts,
-         oink(slicestartsoffset, __LINE__),
          slicestops,
-         oink(slicestopsoffset, __LINE__),
          sliceouterlen,
          sliceindex,
-         oink(sliceindexoffset, __LINE__),
          sliceinnerlen,
          fromstarts,
-         oink(fromstartsoffset, __LINE__),
          fromstops,
-         oink(fromstopsoffset, __LINE__),
          contentlen);
      }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -3930,34 +3815,29 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *tooffsets,
       int64_t *tocarry,
       const int64_t *slicestarts,
-      int64_t slicestartsoffset,
+      int64_t slicestartsoffset,   // DROP
       const int64_t *slicestops,
-      int64_t slicestopsoffset,
+      int64_t slicestopsoffset,   // DROP
       int64_t sliceouterlen,
       const int64_t *sliceindex,
-      int64_t sliceindexoffset,
+      int64_t sliceindexoffset,   // DROP
       int64_t sliceinnerlen,
       const int64_t *fromstarts,
-      int64_t fromstartsoffset,
+      int64_t fromstartsoffset,   // DROP
       const int64_t *fromstops,
-      int64_t fromstopsoffset,
+      int64_t fromstopsoffset,   // DROP
       int64_t contentlen) {
       if (ptr_lib == kernel::lib::cpu) {
        return awkward_ListArray64_getitem_jagged_apply_64(
          tooffsets,
          tocarry,
          slicestarts,
-         oink(slicestartsoffset, __LINE__),
          slicestops,
-         oink(slicestopsoffset, __LINE__),
          sliceouterlen,
          sliceindex,
-         oink(sliceindexoffset, __LINE__),
          sliceinnerlen,
          fromstarts,
-         oink(fromstartsoffset, __LINE__),
          fromstops,
-         oink(fromstopsoffset, __LINE__),
          contentlen);
      }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -3974,23 +3854,20 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *numvalid,
       const int64_t *slicestarts,
-      int64_t slicestartsoffset,
+      int64_t slicestartsoffset,   // DROP
       const int64_t *slicestops,
-      int64_t slicestopsoffset,
+      int64_t slicestopsoffset,   // DROP
       int64_t length,
       const int64_t *missing,
-      int64_t missingoffset,
+      int64_t missingoffset,   // DROP
       int64_t missinglength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray_getitem_jagged_numvalid_64(
           numvalid,
           slicestarts,
-          oink(slicestartsoffset, __LINE__),
           slicestops,
-          oink(slicestopsoffset, __LINE__),
           length,
           missing,
-          oink(missingoffset, __LINE__),
           missinglength);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -4009,24 +3886,21 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *tosmalloffsets,
       int64_t *tolargeoffsets,
       const int64_t *slicestarts,
-      int64_t slicestartsoffset,
+      int64_t slicestartsoffset,   // DROP
       const int64_t *slicestops,
-      int64_t slicestopsoffset,
+      int64_t slicestopsoffset,   // DROP
       int64_t length,
       const int64_t *missing,
-      int64_t missingoffset) {
+      int64_t missingoffset) {   // DROP
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray_getitem_jagged_shrink_64(
           tocarry,
           tosmalloffsets,
           tolargeoffsets,
           slicestarts,
-          oink(slicestartsoffset, __LINE__),
           slicestops,
-          oink(slicestopsoffset, __LINE__),
           length,
-          missing,
-          oink(missingoffset, __LINE__));
+          missing);
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
@@ -4043,26 +3917,22 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *tooffsets,
       const int64_t *slicestarts,
-      int64_t slicestartsoffset,
+      int64_t slicestartsoffset,   // DROP
       const int64_t *slicestops,
-      int64_t slicestopsoffset,
+      int64_t slicestopsoffset,   // DROP
       int64_t sliceouterlen,
       const int32_t *fromstarts,
-      int64_t fromstartsoffset,
-      const int32_t *fromstops,
-      int64_t fromstopsoffset) {
+      int64_t fromstartsoffset,   // DROP
+      const int32_t *fromstops,   // DROP
+      int64_t fromstopsoffset) {  // DROP
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray32_getitem_jagged_descend_64(
           tooffsets,
           slicestarts,
-          oink(slicestartsoffset, __LINE__),
           slicestops,
-          oink(slicestopsoffset, __LINE__),
           sliceouterlen,
           fromstarts,
-          oink(fromstartsoffset, __LINE__),
-          fromstops,
-          oink(fromstopsoffset, __LINE__));
+          fromstops);
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
@@ -4079,26 +3949,22 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *tooffsets,
       const int64_t *slicestarts,
-      int64_t slicestartsoffset,
+      int64_t slicestartsoffset,   // DROP
       const int64_t *slicestops,
-      int64_t slicestopsoffset,
+      int64_t slicestopsoffset,   // DROP
       int64_t sliceouterlen,
       const uint32_t *fromstarts,
-      int64_t fromstartsoffset,
+      int64_t fromstartsoffset,   // DROP
       const uint32_t *fromstops,
-      int64_t fromstopsoffset) {
+      int64_t fromstopsoffset) {   // DROP
       if (ptr_lib == kernel::lib::cpu) {
        return awkward_ListArrayU32_getitem_jagged_descend_64(
          tooffsets,
          slicestarts,
-         oink(slicestartsoffset, __LINE__),
          slicestops,
-         oink(slicestopsoffset, __LINE__),
          sliceouterlen,
          fromstarts,
-         oink(fromstartsoffset, __LINE__),
-         fromstops,
-         oink(fromstopsoffset, __LINE__));
+         fromstops);
      }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
@@ -4115,26 +3981,22 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *tooffsets,
       const int64_t *slicestarts,
-      int64_t slicestartsoffset,
+      int64_t slicestartsoffset,   // DROP
       const int64_t *slicestops,
-      int64_t slicestopsoffset,
+      int64_t slicestopsoffset,   // DROP
       int64_t sliceouterlen,
       const int64_t *fromstarts,
-      int64_t fromstartsoffset,
+      int64_t fromstartsoffset,   // DROP
       const int64_t *fromstops,
-      int64_t fromstopsoffset) {
+      int64_t fromstopsoffset) {   // DROP
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray64_getitem_jagged_descend_64(
           tooffsets,
           slicestarts,
-          oink(slicestartsoffset, __LINE__),
           slicestops,
-          oink(slicestopsoffset, __LINE__),
           sliceouterlen,
           fromstarts,
-          oink(fromstartsoffset, __LINE__),
-          fromstops,
-          oink(fromstopsoffset, __LINE__));
+          fromstops);
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
@@ -4149,12 +4011,11 @@ int64_t oink(int64_t x, int64_t line) {
     template<>
     int8_t index_getitem_at_nowrap(kernel::lib ptr_lib,
                                    int8_t *ptr,
-                                   int64_t offset,
+                                   int64_t offset,  // DROP
                                    int64_t at) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_Index8_getitem_at_nowrap(
           ptr,
-          oink(offset, __LINE__),
           at);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -4163,7 +4024,6 @@ int64_t oink(int64_t x, int64_t line) {
                     ptr_lib);
         return (*awkward_cuda_Index8_getitem_at_nowrap_t)(
           ptr,
-          oink(offset, __LINE__),
           at);
       }
       else {
@@ -4174,12 +4034,11 @@ int64_t oink(int64_t x, int64_t line) {
     template<>
     uint8_t index_getitem_at_nowrap(kernel::lib ptr_lib,
                                     uint8_t *ptr,
-                                    int64_t offset,
+                                    int64_t offset,   // DROP
                                     int64_t at) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexU8_getitem_at_nowrap(
           ptr,
-          oink(offset, __LINE__),
           at);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -4188,7 +4047,6 @@ int64_t oink(int64_t x, int64_t line) {
                     ptr_lib);
         return (*awkward_cuda_IndexU8_getitem_at_nowrap_t)(
           ptr,
-          oink(offset, __LINE__),
           at);
       }
       else {
@@ -4199,12 +4057,11 @@ int64_t oink(int64_t x, int64_t line) {
     template<>
     int32_t index_getitem_at_nowrap(kernel::lib ptr_lib,
                                     int32_t *ptr,
-                                    int64_t offset,
+                                    int64_t offset,   // DROP
                                     int64_t at) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_Index32_getitem_at_nowrap(
           ptr,
-          oink(offset, __LINE__),
           at);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -4213,7 +4070,6 @@ int64_t oink(int64_t x, int64_t line) {
                     ptr_lib);
         return (*awkward_cuda_Index32_getitem_at_nowrap_t)(
           ptr,
-          oink(offset, __LINE__),
           at);
       }
       else {
@@ -4224,12 +4080,11 @@ int64_t oink(int64_t x, int64_t line) {
     template<>
     uint32_t index_getitem_at_nowrap(kernel::lib ptr_lib,
                                      uint32_t *ptr,
-                                     int64_t offset,
+                                     int64_t offset,   // DROP
                                      int64_t at) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexU32_getitem_at_nowrap(
           ptr,
-          oink(offset, __LINE__),
           at);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -4238,7 +4093,6 @@ int64_t oink(int64_t x, int64_t line) {
                     ptr_lib);
         return (*awkward_cuda_IndexU32_getitem_at_nowrap_t)(
           ptr,
-          oink(offset, __LINE__),
           at);
       }
       else {
@@ -4249,12 +4103,11 @@ int64_t oink(int64_t x, int64_t line) {
     template<>
     int64_t index_getitem_at_nowrap(kernel::lib ptr_lib,
                                     int64_t *ptr,
-                                    int64_t offset,
+                                    int64_t offset,   // DROP
                                     int64_t at) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_Index64_getitem_at_nowrap(
           ptr,
-          oink(offset, __LINE__),
           at);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -4263,7 +4116,6 @@ int64_t oink(int64_t x, int64_t line) {
                     ptr_lib);
         return (*awkward_cuda_Index64_getitem_at_nowrap_t)(
           ptr,
-          oink(offset, __LINE__),
           at);
       }
       else {
@@ -4274,13 +4126,12 @@ int64_t oink(int64_t x, int64_t line) {
     template<>
     void index_setitem_at_nowrap(kernel::lib ptr_lib,
                                  int8_t *ptr,
-                                 int64_t offset,
+                                 int64_t offset,   // DROP
                                  int64_t at,
                                  int8_t value) {
       if (ptr_lib == kernel::lib::cpu) {
         awkward_Index8_setitem_at_nowrap(
           ptr,
-          oink(offset, __LINE__),
           at,
           value);
       }
@@ -4290,7 +4141,6 @@ int64_t oink(int64_t x, int64_t line) {
                     ptr_lib);
         (*awkward_cuda_Index8_setitem_at_nowrap_t)(
           ptr,
-          oink(offset, __LINE__),
           at,
           value);
       }
@@ -4302,13 +4152,12 @@ int64_t oink(int64_t x, int64_t line) {
     template<>
     void index_setitem_at_nowrap(kernel::lib ptr_lib,
                                  uint8_t *ptr,
-                                 int64_t offset,
+                                 int64_t offset,   // DROP
                                  int64_t at,
                                  uint8_t value) {
       if (ptr_lib == kernel::lib::cpu) {
         awkward_IndexU8_setitem_at_nowrap(
           ptr,
-          oink(offset, __LINE__),
           at,
           value);
       }
@@ -4318,7 +4167,6 @@ int64_t oink(int64_t x, int64_t line) {
                     ptr_lib);
         (*awkward_cuda_IndexU8_setitem_at_nowrap_t)(
           ptr,
-          oink(offset, __LINE__),
           at,
           value);
       }
@@ -4330,13 +4178,12 @@ int64_t oink(int64_t x, int64_t line) {
     template<>
     void index_setitem_at_nowrap(kernel::lib ptr_lib,
                                  int32_t *ptr,
-                                 int64_t offset,
+                                 int64_t offset,   // DROP
                                  int64_t at,
                                  int32_t value) {
       if (ptr_lib == kernel::lib::cpu) {
         awkward_Index32_setitem_at_nowrap(
           ptr,
-          oink(offset, __LINE__),
           at,
           value);
       }
@@ -4346,7 +4193,6 @@ int64_t oink(int64_t x, int64_t line) {
                     ptr_lib);
         (*awkward_cuda_Index32_setitem_at_nowrap_t)(
           ptr,
-          oink(offset, __LINE__),
           at,
           value);
       }
@@ -4358,13 +4204,12 @@ int64_t oink(int64_t x, int64_t line) {
     template<>
     void index_setitem_at_nowrap(kernel::lib ptr_lib,
                                  uint32_t *ptr,
-                                 int64_t offset,
+                                 int64_t offset,   // DROP
                                  int64_t at,
                                  uint32_t value) {
       if (ptr_lib == kernel::lib::cpu) {
         awkward_IndexU32_setitem_at_nowrap(
           ptr,
-          oink(offset, __LINE__),
           at,
           value);
       }
@@ -4374,7 +4219,6 @@ int64_t oink(int64_t x, int64_t line) {
                     ptr_lib);
         (*awkward_cuda_IndexU32_setitem_at_nowrap_t)(
           ptr,
-          oink(offset, __LINE__),
           at,
           value);
       }
@@ -4386,13 +4230,12 @@ int64_t oink(int64_t x, int64_t line) {
     template<>
     void index_setitem_at_nowrap(kernel::lib ptr_lib,
                                  int64_t *ptr,
-                                 int64_t offset,
+                                 int64_t offset,   // DROP
                                  int64_t at,
                                  int64_t value) {
       if (ptr_lib == kernel::lib::cpu) {
         awkward_Index64_setitem_at_nowrap(
           ptr,
-          oink(offset, __LINE__),
           at,
           value);
       }
@@ -4402,7 +4245,6 @@ int64_t oink(int64_t x, int64_t line) {
                     ptr_lib);
         (*awkward_cuda_Index64_setitem_at_nowrap_t)(
           ptr,
-          oink(offset, __LINE__),
           at,
           value);
       }
@@ -4415,7 +4257,7 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int8_t *tomask,
       const int8_t *frommask,
-      int64_t frommaskoffset,
+      int64_t frommaskoffset,   // DROP
       int64_t lenmask,
       const int64_t *fromcarry,
       int64_t lencarry) {
@@ -4423,7 +4265,6 @@ int64_t oink(int64_t x, int64_t line) {
         return awkward_ByteMaskedArray_getitem_carry_64(
           tomask,
           frommask,
-          oink(frommaskoffset, __LINE__),
           lenmask,
           fromcarry,
           lencarry);
@@ -4442,14 +4283,13 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *numnull,
       const int8_t *mask,
-      int64_t maskoffset,
+      int64_t maskoffset,   // DROP
       int64_t length,
       bool validwhen) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ByteMaskedArray_numnull(
           numnull,
           mask,
-          oink(maskoffset, __LINE__),
           length,
           validwhen);
       }
@@ -4467,14 +4307,13 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *tocarry,
       const int8_t *mask,
-      int64_t maskoffset,
+      int64_t maskoffset,   // DROP
       int64_t length,
       bool validwhen) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ByteMaskedArray_getitem_nextcarry_64(
           tocarry,
           mask,
-          oink(maskoffset, __LINE__),
           length,
           validwhen);
       }
@@ -4493,7 +4332,7 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *tocarry,
       int64_t *toindex,
       const int8_t *mask,
-      int64_t maskoffset,
+      int64_t maskoffset,   // DROP
       int64_t length,
       bool validwhen) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -4501,7 +4340,6 @@ int64_t oink(int64_t x, int64_t line) {
           tocarry,
           toindex,
           mask,
-          oink(maskoffset, __LINE__),
           length,
           validwhen);
       }
@@ -4519,14 +4357,13 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const int8_t *mask,
-      int64_t maskoffset,
+      int64_t maskoffset,   // DROP
       int64_t length,
       bool validwhen) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ByteMaskedArray_toIndexedOptionArray64(
           toindex,
           mask,
-          oink(maskoffset, __LINE__),
           length,
           validwhen);
       }
@@ -4543,9 +4380,9 @@ int64_t oink(int64_t x, int64_t line) {
     ERROR Content_getitem_next_missing_jagged_getmaskstartstop(
       kernel::lib ptr_lib,
       int64_t *index_in,
-      int64_t index_in_offset,
+      int64_t index_in_offset,   // DROP
       int64_t *offsets_in,
-      int64_t offsets_in_offset,
+      int64_t offsets_in_offset,   // DROP
       int64_t *mask_out,
       int64_t *starts_out,
       int64_t *stops_out,
@@ -4553,9 +4390,7 @@ int64_t oink(int64_t x, int64_t line) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_Content_getitem_next_missing_jagged_getmaskstartstop(
           index_in,
-          oink(index_in_offset, __LINE__),
           offsets_in,
-          oink(offsets_in_offset, __LINE__),
           mask_out,
           starts_out,
           stops_out,
@@ -4575,22 +4410,19 @@ int64_t oink(int64_t x, int64_t line) {
     ERROR MaskedArray_getitem_next_jagged_project(
       kernel::lib ptr_lib,
       int32_t *index,
-      int64_t index_offset,
+      int64_t index_offset,   // DROP
       int64_t *starts_in,
-      int64_t starts_offset,
+      int64_t starts_offset,   // DROP
       int64_t *stops_in,
-      int64_t stops_offset,
+      int64_t stops_offset,   // DROP
       int64_t *starts_out,
       int64_t *stops_out,
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_MaskedArray32_getitem_next_jagged_project(
           index,
-          oink(index_offset, __LINE__),
           starts_in,
-          oink(starts_offset, __LINE__),
           stops_in,
-          oink(stops_offset, __LINE__),
           starts_out,
           stops_out,
           length);
@@ -4608,22 +4440,19 @@ int64_t oink(int64_t x, int64_t line) {
     ERROR MaskedArray_getitem_next_jagged_project(
       kernel::lib ptr_lib,
       uint32_t *index,
-      int64_t index_offset,
+      int64_t index_offset,   // DROP
       int64_t *starts_in,
-      int64_t starts_offset,
+      int64_t starts_offset,   // DROP
       int64_t *stops_in,
-      int64_t stops_offset,
+      int64_t stops_offset,   // DROP
       int64_t *starts_out,
       int64_t *stops_out,
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_MaskedArrayU32_getitem_next_jagged_project(
           index,
-          oink(index_offset, __LINE__),
           starts_in,
-          oink(starts_offset, __LINE__),
           stops_in,
-          oink(stops_offset, __LINE__),
           starts_out,
           stops_out,
           length);
@@ -4641,22 +4470,19 @@ int64_t oink(int64_t x, int64_t line) {
     ERROR MaskedArray_getitem_next_jagged_project(
       kernel::lib ptr_lib,
       int64_t *index,
-      int64_t index_offset,
+      int64_t index_offset,   // DROP
       int64_t *starts_in,
-      int64_t starts_offset,
+      int64_t starts_offset,   // DROP
       int64_t *stops_in,
-      int64_t stops_offset,
+      int64_t stops_offset,   // DROP
       int64_t *starts_out,
       int64_t *stops_out,
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_MaskedArray64_getitem_next_jagged_project(
           index,
-          oink(index_offset, __LINE__),
           starts_in,
-          oink(starts_offset, __LINE__),
           stops_in,
-          oink(stops_offset, __LINE__),
           starts_out,
           stops_out,
           length);
@@ -4743,8 +4569,8 @@ int64_t oink(int64_t x, int64_t line) {
       int32_t *toptr,
       const int32_t *fromptr,
       const int32_t *fromoffsets,
-      int64_t fromptroffset,
-      int64_t offsetsoffset,
+      int64_t fromptroffset,   // DROP
+      int64_t offsetsoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
@@ -4753,8 +4579,6 @@ int64_t oink(int64_t x, int64_t line) {
           toptr,
           fromptr,
           fromoffsets,
-          oink(fromptroffset, __LINE__),
-          oink(offsetsoffset, __LINE__),
           tolength,
           fromlength,
           fromwidth);
@@ -4775,8 +4599,8 @@ int64_t oink(int64_t x, int64_t line) {
       int32_t *toptr,
       const int32_t *fromptr,
       const uint32_t *fromoffsets,
-      int64_t fromptroffset,
-      int64_t offsetsoffset,
+      int64_t fromptroffset,   // DROP
+      int64_t offsetsoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
@@ -4785,8 +4609,6 @@ int64_t oink(int64_t x, int64_t line) {
           toptr,
           fromptr,
           fromoffsets,
-          oink(fromptroffset, __LINE__),
-          oink(offsetsoffset, __LINE__),
           tolength,
           fromlength,
           fromwidth);
@@ -4807,8 +4629,8 @@ int64_t oink(int64_t x, int64_t line) {
       int32_t *toptr,
       const int32_t *fromptr,
       const int64_t *fromoffsets,
-      int64_t fromptroffset,
-      int64_t offsetsoffset,
+      int64_t fromptroffset,   // DROP
+      int64_t offsetsoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
@@ -4817,8 +4639,6 @@ int64_t oink(int64_t x, int64_t line) {
           toptr,
           fromptr,
           fromoffsets,
-          oink(fromptroffset, __LINE__),
-          oink(offsetsoffset, __LINE__),
           tolength,
           fromlength,
           fromwidth);
@@ -4839,8 +4659,8 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *toptr,
       const int64_t *fromptr,
       const int32_t *fromoffsets,
-      int64_t fromptroffset,
-      int64_t offsetsoffset,
+      int64_t fromptroffset,   // DROP
+      int64_t offsetsoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
@@ -4849,8 +4669,6 @@ int64_t oink(int64_t x, int64_t line) {
           toptr,
           fromptr,
           fromoffsets,
-          oink(fromptroffset, __LINE__),
-          oink(offsetsoffset, __LINE__),
           tolength,
           fromlength,
           fromwidth);
@@ -4871,8 +4689,8 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *toptr,
       const int64_t *fromptr,
       const uint32_t *fromoffsets,
-      int64_t fromptroffset,
-      int64_t offsetsoffset,
+      int64_t fromptroffset,   // DROP
+      int64_t offsetsoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
@@ -4881,8 +4699,6 @@ int64_t oink(int64_t x, int64_t line) {
           toptr,
           fromptr,
           fromoffsets,
-          oink(fromptroffset, __LINE__),
-          oink(offsetsoffset, __LINE__),
           tolength,
           fromlength,
           fromwidth);
@@ -4903,8 +4719,8 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *toptr,
       const int64_t *fromptr,
       const int64_t *fromoffsets,
-      int64_t fromptroffset,
-      int64_t offsetsoffset,
+      int64_t fromptroffset,   // DROP
+      int64_t offsetsoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
@@ -4913,8 +4729,6 @@ int64_t oink(int64_t x, int64_t line) {
           toptr,
           fromptr,
           fromoffsets,
-          oink(fromptroffset, __LINE__),
-          oink(offsetsoffset, __LINE__),
           tolength,
           fromlength,
           fromwidth);
@@ -4937,9 +4751,9 @@ int64_t oink(int64_t x, int64_t line) {
       const int32_t *fromptr,
       const int32_t *fromstarts,
       const int32_t *fromstops,
-      int64_t fromptroffset,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      int64_t fromptroffset,   // DROP
+      int64_t startsoffset,   // DROP
+      int64_t stopsoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
@@ -4950,9 +4764,6 @@ int64_t oink(int64_t x, int64_t line) {
           fromptr,
           fromstarts,
           fromstops,
-          oink(fromptroffset, __LINE__),
-          oink(startsoffset, __LINE__),
-          oink(stopsoffset, __LINE__),
           tolength,
           fromlength,
           fromwidth);
@@ -4975,9 +4786,9 @@ int64_t oink(int64_t x, int64_t line) {
       const int32_t *fromptr,
       const uint32_t *fromstarts,
       const uint32_t *fromstops,
-      int64_t fromptroffset,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      int64_t fromptroffset,   // DROP
+      int64_t startsoffset,   // DROP
+      int64_t stopsoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
@@ -4988,9 +4799,6 @@ int64_t oink(int64_t x, int64_t line) {
           fromptr,
           fromstarts,
           fromstops,
-          oink(fromptroffset, __LINE__),
-          oink(startsoffset, __LINE__),
-          oink(stopsoffset, __LINE__),
           tolength,
           fromlength,
           fromwidth);
@@ -5013,9 +4821,9 @@ int64_t oink(int64_t x, int64_t line) {
       const int32_t *fromptr,
       const int64_t *fromstarts,
       const int64_t *fromstops,
-      int64_t fromptroffset,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      int64_t fromptroffset,   // DROP
+      int64_t startsoffset,   // DROP
+      int64_t stopsoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
@@ -5026,9 +4834,6 @@ int64_t oink(int64_t x, int64_t line) {
           fromptr,
           fromstarts,
           fromstops,
-          oink(fromptroffset, __LINE__),
-          oink(startsoffset, __LINE__),
-          oink(stopsoffset, __LINE__),
           tolength,
           fromlength,
           fromwidth);
@@ -5051,9 +4856,9 @@ int64_t oink(int64_t x, int64_t line) {
       const int64_t *fromptr,
       const int32_t *fromstarts,
       const int32_t *fromstops,
-      int64_t fromptroffset,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      int64_t fromptroffset,   // DROP
+      int64_t startsoffset,   // DROP
+      int64_t stopsoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
@@ -5064,9 +4869,6 @@ int64_t oink(int64_t x, int64_t line) {
           fromptr,
           fromstarts,
           fromstops,
-          oink(fromptroffset, __LINE__),
-          oink(startsoffset, __LINE__),
-          oink(stopsoffset, __LINE__),
           tolength,
           fromlength,
           fromwidth);
@@ -5089,9 +4891,9 @@ int64_t oink(int64_t x, int64_t line) {
       const int64_t *fromptr,
       const uint32_t *fromstarts,
       const uint32_t *fromstops,
-      int64_t fromptroffset,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      int64_t fromptroffset,   // DROP
+      int64_t startsoffset,   // DROP
+      int64_t stopsoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
@@ -5102,9 +4904,6 @@ int64_t oink(int64_t x, int64_t line) {
           fromptr,
           fromstarts,
           fromstops,
-          oink(fromptroffset, __LINE__),
-          oink(startsoffset, __LINE__),
-          oink(stopsoffset, __LINE__),
           tolength,
           fromlength,
           fromwidth);
@@ -5127,9 +4926,9 @@ int64_t oink(int64_t x, int64_t line) {
       const int64_t *fromptr,
       const int64_t *fromstarts,
       const int64_t *fromstops,
-      int64_t fromptroffset,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      int64_t fromptroffset,   // DROP
+      int64_t startsoffset,   // DROP
+      int64_t stopsoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
@@ -5140,9 +4939,6 @@ int64_t oink(int64_t x, int64_t line) {
           fromptr,
           fromstarts,
           fromstops,
-          oink(fromptroffset, __LINE__),
-          oink(startsoffset, __LINE__),
-          oink(stopsoffset, __LINE__),
           tolength,
           fromlength,
           fromwidth);
@@ -5162,7 +4958,7 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int32_t *toptr,
       const int32_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       int64_t size,
       int64_t tolength,
       int64_t fromlength,
@@ -5171,7 +4967,6 @@ int64_t oink(int64_t x, int64_t line) {
         return awkward_Identities32_from_RegularArray(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           size,
           tolength,
           fromlength,
@@ -5192,7 +4987,7 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int64_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       int64_t size,
       int64_t tolength,
       int64_t fromlength,
@@ -5201,7 +4996,6 @@ int64_t oink(int64_t x, int64_t line) {
         return awkward_Identities64_from_RegularArray(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           size,
           tolength,
           fromlength,
@@ -5224,8 +5018,8 @@ int64_t oink(int64_t x, int64_t line) {
       int32_t *toptr,
       const int32_t *fromptr,
       const int32_t *fromindex,
-      int64_t fromptroffset,
-      int64_t indexoffset,
+      int64_t fromptroffset,   // DROP
+      int64_t indexoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
@@ -5235,8 +5029,6 @@ int64_t oink(int64_t x, int64_t line) {
           toptr,
           fromptr,
           fromindex,
-          oink(fromptroffset, __LINE__),
-          oink(indexoffset, __LINE__),
           tolength,
           fromlength,
           fromwidth);
@@ -5258,8 +5050,8 @@ int64_t oink(int64_t x, int64_t line) {
       int32_t *toptr,
       const int32_t *fromptr,
       const uint32_t *fromindex,
-      int64_t fromptroffset,
-      int64_t indexoffset,
+      int64_t fromptroffset,   // DROP
+      int64_t indexoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
@@ -5269,8 +5061,6 @@ int64_t oink(int64_t x, int64_t line) {
          toptr,
          fromptr,
          fromindex,
-         oink(fromptroffset, __LINE__),
-         oink(indexoffset, __LINE__),
          tolength,
          fromlength,
          fromwidth);
@@ -5292,8 +5082,8 @@ int64_t oink(int64_t x, int64_t line) {
       int32_t *toptr,
       const int32_t *fromptr,
       const int64_t *fromindex,
-      int64_t fromptroffset,
-      int64_t indexoffset,
+      int64_t fromptroffset,   // DROP
+      int64_t indexoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
@@ -5303,8 +5093,6 @@ int64_t oink(int64_t x, int64_t line) {
           toptr,
           fromptr,
           fromindex,
-          oink(fromptroffset, __LINE__),
-          oink(indexoffset, __LINE__),
           tolength,
           fromlength,
           fromwidth);
@@ -5326,8 +5114,8 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *toptr,
       const int64_t *fromptr,
       const int32_t *fromindex,
-      int64_t fromptroffset,
-      int64_t indexoffset,
+      int64_t fromptroffset,   // DROP
+      int64_t indexoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
@@ -5337,8 +5125,6 @@ int64_t oink(int64_t x, int64_t line) {
          toptr,
          fromptr,
          fromindex,
-         oink(fromptroffset, __LINE__),
-         oink(indexoffset, __LINE__),
          tolength,
          fromlength,
          fromwidth);
@@ -5360,8 +5146,8 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *toptr,
       const int64_t *fromptr,
       const uint32_t *fromindex,
-      int64_t fromptroffset,
-      int64_t indexoffset,
+      int64_t fromptroffset,   // DROP
+      int64_t indexoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
@@ -5371,8 +5157,6 @@ int64_t oink(int64_t x, int64_t line) {
           toptr,
           fromptr,
           fromindex,
-          oink(fromptroffset, __LINE__),
-          oink(indexoffset, __LINE__),
           tolength,
           fromlength,
           fromwidth);
@@ -5394,8 +5178,8 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *toptr,
       const int64_t *fromptr,
       const int64_t *fromindex,
-      int64_t fromptroffset,
-      int64_t indexoffset,
+      int64_t fromptroffset,   // DROP
+      int64_t indexoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
@@ -5405,8 +5189,6 @@ int64_t oink(int64_t x, int64_t line) {
          toptr,
          fromptr,
          fromindex,
-         oink(fromptroffset, __LINE__),
-         oink(indexoffset, __LINE__),
          tolength,
          fromlength,
          fromwidth);
@@ -5429,9 +5211,9 @@ int64_t oink(int64_t x, int64_t line) {
       const int32_t *fromptr,
       const int8_t *fromtags,
       const int32_t *fromindex,
-      int64_t fromptroffset,
-      int64_t tagsoffset,
-      int64_t indexoffset,
+      int64_t fromptroffset,   // DROP
+      int64_t tagsoffset,   // DROP
+      int64_t indexoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth,
@@ -5443,9 +5225,6 @@ int64_t oink(int64_t x, int64_t line) {
           fromptr,
           fromtags,
           fromindex,
-          oink(fromptroffset, __LINE__),
-          oink(tagsoffset, __LINE__),
-          oink(indexoffset, __LINE__),
           tolength,
           fromlength,
           fromwidth,
@@ -5469,9 +5248,9 @@ int64_t oink(int64_t x, int64_t line) {
       const int32_t *fromptr,
       const int8_t *fromtags,
       const uint32_t *fromindex,
-      int64_t fromptroffset,
-      int64_t tagsoffset,
-      int64_t indexoffset,
+      int64_t fromptroffset,   // DROP
+      int64_t tagsoffset,   // DROP
+      int64_t indexoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth,
@@ -5483,9 +5262,6 @@ int64_t oink(int64_t x, int64_t line) {
           fromptr,
           fromtags,
           fromindex,
-          oink(fromptroffset, __LINE__),
-          oink(tagsoffset, __LINE__),
-          oink(indexoffset, __LINE__),
           tolength,
           fromlength,
           fromwidth,
@@ -5509,9 +5285,9 @@ int64_t oink(int64_t x, int64_t line) {
       const int32_t *fromptr,
       const int8_t *fromtags,
       const int64_t *fromindex,
-      int64_t fromptroffset,
-      int64_t tagsoffset,
-      int64_t indexoffset,
+      int64_t fromptroffset,   // DROP
+      int64_t tagsoffset,   // DROP
+      int64_t indexoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth,
@@ -5523,9 +5299,6 @@ int64_t oink(int64_t x, int64_t line) {
           fromptr,
           fromtags,
           fromindex,
-          oink(fromptroffset, __LINE__),
-          oink(tagsoffset, __LINE__),
-          oink(indexoffset, __LINE__),
           tolength,
           fromlength,
           fromwidth,
@@ -5549,9 +5322,9 @@ int64_t oink(int64_t x, int64_t line) {
       const int64_t *fromptr,
       const int8_t *fromtags,
       const int32_t *fromindex,
-      int64_t fromptroffset,
-      int64_t tagsoffset,
-      int64_t indexoffset,
+      int64_t fromptroffset,   // DROP
+      int64_t tagsoffset,   // DROP
+      int64_t indexoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth,
@@ -5563,9 +5336,6 @@ int64_t oink(int64_t x, int64_t line) {
           fromptr,
           fromtags,
           fromindex,
-          oink(fromptroffset, __LINE__),
-          oink(tagsoffset, __LINE__),
-          oink(indexoffset, __LINE__),
           tolength,
           fromlength,
           fromwidth,
@@ -5589,9 +5359,9 @@ int64_t oink(int64_t x, int64_t line) {
       const int64_t *fromptr,
       const int8_t *fromtags,
       const uint32_t *fromindex,
-      int64_t fromptroffset,
-      int64_t tagsoffset,
-      int64_t indexoffset,
+      int64_t fromptroffset,   // DROP
+      int64_t tagsoffset,   // DROP
+      int64_t indexoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth,
@@ -5603,9 +5373,6 @@ int64_t oink(int64_t x, int64_t line) {
           fromptr,
           fromtags,
           fromindex,
-          oink(fromptroffset, __LINE__),
-          oink(tagsoffset, __LINE__),
-          oink(indexoffset, __LINE__),
           tolength,
           fromlength,
           fromwidth,
@@ -5629,9 +5396,9 @@ int64_t oink(int64_t x, int64_t line) {
       const int64_t *fromptr,
       const int8_t *fromtags,
       const int64_t *fromindex,
-      int64_t fromptroffset,
-      int64_t tagsoffset,
-      int64_t indexoffset,
+      int64_t fromptroffset,   // DROP
+      int64_t tagsoffset,   // DROP
+      int64_t indexoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth,
@@ -5643,9 +5410,6 @@ int64_t oink(int64_t x, int64_t line) {
           fromptr,
           fromtags,
           fromindex,
-          oink(fromptroffset, __LINE__),
-          oink(tagsoffset, __LINE__),
-          oink(indexoffset, __LINE__),
           tolength,
           fromlength,
           fromwidth,
@@ -5666,14 +5430,13 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int32_t *toptr,
       const int32_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t fromlength,
       int64_t tolength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_Identities32_extend(
           toptr,
           fromptr,
-          oink(fromoffset, __LINE__),
           fromlength,
           tolength);
       }
@@ -5692,14 +5455,13 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int64_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t fromlength,
       int64_t tolength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_Identities64_extend(
           toptr,
           fromptr,
-          oink(fromoffset, __LINE__),
           fromlength,
           tolength);
       }
@@ -5720,17 +5482,15 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *tonum,
       const int32_t *fromstarts,
-      int64_t startsoffset,
+      int64_t startsoffset,   // DROP
       const int32_t *fromstops,
-      int64_t stopsoffset,
+      int64_t stopsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray32_num_64(
           tonum,
           fromstarts,
-          oink(startsoffset, __LINE__),
           fromstops,
-          oink(stopsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -5740,9 +5500,7 @@ int64_t oink(int64_t x, int64_t line) {
         return (*awkward_cuda_ListArray32_num_64_t)(
           tonum,
           fromstarts,
-          oink(startsoffset, __LINE__),
           fromstops,
-          oink(stopsoffset, __LINE__),
           length);
       }
       else {
@@ -5755,17 +5513,15 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *tonum,
       const uint32_t *fromstarts,
-      int64_t startsoffset,
+      int64_t startsoffset,   // DROP
       const uint32_t *fromstops,
-      int64_t stopsoffset,
+      int64_t stopsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArrayU32_num_64(
           tonum,
           fromstarts,
-          oink(startsoffset, __LINE__),
           fromstops,
-          oink(stopsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -5775,9 +5531,7 @@ int64_t oink(int64_t x, int64_t line) {
         return (*awkward_cuda_ListArrayU32_num_64_t)(
           tonum,
           fromstarts,
-          oink(startsoffset, __LINE__),
           fromstops,
-          oink(stopsoffset, __LINE__),
           length);
       }
       else {
@@ -5790,17 +5544,15 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *tonum,
       const int64_t *fromstarts,
-      int64_t startsoffset,
+      int64_t startsoffset,   // DROP
       const int64_t *fromstops,
-      int64_t stopsoffset,
+      int64_t stopsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray64_num_64(
           tonum,
           fromstarts,
-          oink(startsoffset, __LINE__),
           fromstops,
-          oink(stopsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -5810,9 +5562,7 @@ int64_t oink(int64_t x, int64_t line) {
         return (*awkward_cuda_ListArray64_num_64_t)(
           tonum,
           fromstarts,
-          oink(startsoffset, __LINE__),
           fromstops,
-          oink(stopsoffset, __LINE__),
           length);
       }
       else {
@@ -5850,19 +5600,17 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *tooffsets,
       const int32_t *outeroffsets,
-      int64_t outeroffsetsoffset,
+      int64_t outeroffsetsoffset,   // DROP
       int64_t outeroffsetslen,
       const int64_t *inneroffsets,
-      int64_t inneroffsetsoffset,
+      int64_t inneroffsetsoffset,   // DROP
       int64_t inneroffsetslen) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray32_flatten_offsets_64(
           tooffsets,
           outeroffsets,
-          oink(outeroffsetsoffset, __LINE__),
           outeroffsetslen,
           inneroffsets,
-          oink(inneroffsetsoffset, __LINE__),
           inneroffsetslen);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -5880,19 +5628,17 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *tooffsets,
       const uint32_t *outeroffsets,
-      int64_t outeroffsetsoffset,
+      int64_t outeroffsetsoffset,   // DROP
       int64_t outeroffsetslen,
       const int64_t *inneroffsets,
-      int64_t inneroffsetsoffset,
+      int64_t inneroffsetsoffset,   // DROP
       int64_t inneroffsetslen) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArrayU32_flatten_offsets_64(
           tooffsets,
           outeroffsets,
-          oink(outeroffsetsoffset, __LINE__),
           outeroffsetslen,
           inneroffsets,
-          oink(inneroffsetsoffset, __LINE__),
           inneroffsetslen);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -5910,19 +5656,17 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *tooffsets,
       const int64_t *outeroffsets,
-      int64_t outeroffsetsoffset,
+      int64_t outeroffsetsoffset,   // DROP
       int64_t outeroffsetslen,
       const int64_t *inneroffsets,
-      int64_t inneroffsetsoffset,
+      int64_t inneroffsetsoffset,   // DROP
       int64_t inneroffsetslen) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray64_flatten_offsets_64(
           tooffsets,
           outeroffsets,
-          oink(outeroffsetsoffset, __LINE__),
           outeroffsetslen,
           inneroffsets,
-          oink(inneroffsetsoffset, __LINE__),
           inneroffsetslen);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -5940,19 +5684,17 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *outoffsets,
       const int32_t *outindex,
-      int64_t outindexoffset,
+      int64_t outindexoffset,   // DROP
       int64_t outindexlength,
       const int64_t *offsets,
-      int64_t offsetsoffset,
+      int64_t offsetsoffset,   // DROP
       int64_t offsetslength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray32_flatten_none2empty_64(
           outoffsets,
           outindex,
-          oink(outindexoffset, __LINE__),
           outindexlength,
           offsets,
-          oink(offsetsoffset, __LINE__),
           offsetslength);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -5970,19 +5712,17 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *outoffsets,
       const uint32_t *outindex,
-      int64_t outindexoffset,
+      int64_t outindexoffset,   // DROP
       int64_t outindexlength,
       const int64_t *offsets,
-      int64_t offsetsoffset,
+      int64_t offsetsoffset,   // DROP
       int64_t offsetslength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArrayU32_flatten_none2empty_64(
           outoffsets,
           outindex,
-          oink(outindexoffset, __LINE__),
           outindexlength,
           offsets,
-          oink(offsetsoffset, __LINE__),
           offsetslength);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6000,19 +5740,17 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *outoffsets,
       const int64_t *outindex,
-      int64_t outindexoffset,
+      int64_t outindexoffset,   // DROP
       int64_t outindexlength,
       const int64_t *offsets,
-      int64_t offsetsoffset,
+      int64_t offsetsoffset,   // DROP
       int64_t offsetslength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray64_flatten_none2empty_64(
           outoffsets,
           outindex,
-          oink(outindexoffset, __LINE__),
           outindexlength,
           offsets,
-          oink(offsetsoffset, __LINE__),
           offsetslength);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6030,9 +5768,9 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *total_length,
       const int8_t *fromtags,
-      int64_t fromtagsoffset,
+      int64_t fromtagsoffset,   // DROP
       const int32_t *fromindex,
-      int64_t fromindexoffset,
+      int64_t fromindexoffset,   // DROP
       int64_t length,
       int64_t **offsetsraws,
       int64_t *offsetsoffsets) {
@@ -6040,9 +5778,7 @@ int64_t oink(int64_t x, int64_t line) {
         return awkward_UnionArray32_flatten_length_64(
           total_length,
           fromtags,
-          oink(fromtagsoffset, __LINE__),
           fromindex,
-          oink(fromindexoffset, __LINE__),
           length,
           offsetsraws,
           offsetsoffsets);
@@ -6062,9 +5798,9 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *total_length,
       const int8_t *fromtags,
-      int64_t fromtagsoffset,
+      int64_t fromtagsoffset,   // DROP
       const uint32_t *fromindex,
-      int64_t fromindexoffset,
+      int64_t fromindexoffset,   // DROP
       int64_t length,
       int64_t **offsetsraws,
       int64_t *offsetsoffsets) {
@@ -6072,9 +5808,7 @@ int64_t oink(int64_t x, int64_t line) {
         return awkward_UnionArrayU32_flatten_length_64(
           total_length,
           fromtags,
-          oink(fromtagsoffset, __LINE__),
           fromindex,
-          oink(fromindexoffset, __LINE__),
           length,
           offsetsraws,
           offsetsoffsets);
@@ -6094,9 +5828,9 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *total_length,
       const int8_t *fromtags,
-      int64_t fromtagsoffset,
+      int64_t fromtagsoffset,   // DROP
       const int64_t *fromindex,
-      int64_t fromindexoffset,
+      int64_t fromindexoffset,   // DROP
       int64_t length,
       int64_t **offsetsraws,
       int64_t *offsetsoffsets) {
@@ -6104,9 +5838,7 @@ int64_t oink(int64_t x, int64_t line) {
         return awkward_UnionArray64_flatten_length_64(
           total_length,
           fromtags,
-          oink(fromtagsoffset, __LINE__),
           fromindex,
-          oink(fromindexoffset, __LINE__),
           length,
           offsetsraws,
           offsetsoffsets);
@@ -6128,9 +5860,9 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *toindex,
       int64_t *tooffsets,
       const int8_t *fromtags,
-      int64_t fromtagsoffset,
+      int64_t fromtagsoffset,   // DROP
       const int32_t *fromindex,
-      int64_t fromindexoffset,
+      int64_t fromindexoffset,   // DROP
       int64_t length,
       int64_t **offsetsraws,
       int64_t *offsetsoffsets) {
@@ -6140,9 +5872,7 @@ int64_t oink(int64_t x, int64_t line) {
           toindex,
           tooffsets,
           fromtags,
-          oink(fromtagsoffset, __LINE__),
           fromindex,
-          oink(fromindexoffset, __LINE__),
           length,
           offsetsraws,
           offsetsoffsets);
@@ -6164,9 +5894,9 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *toindex,
       int64_t *tooffsets,
       const int8_t *fromtags,
-      int64_t fromtagsoffset,
+      int64_t fromtagsoffset,   // DROP
       const uint32_t *fromindex,
-      int64_t fromindexoffset,
+      int64_t fromindexoffset,   // DROP
       int64_t length,
       int64_t **offsetsraws,
       int64_t *offsetsoffsets) {
@@ -6176,9 +5906,7 @@ int64_t oink(int64_t x, int64_t line) {
           toindex,
           tooffsets,
           fromtags,
-          oink(fromtagsoffset, __LINE__),
           fromindex,
-          oink(fromindexoffset, __LINE__),
           length,
           offsetsraws,
           offsetsoffsets);
@@ -6200,9 +5928,9 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *toindex,
       int64_t *tooffsets,
       const int8_t *fromtags,
-      int64_t fromtagsoffset,
+      int64_t fromtagsoffset,   // DROP
       const int64_t *fromindex,
-      int64_t fromindexoffset,
+      int64_t fromindexoffset,   // DROP
       int64_t length,
       int64_t **offsetsraws,
       int64_t *offsetsoffsets) {
@@ -6212,9 +5940,7 @@ int64_t oink(int64_t x, int64_t line) {
           toindex,
           tooffsets,
           fromtags,
-          oink(fromtagsoffset, __LINE__),
           fromindex,
-          oink(fromindexoffset, __LINE__),
           length,
           offsetsraws,
           offsetsoffsets);
@@ -6234,14 +5960,13 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *tocarry,
       const int32_t *fromindex,
-      int64_t indexoffset,
+      int64_t indexoffset,   // DROP
       int64_t lenindex,
       int64_t lencontent) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray32_flatten_nextcarry_64(
           tocarry,
           fromindex,
-          oink(indexoffset, __LINE__),
           lenindex,
           lencontent);
       }
@@ -6260,14 +5985,13 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *tocarry,
       const uint32_t *fromindex,
-      int64_t indexoffset,
+      int64_t indexoffset,   // DROP
       int64_t lenindex,
       int64_t lencontent) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArrayU32_flatten_nextcarry_64(
           tocarry,
           fromindex,
-          oink(indexoffset, __LINE__),
           lenindex,
           lencontent);
       }
@@ -6286,14 +6010,13 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *tocarry,
       const int64_t *fromindex,
-      int64_t indexoffset,
+      int64_t indexoffset,   // DROP
       int64_t lenindex,
       int64_t lencontent) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray64_flatten_nextcarry_64(
           tocarry,
           fromindex,
-          oink(indexoffset, __LINE__),
           lenindex,
           lencontent);
       }
@@ -6312,17 +6035,15 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const int8_t *mask,
-      int64_t maskoffset,
+      int64_t maskoffset,   // DROP
       const int32_t *fromindex,
-      int64_t indexoffset,
+      int64_t indexoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray32_overlay_mask8_to64(
           toindex,
           mask,
-          oink(maskoffset, __LINE__),
           fromindex,
-          oink(indexoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6340,17 +6061,15 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const int8_t *mask,
-      int64_t maskoffset,
+      int64_t maskoffset,   // DROP
       const uint32_t *fromindex,
-      int64_t indexoffset,
+      int64_t indexoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArrayU32_overlay_mask8_to64(
           toindex,
           mask,
-          oink(maskoffset, __LINE__),
           fromindex,
-          oink(indexoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6368,17 +6087,15 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const int8_t *mask,
-      int64_t maskoffset,
+      int64_t maskoffset,   // DROP
       const int64_t *fromindex,
-      int64_t indexoffset,
+      int64_t indexoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray64_overlay_mask8_to64(
           toindex,
           mask,
-          oink(maskoffset, __LINE__),
           fromindex,
-          oink(indexoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6396,13 +6113,12 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int8_t *tomask,
       const int32_t *fromindex,
-      int64_t indexoffset,
+      int64_t indexoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray32_mask8(
           tomask,
           fromindex,
-          oink(indexoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6420,13 +6136,12 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int8_t *tomask,
       const uint32_t *fromindex,
-      int64_t indexoffset,
+      int64_t indexoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArrayU32_mask8(
           tomask,
           fromindex,
-          oink(indexoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6444,13 +6159,12 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int8_t *tomask,
       const int64_t *fromindex,
-      int64_t indexoffset,
+      int64_t indexoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray64_mask8(
           tomask,
           fromindex,
-          oink(indexoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6467,14 +6181,13 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int8_t *tomask,
       const int8_t *frommask,
-      int64_t maskoffset,
+      int64_t maskoffset,   // DROP
       int64_t length,
       bool validwhen) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ByteMaskedArray_mask8(
           tomask,
           frommask,
-          oink(maskoffset, __LINE__),
           length,
           validwhen);
       }
@@ -6510,19 +6223,17 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const int32_t *outerindex,
-      int64_t outeroffset,
+      int64_t outeroffset,   // DROP
       int64_t outerlength,
       const int32_t *innerindex,
-      int64_t inneroffset,
+      int64_t inneroffset,   // DROP
       int64_t innerlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray32_simplify32_to64(
           toindex,
           outerindex,
-          oink(outeroffset, __LINE__),
           outerlength,
           innerindex,
-          oink(inneroffset, __LINE__),
           innerlength);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6540,19 +6251,17 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const uint32_t *outerindex,
-      int64_t outeroffset,
+      int64_t outeroffset,   // DROP
       int64_t outerlength,
       const int32_t *innerindex,
-      int64_t inneroffset,
+      int64_t inneroffset,   // DROP
       int64_t innerlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArrayU32_simplify32_to64(
           toindex,
           outerindex,
-          oink(outeroffset, __LINE__),
           outerlength,
           innerindex,
-          oink(inneroffset, __LINE__),
           innerlength);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6570,19 +6279,17 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const int64_t *outerindex,
-      int64_t outeroffset,
+      int64_t outeroffset,   // DROP
       int64_t outerlength,
       const int32_t *innerindex,
-      int64_t inneroffset,
+      int64_t inneroffset,   // DROP
       int64_t innerlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray64_simplify32_to64(
           toindex,
           outerindex,
-          oink(outeroffset, __LINE__),
           outerlength,
           innerindex,
-          oink(inneroffset, __LINE__),
           innerlength);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6600,19 +6307,17 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const int32_t *outerindex,
-      int64_t outeroffset,
+      int64_t outeroffset,   // DROP
       int64_t outerlength,
       const uint32_t *innerindex,
-      int64_t inneroffset,
+      int64_t inneroffset,   // DROP
       int64_t innerlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray32_simplifyU32_to64(
           toindex,
           outerindex,
-          oink(outeroffset, __LINE__),
           outerlength,
           innerindex,
-          oink(inneroffset, __LINE__),
           innerlength);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6630,19 +6335,17 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const uint32_t *outerindex,
-      int64_t outeroffset,
+      int64_t outeroffset,   // DROP
       int64_t outerlength,
       const uint32_t *innerindex,
-      int64_t inneroffset,
+      int64_t inneroffset,   // DROP
       int64_t innerlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArrayU32_simplifyU32_to64(
           toindex,
           outerindex,
-          oink(outeroffset, __LINE__),
           outerlength,
           innerindex,
-          oink(inneroffset, __LINE__),
           innerlength);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6660,19 +6363,17 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const int64_t *outerindex,
-      int64_t outeroffset,
+      int64_t outeroffset,   // DROP
       int64_t outerlength,
       const uint32_t *innerindex,
-      int64_t inneroffset,
+      int64_t inneroffset,   // DROP
       int64_t innerlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray64_simplifyU32_to64(
           toindex,
           outerindex,
-          oink(outeroffset, __LINE__),
           outerlength,
           innerindex,
-          oink(inneroffset, __LINE__),
           innerlength);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6690,19 +6391,17 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const int32_t *outerindex,
-      int64_t outeroffset,
+      int64_t outeroffset,   // DROP
       int64_t outerlength,
       const int64_t *innerindex,
-      int64_t inneroffset,
+      int64_t inneroffset,   // DROP
       int64_t innerlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray32_simplify64_to64(
           toindex,
           outerindex,
-          oink(outeroffset, __LINE__),
           outerlength,
           innerindex,
-          oink(inneroffset, __LINE__),
           innerlength);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6720,19 +6419,17 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const uint32_t *outerindex,
-      int64_t outeroffset,
+      int64_t outeroffset,   // DROP
       int64_t outerlength,
       const int64_t *innerindex,
-      int64_t inneroffset,
+      int64_t inneroffset,   // DROP
       int64_t innerlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArrayU32_simplify64_to64(
           toindex,
           outerindex,
-          oink(outeroffset, __LINE__),
           outerlength,
           innerindex,
-          oink(inneroffset, __LINE__),
           innerlength);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6750,19 +6447,17 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const int64_t *outerindex,
-      int64_t outeroffset,
+      int64_t outeroffset,   // DROP
       int64_t outerlength,
       const int64_t *innerindex,
-      int64_t inneroffset,
+      int64_t inneroffset,   // DROP
       int64_t innerlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray64_simplify64_to64(
           toindex,
           outerindex,
-          oink(outeroffset, __LINE__),
           outerlength,
           innerindex,
-          oink(inneroffset, __LINE__),
           innerlength);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6781,16 +6476,14 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *tooffsets,
       const int32_t *fromstarts,
       const int32_t *fromstops,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      int64_t startsoffset,   // DROP
+      int64_t stopsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray32_compact_offsets_64(
           tooffsets,
           fromstarts,
           fromstops,
-          oink(startsoffset, __LINE__),
-          oink(stopsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6809,16 +6502,14 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *tooffsets,
       const uint32_t *fromstarts,
       const uint32_t *fromstops,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      int64_t startsoffset,   // DROP
+      int64_t stopsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArrayU32_compact_offsets_64(
           tooffsets,
           fromstarts,
           fromstops,
-          oink(startsoffset, __LINE__),
-          oink(stopsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6837,16 +6528,14 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *tooffsets,
       const int64_t *fromstarts,
       const int64_t *fromstops,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      int64_t startsoffset,   // DROP
+      int64_t stopsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray64_compact_offsets_64(
           tooffsets,
           fromstarts,
           fromstops,
-          oink(startsoffset, __LINE__),
-          oink(stopsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6885,13 +6574,12 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *tooffsets,
       const int32_t *fromoffsets,
-      int64_t offsetsoffset,
+      int64_t offsetsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray32_compact_offsets_64(
           tooffsets,
           fromoffsets,
-          oink(offsetsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6909,13 +6597,12 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *tooffsets,
       const uint32_t *fromoffsets,
-      int64_t offsetsoffset,
+      int64_t offsetsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArrayU32_compact_offsets_64(
           tooffsets,
           fromoffsets,
-          oink(offsetsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6933,13 +6620,12 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *tooffsets,
       const int64_t *fromoffsets,
-      int64_t offsetsoffset,
+      int64_t offsetsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray64_compact_offsets_64(
           tooffsets,
           fromoffsets,
-          oink(offsetsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6957,23 +6643,20 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *tocarry,
       const int64_t *fromoffsets,
-      int64_t offsetsoffset,
+      int64_t offsetsoffset,   // DROP
       int64_t offsetslength,
       const int32_t *fromstarts,
-      int64_t startsoffset,
+      int64_t startsoffset,   // DROP
       const int32_t *fromstops,
-      int64_t stopsoffset,
+      int64_t stopsoffset,   // DROP
       int64_t lencontent) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray32_broadcast_tooffsets_64(
           tocarry,
           fromoffsets,
-          oink(offsetsoffset, __LINE__),
           offsetslength,
           fromstarts,
-          oink(startsoffset, __LINE__),
           fromstops,
-          oink(stopsoffset, __LINE__),
           lencontent);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6991,23 +6674,20 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *tocarry,
       const int64_t *fromoffsets,
-      int64_t offsetsoffset,
+      int64_t offsetsoffset,   // DROP
       int64_t offsetslength,
       const uint32_t *fromstarts,
-      int64_t startsoffset,
+      int64_t startsoffset,   // DROP
       const uint32_t *fromstops,
-      int64_t stopsoffset,
+      int64_t stopsoffset,   // DROP
       int64_t lencontent) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArrayU32_broadcast_tooffsets_64(
           tocarry,
           fromoffsets,
-          oink(offsetsoffset, __LINE__),
           offsetslength,
           fromstarts,
-          oink(startsoffset, __LINE__),
           fromstops,
-          oink(stopsoffset, __LINE__),
           lencontent);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7025,23 +6705,20 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *tocarry,
       const int64_t *fromoffsets,
-      int64_t offsetsoffset,
+      int64_t offsetsoffset,   // DROP
       int64_t offsetslength,
       const int64_t *fromstarts,
-      int64_t startsoffset,
+      int64_t startsoffset,   // DROP
       const int64_t *fromstops,
-      int64_t stopsoffset,
+      int64_t stopsoffset,   // DROP
       int64_t lencontent) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray64_broadcast_tooffsets_64(
           tocarry,
           fromoffsets,
-          oink(offsetsoffset, __LINE__),
           offsetslength,
           fromstarts,
-          oink(startsoffset, __LINE__),
           fromstops,
-          oink(stopsoffset, __LINE__),
           lencontent);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7057,13 +6734,12 @@ int64_t oink(int64_t x, int64_t line) {
     ERROR RegularArray_broadcast_tooffsets_64(
       kernel::lib ptr_lib,
       const int64_t *fromoffsets,
-      int64_t offsetsoffset,
+      int64_t offsetsoffset,   // DROP
       int64_t offsetslength,
       int64_t size) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_RegularArray_broadcast_tooffsets_64(
           fromoffsets,
-          oink(offsetsoffset, __LINE__),
           offsetslength,
           size);
       }
@@ -7081,13 +6757,12 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *tocarry,
       const int64_t *fromoffsets,
-      int64_t offsetsoffset,
+      int64_t offsetsoffset,   // DROP
       int64_t offsetslength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_RegularArray_broadcast_tooffsets_size1_64(
           tocarry,
           fromoffsets,
-          oink(offsetsoffset, __LINE__),
           offsetslength);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7105,13 +6780,12 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *size,
       const int32_t *fromoffsets,
-      int64_t offsetsoffset,
+      int64_t offsetsoffset,   // DROP
       int64_t offsetslength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray32_toRegularArray(
           size,
           fromoffsets,
-          oink(offsetsoffset, __LINE__),
           offsetslength);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7129,13 +6803,12 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *size,
       const uint32_t *fromoffsets,
-      int64_t offsetsoffset,
+      int64_t offsetsoffset,   // DROP
       int64_t offsetslength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArrayU32_toRegularArray(
           size,
           fromoffsets,
-          oink(offsetsoffset, __LINE__),
           offsetslength);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7153,13 +6826,12 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *size,
       const int64_t *fromoffsets,
-      int64_t offsetsoffset,
+      int64_t offsetsoffset,   // DROP
       int64_t offsetslength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray64_toRegularArray(
           size,
           fromoffsets,
-          oink(offsetsoffset, __LINE__),
           offsetslength);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7178,14 +6850,13 @@ int64_t oink(int64_t x, int64_t line) {
       bool *toptr,
       int64_t tooffset,
       const bool *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tobool_frombool(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7204,14 +6875,13 @@ int64_t oink(int64_t x, int64_t line) {
       int8_t *toptr,
       int64_t tooffset,
       const bool *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint8_frombool(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7230,14 +6900,13 @@ int64_t oink(int64_t x, int64_t line) {
       int16_t *toptr,
       int64_t tooffset,
       const bool *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint16_frombool(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7256,14 +6925,13 @@ int64_t oink(int64_t x, int64_t line) {
       int32_t *toptr,
       int64_t tooffset,
       const bool *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint32_frombool(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7282,14 +6950,13 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *toptr,
       int64_t tooffset,
       const bool *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint64_frombool(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7308,14 +6975,13 @@ int64_t oink(int64_t x, int64_t line) {
       uint8_t *toptr,
       int64_t tooffset,
       const bool *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_touint8_frombool(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7334,14 +7000,13 @@ int64_t oink(int64_t x, int64_t line) {
       uint16_t *toptr,
       int64_t tooffset,
       const bool *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_touint16_frombool(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7360,14 +7025,13 @@ int64_t oink(int64_t x, int64_t line) {
       uint32_t *toptr,
       int64_t tooffset,
       const bool *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_touint32_frombool(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7386,14 +7050,13 @@ int64_t oink(int64_t x, int64_t line) {
       uint64_t *toptr,
       int64_t tooffset,
       const bool *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_touint64_frombool(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7412,14 +7075,13 @@ int64_t oink(int64_t x, int64_t line) {
       float *toptr,
       int64_t tooffset,
       const bool *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat32_frombool(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7438,14 +7100,13 @@ int64_t oink(int64_t x, int64_t line) {
       double *toptr,
       int64_t tooffset,
       const bool *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat64_frombool(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7464,14 +7125,13 @@ int64_t oink(int64_t x, int64_t line) {
       int8_t *toptr,
       int64_t tooffset,
       const int8_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint8_fromint8(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7490,14 +7150,13 @@ int64_t oink(int64_t x, int64_t line) {
       int16_t *toptr,
       int64_t tooffset,
       const int8_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint16_fromint8(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7516,14 +7175,13 @@ int64_t oink(int64_t x, int64_t line) {
       int32_t *toptr,
       int64_t tooffset,
       const int8_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint32_fromint8(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7542,14 +7200,13 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *toptr,
       int64_t tooffset,
       const int8_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint64_fromint8(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7568,14 +7225,13 @@ int64_t oink(int64_t x, int64_t line) {
       float *toptr,
       int64_t tooffset,
       const int8_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat32_fromint8(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7594,14 +7250,13 @@ int64_t oink(int64_t x, int64_t line) {
       double *toptr,
       int64_t tooffset,
       const int8_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat64_fromint8(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7620,14 +7275,13 @@ int64_t oink(int64_t x, int64_t line) {
       int16_t *toptr,
       int64_t tooffset,
       const int16_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint16_fromint16(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7646,14 +7300,13 @@ int64_t oink(int64_t x, int64_t line) {
       int32_t *toptr,
       int64_t tooffset,
       const int16_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint32_fromint16(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7672,14 +7325,13 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *toptr,
       int64_t tooffset,
       const int16_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint64_fromint16(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7698,14 +7350,13 @@ int64_t oink(int64_t x, int64_t line) {
       float *toptr,
       int64_t tooffset,
       const int16_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat32_fromint16(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7724,14 +7375,13 @@ int64_t oink(int64_t x, int64_t line) {
       double *toptr,
       int64_t tooffset,
       const int16_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat64_fromint16(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7750,14 +7400,13 @@ int64_t oink(int64_t x, int64_t line) {
       int32_t *toptr,
       int64_t tooffset,
       const int32_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint32_fromint32(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7776,14 +7425,13 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *toptr,
       int64_t tooffset,
       const int32_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint64_fromint32(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7802,14 +7450,13 @@ int64_t oink(int64_t x, int64_t line) {
       float *toptr,
       int64_t tooffset,
       const int32_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat32_fromint32(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7828,14 +7475,13 @@ int64_t oink(int64_t x, int64_t line) {
       double *toptr,
       int64_t tooffset,
       const int32_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat64_fromint32(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7854,14 +7500,13 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *toptr,
       int64_t tooffset,
       const int64_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint64_fromint64(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7880,14 +7525,13 @@ int64_t oink(int64_t x, int64_t line) {
       float *toptr,
       int64_t tooffset,
       const int64_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat32_fromint64(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7906,14 +7550,13 @@ int64_t oink(int64_t x, int64_t line) {
       double *toptr,
       int64_t tooffset,
       const int64_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat64_fromint64(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7932,14 +7575,13 @@ int64_t oink(int64_t x, int64_t line) {
       int16_t *toptr,
       int64_t tooffset,
       const uint8_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint16_fromuint8(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7958,14 +7600,13 @@ int64_t oink(int64_t x, int64_t line) {
       int32_t *toptr,
       int64_t tooffset,
       const uint8_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint32_fromuint8(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7984,14 +7625,13 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *toptr,
       int64_t tooffset,
       const uint8_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint64_fromuint8(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8010,14 +7650,13 @@ int64_t oink(int64_t x, int64_t line) {
       uint8_t *toptr,
       int64_t tooffset,
       const uint8_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_touint8_fromuint8(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8036,14 +7675,13 @@ int64_t oink(int64_t x, int64_t line) {
       uint16_t *toptr,
       int64_t tooffset,
       const uint8_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_touint16_fromuint8(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8062,14 +7700,13 @@ int64_t oink(int64_t x, int64_t line) {
       uint32_t *toptr,
       int64_t tooffset,
       const uint8_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_touint32_fromuint8(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8088,14 +7725,13 @@ int64_t oink(int64_t x, int64_t line) {
       uint64_t *toptr,
       int64_t tooffset,
       const uint8_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_touint64_fromuint8(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8114,14 +7750,13 @@ int64_t oink(int64_t x, int64_t line) {
       float *toptr,
       int64_t tooffset,
       const uint8_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat32_fromuint8(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8140,14 +7775,13 @@ int64_t oink(int64_t x, int64_t line) {
       double *toptr,
       int64_t tooffset,
       const uint8_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat64_fromuint8(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8166,14 +7800,13 @@ int64_t oink(int64_t x, int64_t line) {
       int32_t *toptr,
       int64_t tooffset,
       const uint16_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint32_fromuint16(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8192,14 +7825,13 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *toptr,
       int64_t tooffset,
       const uint16_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint64_fromuint16(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8218,14 +7850,13 @@ int64_t oink(int64_t x, int64_t line) {
       uint16_t *toptr,
       int64_t tooffset,
       const uint16_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_touint16_fromuint16(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8244,14 +7875,13 @@ int64_t oink(int64_t x, int64_t line) {
       uint32_t *toptr,
       int64_t tooffset,
       const uint16_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_touint32_fromuint16(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8270,14 +7900,13 @@ int64_t oink(int64_t x, int64_t line) {
       uint64_t *toptr,
       int64_t tooffset,
       const uint16_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_touint64_fromuint16(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8296,14 +7925,13 @@ int64_t oink(int64_t x, int64_t line) {
       float *toptr,
       int64_t tooffset,
       const uint16_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat32_fromuint16(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8322,14 +7950,13 @@ int64_t oink(int64_t x, int64_t line) {
       double *toptr,
       int64_t tooffset,
       const uint16_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat64_fromuint16(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8348,14 +7975,13 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *toptr,
       int64_t tooffset,
       const uint32_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint64_fromuint32(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8374,14 +8000,13 @@ int64_t oink(int64_t x, int64_t line) {
       uint32_t *toptr,
       int64_t tooffset,
       const uint32_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_touint32_fromuint32(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8400,14 +8025,13 @@ int64_t oink(int64_t x, int64_t line) {
       uint64_t *toptr,
       int64_t tooffset,
       const uint32_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_touint64_fromuint32(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8426,14 +8050,13 @@ int64_t oink(int64_t x, int64_t line) {
       float *toptr,
       int64_t tooffset,
       const uint32_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat32_fromuint32(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8452,14 +8075,13 @@ int64_t oink(int64_t x, int64_t line) {
       double *toptr,
       int64_t tooffset,
       const uint32_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat64_fromuint32(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8478,14 +8100,13 @@ int64_t oink(int64_t x, int64_t line) {
       uint64_t *toptr,
       int64_t tooffset,
       const uint64_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_touint64_fromuint64(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8504,14 +8125,13 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *toptr,
       int64_t tooffset,
       const uint64_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint64_fromuint64(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8530,14 +8150,13 @@ int64_t oink(int64_t x, int64_t line) {
       float *toptr,
       int64_t tooffset,
       const uint64_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat32_fromuint64(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8556,14 +8175,13 @@ int64_t oink(int64_t x, int64_t line) {
       double *toptr,
       int64_t tooffset,
       const uint64_t *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat64_fromuint64(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8582,14 +8200,13 @@ int64_t oink(int64_t x, int64_t line) {
       float *toptr,
       int64_t tooffset,
       const float *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat32_fromfloat32(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8608,14 +8225,13 @@ int64_t oink(int64_t x, int64_t line) {
       double *toptr,
       int64_t tooffset,
       const float *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat64_fromfloat32(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8634,14 +8250,13 @@ int64_t oink(int64_t x, int64_t line) {
       double *toptr,
       int64_t tooffset,
       const double *fromptr,
-      int64_t fromoffset,
+      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat64_fromfloat64(
           toptr,
           tooffset,
           fromptr,
-          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8662,9 +8277,9 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *tostops,
       int64_t tostopsoffset,
       const int32_t *fromstarts,
-      int64_t fromstartsoffset,
+      int64_t fromstartsoffset,   // DROP
       const int32_t *fromstops,
-      int64_t fromstopsoffset,
+      int64_t fromstopsoffset,   // DROP
       int64_t length,
       int64_t base) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -8674,9 +8289,7 @@ int64_t oink(int64_t x, int64_t line) {
           tostops,
           tostopsoffset,
           fromstarts,
-          oink(fromstartsoffset, __LINE__),
           fromstops,
-          oink(fromstopsoffset, __LINE__),
           length,
           base);
       }
@@ -8698,9 +8311,9 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *tostops,
       int64_t tostopsoffset,
       const uint32_t *fromstarts,
-      int64_t fromstartsoffset,
+      int64_t fromstartsoffset,   // DROP
       const uint32_t *fromstops,
-      int64_t fromstopsoffset,
+      int64_t fromstopsoffset,   // DROP
       int64_t length,
       int64_t base) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -8710,9 +8323,7 @@ int64_t oink(int64_t x, int64_t line) {
           tostops,
           tostopsoffset,
           fromstarts,
-          oink(fromstartsoffset, __LINE__),
           fromstops,
-          oink(fromstopsoffset, __LINE__),
           length,
           base);
       }
@@ -8734,9 +8345,9 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *tostops,
       int64_t tostopsoffset,
       const int64_t *fromstarts,
-      int64_t fromstartsoffset,
+      int64_t fromstartsoffset,   // DROP
       const int64_t *fromstops,
-      int64_t fromstopsoffset,
+      int64_t fromstopsoffset,   // DROP
       int64_t length,
       int64_t base) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -8746,9 +8357,7 @@ int64_t oink(int64_t x, int64_t line) {
           tostops,
           tostopsoffset,
           fromstarts,
-          oink(fromstartsoffset, __LINE__),
           fromstops,
-          oink(fromstopsoffset, __LINE__),
           length,
           base);
       }
@@ -8768,7 +8377,7 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *toindex,
       int64_t toindexoffset,
       const int32_t *fromindex,
-      int64_t fromindexoffset,
+      int64_t fromindexoffset,   // DROP
       int64_t length,
       int64_t base) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -8776,7 +8385,6 @@ int64_t oink(int64_t x, int64_t line) {
           toindex,
           toindexoffset,
           fromindex,
-          oink(fromindexoffset, __LINE__),
           length,
           base);
       }
@@ -8796,7 +8404,7 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *toindex,
       int64_t toindexoffset,
       const uint32_t *fromindex,
-      int64_t fromindexoffset,
+      int64_t fromindexoffset,   // DROP
       int64_t length,
       int64_t base) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -8804,7 +8412,6 @@ int64_t oink(int64_t x, int64_t line) {
           toindex,
           toindexoffset,
           fromindex,
-          oink(fromindexoffset, __LINE__),
           length,
           base);
       }
@@ -8824,7 +8431,7 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *toindex,
       int64_t toindexoffset,
       const int64_t *fromindex,
-      int64_t fromindexoffset,
+      int64_t fromindexoffset,   // DROP
       int64_t length,
       int64_t base) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -8832,7 +8439,6 @@ int64_t oink(int64_t x, int64_t line) {
           toindex,
           toindexoffset,
           fromindex,
-          oink(fromindexoffset, __LINE__),
           length,
           base);
       }
@@ -8874,7 +8480,7 @@ int64_t oink(int64_t x, int64_t line) {
       int8_t *totags,
       int64_t totagsoffset,
       const int8_t *fromtags,
-      int64_t fromtagsoffset,
+      int64_t fromtagsoffset,   // DROP
       int64_t length,
       int64_t base) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -8882,7 +8488,6 @@ int64_t oink(int64_t x, int64_t line) {
           totags,
           totagsoffset,
           fromtags,
-          oink(fromtagsoffset, __LINE__),
           length,
           base);
       }
@@ -8902,14 +8507,13 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *toindex,
       int64_t toindexoffset,
       const int32_t *fromindex,
-      int64_t fromindexoffset,
+      int64_t fromindexoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray_fillindex_to64_from32(
           toindex,
           toindexoffset,
           fromindex,
-          oink(fromindexoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8928,14 +8532,13 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *toindex,
       int64_t toindexoffset,
       const uint32_t *fromindex,
-      int64_t fromindexoffset,
+      int64_t fromindexoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray_fillindex_to64_fromU32(
           toindex,
           toindexoffset,
           fromindex,
-          oink(fromindexoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8954,14 +8557,13 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *toindex,
       int64_t toindexoffset,
       const int64_t *fromindex,
-      int64_t fromindexoffset,
+      int64_t fromindexoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray_fillindex_to64_from64(
           toindex,
           toindexoffset,
           fromindex,
-          oink(fromindexoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -9024,13 +8626,13 @@ int64_t oink(int64_t x, int64_t line) {
       int8_t *totags,
       int64_t *toindex,
       const int8_t *outertags,
-      int64_t outertagsoffset,
+      int64_t outertagsoffset,   // DROP
       const int32_t *outerindex,
-      int64_t outerindexoffset,
+      int64_t outerindexoffset,   // DROP
       const int8_t *innertags,
-      int64_t innertagsoffset,
+      int64_t innertagsoffset,   // DROP
       const int32_t *innerindex,
-      int64_t innerindexoffset,
+      int64_t innerindexoffset,   // DROP
       int64_t towhich,
       int64_t innerwhich,
       int64_t outerwhich,
@@ -9041,13 +8643,9 @@ int64_t oink(int64_t x, int64_t line) {
           totags,
           toindex,
           outertags,
-          oink(outertagsoffset, __LINE__),
           outerindex,
-          oink(outerindexoffset, __LINE__),
           innertags,
-          oink(innertagsoffset, __LINE__),
           innerindex,
-          oink(innerindexoffset, __LINE__),
           towhich,
           innerwhich,
           outerwhich,
@@ -9070,13 +8668,13 @@ int64_t oink(int64_t x, int64_t line) {
       int8_t *totags,
       int64_t *toindex,
       const int8_t *outertags,
-      int64_t outertagsoffset,
+      int64_t outertagsoffset,   // DROP
       const uint32_t *outerindex,
-      int64_t outerindexoffset,
+      int64_t outerindexoffset,   // DROP
       const int8_t *innertags,
-      int64_t innertagsoffset,
+      int64_t innertagsoffset,   // DROP
       const int32_t *innerindex,
-      int64_t innerindexoffset,
+      int64_t innerindexoffset,   // DROP
       int64_t towhich,
       int64_t innerwhich,
       int64_t outerwhich,
@@ -9087,13 +8685,9 @@ int64_t oink(int64_t x, int64_t line) {
           totags,
           toindex,
           outertags,
-          oink(outertagsoffset, __LINE__),
           outerindex,
-          oink(outerindexoffset, __LINE__),
           innertags,
-          oink(innertagsoffset, __LINE__),
           innerindex,
-          oink(innerindexoffset, __LINE__),
           towhich,
           innerwhich,
           outerwhich,
@@ -9116,13 +8710,13 @@ int64_t oink(int64_t x, int64_t line) {
       int8_t *totags,
       int64_t *toindex,
       const int8_t *outertags,
-      int64_t outertagsoffset,
+      int64_t outertagsoffset,   // DROP
       const int64_t *outerindex,
-      int64_t outerindexoffset,
+      int64_t outerindexoffset,   // DROP
       const int8_t *innertags,
-      int64_t innertagsoffset,
+      int64_t innertagsoffset,   // DROP
       const int32_t *innerindex,
-      int64_t innerindexoffset,
+      int64_t innerindexoffset,   // DROP
       int64_t towhich,
       int64_t innerwhich,
       int64_t outerwhich,
@@ -9133,13 +8727,9 @@ int64_t oink(int64_t x, int64_t line) {
           totags,
           toindex,
           outertags,
-          oink(outertagsoffset, __LINE__),
           outerindex,
-          oink(outerindexoffset, __LINE__),
           innertags,
-          oink(innertagsoffset, __LINE__),
           innerindex,
-          oink(innerindexoffset, __LINE__),
           towhich,
           innerwhich,
           outerwhich,
@@ -9162,13 +8752,13 @@ int64_t oink(int64_t x, int64_t line) {
       int8_t *totags,
       int64_t *toindex,
       const int8_t *outertags,
-      int64_t outertagsoffset,
+      int64_t outertagsoffset,   // DROP
       const int32_t *outerindex,
-      int64_t outerindexoffset,
+      int64_t outerindexoffset,   // DROP
       const int8_t *innertags,
-      int64_t innertagsoffset,
+      int64_t innertagsoffset,   // DROP
       const uint32_t *innerindex,
-      int64_t innerindexoffset,
+      int64_t innerindexoffset,   // DROP
       int64_t towhich,
       int64_t innerwhich,
       int64_t outerwhich,
@@ -9179,13 +8769,9 @@ int64_t oink(int64_t x, int64_t line) {
           totags,
           toindex,
           outertags,
-          oink(outertagsoffset, __LINE__),
           outerindex,
-          oink(outerindexoffset, __LINE__),
           innertags,
-          oink(innertagsoffset, __LINE__),
           innerindex,
-          oink(innerindexoffset, __LINE__),
           towhich,
           innerwhich,
           outerwhich,
@@ -9208,13 +8794,13 @@ int64_t oink(int64_t x, int64_t line) {
       int8_t *totags,
       int64_t *toindex,
       const int8_t *outertags,
-      int64_t outertagsoffset,
+      int64_t outertagsoffset,   // DROP
       const uint32_t *outerindex,
-      int64_t outerindexoffset,
+      int64_t outerindexoffset,   // DROP
       const int8_t *innertags,
-      int64_t innertagsoffset,
+      int64_t innertagsoffset,   // DROP
       const uint32_t *innerindex,
-      int64_t innerindexoffset,
+      int64_t innerindexoffset,   // DROP
       int64_t towhich,
       int64_t innerwhich,
       int64_t outerwhich,
@@ -9225,13 +8811,9 @@ int64_t oink(int64_t x, int64_t line) {
           totags,
           toindex,
           outertags,
-          oink(outertagsoffset, __LINE__),
           outerindex,
-          oink(outerindexoffset, __LINE__),
           innertags,
-          oink(innertagsoffset, __LINE__),
           innerindex,
-          oink(innerindexoffset, __LINE__),
           towhich,
           innerwhich,
           outerwhich,
@@ -9254,13 +8836,13 @@ int64_t oink(int64_t x, int64_t line) {
       int8_t *totags,
       int64_t *toindex,
       const int8_t *outertags,
-      int64_t outertagsoffset,
+      int64_t outertagsoffset,   // DROP
       const int64_t *outerindex,
-      int64_t outerindexoffset,
+      int64_t outerindexoffset,   // DROP
       const int8_t *innertags,
-      int64_t innertagsoffset,
+      int64_t innertagsoffset,   // DROP
       const uint32_t *innerindex,
-      int64_t innerindexoffset,
+      int64_t innerindexoffset,   // DROP
       int64_t towhich,
       int64_t innerwhich,
       int64_t outerwhich,
@@ -9271,13 +8853,9 @@ int64_t oink(int64_t x, int64_t line) {
           totags,
           toindex,
           outertags,
-          oink(outertagsoffset, __LINE__),
           outerindex,
-          oink(outerindexoffset, __LINE__),
           innertags,
-          oink(innertagsoffset, __LINE__),
           innerindex,
-          oink(innerindexoffset, __LINE__),
           towhich,
           innerwhich,
           outerwhich,
@@ -9300,13 +8878,13 @@ int64_t oink(int64_t x, int64_t line) {
       int8_t *totags,
       int64_t *toindex,
       const int8_t *outertags,
-      int64_t outertagsoffset,
+      int64_t outertagsoffset,   // DROP
       const int32_t *outerindex,
-      int64_t outerindexoffset,
+      int64_t outerindexoffset,   // DROP
       const int8_t *innertags,
-      int64_t innertagsoffset,
+      int64_t innertagsoffset,   // DROP
       const int64_t *innerindex,
-      int64_t innerindexoffset,
+      int64_t innerindexoffset,   // DROP
       int64_t towhich,
       int64_t innerwhich,
       int64_t outerwhich,
@@ -9317,13 +8895,9 @@ int64_t oink(int64_t x, int64_t line) {
           totags,
           toindex,
           outertags,
-          oink(outertagsoffset, __LINE__),
           outerindex,
-          oink(outerindexoffset, __LINE__),
           innertags,
-          oink(innertagsoffset, __LINE__),
           innerindex,
-          oink(innerindexoffset, __LINE__),
           towhich,
           innerwhich,
           outerwhich,
@@ -9346,13 +8920,13 @@ int64_t oink(int64_t x, int64_t line) {
       int8_t *totags,
       int64_t *toindex,
       const int8_t *outertags,
-      int64_t outertagsoffset,
+      int64_t outertagsoffset,   // DROP
       const uint32_t *outerindex,
-      int64_t outerindexoffset,
+      int64_t outerindexoffset,   // DROP
       const int8_t *innertags,
-      int64_t innertagsoffset,
+      int64_t innertagsoffset,   // DROP
       const int64_t *innerindex,
-      int64_t innerindexoffset,
+      int64_t innerindexoffset,   // DROP
       int64_t towhich,
       int64_t innerwhich,
       int64_t outerwhich,
@@ -9363,13 +8937,9 @@ int64_t oink(int64_t x, int64_t line) {
           totags,
           toindex,
           outertags,
-          oink(outertagsoffset, __LINE__),
           outerindex,
-          oink(outerindexoffset, __LINE__),
           innertags,
-          oink(innertagsoffset, __LINE__),
           innerindex,
-          oink(innerindexoffset, __LINE__),
           towhich,
           innerwhich,
           outerwhich,
@@ -9392,13 +8962,13 @@ int64_t oink(int64_t x, int64_t line) {
       int8_t *totags,
       int64_t *toindex,
       const int8_t *outertags,
-      int64_t outertagsoffset,
+      int64_t outertagsoffset,   // DROP
       const int64_t *outerindex,
-      int64_t outerindexoffset,
+      int64_t outerindexoffset,   // DROP
       const int8_t *innertags,
-      int64_t innertagsoffset,
+      int64_t innertagsoffset,   // DROP
       const int64_t *innerindex,
-      int64_t innerindexoffset,
+      int64_t innerindexoffset,   // DROP
       int64_t towhich,
       int64_t innerwhich,
       int64_t outerwhich,
@@ -9409,13 +8979,9 @@ int64_t oink(int64_t x, int64_t line) {
           totags,
           toindex,
           outertags,
-          oink(outertagsoffset, __LINE__),
           outerindex,
-          oink(outerindexoffset, __LINE__),
           innertags,
-          oink(innertagsoffset, __LINE__),
           innerindex,
-          oink(innerindexoffset, __LINE__),
           towhich,
           innerwhich,
           outerwhich,
@@ -9438,9 +9004,9 @@ int64_t oink(int64_t x, int64_t line) {
       int8_t *totags,
       int64_t *toindex,
       const int8_t *fromtags,
-      int64_t fromtagsoffset,
+      int64_t fromtagsoffset,   // DROP
       const int32_t *fromindex,
-      int64_t fromindexoffset,
+      int64_t fromindexoffset,   // DROP
       int64_t towhich,
       int64_t fromwhich,
       int64_t length,
@@ -9450,9 +9016,7 @@ int64_t oink(int64_t x, int64_t line) {
           totags,
           toindex,
           fromtags,
-          oink(fromtagsoffset, __LINE__),
           fromindex,
-          oink(fromindexoffset, __LINE__),
           towhich,
           fromwhich,
           length,
@@ -9474,9 +9038,9 @@ int64_t oink(int64_t x, int64_t line) {
       int8_t *totags,
       int64_t *toindex,
       const int8_t *fromtags,
-      int64_t fromtagsoffset,
+      int64_t fromtagsoffset,   // DROP
       const uint32_t *fromindex,
-      int64_t fromindexoffset,
+      int64_t fromindexoffset,   // DROP
       int64_t towhich,
       int64_t fromwhich,
       int64_t length,
@@ -9486,9 +9050,7 @@ int64_t oink(int64_t x, int64_t line) {
           totags,
           toindex,
           fromtags,
-          oink(fromtagsoffset, __LINE__),
           fromindex,
-          oink(fromindexoffset, __LINE__),
           towhich,
           fromwhich,
           length,
@@ -9510,9 +9072,9 @@ int64_t oink(int64_t x, int64_t line) {
       int8_t *totags,
       int64_t *toindex,
       const int8_t *fromtags,
-      int64_t fromtagsoffset,
+      int64_t fromtagsoffset,   // DROP
       const int64_t *fromindex,
-      int64_t fromindexoffset,
+      int64_t fromindexoffset,   // DROP
       int64_t towhich,
       int64_t fromwhich,
       int64_t length,
@@ -9522,9 +9084,7 @@ int64_t oink(int64_t x, int64_t line) {
           totags,
           toindex,
           fromtags,
-          oink(fromtagsoffset, __LINE__),
           fromindex,
-          oink(fromindexoffset, __LINE__),
           towhich,
           fromwhich,
           length,
@@ -9544,17 +9104,15 @@ int64_t oink(int64_t x, int64_t line) {
     ERROR ListArray_validity<int32_t>(
       kernel::lib ptr_lib,
       const int32_t *starts,
-      int64_t startsoffset,
+      int64_t startsoffset,   // DROP
       const int32_t *stops,
-      int64_t stopsoffset,
+      int64_t stopsoffset,   // DROP
       int64_t length,
       int64_t lencontent) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray32_validity(
           starts,
-          oink(startsoffset, __LINE__),
           stops,
-          oink(stopsoffset, __LINE__),
           length,
           lencontent);
       }
@@ -9572,17 +9130,15 @@ int64_t oink(int64_t x, int64_t line) {
     ERROR ListArray_validity<uint32_t>(
       kernel::lib ptr_lib,
       const uint32_t *starts,
-      int64_t startsoffset,
+      int64_t startsoffset,   // DROP
       const uint32_t *stops,
-      int64_t stopsoffset,
+      int64_t stopsoffset,   // DROP
       int64_t length,
       int64_t lencontent) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArrayU32_validity(
           starts,
-          oink(startsoffset, __LINE__),
           stops,
-          oink(stopsoffset, __LINE__),
           length,
           lencontent);
       }
@@ -9600,17 +9156,15 @@ int64_t oink(int64_t x, int64_t line) {
     ERROR ListArray_validity<int64_t>(
       kernel::lib ptr_lib,
       const int64_t *starts,
-      int64_t startsoffset,
+      int64_t startsoffset,   // DROP
       const int64_t *stops,
-      int64_t stopsoffset,
+      int64_t stopsoffset,   // DROP
       int64_t length,
       int64_t lencontent) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray64_validity(
           starts,
-          oink(startsoffset, __LINE__),
           stops,
-          oink(stopsoffset, __LINE__),
           length,
           lencontent);
       }
@@ -9628,14 +9182,13 @@ int64_t oink(int64_t x, int64_t line) {
     ERROR IndexedArray_validity<int32_t>(
       kernel::lib ptr_lib,
       const int32_t *index,
-      int64_t indexoffset,
+      int64_t indexoffset,   // DROP
       int64_t length,
       int64_t lencontent,
       bool isoption) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray32_validity(
           index,
-          oink(indexoffset, __LINE__),
           length,
           lencontent,
           isoption);
@@ -9654,14 +9207,13 @@ int64_t oink(int64_t x, int64_t line) {
     ERROR IndexedArray_validity<uint32_t>(
       kernel::lib ptr_lib,
       const uint32_t *index,
-      int64_t indexoffset,
+      int64_t indexoffset,   // DROP
       int64_t length,
       int64_t lencontent,
       bool isoption) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArrayU32_validity(
           index,
-          oink(indexoffset, __LINE__),
           length,
           lencontent,
           isoption);
@@ -9680,14 +9232,13 @@ int64_t oink(int64_t x, int64_t line) {
     ERROR IndexedArray_validity<int64_t>(
       kernel::lib ptr_lib,
       const int64_t *index,
-      int64_t indexoffset,
+      int64_t indexoffset,   // DROP
       int64_t length,
       int64_t lencontent,
       bool isoption) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray64_validity(
           index,
-          oink(indexoffset, __LINE__),
           length,
           lencontent,
           isoption);
@@ -9706,18 +9257,16 @@ int64_t oink(int64_t x, int64_t line) {
     ERROR UnionArray_validity<int8_t, int32_t>(
       kernel::lib ptr_lib,
       const int8_t *tags,
-      int64_t tagsoffset,
+      int64_t tagsoffset,   // DROP
       const int32_t *index,
-      int64_t indexoffset,
+      int64_t indexoffset,   // DROP
       int64_t length,
       int64_t numcontents,
       const int64_t *lencontents) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray8_32_validity(
           tags,
-          oink(tagsoffset, __LINE__),
           index,
-          oink(indexoffset, __LINE__),
           length,
           numcontents,
           lencontents);
@@ -9736,18 +9285,16 @@ int64_t oink(int64_t x, int64_t line) {
     ERROR UnionArray_validity<int8_t, uint32_t>(
       kernel::lib ptr_lib,
       const int8_t *tags,
-      int64_t tagsoffset,
+      int64_t tagsoffset,   // DROP
       const uint32_t *index,
-      int64_t indexoffset,
+      int64_t indexoffset,   // DROP
       int64_t length,
       int64_t numcontents,
       const int64_t *lencontents) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray8_U32_validity(
           tags,
-          oink(tagsoffset, __LINE__),
           index,
-          oink(indexoffset, __LINE__),
           length,
           numcontents,
           lencontents);
@@ -9766,18 +9313,16 @@ int64_t oink(int64_t x, int64_t line) {
     ERROR UnionArray_validity<int8_t, int64_t>(
       kernel::lib ptr_lib,
       const int8_t *tags,
-      int64_t tagsoffset,
+      int64_t tagsoffset,   // DROP
       const int64_t *index,
-      int64_t indexoffset,
+      int64_t indexoffset,   // DROP
       int64_t length,
       int64_t numcontents,
       const int64_t *lencontents) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray8_64_validity(
           tags,
-          oink(tagsoffset, __LINE__),
           index,
-          oink(indexoffset, __LINE__),
           length,
           numcontents,
           lencontents);
@@ -9797,13 +9342,12 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const int32_t *fromindex,
-      int64_t offset,
+      int64_t offset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray_fillna_from32_to64(
           toindex,
           fromindex,
-          oink(offset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -9821,13 +9365,12 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const uint32_t *fromindex,
-      int64_t offset,
+      int64_t offset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray_fillna_fromU32_to64(
           toindex,
           fromindex,
-          oink(offset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -9845,13 +9388,12 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const int64_t *fromindex,
-      int64_t offset,
+      int64_t offset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray_fillna_from64_to64(
           toindex,
           fromindex,
-          oink(offset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -9959,16 +9501,14 @@ int64_t oink(int64_t x, int64_t line) {
       const int32_t *fromstarts,
       const int32_t *fromstops,
       int64_t lenstarts,
-      int64_t startsoffset,
-      int64_t stopsoffset) {
+      int64_t startsoffset,   // DROP
+      int64_t stopsoffset) {   // DROP
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray32_min_range(
           tomin,
           fromstarts,
           fromstops,
-          lenstarts,
-          oink(startsoffset, __LINE__),
-          oink(stopsoffset, __LINE__));
+          lenstarts);
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
@@ -9987,16 +9527,14 @@ int64_t oink(int64_t x, int64_t line) {
       const uint32_t *fromstarts,
       const uint32_t *fromstops,
       int64_t lenstarts,
-      int64_t startsoffset,
-      int64_t stopsoffset) {
+      int64_t startsoffset,   // DROP
+      int64_t stopsoffset) {   // DROP
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArrayU32_min_range(
           tomin,
           fromstarts,
           fromstops,
-          lenstarts,
-          oink(startsoffset, __LINE__),
-          oink(stopsoffset, __LINE__));
+          lenstarts);
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
@@ -10015,16 +9553,14 @@ int64_t oink(int64_t x, int64_t line) {
       const int64_t *fromstarts,
       const int64_t *fromstops,
       int64_t lenstarts,
-      int64_t startsoffset,
-      int64_t stopsoffset) {
+      int64_t startsoffset,   // DROP
+      int64_t stopsoffset) {   // DROP
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray64_min_range(
           tomin,
           fromstarts,
           fromstops,
-          lenstarts,
-          oink(startsoffset, __LINE__),
-          oink(stopsoffset, __LINE__));
+          lenstarts);
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
@@ -10044,17 +9580,15 @@ int64_t oink(int64_t x, int64_t line) {
       const int32_t *fromstops,
       int64_t target,
       int64_t lenstarts,
-      int64_t startsoffset,
-      int64_t stopsoffset) {
+      int64_t startsoffset,   // DROP
+      int64_t stopsoffset) {   // DROP
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray32_rpad_and_clip_length_axis1(
           tolength,
           fromstarts,
           fromstops,
           target,
-          lenstarts,
-          oink(startsoffset, __LINE__),
-          oink(stopsoffset, __LINE__));
+          lenstarts);
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
@@ -10074,17 +9608,15 @@ int64_t oink(int64_t x, int64_t line) {
       const uint32_t *fromstops,
       int64_t target,
       int64_t lenstarts,
-      int64_t startsoffset,
-      int64_t stopsoffset) {
+      int64_t startsoffset,   // DROP
+      int64_t stopsoffset) {   // DROP
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArrayU32_rpad_and_clip_length_axis1(
           tolength,
           fromstarts,
           fromstops,
           target,
-          lenstarts,
-          oink(startsoffset, __LINE__),
-          oink(stopsoffset, __LINE__));
+          lenstarts);
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
@@ -10104,17 +9636,15 @@ int64_t oink(int64_t x, int64_t line) {
       const int64_t *fromstops,
       int64_t target,
       int64_t lenstarts,
-      int64_t startsoffset,
-      int64_t stopsoffset) {
+      int64_t startsoffset,   // DROP
+      int64_t stopsoffset) {   // DROP
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray64_rpad_and_clip_length_axis1(
           tolength,
           fromstarts,
           fromstops,
           target,
-          lenstarts,
-          oink(startsoffset, __LINE__),
-          oink(stopsoffset, __LINE__));
+          lenstarts);
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
@@ -10136,8 +9666,8 @@ int64_t oink(int64_t x, int64_t line) {
       int32_t *tostops,
       int64_t target,
       int64_t length,
-      int64_t startsoffset,
-      int64_t stopsoffset) {
+      int64_t startsoffset,   // DROP
+      int64_t stopsoffset) {   // DROP
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray32_rpad_axis1_64(
           toindex,
@@ -10146,9 +9676,7 @@ int64_t oink(int64_t x, int64_t line) {
           tostarts,
           tostops,
           target,
-          length,
-          oink(startsoffset, __LINE__),
-          oink(stopsoffset, __LINE__));
+          length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
@@ -10170,8 +9698,8 @@ int64_t oink(int64_t x, int64_t line) {
       uint32_t *tostops,
       int64_t target,
       int64_t length,
-      int64_t startsoffset,
-      int64_t stopsoffset) {
+      int64_t startsoffset,   // DROP
+      int64_t stopsoffset) {   // DROP
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArrayU32_rpad_axis1_64(
           toindex,
@@ -10180,9 +9708,7 @@ int64_t oink(int64_t x, int64_t line) {
           tostarts,
           tostops,
           target,
-          length,
-          oink(startsoffset, __LINE__),
-          oink(stopsoffset, __LINE__));
+          length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
@@ -10204,8 +9730,8 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *tostops,
       int64_t target,
       int64_t length,
-      int64_t startsoffset,
-      int64_t stopsoffset) {
+      int64_t startsoffset,   // DROP
+      int64_t stopsoffset) {   // DROP
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray64_rpad_axis1_64(
           toindex,
@@ -10214,9 +9740,7 @@ int64_t oink(int64_t x, int64_t line) {
           tostarts,
           tostops,
           target,
-          length,
-          oink(startsoffset, __LINE__),
-          oink(stopsoffset, __LINE__));
+          length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
@@ -10233,14 +9757,13 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const int32_t *fromoffsets,
-      int64_t offsetsoffset,
+      int64_t offsetsoffset,   // DROP
       int64_t length,
       int64_t target) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray32_rpad_and_clip_axis1_64(
           toindex,
           fromoffsets,
-          oink(offsetsoffset, __LINE__),
           length,
           target);
       }
@@ -10259,14 +9782,13 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const uint32_t *fromoffsets,
-      int64_t offsetsoffset,
+      int64_t offsetsoffset,   // DROP
       int64_t length,
       int64_t target) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArrayU32_rpad_and_clip_axis1_64(
           toindex,
           fromoffsets,
-          offsetsoffset,
           length,
           target);
       }
@@ -10285,14 +9807,13 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const int64_t *fromoffsets,
-      int64_t offsetsoffset,
+      int64_t offsetsoffset,   // DROP
       int64_t length,
       int64_t target) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray64_rpad_and_clip_axis1_64(
           toindex,
           fromoffsets,
-          oink(offsetsoffset, __LINE__),
           length,
           target);
       }
@@ -10311,7 +9832,7 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int32_t *tooffsets,
       const int32_t *fromoffsets,
-      int64_t offsetsoffset,
+      int64_t offsetsoffset,   // DROP
       int64_t fromlength,
       int64_t length,
       int64_t *tocount) {
@@ -10319,7 +9840,6 @@ int64_t oink(int64_t x, int64_t line) {
         return awkward_ListOffsetArray32_rpad_length_axis1(
           tooffsets,
           fromoffsets,
-          oink(offsetsoffset, __LINE__),
           fromlength,
           length,
           tocount);
@@ -10339,7 +9859,7 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       uint32_t *tooffsets,
       const uint32_t *fromoffsets,
-      int64_t offsetsoffset,
+      int64_t offsetsoffset,   // DROP
       int64_t fromlength,
       int64_t length,
       int64_t *tocount) {
@@ -10347,7 +9867,6 @@ int64_t oink(int64_t x, int64_t line) {
         return awkward_ListOffsetArrayU32_rpad_length_axis1(
           tooffsets,
           fromoffsets,
-          oink(offsetsoffset, __LINE__),
           fromlength,
           length,
           tocount);
@@ -10367,7 +9886,7 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *tooffsets,
       const int64_t *fromoffsets,
-      int64_t offsetsoffset,
+      int64_t offsetsoffset,   // DROP
       int64_t fromlength,
       int64_t length,
       int64_t *tocount) {
@@ -10375,7 +9894,6 @@ int64_t oink(int64_t x, int64_t line) {
         return awkward_ListOffsetArray64_rpad_length_axis1(
           tooffsets,
           fromoffsets,
-          oink(offsetsoffset, __LINE__),
           fromlength,
           length,
           tocount);
@@ -10395,14 +9913,13 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const int32_t *fromoffsets,
-      int64_t offsetsoffset,
+      int64_t offsetsoffset,   // DROP
       int64_t fromlength,
       int64_t target) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray32_rpad_axis1_64(
           toindex,
           fromoffsets,
-          oink(offsetsoffset, __LINE__),
           fromlength,
           target);
       }
@@ -10421,14 +9938,13 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const uint32_t *fromoffsets,
-      int64_t offsetsoffset,
+      int64_t offsetsoffset,   // DROP
       int64_t fromlength,
       int64_t target) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArrayU32_rpad_axis1_64(
           toindex,
           fromoffsets,
-          oink(offsetsoffset, __LINE__),
           fromlength,
           target);
       }
@@ -10447,14 +9963,13 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const int64_t *fromoffsets,
-      int64_t offsetsoffset,
+      int64_t offsetsoffset,   // DROP
       int64_t fromlength,
       int64_t target) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray64_rpad_axis1_64(
           toindex,
           fromoffsets,
-          oink(offsetsoffset, __LINE__),
           fromlength,
           target);
       }
@@ -10492,13 +10007,12 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const int32_t *offsets,
-      int64_t offsetsoffset,
+      int64_t offsetsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray32_localindex_64(
           toindex,
           offsets,
-          oink(offsetsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -10516,13 +10030,12 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const uint32_t *offsets,
-      int64_t offsetsoffset,
+      int64_t offsetsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArrayU32_localindex_64(
           toindex,
           offsets,
-          oink(offsetsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -10540,13 +10053,12 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const int64_t *offsets,
-      int64_t offsetsoffset,
+      int64_t offsetsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray64_localindex_64(
           toindex,
           offsets,
-          oink(offsetsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -10612,9 +10124,9 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t n,
       bool replacement,
       const int32_t *starts,
-      int64_t startsoffset,
+      int64_t startsoffset,   // DROP
       const int32_t *stops,
-      int64_t stopsoffset,
+      int64_t stopsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray32_combinations_length_64(
@@ -10623,9 +10135,7 @@ int64_t oink(int64_t x, int64_t line) {
           n,
           replacement,
           starts,
-          oink(startsoffset, __LINE__),
           stops,
-          oink(stopsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -10646,9 +10156,9 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t n,
       bool replacement,
       const uint32_t *starts,
-      int64_t startsoffset,
+      int64_t startsoffset,   // DROP
       const uint32_t *stops,
-      int64_t stopsoffset,
+      int64_t stopsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArrayU32_combinations_length_64(
@@ -10657,9 +10167,7 @@ int64_t oink(int64_t x, int64_t line) {
           n,
           replacement,
           starts,
-          oink(startsoffset, __LINE__),
           stops,
-          oink(stopsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -10680,9 +10188,9 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t n,
       bool replacement,
       const int64_t *starts,
-      int64_t startsoffset,
+      int64_t startsoffset,   // DROP
       const int64_t *stops,
-      int64_t stopsoffset,
+      int64_t stopsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray64_combinations_length_64(
@@ -10691,9 +10199,7 @@ int64_t oink(int64_t x, int64_t line) {
           n,
           replacement,
           starts,
-          oink(startsoffset, __LINE__),
           stops,
-          oink(stopsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -10715,9 +10221,9 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t n,
       bool replacement,
       const int32_t *starts,
-      int64_t startsoffset,
+      int64_t startsoffset,   // DROP
       const int32_t *stops,
-      int64_t stopsoffset,
+      int64_t stopsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray32_combinations_64(
@@ -10727,9 +10233,7 @@ int64_t oink(int64_t x, int64_t line) {
           n,
           replacement,
           starts,
-          oink(startsoffset, __LINE__),
           stops,
-          oink(stopsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -10751,9 +10255,9 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t n,
       bool replacement,
       const uint32_t *starts,
-      int64_t startsoffset,
+      int64_t startsoffset,   // DROP
       const uint32_t *stops,
-      int64_t stopsoffset,
+      int64_t stopsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArrayU32_combinations_64(
@@ -10763,9 +10267,7 @@ int64_t oink(int64_t x, int64_t line) {
           n,
           replacement,
           starts,
-          oink(startsoffset, __LINE__),
           stops,
-          oink(stopsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -10787,9 +10289,9 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t n,
       bool replacement,
       const int64_t *starts,
-      int64_t startsoffset,
+      int64_t startsoffset,   // DROP
       const int64_t *stops,
-      int64_t stopsoffset,
+      int64_t stopsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray64_combinations_64(
@@ -10799,9 +10301,7 @@ int64_t oink(int64_t x, int64_t line) {
           n,
           replacement,
           starts,
-          oink(startsoffset, __LINE__),
           stops,
-          oink(stopsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -10847,18 +10347,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int8_t *tomask,
       const int8_t *theirmask,
-      int64_t theirmaskoffset,
+      int64_t theirmaskoffset,   // DROP
       const int8_t *mymask,
-      int64_t mymaskoffset,
+      int64_t mymaskoffset,   // DROP
       int64_t length,
       bool validwhen) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ByteMaskedArray_overlay_mask8(
           tomask,
           theirmask,
-          oink(theirmaskoffset, __LINE__),
           mymask,
-          oink(mymaskoffset, __LINE__),
           length,
           validwhen);
       }
@@ -10876,7 +10374,7 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int8_t *tobytemask,
       const uint8_t *frombitmask,
-      int64_t bitmaskoffset,
+      int64_t bitmaskoffset,   // DROP
       int64_t bitmasklength,
       bool validwhen,
       bool lsb_order) {
@@ -10884,7 +10382,6 @@ int64_t oink(int64_t x, int64_t line) {
         return awkward_BitMaskedArray_to_ByteMaskedArray(
           tobytemask,
           frombitmask,
-          oink(bitmaskoffset, __LINE__),
           bitmasklength,
           validwhen,
           lsb_order);
@@ -10903,7 +10400,7 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const uint8_t *frombitmask,
-      int64_t bitmaskoffset,
+      int64_t bitmaskoffset,   // DROP
       int64_t bitmasklength,
       bool validwhen,
       bool lsb_order) {
@@ -10911,7 +10408,6 @@ int64_t oink(int64_t x, int64_t line) {
         return awkward_BitMaskedArray_to_IndexedOptionArray64(
           toindex,
           frombitmask,
-          oink(bitmaskoffset, __LINE__),
           bitmasklength,
           validwhen,
           lsb_order);
@@ -10932,14 +10428,13 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_count_64(
           toptr,
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -10958,18 +10453,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const bool *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_countnonzero_bool_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -10988,18 +10481,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const uint8_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_countnonzero_uint8_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11018,18 +10509,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int8_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_countnonzero_int8_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11048,18 +10537,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int16_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_countnonzero_int16_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11078,18 +10565,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const uint16_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_countnonzero_uint16_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11108,18 +10593,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int32_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_countnonzero_int32_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11138,18 +10621,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const uint32_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_countnonzero_uint32_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11168,18 +10649,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int64_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_countnonzero_int64_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11198,18 +10677,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const uint64_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_countnonzero_uint64_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11228,18 +10705,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const float *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_countnonzero_float32_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11258,18 +10733,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const double *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_countnonzero_float64_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11288,18 +10761,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const bool *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_int64_bool_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11318,18 +10789,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int8_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_int64_int8_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11348,18 +10817,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       uint64_t *toptr,
       const uint8_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_uint64_uint8_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11378,18 +10845,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int16_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_int64_int16_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11408,18 +10873,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       uint64_t *toptr,
       const uint16_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_uint64_uint16_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11438,18 +10901,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int32_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_int64_int32_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11468,18 +10929,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       uint64_t *toptr,
       const uint32_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_uint64_uint32_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11498,18 +10957,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int64_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_int64_int64_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11528,18 +10985,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       uint64_t *toptr,
       const uint64_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_uint64_uint64_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11558,18 +11013,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       float *toptr,
       const float *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_float32_float32_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11588,18 +11041,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       double *toptr,
       const double *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_float64_float64_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11618,18 +11069,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int32_t *toptr,
       const bool *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_int32_bool_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11648,18 +11097,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int32_t *toptr,
       const int8_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_int32_int8_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11678,18 +11125,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       uint32_t *toptr,
       const uint8_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_uint32_uint8_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11708,18 +11153,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int32_t *toptr,
       const int16_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_int32_int16_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11738,18 +11181,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       uint32_t *toptr,
       const uint16_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_uint32_uint16_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11768,18 +11209,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int32_t *toptr,
       const int32_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_int32_int32_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11798,18 +11237,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       uint32_t *toptr,
       const uint32_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_uint32_uint32_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11828,18 +11265,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       bool *toptr,
       const bool *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_bool_bool_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11858,18 +11293,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       bool *toptr,
       const int8_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_bool_int8_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11888,18 +11321,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       bool *toptr,
       const uint8_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_bool_uint8_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11918,18 +11349,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       bool *toptr,
       const int16_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_bool_int16_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11948,18 +11377,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       bool *toptr,
       const uint16_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_bool_uint16_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11978,18 +11405,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       bool *toptr,
       const int32_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_bool_int32_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12008,18 +11433,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       bool *toptr,
       const uint32_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_bool_uint32_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12038,18 +11461,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       bool *toptr,
       const int64_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_bool_int64_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12068,18 +11489,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       bool *toptr,
       const uint64_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_bool_uint64_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12098,18 +11517,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       bool *toptr,
       const float *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_bool_float32_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12128,18 +11545,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       bool *toptr,
       const double *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_sum_bool_float64_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12158,18 +11573,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const bool *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_int64_bool_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12188,18 +11601,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int8_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_int64_int8_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12218,18 +11629,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       uint64_t *toptr,
       const uint8_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_uint64_uint8_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12248,18 +11657,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int16_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_int64_int16_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12278,18 +11685,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       uint64_t *toptr,
       const uint16_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_uint64_uint16_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12308,18 +11713,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int32_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_int64_int32_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12338,18 +11741,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       uint64_t *toptr,
       const uint32_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_uint64_uint32_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12368,18 +11769,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int64_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_int64_int64_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12398,18 +11797,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       uint64_t *toptr,
       const uint64_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_uint64_uint64_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12428,18 +11825,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       float *toptr,
       const float *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_float32_float32_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12458,18 +11853,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       double *toptr,
       const double *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_float64_float64_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12488,18 +11881,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int32_t *toptr,
       const bool *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_int32_bool_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12518,18 +11909,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int32_t *toptr,
       const int8_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_int32_int8_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12548,18 +11937,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       uint32_t *toptr,
       const uint8_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_uint32_uint8_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12578,18 +11965,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int32_t *toptr,
       const int16_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_int32_int16_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12608,18 +11993,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       uint32_t *toptr,
       const uint16_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_uint32_uint16_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12638,18 +12021,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int32_t *toptr,
       const int32_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_int32_int32_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12668,18 +12049,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       uint32_t *toptr,
       const uint32_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_uint32_uint32_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12698,18 +12077,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       bool *toptr,
       const bool *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_bool_bool_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12728,18 +12105,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       bool *toptr,
       const int8_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_bool_int8_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12758,18 +12133,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       bool *toptr,
       const uint8_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_bool_uint8_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12788,18 +12161,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       bool *toptr,
       const int16_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_bool_int16_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12818,18 +12189,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       bool *toptr,
       const uint16_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_bool_uint16_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12848,18 +12217,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       bool *toptr,
       const int32_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_bool_int32_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12878,18 +12245,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       bool *toptr,
       const uint32_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_bool_uint32_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12908,18 +12273,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       bool *toptr,
       const int64_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_bool_int64_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12938,18 +12301,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       bool *toptr,
       const uint64_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_bool_uint64_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12968,18 +12329,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       bool *toptr,
       const float *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_bool_float32_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12998,18 +12357,16 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       bool *toptr,
       const double *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_prod_bool_float64_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -13028,9 +12385,9 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int8_t *toptr,
       const int8_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength,
       int8_t identity) {
@@ -13038,9 +12395,7 @@ int64_t oink(int64_t x, int64_t line) {
         return awkward_reduce_min_int8_int8_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength,
           identity);
@@ -13060,9 +12415,9 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       uint8_t *toptr,
       const uint8_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength,
       uint8_t identity) {
@@ -13070,9 +12425,7 @@ int64_t oink(int64_t x, int64_t line) {
         return awkward_reduce_min_uint8_uint8_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength,
           identity);
@@ -13092,9 +12445,9 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int16_t *toptr,
       const int16_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength,
       int16_t identity) {
@@ -13102,9 +12455,7 @@ int64_t oink(int64_t x, int64_t line) {
         return awkward_reduce_min_int16_int16_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength,
           identity);
@@ -13124,9 +12475,9 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       uint16_t *toptr,
       const uint16_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength,
       uint16_t identity) {
@@ -13134,9 +12485,7 @@ int64_t oink(int64_t x, int64_t line) {
         return awkward_reduce_min_uint16_uint16_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength,
           identity);
@@ -13156,9 +12505,9 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int32_t *toptr,
       const int32_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength,
       int32_t identity) {
@@ -13166,9 +12515,7 @@ int64_t oink(int64_t x, int64_t line) {
         return awkward_reduce_min_int32_int32_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength,
           identity);
@@ -13188,9 +12535,9 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       uint32_t *toptr,
       const uint32_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength,
       uint32_t identity) {
@@ -13198,9 +12545,7 @@ int64_t oink(int64_t x, int64_t line) {
         return awkward_reduce_min_uint32_uint32_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength,
           identity);
@@ -13220,9 +12565,9 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int64_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength,
       int64_t identity) {
@@ -13230,9 +12575,7 @@ int64_t oink(int64_t x, int64_t line) {
         return awkward_reduce_min_int64_int64_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength,
           identity);
@@ -13252,9 +12595,9 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       uint64_t *toptr,
       const uint64_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength,
       uint64_t identity) {
@@ -13262,9 +12605,7 @@ int64_t oink(int64_t x, int64_t line) {
         return awkward_reduce_min_uint64_uint64_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength,
           identity);
@@ -13284,9 +12625,9 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       float *toptr,
       const float *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength,
       float identity) {
@@ -13294,9 +12635,7 @@ int64_t oink(int64_t x, int64_t line) {
         return awkward_reduce_min_float32_float32_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength,
           identity);
@@ -13316,9 +12655,9 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       double *toptr,
       const double *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength,
       double identity) {
@@ -13326,9 +12665,7 @@ int64_t oink(int64_t x, int64_t line) {
         return awkward_reduce_min_float64_float64_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength,
           identity);
@@ -13348,9 +12685,9 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int8_t *toptr,
       const int8_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength,
       int8_t identity) {
@@ -13358,9 +12695,7 @@ int64_t oink(int64_t x, int64_t line) {
         return awkward_reduce_max_int8_int8_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength,
           identity);
@@ -13380,9 +12715,9 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       uint8_t *toptr,
       const uint8_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength,
       uint8_t identity) {
@@ -13390,9 +12725,7 @@ int64_t oink(int64_t x, int64_t line) {
         return awkward_reduce_max_uint8_uint8_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength,
           identity);
@@ -13412,9 +12745,9 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int16_t *toptr,
       const int16_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength,
       int16_t identity) {
@@ -13422,9 +12755,7 @@ int64_t oink(int64_t x, int64_t line) {
         return awkward_reduce_max_int16_int16_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength,
           identity);
@@ -13444,9 +12775,9 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       uint16_t *toptr,
       const uint16_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength,
       uint16_t identity) {
@@ -13454,9 +12785,7 @@ int64_t oink(int64_t x, int64_t line) {
         return awkward_reduce_max_uint16_uint16_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength,
           identity);
@@ -13476,9 +12805,9 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int32_t *toptr,
       const int32_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength,
       int32_t identity) {
@@ -13486,9 +12815,7 @@ int64_t oink(int64_t x, int64_t line) {
         return awkward_reduce_max_int32_int32_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength,
           identity);
@@ -13508,9 +12835,9 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       uint32_t *toptr,
       const uint32_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength,
       uint32_t identity) {
@@ -13518,9 +12845,7 @@ int64_t oink(int64_t x, int64_t line) {
         return awkward_reduce_max_uint32_uint32_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength,
           identity);
@@ -13540,9 +12865,9 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int64_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength,
       int64_t identity) {
@@ -13550,9 +12875,7 @@ int64_t oink(int64_t x, int64_t line) {
         return awkward_reduce_max_int64_int64_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength,
           identity);
@@ -13572,9 +12895,9 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       uint64_t *toptr,
       const uint64_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength,
       uint64_t identity) {
@@ -13582,9 +12905,7 @@ int64_t oink(int64_t x, int64_t line) {
         return awkward_reduce_max_uint64_uint64_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength,
           identity);
@@ -13604,9 +12925,9 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       float *toptr,
       const float *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength,
       float identity) {
@@ -13614,9 +12935,7 @@ int64_t oink(int64_t x, int64_t line) {
         return awkward_reduce_max_float32_float32_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength,
           identity);
@@ -13636,9 +12955,9 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       double *toptr,
       const double *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength,
       double identity) {
@@ -13646,9 +12965,7 @@ int64_t oink(int64_t x, int64_t line) {
         return awkward_reduce_max_float64_float64_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength,
           identity);
@@ -13668,22 +12985,19 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const bool *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,
+      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmin_bool_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           starts,
-          oink(startsoffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -13702,22 +13016,19 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int8_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,
+      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmin_int8_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           starts,
-          oink(startsoffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -13736,22 +13047,19 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const uint8_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,
+      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmin_uint8_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           starts,
-          oink(startsoffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -13770,22 +13078,19 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int16_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,
+      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmin_int16_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           starts,
-          oink(startsoffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -13804,22 +13109,19 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const uint16_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,
+      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmin_uint16_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           starts,
-          oink(startsoffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -13838,22 +13140,19 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int32_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,
+      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmin_int32_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           starts,
-          oink(startsoffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -13872,22 +13171,19 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const uint32_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,
+      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmin_uint32_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           starts,
-          oink(startsoffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -13906,22 +13202,19 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int64_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,
+      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmin_int64_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           starts,
-          oink(startsoffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -13940,22 +13233,19 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const uint64_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,
+      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmin_uint64_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           starts,
-          oink(startsoffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -13974,22 +13264,19 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const float *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,
+      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmin_float32_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           starts,
-          oink(startsoffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -14008,22 +13295,19 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const double *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,
+      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmin_float64_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           starts,
-          oink(startsoffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -14043,22 +13327,19 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const bool *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,
+      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmax_bool_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           starts,
-          oink(startsoffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -14077,22 +13358,19 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int8_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,
+      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmax_int8_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           starts,
-          oink(startsoffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -14111,22 +13389,19 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const uint8_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,
+      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmax_uint8_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           starts,
-          oink(startsoffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -14145,22 +13420,19 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int16_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,
+      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmax_int16_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           starts,
-          oink(startsoffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -14179,22 +13451,19 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const uint16_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,
+      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmax_uint16_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           starts,
-          oink(startsoffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -14213,22 +13482,19 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int32_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,
+      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmax_int32_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           starts,
-          oink(startsoffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -14247,22 +13513,19 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const uint32_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,
+      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmax_uint32_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           starts,
-          oink(startsoffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -14281,22 +13544,19 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int64_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,
+      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmax_int64_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           starts,
-          oink(startsoffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -14315,22 +13575,19 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const uint64_t *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,
+      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmax_uint64_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           starts,
-          oink(startsoffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -14349,22 +13606,19 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const float *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,
+      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmax_float32_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           starts,
-          oink(startsoffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -14383,22 +13637,19 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const double *fromptr,
-      int64_t fromptroffset,
+      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,
+      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_reduce_argmax_float64_64(
           toptr,
           fromptr,
-          oink(fromptroffset, __LINE__),
           starts,
-          oink(startsoffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -14436,14 +13687,13 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *globalstart,
       int64_t *globalstop,
       const int64_t *offsets,
-      int64_t offsetsoffset,
+      int64_t offsetsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray_reduce_global_startstop_64(
           globalstart,
           globalstop,
           offsets,
-          oink(offsetsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -14461,14 +13711,13 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *maxcount,
       int64_t *offsetscopy,
       const int64_t *offsets,
-      int64_t offsetsoffset,
+      int64_t offsetsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64(
           maxcount,
           offsetscopy,
           offsets,
-          oink(offsetsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -14491,10 +13740,10 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t distinctslen,
       int64_t *offsetscopy,
       const int64_t *offsets,
-      int64_t offsetsoffset,
+      int64_t offsetsoffset,   // DROP
       int64_t length,
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t maxcount) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray_reduce_nonlocal_preparenext_64(
@@ -14506,10 +13755,8 @@ int64_t oink(int64_t x, int64_t line) {
           distinctslen,
           offsetscopy,
           offsets,
-          oink(offsetsoffset, __LINE__),
           length,
           parents,
-          oink(parentsoffset, __LINE__),
           maxcount);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -14547,13 +13794,12 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *gaps,
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray_reduce_nonlocal_findgaps_64(
           gaps,
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -14597,13 +13843,12 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *nextparents,
       const int64_t *offsets,
-      int64_t offsetsoffset,
+      int64_t offsetsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray_reduce_local_nextparents_64(
           nextparents,
           offsets,
-          oink(offsetsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -14620,14 +13865,13 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *outoffsets,
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray_reduce_local_outoffsets_64(
           outoffsets,
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -14648,9 +13892,9 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *nextparents,
       int64_t *outindex,
       const int32_t *index,
-      int64_t indexoffset,
+      int64_t indexoffset,   // DROP
       int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray32_reduce_next_64(
@@ -14658,9 +13902,7 @@ int64_t oink(int64_t x, int64_t line) {
           nextparents,
           outindex,
           index,
-          oink(indexoffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -14680,9 +13922,9 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *nextparents,
       int64_t *outindex,
       const uint32_t *index,
-      int64_t indexoffset,
+      int64_t indexoffset,   // DROP
       int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArrayU32_reduce_next_64(
@@ -14690,9 +13932,7 @@ int64_t oink(int64_t x, int64_t line) {
           nextparents,
           outindex,
           index,
-          oink(indexoffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -14712,9 +13952,9 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *nextparents,
       int64_t *outindex,
       const int64_t *index,
-      int64_t indexoffset,
+      int64_t indexoffset,   // DROP
       int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray64_reduce_next_64(
@@ -14722,9 +13962,7 @@ int64_t oink(int64_t x, int64_t line) {
           nextparents,
           outindex,
           index,
-          oink(indexoffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -14741,14 +13979,13 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int64_t *outoffsets,
       const int64_t *starts,
-      int64_t startsoffset,
+      int64_t startsoffset,   // DROP
       int64_t startslength,
       int64_t outindexlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray_reduce_next_fix_offsets_64(
           outoffsets,
           starts,
-          oink(startsoffset, __LINE__),
           startslength,
           outindexlength);
       }
@@ -14766,14 +14003,13 @@ int64_t oink(int64_t x, int64_t line) {
       kernel::lib ptr_lib,
       int8_t *toptr,
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_reduce_mask_ByteMaskedArray_64(
           toptr,
           parents,
-          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -14793,9 +14029,9 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *nextparents,
       int64_t *outindex,
       const int8_t *mask,
-      int64_t maskoffset,
+      int64_t maskoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t length,
       bool validwhen) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -14804,9 +14040,7 @@ int64_t oink(int64_t x, int64_t line) {
           nextparents,
           outindex,
           mask,
-          oink(maskoffset, __LINE__),
           parents,
-          oink(parentsoffset, __LINE__),
           length,
           validwhen);
       }
@@ -15604,19 +14838,17 @@ int64_t oink(int64_t x, int64_t line) {
       int64_t *tocarry,
       const int64_t *starts,
       const int64_t *parents,
-      int64_t parentsoffset,
+      int64_t parentsoffset,   // DROP
       int64_t parentslength,
       const int64_t *nextparents,
-      int64_t nextparentsoffset) {
+      int64_t nextparentsoffset) {   // DROP
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray_local_preparenext_64(
           tocarry,
           starts,
           parents,
-          oink(parentsoffset, __LINE__),
           parentslength,
-          nextparents,
-          oink(nextparentsoffset, __LINE__));
+          nextparents);
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(

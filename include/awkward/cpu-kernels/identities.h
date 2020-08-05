@@ -43,8 +43,8 @@ extern "C" {
       int32_t* toptr,
       const int32_t* fromptr,
       const int32_t* fromoffsets,
-      int64_t fromptroffset,
-      int64_t offsetsoffset,
+      // int64_t fromptroffset,   // MAYBE
+      // int64_t offsetsoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
@@ -61,8 +61,8 @@ extern "C" {
       int32_t* toptr,
       const int32_t* fromptr,
       const uint32_t* fromoffsets,
-      int64_t fromptroffset,
-      int64_t offsetsoffset,
+      // int64_t fromptroffset,   // MAYBE
+      // int64_t offsetsoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
@@ -79,8 +79,8 @@ extern "C" {
       int32_t* toptr,
       const int32_t* fromptr,
       const int64_t* fromoffsets,
-      int64_t fromptroffset,
-      int64_t offsetsoffset,
+      // int64_t fromptroffset,   // MAYBE
+      // int64_t offsetsoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
@@ -97,8 +97,8 @@ extern "C" {
       int64_t* toptr,
       const int64_t* fromptr,
       const int32_t* fromoffsets,
-      int64_t fromptroffset,
-      int64_t offsetsoffset,
+      // int64_t fromptroffset,   // MAYBE
+      // int64_t offsetsoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
@@ -115,8 +115,8 @@ extern "C" {
       int64_t* toptr,
       const int64_t* fromptr,
       const uint32_t* fromoffsets,
-      int64_t fromptroffset,
-      int64_t offsetsoffset,
+      // int64_t fromptroffset,   // MAYBE
+      // int64_t offsetsoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
@@ -133,8 +133,8 @@ extern "C" {
       int64_t* toptr,
       const int64_t* fromptr,
       const int64_t* fromoffsets,
-      int64_t fromptroffset,
-      int64_t offsetsoffset,
+      // int64_t fromptroffset,   // MAYBE
+      // int64_t offsetsoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
@@ -157,9 +157,9 @@ extern "C" {
       const int32_t* fromptr,
       const int32_t* fromstarts,
       const int32_t* fromstops,
-      int64_t fromptroffset,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      // int64_t fromptroffset,   // MAYBE
+      // int64_t startsoffset,   // MAYBE
+      // int64_t stopsoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
@@ -181,9 +181,9 @@ extern "C" {
       const int32_t* fromptr,
       const uint32_t* fromstarts,
       const uint32_t* fromstops,
-      int64_t fromptroffset,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      // int64_t fromptroffset,   // MAYBE
+      // int64_t startsoffset,   // MAYBE
+      // int64_t stopsoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
@@ -205,9 +205,9 @@ extern "C" {
       const int32_t* fromptr,
       const int64_t* fromstarts,
       const int64_t* fromstops,
-      int64_t fromptroffset,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      // int64_t fromptroffset,   // MAYBE
+      // int64_t startsoffset,   // MAYBE
+      // int64_t stopsoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
@@ -229,9 +229,9 @@ extern "C" {
       const int64_t* fromptr,
       const int32_t* fromstarts,
       const int32_t* fromstops,
-      int64_t fromptroffset,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      // int64_t fromptroffset,   // MAYBE
+      // int64_t startsoffset,   // MAYBE
+      // int64_t stopsoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
@@ -253,9 +253,9 @@ extern "C" {
       const int64_t* fromptr,
       const uint32_t* fromstarts,
       const uint32_t* fromstops,
-      int64_t fromptroffset,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      // int64_t fromptroffset,   // MAYBE
+      // int64_t startsoffset,   // MAYBE
+      // int64_t stopsoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
@@ -277,9 +277,9 @@ extern "C" {
       const int64_t* fromptr,
       const int64_t* fromstarts,
       const int64_t* fromstops,
-      int64_t fromptroffset,
-      int64_t startsoffset,
-      int64_t stopsoffset,
+      // int64_t fromptroffset,   // MAYBE
+      // int64_t startsoffset,   // MAYBE
+      // int64_t stopsoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
@@ -295,7 +295,7 @@ extern "C" {
     awkward_Identities32_from_RegularArray(
       int32_t* toptr,
       const int32_t* fromptr,
-      int64_t fromptroffset,
+      // int64_t fromptroffset,   // MAYBE
       int64_t size,
       int64_t tolength,
       int64_t fromlength,
@@ -311,7 +311,7 @@ extern "C" {
     awkward_Identities64_from_RegularArray(
       int64_t* toptr,
       const int64_t* fromptr,
-      int64_t fromptroffset,
+      // int64_t fromptroffset,   // MAYBE
       int64_t size,
       int64_t tolength,
       int64_t fromlength,
@@ -332,8 +332,8 @@ extern "C" {
       int32_t* toptr,
       const int32_t* fromptr,
       const int32_t* fromindex,
-      int64_t fromptroffset,
-      int64_t indexoffset,
+      // int64_t fromptroffset,   // MAYBE
+      // int64_t indexoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
@@ -352,8 +352,8 @@ extern "C" {
       int32_t* toptr,
       const int32_t* fromptr,
       const uint32_t* fromindex,
-      int64_t fromptroffset,
-      int64_t indexoffset,
+      // int64_t fromptroffset,   // MAYBE
+      // int64_t indexoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
@@ -372,8 +372,8 @@ extern "C" {
       int32_t* toptr,
       const int32_t* fromptr,
       const int64_t* fromindex,
-      int64_t fromptroffset,
-      int64_t indexoffset,
+      // int64_t fromptroffset,   // MAYBE
+      // int64_t indexoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
@@ -392,8 +392,8 @@ extern "C" {
       int64_t* toptr,
       const int64_t* fromptr,
       const int32_t* fromindex,
-      int64_t fromptroffset,
-      int64_t indexoffset,
+      // int64_t fromptroffset,   // MAYBE
+      // int64_t indexoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
@@ -412,8 +412,8 @@ extern "C" {
       int64_t* toptr,
       const int64_t* fromptr,
       const uint32_t* fromindex,
-      int64_t fromptroffset,
-      int64_t indexoffset,
+      // int64_t fromptroffset,   // MAYBE
+      // int64_t indexoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
@@ -432,8 +432,8 @@ extern "C" {
       int64_t* toptr,
       const int64_t* fromptr,
       const int64_t* fromindex,
-      int64_t fromptroffset,
-      int64_t indexoffset,
+      // int64_t fromptroffset,   // MAYBE
+      // int64_t indexoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
@@ -457,9 +457,9 @@ extern "C" {
       const int32_t* fromptr,
       const int8_t* fromtags,
       const int32_t* fromindex,
-      int64_t fromptroffset,
-      int64_t tagsoffset,
-      int64_t indexoffset,
+      // int64_t fromptroffset,   // MAYBE
+      // int64_t tagsoffset,   // MAYBE
+      // int64_t indexoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth,
@@ -483,9 +483,9 @@ extern "C" {
       const int32_t* fromptr,
       const int8_t* fromtags,
       const uint32_t* fromindex,
-      int64_t fromptroffset,
-      int64_t tagsoffset,
-      int64_t indexoffset,
+      // int64_t fromptroffset,   // MAYBE
+      // int64_t tagsoffset,   // MAYBE
+      // int64_t indexoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth,
@@ -509,9 +509,9 @@ extern "C" {
       const int32_t* fromptr,
       const int8_t* fromtags,
       const int64_t* fromindex,
-      int64_t fromptroffset,
-      int64_t tagsoffset,
-      int64_t indexoffset,
+      // int64_t fromptroffset,   // MAYBE
+      // int64_t tagsoffset,   // MAYBE
+      // int64_t indexoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth,
@@ -535,9 +535,9 @@ extern "C" {
       const int64_t* fromptr,
       const int8_t* fromtags,
       const int32_t* fromindex,
-      int64_t fromptroffset,
-      int64_t tagsoffset,
-      int64_t indexoffset,
+      // int64_t fromptroffset,   // MAYBE
+      // int64_t tagsoffset,   // MAYBE
+      // int64_t indexoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth,
@@ -561,9 +561,9 @@ extern "C" {
       const int64_t* fromptr,
       const int8_t* fromtags,
       const uint32_t* fromindex,
-      int64_t fromptroffset,
-      int64_t tagsoffset,
-      int64_t indexoffset,
+      // int64_t fromptroffset,   // MAYBE
+      // int64_t tagsoffset,   // MAYBE
+      // int64_t indexoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth,
@@ -587,9 +587,9 @@ extern "C" {
       const int64_t* fromptr,
       const int8_t* fromtags,
       const int64_t* fromindex,
-      int64_t fromptroffset,
-      int64_t tagsoffset,
-      int64_t indexoffset,
+      // int64_t fromptroffset,   // MAYBE
+      // int64_t tagsoffset,   // MAYBE
+      // int64_t indexoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth,
@@ -604,7 +604,7 @@ extern "C" {
     awkward_Identities32_extend(
       int32_t* toptr,
       const int32_t* fromptr,
-      int64_t fromoffset,
+      // int64_t fromoffset,   // MAYBE
       int64_t fromlength,
       int64_t tolength);
 /// @param toptr outparam
@@ -616,7 +616,7 @@ extern "C" {
     awkward_Identities64_extend(
       int64_t* toptr,
       const int64_t* fromptr,
-      int64_t fromoffset,
+      // int64_t fromoffset,   // MAYBE
       int64_t fromlength,
       int64_t tolength);
 
