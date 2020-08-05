@@ -17,14 +17,13 @@ ERROR awkward_sorting_ranges(
   toindex[0] = k;
   k++; j++;
   for (int64_t i = 1;  i < parentslength;  i++) {
-    if(parents[i - 1] != parents[i]) {
+    if (parents[i - 1] != parents[i]) {
       toindex[j] = k;
       j++;
     }
     k++;
   }
   toindex[tolength - 1] = parentslength;
-
   return success();
 }
 
@@ -34,12 +33,11 @@ ERROR awkward_sorting_ranges_length(
   int64_t parentslength) {
   int64_t length = 2;
   for (int64_t i = 1;  i < parentslength;  i++) {
-    if(parents[i - 1] != parents[i]) {
+    if (parents[i - 1] != parents[i]) {
       length++;
     }
   }
   *tolength = length;
-
   return success();
 }
 
@@ -575,15 +573,13 @@ ERROR awkward_IndexedArray_local_preparenext_64(
     int64_t* tocarry,
     const int64_t* starts,
     const int64_t* parents,
-    int64_t parentsoffset,
     int64_t parentslength,
-    const int64_t* nextparents,
-    int64_t nextparentsoffset) {
+    const int64_t* nextparents) {
   int64_t j = 0;
   for (int64_t i = 0;  i < parentslength;  i++) {
-    int64_t parent = parents[i] + parentsoffset;
+    int64_t parent = parents[i];
     int64_t start = starts[parent];
-    int64_t nextparent = nextparents[j] + nextparentsoffset;
+    int64_t nextparent = nextparents[j];
     if (parent == nextparent) {
       tocarry[i] = j;
       ++j;

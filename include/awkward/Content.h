@@ -1217,7 +1217,7 @@ namespace awkward {
     ///
     /// @note This function has not been implemented to handle Multi-GPU setups
     virtual const ContentPtr
-      copy_to(kernel::Lib ptr_lib) const = 0;
+      copy_to(kernel::lib ptr_lib) const = 0;
 
   protected:
     /// @brief Internal function to wrap putative #getitem output with enough

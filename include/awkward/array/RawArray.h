@@ -191,14 +191,14 @@ namespace awkward {
     /// buffer.
     /// @param length Number of elements in the array.
     /// @param itemsize Number of bytes per item; should agree with the format.
-    /// @param Choose the Kernel Library for this array, default:= cpu_kernels
+    /// @param Choose the Kernel Library for this array, default:= kernel::lib::cpu
     RawArrayOf<T>(const IdentitiesPtr& identities,
                   const util::Parameters& parameters,
                   const std::shared_ptr<T>& ptr,
                   const int64_t offset,
                   const int64_t length,
                   const int64_t itemsize,
-                  const kernel::Lib ptr_lib = kernel::Lib::cpu_kernels)
+                  const kernel::lib ptr_lib = kernel::lib::cpu)
         : Content(identities, parameters)
         , ptr_lib_(ptr_lib)
         , ptr_(ptr)
@@ -217,7 +217,7 @@ namespace awkward {
                   const util::Parameters& parameters,
                   const std::shared_ptr<T>& ptr,
                   const int64_t length,
-                  const kernel::Lib ptr_lib = kernel::Lib::cpu_kernels)
+                  const kernel::lib ptr_lib = kernel::lib::cpu)
         : Content(identities, parameters)
         , ptr_lib_(ptr_lib)
         , ptr_(ptr)
@@ -234,7 +234,7 @@ namespace awkward {
     RawArrayOf<T>(const IdentitiesPtr& identities,
                   const util::Parameters& parameters,
                   const int64_t length,
-                  const kernel::Lib ptr_lib = kernel::Lib::cpu_kernels)
+                  const kernel::lib ptr_lib = kernel::lib::cpu)
         : Content(identities, parameters)
         , ptr_lib_(ptr_lib)
         , ptr_(kernel::ptr_alloc<T>(ptr_lib_, length))
@@ -246,6 +246,17 @@ namespace awkward {
     const std::shared_ptr<T>
       ptr() const {
       return ptr_;
+    }
+
+    const kernel::lib
+    ptr_lib() const {
+      return ptr_lib_;
+    }
+
+    /// @brief Raw pointer to the beginning of data (i.e. offset accounted for).
+    T*
+      data() const {
+      return ptr_.get() + offset_;
     }
 
     /// @brief Location of item zero in the buffer, relative to
@@ -264,12 +275,6 @@ namespace awkward {
       itemsize() const {
       return itemsize_;
     }
-
-    const kernel::Lib
-    ptr_lib() const {
-      return ptr_lib_;
-    }
-
 
     /// @brief Location of item zero in the buffer, relative to
     /// `ptr`, measured in bytes, rather than number of elements; see #offset.
@@ -326,7 +331,11 @@ namespace awkward {
                                          Identities::FieldLoc(), 1, length());
         Identities32* rawidentities =
           reinterpret_cast<Identities32*>(newidentities.get());
-        kernel::new_Identities<int32_t>(rawidentities->ptr().get(), length());
+        struct Error err = kernel::new_Identities<int32_t>(
+          kernel::lib::cpu,   // DERIVE
+          rawidentities->ptr().get(),
+          length());
+        util::handle_error(err, classname(), identities_.get());
         setidentities(newidentities);
       }
       else {
@@ -335,7 +344,11 @@ namespace awkward {
                                          Identities::FieldLoc(), 1, length());
         Identities64* rawidentities =
           reinterpret_cast<Identities64*>(newidentities.get());
-        kernel::new_Identities<int64_t>(rawidentities->ptr().get(), length());
+        struct Error err = kernel::new_Identities<int64_t>(
+          kernel::lib::cpu,   // DERIVE
+          rawidentities->ptr().get(),
+          length());
+        util::handle_error(err, classname(), identities_.get());
         setidentities(newidentities);
       }
     }
@@ -681,11 +694,11 @@ namespace awkward {
                              kernel::array_deleter<T>());
 
       struct Error err = kernel::NumpyArray_getitem_next_null_64(
+        kernel::lib::cpu,   // DERIVE
         reinterpret_cast<uint8_t*>(ptr.get()),
         reinterpret_cast<uint8_t*>(ptr_.get()),
         carry.length(),
         itemsize_,
-        byteoffset(),
         carry.ptr().get());
       util::handle_error(err, classname(), identities_.get());
 
@@ -922,6 +935,7 @@ namespace awkward {
       }
       Index64 index(target);
       struct Error err = kernel::index_rpad_and_clip_axis0_64(
+        kernel::lib::cpu,   // DERIVE
         index.ptr().get(),
         target,
         length());
@@ -960,6 +974,7 @@ namespace awkward {
       offsets.setitem_at_nowrap(1, length_);
 
       struct Error err = kernel::NumpyArray_sort<T>(
+        kernel::lib::cpu,   // DERIVE
         ptr.get(),
         ptr_.get(),
         length_,
@@ -1002,6 +1017,7 @@ namespace awkward {
       outranges.setitem_at_nowrap(1, length_);
 
       struct Error err = kernel::NumpyArray_argsort<T>(
+        kernel::lib::cpu,   // DERIVE
         ptr.get(),
         ptr_.get(),
         length_,
@@ -1113,6 +1129,7 @@ namespace awkward {
       }
       Index64 flathead = array.ravel();
       struct Error err = kernel::regularize_arrayslice_64(
+        kernel::lib::cpu,   // DERIVE
         flathead.ptr().get(),
         flathead.length(),
         length_);
@@ -1172,8 +1189,8 @@ namespace awkward {
     }
 
     const ContentPtr
-      copy_to(kernel::Lib ptr_lib) const override {
-        if(ptr_lib == ptr_lib_) {
+      copy_to(kernel::lib ptr_lib) const override {
+        if (ptr_lib == ptr_lib_) {
           return std::make_shared<RawArrayOf<T>>(identities(),
                                                  parameters(),
                                                  ptr_,
@@ -1203,7 +1220,7 @@ namespace awkward {
     }
 
   private:
-    const kernel::Lib ptr_lib_;
+    const kernel::lib ptr_lib_;
     const std::shared_ptr<T> ptr_;
     const int64_t offset_;
     const int64_t length_;

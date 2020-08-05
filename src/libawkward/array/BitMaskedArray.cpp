@@ -244,9 +244,9 @@ namespace awkward {
   BitMaskedArray::bytemask() const {
     Index8 bytemask(mask_.length() * 8);
     struct Error err = kernel::BitMaskedArray_to_ByteMaskedArray(
-      bytemask.ptr().get(),
-      mask_.ptr().get(),
-      mask_.offset(),
+      kernel::lib::cpu,   // DERIVE
+      bytemask.data(),
+      mask_.data(),
       mask_.length(),
       false,
       lsb_order_);
@@ -278,9 +278,9 @@ namespace awkward {
   BitMaskedArray::toByteMaskedArray() const {
     Index8 bytemask(mask_.length() * 8);
     struct Error err = kernel::BitMaskedArray_to_ByteMaskedArray(
-      bytemask.ptr().get(),
-      mask_.ptr().get(),
-      mask_.offset(),
+      kernel::lib::cpu,   // DERIVE
+      bytemask.data(),
+      mask_.data(),
       mask_.length(),
       false,
       lsb_order_);
@@ -297,9 +297,9 @@ namespace awkward {
   BitMaskedArray::toIndexedOptionArray64() const {
     Index64 index(mask_.length() * 8);
     struct Error err = kernel::BitMaskedArray_to_IndexedOptionArray64(
-      index.ptr().get(),
-      mask_.ptr().get(),
-      mask_.offset(),
+      kernel::lib::cpu,   // DERIVE
+      index.data(),
+      mask_.data(),
       mask_.length(),
       valid_when_,
       lsb_order_);
@@ -340,9 +340,9 @@ namespace awkward {
         Identities32* rawsubidentities =
           reinterpret_cast<Identities32*>(subidentities.get());
         struct Error err = kernel::Identities_extend<int32_t>(
-          rawsubidentities->ptr().get(),
-          rawidentities->ptr().get(),
-          rawidentities->offset(),
+          kernel::lib::cpu,   // DERIVE
+          rawsubidentities->data(),
+          rawidentities->data(),
           rawidentities->length(),
           content_.get()->length());
         util::handle_error(err, classname(), identities_.get());
@@ -358,9 +358,9 @@ namespace awkward {
         Identities64* rawsubidentities =
           reinterpret_cast<Identities64*>(subidentities.get());
         struct Error err = kernel::Identities_extend<int64_t>(
-          rawsubidentities->ptr().get(),
-          rawidentities->ptr().get(),
-          rawidentities->offset(),
+          kernel::lib::cpu,   // DERIVE
+          rawsubidentities->data(),
+          rawidentities->data(),
           rawidentities->length(),
           content_.get()->length());
         util::handle_error(err, classname(), identities_.get());
@@ -383,8 +383,10 @@ namespace awkward {
                                        length());
       Identities32* rawidentities =
         reinterpret_cast<Identities32*>(newidentities.get());
-      struct Error err =
-        kernel::new_Identities<int32_t>(rawidentities->ptr().get(), length());
+      struct Error err = kernel::new_Identities<int32_t>(
+        kernel::lib::cpu,   // DERIVE
+        rawidentities->data(),
+        length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
     }
@@ -396,8 +398,10 @@ namespace awkward {
                                        length());
       Identities64* rawidentities =
         reinterpret_cast<Identities64*>(newidentities.get());
-      struct Error err = kernel::new_Identities<int64_t>(rawidentities->ptr().get(),
-                                                         length());
+      struct Error err = kernel::new_Identities<int64_t>(
+        kernel::lib::cpu,   // DERIVE
+        rawidentities->data(),
+        length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
     }
@@ -911,7 +915,7 @@ namespace awkward {
   }
 
   const ContentPtr
-  BitMaskedArray::copy_to(kernel::Lib ptr_lib) const {
+  BitMaskedArray::copy_to(kernel::lib ptr_lib) const {
     IndexU8 mask = mask_.copy_to(ptr_lib);
     ContentPtr  content = content_->copy_to(ptr_lib);
     return std::make_shared<BitMaskedArray>(identities(),

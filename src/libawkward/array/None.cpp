@@ -331,7 +331,7 @@ namespace awkward {
   }
 
   const ContentPtr
-  None::copy_to(kernel::Lib ptr_lib) const {
+  None::copy_to(kernel::lib ptr_lib) const {
     throw std::runtime_error(
       "undefined operation: None::copy_to(ptr_lib)");
   }

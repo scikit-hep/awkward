@@ -27,7 +27,7 @@ box(const std::shared_ptr<ak::Content>& content) {
            dynamic_cast<ak::NumpyArray*>(content.get())) {
     if (raw->isscalar()) {
       return py::array(py::buffer_info(
-        raw->byteptr(),
+        raw->data(),
         raw->itemsize(),
         raw->format(),
         raw->ndim(),
@@ -1289,18 +1289,18 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
                return box(self.argsort(axis, ascending, false));
           })
           .def("copy_to",
-               [](const T&self,
-                      std::string ptr_lib) -> py::object {
-               if(ptr_lib == "cuda") {
-                 return box(self.copy_to(kernel::Lib::cuda_kernels));
+               [](const T&self, const std::string& ptr_lib) -> py::object {
+               if (ptr_lib == "cpu") {
+                 return box(self.copy_to(ak::kernel::lib::cpu));
                }
-               else if(ptr_lib == "cpu") {
-                 return box(self.copy_to(kernel::Lib::cpu_kernels));
+               else if (ptr_lib == "cuda") {
+                 return box(self.copy_to(ak::kernel::lib::cuda));
                }
                else {
-                 throw std::invalid_argument("Invalid kernel specified, valid kernels are cpu and cuda");
+                 throw std::invalid_argument("specify 'cpu' or 'cuda'");
                }
-          });
+          })
+    ;
   }
 
 ////////// EmptyArray
@@ -1653,7 +1653,7 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
                          ak::Content>(m, name.c_str(), py::buffer_protocol())
       .def_buffer([](const ak::NumpyArray& self) -> py::buffer_info {
         return py::buffer_info(
-          self.byteptr(),
+          self.data(),
           self.itemsize(),
           self.format(),
           self.ndim(),

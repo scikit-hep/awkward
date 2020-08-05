@@ -434,19 +434,15 @@ extern "C" {
   /// @param tocarry outparam
   /// @param starts inparam role: ListArray-starts
   /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
   /// @param parentslength inparam
   /// @param nextparents inparam role: IndexedArray-index
-  /// @param nextparentsoffset inparam role: IndexedArray-index-offset
   EXPORT_SYMBOL struct Error
     awkward_IndexedArray_local_preparenext_64(
       int64_t* tocarry,
       const int64_t* starts,
       const int64_t* parents,
-      int64_t parentsoffset,
       int64_t parentslength,
-      const int64_t* nextparents,
-      int64_t nextparentsoffset);
+      const int64_t* nextparents);
 
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index

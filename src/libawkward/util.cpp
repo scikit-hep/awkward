@@ -396,7 +396,7 @@ namespace awkward {
     handle_error(const struct Error& err,
                  const std::string& classname,
                  const Identities* identities) {
-      if(err.pass_through == true) {
+      if (err.pass_through == true) {
         throw std::invalid_argument(err.str);
       }
       else {

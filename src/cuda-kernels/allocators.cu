@@ -4,11 +4,12 @@
 
 template <typename  T>
 T *awkward_cuda_ptr_alloc(int64_t length) {
-  if(length != 0) {
+  if (length != 0) {
     T *ptr;
     cudaError_t err = cudaMallocManaged((void **)&ptr, sizeof(T) * length);
-    if(err == cudaError::cudaSuccess)
+    if (err == cudaError::cudaSuccess) {
       return ptr;
+    }
   }
   return nullptr;
 }
@@ -49,8 +50,8 @@ double *awkward_cuda_ptrfloat64_alloc(int64_t length) {
 template <typename  T>
 Error awkward_cuda_ptr_dealloc(const T* ptr) {
   cudaError_t  status = cudaFree((void *)ptr);
-  if(status != cudaError_t::cudaSuccess) {
-      return failure(cudaGetErrorString(status), 0, kSliceNone, true);
+  if (status != cudaError_t::cudaSuccess) {
+    return failure(cudaGetErrorString(status), 0, kSliceNone, true);
   }
 
   return success();
@@ -102,8 +103,8 @@ ERROR awkward_cuda_H2D(
                                        sizeof(T) * length,
                                        cudaMemcpyHostToDevice);
 
-  if(memcpy_stat != cudaError_t::cudaSuccess) {
-      return failure(cudaGetErrorString(memcpy_stat), 0, kSliceNone, true);
+  if (memcpy_stat != cudaError_t::cudaSuccess) {
+    return failure(cudaGetErrorString(memcpy_stat), 0, kSliceNone, true);
   }
   return success();
 }
@@ -209,18 +210,19 @@ ERROR awkward_cuda_H2Dfloat64(
 
 template <typename T>
 ERROR awkward_cuda_D2H(
-        T* to_ptr,
-        T* from_ptr,
-        int64_t length) {
-    cudaError_t memcpy_stat = cudaMemcpy(to_ptr,
-                                         from_ptr,
-                                         sizeof(T) * length,
-                                         cudaMemcpyDeviceToHost);
-
-    if(memcpy_stat != cudaError_t::cudaSuccess) {
-        return failure(cudaGetErrorString(memcpy_stat), 0, kSliceNone, true);
-    }
+  T* to_ptr,
+  T* from_ptr,
+  int64_t length) {
+  cudaError_t memcpy_stat = cudaMemcpy(to_ptr,
+                                       from_ptr,
+                                       sizeof(T) * length,
+                                       cudaMemcpyDeviceToHost);
+  if (memcpy_stat != cudaError_t::cudaSuccess) {
+    return failure(cudaGetErrorString(memcpy_stat), 0, kSliceNone, true);
+  }
+  else {
     return success();
+  }
 }
 ERROR awkward_cuda_D2Hbool(
         bool *to_ptr,
