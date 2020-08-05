@@ -263,11 +263,12 @@ ERROR awkward_slicearray_ravel(
   else {
     for (T i = 0;  i < shape[0];  i++) {
       ERROR err =
-        awkward_slicearray_ravel<T>(&toptr[i*shape[1]],
-                                    &fromptr[i*strides[0]],
-                                    ndim - 1,
-                                    &shape[1],
-                                    &strides[1]);
+        awkward_slicearray_ravel<T>(
+          &toptr[i*shape[1]],
+          &fromptr[i*strides[0]],
+          ndim - 1,
+          &shape[1],
+          &strides[1]);
       if (err.str != nullptr) {
         return err;
       }
@@ -994,8 +995,7 @@ ERROR awkward_ListArray32_getitem_next_range_spreadadvanced_64(
   const int64_t* fromadvanced,
   const int32_t* fromoffsets,
   int64_t lenstarts) {
-  return awkward_ListArray_getitem_next_range_spreadadvanced<int32_t,
-                                                             int64_t>(
+  return awkward_ListArray_getitem_next_range_spreadadvanced<int32_t, int64_t>(
     toadvanced,
     fromadvanced,
     fromoffsets,
@@ -1006,8 +1006,7 @@ ERROR awkward_ListArrayU32_getitem_next_range_spreadadvanced_64(
   const int64_t* fromadvanced,
   const uint32_t* fromoffsets,
   int64_t lenstarts) {
-  return awkward_ListArray_getitem_next_range_spreadadvanced<uint32_t,
-                                                             int64_t>(
+  return awkward_ListArray_getitem_next_range_spreadadvanced<uint32_t, int64_t>(
     toadvanced,
     fromadvanced,
     fromoffsets,
@@ -1018,8 +1017,7 @@ ERROR awkward_ListArray64_getitem_next_range_spreadadvanced_64(
   const int64_t* fromadvanced,
   const int64_t* fromoffsets,
   int64_t lenstarts) {
-  return awkward_ListArray_getitem_next_range_spreadadvanced<int64_t,
-                                                             int64_t>(
+  return awkward_ListArray_getitem_next_range_spreadadvanced<int64_t, int64_t>(
     toadvanced,
     fromadvanced,
     fromoffsets,
@@ -1623,8 +1621,7 @@ ERROR awkward_IndexedArray32_getitem_nextcarry_outindex_mask_64(
   const int32_t* fromindex,
   int64_t lenindex,
   int64_t lencontent) {
-  return awkward_IndexedArray_getitem_nextcarry_outindex_mask
-    <int32_t, int64_t>(
+  return awkward_IndexedArray_getitem_nextcarry_outindex_mask<int32_t, int64_t>(
     tocarry,
     toindex,
     fromindex,
@@ -1637,8 +1634,7 @@ ERROR awkward_IndexedArrayU32_getitem_nextcarry_outindex_mask_64(
   const uint32_t* fromindex,
   int64_t lenindex,
   int64_t lencontent) {
-  return awkward_IndexedArray_getitem_nextcarry_outindex_mask
-    <uint32_t, int64_t>(
+  return awkward_IndexedArray_getitem_nextcarry_outindex_mask<uint32_t, int64_t>(
     tocarry,
     toindex,
     fromindex,
@@ -1651,8 +1647,7 @@ ERROR awkward_IndexedArray64_getitem_nextcarry_outindex_mask_64(
   const int64_t* fromindex,
   int64_t lenindex,
   int64_t lencontent) {
-  return awkward_IndexedArray_getitem_nextcarry_outindex_mask
-    <int64_t, int64_t>(
+  return awkward_IndexedArray_getitem_nextcarry_outindex_mask<int64_t, int64_t>(
     tocarry,
     toindex,
     fromindex,
@@ -2777,7 +2772,8 @@ ERROR awkward_Content_getitem_next_missing_jagged_getmaskstartstop(
     }
     else {
       mask_out[i] = i;
-      stops_out[i] = offsets_in[++k];
+      k++;
+      stops_out[i] = offsets_in[k];
     }
   }
   return success();

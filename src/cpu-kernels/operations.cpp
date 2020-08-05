@@ -292,8 +292,7 @@ ERROR awkward_UnionArray32_flatten_combine_64(
   int64_t length,
   int64_t** offsetsraws,
   int64_t* offsetsoffsets) {
-  return awkward_UnionArray_flatten_combine<
-    int8_t, int32_t, int8_t, int64_t, int64_t>(
+  return awkward_UnionArray_flatten_combine<int8_t, int32_t, int8_t, int64_t, int64_t>(
     totags,
     toindex,
     tooffsets,
@@ -312,8 +311,7 @@ ERROR awkward_UnionArrayU32_flatten_combine_64(
   int64_t length,
   int64_t** offsetsraws,
   int64_t* offsetsoffsets) {
-  return awkward_UnionArray_flatten_combine
-    <int8_t, uint32_t, int8_t, int64_t, int64_t>(
+  return awkward_UnionArray_flatten_combine<int8_t, uint32_t, int8_t, int64_t, int64_t>(
     totags,
     toindex,
     tooffsets,
@@ -332,8 +330,7 @@ ERROR awkward_UnionArray64_flatten_combine_64(
   int64_t length,
   int64_t** offsetsraws,
   int64_t* offsetsoffsets) {
-  return awkward_UnionArray_flatten_combine
-    <int8_t, int64_t, int8_t, int64_t, int64_t>(
+  return awkward_UnionArray_flatten_combine<int8_t, int64_t, int8_t, int64_t, int64_t>(
     totags,
     toindex,
     tooffsets,
@@ -909,7 +906,7 @@ ERROR awkward_ListOffsetArray_toRegularArray(
   int64_t offsetslength) {
   *size = -1;
   for (int64_t i = 0;  i < offsetslength - 1;  i++) {
-    int64_t count = (int64_t)(fromoffsets[i + 1] - fromoffsets[i]);
+    int64_t count = (int64_t)fromoffsets[i + 1] - (int64_t)fromoffsets[i];
     if (count < 0) {
       return failure(
         "offsets must be monotonically increasing", i, kSliceNone);
@@ -1914,12 +1911,7 @@ ERROR awkward_UnionArray8_32_simplify8_32_to8_64(
   int64_t outerwhich,
   int64_t length,
   int64_t base) {
-  return awkward_UnionArray_simplify<int8_t,
-                                     int32_t,
-                                     int8_t,
-                                     int32_t,
-                                     int8_t,
-                                     int64_t>(
+  return awkward_UnionArray_simplify<int8_t, int32_t, int8_t, int32_t, int8_t, int64_t>(
     totags,
     toindex,
     outertags,
@@ -1944,12 +1936,7 @@ ERROR awkward_UnionArray8_32_simplify8_U32_to8_64(
   int64_t outerwhich,
   int64_t length,
   int64_t base) {
-  return awkward_UnionArray_simplify<int8_t,
-                                     int32_t,
-                                     int8_t,
-                                     uint32_t,
-                                     int8_t,
-                                     int64_t>(
+  return awkward_UnionArray_simplify<int8_t, int32_t, int8_t, uint32_t, int8_t, int64_t>(
     totags,
     toindex,
     outertags,
@@ -1974,12 +1961,7 @@ ERROR awkward_UnionArray8_32_simplify8_64_to8_64(
   int64_t outerwhich,
   int64_t length,
   int64_t base) {
-  return awkward_UnionArray_simplify<int8_t,
-                                     int32_t,
-                                     int8_t,
-                                     int64_t,
-                                     int8_t,
-                                     int64_t>(
+  return awkward_UnionArray_simplify<int8_t, int32_t, int8_t, int64_t, int8_t, int64_t>(
     totags,
     toindex,
     outertags,
@@ -2004,12 +1986,7 @@ ERROR awkward_UnionArray8_U32_simplify8_32_to8_64(
   int64_t outerwhich,
   int64_t length,
   int64_t base) {
-  return awkward_UnionArray_simplify<int8_t,
-                                     uint32_t,
-                                     int8_t,
-                                     int32_t,
-                                     int8_t,
-                                     int64_t>(
+  return awkward_UnionArray_simplify<int8_t, uint32_t, int8_t, int32_t, int8_t, int64_t>(
     totags,
     toindex,
     outertags,
@@ -2034,12 +2011,7 @@ ERROR awkward_UnionArray8_U32_simplify8_U32_to8_64(
   int64_t outerwhich,
   int64_t length,
   int64_t base) {
-  return awkward_UnionArray_simplify<int8_t,
-                                     uint32_t,
-                                     int8_t,
-                                     uint32_t,
-                                     int8_t,
-                                     int64_t>(
+  return awkward_UnionArray_simplify<int8_t, uint32_t, int8_t, uint32_t, int8_t, int64_t>(
     totags,
     toindex,
     outertags,
@@ -2064,12 +2036,7 @@ ERROR awkward_UnionArray8_U32_simplify8_64_to8_64(
   int64_t outerwhich,
   int64_t length,
   int64_t base) {
-  return awkward_UnionArray_simplify<int8_t,
-                                     uint32_t,
-                                     int8_t,
-                                     int64_t,
-                                     int8_t,
-                                     int64_t>(
+  return awkward_UnionArray_simplify<int8_t, uint32_t, int8_t, int64_t, int8_t, int64_t>(
     totags,
     toindex,
     outertags,
@@ -2094,12 +2061,7 @@ ERROR awkward_UnionArray8_64_simplify8_32_to8_64(
   int64_t outerwhich,
   int64_t length,
   int64_t base) {
-  return awkward_UnionArray_simplify<int8_t,
-                                     int64_t,
-                                     int8_t,
-                                     int32_t,
-                                     int8_t,
-                                     int64_t>(
+  return awkward_UnionArray_simplify<int8_t, int64_t, int8_t, int32_t, int8_t, int64_t>(
     totags,
     toindex,
     outertags,
@@ -2124,12 +2086,7 @@ ERROR awkward_UnionArray8_64_simplify8_U32_to8_64(
   int64_t outerwhich,
   int64_t length,
   int64_t base) {
-  return awkward_UnionArray_simplify<int8_t,
-                                     int64_t,
-                                     int8_t,
-                                     uint32_t,
-                                     int8_t,
-                                     int64_t>(
+  return awkward_UnionArray_simplify<int8_t, int64_t, int8_t, uint32_t, int8_t, int64_t>(
     totags,
     toindex,
     outertags,
@@ -2154,12 +2111,7 @@ ERROR awkward_UnionArray8_64_simplify8_64_to8_64(
   int64_t outerwhich,
   int64_t length,
   int64_t base) {
-  return awkward_UnionArray_simplify<int8_t,
-                                     int64_t,
-                                     int8_t,
-                                     int64_t,
-                                     int8_t,
-                                     int64_t>(
+  return awkward_UnionArray_simplify<int8_t, int64_t, int8_t, int64_t, int8_t, int64_t>(
     totags,
     toindex,
     outertags,
@@ -3139,13 +3091,14 @@ void awkward_ListArray_combinations_step(
       }
     }
     else {
-      awkward_ListArray_combinations_step<T>(tocarry,
-                                             toindex,
-                                             fromindex,
-                                             j + 1,
-                                             stop,
-                                             n,
-                                             replacement);
+      awkward_ListArray_combinations_step<T>(
+        tocarry,
+        toindex,
+        fromindex,
+        j + 1,
+        stop,
+        n,
+        replacement);
     }
     fromindex[j]++;
   }
@@ -3168,13 +3121,14 @@ ERROR awkward_ListArray_combinations(
     int64_t start = (int64_t)starts[i];
     int64_t stop = (int64_t)stops[i];
     fromindex[0] = start;
-    awkward_ListArray_combinations_step<T>(tocarry,
-                                           toindex,
-                                           fromindex,
-                                           0,
-                                           stop,
-                                           n,
-                                           replacement);
+    awkward_ListArray_combinations_step<T>(
+      tocarry,
+      toindex,
+      fromindex,
+      0,
+      stop,
+      n,
+      replacement);
   }
   return success();
 }
@@ -3252,13 +3206,14 @@ ERROR awkward_RegularArray_combinations(
     int64_t start = size*i;
     int64_t stop = start + size;
     fromindex[0] = start;
-    awkward_ListArray_combinations_step<T>(tocarry,
-                                           toindex,
-                                           fromindex,
-                                           0,
-                                           stop,
-                                           n,
-                                           replacement);
+    awkward_ListArray_combinations_step<T>(
+      tocarry,
+      toindex,
+      fromindex,
+      0,
+      stop,
+      n,
+      replacement);
   }
   return success();
 }

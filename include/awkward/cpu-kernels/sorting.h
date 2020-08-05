@@ -434,7 +434,6 @@ extern "C" {
   /// @param tocarry outparam
   /// @param starts inparam role: ListArray-starts
   /// @param parents inparam role: IndexedArray-index
-  /// @param parentsoffset inparam role: IndexedArray-index-offset
   /// @param parentslength inparam
   /// @param nextparents inparam role: IndexedArray-index
   EXPORT_SYMBOL struct Error

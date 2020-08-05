@@ -222,8 +222,8 @@ extern "C" {
   /// @param identitiesptr inparam role: IndexedArray-index
   /// @param carryptr inparam role: ListOffsetArray-offsets
   /// @param lencarry inparam
-  /// @param offset inparam role: IndexedArray-index-offset
   /// @param width inparam
+  /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities32_getitem_carry_64(
       int32_t* newidentitiesptr,
@@ -236,8 +236,8 @@ extern "C" {
   /// @param identitiesptr inparam role: IndexedArray-index
   /// @param carryptr inparam role: ListOffsetArray-offsets
   /// @param lencarry inparam
-  /// @param offset inparam role: IndexedArray-index-offset
   /// @param width inparam
+  /// @param length inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities64_getitem_carry_64(
       int64_t* newidentitiesptr,
@@ -1386,7 +1386,6 @@ extern "C" {
   /// @param tooffsets outparam
   /// @param slicestarts inparam role: ListArray-starts
   /// @param slicestops inparam role: ListArray-stops
-  /// @param slicestopsoffset inparam role: ListArray-stops-offset
   /// @param sliceouterlen inparam
   /// @param fromstarts inparam role: ListArray2-starts
   /// @param fromstops inparam role: ListArray2-stops
