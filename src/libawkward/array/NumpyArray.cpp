@@ -1181,7 +1181,6 @@ namespace awkward {
       reinterpret_cast<uint8_t*>(data()),
       carry.length(),
       strides_[0],
-      999,   // DROP
       carry.ptr().get());
     util::handle_error(err, classname(), identities_.get());
 
@@ -1744,7 +1743,6 @@ namespace awkward {
           reinterpret_cast<bool*>(ptr.get()),
           0,
           reinterpret_cast<bool*>(contiguous_self.data()),
-          999,   // DROP
           self_flatlength);
         util::handle_error(err, classname(), nullptr);
         err = kernel::NumpyArray_fill_frombool<bool>(
@@ -1752,7 +1750,6 @@ namespace awkward {
           reinterpret_cast<bool*>(ptr.get()),
           self_flatlength,
           reinterpret_cast<bool*>(contiguous_other.data()),
-          999,   // DROP
           other_flatlength);
         util::handle_error(err, classname(), nullptr);
         break;
@@ -1776,7 +1773,6 @@ namespace awkward {
               reinterpret_cast<int8_t*>(ptr.get()),
               0,
               reinterpret_cast<bool*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           case util::dtype::int8:
@@ -1785,7 +1781,6 @@ namespace awkward {
               reinterpret_cast<int8_t*>(ptr.get()),
               0,
               reinterpret_cast<int8_t*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           default:
@@ -1800,7 +1795,6 @@ namespace awkward {
               reinterpret_cast<int8_t*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<bool*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           case util::dtype::int8:
@@ -1809,7 +1803,6 @@ namespace awkward {
               reinterpret_cast<int8_t*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<int8_t*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           default:
@@ -1828,7 +1821,6 @@ namespace awkward {
               reinterpret_cast<int16_t*>(ptr.get()),
               0,
               reinterpret_cast<bool*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           case util::dtype::int8:
@@ -1837,7 +1829,6 @@ namespace awkward {
               reinterpret_cast<int16_t*>(ptr.get()),
               0,
               reinterpret_cast<int8_t*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           case util::dtype::int16:
@@ -1846,7 +1837,6 @@ namespace awkward {
               reinterpret_cast<int16_t*>(ptr.get()),
               0,
               reinterpret_cast<int16_t*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           case util::dtype::uint8:
@@ -1855,7 +1845,6 @@ namespace awkward {
               reinterpret_cast<int16_t*>(ptr.get()),
               0,
               reinterpret_cast<uint8_t*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           default:
@@ -1870,7 +1859,6 @@ namespace awkward {
               reinterpret_cast<int16_t*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<bool*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           case util::dtype::int8:
@@ -1879,7 +1867,6 @@ namespace awkward {
               reinterpret_cast<int16_t*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<int8_t*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           case util::dtype::int16:
@@ -1888,7 +1875,6 @@ namespace awkward {
               reinterpret_cast<int16_t*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<int16_t*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           case util::dtype::uint8:
@@ -1897,7 +1883,6 @@ namespace awkward {
               reinterpret_cast<int16_t*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<uint8_t*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           default:
@@ -1916,7 +1901,6 @@ namespace awkward {
               reinterpret_cast<int32_t*>(ptr.get()),
               0,
               reinterpret_cast<bool*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           case util::dtype::int8:
@@ -1925,7 +1909,6 @@ namespace awkward {
               reinterpret_cast<int32_t*>(ptr.get()),
               0,
               reinterpret_cast<int8_t*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           case util::dtype::int16:
@@ -1934,7 +1917,6 @@ namespace awkward {
               reinterpret_cast<int32_t*>(ptr.get()),
               0,
               reinterpret_cast<int16_t*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           case util::dtype::int32:
@@ -1943,7 +1925,6 @@ namespace awkward {
               reinterpret_cast<int32_t*>(ptr.get()),
               0,
               reinterpret_cast<int32_t*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           case util::dtype::uint8:
@@ -1952,7 +1933,6 @@ namespace awkward {
               reinterpret_cast<int32_t*>(ptr.get()),
               0,
               reinterpret_cast<uint8_t*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           case util::dtype::uint16:
@@ -1961,7 +1941,6 @@ namespace awkward {
               reinterpret_cast<int32_t*>(ptr.get()),
               0,
               reinterpret_cast<uint16_t*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           default:
@@ -1976,7 +1955,6 @@ namespace awkward {
               reinterpret_cast<int32_t*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<bool*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           case util::dtype::int8:
@@ -1985,7 +1963,6 @@ namespace awkward {
               reinterpret_cast<int32_t*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<int8_t*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           case util::dtype::int16:
@@ -1994,7 +1971,6 @@ namespace awkward {
               reinterpret_cast<int32_t*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<int16_t*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           case util::dtype::int32:
@@ -2003,7 +1979,6 @@ namespace awkward {
               reinterpret_cast<int32_t*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<int32_t*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           case util::dtype::uint8:
@@ -2012,7 +1987,6 @@ namespace awkward {
               reinterpret_cast<int32_t*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<uint8_t*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           case util::dtype::uint16:
@@ -2021,7 +1995,6 @@ namespace awkward {
               reinterpret_cast<int32_t*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<uint16_t*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           default:
@@ -2040,7 +2013,6 @@ namespace awkward {
               reinterpret_cast<int64_t*>(ptr.get()),
               0,
               reinterpret_cast<bool*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           case util::dtype::int8:
@@ -2049,7 +2021,6 @@ namespace awkward {
               reinterpret_cast<int64_t*>(ptr.get()),
               0,
               reinterpret_cast<int8_t*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           case util::dtype::int16:
@@ -2058,7 +2029,6 @@ namespace awkward {
               reinterpret_cast<int64_t*>(ptr.get()),
               0,
               reinterpret_cast<int16_t*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           case util::dtype::int32:
@@ -2067,7 +2037,6 @@ namespace awkward {
               reinterpret_cast<int64_t*>(ptr.get()),
               0,
               reinterpret_cast<int32_t*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           case util::dtype::int64:
@@ -2076,7 +2045,6 @@ namespace awkward {
               reinterpret_cast<int64_t*>(ptr.get()),
               0,
               reinterpret_cast<int64_t*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           case util::dtype::uint8:
@@ -2085,7 +2053,6 @@ namespace awkward {
               reinterpret_cast<int64_t*>(ptr.get()),
               0,
               reinterpret_cast<uint8_t*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           case util::dtype::uint16:
@@ -2094,7 +2061,6 @@ namespace awkward {
               reinterpret_cast<int64_t*>(ptr.get()),
               0,
               reinterpret_cast<uint16_t*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           case util::dtype::uint32:
@@ -2103,7 +2069,6 @@ namespace awkward {
               reinterpret_cast<int64_t*>(ptr.get()),
               0,
               reinterpret_cast<uint32_t*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           default:
@@ -2119,7 +2084,6 @@ namespace awkward {
               reinterpret_cast<int64_t*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<bool*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           case util::dtype::int8:
@@ -2128,7 +2092,6 @@ namespace awkward {
               reinterpret_cast<int64_t*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<int8_t*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           case util::dtype::int16:
@@ -2137,7 +2100,6 @@ namespace awkward {
               reinterpret_cast<int64_t*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<int16_t*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           case util::dtype::int32:
@@ -2146,7 +2108,6 @@ namespace awkward {
               reinterpret_cast<int64_t*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<int32_t*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           case util::dtype::int64:
@@ -2155,7 +2116,6 @@ namespace awkward {
               reinterpret_cast<int64_t*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<int64_t*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           case util::dtype::uint8:
@@ -2164,7 +2124,6 @@ namespace awkward {
               reinterpret_cast<int64_t*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<uint8_t*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           case util::dtype::uint16:
@@ -2173,7 +2132,6 @@ namespace awkward {
               reinterpret_cast<int64_t*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<uint16_t*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           case util::dtype::uint32:
@@ -2182,7 +2140,6 @@ namespace awkward {
               reinterpret_cast<int64_t*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<uint32_t*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           default:
@@ -2202,7 +2159,6 @@ namespace awkward {
               reinterpret_cast<uint8_t*>(ptr.get()),
               0,
               reinterpret_cast<bool*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           case util::dtype::uint8:
@@ -2211,7 +2167,6 @@ namespace awkward {
               reinterpret_cast<uint8_t*>(ptr.get()),
               0,
               reinterpret_cast<uint8_t*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           default:
@@ -2226,7 +2181,6 @@ namespace awkward {
               reinterpret_cast<uint8_t*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<bool*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           case util::dtype::uint8:
@@ -2235,7 +2189,6 @@ namespace awkward {
               reinterpret_cast<uint8_t*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<uint8_t*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           default:
@@ -2254,7 +2207,6 @@ namespace awkward {
               reinterpret_cast<uint16_t*>(ptr.get()),
               0,
               reinterpret_cast<bool*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           case util::dtype::uint8:
@@ -2263,7 +2215,6 @@ namespace awkward {
               reinterpret_cast<uint16_t*>(ptr.get()),
               0,
               reinterpret_cast<uint8_t*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           case util::dtype::uint16:
@@ -2272,7 +2223,6 @@ namespace awkward {
               reinterpret_cast<uint16_t*>(ptr.get()),
               0,
               reinterpret_cast<uint16_t*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           default:
@@ -2287,7 +2237,6 @@ namespace awkward {
               reinterpret_cast<uint16_t*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<bool*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           case util::dtype::uint8:
@@ -2296,7 +2245,6 @@ namespace awkward {
               reinterpret_cast<uint16_t*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<uint8_t*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           case util::dtype::uint16:
@@ -2305,7 +2253,6 @@ namespace awkward {
               reinterpret_cast<uint16_t*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<uint16_t*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           default:
@@ -2324,7 +2271,6 @@ namespace awkward {
               reinterpret_cast<uint32_t*>(ptr.get()),
               0,
               reinterpret_cast<bool*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           case util::dtype::uint8:
@@ -2333,7 +2279,6 @@ namespace awkward {
               reinterpret_cast<uint32_t*>(ptr.get()),
               0,
               reinterpret_cast<uint8_t*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           case util::dtype::uint16:
@@ -2342,7 +2287,6 @@ namespace awkward {
               reinterpret_cast<uint32_t*>(ptr.get()),
               0,
               reinterpret_cast<uint16_t*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           case util::dtype::uint32:
@@ -2351,7 +2295,6 @@ namespace awkward {
               reinterpret_cast<uint32_t*>(ptr.get()),
               0,
               reinterpret_cast<uint32_t*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           default:
@@ -2366,7 +2309,6 @@ namespace awkward {
               reinterpret_cast<uint32_t*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<bool*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           case util::dtype::uint8:
@@ -2375,7 +2317,6 @@ namespace awkward {
               reinterpret_cast<uint32_t*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<uint8_t*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           case util::dtype::uint16:
@@ -2384,7 +2325,6 @@ namespace awkward {
               reinterpret_cast<uint32_t*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<uint16_t*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           case util::dtype::uint32:
@@ -2393,7 +2333,6 @@ namespace awkward {
               reinterpret_cast<uint32_t*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<uint32_t*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           default:
@@ -2412,7 +2351,6 @@ namespace awkward {
               reinterpret_cast<uint64_t*>(ptr.get()),
               0,
               reinterpret_cast<bool*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           case util::dtype::uint8:
@@ -2421,7 +2359,6 @@ namespace awkward {
               reinterpret_cast<uint64_t*>(ptr.get()),
               0,
               reinterpret_cast<uint8_t*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           case util::dtype::uint16:
@@ -2430,7 +2367,6 @@ namespace awkward {
               reinterpret_cast<uint64_t*>(ptr.get()),
               0,
               reinterpret_cast<uint16_t*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           case util::dtype::uint32:
@@ -2439,7 +2375,6 @@ namespace awkward {
               reinterpret_cast<uint64_t*>(ptr.get()),
               0,
               reinterpret_cast<uint32_t*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           case util::dtype::uint64:
@@ -2448,7 +2383,6 @@ namespace awkward {
               reinterpret_cast<uint64_t*>(ptr.get()),
               0,
               reinterpret_cast<uint64_t*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           default:
@@ -2463,7 +2397,6 @@ namespace awkward {
               reinterpret_cast<uint64_t*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<bool*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           case util::dtype::uint8:
@@ -2472,7 +2405,6 @@ namespace awkward {
               reinterpret_cast<uint64_t*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<uint8_t*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           case util::dtype::uint16:
@@ -2481,7 +2413,6 @@ namespace awkward {
               reinterpret_cast<uint64_t*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<uint16_t*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           case util::dtype::uint32:
@@ -2490,7 +2421,6 @@ namespace awkward {
               reinterpret_cast<uint64_t*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<uint32_t*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           case util::dtype::uint64:
@@ -2499,7 +2429,6 @@ namespace awkward {
               reinterpret_cast<uint64_t*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<uint64_t*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           default:
@@ -2523,7 +2452,6 @@ namespace awkward {
               reinterpret_cast<float*>(ptr.get()),
               0,
               reinterpret_cast<bool*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           case util::dtype::int8:
@@ -2532,7 +2460,6 @@ namespace awkward {
               reinterpret_cast<float*>(ptr.get()),
               0,
               reinterpret_cast<int8_t*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           case util::dtype::int16:
@@ -2541,7 +2468,6 @@ namespace awkward {
               reinterpret_cast<float*>(ptr.get()),
               0,
               reinterpret_cast<int16_t*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           case util::dtype::uint8:
@@ -2550,7 +2476,6 @@ namespace awkward {
               reinterpret_cast<float*>(ptr.get()),
               0,
               reinterpret_cast<uint8_t*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           case util::dtype::uint16:
@@ -2559,7 +2484,6 @@ namespace awkward {
               reinterpret_cast<float*>(ptr.get()),
               0,
               reinterpret_cast<uint16_t*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           case util::dtype::float16:
@@ -2570,7 +2494,6 @@ namespace awkward {
               reinterpret_cast<float*>(ptr.get()),
               0,
               reinterpret_cast<float*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           default:
@@ -2586,7 +2509,6 @@ namespace awkward {
               reinterpret_cast<float*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<bool*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           case util::dtype::int8:
@@ -2595,7 +2517,6 @@ namespace awkward {
               reinterpret_cast<float*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<int8_t*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           case util::dtype::int16:
@@ -2604,7 +2525,6 @@ namespace awkward {
               reinterpret_cast<float*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<int16_t*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           case util::dtype::uint8:
@@ -2613,7 +2533,6 @@ namespace awkward {
               reinterpret_cast<float*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<uint8_t*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           case util::dtype::uint16:
@@ -2622,7 +2541,6 @@ namespace awkward {
               reinterpret_cast<float*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<uint16_t*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           case util::dtype::float16:
@@ -2633,7 +2551,6 @@ namespace awkward {
               reinterpret_cast<float*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<float*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           default:
@@ -2653,7 +2570,6 @@ namespace awkward {
               reinterpret_cast<double*>(ptr.get()),
               0,
               reinterpret_cast<bool*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           case util::dtype::int8:
@@ -2662,7 +2578,6 @@ namespace awkward {
               reinterpret_cast<double*>(ptr.get()),
               0,
               reinterpret_cast<int8_t*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           case util::dtype::int16:
@@ -2671,7 +2586,6 @@ namespace awkward {
               reinterpret_cast<double*>(ptr.get()),
               0,
               reinterpret_cast<int16_t*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           case util::dtype::int32:
@@ -2680,7 +2594,6 @@ namespace awkward {
               reinterpret_cast<double*>(ptr.get()),
               0,
               reinterpret_cast<int32_t*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           case util::dtype::int64:
@@ -2689,7 +2602,6 @@ namespace awkward {
               reinterpret_cast<double*>(ptr.get()),
               0,
               reinterpret_cast<int64_t*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           case util::dtype::uint8:
@@ -2698,7 +2610,6 @@ namespace awkward {
               reinterpret_cast<double*>(ptr.get()),
               0,
               reinterpret_cast<uint8_t*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           case util::dtype::uint16:
@@ -2707,7 +2618,6 @@ namespace awkward {
               reinterpret_cast<double*>(ptr.get()),
               0,
               reinterpret_cast<uint16_t*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           case util::dtype::uint32:
@@ -2716,7 +2626,6 @@ namespace awkward {
               reinterpret_cast<double*>(ptr.get()),
               0,
               reinterpret_cast<uint32_t*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           case util::dtype::uint64:
@@ -2725,7 +2634,6 @@ namespace awkward {
               reinterpret_cast<double*>(ptr.get()),
               0,
               reinterpret_cast<uint64_t*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           case util::dtype::float16:
@@ -2736,7 +2644,6 @@ namespace awkward {
               reinterpret_cast<double*>(ptr.get()),
               0,
               reinterpret_cast<float*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           case util::dtype::float64:
@@ -2745,7 +2652,6 @@ namespace awkward {
               reinterpret_cast<double*>(ptr.get()),
               0,
               reinterpret_cast<double*>(contiguous_self.data()),
-              999,   // DROP
               self_flatlength);
             break;
           default:
@@ -2761,7 +2667,6 @@ namespace awkward {
               reinterpret_cast<double*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<bool*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           case util::dtype::int8:
@@ -2770,7 +2675,6 @@ namespace awkward {
               reinterpret_cast<double*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<int8_t*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           case util::dtype::int16:
@@ -2779,7 +2683,6 @@ namespace awkward {
               reinterpret_cast<double*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<int16_t*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           case util::dtype::int32:
@@ -2788,7 +2691,6 @@ namespace awkward {
               reinterpret_cast<double*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<int32_t*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           case util::dtype::int64:
@@ -2797,7 +2699,6 @@ namespace awkward {
               reinterpret_cast<double*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<int64_t*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           case util::dtype::uint8:
@@ -2806,7 +2707,6 @@ namespace awkward {
               reinterpret_cast<double*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<uint8_t*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           case util::dtype::uint16:
@@ -2815,7 +2715,6 @@ namespace awkward {
               reinterpret_cast<double*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<uint16_t*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           case util::dtype::uint32:
@@ -2824,7 +2723,6 @@ namespace awkward {
               reinterpret_cast<double*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<uint32_t*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           case util::dtype::uint64:
@@ -2833,7 +2731,6 @@ namespace awkward {
               reinterpret_cast<double*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<uint64_t*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           case util::dtype::float16:
@@ -2844,7 +2741,6 @@ namespace awkward {
               reinterpret_cast<double*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<float*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           case util::dtype::float64:
@@ -2853,7 +2749,6 @@ namespace awkward {
               reinterpret_cast<double*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<double*>(contiguous_other.data()),
-              999,   // DROP
               other_flatlength);
             break;
           default:
@@ -2923,7 +2818,6 @@ namespace awkward {
       reinterpret_cast<uint8_t*>(ptr.get()),
       0,
       reinterpret_cast<uint8_t*>(contiguous_self.data()),
-      999,   // DROP
       contiguous_self.length());
     util::handle_error(err, classname(), nullptr);
 
@@ -2932,7 +2826,6 @@ namespace awkward {
       reinterpret_cast<uint8_t*>(ptr.get()),
       length(),
       reinterpret_cast<uint8_t*>(contiguous_other.data()),
-      999,   // DROP
       contiguous_other.length());
     util::handle_error(err, classname(), nullptr);
 
@@ -2982,7 +2875,6 @@ namespace awkward {
           index.data(),
           0,
           reinterpret_cast<int8_t*>(contiguous_self.data()),
-          999,   // DROP
           length());
         break;
       case util::dtype::int16:
@@ -2991,7 +2883,6 @@ namespace awkward {
           index.data(),
           0,
           reinterpret_cast<int16_t*>(contiguous_self.data()),
-          999,   // DROP
           length());
         break;
       case util::dtype::int32:
@@ -3000,7 +2891,6 @@ namespace awkward {
           index.data(),
           0,
           reinterpret_cast<int32_t*>(contiguous_self.data()),
-          999,   // DROP
           length());
         break;
       case util::dtype::uint8:
@@ -3009,7 +2899,6 @@ namespace awkward {
           index.data(),
           0,
           reinterpret_cast<uint8_t*>(contiguous_self.data()),
-          999,   // DROP
           length());
         break;
       case util::dtype::uint16:
@@ -3018,7 +2907,6 @@ namespace awkward {
           index.data(),
           0,
           reinterpret_cast<uint16_t*>(contiguous_self.data()),
-          999,   // DROP
           length());
         break;
       case util::dtype::uint32:
@@ -3027,7 +2915,6 @@ namespace awkward {
           index.data(),
           0,
           reinterpret_cast<uint32_t*>(contiguous_self.data()),
-          999,   // DROP
           length());
         break;
       case util::dtype::uint64:
@@ -3036,7 +2923,6 @@ namespace awkward {
           index.data(),
           0,
           reinterpret_cast<uint64_t*>(contiguous_self.data()),
-          999,   // DROP
           length());
         break;
       default:
@@ -3057,7 +2943,6 @@ namespace awkward {
         kernel::lib::cpu,   // DERIVE
         &numtrue,
         reinterpret_cast<int8_t*>(data()),
-        999,   // DROP
         (int64_t)shape_[0],
         (int64_t)strides_[0]);
       util::handle_error(err1, classname(), identities_.get());
@@ -3067,7 +2952,6 @@ namespace awkward {
         kernel::lib::cpu,   // DERIVE
         index.data(),
         reinterpret_cast<int8_t*>(data()),
-        999,   // DROP
         (int64_t)shape_[0],
         (int64_t)strides_[0]);
       util::handle_error(err2, classname(), identities_.get());
@@ -3149,63 +3033,54 @@ namespace awkward {
       switch (dtype_) {
       case util::dtype::boolean:
         ptr = reducer.apply_bool(reinterpret_cast<bool*>(data()),
-                                 999,   // DROP
                                  starts,
                                  parents,
                                  outlength);
         break;
       case util::dtype::int8:
         ptr = reducer.apply_int8(reinterpret_cast<int8_t*>(data()),
-                                 999,   // DROP
                                  starts,
                                  parents,
                                  outlength);
         break;
       case util::dtype::int16:
         ptr = reducer.apply_int16(reinterpret_cast<int16_t*>(data()),
-                                  999,   // DROP
                                   starts,
                                   parents,
                                   outlength);
         break;
       case util::dtype::int32:
         ptr = reducer.apply_int32(reinterpret_cast<int32_t*>(data()),
-                                  999,   // DROP
                                   starts,
                                   parents,
                                   outlength);
         break;
       case util::dtype::int64:
         ptr = reducer.apply_int64(reinterpret_cast<int64_t*>(data()),
-                                  999,   // DROP
                                   starts,
                                   parents,
                                   outlength);
         break;
       case util::dtype::uint8:
         ptr = reducer.apply_uint8(reinterpret_cast<uint8_t*>(data()),
-                                  999,   // DROP
                                   starts,
                                   parents,
                                   outlength);
         break;
       case util::dtype::uint16:
         ptr = reducer.apply_uint16(reinterpret_cast<uint16_t*>(data()),
-                                   999,   // DROP
                                    starts,
                                    parents,
                                    outlength);
         break;
       case util::dtype::uint32:
         ptr = reducer.apply_uint32(reinterpret_cast<uint32_t*>(data()),
-                                   999,   // DROp
                                    starts,
                                    parents,
                                    outlength);
         break;
       case util::dtype::uint64:
         ptr = reducer.apply_uint64(reinterpret_cast<uint64_t*>(data()),
-                                   999,   // DROP
                                    starts,
                                    parents,
                                    outlength);
@@ -3214,14 +3089,12 @@ namespace awkward {
         throw std::runtime_error("FIXME: reducers on float16");
       case util::dtype::float32:
         ptr = reducer.apply_float32(reinterpret_cast<float*>(data()),
-                                    999,   // DROP
                                     starts,
                                     parents,
                                     outlength);
         break;
       case util::dtype::float64:
         ptr = reducer.apply_float64(reinterpret_cast<double*>(data()),
-                                    999,   // DROP
                                     starts,
                                     parents,
                                     outlength);
@@ -3266,7 +3139,6 @@ namespace awkward {
           kernel::lib::cpu,   // DERIVE
           mask.data(),
           parents.data(),
-          999,   // DROP
           parents.length(),
           outlength);
         util::handle_error(err, classname(), nullptr);
@@ -3360,7 +3232,6 @@ namespace awkward {
       case util::dtype::boolean:
         ptr = array_sort<bool>(reinterpret_cast<bool*>(data()),
                                length(),
-                               999,   // DROP
                                starts,
                                parents,
                                outlength,
@@ -3370,7 +3241,6 @@ namespace awkward {
       case util::dtype::int8:
         ptr = array_sort<int8_t>(reinterpret_cast<int8_t*>(data()),
                                  length(),
-                                 999,   // DROP
                                  starts,
                                  parents,
                                  outlength,
@@ -3380,7 +3250,6 @@ namespace awkward {
       case util::dtype::int16:
         ptr = array_sort<int16_t>(reinterpret_cast<int16_t*>(data()),
                                   length(),
-                                  999,   // DROP
                                   starts,
                                   parents,
                                   outlength,
@@ -3390,7 +3259,6 @@ namespace awkward {
       case util::dtype::int32:
         ptr = array_sort<int32_t>(reinterpret_cast<int32_t*>(data()),
                                   length(),
-                                  999,   // DROP
                                   starts,
                                   parents,
                                   outlength,
@@ -3400,7 +3268,6 @@ namespace awkward {
       case util::dtype::int64:
         ptr = array_sort<int64_t>(reinterpret_cast<int64_t*>(data()),
                                   length(),
-                                  999,   // DROP
                                   starts,
                                   parents,
                                   outlength,
@@ -3410,7 +3277,6 @@ namespace awkward {
       case util::dtype::uint8:
         ptr = array_sort<uint8_t>(reinterpret_cast<uint8_t*>(data()),
                                   length(),
-                                  999,   // DROP
                                   starts,
                                   parents,
                                   outlength,
@@ -3420,7 +3286,6 @@ namespace awkward {
       case util::dtype::uint16:
         ptr = array_sort<uint16_t>(reinterpret_cast<uint16_t*>(data()),
                                    length(),
-                                   999,   // DROP
                                    starts,
                                    parents,
                                    outlength,
@@ -3430,7 +3295,6 @@ namespace awkward {
       case util::dtype::uint32:
         ptr = array_sort<uint32_t>(reinterpret_cast<uint32_t*>(data()),
                                    length(),
-                                   999,   // DROP
                                    starts,
                                    parents,
                                    outlength,
@@ -3440,7 +3304,6 @@ namespace awkward {
       case util::dtype::uint64:
         ptr = array_sort<uint64_t>(reinterpret_cast<uint64_t*>(data()),
                                    length(),
-                                   999,   // DROP
                                    starts,
                                    parents,
                                    outlength,
@@ -3452,7 +3315,6 @@ namespace awkward {
       case util::dtype::float32:
         ptr = array_sort<float>(reinterpret_cast<float*>(data()),
                                 length(),
-                                999,   // DROP
                                 starts,
                                 parents,
                                 outlength,
@@ -3462,7 +3324,6 @@ namespace awkward {
       case util::dtype::float64:
         ptr = array_sort<double>(reinterpret_cast<double*>(data()),
                                  length(),
-                                 999,   // DROP
                                  starts,
                                  parents,
                                  outlength,
@@ -3533,7 +3394,6 @@ namespace awkward {
       case util::dtype::boolean:
         ptr = index_sort<bool>(reinterpret_cast<bool*>(data()),
                                length(),
-                               999,   // DROP
                                starts,
                                parents,
                                outlength,
@@ -3543,7 +3403,6 @@ namespace awkward {
       case util::dtype::int8:
         ptr = index_sort<int8_t>(reinterpret_cast<int8_t*>(data()),
                                  length(),
-                                 999,   // DROP
                                  starts,
                                  parents,
                                  outlength,
@@ -3553,7 +3412,6 @@ namespace awkward {
       case util::dtype::int16:
         ptr = index_sort<int16_t>(reinterpret_cast<int16_t*>(data()),
                                   length(),
-                                  999,   // DROP
                                   starts,
                                   parents,
                                   outlength,
@@ -3563,7 +3421,6 @@ namespace awkward {
       case util::dtype::int32:
         ptr = index_sort<int32_t>(reinterpret_cast<int32_t*>(data()),
                                   length(),
-                                  999,   // DROP
                                   starts,
                                   parents,
                                   outlength,
@@ -3573,7 +3430,6 @@ namespace awkward {
       case util::dtype::int64:
         ptr = index_sort<int64_t>(reinterpret_cast<int64_t*>(data()),
                                   length(),
-                                  999,   // DROP
                                   starts,
                                   parents,
                                   outlength,
@@ -3583,7 +3439,6 @@ namespace awkward {
       case util::dtype::uint8:
         ptr = index_sort<uint8_t>(reinterpret_cast<uint8_t*>(data()),
                                   length(),
-                                  999,   // DROP
                                   starts,
                                   parents,
                                   outlength,
@@ -3593,7 +3448,6 @@ namespace awkward {
       case util::dtype::uint16:
         ptr = index_sort<uint16_t>(reinterpret_cast<uint16_t*>(data()),
                                    length(),
-                                   999,   // DROP
                                    starts,
                                    parents,
                                    outlength,
@@ -3603,7 +3457,6 @@ namespace awkward {
       case util::dtype::uint32:
         ptr = index_sort<uint32_t>(reinterpret_cast<uint32_t*>(data()),
                                    length(),
-                                   999,   // DROP
                                    starts,
                                    parents,
                                    outlength,
@@ -3613,7 +3466,6 @@ namespace awkward {
       case util::dtype::uint64:
         ptr = index_sort<uint64_t>(reinterpret_cast<uint64_t*>(data()),
                                    length(),
-                                   999,   // DROP
                                    starts,
                                    parents,
                                    outlength,
@@ -3625,7 +3477,6 @@ namespace awkward {
       case util::dtype::float32:
         ptr = index_sort<float>(reinterpret_cast<float*>(data()),
                                 length(),
-                                999,   // DROP
                                 starts,
                                 parents,
                                 outlength,
@@ -3635,7 +3486,6 @@ namespace awkward {
       case util::dtype::float64:
         ptr = index_sort<double>(reinterpret_cast<double*>(data()),
                                  length(),
-                                 999,   // DROP
                                  starts,
                                  parents,
                                  outlength,
@@ -3880,7 +3730,6 @@ namespace awkward {
         reinterpret_cast<uint8_t*>(data()),
         bytepos.length(),
         strides_[0],
-        999,   // DROP
         bytepos.data());
       util::handle_error(err, classname(), identities_.get());
       return NumpyArray(identities_,
@@ -3903,7 +3752,6 @@ namespace awkward {
         reinterpret_cast<uint8_t*>(data()),
         bytepos.length(),
         itemsize_,
-        999,   // DROP
         bytepos.data());
       util::handle_error(err, classname(), identities_.get());
       std::vector<ssize_t> strides = { itemsize_ };
@@ -4170,7 +4018,6 @@ namespace awkward {
         reinterpret_cast<uint8_t*>(data()),
         carry.length(),
         stride,
-        999,   // DROP
         carry.ptr().get());
       util::handle_error(err, classname(), identities_.get());
 
@@ -4977,7 +4824,6 @@ namespace awkward {
   const std::shared_ptr<void>
   NumpyArray::index_sort(const T* data,
                          int64_t length,
-                         int64_t offset,
                          const Index64& starts,
                          const Index64& parents,
                          int64_t outlength,
@@ -5025,7 +4871,6 @@ namespace awkward {
   const std::shared_ptr<void>
   NumpyArray::array_sort(const T* data,
                          int64_t length,
-                         int64_t offset,
                          const Index64& starts,
                          const Index64& parents,
                          int64_t outlength,

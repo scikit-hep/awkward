@@ -1256,7 +1256,6 @@ namespace awkward {
       int8_t *toindex,
       const int8_t *fromindex,
       const int64_t *carry,
-      int64_t fromindexoffset,   // DROP
       int64_t lenfromindex,
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -1283,7 +1282,6 @@ namespace awkward {
       uint8_t *toindex,
       const uint8_t *fromindex,
       const int64_t *carry,
-      int64_t fromindexoffset,   // DROP
       int64_t lenfromindex,
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -1310,7 +1308,6 @@ namespace awkward {
       int32_t *toindex,
       const int32_t *fromindex,
       const int64_t *carry,
-      int64_t fromindexoffset,   // DROP
       int64_t lenfromindex,
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -1337,7 +1334,6 @@ namespace awkward {
       uint32_t *toindex,
       const uint32_t *fromindex,
       const int64_t *carry,
-      int64_t fromindexoffset,   // DROP
       int64_t lenfromindex,
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -1364,7 +1360,6 @@ namespace awkward {
       int64_t *toindex,
       const int64_t *fromindex,
       const int64_t *carry,
-      int64_t fromindexoffset,   // DROP
       int64_t lenfromindex,
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -1391,7 +1386,6 @@ namespace awkward {
       int8_t *toindex,
       const int8_t *fromindex,
       const int64_t *carry,
-      int64_t fromindexoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_Index8_carry_nocheck_64(
@@ -1416,7 +1410,6 @@ namespace awkward {
       uint8_t *toindex,
       const uint8_t *fromindex,
       const int64_t *carry,
-      int64_t fromindexoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexU8_carry_nocheck_64(
@@ -1441,7 +1434,6 @@ namespace awkward {
       int32_t *toindex,
       const int32_t *fromindex,
       const int64_t *carry,
-      int64_t fromindexoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_Index32_carry_nocheck_64(
@@ -1466,7 +1458,6 @@ namespace awkward {
       uint32_t *toindex,
       const uint32_t *fromindex,
       const int64_t *carry,
-      int64_t fromindexoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexU32_carry_nocheck_64(
@@ -1491,7 +1482,6 @@ namespace awkward {
       int64_t *toindex,
       const int64_t *fromindex,
       const int64_t *carry,
-      int64_t fromindexoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_Index64_carry_nocheck_64(
@@ -1539,9 +1529,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       bool *same,
       const int8_t *bytemask,
-      int64_t bytemaskoffset,   // DROP
       const int64_t *missingindex,
-      int64_t missingindexoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_slicemissing_check_same(
@@ -1627,7 +1615,6 @@ namespace awkward {
       const int32_t *identitiesptr,
       const int64_t *carryptr,
       int64_t lencarry,
-      int64_t offset,   // DROP
       int64_t width,
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -1656,7 +1643,6 @@ namespace awkward {
       const int64_t *identitiesptr,
       const int64_t *carryptr,
       int64_t lencarry,
-      int64_t offset,   // DROP
       int64_t width,
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -1706,7 +1692,6 @@ namespace awkward {
       const uint8_t *fromptr,
       int64_t len,
       int64_t stride,
-      int64_t offset,   // DROP
       const int64_t *pos) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_contiguous_copy_64(
@@ -1757,7 +1742,6 @@ namespace awkward {
       const uint8_t *fromptr,
       int64_t len,
       int64_t stride,
-      int64_t offset,   // DROP
       const int64_t *pos) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_getitem_next_null_64(
@@ -1924,7 +1908,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *numtrue,
       const int8_t *fromptr,
-      int64_t byteoffset,   // DROP
       int64_t length,
       int64_t stride) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -1948,7 +1931,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int8_t *fromptr,
-      int64_t byteoffset,   // DROP
       int64_t length,
       int64_t stride) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -1975,8 +1957,6 @@ namespace awkward {
       const int32_t *fromstarts,
       const int32_t *fromstops,
       int64_t lenstarts,
-      int64_t startsoffset,   // DROP
-      int64_t stopsoffset,   // DROP
       int64_t at) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray32_getitem_next_at_64(
@@ -2003,8 +1983,6 @@ namespace awkward {
       const uint32_t *fromstarts,
       const uint32_t *fromstops,
       int64_t lenstarts,
-      int64_t startsoffset,   // DROP
-      int64_t stopsoffset,   // DROP
       int64_t at) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArrayU32_getitem_next_at_64(
@@ -2031,8 +2009,6 @@ namespace awkward {
       const int64_t *fromstarts,
       const int64_t *fromstops,
       int64_t lenstarts,
-      int64_t startsoffset,   // DROP
-      int64_t stopsoffset,   // DROP
       int64_t at) {
       if (ptr_lib == kernel::lib::cpu) {
        return awkward_ListArray64_getitem_next_at_64(
@@ -2059,8 +2035,6 @@ namespace awkward {
       const int32_t *fromstarts,
       const int32_t *fromstops,
       int64_t lenstarts,
-      int64_t startsoffset,   // DROP
-      int64_t stopsoffset,   // DROP
       int64_t start,
       int64_t stop,
       int64_t step) {
@@ -2091,8 +2065,6 @@ namespace awkward {
       const uint32_t *fromstarts,
       const uint32_t *fromstops,
       int64_t lenstarts,
-      int64_t startsoffset,   // DROP
-      int64_t stopsoffset,   // DROP
       int64_t start,
       int64_t stop,
       int64_t step) {
@@ -2123,8 +2095,6 @@ namespace awkward {
       const int64_t *fromstarts,
       const int64_t *fromstops,
       int64_t lenstarts,
-      int64_t startsoffset,   // DROP
-      int64_t stopsoffset,   // DROP
       int64_t start,
       int64_t stop,
       int64_t step) {
@@ -2156,8 +2126,6 @@ namespace awkward {
       const int32_t *fromstarts,
       const int32_t *fromstops,
       int64_t lenstarts,
-      int64_t startsoffset,   // DROP
-      int64_t stopsoffset,   // DROP
       int64_t start,
       int64_t stop,
       int64_t step) {
@@ -2190,8 +2158,6 @@ namespace awkward {
       const uint32_t *fromstarts,
       const uint32_t *fromstops,
       int64_t lenstarts,
-      int64_t startsoffset,   // DROP
-      int64_t stopsoffset,   // DROP
       int64_t start,
       int64_t stop,
       int64_t step) {
@@ -2224,8 +2190,6 @@ namespace awkward {
       const int64_t *fromstarts,
       const int64_t *fromstops,
       int64_t lenstarts,
-      int64_t startsoffset,   // DROP
-      int64_t stopsoffset,   // DROP
       int64_t start,
       int64_t stop,
       int64_t step) {
@@ -2396,8 +2360,6 @@ namespace awkward {
       const int32_t *fromstarts,
       const int32_t *fromstops,
       const int64_t *fromarray,
-      int64_t startsoffset,   // DROP
-      int64_t stopsoffset,   // DROP
       int64_t lenstarts,
       int64_t lenarray,
       int64_t lencontent) {
@@ -2430,8 +2392,6 @@ namespace awkward {
       const uint32_t *fromstarts,
       const uint32_t *fromstops,
       const int64_t *fromarray,
-      int64_t startsoffset,   // DROP
-      int64_t stopsoffset,   // DROP
       int64_t lenstarts,
       int64_t lenarray,
       int64_t lencontent) {
@@ -2464,8 +2424,6 @@ namespace awkward {
       const int64_t *fromstarts,
       const int64_t *fromstops,
       const int64_t *fromarray,
-      int64_t startsoffset,   // DROP
-      int64_t stopsoffset,   // DROP
       int64_t lenstarts,
       int64_t lenarray,
       int64_t lencontent) {
@@ -2499,8 +2457,6 @@ namespace awkward {
       const int32_t *fromstops,
       const int64_t *fromarray,
       const int64_t *fromadvanced,
-      int64_t startsoffset,   // DROP
-      int64_t stopsoffset,   // DROP
       int64_t lenstarts,
       int64_t lenarray,
       int64_t lencontent) {
@@ -2535,8 +2491,6 @@ namespace awkward {
       const uint32_t *fromstops,
       const int64_t *fromarray,
       const int64_t *fromadvanced,
-      int64_t startsoffset,   // DROP
-      int64_t stopsoffset,   // DROP
       int64_t lenstarts,
       int64_t lenarray,
       int64_t lencontent) {
@@ -2571,8 +2525,6 @@ namespace awkward {
       const int64_t *fromstops,
       const int64_t *fromarray,
       const int64_t *fromadvanced,
-      int64_t startsoffset,   // DROP
-      int64_t stopsoffset,   // DROP
       int64_t lenstarts,
       int64_t lenarray,
       int64_t lencontent) {
@@ -2606,8 +2558,6 @@ namespace awkward {
       const int32_t *fromstarts,
       const int32_t *fromstops,
       const int64_t *fromcarry,
-      int64_t startsoffset,   // DROP
-      int64_t stopsoffset,   // DROP
       int64_t lenstarts,
       int64_t lencarry) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -2638,8 +2588,6 @@ namespace awkward {
       const uint32_t *fromstarts,
       const uint32_t *fromstops,
       const int64_t *fromcarry,
-      int64_t startsoffset,   // DROP
-      int64_t stopsoffset,   // DROP
       int64_t lenstarts,
       int64_t lencarry) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -2670,8 +2618,6 @@ namespace awkward {
       const int64_t *fromstarts,
       const int64_t *fromstops,
       const int64_t *fromcarry,
-      int64_t startsoffset,   // DROP
-      int64_t stopsoffset,   // DROP
       int64_t lenstarts,
       int64_t lencarry) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -2874,7 +2820,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *numnull,
       const int32_t *fromindex,
-      int64_t indexoffset,   // DROP
       int64_t lenindex) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray32_numnull(
@@ -2897,7 +2842,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *numnull,
       const uint32_t *fromindex,
-      int64_t indexoffset,   // DROP
       int64_t lenindex) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArrayU32_numnull(
@@ -2920,7 +2864,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *numnull,
       const int64_t *fromindex,
-      int64_t indexoffset,   // DROP
       int64_t lenindex) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray64_numnull(
@@ -2944,7 +2887,6 @@ namespace awkward {
       int64_t *tocarry,
       int32_t *toindex,
       const int32_t *fromindex,
-      int64_t indexoffset,   // DROP
       int64_t lenindex,
       int64_t lencontent) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -2971,7 +2913,6 @@ namespace awkward {
       int64_t *tocarry,
       uint32_t *toindex,
       const uint32_t *fromindex,
-      int64_t indexoffset,   // DROP
       int64_t lenindex,
       int64_t lencontent) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -2998,7 +2939,6 @@ namespace awkward {
       int64_t *tocarry,
       int64_t *toindex,
       const int64_t *fromindex,
-      int64_t indexoffset,   // DROP
       int64_t lenindex,
       int64_t lencontent) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -3025,7 +2965,6 @@ namespace awkward {
       int64_t *tocarry,
       int64_t *toindex,
       const int32_t *fromindex,
-      int64_t indexoffset,   // DROP
       int64_t lenindex,
       int64_t lencontent) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -3052,7 +2991,6 @@ namespace awkward {
       int64_t *tocarry,
       int64_t *toindex,
       const uint32_t *fromindex,
-      int64_t indexoffset,   // DROP
       int64_t lenindex,
       int64_t lencontent) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -3079,7 +3017,6 @@ namespace awkward {
       int64_t *tocarry,
       int64_t *toindex,
       const int64_t *fromindex,
-      int64_t indexoffset,   // DROP
       int64_t lenindex,
       int64_t lencontent) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -3105,10 +3042,8 @@ namespace awkward {
       int64_t *tooffsets,
       int64_t *tononzero,
       const int64_t *fromoffsets,
-      int64_t offsetsoffset,   // DROP
       int64_t length,
       const int64_t *nonzero,
-      int64_t nonzerooffset,   // DROP
       int64_t nonzerolength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray_getitem_adjust_offsets_64(
@@ -3134,16 +3069,12 @@ namespace awkward {
       int64_t *tooffsets,
       int64_t *tononzero,
       const int64_t *fromoffsets,
-      int64_t offsetsoffset,   // DROP
       int64_t length,
       const int64_t *index,
-      int64_t indexoffset,   // DROP
       int64_t indexlength,
       const int64_t *nonzero,
-      int64_t nonzerooffset,   // DROP
       int64_t nonzerolength,
       const int8_t *originalmask,
-      int64_t maskoffset,   // DROP
       int64_t masklength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray_getitem_adjust_offsets_index_64(
@@ -3174,10 +3105,8 @@ namespace awkward {
       int64_t *toindex,
       int64_t *tononzero,
       const int64_t *fromindex,
-      int64_t fromindexoffset,   // DROP
       int64_t fromindexlength,
       const int64_t *nonzero,
-      int64_t nonzerooffset,   // DROP
       int64_t nonzerolength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray_getitem_adjust_outindex_64(
@@ -3204,7 +3133,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *tocarry,
       const int32_t *fromindex,
-      int64_t indexoffset,   // DROP
       int64_t lenindex,
       int64_t lencontent) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -3229,7 +3157,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *tocarry,
       const uint32_t *fromindex,
-      int64_t indexoffset,   // DROP
       int64_t lenindex,
       int64_t lencontent) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -3254,7 +3181,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *tocarry,
       const int64_t *fromindex,
-      int64_t indexoffset,   // DROP
       int64_t lenindex,
       int64_t lencontent) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -3280,7 +3206,6 @@ namespace awkward {
       int32_t *toindex,
       const int32_t *fromindex,
       const int64_t *fromcarry,
-      int64_t indexoffset,   // DROP
       int64_t lenindex,
       int64_t lencarry) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -3307,7 +3232,6 @@ namespace awkward {
       uint32_t *toindex,
       const uint32_t *fromindex,
       const int64_t *fromcarry,
-      int64_t indexoffset,   // DROP
       int64_t lenindex,
       int64_t lencarry) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -3334,7 +3258,6 @@ namespace awkward {
       int64_t *toindex,
       const int64_t *fromindex,
       const int64_t *fromcarry,
-      int64_t indexoffset,   // DROP
       int64_t lenindex,
       int64_t lencarry) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -3360,7 +3283,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *size,
       const int8_t *fromtags,
-      int64_t tagsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray8_regular_index_getsize(
@@ -3385,7 +3307,6 @@ namespace awkward {
       int32_t *current,
       int64_t size,
       const int8_t *fromtags,
-      int64_t tagsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
        return awkward_UnionArray8_32_regular_index(
@@ -3412,7 +3333,6 @@ namespace awkward {
       uint32_t *current,
       int64_t size,
       const int8_t *fromtags,
-      int64_t tagsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray8_U32_regular_index(
@@ -3439,7 +3359,6 @@ namespace awkward {
       int64_t *current,
       int64_t size,
       const int8_t *fromtags,
-      int64_t tagsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
        return awkward_UnionArray8_64_regular_index(
@@ -3465,9 +3384,7 @@ namespace awkward {
       int64_t *lenout,
       int64_t *tocarry,
       const int8_t *fromtags,
-      int64_t tagsoffset,   // DROP
       const int32_t *fromindex,
-      int64_t indexoffset,   // DROP
       int64_t length,
       int64_t which) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -3495,9 +3412,7 @@ namespace awkward {
       int64_t *lenout,
       int64_t *tocarry,
       const int8_t *fromtags,
-      int64_t tagsoffset,   // DROP
       const uint32_t *fromindex,
-      int64_t indexoffset,   // DROP
       int64_t length,
       int64_t which) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -3525,9 +3440,7 @@ namespace awkward {
       int64_t *lenout,
       int64_t *tocarry,
       const int8_t *fromtags,
-      int64_t tagsoffset,   // DROP
       const int64_t *fromindex,
-      int64_t indexoffset,   // DROP
       int64_t length,
       int64_t which) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -3553,7 +3466,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *outindex,
       const int64_t *index,
-      int64_t indexoffset,   // DROP
       int64_t indexlength,
       int64_t repetitions,
       int64_t regularsize) {
@@ -3608,9 +3520,7 @@ namespace awkward {
       const int64_t *singleoffsets,
       int64_t *tocarry,
       const int32_t *fromstarts,
-      int64_t fromstartsoffset,   // DROP
       const int32_t *fromstops,
-      int64_t fromstopsoffset,   // DROP
       int64_t jaggedsize,
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -3642,9 +3552,7 @@ namespace awkward {
       const int64_t *singleoffsets,
       int64_t *tocarry,
       const uint32_t *fromstarts,
-      int64_t fromstartsoffset,   // DROP
       const uint32_t *fromstops,
-      int64_t fromstopsoffset,   // DROP
       int64_t jaggedsize,
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -3676,9 +3584,7 @@ namespace awkward {
       const int64_t *singleoffsets,
       int64_t *tocarry,
       const int64_t *fromstarts,
-      int64_t fromstartsoffset,   // DROP
       const int64_t *fromstops,
-      int64_t fromstopsoffset,   // DROP
       int64_t jaggedsize,
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -3706,9 +3612,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *carrylen,
       const int64_t *slicestarts,
-      int64_t slicestartsoffset,   // DROP
       const int64_t *slicestops,
-      int64_t slicestopsoffset,   // DROP
       int64_t sliceouterlen) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray_getitem_jagged_carrylen_64(
@@ -3733,17 +3637,12 @@ namespace awkward {
       int64_t *tooffsets,
       int64_t *tocarry,
       const int64_t *slicestarts,
-      int64_t slicestartsoffset,   // DROP
       const int64_t *slicestops,
-      int64_t slicestopsoffset,   // DROP
       int64_t sliceouterlen,
       const int64_t *sliceindex,
-      int64_t sliceindexoffset,   // DROP
       int64_t sliceinnerlen,
       const int32_t *fromstarts,
-      int64_t fromstartsoffset,   // DROP
       const int32_t *fromstops,
-      int64_t fromstopsoffset,   // DROP
       int64_t contentlen) {
       if (ptr_lib == kernel::lib::cpu) {
        return awkward_ListArray32_getitem_jagged_apply_64(
@@ -3774,17 +3673,12 @@ namespace awkward {
       int64_t *tooffsets,
       int64_t *tocarry,
       const int64_t *slicestarts,
-      int64_t slicestartsoffset,   // DROP
       const int64_t *slicestops,
-      int64_t slicestopsoffset,   // DROP
       int64_t sliceouterlen,
       const int64_t *sliceindex,
-      int64_t sliceindexoffset,   // DROP
       int64_t sliceinnerlen,
       const uint32_t *fromstarts,
-      int64_t fromstartsoffset,   // DROP
       const uint32_t *fromstops,
-      int64_t fromstopsoffset,   // DROP
       int64_t contentlen) {
       if (ptr_lib == kernel::lib::cpu) {
        return awkward_ListArrayU32_getitem_jagged_apply_64(
@@ -3815,17 +3709,12 @@ namespace awkward {
       int64_t *tooffsets,
       int64_t *tocarry,
       const int64_t *slicestarts,
-      int64_t slicestartsoffset,   // DROP
       const int64_t *slicestops,
-      int64_t slicestopsoffset,   // DROP
       int64_t sliceouterlen,
       const int64_t *sliceindex,
-      int64_t sliceindexoffset,   // DROP
       int64_t sliceinnerlen,
       const int64_t *fromstarts,
-      int64_t fromstartsoffset,   // DROP
       const int64_t *fromstops,
-      int64_t fromstopsoffset,   // DROP
       int64_t contentlen) {
       if (ptr_lib == kernel::lib::cpu) {
        return awkward_ListArray64_getitem_jagged_apply_64(
@@ -3854,12 +3743,9 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *numvalid,
       const int64_t *slicestarts,
-      int64_t slicestartsoffset,   // DROP
       const int64_t *slicestops,
-      int64_t slicestopsoffset,   // DROP
       int64_t length,
       const int64_t *missing,
-      int64_t missingoffset,   // DROP
       int64_t missinglength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray_getitem_jagged_numvalid_64(
@@ -3886,12 +3772,9 @@ namespace awkward {
       int64_t *tosmalloffsets,
       int64_t *tolargeoffsets,
       const int64_t *slicestarts,
-      int64_t slicestartsoffset,   // DROP
       const int64_t *slicestops,
-      int64_t slicestopsoffset,   // DROP
       int64_t length,
-      const int64_t *missing,
-      int64_t missingoffset) {   // DROP
+      const int64_t *missing) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray_getitem_jagged_shrink_64(
           tocarry,
@@ -3917,14 +3800,10 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *tooffsets,
       const int64_t *slicestarts,
-      int64_t slicestartsoffset,   // DROP
       const int64_t *slicestops,
-      int64_t slicestopsoffset,   // DROP
       int64_t sliceouterlen,
       const int32_t *fromstarts,
-      int64_t fromstartsoffset,   // DROP
-      const int32_t *fromstops,   // DROP
-      int64_t fromstopsoffset) {  // DROP
+      const int32_t *fromstops) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray32_getitem_jagged_descend_64(
           tooffsets,
@@ -3949,14 +3828,10 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *tooffsets,
       const int64_t *slicestarts,
-      int64_t slicestartsoffset,   // DROP
       const int64_t *slicestops,
-      int64_t slicestopsoffset,   // DROP
       int64_t sliceouterlen,
       const uint32_t *fromstarts,
-      int64_t fromstartsoffset,   // DROP
-      const uint32_t *fromstops,
-      int64_t fromstopsoffset) {   // DROP
+      const uint32_t *fromstops) {
       if (ptr_lib == kernel::lib::cpu) {
        return awkward_ListArrayU32_getitem_jagged_descend_64(
          tooffsets,
@@ -3981,14 +3856,10 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *tooffsets,
       const int64_t *slicestarts,
-      int64_t slicestartsoffset,   // DROP
       const int64_t *slicestops,
-      int64_t slicestopsoffset,   // DROP
       int64_t sliceouterlen,
       const int64_t *fromstarts,
-      int64_t fromstartsoffset,   // DROP
-      const int64_t *fromstops,
-      int64_t fromstopsoffset) {   // DROP
+      const int64_t *fromstops) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray64_getitem_jagged_descend_64(
           tooffsets,
@@ -4011,7 +3882,6 @@ namespace awkward {
     template<>
     int8_t index_getitem_at_nowrap(kernel::lib ptr_lib,
                                    int8_t *ptr,
-                                   int64_t offset,  // DROP
                                    int64_t at) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_Index8_getitem_at_nowrap(
@@ -4034,7 +3904,6 @@ namespace awkward {
     template<>
     uint8_t index_getitem_at_nowrap(kernel::lib ptr_lib,
                                     uint8_t *ptr,
-                                    int64_t offset,   // DROP
                                     int64_t at) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexU8_getitem_at_nowrap(
@@ -4057,7 +3926,6 @@ namespace awkward {
     template<>
     int32_t index_getitem_at_nowrap(kernel::lib ptr_lib,
                                     int32_t *ptr,
-                                    int64_t offset,   // DROP
                                     int64_t at) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_Index32_getitem_at_nowrap(
@@ -4080,7 +3948,6 @@ namespace awkward {
     template<>
     uint32_t index_getitem_at_nowrap(kernel::lib ptr_lib,
                                      uint32_t *ptr,
-                                     int64_t offset,   // DROP
                                      int64_t at) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexU32_getitem_at_nowrap(
@@ -4103,7 +3970,6 @@ namespace awkward {
     template<>
     int64_t index_getitem_at_nowrap(kernel::lib ptr_lib,
                                     int64_t *ptr,
-                                    int64_t offset,   // DROP
                                     int64_t at) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_Index64_getitem_at_nowrap(
@@ -4126,7 +3992,6 @@ namespace awkward {
     template<>
     void index_setitem_at_nowrap(kernel::lib ptr_lib,
                                  int8_t *ptr,
-                                 int64_t offset,   // DROP
                                  int64_t at,
                                  int8_t value) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -4152,7 +4017,6 @@ namespace awkward {
     template<>
     void index_setitem_at_nowrap(kernel::lib ptr_lib,
                                  uint8_t *ptr,
-                                 int64_t offset,   // DROP
                                  int64_t at,
                                  uint8_t value) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -4178,7 +4042,6 @@ namespace awkward {
     template<>
     void index_setitem_at_nowrap(kernel::lib ptr_lib,
                                  int32_t *ptr,
-                                 int64_t offset,   // DROP
                                  int64_t at,
                                  int32_t value) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -4204,7 +4067,6 @@ namespace awkward {
     template<>
     void index_setitem_at_nowrap(kernel::lib ptr_lib,
                                  uint32_t *ptr,
-                                 int64_t offset,   // DROP
                                  int64_t at,
                                  uint32_t value) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -4230,7 +4092,6 @@ namespace awkward {
     template<>
     void index_setitem_at_nowrap(kernel::lib ptr_lib,
                                  int64_t *ptr,
-                                 int64_t offset,   // DROP
                                  int64_t at,
                                  int64_t value) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -4257,7 +4118,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int8_t *tomask,
       const int8_t *frommask,
-      int64_t frommaskoffset,   // DROP
       int64_t lenmask,
       const int64_t *fromcarry,
       int64_t lencarry) {
@@ -4283,7 +4143,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *numnull,
       const int8_t *mask,
-      int64_t maskoffset,   // DROP
       int64_t length,
       bool validwhen) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -4307,7 +4166,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *tocarry,
       const int8_t *mask,
-      int64_t maskoffset,   // DROP
       int64_t length,
       bool validwhen) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -4332,7 +4190,6 @@ namespace awkward {
       int64_t *tocarry,
       int64_t *toindex,
       const int8_t *mask,
-      int64_t maskoffset,   // DROP
       int64_t length,
       bool validwhen) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -4357,7 +4214,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const int8_t *mask,
-      int64_t maskoffset,   // DROP
       int64_t length,
       bool validwhen) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -4380,9 +4236,7 @@ namespace awkward {
     ERROR Content_getitem_next_missing_jagged_getmaskstartstop(
       kernel::lib ptr_lib,
       int64_t *index_in,
-      int64_t index_in_offset,   // DROP
       int64_t *offsets_in,
-      int64_t offsets_in_offset,   // DROP
       int64_t *mask_out,
       int64_t *starts_out,
       int64_t *stops_out,
@@ -4410,11 +4264,8 @@ namespace awkward {
     ERROR MaskedArray_getitem_next_jagged_project(
       kernel::lib ptr_lib,
       int32_t *index,
-      int64_t index_offset,   // DROP
       int64_t *starts_in,
-      int64_t starts_offset,   // DROP
       int64_t *stops_in,
-      int64_t stops_offset,   // DROP
       int64_t *starts_out,
       int64_t *stops_out,
       int64_t length) {
@@ -4440,11 +4291,8 @@ namespace awkward {
     ERROR MaskedArray_getitem_next_jagged_project(
       kernel::lib ptr_lib,
       uint32_t *index,
-      int64_t index_offset,   // DROP
       int64_t *starts_in,
-      int64_t starts_offset,   // DROP
       int64_t *stops_in,
-      int64_t stops_offset,   // DROP
       int64_t *starts_out,
       int64_t *stops_out,
       int64_t length) {
@@ -4470,11 +4318,8 @@ namespace awkward {
     ERROR MaskedArray_getitem_next_jagged_project(
       kernel::lib ptr_lib,
       int64_t *index,
-      int64_t index_offset,   // DROP
       int64_t *starts_in,
-      int64_t starts_offset,   // DROP
       int64_t *stops_in,
-      int64_t stops_offset,   // DROP
       int64_t *starts_out,
       int64_t *stops_out,
       int64_t length) {
@@ -4569,8 +4414,6 @@ namespace awkward {
       int32_t *toptr,
       const int32_t *fromptr,
       const int32_t *fromoffsets,
-      int64_t fromptroffset,   // DROP
-      int64_t offsetsoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
@@ -4599,8 +4442,6 @@ namespace awkward {
       int32_t *toptr,
       const int32_t *fromptr,
       const uint32_t *fromoffsets,
-      int64_t fromptroffset,   // DROP
-      int64_t offsetsoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
@@ -4629,8 +4470,6 @@ namespace awkward {
       int32_t *toptr,
       const int32_t *fromptr,
       const int64_t *fromoffsets,
-      int64_t fromptroffset,   // DROP
-      int64_t offsetsoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
@@ -4659,8 +4498,6 @@ namespace awkward {
       int64_t *toptr,
       const int64_t *fromptr,
       const int32_t *fromoffsets,
-      int64_t fromptroffset,   // DROP
-      int64_t offsetsoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
@@ -4689,8 +4526,6 @@ namespace awkward {
       int64_t *toptr,
       const int64_t *fromptr,
       const uint32_t *fromoffsets,
-      int64_t fromptroffset,   // DROP
-      int64_t offsetsoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
@@ -4719,8 +4554,6 @@ namespace awkward {
       int64_t *toptr,
       const int64_t *fromptr,
       const int64_t *fromoffsets,
-      int64_t fromptroffset,   // DROP
-      int64_t offsetsoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
@@ -4751,9 +4584,6 @@ namespace awkward {
       const int32_t *fromptr,
       const int32_t *fromstarts,
       const int32_t *fromstops,
-      int64_t fromptroffset,   // DROP
-      int64_t startsoffset,   // DROP
-      int64_t stopsoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
@@ -4786,9 +4616,6 @@ namespace awkward {
       const int32_t *fromptr,
       const uint32_t *fromstarts,
       const uint32_t *fromstops,
-      int64_t fromptroffset,   // DROP
-      int64_t startsoffset,   // DROP
-      int64_t stopsoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
@@ -4821,9 +4648,6 @@ namespace awkward {
       const int32_t *fromptr,
       const int64_t *fromstarts,
       const int64_t *fromstops,
-      int64_t fromptroffset,   // DROP
-      int64_t startsoffset,   // DROP
-      int64_t stopsoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
@@ -4856,9 +4680,6 @@ namespace awkward {
       const int64_t *fromptr,
       const int32_t *fromstarts,
       const int32_t *fromstops,
-      int64_t fromptroffset,   // DROP
-      int64_t startsoffset,   // DROP
-      int64_t stopsoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
@@ -4891,9 +4712,6 @@ namespace awkward {
       const int64_t *fromptr,
       const uint32_t *fromstarts,
       const uint32_t *fromstops,
-      int64_t fromptroffset,   // DROP
-      int64_t startsoffset,   // DROP
-      int64_t stopsoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
@@ -4926,9 +4744,6 @@ namespace awkward {
       const int64_t *fromptr,
       const int64_t *fromstarts,
       const int64_t *fromstops,
-      int64_t fromptroffset,   // DROP
-      int64_t startsoffset,   // DROP
-      int64_t stopsoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
@@ -4958,7 +4773,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int32_t *toptr,
       const int32_t *fromptr,
-      int64_t fromptroffset,   // DROP
       int64_t size,
       int64_t tolength,
       int64_t fromlength,
@@ -4987,7 +4801,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int64_t *fromptr,
-      int64_t fromptroffset,   // DROP
       int64_t size,
       int64_t tolength,
       int64_t fromlength,
@@ -5018,8 +4831,6 @@ namespace awkward {
       int32_t *toptr,
       const int32_t *fromptr,
       const int32_t *fromindex,
-      int64_t fromptroffset,   // DROP
-      int64_t indexoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
@@ -5050,8 +4861,6 @@ namespace awkward {
       int32_t *toptr,
       const int32_t *fromptr,
       const uint32_t *fromindex,
-      int64_t fromptroffset,   // DROP
-      int64_t indexoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
@@ -5082,8 +4891,6 @@ namespace awkward {
       int32_t *toptr,
       const int32_t *fromptr,
       const int64_t *fromindex,
-      int64_t fromptroffset,   // DROP
-      int64_t indexoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
@@ -5114,8 +4921,6 @@ namespace awkward {
       int64_t *toptr,
       const int64_t *fromptr,
       const int32_t *fromindex,
-      int64_t fromptroffset,   // DROP
-      int64_t indexoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
@@ -5146,8 +4951,6 @@ namespace awkward {
       int64_t *toptr,
       const int64_t *fromptr,
       const uint32_t *fromindex,
-      int64_t fromptroffset,   // DROP
-      int64_t indexoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
@@ -5178,8 +4981,6 @@ namespace awkward {
       int64_t *toptr,
       const int64_t *fromptr,
       const int64_t *fromindex,
-      int64_t fromptroffset,   // DROP
-      int64_t indexoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth) {
@@ -5211,9 +5012,6 @@ namespace awkward {
       const int32_t *fromptr,
       const int8_t *fromtags,
       const int32_t *fromindex,
-      int64_t fromptroffset,   // DROP
-      int64_t tagsoffset,   // DROP
-      int64_t indexoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth,
@@ -5248,9 +5046,6 @@ namespace awkward {
       const int32_t *fromptr,
       const int8_t *fromtags,
       const uint32_t *fromindex,
-      int64_t fromptroffset,   // DROP
-      int64_t tagsoffset,   // DROP
-      int64_t indexoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth,
@@ -5285,9 +5080,6 @@ namespace awkward {
       const int32_t *fromptr,
       const int8_t *fromtags,
       const int64_t *fromindex,
-      int64_t fromptroffset,   // DROP
-      int64_t tagsoffset,   // DROP
-      int64_t indexoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth,
@@ -5322,9 +5114,6 @@ namespace awkward {
       const int64_t *fromptr,
       const int8_t *fromtags,
       const int32_t *fromindex,
-      int64_t fromptroffset,   // DROP
-      int64_t tagsoffset,   // DROP
-      int64_t indexoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth,
@@ -5359,9 +5148,6 @@ namespace awkward {
       const int64_t *fromptr,
       const int8_t *fromtags,
       const uint32_t *fromindex,
-      int64_t fromptroffset,   // DROP
-      int64_t tagsoffset,   // DROP
-      int64_t indexoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth,
@@ -5396,9 +5182,6 @@ namespace awkward {
       const int64_t *fromptr,
       const int8_t *fromtags,
       const int64_t *fromindex,
-      int64_t fromptroffset,   // DROP
-      int64_t tagsoffset,   // DROP
-      int64_t indexoffset,   // DROP
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth,
@@ -5430,7 +5213,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int32_t *toptr,
       const int32_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t fromlength,
       int64_t tolength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -5455,7 +5237,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int64_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t fromlength,
       int64_t tolength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -5482,9 +5263,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *tonum,
       const int32_t *fromstarts,
-      int64_t startsoffset,   // DROP
       const int32_t *fromstops,
-      int64_t stopsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray32_num_64(
@@ -5513,9 +5292,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *tonum,
       const uint32_t *fromstarts,
-      int64_t startsoffset,   // DROP
       const uint32_t *fromstops,
-      int64_t stopsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArrayU32_num_64(
@@ -5544,9 +5321,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *tonum,
       const int64_t *fromstarts,
-      int64_t startsoffset,   // DROP
       const int64_t *fromstops,
-      int64_t stopsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray64_num_64(
@@ -5600,10 +5375,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *tooffsets,
       const int32_t *outeroffsets,
-      int64_t outeroffsetsoffset,   // DROP
       int64_t outeroffsetslen,
       const int64_t *inneroffsets,
-      int64_t inneroffsetsoffset,   // DROP
       int64_t inneroffsetslen) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray32_flatten_offsets_64(
@@ -5628,10 +5401,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *tooffsets,
       const uint32_t *outeroffsets,
-      int64_t outeroffsetsoffset,   // DROP
       int64_t outeroffsetslen,
       const int64_t *inneroffsets,
-      int64_t inneroffsetsoffset,   // DROP
       int64_t inneroffsetslen) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArrayU32_flatten_offsets_64(
@@ -5656,10 +5427,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *tooffsets,
       const int64_t *outeroffsets,
-      int64_t outeroffsetsoffset,   // DROP
       int64_t outeroffsetslen,
       const int64_t *inneroffsets,
-      int64_t inneroffsetsoffset,   // DROP
       int64_t inneroffsetslen) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray64_flatten_offsets_64(
@@ -5684,10 +5453,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *outoffsets,
       const int32_t *outindex,
-      int64_t outindexoffset,   // DROP
       int64_t outindexlength,
       const int64_t *offsets,
-      int64_t offsetsoffset,   // DROP
       int64_t offsetslength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray32_flatten_none2empty_64(
@@ -5712,10 +5479,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *outoffsets,
       const uint32_t *outindex,
-      int64_t outindexoffset,   // DROP
       int64_t outindexlength,
       const int64_t *offsets,
-      int64_t offsetsoffset,   // DROP
       int64_t offsetslength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArrayU32_flatten_none2empty_64(
@@ -5740,10 +5505,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *outoffsets,
       const int64_t *outindex,
-      int64_t outindexoffset,   // DROP
       int64_t outindexlength,
       const int64_t *offsets,
-      int64_t offsetsoffset,   // DROP
       int64_t offsetslength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray64_flatten_none2empty_64(
@@ -5768,9 +5531,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *total_length,
       const int8_t *fromtags,
-      int64_t fromtagsoffset,   // DROP
       const int32_t *fromindex,
-      int64_t fromindexoffset,   // DROP
       int64_t length,
       int64_t **offsetsraws,
       int64_t *offsetsoffsets) {
@@ -5798,9 +5559,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *total_length,
       const int8_t *fromtags,
-      int64_t fromtagsoffset,   // DROP
       const uint32_t *fromindex,
-      int64_t fromindexoffset,   // DROP
       int64_t length,
       int64_t **offsetsraws,
       int64_t *offsetsoffsets) {
@@ -5828,9 +5587,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *total_length,
       const int8_t *fromtags,
-      int64_t fromtagsoffset,   // DROP
       const int64_t *fromindex,
-      int64_t fromindexoffset,   // DROP
       int64_t length,
       int64_t **offsetsraws,
       int64_t *offsetsoffsets) {
@@ -5860,9 +5617,7 @@ namespace awkward {
       int64_t *toindex,
       int64_t *tooffsets,
       const int8_t *fromtags,
-      int64_t fromtagsoffset,   // DROP
       const int32_t *fromindex,
-      int64_t fromindexoffset,   // DROP
       int64_t length,
       int64_t **offsetsraws,
       int64_t *offsetsoffsets) {
@@ -5894,9 +5649,7 @@ namespace awkward {
       int64_t *toindex,
       int64_t *tooffsets,
       const int8_t *fromtags,
-      int64_t fromtagsoffset,   // DROP
       const uint32_t *fromindex,
-      int64_t fromindexoffset,   // DROP
       int64_t length,
       int64_t **offsetsraws,
       int64_t *offsetsoffsets) {
@@ -5928,9 +5681,7 @@ namespace awkward {
       int64_t *toindex,
       int64_t *tooffsets,
       const int8_t *fromtags,
-      int64_t fromtagsoffset,   // DROP
       const int64_t *fromindex,
-      int64_t fromindexoffset,   // DROP
       int64_t length,
       int64_t **offsetsraws,
       int64_t *offsetsoffsets) {
@@ -5960,7 +5711,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *tocarry,
       const int32_t *fromindex,
-      int64_t indexoffset,   // DROP
       int64_t lenindex,
       int64_t lencontent) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -5985,7 +5735,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *tocarry,
       const uint32_t *fromindex,
-      int64_t indexoffset,   // DROP
       int64_t lenindex,
       int64_t lencontent) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -6010,7 +5759,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *tocarry,
       const int64_t *fromindex,
-      int64_t indexoffset,   // DROP
       int64_t lenindex,
       int64_t lencontent) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -6035,9 +5783,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const int8_t *mask,
-      int64_t maskoffset,   // DROP
       const int32_t *fromindex,
-      int64_t indexoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray32_overlay_mask8_to64(
@@ -6061,9 +5807,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const int8_t *mask,
-      int64_t maskoffset,   // DROP
       const uint32_t *fromindex,
-      int64_t indexoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArrayU32_overlay_mask8_to64(
@@ -6087,9 +5831,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const int8_t *mask,
-      int64_t maskoffset,   // DROP
       const int64_t *fromindex,
-      int64_t indexoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray64_overlay_mask8_to64(
@@ -6113,7 +5855,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int8_t *tomask,
       const int32_t *fromindex,
-      int64_t indexoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray32_mask8(
@@ -6136,7 +5877,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int8_t *tomask,
       const uint32_t *fromindex,
-      int64_t indexoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArrayU32_mask8(
@@ -6159,7 +5899,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int8_t *tomask,
       const int64_t *fromindex,
-      int64_t indexoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray64_mask8(
@@ -6181,7 +5920,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int8_t *tomask,
       const int8_t *frommask,
-      int64_t maskoffset,   // DROP
       int64_t length,
       bool validwhen) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -6223,10 +5961,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const int32_t *outerindex,
-      int64_t outeroffset,   // DROP
       int64_t outerlength,
       const int32_t *innerindex,
-      int64_t inneroffset,   // DROP
       int64_t innerlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray32_simplify32_to64(
@@ -6251,10 +5987,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const uint32_t *outerindex,
-      int64_t outeroffset,   // DROP
       int64_t outerlength,
       const int32_t *innerindex,
-      int64_t inneroffset,   // DROP
       int64_t innerlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArrayU32_simplify32_to64(
@@ -6279,10 +6013,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const int64_t *outerindex,
-      int64_t outeroffset,   // DROP
       int64_t outerlength,
       const int32_t *innerindex,
-      int64_t inneroffset,   // DROP
       int64_t innerlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray64_simplify32_to64(
@@ -6307,10 +6039,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const int32_t *outerindex,
-      int64_t outeroffset,   // DROP
       int64_t outerlength,
       const uint32_t *innerindex,
-      int64_t inneroffset,   // DROP
       int64_t innerlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray32_simplifyU32_to64(
@@ -6335,10 +6065,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const uint32_t *outerindex,
-      int64_t outeroffset,   // DROP
       int64_t outerlength,
       const uint32_t *innerindex,
-      int64_t inneroffset,   // DROP
       int64_t innerlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArrayU32_simplifyU32_to64(
@@ -6363,10 +6091,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const int64_t *outerindex,
-      int64_t outeroffset,   // DROP
       int64_t outerlength,
       const uint32_t *innerindex,
-      int64_t inneroffset,   // DROP
       int64_t innerlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray64_simplifyU32_to64(
@@ -6391,10 +6117,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const int32_t *outerindex,
-      int64_t outeroffset,   // DROP
       int64_t outerlength,
       const int64_t *innerindex,
-      int64_t inneroffset,   // DROP
       int64_t innerlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray32_simplify64_to64(
@@ -6419,10 +6143,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const uint32_t *outerindex,
-      int64_t outeroffset,   // DROP
       int64_t outerlength,
       const int64_t *innerindex,
-      int64_t inneroffset,   // DROP
       int64_t innerlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArrayU32_simplify64_to64(
@@ -6447,10 +6169,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const int64_t *outerindex,
-      int64_t outeroffset,   // DROP
       int64_t outerlength,
       const int64_t *innerindex,
-      int64_t inneroffset,   // DROP
       int64_t innerlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray64_simplify64_to64(
@@ -6476,8 +6196,6 @@ namespace awkward {
       int64_t *tooffsets,
       const int32_t *fromstarts,
       const int32_t *fromstops,
-      int64_t startsoffset,   // DROP
-      int64_t stopsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray32_compact_offsets_64(
@@ -6502,8 +6220,6 @@ namespace awkward {
       int64_t *tooffsets,
       const uint32_t *fromstarts,
       const uint32_t *fromstops,
-      int64_t startsoffset,   // DROP
-      int64_t stopsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArrayU32_compact_offsets_64(
@@ -6528,8 +6244,6 @@ namespace awkward {
       int64_t *tooffsets,
       const int64_t *fromstarts,
       const int64_t *fromstops,
-      int64_t startsoffset,   // DROP
-      int64_t stopsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray64_compact_offsets_64(
@@ -6574,7 +6288,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *tooffsets,
       const int32_t *fromoffsets,
-      int64_t offsetsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray32_compact_offsets_64(
@@ -6597,7 +6310,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *tooffsets,
       const uint32_t *fromoffsets,
-      int64_t offsetsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArrayU32_compact_offsets_64(
@@ -6620,7 +6332,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *tooffsets,
       const int64_t *fromoffsets,
-      int64_t offsetsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray64_compact_offsets_64(
@@ -6643,12 +6354,9 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *tocarry,
       const int64_t *fromoffsets,
-      int64_t offsetsoffset,   // DROP
       int64_t offsetslength,
       const int32_t *fromstarts,
-      int64_t startsoffset,   // DROP
       const int32_t *fromstops,
-      int64_t stopsoffset,   // DROP
       int64_t lencontent) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray32_broadcast_tooffsets_64(
@@ -6674,12 +6382,9 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *tocarry,
       const int64_t *fromoffsets,
-      int64_t offsetsoffset,   // DROP
       int64_t offsetslength,
       const uint32_t *fromstarts,
-      int64_t startsoffset,   // DROP
       const uint32_t *fromstops,
-      int64_t stopsoffset,   // DROP
       int64_t lencontent) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArrayU32_broadcast_tooffsets_64(
@@ -6705,12 +6410,9 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *tocarry,
       const int64_t *fromoffsets,
-      int64_t offsetsoffset,   // DROP
       int64_t offsetslength,
       const int64_t *fromstarts,
-      int64_t startsoffset,   // DROP
       const int64_t *fromstops,
-      int64_t stopsoffset,   // DROP
       int64_t lencontent) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray64_broadcast_tooffsets_64(
@@ -6734,7 +6436,6 @@ namespace awkward {
     ERROR RegularArray_broadcast_tooffsets_64(
       kernel::lib ptr_lib,
       const int64_t *fromoffsets,
-      int64_t offsetsoffset,   // DROP
       int64_t offsetslength,
       int64_t size) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -6757,7 +6458,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *tocarry,
       const int64_t *fromoffsets,
-      int64_t offsetsoffset,   // DROP
       int64_t offsetslength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_RegularArray_broadcast_tooffsets_size1_64(
@@ -6780,7 +6480,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *size,
       const int32_t *fromoffsets,
-      int64_t offsetsoffset,   // DROP
       int64_t offsetslength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray32_toRegularArray(
@@ -6803,7 +6502,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *size,
       const uint32_t *fromoffsets,
-      int64_t offsetsoffset,   // DROP
       int64_t offsetslength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArrayU32_toRegularArray(
@@ -6826,7 +6524,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *size,
       const int64_t *fromoffsets,
-      int64_t offsetsoffset,   // DROP
       int64_t offsetslength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray64_toRegularArray(
@@ -6850,7 +6547,6 @@ namespace awkward {
       bool *toptr,
       int64_t tooffset,
       const bool *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tobool_frombool(
@@ -6875,7 +6571,6 @@ namespace awkward {
       int8_t *toptr,
       int64_t tooffset,
       const bool *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint8_frombool(
@@ -6900,7 +6595,6 @@ namespace awkward {
       int16_t *toptr,
       int64_t tooffset,
       const bool *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint16_frombool(
@@ -6925,7 +6619,6 @@ namespace awkward {
       int32_t *toptr,
       int64_t tooffset,
       const bool *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint32_frombool(
@@ -6950,7 +6643,6 @@ namespace awkward {
       int64_t *toptr,
       int64_t tooffset,
       const bool *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint64_frombool(
@@ -6975,7 +6667,6 @@ namespace awkward {
       uint8_t *toptr,
       int64_t tooffset,
       const bool *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_touint8_frombool(
@@ -7000,7 +6691,6 @@ namespace awkward {
       uint16_t *toptr,
       int64_t tooffset,
       const bool *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_touint16_frombool(
@@ -7025,7 +6715,6 @@ namespace awkward {
       uint32_t *toptr,
       int64_t tooffset,
       const bool *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_touint32_frombool(
@@ -7050,7 +6739,6 @@ namespace awkward {
       uint64_t *toptr,
       int64_t tooffset,
       const bool *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_touint64_frombool(
@@ -7075,7 +6763,6 @@ namespace awkward {
       float *toptr,
       int64_t tooffset,
       const bool *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat32_frombool(
@@ -7100,7 +6787,6 @@ namespace awkward {
       double *toptr,
       int64_t tooffset,
       const bool *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat64_frombool(
@@ -7125,7 +6811,6 @@ namespace awkward {
       int8_t *toptr,
       int64_t tooffset,
       const int8_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint8_fromint8(
@@ -7150,7 +6835,6 @@ namespace awkward {
       int16_t *toptr,
       int64_t tooffset,
       const int8_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint16_fromint8(
@@ -7175,7 +6859,6 @@ namespace awkward {
       int32_t *toptr,
       int64_t tooffset,
       const int8_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint32_fromint8(
@@ -7200,7 +6883,6 @@ namespace awkward {
       int64_t *toptr,
       int64_t tooffset,
       const int8_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint64_fromint8(
@@ -7225,7 +6907,6 @@ namespace awkward {
       float *toptr,
       int64_t tooffset,
       const int8_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat32_fromint8(
@@ -7250,7 +6931,6 @@ namespace awkward {
       double *toptr,
       int64_t tooffset,
       const int8_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat64_fromint8(
@@ -7275,7 +6955,6 @@ namespace awkward {
       int16_t *toptr,
       int64_t tooffset,
       const int16_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint16_fromint16(
@@ -7300,7 +6979,6 @@ namespace awkward {
       int32_t *toptr,
       int64_t tooffset,
       const int16_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint32_fromint16(
@@ -7325,7 +7003,6 @@ namespace awkward {
       int64_t *toptr,
       int64_t tooffset,
       const int16_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint64_fromint16(
@@ -7350,7 +7027,6 @@ namespace awkward {
       float *toptr,
       int64_t tooffset,
       const int16_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat32_fromint16(
@@ -7375,7 +7051,6 @@ namespace awkward {
       double *toptr,
       int64_t tooffset,
       const int16_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat64_fromint16(
@@ -7400,7 +7075,6 @@ namespace awkward {
       int32_t *toptr,
       int64_t tooffset,
       const int32_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint32_fromint32(
@@ -7425,7 +7099,6 @@ namespace awkward {
       int64_t *toptr,
       int64_t tooffset,
       const int32_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint64_fromint32(
@@ -7450,7 +7123,6 @@ namespace awkward {
       float *toptr,
       int64_t tooffset,
       const int32_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat32_fromint32(
@@ -7475,7 +7147,6 @@ namespace awkward {
       double *toptr,
       int64_t tooffset,
       const int32_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat64_fromint32(
@@ -7500,7 +7171,6 @@ namespace awkward {
       int64_t *toptr,
       int64_t tooffset,
       const int64_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint64_fromint64(
@@ -7525,7 +7195,6 @@ namespace awkward {
       float *toptr,
       int64_t tooffset,
       const int64_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat32_fromint64(
@@ -7550,7 +7219,6 @@ namespace awkward {
       double *toptr,
       int64_t tooffset,
       const int64_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat64_fromint64(
@@ -7575,7 +7243,6 @@ namespace awkward {
       int16_t *toptr,
       int64_t tooffset,
       const uint8_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint16_fromuint8(
@@ -7600,7 +7267,6 @@ namespace awkward {
       int32_t *toptr,
       int64_t tooffset,
       const uint8_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint32_fromuint8(
@@ -7625,7 +7291,6 @@ namespace awkward {
       int64_t *toptr,
       int64_t tooffset,
       const uint8_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint64_fromuint8(
@@ -7650,7 +7315,6 @@ namespace awkward {
       uint8_t *toptr,
       int64_t tooffset,
       const uint8_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_touint8_fromuint8(
@@ -7675,7 +7339,6 @@ namespace awkward {
       uint16_t *toptr,
       int64_t tooffset,
       const uint8_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_touint16_fromuint8(
@@ -7700,7 +7363,6 @@ namespace awkward {
       uint32_t *toptr,
       int64_t tooffset,
       const uint8_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_touint32_fromuint8(
@@ -7725,7 +7387,6 @@ namespace awkward {
       uint64_t *toptr,
       int64_t tooffset,
       const uint8_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_touint64_fromuint8(
@@ -7750,7 +7411,6 @@ namespace awkward {
       float *toptr,
       int64_t tooffset,
       const uint8_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat32_fromuint8(
@@ -7775,7 +7435,6 @@ namespace awkward {
       double *toptr,
       int64_t tooffset,
       const uint8_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat64_fromuint8(
@@ -7800,7 +7459,6 @@ namespace awkward {
       int32_t *toptr,
       int64_t tooffset,
       const uint16_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint32_fromuint16(
@@ -7825,7 +7483,6 @@ namespace awkward {
       int64_t *toptr,
       int64_t tooffset,
       const uint16_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint64_fromuint16(
@@ -7850,7 +7507,6 @@ namespace awkward {
       uint16_t *toptr,
       int64_t tooffset,
       const uint16_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_touint16_fromuint16(
@@ -7875,7 +7531,6 @@ namespace awkward {
       uint32_t *toptr,
       int64_t tooffset,
       const uint16_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_touint32_fromuint16(
@@ -7900,7 +7555,6 @@ namespace awkward {
       uint64_t *toptr,
       int64_t tooffset,
       const uint16_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_touint64_fromuint16(
@@ -7925,7 +7579,6 @@ namespace awkward {
       float *toptr,
       int64_t tooffset,
       const uint16_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat32_fromuint16(
@@ -7950,7 +7603,6 @@ namespace awkward {
       double *toptr,
       int64_t tooffset,
       const uint16_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat64_fromuint16(
@@ -7975,7 +7627,6 @@ namespace awkward {
       int64_t *toptr,
       int64_t tooffset,
       const uint32_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint64_fromuint32(
@@ -8000,7 +7651,6 @@ namespace awkward {
       uint32_t *toptr,
       int64_t tooffset,
       const uint32_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_touint32_fromuint32(
@@ -8025,7 +7675,6 @@ namespace awkward {
       uint64_t *toptr,
       int64_t tooffset,
       const uint32_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_touint64_fromuint32(
@@ -8050,7 +7699,6 @@ namespace awkward {
       float *toptr,
       int64_t tooffset,
       const uint32_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat32_fromuint32(
@@ -8075,7 +7723,6 @@ namespace awkward {
       double *toptr,
       int64_t tooffset,
       const uint32_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat64_fromuint32(
@@ -8100,7 +7747,6 @@ namespace awkward {
       uint64_t *toptr,
       int64_t tooffset,
       const uint64_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_touint64_fromuint64(
@@ -8125,7 +7771,6 @@ namespace awkward {
       int64_t *toptr,
       int64_t tooffset,
       const uint64_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_toint64_fromuint64(
@@ -8150,7 +7795,6 @@ namespace awkward {
       float *toptr,
       int64_t tooffset,
       const uint64_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat32_fromuint64(
@@ -8175,7 +7819,6 @@ namespace awkward {
       double *toptr,
       int64_t tooffset,
       const uint64_t *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat64_fromuint64(
@@ -8200,7 +7843,6 @@ namespace awkward {
       float *toptr,
       int64_t tooffset,
       const float *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat32_fromfloat32(
@@ -8225,7 +7867,6 @@ namespace awkward {
       double *toptr,
       int64_t tooffset,
       const float *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat64_fromfloat32(
@@ -8250,7 +7891,6 @@ namespace awkward {
       double *toptr,
       int64_t tooffset,
       const double *fromptr,
-      int64_t fromoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_tofloat64_fromfloat64(
@@ -8277,9 +7917,7 @@ namespace awkward {
       int64_t *tostops,
       int64_t tostopsoffset,
       const int32_t *fromstarts,
-      int64_t fromstartsoffset,   // DROP
       const int32_t *fromstops,
-      int64_t fromstopsoffset,   // DROP
       int64_t length,
       int64_t base) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -8311,9 +7949,7 @@ namespace awkward {
       int64_t *tostops,
       int64_t tostopsoffset,
       const uint32_t *fromstarts,
-      int64_t fromstartsoffset,   // DROP
       const uint32_t *fromstops,
-      int64_t fromstopsoffset,   // DROP
       int64_t length,
       int64_t base) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -8345,9 +7981,7 @@ namespace awkward {
       int64_t *tostops,
       int64_t tostopsoffset,
       const int64_t *fromstarts,
-      int64_t fromstartsoffset,   // DROP
       const int64_t *fromstops,
-      int64_t fromstopsoffset,   // DROP
       int64_t length,
       int64_t base) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -8377,7 +8011,6 @@ namespace awkward {
       int64_t *toindex,
       int64_t toindexoffset,
       const int32_t *fromindex,
-      int64_t fromindexoffset,   // DROP
       int64_t length,
       int64_t base) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -8404,7 +8037,6 @@ namespace awkward {
       int64_t *toindex,
       int64_t toindexoffset,
       const uint32_t *fromindex,
-      int64_t fromindexoffset,   // DROP
       int64_t length,
       int64_t base) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -8431,7 +8063,6 @@ namespace awkward {
       int64_t *toindex,
       int64_t toindexoffset,
       const int64_t *fromindex,
-      int64_t fromindexoffset,   // DROP
       int64_t length,
       int64_t base) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -8480,7 +8111,6 @@ namespace awkward {
       int8_t *totags,
       int64_t totagsoffset,
       const int8_t *fromtags,
-      int64_t fromtagsoffset,   // DROP
       int64_t length,
       int64_t base) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -8507,7 +8137,6 @@ namespace awkward {
       int64_t *toindex,
       int64_t toindexoffset,
       const int32_t *fromindex,
-      int64_t fromindexoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray_fillindex_to64_from32(
@@ -8532,7 +8161,6 @@ namespace awkward {
       int64_t *toindex,
       int64_t toindexoffset,
       const uint32_t *fromindex,
-      int64_t fromindexoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray_fillindex_to64_fromU32(
@@ -8557,7 +8185,6 @@ namespace awkward {
       int64_t *toindex,
       int64_t toindexoffset,
       const int64_t *fromindex,
-      int64_t fromindexoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray_fillindex_to64_from64(
@@ -8626,13 +8253,9 @@ namespace awkward {
       int8_t *totags,
       int64_t *toindex,
       const int8_t *outertags,
-      int64_t outertagsoffset,   // DROP
       const int32_t *outerindex,
-      int64_t outerindexoffset,   // DROP
       const int8_t *innertags,
-      int64_t innertagsoffset,   // DROP
       const int32_t *innerindex,
-      int64_t innerindexoffset,   // DROP
       int64_t towhich,
       int64_t innerwhich,
       int64_t outerwhich,
@@ -8668,13 +8291,9 @@ namespace awkward {
       int8_t *totags,
       int64_t *toindex,
       const int8_t *outertags,
-      int64_t outertagsoffset,   // DROP
       const uint32_t *outerindex,
-      int64_t outerindexoffset,   // DROP
       const int8_t *innertags,
-      int64_t innertagsoffset,   // DROP
       const int32_t *innerindex,
-      int64_t innerindexoffset,   // DROP
       int64_t towhich,
       int64_t innerwhich,
       int64_t outerwhich,
@@ -8710,13 +8329,9 @@ namespace awkward {
       int8_t *totags,
       int64_t *toindex,
       const int8_t *outertags,
-      int64_t outertagsoffset,   // DROP
       const int64_t *outerindex,
-      int64_t outerindexoffset,   // DROP
       const int8_t *innertags,
-      int64_t innertagsoffset,   // DROP
       const int32_t *innerindex,
-      int64_t innerindexoffset,   // DROP
       int64_t towhich,
       int64_t innerwhich,
       int64_t outerwhich,
@@ -8752,13 +8367,9 @@ namespace awkward {
       int8_t *totags,
       int64_t *toindex,
       const int8_t *outertags,
-      int64_t outertagsoffset,   // DROP
       const int32_t *outerindex,
-      int64_t outerindexoffset,   // DROP
       const int8_t *innertags,
-      int64_t innertagsoffset,   // DROP
       const uint32_t *innerindex,
-      int64_t innerindexoffset,   // DROP
       int64_t towhich,
       int64_t innerwhich,
       int64_t outerwhich,
@@ -8794,13 +8405,9 @@ namespace awkward {
       int8_t *totags,
       int64_t *toindex,
       const int8_t *outertags,
-      int64_t outertagsoffset,   // DROP
       const uint32_t *outerindex,
-      int64_t outerindexoffset,   // DROP
       const int8_t *innertags,
-      int64_t innertagsoffset,   // DROP
       const uint32_t *innerindex,
-      int64_t innerindexoffset,   // DROP
       int64_t towhich,
       int64_t innerwhich,
       int64_t outerwhich,
@@ -8836,13 +8443,9 @@ namespace awkward {
       int8_t *totags,
       int64_t *toindex,
       const int8_t *outertags,
-      int64_t outertagsoffset,   // DROP
       const int64_t *outerindex,
-      int64_t outerindexoffset,   // DROP
       const int8_t *innertags,
-      int64_t innertagsoffset,   // DROP
       const uint32_t *innerindex,
-      int64_t innerindexoffset,   // DROP
       int64_t towhich,
       int64_t innerwhich,
       int64_t outerwhich,
@@ -8878,13 +8481,9 @@ namespace awkward {
       int8_t *totags,
       int64_t *toindex,
       const int8_t *outertags,
-      int64_t outertagsoffset,   // DROP
       const int32_t *outerindex,
-      int64_t outerindexoffset,   // DROP
       const int8_t *innertags,
-      int64_t innertagsoffset,   // DROP
       const int64_t *innerindex,
-      int64_t innerindexoffset,   // DROP
       int64_t towhich,
       int64_t innerwhich,
       int64_t outerwhich,
@@ -8920,13 +8519,9 @@ namespace awkward {
       int8_t *totags,
       int64_t *toindex,
       const int8_t *outertags,
-      int64_t outertagsoffset,   // DROP
       const uint32_t *outerindex,
-      int64_t outerindexoffset,   // DROP
       const int8_t *innertags,
-      int64_t innertagsoffset,   // DROP
       const int64_t *innerindex,
-      int64_t innerindexoffset,   // DROP
       int64_t towhich,
       int64_t innerwhich,
       int64_t outerwhich,
@@ -8962,13 +8557,9 @@ namespace awkward {
       int8_t *totags,
       int64_t *toindex,
       const int8_t *outertags,
-      int64_t outertagsoffset,   // DROP
       const int64_t *outerindex,
-      int64_t outerindexoffset,   // DROP
       const int8_t *innertags,
-      int64_t innertagsoffset,   // DROP
       const int64_t *innerindex,
-      int64_t innerindexoffset,   // DROP
       int64_t towhich,
       int64_t innerwhich,
       int64_t outerwhich,
@@ -9004,9 +8595,7 @@ namespace awkward {
       int8_t *totags,
       int64_t *toindex,
       const int8_t *fromtags,
-      int64_t fromtagsoffset,   // DROP
       const int32_t *fromindex,
-      int64_t fromindexoffset,   // DROP
       int64_t towhich,
       int64_t fromwhich,
       int64_t length,
@@ -9038,9 +8627,7 @@ namespace awkward {
       int8_t *totags,
       int64_t *toindex,
       const int8_t *fromtags,
-      int64_t fromtagsoffset,   // DROP
       const uint32_t *fromindex,
-      int64_t fromindexoffset,   // DROP
       int64_t towhich,
       int64_t fromwhich,
       int64_t length,
@@ -9072,9 +8659,7 @@ namespace awkward {
       int8_t *totags,
       int64_t *toindex,
       const int8_t *fromtags,
-      int64_t fromtagsoffset,   // DROP
       const int64_t *fromindex,
-      int64_t fromindexoffset,   // DROP
       int64_t towhich,
       int64_t fromwhich,
       int64_t length,
@@ -9104,9 +8689,7 @@ namespace awkward {
     ERROR ListArray_validity<int32_t>(
       kernel::lib ptr_lib,
       const int32_t *starts,
-      int64_t startsoffset,   // DROP
       const int32_t *stops,
-      int64_t stopsoffset,   // DROP
       int64_t length,
       int64_t lencontent) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -9130,9 +8713,7 @@ namespace awkward {
     ERROR ListArray_validity<uint32_t>(
       kernel::lib ptr_lib,
       const uint32_t *starts,
-      int64_t startsoffset,   // DROP
       const uint32_t *stops,
-      int64_t stopsoffset,   // DROP
       int64_t length,
       int64_t lencontent) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -9156,9 +8737,7 @@ namespace awkward {
     ERROR ListArray_validity<int64_t>(
       kernel::lib ptr_lib,
       const int64_t *starts,
-      int64_t startsoffset,   // DROP
       const int64_t *stops,
-      int64_t stopsoffset,   // DROP
       int64_t length,
       int64_t lencontent) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -9182,7 +8761,6 @@ namespace awkward {
     ERROR IndexedArray_validity<int32_t>(
       kernel::lib ptr_lib,
       const int32_t *index,
-      int64_t indexoffset,   // DROP
       int64_t length,
       int64_t lencontent,
       bool isoption) {
@@ -9207,7 +8785,6 @@ namespace awkward {
     ERROR IndexedArray_validity<uint32_t>(
       kernel::lib ptr_lib,
       const uint32_t *index,
-      int64_t indexoffset,   // DROP
       int64_t length,
       int64_t lencontent,
       bool isoption) {
@@ -9232,7 +8809,6 @@ namespace awkward {
     ERROR IndexedArray_validity<int64_t>(
       kernel::lib ptr_lib,
       const int64_t *index,
-      int64_t indexoffset,   // DROP
       int64_t length,
       int64_t lencontent,
       bool isoption) {
@@ -9257,9 +8833,7 @@ namespace awkward {
     ERROR UnionArray_validity<int8_t, int32_t>(
       kernel::lib ptr_lib,
       const int8_t *tags,
-      int64_t tagsoffset,   // DROP
       const int32_t *index,
-      int64_t indexoffset,   // DROP
       int64_t length,
       int64_t numcontents,
       const int64_t *lencontents) {
@@ -9285,9 +8859,7 @@ namespace awkward {
     ERROR UnionArray_validity<int8_t, uint32_t>(
       kernel::lib ptr_lib,
       const int8_t *tags,
-      int64_t tagsoffset,   // DROP
       const uint32_t *index,
-      int64_t indexoffset,   // DROP
       int64_t length,
       int64_t numcontents,
       const int64_t *lencontents) {
@@ -9313,9 +8885,7 @@ namespace awkward {
     ERROR UnionArray_validity<int8_t, int64_t>(
       kernel::lib ptr_lib,
       const int8_t *tags,
-      int64_t tagsoffset,   // DROP
       const int64_t *index,
-      int64_t indexoffset,   // DROP
       int64_t length,
       int64_t numcontents,
       const int64_t *lencontents) {
@@ -9342,7 +8912,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const int32_t *fromindex,
-      int64_t offset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray_fillna_from32_to64(
@@ -9365,7 +8934,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const uint32_t *fromindex,
-      int64_t offset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray_fillna_fromU32_to64(
@@ -9388,7 +8956,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const int64_t *fromindex,
-      int64_t offset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray_fillna_from64_to64(
@@ -9500,9 +9067,7 @@ namespace awkward {
       int64_t *tomin,
       const int32_t *fromstarts,
       const int32_t *fromstops,
-      int64_t lenstarts,
-      int64_t startsoffset,   // DROP
-      int64_t stopsoffset) {   // DROP
+      int64_t lenstarts) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray32_min_range(
           tomin,
@@ -9526,9 +9091,7 @@ namespace awkward {
       int64_t *tomin,
       const uint32_t *fromstarts,
       const uint32_t *fromstops,
-      int64_t lenstarts,
-      int64_t startsoffset,   // DROP
-      int64_t stopsoffset) {   // DROP
+      int64_t lenstarts) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArrayU32_min_range(
           tomin,
@@ -9552,9 +9115,7 @@ namespace awkward {
       int64_t *tomin,
       const int64_t *fromstarts,
       const int64_t *fromstops,
-      int64_t lenstarts,
-      int64_t startsoffset,   // DROP
-      int64_t stopsoffset) {   // DROP
+      int64_t lenstarts) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray64_min_range(
           tomin,
@@ -9579,9 +9140,7 @@ namespace awkward {
       const int32_t *fromstarts,
       const int32_t *fromstops,
       int64_t target,
-      int64_t lenstarts,
-      int64_t startsoffset,   // DROP
-      int64_t stopsoffset) {   // DROP
+      int64_t lenstarts) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray32_rpad_and_clip_length_axis1(
           tolength,
@@ -9607,9 +9166,7 @@ namespace awkward {
       const uint32_t *fromstarts,
       const uint32_t *fromstops,
       int64_t target,
-      int64_t lenstarts,
-      int64_t startsoffset,   // DROP
-      int64_t stopsoffset) {   // DROP
+      int64_t lenstarts) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArrayU32_rpad_and_clip_length_axis1(
           tolength,
@@ -9635,9 +9192,7 @@ namespace awkward {
       const int64_t *fromstarts,
       const int64_t *fromstops,
       int64_t target,
-      int64_t lenstarts,
-      int64_t startsoffset,   // DROP
-      int64_t stopsoffset) {   // DROP
+      int64_t lenstarts) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray64_rpad_and_clip_length_axis1(
           tolength,
@@ -9665,9 +9220,7 @@ namespace awkward {
       int32_t *tostarts,
       int32_t *tostops,
       int64_t target,
-      int64_t length,
-      int64_t startsoffset,   // DROP
-      int64_t stopsoffset) {   // DROP
+      int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray32_rpad_axis1_64(
           toindex,
@@ -9697,9 +9250,7 @@ namespace awkward {
       uint32_t *tostarts,
       uint32_t *tostops,
       int64_t target,
-      int64_t length,
-      int64_t startsoffset,   // DROP
-      int64_t stopsoffset) {   // DROP
+      int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArrayU32_rpad_axis1_64(
           toindex,
@@ -9729,9 +9280,7 @@ namespace awkward {
       int64_t *tostarts,
       int64_t *tostops,
       int64_t target,
-      int64_t length,
-      int64_t startsoffset,   // DROP
-      int64_t stopsoffset) {   // DROP
+      int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray64_rpad_axis1_64(
           toindex,
@@ -9757,7 +9306,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const int32_t *fromoffsets,
-      int64_t offsetsoffset,   // DROP
       int64_t length,
       int64_t target) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -9782,7 +9330,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const uint32_t *fromoffsets,
-      int64_t offsetsoffset,   // DROP
       int64_t length,
       int64_t target) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -9807,7 +9354,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const int64_t *fromoffsets,
-      int64_t offsetsoffset,   // DROP
       int64_t length,
       int64_t target) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -9832,7 +9378,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int32_t *tooffsets,
       const int32_t *fromoffsets,
-      int64_t offsetsoffset,   // DROP
       int64_t fromlength,
       int64_t length,
       int64_t *tocount) {
@@ -9859,7 +9404,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       uint32_t *tooffsets,
       const uint32_t *fromoffsets,
-      int64_t offsetsoffset,   // DROP
       int64_t fromlength,
       int64_t length,
       int64_t *tocount) {
@@ -9886,7 +9430,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *tooffsets,
       const int64_t *fromoffsets,
-      int64_t offsetsoffset,   // DROP
       int64_t fromlength,
       int64_t length,
       int64_t *tocount) {
@@ -9913,7 +9456,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const int32_t *fromoffsets,
-      int64_t offsetsoffset,   // DROP
       int64_t fromlength,
       int64_t target) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -9938,7 +9480,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const uint32_t *fromoffsets,
-      int64_t offsetsoffset,   // DROP
       int64_t fromlength,
       int64_t target) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -9963,7 +9504,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const int64_t *fromoffsets,
-      int64_t offsetsoffset,   // DROP
       int64_t fromlength,
       int64_t target) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -10007,7 +9547,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const int32_t *offsets,
-      int64_t offsetsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray32_localindex_64(
@@ -10030,7 +9569,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const uint32_t *offsets,
-      int64_t offsetsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArrayU32_localindex_64(
@@ -10053,7 +9591,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const int64_t *offsets,
-      int64_t offsetsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray64_localindex_64(
@@ -10124,9 +9661,7 @@ namespace awkward {
       int64_t n,
       bool replacement,
       const int32_t *starts,
-      int64_t startsoffset,   // DROP
       const int32_t *stops,
-      int64_t stopsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray32_combinations_length_64(
@@ -10156,9 +9691,7 @@ namespace awkward {
       int64_t n,
       bool replacement,
       const uint32_t *starts,
-      int64_t startsoffset,   // DROP
       const uint32_t *stops,
-      int64_t stopsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArrayU32_combinations_length_64(
@@ -10188,9 +9721,7 @@ namespace awkward {
       int64_t n,
       bool replacement,
       const int64_t *starts,
-      int64_t startsoffset,   // DROP
       const int64_t *stops,
-      int64_t stopsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray64_combinations_length_64(
@@ -10221,9 +9752,7 @@ namespace awkward {
       int64_t n,
       bool replacement,
       const int32_t *starts,
-      int64_t startsoffset,   // DROP
       const int32_t *stops,
-      int64_t stopsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray32_combinations_64(
@@ -10255,9 +9784,7 @@ namespace awkward {
       int64_t n,
       bool replacement,
       const uint32_t *starts,
-      int64_t startsoffset,   // DROP
       const uint32_t *stops,
-      int64_t stopsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArrayU32_combinations_64(
@@ -10289,9 +9816,7 @@ namespace awkward {
       int64_t n,
       bool replacement,
       const int64_t *starts,
-      int64_t startsoffset,   // DROP
       const int64_t *stops,
-      int64_t stopsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray64_combinations_64(
@@ -10347,9 +9872,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int8_t *tomask,
       const int8_t *theirmask,
-      int64_t theirmaskoffset,   // DROP
       const int8_t *mymask,
-      int64_t mymaskoffset,   // DROP
       int64_t length,
       bool validwhen) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -10374,7 +9897,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int8_t *tobytemask,
       const uint8_t *frombitmask,
-      int64_t bitmaskoffset,   // DROP
       int64_t bitmasklength,
       bool validwhen,
       bool lsb_order) {
@@ -10400,7 +9922,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toindex,
       const uint8_t *frombitmask,
-      int64_t bitmaskoffset,   // DROP
       int64_t bitmasklength,
       bool validwhen,
       bool lsb_order) {
@@ -10428,7 +9949,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -10453,9 +9973,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const bool *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -10481,9 +9999,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const uint8_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -10509,9 +10025,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int8_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -10537,9 +10051,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int16_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -10565,9 +10077,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const uint16_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -10593,9 +10103,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int32_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -10621,9 +10129,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const uint32_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -10649,9 +10155,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int64_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -10677,9 +10181,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const uint64_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -10705,9 +10207,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const float *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -10733,9 +10233,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const double *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -10761,9 +10259,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const bool *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -10789,9 +10285,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int8_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -10817,9 +10311,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       uint64_t *toptr,
       const uint8_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -10845,9 +10337,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int16_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -10873,9 +10363,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       uint64_t *toptr,
       const uint16_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -10901,9 +10389,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int32_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -10929,9 +10415,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       uint64_t *toptr,
       const uint32_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -10957,9 +10441,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int64_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -10985,9 +10467,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       uint64_t *toptr,
       const uint64_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -11013,9 +10493,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       float *toptr,
       const float *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -11041,9 +10519,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       double *toptr,
       const double *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -11069,9 +10545,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int32_t *toptr,
       const bool *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -11097,9 +10571,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int32_t *toptr,
       const int8_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -11125,9 +10597,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       uint32_t *toptr,
       const uint8_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -11153,9 +10623,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int32_t *toptr,
       const int16_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -11181,9 +10649,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       uint32_t *toptr,
       const uint16_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -11209,9 +10675,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int32_t *toptr,
       const int32_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -11237,9 +10701,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       uint32_t *toptr,
       const uint32_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -11265,9 +10727,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       bool *toptr,
       const bool *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -11293,9 +10753,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       bool *toptr,
       const int8_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -11321,9 +10779,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       bool *toptr,
       const uint8_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -11349,9 +10805,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       bool *toptr,
       const int16_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -11377,9 +10831,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       bool *toptr,
       const uint16_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -11405,9 +10857,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       bool *toptr,
       const int32_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -11433,9 +10883,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       bool *toptr,
       const uint32_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -11461,9 +10909,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       bool *toptr,
       const int64_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -11489,9 +10935,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       bool *toptr,
       const uint64_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -11517,9 +10961,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       bool *toptr,
       const float *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -11545,9 +10987,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       bool *toptr,
       const double *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -11573,9 +11013,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const bool *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -11601,9 +11039,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int8_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -11629,9 +11065,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       uint64_t *toptr,
       const uint8_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -11657,9 +11091,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int16_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -11685,9 +11117,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       uint64_t *toptr,
       const uint16_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -11713,9 +11143,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int32_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -11741,9 +11169,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       uint64_t *toptr,
       const uint32_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -11769,9 +11195,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int64_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -11797,9 +11221,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       uint64_t *toptr,
       const uint64_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -11825,9 +11247,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       float *toptr,
       const float *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -11853,9 +11273,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       double *toptr,
       const double *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -11881,9 +11299,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int32_t *toptr,
       const bool *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -11909,9 +11325,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int32_t *toptr,
       const int8_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -11937,9 +11351,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       uint32_t *toptr,
       const uint8_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -11965,9 +11377,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int32_t *toptr,
       const int16_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -11993,9 +11403,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       uint32_t *toptr,
       const uint16_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -12021,9 +11429,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int32_t *toptr,
       const int32_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -12049,9 +11455,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       uint32_t *toptr,
       const uint32_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -12077,9 +11481,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       bool *toptr,
       const bool *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -12105,9 +11507,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       bool *toptr,
       const int8_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -12133,9 +11533,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       bool *toptr,
       const uint8_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -12161,9 +11559,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       bool *toptr,
       const int16_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -12189,9 +11585,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       bool *toptr,
       const uint16_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -12217,9 +11611,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       bool *toptr,
       const int32_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -12245,9 +11637,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       bool *toptr,
       const uint32_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -12273,9 +11663,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       bool *toptr,
       const int64_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -12301,9 +11689,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       bool *toptr,
       const uint64_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -12329,9 +11715,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       bool *toptr,
       const float *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -12357,9 +11741,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       bool *toptr,
       const double *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -12385,9 +11767,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int8_t *toptr,
       const int8_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength,
       int8_t identity) {
@@ -12415,9 +11795,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       uint8_t *toptr,
       const uint8_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength,
       uint8_t identity) {
@@ -12445,9 +11823,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int16_t *toptr,
       const int16_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength,
       int16_t identity) {
@@ -12475,9 +11851,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       uint16_t *toptr,
       const uint16_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength,
       uint16_t identity) {
@@ -12505,9 +11879,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int32_t *toptr,
       const int32_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength,
       int32_t identity) {
@@ -12535,9 +11907,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       uint32_t *toptr,
       const uint32_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength,
       uint32_t identity) {
@@ -12565,9 +11935,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int64_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength,
       int64_t identity) {
@@ -12595,9 +11963,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       uint64_t *toptr,
       const uint64_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength,
       uint64_t identity) {
@@ -12625,9 +11991,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       float *toptr,
       const float *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength,
       float identity) {
@@ -12655,9 +12019,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       double *toptr,
       const double *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength,
       double identity) {
@@ -12685,9 +12047,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int8_t *toptr,
       const int8_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength,
       int8_t identity) {
@@ -12715,9 +12075,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       uint8_t *toptr,
       const uint8_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength,
       uint8_t identity) {
@@ -12745,9 +12103,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int16_t *toptr,
       const int16_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength,
       int16_t identity) {
@@ -12775,9 +12131,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       uint16_t *toptr,
       const uint16_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength,
       uint16_t identity) {
@@ -12805,9 +12159,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int32_t *toptr,
       const int32_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength,
       int32_t identity) {
@@ -12835,9 +12187,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       uint32_t *toptr,
       const uint32_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength,
       uint32_t identity) {
@@ -12865,9 +12215,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int64_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength,
       int64_t identity) {
@@ -12895,9 +12243,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       uint64_t *toptr,
       const uint64_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength,
       uint64_t identity) {
@@ -12925,9 +12271,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       float *toptr,
       const float *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength,
       float identity) {
@@ -12955,9 +12299,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       double *toptr,
       const double *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength,
       double identity) {
@@ -12985,11 +12327,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const bool *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -13016,11 +12355,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int8_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -13047,11 +12383,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const uint8_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -13078,11 +12411,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int16_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -13109,11 +12439,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const uint16_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -13140,11 +12467,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int32_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -13171,11 +12495,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const uint32_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -13202,11 +12523,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int64_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -13233,11 +12551,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const uint64_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -13264,11 +12579,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const float *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -13295,11 +12607,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const double *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -13327,11 +12636,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const bool *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -13358,11 +12664,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int8_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -13389,11 +12692,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const uint8_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -13420,11 +12720,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int16_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -13451,11 +12748,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const uint16_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -13482,11 +12776,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int32_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -13513,11 +12804,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const uint32_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -13544,11 +12832,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int64_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -13575,11 +12860,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const uint64_t *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -13606,11 +12888,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const float *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -13637,11 +12916,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const double *fromptr,
-      int64_t fromptroffset,   // DROP
       const int64_t *starts,
-      int64_t startsoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -13687,7 +12963,6 @@ namespace awkward {
       int64_t *globalstart,
       int64_t *globalstop,
       const int64_t *offsets,
-      int64_t offsetsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray_reduce_global_startstop_64(
@@ -13711,7 +12986,6 @@ namespace awkward {
       int64_t *maxcount,
       int64_t *offsetscopy,
       const int64_t *offsets,
-      int64_t offsetsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64(
@@ -13740,10 +13014,8 @@ namespace awkward {
       int64_t distinctslen,
       int64_t *offsetscopy,
       const int64_t *offsets,
-      int64_t offsetsoffset,   // DROP
       int64_t length,
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t maxcount) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray_reduce_nonlocal_preparenext_64(
@@ -13794,7 +13066,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *gaps,
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray_reduce_nonlocal_findgaps_64(
@@ -13843,7 +13114,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *nextparents,
       const int64_t *offsets,
-      int64_t offsetsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray_reduce_local_nextparents_64(
@@ -13865,7 +13135,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *outoffsets,
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -13892,9 +13161,7 @@ namespace awkward {
       int64_t *nextparents,
       int64_t *outindex,
       const int32_t *index,
-      int64_t indexoffset,   // DROP
       int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray32_reduce_next_64(
@@ -13922,9 +13189,7 @@ namespace awkward {
       int64_t *nextparents,
       int64_t *outindex,
       const uint32_t *index,
-      int64_t indexoffset,   // DROP
       int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArrayU32_reduce_next_64(
@@ -13952,9 +13217,7 @@ namespace awkward {
       int64_t *nextparents,
       int64_t *outindex,
       const int64_t *index,
-      int64_t indexoffset,   // DROP
       int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray64_reduce_next_64(
@@ -13979,7 +13242,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *outoffsets,
       const int64_t *starts,
-      int64_t startsoffset,   // DROP
       int64_t startslength,
       int64_t outindexlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -14003,7 +13265,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int8_t *toptr,
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t lenparents,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -14029,9 +13290,7 @@ namespace awkward {
       int64_t *nextparents,
       int64_t *outindex,
       const int8_t *mask,
-      int64_t maskoffset,   // DROP
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t length,
       bool validwhen) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -14838,10 +14097,8 @@ namespace awkward {
       int64_t *tocarry,
       const int64_t *starts,
       const int64_t *parents,
-      int64_t parentsoffset,   // DROP
       int64_t parentslength,
-      const int64_t *nextparents,
-      int64_t nextparentsoffset) {   // DROP
+      const int64_t *nextparents) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray_local_preparenext_64(
           tocarry,

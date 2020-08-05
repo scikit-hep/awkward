@@ -198,7 +198,6 @@ namespace awkward {
       T* toindex,
       const T* fromindex,
       const int64_t* carry,
-      int64_t fromindexoffset,
       int64_t lenfromindex,
       int64_t length);
 
@@ -208,7 +207,6 @@ namespace awkward {
       T* toindex,
       const T* fromindex,
       const int64_t* carry,
-      int64_t fromindexoffset,
       int64_t length);
 
     ERROR slicearray_ravel_64(
@@ -223,9 +221,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       bool* same,
       const int8_t* bytemask,
-      int64_t bytemaskoffset,
       const int64_t* missingindex,
-      int64_t missingindexoffset,
       int64_t length);
 
     template <typename T>
@@ -241,7 +237,6 @@ namespace awkward {
       const ID* identitiesptr,
       const int64_t* carryptr,
       int64_t lencarry,
-      int64_t offset,
       int64_t width,
       int64_t length);
 
@@ -257,7 +252,6 @@ namespace awkward {
       const uint8_t* fromptr,
       int64_t len,
       int64_t stride,
-      int64_t offset,
       const int64_t* pos);
 
     ERROR NumpyArray_contiguous_next_64(
@@ -274,7 +268,6 @@ namespace awkward {
       const uint8_t* fromptr,
       int64_t len,
       int64_t stride,
-      int64_t offset,
       const int64_t* pos);
 
     ERROR NumpyArray_getitem_next_at_64(
@@ -330,7 +323,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t* numtrue,
       const int8_t* fromptr,
-      int64_t byteoffset,
       int64_t length,
       int64_t stride);
 
@@ -338,7 +330,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t* toptr,
       const int8_t* fromptr,
-      int64_t byteoffset,
       int64_t length,
       int64_t stride);
 
@@ -349,8 +340,6 @@ namespace awkward {
       const T* fromstarts,
       const T* fromstops,
       int64_t lenstarts,
-      int64_t startsoffset,
-      int64_t stopsoffset,
       int64_t at);
 
 
@@ -361,8 +350,6 @@ namespace awkward {
       const T* fromstarts,
       const T* fromstops,
       int64_t lenstarts,
-      int64_t startsoffset,
-      int64_t stopsoffset,
       int64_t start,
       int64_t stop,
       int64_t step);
@@ -375,8 +362,6 @@ namespace awkward {
       const T* fromstarts,
       const T* fromstops,
       int64_t lenstarts,
-      int64_t startsoffset,
-      int64_t stopsoffset,
       int64_t start,
       int64_t stop,
       int64_t step);
@@ -407,8 +392,6 @@ namespace awkward {
       const T* fromstarts,
       const T* fromstops,
       const int64_t* fromarray,
-      int64_t startsoffset,
-      int64_t stopsoffset,
       int64_t lenstarts,
       int64_t lenarray,
       int64_t lencontent);
@@ -423,8 +406,6 @@ namespace awkward {
       const T* fromstops,
       const int64_t* fromarray,
       const int64_t* fromadvanced,
-      int64_t startsoffset,
-      int64_t stopsoffset,
       int64_t lenstarts,
       int64_t lenarray,
       int64_t lencontent);
@@ -438,8 +419,6 @@ namespace awkward {
       const T* fromstarts,
       const T* fromstops,
       const int64_t* fromcarry,
-      int64_t startsoffset,
-      int64_t stopsoffset,
       int64_t lenstarts,
       int64_t lencarry);
 
@@ -504,7 +483,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t* numnull,
       const T* fromindex,
-      int64_t indexoffset,
       int64_t lenindex);
 
     template <typename T>
@@ -513,7 +491,6 @@ namespace awkward {
       int64_t* tocarry,
       T* toindex,
       const T* fromindex,
-      int64_t indexoffset,
       int64_t lenindex,
       int64_t lencontent);
 
@@ -523,7 +500,6 @@ namespace awkward {
       int64_t* tocarry,
       int64_t* toindex,
       const T* fromindex,
-      int64_t indexoffset,
       int64_t lenindex,
       int64_t lencontent);
 
@@ -532,10 +508,8 @@ namespace awkward {
       int64_t* tooffsets,
       int64_t* tononzero,
       const int64_t* fromoffsets,
-      int64_t offsetsoffset,
       int64_t length,
       const int64_t* nonzero,
-      int64_t nonzerooffset,
       int64_t nonzerolength);
 
     ERROR ListOffsetArray_getitem_adjust_offsets_index_64(
@@ -543,16 +517,12 @@ namespace awkward {
       int64_t* tooffsets,
       int64_t* tononzero,
       const int64_t* fromoffsets,
-      int64_t offsetsoffset,
       int64_t length,
       const int64_t* index,
-      int64_t indexoffset,
       int64_t indexlength,
       const int64_t* nonzero,
-      int64_t nonzerooffset,
       int64_t nonzerolength,
       const int8_t* originalmask,
-      int64_t maskoffset,
       int64_t masklength);
 
     ERROR IndexedArray_getitem_adjust_outindex_64(
@@ -561,10 +531,8 @@ namespace awkward {
       int64_t* toindex,
       int64_t* tononzero,
       const int64_t* fromindex,
-      int64_t fromindexoffset,
       int64_t fromindexlength,
       const int64_t* nonzero,
-      int64_t nonzerooffset,
       int64_t nonzerolength);
 
     template <typename T>
@@ -572,7 +540,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t* tocarry,
       const T* fromindex,
-      int64_t indexoffset,
       int64_t lenindex,
       int64_t lencontent);
 
@@ -583,7 +550,6 @@ namespace awkward {
       T* toindex,
       const T* fromindex,
       const int64_t* fromcarry,
-      int64_t indexoffset,
       int64_t lenindex,
       int64_t lencarry);
 
@@ -592,7 +558,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t* size,
       const T* fromtags,
-      int64_t tagsoffset,
       int64_t length);
 
     template <typename T, typename I>
@@ -602,7 +567,6 @@ namespace awkward {
       I* current,
       int64_t size,
       const T* fromtags,
-      int64_t tagsoffset,
       int64_t length);
 
     template <typename T, typename I>
@@ -611,9 +575,7 @@ namespace awkward {
       int64_t* lenout,
       int64_t* tocarry,
       const T* fromtags,
-      int64_t tagsoffset,
       const I* fromindex,
-      int64_t indexoffset,
       int64_t length,
       int64_t which);
 
@@ -621,7 +583,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t* outindex,
       const int64_t* index,
-      int64_t indexoffset,
       int64_t indexlength,
       int64_t repetitions,
       int64_t regularsize);
@@ -642,9 +603,7 @@ namespace awkward {
       const int64_t* singleoffsets,
       int64_t* tocarry,
       const T* fromstarts,
-      int64_t fromstartsoffset,
       const T* fromstops,
-      int64_t fromstopsoffset,
       int64_t jaggedsize,
       int64_t length);
 
@@ -652,9 +611,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t* carrylen,
       const int64_t* slicestarts,
-      int64_t slicestartsoffset,
       const int64_t* slicestops,
-      int64_t slicestopsoffset,
       int64_t sliceouterlen);
 
     template <typename T>
@@ -663,29 +620,21 @@ namespace awkward {
       int64_t* tooffsets,
       int64_t* tocarry,
       const int64_t* slicestarts,
-      int64_t slicestartsoffset,
       const int64_t* slicestops,
-      int64_t slicestopsoffset,
       int64_t sliceouterlen,
       const int64_t* sliceindex,
-      int64_t sliceindexoffset,
       int64_t sliceinnerlen,
       const T* fromstarts,
-      int64_t fromstartsoffset,
       const T* fromstops,
-      int64_t fromstopsoffset,
       int64_t contentlen);
 
     ERROR ListArray_getitem_jagged_numvalid_64(
       kernel::lib ptr_lib,
       int64_t* numvalid,
       const int64_t* slicestarts,
-      int64_t slicestartsoffset,
       const int64_t* slicestops,
-      int64_t slicestopsoffset,
       int64_t length,
       const int64_t* missing,
-      int64_t missingoffset,
       int64_t missinglength);
 
     ERROR ListArray_getitem_jagged_shrink_64(
@@ -694,39 +643,30 @@ namespace awkward {
       int64_t* tosmalloffsets,
       int64_t* tolargeoffsets,
       const int64_t* slicestarts,
-      int64_t slicestartsoffset,
       const int64_t* slicestops,
-      int64_t slicestopsoffset,
       int64_t length,
-      const int64_t* missing,
-      int64_t missingoffset);
+      const int64_t* missing);
 
     template <typename T>
     ERROR ListArray_getitem_jagged_descend_64(
       kernel::lib ptr_lib,
       int64_t* tooffsets,
       const int64_t* slicestarts,
-      int64_t slicestartsoffset,
       const int64_t* slicestops,
-      int64_t slicestopsoffset,
       int64_t sliceouterlen,
       const T* fromstarts,
-      int64_t fromstartsoffset,
-      const T* fromstops,
-      int64_t fromstopsoffset);
+      const T* fromstops);
 
       template <typename T>
       T index_getitem_at_nowrap(
         kernel::lib ptr_lib,
         T* ptr,
-        int64_t offset,
         int64_t at);
 
       template <typename T>
       void index_setitem_at_nowrap(
         kernel::lib ptr_lib,
         T* ptr,
-        int64_t offset,
         int64_t at,
         T value);
 
@@ -734,7 +674,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int8_t* tomask,
       const int8_t* frommask,
-      int64_t frommaskoffset,
       int64_t lenmask,
       const int64_t* fromcarry,
       int64_t lencarry);
@@ -743,7 +682,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t* numnull,
       const int8_t* mask,
-      int64_t maskoffset,
       int64_t length,
       bool validwhen);
 
@@ -751,7 +689,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t* tocarry,
       const int8_t* mask,
-      int64_t maskoffset,
       int64_t length,
       bool validwhen);
 
@@ -760,7 +697,6 @@ namespace awkward {
       int64_t* tocarry,
       int64_t* toindex,
       const int8_t* mask,
-      int64_t maskoffset,
       int64_t length,
       bool validwhen);
 
@@ -768,16 +704,13 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t* toindex,
       const int8_t* mask,
-      int64_t maskoffset,
       int64_t length,
       bool validwhen);
 
     ERROR Content_getitem_next_missing_jagged_getmaskstartstop(
       kernel::lib ptr_lib,
       int64_t* index_in,
-      int64_t index_in_offset,
       int64_t* offsets_in,
-      int64_t offsets_in_offset,
       int64_t* mask_out,
       int64_t* starts_out,
       int64_t* stops_out,
@@ -787,11 +720,8 @@ namespace awkward {
     ERROR MaskedArray_getitem_next_jagged_project(
       kernel::lib ptr_lib,
       T* index,
-      int64_t index_offset,
       int64_t* starts_in,
-      int64_t starts_offset,
       int64_t* stops_in,
-      int64_t stops_offset,
       int64_t* starts_out,
       int64_t* stops_out,
       int64_t length);
@@ -818,8 +748,6 @@ namespace awkward {
       C* toptr,
       const C* fromptr,
       const T* fromoffsets,
-      int64_t fromptroffset,
-      int64_t offsetsoffset,
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
@@ -832,9 +760,6 @@ namespace awkward {
       const C* fromptr,
       const T* fromstarts,
       const T* fromstops,
-      int64_t fromptroffset,
-      int64_t startsoffset,
-      int64_t stopsoffset,
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
@@ -844,7 +769,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       ID* toptr,
       const ID* fromptr,
-      int64_t fromptroffset,
       int64_t size,
       int64_t tolength,
       int64_t fromlength,
@@ -858,8 +782,6 @@ namespace awkward {
       C* toptr,
       const C* fromptr,
       const T* fromindex,
-      int64_t fromptroffset,
-      int64_t indexoffset,
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
@@ -873,9 +795,6 @@ namespace awkward {
       const C* fromptr,
       const T* fromtags,
       const I* fromindex,
-      int64_t fromptroffset,
-      int64_t tagsoffset,
-      int64_t indexoffset,
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth,
@@ -886,7 +805,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       ID* toptr,
       const ID* fromptr,
-      int64_t fromoffset,
       int64_t fromlength,
       int64_t tolength);
 
@@ -897,9 +815,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t* tonum,
       const T* fromstarts,
-      int64_t startsoffset,
       const T* fromstops,
-      int64_t stopsoffset,
       int64_t length);
 
     ERROR RegularArray_num_64(
@@ -913,10 +829,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t* tooffsets,
       const T* outeroffsets,
-      int64_t outeroffsetsoffset,
       int64_t outeroffsetslen,
       const int64_t* inneroffsets,
-      int64_t inneroffsetsoffset,
       int64_t inneroffsetslen);
 
 
@@ -925,10 +839,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t* outoffsets,
       const T* outindex,
-      int64_t outindexoffset,
       int64_t outindexlength,
       const int64_t* offsets,
-      int64_t offsetsoffset,
       int64_t offsetslength);
 
 
@@ -937,9 +849,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t* total_length,
       const T* fromtags,
-      int64_t fromtagsoffset,
       const I* fromindex,
-      int64_t fromindexoffset,
       int64_t length,
       int64_t** offsetsraws,
       int64_t* offsetsoffsets);
@@ -952,9 +862,7 @@ namespace awkward {
       int64_t* toindex,
       int64_t* tooffsets,
       const T* fromtags,
-      int64_t fromtagsoffset,
       const I* fromindex,
-      int64_t fromindexoffset,
       int64_t length,
       int64_t** offsetsraws,
       int64_t* offsetsoffsets);
@@ -965,7 +873,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t* tocarry,
       const T* fromindex,
-      int64_t indexoffset,
       int64_t lenindex,
       int64_t lencontent);
 
@@ -974,9 +881,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t* toindex,
       const int8_t* mask,
-      int64_t maskoffset,
       const T* fromindex,
-      int64_t indexoffset,
       int64_t length);
 
 
@@ -985,14 +890,12 @@ namespace awkward {
       kernel::lib ptr_lib,
       int8_t* tomask,
       const T* fromindex,
-      int64_t indexoffset,
       int64_t length);
 
     ERROR ByteMaskedArray_mask8(
       kernel::lib ptr_lib,
       int8_t* tomask,
       const int8_t* frommask,
-      int64_t maskoffset,
       int64_t length,
       bool validwhen);
 
@@ -1006,10 +909,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t* toindex,
       const T* outerindex,
-      int64_t outeroffset,
       int64_t outerlength,
       const int32_t* innerindex,
-      int64_t inneroffset,
       int64_t innerlength);
 
 
@@ -1018,10 +919,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t* toindex,
       const T* outerindex,
-      int64_t outeroffset,
       int64_t outerlength,
       const uint32_t* innerindex,
-      int64_t inneroffset,
       int64_t innerlength);
 
 
@@ -1030,10 +929,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t* toindex,
       const T* outerindex,
-      int64_t outeroffset,
       int64_t outerlength,
       const int64_t* innerindex,
-      int64_t inneroffset,
       int64_t innerlength);
 
     template <typename T>
@@ -1042,8 +939,6 @@ namespace awkward {
       int64_t* tooffsets,
       const T* fromstarts,
       const T* fromstops,
-      int64_t startsoffset,
-      int64_t stopsoffset,
       int64_t length);
 
     ERROR RegularArray_compact_offsets_64(
@@ -1057,7 +952,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t* tooffsets,
       const T* fromoffsets,
-      int64_t offsetsoffset,
       int64_t length);
 
 
@@ -1066,18 +960,14 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t* tocarry,
       const int64_t* fromoffsets,
-      int64_t offsetsoffset,
       int64_t offsetslength,
       const T* fromstarts,
-      int64_t startsoffset,
       const T* fromstops,
-      int64_t stopsoffset,
       int64_t lencontent);
 
     ERROR RegularArray_broadcast_tooffsets_64(
       kernel::lib ptr_lib,
       const int64_t* fromoffsets,
-      int64_t offsetsoffset,
       int64_t offsetslength,
       int64_t size);
 
@@ -1085,7 +975,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t* tocarry,
       const int64_t* fromoffsets,
-      int64_t offsetsoffset,
       int64_t offsetslength);
 
     template <typename T>
@@ -1093,7 +982,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t* size,
       const T* fromoffsets,
-      int64_t offsetsoffset,
       int64_t offsetslength);
 
     template <typename FROM, typename TO>
@@ -1102,7 +990,6 @@ namespace awkward {
       TO* toptr,
       int64_t tooffset,
       const FROM* fromptr,
-      int64_t fromoffset,
       int64_t length);
 
     template <typename TO>
@@ -1111,7 +998,6 @@ namespace awkward {
       TO* toptr,
       int64_t tooffset,
       const bool* fromptr,
-      int64_t fromoffset,
       int64_t length);
 
     template <typename FROM, typename TO>
@@ -1122,9 +1008,7 @@ namespace awkward {
       TO* tostops,
       int64_t tostopsoffset,
       const FROM* fromstarts,
-      int64_t fromstartsoffset,
       const FROM* fromstops,
-      int64_t fromstopsoffset,
       int64_t length,
       int64_t base);
 
@@ -1134,7 +1018,6 @@ namespace awkward {
       TO* toindex,
       int64_t toindexoffset,
       const FROM* fromindex,
-      int64_t fromindexoffset,
       int64_t length,
       int64_t base);
 
@@ -1150,7 +1033,6 @@ namespace awkward {
       int8_t* totags,
       int64_t totagsoffset,
       const int8_t* fromtags,
-      int64_t fromtagsoffset,
       int64_t length,
       int64_t base);
 
@@ -1160,7 +1042,6 @@ namespace awkward {
       TO* toindex,
       int64_t toindexoffset,
       const FROM* fromindex,
-      int64_t fromindexoffset,
       int64_t length);
 
     ERROR UnionArray_filltags_to8_const(
@@ -1182,13 +1063,9 @@ namespace awkward {
       int8_t* totags,
       int64_t* toindex,
       const T* outertags,
-      int64_t outertagsoffset,
       const I* outerindex,
-      int64_t outerindexoffset,
       const int8_t* innertags,
-      int64_t innertagsoffset,
       const int32_t* innerindex,
-      int64_t innerindexoffset,
       int64_t towhich,
       int64_t innerwhich,
       int64_t outerwhich,
@@ -1202,13 +1079,9 @@ namespace awkward {
       int8_t* totags,
       int64_t* toindex,
       const T* outertags,
-      int64_t outertagsoffset,
       const I* outerindex,
-      int64_t outerindexoffset,
       const int8_t* innertags,
-      int64_t innertagsoffset,
       const uint32_t* innerindex,
-      int64_t innerindexoffset,
       int64_t towhich,
       int64_t innerwhich,
       int64_t outerwhich,
@@ -1222,13 +1095,9 @@ namespace awkward {
       int8_t* totags,
       int64_t* toindex,
       const T* outertags,
-      int64_t outertagsoffset,
       const I* outerindex,
-      int64_t outerindexoffset,
       const int8_t* innertags,
-      int64_t innertagsoffset,
       const int64_t* innerindex,
-      int64_t innerindexoffset,
       int64_t towhich,
       int64_t innerwhich,
       int64_t outerwhich,
@@ -1242,9 +1111,7 @@ namespace awkward {
       int8_t* totags,
       int64_t* toindex,
       const T* fromtags,
-      int64_t fromtagsoffset,
       const I* fromindex,
-      int64_t fromindexoffset,
       int64_t towhich,
       int64_t fromwhich,
       int64_t length,
@@ -1254,9 +1121,7 @@ namespace awkward {
     ERROR ListArray_validity(
       kernel::lib ptr_lib,
       const T* starts,
-      int64_t startsoffset,
       const T* stops,
-      int64_t stopsoffset,
       int64_t length,
       int64_t lencontent);
 
@@ -1265,7 +1130,6 @@ namespace awkward {
     ERROR IndexedArray_validity(
       kernel::lib ptr_lib,
       const T* index,
-      int64_t indexoffset,
       int64_t length,
       int64_t lencontent,
       bool isoption);
@@ -1275,9 +1139,7 @@ namespace awkward {
     ERROR UnionArray_validity(
       kernel::lib ptr_lib,
       const T* tags,
-      int64_t tagsoffset,
       const I* index,
-      int64_t indexoffset,
       int64_t length,
       int64_t numcontents,
       const int64_t* lencontents);
@@ -1287,7 +1149,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t* toindex,
       const T* fromindex,
-      int64_t offset,
       int64_t length);
 
     ERROR IndexedOptionArray_rpad_and_clip_mask_axis1_64(
@@ -1322,9 +1183,7 @@ namespace awkward {
       int64_t* tomin,
       const T* fromstarts,
       const T* fromstops,
-      int64_t lenstarts,
-      int64_t startsoffset,
-      int64_t stopsoffset);
+      int64_t lenstarts);
 
     template <typename T>
     ERROR ListArray_rpad_and_clip_length_axis1(
@@ -1333,9 +1192,7 @@ namespace awkward {
       const T* fromstarts,
       const T* fromstops,
       int64_t target,
-      int64_t lenstarts,
-      int64_t startsoffset,
-      int64_t stopsoffset);
+      int64_t lenstarts);
 
     template <typename T>
     ERROR ListArray_rpad_axis1_64(
@@ -1346,16 +1203,13 @@ namespace awkward {
       T* tostarts,
       T* tostops,
       int64_t target,
-      int64_t length,
-      int64_t startsoffset,
-      int64_t stopsoffset);
+      int64_t length);
 
     template <typename T>
     ERROR ListOffsetArray_rpad_and_clip_axis1_64(
       kernel::lib ptr_lib,
       int64_t* toindex,
       const T* fromoffsets,
-      int64_t offsetsoffset,
       int64_t length,
       int64_t target);
 
@@ -1364,7 +1218,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       T* tooffsets,
       const T* fromoffsets,
-      int64_t offsetsoffset,
       int64_t fromlength,
       int64_t target,
       int64_t* tolength);
@@ -1374,7 +1227,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t* toindex,
       const T* fromoffsets,
-      int64_t offsetsoffset,
       int64_t fromlength,
       int64_t target);
 
@@ -1388,7 +1240,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t* toindex,
       const T* offsets,
-      int64_t offsetsoffset,
       int64_t length);
 
     ERROR RegularArray_localindex_64(
@@ -1413,9 +1264,7 @@ namespace awkward {
       int64_t n,
       bool replacement,
       const T* starts,
-      int64_t startsoffset,
       const T* stops,
-      int64_t stopsoffset,
       int64_t length);
 
     template <typename T>
@@ -1427,9 +1276,7 @@ namespace awkward {
       int64_t n,
       bool replacement,
       const T* starts,
-      int64_t startsoffset,
       const T* stops,
-      int64_t stopsoffset,
       int64_t length);
 
     ERROR RegularArray_combinations_64(
@@ -1446,9 +1293,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int8_t* tomask,
       const int8_t* theirmask,
-      int64_t theirmaskoffset,
       const int8_t* mymask,
-      int64_t mymaskoffset,
       int64_t length,
       bool validwhen);
 
@@ -1456,7 +1301,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int8_t* tobytemask,
       const uint8_t* frombitmask,
-      int64_t bitmaskoffset,
       int64_t bitmasklength,
       bool validwhen,
       bool lsb_order);
@@ -1465,7 +1309,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t* toindex,
       const uint8_t* frombitmask,
-      int64_t bitmaskoffset,
       int64_t bitmasklength,
       bool validwhen,
       bool lsb_order);
@@ -1476,7 +1319,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t* toptr,
       const int64_t* parents,
-      int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength);
 
@@ -1485,9 +1327,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t* toptr,
       const IN* fromptr,
-      int64_t fromptroffset,
       const int64_t* parents,
-      int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength);
 
@@ -1496,9 +1336,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       OUT* toptr,
       const IN* fromptr,
-      int64_t fromptroffset,
       const int64_t* parents,
-      int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength);
 
@@ -1507,9 +1345,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       bool* toptr,
       const IN* fromptr,
-      int64_t fromptroffset,
       const int64_t* parents,
-      int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength);
 
@@ -1518,9 +1354,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       OUT* toptr,
       const IN* fromptr,
-      int64_t fromptroffset,
       const int64_t* parents,
-      int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength);
 
@@ -1529,9 +1363,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       bool* toptr,
       const IN* fromptr,
-      int64_t fromptroffset,
       const int64_t* parents,
-      int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength);
 
@@ -1540,9 +1372,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       OUT* toptr,
       const IN* fromptr,
-      int64_t fromptroffset,
       const int64_t* parents,
-      int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength,
       OUT identity);
@@ -1552,9 +1382,7 @@ namespace awkward {
       kernel::lib ptr_lib,
       OUT* toptr,
       const IN* fromptr,
-      int64_t fromptroffset,
       const int64_t* parents,
-      int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength,
       OUT identity);
@@ -1564,11 +1392,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       OUT* toptr,
       const IN* fromptr,
-      int64_t fromptroffset,
       const int64_t* starts,
-      int64_t startsoffset,
       const int64_t* parents,
-      int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength);
 
@@ -1577,11 +1402,8 @@ namespace awkward {
       kernel::lib ptr_lib,
       OUT* toptr,
       const IN* fromptr,
-      int64_t fromptroffset,
       const int64_t* starts,
-      int64_t startsoffset,
       const int64_t* parents,
-      int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength);
 
@@ -1595,7 +1417,6 @@ namespace awkward {
       int64_t* globalstart,
       int64_t* globalstop,
       const int64_t* offsets,
-      int64_t offsetsoffset,
       int64_t length);
 
     ERROR ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64(
@@ -1603,7 +1424,6 @@ namespace awkward {
       int64_t* maxcount,
       int64_t* offsetscopy,
       const int64_t* offsets,
-      int64_t offsetsoffset,
       int64_t length);
 
     ERROR ListOffsetArray_reduce_nonlocal_preparenext_64(
@@ -1616,10 +1436,8 @@ namespace awkward {
       int64_t distinctslen,
       int64_t* offsetscopy,
       const int64_t* offsets,
-      int64_t offsetsoffset,
       int64_t length,
       const int64_t* parents,
-      int64_t parentsoffset,
       int64_t maxcount);
 
     ERROR ListOffsetArray_reduce_nonlocal_nextstarts_64(
@@ -1632,7 +1450,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t* gaps,
       const int64_t* parents,
-      int64_t parentsoffset,
       int64_t lenparents);
 
     ERROR ListOffsetArray_reduce_nonlocal_outstartsstops_64(
@@ -1648,14 +1465,12 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t* nextparents,
       const int64_t* offsets,
-      int64_t offsetsoffset,
       int64_t length);
 
     ERROR ListOffsetArray_reduce_local_outoffsets_64(
       kernel::lib ptr_lib,
       int64_t* outoffsets,
       const int64_t* parents,
-      int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength);
 
@@ -1666,16 +1481,13 @@ namespace awkward {
       int64_t* nextparents,
       int64_t* outindex,
       const T* index,
-      int64_t indexoffset,
       int64_t* parents,
-      int64_t parentsoffset,
       int64_t length);
 
     ERROR IndexedArray_reduce_next_fix_offsets_64(
       kernel::lib ptr_lib,
       int64_t* outoffsets,
       const int64_t* starts,
-      int64_t startsoffset,
       int64_t startslength,
       int64_t outindexlength);
 
@@ -1683,7 +1495,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int8_t* toptr,
       const int64_t* parents,
-      int64_t parentsoffset,
       int64_t lenparents,
       int64_t outlength);
 
@@ -1693,9 +1504,7 @@ namespace awkward {
       int64_t* nextparents,
       int64_t* outindex,
       const int8_t* mask,
-      int64_t maskoffset,
       const int64_t* parents,
-      int64_t parentsoffset,
       int64_t length,
       bool validwhen);
 
@@ -1759,10 +1568,8 @@ namespace awkward {
       int64_t* tocarry,
       const int64_t* starts,
       const int64_t* parents,
-      int64_t parentsoffset,
       int64_t parentslength,
-      const int64_t* nextparents,
-      int64_t nextparentsoffset);
+      const int64_t* nextparents);
   }
 }
 

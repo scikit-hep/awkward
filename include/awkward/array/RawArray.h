@@ -699,7 +699,6 @@ namespace awkward {
         reinterpret_cast<uint8_t*>(ptr_.get()),
         carry.length(),
         itemsize_,
-        byteoffset(),
         carry.ptr().get());
       util::handle_error(err, classname(), identities_.get());
 

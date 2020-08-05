@@ -753,7 +753,6 @@ namespace awkward {
     template<typename T>
     const std::shared_ptr<void> index_sort(const T* data,
                                            int64_t length,
-                                           int64_t offset,
                                            const Index64& starts,
                                            const Index64& parents,
                                            int64_t outlength,
@@ -763,7 +762,6 @@ namespace awkward {
     template<typename T>
     const std::shared_ptr<void> array_sort(const T* data,
                                            int64_t length,
-                                           int64_t offset,
                                            const Index64& starts,
                                            const Index64& parents,
                                            int64_t outlength,

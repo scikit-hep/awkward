@@ -216,7 +216,6 @@ namespace awkward {
       kernel::lib::cpu,   // DERIVE
       &numnull,
       mask_.data(),
-      999,   // DROP
       length(),
       valid_when_);
     util::handle_error(err1, classname(), identities_.get());
@@ -226,7 +225,6 @@ namespace awkward {
       kernel::lib::cpu,   // DERIVE
       nextcarry.data(),
       mask_.data(),
-      999,   // DROP
       length(),
       valid_when_);
     util::handle_error(err2, classname(), identities_.get());
@@ -249,9 +247,7 @@ namespace awkward {
       kernel::lib::cpu,   // DERIVE
       nextmask.data(),
       mask.data(),
-      999,   // DROP
       mask_.data(),
-      999,   // DROP
       length(),
       valid_when_);
     util::handle_error(err, classname(), identities_.get());
@@ -272,7 +268,6 @@ namespace awkward {
         kernel::lib::cpu,   // DERIVE
         out.data(),
         mask_.data(),
-        999,   // DROP
         mask_.length(),
         valid_when_);
       util::handle_error(err, classname(), identities_.get());
@@ -307,7 +302,6 @@ namespace awkward {
       kernel::lib::cpu,   // DERIVE
       index.data(),
       mask_.data(),
-      999,   // DROP
       mask_.length(),
       valid_when_);
     util::handle_error(err, classname(), identities_.get());
@@ -349,7 +343,6 @@ namespace awkward {
           kernel::lib::cpu,   // DERIVE
           rawsubidentities->data(),
           rawidentities->data(),
-          999,   // DROP
           rawidentities->length(),
           content_.get()->length());
         util::handle_error(err, classname(), identities_.get());
@@ -368,7 +361,6 @@ namespace awkward {
           kernel::lib::cpu,   // DERIVE
           rawsubidentities->data(),
           rawidentities->data(),
-          999,   // DROP
           rawidentities->length(),
           content_.get()->length());
         util::handle_error(err, classname(), identities_.get());
@@ -666,7 +658,6 @@ namespace awkward {
       kernel::lib::cpu,   // DERIVE
       nextmask.data(),
       mask_.data(),
-      999,   // DROP
       mask_.length(),
       carry.data(),
       carry.length());
@@ -775,10 +766,8 @@ namespace awkward {
           kernel::lib::cpu,   // DERIVE
           outoffsets.data(),
           outindex.data(),
-          999,   // DROP
           outindex.length(),
           offsets.data(),
-          999,   // DROP
           offsets.length());
         util::handle_error(err, classname(), identities_.get());
         return std::pair<Index64, ContentPtr>(outoffsets, flattened);
@@ -944,7 +933,6 @@ namespace awkward {
       kernel::lib::cpu,   // DERIVE
       &numnull,
       mask_.data(),
-      999,   // DROP
       length(),
       valid_when_);
     util::handle_error(err1, classname(), identities_.get());
@@ -958,9 +946,7 @@ namespace awkward {
       nextparents.data(),
       outindex.data(),
       mask_.data(),
-      999,   // DROP
       parents.data(),
-      999,   // DROP
       length(),
       valid_when_);
     util::handle_error(err2, classname(), identities_.get());
@@ -995,7 +981,6 @@ namespace awkward {
           kernel::lib::cpu,   // DERIVE
           outoffsets.data(),
           starts.data(),
-          999,   // DROP
           starts.length(),
           outindex.length());
         util::handle_error(err3, classname(), identities_.get());
@@ -1089,7 +1074,6 @@ namespace awkward {
       kernel::lib::cpu,   // DERIVE
       &numnull,
       mask_.data(),
-      999,   // DROP
       length(),
       valid_when_);
     util::handle_error(err1, classname(), identities_.get());
@@ -1103,9 +1087,7 @@ namespace awkward {
       nextparents.data(),
       outindex.data(),
       mask_.data(),
-      999,   // DROP
       parents.data(),
-      999,   // DROP
       length(),
       valid_when_);
     util::handle_error(err2, classname(), identities_.get());
@@ -1140,7 +1122,6 @@ namespace awkward {
           kernel::lib::cpu,   // DERIVE
           outoffsets.data(),
           starts.data(),
-          999,   // DROP
           starts.length(),
           outindex.length());
         util::handle_error(err3, classname(), identities_.get());
@@ -1177,7 +1158,6 @@ namespace awkward {
       kernel::lib::cpu,   // DERIVE
       &numnull,
       mask_.data(),
-      999,   // DROP
       length(),
       valid_when_);
     util::handle_error(err1, classname(), identities_.get());
@@ -1191,9 +1171,7 @@ namespace awkward {
       nextparents.data(),
       outindex.data(),
       mask_.data(),
-      999,   // DROP
       parents.data(),
-      999,   // DROP
       length(),
       valid_when_);
     util::handle_error(err2, classname(), identities_.get());
@@ -1228,7 +1206,6 @@ namespace awkward {
           kernel::lib::cpu,   // DERIVE
           outoffsets.data(),
           starts.data(),
-          999,   // DROP
           starts.length(),
           outindex.length());
         util::handle_error(err3, classname(), identities_.get());
@@ -1342,11 +1319,8 @@ namespace awkward {
     struct Error err = kernel::MaskedArray_getitem_next_jagged_project<int64_t>(
         kernel::lib::cpu,   // DERIVE
         outindex.data(),
-        999,   // DROP
         slicestarts.data(),
-        999,   // DROP
         slicestops.data(),
-        999,   // DROP
         reducedstarts.data(),
         reducedstops.data(),
         length());
@@ -1365,7 +1339,6 @@ namespace awkward {
       kernel::lib::cpu,   // DERIVE
       &numnull,
       mask_.data(),
-      999,   // DROP
       mask_.length(),
       valid_when_);
     util::handle_error(err1, classname(), identities_.get());
@@ -1377,7 +1350,6 @@ namespace awkward {
       nextcarry.data(),
       outindex.data(),
       mask_.data(),
-      999,   // DROP
       mask_.length(),
       valid_when_);
     util::handle_error(err2, classname(), identities_.get());

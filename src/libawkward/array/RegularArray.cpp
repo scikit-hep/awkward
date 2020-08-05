@@ -235,7 +235,6 @@ namespace awkward {
         kernel::lib::cpu,   // DERIVE
         nextcarry.data(),
         offsets.data(),
-        999,   // DROP
         offsets.length());
       util::handle_error(err, classname(), identities_.get());
       ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
@@ -248,7 +247,6 @@ namespace awkward {
       struct Error err = kernel::RegularArray_broadcast_tooffsets_64(
         kernel::lib::cpu,   // DERIVE
         offsets.data(),
-        999,   // DROP
         offsets.length(),
         size_);
       util::handle_error(err, classname(), identities_.get());
@@ -306,7 +304,6 @@ namespace awkward {
           kernel::lib::cpu,   // DERIVE
           rawsubidentities->data(),
           rawidentities->data(),
-          999,   // DROP
           size_,
           content_.get()->length(),
           length(),
@@ -327,7 +324,6 @@ namespace awkward {
           kernel::lib::cpu,   // DERIVE
           rawsubidentities->data(),
           rawidentities->data(),
-          999,   // DROP
           size_,
           content_.get()->length(),
           length(),

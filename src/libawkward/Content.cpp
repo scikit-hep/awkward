@@ -1391,7 +1391,6 @@ namespace awkward {
       kernel::lib::cpu,   // DERIVE
       outindex.data(),
       index.data(),
-      999,   // DROP
       index.length(),
       length,
       raw->size());
@@ -1432,9 +1431,7 @@ namespace awkward {
     struct Error err = kernel::Content_getitem_next_missing_jagged_getmaskstartstop(
       kernel::lib::cpu,   // DERIVE
       index.data(),
-      999,   // DROP
       jagged->offsets().data(),
-      999,   // DROP
       outputmask.data(),
       starts.data(),
       stops.data(),
